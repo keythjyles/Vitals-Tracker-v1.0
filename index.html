@@ -83,6 +83,9 @@
       padding:0 18px;
       user-select:none;
       -webkit-tap-highlight-color: transparent;
+
+      /* CHANGE: bigger button label text */
+      font-size: 20px;
     }
     .btn:active{ transform: translateY(1px); }
     .btn.primary{
@@ -92,7 +95,8 @@
     }
     .btn.small{
       height:44px;
-      font-size:14px;
+      /* CHANGE: keep “small” buttons readable, same family as Install/Exit */
+      font-size:16px;
       padding:0 14px;
       font-weight:650;
     }
@@ -344,12 +348,17 @@
     <!-- HOME -->
     <div id="home" class="card">
       <div class="homeMain">
-        <button id="btnGoAdd" class="btn primary">Add</button>
+        <!-- CHANGE: label -->
+        <button id="btnGoAdd" class="btn primary">Add Reading</button>
         <button id="btnGoLog" class="btn">Log</button>
         <button id="btnGoCharts" class="btn">Charts</button>
 
         <div class="homeFooterRow">
           <button id="btnInstall" class="btn small">Install</button>
+
+          <!-- NEW: Clear Data button next to Install/Uninstall -->
+          <button id="btnClearData" class="btn small">Clear Data</button>
+
           <div class="grow"></div>
           <button id="btnExitHome" class="btn small">Exit</button>
         </div>
@@ -357,7 +366,7 @@
         <div class="subtle">Data stays on your phone (local only).</div>
 
         <div class="footerTiny">
-          <div>v1.15</div>
+          <div>v1.16</div>
           <div>developed by Keyth Jyles</div>
         </div>
       </div>
@@ -498,16 +507,11 @@
   const screens = ["home","add","log","charts"];
 
   function focusTopOfPanel(screen){
-    // Ensure we're at the top without forcing input focus (prevents keyboard pop on Log).
     window.scrollTo({top:0, left:0, behavior:"auto"});
 
     if(screen === "add"){
-      // Add screen is fine to focus systolic for faster entry.
       setTimeout(() => { try{ $("sys").focus({preventScroll:true}); }catch{} }, 0);
     }
-
-    // LOG: intentionally do NOT focus anything.
-    // CHARTS/HOME: no focus.
   }
 
   function show(screen){
@@ -717,7 +721,6 @@
       return;
     }
 
-    // Already most recent first.
     for(const r of recs){
       const e = document.createElement("div");
       e.className = "entry";
@@ -871,7 +874,6 @@
     const canvas = $("chart");
     const ctx = canvas.getContext("2d");
 
-    // For charts, we want chronological for plotting.
     const recs = filteredRecords({fromId:"chartFrom", toId:"chartTo", searchId:null}).slice().reverse();
 
     ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -919,7 +921,6 @@
       ctx.fillText(String(val), 16, y+6);
     }
 
-    // X labels: up to 4
     const xCount = recs.length;
     const labelCount = Math.min(4, xCount);
     for(let i=0;i<labelCount;i++){
@@ -935,7 +936,6 @@
     drawSeries(ctx, recs.map(r=>r.dia), yMin, yMax, pad, W, H, "rgba(216,224,240,.88)");
     drawSeries(ctx, recs.map(r=>r.hr ), yMin, yMax, pad, W, H, "rgba(120,220,180,.92)");
 
-    // Legend
     const lx = pad.l + 8;
     let ly = pad.t + 22;
     ctx.font = "18px system-ui,Segoe UI,Roboto";
@@ -995,6 +995,28 @@
     alert("Install is available when your browser offers it (menu → Install app).");
   });
 
+  // NEW: Clear Data
+  $("btnClearData").addEventListener("click", () => {
+    const ok = confirm(
+      "Clear ALL saved vitals data on this device?\n\n" +
+      "This deletes your local records (BP/HR/notes/symptoms). This cannot be undone."
+    );
+    if(!ok) return;
+
+    try{
+      localStorage.removeItem(STORAGE_KEY);
+    }catch{}
+
+    // Reset filters so the Log/Charts won’t look “empty by filter”
+    $("fromDate").value = "";
+    $("toDate").value = "";
+    $("search").value = "";
+    $("chartFrom").value = "";
+    $("chartTo").value = "";
+
+    alert("Saved data cleared.");
+  });
+
   // =========================
   // Exit
   // =========================
@@ -1016,11 +1038,10 @@
   $("btnBackFromLog").addEventListener("click", () => show("home"));
   $("btnBackFromCharts").addEventListener("click", () => show("home"));
 
-  // From log -> add
   $("btnAddFromLog").addEventListener("click", () => show("add"));
 
   // =========================
-  // Save: Save -> Log, top focus (no input focus on Log)
+  // Save: Save -> Log
   // =========================
   function intOrNull(v){
     const t = String(v).trim();
@@ -1046,7 +1067,6 @@
     recs.unshift({ ts: Date.now(), sys, dia, hr, notes, symptoms });
     saveRecords(recs);
 
-    // Ensure log defaults show ALL data (blank filters)
     $("fromDate").value = "";
     $("toDate").value = "";
     $("search").value = "";
@@ -1066,7 +1086,6 @@
     $(id).addEventListener("change", () => renderCharts());
   });
 
-  // Export buttons
   $("btnExportLog").addEventListener("click", () => {
     const recs = filteredRecords({fromId:"fromDate", toId:"toDate", searchId:"search"});
     exportText(recs);
@@ -1145,3 +1164,4 @@ self.addEventListener('fetch', (e)=>{ });`;
 })();
 </script>
 </body>
+</html>
