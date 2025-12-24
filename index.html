@@ -7,31 +7,26 @@
     content="width=device-width, initial-scale=1, viewport-fit=cover"
   />
   <title>Vitals Tracker</title>
-
-  <!-- PWA-ish (still single-file). If you later want “Install”, we can add manifest + icon files. -->
   <meta name="theme-color" content="#0b0d10" />
 
   <style>
     :root{
-      /* Softer dark mode (less “blinding”) */
       --bg:#0b0d10;
       --panel:#121827;
-      --panel2:#171f33;
-      --fg:#e7eaf0;      /* off-white */
+      --panel2:#161e31;
+      --fg:#e7eaf0;
       --muted:#a9b2c2;
       --border:rgba(255,255,255,.10);
       --shadow:rgba(0,0,0,.35);
 
-      /* Accent (less neon) */
       --accent:#5a93ff;
       --accent2:#3f78ea;
 
-      /* Sizing */
       --radius:22px;
-      --font:28px;       /* global base */
-      --gap:14px;
-      --pad:18px;
-      --btnpad:18px;
+      --font:22px;
+      --gap:12px;
+      --pad:16px;
+      --btnpad:16px;
     }
 
     html, body{
@@ -46,7 +41,7 @@
       -webkit-font-smoothing: antialiased;
       font-family: Roboto, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
       font-size: var(--font);
-      font-weight: 600;
+      font-weight: 500;
     }
 
     *{ box-sizing:border-box; }
@@ -66,8 +61,8 @@
 
     h1{
       margin:0;
-      font-size: 1.9em;
-      font-weight: 800;
+      font-size: 1.75em;
+      font-weight: 700;
       letter-spacing: .2px;
     }
 
@@ -77,85 +72,129 @@
       border-radius: var(--radius);
       padding: var(--pad);
       box-shadow: 0 10px 30px var(--shadow);
-      overflow:hidden; /* helps squash stray artifacts */
+      overflow:hidden;
     }
 
     .row{ display:flex; gap: var(--gap); }
     .col{ flex:1; min-width: 0; }
-
     .stack{ display:flex; flex-direction:column; gap: var(--gap); }
 
     label{
       display:block;
       margin: 0 0 8px;
-      font-weight: 800;
-      letter-spacing: .2px;
+      font-weight: 650;
+      letter-spacing: .1px;
+    }
+
+    .metaLabel{
+      color: var(--muted);
+      font-size: .9em;
+      font-weight: 550;
+      margin-bottom: 6px;
+    }
+    .metaValue{
+      font-size: 1em;
+      font-weight: 600;
+      color: var(--fg);
+      padding: 10px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      user-select: text;
+      -webkit-user-select: text;
     }
 
     input, textarea, select{
       width:100%;
       font-size: 1em;
       border-radius: 18px;
-      border: 2px solid rgba(255,255,255,.14);
-      background: rgba(10,14,24,.65);
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(10,14,24,.55);
       color: var(--fg);
-      padding: 16px 16px;
+      padding: 14px 14px;
       outline: none;
+      font-weight: 520;
     }
-    textarea{ min-height: 110px; resize: vertical; }
+    textarea{ min-height: 100px; resize: vertical; }
 
     input:focus, textarea:focus, select:focus{
-      border-color: rgba(90,147,255,.65);
-      box-shadow: 0 0 0 4px rgba(90,147,255,.15);
+      border-color: rgba(90,147,255,.55);
+      box-shadow: 0 0 0 4px rgba(90,147,255,.12);
     }
 
+    /* Compact buttons for top bar */
+    .topBar{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      flex-wrap: nowrap;
+    }
     .btn{
       width:100%;
       padding: var(--btnpad);
       border-radius: 26px;
-      border: 2px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.05);
       color: var(--fg);
-      font-size: 1.25em;
-      font-weight: 800;
-      letter-spacing: .2px;
+      font-size: 1.15em;
+      font-weight: 650;
+      letter-spacing: .1px;
       cursor: pointer;
-      box-shadow: 0 10px 25px rgba(0,0,0,.18);
+      box-shadow: 0 10px 25px rgba(0,0,0,.16);
     }
     .btn:active{ transform: translateY(1px); }
+
+    .btn.small{
+      width: auto;
+      flex: 1 1 auto;
+      padding: 12px 14px;
+      border-radius: 18px;
+      font-size: 1.02em;
+      font-weight: 650;
+      box-shadow: 0 8px 18px rgba(0,0,0,.14);
+    }
 
     .btn.primary{
       background: linear-gradient(180deg, var(--accent), var(--accent2));
       color: #0b1020;
       border-color: rgba(0,0,0,.18);
-      box-shadow: 0 10px 25px rgba(90,147,255,.20);
+      box-shadow: 0 10px 25px rgba(90,147,255,.16);
+      font-weight: 750;
     }
 
     .btn.danger{
-      background: rgba(255,80,80,.12);
-      border-color: rgba(255,80,80,.28);
+      background: rgba(255,80,80,.10);
+      border-color: rgba(255,80,80,.25);
       color: var(--fg);
     }
 
     .hint{
       color: var(--muted);
       margin-top: 10px;
-      font-size: .9em;
+      font-size: .92em;
+      font-weight: 500;
+    }
+
+    .miniHint{
+      color: var(--muted);
+      font-size: .86em;
+      font-weight: 500;
+      margin-top: 8px;
+      line-height: 1.25;
     }
 
     .topActions{
       display:flex;
       flex-direction:column;
-      gap: 14px;
+      gap: 12px;
     }
 
-    /* Symptoms grid (smaller; 2 columns) */
     .symptoms{
       margin-top: 6px;
       display:grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px 12px;
-      font-size: 0.55em; /* ~half-size */
+      font-size: 0.62em;
     }
     .symptoms .chip{
       display:flex;
@@ -163,57 +202,58 @@
       gap: 10px;
       padding: 12px 12px;
       border-radius: 18px;
-      border: 2px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.18);
+      background: transparent;
     }
     .symptoms input[type="checkbox"]{
-      width: 26px;
-      height: 26px;
+      width: 24px;
+      height: 24px;
       margin:0;
       accent-color: var(--accent);
       flex: 0 0 auto;
     }
     .symptoms span{
       line-height: 1.05;
-      font-weight: 700;
+      font-weight: 550;
       color: var(--fg);
     }
 
-    /* Log cards */
     .logItem{
       border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
+      background: rgba(255,255,255,.03);
       border-radius: 20px;
       padding: 14px 14px;
     }
     .logWhen{
       color: var(--muted);
-      font-size: .85em;
+      font-size: .9em;
       margin-bottom: 6px;
+      font-weight: 500;
     }
     .logBig{
-      font-size: 1.2em;
-      font-weight: 900;
-      letter-spacing: .2px;
+      font-size: 1.15em;
+      font-weight: 750;
+      letter-spacing: .1px;
       margin-bottom: 6px;
     }
     .logLine{
       font-size: .95em;
       color: var(--fg);
       margin: 2px 0;
+      font-weight: 520;
+      overflow-wrap: anywhere;
     }
-    .logLine b{ font-weight: 900; }
+    .logLine b{ font-weight: 700; }
 
-    /* Chart canvas container */
     .chartBox{
       border-radius: 22px;
       border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.18);
+      background: rgba(0,0,0,.16);
       padding: 12px;
     }
     canvas{
       width: 100%;
-      height: 300px;
+      height: 280px;
       display:block;
     }
     .chartLegend{
@@ -222,25 +262,25 @@
       gap: 10px 16px;
       margin-top: 10px;
       color: var(--muted);
-      font-size: .85em;
+      font-size: .9em;
+      font-weight: 500;
     }
 
-    /* Simple toast */
     .toast{
       margin-top: 12px;
       color: var(--muted);
       font-size: .95em;
       min-height: 1.2em;
+      font-weight: 500;
     }
 
-    /* Hide/show screens */
     .screen{ display:none; }
     .screen.active{ display:block; }
 
-    /* Make tap targets even bigger on small screens */
     @media (max-width: 420px){
-      :root{ --font: 27px; }
-      canvas{ height: 280px; }
+      :root{ --font: 21px; }
+      canvas{ height: 260px; }
+      .btn.small{ padding: 11px 12px; font-size: .98em; }
     }
   </style>
 </head>
@@ -267,7 +307,11 @@
     <!-- ADD -->
     <section id="add" class="screen">
       <div class="card stack">
-        <!-- BP first (per your request) -->
+        <div>
+          <div class="metaLabel">Time</div>
+          <div class="metaValue" id="whenText"></div>
+        </div>
+
         <div class="row">
           <div class="col">
             <label for="sys">Systolic</label>
@@ -285,28 +329,17 @@
             <input id="hr" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 72" />
           </div>
           <div class="col">
-            <label>Time</label>
-            <!-- Not editable: shows current timestamp -->
-            <input id="when" readonly aria-readonly="true" />
+            <label for="notes">Notes</label>
+            <input id="notes" placeholder="optional" />
           </div>
         </div>
 
         <div>
           <label>Symptoms</label>
-          <div class="symptoms" id="symptomsGrid">
-            <!-- Filled by JS -->
-          </div>
-          <div class="hint">Tip: check only what matters right now.</div>
+          <div class="symptoms" id="symptomsGrid"></div>
+          <div class="hint">Check only what matters.</div>
         </div>
 
-        <div class="row">
-          <div class="col">
-            <label for="notes">Notes</label>
-            <textarea id="notes" placeholder="Short note (optional)"></textarea>
-          </div>
-        </div>
-
-        <!-- Buttons AFTER input fields -->
         <div class="row">
           <div class="col">
             <button class="btn primary" id="save">Save</button>
@@ -323,22 +356,41 @@
     <!-- LOG -->
     <section id="log" class="screen">
       <div class="card stack">
+        <!-- Top bar: small horizontal buttons -->
+        <div class="topBar">
+          <button class="btn small" id="export">Export</button>
+          <button class="btn small" id="backFromLog">Back</button>
+        </div>
+        <div class="miniHint" id="exportHint">
+          Export copies the currently filtered log (date + search) as text. Data stays on your phone.
+        </div>
+
+        <!-- Search -->
         <div class="row">
           <div class="col">
-            <label for="search">Search (symptoms/notes)</label>
-            <input id="search" placeholder="Type a word: sweaty, dizzy, etc." />
+            <label for="search">Search</label>
+            <input id="search" placeholder="Type a word: sweaty, dizzy, heartburn..." />
+            <div class="miniHint">Search looks in symptoms, notes, and BP.</div>
           </div>
         </div>
 
-        <button class="btn" id="export">Export for ChatGPT / Doctor / VA</button>
-        <button class="btn" id="backFromLog">Back</button>
+        <!-- Date filter -->
+        <div class="row">
+          <div class="col">
+            <label for="fromDate">From</label>
+            <input id="fromDate" type="date" />
+          </div>
+          <div class="col">
+            <label for="toDate">To</label>
+            <input id="toDate" type="date" />
+          </div>
+        </div>
+        <div class="miniHint">Tip: set both dates to export a single day.</div>
 
-        <div class="hint" id="exportHint"></div>
-
+        <!-- Default log -->
         <div id="logList" class="stack" aria-live="polite"></div>
 
         <button class="btn danger" id="clearAll">Delete ALL data (local)</button>
-
         <div class="toast" id="logToast" aria-live="polite"></div>
       </div>
     </section>
@@ -372,36 +424,25 @@
         </div>
 
         <button class="btn" id="backFromCharts">Back</button>
-
         <div class="toast" id="chartToast" aria-live="polite"></div>
       </div>
     </section>
   </div>
 
   <script>
-    /***************
-     * Data model
-     ***************/
     const STORAGE_KEY = "vitals_tracker_entries_v1";
 
     function loadEntries(){
       try{
         const raw = localStorage.getItem(STORAGE_KEY);
         const arr = raw ? JSON.parse(raw) : [];
-        if(!Array.isArray(arr)) return [];
-        return arr;
-      }catch(e){
-        return [];
-      }
+        return Array.isArray(arr) ? arr : [];
+      }catch(e){ return []; }
     }
-
     function saveEntries(entries){
       localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
     }
-
-    function nowISO(){
-      return new Date().toISOString();
-    }
+    function nowISO(){ return new Date().toISOString(); }
 
     function formatWhen(iso){
       const d = new Date(iso);
@@ -417,9 +458,28 @@
       return Number.isFinite(n) ? n : null;
     }
 
-    /***************
-     * Screens
-     ***************/
+    function toDateInputValue(iso){
+      const d = new Date(iso);
+      if(isNaN(d.getTime())) return "";
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,"0");
+      const day = String(d.getDate()).padStart(2,"0");
+      return `${y}-${m}-${day}`;
+    }
+
+    function startOfDayMs(yyyy_mm_dd){
+      if(!yyyy_mm_dd) return null;
+      const [y,m,d] = yyyy_mm_dd.split("-").map(n=>parseInt(n,10));
+      if(!y || !m || !d) return null;
+      return new Date(y, m-1, d, 0,0,0,0).getTime();
+    }
+    function endOfDayMs(yyyy_mm_dd){
+      if(!yyyy_mm_dd) return null;
+      const [y,m,d] = yyyy_mm_dd.split("-").map(n=>parseInt(n,10));
+      if(!y || !m || !d) return null;
+      return new Date(y, m-1, d, 23,59,59,999).getTime();
+    }
+
     const screens = {
       home: document.getElementById("home"),
       add: document.getElementById("add"),
@@ -427,10 +487,14 @@
       charts: document.getElementById("charts"),
     };
 
+    function setToast(id, msg){
+      const el = document.getElementById(id);
+      if(el) el.textContent = msg || "";
+    }
+
     function show(name){
       Object.values(screens).forEach(s => s.classList.remove("active"));
       screens[name].classList.add("active");
-      // Reset some toasts when switching
       setToast("homeToast","");
       setToast("addToast","");
       setToast("logToast","");
@@ -438,29 +502,13 @@
       if(name === "add") startAdd();
       if(name === "log") renderLog();
       if(name === "charts") renderChart();
+      if(name === "home") refreshHomeHint();
     }
 
-    function setToast(id, msg){
-      const el = document.getElementById(id);
-      if(el) el.textContent = msg || "";
-    }
-
-    /***************
-     * Symptoms (2 columns, smaller)
-     ***************/
     const SYMPTOMS = [
-      "Sweaty",
-      "Dizzy",
-      "Panic",
-      "Brain fog",
-      "Chest tight",
-      "Headache",
-      "Nausea",
-      "Short breath",
-      "Hot ears",
-      "Shaky",
-      "Blurred vision",
-      "Weakness"
+      "Sweaty","Dizzy","Panic","Brain fog",
+      "Chest tight","Headache","Nausea","Short breath",
+      "Hot ears","Shaky","Blurred vision","Weakness"
     ];
 
     const symptomsGrid = document.getElementById("symptomsGrid");
@@ -495,45 +543,35 @@
       return out;
     }
     function clearSymptoms(){
-      const cbs = symptomsGrid.querySelectorAll("input[type=checkbox]");
-      cbs.forEach(cb => cb.checked = false);
+      symptomsGrid.querySelectorAll("input[type=checkbox]").forEach(cb => cb.checked = false);
     }
 
-    /***************
-     * Add screen behavior
-     ***************/
     const sysEl = document.getElementById("sys");
     const diaEl = document.getElementById("dia");
     const hrEl  = document.getElementById("hr");
-    const whenEl= document.getElementById("when");
     const notesEl = document.getElementById("notes");
+    const whenTextEl = document.getElementById("whenText");
 
     let addTimestampISO = null;
     let whenTimer = null;
 
     function startAdd(){
-      // Clear input
       sysEl.value = "";
       diaEl.value = "";
       hrEl.value  = "";
       notesEl.value = "";
       clearSymptoms();
 
-      // Non-editable time
       addTimestampISO = nowISO();
-      updateWhenField();
+      whenTextEl.textContent = formatWhen(addTimestampISO);
+
       if(whenTimer) clearInterval(whenTimer);
       whenTimer = setInterval(() => {
         addTimestampISO = nowISO();
-        updateWhenField();
+        whenTextEl.textContent = formatWhen(addTimestampISO);
       }, 1000);
 
-      // Put cursor in systolic
-      setTimeout(() => sysEl.focus(), 150);
-    }
-
-    function updateWhenField(){
-      whenEl.value = formatWhen(addTimestampISO);
+      setTimeout(() => sysEl.focus(), 120);
     }
 
     document.getElementById("save").addEventListener("click", () => {
@@ -559,13 +597,11 @@
 
       const entries = loadEntries();
       entries.push(entry);
-      // Sort newest first
       entries.sort((a,b) => new Date(b.t) - new Date(a.t));
       saveEntries(entries);
 
       if(whenTimer) clearInterval(whenTimer);
-      setToast("homeToast","Saved.");
-      document.getElementById("homeHint").textContent = "Saved.";
+      document.getElementById("homeToast").textContent = "Saved.";
       show("home");
     });
 
@@ -574,19 +610,14 @@
       show("home");
     });
 
-    /***************
-     * Home buttons
-     ***************/
     document.getElementById("goAdd").addEventListener("click", () => show("add"));
     document.getElementById("goLog").addEventListener("click", () => show("log"));
     document.getElementById("goCharts").addEventListener("click", () => show("charts"));
 
-    /***************
-     * Log screen
-     ***************/
     const logList = document.getElementById("logList");
     const searchEl = document.getElementById("search");
-    const exportHint = document.getElementById("exportHint");
+    const fromDateEl = document.getElementById("fromDate");
+    const toDateEl = document.getElementById("toDate");
 
     function entryMatches(entry, q){
       if(!q) return true;
@@ -597,17 +628,53 @@
       return sym.includes(q) || notes.includes(q) || bp.includes(q);
     }
 
-    function renderLog(){
+    function inDateRange(entry, fromStr, toStr){
+      const t = new Date(entry.t).getTime();
+      if(!Number.isFinite(t)) return true;
+
+      const from = startOfDayMs(fromStr);
+      const to = endOfDayMs(toStr);
+
+      if(from !== null && t < from) return false;
+      if(to !== null && t > to) return false;
+      return true;
+    }
+
+    function escapeHTML(s){
+      return String(s)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function getFilteredEntries(){
       const entries = loadEntries();
       const q = (searchEl.value || "");
-      const filtered = entries.filter(e => entryMatches(e, q));
+      const fromStr = (fromDateEl.value || "");
+      const toStr = (toDateEl.value || "");
+
+      return entries
+        .filter(e => entryMatches(e, q))
+        .filter(e => inDateRange(e, fromStr, toStr));
+    }
+
+    function renderLog(){
+      // sensible defaults: if blank, leave blank (show all)
+      const entriesAll = loadEntries();
+
+      // if user never set date filters, keep blank
+      // (no auto-fill to avoid surprising behavior)
+
+      const filtered = getFilteredEntries();
 
       logList.innerHTML = "";
 
       if(filtered.length === 0){
         const empty = document.createElement("div");
         empty.className = "hint";
-        empty.textContent = entries.length ? "No matches." : "No entries yet. Tap Add.";
+        empty.textContent = entriesAll.length ? "No matches for that search/date range." : "No entries yet. Tap Add.";
         logList.appendChild(empty);
       }else{
         filtered.forEach(e => {
@@ -641,29 +708,66 @@
         });
       }
 
-      // Export hint
-      exportHint.textContent = "Export copies your data as text (for ChatGPT / doctor / VA). Data stays on your phone.";
-
-      // Accessibility: focus search if you came here intentionally
-      setTimeout(() => searchEl.focus(), 100);
+      setTimeout(() => searchEl.focus(), 80);
     }
 
     searchEl.addEventListener("input", renderLog);
+    fromDateEl.addEventListener("change", renderLog);
+    toDateEl.addEventListener("change", renderLog);
 
     document.getElementById("backFromLog").addEventListener("click", () => show("home"));
 
+    function makeExportText(entries){
+      const lines = [];
+      const fromStr = (fromDateEl.value || "");
+      const toStr = (toDateEl.value || "");
+      const q = (searchEl.value || "").trim();
+
+      lines.push("Vitals Tracker Export");
+      if(fromStr || toStr || q){
+        lines.push("Filters:");
+        if(fromStr) lines.push(`- From: ${fromStr}`);
+        if(toStr) lines.push(`- To: ${toStr}`);
+        if(q) lines.push(`- Search: ${q}`);
+      }
+      lines.push("----");
+
+      entries
+        .slice()
+        .sort((a,b) => new Date(a.t) - new Date(b.t))
+        .forEach(e => {
+          const stamp = formatWhen(e.t);
+          const sym = (e.symptoms && e.symptoms.length) ? e.symptoms.join(", ") : "None";
+          const notes = (e.notes && e.notes.trim()) ? e.notes.trim() : "None";
+          lines.push(`${stamp} | BP ${e.sys}/${e.dia} | HR ${e.hr} | Symptoms: ${sym} | Notes: ${notes}`);
+        });
+
+      lines.push("----");
+      lines.push("CSV:");
+      lines.push("timestamp_iso,sys,dia,hr,symptoms,notes");
+      entries
+        .slice()
+        .sort((a,b) => new Date(a.t) - new Date(b.t))
+        .forEach(e => {
+          const sym = (e.symptoms && e.symptoms.length) ? e.symptoms.join(";") : "";
+          const notes = (e.notes || "").replaceAll('"','""');
+          lines.push(`${e.t},${e.sys},${e.dia},${e.hr},"${sym}","${notes}"`);
+        });
+
+      return lines.join("\n");
+    }
+
     document.getElementById("export").addEventListener("click", async () => {
-      const entries = loadEntries();
-      if(!entries.length){
-        setToast("logToast","Nothing to export yet.");
+      const filtered = getFilteredEntries();
+      if(!filtered.length){
+        setToast("logToast","Nothing to export for that search/date range.");
         return;
       }
-      const payload = makeExportText(entries);
+      const payload = makeExportText(filtered);
       try{
         await navigator.clipboard.writeText(payload);
-        setToast("logToast","Copied to clipboard. Paste into ChatGPT.");
+        setToast("logToast","Copied. Paste into ChatGPT.");
       }catch(e){
-        // Fallback: prompt
         window.prompt("Copy this text:", payload);
         setToast("logToast","Copy prompt opened.");
       }
@@ -678,50 +782,6 @@
       renderChart();
     });
 
-    function makeExportText(entries){
-      // Toddler-simple, still machine-readable.
-      // Format:
-      // YYYY-MM-DD HH:MM:SS | BP 132/91 | HR 72 | Symptoms: A, B | Notes: ...
-      const lines = [];
-      lines.push("Vitals Tracker Export");
-      lines.push("Local-only data from your phone");
-      lines.push("----");
-      entries
-        .slice()
-        .sort((a,b) => new Date(a.t) - new Date(b.t)) // oldest->newest for timelines
-        .forEach(e => {
-          const when = new Date(e.t);
-          const stamp = isNaN(when.getTime()) ? String(e.t) : when.toLocaleString();
-          const sym = (e.symptoms && e.symptoms.length) ? e.symptoms.join(", ") : "None";
-          const notes = (e.notes && e.notes.trim()) ? e.notes.trim() : "None";
-          lines.push(`${stamp} | BP ${e.sys}/${e.dia} | HR ${e.hr} | Symptoms: ${sym} | Notes: ${notes}`);
-        });
-      lines.push("----");
-      lines.push("CSV (for spreadsheets):");
-      lines.push("timestamp_iso,sys,dia,hr,symptoms,notes");
-      entries
-        .slice()
-        .sort((a,b) => new Date(a.t) - new Date(b.t))
-        .forEach(e => {
-          const sym = (e.symptoms && e.symptoms.length) ? e.symptoms.join(";") : "";
-          const notes = (e.notes || "").replaceAll('"','""');
-          lines.push(`${e.t},${e.sys},${e.dia},${e.hr},"${sym}","${notes}"`);
-        });
-      return lines.join("\n");
-    }
-
-    function escapeHTML(s){
-      return String(s)
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-    }
-
-    /***************
-     * Charts (works with 1 point)
-     ***************/
     const chartCanvas = document.getElementById("chart");
     const ctx = chartCanvas.getContext("2d");
     const rangeEl = document.getElementById("range");
@@ -740,35 +800,13 @@
       return entries.filter(e => new Date(e.t).getTime() >= cutoff);
     }
 
-    function renderChart(){
-      const entriesAll = loadEntries().slice().sort((a,b) => new Date(a.t) - new Date(b.t)); // oldest->newest
-      const entries = filterByRange(entriesAll, rangeEl.value);
-
-      // Clear
-      ctx.clearRect(0,0,chartCanvas.width, chartCanvas.height);
-      legendEl.textContent = "";
-
-      if(entries.length === 0){
-        drawEmpty("No data yet. Add one BP reading.");
-        return;
-      }
-
-      const metric = metricEl.value;
-
-      if(metric === "bp"){
-        drawBP(entries);
-      }else{
-        drawHR(entries);
-      }
-    }
-
     function drawEmpty(msg){
       const w = chartCanvas.width, h = chartCanvas.height;
-      ctx.fillStyle = "rgba(255,255,255,.08)";
+      ctx.fillStyle = "rgba(255,255,255,.05)";
       ctx.fillRect(0,0,w,h);
 
       ctx.fillStyle = "rgba(231,234,240,.85)";
-      ctx.font = "bold 28px Roboto, system-ui, sans-serif";
+      ctx.font = "600 22px Roboto, system-ui, sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(msg, w/2, h/2);
@@ -777,14 +815,12 @@
 
     function drawAxes(padL, padR, padT, padB){
       const w = chartCanvas.width, h = chartCanvas.height;
-      ctx.strokeStyle = "rgba(255,255,255,.18)";
+      ctx.strokeStyle = "rgba(255,255,255,.16)";
       ctx.lineWidth = 2;
-      // y-axis
       ctx.beginPath();
       ctx.moveTo(padL, padT);
       ctx.lineTo(padL, h-padB);
       ctx.stroke();
-      // x-axis
       ctx.beginPath();
       ctx.moveTo(padL, h-padB);
       ctx.lineTo(w-padR, h-padB);
@@ -793,7 +829,7 @@
 
     function mapX(i, n, padL, padR){
       const w = chartCanvas.width;
-      if(n === 1) return (padL + (w-padR)) / 2; // single point centered
+      if(n === 1) return (padL + (w-padR)) / 2;
       const span = (w - padL - padR);
       return padL + (i/(n-1))*span;
     }
@@ -816,7 +852,6 @@
       });
       ctx.stroke();
 
-      // points
       ctx.fillStyle = color;
       points.forEach(p => {
         ctx.beginPath();
@@ -826,10 +861,9 @@
     }
 
     function drawLabelsY(vmin, vmax, padL, padT, padB){
-      // 4 ticks
       const ticks = 4;
-      ctx.fillStyle = "rgba(233,236,244,.80)";
-      ctx.font = "700 18px Roboto, system-ui, sans-serif";
+      ctx.fillStyle = "rgba(233,236,244,.75)";
+      ctx.font = "500 16px Roboto, system-ui, sans-serif";
       ctx.textAlign = "right";
       ctx.textBaseline = "middle";
 
@@ -838,8 +872,7 @@
         const y = mapY(val, vmin, vmax, padT, padB);
         ctx.fillText(String(Math.round(val)), padL-10, y);
 
-        // gridline
-        ctx.strokeStyle = "rgba(255,255,255,.08)";
+        ctx.strokeStyle = "rgba(255,255,255,.07)";
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(padL, y);
@@ -848,110 +881,14 @@
       }
     }
 
-    function drawBP(entries){
-      const padL=72, padR=18, padT=18, padB=48;
-      const n = entries.length;
-
-      const sysVals = entries.map(e=>e.sys);
-      const diaVals = entries.map(e=>e.dia);
-
-      // Determine y scale with padding
-      let vmin = Math.min(...diaVals, ...sysVals);
-      let vmax = Math.max(...diaVals, ...sysVals);
-
-      // Expand range a bit for readability (including single point)
-      const extra = Math.max(10, Math.round((vmax - vmin)*0.2));
-      vmin = Math.max(0, vmin - extra);
-      vmax = vmax + extra;
-
-      // Background
-      ctx.fillStyle = "rgba(0,0,0,.12)";
-      ctx.fillRect(0,0,chartCanvas.width, chartCanvas.height);
-
-      drawAxes(padL,padR,padT,padB);
-      drawLabelsY(vmin,vmax,padL,padT,padB);
-
-      const sysPts = entries.map((e,i)=>({
-        x: mapX(i,n,padL,padR),
-        y: mapY(e.sys,vmin,vmax,padT,padB)
-      }));
-      const diaPts = entries.map((e,i)=>({
-        x: mapX(i,n,padL,padR),
-        y: mapY(e.dia,vmin,vmax,padT,padB)
-      }));
-
-      // Colors chosen to be readable on dark without being neon.
-      drawLine(sysPts, "rgba(90,147,255,.95)");
-      drawLine(diaPts, "rgba(231,234,240,.85)");
-
-      // X labels: show first and last dates (or just one)
-      ctx.fillStyle = "rgba(233,236,244,.75)";
-      ctx.font = "700 18px Roboto, system-ui, sans-serif";
-      ctx.textAlign = "left";
-      ctx.textBaseline = "top";
-      const first = new Date(entries[0].t);
-      const last = new Date(entries[n-1].t);
-      const firstTxt = isNaN(first.getTime()) ? String(entries[0].t) : first.toLocaleDateString();
-      const lastTxt  = isNaN(last.getTime()) ? String(entries[n-1].t) : last.toLocaleDateString();
-      ctx.fillText(firstTxt, padL, chartCanvas.height-padB+10);
-      ctx.textAlign = "right";
-      ctx.fillText(lastTxt, chartCanvas.width-padR, chartCanvas.height-padB+10);
-
-      legendEl.innerHTML = "";
-      legendEl.appendChild(legendChip("Systolic", "rgba(90,147,255,.95)"));
-      legendEl.appendChild(legendChip("Diastolic", "rgba(231,234,240,.85)"));
-      setToast("chartToast", n===1 ? "Showing 1 reading (chart still works)." : "");
-    }
-
-    function drawHR(entries){
-      const padL=72, padR=18, padT=18, padB=48;
-      const n = entries.length;
-
-      const vals = entries.map(e=>e.hr);
-      let vmin = Math.min(...vals);
-      let vmax = Math.max(...vals);
-      const extra = Math.max(8, Math.round((vmax - vmin)*0.25));
-      vmin = Math.max(0, vmin - extra);
-      vmax = vmax + extra;
-
-      ctx.fillStyle = "rgba(0,0,0,.12)";
-      ctx.fillRect(0,0,chartCanvas.width, chartCanvas.height);
-
-      drawAxes(padL,padR,padT,padB);
-      drawLabelsY(vmin,vmax,padL,padT,padB);
-
-      const pts = entries.map((e,i)=>({
-        x: mapX(i,n,padL,padR),
-        y: mapY(e.hr,vmin,vmax,padT,padB)
-      }));
-
-      drawLine(pts, "rgba(90,147,255,.95)");
-
-      ctx.fillStyle = "rgba(233,236,244,.75)";
-      ctx.font = "700 18px Roboto, system-ui, sans-serif";
-      ctx.textAlign = "left";
-      ctx.textBaseline = "top";
-      const first = new Date(entries[0].t);
-      const last = new Date(entries[n-1].t);
-      const firstTxt = isNaN(first.getTime()) ? String(entries[0].t) : first.toLocaleDateString();
-      const lastTxt  = isNaN(last.getTime()) ? String(entries[n-1].t) : last.toLocaleDateString();
-      ctx.fillText(firstTxt, padL, chartCanvas.height-padB+10);
-      ctx.textAlign = "right";
-      ctx.fillText(lastTxt, chartCanvas.width-padR, chartCanvas.height-padB+10);
-
-      legendEl.innerHTML = "";
-      legendEl.appendChild(legendChip("Heart Rate", "rgba(90,147,255,.95)"));
-      setToast("chartToast", n===1 ? "Showing 1 reading (chart still works)." : "");
-    }
-
     function legendChip(name, color){
       const wrap = document.createElement("span");
       wrap.style.display = "inline-flex";
       wrap.style.alignItems = "center";
       wrap.style.gap = "8px";
       const dot = document.createElement("span");
-      dot.style.width = "14px";
-      dot.style.height = "14px";
+      dot.style.width = "12px";
+      dot.style.height = "12px";
       dot.style.borderRadius = "999px";
       dot.style.background = color;
       dot.style.boxShadow = "0 0 0 2px rgba(0,0,0,.25)";
@@ -962,9 +899,102 @@
       return wrap;
     }
 
-    /***************
-     * Startup: set home hint based on existing data
-     ***************/
+    function drawBP(entries){
+      const padL=66, padR=18, padT=18, padB=44;
+      const n = entries.length;
+
+      const sysVals = entries.map(e=>e.sys);
+      const diaVals = entries.map(e=>e.dia);
+
+      let vmin = Math.min(...diaVals, ...sysVals);
+      let vmax = Math.max(...diaVals, ...sysVals);
+      const extra = Math.max(10, Math.round((vmax - vmin)*0.2));
+      vmin = Math.max(0, vmin - extra);
+      vmax = vmax + extra;
+
+      ctx.fillStyle = "rgba(0,0,0,.10)";
+      ctx.fillRect(0,0,chartCanvas.width, chartCanvas.height);
+
+      drawAxes(padL,padR,padT,padB);
+      drawLabelsY(vmin,vmax,padL,padT,padB);
+
+      const sysPts = entries.map((e,i)=>({ x: mapX(i,n,padL,padR), y: mapY(e.sys,vmin,vmax,padT,padB) }));
+      const diaPts = entries.map((e,i)=>({ x: mapX(i,n,padL,padR), y: mapY(e.dia,vmin,vmax,padT,padB) }));
+
+      drawLine(sysPts, "rgba(90,147,255,.92)");
+      drawLine(diaPts, "rgba(231,234,240,.82)");
+
+      ctx.fillStyle = "rgba(233,236,244,.70)";
+      ctx.font = "500 16px Roboto, system-ui, sans-serif";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "top";
+      const first = new Date(entries[0].t);
+      const last = new Date(entries[n-1].t);
+      const firstTxt = isNaN(first.getTime()) ? String(entries[0].t) : first.toLocaleDateString();
+      const lastTxt  = isNaN(last.getTime()) ? String(entries[n-1].t) : last.toLocaleDateString();
+      ctx.fillText(firstTxt, padL, chartCanvas.height-padB+10);
+      ctx.textAlign = "right";
+      ctx.fillText(lastTxt, chartCanvas.width-padR, chartCanvas.height-padB+10);
+
+      legendEl.innerHTML = "";
+      legendEl.appendChild(legendChip("Systolic", "rgba(90,147,255,.92)"));
+      legendEl.appendChild(legendChip("Diastolic", "rgba(231,234,240,.82)"));
+      setToast("chartToast", n===1 ? "Showing 1 reading." : "");
+    }
+
+    function drawHR(entries){
+      const padL=66, padR=18, padT=18, padB=44;
+      const n = entries.length;
+
+      const vals = entries.map(e=>e.hr);
+      let vmin = Math.min(...vals);
+      let vmax = Math.max(...vals);
+      const extra = Math.max(8, Math.round((vmax - vmin)*0.25));
+      vmin = Math.max(0, vmin - extra);
+      vmax = vmax + extra;
+
+      ctx.fillStyle = "rgba(0,0,0,.10)";
+      ctx.fillRect(0,0,chartCanvas.width, chartCanvas.height);
+
+      drawAxes(padL,padR,padT,padB);
+      drawLabelsY(vmin,vmax,padL,padT,padB);
+
+      const pts = entries.map((e,i)=>({ x: mapX(i,n,padL,padR), y: mapY(e.hr,vmin,vmax,padT,padB) }));
+      drawLine(pts, "rgba(90,147,255,.92)");
+
+      ctx.fillStyle = "rgba(233,236,244,.70)";
+      ctx.font = "500 16px Roboto, system-ui, sans-serif";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "top";
+      const first = new Date(entries[0].t);
+      const last = new Date(entries[n-1].t);
+      const firstTxt = isNaN(first.getTime()) ? String(entries[0].t) : first.toLocaleDateString();
+      const lastTxt  = isNaN(last.getTime()) ? String(entries[n-1].t) : last.toLocaleDateString();
+      ctx.fillText(firstTxt, padL, chartCanvas.height-padB+10);
+      ctx.textAlign = "right";
+      ctx.fillText(lastTxt, chartCanvas.width-padR, chartCanvas.height-padB+10);
+
+      legendEl.innerHTML = "";
+      legendEl.appendChild(legendChip("Heart Rate", "rgba(90,147,255,.92)"));
+      setToast("chartToast", n===1 ? "Showing 1 reading." : "");
+    }
+
+    function renderChart(){
+      const entriesAll = loadEntries().slice().sort((a,b) => new Date(a.t) - new Date(b.t));
+      const entries = filterByRange(entriesAll, rangeEl.value);
+
+      ctx.clearRect(0,0,chartCanvas.width, chartCanvas.height);
+      legendEl.textContent = "";
+
+      if(entries.length === 0){
+        drawEmpty("No data yet. Tap Add.");
+        return;
+      }
+
+      if(metricEl.value === "bp") drawBP(entries);
+      else drawHR(entries);
+    }
+
     function refreshHomeHint(){
       const entries = loadEntries();
       document.getElementById("homeHint").textContent =
@@ -972,21 +1002,9 @@
     }
     refreshHomeHint();
 
-    // Update hint whenever we return home
-    const oldShow = show;
-    show = function(name){
-      oldShow(name);
-      if(name === "home") refreshHomeHint();
-    }
-
-    /***************
-     * Defensive: prevent odd bottom artifacts from overflow
-     ***************/
     window.addEventListener("resize", () => {
-      // re-render chart on resize so it fits
       if(screens.charts.classList.contains("active")) renderChart();
     });
   </script>
 </body>
 </html>
-```0
