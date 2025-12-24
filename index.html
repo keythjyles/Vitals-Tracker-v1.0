@@ -1,934 +1,1255 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Vitals Tracker v2.02</title>
-<style>
-:root{
-  --blue:#2a7fff;
-  --red:#c62828;
-  --green:#2e7d32;
-  --amber:#9a6b00;
-  --ink:#111;
-  --muted:#666;
-  --bg:#fff;
-  --card:#f7f9fc;
-  --border:6px solid var(--blue);
-  --r:16px;
-  --pad:14px;
-  --font: 19px;
-}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Vitals Tracker v2.02</title>
+  <style>
+    :root{
+      --brand:#4aa3ff; /* border + logo blue */
+      --ink:#111;
+      --muted:#444;
+      --bg:#fff;
+      --card:#f7f7f7;
+      --line:#d9d9d9;
+      --danger:#c01818; /* exit button */
+      --focus:#111;
+      --radius:16px;
+      --pad:14px;
+      --shadow:0 1px 0 rgba(0,0,0,.08);
+      --font: system-ui,-apple-system,Segoe UI,Roboto,Arial,Helvetica,sans-serif;
+      --mono: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    }
 
-*{ box-sizing:border-box; }
-body{
-  margin:0;
-  background:var(--bg);
-  color:var(--ink);
-  font-family: Arial, Helvetica, sans-serif;
-  padding:12px;
-}
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; background:var(--bg); color:var(--ink); font-family:var(--font); }
+    body{ margin:0; }
 
-.app{
-  max-width:860px;
-  margin:0 auto;
-  border:var(--border);
-  border-radius:var(--r);
-  padding:var(--pad);
-}
+    /* Full-screen blue border */
+    .frame{
+      min-height:100%;
+      border:6px solid var(--brand);
+      padding:12px;
+    }
 
-.header{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  margin-bottom:10px;
-}
-.logo{
-  width:48px;height:48px;border-radius:50%;
-  background:var(--blue);
-  display:flex;align-items:center;justify-content:center;
-  color:#fff;font-weight:800;font-size:22px;
-}
-.title{
-  font-size:20px;
-  font-weight:800;
-}
-.meta{
-  margin-left:auto;
-  font-size:14px;
-  color:#222;
-  text-align:right;
-}
-.meta .v{ font-weight:700; }
-.meta .s{ color:var(--muted); }
+    /* App shell */
+    .app{
+      max-width:980px;
+      margin:0 auto;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
 
-.nav{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin:10px 0 12px;
-}
-.nav button{
-  font-size:16px;
-  padding:10px 12px;
-  border-radius:12px;
-  border:1px solid #bbb;
-  background:#fff;
-  font-weight:800;
-  cursor:pointer;
-}
-.nav button.active{
-  border-color:var(--blue);
-  outline:3px solid rgba(42,127,255,.25);
-}
-.nav .spacer{ flex:1; min-width:10px; }
-.nav .exit{
-  background:var(--red);
-  border:none;
-  color:#fff;
-}
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 10px 0 10px;
+    }
 
-.card{
-  background:var(--card);
-  border:1px solid #cfd8ea;
-  border-radius:14px;
-  padding:12px;
-}
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
 
-.row{ display:flex; gap:10px; flex-wrap:wrap; }
-.row > *{ flex:1; min-width:180px; }
+    .logo{
+      width:44px;
+      height:44px;
+      flex:0 0 auto;
+    }
 
-label{ display:block; font-size:14px; color:var(--muted); margin:6px 0 6px; }
-input, textarea, button, select{
-  width:100%;
-  font-size:var(--font);
-  padding:10px;
-  border-radius:12px;
-  border:1px solid #bbb;
-  background:#fff;
-}
-textarea{ min-height:90px; resize:vertical; }
+    .brand h1{
+      margin:0;
+      font-size:20px;
+      letter-spacing:.2px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
 
-.small{ font-size:14px; color:var(--muted); margin-top:6px; }
+    .brand .sub{
+      margin:2px 0 0 0;
+      font-size:13px;
+      color:var(--muted);
+    }
 
-.vitalsline{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-.vitalsline .box{
-  flex:1;
-  min-width:180px;
-}
-.vitalsline input{
-  text-align:center;
-  font-weight:800;
-}
+    .top-actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex:0 0 auto;
+    }
 
-.steps{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  margin:10px 0;
-}
-.stepchip{
-  padding:8px 10px;
-  border-radius:999px;
-  border:1px solid #bbb;
-  font-size:14px;
-  font-weight:800;
-  background:#fff;
-  cursor:pointer;
-}
-.stepchip.active{
-  border-color:var(--blue);
-  outline:3px solid rgba(42,127,255,.25);
-}
-.stepchip.done{
-  border-color:var(--green);
-}
+    button, input, textarea, select{
+      font:inherit;
+    }
 
-.symptoms{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px 12px;
-  margin-top:8px;
-}
-.symptoms label{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  border-radius:12px;
-  padding:8px 10px;
-  background:#fff;
-  border:1px solid #ddd;
-  font-size:16px;
-  color:#111;
-}
-.symptoms input[type="checkbox"]{
-  width:auto;
-  transform:scale(1.25);
-}
+    .btn{
+      border:1px solid var(--ink);
+      background:#fff;
+      padding:10px 12px;
+      border-radius:12px;
+      cursor:pointer;
+      box-shadow:var(--shadow);
+      min-height:44px;
+    }
+    .btn:focus{ outline:3px solid var(--focus); outline-offset:2px; }
+    .btn.primary{
+      background:var(--ink);
+      color:#fff;
+      border-color:var(--ink);
+    }
+    .btn.secondary{
+      background:#fff;
+      color:var(--ink);
+    }
+    .btn.danger{
+      background:var(--danger);
+      color:#fff;
+      border-color:var(--danger);
+    }
+    .btn.link{
+      border:none;
+      background:transparent;
+      box-shadow:none;
+      text-decoration:underline;
+      padding:10px 8px;
+      min-height:44px;
+    }
 
-.alert{
-  margin-top:10px;
-  padding:10px;
-  border-radius:12px;
-  font-weight:900;
-}
-.alert.ok{ background:#e8f5e9; color:var(--green); }
-.alert.warn{ background:#fdecea; color:var(--red); }
-.alert.note{ background:#eef5ff; color:#0b3a7a; }
-.alert.mid{ background:#fff7e6; color:var(--amber); }
+    main{
+      padding:0 10px 10px 10px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
 
-.actions{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-top:12px;
-}
-.actions button{
-  border:none;
-  cursor:pointer;
-  font-weight:900;
-  font-size:18px;
-  padding:12px 14px;
-  border-radius:12px;
-  width:auto;
-}
-.btn-blue{ background:var(--blue); color:#fff; }
-.btn-gray{ background:#eee; color:#000; border:1px solid #bbb; }
-.btn-red{ background:var(--red); color:#fff; }
+    .panel{
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:var(--pad);
+      background:#fff;
+      box-shadow:var(--shadow);
+    }
 
-.hr{ height:1px; background:#d6deef; margin:12px 0; }
+    .panel h2{
+      margin:0 0 8px 0;
+      font-size:18px;
+    }
 
-.logwrap{
-  background:#fff;
-  border:1px solid #cfd8ea;
-  border-radius:14px;
-  padding:12px;
-}
-.logheader{
-  display:flex;
-  gap:10px;
-  align-items:center;
-  flex-wrap:wrap;
-}
-.logheader input{ max-width:320px; }
-.log{
-  margin-top:10px;
-  max-height:420px;
-  overflow:auto;
-  border-top:1px solid #ddd;
-  padding-top:10px;
-}
-.entry{
-  border:1px solid #ddd;
-  border-radius:14px;
-  padding:10px;
-  margin-bottom:10px;
-}
-.entrytop{
-  display:flex;
-  gap:10px;
-  align-items:center;
-  flex-wrap:wrap;
-}
-.pill{
-  padding:4px 10px;
-  border-radius:999px;
-  font-size:13px;
-  font-weight:900;
-  border:1px solid #bbb;
-}
-.pill.ok{ border-color:var(--green); color:var(--green); }
-.pill.warn{ border-color:var(--red); color:var(--red); }
-.kv{
-  margin-top:8px;
-  font-size:16px;
-}
-.entryactions{
-  margin-top:10px;
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-.entryactions button{
-  width:auto;
-  font-size:16px;
-  padding:8px 10px;
-  border-radius:10px;
-  border:1px solid #bbb;
-  background:#fff;
-  font-weight:900;
-}
-.entryactions .danger{
-  border:none;
-  background:var(--red);
-  color:#fff;
-}
+    .panel .hint{
+      margin:0 0 10px 0;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.35;
+    }
 
-.hidden{ display:none; }
+    /* Bottom nav (keeps v1-style flow feel) */
+    nav{
+      position:sticky;
+      bottom:0;
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:8px;
+      display:flex;
+      gap:8px;
+      box-shadow:var(--shadow);
+    }
 
-/* Print/PDF: hide navigation and buttons; show log/export content cleanly */
-@media print{
-  body{ padding:0; }
-  .app{ border:none; }
-  .nav, .steps, .actions, .small, .entryactions, .logheader, .printHide{ display:none !important; }
-  .log{ max-height:none; overflow:visible; }
-  .entry{ page-break-inside:avoid; }
-}
-</style>
+    .tab{
+      flex:1 1 0;
+      border:1px solid var(--ink);
+      border-radius:12px;
+      background:#fff;
+      padding:10px 8px;
+      min-height:52px;
+      cursor:pointer;
+      text-align:center;
+      font-weight:700;
+    }
+    .tab[aria-selected="true"]{
+      background:var(--ink);
+      color:#fff;
+    }
+
+    /* Form layout */
+    .grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      flex:1 1 140px;
+      min-width:140px;
+    }
+
+    label{
+      font-weight:700;
+      font-size:14px;
+    }
+
+    input[type="number"], input[type="datetime-local"], input[type="text"], textarea, select{
+      border:1px solid var(--ink);
+      border-radius:12px;
+      padding:10px 10px;
+      min-height:44px;
+      background:#fff;
+    }
+
+    textarea{
+      min-height:84px;
+      resize:vertical;
+    }
+
+    .one-line-vitals{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:flex-end;
+    }
+
+    .one-line-vitals .field{
+      flex:1 1 120px;
+      min-width:120px;
+    }
+
+    /* Alerts */
+    .alert{
+      border:2px solid var(--ink);
+      border-radius:var(--radius);
+      padding:12px;
+      background:#fff;
+    }
+    .alert h3{
+      margin:0 0 6px 0;
+      font-size:16px;
+    }
+    .alert p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.35;
+    }
+
+    .alert.urgent{
+      border-color:var(--danger);
+    }
+
+    /* Symptoms grid (double-column list) */
+    .symptoms-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px 10px;
+      margin-top:8px;
+    }
+    .sym{
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px;
+      background:var(--card);
+      min-height:52px;
+    }
+    .sym input{
+      width:22px;
+      height:22px;
+      margin-top:2px;
+    }
+    .sym span{
+      font-weight:700;
+      line-height:1.25;
+    }
+    @media (max-width:640px){
+      .symptoms-grid{ grid-template-columns:1fr; }
+      header{ flex-direction:column; align-items:stretch; }
+      .top-actions{ width:100%; justify-content:space-between; }
+    }
+
+    /* History list */
+    .history{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-top:10px;
+    }
+    .entry{
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:12px;
+      background:#fff;
+      box-shadow:var(--shadow);
+    }
+    .entry .meta{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .entry .meta .when{
+      font-weight:800;
+    }
+    .pill{
+      display:inline-block;
+      border:1px solid var(--ink);
+      border-radius:999px;
+      padding:6px 10px;
+      font-weight:800;
+      font-size:13px;
+      background:#fff;
+    }
+    .pill.muted{
+      border-color:var(--line);
+      color:var(--muted);
+    }
+    .entry .details{
+      margin-top:10px;
+      color:var(--muted);
+      line-height:1.35;
+      white-space:pre-wrap;
+    }
+
+    .split{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      margin-top:10px;
+    }
+
+    .k{
+      font-family:var(--mono);
+      font-size:13px;
+      color:#222;
+      background:#fff;
+      border:1px dashed var(--line);
+      padding:8px 10px;
+      border-radius:12px;
+    }
+
+    /* Print/PDF: black, clean */
+    @media print{
+      .frame{ border:none; padding:0; }
+      nav, .top-actions, .no-print{ display:none !important; }
+      header{ padding:0; }
+      .panel{ box-shadow:none; }
+      *{ color:#000 !important; }
+      a{ color:#000 !important; text-decoration:none !important; }
+    }
+
+    /* Exit screen */
+    .exit-screen{
+      border:2px solid var(--ink);
+      border-radius:var(--radius);
+      padding:18px;
+      background:#fff;
+    }
+    .exit-screen h2{ margin:0 0 10px 0; }
+    .exit-screen p{ margin:0 0 12px 0; color:var(--muted); line-height:1.35; }
+  </style>
 </head>
-
 <body>
-<div class="app" role="application" aria-label="Vitals Tracker">
-  <div class="header">
-    <div class="logo" aria-hidden="true">VT</div>
-    <div>
-      <div class="title">Vitals Tracker</div>
-      <div class="small">Fast capture. Clean log. Clinician-ready export.</div>
-    </div>
-    <div class="meta">
-      <div class="v">v2.02</div>
-      <div class="s" id="statusLine">Ready</div>
+  <div class="frame" id="frame">
+    <div class="app" id="appRoot" role="application" aria-label="Vitals Tracker v2.02">
+      <header>
+        <div class="brand" aria-label="App header">
+          <!-- Simple accessible logo (no external assets) -->
+          <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
+            <rect x="6" y="6" width="52" height="52" rx="14" fill="none" stroke="var(--brand)" stroke-width="6"/>
+            <path d="M18 36h10l4-14 6 28 4-14h10" fill="none" stroke="var(--brand)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <div style="min-width:0;">
+            <h1>Vitals Tracker</h1>
+            <p class="sub">v2.02 • accessible log + PDF report</p>
+          </div>
+        </div>
+
+        <div class="top-actions no-print">
+          <button class="btn secondary" id="btnExportPdf" type="button" aria-label="Export report to PDF (Print)">
+            Export PDF
+          </button>
+          <button class="btn danger" id="btnExit" type="button" aria-label="Exit the app">
+            Exit
+          </button>
+        </div>
+      </header>
+
+      <main id="main">
+        <!-- PANEL: Home / Entry (kept tight; 4–5 core actions) -->
+        <section class="panel" id="panel-home" role="region" aria-label="Home panel">
+          <h2>New Reading</h2>
+          <p class="hint">Enter BP and heart rate on one line. Save. Alerts use clinical thresholds. Add symptoms on the Symptoms panel.</p>
+
+          <div class="grid">
+            <div class="field">
+              <label for="dt">Date / Time</label>
+              <input id="dt" type="datetime-local" />
+            </div>
+
+            <div class="one-line-vitals" aria-label="Vitals entry row (one line)">
+              <div class="field">
+                <label for="sys">Systolic</label>
+                <input id="sys" type="number" inputmode="numeric" min="0" max="300" placeholder="e.g., 140" />
+              </div>
+              <div class="field">
+                <label for="dia">Diastolic</label>
+                <input id="dia" type="number" inputmode="numeric" min="0" max="200" placeholder="e.g., 90" />
+              </div>
+              <div class="field">
+                <label for="hr">HR</label>
+                <input id="hr" type="number" inputmode="numeric" min="0" max="250" placeholder="e.g., 72" />
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="notes">Notes</label>
+              <textarea id="notes" placeholder="Symptoms, context, meds taken, triggers, etc."></textarea>
+            </div>
+
+            <!-- 4–5 items: Save, Quick Add Symptoms (short), Clear, Last Saved -->
+            <div class="row">
+              <button class="btn primary" id="btnSave" type="button">Save Reading</button>
+              <button class="btn secondary" id="btnPickSymptoms" type="button">Select Symptoms</button>
+              <button class="btn secondary" id="btnClear" type="button">Clear</button>
+            </div>
+
+            <div class="k" id="lastSaved" aria-live="polite">Last saved: none</div>
+
+            <div id="alertBox" class="alert" aria-live="polite" style="display:none;"></div>
+          </div>
+        </section>
+
+        <!-- PANEL: Symptoms (4–5 items: symptom grid, custom add, save selection, clear selection) -->
+        <section class="panel" id="panel-symptoms" role="region" aria-label="Symptoms panel" hidden>
+          <h2>Symptoms</h2>
+          <p class="hint">Choose symptoms for the next save. Add your own symptom once, and it will always appear.</p>
+
+          <div class="field">
+            <label for="customSym">Add a symptom</label>
+            <div class="row">
+              <input id="customSym" type="text" placeholder="Type new symptom (e.g., chest tightness)" aria-label="Custom symptom text" />
+              <button class="btn secondary" id="btnAddSym" type="button">Add</button>
+            </div>
+            <div class="k" id="symCount">Symptoms available: 0</div>
+          </div>
+
+          <div class="symptoms-grid" id="symptomsGrid" aria-label="Symptoms list (two columns)"></div>
+
+          <div class="row">
+            <button class="btn primary" id="btnSymptomsDone" type="button">Use Selected Symptoms</button>
+            <button class="btn secondary" id="btnSymptomsClear" type="button">Clear Selection</button>
+          </div>
+
+          <div class="k" id="symSelectedSummary" aria-live="polite">Selected: none</div>
+        </section>
+
+        <!-- PANEL: History & Reports (4–5 items: search/filter, print, export csv, delete last, list) -->
+        <section class="panel" id="panel-history" role="region" aria-label="History panel" hidden>
+          <h2>History</h2>
+          <p class="hint">Review entries. Print/export for records. Use PDF export for clean black print output.</p>
+
+          <div class="row">
+            <div class="field" style="min-width:220px; flex:2 1 240px;">
+              <label for="search">Search</label>
+              <input id="search" type="text" placeholder="Search notes or symptoms" />
+            </div>
+            <div class="field" style="min-width:180px;">
+              <label for="filter">Filter</label>
+              <select id="filter" aria-label="Filter list">
+                <option value="all">All</option>
+                <option value="urgent">Urgent alerts only</option>
+                <option value="highbp">High BP (Stage 2+)</option>
+                <option value="lowbp">Low BP</option>
+                <option value="tachy">Tachycardia</option>
+                <option value="brady">Bradycardia</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <button class="btn secondary" id="btnPrint" type="button">Print</button>
+            <button class="btn secondary" id="btnExportCsv" type="button">Export CSV</button>
+            <button class="btn secondary" id="btnDeleteLast" type="button">Delete Last</button>
+          </div>
+
+          <div class="k" id="historyStats" aria-live="polite">Entries: 0</div>
+          <div class="history" id="historyList" aria-label="Saved entries list"></div>
+        </section>
+
+        <!-- PANEL: Settings (4–5 items: backup, restore, clear all, about) -->
+        <section class="panel" id="panel-settings" role="region" aria-label="Settings panel" hidden>
+          <h2>Settings</h2>
+          <p class="hint">Your data stays on this device (local storage). Use Backup/Restore for portability.</p>
+
+          <div class="row">
+            <button class="btn secondary" id="btnBackup" type="button">Backup</button>
+            <button class="btn secondary" id="btnRestore" type="button">Restore</button>
+            <button class="btn secondary" id="btnClearAll" type="button">Clear All</button>
+          </div>
+
+          <div class="field">
+            <label for="ioBox">Backup / Restore Data</label>
+            <textarea id="ioBox" placeholder="Backup JSON appears here. Paste JSON to restore."></textarea>
+          </div>
+
+          <div class="k">
+            Clinical thresholds (summary):
+            • Hypertensive crisis ≥180 systolic OR ≥120 diastolic
+            • Stage 2 ≥140 OR ≥90
+            • Low BP: systolic &lt;90 OR diastolic &lt;60
+            • HR high: &gt;100 • HR low: &lt;50
+          </div>
+        </section>
+
+        <!-- Exit screen -->
+        <section class="panel" id="panel-exit" role="region" aria-label="Exit panel" hidden>
+          <div class="exit-screen">
+            <h2>Exited</h2>
+            <p>This screen is intentionally simple. If you want to return, press the button below.</p>
+            <button class="btn primary" id="btnReturn" type="button">Return to App</button>
+          </div>
+        </section>
+
+        <nav class="no-print" aria-label="Bottom navigation">
+          <button class="tab" id="tabHome" aria-selected="true" type="button">Home</button>
+          <button class="tab" id="tabSymptoms" aria-selected="false" type="button">Symptoms</button>
+          <button class="tab" id="tabHistory" aria-selected="false" type="button">History</button>
+          <button class="tab" id="tabSettings" aria-selected="false" type="button">Settings</button>
+        </nav>
+      </main>
     </div>
   </div>
 
-  <div class="nav" role="navigation" aria-label="Main navigation">
-    <button id="navCapture" class="active" type="button">Capture</button>
-    <button id="navLog" type="button">Log</button>
-    <button id="navExport" type="button">Export</button>
-    <div class="spacer"></div>
-    <button id="exitBtn" class="exit" type="button">EXIT</button>
-  </div>
-
-  <!-- CAPTURE VIEW -->
-  <section id="viewCapture" class="card" aria-label="Capture vitals">
-    <div class="steps" aria-label="Capture steps">
-      <button id="chip1" class="stepchip active" type="button">1) Vitals</button>
-      <button id="chip2" class="stepchip" type="button">2) Symptoms</button>
-      <button id="chip3" class="stepchip" type="button">3) Notes</button>
-      <button id="chip4" class="stepchip" type="button">4) Review</button>
-    </div>
-
-    <!-- Step 1 -->
-    <div id="step1">
-      <div class="row">
-        <div>
-          <label for="dt">Date & Time</label>
-          <input id="dt" type="datetime-local" aria-label="Date and time"/>
-          <div class="small">Tip: log each reading separately (even 5 minutes apart).</div>
-        </div>
-      </div>
-
-      <div class="hr"></div>
-
-      <div class="vitalsline" aria-label="Vitals entry">
-        <div class="box">
-          <label for="sys">SYS</label>
-          <input id="sys" type="number" inputmode="numeric" min="50" max="260" placeholder="Systolic" aria-label="Systolic"/>
-        </div>
-        <div class="box">
-          <label for="dia">DIA</label>
-          <input id="dia" type="number" inputmode="numeric" min="30" max="180" placeholder="Diastolic" aria-label="Diastolic"/>
-        </div>
-        <div class="box">
-          <label for="hr">HR</label>
-          <input id="hr" type="number" inputmode="numeric" min="30" max="220" placeholder="Heart rate" aria-label="Heart rate"/>
-        </div>
-      </div>
-
-      <div class="actions">
-        <button class="btn-blue" id="next1" type="button">Next</button>
-        <button class="btn-gray" id="clear1" type="button">Clear</button>
-      </div>
-    </div>
-
-    <!-- Step 2 -->
-    <div id="step2" class="hidden">
-      <div class="section-title" style="font-weight:900;font-size:18px;">Symptoms</div>
-      <div id="symptomList" class="symptoms" aria-label="Symptoms list"></div>
-
-      <div class="row" style="margin-top:10px;">
-        <div>
-          <label for="customSymptom">Add custom symptom (saved permanently)</label>
-          <input id="customSymptom" type="text" placeholder="e.g., tingling hands" aria-label="Custom symptom"/>
-          <div class="small">Custom symptoms will appear in the list every time.</div>
-        </div>
-        <div style="flex:0.55; min-width:160px;">
-          <label class="printHide">&nbsp;</label>
-          <button id="addSymBtn" class="btn-gray" type="button" style="width:100%;">Add</button>
-        </div>
-      </div>
-
-      <div class="actions">
-        <button class="btn-gray" id="back2" type="button">Back</button>
-        <button class="btn-blue" id="next2" type="button">Next</button>
-      </div>
-    </div>
-
-    <!-- Step 3 -->
-    <div id="step3" class="hidden">
-      <div class="section-title" style="font-weight:900;font-size:18px;">Notes</div>
-      <label for="notes">Optional details</label>
-      <textarea id="notes" placeholder="Meds taken, trigger, what you were doing, etc." aria-label="Notes"></textarea>
-      <div class="small">Keep it simple. Short notes are fine.</div>
-
-      <div class="actions">
-        <button class="btn-gray" id="back3" type="button">Back</button>
-        <button class="btn-blue" id="next3" type="button">Next</button>
-      </div>
-    </div>
-
-    <!-- Step 4 -->
-    <div id="step4" class="hidden">
-      <div class="section-title" style="font-weight:900;font-size:18px;">Review</div>
-      <div class="small" id="reviewLine">—</div>
-
-      <div id="alertBox" class="alert ok" role="status">No clinical alerts detected.</div>
-
-      <div class="hr"></div>
-
-      <div class="actions">
-        <button class="btn-gray" id="back4" type="button">Back</button>
-        <button class="btn-blue" id="saveBtn" type="button">Save Entry</button>
-        <button class="btn-gray" id="clearAll" type="button">Clear Form</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- LOG VIEW -->
-  <section id="viewLog" class="logwrap hidden" aria-label="Saved log">
-    <div class="logheader">
-      <div style="flex:1;">
-        <div style="font-size:18px;font-weight:900;">Saved Entries</div>
-        <div class="small" id="countText">0 entries</div>
-      </div>
-      <input id="search" type="text" placeholder="Search (symptom/notes/date)" aria-label="Search log"/>
-      <button id="wipeBtn" class="btn-red" type="button" style="width:auto;">Wipe Log</button>
-    </div>
-    <div id="log" class="log"></div>
-  </section>
-
-  <!-- EXPORT VIEW -->
-  <section id="viewExport" class="card hidden" aria-label="Export">
-    <div style="font-size:18px;font-weight:900;">Export</div>
-    <div class="small">PDF uses your device print dialog (“Save as PDF”). CSV downloads a spreadsheet-friendly file.</div>
-
-    <div class="hr"></div>
-
-    <div class="actions">
-      <button class="btn-blue" id="pdfBtn" type="button">PDF</button>
-      <button class="btn-blue" id="csvBtn" type="button">CSV</button>
-      <button class="btn-gray" id="printLogBtn" type="button">Print Log View</button>
-    </div>
-
-    <div class="hr"></div>
-
-    <div class="small">
-      Note: browsers often block scripted tab-closing. Use EXIT to clear the form, then close the tab/app normally.
-    </div>
-  </section>
-</div>
-
-<script>
-/* =========================
-   Storage + Constants
-========================= */
-const APP_VERSION = "2.02";
-const KEY_ENTRIES  = "vt_entries";
-const KEY_SYMPTOMS = "vt_symptoms";
-const KEY_SCHEMA   = "vt_schema_version";
-
-const DEFAULT_SYMPTOMS = [
-  "Dizziness","Chest tightness","Nausea","Sweating",
-  "Blurred vision","Weakness","Palpitations","Anxiety",
-  "Head pain","Shortness of breath","Tremor","Confusion"
-];
-
-function safeParse(x){ try{ return JSON.parse(x); } catch(e){ return null; } }
-function el(id){ return document.getElementById(id); }
-function toNum(v){ const n = Number(v); return Number.isFinite(n) ? n : NaN; }
-function uid(){ return "e_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16); }
-
-function escapeHtml(str){
-  return String(str).replace(/[&<>"']/g, m => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"
-  }[m]));
-}
-
-function ensureSchema(){
-  const v = localStorage.getItem(KEY_SCHEMA);
-  if (!v) localStorage.setItem(KEY_SCHEMA, APP_VERSION);
-  // Future migrations can go here.
-}
-
-function loadSymptoms(){
-  const stored = safeParse(localStorage.getItem(KEY_SYMPTOMS));
-  if (Array.isArray(stored) && stored.length) return stored;
-  localStorage.setItem(KEY_SYMPTOMS, JSON.stringify(DEFAULT_SYMPTOMS));
-  return [...DEFAULT_SYMPTOMS];
-}
-function loadEntries(){
-  const stored = safeParse(localStorage.getItem(KEY_ENTRIES));
-  return Array.isArray(stored) ? stored : [];
-}
-function saveEntries(entries){
-  localStorage.setItem(KEY_ENTRIES, JSON.stringify(entries));
-}
-
-/* =========================
-   State
-========================= */
-let symptoms = loadSymptoms();
-let entries = loadEntries();
-let editingId = null;
-let currentStep = 1;
-
-/* =========================
-   Navigation: Main Views
-========================= */
-function setStatus(text){ el("statusLine").textContent = text; }
-
-function showView(which){
-  const map = {
-    capture: ["viewCapture","navCapture"],
-    log:     ["viewLog","navLog"],
-    export:  ["viewExport","navExport"]
-  };
-
-  // hide all
-  el("viewCapture").classList.add("hidden");
-  el("viewLog").classList.add("hidden");
-  el("viewExport").classList.add("hidden");
-  el("navCapture").classList.remove("active");
-  el("navLog").classList.remove("active");
-  el("navExport").classList.remove("active");
-
-  const [viewId, btnId] = map[which];
-  el(viewId).classList.remove("hidden");
-  el(btnId).classList.add("active");
-
-  if (which === "capture") setStatus("Capture");
-  if (which === "log") { setStatus("Log"); renderLog(); }
-  if (which === "export") setStatus("Export");
-}
-
-el("navCapture").addEventListener("click", ()=>showView("capture"));
-el("navLog").addEventListener("click", ()=>showView("log"));
-el("navExport").addEventListener("click", ()=>showView("export"));
-
-/* =========================
-   Step Flow
-========================= */
-function markChip(){
-  // reset
-  [1,2,3,4].forEach(i=>{
-    el("chip"+i).classList.remove("active");
-  });
-  el("chip"+currentStep).classList.add("active");
-
-  // done markers (basic)
-  el("chip1").classList.toggle("done", hasVitals());
-  el("chip2").classList.toggle("done", selectedSymptoms().length > 0);
-  el("chip3").classList.toggle("done", (el("notes").value||"").trim().length > 0);
-  el("chip4").classList.toggle("done", false);
-}
-
-function showStep(n){
-  currentStep = n;
-  ["step1","step2","step3","step4"].forEach((id, idx)=>{
-    el(id).classList.toggle("hidden", idx !== (n-1));
-  });
-  markChip();
-  if (n === 4) updateReview();
-}
-
-[1,2,3,4].forEach(i=>{
-  el("chip"+i).addEventListener("click", ()=>showStep(i));
-});
-
-function hasVitals(){
-  const sys = toNum(el("sys").value);
-  const dia = toNum(el("dia").value);
-  const hr  = toNum(el("hr").value);
-  return Number.isFinite(sys) && Number.isFinite(dia) && Number.isFinite(hr);
-}
-
-el("next1").addEventListener("click", ()=>{
-  if (!hasVitals()){
-    setAlert(["SYS, DIA, and HR are required before continuing."], true);
-    return;
-  }
-  showStep(2);
-});
-el("clear1").addEventListener("click", ()=>{
-  el("sys").value=""; el("dia").value=""; el("hr").value="";
-  setAlert([], false);
-  markChip();
-});
-
-el("back2").addEventListener("click", ()=>showStep(1));
-el("next2").addEventListener("click", ()=>showStep(3));
-el("back3").addEventListener("click", ()=>showStep(2));
-el("next3").addEventListener("click", ()=>showStep(4));
-el("back4").addEventListener("click", ()=>showStep(3));
-
-/* =========================
-   Symptoms
-========================= */
-function renderSymptoms(){
-  const box = el("symptomList");
-  box.innerHTML = "";
-
-  // Always include "Other" checkbox (notes should capture specifics)
-  const all = [...symptoms, "Other"];
-
-  all.forEach(s=>{
-    const id = "sym_" + s.toLowerCase().replace(/[^a-z0-9]+/g,"_");
-    const label = document.createElement("label");
-    label.innerHTML = `
-      <input id="${id}" type="checkbox" value="${escapeHtml(s)}" aria-label="${escapeHtml(s)}">
-      <span>${escapeHtml(s)}</span>
-    `;
-    box.appendChild(label);
-  });
-
-  box.addEventListener("change", ()=>{
-    markChip();
-    if (currentStep === 4) updateReview();
-  }, { once:false });
-}
-
-function selectedSymptoms(){
-  return Array.from(document.querySelectorAll("#symptomList input[type=checkbox]:checked"))
-    .map(cb => cb.value);
-}
-
-function addCustomSymptom(){
-  const val = (el("customSymptom").value||"").trim();
-  if (!val) return;
-  if (val.toLowerCase() === "other") { el("customSymptom").value=""; return; }
-  if (symptoms.some(s=>s.toLowerCase()===val.toLowerCase())){
-    el("customSymptom").value="";
-    return;
-  }
-  symptoms.push(val);
-  localStorage.setItem(KEY_SYMPTOMS, JSON.stringify(symptoms));
-  el("customSymptom").value="";
-  renderSymptoms();
-}
-
-el("addSymBtn").addEventListener("click", addCustomSymptom);
-el("customSymptom").addEventListener("keydown",(e)=>{
-  if (e.key === "Enter"){ e.preventDefault(); addCustomSymptom(); }
-});
-
-/* =========================
-   Clinical Alerts (standard ranges)
-========================= */
-function computeAlerts(sys, dia, hr, symList){
-  const alerts = [];
-
-  if (Number.isFinite(sys) && Number.isFinite(dia)){
-    if (sys >= 180 || dia >= 120) alerts.push({level:"warn", msg:"Hypertensive crisis range"});
-    else if (sys >= 140 || dia >= 90) alerts.push({level:"mid", msg:"High BP range"});
-    else if (sys < 90 || dia < 60) alerts.push({level:"mid", msg:"Low BP range"});
-  }
-
-  if (Number.isFinite(hr)){
-    if (hr > 120) alerts.push({level:"mid", msg:"High heart rate range"});
-    else if (hr < 50) alerts.push({level:"mid", msg:"Low heart rate range"});
-  }
-
-  const redFlagSymptoms = ["Chest tightness","Shortness of breath","Confusion","Weakness","Blurred vision"];
-  const redFlag = redFlagSymptoms.some(s => symList.includes(s));
-
-  if (redFlag && (sys >= 180 || dia >= 120)){
-    alerts.push({level:"warn", msg:"Symptoms + crisis range: consider urgent evaluation"});
-  } else if (redFlag && (sys >= 140 || dia >= 90)){
-    alerts.push({level:"note", msg:"Symptoms + high range: monitor closely; consider calling care team"});
-  }
-
-  return alerts;
-}
-
-function setAlert(alerts, hardWarn){
-  const box = el("alertBox");
-  if (!alerts || alerts.length === 0){
-    box.className = "alert ok";
-    box.textContent = "No clinical alerts detected.";
-    return;
-  }
-  const levels = alerts.map(a=>a.level || "note");
-  const top = hardWarn ? "warn" : (levels.includes("warn") ? "warn" : (levels.includes("mid") ? "mid" : "note"));
-  box.className = "alert " + top;
-  box.textContent = alerts.map(a=>a.msg || a).join(" • ");
-}
-
-function validateVitals(sys, dia, hr){
-  const problems = [];
-  if (!Number.isFinite(sys) || !Number.isFinite(dia) || !Number.isFinite(hr)){
-    problems.push("SYS, DIA, and HR are required.");
-    return problems;
-  }
-  if (sys < 50 || sys > 260) problems.push("SYS looks out of range.");
-  if (dia < 30 || dia > 180) problems.push("DIA looks out of range.");
-  if (hr  < 30 || hr  > 220) problems.push("HR looks out of range.");
-  if (sys <= dia) problems.push("SYS should be higher than DIA.");
-  return problems;
-}
-
-/* =========================
-   Review + Save
-========================= */
-function formatStamp(ts){
-  if (!ts) return "—";
-  const [d,t] = ts.split("T");
-  return `${d} ${t}`;
-}
-
-function updateReview(){
-  const ts = el("dt").value || new Date().toISOString().slice(0,16);
-  const sys = toNum(el("sys").value);
-  const dia = toNum(el("dia").value);
-  const hr  = toNum(el("hr").value);
-  const sym = selectedSymptoms();
-  const notes = (el("notes").value||"").trim();
-
-  el("reviewLine").textContent =
-    `Date/Time: ${formatStamp(ts)} | SYS/DIA/HR: ${Number.isFinite(sys)?sys:"—"}/${Number.isFinite(dia)?dia:"—"}/${Number.isFinite(hr)?hr:"—"} | Symptoms: ${sym.length?sym.join(", "):"None"} | Notes: ${notes?notes:"—"}`;
-
-  const problems = validateVitals(sys, dia, hr);
-  if (problems.length){
-    setAlert(problems.map(p=>({level:"warn", msg:p})), true);
-    return;
-  }
-  const alerts = computeAlerts(sys, dia, hr, sym);
-  setAlert(alerts, false);
-}
-
-["sys","dia","hr","dt","notes"].forEach(id=>{
-  el(id).addEventListener("input", ()=>{
-    markChip();
-    if (currentStep === 4) updateReview();
-  });
-});
-
-function clearForm(){
-  editingId = null;
-  setNow();
-  el("sys").value=""; el("dia").value=""; el("hr").value="";
-  el("notes").value="";
-  document.querySelectorAll("#symptomList input[type=checkbox]").forEach(cb=>cb.checked=false);
-  setAlert([], false);
-  showStep(1);
-  setStatus("Capture");
-}
-
-el("clearAll").addEventListener("click", clearForm);
-
-function saveEntry(){
-  const ts = el("dt").value || new Date().toISOString().slice(0,16);
-  const sys = toNum(el("sys").value);
-  const dia = toNum(el("dia").value);
-  const hr  = toNum(el("hr").value);
-  const sym = selectedSymptoms();
-  const notes = (el("notes").value||"").trim();
-
-  const problems = validateVitals(sys, dia, hr);
-  if (problems.length){
-    setAlert(problems.map(p=>({level:"warn", msg:p})), true);
-    return;
-  }
-
-  const entry = { id: editingId || uid(), ts, sys, dia, hr, symptoms:sym, notes };
-  if (editingId){
-    entries = entries.map(e => e.id === editingId ? entry : e);
-  } else {
-    entries.push(entry);
-  }
-  saveEntries(entries);
-  editingId = null;
-  setStatus("Saved");
-  clearForm();
-}
-
-el("saveBtn").addEventListener("click", saveEntry);
-
-/* =========================
-   Log View
-========================= */
-function renderLog(){
-  el("countText").textContent = `${entries.length} entr${entries.length===1?"y":"ies"}`;
-  const q = (el("search").value||"").trim().toLowerCase();
-  const box = el("log");
-  box.innerHTML = "";
-
-  const filtered = entries
-    .slice()
-    .sort((a,b)=> (b.ts||"").localeCompare(a.ts||""))
-    .filter(e=>{
-      if (!q) return true;
-      const blob = [
-        e.ts, e.sys, e.dia, e.hr,
-        (e.symptoms||[]).join(", "),
-        e.notes||""
-      ].join(" ").toLowerCase();
-      return blob.includes(q);
+  <script>
+    /***************
+     * Vitals Tracker v2.02
+     * - Built in v1.15 flow style: simple panels, bottom nav
+     * - Adds functions in new panels, each kept compact (4–5 core actions)
+     * - Symptoms: double-column, custom symptoms persist, "Other" included
+     * - Alerts: clinical threshold logic (no user-set thresholds)
+     * - PDF export: uses browser print to save as PDF, black print CSS
+     * - Data persistence: localStorage
+     ***************/
+
+    const LS_KEYS = {
+      ENTRIES: "vitalsTracker.entries.v2",
+      SYMPTOMS: "vitalsTracker.symptoms.v2",
+      SYM_SELECTION: "vitalsTracker.symSelection.v2",
+      LAST_SAVED: "vitalsTracker.lastSaved.v2"
+    };
+
+    const DEFAULT_SYMPTOMS = [
+      "Chest tightness",
+      "Nausea",
+      "Dizziness",
+      "Blurred vision",
+      "Weakness",
+      "Sweaty hands",
+      "Sweaty feet",
+      "Head pain",
+      "Panic episode",
+      "Shortness of breath",
+      "Palpitations",
+      "Shakes / tremor",
+      "Mental fog",
+      "Stomach pain",
+      "Hot ears",
+      "Itching",
+      "Other"
+    ];
+
+    // App state
+    let entries = loadJSON(LS_KEYS.ENTRIES, []);
+    let symptomsMaster = loadJSON(LS_KEYS.SYMPTOMS, DEFAULT_SYMPTOMS.slice());
+    let selectedSymptoms = loadJSON(LS_KEYS.SYM_SELECTION, []);
+    let lastSaved = loadJSON(LS_KEYS.LAST_SAVED, null);
+
+    // Elements
+    const dt = document.getElementById("dt");
+    const sys = document.getElementById("sys");
+    const dia = document.getElementById("dia");
+    const hr = document.getElementById("hr");
+    const notes = document.getElementById("notes");
+
+    const alertBox = document.getElementById("alertBox");
+    const lastSavedEl = document.getElementById("lastSaved");
+
+    const symptomsGrid = document.getElementById("symptomsGrid");
+    const symCount = document.getElementById("symCount");
+    const symSelectedSummary = document.getElementById("symSelectedSummary");
+    const customSym = document.getElementById("customSym");
+
+    const historyList = document.getElementById("historyList");
+    const historyStats = document.getElementById("historyStats");
+    const search = document.getElementById("search");
+    const filter = document.getElementById("filter");
+
+    const ioBox = document.getElementById("ioBox");
+
+    // Panels
+    const panels = {
+      home: document.getElementById("panel-home"),
+      symptoms: document.getElementById("panel-symptoms"),
+      history: document.getElementById("panel-history"),
+      settings: document.getElementById("panel-settings"),
+      exit: document.getElementById("panel-exit")
+    };
+
+    // Tabs
+    const tabs = {
+      home: document.getElementById("tabHome"),
+      symptoms: document.getElementById("tabSymptoms"),
+      history: document.getElementById("tabHistory"),
+      settings: document.getElementById("tabSettings")
+    };
+
+    // Buttons
+    document.getElementById("btnSave").addEventListener("click", onSave);
+    document.getElementById("btnClear").addEventListener("click", clearEntryForm);
+    document.getElementById("btnPickSymptoms").addEventListener("click", () => go("symptoms"));
+    document.getElementById("btnSymptomsDone").addEventListener("click", () => {
+      persistSelection();
+      go("home");
+      announceSelectedSymptoms();
+    });
+    document.getElementById("btnSymptomsClear").addEventListener("click", () => {
+      selectedSymptoms = [];
+      saveJSON(LS_KEYS.SYM_SELECTION, selectedSymptoms);
+      renderSymptoms();
+      announceSelectedSymptoms();
+    });
+    document.getElementById("btnAddSym").addEventListener("click", addCustomSymptom);
+
+    document.getElementById("btnPrint").addEventListener("click", () => window.print());
+    document.getElementById("btnExportPdf").addEventListener("click", () => window.print());
+
+    document.getElementById("btnExportCsv").addEventListener("click", exportCSV);
+    document.getElementById("btnDeleteLast").addEventListener("click", deleteLast);
+
+    document.getElementById("btnBackup").addEventListener("click", backup);
+    document.getElementById("btnRestore").addEventListener("click", restore);
+    document.getElementById("btnClearAll").addEventListener("click", clearAll);
+
+    document.getElementById("btnExit").addEventListener("click", exitApp);
+    document.getElementById("btnReturn").addEventListener("click", () => {
+      panels.exit.hidden = true;
+      go("home");
     });
 
-  if (filtered.length === 0){
-    const d = document.createElement("div");
-    d.className="small";
-    d.textContent = q ? "No matches." : "No saved entries yet.";
-    box.appendChild(d);
-    return;
-  }
+    // Tab navigation
+    tabs.home.addEventListener("click", () => go("home"));
+    tabs.symptoms.addEventListener("click", () => go("symptoms"));
+    tabs.history.addEventListener("click", () => go("history"));
+    tabs.settings.addEventListener("click", () => go("settings"));
 
-  filtered.forEach(e=>{
-    const sym = e.symptoms || [];
-    const alerts = computeAlerts(e.sys, e.dia, e.hr, sym);
-    const crisis = alerts.some(a=>a.level==="warn");
+    // Recompute alerts as user types
+    [sys, dia, hr].forEach(el => el.addEventListener("input", previewAlerts));
+    dt.addEventListener("change", previewAlerts);
 
-    const card = document.createElement("div");
-    card.className="entry";
-    card.innerHTML = `
-      <div class="entrytop">
-        <div style="font-weight:900;">${escapeHtml(formatStamp(e.ts))}</div>
-        <div class="pill ${crisis?"warn":"ok"}">${crisis?"ALERT":"OK"}</div>
-        <div class="small">SYS ${e.sys} / DIA ${e.dia} / HR ${e.hr}</div>
-      </div>
-      <div class="kv"><strong>Symptoms:</strong> ${escapeHtml(sym.length?sym.join(", "):"None")}</div>
-      <div class="kv"><strong>Notes:</strong> ${escapeHtml((e.notes||"").trim() || "—")}</div>
-      <div class="small"><strong>Flags:</strong> ${escapeHtml(alerts.length ? alerts.map(a=>a.msg).join(" • ") : "None")}</div>
-      <div class="entryactions">
-        <button data-edit="${escapeHtml(e.id)}" type="button">Edit</button>
-        <button class="danger" data-del="${escapeHtml(e.id)}" type="button">Delete</button>
-      </div>
-    `;
-    box.appendChild(card);
-  });
+    // Search/filter
+    search.addEventListener("input", renderHistory);
+    filter.addEventListener("change", renderHistory);
 
-  box.querySelectorAll("button[data-del]").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      const id = btn.getAttribute("data-del");
-      if (!confirm("Delete this entry?")) return;
-      entries = entries.filter(e=>e.id!==id);
-      saveEntries(entries);
-      renderLog();
-    });
-  });
+    // Init
+    initDateTime();
+    renderSymptoms();
+    renderHistory();
+    renderLastSaved();
+    previewAlerts();
+    announceSelectedSymptoms();
 
-  box.querySelectorAll("button[data-edit]").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      const id = btn.getAttribute("data-edit");
-      loadEntryForEdit(id);
-    });
-  });
-}
+    /****************
+     * Core helpers
+     ****************/
+    function initDateTime(){
+      // default to now in local time (rounded to minute)
+      const now = new Date();
+      now.setSeconds(0,0);
+      dt.value = toLocalDT(now);
+    }
 
-function loadEntryForEdit(id){
-  const e = entries.find(x=>x.id===id);
-  if (!e) return;
+    function toLocalDT(d){
+      const pad = (n) => String(n).padStart(2,"0");
+      const yyyy = d.getFullYear();
+      const mm = pad(d.getMonth()+1);
+      const dd = pad(d.getDate());
+      const hh = pad(d.getHours());
+      const mi = pad(d.getMinutes());
+      return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+    }
 
-  editingId = id;
-  showView("capture");
-  showStep(1);
+    function parseDT(val){
+      // datetime-local value => Date
+      if(!val) return null;
+      const d = new Date(val);
+      return isNaN(d.getTime()) ? null : d;
+    }
 
-  el("dt").value = e.ts || new Date().toISOString().slice(0,16);
-  el("sys").value = e.sys ?? "";
-  el("dia").value = e.dia ?? "";
-  el("hr").value  = e.hr  ?? "";
-  el("notes").value = e.notes || "";
+    function loadJSON(key, fallback){
+      try{
+        const raw = localStorage.getItem(key);
+        if(!raw) return fallback;
+        return JSON.parse(raw);
+      }catch(e){
+        return fallback;
+      }
+    }
 
-  const set = new Set(e.symptoms || []);
-  document.querySelectorAll("#symptomList input[type=checkbox]").forEach(cb=>{
-    cb.checked = set.has(cb.value);
-  });
+    function saveJSON(key, value){
+      localStorage.setItem(key, JSON.stringify(value));
+    }
 
-  setStatus("Editing");
-  showStep(4);
-}
+    function formatWhen(iso){
+      try{
+        const d = new Date(iso);
+        if(isNaN(d.getTime())) return iso;
+        return d.toLocaleString();
+      }catch(_){
+        return iso;
+      }
+    }
 
-/* =========================
-   Export
-========================= */
-function exportCSV(){
-  const header = ["DateTime","SYS","DIA","HR","Symptoms","Notes"];
-  const rows = entries
-    .slice()
-    .sort((a,b)=> (a.ts||"").localeCompare(b.ts||""))
-    .map(e=>[
-      e.ts || "",
-      e.sys ?? "",
-      e.dia ?? "",
-      e.hr ?? "",
-      (e.symptoms||[]).join("; "),
-      (e.notes||"").replace(/\s+/g," ").trim()
-    ]);
+    function safeNum(v){
+      const n = Number(v);
+      return Number.isFinite(n) ? n : null;
+    }
 
-  const csv = [header, ...rows]
-    .map(r => r.map(f => `"${String(f).replace(/"/g,'""')}"`).join(","))
-    .join("\n");
+    /****************
+     * Navigation
+     ****************/
+    function go(which){
+      // Hide all main panels except exit (handled separately)
+      Object.values(panels).forEach(p => {
+        if(p !== panels.exit) p.hidden = true;
+      });
+      if(which === "exit"){
+        panels.exit.hidden = false;
+        // tabs remain visible, but exit is intentionally minimal
+      }else{
+        panels[which].hidden = false;
+      }
 
-  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "VitalsTracker_Log.csv";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-}
+      // Update aria-selected tabs
+      Object.entries(tabs).forEach(([k,btn]) => {
+        btn.setAttribute("aria-selected", String(k === which));
+      });
 
-function exportPDF(){
-  // Uses print stylesheet. Recommend: open Export view first if desired.
-  window.print();
-}
+      // Panel-specific refresh
+      if(which === "symptoms") renderSymptoms();
+      if(which === "history") renderHistory();
+      if(which === "home") previewAlerts();
+    }
 
-el("csvBtn").addEventListener("click", exportCSV);
-el("pdfBtn").addEventListener("click", exportPDF);
-el("printLogBtn").addEventListener("click", ()=>{
-  showView("log");
-  setTimeout(()=>window.print(), 200);
-});
+    /****************
+     * Symptoms
+     ****************/
+    function normalizeSym(s){
+      return (s || "").trim().replace(/\s+/g," ");
+    }
 
-/* =========================
-   Wipe
-========================= */
-el("wipeBtn").addEventListener("click", ()=>{
-  if (!confirm("Wipe ALL saved entries? This cannot be undone.")) return;
-  entries = [];
-  saveEntries(entries);
-  renderLog();
-});
+    function addCustomSymptom(){
+      const value = normalizeSym(customSym.value);
+      if(!value) return;
+      // Prevent duplicates (case-insensitive)
+      const lower = value.toLowerCase();
+      const exists = symptomsMaster.some(x => x.toLowerCase() === lower);
+      if(exists){
+        customSym.value = "";
+        return;
+      }
+      // Keep "Other" last
+      const hasOther = symptomsMaster.some(s => s.toLowerCase() === "other");
+      symptomsMaster = symptomsMaster.filter(s => s.toLowerCase() !== "other");
+      symptomsMaster.push(value);
+      if(hasOther) symptomsMaster.push("Other");
 
-/* =========================
-   Exit (mobile-safe)
-========================= */
-el("exitBtn").addEventListener("click", ()=>{
-  clearForm();
-  alert("Form cleared.\n\nTo exit:\n- Close this tab, or\n- Swipe away the browser/app.");
-});
+      saveJSON(LS_KEYS.SYMPTOMS, symptomsMaster);
+      customSym.value = "";
+      renderSymptoms();
+    }
 
-/* =========================
-   Boot
-========================= */
-function setNow(){
-  const now = new Date();
-  el("dt").value = now.toISOString().slice(0,16);
-}
-ensureSchema();
-renderSymptoms();
-setNow();
-showView("capture");
-showStep(1);
-setAlert([], false);
+    function renderSymptoms(){
+      symCount.textContent = `Symptoms available: ${symptomsMaster.length}`;
+      symptomsGrid.innerHTML = "";
 
-el("search").addEventListener("input", renderLog);
-</script>
+      // Build two-column checkbox cards
+      symptomsMaster.forEach((s) => {
+        const id = `sym_${s.toLowerCase().replace(/[^a-z0-9]+/g,"_")}`;
+        const wrap = document.createElement("label");
+        wrap.className = "sym";
+        wrap.setAttribute("for", id);
+
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.id = id;
+        cb.checked = selectedSymptoms.includes(s);
+        cb.addEventListener("change", () => {
+          if(cb.checked){
+            if(!selectedSymptoms.includes(s)) selectedSymptoms.push(s);
+          }else{
+            selectedSymptoms = selectedSymptoms.filter(x => x !== s);
+          }
+          saveJSON(LS_KEYS.SYM_SELECTION, selectedSymptoms);
+          announceSelectedSymptoms();
+        });
+
+        const text = document.createElement("span");
+        text.textContent = s;
+
+        wrap.appendChild(cb);
+        wrap.appendChild(text);
+        symptomsGrid.appendChild(wrap);
+      });
+
+      announceSelectedSymptoms();
+    }
+
+    function announceSelectedSymptoms(){
+      if(!selectedSymptoms.length){
+        symSelectedSummary.textContent = "Selected: none";
+        return;
+      }
+      symSelectedSummary.textContent = "Selected: " + selectedSymptoms.join(", ");
+    }
+
+    function persistSelection(){
+      saveJSON(LS_KEYS.SYM_SELECTION, selectedSymptoms);
+    }
+
+    /****************
+     * Clinical alerts (no user thresholds)
+     ****************/
+    function computeAlerts(systolic, diastolic, heartRate){
+      // Returns { level: "none"|"info"|"urgent", title, message, tags:[] }
+      const tags = [];
+
+      const s = systolic;
+      const d = diastolic;
+      const h = heartRate;
+
+      const haveBP = (s !== null && d !== null);
+      const haveHR = (h !== null);
+
+      let urgent = false;
+      let pieces = [];
+
+      // BP classification (AHA-style thresholds)
+      if(haveBP){
+        const crisis = (s >= 180) || (d >= 120);
+        const stage2 = (s >= 140) || (d >= 90);
+        const stage1 = (s >= 130 && s <= 139) || (d >= 80 && d <= 89);
+        const elevated = (s >= 120 && s <= 129) && (d < 80);
+        const lowbp = (s < 90) || (d < 60);
+
+        if(crisis){
+          urgent = true;
+          tags.push("urgent","highbp");
+          pieces.push("Hypertensive crisis range (≥180 systolic or ≥120 diastolic).");
+        }else if(stage2){
+          tags.push("highbp");
+          pieces.push("High BP in Stage 2 range (≥140 systolic or ≥90 diastolic).");
+        }else if(stage1){
+          pieces.push("BP in Stage 1 range (130–139 systolic or 80–89 diastolic).");
+        }else if(elevated){
+          pieces.push("BP in Elevated range (120–129 systolic and <80 diastolic).");
+        }else{
+          pieces.push("BP not in elevated/stage ranges.");
+        }
+
+        if(lowbp){
+          // low BP can be clinically important, but not always emergency.
+          tags.push("lowbp");
+          pieces.push("Low BP threshold met (<90 systolic or <60 diastolic).");
+        }
+      }
+
+      // HR classification (simple clinical cutoffs)
+      if(haveHR){
+        const tachy = h > 100;
+        const brady = h < 50;
+        if(tachy){
+          tags.push("tachy");
+          pieces.push("Heart rate is above 100 (tachycardia threshold).");
+        }else if(brady){
+          tags.push("brady");
+          pieces.push("Heart rate is below 50 (bradycardia threshold).");
+        }else{
+          pieces.push("Heart rate not in high/low threshold ranges.");
+        }
+      }
+
+      if(!haveBP && !haveHR){
+        return { level:"none", title:"", message:"", tags:[] };
+      }
+
+      // Determine level/title
+      let level = "info";
+      let title = "Clinical Range Check";
+      if(urgent){
+        level = "urgent";
+        title = "Urgent Range Detected";
+      }
+
+      const message = pieces.join(" ");
+
+      return { level, title, message, tags };
+    }
+
+    function previewAlerts(){
+      const s = safeNum(sys.value);
+      const d = safeNum(dia.value);
+      const h = safeNum(hr.value);
+
+      const a = computeAlerts(s, d, h);
+      if(a.level === "none"){
+        alertBox.style.display = "none";
+        alertBox.classList.remove("urgent");
+        alertBox.innerHTML = "";
+        return;
+      }
+
+      alertBox.style.display = "block";
+      alertBox.classList.toggle("urgent", a.level === "urgent");
+      alertBox.innerHTML = `
+        <h3>${escapeHTML(a.title)}</h3>
+        <p>${escapeHTML(a.message)}</p>
+      `;
+    }
+
+    /****************
+     * Save entry
+     ****************/
+    function onSave(){
+      const dObj = parseDT(dt.value) || new Date();
+      const s = safeNum(sys.value);
+      const d = safeNum(dia.value);
+      const h = safeNum(hr.value);
+
+      if(s === null || d === null || h === null){
+        showInlineAlert("Enter systolic, diastolic, and HR before saving.", true);
+        return;
+      }
+
+      const alert = computeAlerts(s, d, h);
+      const entry = {
+        id: cryptoRandomId(),
+        when: dObj.toISOString(),
+        sys: s,
+        dia: d,
+        hr: h,
+        symptoms: selectedSymptoms.slice(),
+        notes: (notes.value || "").trim(),
+        tags: alert.tags || []
+      };
+
+      entries.unshift(entry);
+      saveJSON(LS_KEYS.ENTRIES, entries);
+
+      lastSaved = { when: entry.when, id: entry.id };
+      saveJSON(LS_KEYS.LAST_SAVED, lastSaved);
+
+      renderLastSaved();
+      renderHistory();
+      showInlineAlert("Saved.", false);
+
+      // Keep the selected symptoms (so user doesn't lose them), but allow quick clear if desired.
+      // Optionally you can clear vitals fields after save:
+      // clearEntryForm(false); // keep datetime
+    }
+
+    function clearEntryForm(){
+      // Keep datetime as-is; clear numeric + notes.
+      sys.value = "";
+      dia.value = "";
+      hr.value = "";
+      notes.value = "";
+      previewAlerts();
+      showInlineAlert("Cleared.", false);
+    }
+
+    function renderLastSaved(){
+      if(!lastSaved){
+        lastSavedEl.textContent = "Last saved: none";
+        return;
+      }
+      lastSavedEl.textContent = "Last saved: " + formatWhen(lastSaved.when);
+    }
+
+    function showInlineAlert(msg, isUrgent){
+      alertBox.style.display = "block";
+      alertBox.classList.toggle("urgent", !!isUrgent);
+      alertBox.innerHTML = `
+        <h3>${isUrgent ? "Attention" : "Update"}</h3>
+        <p>${escapeHTML(msg)}</p>
+      `;
+    }
+
+    /****************
+     * History
+     ****************/
+    function renderHistory(){
+      const q = (search.value || "").trim().toLowerCase();
+      const f = filter.value;
+
+      let list = entries.slice();
+
+      if(q){
+        list = list.filter(e => {
+          const hay = [
+            (e.notes || ""),
+            (e.symptoms || []).join(" "),
+            `${e.sys}/${e.dia}`,
+            String(e.hr)
+          ].join(" ").toLowerCase();
+          return hay.includes(q);
+        });
+      }
+
+      if(f !== "all"){
+        list = list.filter(e => {
+          const tags = new Set(e.tags || []);
+          if(f === "urgent") return tags.has("urgent");
+          if(f === "highbp") return tags.has("highbp");
+          if(f === "lowbp") return tags.has("lowbp");
+          if(f === "tachy") return tags.has("tachy");
+          if(f === "brady") return tags.has("brady");
+          return true;
+        });
+      }
+
+      historyStats.textContent = `Entries: ${entries.length} • Showing: ${list.length}`;
+      historyList.innerHTML = "";
+
+      if(!list.length){
+        const empty = document.createElement("div");
+        empty.className = "entry";
+        empty.innerHTML = `<div class="meta"><div class="when">No entries to show</div><span class="pill muted">—</span></div>`;
+        historyList.appendChild(empty);
+        return;
+      }
+
+      list.forEach(e => {
+        const wrap = document.createElement("div");
+        wrap.className = "entry";
+
+        const when = formatWhen(e.when);
+        const bp = `${e.sys}/${e.dia}`;
+        const hrText = `${e.hr}`;
+
+        const tagPills = renderTagPills(e.tags || []);
+
+        const symText = (e.symptoms && e.symptoms.length) ? e.symptoms.join(", ") : "None";
+        const noteText = e.notes ? e.notes : "";
+
+        wrap.innerHTML = `
+          <div class="meta">
+            <div class="when">${escapeHTML(when)}</div>
+            <div class="row" style="gap:8px; justify-content:flex-end;">
+              <span class="pill">BP ${escapeHTML(bp)}</span>
+              <span class="pill">HR ${escapeHTML(hrText)}</span>
+              ${tagPills}
+            </div>
+          </div>
+          <div class="details"><strong>Symptoms:</strong> ${escapeHTML(symText)}${noteText ? "\n\n" + escapeHTML(noteText) : ""}</div>
+          <div class="split no-print">
+            <span class="k">ID: ${escapeHTML(e.id)}</span>
+            <button class="btn secondary" type="button" data-del="${escapeHTML(e.id)}">Delete</button>
+          </div>
+        `;
+        historyList.appendChild(wrap);
+      });
+
+      // Hook delete buttons
+      historyList.querySelectorAll("button[data-del]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.getAttribute("data-del");
+          entries = entries.filter(x => x.id !== id);
+          saveJSON(LS_KEYS.ENTRIES, entries);
+          renderHistory();
+        });
+      });
+    }
+
+    function renderTagPills(tags){
+      if(!tags || !tags.length) return `<span class="pill muted">No flags</span>`;
+      // Order flags for readability
+      const order = ["urgent","highbp","lowbp","tachy","brady"];
+      const set = new Set(tags);
+      const out = order.filter(t => set.has(t)).map(t => {
+        const label = ({
+          urgent:"URGENT",
+          highbp:"High BP",
+          lowbp:"Low BP",
+          tachy:"Tachy",
+          brady:"Brady"
+        })[t] || t;
+        return `<span class="pill">${escapeHTML(label)}</span>`;
+      });
+      return out.join("");
+    }
+
+    function deleteLast(){
+      if(!entries.length) return;
+      entries.shift();
+      saveJSON(LS_KEYS.ENTRIES, entries);
+      renderHistory();
+    }
+
+    /****************
+     * Export (CSV) + Backup/Restore
+     ****************/
+    function exportCSV(){
+      const header = ["when","systolic","diastolic","hr","symptoms","notes","flags"];
+      const lines = [header.join(",")];
+
+      entries.forEach(e => {
+        const row = [
+          csvSafe(e.when),
+          csvSafe(e.sys),
+          csvSafe(e.dia),
+          csvSafe(e.hr),
+          csvSafe((e.symptoms || []).join("; ")),
+          csvSafe(e.notes || ""),
+          csvSafe((e.tags || []).join("; "))
+        ];
+        lines.push(row.join(","));
+      });
+
+      const blob = new Blob([lines.join("\n")], { type:"text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "vitals-tracker-v2.02.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function csvSafe(v){
+      const s = String(v ?? "");
+      const needs = /[",\n]/.test(s);
+      return needs ? `"${s.replace(/"/g,'""')}"` : s;
+    }
+
+    function backup(){
+      const payload = {
+        version: "2.02",
+        exportedAt: new Date().toISOString(),
+        entries,
+        symptomsMaster,
+        selectedSymptoms,
+        lastSaved
+      };
+      ioBox.value = JSON.stringify(payload, null, 2);
+      ioBox.focus();
+    }
+
+    function restore(){
+      const raw = (ioBox.value || "").trim();
+      if(!raw) return;
+      try{
+        const payload = JSON.parse(raw);
+        if(payload && payload.entries && Array.isArray(payload.entries)){
+          entries = payload.entries;
+          saveJSON(LS_KEYS.ENTRIES, entries);
+        }
+        if(payload && payload.symptomsMaster && Array.isArray(payload.symptomsMaster)){
+          symptomsMaster = payload.symptomsMaster;
+          saveJSON(LS_KEYS.SYMPTOMS, symptomsMaster);
+        }
+        if(payload && payload.selectedSymptoms && Array.isArray(payload.selectedSymptoms)){
+          selectedSymptoms = payload.selectedSymptoms;
+          saveJSON(LS_KEYS.SYM_SELECTION, selectedSymptoms);
+        }
+        if(payload && payload.lastSaved){
+          lastSaved = payload.lastSaved;
+          saveJSON(LS_KEYS.LAST_SAVED, lastSaved);
+        }
+        renderSymptoms();
+        renderHistory();
+        renderLastSaved();
+        go("home");
+        showInlineAlert("Restore complete.", false);
+      }catch(e){
+        showInlineAlert("Restore failed: invalid data.", true);
+      }
+    }
+
+    function clearAll(){
+      // keeps the app usable, but clears stored user data
+      if(!confirm("Clear ALL entries and custom symptoms?")) return;
+
+      entries = [];
+      selectedSymptoms = [];
+      lastSaved = null;
+
+      // Reset symptoms to defaults
+      symptomsMaster = DEFAULT_SYMPTOMS.slice();
+
+      saveJSON(LS_KEYS.ENTRIES, entries);
+      saveJSON(LS_KEYS.SYM_SELECTION, selectedSymptoms);
+      saveJSON(LS_KEYS.LAST_SAVED, lastSaved);
+      saveJSON(LS_KEYS.SYMPTOMS, symptomsMaster);
+
+      ioBox.value = "";
+      renderSymptoms();
+      renderHistory();
+      renderLastSaved();
+      go("home");
+      showInlineAlert("All data cleared.", false);
+    }
+
+    /****************
+     * Exit behavior
+     ****************/
+    function exitApp(){
+      // window.close often blocked on mobile; provide an "Exited" screen instead.
+      Object.values(panels).forEach(p => p.hidden = true);
+      panels.exit.hidden = false;
+      // Keep nav visible; user can still return via button.
+    }
+
+    /****************
+     * Utilities
+     ****************/
+    function cryptoRandomId(){
+      // short stable ID
+      try{
+        const a = new Uint8Array(8);
+        crypto.getRandomValues(a);
+        return Array.from(a).map(x => x.toString(16).padStart(2,"0")).join("");
+      }catch(_){
+        return String(Date.now()) + "_" + Math.random().toString(16).slice(2);
+      }
+    }
+
+    function escapeHTML(s){
+      return String(s ?? "").replace(/[&<>"']/g, (c) => ({
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        '"':"&quot;",
+        "'":"&#039;"
+      })[c]);
+    }
+  </script>
 </body>
 </html>
