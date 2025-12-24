@@ -9,18 +9,13 @@
     :root{
       --bg0:#07101e;
       --bg1:#0b1730;
-      --panel:rgba(20,28,43,.72);
       --stroke:rgba(255,255,255,.10);
       --text:rgba(245,248,255,.92);
       --muted:rgba(245,248,255,.62);
-      --muted2:rgba(245,248,255,.48);
       --inputBg:rgba(44,56,76,.55);
       --inputStroke:rgba(255,255,255,.22);
       --focus:rgba(90,160,255,.70);
       --shadow:0 18px 55px rgba(0,0,0,.55);
-      --accent:#5aa0ff;
-      --accent2:#3c7de6;
-      --danger:#ff5a6d;
       --r24:24px;
     }
 
@@ -148,14 +143,17 @@
       box-shadow: 0 0 0 4px rgba(90,160,255,.14);
     }
 
-    /* Add: time line (bigger heading) */
+    /* Add: time line */
     .timeLine{
-      font-size: 28px; /* bigger per request */
+      font-size: 28px;
       font-weight: 800;
       letter-spacing: .3px;
       opacity: .86;
       margin: 2px 2px 14px;
       line-height: 1.05;
+      white-space: nowrap; /* keep on one line */
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .grid3{
@@ -165,13 +163,13 @@
       margin-bottom: 12px;
     }
 
-    /* Symptoms: tight 2-column list, no pills/borders */
+    /* Symptoms: tight 2-column list */
     .symWrap{ margin-top: 8px; }
     .symGrid{
       display:grid;
       grid-template-columns: 1fr 1fr;
       column-gap: 18px;
-      row-gap: 4px; /* twice as tight */
+      row-gap: 4px;
       margin-top: 6px;
       padding: 4px 2px 2px;
     }
@@ -202,7 +200,6 @@
       opacity: .86;
     }
 
-    /* Section titles */
     .subTitle{
       font-size: 30px;
       font-weight: 760;
@@ -210,7 +207,6 @@
       margin: 6px 2px 10px;
     }
 
-    /* Log cards */
     .tinyLine{
       font-size: 13px;
       opacity: .60;
@@ -256,7 +252,6 @@
     }
     .metaLine b{ opacity:.88; }
 
-    /* Charts */
     .chartBox{
       border-radius: var(--r24);
       padding: 12px;
@@ -291,7 +286,7 @@
     @media (max-width: 520px){
       h1{ font-size: 46px; }
       .grid3{ grid-template-columns: 1fr 1fr 1fr; gap:10px; }
-      .timeLine{ font-size: 26px; }
+      .timeLine{ font-size: 24px; } /* prevent wrapping on small screens */
       .symText{ font-size: 18px; }
       .bpBig{ font-size: 34px; }
       .hrBig{ font-size: 28px; }
@@ -312,7 +307,7 @@
         <button id="btnGoLog" class="btn">Log</button>
         <button id="btnGoCharts" class="btn">Charts</button>
 
-        <!-- Install (left) + Exit (right) only -->
+        <!-- Install (left) + Exit (right) -->
         <div class="rowBetween" style="margin-top:6px;">
           <button id="btnInstall" class="btnSmall">Install</button>
           <button id="btnExitHome" class="btnSmall">Exit</button>
@@ -323,7 +318,7 @@
       </div>
     </div>
 
-    <!-- ADD -->
+    <!-- ADD (no Exit here) -->
     <div id="viewAdd" class="panel hidden">
       <div class="timeLine" id="addNowLine">--:--:-- --, --/--/----</div>
 
@@ -352,28 +347,25 @@
         <div id="symGrid" class="symGrid"></div>
       </div>
 
-      <!-- Buttons just below symptoms (not pinned to bottom) -->
+      <!-- Buttons just below symptoms -->
       <div class="rowBetween" style="margin-top:12px;">
         <button id="btnSave" class="btnSmall btnSmallPrimary">Save</button>
         <button id="btnBackFromAdd" class="btnSmall">Back</button>
-        <button id="btnExitFromAdd" class="btnSmall">Exit</button>
       </div>
     </div>
 
-    <!-- LOG -->
+    <!-- LOG (no Exit here) -->
     <div id="viewLog" class="panel hidden">
       <div class="rowBetween" style="margin-bottom:8px;">
         <button id="btnExportLog" class="btnSmall btnSmallPrimary">Export</button>
         <button id="btnBackFromLog" class="btnSmall">Back</button>
-        <button id="btnExitFromLog" class="btnSmall">Exit</button>
       </div>
 
       <div class="subTitle">Search</div>
 
-      <!-- No instruction text under search, per request -->
       <input id="inSearch" type="text" placeholder="Type a word: sweaty, dizzy, headache..." />
 
-      <!-- Calendar range (native date pickers) -->
+      <!-- Date range (blank = all) -->
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:10px;">
         <div>
           <div class="fieldLabel" style="font-size:14px; margin-bottom:6px;">From</div>
@@ -389,17 +381,16 @@
       <div id="logList"></div>
     </div>
 
-    <!-- CHARTS -->
+    <!-- CHARTS (no Exit here) -->
     <div id="viewCharts" class="panel hidden">
       <div class="rowBetween" style="margin-bottom:8px;">
         <button id="btnExportChart" class="btnSmall btnSmallPrimary">Export</button>
         <button id="btnBackFromCharts" class="btnSmall">Back</button>
-        <button id="btnExitFromCharts" class="btnSmall">Exit</button>
       </div>
 
       <div class="subTitle">Charts</div>
 
-      <!-- Date options; default = all (blank) -->
+      <!-- Date range (blank = all) -->
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:10px;">
         <div>
           <div class="fieldLabel" style="font-size:14px; margin-bottom:6px;">From</div>
@@ -424,9 +415,9 @@
     <div class="modalCard">
       <div class="modalTitle">Uninstall</div>
       <div class="modalText">
-        This app can’t uninstall itself from inside the browser.<br><br>
-        <b>Android:</b> go to your home screen, long-press <i>Vitals Tracker</i>, then tap <b>Uninstall</b> (or <b>Remove</b>).<br><br>
-        <b>Chrome:</b> Menu → <b>Apps</b> / <b>Installed apps</b> → remove <i>Vitals Tracker</i>.
+        Uninstalling the app typically removes the app and clears its storage, but behavior can vary by device/browser.<br><br>
+        <b>Android:</b> home screen → long-press <i>Vitals Tracker</i> → <b>Uninstall</b> (or <b>Remove</b>).<br><br>
+        If you want guaranteed deletion, I can add a <b>Clear Data</b> button inside the app.
       </div>
       <div class="modalActions">
         <button id="btnUninstallClose" class="btnSmall">Close</button>
@@ -438,7 +429,6 @@
 (function(){
   "use strict";
 
-  /* Storage */
   const LS_KEY = "vitalsTracker.logs.v1";
 
   function loadLogs(){
@@ -478,17 +468,15 @@
   }
 
   function parseYmd(str){
-    if(!str) return null;
+    if(!str) return null;              // blank => all data
     const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(str);
     if(!m) return null;
-    const yr = +m[1], mo = +m[2], da = +m[3];
-    const dt = new Date(yr, mo-1, da, 0, 0, 0, 0);
-    if(isNaN(dt.getTime())) return null;
-    return dt;
+    const dt = new Date(+m[1], +m[2]-1, +m[3], 0, 0, 0, 0);
+    return isNaN(dt.getTime()) ? null : dt;
   }
 
   function withinRange(ts, fromDt, toDt){
-    if(!fromDt && !toDt) return true;
+    if(!fromDt && !toDt) return true;  // default: all
     const d = new Date(ts);
     const day = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0,0,0,0).getTime();
     if(fromDt){
@@ -508,7 +496,6 @@
     }[ch]));
   }
 
-  /* Views */
   const views = {
     home: document.getElementById("viewHome"),
     add: document.getElementById("viewAdd"),
@@ -550,7 +537,6 @@
       function sync(){
         box.classList.toggle("on", symState.has(label));
       }
-
       function toggle(){
         if(symState.has(label)) symState.delete(label);
         else symState.add(label);
@@ -659,10 +645,8 @@
 
   function renderLog(){
     const { logs, filtered } = getFilteredLogs();
-
     showingLine.textContent = "Showing: "+filtered.length+" of "+logs.length;
     btnExportLog.disabled = filtered.length === 0;
-
     logList.innerHTML = "";
 
     if(filtered.length === 0){
@@ -822,7 +806,6 @@
       return (H - pad.b) - t*innerH;
     }
 
-    /* Grid + y labels (bigger, readable) */
     ctx.strokeStyle = "rgba(255,255,255,.10)";
     ctx.lineWidth = 1;
     ctx.font = "14px system-ui, -apple-system, Segoe UI, Roboto, Arial";
@@ -839,7 +822,6 @@
       ctx.fillText(String(Math.round(v)), 10, y+5);
     }
 
-    /* X endpoints */
     const first = new Date(data[0].ts);
     const last  = new Date(data[data.length-1].ts);
     ctx.fillStyle = "rgba(245,248,255,.62)";
@@ -872,7 +854,6 @@
     drawLine(dia, "rgba(220,230,245,.78)");
     drawLine(hr,  "rgba(120,220,180,.85)");
 
-    /* Legend (bigger) */
     let lx = pad.l + 6;
     let ly = pad.t + 22;
     ctx.font = "16px system-ui, -apple-system, Segoe UI, Roboto, Arial";
@@ -977,16 +958,11 @@
   document.getElementById("btnBackFromLog").addEventListener("click", ()=>showView("home"));
   document.getElementById("btnBackFromCharts").addEventListener("click", ()=>showView("home"));
 
-  /* Exit behavior: mobile browsers may ignore window.close() */
   function attemptExit(){
     window.close();
-    // fallback note kept minimal
     setTimeout(()=>{ alert("If Exit doesn't work: use your browser back/home."); }, 150);
   }
   document.getElementById("btnExitHome").addEventListener("click", attemptExit);
-  document.getElementById("btnExitFromAdd").addEventListener("click", attemptExit);
-  document.getElementById("btnExitFromLog").addEventListener("click", attemptExit);
-  document.getElementById("btnExitFromCharts").addEventListener("click", attemptExit);
 
   document.getElementById("btnSave").addEventListener("click", saveRecord);
   document.getElementById("btnExportLog").addEventListener("click", exportLog);
@@ -994,23 +970,25 @@
 
   /* Re-render on filters */
   ["input","change"].forEach(evt=>{
-    inSearch.addEventListener(evt, renderLog);
-    inFrom.addEventListener(evt, renderLog);
-    inTo.addEventListener(evt, renderLog);
+    document.getElementById("inSearch").addEventListener(evt, renderLog);
+    document.getElementById("inFrom").addEventListener(evt, renderLog);
+    document.getElementById("inTo").addEventListener(evt, renderLog);
 
-    chartFrom.addEventListener(evt, renderCharts);
-    chartTo.addEventListener(evt, renderCharts);
+    document.getElementById("chartFrom").addEventListener(evt, renderCharts);
+    document.getElementById("chartTo").addEventListener(evt, renderCharts);
   });
 
   /* Init */
   renderSymptoms();
   clearAddForm();
 
-  // defaults blank = all
-  document.getElementById("inFrom").value = "";
-  document.getElementById("inTo").value = "";
-  document.getElementById("chartFrom").value = "";
-  document.getElementById("chartTo").value = "";
+  // Force date inputs blank on load (default = all data)
+  requestAnimationFrame(()=>{
+    document.getElementById("inFrom").value = "";
+    document.getElementById("inTo").value = "";
+    document.getElementById("chartFrom").value = "";
+    document.getElementById("chartTo").value = "";
+  });
 
   setInstallButtonState();
   showView("home");
