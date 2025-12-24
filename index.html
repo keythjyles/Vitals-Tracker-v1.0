@@ -11,12 +11,12 @@
 
   <style>
     :root{
-      /* Slightly dimmer whites for less glare */
       --bg:#0b0d10;
       --panel:#111725;
       --panel2:#151d2f;
 
-      --fg:#d8dde8;
+      /* dimmer whites */
+      --fg:#d6dbea;
       --muted:#9aa5ba;
 
       --border:rgba(255,255,255,.14);
@@ -27,22 +27,21 @@
 
       --radius:22px;
 
-      /* Tighter spacing */
-      --font:21px;
+      /* tighter */
+      --font:20px;
       --gap:10px;
       --pad:14px;
       --btnpad:14px;
 
-      /* Inputs: higher contrast */
+      /* inputs: higher contrast */
       --inBg: rgba(255,255,255,.07);
-      --inBd: rgba(255,255,255,.26);
+      --inBd: rgba(255,255,255,.30);
       --inBdFocus: rgba(106,160,255,.62);
     }
 
     html, body{
       height:100%;
       margin:0;
-      padding:0;
       background:var(--bg);
       color:var(--fg);
       overflow-x:hidden;
@@ -51,7 +50,7 @@
       -webkit-font-smoothing: antialiased;
       font-family: Roboto, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
       font-size: var(--font);
-      font-weight: 500;
+      font-weight: 520;
     }
 
     *{ box-sizing:border-box; }
@@ -74,7 +73,7 @@
       font-size: 1.75em;
       font-weight: 720;
       letter-spacing: .2px;
-      color: rgba(216,221,232,.95);
+      color: rgba(214,219,234,.92);
     }
 
     .card{
@@ -93,27 +92,9 @@
     label{
       display:block;
       margin: 0 0 6px;
-      font-weight: 650;
+      font-weight: 640;
       letter-spacing: .1px;
-      color: rgba(216,221,232,.92);
-    }
-
-    .metaLabel{
-      color: var(--muted);
-      font-size: .88em;
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
-    .metaValue{
-      font-size: .98em;
-      font-weight: 650;
-      color: rgba(216,221,232,.95);
-      padding: 10px 12px;
-      border-radius: 16px;
-      border: 2px solid rgba(255,255,255,.16);
-      background: rgba(255,255,255,.05);
-      user-select: text;
-      -webkit-user-select: text;
+      color: rgba(214,219,234,.90);
     }
 
     input, textarea, select{
@@ -122,12 +103,11 @@
       border-radius: 18px;
       border: 2px solid var(--inBd);
       background: var(--inBg);
-      color: rgba(216,221,232,.98);
-      padding: 13px 14px;
+      color: rgba(214,219,234,.98);
+      padding: 12px 14px;
       outline: none;
       font-weight: 560;
     }
-    textarea{ min-height: 92px; resize: vertical; }
 
     input::placeholder, textarea::placeholder{
       color: rgba(154,165,186,.70);
@@ -139,22 +119,14 @@
       box-shadow: 0 0 0 4px rgba(106,160,255,.14);
     }
 
-    /* Compact button bar */
-    .topBar{
-      display:flex;
-      gap: 10px;
-      align-items:center;
-      flex-wrap: nowrap;
-    }
-
     .btn{
       width:100%;
       padding: var(--btnpad);
       border-radius: 22px;
       border: 1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.05);
-      color: rgba(216,221,232,.95);
-      font-size: 1.10em;
+      color: rgba(214,219,234,.95);
+      font-size: 1.08em;
       font-weight: 680;
       letter-spacing: .1px;
       cursor: pointer;
@@ -183,7 +155,7 @@
     .btn.danger{
       background: rgba(255,80,80,.10);
       border-color: rgba(255,80,80,.26);
-      color: rgba(216,221,232,.95);
+      color: rgba(214,219,234,.95);
     }
 
     .hint{
@@ -192,7 +164,6 @@
       font-size: .90em;
       font-weight: 540;
     }
-
     .miniHint{
       color: var(--muted);
       font-size: .84em;
@@ -201,65 +172,11 @@
       line-height: 1.22;
     }
 
-    .topActions{
-      display:flex;
-      flex-direction:column;
-      gap: 10px;
-    }
+    .screen{ display:none; }
+    .screen.active{ display:block; }
 
-    /* Symptoms: smaller + tighter */
-    .symptoms{
-      margin-top: 4px;
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px 10px;
-      font-size: 0.58em; /* halved-ish */
-    }
-    .symptoms .chip{
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      padding: 10px 10px;
-      border-radius: 18px;
-      border: 2px solid rgba(255,255,255,.16);
-      background: transparent;
-    }
-
-    /* Outline-only checkbox (no white fill) */
-    .symptoms input[type="checkbox"]{
-      -webkit-appearance: none;
-      appearance: none;
-      width: 22px;
-      height: 22px;
-      margin:0;
-      border-radius: 6px;
-      border: 2px solid rgba(255,255,255,.34);
-      background: transparent;
-      box-shadow: inset 0 0 0 2px rgba(0,0,0,.12);
-      position: relative;
-      flex: 0 0 auto;
-    }
-    .symptoms input[type="checkbox"]:checked{
-      border-color: rgba(106,160,255,.80);
-      background: rgba(106,160,255,.14);
-    }
-    .symptoms input[type="checkbox"]:checked::after{
-      content:"";
-      position:absolute;
-      left: 6px;
-      top: 2px;
-      width: 6px;
-      height: 12px;
-      border-right: 3px solid rgba(106,160,255,.95);
-      border-bottom: 3px solid rgba(106,160,255,.95);
-      transform: rotate(40deg);
-    }
-
-    .symptoms span{
-      line-height: 1.05;
-      font-weight: 600;
-      color: rgba(216,221,232,.92);
-    }
+    .topActions{ display:flex; flex-direction:column; gap: 10px; }
+    .topBar{ display:flex; gap: 10px; align-items:center; flex-wrap: nowrap; }
 
     .logItem{
       border: 1px solid rgba(255,255,255,.12);
@@ -269,7 +186,7 @@
     }
     .logWhen{
       color: rgba(154,165,186,.92);
-      font-size: .82em; /* smaller so date fits */
+      font-size: .82em;
       margin-bottom: 6px;
       font-weight: 560;
     }
@@ -283,17 +200,19 @@
       gap: 10px;
       flex-wrap: wrap;
     }
-    .logBig .bp{ white-space:nowrap; }
-    .logBig .hr{ white-space:nowrap; opacity:.92; }
-
     .logLine{
       font-size: .92em;
-      color: rgba(216,221,232,.92);
+      color: rgba(214,219,234,.92);
       margin: 2px 0;
       font-weight: 560;
       overflow-wrap: anywhere;
     }
     .logLine b{ font-weight: 760; }
+
+    input[type="date"]{
+      font-size: .92em;
+      padding: 12px 12px;
+    }
 
     .chartBox{
       border-radius: 22px;
@@ -301,11 +220,7 @@
       background: rgba(0,0,0,.16);
       padding: 12px;
     }
-    canvas{
-      width: 100%;
-      height: 270px;
-      display:block;
-    }
+    canvas{ width: 100%; height: 270px; display:block; }
     .chartLegend{
       display:flex;
       flex-wrap:wrap;
@@ -316,28 +231,96 @@
       font-weight: 560;
     }
 
-    .toast{
-      margin-top: 10px;
-      color: var(--muted);
-      font-size: .92em;
-      min-height: 1.1em;
-      font-weight: 540;
+    .toast{ margin-top: 10px; color: var(--muted); font-size: .92em; min-height: 1.1em; font-weight: 540; }
+
+    /* ====== ADD SCREEN: your requested changes ====== */
+
+    /* Time: plain text, no border, not editable-looking */
+    .whenPlain{
+      font-size: .95em;
+      font-weight: 650;
+      color: rgba(214,219,234,.92);
+      padding: 2px 0 6px;
+      user-select: text;
+      -webkit-user-select: text;
     }
 
-    .screen{ display:none; }
-    .screen.active{ display:block; }
+    /* 3 fields on one line */
+    .row.three .col{
+      flex: 1 1 33.333%;
+    }
 
-    /* Date filter inputs: smaller text so full date fits */
-    input[type="date"]{
-      font-size: .92em;
-      padding: 12px 12px;
+    /* Notes label and field on next line, full width */
+    .notesLabel span{
+      font-style: italic;
+      font-weight: 560;
+      color: rgba(154,165,186,.95);
+    }
+
+    /* Symptoms: economical list, no borders */
+    .symptomsWrap{
+      margin-top: 2px;
+    }
+    .symptomsGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 14px;
+      row-gap: 6px;          /* tight vertical spacing */
+      padding: 0;            /* no padding */
+      margin: 0;
+      border: 0;             /* no border */
+      background: transparent;
+      font-size: .86em;      /* smaller than main text */
+    }
+    .symptomsItem{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding: 0;            /* no pill padding */
+      margin: 0;
+      border: 0;             /* no pill border */
+      background: transparent;
+    }
+
+    /* Outline-only checkbox, still visible */
+    .symptomsItem input[type="checkbox"]{
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      margin:0;
+      border-radius: 6px;
+      border: 2px solid rgba(255,255,255,.34);
+      background: transparent;
+      position: relative;
+      flex: 0 0 auto;
+    }
+    .symptomsItem input[type="checkbox"]:checked{
+      border-color: rgba(106,160,255,.80);
+      background: rgba(106,160,255,.12);
+    }
+    .symptomsItem input[type="checkbox"]:checked::after{
+      content:"";
+      position:absolute;
+      left: 6px;
+      top: 2px;
+      width: 6px;
+      height: 12px;
+      border-right: 3px solid rgba(106,160,255,.95);
+      border-bottom: 3px solid rgba(106,160,255,.95);
+      transform: rotate(40deg);
+    }
+
+    .symptomsItem span{
+      line-height: 1.05;
+      font-weight: 600;
+      color: rgba(214,219,234,.90);
     }
 
     @media (max-width: 420px){
-      :root{ --font: 20px; }
+      :root{ --font: 19px; }
       canvas{ height: 250px; }
       .btn.small{ padding: 10px 10px; font-size: .94em; }
-      .logWhen{ font-size: .80em; }
     }
   </style>
 </head>
@@ -365,12 +348,11 @@
     <!-- ADD -->
     <section id="add" class="screen">
       <div class="card stack">
-        <div>
-          <div class="metaLabel">Time (then Date)</div>
-          <div class="metaValue" id="whenText"></div>
-        </div>
+        <!-- Plain time/date line (no label, no border, not editable) -->
+        <div class="whenPlain" id="whenText"></div>
 
-        <div class="row">
+        <!-- 3 fields on one horizontal line -->
+        <div class="row three">
           <div class="col">
             <label for="sys">Systolic</label>
             <input id="sys" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 132" />
@@ -379,25 +361,22 @@
             <label for="dia">Diastolic</label>
             <input id="dia" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 91" />
           </div>
-        </div>
-
-        <!-- BP and HR should read as a single set; keep HR visible and simple -->
-        <div class="row">
           <div class="col">
             <label for="hr">Heart Rate</label>
             <input id="hr" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 72" />
           </div>
         </div>
 
-        <!-- Notes: label on its own line, optional italicized; input spans full width -->
+        <!-- Notes: label line, then full-width input underneath -->
         <div>
-          <label for="notes">Notes <span style="font-style:italic; font-weight:560; color:rgba(154,165,186,.95)">(optional)</span></label>
+          <label class="notesLabel" for="notes">Notes <span>(optional)</span></label>
           <input id="notes" placeholder="optional" />
         </div>
 
-        <div>
+        <!-- Symptoms: compact list, no borders -->
+        <div class="symptomsWrap">
           <label>Symptoms</label>
-          <div class="symptoms" id="symptomsGrid"></div>
+          <div class="symptomsGrid" id="symptomsGrid"></div>
         </div>
 
         <div class="row">
@@ -416,7 +395,6 @@
     <!-- LOG -->
     <section id="log" class="screen">
       <div class="card stack">
-        <!-- Top bar: Export / Back / Exit -->
         <div class="topBar">
           <button class="btn small" id="export">Export</button>
           <button class="btn small" id="backFromLog">Back</button>
@@ -508,12 +486,13 @@
     }
     function nowISO(){ return new Date().toISOString(); }
 
-    function formatWhenTimeFirst(iso){
+    // Add screen: time ticking, then comma, then date; no labels
+    function formatWhenPlain(iso){
       const d = new Date(iso);
       if (isNaN(d.getTime())) return iso;
       const time = d.toLocaleTimeString(undefined, { hour:"2-digit", minute:"2-digit", second:"2-digit" });
       const date = d.toLocaleDateString(undefined, { year:"numeric", month:"2-digit", day:"2-digit" });
-      return `Time ${time} • Date ${date}`;
+      return `${time}, ${date}`;
     }
 
     function formatWhenForLog(iso){
@@ -569,8 +548,6 @@
     }
 
     function exitApp(){
-      // In a browser/PWA, "close app" is not reliably allowed.
-      // Best-effort: navigate away and stop interaction.
       window.location.href = "about:blank";
     }
 
@@ -578,6 +555,7 @@
     document.getElementById("exitAppLog").addEventListener("click", exitApp);
     document.getElementById("exitAppCharts").addEventListener("click", exitApp);
 
+    // Symptoms: compact list items, no borders
     const SYMPTOMS = [
       "Sweaty","Dizzy","Panic","Brain fog",
       "Chest tight","Headache","Nausea","Short breath",
@@ -590,8 +568,9 @@
       symptomsGrid.innerHTML = "";
       SYMPTOMS.forEach((name, i) => {
         const id = "sym_" + i;
+
         const wrap = document.createElement("label");
-        wrap.className = "chip";
+        wrap.className = "symptomsItem";
         wrap.setAttribute("for", id);
 
         const cb = document.createElement("input");
@@ -636,12 +615,12 @@
       clearSymptoms();
 
       addTimestampISO = nowISO();
-      whenTextEl.textContent = formatWhenTimeFirst(addTimestampISO);
+      whenTextEl.textContent = formatWhenPlain(addTimestampISO);
 
       if(whenTimer) clearInterval(whenTimer);
       whenTimer = setInterval(() => {
         addTimestampISO = nowISO();
-        whenTextEl.textContent = formatWhenTimeFirst(addTimestampISO);
+        whenTextEl.textContent = formatWhenPlain(addTimestampISO);
       }, 1000);
 
       setTimeout(() => sysEl.focus(), 120);
@@ -874,7 +853,7 @@
       ctx.fillStyle = "rgba(255,255,255,.05)";
       ctx.fillRect(0,0,w,h);
 
-      ctx.fillStyle = "rgba(216,221,232,.80)";
+      ctx.fillStyle = "rgba(214,219,234,.80)";
       ctx.font = "600 22px Roboto, system-ui, sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
@@ -931,7 +910,7 @@
 
     function drawLabelsY(vmin, vmax, padL, padT, padB){
       const ticks = 4;
-      ctx.fillStyle = "rgba(216,221,232,.70)";
+      ctx.fillStyle = "rgba(214,219,234,.70)";
       ctx.font = "520 16px Roboto, system-ui, sans-serif";
       ctx.textAlign = "right";
       ctx.textBaseline = "middle";
@@ -991,11 +970,11 @@
       const diaPts = entries.map((e,i)=>({ x: mapX(i,n,padL,padR), y: mapY(e.dia,vmin,vmax,padT,padB) }));
 
       drawLine(sysPts, "rgba(106,160,255,.92)");
-      drawLine(diaPts, "rgba(216,221,232,.78)");
+      drawLine(diaPts, "rgba(214,219,234,.76)");
 
       legendEl.innerHTML = "";
       legendEl.appendChild(legendChip("Systolic", "rgba(106,160,255,.92)"));
-      legendEl.appendChild(legendChip("Diastolic", "rgba(216,221,232,.78)"));
+      legendEl.appendChild(legendChip("Diastolic", "rgba(214,219,234,.76)"));
       setToast("chartToast", n===1 ? "Showing 1 reading." : "");
     }
 
@@ -1053,4 +1032,3 @@
   </script>
 </body>
 </html>
-```0
