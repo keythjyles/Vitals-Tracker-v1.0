@@ -11,22 +11,32 @@
 
   <style>
     :root{
+      /* Slightly dimmer whites for less glare */
       --bg:#0b0d10;
-      --panel:#121827;
-      --panel2:#161e31;
-      --fg:#e7eaf0;
-      --muted:#a9b2c2;
-      --border:rgba(255,255,255,.10);
-      --shadow:rgba(0,0,0,.35);
+      --panel:#111725;
+      --panel2:#151d2f;
 
-      --accent:#5a93ff;
+      --fg:#d8dde8;
+      --muted:#9aa5ba;
+
+      --border:rgba(255,255,255,.14);
+      --shadow:rgba(0,0,0,.38);
+
+      --accent:#6aa0ff;
       --accent2:#3f78ea;
 
       --radius:22px;
-      --font:22px;
-      --gap:12px;
-      --pad:16px;
-      --btnpad:16px;
+
+      /* Tighter spacing */
+      --font:21px;
+      --gap:10px;
+      --pad:14px;
+      --btnpad:14px;
+
+      /* Inputs: higher contrast */
+      --inBg: rgba(255,255,255,.07);
+      --inBd: rgba(255,255,255,.26);
+      --inBdFocus: rgba(106,160,255,.62);
     }
 
     html, body{
@@ -50,20 +60,21 @@
     .wrap{
       max-width: 860px;
       margin: 0 auto;
-      padding: 18px 16px 28px;
+      padding: 14px 14px 22px;
     }
 
     header{
-      padding: 10px 2px 18px;
+      padding: 8px 2px 14px;
       border-bottom: 1px solid rgba(255,255,255,.08);
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
 
     h1{
       margin:0;
       font-size: 1.75em;
-      font-weight: 700;
+      font-weight: 720;
       letter-spacing: .2px;
+      color: rgba(216,221,232,.95);
     }
 
     .card{
@@ -71,7 +82,7 @@
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: var(--pad);
-      box-shadow: 0 10px 30px var(--shadow);
+      box-shadow: 0 10px 28px var(--shadow);
       overflow:hidden;
     }
 
@@ -81,25 +92,26 @@
 
     label{
       display:block;
-      margin: 0 0 8px;
+      margin: 0 0 6px;
       font-weight: 650;
       letter-spacing: .1px;
+      color: rgba(216,221,232,.92);
     }
 
     .metaLabel{
       color: var(--muted);
-      font-size: .9em;
-      font-weight: 550;
+      font-size: .88em;
+      font-weight: 600;
       margin-bottom: 6px;
     }
     .metaValue{
-      font-size: 1em;
-      font-weight: 600;
-      color: var(--fg);
+      font-size: .98em;
+      font-weight: 650;
+      color: rgba(216,221,232,.95);
       padding: 10px 12px;
       border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.18);
+      border: 2px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.05);
       user-select: text;
       -webkit-user-select: text;
     }
@@ -108,142 +120,180 @@
       width:100%;
       font-size: 1em;
       border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(10,14,24,.55);
-      color: var(--fg);
-      padding: 14px 14px;
+      border: 2px solid var(--inBd);
+      background: var(--inBg);
+      color: rgba(216,221,232,.98);
+      padding: 13px 14px;
       outline: none;
+      font-weight: 560;
+    }
+    textarea{ min-height: 92px; resize: vertical; }
+
+    input::placeholder, textarea::placeholder{
+      color: rgba(154,165,186,.70);
       font-weight: 520;
     }
-    textarea{ min-height: 100px; resize: vertical; }
 
     input:focus, textarea:focus, select:focus{
-      border-color: rgba(90,147,255,.55);
-      box-shadow: 0 0 0 4px rgba(90,147,255,.12);
+      border-color: var(--inBdFocus);
+      box-shadow: 0 0 0 4px rgba(106,160,255,.14);
     }
 
-    /* Compact buttons for top bar */
+    /* Compact button bar */
     .topBar{
       display:flex;
       gap: 10px;
       align-items:center;
       flex-wrap: nowrap;
     }
+
     .btn{
       width:100%;
       padding: var(--btnpad);
-      border-radius: 26px;
-      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.05);
-      color: var(--fg);
-      font-size: 1.15em;
-      font-weight: 650;
+      color: rgba(216,221,232,.95);
+      font-size: 1.10em;
+      font-weight: 680;
       letter-spacing: .1px;
       cursor: pointer;
-      box-shadow: 0 10px 25px rgba(0,0,0,.16);
+      box-shadow: 0 10px 22px rgba(0,0,0,.16);
     }
     .btn:active{ transform: translateY(1px); }
 
     .btn.small{
       width: auto;
       flex: 1 1 auto;
-      padding: 12px 14px;
+      padding: 11px 12px;
       border-radius: 18px;
-      font-size: 1.02em;
-      font-weight: 650;
-      box-shadow: 0 8px 18px rgba(0,0,0,.14);
+      font-size: .98em;
+      font-weight: 680;
+      box-shadow: 0 8px 18px rgba(0,0,0,.12);
     }
 
     .btn.primary{
       background: linear-gradient(180deg, var(--accent), var(--accent2));
       color: #0b1020;
       border-color: rgba(0,0,0,.18);
-      box-shadow: 0 10px 25px rgba(90,147,255,.16);
-      font-weight: 750;
+      box-shadow: 0 10px 22px rgba(106,160,255,.14);
+      font-weight: 780;
     }
 
     .btn.danger{
       background: rgba(255,80,80,.10);
-      border-color: rgba(255,80,80,.25);
-      color: var(--fg);
+      border-color: rgba(255,80,80,.26);
+      color: rgba(216,221,232,.95);
     }
 
     .hint{
       color: var(--muted);
-      margin-top: 10px;
-      font-size: .92em;
-      font-weight: 500;
+      margin-top: 8px;
+      font-size: .90em;
+      font-weight: 540;
     }
 
     .miniHint{
       color: var(--muted);
-      font-size: .86em;
-      font-weight: 500;
-      margin-top: 8px;
-      line-height: 1.25;
+      font-size: .84em;
+      font-weight: 540;
+      margin-top: 6px;
+      line-height: 1.22;
     }
 
     .topActions{
       display:flex;
       flex-direction:column;
-      gap: 12px;
+      gap: 10px;
     }
 
+    /* Symptoms: smaller + tighter */
     .symptoms{
-      margin-top: 6px;
+      margin-top: 4px;
       display:grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px 12px;
-      font-size: 0.62em;
+      gap: 8px 10px;
+      font-size: 0.58em; /* halved-ish */
     }
     .symptoms .chip{
       display:flex;
       align-items:center;
       gap: 10px;
-      padding: 12px 12px;
+      padding: 10px 10px;
       border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.18);
+      border: 2px solid rgba(255,255,255,.16);
       background: transparent;
     }
+
+    /* Outline-only checkbox (no white fill) */
     .symptoms input[type="checkbox"]{
-      width: 24px;
-      height: 24px;
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
       margin:0;
-      accent-color: var(--accent);
+      border-radius: 6px;
+      border: 2px solid rgba(255,255,255,.34);
+      background: transparent;
+      box-shadow: inset 0 0 0 2px rgba(0,0,0,.12);
+      position: relative;
       flex: 0 0 auto;
     }
+    .symptoms input[type="checkbox"]:checked{
+      border-color: rgba(106,160,255,.80);
+      background: rgba(106,160,255,.14);
+    }
+    .symptoms input[type="checkbox"]:checked::after{
+      content:"";
+      position:absolute;
+      left: 6px;
+      top: 2px;
+      width: 6px;
+      height: 12px;
+      border-right: 3px solid rgba(106,160,255,.95);
+      border-bottom: 3px solid rgba(106,160,255,.95);
+      transform: rotate(40deg);
+    }
+
     .symptoms span{
       line-height: 1.05;
-      font-weight: 550;
-      color: var(--fg);
+      font-weight: 600;
+      color: rgba(216,221,232,.92);
     }
 
     .logItem{
-      border: 1px solid rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.03);
       border-radius: 20px;
-      padding: 14px 14px;
+      padding: 12px 12px;
     }
     .logWhen{
-      color: var(--muted);
-      font-size: .9em;
+      color: rgba(154,165,186,.92);
+      font-size: .82em; /* smaller so date fits */
       margin-bottom: 6px;
-      font-weight: 500;
+      font-weight: 560;
     }
     .logBig{
-      font-size: 1.15em;
-      font-weight: 750;
+      font-size: 1.05em;
+      font-weight: 780;
       letter-spacing: .1px;
       margin-bottom: 6px;
+      display:flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
     }
+    .logBig .bp{ white-space:nowrap; }
+    .logBig .hr{ white-space:nowrap; opacity:.92; }
+
     .logLine{
-      font-size: .95em;
-      color: var(--fg);
+      font-size: .92em;
+      color: rgba(216,221,232,.92);
       margin: 2px 0;
-      font-weight: 520;
+      font-weight: 560;
       overflow-wrap: anywhere;
     }
-    .logLine b{ font-weight: 700; }
+    .logLine b{ font-weight: 760; }
 
     .chartBox{
       border-radius: 22px;
@@ -253,7 +303,7 @@
     }
     canvas{
       width: 100%;
-      height: 280px;
+      height: 270px;
       display:block;
     }
     .chartLegend{
@@ -262,25 +312,32 @@
       gap: 10px 16px;
       margin-top: 10px;
       color: var(--muted);
-      font-size: .9em;
-      font-weight: 500;
+      font-size: .88em;
+      font-weight: 560;
     }
 
     .toast{
-      margin-top: 12px;
+      margin-top: 10px;
       color: var(--muted);
-      font-size: .95em;
-      min-height: 1.2em;
-      font-weight: 500;
+      font-size: .92em;
+      min-height: 1.1em;
+      font-weight: 540;
     }
 
     .screen{ display:none; }
     .screen.active{ display:block; }
 
+    /* Date filter inputs: smaller text so full date fits */
+    input[type="date"]{
+      font-size: .92em;
+      padding: 12px 12px;
+    }
+
     @media (max-width: 420px){
-      :root{ --font: 21px; }
-      canvas{ height: 260px; }
-      .btn.small{ padding: 11px 12px; font-size: .98em; }
+      :root{ --font: 20px; }
+      canvas{ height: 250px; }
+      .btn.small{ padding: 10px 10px; font-size: .94em; }
+      .logWhen{ font-size: .80em; }
     }
   </style>
 </head>
@@ -298,6 +355,7 @@
           <button class="btn primary" id="goAdd">Add</button>
           <button class="btn" id="goLog">Log</button>
           <button class="btn" id="goCharts">Charts</button>
+          <button class="btn" id="exitAppHome">Exit</button>
         </div>
         <div class="hint" id="homeHint">Tap “Add” to record BP.</div>
         <div class="toast" id="homeToast" aria-live="polite"></div>
@@ -308,7 +366,7 @@
     <section id="add" class="screen">
       <div class="card stack">
         <div>
-          <div class="metaLabel">Time</div>
+          <div class="metaLabel">Time (then Date)</div>
           <div class="metaValue" id="whenText"></div>
         </div>
 
@@ -323,21 +381,23 @@
           </div>
         </div>
 
+        <!-- BP and HR should read as a single set; keep HR visible and simple -->
         <div class="row">
           <div class="col">
             <label for="hr">Heart Rate</label>
             <input id="hr" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 72" />
           </div>
-          <div class="col">
-            <label for="notes">Notes</label>
-            <input id="notes" placeholder="optional" />
-          </div>
+        </div>
+
+        <!-- Notes: label on its own line, optional italicized; input spans full width -->
+        <div>
+          <label for="notes">Notes <span style="font-style:italic; font-weight:560; color:rgba(154,165,186,.95)">(optional)</span></label>
+          <input id="notes" placeholder="optional" />
         </div>
 
         <div>
           <label>Symptoms</label>
           <div class="symptoms" id="symptomsGrid"></div>
-          <div class="hint">Check only what matters.</div>
         </div>
 
         <div class="row">
@@ -356,16 +416,17 @@
     <!-- LOG -->
     <section id="log" class="screen">
       <div class="card stack">
-        <!-- Top bar: small horizontal buttons -->
+        <!-- Top bar: Export / Back / Exit -->
         <div class="topBar">
           <button class="btn small" id="export">Export</button>
           <button class="btn small" id="backFromLog">Back</button>
+          <button class="btn small" id="exitAppLog">Exit</button>
         </div>
+
         <div class="miniHint" id="exportHint">
           Export copies the currently filtered log (date + search) as text. Data stays on your phone.
         </div>
 
-        <!-- Search -->
         <div class="row">
           <div class="col">
             <label for="search">Search</label>
@@ -374,7 +435,6 @@
           </div>
         </div>
 
-        <!-- Date filter -->
         <div class="row">
           <div class="col">
             <label for="fromDate">From</label>
@@ -385,9 +445,9 @@
             <input id="toDate" type="date" />
           </div>
         </div>
+
         <div class="miniHint">Tip: set both dates to export a single day.</div>
 
-        <!-- Default log -->
         <div id="logList" class="stack" aria-live="polite"></div>
 
         <button class="btn danger" id="clearAll">Delete ALL data (local)</button>
@@ -398,6 +458,11 @@
     <!-- CHARTS -->
     <section id="charts" class="screen">
       <div class="card stack">
+        <div class="topBar">
+          <button class="btn small" id="backFromCharts">Back</button>
+          <button class="btn small" id="exitAppCharts">Exit</button>
+        </div>
+
         <div class="row">
           <div class="col">
             <label for="range">Range</label>
@@ -423,7 +488,6 @@
           <div class="chartLegend" id="legend"></div>
         </div>
 
-        <button class="btn" id="backFromCharts">Back</button>
         <div class="toast" id="chartToast" aria-live="polite"></div>
       </div>
     </section>
@@ -444,7 +508,15 @@
     }
     function nowISO(){ return new Date().toISOString(); }
 
-    function formatWhen(iso){
+    function formatWhenTimeFirst(iso){
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return iso;
+      const time = d.toLocaleTimeString(undefined, { hour:"2-digit", minute:"2-digit", second:"2-digit" });
+      const date = d.toLocaleDateString(undefined, { year:"numeric", month:"2-digit", day:"2-digit" });
+      return `Time ${time} • Date ${date}`;
+    }
+
+    function formatWhenForLog(iso){
       const d = new Date(iso);
       if (isNaN(d.getTime())) return iso;
       return d.toLocaleString(undefined, {
@@ -456,15 +528,6 @@
     function clampInt(s){
       const n = parseInt(String(s).replace(/[^\d]/g,''), 10);
       return Number.isFinite(n) ? n : null;
-    }
-
-    function toDateInputValue(iso){
-      const d = new Date(iso);
-      if(isNaN(d.getTime())) return "";
-      const y = d.getFullYear();
-      const m = String(d.getMonth()+1).padStart(2,"0");
-      const day = String(d.getDate()).padStart(2,"0");
-      return `${y}-${m}-${day}`;
     }
 
     function startOfDayMs(yyyy_mm_dd){
@@ -504,6 +567,16 @@
       if(name === "charts") renderChart();
       if(name === "home") refreshHomeHint();
     }
+
+    function exitApp(){
+      // In a browser/PWA, "close app" is not reliably allowed.
+      // Best-effort: navigate away and stop interaction.
+      window.location.href = "about:blank";
+    }
+
+    document.getElementById("exitAppHome").addEventListener("click", exitApp);
+    document.getElementById("exitAppLog").addEventListener("click", exitApp);
+    document.getElementById("exitAppCharts").addEventListener("click", exitApp);
 
     const SYMPTOMS = [
       "Sweaty","Dizzy","Panic","Brain fog",
@@ -563,12 +636,12 @@
       clearSymptoms();
 
       addTimestampISO = nowISO();
-      whenTextEl.textContent = formatWhen(addTimestampISO);
+      whenTextEl.textContent = formatWhenTimeFirst(addTimestampISO);
 
       if(whenTimer) clearInterval(whenTimer);
       whenTimer = setInterval(() => {
         addTimestampISO = nowISO();
-        whenTextEl.textContent = formatWhen(addTimestampISO);
+        whenTextEl.textContent = formatWhenTimeFirst(addTimestampISO);
       }, 1000);
 
       setTimeout(() => sysEl.focus(), 120);
@@ -661,12 +734,7 @@
     }
 
     function renderLog(){
-      // sensible defaults: if blank, leave blank (show all)
       const entriesAll = loadEntries();
-
-      // if user never set date filters, keep blank
-      // (no auto-fill to avoid surprising behavior)
-
       const filtered = getFilteredEntries();
 
       logList.innerHTML = "";
@@ -683,11 +751,14 @@
 
           const when = document.createElement("div");
           when.className = "logWhen";
-          when.textContent = formatWhen(e.t);
+          when.textContent = formatWhenForLog(e.t);
 
           const big = document.createElement("div");
           big.className = "logBig";
-          big.textContent = `BP ${e.sys}/${e.dia}  •  HR ${e.hr}`;
+          big.innerHTML = `
+            <span class="bp">BP ${e.sys}/${e.dia}</span>
+            <span class="hr">HR ${e.hr}</span>
+          `;
 
           const sym = document.createElement("div");
           sym.className = "logLine";
@@ -707,8 +778,6 @@
           logList.appendChild(item);
         });
       }
-
-      setTimeout(() => searchEl.focus(), 80);
     }
 
     searchEl.addEventListener("input", renderLog);
@@ -736,7 +805,7 @@
         .slice()
         .sort((a,b) => new Date(a.t) - new Date(b.t))
         .forEach(e => {
-          const stamp = formatWhen(e.t);
+          const stamp = formatWhenForLog(e.t);
           const sym = (e.symptoms && e.symptoms.length) ? e.symptoms.join(", ") : "None";
           const notes = (e.notes && e.notes.trim()) ? e.notes.trim() : "None";
           lines.push(`${stamp} | BP ${e.sys}/${e.dia} | HR ${e.hr} | Symptoms: ${sym} | Notes: ${notes}`);
@@ -805,7 +874,7 @@
       ctx.fillStyle = "rgba(255,255,255,.05)";
       ctx.fillRect(0,0,w,h);
 
-      ctx.fillStyle = "rgba(231,234,240,.85)";
+      ctx.fillStyle = "rgba(216,221,232,.80)";
       ctx.font = "600 22px Roboto, system-ui, sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
@@ -862,8 +931,8 @@
 
     function drawLabelsY(vmin, vmax, padL, padT, padB){
       const ticks = 4;
-      ctx.fillStyle = "rgba(233,236,244,.75)";
-      ctx.font = "500 16px Roboto, system-ui, sans-serif";
+      ctx.fillStyle = "rgba(216,221,232,.70)";
+      ctx.font = "520 16px Roboto, system-ui, sans-serif";
       ctx.textAlign = "right";
       ctx.textBaseline = "middle";
 
@@ -921,24 +990,12 @@
       const sysPts = entries.map((e,i)=>({ x: mapX(i,n,padL,padR), y: mapY(e.sys,vmin,vmax,padT,padB) }));
       const diaPts = entries.map((e,i)=>({ x: mapX(i,n,padL,padR), y: mapY(e.dia,vmin,vmax,padT,padB) }));
 
-      drawLine(sysPts, "rgba(90,147,255,.92)");
-      drawLine(diaPts, "rgba(231,234,240,.82)");
-
-      ctx.fillStyle = "rgba(233,236,244,.70)";
-      ctx.font = "500 16px Roboto, system-ui, sans-serif";
-      ctx.textAlign = "left";
-      ctx.textBaseline = "top";
-      const first = new Date(entries[0].t);
-      const last = new Date(entries[n-1].t);
-      const firstTxt = isNaN(first.getTime()) ? String(entries[0].t) : first.toLocaleDateString();
-      const lastTxt  = isNaN(last.getTime()) ? String(entries[n-1].t) : last.toLocaleDateString();
-      ctx.fillText(firstTxt, padL, chartCanvas.height-padB+10);
-      ctx.textAlign = "right";
-      ctx.fillText(lastTxt, chartCanvas.width-padR, chartCanvas.height-padB+10);
+      drawLine(sysPts, "rgba(106,160,255,.92)");
+      drawLine(diaPts, "rgba(216,221,232,.78)");
 
       legendEl.innerHTML = "";
-      legendEl.appendChild(legendChip("Systolic", "rgba(90,147,255,.92)"));
-      legendEl.appendChild(legendChip("Diastolic", "rgba(231,234,240,.82)"));
+      legendEl.appendChild(legendChip("Systolic", "rgba(106,160,255,.92)"));
+      legendEl.appendChild(legendChip("Diastolic", "rgba(216,221,232,.78)"));
       setToast("chartToast", n===1 ? "Showing 1 reading." : "");
     }
 
@@ -960,22 +1017,10 @@
       drawLabelsY(vmin,vmax,padL,padT,padB);
 
       const pts = entries.map((e,i)=>({ x: mapX(i,n,padL,padR), y: mapY(e.hr,vmin,vmax,padT,padB) }));
-      drawLine(pts, "rgba(90,147,255,.92)");
-
-      ctx.fillStyle = "rgba(233,236,244,.70)";
-      ctx.font = "500 16px Roboto, system-ui, sans-serif";
-      ctx.textAlign = "left";
-      ctx.textBaseline = "top";
-      const first = new Date(entries[0].t);
-      const last = new Date(entries[n-1].t);
-      const firstTxt = isNaN(first.getTime()) ? String(entries[0].t) : first.toLocaleDateString();
-      const lastTxt  = isNaN(last.getTime()) ? String(entries[n-1].t) : last.toLocaleDateString();
-      ctx.fillText(firstTxt, padL, chartCanvas.height-padB+10);
-      ctx.textAlign = "right";
-      ctx.fillText(lastTxt, chartCanvas.width-padR, chartCanvas.height-padB+10);
+      drawLine(pts, "rgba(106,160,255,.92)");
 
       legendEl.innerHTML = "";
-      legendEl.appendChild(legendChip("Heart Rate", "rgba(90,147,255,.92)"));
+      legendEl.appendChild(legendChip("Heart Rate", "rgba(106,160,255,.92)"));
       setToast("chartToast", n===1 ? "Showing 1 reading." : "");
     }
 
@@ -1008,3 +1053,4 @@
   </script>
 </body>
 </html>
+```0
