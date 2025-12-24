@@ -2,435 +2,480 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Vitals Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1324" />
+  <title>Vitals Tracker</title>
 
-  <link id="dyn-manifest" rel="manifest" href="" />
+  <!-- Minimal PWA hooks (install works when served over https / GitHub Pages) -->
+  <link rel="manifest" id="manifestLink" href="#" />
 
   <style>
     :root{
-      --bg1:#071024;
-      --bg2:#0c1630;
-      --text:#d7deee;
-      --muted:#9fb0cf;
-      --muted2:#7f93b8;
-      --radius:28px;
+      --bg0:#08101f;
+      --bg1:#0b1324;
+      --panel:#0c1528cc;
+      --panel2:#0c1528f0;
+      --stroke:rgba(235,245,255,.16);
+      --stroke2:rgba(235,245,255,.22);
+      --strokeBold:rgba(180,210,255,.42);
+      --text:rgba(235,245,255,.86);
+      --muted:rgba(235,245,255,.58);
+      --muted2:rgba(235,245,255,.42);
+      --accent:#2f78ff;
+      --accent2:rgba(47,120,255,.18);
+      --good:#5bd6b2;
+      --shadow:0 14px 40px rgba(0,0,0,.38);
+      --radius:26px;
       --radius2:18px;
-      --shadow: 0 16px 40px rgba(0,0,0,.45);
-      --inner: inset 0 1px 0 rgba(255,255,255,.06);
-      --font: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      --btnH:56px;
+      --pad:18px;
+      --gap:12px;
+      --font: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
     }
 
-    *{box-sizing:border-box}
-    html,body{height:100%}
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
     body{
       margin:0;
       font-family:var(--font);
       color:var(--text);
       background:
-        radial-gradient(1200px 800px at 30% 10%, rgba(70,120,255,.25), transparent 60%),
-        radial-gradient(900px 700px at 80% 0%, rgba(40,90,190,.18), transparent 60%),
-        linear-gradient(180deg, var(--bg2), var(--bg1) 60%, #050a16);
-      padding: 18px 14px 28px;
+        radial-gradient(1200px 700px at 30% 0%, rgba(47,120,255,.22), transparent 55%),
+        radial-gradient(900px 600px at 80% 20%, rgba(91,214,178,.10), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+      display:flex;
+      justify-content:center;
+      padding: max(14px, env(safe-area-inset-top)) 12px max(14px, env(safe-area-inset-bottom));
     }
 
-    .wrap{max-width:560px;margin:0 auto;}
-    .title{
-      font-weight:800;
+    .app{
+      width:min(520px, 100%);
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    h1{
+      margin:10px 6px 0;
+      font-size: clamp(40px, 7.6vw, 64px);
       letter-spacing:.4px;
-      font-size:52px;
-      line-height:1.05;
-      margin:14px 6px 18px;
-      color:#d6deef;
-      opacity:.95;
-      text-shadow:0 10px 28px rgba(0,0,0,.55);
+      color:rgba(235,245,255,.78);
+      text-shadow: 0 10px 22px rgba(0,0,0,.35);
     }
-    @media (max-width:420px){ .title{font-size:44px} }
 
-    .panel{
-      background: linear-gradient(180deg, rgba(16,28,58,.65), rgba(9,16,34,.55));
-      border: 1px solid rgba(120,150,210,.18);
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid var(--stroke);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      padding: 18px;
-      position: relative;
-      overflow: hidden;
-    }
-    .panel::before{
-      content:"";
-      position:absolute;
-      inset:-1px;
-      border-radius: var(--radius);
-      pointer-events:none;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
+      padding: var(--pad);
+      backdrop-filter: blur(10px);
     }
 
-    .row{display:flex;gap:12px;align-items:center}
-    .row.space{justify-content:space-between}
-    .row.center{justify-content:center}
-    .mt8{margin-top:8px}
-    .mt12{margin-top:12px}
-    .mt16{margin-top:16px}
-    .mb10{margin-bottom:10px}
-    .hidden{display:none !important}
+    .hidden{ display:none !important; }
 
     .btn{
-      border: 1px solid rgba(140,170,230,.18);
-      background: linear-gradient(180deg, rgba(22,36,70,.85), rgba(10,18,40,.85));
-      color: var(--text);
-      padding: 14px 16px;
+      height:var(--btnH);
       border-radius: 999px;
-      font-weight: 700;
-      font-size: 18px;
-      letter-spacing: .2px;
-      box-shadow: var(--inner);
-      cursor: pointer;
+      border:1px solid var(--stroke2);
+      background: rgba(255,255,255,.03);
+      color:rgba(235,245,255,.78);
+      font-weight:650;
+      letter-spacing:.2px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 18px;
       user-select:none;
       -webkit-tap-highlight-color: transparent;
     }
-    .btn:active{transform: translateY(1px)}
+    .btn:active{ transform: translateY(1px); }
     .btn.primary{
-      background: linear-gradient(180deg, rgba(90,145,255,.95), rgba(46,108,240,.92));
-      border-color: rgba(160,200,255,.35);
-      color:#0b1324;
-      font-weight: 800;
+      background: linear-gradient(180deg, rgba(47,120,255,.92), rgba(47,120,255,.72));
+      border-color: rgba(120,170,255,.55);
+      color: rgba(0,0,0,.78);
+      text-shadow:none;
     }
-    .btn.small{padding:10px 14px;font-size:16px;font-weight:750;}
-    .btn.danger{
-      background: linear-gradient(180deg, rgba(255,106,125,.92), rgba(220,60,85,.92));
-      border-color: rgba(255,170,185,.35);
-      color:#0b1324;
-      font-weight: 850;
+    .btn.small{
+      height:44px;
+      font-size:14px;
+      padding:0 14px;
+      font-weight:650;
     }
 
-    .bigStack .btn{
-      width:100%;
-      padding:20px 18px;
-      font-size:26px;
-      border-radius:999px;
-    }
-    .bigStack .btn:not(:first-child){margin-top:14px}
+    .row{ display:flex; gap:12px; }
+    .row.between{ justify-content:space-between; }
+    .row.center{ align-items:center; }
+    .row.wrap{ flex-wrap:wrap; }
+    .grow{ flex:1; }
 
-    h2{margin:0 0 10px;font-size:34px;letter-spacing:.2px;}
+    .divider{
+      height:1px;
+      background: rgba(235,245,255,.10);
+      margin: 10px 4px 2px;
+    }
+
     .label{
       font-size:16px;
-      font-weight:750;
       color:var(--muted);
-      letter-spacing:.2px;
-      margin:10px 2px 6px;
+      font-weight:650;
+      margin: 12px 4px 8px;
     }
-    .labelSmall{font-size:13px;font-weight:700;color:var(--muted2);margin:0;opacity:.95;}
-    .noteOptional{font-style:italic;font-weight:650;color:var(--muted2);}
+    .subtle{
+      font-size:14px;
+      color:var(--muted2);
+      margin: 6px 4px 0;
+    }
 
-    input[type="text"], input[type="number"], textarea, input[type="date"]{
-      width:100%;
-      padding:14px 14px;
-      border-radius:22px;
-      border:2px solid rgba(160,190,240,.28);
-      background: rgba(21,34,65,.75);
-      color: var(--text);
-      outline:none;
+    .field{
+      border:2px solid var(--strokeBold);
+      background: rgba(255,255,255,.06);
+      color: rgba(235,245,255,.86);
+      border-radius: 18px;
+      height:54px;
+      padding: 0 14px;
       font-size:18px;
-      box-shadow: var(--inner);
+      outline:none;
+      width:100%;
     }
-    input::placeholder, textarea::placeholder{color: rgba(180,200,235,.45)}
-    input:focus, textarea:focus{
-      border-color: rgba(120,170,255,.78);
-      box-shadow: 0 0 0 3px rgba(80,140,255,.20), var(--inner);
+    .field::placeholder{ color: rgba(235,245,255,.35); }
+    .field:focus{
+      border-color: rgba(90,150,255,.78);
+      box-shadow: 0 0 0 4px rgba(47,120,255,.16);
     }
-    input[type="number"]{-moz-appearance:textfield;}
-    input[type="number"]::-webkit-outer-spin-button,
-    input[type="number"]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
-    textarea{min-height:54px;resize:none;}
+    textarea.field{
+      height:64px;
+      padding: 12px 14px;
+      resize:none;
+      line-height:1.25;
+    }
 
-    .threeCols{
+    /* Home buttons */
+    .homeMain{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      margin-top:8px;
+    }
+
+    .homeFooterRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-top:8px;
+    }
+
+    .footerTiny{
+      margin-top:10px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      font-size: 12px;
+      color: rgba(235,245,255,.38);
+    }
+
+    /* Add screen time line */
+    .timeLine{
+      margin: 4px 4px 14px;
+      color: rgba(235,245,255,.82);
+      font-weight:750;
+      letter-spacing:.3px;
+      white-space:nowrap;          /* must stay on one line */
+      overflow:hidden;
+      text-overflow:ellipsis;
+      line-height:1.05;
+      font-size: clamp(18px, 6.4vw, 44px); /* baseline; JS will shrink further if needed */
+    }
+
+    .triple{
       display:grid;
       grid-template-columns: 1fr 1fr 1fr;
-      gap:12px;
-      align-items:end;
+      gap: 12px;
+    }
+    .triple .miniLabel{
+      margin: 0 4px 8px;
+      color: var(--muted);
+      font-weight:650;
+      font-size:16px;
     }
 
-    /* v1.12: time/date must never wrap */
-    .timeLine{
-      margin: 6px 2px 10px;
-      font-weight: 850;
-      letter-spacing: .2px;
-      color:#d7deee;
-      opacity:.96;
-
-      display:block;
-      width:100%;
-      max-width:100%;
-      white-space:nowrap;         /* never wrap */
-      overflow:hidden;            /* clip */
-      text-overflow:ellipsis;     /* show … instead of wrapping */
-
-      font-size: clamp(22px, 7.2vw, 34px);  /* scales down on narrow screens */
-      line-height: 1.05;
-    }
-
-    .symWrap{
-      margin-top:8px;
-      border:1px solid rgba(140,170,230,.14);
-      border-radius: var(--radius2);
-      padding:12px 10px 10px;
-      background: linear-gradient(180deg, rgba(10,18,40,.35), rgba(8,14,30,.22));
-    }
+    /* Symptoms: two-column list, tight, no pills, no border around list */
     .symGrid{
       display:grid;
       grid-template-columns: 1fr 1fr;
-      gap:6px 14px;
-      align-items:center;
-      padding:6px 4px 2px;
+      gap: 6px 18px;               /* tighter */
+      padding: 6px 2px 2px;
+      margin-top: 2px;
     }
+
     .symItem{
       display:flex;
       align-items:center;
       gap:10px;
-      padding:2px 0;
-      min-height:30px;
+      padding: 4px 6px;            /* tight */
+      border-radius: 14px;
+      transition: background .12s ease, border-color .12s ease;
     }
-    .chk{
-      width:28px;
-      height:28px;
-      border-radius:6px;
-      border:2px solid rgba(210,230,255,.55);
-      background: transparent;
-      position:relative;
+
+    /* checkbox box */
+    .box{
+      width:30px;
+      height:30px;
+      border-radius: 8px;
+      border:2px solid rgba(235,245,255,.40);
+      background: rgba(255,255,255,.03);
+      display:grid;
+      place-items:center;
       flex:0 0 auto;
     }
 
-    /* v1.12: checked = lighter bg + blue checkmark */
-    .chk.on{
-      border-color: rgba(120,170,255,.95);
-      background: rgba(120,170,255,.22);
-      box-shadow: 0 0 0 3px rgba(80,140,255,.18);
-    }
-    .chk.on::after{
-      content:"";
-      position:absolute;
-      left:7px;
-      top:3px;
-      width:10px;
-      height:16px;
-      border-right: 3px solid rgba(60,140,255,.98);
-      border-bottom: 3px solid rgba(60,140,255,.98);
-      transform: rotate(40deg);
+    /* check mark */
+    .check{
+      width:14px;
+      height:8px;
+      border-left:3px solid transparent;
+      border-bottom:3px solid transparent;
+      transform: rotate(-45deg);
+      margin-top:-2px;
     }
 
-    /* v1.12: symptoms labels less bold */
     .symText{
-      font-size:20px;
-      font-weight:650;
-      color:#d7deee;
-      line-height:1.05;
-      user-select:none;
+      font-size:18px;              /* slightly smaller */
+      font-weight:600;             /* less bold (no shouting) */
+      color: rgba(235,245,255,.78);
+      line-height:1.1;
     }
 
-    .logCard{
-      margin-top:12px;
-      border-radius:24px;
-      border:1px solid rgba(140,170,230,.18);
-      background: linear-gradient(180deg, rgba(16,28,58,.55), rgba(8,14,30,.45));
-      padding:14px 14px 12px;
-      box-shadow: var(--inner);
+    /* selected state: highlight + blue check */
+    .symItem.selected{
+      background: rgba(47,120,255,.16);
     }
-    .logCard.new{
-      border-color: rgba(120,170,255,.55);
-      box-shadow: 0 0 0 3px rgba(80,140,255,.16), var(--inner);
+    .symItem.selected .box{
+      border-color: rgba(90,150,255,.90);
+      background: rgba(47,120,255,.18);  /* highlighted box bg */
     }
-    .logTop{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;}
-    .logDt{font-size:15px;color: rgba(180,200,235,.70);letter-spacing:.2px;margin-bottom:6px;}
-    .logBp{font-size:38px;font-weight:900;letter-spacing:.3px;margin:0;line-height:1.0;}
-    .logHr{font-size:22px;font-weight:900;letter-spacing:.2px;color: rgba(215,235,255,.92);margin-bottom:6px;white-space:nowrap;}
-    .logLine{margin-top:10px;font-size:18px;color: rgba(210,230,255,.90);line-height:1.25;}
-    .logLine b{color: rgba(230,240,255,.95)}
-
-    .subPanel{
-      margin-top:12px;
-      border-radius:24px;
-      border:1px solid rgba(140,170,230,.14);
-      background: linear-gradient(180deg, rgba(12,20,44,.45), rgba(7,12,28,.40));
-      padding:14px;
-      box-shadow: var(--inner);
+    .symItem.selected .check{
+      border-left-color: rgba(235,245,255,.92);
+      border-bottom-color: rgba(235,245,255,.92);
     }
 
-    canvas{
-      width:100%;
-      height:260px;
-      display:block;
-      border-radius:20px;
-      background: linear-gradient(180deg, rgba(10,16,36,.55), rgba(6,10,22,.55));
-      border: 1px solid rgba(140,170,230,.16);
-      box-shadow: var(--inner);
-    }
-
-    .topBar{
+    /* Button row inside panels */
+    .panelButtons{
       display:flex;
       gap:12px;
-      align-items:center;
-      justify-content: space-between;
-      margin-bottom:10px;
+      margin-top: 10px;            /* just below content */
     }
-    .topBar .left, .topBar .mid, .topBar .right{
+
+    /* Log list cards */
+    .entry{
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.03);
+      border-radius: 22px;
+      padding: 14px 14px 12px;
+      margin-top: 12px;
+    }
+    .entryTop{
       display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
       gap:12px;
-      align-items:center;
+      margin-bottom: 6px;
     }
-    .topBar .mid{justify-content:center;flex:1}
-
-    .twoCols{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
+    .entryTime{
+      font-size:14px;
+      color: rgba(235,245,255,.46);
+      white-space:nowrap;
+    }
+    .entryBPHR{
+      display:flex;
+      justify-content:space-between;
       gap:12px;
-      align-items:end;
+      align-items:baseline;
     }
-
-    .tinyFooter{
-      margin-top:14px;
-      font-size:12px;
-      color: rgba(165,190,235,.70);
-      text-align:center;
+    .bpBig{
+      font-size:34px;
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+    .hrBig{
+      font-size:28px;
+      font-weight:800;
+      color: rgba(235,245,255,.72);
+      white-space:nowrap;
+    }
+    .entryLine{
+      margin-top: 6px;
+      color: rgba(235,245,255,.62);
+      font-size:16px;
       line-height:1.25;
     }
-    .homeFooterBar{
-      display:flex;
-      justify-content: space-between;
-      align-items:center;
-      gap:12px;
-      margin-top:14px;
+    .entryLine b{
+      color: rgba(235,245,255,.70);
     }
+
+    /* Filters */
+    .filters{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top:10px;
+    }
+
+    .dateField{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .dateField .miniLabel{
+      margin: 0 4px;
+      color: var(--muted);
+      font-weight:650;
+      font-size:14px;
+    }
+
+    input[type="date"].field{
+      font-size:16px;              /* smaller so full date fits */
+      padding-right: 10px;
+    }
+
+    /* Charts */
+    canvas{
+      width:100%;
+      height:280px;
+      border-radius: 22px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.02);
+      margin-top: 10px;
+    }
+
+    /* Utility */
+    .noteLabel{
+      margin: 12px 4px 8px;
+      color: var(--muted);
+      font-weight:650;
+      font-size:16px;
+    }
+    .noteLabel em{
+      font-style:italic;
+      color: rgba(235,245,255,.42);
+      font-weight:600;
+    }
+
+    /* Make tight overall */
+    .tightTop{ margin-top: 4px; }
   </style>
 </head>
 
 <body>
-  <div class="wrap">
-    <div class="title">Vitals Tracker</div>
+  <div class="app">
+    <h1>Vitals Tracker</h1>
 
     <!-- HOME -->
-    <div id="screen-home" class="panel">
-      <div class="bigStack">
-        <button class="btn primary" id="goAdd">Add</button>
-        <button class="btn" id="goLog">Log</button>
-        <button class="btn" id="goCharts">Charts</button>
-      </div>
+    <div id="home" class="card">
+      <div class="homeMain">
+        <button id="btnGoAdd" class="btn primary">Add</button>
+        <button id="btnGoLog" class="btn">Log</button>
+        <button id="btnGoCharts" class="btn">Charts</button>
 
-      <div class="homeFooterBar">
-        <button class="btn small" id="btnInstall">Install</button>
-        <button class="btn small danger" id="btnExitHome">Exit</button>
-      </div>
+        <div class="homeFooterRow">
+          <!-- Install/Uninstall small (left), Exit small (right) -->
+          <button id="btnInstall" class="btn small">Install</button>
+          <div class="grow"></div>
+          <button id="btnExitHome" class="btn small">Exit</button>
+        </div>
 
-      <div class="tinyFooter">
-        Data stays on your phone (local only).<br>
-        <span id="homeVersion">v1.12</span> · developed by Keyth Jyles
+        <div class="subtle">Data stays on your phone (local only).</div>
+
+        <div class="footerTiny">
+          <div>v1.13</div>
+          <div>developed by Keyth Jyles</div>
+        </div>
       </div>
     </div>
 
     <!-- ADD -->
-    <div id="screen-add" class="panel hidden">
-      <div class="timeLine" id="timeLine">--:--:-- --, --/--/----</div>
+    <div id="add" class="card hidden">
+      <div id="timeLine" class="timeLine">--:--:-- --, --/--/----</div>
 
-      <div class="threeCols">
+      <div class="triple">
         <div>
-          <div class="label">Systolic</div>
-          <input inputmode="numeric" type="number" id="inSys" placeholder="e.g., 132" min="0" max="300" />
+          <div class="miniLabel">Systolic</div>
+          <input id="sys" class="field" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 132" />
         </div>
         <div>
-          <div class="label">Diastolic</div>
-          <input inputmode="numeric" type="number" id="inDia" placeholder="e.g., 91" min="0" max="200" />
+          <div class="miniLabel">Diastolic</div>
+          <input id="dia" class="field" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 91" />
         </div>
         <div>
-          <div class="label">Heart Rate</div>
-          <input inputmode="numeric" type="number" id="inHr" placeholder="e.g., 72" min="0" max="250" />
+          <div class="miniLabel">Heart Rate</div>
+          <input id="hr" class="field" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 72" />
         </div>
       </div>
 
-      <div class="mt12">
-        <div class="label">Notes <span class="noteOptional">(optional)</span></div>
-        <textarea id="inNotes" placeholder="optional"></textarea>
-      </div>
+      <div class="noteLabel">Notes <em>(optional)</em></div>
+      <textarea id="notes" class="field" placeholder="optional"></textarea>
 
-      <div class="mt12">
-        <div class="label">Symptoms</div>
-        <div class="symWrap">
-          <div class="symGrid" id="symGrid"></div>
-        </div>
-      </div>
+      <div class="label">Symptoms</div>
+      <div id="symGrid" class="symGrid"></div>
 
-      <div class="mt16 row space">
-        <button class="btn primary" id="btnSave">Save</button>
-        <button class="btn" id="btnBackFromAdd">Back</button>
+      <!-- Buttons just below symptoms (not at bottom of screen) -->
+      <div class="panelButtons">
+        <button id="btnSave" class="btn primary grow">Save</button>
+        <button id="btnBackFromAdd" class="btn grow">Back</button>
       </div>
     </div>
 
     <!-- LOG -->
-    <div id="screen-log" class="panel hidden">
-      <div class="topBar">
-        <div class="left">
-          <button class="btn small" id="btnBackFromLog">Back</button>
-        </div>
-        <div class="mid">
-          <button class="btn small primary" id="btnAddFromLog">Add</button>
-        </div>
-        <div class="right">
-          <button class="btn small primary" id="btnExportLog">Export</button>
-        </div>
+    <div id="log" class="card hidden">
+      <div class="row center">
+        <button id="btnExportLog" class="btn small">Export</button>
+        <!-- Add button inserted in the middle of existing row -->
+        <button id="btnAddFromLog" class="btn small">Add</button>
+        <div class="grow"></div>
+        <button id="btnBackFromLog" class="btn small">Back</button>
       </div>
 
-      <h2 class="mb10">Search</h2>
+      <div class="label tightTop">Search</div>
+      <input id="search" class="field" placeholder="Type a word: sweaty, dizzy, headache..." />
 
-      <div class="subPanel">
-        <div class="label">Search</div>
-        <input type="text" id="logSearch" placeholder="Type a word: sweaty, dizzy, headache..." />
-
-        <div class="twoCols mt12">
-          <div>
-            <div class="label">From</div>
-            <input type="date" id="logFrom" />
-          </div>
-          <div>
-            <div class="label">To</div>
-            <input type="date" id="logTo" />
-          </div>
+      <!-- Date range calendar fields (not dropdowns). Defaults to all -->
+      <div class="filters">
+        <div class="dateField">
+          <div class="miniLabel">From</div>
+          <input id="fromDate" class="field" type="date" />
         </div>
-
-        <div class="mt12 labelSmall" id="logStatus"></div>
+        <div class="dateField">
+          <div class="miniLabel">To</div>
+          <input id="toDate" class="field" type="date" />
+        </div>
       </div>
 
       <div id="logList"></div>
     </div>
 
     <!-- CHARTS -->
-    <div id="screen-charts" class="panel hidden">
-      <div class="topBar">
-        <div class="left">
-          <button class="btn small" id="btnBackFromCharts">Back</button>
+    <div id="charts" class="card hidden">
+      <div class="row center">
+        <button id="btnExportCharts" class="btn small">Export</button>
+        <div class="grow"></div>
+        <button id="btnBackFromCharts" class="btn small">Back</button>
+      </div>
+
+      <div class="subtle">Systolic, Diastolic, and Heart Rate over time.</div>
+
+      <div class="filters">
+        <div class="dateField">
+          <div class="miniLabel">From</div>
+          <input id="chartFrom" class="field" type="date" />
         </div>
-        <div class="right">
-          <button class="btn small primary" id="btnExportCharts">Export</button>
+        <div class="dateField">
+          <div class="miniLabel">To</div>
+          <input id="chartTo" class="field" type="date" />
         </div>
       </div>
 
-      <h2 class="mb10">Charts</h2>
-
-      <div class="subPanel">
-        <div class="twoCols">
-          <div>
-            <div class="label">From</div>
-            <input type="date" id="chFrom" />
-          </div>
-          <div>
-            <div class="label">To</div>
-            <input type="date" id="chTo" />
-          </div>
-        </div>
-        <div class="mt12 labelSmall" id="chartStatus"></div>
-      </div>
-
-      <div class="mt12">
-        <canvas id="chart" width="900" height="420"></canvas>
-      </div>
+      <canvas id="chart" width="900" height="520"></canvas>
     </div>
 
   </div>
@@ -439,633 +484,750 @@
 (() => {
   "use strict";
 
-  const VERSION = "v1.12";
-
+  // =========================
+  // Data model + persistence
+  // =========================
   const STORAGE_KEY = "vitals_tracker_records_v1";
   const SYMPTOMS = [
-    "Sweaty","Dizzy",
-    "Panic","Brain fog",
-    "Chest tight","Headache",
-    "Nausea","Short breath",
-    "Hot ears","Shaky",
-    "Blurred vision","Weakness"
+    "Sweaty","Dizzy","Panic","Brain fog","Chest tight","Headache",
+    "Nausea","Short breath","Hot ears","Shaky","Blurred vision","Weakness"
   ];
 
-  let lastSavedId = null;
-
-  const $ = (id) => document.getElementById(id);
-  const pad2 = (n) => String(n).padStart(2,"0");
-
-  function fmtDate(d){
-    return `${pad2(d.getMonth()+1)}/${pad2(d.getDate())}/${d.getFullYear()}`;
-  }
-  function fmtTime(d){
-    let h = d.getHours();
-    const ampm = h >= 12 ? "PM" : "AM";
-    h = h % 12; if (h === 0) h = 12;
-    const m = pad2(d.getMinutes());
-    const s = pad2(d.getSeconds());
-    return `${pad2(h)}:${m}:${s} ${ampm}`;
-  }
-  function fmtTimeNoSeconds(d){
-    let h = d.getHours();
-    const ampm = h >= 12 ? "PM" : "AM";
-    h = h % 12; if (h === 0) h = 12;
-    const m = pad2(d.getMinutes());
-    return `${pad2(h)}:${m} ${ampm}`;
-  }
-  function dateToYMD(d){
-    return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
-  }
-
+  /** record: {ts:number, sys:number|null, dia:number|null, hr:number|null, notes:string, symptoms:string[]} */
   function loadRecords(){
     try{
       const raw = localStorage.getItem(STORAGE_KEY);
       if(!raw) return [];
       const arr = JSON.parse(raw);
       if(!Array.isArray(arr)) return [];
-      return arr.filter(r => r && typeof r.ts === "number");
+      // sanitize
+      return arr
+        .filter(r => r && typeof r.ts === "number")
+        .map(r => ({
+          ts: r.ts,
+          sys: numOrNull(r.sys),
+          dia: numOrNull(r.dia),
+          hr:  numOrNull(r.hr),
+          notes: (r.notes ?? "").toString(),
+          symptoms: Array.isArray(r.symptoms) ? r.symptoms.map(String) : []
+        }))
+        .sort((a,b)=> b.ts - a.ts);
     }catch{
       return [];
     }
   }
-  function saveRecords(records){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
-  }
-  function normalizeRecords(records){
-    records.sort((a,b)=>b.ts - a.ts);
-    return records;
+
+  function saveRecords(recs){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(recs));
   }
 
-  function withinDateRange(ts, fromYMD, toYMD){
-    const d = new Date(ts);
-    const ymd = dateToYMD(d);
-    if(fromYMD && ymd < fromYMD) return false;
-    if(toYMD && ymd > toYMD) return false;
-    return true;
+  function numOrNull(v){
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
   }
 
-  function matchSearch(r, q){
-    if(!q) return true;
-    const t = q.trim().toLowerCase();
-    if(!t) return true;
-    const parts = [
-      String(r.sys ?? ""),
-      String(r.dia ?? ""),
-      String(r.hr ?? ""),
-      (r.notes ?? ""),
-      (Array.isArray(r.symptoms) ? r.symptoms.join(", ") : "")
-    ].join(" ").toLowerCase();
-    return parts.includes(t);
-  }
-
-  function escapeHtml(s){
-    return String(s).replace(/[&<>"']/g, (c) => ({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-    }[c]));
-  }
+  // =========================
+  // UI helpers
+  // =========================
+  const $ = (id) => document.getElementById(id);
 
   const screens = ["home","add","log","charts"];
-  function show(name){
+  function show(screen){
     for(const s of screens){
-      const el = $("screen-"+s);
-      if(el) el.classList.toggle("hidden", s !== name);
+      $(s).classList.toggle("hidden", s !== screen);
     }
-    if(name === "log") renderLog();
-    if(name === "charts") renderCharts();
+    // Defaults: log & charts populate with ALL data immediately
+    if(screen === "log") renderLog();
+    if(screen === "charts") renderCharts();
+    if(screen === "add"){
+      // reset add fields (do not change layout)
+      // keep symptoms unchecked
+      clearAddForm();
+      tickTime(); // start immediately
+      adjustTimeFont(); // fit one line
+    }
   }
 
+  function fmtDateTime(ts){
+    const d = new Date(ts);
+    const parts = new Intl.DateTimeFormat(undefined, {
+      year:"numeric", month:"2-digit", day:"2-digit",
+      hour:"2-digit", minute:"2-digit", second:"2-digit"
+    }).formatToParts(d);
+
+    // Build "MM/DD/YYYY, HH:MM:SS AM" style but stable
+    const map = Object.fromEntries(parts.map(p=>[p.type,p.value]));
+    const mm = map.month, dd = map.day, yy = map.year;
+    const hh = map.hour, mi = map.minute, ss = map.second;
+    const dp = map.dayPeriod ? ` ${map.dayPeriod}` : "";
+    return `${mm}/${dd}/${yy}, ${hh}:${mi}:${ss}${dp}`;
+  }
+
+  function fmtTimeCommaDate(ts){
+    const d = new Date(ts);
+    const time = new Intl.DateTimeFormat(undefined, {
+      hour:"2-digit", minute:"2-digit", second:"2-digit"
+    }).format(d);
+    const date = new Intl.DateTimeFormat(undefined, {
+      month:"2-digit", day:"2-digit", year:"numeric"
+    }).format(d);
+    return `${time}, ${date}`; // must stay one line
+  }
+
+  function isoDate(ts){
+    const d = new Date(ts);
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,"0");
+    const day = String(d.getDate()).padStart(2,"0");
+    return `${y}-${m}-${day}`;
+  }
+
+  // =========================
+  // Add screen: symptoms grid
+  // =========================
   const symGrid = $("symGrid");
-  const symState = new Set();
+  const symState = new Map();
 
   function buildSymptoms(){
     symGrid.innerHTML = "";
-    for(const label of SYMPTOMS){
+    symState.clear();
+
+    for(const name of SYMPTOMS){
       const item = document.createElement("div");
       item.className = "symItem";
+      item.setAttribute("role","checkbox");
+      item.setAttribute("aria-checked","false");
+      item.tabIndex = 0;
 
       const box = document.createElement("div");
-      box.className = "chk";
-      box.setAttribute("role","checkbox");
-      box.setAttribute("aria-checked","false");
-      box.tabIndex = 0;
+      box.className = "box";
+      const check = document.createElement("div");
+      check.className = "check";
+      box.appendChild(check);
 
       const text = document.createElement("div");
       text.className = "symText";
-      text.textContent = label;
+      text.textContent = name;
 
-      function toggle(){
-        if(symState.has(label)) symState.delete(label);
-        else symState.add(label);
-        sync();
-      }
-      function sync(){
-        const on = symState.has(label);
-        box.classList.toggle("on", on);
-        box.setAttribute("aria-checked", on ? "true" : "false");
-      }
+      item.appendChild(box);
+      item.appendChild(text);
 
-      item.addEventListener("click", (e) => { e.preventDefault(); toggle(); });
-      box.addEventListener("keydown", (e) => {
+      const setSelected = (on) => {
+        item.classList.toggle("selected", on);
+        item.setAttribute("aria-checked", on ? "true" : "false");
+        symState.set(name, on);
+      };
+
+      setSelected(false);
+
+      const toggle = () => setSelected(!symState.get(name));
+      item.addEventListener("click", toggle);
+      item.addEventListener("keydown", (e) => {
         if(e.key === "Enter" || e.key === " "){
           e.preventDefault();
           toggle();
         }
       });
 
-      item.appendChild(box);
-      item.appendChild(text);
       symGrid.appendChild(item);
-      sync();
     }
   }
 
-  function setSymptoms(selected){
-    symState.clear();
-    (selected || []).forEach(s => symState.add(s));
-    buildSymptoms();
-  }
-  function getSymptoms(){
-    return Array.from(symState.values());
-  }
-
-  let clockTimer = null;
-  function startClock(){
-    stopClock();
-    const tick = () => {
-      const d = new Date();
-      $("timeLine").textContent = `${fmtTime(d)}, ${fmtDate(d)}`;
-    };
-    tick();
-    clockTimer = setInterval(tick, 250);
-  }
-  function stopClock(){
-    if(clockTimer){ clearInterval(clockTimer); clockTimer = null; }
+  function selectedSymptoms(){
+    return SYMPTOMS.filter(s => symState.get(s));
   }
 
   function clearAddForm(){
-    $("inSys").value = "";
-    $("inDia").value = "";
-    $("inHr").value = "";
-    $("inNotes").value = "";
-    setSymptoms([]);
-  }
-
-  function validateNum(val, min, max){
-    if(val === "" || val === null || typeof val === "undefined") return null;
-    const n = Number(val);
-    if(!Number.isFinite(n)) return null;
-    if(n < min || n > max) return null;
-    return Math.round(n);
-  }
-
-  function saveCurrentRecord(){
-    const sys = validateNum($("inSys").value, 0, 300);
-    const dia = validateNum($("inDia").value, 0, 200);
-    const hr  = validateNum($("inHr").value, 0, 250);
-
-    if(sys === null || dia === null || hr === null){
-      alert("Enter Systolic, Diastolic, and Heart Rate.");
-      return;
+    $("sys").value = "";
+    $("dia").value = "";
+    $("hr").value = "";
+    $("notes").value = "";
+    for(const k of SYMPTOMS) symState.set(k,false);
+    // update DOM selected classes
+    for(const el of symGrid.querySelectorAll(".symItem")){
+      el.classList.remove("selected");
+      el.setAttribute("aria-checked","false");
     }
-
-    const now = Date.now();
-    const rec = {
-      id: "r_" + now + "_" + Math.random().toString(16).slice(2),
-      ts: now,
-      sys, dia, hr,
-      notes: ($("inNotes").value || "").trim(),
-      symptoms: getSymptoms()
-    };
-
-    const records = normalizeRecords(loadRecords());
-    records.unshift(rec);
-    saveRecords(records);
-
-    lastSavedId = rec.id;
-
-    clearAddForm();
-    stopClock();
-
-    $("logSearch").value = "";
-    $("logFrom").value = "";
-    $("logTo").value = "";
-
-    show("log");
-    window.scrollTo({top:0, behavior:"smooth"});
   }
 
-  function filteredRecords(fromEl, toEl, searchEl){
-    const records = normalizeRecords(loadRecords());
-    const fromYMD = (fromEl.value || "").trim();
-    const toYMD   = (toEl.value || "").trim();
-    const q = (searchEl.value || "").trim();
+  // =========================
+  // Time line: dynamic fit (no wrap)
+  // =========================
+  let timeTimer = null;
 
-    return records.filter(r =>
-      withinDateRange(r.ts, fromYMD, toYMD) &&
-      matchSearch(r, q)
+  function tickTime(){
+    const line = $("timeLine");
+    const now = Date.now();
+    line.textContent = fmtTimeCommaDate(now);
+    adjustTimeFont();
+    if(timeTimer) clearTimeout(timeTimer);
+    // align updates close to 1s
+    timeTimer = setTimeout(tickTime, 900);
+  }
+
+  function adjustTimeFont(){
+    const el = $("timeLine");
+    if(!el) return;
+
+    // Start from computed size and shrink until it fits container width.
+    // This keeps it on ONE line. (white-space:nowrap + JS shrink)
+    const parent = el.parentElement;
+    if(!parent) return;
+
+    const maxW = parent.clientWidth - 8; // small safety
+    let fs = parseFloat(getComputedStyle(el).fontSize) || 28;
+
+    // If it fits, try to grow slightly up to clamp max already applied—no need.
+    // If it overflows, shrink down to minimum 16px.
+    let guard = 0;
+    while(el.scrollWidth > maxW && fs > 16 && guard < 20){
+      fs -= 1;
+      el.style.fontSize = fs + "px";
+      guard++;
+    }
+  }
+
+  // =========================
+  // Log screen: filters + render
+  // =========================
+  function parseDateField(v){
+    // v in YYYY-MM-DD; interpret as local midnight
+    if(!v) return null;
+    const [y,m,d] = v.split("-").map(Number);
+    if(!y || !m || !d) return null;
+    return new Date(y, m-1, d, 0, 0, 0, 0).getTime();
+  }
+
+  function clampEndOfDay(ts){
+    // convert midnight to end-of-day
+    const d = new Date(ts);
+    d.setHours(23,59,59,999);
+    return d.getTime();
+  }
+
+  function recordMatches(rec, q){
+    if(!q) return true;
+    const s = q.toLowerCase().trim();
+    if(!s) return true;
+
+    const bp = `${rec.sys ?? ""}/${rec.dia ?? ""}`.toLowerCase();
+    const hr = `${rec.hr ?? ""}`.toLowerCase();
+    const notes = (rec.notes || "").toLowerCase();
+    const sym = (rec.symptoms || []).join(", ").toLowerCase();
+    const dt = fmtDateTime(rec.ts).toLowerCase();
+
+    return (
+      bp.includes(s) ||
+      hr.includes(s) ||
+      notes.includes(s) ||
+      sym.includes(s) ||
+      dt.includes(s)
     );
+  }
+
+  function filteredRecords({fromId,toId,searchId}){
+    const recs = loadRecords(); // already sorted desc
+    const q = (searchId ? $(searchId).value : "").trim();
+
+    const fromV = fromId ? $(fromId).value : "";
+    const toV   = toId ? $(toId).value : "";
+
+    const fromTs = parseDateField(fromV);
+    const toMid  = parseDateField(toV);
+    const toTs   = toMid != null ? clampEndOfDay(toMid) : null;
+
+    return recs.filter(r => {
+      if(fromTs != null && r.ts < fromTs) return false;
+      if(toTs != null && r.ts > toTs) return false;
+      return recordMatches(r, q);
+    });
   }
 
   function renderLog(){
     const list = $("logList");
-    const status = $("logStatus");
+    const recs = filteredRecords({fromId:"fromDate", toId:"toDate", searchId:"search"});
 
-    const recs = filteredRecords($("logFrom"), $("logTo"), $("logSearch"));
     list.innerHTML = "";
-
-    status.textContent = `Showing: ${recs.length} of ${loadRecords().length}`;
-
-    for(const r of recs){
-      const d = new Date(r.ts);
-
-      const card = document.createElement("div");
-      card.className = "logCard" + (r.id === lastSavedId ? " new" : "");
-
-      const top = document.createElement("div");
-      top.className = "logTop";
-
-      const left = document.createElement("div");
-      const dt = document.createElement("div");
-      dt.className = "logDt";
-      dt.textContent = `${fmtDate(d)}, ${fmtTimeNoSeconds(d)}`;
-
-      const bp = document.createElement("p");
-      bp.className = "logBp";
-      bp.textContent = `BP ${r.sys}/${r.dia}`;
-
-      left.appendChild(dt);
-      left.appendChild(bp);
-
-      const hr = document.createElement("div");
-      hr.className = "logHr";
-      hr.textContent = `HR ${r.hr}`;
-
-      top.appendChild(left);
-      top.appendChild(hr);
-
-      const sym = document.createElement("div");
-      sym.className = "logLine";
-      const symText = (r.symptoms && r.symptoms.length) ? r.symptoms.join(", ") : "None";
-      sym.innerHTML = `<b>Symptoms:</b> ${escapeHtml(symText)}`;
-
-      const notes = document.createElement("div");
-      notes.className = "logLine";
-      notes.innerHTML = `<b>Notes:</b> ${escapeHtml(r.notes ? r.notes : "None")}`;
-
-      card.appendChild(top);
-      card.appendChild(sym);
-      card.appendChild(notes);
-      list.appendChild(card);
-    }
-
     if(recs.length === 0){
       const empty = document.createElement("div");
-      empty.className = "subPanel";
-      empty.innerHTML = `<div class="labelSmall">No matching records.</div>`;
+      empty.className = "subtle";
+      empty.style.marginTop = "10px";
+      empty.textContent = "No matching records.";
       list.appendChild(empty);
+      return;
     }
-  }
 
-  function exportText(records){
-    const lines = [];
-    for(const r of records){
-      const d = new Date(r.ts);
-      const dt = `${fmtDate(d)}, ${fmtTime(d)}`;
+    for(const r of recs){
+      const e = document.createElement("div");
+      e.className = "entry";
+
+      const top = document.createElement("div");
+      top.className = "entryTop";
+
+      const t = document.createElement("div");
+      t.className = "entryTime";
+      t.textContent = fmtDateTime(r.ts);
+
+      top.appendChild(t);
+      e.appendChild(top);
+
+      const line1 = document.createElement("div");
+      line1.className = "entryBPHR";
+
+      const bp = document.createElement("div");
+      bp.className = "bpBig";
+      bp.textContent = `BP ${r.sys ?? "—"}/${r.dia ?? "—"}`;
+
+      const hr = document.createElement("div");
+      hr.className = "hrBig";
+      hr.textContent = `HR ${r.hr ?? "—"}`;
+
+      line1.appendChild(bp);
+      line1.appendChild(hr);
+      e.appendChild(line1);
+
       const sym = (r.symptoms && r.symptoms.length) ? r.symptoms.join(", ") : "None";
-      const notes = r.notes ? r.notes : "None";
-      lines.push(`${dt}`);
-      lines.push(`BP ${r.sys}/${r.dia} • HR ${r.hr}`);
-      lines.push(`Symptoms: ${sym}`);
-      lines.push(`Notes: ${notes}`);
-      lines.push("");
-    }
-    return lines.join("\n");
-  }
+      const notes = (r.notes && r.notes.trim()) ? r.notes.trim() : "None";
 
-  async function copyToClipboard(text){
-    try{
-      await navigator.clipboard.writeText(text);
-      alert("Copied to clipboard.");
-      return true;
-    }catch{
-      const ta = document.createElement("textarea");
-      ta.value = text;
-      ta.style.position = "fixed";
-      ta.style.left = "-9999px";
-      document.body.appendChild(ta);
-      ta.focus();
-      ta.select();
-      let ok = false;
-      try{ ok = document.execCommand("copy"); }catch{}
-      document.body.removeChild(ta);
-      alert(ok ? "Copied to clipboard." : "Copy failed. Try again.");
-      return ok;
+      const l2 = document.createElement("div");
+      l2.className = "entryLine";
+      l2.innerHTML = `<b>Symptoms:</b> ${escapeHtml(sym)}`;
+      e.appendChild(l2);
+
+      const l3 = document.createElement("div");
+      l3.className = "entryLine";
+      l3.innerHTML = `<b>Notes:</b> ${escapeHtml(notes)}`;
+      e.appendChild(l3);
+
+      list.appendChild(e);
     }
   }
 
+  function escapeHtml(s){
+    return String(s)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  // =========================
+  // Export
+  // =========================
+  function exportText(recs){
+    // Export currently filtered log as text
+    const lines = recs.map(r => {
+      const dt = fmtDateTime(r.ts);
+      const bp = `BP ${r.sys ?? "—"}/${r.dia ?? "—"}`;
+      const hr = `HR ${r.hr ?? "—"}`;
+      const sym = (r.symptoms && r.symptoms.length) ? r.symptoms.join(", ") : "None";
+      const notes = (r.notes && r.notes.trim()) ? r.notes.trim() : "None";
+      return `${dt}\n${bp} • ${hr}\nSymptoms: ${sym}\nNotes: ${notes}\n`;
+    });
+
+    const out = lines.join("\n");
+    // Copy to clipboard if possible; otherwise download
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(out).then(() => {
+        alert("Export copied to clipboard.");
+      }).catch(() => {
+        downloadText(out, "vitals_export.txt");
+      });
+    }else{
+      downloadText(out, "vitals_export.txt");
+    }
+  }
+
+  function downloadText(text, filename){
+    const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  // =========================
+  // Charts
+  // =========================
   function renderCharts(){
     const canvas = $("chart");
     const ctx = canvas.getContext("2d");
-    const status = $("chartStatus");
+    const recs = filteredRecords({fromId:"chartFrom", toId:"chartTo", searchId:null}).slice().reverse(); // chronological
 
-    const recs = normalizeRecords(loadRecords()).slice().reverse();
-    const fromYMD = ($("chFrom").value || "").trim();
-    const toYMD   = ($("chTo").value || "").trim();
-
-    const filtered = recs.filter(r => withinDateRange(r.ts, fromYMD, toYMD));
-    status.textContent = `Showing: ${filtered.length} of ${loadRecords().length}`;
-
+    // Clear
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    if(filtered.length === 0){
-      drawChartFrame(ctx, canvas, []);
-      drawCenteredText(ctx, canvas, "No data in selected range");
+    if(recs.length === 0){
+      drawChartEmpty(ctx, canvas, "No data in range.");
       return;
     }
 
-    const sys = filtered.map(r => r.sys);
-    const dia = filtered.map(r => r.dia);
-    const hr  = filtered.map(r => r.hr);
+    const sys = recs.map(r => r.sys).filter(v => v != null);
+    const dia = recs.map(r => r.dia).filter(v => v != null);
+    const hr  = recs.map(r => r.hr ).filter(v => v != null);
 
-    const all = sys.concat(dia).concat(hr);
-    let minV = Math.min(...all);
-    let maxV = Math.max(...all);
-    const pad = Math.max(6, Math.round((maxV - minV) * 0.12));
-    minV = Math.max(0, minV - pad);
-    maxV = maxV + pad;
+    const all = [...sys,...dia,...hr].filter(v => v != null);
+    if(all.length === 0){
+      drawChartEmpty(ctx, canvas, "No numeric values.");
+      return;
+    }
 
-    drawChartFrame(ctx, canvas, {minV, maxV});
+    const minV = Math.min(...all);
+    const maxV = Math.max(...all);
+    const padV = Math.max(8, Math.round((maxV-minV)*0.12));
+    const yMin = minV - padV;
+    const yMax = maxV + padV;
 
-    const padL = 56, padR = 18, padT = 16, padB = 40;
     const W = canvas.width, H = canvas.height;
-    const plotW = W - padL - padR;
-    const plotH = H - padT - padB;
+    const pad = {l:62, r:18, t:18, b:56};
 
-    const xFor = (i) => padL + (filtered.length === 1 ? plotW/2 : (i * (plotW/(filtered.length-1))));
-    const yFor = (v) => padT + (maxV - v) * (plotH / (maxV - minV || 1));
+    // Background
+    roundRect(ctx, 0, 0, W, H, 22, "rgba(255,255,255,.02)", "rgba(235,245,255,.12)");
 
-    plotLine(ctx, sys, xFor, yFor, "rgba(79,140,255,.98)", 3);
-    plotLine(ctx, dia, xFor, yFor, "rgba(216,224,240,.88)", 3);
-    plotLine(ctx, hr,  xFor, yFor, "rgba(120,220,180,.92)", 3);
-
-    drawLegend(ctx, canvas, [
-      ["Systolic", "rgba(79,140,255,.98)"],
-      ["Diastolic", "rgba(216,224,240,.88)"],
-      ["Heart Rate", "rgba(120,220,180,.92)"]
-    ]);
-  }
-
-  function drawChartFrame(ctx, canvas, range){
-    const W = canvas.width, H = canvas.height;
-    const padL = 56, padR = 18, padT = 16, padB = 40;
-    const plotW = W - padL - padR;
-    const plotH = H - padT - padB;
-
-    ctx.save();
+    // Grid + axes labels (bigger, readable)
+    ctx.font = "16px system-ui,Segoe UI,Roboto";
+    ctx.fillStyle = "rgba(235,245,255,.60)";
+    ctx.strokeStyle = "rgba(235,245,255,.10)";
     ctx.lineWidth = 1;
 
-    const gridLines = 5;
-    for(let i=0;i<=gridLines;i++){
-      const y = padT + (i*(plotH/gridLines));
-      ctx.strokeStyle = "rgba(210,230,255,.10)";
+    const ticks = 5;
+    for(let i=0;i<=ticks;i++){
+      const y = pad.t + (H - pad.t - pad.b) * (i/ticks);
       ctx.beginPath();
-      ctx.moveTo(padL, y);
-      ctx.lineTo(padL+plotW, y);
+      ctx.moveTo(pad.l, y);
+      ctx.lineTo(W - pad.r, y);
       ctx.stroke();
+
+      const val = Math.round(yMax - (yMax-yMin)*(i/ticks));
+      ctx.fillText(String(val), 16, y+6);
     }
 
-    if(range && typeof range.minV === "number"){
-      ctx.fillStyle = "rgba(215,230,255,.70)";
-      ctx.font = "16px system-ui,Segoe UI,Arial";
-      for(let i=0;i<=gridLines;i++){
-        const v = Math.round(range.maxV - (i*(range.maxV-range.minV)/gridLines));
-        const y = padT + (i*(plotH/gridLines));
-        ctx.fillText(String(v), 10, y+6);
+    // X labels: show up to 4 dates
+    const xCount = recs.length;
+    const labelCount = Math.min(4, xCount);
+    for(let i=0;i<labelCount;i++){
+      const idx = Math.round((xCount-1) * (i/(labelCount-1 || 1)));
+      const x = xTo(idx, xCount, pad, W);
+      const d = new Date(recs[idx].ts);
+      const lab = new Intl.DateTimeFormat(undefined, {month:"2-digit", day:"2-digit"}).format(d);
+      ctx.fillStyle = "rgba(235,245,255,.56)";
+      ctx.fillText(lab, x-16, H-22);
+    }
+
+    // Lines
+    drawSeries(ctx, recs.map(r=>r.sys), yMin, yMax, pad, W, H, "rgba(79,140,255,.98)");
+    drawSeries(ctx, recs.map(r=>r.dia), yMin, yMax, pad, W, H, "rgba(216,224,240,.88)");
+    drawSeries(ctx, recs.map(r=>r.hr ), yMin, yMax, pad, W, H, "rgba(120,220,180,.92)");
+
+    // Legend (larger)
+    const lx = pad.l + 8;
+    let ly = pad.t + 22;
+    ctx.font = "18px system-ui,Segoe UI,Roboto";
+    function legend(text, color){
+      ctx.fillStyle = color;
+      ctx.fillRect(lx, ly-12, 18, 6);
+      ctx.fillStyle = "rgba(235,245,255,.70)";
+      ctx.fillText(text, lx+26, ly-6);
+      ly += 24;
+    }
+    legend("Systolic", "rgba(79,140,255,.98)");
+    legend("Diastolic", "rgba(216,224,240,.88)");
+    legend("Heart Rate", "rgba(120,220,180,.92)");
+  }
+
+  function drawChartEmpty(ctx, canvas, msg){
+    const W = canvas.width, H = canvas.height;
+    roundRect(ctx, 0,0,W,H,22,"rgba(255,255,255,.02)","rgba(235,245,255,.12)");
+    ctx.fillStyle = "rgba(235,245,255,.50)";
+    ctx.font = "18px system-ui,Segoe UI,Roboto";
+    ctx.fillText(msg, 22, 44);
+  }
+
+  function xTo(i, n, pad, W){
+    if(n<=1) return pad.l;
+    const span = W - pad.l - pad.r;
+    return pad.l + span * (i/(n-1));
+  }
+
+  function yTo(v, yMin, yMax, pad, H){
+    const span = H - pad.t - pad.b;
+    const t = (v - yMin) / (yMax - yMin || 1);
+    return pad.t + span * (1 - t);
+  }
+
+  function drawSeries(ctx, values, yMin, yMax, pad, W, H, color){
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 3;
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+
+    let started = false;
+    ctx.beginPath();
+    for(let i=0;i<values.length;i++){
+      const v = values[i];
+      if(v == null) { started = false; continue; }
+      const x = xTo(i, values.length, pad, W);
+      const y = yTo(v, yMin, yMax, pad, H);
+      if(!started){
+        ctx.moveTo(x,y);
+        started = true;
+      }else{
+        ctx.lineTo(x,y);
       }
     }
-    ctx.restore();
+    ctx.stroke();
   }
 
-  function plotLine(ctx, series, xFor, yFor, color, width){
-    ctx.save();
-    ctx.lineWidth = width;
-    ctx.strokeStyle = color;
+  function roundRect(ctx, x,y,w,h,r, fill, stroke){
+    const rr = Math.min(r, w/2, h/2);
     ctx.beginPath();
-    for(let i=0;i<series.length;i++){
-      const x = xFor(i);
-      const y = yFor(series[i]);
-      if(i===0) ctx.moveTo(x,y);
-      else ctx.lineTo(x,y);
-    }
-    ctx.stroke();
-
-    ctx.fillStyle = color;
-    for(let i=0;i<series.length;i++){
-      const x = xFor(i), y = yFor(series[i]);
-      ctx.beginPath();
-      ctx.arc(x,y,3.2,0,Math.PI*2);
+    ctx.moveTo(x+rr,y);
+    ctx.arcTo(x+w,y,x+w,y+h,rr);
+    ctx.arcTo(x+w,y+h,x,y+h,rr);
+    ctx.arcTo(x,y+h,x,y,rr);
+    ctx.arcTo(x,y,x+w,y,rr);
+    ctx.closePath();
+    if(fill){
+      ctx.fillStyle = fill;
       ctx.fill();
     }
-    ctx.restore();
-  }
-
-  function drawLegend(ctx, canvas, items){
-    const H = canvas.height;
-    let x = 64;
-    const y = H - 18;
-    ctx.save();
-    ctx.font = "18px system-ui,Segoe UI,Arial";
-    ctx.textBaseline = "middle";
-    for(const [text, color] of items){
-      ctx.fillStyle = color;
-      ctx.fillRect(x, y-6, 18, 6);
-      ctx.fillStyle = "rgba(235,245,255,.92)";
-      ctx.fillText(text, x+26, y-3);
-      x += 220;
+    if(stroke){
+      ctx.strokeStyle = stroke;
+      ctx.lineWidth = 1;
+      ctx.stroke();
     }
-    ctx.restore();
   }
 
-  function drawCenteredText(ctx, canvas, text){
-    ctx.save();
-    ctx.fillStyle = "rgba(235,245,255,.80)";
-    ctx.font = "22px system-ui,Segoe UI,Arial";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(text, canvas.width/2, canvas.height/2);
-    ctx.restore();
-  }
-
+  // =========================
+  // Install / "Uninstall" UX
+  // =========================
   let deferredPrompt = null;
-  function isStandalone(){
-    return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
-  }
-  function setInstallButtonState(){
-    const btn = $("btnInstall");
-    const installed = isStandalone() || localStorage.getItem("vt_installed_hint") === "1";
-    btn.textContent = installed ? "Uninstall" : "Install";
-  }
+
   window.addEventListener("beforeinstallprompt", (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    setInstallButtonState();
-  });
-  window.addEventListener("appinstalled", () => {
-    localStorage.setItem("vt_installed_hint","1");
-    deferredPrompt = null;
-    setInstallButtonState();
+    refreshInstallButton();
   });
 
-  async function handleInstallClick(){
-    const installed = isStandalone() || localStorage.getItem("vt_installed_hint") === "1";
-    if(installed){
-      alert("To uninstall: long-press the app icon and choose Uninstall (or remove from Home screen). Uninstall may remove local app data depending on your phone/browser.");
+  window.addEventListener("appinstalled", () => {
+    deferredPrompt = null;
+    refreshInstallButton();
+  });
+
+  function isStandalone(){
+    // Android Chrome: matchMedia works; iOS uses navigator.standalone
+    return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  }
+
+  function refreshInstallButton(){
+    const btn = $("btnInstall");
+    if(isStandalone()){
+      btn.textContent = "Uninstall";
+    }else{
+      btn.textContent = "Install";
+    }
+  }
+
+  $("btnInstall").addEventListener("click", async () => {
+    if(isStandalone()){
+      // You cannot programmatically uninstall a PWA. Provide clean instruction.
+      // IMPORTANT: uninstall does NOT delete site data automatically (browser-dependent).
+      alert(
+        "Uninstall:\n\n" +
+        "Android: press-and-hold the app icon → Uninstall.\n" +
+        "This usually does NOT delete your saved data, but some devices/browsers may clear it.\n\n" +
+        "If you want to delete data on purpose, clear site storage in your browser settings."
+      );
       return;
     }
+
     if(deferredPrompt){
       deferredPrompt.prompt();
-      await deferredPrompt.userChoice.catch(()=>{});
+      try { await deferredPrompt.userChoice; } catch {}
       deferredPrompt = null;
-      setInstallButtonState();
-    }else{
-      alert("Install prompt not available. If you see an Install / Add to Home screen option in your browser menu, use that.");
+      refreshInstallButton();
+      return;
     }
+
+    alert("Install is available when your browser offers it (menu → Install app).");
+  });
+
+  // =========================
+  // Exit
+  // =========================
+  $("btnExitHome").addEventListener("click", () => {
+    // Web apps cannot reliably close the tab unless opened by script.
+    // Attempt and then instruct.
+    window.close();
+    setTimeout(() => {
+      alert("If it didn’t close: use your phone’s Back/Home.");
+    }, 200);
+  });
+
+  // =========================
+  // Navigation buttons
+  // =========================
+  $("btnGoAdd").addEventListener("click", () => show("add"));
+  $("btnGoLog").addEventListener("click", () => show("log"));
+  $("btnGoCharts").addEventListener("click", () => show("charts"));
+
+  $("btnBackFromAdd").addEventListener("click", () => show("home"));
+  $("btnBackFromLog").addEventListener("click", () => show("home"));
+  $("btnBackFromCharts").addEventListener("click", () => show("home"));
+
+  // Add button in the middle on Log row
+  $("btnAddFromLog").addEventListener("click", () => show("add"));
+
+  // =========================
+  // Save behavior: Save -> Log (new entry at top)
+  // =========================
+  $("btnSave").addEventListener("click", () => {
+    const sys = intOrNull($("sys").value);
+    const dia = intOrNull($("dia").value);
+    const hr  = intOrNull($("hr").value);
+    const notes = ($("notes").value || "").toString();
+    const symptoms = selectedSymptoms();
+
+    // basic: require at least one numeric value (prevents empty spam)
+    if(sys==null && dia==null && hr==null && !notes.trim() && symptoms.length===0){
+      alert("Enter at least one value (BP, HR, notes, or symptom).");
+      return;
+    }
+
+    const recs = loadRecords();
+    const rec = { ts: Date.now(), sys, dia, hr, notes, symptoms };
+    recs.unshift(rec);
+    saveRecords(recs);
+
+    // After save: go to log and show the new record at top
+    show("log");
+    // ensure date filters default to ALL (blank) so everything shows
+    $("fromDate").value = "";
+    $("toDate").value = "";
+    $("search").value = "";
+    renderLog();
+
+    // scroll list top
+    $("logList").scrollIntoView({behavior:"smooth", block:"start"});
+  });
+
+  function intOrNull(v){
+    const t = String(v).trim();
+    if(!t) return null;
+    const n = Number(t);
+    if(!Number.isFinite(n)) return null;
+    return Math.round(n);
   }
 
-  function exitApp(){
-    try{ window.close(); }catch{}
-    show("home");
-    window.scrollTo({top:0, behavior:"smooth"});
-  }
+  // =========================
+  // Filters trigger render (Log/Charts)
+  // =========================
+  ["search","fromDate","toDate"].forEach(id => {
+    $(id).addEventListener("input", () => renderLog());
+    $(id).addEventListener("change", () => renderLog());
+  });
 
-  function setupPWA(){
+  ["chartFrom","chartTo"].forEach(id => {
+    $(id).addEventListener("input", () => renderCharts());
+    $(id).addEventListener("change", () => renderCharts());
+  });
+
+  // Export buttons (only on Log/Charts panels)
+  $("btnExportLog").addEventListener("click", () => {
+    const recs = filteredRecords({fromId:"fromDate", toId:"toDate", searchId:"search"});
+    exportText(recs);
+  });
+
+  $("btnExportCharts").addEventListener("click", () => {
+    const recs = filteredRecords({fromId:"chartFrom", toId:"chartTo", searchId:null});
+    exportText(recs);
+  });
+
+  // =========================
+  // PWA manifest inline (single-file)
+  // =========================
+  function injectManifest(){
+    // Simple icon as SVG data URL
+    const svg =
+`<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f78ff"/>
+      <stop offset="1" stop-color="#0b1324"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="110" fill="url(#g)"/>
+  <path d="M128 290h70l26-94 44 160 30-98h84" fill="none"
+        stroke="rgba(235,245,255,.92)" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="160" cy="290" r="10" fill="rgba(235,245,255,.92)"/>
+  <circle cx="382" cy="258" r="10" fill="rgba(235,245,255,.92)"/>
+</svg>`;
+    const encoded = encodeURIComponent(svg)
+      .replace(/'/g,"%27").replace(/"/g,"%22");
+
+    const icon = `data:image/svg+xml;charset=utf-8,${encoded}`;
+
     const manifest = {
       name: "Vitals Tracker",
       short_name: "Vitals",
-      start_url: "./",
+      start_url: ".",
       display: "standalone",
-      background_color: "#071024",
+      background_color: "#0b1324",
       theme_color: "#0b1324",
       icons: [
-        { src: makeIconDataUrl("#2f6cf0"), sizes: "192x192", type: "image/svg+xml" },
-        { src: makeIconDataUrl("#2f6cf0"), sizes: "512x512", type: "image/svg+xml" }
+        { src: icon, sizes: "512x512", type: "image/svg+xml", purpose: "any" }
       ]
     };
-    const manBlob = new Blob([JSON.stringify(manifest)], {type:"application/manifest+json"});
-    const manUrl = URL.createObjectURL(manBlob);
-    $("dyn-manifest").setAttribute("href", manUrl);
 
-    if("serviceWorker" in navigator){
-      const swCode = `
-        const CACHE = "vt_cache_v112";
-        self.addEventListener("install", (e) => {
-          e.waitUntil((async() => {
-            const c = await caches.open(CACHE);
-            await c.addAll(["./"]);
-            self.skipWaiting();
-          })());
-        });
-        self.addEventListener("activate", (e) => {
-          e.waitUntil((async() => {
-            const keys = await caches.keys();
-            await Promise.all(keys.map(k => (k !== CACHE) ? caches.delete(k) : Promise.resolve()));
-            self.clients.claim();
-          })());
-        });
-        self.addEventListener("fetch", (e) => {
-          const req = e.request;
-          e.respondWith((async() => {
-            const cached = await caches.match(req);
-            if(cached) return cached;
-            try{
-              const fresh = await fetch(req);
-              const c = await caches.open(CACHE);
-              c.put(req, fresh.clone());
-              return fresh;
-            }catch{
-              return cached || Response.error();
-            }
-          })());
-        });
-      `;
-      const swBlob = new Blob([swCode], {type:"text/javascript"});
-      const swUrl = URL.createObjectURL(swBlob);
-      navigator.serviceWorker.register(swUrl).catch(()=>{});
-    }
+    const blob = new Blob([JSON.stringify(manifest)], {type:"application/manifest+json"});
+    const url = URL.createObjectURL(blob);
+    $("manifestLink").setAttribute("href", url);
   }
 
-  function makeIconDataUrl(color){
-    const svg =
-      `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-        <defs>
-          <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="${color}" stop-opacity="1"/>
-            <stop offset="1" stop-color="#0b1324" stop-opacity="1"/>
-          </linearGradient>
-        </defs>
-        <rect width="512" height="512" rx="110" fill="url(#g)"/>
-        <path d="M128 290h70l26-94 44 160 30-98h84" fill="none" stroke="rgba(235,245,255,.92)" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="160" cy="290" r="10" fill="rgba(235,245,255,.92)"/>
-        <circle cx="382" cy="258" r="10" fill="rgba(235,245,255,.92)"/>
-      </svg>`;
-    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  // =========================
+  // Service worker (optional). Single-file sw via blob URL.
+  // =========================
+  async function registerSW(){
+    if(!("serviceWorker" in navigator)) return;
+
+    const swCode =
+`self.addEventListener('install', (e)=>{ self.skipWaiting(); });
+self.addEventListener('activate', (e)=>{ e.waitUntil(self.clients.claim()); });
+self.addEventListener('fetch', (e)=>{ /* network-first */ });`;
+
+    const blob = new Blob([swCode], {type:"text/javascript"});
+    const swUrl = URL.createObjectURL(blob);
+    try { await navigator.serviceWorker.register(swUrl); } catch {}
   }
 
-  function init(){
-    $("homeVersion").textContent = VERSION;
+  // =========================
+  // Init
+  // =========================
+  buildSymptoms();
+  injectManifest();
+  registerSW();
+  refreshInstallButton();
 
-    $("goAdd").addEventListener("click", () => {
-      show("add");
-      startClock();
-      clearAddForm();
-    });
-    $("goLog").addEventListener("click", () => show("log"));
-    $("goCharts").addEventListener("click", () => show("charts"));
+  // Default date filters: blank => ALL data
+  $("fromDate").value = "";
+  $("toDate").value = "";
+  $("chartFrom").value = "";
+  $("chartTo").value = "";
 
-    $("btnInstall").addEventListener("click", handleInstallClick);
-    $("btnExitHome").addEventListener("click", exitApp);
+  // Initial view
+  show("home");
 
-    $("btnSave").addEventListener("click", saveCurrentRecord);
-    $("btnBackFromAdd").addEventListener("click", () => { stopClock(); show("home"); });
+  // Resize handling for time line fitting
+  window.addEventListener("resize", () => {
+    if(!$("add").classList.contains("hidden")) adjustTimeFont();
+  });
 
-    $("btnBackFromLog").addEventListener("click", () => show("home"));
-    $("btnAddFromLog").addEventListener("click", () => {
-      show("add");
-      startClock();
-      clearAddForm();
-    });
-
-    $("logSearch").addEventListener("input", renderLog);
-    $("logFrom").addEventListener("change", renderLog);
-    $("logTo").addEventListener("change", renderLog);
-    $("btnExportLog").addEventListener("click", async () => {
-      const recs = filteredRecords($("logFrom"), $("logTo"), $("logSearch"));
-      const txt = exportText(recs);
-      await copyToClipboard(txt);
-    });
-
-    $("btnBackFromCharts").addEventListener("click", () => show("home"));
-    $("chFrom").addEventListener("change", renderCharts);
-    $("chTo").addEventListener("change", renderCharts);
-    $("btnExportCharts").addEventListener("click", async () => {
-      const all = normalizeRecords(loadRecords());
-      const fromYMD = ($("chFrom").value || "").trim();
-      const toYMD   = ($("chTo").value || "").trim();
-      const filtered = all.filter(r => withinDateRange(r.ts, fromYMD, toYMD));
-      const txt = exportText(filtered);
-      await copyToClipboard(txt);
-    });
-
-    buildSymptoms();
-    setupPWA();
-    setInstallButtonState();
-    show("home");
-  }
-
-  init();
-
-})();
+})();  
 </script>
 </body>
 </html>
