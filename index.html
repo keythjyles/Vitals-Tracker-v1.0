@@ -1,83 +1,141 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="dark" />
 <title>Vitals Tracker</title>
 
 <style>
 :root{
-  --bg:#ffffff;
-  --fg:#0b0b0b;
-  --card:#f2f2f2;
-  --accent:#005fcc;
+  color-scheme: dark;
+  --bg:#0f1115;
+  --panel:#161a22;
+  --panel2:#1b2130;
+  --fg:#f2f4f8;
+  --muted:#b9c0cc;
+  --border:#2a3346;
+  --focus:#6ea8ff;
+  --danger:#ff6b6b;
+
   --radius:18px;
-  --font:28px;
+  --font:30px;
 }
 
 *{box-sizing:border-box}
 
 body{
   margin:0;
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
   background:var(--bg);
   color:var(--fg);
   font-size:var(--font);
+  line-height:1.25;
 }
 
 header{
-  padding:20px;
-  border-bottom:2px solid #ddd;
+  padding:18px;
+  border-bottom:2px solid var(--border);
+  background:linear-gradient(180deg,var(--panel),var(--bg));
 }
 
-h1{
-  margin:0;
-  font-size:1.4em;
-}
+h1{margin:0;font-size:1.3em}
+.sub{margin-top:6px;color:var(--muted);font-size:.9em}
 
-main{
-  max-width:900px;
-  margin:0 auto;
-  padding:20px;
+main{max-width:980px;margin:0 auto;padding:14px}
+
+.tabs{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.tab{
+  padding:12px 18px;
+  border-radius:999px;
+  border:2px solid var(--border);
+  background:var(--panel);
+  color:var(--fg);
+  font-weight:950;
 }
+.tab.on{border-color:var(--focus);background:var(--panel2)}
 
 .card{
-  background:var(--card);
+  background:var(--panel);
+  border:2px solid var(--border);
   border-radius:var(--radius);
-  padding:20px;
-  margin-bottom:20px;
+  padding:16px;
+  margin-bottom:14px;
 }
 
 label{
-  font-weight:800;
   display:block;
-  margin-top:18px;
+  font-weight:950;
+  margin:14px 0 8px;
 }
 
-input, textarea, button{
+input,textarea,select,button{
   width:100%;
   font-size:1em;
   padding:16px;
-  margin-top:8px;
-  border-radius:var(--radius);
-  border:2px solid #999;
+  border-radius:16px;
+  border:2px solid var(--border);
+  background:#0b0d12;
+  color:var(--fg);
+  caret-color:var(--fg);
 }
+
+textarea{min-height:120px}
 
 button{
-  background:var(--accent);
-  color:#fff;
-  font-weight:900;
-  border:none;
-  margin-top:24px;
+  font-weight:950;
+  background:var(--panel2);
+}
+button.primary{
+  background:var(--focus);
+  color:#07101f;
+  border-color:transparent;
 }
 
-button:active{
-  opacity:0.85;
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:820px){.grid2,.grid3{grid-template-columns:1fr}}
+
+.checklist{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:820px){.checklist{grid-template-columns:1fr}}
+
+.check{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:14px;
+  border:2px solid var(--border);
+  border-radius:16px;
+  background:#0b0d12;
+}
+.check input{width:34px;height:34px}
+
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.badge{
+  padding:10px 14px;
+  border-radius:999px;
+  border:2px solid var(--border);
+  background:#0b0d12;
+  font-weight:950;
+}
+.note{color:var(--muted);font-size:.9em}
+.danger{color:var(--danger);font-weight:950}
+
+.hidden{display:none}
+
+.item{
+  border:2px solid var(--border);
+  border-radius:16px;
+  padding:12px;
+  background:#0b0d12;
+  margin-top:10px;
 }
 
-.small{
-  font-size:0.85em;
-  opacity:0.8;
+canvas{
+  width:100%;
+  border:2px solid var(--border);
+  border-radius:16px;
+  background:#0b0d12;
 }
 </style>
 </head>
@@ -85,66 +143,195 @@ button:active{
 <body>
 <header>
   <h1>Vitals Tracker</h1>
-  <div class="small">Simple, local, accessible</div>
+  <div class="sub">Dark • Accessible • Local only</div>
 </header>
 
 <main>
-  <div class="card">
-    <label for="date">Date</label>
-    <input id="date" type="date">
-
-    <label for="time">Time</label>
-    <input id="time" type="time">
-
-    <label for="sys">Systolic</label>
-    <input id="sys" type="number" inputmode="numeric">
-
-    <label for="dia">Diastolic</label>
-    <input id="dia" type="number" inputmode="numeric">
-
-    <label for="hr">Heart Rate</label>
-    <input id="hr" type="number" inputmode="numeric">
-
-    <label for="symptoms">Symptoms</label>
-    <textarea id="symptoms" rows="3"></textarea>
-
-    <label for="notes">Notes</label>
-    <textarea id="notes" rows="3"></textarea>
-
-    <button onclick="saveEntry()">Save</button>
+  <div class="tabs">
+    <button class="tab on" id="tEntry">Add</button>
+    <button class="tab" id="tLog">Log</button>
+    <button class="tab" id="tCharts">Charts</button>
   </div>
+
+  <!-- ENTRY -->
+  <section class="card" id="pEntry">
+    <div class="grid2">
+      <div>
+        <label>Date</label>
+        <input id="date" type="date">
+      </div>
+      <div>
+        <label>Time</label>
+        <input id="time" type="time">
+      </div>
+    </div>
+
+    <div class="grid3">
+      <div><label>Systolic</label><input id="sys" type="number"></div>
+      <div><label>Diastolic</label><input id="dia" type="number"></div>
+      <div><label>Heart Rate</label><input id="hr" type="number"></div>
+    </div>
+
+    <label>Symptoms</label>
+    <div class="checklist" id="symptoms"></div>
+
+    <label>Notes</label>
+    <textarea id="notes"></textarea>
+
+    <div class="row">
+      <div class="badge" id="status">Enter BP</div>
+      <div class="danger" id="crisis" style="display:none">Possible crisis</div>
+    </div>
+
+    <div class="row">
+      <button class="primary" id="save">Save</button>
+      <button id="clear">Clear</button>
+    </div>
+  </section>
+
+  <!-- LOG -->
+  <section class="card hidden" id="pLog">
+    <input id="search" placeholder="Search symptoms or notes">
+    <button id="exportGPT" class="primary" style="margin-top:12px">
+      Export for ChatGPT / Doctor / VA
+    </button>
+    <div id="list"></div>
+  </section>
+
+  <!-- CHARTS -->
+  <section class="card hidden" id="pCharts">
+    <canvas id="bpChart" height="360"></canvas>
+    <canvas id="hrChart" height="260" style="margin-top:16px"></canvas>
+  </section>
 </main>
 
 <script>
-const d=new Date();
-document.getElementById("date").value=d.toISOString().slice(0,10);
-document.getElementById("time").value=d.toTimeString().slice(0,5);
-document.getElementById("sys").focus();
+const PRESETS=["Sweaty","Dizzy","Chest tight","Panic","Headache","Brain fog"];
+const KEY="vitals_v3";
+const $=id=>document.getElementById(id);
 
-function saveEntry(){
-  const entry={
-    date:date.value,
-    time:time.value,
-    systolic:sys.value,
-    diastolic:dia.value,
-    hr:hr.value,
-    symptoms:symptoms.value,
-    notes:notes.value
-  };
-
-  const data=JSON.parse(localStorage.getItem("vitals")||"[]");
-  data.push(entry);
-  localStorage.setItem("vitals",JSON.stringify(data));
-
-  sys.value="";
-  dia.value="";
-  hr.value="";
-  symptoms.value="";
-  notes.value="";
+function now(){
+  const d=new Date();
+  date.value=d.toISOString().slice(0,10);
+  time.value=d.toTimeString().slice(0,5);
   sys.focus();
-
-  alert("Saved");
 }
+
+function load(){return JSON.parse(localStorage.getItem(KEY)||"[]")}
+function saveAll(a){localStorage.setItem(KEY,JSON.stringify(a))}
+
+PRESETS.forEach((s,i)=>{
+  const d=document.createElement("div");
+  d.className="check";
+  d.innerHTML=`<input type="checkbox" id="s${i}"><label for="s${i}">${s}</label>`;
+  symptoms.appendChild(d);
+});
+
+function category(sys,dia){
+  if(sys>=180||dia>=120)return["Crisis",true];
+  if(sys<120&&dia<80)return["Normal",false];
+  if(sys<130)return["Elevated",false];
+  if(sys<140||dia<90)return["Stage 1",false];
+  return["Stage 2",false];
+}
+
+function update(){
+  const s=+sys.value,d=+dia.value;
+  if(!s||!d)return;
+  const [c,x]=category(s,d);
+  status.textContent=c;
+  crisis.style.display=x?"block":"none";
+}
+
+sys.oninput=update;
+dia.oninput=update;
+
+save.onclick=()=>{
+  const e={
+    t:new Date(`${date.value}T${time.value}`),
+    s:+sys.value,
+    d:+dia.value,
+    h:+hr.value,
+    sym:PRESETS.filter((_,i)=>$("s"+i).checked),
+    n:notes.value
+  };
+  const a=load();
+  a.push(e);
+  saveAll(a);
+  clear.onclick();
+  status.textContent="Saved";
+};
+
+clear.onclick=()=>{
+  sys.value=dia.value=hr.value=notes.value="";
+  PRESETS.forEach((_,i)=>$("s"+i).checked=false);
+  sys.focus();
+};
+
+function tab(a){
+  pEntry.classList.toggle("hidden",a!=="e");
+  pLog.classList.toggle("hidden",a!=="l");
+  pCharts.classList.toggle("hidden",a!=="c");
+}
+
+tEntry.onclick=()=>tab("e");
+tLog.onclick=()=>{tab("l");renderLog()};
+tCharts.onclick=()=>{tab("c");renderCharts()};
+
+function renderLog(){
+  list.innerHTML="";
+  load().slice().reverse().forEach(e=>{
+    const d=document.createElement("div");
+    d.className="item";
+    d.textContent=`${e.t.toLocaleString()} | BP ${e.s}/${e.d} | HR ${e.h} | ${e.sym.join(", ")} ${e.n||""}`;
+    list.appendChild(d);
+  });
+}
+
+function draw(canvas,vals){
+  const c=$(canvas),ctx=c.getContext("2d");
+  ctx.clearRect(0,0,c.width,c.height);
+  if(!vals.length)return;
+  const max=Math.max(...vals),min=Math.min(...vals);
+  ctx.beginPath();
+  vals.forEach((v,i)=>{
+    const x=i*(c.width/(vals.length-1||1));
+    const y=c.height-((v-min)/(max-min||1))*c.height;
+    if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle="#6ea8ff";
+  ctx.lineWidth=4;
+  ctx.stroke();
+}
+
+function renderCharts(){
+  const a=load();
+  draw("bpChart",a.map(e=>e.s));
+  draw("hrChart",a.map(e=>e.h));
+}
+
+exportGPT.onclick=()=>{
+  const data=load();
+  if(!data.length){alert("No vitals recorded yet.");return;}
+  const lines=[];
+  lines.push("Vitals Log Export");
+  lines.push("");
+  lines.push("DATE | TIME | SYS | DIA | HR | SYMPTOMS | NOTES");
+  lines.push("------------------------------------------------");
+  data.forEach(e=>{
+    const d=new Date(e.t);
+    const date=d.toISOString().slice(0,10);
+    const time=d.toTimeString().slice(0,5);
+    lines.push(`${date} | ${time} | ${e.s} | ${e.d} | ${e.h} | ${e.sym.join(", ")} | ${e.n||""}`);
+  });
+  const out=lines.join("\n");
+  navigator.clipboard.writeText(out).then(
+    ()=>alert("Copied to clipboard."),
+    ()=>alert(out)
+  );
+};
+
+now();
 </script>
 </body>
 </html>
