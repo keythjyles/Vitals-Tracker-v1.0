@@ -20,7 +20,7 @@
       --muted:rgba(235,245,255,.58);
       --muted2:rgba(235,245,255,.42);
 
-      /* CHANGE: border is now light blue (less bright) */
+      /* Border color (light blue) */
       --accent:#8fc6ff;
 
       --shadow:0 14px 40px rgba(0,0,0,.38);
@@ -101,6 +101,7 @@
       padding:0 18px;
       user-select:none;
       -webkit-tap-highlight-color: transparent;
+      font-size:18px; /* base */
     }
     .btn:active{ transform: translateY(1px); }
     .btn.primary{
@@ -154,12 +155,21 @@
       line-height:1.25;
     }
 
+    /* Home layout */
     .homeMain{
       display:flex;
       flex-direction:column;
       gap:14px;
       margin-top:8px;
     }
+
+    /* CHANGE: make the three main home buttons much larger text */
+    .homeMain > .btn:not(.small){
+      font-size:26px;
+      font-weight:750;
+      letter-spacing:.3px;
+    }
+
     .homeFooterRow{
       display:flex;
       align-items:center;
@@ -176,6 +186,7 @@
       color: rgba(235,245,255,.38);
     }
 
+    /* Add screen time line: ONE line, dynamic shrink */
     .timeLine{
       margin: 4px 4px 14px;
       color: rgba(235,245,255,.82);
@@ -773,7 +784,6 @@
       list.appendChild(e);
     }
 
-    // IMPORTANT: no autofocus on log; prevent keyboard pop
     try { document.activeElement && document.activeElement.blur(); } catch {}
   }
 
