@@ -114,6 +114,7 @@
       font-size:14px;
       padding:0 14px;
       font-weight:650;
+      white-space:nowrap;
     }
 
     .row{ display:flex; gap:12px; }
@@ -155,7 +156,6 @@
       line-height:1.25;
     }
 
-    /* Home layout */
     .homeMain{
       display:flex;
       flex-direction:column;
@@ -163,7 +163,6 @@
       margin-top:8px;
     }
 
-    /* CHANGE: make the three main home buttons much larger text */
     .homeMain > .btn:not(.small){
       font-size:26px;
       font-weight:750;
@@ -174,9 +173,11 @@
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:12px;
+      gap:10px;
       margin-top:8px;
+      flex-wrap:nowrap;
     }
+
     .footerTiny{
       margin-top:10px;
       display:flex;
@@ -186,7 +187,6 @@
       color: rgba(235,245,255,.38);
     }
 
-    /* Add screen time line: ONE line, dynamic shrink */
     .timeLine{
       margin: 4px 4px 14px;
       color: rgba(235,245,255,.82);
@@ -397,6 +397,7 @@
 
         <div class="homeFooterRow">
           <button id="btnInstall" class="btn small">Install</button>
+          <button id="btnClearAll" class="btn small">Clear Data</button>
           <div class="grow"></div>
           <button id="btnExitHome" class="btn small">Exit</button>
         </div>
@@ -404,7 +405,7 @@
         <div class="subtle">Data stays on your phone (local only).</div>
 
         <div class="footerTiny">
-          <div>v1.15</div>
+          <div>v1.16</div>
           <div>developed by Keyth Jyles</div>
         </div>
       </div>
@@ -965,6 +966,32 @@
     legend("Heart Rate", "rgba(120,220,180,.92)");
   }
 
+  function clearFilters(){
+    $("fromDate").value = "";
+    $("toDate").value = "";
+    $("search").value = "";
+    $("chartFrom").value = "";
+    $("chartTo").value = "";
+  }
+
+  function clearAllData(){
+    const ok = confirm(
+      "Clear ALL saved vitals data?\n\n" +
+      "This deletes everything stored on this phone for Vitals Tracker.\n" +
+      "This cannot be undone."
+    );
+    if(!ok) return;
+
+    try{
+      localStorage.removeItem(STORAGE_KEY);
+    }catch{}
+
+    clearFilters();
+
+    alert("All data cleared.");
+    show("home");
+  }
+
   let deferredPrompt = null;
 
   window.addEventListener("beforeinstallprompt", (e) => {
@@ -992,7 +1019,7 @@
         "Uninstall:\n\n" +
         "Android: press-and-hold the app icon → Uninstall.\n" +
         "Uninstall typically does NOT delete your saved data, but device/browser behavior can vary.\n\n" +
-        "To delete data on purpose: clear site storage in your browser settings."
+        "To delete data on purpose: use Clear Data (home screen)."
       );
       return;
     }
@@ -1005,6 +1032,8 @@
     }
     alert("Install is available when your browser offers it (menu → Install app).");
   });
+
+  $("btnClearAll").addEventListener("click", clearAllData);
 
   $("btnExitHome").addEventListener("click", () => {
     window.close();
@@ -1136,3 +1165,4 @@ self.addEventListener('fetch', (e)=>{ });`;
 </script>
 </body>
 </html>
+```0
