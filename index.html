@@ -14,7 +14,6 @@
       --bg0:#08101f;
       --bg1:#0b1324;
       --panel:#0c1528cc;
-      --panel2:#0c1528f0;
       --stroke:rgba(235,245,255,.16);
       --stroke2:rgba(235,245,255,.22);
       --strokeBold:rgba(180,210,255,.42);
@@ -22,14 +21,10 @@
       --muted:rgba(235,245,255,.58);
       --muted2:rgba(235,245,255,.42);
       --accent:#2f78ff;
-      --accent2:rgba(47,120,255,.18);
-      --good:#5bd6b2;
       --shadow:0 14px 40px rgba(0,0,0,.38);
       --radius:26px;
-      --radius2:18px;
       --btnH:56px;
       --pad:18px;
-      --gap:12px;
       --font: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
     }
 
@@ -94,7 +89,6 @@
       background: linear-gradient(180deg, rgba(47,120,255,.92), rgba(47,120,255,.72));
       border-color: rgba(120,170,255,.55);
       color: rgba(0,0,0,.78);
-      text-shadow:none;
     }
     .btn.small{
       height:44px;
@@ -104,16 +98,8 @@
     }
 
     .row{ display:flex; gap:12px; }
-    .row.between{ justify-content:space-between; }
     .row.center{ align-items:center; }
-    .row.wrap{ flex-wrap:wrap; }
     .grow{ flex:1; }
-
-    .divider{
-      height:1px;
-      background: rgba(235,245,255,.10);
-      margin: 10px 4px 2px;
-    }
 
     .label{
       font-size:16px;
@@ -150,14 +136,13 @@
       line-height:1.25;
     }
 
-    /* Home buttons */
+    /* Home layout */
     .homeMain{
       display:flex;
       flex-direction:column;
       gap:14px;
       margin-top:8px;
     }
-
     .homeFooterRow{
       display:flex;
       align-items:center;
@@ -165,7 +150,6 @@
       gap:12px;
       margin-top:8px;
     }
-
     .footerTiny{
       margin-top:10px;
       display:flex;
@@ -175,17 +159,17 @@
       color: rgba(235,245,255,.38);
     }
 
-    /* Add screen time line */
+    /* Add screen time line: ONE line, dynamic shrink */
     .timeLine{
       margin: 4px 4px 14px;
       color: rgba(235,245,255,.82);
       font-weight:750;
       letter-spacing:.3px;
-      white-space:nowrap;          /* must stay on one line */
+      white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
       line-height:1.05;
-      font-size: clamp(18px, 6.4vw, 44px); /* baseline; JS will shrink further if needed */
+      font-size: clamp(18px, 6.4vw, 44px);
     }
 
     .triple{
@@ -200,25 +184,22 @@
       font-size:16px;
     }
 
-    /* Symptoms: two-column list, tight, no pills, no border around list */
+    /* Symptoms: smaller, less bold */
     .symGrid{
       display:grid;
       grid-template-columns: 1fr 1fr;
-      gap: 6px 18px;               /* tighter */
+      gap: 6px 18px;
       padding: 6px 2px 2px;
       margin-top: 2px;
     }
-
     .symItem{
       display:flex;
       align-items:center;
       gap:10px;
-      padding: 4px 6px;            /* tight */
+      padding: 4px 6px;
       border-radius: 14px;
       transition: background .12s ease, border-color .12s ease;
     }
-
-    /* checkbox box */
     .box{
       width:30px;
       height:30px;
@@ -229,8 +210,6 @@
       place-items:center;
       flex:0 0 auto;
     }
-
-    /* check mark */
     .check{
       width:14px;
       height:8px;
@@ -239,35 +218,32 @@
       transform: rotate(-45deg);
       margin-top:-2px;
     }
-
     .symText{
-      font-size:18px;              /* slightly smaller */
-      font-weight:600;             /* less bold (no shouting) */
-      color: rgba(235,245,255,.78);
+      font-size:16px;
+      font-weight:500;
+      color: rgba(235,245,255,.76);
       line-height:1.1;
     }
-
-    /* selected state: highlight + blue check */
     .symItem.selected{
       background: rgba(47,120,255,.16);
     }
     .symItem.selected .box{
       border-color: rgba(90,150,255,.90);
-      background: rgba(47,120,255,.18);  /* highlighted box bg */
+      background: rgba(47,120,255,.18);
     }
     .symItem.selected .check{
       border-left-color: rgba(235,245,255,.92);
       border-bottom-color: rgba(235,245,255,.92);
     }
 
-    /* Button row inside panels */
+    /* Buttons just below symptoms */
     .panelButtons{
       display:flex;
       gap:12px;
-      margin-top: 10px;            /* just below content */
+      margin-top: 10px;
     }
 
-    /* Log list cards */
+    /* Log entries */
     .entry{
       border:1px solid var(--stroke);
       background: rgba(255,255,255,.03);
@@ -314,14 +290,13 @@
       color: rgba(235,245,255,.70);
     }
 
-    /* Filters */
+    /* Date range */
     .filters{
       display:grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
       margin-top:10px;
     }
-
     .dateField{
       display:flex;
       flex-direction:column;
@@ -333,9 +308,8 @@
       font-weight:650;
       font-size:14px;
     }
-
     input[type="date"].field{
-      font-size:16px;              /* smaller so full date fits */
+      font-size:16px;
       padding-right: 10px;
     }
 
@@ -349,7 +323,6 @@
       margin-top: 10px;
     }
 
-    /* Utility */
     .noteLabel{
       margin: 12px 4px 8px;
       color: var(--muted);
@@ -361,9 +334,6 @@
       color: rgba(235,245,255,.42);
       font-weight:600;
     }
-
-    /* Make tight overall */
-    .tightTop{ margin-top: 4px; }
   </style>
 </head>
 
@@ -379,7 +349,6 @@
         <button id="btnGoCharts" class="btn">Charts</button>
 
         <div class="homeFooterRow">
-          <!-- Install/Uninstall small (left), Exit small (right) -->
           <button id="btnInstall" class="btn small">Install</button>
           <div class="grow"></div>
           <button id="btnExitHome" class="btn small">Exit</button>
@@ -388,7 +357,7 @@
         <div class="subtle">Data stays on your phone (local only).</div>
 
         <div class="footerTiny">
-          <div>v1.13</div>
+          <div>v1.14</div>
           <div>developed by Keyth Jyles</div>
         </div>
       </div>
@@ -419,7 +388,6 @@
       <div class="label">Symptoms</div>
       <div id="symGrid" class="symGrid"></div>
 
-      <!-- Buttons just below symptoms (not at bottom of screen) -->
       <div class="panelButtons">
         <button id="btnSave" class="btn primary grow">Save</button>
         <button id="btnBackFromAdd" class="btn grow">Back</button>
@@ -430,16 +398,14 @@
     <div id="log" class="card hidden">
       <div class="row center">
         <button id="btnExportLog" class="btn small">Export</button>
-        <!-- Add button inserted in the middle of existing row -->
         <button id="btnAddFromLog" class="btn small">Add</button>
         <div class="grow"></div>
         <button id="btnBackFromLog" class="btn small">Back</button>
       </div>
 
-      <div class="label tightTop">Search</div>
+      <div class="label">Search</div>
       <input id="search" class="field" placeholder="Type a word: sweaty, dizzy, headache..." />
 
-      <!-- Date range calendar fields (not dropdowns). Defaults to all -->
       <div class="filters">
         <div class="dateField">
           <div class="miniLabel">From</div>
@@ -493,14 +459,18 @@
     "Nausea","Short breath","Hot ears","Shaky","Blurred vision","Weakness"
   ];
 
-  /** record: {ts:number, sys:number|null, dia:number|null, hr:number|null, notes:string, symptoms:string[]} */
+  function numOrNull(v){
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  }
+
   function loadRecords(){
     try{
       const raw = localStorage.getItem(STORAGE_KEY);
       if(!raw) return [];
       const arr = JSON.parse(raw);
       if(!Array.isArray(arr)) return [];
-      // sanitize
+      // Always sort MOST RECENT FIRST
       return arr
         .filter(r => r && typeof r.ts === "number")
         .map(r => ({
@@ -521,31 +491,36 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify(recs));
   }
 
-  function numOrNull(v){
-    const n = Number(v);
-    return Number.isFinite(n) ? n : null;
-  }
-
   // =========================
   // UI helpers
   // =========================
   const $ = (id) => document.getElementById(id);
-
   const screens = ["home","add","log","charts"];
+
+  function focusTopOfPanel(screen){
+    // Make sure the user is at the top of the panel, not stuck at bottom.
+    window.scrollTo({top:0, left:0, behavior:"auto"});
+    if(screen === "log"){
+      // put focus on search field (top of log panel)
+      setTimeout(() => { try{ $("search").focus({preventScroll:true}); }catch{} }, 0);
+    }
+    if(screen === "add"){
+      setTimeout(() => { try{ $("sys").focus({preventScroll:true}); }catch{} }, 0);
+    }
+  }
+
   function show(screen){
     for(const s of screens){
       $(s).classList.toggle("hidden", s !== screen);
     }
-    // Defaults: log & charts populate with ALL data immediately
-    if(screen === "log") renderLog();
-    if(screen === "charts") renderCharts();
+    if(screen === "log"){ renderLog(); }
+    if(screen === "charts"){ renderCharts(); }
     if(screen === "add"){
-      // reset add fields (do not change layout)
-      // keep symptoms unchecked
       clearAddForm();
-      tickTime(); // start immediately
-      adjustTimeFont(); // fit one line
+      tickTime();
+      adjustTimeFont();
     }
+    focusTopOfPanel(screen);
   }
 
   function fmtDateTime(ts){
@@ -554,8 +529,6 @@
       year:"numeric", month:"2-digit", day:"2-digit",
       hour:"2-digit", minute:"2-digit", second:"2-digit"
     }).formatToParts(d);
-
-    // Build "MM/DD/YYYY, HH:MM:SS AM" style but stable
     const map = Object.fromEntries(parts.map(p=>[p.type,p.value]));
     const mm = map.month, dd = map.day, yy = map.year;
     const hh = map.hour, mi = map.minute, ss = map.second;
@@ -571,15 +544,7 @@
     const date = new Intl.DateTimeFormat(undefined, {
       month:"2-digit", day:"2-digit", year:"numeric"
     }).format(d);
-    return `${time}, ${date}`; // must stay one line
-  }
-
-  function isoDate(ts){
-    const d = new Date(ts);
-    const y = d.getFullYear();
-    const m = String(d.getMonth()+1).padStart(2,"0");
-    const day = String(d.getDate()).padStart(2,"0");
-    return `${y}-${m}-${day}`;
+    return `${time}, ${date}`;
   }
 
   // =========================
@@ -643,7 +608,6 @@
     $("hr").value = "";
     $("notes").value = "";
     for(const k of SYMPTOMS) symState.set(k,false);
-    // update DOM selected classes
     for(const el of symGrid.querySelectorAll(".symItem")){
       el.classList.remove("selected");
       el.setAttribute("aria-checked","false");
@@ -657,30 +621,25 @@
 
   function tickTime(){
     const line = $("timeLine");
-    const now = Date.now();
-    line.textContent = fmtTimeCommaDate(now);
+    line.textContent = fmtTimeCommaDate(Date.now());
     adjustTimeFont();
     if(timeTimer) clearTimeout(timeTimer);
-    // align updates close to 1s
     timeTimer = setTimeout(tickTime, 900);
   }
 
   function adjustTimeFont(){
     const el = $("timeLine");
     if(!el) return;
-
-    // Start from computed size and shrink until it fits container width.
-    // This keeps it on ONE line. (white-space:nowrap + JS shrink)
     const parent = el.parentElement;
     if(!parent) return;
 
-    const maxW = parent.clientWidth - 8; // small safety
-    let fs = parseFloat(getComputedStyle(el).fontSize) || 28;
+    // reset any prior shrink so we can re-fit on orientation changes
+    el.style.fontSize = "";
+    const maxW = parent.clientWidth - 8;
 
-    // If it fits, try to grow slightly up to clamp max already applied—no need.
-    // If it overflows, shrink down to minimum 16px.
+    let fs = parseFloat(getComputedStyle(el).fontSize) || 28;
     let guard = 0;
-    while(el.scrollWidth > maxW && fs > 16 && guard < 20){
+    while(el.scrollWidth > maxW && fs > 16 && guard < 30){
       fs -= 1;
       el.style.fontSize = fs + "px";
       guard++;
@@ -691,7 +650,6 @@
   // Log screen: filters + render
   // =========================
   function parseDateField(v){
-    // v in YYYY-MM-DD; interpret as local midnight
     if(!v) return null;
     const [y,m,d] = v.split("-").map(Number);
     if(!y || !m || !d) return null;
@@ -699,7 +657,6 @@
   }
 
   function clampEndOfDay(ts){
-    // convert midnight to end-of-day
     const d = new Date(ts);
     d.setHours(23,59,59,999);
     return d.getTime();
@@ -716,17 +673,11 @@
     const sym = (rec.symptoms || []).join(", ").toLowerCase();
     const dt = fmtDateTime(rec.ts).toLowerCase();
 
-    return (
-      bp.includes(s) ||
-      hr.includes(s) ||
-      notes.includes(s) ||
-      sym.includes(s) ||
-      dt.includes(s)
-    );
+    return bp.includes(s) || hr.includes(s) || notes.includes(s) || sym.includes(s) || dt.includes(s);
   }
 
   function filteredRecords({fromId,toId,searchId}){
-    const recs = loadRecords(); // already sorted desc
+    const recs = loadRecords(); // MOST RECENT FIRST
     const q = (searchId ? $(searchId).value : "").trim();
 
     const fromV = fromId ? $(fromId).value : "";
@@ -743,6 +694,15 @@
     });
   }
 
+  function escapeHtml(s){
+    return String(s)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
   function renderLog(){
     const list = $("logList");
     const recs = filteredRecords({fromId:"fromDate", toId:"toDate", searchId:"search"});
@@ -757,6 +717,7 @@
       return;
     }
 
+    // Already most recent first.
     for(const r of recs){
       const e = document.createElement("div");
       e.className = "entry";
@@ -803,42 +764,9 @@
     }
   }
 
-  function escapeHtml(s){
-    return String(s)
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
-
   // =========================
   // Export
   // =========================
-  function exportText(recs){
-    // Export currently filtered log as text
-    const lines = recs.map(r => {
-      const dt = fmtDateTime(r.ts);
-      const bp = `BP ${r.sys ?? "—"}/${r.dia ?? "—"}`;
-      const hr = `HR ${r.hr ?? "—"}`;
-      const sym = (r.symptoms && r.symptoms.length) ? r.symptoms.join(", ") : "None";
-      const notes = (r.notes && r.notes.trim()) ? r.notes.trim() : "None";
-      return `${dt}\n${bp} • ${hr}\nSymptoms: ${sym}\nNotes: ${notes}\n`;
-    });
-
-    const out = lines.join("\n");
-    // Copy to clipboard if possible; otherwise download
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(out).then(() => {
-        alert("Export copied to clipboard.");
-      }).catch(() => {
-        downloadText(out, "vitals_export.txt");
-      });
-    }else{
-      downloadText(out, "vitals_export.txt");
-    }
-  }
-
   function downloadText(text, filename){
     const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
     const url = URL.createObjectURL(blob);
@@ -851,93 +779,49 @@
     URL.revokeObjectURL(url);
   }
 
+  function exportText(recs){
+    const lines = recs.map(r => {
+      const dt = fmtDateTime(r.ts);
+      const bp = `BP ${r.sys ?? "—"}/${r.dia ?? "—"}`;
+      const hr = `HR ${r.hr ?? "—"}`;
+      const sym = (r.symptoms && r.symptoms.length) ? r.symptoms.join(", ") : "None";
+      const notes = (r.notes && r.notes.trim()) ? r.notes.trim() : "None";
+      return `${dt}\n${bp} • ${hr}\nSymptoms: ${sym}\nNotes: ${notes}\n`;
+    });
+
+    const out = lines.join("\n");
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(out).then(() => {
+        alert("Export copied to clipboard.");
+      }).catch(() => {
+        downloadText(out, "vitals_export.txt");
+      });
+    }else{
+      downloadText(out, "vitals_export.txt");
+    }
+  }
+
   // =========================
   // Charts
   // =========================
-  function renderCharts(){
-    const canvas = $("chart");
-    const ctx = canvas.getContext("2d");
-    const recs = filteredRecords({fromId:"chartFrom", toId:"chartTo", searchId:null}).slice().reverse(); // chronological
-
-    // Clear
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-
-    if(recs.length === 0){
-      drawChartEmpty(ctx, canvas, "No data in range.");
-      return;
+  function roundRect(ctx, x,y,w,h,r, fill, stroke){
+    const rr = Math.min(r, w/2, h/2);
+    ctx.beginPath();
+    ctx.moveTo(x+rr,y);
+    ctx.arcTo(x+w,y,x+w,y+h,rr);
+    ctx.arcTo(x+w,y+h,x,y+h,rr);
+    ctx.arcTo(x,y+h,x,y,rr);
+    ctx.arcTo(x,y,x+w,y,rr);
+    ctx.closePath();
+    if(fill){
+      ctx.fillStyle = fill;
+      ctx.fill();
     }
-
-    const sys = recs.map(r => r.sys).filter(v => v != null);
-    const dia = recs.map(r => r.dia).filter(v => v != null);
-    const hr  = recs.map(r => r.hr ).filter(v => v != null);
-
-    const all = [...sys,...dia,...hr].filter(v => v != null);
-    if(all.length === 0){
-      drawChartEmpty(ctx, canvas, "No numeric values.");
-      return;
-    }
-
-    const minV = Math.min(...all);
-    const maxV = Math.max(...all);
-    const padV = Math.max(8, Math.round((maxV-minV)*0.12));
-    const yMin = minV - padV;
-    const yMax = maxV + padV;
-
-    const W = canvas.width, H = canvas.height;
-    const pad = {l:62, r:18, t:18, b:56};
-
-    // Background
-    roundRect(ctx, 0, 0, W, H, 22, "rgba(255,255,255,.02)", "rgba(235,245,255,.12)");
-
-    // Grid + axes labels (bigger, readable)
-    ctx.font = "16px system-ui,Segoe UI,Roboto";
-    ctx.fillStyle = "rgba(235,245,255,.60)";
-    ctx.strokeStyle = "rgba(235,245,255,.10)";
-    ctx.lineWidth = 1;
-
-    const ticks = 5;
-    for(let i=0;i<=ticks;i++){
-      const y = pad.t + (H - pad.t - pad.b) * (i/ticks);
-      ctx.beginPath();
-      ctx.moveTo(pad.l, y);
-      ctx.lineTo(W - pad.r, y);
+    if(stroke){
+      ctx.strokeStyle = stroke;
+      ctx.lineWidth = 1;
       ctx.stroke();
-
-      const val = Math.round(yMax - (yMax-yMin)*(i/ticks));
-      ctx.fillText(String(val), 16, y+6);
     }
-
-    // X labels: show up to 4 dates
-    const xCount = recs.length;
-    const labelCount = Math.min(4, xCount);
-    for(let i=0;i<labelCount;i++){
-      const idx = Math.round((xCount-1) * (i/(labelCount-1 || 1)));
-      const x = xTo(idx, xCount, pad, W);
-      const d = new Date(recs[idx].ts);
-      const lab = new Intl.DateTimeFormat(undefined, {month:"2-digit", day:"2-digit"}).format(d);
-      ctx.fillStyle = "rgba(235,245,255,.56)";
-      ctx.fillText(lab, x-16, H-22);
-    }
-
-    // Lines
-    drawSeries(ctx, recs.map(r=>r.sys), yMin, yMax, pad, W, H, "rgba(79,140,255,.98)");
-    drawSeries(ctx, recs.map(r=>r.dia), yMin, yMax, pad, W, H, "rgba(216,224,240,.88)");
-    drawSeries(ctx, recs.map(r=>r.hr ), yMin, yMax, pad, W, H, "rgba(120,220,180,.92)");
-
-    // Legend (larger)
-    const lx = pad.l + 8;
-    let ly = pad.t + 22;
-    ctx.font = "18px system-ui,Segoe UI,Roboto";
-    function legend(text, color){
-      ctx.fillStyle = color;
-      ctx.fillRect(lx, ly-12, 18, 6);
-      ctx.fillStyle = "rgba(235,245,255,.70)";
-      ctx.fillText(text, lx+26, ly-6);
-      ly += 24;
-    }
-    legend("Systolic", "rgba(79,140,255,.98)");
-    legend("Diastolic", "rgba(216,224,240,.88)");
-    legend("Heart Rate", "rgba(120,220,180,.92)");
   }
 
   function drawChartEmpty(ctx, canvas, msg){
@@ -983,24 +867,88 @@
     ctx.stroke();
   }
 
-  function roundRect(ctx, x,y,w,h,r, fill, stroke){
-    const rr = Math.min(r, w/2, h/2);
-    ctx.beginPath();
-    ctx.moveTo(x+rr,y);
-    ctx.arcTo(x+w,y,x+w,y+h,rr);
-    ctx.arcTo(x+w,y+h,x,y+h,rr);
-    ctx.arcTo(x,y+h,x,y,rr);
-    ctx.arcTo(x,y,x+w,y,rr);
-    ctx.closePath();
-    if(fill){
-      ctx.fillStyle = fill;
-      ctx.fill();
+  function renderCharts(){
+    const canvas = $("chart");
+    const ctx = canvas.getContext("2d");
+
+    // For charts, we want chronological for plotting.
+    const recs = filteredRecords({fromId:"chartFrom", toId:"chartTo", searchId:null}).slice().reverse();
+
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    if(recs.length === 0){
+      drawChartEmpty(ctx, canvas, "No data in range.");
+      return;
     }
-    if(stroke){
-      ctx.strokeStyle = stroke;
-      ctx.lineWidth = 1;
+
+    const sys = recs.map(r => r.sys).filter(v => v != null);
+    const dia = recs.map(r => r.dia).filter(v => v != null);
+    const hr  = recs.map(r => r.hr ).filter(v => v != null);
+
+    const all = [...sys,...dia,...hr].filter(v => v != null);
+    if(all.length === 0){
+      drawChartEmpty(ctx, canvas, "No numeric values.");
+      return;
+    }
+
+    const minV = Math.min(...all);
+    const maxV = Math.max(...all);
+    const padV = Math.max(8, Math.round((maxV-minV)*0.12));
+    const yMin = minV - padV;
+    const yMax = maxV + padV;
+
+    const W = canvas.width, H = canvas.height;
+    const pad = {l:62, r:18, t:18, b:56};
+
+    roundRect(ctx, 0, 0, W, H, 22, "rgba(255,255,255,.02)", "rgba(235,245,255,.12)");
+
+    ctx.font = "16px system-ui,Segoe UI,Roboto";
+    ctx.fillStyle = "rgba(235,245,255,.60)";
+    ctx.strokeStyle = "rgba(235,245,255,.10)";
+    ctx.lineWidth = 1;
+
+    const ticks = 5;
+    for(let i=0;i<=ticks;i++){
+      const y = pad.t + (H - pad.t - pad.b) * (i/ticks);
+      ctx.beginPath();
+      ctx.moveTo(pad.l, y);
+      ctx.lineTo(W - pad.r, y);
       ctx.stroke();
+
+      const val = Math.round(yMax - (yMax-yMin)*(i/ticks));
+      ctx.fillText(String(val), 16, y+6);
     }
+
+    // X labels: up to 4
+    const xCount = recs.length;
+    const labelCount = Math.min(4, xCount);
+    for(let i=0;i<labelCount;i++){
+      const idx = Math.round((xCount-1) * (i/(labelCount-1 || 1)));
+      const x = xTo(idx, xCount, pad, W);
+      const d = new Date(recs[idx].ts);
+      const lab = new Intl.DateTimeFormat(undefined, {month:"2-digit", day:"2-digit"}).format(d);
+      ctx.fillStyle = "rgba(235,245,255,.56)";
+      ctx.fillText(lab, x-16, H-22);
+    }
+
+    drawSeries(ctx, recs.map(r=>r.sys), yMin, yMax, pad, W, H, "rgba(79,140,255,.98)");
+    drawSeries(ctx, recs.map(r=>r.dia), yMin, yMax, pad, W, H, "rgba(216,224,240,.88)");
+    drawSeries(ctx, recs.map(r=>r.hr ), yMin, yMax, pad, W, H, "rgba(120,220,180,.92)");
+
+    // Legend
+    const lx = pad.l + 8;
+    let ly = pad.t + 22;
+    ctx.font = "18px system-ui,Segoe UI,Roboto";
+    function legend(text, color){
+      ctx.fillStyle = color;
+      ctx.fillRect(lx, ly-12, 18, 6);
+      ctx.fillStyle = "rgba(235,245,255,.70)";
+      ctx.fillText(text, lx+26, ly-6);
+      ly += 24;
+    }
+    legend("Systolic", "rgba(79,140,255,.98)");
+    legend("Diastolic", "rgba(216,224,240,.88)");
+    legend("Heart Rate", "rgba(120,220,180,.92)");
   }
 
   // =========================
@@ -1020,32 +968,23 @@
   });
 
   function isStandalone(){
-    // Android Chrome: matchMedia works; iOS uses navigator.standalone
     return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
   }
 
   function refreshInstallButton(){
-    const btn = $("btnInstall");
-    if(isStandalone()){
-      btn.textContent = "Uninstall";
-    }else{
-      btn.textContent = "Install";
-    }
+    $("btnInstall").textContent = isStandalone() ? "Uninstall" : "Install";
   }
 
   $("btnInstall").addEventListener("click", async () => {
     if(isStandalone()){
-      // You cannot programmatically uninstall a PWA. Provide clean instruction.
-      // IMPORTANT: uninstall does NOT delete site data automatically (browser-dependent).
       alert(
         "Uninstall:\n\n" +
         "Android: press-and-hold the app icon → Uninstall.\n" +
-        "This usually does NOT delete your saved data, but some devices/browsers may clear it.\n\n" +
-        "If you want to delete data on purpose, clear site storage in your browser settings."
+        "Uninstall typically does NOT delete your saved data, but device/browser behavior can vary.\n\n" +
+        "To delete data on purpose: clear site storage in your browser settings."
       );
       return;
     }
-
     if(deferredPrompt){
       deferredPrompt.prompt();
       try { await deferredPrompt.userChoice; } catch {}
@@ -1053,7 +992,6 @@
       refreshInstallButton();
       return;
     }
-
     alert("Install is available when your browser offers it (menu → Install app).");
   });
 
@@ -1061,8 +999,6 @@
   // Exit
   // =========================
   $("btnExitHome").addEventListener("click", () => {
-    // Web apps cannot reliably close the tab unless opened by script.
-    // Attempt and then instruct.
     window.close();
     setTimeout(() => {
       alert("If it didn’t close: use your phone’s Back/Home.");
@@ -1080,42 +1016,12 @@
   $("btnBackFromLog").addEventListener("click", () => show("home"));
   $("btnBackFromCharts").addEventListener("click", () => show("home"));
 
-  // Add button in the middle on Log row
+  // From log -> add
   $("btnAddFromLog").addEventListener("click", () => show("add"));
 
   // =========================
-  // Save behavior: Save -> Log (new entry at top)
+  // Save: Save -> Log, top focus
   // =========================
-  $("btnSave").addEventListener("click", () => {
-    const sys = intOrNull($("sys").value);
-    const dia = intOrNull($("dia").value);
-    const hr  = intOrNull($("hr").value);
-    const notes = ($("notes").value || "").toString();
-    const symptoms = selectedSymptoms();
-
-    // basic: require at least one numeric value (prevents empty spam)
-    if(sys==null && dia==null && hr==null && !notes.trim() && symptoms.length===0){
-      alert("Enter at least one value (BP, HR, notes, or symptom).");
-      return;
-    }
-
-    const recs = loadRecords();
-    const rec = { ts: Date.now(), sys, dia, hr, notes, symptoms };
-    recs.unshift(rec);
-    saveRecords(recs);
-
-    // After save: go to log and show the new record at top
-    show("log");
-    // ensure date filters default to ALL (blank) so everything shows
-    $("fromDate").value = "";
-    $("toDate").value = "";
-    $("search").value = "";
-    renderLog();
-
-    // scroll list top
-    $("logList").scrollIntoView({behavior:"smooth", block:"start"});
-  });
-
   function intOrNull(v){
     const t = String(v).trim();
     if(!t) return null;
@@ -1124,35 +1030,56 @@
     return Math.round(n);
   }
 
+  $("btnSave").addEventListener("click", () => {
+    const sys = intOrNull($("sys").value);
+    const dia = intOrNull($("dia").value);
+    const hr  = intOrNull($("hr").value);
+    const notes = ($("notes").value || "").toString();
+    const symptoms = selectedSymptoms();
+
+    if(sys==null && dia==null && hr==null && !notes.trim() && symptoms.length===0){
+      alert("Enter at least one value (BP, HR, notes, or symptom).");
+      return;
+    }
+
+    const recs = loadRecords();
+    recs.unshift({ ts: Date.now(), sys, dia, hr, notes, symptoms });
+    saveRecords(recs);
+
+    // Ensure log defaults show ALL data (blank filters)
+    $("fromDate").value = "";
+    $("toDate").value = "";
+    $("search").value = "";
+
+    show("log");        // render + force top focus inside show()
+  });
+
   // =========================
-  // Filters trigger render (Log/Charts)
+  // Filters trigger render
   // =========================
   ["search","fromDate","toDate"].forEach(id => {
     $(id).addEventListener("input", () => renderLog());
     $(id).addEventListener("change", () => renderLog());
   });
-
   ["chartFrom","chartTo"].forEach(id => {
     $(id).addEventListener("input", () => renderCharts());
     $(id).addEventListener("change", () => renderCharts());
   });
 
-  // Export buttons (only on Log/Charts panels)
+  // Export buttons
   $("btnExportLog").addEventListener("click", () => {
     const recs = filteredRecords({fromId:"fromDate", toId:"toDate", searchId:"search"});
     exportText(recs);
   });
-
   $("btnExportCharts").addEventListener("click", () => {
     const recs = filteredRecords({fromId:"chartFrom", toId:"chartTo", searchId:null});
     exportText(recs);
   });
 
   // =========================
-  // PWA manifest inline (single-file)
+  // Manifest + SW (single-file)
   // =========================
   function injectManifest(){
-    // Simple icon as SVG data URL
     const svg =
 `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
   <defs>
@@ -1167,9 +1094,7 @@
   <circle cx="160" cy="290" r="10" fill="rgba(235,245,255,.92)"/>
   <circle cx="382" cy="258" r="10" fill="rgba(235,245,255,.92)"/>
 </svg>`;
-    const encoded = encodeURIComponent(svg)
-      .replace(/'/g,"%27").replace(/"/g,"%22");
-
+    const encoded = encodeURIComponent(svg).replace(/'/g,"%27").replace(/"/g,"%22");
     const icon = `data:image/svg+xml;charset=utf-8,${encoded}`;
 
     const manifest = {
@@ -1179,9 +1104,7 @@
       display: "standalone",
       background_color: "#0b1324",
       theme_color: "#0b1324",
-      icons: [
-        { src: icon, sizes: "512x512", type: "image/svg+xml", purpose: "any" }
-      ]
+      icons: [{ src: icon, sizes: "512x512", type: "image/svg+xml", purpose: "any" }]
     };
 
     const blob = new Blob([JSON.stringify(manifest)], {type:"application/manifest+json"});
@@ -1189,17 +1112,12 @@
     $("manifestLink").setAttribute("href", url);
   }
 
-  // =========================
-  // Service worker (optional). Single-file sw via blob URL.
-  // =========================
   async function registerSW(){
     if(!("serviceWorker" in navigator)) return;
-
     const swCode =
 `self.addEventListener('install', (e)=>{ self.skipWaiting(); });
 self.addEventListener('activate', (e)=>{ e.waitUntil(self.clients.claim()); });
-self.addEventListener('fetch', (e)=>{ /* network-first */ });`;
-
+self.addEventListener('fetch', (e)=>{ });`;
     const blob = new Blob([swCode], {type:"text/javascript"});
     const swUrl = URL.createObjectURL(blob);
     try { await navigator.serviceWorker.register(swUrl); } catch {}
@@ -1213,21 +1131,18 @@ self.addEventListener('fetch', (e)=>{ /* network-first */ });`;
   registerSW();
   refreshInstallButton();
 
-  // Default date filters: blank => ALL data
   $("fromDate").value = "";
   $("toDate").value = "";
   $("chartFrom").value = "";
   $("chartTo").value = "";
 
-  // Initial view
   show("home");
 
-  // Resize handling for time line fitting
   window.addEventListener("resize", () => {
     if(!$("add").classList.contains("hidden")) adjustTimeFont();
   });
 
-})();  
+})();
 </script>
 </body>
 </html>
