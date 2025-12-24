@@ -1,904 +1,934 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Vitals Tracker v2</title>
-  <style>
-    :root{
-      --bg:#000;
-      --panel:#0b0f14;
-      --line:#1f2a33;
-      --text:#fff;
-      --muted:#9aa7b1;
-      --blue:#4da3ff;            /* single source for logo + border */
-      --blue2:#7ecbff;
-      --danger:#ff6b6b;
-      --warn:#ffd36b;
-      --ok:#7dffb2;
-      --focus:#b7e5ff;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Vitals Tracker v2.02</title>
+<style>
+:root{
+  --blue:#2a7fff;
+  --red:#c62828;
+  --green:#2e7d32;
+  --amber:#9a6b00;
+  --ink:#111;
+  --muted:#666;
+  --bg:#fff;
+  --card:#f7f9fc;
+  --border:6px solid var(--blue);
+  --r:16px;
+  --pad:14px;
+  --font: 19px;
+}
 
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      background:var(--bg);
-      color:var(--text);
-      font-family:Arial, Helvetica, sans-serif;
-      padding:12px;
-    }
+*{ box-sizing:border-box; }
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family: Arial, Helvetica, sans-serif;
+  padding:12px;
+}
 
-    .app{
-      max-width:760px;
-      margin:0 auto;
-      border:4px solid var(--blue);
-      border-radius:14px;
-      padding:14px;
-      background:linear-gradient(180deg, rgba(77,163,255,0.08), rgba(0,0,0,0));
-    }
+.app{
+  max-width:860px;
+  margin:0 auto;
+  border:var(--border);
+  border-radius:var(--r);
+  padding:var(--pad);
+}
 
-    .panel{
-      border:1px solid var(--line);
-      background:rgba(11,15,20,0.85);
-      border-radius:12px;
-      padding:12px;
-    }
+.header{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:10px;
+}
+.logo{
+  width:48px;height:48px;border-radius:50%;
+  background:var(--blue);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:800;font-size:22px;
+}
+.title{
+  font-size:20px;
+  font-weight:800;
+}
+.meta{
+  margin-left:auto;
+  font-size:14px;
+  color:#222;
+  text-align:right;
+}
+.meta .v{ font-weight:700; }
+.meta .s{ color:var(--muted); }
 
-    header{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:10px;
-    }
+.nav{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin:10px 0 12px;
+}
+.nav button{
+  font-size:16px;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid #bbb;
+  background:#fff;
+  font-weight:800;
+  cursor:pointer;
+}
+.nav button.active{
+  border-color:var(--blue);
+  outline:3px solid rgba(42,127,255,.25);
+}
+.nav .spacer{ flex:1; min-width:10px; }
+.nav .exit{
+  background:var(--red);
+  border:none;
+  color:#fff;
+}
 
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      min-width:0;
-    }
+.card{
+  background:var(--card);
+  border:1px solid #cfd8ea;
+  border-radius:14px;
+  padding:12px;
+}
 
-    .logo{
-      width:52px;height:52px;border-radius:14px;
-      background:linear-gradient(135deg,var(--blue),var(--blue2));
-      display:flex;align-items:center;justify-content:center;
-      color:#000;font-weight:900;letter-spacing:0.5px;
-      flex:0 0 auto;
-    }
+.row{ display:flex; gap:10px; flex-wrap:wrap; }
+.row > *{ flex:1; min-width:180px; }
 
-    h1{margin:0;font-size:22px;line-height:1.1}
-    .subtitle{color:var(--muted);font-size:12px;margin-top:4px}
+label{ display:block; font-size:14px; color:var(--muted); margin:6px 0 6px; }
+input, textarea, button, select{
+  width:100%;
+  font-size:var(--font);
+  padding:10px;
+  border-radius:12px;
+  border:1px solid #bbb;
+  background:#fff;
+}
+textarea{ min-height:90px; resize:vertical; }
 
-    .header-actions{
-      display:flex; gap:10px; align-items:center;
-      flex:0 0 auto;
-    }
+.small{ font-size:14px; color:var(--muted); margin-top:6px; }
 
-    .btn{
-      border-radius:12px;
-      padding:12px 14px;
-      font-size:16px;
-      font-weight:800;
-      border:none;
-      cursor:pointer;
-      width:auto;
-      min-width:110px;
-    }
+.vitalsline{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.vitalsline .box{
+  flex:1;
+  min-width:180px;
+}
+.vitalsline input{
+  text-align:center;
+  font-weight:800;
+}
 
-    .btn.primary{ background:var(--blue); color:#000; }
-    .btn.secondary{ background:#111; color:var(--text); border:1px solid #2a3a45; }
-    .btn.danger{ background:var(--danger); color:#000; }
-    .btn.ok{ background:var(--ok); color:#000; }
+.steps{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin:10px 0;
+}
+.stepchip{
+  padding:8px 10px;
+  border-radius:999px;
+  border:1px solid #bbb;
+  font-size:14px;
+  font-weight:800;
+  background:#fff;
+  cursor:pointer;
+}
+.stepchip.active{
+  border-color:var(--blue);
+  outline:3px solid rgba(42,127,255,.25);
+}
+.stepchip.done{
+  border-color:var(--green);
+}
 
-    input, select, textarea{
-      width:100%;
-      border-radius:12px;
-      border:1px solid #2a3a45;
-      background:#0a0a0a;
-      color:var(--text);
-      padding:12px 12px;
-      font-size:18px;
-      outline:none;
-    }
-    input:focus, select:focus, textarea:focus{
-      border-color:var(--focus);
-      box-shadow:0 0 0 3px rgba(183,229,255,0.18);
-    }
-    textarea{min-height:90px; resize:vertical; font-size:16px;}
+.symptoms{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px 12px;
+  margin-top:8px;
+}
+.symptoms label{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  border-radius:12px;
+  padding:8px 10px;
+  background:#fff;
+  border:1px solid #ddd;
+  font-size:16px;
+  color:#111;
+}
+.symptoms input[type="checkbox"]{
+  width:auto;
+  transform:scale(1.25);
+}
 
-    label{
-      display:block;
-      font-size:13px;
-      color:var(--muted);
-      margin:10px 0 6px 0;
-    }
+.alert{
+  margin-top:10px;
+  padding:10px;
+  border-radius:12px;
+  font-weight:900;
+}
+.alert.ok{ background:#e8f5e9; color:var(--green); }
+.alert.warn{ background:#fdecea; color:var(--red); }
+.alert.note{ background:#eef5ff; color:#0b3a7a; }
+.alert.mid{ background:#fff7e6; color:var(--amber); }
 
-    .grid-2{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-    }
+.actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:12px;
+}
+.actions button{
+  border:none;
+  cursor:pointer;
+  font-weight:900;
+  font-size:18px;
+  padding:12px 14px;
+  border-radius:12px;
+  width:auto;
+}
+.btn-blue{ background:var(--blue); color:#fff; }
+.btn-gray{ background:#eee; color:#000; border:1px solid #bbb; }
+.btn-red{ background:var(--red); color:#fff; }
 
-    .row-3{
-      display:grid;
-      grid-template-columns:1fr 1fr 1fr;
-      gap:10px;
-    }
+.hr{ height:1px; background:#d6deef; margin:12px 0; }
 
-    @media (max-width:520px){
-      .grid-2{grid-template-columns:1fr}
-      .row-3{grid-template-columns:1fr 1fr 1fr;}
-      .btn{min-width:95px}
-    }
+.logwrap{
+  background:#fff;
+  border:1px solid #cfd8ea;
+  border-radius:14px;
+  padding:12px;
+}
+.logheader{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.logheader input{ max-width:320px; }
+.log{
+  margin-top:10px;
+  max-height:420px;
+  overflow:auto;
+  border-top:1px solid #ddd;
+  padding-top:10px;
+}
+.entry{
+  border:1px solid #ddd;
+  border-radius:14px;
+  padding:10px;
+  margin-bottom:10px;
+}
+.entrytop{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.pill{
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:900;
+  border:1px solid #bbb;
+}
+.pill.ok{ border-color:var(--green); color:var(--green); }
+.pill.warn{ border-color:var(--red); color:var(--red); }
+.kv{
+  margin-top:8px;
+  font-size:16px;
+}
+.entryactions{
+  margin-top:10px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.entryactions button{
+  width:auto;
+  font-size:16px;
+  padding:8px 10px;
+  border-radius:10px;
+  border:1px solid #bbb;
+  background:#fff;
+  font-weight:900;
+}
+.entryactions .danger{
+  border:none;
+  background:var(--red);
+  color:#fff;
+}
 
-    .symptom-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-      margin-top:8px;
-    }
+.hidden{ display:none; }
 
-    .symptom{
-      border:1px solid #2a3a45;
-      background:#0b0f14;
-      color:var(--text);
-      padding:14px 12px;
-      border-radius:14px;
-      font-size:16px;
-      font-weight:800;
-      cursor:pointer;
-      text-align:center;
-      user-select:none;
-    }
-    .symptom[aria-pressed="true"]{
-      border-color:var(--blue2);
-      background:rgba(126,203,255,0.12);
-    }
-
-    .hint{color:var(--muted); font-size:12px; margin-top:6px;}
-
-    .banner{
-      margin-top:12px;
-      border-radius:12px;
-      padding:10px 12px;
-      border:1px solid #2a3a45;
-      background:rgba(0,0,0,0.35);
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-    }
-    .banner strong{display:block; font-size:14px}
-    .banner span{color:var(--muted); font-size:12px}
-    .pill{
-      display:inline-block;
-      padding:4px 10px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:900;
-      border:1px solid;
-      white-space:nowrap;
-      margin-left:8px;
-    }
-    .pill.ok{border-color:rgba(125,255,178,0.5); color:var(--ok); background:rgba(125,255,178,0.12)}
-    .pill.warn{border-color:rgba(255,211,107,0.5); color:var(--warn); background:rgba(255,211,107,0.12)}
-    .pill.danger{border-color:rgba(255,107,107,0.5); color:var(--danger); background:rgba(255,107,107,0.10)}
-
-    .actions{
-      display:flex; flex-wrap:wrap; gap:10px;
-      margin-top:12px;
-    }
-    .actions .btn{flex:1 1 150px}
-
-    details{
-      margin-top:12px;
-      border:1px solid var(--line);
-      background:rgba(0,0,0,0.25);
-      border-radius:12px;
-      padding:10px 12px;
-    }
-    summary{
-      cursor:pointer;
-      font-weight:900;
-      color:var(--blue2);
-      outline:none;
-    }
-    summary:focus{ box-shadow:0 0 0 3px rgba(183,229,255,0.18); border-radius:10px; }
-
-    table{
-      width:100%;
-      border-collapse:collapse;
-      margin-top:12px;
-      font-size:13px;
-    }
-    th, td{
-      border-bottom:1px solid #1e2a33;
-      padding:10px 8px;
-      text-align:left;
-      vertical-align:top;
-    }
-    th{color:var(--blue2); font-size:12px; letter-spacing:0.3px}
-    .small{color:var(--muted); font-size:12px}
-
-    .tag{
-      display:inline-block;
-      padding:2px 8px;
-      border-radius:999px;
-      border:1px solid #2a3a45;
-      color:var(--text);
-      font-size:12px;
-      margin:2px 6px 2px 0;
-      background:rgba(255,255,255,0.03);
-    }
-
-    @media print{
-      body{background:#fff;color:#000;padding:0}
-      .app{border:none;border-radius:0;max-width:none;padding:0;background:none}
-      .no-print{display:none !important}
-      .panel{border:none;background:none;padding:0}
-      th{color:#000}
-      td,th{border-bottom:1px solid #bbb}
-      .tag,.pill{border:1px solid #999;color:#000;background:none}
-    }
-  </style>
+/* Print/PDF: hide navigation and buttons; show log/export content cleanly */
+@media print{
+  body{ padding:0; }
+  .app{ border:none; }
+  .nav, .steps, .actions, .small, .entryactions, .logheader, .printHide{ display:none !important; }
+  .log{ max-height:none; overflow:visible; }
+  .entry{ page-break-inside:avoid; }
+}
+</style>
 </head>
+
 <body>
-  <div class="app" role="application" aria-label="Vitals Tracker v2">
-    <div class="panel">
-      <header class="no-print">
-        <div class="brand">
-          <div class="logo" aria-hidden="true">VT</div>
-          <div style="min-width:0">
-            <h1>Vitals Tracker v2</h1>
-            <div class="subtitle">Local-only BP/HR + symptoms. Simple, accessible, print-ready.</div>
-          </div>
-        </div>
-        <div class="header-actions">
-          <button class="btn secondary" type="button" onclick="exitApp()">Exit</button>
-        </div>
-      </header>
-
-      <!-- DATE/TIME -->
-      <div class="grid-2">
-        <div>
-          <label for="date">Date</label>
-          <input id="date" type="date" />
-        </div>
-        <div>
-          <label for="time">Time</label>
-          <input id="time" type="time" />
-        </div>
-      </div>
-
-      <!-- SYS/DIA/HR ON ONE LINE -->
-      <label>Vitals</label>
-      <div class="row-3">
-        <div>
-          <input id="sys" type="number" inputmode="numeric" placeholder="SYS" aria-label="Systolic" />
-        </div>
-        <div>
-          <input id="dia" type="number" inputmode="numeric" placeholder="DIA" aria-label="Diastolic" />
-        </div>
-        <div>
-          <input id="hr" type="number" inputmode="numeric" placeholder="HR" aria-label="Heart rate" />
-        </div>
-      </div>
-
-      <div class="grid-2">
-        <div>
-          <label for="position">Body position</label>
-          <select id="position">
-            <option>Sitting</option>
-            <option>Standing</option>
-            <option>Lying down</option>
-          </select>
-        </div>
-        <div>
-          <label for="daytype">Day type</label>
-          <select id="daytype">
-            <option value="typical">Typical</option>
-            <option value="bad">Bad spike day</option>
-            <option value="worst">Worst day</option>
-          </select>
-        </div>
-      </div>
-
-      <label for="meds">Meds taken (optional)</label>
-      <input id="meds" type="text" placeholder="e.g., Lisinopril 10mg, Ivabradine, Propranolol" />
-
-      <!-- SYMPTOMS 2-COLUMN + DYNAMIC OTHER -->
-      <label>Symptoms (tap to select)</label>
-      <div id="symptomGrid" class="symptom-grid" role="group" aria-label="Symptom options"></div>
-
-      <div class="grid-2" style="margin-top:10px">
-        <div>
-          <label for="newSymptom">Other (add a new symptom)</label>
-          <input id="newSymptom" type="text" placeholder="Type a new symptom name" />
-          <div class="hint">Add once and it becomes a permanent option.</div>
-        </div>
-        <div style="display:flex;align-items:flex-end">
-          <button class="btn secondary" type="button" onclick="addNewSymptom()">Add symptom</button>
-        </div>
-      </div>
-
-      <label for="notes">Notes (free text)</label>
-      <textarea id="notes" placeholder="Write it exactly how it felt. Short is fine."></textarea>
-
-      <!-- ALERT BANNER (CLINICAL STANDARD CATEGORIES) -->
-      <div class="banner" id="banner" aria-live="polite">
-        <div>
-          <strong id="bannerTitle">No reading yet</strong>
-          <span id="bannerText">Enter SYS/DIA/HR to see clinical category flags.</span>
-        </div>
-        <div id="bannerPills"></div>
-      </div>
-
-      <div class="actions no-print">
-        <button class="btn primary" type="button" id="saveBtn" onclick="saveEntry()">Save</button>
-        <button class="btn secondary" type="button" onclick="resetForm()">Reset</button>
-      </div>
-
-      <!-- ONE PANEL: "MORE" COLLAPSES TO KEEP PRIMARY FLOW SIMPLE -->
-      <details class="no-print">
-        <summary>More</summary>
-
-        <label for="search">Search (notes/symptoms/meds)</label>
-        <input id="search" type="text" placeholder="Type to filter..." oninput="render()" />
-
-        <div class="grid-2">
-          <div>
-            <label for="from">From</label>
-            <input id="from" type="date" onchange="render()" />
-          </div>
-          <div>
-            <label for="to">To</label>
-            <input id="to" type="date" onchange="render()" />
-          </div>
-        </div>
-
-        <div class="grid-2">
-          <div>
-            <label for="symFilter">Symptom filter</label>
-            <select id="symFilter" onchange="render()">
-              <option value="">All</option>
-            </select>
-          </div>
-          <div>
-            <label for="sort">Sort</label>
-            <select id="sort" onchange="render()">
-              <option value="newest">Newest first</option>
-              <option value="oldest">Oldest first</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="actions">
-          <button class="btn secondary" type="button" onclick="exportCSV()">Export CSV</button>
-          <button class="btn secondary" type="button" onclick="backup()">Backup</button>
-          <button class="btn secondary" type="button" onclick="document.getElementById('restoreFile').click()">Restore</button>
-          <input id="restoreFile" type="file" accept="application/json" style="display:none" onchange="restore(event)" />
-          <button class="btn ok" type="button" onclick="printReport()">Print / Save as PDF</button>
-          <button class="btn danger" type="button" onclick="clearAll()">Clear all data</button>
-        </div>
-
-        <div class="hint">Print/PDF uses your current filters.</div>
-      </details>
-
-      <!-- LOG -->
-      <div id="countLine" class="small" style="margin-top:12px"></div>
-      <div id="empty" class="small" style="margin-top:10px; display:none; padding:12px; border:1px dashed #2a3a45; border-radius:12px;">
-        No entries match your filters.
-      </div>
-
-      <div style="overflow:auto">
-        <table aria-label="Vitals log table">
-          <thead>
-            <tr>
-              <th>Date</th><th>Time</th><th>BP</th><th>HR</th><th>Flags</th><th>Symptoms</th><th>Meds</th><th>Notes</th>
-              <th class="no-print">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="log"></tbody>
-        </table>
-      </div>
+<div class="app" role="application" aria-label="Vitals Tracker">
+  <div class="header">
+    <div class="logo" aria-hidden="true">VT</div>
+    <div>
+      <div class="title">Vitals Tracker</div>
+      <div class="small">Fast capture. Clean log. Clinician-ready export.</div>
+    </div>
+    <div class="meta">
+      <div class="v">v2.02</div>
+      <div class="s" id="statusLine">Ready</div>
     </div>
   </div>
 
+  <div class="nav" role="navigation" aria-label="Main navigation">
+    <button id="navCapture" class="active" type="button">Capture</button>
+    <button id="navLog" type="button">Log</button>
+    <button id="navExport" type="button">Export</button>
+    <div class="spacer"></div>
+    <button id="exitBtn" class="exit" type="button">EXIT</button>
+  </div>
+
+  <!-- CAPTURE VIEW -->
+  <section id="viewCapture" class="card" aria-label="Capture vitals">
+    <div class="steps" aria-label="Capture steps">
+      <button id="chip1" class="stepchip active" type="button">1) Vitals</button>
+      <button id="chip2" class="stepchip" type="button">2) Symptoms</button>
+      <button id="chip3" class="stepchip" type="button">3) Notes</button>
+      <button id="chip4" class="stepchip" type="button">4) Review</button>
+    </div>
+
+    <!-- Step 1 -->
+    <div id="step1">
+      <div class="row">
+        <div>
+          <label for="dt">Date & Time</label>
+          <input id="dt" type="datetime-local" aria-label="Date and time"/>
+          <div class="small">Tip: log each reading separately (even 5 minutes apart).</div>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="vitalsline" aria-label="Vitals entry">
+        <div class="box">
+          <label for="sys">SYS</label>
+          <input id="sys" type="number" inputmode="numeric" min="50" max="260" placeholder="Systolic" aria-label="Systolic"/>
+        </div>
+        <div class="box">
+          <label for="dia">DIA</label>
+          <input id="dia" type="number" inputmode="numeric" min="30" max="180" placeholder="Diastolic" aria-label="Diastolic"/>
+        </div>
+        <div class="box">
+          <label for="hr">HR</label>
+          <input id="hr" type="number" inputmode="numeric" min="30" max="220" placeholder="Heart rate" aria-label="Heart rate"/>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-blue" id="next1" type="button">Next</button>
+        <button class="btn-gray" id="clear1" type="button">Clear</button>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div id="step2" class="hidden">
+      <div class="section-title" style="font-weight:900;font-size:18px;">Symptoms</div>
+      <div id="symptomList" class="symptoms" aria-label="Symptoms list"></div>
+
+      <div class="row" style="margin-top:10px;">
+        <div>
+          <label for="customSymptom">Add custom symptom (saved permanently)</label>
+          <input id="customSymptom" type="text" placeholder="e.g., tingling hands" aria-label="Custom symptom"/>
+          <div class="small">Custom symptoms will appear in the list every time.</div>
+        </div>
+        <div style="flex:0.55; min-width:160px;">
+          <label class="printHide">&nbsp;</label>
+          <button id="addSymBtn" class="btn-gray" type="button" style="width:100%;">Add</button>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-gray" id="back2" type="button">Back</button>
+        <button class="btn-blue" id="next2" type="button">Next</button>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div id="step3" class="hidden">
+      <div class="section-title" style="font-weight:900;font-size:18px;">Notes</div>
+      <label for="notes">Optional details</label>
+      <textarea id="notes" placeholder="Meds taken, trigger, what you were doing, etc." aria-label="Notes"></textarea>
+      <div class="small">Keep it simple. Short notes are fine.</div>
+
+      <div class="actions">
+        <button class="btn-gray" id="back3" type="button">Back</button>
+        <button class="btn-blue" id="next3" type="button">Next</button>
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div id="step4" class="hidden">
+      <div class="section-title" style="font-weight:900;font-size:18px;">Review</div>
+      <div class="small" id="reviewLine">—</div>
+
+      <div id="alertBox" class="alert ok" role="status">No clinical alerts detected.</div>
+
+      <div class="hr"></div>
+
+      <div class="actions">
+        <button class="btn-gray" id="back4" type="button">Back</button>
+        <button class="btn-blue" id="saveBtn" type="button">Save Entry</button>
+        <button class="btn-gray" id="clearAll" type="button">Clear Form</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOG VIEW -->
+  <section id="viewLog" class="logwrap hidden" aria-label="Saved log">
+    <div class="logheader">
+      <div style="flex:1;">
+        <div style="font-size:18px;font-weight:900;">Saved Entries</div>
+        <div class="small" id="countText">0 entries</div>
+      </div>
+      <input id="search" type="text" placeholder="Search (symptom/notes/date)" aria-label="Search log"/>
+      <button id="wipeBtn" class="btn-red" type="button" style="width:auto;">Wipe Log</button>
+    </div>
+    <div id="log" class="log"></div>
+  </section>
+
+  <!-- EXPORT VIEW -->
+  <section id="viewExport" class="card hidden" aria-label="Export">
+    <div style="font-size:18px;font-weight:900;">Export</div>
+    <div class="small">PDF uses your device print dialog (“Save as PDF”). CSV downloads a spreadsheet-friendly file.</div>
+
+    <div class="hr"></div>
+
+    <div class="actions">
+      <button class="btn-blue" id="pdfBtn" type="button">PDF</button>
+      <button class="btn-blue" id="csvBtn" type="button">CSV</button>
+      <button class="btn-gray" id="printLogBtn" type="button">Print Log View</button>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="small">
+      Note: browsers often block scripted tab-closing. Use EXIT to clear the form, then close the tab/app normally.
+    </div>
+  </section>
+</div>
+
 <script>
-  const STORAGE_KEY = "vitals_v2_entries";
-  const SYMPTOM_KEY = "vitals_v2_symptoms";
+/* =========================
+   Storage + Constants
+========================= */
+const APP_VERSION = "2.02";
+const KEY_ENTRIES  = "vt_entries";
+const KEY_SYMPTOMS = "vt_symptoms";
+const KEY_SCHEMA   = "vt_schema_version";
 
-  // Default symptom options (user can add permanently)
-  const DEFAULT_SYMPTOMS = [
-    "Sweaty","Panic","Chest tight","Dizzy","Nausea","Blurred vision",
-    "Weakness","Head pain","Hot ears","Shaky","Short breath","Stomach pain",
-    "Anxious","Calm","Foggy"
-  ];
+const DEFAULT_SYMPTOMS = [
+  "Dizziness","Chest tightness","Nausea","Sweating",
+  "Blurred vision","Weakness","Palpitations","Anxiety",
+  "Head pain","Shortness of breath","Tremor","Confusion"
+];
 
-  // DOM
-  const dateEl = document.getElementById("date");
-  const timeEl = document.getElementById("time");
-  const sysEl = document.getElementById("sys");
-  const diaEl = document.getElementById("dia");
-  const hrEl  = document.getElementById("hr");
-  const posEl = document.getElementById("position");
-  const dayEl = document.getElementById("daytype");
-  const medsEl = document.getElementById("meds");
-  const notesEl = document.getElementById("notes");
+function safeParse(x){ try{ return JSON.parse(x); } catch(e){ return null; } }
+function el(id){ return document.getElementById(id); }
+function toNum(v){ const n = Number(v); return Number.isFinite(n) ? n : NaN; }
+function uid(){ return "e_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16); }
 
-  const symptomGrid = document.getElementById("symptomGrid");
-  const newSymptomEl = document.getElementById("newSymptom");
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, m => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"
+  }[m]));
+}
 
-  const bannerTitle = document.getElementById("bannerTitle");
-  const bannerText  = document.getElementById("bannerText");
-  const bannerPills = document.getElementById("bannerPills");
+function ensureSchema(){
+  const v = localStorage.getItem(KEY_SCHEMA);
+  if (!v) localStorage.setItem(KEY_SCHEMA, APP_VERSION);
+  // Future migrations can go here.
+}
 
-  const searchEl = document.getElementById("search");
-  const fromEl = document.getElementById("from");
-  const toEl = document.getElementById("to");
-  const symFilterEl = document.getElementById("symFilter");
-  const sortEl = document.getElementById("sort");
+function loadSymptoms(){
+  const stored = safeParse(localStorage.getItem(KEY_SYMPTOMS));
+  if (Array.isArray(stored) && stored.length) return stored;
+  localStorage.setItem(KEY_SYMPTOMS, JSON.stringify(DEFAULT_SYMPTOMS));
+  return [...DEFAULT_SYMPTOMS];
+}
+function loadEntries(){
+  const stored = safeParse(localStorage.getItem(KEY_ENTRIES));
+  return Array.isArray(stored) ? stored : [];
+}
+function saveEntries(entries){
+  localStorage.setItem(KEY_ENTRIES, JSON.stringify(entries));
+}
 
-  const logEl = document.getElementById("log");
-  const countLine = document.getElementById("countLine");
-  const emptyEl = document.getElementById("empty");
+/* =========================
+   State
+========================= */
+let symptoms = loadSymptoms();
+let entries = loadEntries();
+let editingId = null;
+let currentStep = 1;
 
-  let selectedSymptoms = new Set();
-  let editId = null;
+/* =========================
+   Navigation: Main Views
+========================= */
+function setStatus(text){ el("statusLine").textContent = text; }
 
-  function nowLocal(){
-    const now = new Date();
-    const yyyy = now.getFullYear();
-    const mm = String(now.getMonth()+1).padStart(2,"0");
-    const dd = String(now.getDate()).padStart(2,"0");
-    const hh = String(now.getHours()).padStart(2,"0");
-    const mi = String(now.getMinutes()).padStart(2,"0");
-    return { date:`${yyyy}-${mm}-${dd}`, time:`${hh}:${mi}` };
+function showView(which){
+  const map = {
+    capture: ["viewCapture","navCapture"],
+    log:     ["viewLog","navLog"],
+    export:  ["viewExport","navExport"]
+  };
+
+  // hide all
+  el("viewCapture").classList.add("hidden");
+  el("viewLog").classList.add("hidden");
+  el("viewExport").classList.add("hidden");
+  el("navCapture").classList.remove("active");
+  el("navLog").classList.remove("active");
+  el("navExport").classList.remove("active");
+
+  const [viewId, btnId] = map[which];
+  el(viewId).classList.remove("hidden");
+  el(btnId).classList.add("active");
+
+  if (which === "capture") setStatus("Capture");
+  if (which === "log") { setStatus("Log"); renderLog(); }
+  if (which === "export") setStatus("Export");
+}
+
+el("navCapture").addEventListener("click", ()=>showView("capture"));
+el("navLog").addEventListener("click", ()=>showView("log"));
+el("navExport").addEventListener("click", ()=>showView("export"));
+
+/* =========================
+   Step Flow
+========================= */
+function markChip(){
+  // reset
+  [1,2,3,4].forEach(i=>{
+    el("chip"+i).classList.remove("active");
+  });
+  el("chip"+currentStep).classList.add("active");
+
+  // done markers (basic)
+  el("chip1").classList.toggle("done", hasVitals());
+  el("chip2").classList.toggle("done", selectedSymptoms().length > 0);
+  el("chip3").classList.toggle("done", (el("notes").value||"").trim().length > 0);
+  el("chip4").classList.toggle("done", false);
+}
+
+function showStep(n){
+  currentStep = n;
+  ["step1","step2","step3","step4"].forEach((id, idx)=>{
+    el(id).classList.toggle("hidden", idx !== (n-1));
+  });
+  markChip();
+  if (n === 4) updateReview();
+}
+
+[1,2,3,4].forEach(i=>{
+  el("chip"+i).addEventListener("click", ()=>showStep(i));
+});
+
+function hasVitals(){
+  const sys = toNum(el("sys").value);
+  const dia = toNum(el("dia").value);
+  const hr  = toNum(el("hr").value);
+  return Number.isFinite(sys) && Number.isFinite(dia) && Number.isFinite(hr);
+}
+
+el("next1").addEventListener("click", ()=>{
+  if (!hasVitals()){
+    setAlert(["SYS, DIA, and HR are required before continuing."], true);
+    return;
   }
+  showStep(2);
+});
+el("clear1").addEventListener("click", ()=>{
+  el("sys").value=""; el("dia").value=""; el("hr").value="";
+  setAlert([], false);
+  markChip();
+});
 
-  function getEntries(){
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); }
-    catch { return []; }
-  }
-  function setEntries(entries){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-  }
+el("back2").addEventListener("click", ()=>showStep(1));
+el("next2").addEventListener("click", ()=>showStep(3));
+el("back3").addEventListener("click", ()=>showStep(2));
+el("next3").addEventListener("click", ()=>showStep(4));
+el("back4").addEventListener("click", ()=>showStep(3));
 
-  function getSymptoms(){
-    try{
-      const saved = JSON.parse(localStorage.getItem(SYMPTOM_KEY) || "null");
-      if(Array.isArray(saved) && saved.length) return saved;
-    }catch{}
-    return [...DEFAULT_SYMPTOMS];
-  }
-  function setSymptoms(list){
-    localStorage.setItem(SYMPTOM_KEY, JSON.stringify(list));
-  }
+/* =========================
+   Symptoms
+========================= */
+function renderSymptoms(){
+  const box = el("symptomList");
+  box.innerHTML = "";
 
-  function buildSymptomGrid(){
-    const list = getSymptoms();
-    symptomGrid.innerHTML = "";
-    list.forEach(sym=>{
-      const b = document.createElement("button");
-      b.type = "button";
-      b.className = "symptom";
-      b.textContent = sym;
-      b.setAttribute("aria-pressed", selectedSymptoms.has(sym) ? "true" : "false");
-      b.onclick = ()=>{
-        if(selectedSymptoms.has(sym)) selectedSymptoms.delete(sym);
-        else selectedSymptoms.add(sym);
-        b.setAttribute("aria-pressed", selectedSymptoms.has(sym) ? "true" : "false");
-        renderBanner();
-      };
-      symptomGrid.appendChild(b);
-    });
-  }
+  // Always include "Other" checkbox (notes should capture specifics)
+  const all = [...symptoms, "Other"];
 
-  function addNewSymptom(){
-    const s = (newSymptomEl.value || "").trim();
-    if(!s) return;
-
-    // normalize: title-case-ish, but preserve user intent
-    const list = getSymptoms();
-    const exists = list.some(x => x.toLowerCase() === s.toLowerCase());
-    if(exists){
-      newSymptomEl.value = "";
-      return;
-    }
-    list.push(s);
-    list.sort((a,b)=>a.localeCompare(b));
-    setSymptoms(list);
-
-    selectedSymptoms.add(s);
-    newSymptomEl.value = "";
-    buildSymptomGrid();
-    render();
-  }
-
-  // CLINICAL STANDARD BP CATEGORY FLAGS
-  // Categories (ACC/AHA style): Normal, Elevated, Stage 1, Stage 2, Crisis
-  // Plus hypotension flag (commonly: <90 systolic or <60 diastolic)
-  function bpCategory(sys, dia){
-    if(!Number.isFinite(sys) || !Number.isFinite(dia)) return null;
-
-    const hypotension = (sys < 90 || dia < 60);
-
-    // Hypertensive crisis (commonly: >=180 and/or >=120)
-    if(sys >= 180 || dia >= 120) return {level:"danger", title:"Hypertensive Crisis", text:"Consider urgent evaluation if symptoms are present.", extra: hypotension ? "Low BP flag also present." : ""};
-
-    // Stage 2: >=140 or >=90
-    if(sys >= 140 || dia >= 90) return {level:"danger", title:"High BP (Stage 2)", text:"Above standard threshold. Track pattern and discuss with clinician.", extra: hypotension ? "Low BP flag also present." : ""};
-
-    // Stage 1: 130-139 or 80-89
-    if((sys >= 130 && sys <= 139) || (dia >= 80 && dia <= 89)) return {level:"warn", title:"High BP (Stage 1)", text:"Above target range. Monitor trends and symptoms.", extra: hypotension ? "Low BP flag also present." : ""};
-
-    // Elevated: 120-129 and <80
-    if(sys >= 120 && sys <= 129 && dia < 80) return {level:"warn", title:"Elevated BP", text:"Slightly elevated systolic with normal diastolic.", extra: hypotension ? "Low BP flag also present." : ""};
-
-    // Normal: <120 and <80
-    if(sys < 120 && dia < 80){
-      if(hypotension) return {level:"warn", title:"Low BP pattern", text:"Systolic <90 or diastolic <60 flagged.", extra:""};
-      return {level:"ok", title:"Normal BP", text:"Within standard normal range.", extra:""};
-    }
-
-    // fallback
-    if(hypotension) return {level:"warn", title:"Low BP pattern", text:"Systolic <90 or diastolic <60 flagged.", extra:""};
-    return {level:"ok", title:"BP recorded", text:"", extra:""};
-  }
-
-  function hrFlags(hr){
-    if(!Number.isFinite(hr)) return [];
-    const flags = [];
-    if(hr > 100) flags.push({level:"warn", text:"Tachy (>100)"});
-    if(hr < 60) flags.push({level:"warn", text:"Brady (<60)"});
-    return flags;
-  }
-
-  function dayFlags(){
-    const v = dayEl.value;
-    if(v === "worst") return [{level:"danger", text:"Worst day"}];
-    if(v === "bad") return [{level:"warn", text:"Bad day"}];
-    return [];
-  }
-
-  function renderBanner(){
-    const sys = Number(sysEl.value);
-    const dia = Number(diaEl.value);
-    const hr  = Number(hrEl.value);
-
-    const bp = bpCategory(sys, dia);
-    const pills = [];
-
-    if(bp){
-      bannerTitle.textContent = bp.title;
-      bannerText.textContent = bp.text;
-      pills.push({level:bp.level, text:"BP"});
-      if(bp.extra) pills.push({level:"warn", text:"Note"});
-    }else{
-      bannerTitle.textContent = "No reading yet";
-      bannerText.textContent = "Enter SYS/DIA/HR to see clinical category flags.";
-    }
-
-    hrFlags(hr).forEach(f=>pills.push({level:f.level, text:f.text}));
-    dayFlags().forEach(f=>pills.push({level:f.level, text:f.text}));
-
-    if(selectedSymptoms.size){
-      pills.push({level:"ok", text:`Symptoms: ${selectedSymptoms.size}`});
-    }
-
-    bannerPills.innerHTML = pills.map(p=>`<span class="pill ${p.level}">${escapeHtml(p.text)}</span>`).join("");
-  }
-
-  function validate(entry){
-    const errs = [];
-    if(!entry.date) errs.push("Date required.");
-    if(!entry.time) errs.push("Time required.");
-    if(entry.sys === "" || entry.dia === "" || entry.hr === "") errs.push("SYS/DIA/HR required.");
-    if(Number(entry.sys) <= 0 || Number(entry.dia) <= 0 || Number(entry.hr) <= 0) errs.push("Vitals must be positive numbers.");
-    return errs;
-  }
-
-  function saveEntry(){
-    const entry = {
-      id: editId || crypto.randomUUID(),
-      date: dateEl.value,
-      time: timeEl.value,
-      sys: sysEl.value,
-      dia: diaEl.value,
-      hr:  hrEl.value,
-      position: posEl.value,
-      daytype: dayEl.value,
-      symptoms: Array.from(selectedSymptoms),
-      meds: medsEl.value.trim(),
-      notes: notesEl.value.trim(),
-      createdAt: Date.now()
-    };
-
-    const errs = validate(entry);
-    if(errs.length){ alert(errs.join("\n")); return; }
-
-    const entries = getEntries();
-    const idx = entries.findIndex(e=>e.id === entry.id);
-    if(idx >= 0) entries[idx] = entry;
-    else entries.unshift(entry);
-    setEntries(entries);
-
-    resetForm();
-    render();
-  }
-
-  function resetForm(){
-    editId = null;
-    const n = nowLocal();
-    dateEl.value = n.date;
-    timeEl.value = n.time;
-    sysEl.value = "";
-    diaEl.value = "";
-    hrEl.value  = "";
-    posEl.value = "Sitting";
-    dayEl.value = "typical";
-    medsEl.value = "";
-    notesEl.value = "";
-    selectedSymptoms.clear();
-    document.getElementById("saveBtn").textContent = "Save";
-    buildSymptomGrid();
-    renderBanner();
-    sysEl.focus();
-  }
-
-  function applyFilters(entries){
-    let out = [...entries];
-    const q = (searchEl?.value || "").toLowerCase();
-    const from = fromEl?.value ? new Date(fromEl.value + "T00:00:00") : null;
-    const to   = toEl?.value ? new Date(toEl.value + "T23:59:59") : null;
-    const sf   = symFilterEl?.value || "";
-
-    out = out.filter(e=>{
-      const dt = new Date(e.date + "T" + (e.time || "00:00") + ":00");
-      if(from && dt < from) return false;
-      if(to && dt > to) return false;
-      if(sf){
-        const syms = e.symptoms || [];
-        if(!syms.includes(sf)) return false;
-      }
-      if(q){
-        const hay = [
-          e.notes||"",
-          e.meds||"",
-          (e.symptoms||[]).join(" "),
-          e.position||"",
-          e.daytype||""
-        ].join(" ").toLowerCase();
-        if(!hay.includes(q)) return false;
-      }
-      return true;
-    });
-
-    const sort = sortEl?.value || "newest";
-    out.sort((a,b)=>{
-      const da = new Date(a.date+"T"+(a.time||"00:00")+":00").getTime();
-      const db = new Date(b.date+"T"+(b.time||"00:00")+":00").getTime();
-      return sort === "oldest" ? (da-db) : (db-da);
-    });
-
-    return out;
-  }
-
-  function updateSymptomFilter(entries){
-    const all = new Set();
-    entries.forEach(e => (e.symptoms||[]).forEach(s=>all.add(s)));
-    const current = symFilterEl.value;
-
-    const opts = ["", ...Array.from(all).sort((a,b)=>a.localeCompare(b))];
-    symFilterEl.innerHTML = "";
-    opts.forEach(v=>{
-      const o = document.createElement("option");
-      o.value = v;
-      o.textContent = v ? v : "All";
-      symFilterEl.appendChild(o);
-    });
-    if(opts.includes(current)) symFilterEl.value = current;
-  }
-
-  function entryFlagsText(e){
-    const sys = Number(e.sys), dia = Number(e.dia), hr = Number(e.hr);
-    const bp = bpCategory(sys, dia);
-    const flags = [];
-    if(bp) flags.push(bp.title);
-    hrFlags(hr).forEach(f=>flags.push(f.text));
-    if(e.daytype === "worst") flags.push("Worst day");
-    else if(e.daytype === "bad") flags.push("Bad day");
-    return flags.join("; ");
-  }
-
-  function render(){
-    const entries = getEntries();
-    updateSymptomFilter(entries);
-
-    const filtered = applyFilters(entries);
-    countLine.textContent = `Showing ${filtered.length} of ${entries.length} entries.`;
-
-    logEl.innerHTML = "";
-    if(filtered.length === 0){
-      emptyEl.style.display = "block";
-      return;
-    }
-    emptyEl.style.display = "none";
-
-    filtered.forEach(e=>{
-      const tr = document.createElement("tr");
-      const syms = (e.symptoms||[]).map(s=>`<span class="tag">${escapeHtml(s)}</span>`).join(" ");
-      tr.innerHTML = `
-        <td>${escapeHtml(e.date)}</td>
-        <td>${escapeHtml(e.time)}</td>
-        <td>${escapeHtml(e.sys)}/${escapeHtml(e.dia)}</td>
-        <td>${escapeHtml(e.hr)}</td>
-        <td>${escapeHtml(entryFlagsText(e))}</td>
-        <td>${syms || '<span class="small">—</span>'}</td>
-        <td>${escapeHtml(e.meds||"") || '<span class="small">—</span>'}</td>
-        <td>${escapeHtml(e.notes||"") || '<span class="small">—</span>'}</td>
-        <td class="no-print">
-          <button class="btn secondary" style="min-width:auto;padding:10px 12px;margin-right:8px" onclick="startEdit('${e.id}')">Edit</button>
-          <button class="btn danger" style="min-width:auto;padding:10px 12px" onclick="deleteEntry('${e.id}')">Delete</button>
-        </td>
-      `;
-      logEl.appendChild(tr);
-    });
-  }
-
-  function startEdit(id){
-    const entries = getEntries();
-    const e = entries.find(x=>x.id === id);
-    if(!e) return;
-
-    editId = e.id;
-    dateEl.value = e.date || "";
-    timeEl.value = e.time || "";
-    sysEl.value = e.sys || "";
-    diaEl.value = e.dia || "";
-    hrEl.value  = e.hr || "";
-    posEl.value = e.position || "Sitting";
-    dayEl.value = e.daytype || "typical";
-    medsEl.value = e.meds || "";
-    notesEl.value = e.notes || "";
-
-    selectedSymptoms = new Set(e.symptoms || []);
-    buildSymptomGrid();
-    document.getElementById("saveBtn").textContent = "Save changes";
-    renderBanner();
-    sysEl.focus();
-  }
-
-  function deleteEntry(id){
-    if(!confirm("Delete this entry?")) return;
-    const entries = getEntries().filter(e=>e.id !== id);
-    setEntries(entries);
-    if(editId === id) resetForm();
-    render();
-  }
-
-  function clearAll(){
-    if(!confirm("Delete ALL entries and custom symptoms?")) return;
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(SYMPTOM_KEY);
-    selectedSymptoms.clear();
-    buildSymptomGrid();
-    resetForm();
-    render();
-  }
-
-  function exportCSV(){
-    const entries = applyFilters(getEntries());
-    let csv = "Date,Time,Systolic,Diastolic,HR,Position,DayType,Symptoms,Meds,Notes,Flags\n";
-    entries.forEach(e=>{
-      const symptoms = (e.symptoms||[]).join("; ");
-      const row = [
-        e.date, e.time, e.sys, e.dia, e.hr,
-        e.position||"", e.daytype||"",
-        csvEscape(symptoms),
-        csvEscape(e.meds||""),
-        csvEscape(e.notes||""),
-        csvEscape(entryFlagsText(e))
-      ].join(",");
-      csv += row + "\n";
-    });
-    downloadBlob(csv, "text/csv", "vitals_export.csv");
-  }
-
-  function backup(){
-    const payload = {
-      version: "v2",
-      exportedAt: new Date().toISOString(),
-      symptoms: getSymptoms(),
-      entries: getEntries()
-    };
-    downloadBlob(JSON.stringify(payload, null, 2), "application/json", "vitals_backup.json");
-  }
-
-  function restore(evt){
-    const file = evt.target.files?.[0];
-    evt.target.value = "";
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      try{
-        const payload = JSON.parse(reader.result);
-        if(payload?.entries && Array.isArray(payload.entries)) setEntries(payload.entries);
-        if(payload?.symptoms && Array.isArray(payload.symptoms)) setSymptoms(payload.symptoms);
-        buildSymptomGrid();
-        render();
-        alert("Restore complete.");
-      }catch{
-        alert("Restore failed: invalid file.");
-      }
-    };
-    reader.readAsText(file);
-  }
-
-  function printReport(){
-    window.print();
-  }
-
-  function exitApp(){
-    // Works in some contexts; if blocked, gives a clear instruction.
-    try{
-      window.close();
-      // If close is blocked, window will remain open:
-      setTimeout(()=>{
-        alert("If Exit is blocked, use your device Back button or close the tab/window.");
-      }, 200);
-    }catch{
-      alert("Use your device Back button or close the tab/window.");
-    }
-  }
-
-  function downloadBlob(text, mime, filename){
-    const blob = new Blob([text], {type:mime});
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    URL.revokeObjectURL(a.href);
-    a.remove();
-  }
-
-  function csvEscape(s){
-    const v = String(s ?? "");
-    const needs = /[",\n]/.test(v);
-    const esc = v.replace(/"/g,'""');
-    return needs ? `"${esc}"` : esc;
-  }
-
-  function escapeHtml(s){
-    return String(s ?? "")
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
-
-  // Live banner updates
-  [sysEl, diaEl, hrEl, dayEl].forEach(el=>{
-    el.addEventListener("input", renderBanner);
-    el.addEventListener("change", renderBanner);
+  all.forEach(s=>{
+    const id = "sym_" + s.toLowerCase().replace(/[^a-z0-9]+/g,"_");
+    const label = document.createElement("label");
+    label.innerHTML = `
+      <input id="${id}" type="checkbox" value="${escapeHtml(s)}" aria-label="${escapeHtml(s)}">
+      <span>${escapeHtml(s)}</span>
+    `;
+    box.appendChild(label);
   });
 
-  // Enter on HR saves
-  hrEl.addEventListener("keydown",(e)=>{
-    if(e.key === "Enter"){ e.preventDefault(); saveEntry(); }
+  box.addEventListener("change", ()=>{
+    markChip();
+    if (currentStep === 4) updateReview();
+  }, { once:false });
+}
+
+function selectedSymptoms(){
+  return Array.from(document.querySelectorAll("#symptomList input[type=checkbox]:checked"))
+    .map(cb => cb.value);
+}
+
+function addCustomSymptom(){
+  const val = (el("customSymptom").value||"").trim();
+  if (!val) return;
+  if (val.toLowerCase() === "other") { el("customSymptom").value=""; return; }
+  if (symptoms.some(s=>s.toLowerCase()===val.toLowerCase())){
+    el("customSymptom").value="";
+    return;
+  }
+  symptoms.push(val);
+  localStorage.setItem(KEY_SYMPTOMS, JSON.stringify(symptoms));
+  el("customSymptom").value="";
+  renderSymptoms();
+}
+
+el("addSymBtn").addEventListener("click", addCustomSymptom);
+el("customSymptom").addEventListener("keydown",(e)=>{
+  if (e.key === "Enter"){ e.preventDefault(); addCustomSymptom(); }
+});
+
+/* =========================
+   Clinical Alerts (standard ranges)
+========================= */
+function computeAlerts(sys, dia, hr, symList){
+  const alerts = [];
+
+  if (Number.isFinite(sys) && Number.isFinite(dia)){
+    if (sys >= 180 || dia >= 120) alerts.push({level:"warn", msg:"Hypertensive crisis range"});
+    else if (sys >= 140 || dia >= 90) alerts.push({level:"mid", msg:"High BP range"});
+    else if (sys < 90 || dia < 60) alerts.push({level:"mid", msg:"Low BP range"});
+  }
+
+  if (Number.isFinite(hr)){
+    if (hr > 120) alerts.push({level:"mid", msg:"High heart rate range"});
+    else if (hr < 50) alerts.push({level:"mid", msg:"Low heart rate range"});
+  }
+
+  const redFlagSymptoms = ["Chest tightness","Shortness of breath","Confusion","Weakness","Blurred vision"];
+  const redFlag = redFlagSymptoms.some(s => symList.includes(s));
+
+  if (redFlag && (sys >= 180 || dia >= 120)){
+    alerts.push({level:"warn", msg:"Symptoms + crisis range: consider urgent evaluation"});
+  } else if (redFlag && (sys >= 140 || dia >= 90)){
+    alerts.push({level:"note", msg:"Symptoms + high range: monitor closely; consider calling care team"});
+  }
+
+  return alerts;
+}
+
+function setAlert(alerts, hardWarn){
+  const box = el("alertBox");
+  if (!alerts || alerts.length === 0){
+    box.className = "alert ok";
+    box.textContent = "No clinical alerts detected.";
+    return;
+  }
+  const levels = alerts.map(a=>a.level || "note");
+  const top = hardWarn ? "warn" : (levels.includes("warn") ? "warn" : (levels.includes("mid") ? "mid" : "note"));
+  box.className = "alert " + top;
+  box.textContent = alerts.map(a=>a.msg || a).join(" • ");
+}
+
+function validateVitals(sys, dia, hr){
+  const problems = [];
+  if (!Number.isFinite(sys) || !Number.isFinite(dia) || !Number.isFinite(hr)){
+    problems.push("SYS, DIA, and HR are required.");
+    return problems;
+  }
+  if (sys < 50 || sys > 260) problems.push("SYS looks out of range.");
+  if (dia < 30 || dia > 180) problems.push("DIA looks out of range.");
+  if (hr  < 30 || hr  > 220) problems.push("HR looks out of range.");
+  if (sys <= dia) problems.push("SYS should be higher than DIA.");
+  return problems;
+}
+
+/* =========================
+   Review + Save
+========================= */
+function formatStamp(ts){
+  if (!ts) return "—";
+  const [d,t] = ts.split("T");
+  return `${d} ${t}`;
+}
+
+function updateReview(){
+  const ts = el("dt").value || new Date().toISOString().slice(0,16);
+  const sys = toNum(el("sys").value);
+  const dia = toNum(el("dia").value);
+  const hr  = toNum(el("hr").value);
+  const sym = selectedSymptoms();
+  const notes = (el("notes").value||"").trim();
+
+  el("reviewLine").textContent =
+    `Date/Time: ${formatStamp(ts)} | SYS/DIA/HR: ${Number.isFinite(sys)?sys:"—"}/${Number.isFinite(dia)?dia:"—"}/${Number.isFinite(hr)?hr:"—"} | Symptoms: ${sym.length?sym.join(", "):"None"} | Notes: ${notes?notes:"—"}`;
+
+  const problems = validateVitals(sys, dia, hr);
+  if (problems.length){
+    setAlert(problems.map(p=>({level:"warn", msg:p})), true);
+    return;
+  }
+  const alerts = computeAlerts(sys, dia, hr, sym);
+  setAlert(alerts, false);
+}
+
+["sys","dia","hr","dt","notes"].forEach(id=>{
+  el(id).addEventListener("input", ()=>{
+    markChip();
+    if (currentStep === 4) updateReview();
+  });
+});
+
+function clearForm(){
+  editingId = null;
+  setNow();
+  el("sys").value=""; el("dia").value=""; el("hr").value="";
+  el("notes").value="";
+  document.querySelectorAll("#symptomList input[type=checkbox]").forEach(cb=>cb.checked=false);
+  setAlert([], false);
+  showStep(1);
+  setStatus("Capture");
+}
+
+el("clearAll").addEventListener("click", clearForm);
+
+function saveEntry(){
+  const ts = el("dt").value || new Date().toISOString().slice(0,16);
+  const sys = toNum(el("sys").value);
+  const dia = toNum(el("dia").value);
+  const hr  = toNum(el("hr").value);
+  const sym = selectedSymptoms();
+  const notes = (el("notes").value||"").trim();
+
+  const problems = validateVitals(sys, dia, hr);
+  if (problems.length){
+    setAlert(problems.map(p=>({level:"warn", msg:p})), true);
+    return;
+  }
+
+  const entry = { id: editingId || uid(), ts, sys, dia, hr, symptoms:sym, notes };
+  if (editingId){
+    entries = entries.map(e => e.id === editingId ? entry : e);
+  } else {
+    entries.push(entry);
+  }
+  saveEntries(entries);
+  editingId = null;
+  setStatus("Saved");
+  clearForm();
+}
+
+el("saveBtn").addEventListener("click", saveEntry);
+
+/* =========================
+   Log View
+========================= */
+function renderLog(){
+  el("countText").textContent = `${entries.length} entr${entries.length===1?"y":"ies"}`;
+  const q = (el("search").value||"").trim().toLowerCase();
+  const box = el("log");
+  box.innerHTML = "";
+
+  const filtered = entries
+    .slice()
+    .sort((a,b)=> (b.ts||"").localeCompare(a.ts||""))
+    .filter(e=>{
+      if (!q) return true;
+      const blob = [
+        e.ts, e.sys, e.dia, e.hr,
+        (e.symptoms||[]).join(", "),
+        e.notes||""
+      ].join(" ").toLowerCase();
+      return blob.includes(q);
+    });
+
+  if (filtered.length === 0){
+    const d = document.createElement("div");
+    d.className="small";
+    d.textContent = q ? "No matches." : "No saved entries yet.";
+    box.appendChild(d);
+    return;
+  }
+
+  filtered.forEach(e=>{
+    const sym = e.symptoms || [];
+    const alerts = computeAlerts(e.sys, e.dia, e.hr, sym);
+    const crisis = alerts.some(a=>a.level==="warn");
+
+    const card = document.createElement("div");
+    card.className="entry";
+    card.innerHTML = `
+      <div class="entrytop">
+        <div style="font-weight:900;">${escapeHtml(formatStamp(e.ts))}</div>
+        <div class="pill ${crisis?"warn":"ok"}">${crisis?"ALERT":"OK"}</div>
+        <div class="small">SYS ${e.sys} / DIA ${e.dia} / HR ${e.hr}</div>
+      </div>
+      <div class="kv"><strong>Symptoms:</strong> ${escapeHtml(sym.length?sym.join(", "):"None")}</div>
+      <div class="kv"><strong>Notes:</strong> ${escapeHtml((e.notes||"").trim() || "—")}</div>
+      <div class="small"><strong>Flags:</strong> ${escapeHtml(alerts.length ? alerts.map(a=>a.msg).join(" • ") : "None")}</div>
+      <div class="entryactions">
+        <button data-edit="${escapeHtml(e.id)}" type="button">Edit</button>
+        <button class="danger" data-del="${escapeHtml(e.id)}" type="button">Delete</button>
+      </div>
+    `;
+    box.appendChild(card);
   });
 
-  (function init(){
-    const n = nowLocal();
-    dateEl.value = n.date;
-    timeEl.value = n.time;
-    buildSymptomGrid();
-    renderBanner();
-    render();
-  })();
+  box.querySelectorAll("button[data-del]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const id = btn.getAttribute("data-del");
+      if (!confirm("Delete this entry?")) return;
+      entries = entries.filter(e=>e.id!==id);
+      saveEntries(entries);
+      renderLog();
+    });
+  });
+
+  box.querySelectorAll("button[data-edit]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const id = btn.getAttribute("data-edit");
+      loadEntryForEdit(id);
+    });
+  });
+}
+
+function loadEntryForEdit(id){
+  const e = entries.find(x=>x.id===id);
+  if (!e) return;
+
+  editingId = id;
+  showView("capture");
+  showStep(1);
+
+  el("dt").value = e.ts || new Date().toISOString().slice(0,16);
+  el("sys").value = e.sys ?? "";
+  el("dia").value = e.dia ?? "";
+  el("hr").value  = e.hr  ?? "";
+  el("notes").value = e.notes || "";
+
+  const set = new Set(e.symptoms || []);
+  document.querySelectorAll("#symptomList input[type=checkbox]").forEach(cb=>{
+    cb.checked = set.has(cb.value);
+  });
+
+  setStatus("Editing");
+  showStep(4);
+}
+
+/* =========================
+   Export
+========================= */
+function exportCSV(){
+  const header = ["DateTime","SYS","DIA","HR","Symptoms","Notes"];
+  const rows = entries
+    .slice()
+    .sort((a,b)=> (a.ts||"").localeCompare(b.ts||""))
+    .map(e=>[
+      e.ts || "",
+      e.sys ?? "",
+      e.dia ?? "",
+      e.hr ?? "",
+      (e.symptoms||[]).join("; "),
+      (e.notes||"").replace(/\s+/g," ").trim()
+    ]);
+
+  const csv = [header, ...rows]
+    .map(r => r.map(f => `"${String(f).replace(/"/g,'""')}"`).join(","))
+    .join("\n");
+
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "VitalsTracker_Log.csv";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function exportPDF(){
+  // Uses print stylesheet. Recommend: open Export view first if desired.
+  window.print();
+}
+
+el("csvBtn").addEventListener("click", exportCSV);
+el("pdfBtn").addEventListener("click", exportPDF);
+el("printLogBtn").addEventListener("click", ()=>{
+  showView("log");
+  setTimeout(()=>window.print(), 200);
+});
+
+/* =========================
+   Wipe
+========================= */
+el("wipeBtn").addEventListener("click", ()=>{
+  if (!confirm("Wipe ALL saved entries? This cannot be undone.")) return;
+  entries = [];
+  saveEntries(entries);
+  renderLog();
+});
+
+/* =========================
+   Exit (mobile-safe)
+========================= */
+el("exitBtn").addEventListener("click", ()=>{
+  clearForm();
+  alert("Form cleared.\n\nTo exit:\n- Close this tab, or\n- Swipe away the browser/app.");
+});
+
+/* =========================
+   Boot
+========================= */
+function setNow(){
+  const now = new Date();
+  el("dt").value = now.toISOString().slice(0,16);
+}
+ensureSchema();
+renderSymptoms();
+setNow();
+showView("capture");
+showStep(1);
+setAlert([], false);
+
+el("search").addEventListener("input", renderLog);
 </script>
 </body>
 </html>
