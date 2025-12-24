@@ -357,7 +357,7 @@
         <div class="subtle">Data stays on your phone (local only).</div>
 
         <div class="footerTiny">
-          <div>v1.14</div>
+          <div>v1.15</div>
           <div>developed by Keyth Jyles</div>
         </div>
       </div>
@@ -498,15 +498,16 @@
   const screens = ["home","add","log","charts"];
 
   function focusTopOfPanel(screen){
-    // Make sure the user is at the top of the panel, not stuck at bottom.
+    // Ensure we're at the top without forcing input focus (prevents keyboard pop on Log).
     window.scrollTo({top:0, left:0, behavior:"auto"});
-    if(screen === "log"){
-      // put focus on search field (top of log panel)
-      setTimeout(() => { try{ $("search").focus({preventScroll:true}); }catch{} }, 0);
-    }
+
     if(screen === "add"){
+      // Add screen is fine to focus systolic for faster entry.
       setTimeout(() => { try{ $("sys").focus({preventScroll:true}); }catch{} }, 0);
     }
+
+    // LOG: intentionally do NOT focus anything.
+    // CHARTS/HOME: no focus.
   }
 
   function show(screen){
@@ -633,7 +634,6 @@
     const parent = el.parentElement;
     if(!parent) return;
 
-    // reset any prior shrink so we can re-fit on orientation changes
     el.style.fontSize = "";
     const maxW = parent.clientWidth - 8;
 
@@ -1020,7 +1020,7 @@
   $("btnAddFromLog").addEventListener("click", () => show("add"));
 
   // =========================
-  // Save: Save -> Log, top focus
+  // Save: Save -> Log, top focus (no input focus on Log)
   // =========================
   function intOrNull(v){
     const t = String(v).trim();
@@ -1051,7 +1051,7 @@
     $("toDate").value = "";
     $("search").value = "";
 
-    show("log");        // render + force top focus inside show()
+    show("log");
   });
 
   // =========================
