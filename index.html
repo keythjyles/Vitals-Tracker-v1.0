@@ -135,6 +135,14 @@
       background: transparent;
       border-color: rgba(46,62,92,.75);
     }
+    /* v1.09: small install button */
+    .btn.small{
+      padding: 8px 10px;
+      min-width: 74px;
+      font-size: 13px;
+      border-radius: 12px;
+      box-shadow: 0 5px 12px rgba(0,0,0,.18);
+    }
 
     .homeStack{ display:flex; flex-direction:column; gap: 12px; }
     .btnBig{
@@ -200,7 +208,6 @@
       .grid3 .forceRow{ grid-column: 1 / -1; }
     }
 
-    /* Add screen time line: larger, more prominent */
     .nowline{
       font-size: 18px;
       font-weight: 750;
@@ -212,23 +219,22 @@
       text-overflow: ellipsis;
     }
 
-    /* Symptoms: tightened substantially */
     .symptomsWrap{ margin-top: 2px; padding-top: 0; }
     .symptomsGrid{
       display:grid;
       grid-template-columns: 1fr 1fr;
-      gap: 2px 14px;          /* tighter row gap */
+      gap: 2px 14px;
       align-items:center;
     }
     .symRow{
       display:flex;
       align-items:center;
       gap: 10px;
-      padding: 0;            /* remove vertical padding */
-      margin: 0;             /* remove margins */
+      padding: 0;
+      margin: 0;
       cursor:pointer;
       user-select:none;
-      line-height: 1.15;     /* tighter line height */
+      line-height: 1.15;
     }
     .symRow input[type="checkbox"]{
       appearance:none;
@@ -344,7 +350,6 @@
       letter-spacing: .15px;
     }
 
-    /* Add screen buttons: directly below symptoms list */
     .addButtons{
       margin-top: 12px;
       display:flex;
@@ -371,10 +376,10 @@
         <button class="btn btnBig" id="goCharts">Charts</button>
       </div>
 
-      <!-- Home: no Export at all -->
+      <!-- v1.09: Install (small) left, Exit right; Install shows only if eligible + not installed -->
       <div class="toolbar spread" style="margin-top:14px;">
         <div class="leftGroup">
-          <button class="btn ghost hidden" id="btnInstall">Install</button>
+          <button class="btn ghost small hidden" id="btnInstall">Install</button>
         </div>
         <div class="rightGroup">
           <button class="btn ghost" id="btnExitHome">Exit</button>
@@ -383,7 +388,7 @@
 
       <div class="subtle">Data stays on your phone (local only).</div>
       <div class="metaLine" id="homeCount">Records: 0</div>
-      <div class="homeVersion">v1.07</div>
+      <div class="homeVersion">v1.09</div>
     </div>
 
     <!-- ADD -->
@@ -413,7 +418,6 @@
         <div class="symptomsGrid" id="symptomsGrid"></div>
       </div>
 
-      <!-- Buttons: just below symptoms list -->
       <div class="addButtons">
         <button class="btn primary" id="saveAdd">Save</button>
         <button class="btn" id="backFromAdd">Back</button>
@@ -432,7 +436,6 @@
       <div class="sectionTitle">Search</div>
       <input id="searchBox" placeholder="Type a word: sweaty, dizzy, headache..." />
 
-      <!-- Calendar range (no dropdowns) -->
       <div class="logControls">
         <div>
           <div class="smallLabel">From</div>
@@ -458,7 +461,6 @@
 
       <div class="sectionTitle">Charts</div>
 
-      <!-- Date options (default all) -->
       <div class="logControls">
         <div>
           <div class="smallLabel">From</div>
@@ -544,20 +546,36 @@
     navigator.serviceWorker.register(swUrl, { scope: "./" }).catch(()=>{});
   }
 
-  let deferredPrompt = null;
+  // v1.09: Install button is small and only appears if NOT installed and browser offers beforeinstallprompt
   const btnInstall = document.getElementById("btnInstall");
-  window.addEventListener("beforeinstallprompt", (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    btnInstall.classList.remove("hidden");
-  });
-  btnInstall.addEventListener("click", async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    try { await deferredPrompt.userChoice; } catch(e){}
-    deferredPrompt = null;
+  const isStandalone =
+    (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+    (window.navigator && window.navigator.standalone === true);
+
+  let deferredPrompt = null;
+
+  if (isStandalone) {
     btnInstall.classList.add("hidden");
-  });
+  } else {
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      btnInstall.classList.remove("hidden");
+    });
+
+    btnInstall.addEventListener("click", async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      try { await deferredPrompt.userChoice; } catch(e){}
+      deferredPrompt = null;
+      btnInstall.classList.add("hidden");
+    });
+
+    window.addEventListener("appinstalled", () => {
+      btnInstall.classList.add("hidden");
+      deferredPrompt = null;
+    });
+  }
 })();
 
 /* =========================
@@ -712,7 +730,6 @@ function refreshCounts(){
   const all = loadEntries();
   document.getElementById("homeCount").textContent = `Records: ${all.length}`;
 
-  // Export buttons only appear once there is data
   document.getElementById("btnExportLog").style.display = all.length ? "" : "none";
   document.getElementById("btnExportCharts").style.display = all.length ? "" : "none";
 }
@@ -984,7 +1001,7 @@ chartTo.addEventListener("change", renderCharts);
 
 document.getElementById("btnExportCharts").onclick = () => {
   const data = getChartFiltered();
-  copyText(buildExportText(data.slice().reverse())); // export in newest-first order
+  copyText(buildExportText(data.slice().reverse()));
 };
 
 function drawChart(sys, dia, hr){
@@ -1075,4 +1092,5 @@ document.getElementById("btnExportCharts").style.display = "none";
 show("home");
 </script>
 </body>
-  </html>
+</html>
+```0
