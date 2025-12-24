@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vitals Tracker</title>
+<style>
+  :root{
+    --bg:#ffffff; --fg:#0b0b0b; --muted:#4b4b4b; --card:#f7f7f7; --border:#0b0b0b; --focus:#005fcc;
+    --radius:18px; --font:28px;
+  }
+  body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background:var(--bg); color:var(--fg); font-size:var(--font); line-height:1.25}
+  header{padding:18px; border-bottom:4px solid var(--border)}
+  h1{margin:0; font-size:1.25em}
+  .sub{margin:8px 0 0 0; color:var(--muted); font-size:.9em}
+  main{max-width:980px; margin:0 auto; padding:14px}
+  .card{background:var(--card); border:3px solid var(--border); border-radius:var(--radius); padding:16px; margin-bottom:14px}
+  label{font-weight:900; display:block; margin:14px 0 8px}
+  input, textarea, button, select{
+    font-size:1em; width:100%; padding:14px; border-radius:14px; border:3px solid var(--border); background:var(--bg); color:var(--fg)
+  }
+  textarea{min-height:110px}
+  button{font-weight:900}
+  button.primary{background:var(--fg); color:var(--bg)}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+  .grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px}
+  @media(max-width:820px){ .grid2,.grid3{grid-template-columns:1fr} }
+  :focus{outline:6px solid var(--focus); outline-offset:2px}
+  .tabs{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px}
+  .tab{padding:12px 16px; border-radius:999px; border:3px solid var(--border); background:var(--bg); cursor:pointer}
+  .tab.on{background:var(--fg); color:var(--bg)}
+  .hidden{display:none!important}
+  .checklist{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+  @media(max-width:820px){ .checklist{grid-template-columns:1fr} }
+  .check{display:flex; align-items:center; gap:12px; padding:14px; border:3px solid var(--border); border-radius:16px; background:var(--bg)}
+  .check input{width:34px; height:34px; margin:0}
+  .row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+  .badge{padding:10px 12px; border:3px solid var(--border); border-radius:999px; font-weight:900; background:var(--bg)}
+  .note{color:var(--muted); font-size:.9em}
+  .item{border:3px solid var(--border); border-radius:16px; padding:12px; background:var(--bg); margin-top:10px}
+  .top{display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap}
+  canvas{width:100%; height:auto; border:3px solid var(--border); border-radius:14px; background:var(--bg)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Vitals Tracker</h1>
+  <div class="sub">Big entry • Searchable log • Simple charts</div>
+</header>
+
+<main>
+  <div class="tabs" role="navigation" aria-label="Primary">
+    <button class="tab on" id="tEntry">Add Reading</button>
+    <button class="tab" id="tLog">Log</button>
+    <button class="tab" id="tCharts">Charts</button>
+  </div>
+
+  <!-- ENTRY -->
+  <section class="card" id="pEntry">
+    <div class="grid2">
+      <div>
+        <label for="date">Date</label>
+        <input id="date" type="date">
+      </div>
+      <div>
+        <label for="time">Time</label>
+        <input id="time" type="time">
+      </div>
+    </div>
+
+    <div class="grid3">
+      <div>
+        <label for="sys">Systolic</label>
+        <input id="sys" type="number" inputmode="numeric" min="50" max="300" placeholder="132">
+      </div>
+      <div>
+        <label for="dia">Diastolic</label>
+        <input id="dia" type="number" inputmode="numeric" min="30" max="200" placeholder="84">
+      </div>
+      <div>
+        <label for="hr">Heart rate</label>
+        <input id="hr" type="number" inputmode="numeric" min="30" max="220" placeholder="74">
+      </div>
+    </div>
+
+    <label>Symptoms (tap to select)</label>
+    <div class="checklist" id="symList" role="group" aria-label="Symptoms"></div>
+
+    <label for="symOther">Other symptoms (optional)</label>
+    <input id="symOther" type="text" placeholder="Type anything else (comma-separated)">
+
+    <label for="notes">Notes</label>
+    <textarea id="notes" placeholder="Meds taken, triggers, how you felt, etc."></textarea>
+
+    <div class="row" style="margin-top:10px">
+      <div class="badge" id="badge" aria-live="polite">Enter BP to see category</div>
+      <div class="note" id="crisis" style="font-weight:900; display:none">Possible crisis range. If you feel unwell, seek urgent care / call 911.</div>
+    </div>
+
+    <div class="row" style="margin-top:12px">
+      <button class="primary" id="save">Save</button>
+      <button id="clear">Clear</button>
+    </div>
+
+    <div class="note" style="margin-top:10px">Data stays on this device (browser storage). Not medical advice.</div>
+  </section>
+
+  <!-- LOG -->
+  <section class="card hidden" id="pLog">
+    <label for="q">Search (symptoms or notes)</label>
+    <input id="q" type="text" placeholder="sweaty, panic, propranolol, headache">
+
+    <label for="range">Range</label>
+    <select id="range">
+      <option value="7">Last 7 days</option>
+      <option value="30" selected>Last 30 days</option>
+      <option value="90">Last 90 days</option>
+      <option value="365">Last 365 days</option>
+      <option value="all">All</option>
+    </select>
+
+    <div class="badge" id="summary" style="margin-top:12px" aria-live="polite"></div>
+    <div id="list"></div>
+  </section>
+
+  <!-- CHARTS -->
+  <section class="card hidden" id="pCharts">
+    <label for="crange">Chart range</label>
+    <select id="crange">
+      <option value="7">Last 7 days</option>
+      <option value="30" selected>Last 30 days</option>
+      <option value="90">Last 90 days</option>
+      <option value="365">Last 365 days</option>
+      <option value="all">All</option>
+    </select>
+
+    <label style="margin-top:16px">Blood Pressure Trend</label>
+    <canvas id="cBP" width="900" height="420" aria-label="BP chart" role="img"></canvas>
+
+    <label style="margin-top:16px">Heart Rate Trend</label>
+    <canvas id="cHR" width="900" height="340" aria-label="HR chart" role="img"></canvas>
+
+    <div class="note" style="margin-top:10px">If charts look empty, add readings first.</div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const PRESETS = ["Sweaty hands","Hot ears","Chest tightness","Dizziness","Headache","Panic episode","Brain fog","Nausea / stomach pain","Shortness of breath","Fatigue"];
+  const KEY = "vitals_entries_v1";
+
+  const $ = id => document.getElementById(id);
+
+  const tEntry=$("tEntry"), tLog=$("tLog"), tCharts=$("tCharts");
+  const pEntry=$("pEntry"), pLog=$("pLog"), pCharts=$("pCharts");
+
+  function tab(which){
+    [tEntry,tLog,tCharts].forEach(b=>b.classList.remove("on"));
+    [pEntry,pLog,pCharts].forEach(p=>p.classList.add("hidden"));
+    if(which==="entry"){ tEntry.classList.add("on"); pEntry.classList.remove("hidden"); $("sys").focus(); }
+    if(which==="log"){ tLog.classList.add("on"); pLog.classList.remove("hidden"); renderLog(); }
+    if(which==="charts"){ tCharts.classList.add("on"); pCharts.classList.remove("hidden"); renderCharts(); }
+  }
+  tEntry.onclick=()=>tab("entry");
+  tLog.onclick=()=>tab("log");
+  tCharts.onclick=()=>tab("charts");
+
+  function nowFill(){
+    const d=new Date();
+    const pad=n=>String(n).padStart(2,"0");
+    $("date").value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    $("time").value=`${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  function load(){
+    try{ return JSON.parse(localStorage.getItem(KEY)||"[]"); }catch{ return []; }
+  }
+  function saveAll(arr){
+    localStorage.setItem(KEY, JSON.stringify(arr));
+  }
+  function safeInt(v){ const n=Number(v); return Number.isFinite(n)?Math.round(n):null; }
+
+  function category(sys,dia){
+    if(sys==null||dia==null) return {label:"Enter BP to see category",crisis:false};
+    const crisis = sys>=180 || dia>=120;
+    if(crisis) return {label:"Hypertensive Crisis (possible)", crisis:true};
+    if(sys<120 && dia<80) return {label:"Normal", crisis:false};
+    if(sys>=120 && sys<=129 && dia<80) return {label:"Elevated", crisis:false};
+    if((sys>=130 && sys<=139) || (dia>=80 && dia<=89)) return {label:"High BP Stage 1", crisis:false};
+    if(sys>=140 || dia>=90) return {label:"High BP Stage 2", crisis:false};
+    return {label:"Unclassified", crisis:false};
+  }
+
+  function parseComma(s){
+    return (s||"").split(",").map(x=>x.trim()).filter(Boolean);
+  }
+
+  // build checklist
+  const symList = $("symList");
+  PRESETS.forEach((name,i)=>{
+    const wrap=document.createElement("div");
+    wrap.className="check";
+    const cb=document.createElement("input");
+    cb.type="checkbox"; cb.id="sym_"+i;
+    const lab=document.createElement("label");
+    lab.htmlFor=cb.id; lab.textContent=name; lab.style.margin="0"; lab.style.fontWeight="900";
+    wrap.appendChild(cb); wrap.appendChild(lab);
+    symList.appendChild(wrap);
+  });
+
+  function selectedSymptoms(){
+    const checked=[];
+    PRESETS.forEach((n,i)=>{ if($("sym_"+i).checked) checked.push(n); });
+    const other=parseComma($("symOther").value);
+    return [...checked, ...other];
+  }
+
+  function updateBadge(){
+    const sys=safeInt($("sys").value), dia=safeInt($("dia").value);
+    const c=category(sys,dia);
+    $("badge").textContent=c.label;
+    $("crisis").style.display = c.crisis ? "block" : "none";
+  }
+  $("sys").oninput=updateBadge;
+  $("dia").oninput=updateBadge;
+
+  $("clear").onclick=()=>{
+    $("sys").value=""; $("dia").value=""; $("hr").value="";
+    PRESETS.forEach((_,i)=>$("sym_"+i).checked=false);
+    $("symOther").value=""; $("notes").value="";
+    updateBadge();
+    $("sys").focus();
+  };
+
+  $("save").onclick=()=>{
+    const sys=safeInt($("sys").value), dia=safeInt($("dia").value), hr=safeInt($("hr").value);
+    if(sys==null||dia==null||hr==null){ alert("Enter Systolic, Diastolic, and Heart rate."); return; }
+
+    const date=$("date").value, time=$("time").value;
+    const recordedAt = new Date(`${date}T${time}:00`).toISOString();
+    const entry = {
+      recordedAt, systolic:sys, diastolic:dia, pulse:hr,
+      symptoms: selectedSymptoms(),
+      notes: ($("notes").value||"").trim()
+    };
+
+    const arr=load();
+    arr.push(entry);
+    arr.sort((a,b)=>new Date(a.recordedAt)-new Date(b.recordedAt));
+    saveAll(arr);
+
+    // reset for next entry
+    nowFill();
+    $("sys").value=""; $("dia").value=""; $("hr").value="";
+    PRESETS.forEach((_,i)=>$("sym_"+i).checked=false);
+    $("symOther").value=""; $("notes").value="";
+    $("badge").textContent="Saved.";
+    setTimeout(updateBadge, 600);
+    $("sys").focus();
+  };
+
+  // log
+  function withinDays(iso, days){
+    if(days==="all") return true;
+    const d=new Date(iso), now=new Date();
+    return (now-d) <= (Number(days)*24*60*60*1000);
+  }
+  function fmt(iso){
+    const d=new Date(iso);
+    return d.toLocaleString(undefined,{year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"});
+  }
+  function renderLog(){
+    const q=($("q").value||"").toLowerCase().trim();
+    const r=$("range").value;
+    const arr=load().slice().reverse(); // newest first
+    const filtered=arr.filter(e=>{
+      if(!withinDays(e.recordedAt,r)) return false;
+      if(!q) return true;
+      const hay=(e.symptoms.join(" ")+" "+(e.notes||"")).toLowerCase();
+      return hay.includes(q);
+    });
+
+    const box=$("list");
+    box.innerHTML="";
+    if(filtered.length===0){ $("summary").textContent="No readings match."; return; }
+
+    const avg=(k)=>Math.round(filtered.reduce((s,e)=>s+e[k],0)/filtered.length);
+    $("summary").textContent=`Readings: ${filtered.length}. Avg BP: ${avg("systolic")}/${avg("diastolic")}. Avg HR: ${avg("pulse")}.`;
+
+    filtered.forEach(e=>{
+      const div=document.createElement("div");
+      div.className="item";
+      const c=category(e.systolic,e.diastolic).label;
+      div.innerHTML = `
+        <div class="top">
+          <div style="font-weight:900">${fmt(e.recordedAt)}</div>
+          <div style="font-weight:900">${e.systolic}/${e.diastolic} • HR ${e.pulse}</div>
+        </div>
+        <div class="note" style="margin-top:8px">${c}${e.symptoms.length?" • "+e.symptoms.join(", "):""}${e.notes?" • Notes: "+escapeHtml(e.notes):""}</div>
+      `;
+      box.appendChild(div);
+    });
+  }
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"]/g,c=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+  }
+  $("q").oninput=renderLog;
+  $("range").onchange=renderLog;
+
+  // charts (simple lines)
+  function drawLine(canvasId, values, yLabel){
+    const c=$(canvasId), ctx=c.getContext("2d");
+    const w=c.width, h=c.height, pad=44;
+    ctx.clearRect(0,0,w,h);
+    ctx.lineWidth=3; ctx.strokeStyle="#0b0b0b";
+    // axes
+    ctx.beginPath();
+    ctx.moveTo(pad,pad); ctx.lineTo(pad,h-pad); ctx.lineTo(w-pad,h-pad);
+    ctx.stroke();
+    ctx.font="700 16px system-ui";
+    ctx.fillText(yLabel, 10, pad-10);
+
+    if(values.length===0){
+      ctx.fillText("No readings in range.", pad, pad+24);
+      return;
+    }
+    const ymin=Math.min(...values)-5, ymax=Math.max(...values)+5;
+    const x0=pad+6, x1=w-pad-10, y0=pad+10, y1=h-pad-8;
+
+    ctx.lineWidth=4; ctx.strokeStyle="#0b0b0b";
+    ctx.beginPath();
+    values.forEach((v,i)=>{
+      const x = values.length===1 ? (x0+x1)/2 : x0 + (i/(values.length-1))*(x1-x0);
+      const y = y1 - ((v - ymin)/((ymax-ymin)||1))*(y1-y0);
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+  }
+
+  function renderCharts(){
+    const r=$("crange").value;
+    const arr=load().filter(e=>withinDays(e.recordedAt,r));
+    arr.sort((a,b)=>new Date(a.recordedAt)-new Date(b.recordedAt));
+    drawLine("cBP", arr.map(e=>e.systolic), "Systolic");
+    // overlay diastolic
+    const c=$("cBP"), ctx=c.getContext("2d");
+    if(arr.length){
+      const w=c.width, h=c.height, pad=44;
+      const dia=arr.map(e=>e.diastolic);
+      const ymin=Math.min(...dia)-5, ymax=Math.max(...dia)+5;
+      const x0=pad+6, x1=w-pad-10, y0=pad+10, y1=h-pad-8;
+      ctx.lineWidth=3; ctx.strokeStyle="#4b4b4b";
+      ctx.beginPath();
+      dia.forEach((v,i)=>{
+        const x = dia.length===1 ? (x0+x1)/2 : x0 + (i/(dia.length-1))*(x1-x0);
+        const y = y1 - ((v - ymin)/((ymax-ymin)||1))*(y1-y0);
+        if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      });
+      ctx.stroke();
+      ctx.font="700 16px system-ui";
+      ctx.fillText("Diastolic (gray line)", pad, pad+18);
+    }
+    drawLine("cHR", arr.map(e=>e.pulse), "Heart rate");
+  }
+  $("crange").onchange=renderCharts;
+
+  // init
+  nowFill();
+  updateBadge();
+  $("sys").focus();
+})();
+</script>
+</body>
+</html>
