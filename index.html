@@ -1,1034 +1,1011 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover"
-  />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b1220" />
+  <meta name="color-scheme" content="dark" />
   <title>Vitals Tracker</title>
-  <meta name="theme-color" content="#0b0d10" />
+
+  <!-- PWA: manifest (single-file via data: URI) -->
+  <link id="manifestLink" rel="manifest" href="" />
+
+  <!-- PWA: iOS-friendly -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Vitals Tracker" />
+  <link id="appleTouchIcon" rel="apple-touch-icon" href="" />
 
   <style>
     :root{
-      --bg:#0b0d10;
-      --panel:#111725;
-      --panel2:#151d2f;
+      --bg0:#070b14;
+      --bg1:#0b1220;
+      --card:#101a2a;
+      --card2:#0e1726;
+      --line:#23314a;
+      --line2:#2e3e5c;
+      --text:#d8e0f0;
+      --muted:#9aa8c4;
+      --muted2:#7f8fb0;
+      --accent:#4f8cff;
+      --accent2:#3a72dd;
 
-      /* dimmer whites */
-      --fg:#d6dbea;
-      --muted:#9aa5ba;
+      --radius:18px;
+      --radius2:14px;
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --focus: 0 0 0 3px rgba(79,140,255,.35);
 
-      --border:rgba(255,255,255,.14);
-      --shadow:rgba(0,0,0,.38);
-
-      --accent:#6aa0ff;
-      --accent2:#3f78ea;
-
-      --radius:22px;
-
-      /* tighter */
-      --font:20px;
-      --gap:10px;
-      --pad:14px;
-      --btnpad:14px;
-
-      /* inputs: higher contrast */
-      --inBg: rgba(255,255,255,.07);
-      --inBd: rgba(255,255,255,.30);
-      --inBdFocus: rgba(106,160,255,.62);
-    }
-
-    html, body{
-      height:100%;
-      margin:0;
-      background:var(--bg);
-      color:var(--fg);
-      overflow-x:hidden;
-      -webkit-text-size-adjust: 100%;
-      text-rendering: optimizeLegibility;
-      -webkit-font-smoothing: antialiased;
-      font-family: Roboto, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
-      font-size: var(--font);
-      font-weight: 520;
+      /* sizing (tuned down from “too bold/large”) */
+      --h1: 36px;
+      --h2: 20px;
+      --label: 14px;
+      --body: 15px;
+      --small: 13px;
+      --btn: 14px;
+      --input: 16px;
     }
 
     *{ box-sizing:border-box; }
-    *::before, *::after{ unicode-bidi:isolate; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 700px at 20% -10%, #142443 0%, rgba(20,36,67,0) 55%),
+                  radial-gradient(900px 600px at 90% 10%, rgba(79,140,255,.22) 0%, rgba(79,140,255,0) 55%),
+                  linear-gradient(180deg, var(--bg0), var(--bg1) 55%, #060913);
+      color: var(--text);
+    }
 
     .wrap{
       max-width: 860px;
       margin: 0 auto;
-      padding: 14px 14px 22px;
+      padding: 22px 16px 28px;
     }
 
-    header{
-      padding: 8px 2px 14px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      margin-bottom: 12px;
-    }
-
-    h1{
-      margin:0;
-      font-size: 1.75em;
-      font-weight: 720;
+    .title{
+      font-size: var(--h1);
+      font-weight: 700;
       letter-spacing: .2px;
-      color: rgba(214,219,234,.92);
+      margin: 6px 2px 10px;
+      color: var(--text);
+      text-shadow: 0 2px 14px rgba(0,0,0,.35);
+    }
+
+    .divider{
+      height:1px;
+      background: linear-gradient(90deg, rgba(35,49,74,0), rgba(35,49,74,.85), rgba(35,49,74,0));
+      margin: 10px 0 18px;
     }
 
     .card{
-      background: linear-gradient(180deg, var(--panel), var(--panel2));
-      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(16,26,42,.95), rgba(12,20,34,.92));
+      border: 1px solid rgba(46,62,92,.72);
       border-radius: var(--radius);
-      padding: var(--pad);
-      box-shadow: 0 10px 28px var(--shadow);
-      overflow:hidden;
+      box-shadow: var(--shadow);
+      padding: 14px;
     }
 
-    .row{ display:flex; gap: var(--gap); }
-    .col{ flex:1; min-width: 0; }
-    .stack{ display:flex; flex-direction:column; gap: var(--gap); }
+    .toolbar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:flex-start;
+      margin-bottom: 10px;
+    }
+
+    .btn{
+      appearance:none;
+      border:1px solid rgba(46,62,92,.9);
+      background: linear-gradient(180deg, rgba(22,34,54,.88), rgba(16,26,42,.88));
+      color: var(--text);
+      border-radius: 14px;
+      padding: 10px 14px;
+      font-size: var(--btn);
+      font-weight: 600;
+      letter-spacing: .1px;
+      cursor:pointer;
+      user-select:none;
+      box-shadow: 0 6px 14px rgba(0,0,0,.25);
+      min-width: 98px;
+      text-align:center;
+    }
+    .btn:active{ transform: translateY(1px); }
+    .btn.primary{
+      border-color: rgba(79,140,255,.85);
+      background: linear-gradient(180deg, rgba(79,140,255,.92), rgba(58,114,221,.92));
+      color:#081224;
+    }
+    .btn.ghost{
+      background: transparent;
+      border-color: rgba(46,62,92,.75);
+      color: var(--text);
+    }
+
+    .btnRowBig{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      justify-content:flex-start;
+    }
+    .btnBig{
+      flex: 1 1 150px;
+      padding: 16px 14px;
+      border-radius: 18px;
+      font-size: 18px;
+      font-weight: 700;
+      min-width: 140px;
+    }
+
+    .subtle{
+      color: var(--muted);
+      font-size: var(--small);
+      margin-top: 6px;
+      line-height: 1.35;
+    }
+
+    .sectionTitle{
+      font-size: var(--h2);
+      font-weight: 700;
+      margin: 8px 2px 10px;
+      color: var(--text);
+    }
 
     label{
       display:block;
-      margin: 0 0 6px;
-      font-weight: 640;
-      letter-spacing: .1px;
-      color: rgba(214,219,234,.90);
+      font-size: var(--label);
+      font-weight: 650;
+      color: var(--muted);
+      margin: 10px 2px 6px;
+      letter-spacing: .15px;
     }
 
     input, textarea, select{
       width:100%;
-      font-size: 1em;
-      border-radius: 18px;
-      border: 2px solid var(--inBd);
-      background: var(--inBg);
-      color: rgba(214,219,234,.98);
-      padding: 12px 14px;
-      outline: none;
-      font-weight: 560;
+      padding: 12px 12px;
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      border: 2px solid rgba(46,62,92,.85); /* more contrasting/bold */
+      border-radius: 14px;
+      outline:none;
+      font-size: var(--input);
     }
-
-    input::placeholder, textarea::placeholder{
-      color: rgba(154,165,186,.70);
-      font-weight: 520;
-    }
-
+    input::placeholder, textarea::placeholder{ color: rgba(154,168,196,.65); }
     input:focus, textarea:focus, select:focus{
-      border-color: var(--inBdFocus);
-      box-shadow: 0 0 0 4px rgba(106,160,255,.14);
+      border-color: rgba(79,140,255,.95);
+      box-shadow: var(--focus);
     }
 
-    .btn{
-      width:100%;
-      padding: var(--btnpad);
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.05);
-      color: rgba(214,219,234,.95);
-      font-size: 1.08em;
-      font-weight: 680;
-      letter-spacing: .1px;
-      cursor: pointer;
-      box-shadow: 0 10px 22px rgba(0,0,0,.16);
-    }
-    .btn:active{ transform: translateY(1px); }
-
-    .btn.small{
-      width: auto;
-      flex: 1 1 auto;
-      padding: 11px 12px;
-      border-radius: 18px;
-      font-size: .98em;
-      font-weight: 680;
-      box-shadow: 0 8px 18px rgba(0,0,0,.12);
-    }
-
-    .btn.primary{
-      background: linear-gradient(180deg, var(--accent), var(--accent2));
-      color: #0b1020;
-      border-color: rgba(0,0,0,.18);
-      box-shadow: 0 10px 22px rgba(106,160,255,.14);
-      font-weight: 780;
-    }
-
-    .btn.danger{
-      background: rgba(255,80,80,.10);
-      border-color: rgba(255,80,80,.26);
-      color: rgba(214,219,234,.95);
-    }
-
-    .hint{
-      color: var(--muted);
-      margin-top: 8px;
-      font-size: .90em;
-      font-weight: 540;
-    }
-    .miniHint{
-      color: var(--muted);
-      font-size: .84em;
-      font-weight: 540;
-      margin-top: 6px;
-      line-height: 1.22;
-    }
-
-    .screen{ display:none; }
-    .screen.active{ display:block; }
-
-    .topActions{ display:flex; flex-direction:column; gap: 10px; }
-    .topBar{ display:flex; gap: 10px; align-items:center; flex-wrap: nowrap; }
-
-    .logItem{
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.03);
-      border-radius: 20px;
-      padding: 12px 12px;
-    }
-    .logWhen{
-      color: rgba(154,165,186,.92);
-      font-size: .82em;
-      margin-bottom: 6px;
-      font-weight: 560;
-    }
-    .logBig{
-      font-size: 1.05em;
-      font-weight: 780;
-      letter-spacing: .1px;
-      margin-bottom: 6px;
-      display:flex;
-      justify-content: space-between;
+    .grid3{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 10px;
-      flex-wrap: wrap;
     }
-    .logLine{
-      font-size: .92em;
-      color: rgba(214,219,234,.92);
-      margin: 2px 0;
-      font-weight: 560;
-      overflow-wrap: anywhere;
-    }
-    .logLine b{ font-weight: 760; }
-
-    input[type="date"]{
-      font-size: .92em;
-      padding: 12px 12px;
+    @media (max-width:720px){
+      .grid3{ grid-template-columns: 1fr 1fr; }
+      .grid3 .span2{ grid-column: 1 / -1; }
     }
 
-    .chartBox{
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.16);
-      padding: 12px;
-    }
-    canvas{ width: 100%; height: 270px; display:block; }
-    .chartLegend{
-      display:flex;
-      flex-wrap:wrap;
-      gap: 10px 16px;
-      margin-top: 10px;
-      color: var(--muted);
-      font-size: .88em;
-      font-weight: 560;
+    .nowline{
+      font-size: var(--small);
+      color: var(--muted2);
+      margin: 0 2px 8px;
+      letter-spacing: .2px;
     }
 
-    .toast{ margin-top: 10px; color: var(--muted); font-size: .92em; min-height: 1.1em; font-weight: 540; }
-
-    /* ====== ADD SCREEN: your requested changes ====== */
-
-    /* Time: plain text, no border, not editable-looking */
-    .whenPlain{
-      font-size: .95em;
-      font-weight: 650;
-      color: rgba(214,219,234,.92);
-      padding: 2px 0 6px;
-      user-select: text;
-      -webkit-user-select: text;
-    }
-
-    /* 3 fields on one line */
-    .row.three .col{
-      flex: 1 1 33.333%;
-    }
-
-    /* Notes label and field on next line, full width */
-    .notesLabel span{
-      font-style: italic;
-      font-weight: 560;
-      color: rgba(154,165,186,.95);
-    }
-
-    /* Symptoms: economical list, no borders */
-    .symptomsWrap{
-      margin-top: 2px;
-    }
-    .symptomsGrid{
+    /* economical symptoms list */
+    .symptomsList{
       display:grid;
       grid-template-columns: 1fr 1fr;
-      column-gap: 14px;
-      row-gap: 6px;          /* tight vertical spacing */
-      padding: 0;            /* no padding */
-      margin: 0;
-      border: 0;             /* no border */
-      background: transparent;
-      font-size: .86em;      /* smaller than main text */
+      gap: 6px 10px;            /* tight */
+      padding: 6px 2px 2px;
+      margin: 2px 0 8px;
     }
-    .symptomsItem{
+    @media (max-width:520px){
+      .symptomsList{ grid-template-columns: 1fr; }
+    }
+    .symItem{
       display:flex;
       align-items:center;
       gap: 10px;
-      padding: 0;            /* no pill padding */
-      margin: 0;
-      border: 0;             /* no pill border */
+      padding: 4px 0;          /* no “big pill boxes” */
+    }
+    .symItem input[type="checkbox"]{
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
       background: transparent;
     }
-
-    /* Outline-only checkbox, still visible */
-    .symptomsItem input[type="checkbox"]{
-      -webkit-appearance: none;
-      appearance: none;
-      width: 22px;
-      height: 22px;
-      margin:0;
-      border-radius: 6px;
-      border: 2px solid rgba(255,255,255,.34);
-      background: transparent;
-      position: relative;
-      flex: 0 0 auto;
-    }
-    .symptomsItem input[type="checkbox"]:checked{
-      border-color: rgba(106,160,255,.80);
-      background: rgba(106,160,255,.12);
-    }
-    .symptomsItem input[type="checkbox"]:checked::after{
-      content:"";
-      position:absolute;
-      left: 6px;
-      top: 2px;
-      width: 6px;
-      height: 12px;
-      border-right: 3px solid rgba(106,160,255,.95);
-      border-bottom: 3px solid rgba(106,160,255,.95);
-      transform: rotate(40deg);
-    }
-
-    .symptomsItem span{
-      line-height: 1.05;
+    .symItem span{
+      font-size: 14px;         /* halved feel vs earlier */
+      color: var(--text);
       font-weight: 600;
-      color: rgba(214,219,234,.90);
+      letter-spacing: .1px;
     }
 
-    @media (max-width: 420px){
-      :root{ --font: 19px; }
-      canvas{ height: 250px; }
-      .btn.small{ padding: 10px 10px; font-size: .94em; }
+    .row{
+      display:flex;
+      gap: 10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .pill{
+      display:inline-flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      padding: 10px 12px;
+      background: rgba(255,255,255,.04);
+      border:1px solid rgba(46,62,92,.70);
+      border-radius: 14px;
+      margin: 8px 0 10px;
+      width:100%;
+    }
+
+    .logControls{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      align-items:end;
+      margin-top: 8px;
+    }
+    @media (max-width:600px){
+      .logControls{ grid-template-columns: 1fr; }
+    }
+    .smallLabel{ font-size: 12px; font-weight: 650; color: var(--muted2); margin-bottom: 6px; }
+    .hint{ color: var(--muted2); font-size: 12px; margin-top: 8px; }
+
+    .logList{ margin-top: 12px; display:flex; flex-direction:column; gap:10px; }
+    .entry{
+      background: linear-gradient(180deg, rgba(12,20,34,.92), rgba(10,16,28,.92));
+      border: 1px solid rgba(46,62,92,.72);
+      border-radius: 18px;
+      padding: 12px;
+    }
+    .entryTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:baseline;
+      gap: 10px;
+      margin-bottom: 6px;
+      color: var(--muted2);
+      font-size: 12px;           /* smaller so full date fits */
+      letter-spacing: .15px;
+    }
+    .entryMain{
+      display:flex;
+      justify-content:space-between;  /* BP and HR same line */
+      align-items:baseline;
+      gap: 12px;
+      flex-wrap:wrap;
+      margin-bottom: 6px;
+    }
+    .bp{
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+    .hr{
+      font-size: 18px;
+      font-weight: 750;
+      color: var(--text);
+      opacity: .92;
+      white-space:nowrap;
+    }
+
+    .entryText{
+      font-size: 14px;
+      color: var(--text);
+      opacity: .92;
+      line-height: 1.35;
+    }
+    .entryText b{ color: var(--muted); font-weight: 750; }
+
+    .mutedBlock{
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.35;
+      margin-top: 6px;
+    }
+
+    .hidden{ display:none !important; }
+
+    /* charts */
+    .chartBox{
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(46,62,92,.70);
+      border-radius: 18px;
+      padding: 10px;
+    }
+    canvas{ width:100%; height:260px; display:block; }
+
+    /* accessibility */
+    .sr{
+      position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+      overflow:hidden; clip:rect(0,0,0,0); border:0;
     }
   </style>
 </head>
 
 <body>
   <div class="wrap">
-    <header>
-      <h1>Vitals Tracker</h1>
-    </header>
+    <div class="title">Vitals Tracker</div>
+    <div class="divider"></div>
 
     <!-- HOME -->
-    <section id="home" class="screen active">
-      <div class="card">
-        <div class="topActions">
-          <button class="btn primary" id="goAdd">Add</button>
-          <button class="btn" id="goLog">Log</button>
-          <button class="btn" id="goCharts">Charts</button>
-          <button class="btn" id="exitAppHome">Exit</button>
-        </div>
-        <div class="hint" id="homeHint">Tap “Add” to record BP.</div>
-        <div class="toast" id="homeToast" aria-live="polite"></div>
+    <div id="screenHome" class="card">
+      <div class="btnRowBig">
+        <button class="btn btnBig primary" id="goAdd">Add</button>
+        <button class="btn btnBig" id="goLog">Log</button>
+        <button class="btn btnBig" id="goCharts">Charts</button>
       </div>
-    </section>
+
+      <div class="subtle" id="installHint" style="margin-top:10px;">
+        For full-screen app mode: open this in Chrome → menu → Add to Home screen → Install.
+      </div>
+
+      <div class="toolbar" style="margin-top:12px;">
+        <button class="btn ghost hidden" id="btnInstall">Install</button>
+        <button class="btn ghost" id="btnExportFromHome">Export</button>
+        <button class="btn ghost" id="btnExitHome">Exit</button>
+      </div>
+
+      <div class="subtle">Data stays on your phone (local only).</div>
+    </div>
 
     <!-- ADD -->
-    <section id="add" class="screen">
-      <div class="card stack">
-        <!-- Plain time/date line (no label, no border, not editable) -->
-        <div class="whenPlain" id="whenText"></div>
-
-        <!-- 3 fields on one horizontal line -->
-        <div class="row three">
-          <div class="col">
-            <label for="sys">Systolic</label>
-            <input id="sys" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 132" />
-          </div>
-          <div class="col">
-            <label for="dia">Diastolic</label>
-            <input id="dia" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 91" />
-          </div>
-          <div class="col">
-            <label for="hr">Heart Rate</label>
-            <input id="hr" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 72" />
-          </div>
-        </div>
-
-        <!-- Notes: label line, then full-width input underneath -->
-        <div>
-          <label class="notesLabel" for="notes">Notes <span>(optional)</span></label>
-          <input id="notes" placeholder="optional" />
-        </div>
-
-        <!-- Symptoms: compact list, no borders -->
-        <div class="symptomsWrap">
-          <label>Symptoms</label>
-          <div class="symptomsGrid" id="symptomsGrid"></div>
-        </div>
-
-        <div class="row">
-          <div class="col">
-            <button class="btn primary" id="save">Save</button>
-          </div>
-          <div class="col">
-            <button class="btn" id="cancelAdd">Back</button>
-          </div>
-        </div>
-
-        <div class="toast" id="addToast" aria-live="polite"></div>
+    <div id="screenAdd" class="card hidden" style="margin-top:14px;">
+      <div class="toolbar">
+        <button class="btn primary" id="saveAdd">Save</button>
+        <button class="btn" id="backFromAdd">Back</button>
+        <button class="btn ghost" id="exitFromAdd">Exit</button>
       </div>
-    </section>
+
+      <!-- time ticking away then comma then date; no border, not editable -->
+      <div class="nowline" id="nowLine">Time, Date</div>
+
+      <div class="grid3">
+        <div>
+          <label for="sys">Systolic</label>
+          <input id="sys" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 132" />
+        </div>
+        <div>
+          <label for="dia">Diastolic</label>
+          <input id="dia" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 91" />
+        </div>
+        <div>
+          <label for="hr">Heart Rate</label>
+          <input id="hr" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 72" />
+        </div>
+        <div class="span2"></div>
+      </div>
+
+      <label for="notes">Notes <i style="font-weight:650;color:var(--muted2)">(optional)</i></label>
+      <input id="notes" placeholder="optional" />
+
+      <label style="margin-bottom:4px;">Symptoms</label>
+      <div class="symptomsList" id="symptomsList"></div>
+    </div>
 
     <!-- LOG -->
-    <section id="log" class="screen">
-      <div class="card stack">
-        <div class="topBar">
-          <button class="btn small" id="export">Export</button>
-          <button class="btn small" id="backFromLog">Back</button>
-          <button class="btn small" id="exitAppLog">Exit</button>
-        </div>
-
-        <div class="miniHint" id="exportHint">
-          Export copies the currently filtered log (date + search) as text. Data stays on your phone.
-        </div>
-
-        <div class="row">
-          <div class="col">
-            <label for="search">Search</label>
-            <input id="search" placeholder="Type a word: sweaty, dizzy, heartburn..." />
-            <div class="miniHint">Search looks in symptoms, notes, and BP.</div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col">
-            <label for="fromDate">From</label>
-            <input id="fromDate" type="date" />
-          </div>
-          <div class="col">
-            <label for="toDate">To</label>
-            <input id="toDate" type="date" />
-          </div>
-        </div>
-
-        <div class="miniHint">Tip: set both dates to export a single day.</div>
-
-        <div id="logList" class="stack" aria-live="polite"></div>
-
-        <button class="btn danger" id="clearAll">Delete ALL data (local)</button>
-        <div class="toast" id="logToast" aria-live="polite"></div>
+    <div id="screenLog" class="card hidden" style="margin-top:14px;">
+      <div class="toolbar">
+        <button class="btn primary" id="btnExport">Export</button>
+        <button class="btn" id="backFromLog">Back</button>
+        <button class="btn ghost" id="exitFromLog">Exit</button>
       </div>
-    </section>
+
+      <div class="sectionTitle" style="margin-top:8px;">Search</div>
+      <input id="searchBox" placeholder="Type a word: sweaty, dizzy, headache..." />
+
+      <div class="logControls">
+        <div>
+          <div class="smallLabel">From</div>
+          <select id="fromDate"></select>
+        </div>
+        <div>
+          <div class="smallLabel">To</div>
+          <select id="toDate"></select>
+        </div>
+      </div>
+
+      <div class="logList" id="logList"></div>
+    </div>
 
     <!-- CHARTS -->
-    <section id="charts" class="screen">
-      <div class="card stack">
-        <div class="topBar">
-          <button class="btn small" id="backFromCharts">Back</button>
-          <button class="btn small" id="exitAppCharts">Exit</button>
-        </div>
-
-        <div class="row">
-          <div class="col">
-            <label for="range">Range</label>
-            <select id="range">
-              <option value="7">Last 7 days</option>
-              <option value="30" selected>Last 30 days</option>
-              <option value="90">Last 90 days</option>
-              <option value="365">Last 365 days</option>
-              <option value="all">All</option>
-            </select>
-          </div>
-          <div class="col">
-            <label for="metric">Metric</label>
-            <select id="metric">
-              <option value="bp">Blood Pressure</option>
-              <option value="hr">Heart Rate</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="chartBox">
-          <canvas id="chart" width="800" height="300"></canvas>
-          <div class="chartLegend" id="legend"></div>
-        </div>
-
-        <div class="toast" id="chartToast" aria-live="polite"></div>
+    <div id="screenCharts" class="card hidden" style="margin-top:14px;">
+      <div class="toolbar">
+        <button class="btn" id="backFromCharts">Back</button>
+        <button class="btn ghost" id="exitFromCharts">Exit</button>
       </div>
-    </section>
+
+      <div class="sectionTitle" style="margin-top:8px;">Charts</div>
+      <div class="mutedBlock" id="chartHint"></div>
+
+      <div class="chartBox" style="margin-top:10px;">
+        <canvas id="chartCanvas" width="900" height="260" aria-label="Vitals chart" role="img"></canvas>
+      </div>
+    </div>
   </div>
 
-  <script>
-    const STORAGE_KEY = "vitals_tracker_entries_v1";
+<script>
+/* =========================
+   Single-file PWA implement
+   - manifest via data: URI
+   - service worker via Blob URL
+   - optional in-app Install button if browser provides prompt
+========================= */
 
-    function loadEntries(){
-      try{
-        const raw = localStorage.getItem(STORAGE_KEY);
-        const arr = raw ? JSON.parse(raw) : [];
-        return Array.isArray(arr) ? arr : [];
-      }catch(e){ return []; }
-    }
-    function saveEntries(entries){
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-    }
-    function nowISO(){ return new Date().toISOString(); }
+(function setupPWA(){
+  // manifest (data URI)
+  const iconSVG = encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512">
+      <defs>
+        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#4f8cff"/>
+          <stop offset="1" stop-color="#101a2a"/>
+        </linearGradient>
+      </defs>
+      <rect width="512" height="512" rx="120" fill="url(#g)"/>
+      <g fill="#081224" opacity="0.95">
+        <rect x="120" y="130" width="272" height="252" rx="34" fill="#d8e0f0" opacity="0.95"/>
+      </g>
+      <path d="M170 300h55l25-60 40 120 30-70h55" fill="none" stroke="#081224" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="256" y="210" text-anchor="middle" font-family="system-ui,Segoe UI,Roboto,Arial" font-size="52" font-weight="800" fill="#081224">VT</text>
+    </svg>
+  `);
 
-    // Add screen: time ticking, then comma, then date; no labels
-    function formatWhenPlain(iso){
-      const d = new Date(iso);
-      if (isNaN(d.getTime())) return iso;
-      const time = d.toLocaleTimeString(undefined, { hour:"2-digit", minute:"2-digit", second:"2-digit" });
-      const date = d.toLocaleDateString(undefined, { year:"numeric", month:"2-digit", day:"2-digit" });
-      return `${time}, ${date}`;
-    }
+  const iconData = "data:image/svg+xml;charset=utf-8," + iconSVG;
 
-    function formatWhenForLog(iso){
-      const d = new Date(iso);
-      if (isNaN(d.getTime())) return iso;
-      return d.toLocaleString(undefined, {
-        year:"numeric", month:"2-digit", day:"2-digit",
-        hour:"2-digit", minute:"2-digit", second:"2-digit"
+  const manifest = {
+    name: "Vitals Tracker",
+    short_name: "Vitals",
+    start_url: "./",
+    scope: "./",
+    display: "standalone",
+    background_color: "#0b1220",
+    theme_color: "#0b1220",
+    icons: [
+      { src: iconData, sizes: "512x512", type: "image/svg+xml", purpose: "any maskable" }
+    ]
+  };
+
+  const manifestJSON = encodeURIComponent(JSON.stringify(manifest));
+  document.getElementById("manifestLink").href = "data:application/manifest+json;charset=utf-8," + manifestJSON;
+  document.getElementById("appleTouchIcon").href = iconData;
+
+  // service worker (Blob URL)
+  if ("serviceWorker" in navigator) {
+    const swCode = `
+      const CACHE = "vitals-tracker-singlefile-cache-v1";
+      self.addEventListener("install", (e) => {
+        e.waitUntil(
+          caches.open(CACHE).then((cache) => cache.addAll(["./"]))
+        );
+        self.skipWaiting();
       });
-    }
-
-    function clampInt(s){
-      const n = parseInt(String(s).replace(/[^\d]/g,''), 10);
-      return Number.isFinite(n) ? n : null;
-    }
-
-    function startOfDayMs(yyyy_mm_dd){
-      if(!yyyy_mm_dd) return null;
-      const [y,m,d] = yyyy_mm_dd.split("-").map(n=>parseInt(n,10));
-      if(!y || !m || !d) return null;
-      return new Date(y, m-1, d, 0,0,0,0).getTime();
-    }
-    function endOfDayMs(yyyy_mm_dd){
-      if(!yyyy_mm_dd) return null;
-      const [y,m,d] = yyyy_mm_dd.split("-").map(n=>parseInt(n,10));
-      if(!y || !m || !d) return null;
-      return new Date(y, m-1, d, 23,59,59,999).getTime();
-    }
-
-    const screens = {
-      home: document.getElementById("home"),
-      add: document.getElementById("add"),
-      log: document.getElementById("log"),
-      charts: document.getElementById("charts"),
-    };
-
-    function setToast(id, msg){
-      const el = document.getElementById(id);
-      if(el) el.textContent = msg || "";
-    }
-
-    function show(name){
-      Object.values(screens).forEach(s => s.classList.remove("active"));
-      screens[name].classList.add("active");
-      setToast("homeToast","");
-      setToast("addToast","");
-      setToast("logToast","");
-      setToast("chartToast","");
-      if(name === "add") startAdd();
-      if(name === "log") renderLog();
-      if(name === "charts") renderChart();
-      if(name === "home") refreshHomeHint();
-    }
-
-    function exitApp(){
-      window.location.href = "about:blank";
-    }
-
-    document.getElementById("exitAppHome").addEventListener("click", exitApp);
-    document.getElementById("exitAppLog").addEventListener("click", exitApp);
-    document.getElementById("exitAppCharts").addEventListener("click", exitApp);
-
-    // Symptoms: compact list items, no borders
-    const SYMPTOMS = [
-      "Sweaty","Dizzy","Panic","Brain fog",
-      "Chest tight","Headache","Nausea","Short breath",
-      "Hot ears","Shaky","Blurred vision","Weakness"
-    ];
-
-    const symptomsGrid = document.getElementById("symptomsGrid");
-
-    function buildSymptoms(){
-      symptomsGrid.innerHTML = "";
-      SYMPTOMS.forEach((name, i) => {
-        const id = "sym_" + i;
-
-        const wrap = document.createElement("label");
-        wrap.className = "symptomsItem";
-        wrap.setAttribute("for", id);
-
-        const cb = document.createElement("input");
-        cb.type = "checkbox";
-        cb.id = id;
-        cb.dataset.symptom = name;
-
-        const txt = document.createElement("span");
-        txt.textContent = name;
-
-        wrap.appendChild(cb);
-        wrap.appendChild(txt);
-        symptomsGrid.appendChild(wrap);
+      self.addEventListener("activate", (e) => {
+        e.waitUntil(
+          caches.keys().then(keys => Promise.all(keys.map(k => (k !== CACHE) ? caches.delete(k) : null)))
+        );
+        self.clients.claim();
       });
-    }
-    buildSymptoms();
+      self.addEventListener("fetch", (e) => {
+        const req = e.request;
+        if (req.method !== "GET") return;
+        e.respondWith(
+          caches.match(req).then((cached) => {
+            if (cached) return cached;
+            return fetch(req).then((resp) => {
+              const copy = resp.clone();
+              caches.open(CACHE).then((cache) => cache.put(req, copy)).catch(()=>{});
+              return resp;
+            }).catch(() => cached);
+          })
+        );
+      });
+    `;
+    const swBlob = new Blob([swCode], { type: "text/javascript" });
+    const swUrl = URL.createObjectURL(swBlob);
+    navigator.serviceWorker.register(swUrl, { scope: "./" }).catch(()=>{});
+  }
 
-    function getCheckedSymptoms(){
-      const cbs = symptomsGrid.querySelectorAll("input[type=checkbox]");
-      const out = [];
-      cbs.forEach(cb => { if(cb.checked) out.push(cb.dataset.symptom); });
-      return out;
-    }
-    function clearSymptoms(){
-      symptomsGrid.querySelectorAll("input[type=checkbox]").forEach(cb => cb.checked = false);
-    }
+  // install prompt button (where supported)
+  let deferredPrompt = null;
+  const btnInstall = document.getElementById("btnInstall");
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    btnInstall.classList.remove("hidden");
+    document.getElementById("installHint").classList.add("hidden");
+  });
 
-    const sysEl = document.getElementById("sys");
-    const diaEl = document.getElementById("dia");
-    const hrEl  = document.getElementById("hr");
-    const notesEl = document.getElementById("notes");
-    const whenTextEl = document.getElementById("whenText");
+  btnInstall.addEventListener("click", async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    try { await deferredPrompt.userChoice; } catch(e){}
+    deferredPrompt = null;
+    btnInstall.classList.add("hidden");
+  });
+})();
 
-    let addTimestampISO = null;
-    let whenTimer = null;
+/* =========================
+   App state / storage
+========================= */
+const STORAGE_KEY = "vitals_tracker_entries_v1";
 
-    function startAdd(){
-      sysEl.value = "";
-      diaEl.value = "";
-      hrEl.value  = "";
-      notesEl.value = "";
-      clearSymptoms();
+const SYMPTOMS = [
+  "Sweaty","Dizzy","Panic","Brain fog","Chest tight","Headache","Nausea","Short breath",
+  "Hot ears","Shaky","Blurred vision","Weakness"
+];
 
-      addTimestampISO = nowISO();
-      whenTextEl.textContent = formatWhenPlain(addTimestampISO);
+function loadEntries(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  }catch(e){ return []; }
+}
+function saveEntries(entries){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+}
 
-      if(whenTimer) clearInterval(whenTimer);
-      whenTimer = setInterval(() => {
-        addTimestampISO = nowISO();
-        whenTextEl.textContent = formatWhenPlain(addTimestampISO);
-      }, 1000);
+function pad2(n){ return String(n).padStart(2,"0"); }
+function fmtDateTimeLocal(iso){
+  const d = new Date(iso);
+  const mm = pad2(d.getMonth()+1);
+  const dd = pad2(d.getDate());
+  const yyyy = d.getFullYear();
+  let hh = d.getHours();
+  const ampm = hh >= 12 ? "PM" : "AM";
+  hh = hh % 12; if (hh === 0) hh = 12;
+  const min = pad2(d.getMinutes());
+  const sec = pad2(d.getSeconds());
+  return `${mm}/${dd}/${yyyy}, ${pad2(hh)}:${min}:${sec} ${ampm}`;
+}
+function fmtDateOnly(iso){
+  const d = new Date(iso);
+  return `${pad2(d.getMonth()+1)}/${pad2(d.getDate())}/${d.getFullYear()}`;
+}
+function isoDayKey(iso){
+  const d = new Date(iso);
+  return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+}
+function clampInt(v){
+  const n = parseInt(String(v).trim(), 10);
+  return Number.isFinite(n) ? n : null;
+}
 
-      setTimeout(() => sysEl.focus(), 120);
-    }
+/* =========================
+   Screens / navigation
+========================= */
+const screens = {
+  home: document.getElementById("screenHome"),
+  add: document.getElementById("screenAdd"),
+  log: document.getElementById("screenLog"),
+  charts: document.getElementById("screenCharts"),
+};
+function show(name){
+  Object.keys(screens).forEach(k => screens[k].classList.toggle("hidden", k !== name));
+  if (name === "log") renderLog();
+  if (name === "charts") renderCharts();
+  if (name === "add") resetAdd();
+}
 
-    document.getElementById("save").addEventListener("click", () => {
-      const sys = clampInt(sysEl.value);
-      const dia = clampInt(diaEl.value);
-      const hr  = clampInt(hrEl.value);
+document.getElementById("goAdd").onclick = () => show("add");
+document.getElementById("goLog").onclick = () => show("log");
+document.getElementById("goCharts").onclick = () => show("charts");
 
-      if(sys === null || dia === null || hr === null){
-        setToast("addToast","Enter Systolic, Diastolic, and Heart Rate.");
-        return;
-      }
-      if(sys < 50 || sys > 300 || dia < 30 || dia > 200 || hr < 25 || hr > 250){
-        setToast("addToast","Numbers look off. Please re-check.");
-        return;
-      }
+document.getElementById("backFromAdd").onclick = () => show("home");
+document.getElementById("backFromLog").onclick = () => show("home");
+document.getElementById("backFromCharts").onclick = () => show("home");
 
-      const entry = {
-        t: addTimestampISO || nowISO(),
-        sys, dia, hr,
-        symptoms: getCheckedSymptoms(),
-        notes: (notesEl.value || "").trim()
-      };
+document.getElementById("btnExportFromHome").onclick = () => { show("log"); setTimeout(()=>doExport(), 50); };
 
-      const entries = loadEntries();
-      entries.push(entry);
-      entries.sort((a,b) => new Date(b.t) - new Date(a.t));
-      saveEntries(entries);
+/* Exit behavior: browsers generally block programmatic close unless opened by script.
+   We'll offer: try window.close(); if blocked, navigate to blank as a “soft exit”. */
+function doExit(){
+  try{ window.close(); }catch(e){}
+  // fallback (user can hit back/home)
+  setTimeout(()=>{ try{ window.location.href = "about:blank"; }catch(e){} }, 250);
+}
+document.getElementById("btnExitHome").onclick = doExit;
+document.getElementById("exitFromAdd").onclick = doExit;
+document.getElementById("exitFromLog").onclick = doExit;
+document.getElementById("exitFromCharts").onclick = doExit;
 
-      if(whenTimer) clearInterval(whenTimer);
-      document.getElementById("homeToast").textContent = "Saved.";
-      show("home");
+/* =========================
+   Add screen
+========================= */
+const elNowLine = document.getElementById("nowLine");
+const elSys = document.getElementById("sys");
+const elDia = document.getElementById("dia");
+const elHr = document.getElementById("hr");
+const elNotes = document.getElementById("notes");
+const elSymptomsList = document.getElementById("symptomsList");
+
+let addTimer = null;
+let currentStampISO = null;
+
+function buildSymptoms(){
+  elSymptomsList.innerHTML = "";
+  SYMPTOMS.forEach((name, idx) => {
+    const row = document.createElement("label");
+    row.className = "symItem";
+    row.style.margin = "0";
+    row.style.cursor = "pointer";
+
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.value = name;
+    cb.id = "sym_" + idx;
+
+    const txt = document.createElement("span");
+    txt.textContent = name;
+
+    row.appendChild(cb);
+    row.appendChild(txt);
+    elSymptomsList.appendChild(row);
+  });
+}
+buildSymptoms();
+
+function tickNow(){
+  const d = new Date();
+  // “Time then Date”, no labels, no border
+  let hh = d.getHours();
+  const ampm = hh >= 12 ? "PM" : "AM";
+  hh = hh % 12; if (hh === 0) hh = 12;
+  const min = pad2(d.getMinutes());
+  const sec = pad2(d.getSeconds());
+  const time = `${pad2(hh)}:${min}:${sec} ${ampm}`;
+  const date = `${pad2(d.getMonth()+1)}/${pad2(d.getDate())}/${d.getFullYear()}`;
+  elNowLine.textContent = `${time}, ${date}`;
+  currentStampISO = d.toISOString();
+}
+
+function resetAdd(){
+  elSys.value = "";
+  elDia.value = "";
+  elHr.value = "";
+  elNotes.value = "";
+  elSymptomsList.querySelectorAll("input[type=checkbox]").forEach(cb => cb.checked = false);
+
+  tickNow();
+  if (addTimer) clearInterval(addTimer);
+  addTimer = setInterval(tickNow, 1000);
+}
+
+document.getElementById("saveAdd").onclick = () => {
+  const sys = clampInt(elSys.value);
+  const dia = clampInt(elDia.value);
+  const hr  = clampInt(elHr.value);
+
+  if (sys === null || dia === null || hr === null){
+    alert("Enter Systolic, Diastolic, and Heart Rate.");
+    return;
+  }
+
+  const notes = String(elNotes.value || "").trim();
+  const symptoms = Array.from(elSymptomsList.querySelectorAll("input[type=checkbox]:checked"))
+    .map(cb => cb.value);
+
+  const entry = {
+    id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2),
+    ts: currentStampISO || new Date().toISOString(),
+    sys, dia, hr,
+    symptoms,
+    notes
+  };
+
+  const entries = loadEntries();
+  entries.unshift(entry);
+  saveEntries(entries);
+
+  show("home");
+};
+
+/* =========================
+   Log screen + filters + export
+========================= */
+const elSearch = document.getElementById("searchBox");
+const elFrom = document.getElementById("fromDate");
+const elTo = document.getElementById("toDate");
+const elLogList = document.getElementById("logList");
+
+function buildDateOptions(entries){
+  // Unique days present in data (descending)
+  const days = Array.from(new Set(entries.map(e => isoDayKey(e.ts)))).sort().reverse();
+  const opts = ['(any)', ...days.map(d => d)];
+  function setSelect(sel){
+    sel.innerHTML = "";
+    opts.forEach(v => {
+      const o = document.createElement("option");
+      o.value = v;
+      o.textContent = v === "(any)" ? "(any)" : v;
+      sel.appendChild(o);
     });
+  }
+  setSelect(elFrom);
+  setSelect(elTo);
+}
 
-    document.getElementById("cancelAdd").addEventListener("click", () => {
-      if(whenTimer) clearInterval(whenTimer);
-      show("home");
+function passesDateRange(entry, fromKey, toKey){
+  const k = isoDayKey(entry.ts);
+  if (fromKey && fromKey !== "(any)" && k < fromKey) return false;
+  if (toKey && toKey !== "(any)" && k > toKey) return false;
+  return true;
+}
+
+function passesSearch(entry, q){
+  if (!q) return true;
+  const s = q.toLowerCase();
+  const hay = [
+    `${entry.sys}/${entry.dia}`,
+    String(entry.hr),
+    (entry.symptoms || []).join(", "),
+    String(entry.notes || "")
+  ].join(" | ").toLowerCase();
+  return hay.includes(s);
+}
+
+function getFilteredEntries(){
+  const entries = loadEntries();
+  const q = String(elSearch.value || "").trim();
+  const fromKey = elFrom.value || "(any)";
+  const toKey = elTo.value || "(any)";
+
+  return entries.filter(e => passesDateRange(e, fromKey, toKey) && passesSearch(e, q));
+}
+
+function renderLog(){
+  const entries = loadEntries();
+  buildDateOptions(entries);
+
+  // If user had selections, keep if still present
+  // (best-effort; if not present, default "(any)")
+  const fromPrev = elFrom.value || "(any)";
+  const toPrev = elTo.value || "(any)";
+  if ([...elFrom.options].some(o => o.value === fromPrev)) elFrom.value = fromPrev;
+  if ([...elTo.options].some(o => o.value === toPrev)) elTo.value = toPrev;
+
+  const filtered = getFilteredEntries();
+  elLogList.innerHTML = "";
+
+  if (filtered.length === 0){
+    const empty = document.createElement("div");
+    empty.className = "mutedBlock";
+    empty.textContent = "No matching entries.";
+    elLogList.appendChild(empty);
+    return;
+  }
+
+  filtered.forEach(e => {
+    const card = document.createElement("div");
+    card.className = "entry";
+
+    const top = document.createElement("div");
+    top.className = "entryTop";
+    top.innerHTML = `<div>${fmtDateTimeLocal(e.ts)}</div><div>${fmtDateOnly(e.ts)}</div>`;
+
+    const main = document.createElement("div");
+    main.className = "entryMain";
+    main.innerHTML = `
+      <div class="bp">BP ${e.sys}/${e.dia}</div>
+      <div class="hr">HR ${e.hr}</div>
+    `;
+
+    const txt = document.createElement("div");
+    txt.className = "entryText";
+    const sym = (e.symptoms && e.symptoms.length) ? e.symptoms.join(", ") : "None";
+    const notes = (e.notes && e.notes.trim().length) ? e.notes.trim() : "None";
+    txt.innerHTML = `<b>Symptoms:</b> ${escapeHTML(sym)}<br/><b>Notes:</b> ${escapeHTML(notes)}`;
+
+    card.appendChild(top);
+    card.appendChild(main);
+    card.appendChild(txt);
+    elLogList.appendChild(card);
+  });
+}
+
+function escapeHTML(s){
+  return String(s).replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[c]));
+}
+
+elSearch.addEventListener("input", renderLog);
+elFrom.addEventListener("change", renderLog);
+elTo.addEventListener("change", renderLog);
+
+function buildExportText(entries){
+  // toddler-level readable, consistent blocks
+  const lines = [];
+  lines.push("VITALS LOG (filtered)");
+  lines.push("Format: Date/Time | BP | HR | Symptoms | Notes");
+  lines.push("");
+
+  entries.forEach(e => {
+    const dt = fmtDateTimeLocal(e.ts);
+    const bp = `${e.sys}/${e.dia}`;
+    const hr = `${e.hr}`;
+    const sym = (e.symptoms && e.symptoms.length) ? e.symptoms.join(", ") : "None";
+    const notes = (e.notes && e.notes.trim().length) ? e.notes.trim() : "None";
+    lines.push(`${dt} | BP ${bp} | HR ${hr}`);
+    lines.push(`Symptoms: ${sym}`);
+    lines.push(`Notes: ${notes}`);
+    lines.push("");
+  });
+
+  return lines.join("\n").trim() + "\n";
+}
+
+async function doExport(){
+  const filtered = getFilteredEntries();
+  const text = buildExportText(filtered);
+
+  // Try modern clipboard
+  try{
+    await navigator.clipboard.writeText(text);
+    alert("Export copied to clipboard.");
+    return;
+  }catch(e){}
+
+  // Fallback: show prompt for copy
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.style.position = "fixed";
+  ta.style.left = "-9999px";
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try{
+    document.execCommand("copy");
+    alert("Export copied to clipboard.");
+  }catch(e){
+    alert("Copy failed. Long-press to select/copy from your log screen, or try again.");
+  }
+  document.body.removeChild(ta);
+}
+
+document.getElementById("btnExport").onclick = doExport;
+
+/* =========================
+   Charts (no external libs)
+========================= */
+const canvas = document.getElementById("chartCanvas");
+const ctx = canvas.getContext("2d");
+const chartHint = document.getElementById("chartHint");
+
+function renderCharts(){
+  const entries = loadEntries().slice().reverse(); // chronological
+  if (entries.length < 2){
+    chartHint.textContent = "Add at least 2 entries to show a chart.";
+    clearChart();
+    return;
+  }
+  chartHint.textContent = "Chart shows Systolic, Diastolic, and Heart Rate over time.";
+
+  // use last up to 30 points for readability
+  const data = entries.slice(Math.max(0, entries.length - 30));
+  const series = {
+    sys: data.map(e => e.sys),
+    dia: data.map(e => e.dia),
+    hr:  data.map(e => e.hr),
+    labels: data.map(e => new Date(e.ts))
+  };
+
+  drawChart(series);
+}
+
+function clearChart(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  // subtle baseline
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = "rgba(255,255,255,.06)";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+}
+
+function drawChart(series){
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  // background
+  ctx.fillStyle = "rgba(255,255,255,.03)";
+  ctx.fillRect(0,0,W,H);
+
+  const pad = {l:42, r:16, t:16, b:28};
+  const innerW = W - pad.l - pad.r;
+  const innerH = H - pad.t - pad.b;
+
+  // range (combine sys/dia/hr) but keep sane
+  const all = [...series.sys, ...series.dia, ...series.hr];
+  let minV = Math.min(...all);
+  let maxV = Math.max(...all);
+  // pad range
+  const range = Math.max(10, maxV - minV);
+  minV = Math.floor((minV - range*0.12));
+  maxV = Math.ceil((maxV + range*0.12));
+
+  // grid
+  ctx.strokeStyle = "rgba(46,62,92,.65)";
+  ctx.lineWidth = 1;
+
+  const gridY = 5;
+  for (let i=0;i<=gridY;i++){
+    const y = pad.t + (innerH * i/gridY);
+    ctx.beginPath();
+    ctx.moveTo(pad.l, y);
+    ctx.lineTo(pad.l + innerW, y);
+    ctx.stroke();
+
+    const val = Math.round(maxV - (range*(i/gridY)));
+    ctx.fillStyle = "rgba(154,168,196,.85)";
+    ctx.font = "12px system-ui,Segoe UI,Roboto,Arial";
+    ctx.fillText(String(val), 8, y+4);
+  }
+
+  // x spacing
+  const n = series.sys.length;
+  const xAt = (i) => pad.l + (innerW * (n === 1 ? 0 : i/(n-1)));
+  const yAt = (v) => pad.t + ((maxV - v) / (maxV - minV)) * innerH;
+
+  // draw a line helper
+  function line(vals, stroke){
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    vals.forEach((v,i) => {
+      const x = xAt(i), y = yAt(v);
+      if (i===0) ctx.moveTo(x,y);
+      else ctx.lineTo(x,y);
     });
+    ctx.stroke();
 
-    document.getElementById("goAdd").addEventListener("click", () => show("add"));
-    document.getElementById("goLog").addEventListener("click", () => show("log"));
-    document.getElementById("goCharts").addEventListener("click", () => show("charts"));
-
-    const logList = document.getElementById("logList");
-    const searchEl = document.getElementById("search");
-    const fromDateEl = document.getElementById("fromDate");
-    const toDateEl = document.getElementById("toDate");
-
-    function entryMatches(entry, q){
-      if(!q) return true;
-      q = q.toLowerCase().trim();
-      const sym = (entry.symptoms || []).join(" ").toLowerCase();
-      const notes = (entry.notes || "").toLowerCase();
-      const bp = `${entry.sys}/${entry.dia}`.toLowerCase();
-      return sym.includes(q) || notes.includes(q) || bp.includes(q);
-    }
-
-    function inDateRange(entry, fromStr, toStr){
-      const t = new Date(entry.t).getTime();
-      if(!Number.isFinite(t)) return true;
-
-      const from = startOfDayMs(fromStr);
-      const to = endOfDayMs(toStr);
-
-      if(from !== null && t < from) return false;
-      if(to !== null && t > to) return false;
-      return true;
-    }
-
-    function escapeHTML(s){
-      return String(s)
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-    }
-
-    function getFilteredEntries(){
-      const entries = loadEntries();
-      const q = (searchEl.value || "");
-      const fromStr = (fromDateEl.value || "");
-      const toStr = (toDateEl.value || "");
-
-      return entries
-        .filter(e => entryMatches(e, q))
-        .filter(e => inDateRange(e, fromStr, toStr));
-    }
-
-    function renderLog(){
-      const entriesAll = loadEntries();
-      const filtered = getFilteredEntries();
-
-      logList.innerHTML = "";
-
-      if(filtered.length === 0){
-        const empty = document.createElement("div");
-        empty.className = "hint";
-        empty.textContent = entriesAll.length ? "No matches for that search/date range." : "No entries yet. Tap Add.";
-        logList.appendChild(empty);
-      }else{
-        filtered.forEach(e => {
-          const item = document.createElement("div");
-          item.className = "logItem";
-
-          const when = document.createElement("div");
-          when.className = "logWhen";
-          when.textContent = formatWhenForLog(e.t);
-
-          const big = document.createElement("div");
-          big.className = "logBig";
-          big.innerHTML = `
-            <span class="bp">BP ${e.sys}/${e.dia}</span>
-            <span class="hr">HR ${e.hr}</span>
-          `;
-
-          const sym = document.createElement("div");
-          sym.className = "logLine";
-          const symText = (e.symptoms && e.symptoms.length) ? e.symptoms.join(", ") : "None";
-          sym.innerHTML = `<b>Symptoms:</b> ${escapeHTML(symText)}`;
-
-          const notes = document.createElement("div");
-          notes.className = "logLine";
-          const noteText = e.notes ? e.notes : "None";
-          notes.innerHTML = `<b>Notes:</b> ${escapeHTML(noteText)}`;
-
-          item.appendChild(when);
-          item.appendChild(big);
-          item.appendChild(sym);
-          item.appendChild(notes);
-
-          logList.appendChild(item);
-        });
-      }
-    }
-
-    searchEl.addEventListener("input", renderLog);
-    fromDateEl.addEventListener("change", renderLog);
-    toDateEl.addEventListener("change", renderLog);
-
-    document.getElementById("backFromLog").addEventListener("click", () => show("home"));
-
-    function makeExportText(entries){
-      const lines = [];
-      const fromStr = (fromDateEl.value || "");
-      const toStr = (toDateEl.value || "");
-      const q = (searchEl.value || "").trim();
-
-      lines.push("Vitals Tracker Export");
-      if(fromStr || toStr || q){
-        lines.push("Filters:");
-        if(fromStr) lines.push(`- From: ${fromStr}`);
-        if(toStr) lines.push(`- To: ${toStr}`);
-        if(q) lines.push(`- Search: ${q}`);
-      }
-      lines.push("----");
-
-      entries
-        .slice()
-        .sort((a,b) => new Date(a.t) - new Date(b.t))
-        .forEach(e => {
-          const stamp = formatWhenForLog(e.t);
-          const sym = (e.symptoms && e.symptoms.length) ? e.symptoms.join(", ") : "None";
-          const notes = (e.notes && e.notes.trim()) ? e.notes.trim() : "None";
-          lines.push(`${stamp} | BP ${e.sys}/${e.dia} | HR ${e.hr} | Symptoms: ${sym} | Notes: ${notes}`);
-        });
-
-      lines.push("----");
-      lines.push("CSV:");
-      lines.push("timestamp_iso,sys,dia,hr,symptoms,notes");
-      entries
-        .slice()
-        .sort((a,b) => new Date(a.t) - new Date(b.t))
-        .forEach(e => {
-          const sym = (e.symptoms && e.symptoms.length) ? e.symptoms.join(";") : "";
-          const notes = (e.notes || "").replaceAll('"','""');
-          lines.push(`${e.t},${e.sys},${e.dia},${e.hr},"${sym}","${notes}"`);
-        });
-
-      return lines.join("\n");
-    }
-
-    document.getElementById("export").addEventListener("click", async () => {
-      const filtered = getFilteredEntries();
-      if(!filtered.length){
-        setToast("logToast","Nothing to export for that search/date range.");
-        return;
-      }
-      const payload = makeExportText(filtered);
-      try{
-        await navigator.clipboard.writeText(payload);
-        setToast("logToast","Copied. Paste into ChatGPT.");
-      }catch(e){
-        window.prompt("Copy this text:", payload);
-        setToast("logToast","Copy prompt opened.");
-      }
-    });
-
-    document.getElementById("clearAll").addEventListener("click", () => {
-      const ok = confirm("Delete ALL vitals data on this phone?");
-      if(!ok) return;
-      localStorage.removeItem(STORAGE_KEY);
-      setToast("logToast","Deleted.");
-      renderLog();
-      renderChart();
-    });
-
-    const chartCanvas = document.getElementById("chart");
-    const ctx = chartCanvas.getContext("2d");
-    const rangeEl = document.getElementById("range");
-    const metricEl = document.getElementById("metric");
-    const legendEl = document.getElementById("legend");
-
-    rangeEl.addEventListener("change", renderChart);
-    metricEl.addEventListener("change", renderChart);
-
-    document.getElementById("backFromCharts").addEventListener("click", () => show("home"));
-
-    function filterByRange(entries, rangeVal){
-      if(rangeVal === "all") return entries.slice();
-      const days = parseInt(rangeVal, 10);
-      const cutoff = Date.now() - days*24*60*60*1000;
-      return entries.filter(e => new Date(e.t).getTime() >= cutoff);
-    }
-
-    function drawEmpty(msg){
-      const w = chartCanvas.width, h = chartCanvas.height;
-      ctx.fillStyle = "rgba(255,255,255,.05)";
-      ctx.fillRect(0,0,w,h);
-
-      ctx.fillStyle = "rgba(214,219,234,.80)";
-      ctx.font = "600 22px Roboto, system-ui, sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(msg, w/2, h/2);
-      setToast("chartToast","");
-    }
-
-    function drawAxes(padL, padR, padT, padB){
-      const w = chartCanvas.width, h = chartCanvas.height;
-      ctx.strokeStyle = "rgba(255,255,255,.16)";
-      ctx.lineWidth = 2;
+    // points
+    ctx.fillStyle = stroke;
+    vals.forEach((v,i) => {
+      const x = xAt(i), y = yAt(v);
       ctx.beginPath();
-      ctx.moveTo(padL, padT);
-      ctx.lineTo(padL, h-padB);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(padL, h-padB);
-      ctx.lineTo(w-padR, h-padB);
-      ctx.stroke();
-    }
-
-    function mapX(i, n, padL, padR){
-      const w = chartCanvas.width;
-      if(n === 1) return (padL + (w-padR)) / 2;
-      const span = (w - padL - padR);
-      return padL + (i/(n-1))*span;
-    }
-
-    function mapY(v, vmin, vmax, padT, padB){
-      const h = chartCanvas.height;
-      if(vmax === vmin) return (padT + (h-padB))/2;
-      const span = (h - padT - padB);
-      const t = (v - vmin) / (vmax - vmin);
-      return (h - padB) - t*span;
-    }
-
-    function drawLine(points, color){
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 4;
-      ctx.beginPath();
-      points.forEach((p, idx) => {
-        if(idx === 0) ctx.moveTo(p.x, p.y);
-        else ctx.lineTo(p.x, p.y);
-      });
-      ctx.stroke();
-
-      ctx.fillStyle = color;
-      points.forEach(p => {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 6, 0, Math.PI*2);
-        ctx.fill();
-      });
-    }
-
-    function drawLabelsY(vmin, vmax, padL, padT, padB){
-      const ticks = 4;
-      ctx.fillStyle = "rgba(214,219,234,.70)";
-      ctx.font = "520 16px Roboto, system-ui, sans-serif";
-      ctx.textAlign = "right";
-      ctx.textBaseline = "middle";
-
-      for(let i=0;i<=ticks;i++){
-        const val = vmin + (i/ticks)*(vmax-vmin);
-        const y = mapY(val, vmin, vmax, padT, padB);
-        ctx.fillText(String(Math.round(val)), padL-10, y);
-
-        ctx.strokeStyle = "rgba(255,255,255,.07)";
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(padL, y);
-        ctx.lineTo(chartCanvas.width-18, y);
-        ctx.stroke();
-      }
-    }
-
-    function legendChip(name, color){
-      const wrap = document.createElement("span");
-      wrap.style.display = "inline-flex";
-      wrap.style.alignItems = "center";
-      wrap.style.gap = "8px";
-      const dot = document.createElement("span");
-      dot.style.width = "12px";
-      dot.style.height = "12px";
-      dot.style.borderRadius = "999px";
-      dot.style.background = color;
-      dot.style.boxShadow = "0 0 0 2px rgba(0,0,0,.25)";
-      const txt = document.createElement("span");
-      txt.textContent = name;
-      wrap.appendChild(dot);
-      wrap.appendChild(txt);
-      return wrap;
-    }
-
-    function drawBP(entries){
-      const padL=66, padR=18, padT=18, padB=44;
-      const n = entries.length;
-
-      const sysVals = entries.map(e=>e.sys);
-      const diaVals = entries.map(e=>e.dia);
-
-      let vmin = Math.min(...diaVals, ...sysVals);
-      let vmax = Math.max(...diaVals, ...sysVals);
-      const extra = Math.max(10, Math.round((vmax - vmin)*0.2));
-      vmin = Math.max(0, vmin - extra);
-      vmax = vmax + extra;
-
-      ctx.fillStyle = "rgba(0,0,0,.10)";
-      ctx.fillRect(0,0,chartCanvas.width, chartCanvas.height);
-
-      drawAxes(padL,padR,padT,padB);
-      drawLabelsY(vmin,vmax,padL,padT,padB);
-
-      const sysPts = entries.map((e,i)=>({ x: mapX(i,n,padL,padR), y: mapY(e.sys,vmin,vmax,padT,padB) }));
-      const diaPts = entries.map((e,i)=>({ x: mapX(i,n,padL,padR), y: mapY(e.dia,vmin,vmax,padT,padB) }));
-
-      drawLine(sysPts, "rgba(106,160,255,.92)");
-      drawLine(diaPts, "rgba(214,219,234,.76)");
-
-      legendEl.innerHTML = "";
-      legendEl.appendChild(legendChip("Systolic", "rgba(106,160,255,.92)"));
-      legendEl.appendChild(legendChip("Diastolic", "rgba(214,219,234,.76)"));
-      setToast("chartToast", n===1 ? "Showing 1 reading." : "");
-    }
-
-    function drawHR(entries){
-      const padL=66, padR=18, padT=18, padB=44;
-      const n = entries.length;
-
-      const vals = entries.map(e=>e.hr);
-      let vmin = Math.min(...vals);
-      let vmax = Math.max(...vals);
-      const extra = Math.max(8, Math.round((vmax - vmin)*0.25));
-      vmin = Math.max(0, vmin - extra);
-      vmax = vmax + extra;
-
-      ctx.fillStyle = "rgba(0,0,0,.10)";
-      ctx.fillRect(0,0,chartCanvas.width, chartCanvas.height);
-
-      drawAxes(padL,padR,padT,padB);
-      drawLabelsY(vmin,vmax,padL,padT,padB);
-
-      const pts = entries.map((e,i)=>({ x: mapX(i,n,padL,padR), y: mapY(e.hr,vmin,vmax,padT,padB) }));
-      drawLine(pts, "rgba(106,160,255,.92)");
-
-      legendEl.innerHTML = "";
-      legendEl.appendChild(legendChip("Heart Rate", "rgba(106,160,255,.92)"));
-      setToast("chartToast", n===1 ? "Showing 1 reading." : "");
-    }
-
-    function renderChart(){
-      const entriesAll = loadEntries().slice().sort((a,b) => new Date(a.t) - new Date(b.t));
-      const entries = filterByRange(entriesAll, rangeEl.value);
-
-      ctx.clearRect(0,0,chartCanvas.width, chartCanvas.height);
-      legendEl.textContent = "";
-
-      if(entries.length === 0){
-        drawEmpty("No data yet. Tap Add.");
-        return;
-      }
-
-      if(metricEl.value === "bp") drawBP(entries);
-      else drawHR(entries);
-    }
-
-    function refreshHomeHint(){
-      const entries = loadEntries();
-      document.getElementById("homeHint").textContent =
-        entries.length ? `You have ${entries.length} saved reading${entries.length===1?"":"s"}.` : "Tap “Add” to record BP.";
-    }
-    refreshHomeHint();
-
-    window.addEventListener("resize", () => {
-      if(screens.charts.classList.contains("active")) renderChart();
+      ctx.arc(x,y,3,0,Math.PI*2);
+      ctx.fill();
     });
-  </script>
+  }
+
+  // colors (kept subdued to reduce glare)
+  line(series.sys, "rgba(79,140,255,.95)"); // systolic
+  line(series.dia, "rgba(154,168,196,.95)"); // diastolic
+  line(series.hr,  "rgba(120,220,180,.85)"); // heart rate
+
+  // legend
+  const lx = pad.l, ly = H - 10;
+  ctx.font = "12px system-ui,Segoe UI,Roboto,Arial";
+  function leg(text, color, x){
+    ctx.fillStyle = color;
+    ctx.fillRect(x, ly-9, 10, 3);
+    ctx.fillStyle = "rgba(216,224,240,.92)";
+    ctx.fillText(text, x+14, ly-4);
+    return x + 14 + ctx.measureText(text).width + 14;
+  }
+  let x = lx;
+  x = leg("Systolic", "rgba(79,140,255,.95)", x);
+  x = leg("Diastolic", "rgba(154,168,196,.95)", x);
+  x = leg("Heart Rate", "rgba(120,220,180,.85)", x);
+}
+
+document.getElementById("goCharts").addEventListener("click", () => setTimeout(renderCharts, 10));
+document.getElementById("backFromCharts").addEventListener("click", () => setTimeout(clearChart, 10));
+
+/* =========================
+   Wire Log button on home to Log screen
+========================= */
+document.getElementById("btnExportFromHome").addEventListener("click", () => {
+  show("log");
+});
+
+/* Initial */
+show("home");
+</script>
 </body>
 </html>
