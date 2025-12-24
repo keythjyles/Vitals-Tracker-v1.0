@@ -97,6 +97,18 @@
       align-items:center;
       justify-content:flex-start;
     }
+    .toolbar.spread{
+      justify-content: space-between;
+      width: 100%;
+      gap: 12px;
+    }
+    .toolbar.spread .leftGroup,
+    .toolbar.spread .rightGroup{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+    }
+
     .btn{
       appearance:none;
       border:1px solid rgba(46,62,92,.9);
@@ -195,16 +207,30 @@
       letter-spacing: .2px;
     }
 
-    .stickyTop{
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      background: linear-gradient(180deg, rgba(11,18,32,.98), rgba(11,18,32,.82));
-      border-radius: 14px;
-      padding: 8px;
-      border: 1px solid rgba(46,62,92,.55);
-      margin-bottom: 10px;
+    /* ADD: buttons bottom-fixed */
+    .addPadBottom{
+      padding-bottom: 78px; /* room for bottom bar */
+    }
+    .bottomBar{
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 50;
+      background: linear-gradient(180deg, rgba(11,18,32,.70), rgba(11,18,32,.96));
+      border-top: 1px solid rgba(46,62,92,.55);
+      padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
       backdrop-filter: blur(10px);
+    }
+    .bottomBarInner{
+      max-width: 860px;
+      margin: 0 auto;
+      display:flex;
+      gap: 10px;
+    }
+    .bottomBarInner .btn{
+      flex: 1 1 0;
+      min-width: 0;
     }
 
     .symptomsWrap{ margin-top: 6px; padding-top: 2px; }
@@ -329,6 +355,14 @@
       padding: 10px;
     }
     canvas{ width:100%; height:260px; display:block; }
+
+    /* Home footer version */
+    .homeVersion{
+      margin-top: 6px;
+      font-size: 11px;
+      color: rgba(154,168,196,.75);
+      letter-spacing: .15px;
+    }
   </style>
 </head>
 
@@ -345,26 +379,24 @@
         <button class="btn btnBig" id="goCharts">Charts</button>
       </div>
 
-      <div class="toolbar" style="margin-top:14px;">
-        <button class="btn ghost hidden" id="btnInstall">Install</button>
-        <button class="btn ghost" id="btnExportFromHome">Export</button>
-        <button class="btn ghost" id="btnExitHome">Exit</button>
+      <!-- Export left / Exit right -->
+      <div class="toolbar spread" style="margin-top:14px;">
+        <div class="leftGroup">
+          <button class="btn ghost hidden" id="btnInstall">Install</button>
+          <button class="btn ghost" id="btnExportFromHome">Export</button>
+        </div>
+        <div class="rightGroup">
+          <button class="btn ghost" id="btnExitHome">Exit</button>
+        </div>
       </div>
 
       <div class="subtle">Data stays on your phone (local only).</div>
       <div class="metaLine" id="homeCount">Records: 0</div>
+      <div class="homeVersion">v1.07</div>
     </div>
 
     <!-- ADD -->
-    <div id="screenAdd" class="card hidden" style="margin-top:14px;">
-      <div class="stickyTop">
-        <div class="toolbar">
-          <button class="btn primary" id="saveAdd">Save</button>
-          <button class="btn" id="backFromAdd">Back</button>
-          <button class="btn ghost" id="exitFromAdd">Exit</button>
-        </div>
-      </div>
-
+    <div id="screenAdd" class="card hidden addPadBottom" style="margin-top:14px;">
       <div class="nowline" id="nowLine">08:23:49 PM, 12/23/2025</div>
 
       <div class="grid3">
@@ -430,6 +462,15 @@
       <div class="chartBox" style="margin-top:10px;">
         <canvas id="chartCanvas" width="900" height="260" aria-label="Vitals chart" role="img"></canvas>
       </div>
+    </div>
+  </div>
+
+  <!-- ADD bottom buttons -->
+  <div id="addBottomBar" class="bottomBar hidden" aria-hidden="true">
+    <div class="bottomBarInner">
+      <button class="btn primary" id="saveAdd">Save</button>
+      <button class="btn" id="backFromAdd">Back</button>
+      <button class="btn ghost" id="exitFromAdd">Exit</button>
     </div>
   </div>
 
@@ -531,7 +572,6 @@ function isValidDate(d){
 }
 
 function normalizeISO(ts){
-  // Accept ISO, numeric epoch, or Date-like strings; return ISO or null.
   if (ts == null) return null;
   if (typeof ts === "number" && Number.isFinite(ts)){
     const d = new Date(ts);
@@ -544,7 +584,6 @@ function normalizeISO(ts){
 }
 
 function sanitizeEntries(raw){
-  // Fix/normalize entries; drop irreparable ones.
   if (!Array.isArray(raw)) return [];
   const out = [];
   for (const e of raw){
@@ -554,11 +593,9 @@ function sanitizeEntries(raw){
     const dia = Number.isFinite(+e.dia) ? parseInt(e.dia,10) : null;
     const hr  = Number.isFinite(+e.hr)  ? parseInt(e.hr,10)  : null;
 
-    // If vitals are missing, skip.
     if (sys == null || dia == null || hr == null) continue;
 
     const ts = normalizeISO(e.ts) || new Date().toISOString();
-
     const symptoms = Array.isArray(e.symptoms) ? e.symptoms.filter(Boolean).map(String) : [];
     const notes = (e.notes == null) ? "" : String(e.notes);
 
@@ -570,7 +607,6 @@ function sanitizeEntries(raw){
       notes
     });
   }
-  // keep newest-first if possible
   out.sort((a,b) => new Date(b.ts) - new Date(a.ts));
   return out;
 }
@@ -581,13 +617,9 @@ function loadEntries(){
     const arr = raw ? JSON.parse(raw) : [];
     const cleaned = sanitizeEntries(arr);
 
-    // If we had to clean, persist the cleaned dataset so NaNs stop returning.
-    if (Array.isArray(arr) && cleaned.length !== arr.length){
+    const anyBad = Array.isArray(arr) && arr.some(e => !normalizeISO(e && e.ts));
+    if (anyBad || cleaned.length !== arr.length){
       localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
-    } else {
-      // Also normalize any bad timestamps without changing count.
-      const anyBad = Array.isArray(arr) && arr.some(e => !normalizeISO(e && e.ts));
-      if (anyBad) localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
     }
     return cleaned;
   }catch(e){
@@ -617,7 +649,6 @@ function isoDayKey(iso){
   const d = new Date(iso);
   if (!isValidDate(d)) return null;
   const k = `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
-  // Basic guard
   if (!/^\d{4}-\d{2}-\d{2}$/.test(k)) return null;
   return k;
 }
@@ -642,8 +673,16 @@ const screens = {
   log: document.getElementById("screenLog"),
   charts: document.getElementById("screenCharts"),
 };
+const addBottomBar = document.getElementById("addBottomBar");
+
 function show(name){
   Object.keys(screens).forEach(k => screens[k].classList.toggle("hidden", k !== name));
+
+  // show bottom bar only on Add
+  const isAdd = (name === "add");
+  addBottomBar.classList.toggle("hidden", !isAdd);
+  addBottomBar.setAttribute("aria-hidden", String(!isAdd));
+
   refreshCounts();
   if (name === "log") renderLog();
   if (name === "charts") renderCharts();
@@ -781,7 +820,6 @@ function buildDateOptions(entries){
     if (k) keys.push(k);
   }
   const days = Array.from(new Set(keys)).sort().reverse();
-
   const opts = ["(any)", ...days];
 
   function setSelect(sel){
@@ -951,11 +989,10 @@ function drawChart(sys, dia, hr){
   const W = canvas.width, H = canvas.height;
   ctx.clearRect(0,0,W,H);
 
-  // Slightly brighter panel for readability
   ctx.fillStyle = "rgba(255,255,255,.06)";
   ctx.fillRect(0,0,W,H);
 
-  const pad = {l:54, r:18, t:16, b:40}; // more left/bottom padding
+  const pad = {l:54, r:18, t:16, b:40};
   const innerW = W - pad.l - pad.r;
   const innerH = H - pad.t - pad.b;
 
@@ -966,13 +1003,12 @@ function drawChart(sys, dia, hr){
   minV = Math.floor(minV - range0*0.15);
   maxV = Math.ceil(maxV + range0*0.15);
 
-  // grid lines (higher contrast)
   ctx.strokeStyle = "rgba(154,168,196,.22)";
   ctx.lineWidth = 1;
 
   const gridY = 5;
-  ctx.font = "13px system-ui,Segoe UI,Roboto,Arial"; // larger labels
-  ctx.fillStyle = "rgba(216,224,240,.78)";           // higher contrast labels
+  ctx.font = "13px system-ui,Segoe UI,Roboto,Arial";
+  ctx.fillStyle = "rgba(216,224,240,.78)";
 
   for (let i=0;i<=gridY;i++){
     const y = pad.t + (innerH * i/gridY);
@@ -991,7 +1027,7 @@ function drawChart(sys, dia, hr){
 
   function line(vals, stroke){
     ctx.strokeStyle = stroke;
-    ctx.lineWidth = 2.4; // a bit thicker
+    ctx.lineWidth = 2.4;
     ctx.beginPath();
     vals.forEach((v,i) => {
       const x = xAt(i), y = yAt(v);
@@ -1009,12 +1045,10 @@ function drawChart(sys, dia, hr){
     });
   }
 
-  // Keep your palette but increase opacity for visibility
   line(sys, "rgba(79,140,255,.98)");
   line(dia, "rgba(216,224,240,.88)");
   line(hr,  "rgba(120,220,180,.92)");
 
-  // legend (moved to top-left INSIDE chart for readability)
   const lx = pad.l + 10;
   let ly = pad.t + 14;
   ctx.font = "13px system-ui,Segoe UI,Roboto,Arial";
