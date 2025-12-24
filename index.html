@@ -2,700 +2,924 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0b1324" />
-  <title>Vitals Tracker</title>
-
-  <!-- Minimal PWA hooks (install works when served over https / GitHub Pages) -->
-  <link rel="manifest" id="manifestLink" href="#" />
-
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Vitals Tracker v2</title>
   <style>
     :root{
-      --bg0:#08101f;
-      --bg1:#0b1324;
-      --panel:#0c1528cc;
-      --stroke:rgba(235,245,255,.16);
-      --stroke2:rgba(235,245,255,.22);
-      --strokeBold:rgba(180,210,255,.42);
-      --text:rgba(235,245,255,.86);
-      --muted:rgba(235,245,255,.58);
-      --muted2:rgba(235,245,255,.42);
-      --accent:#2f78ff;
-      --shadow:0 14px 40px rgba(0,0,0,.38);
-      --radius:26px;
-      --btnH:56px;
-      --pad:18px;
-      --font: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      --bg:#000;
+      --panel:#0b0f14;
+      --panel2:#0a0a0a;
+      --border:#7ecbff;
+      --text:#fff;
+      --muted:#9aa7b1;
+      --accent:#4da3ff;
+      --danger:#ff6b6b;
+      --ok:#7dffb2;
+      --warn:#ffd36b;
+      --focus:#b7e5ff;
+      --line:#1f2a33;
     }
 
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
+    *{box-sizing:border-box}
     body{
       margin:0;
-      font-family:var(--font);
+      background:var(--bg);
       color:var(--text);
-      background:
-        radial-gradient(1200px 700px at 30% 0%, rgba(47,120,255,.22), transparent 55%),
-        radial-gradient(900px 600px at 80% 20%, rgba(91,214,178,.10), transparent 55%),
-        linear-gradient(180deg, var(--bg1), var(--bg0));
-      display:flex;
-      justify-content:center;
-      padding: max(14px, env(safe-area-inset-top)) 12px max(14px, env(safe-area-inset-bottom));
+      font-family:Arial, Helvetica, sans-serif;
+      padding:12px;
     }
-
     .app{
-      width:min(520px, 100%);
-      display:flex;
-      flex-direction:column;
-      gap:14px;
+      border:4px solid var(--border);
+      border-radius:14px;
+      padding:16px;
+      max-width:1050px;
+      margin:0 auto;
+      background:linear-gradient(180deg, rgba(126,203,255,0.06), rgba(0,0,0,0));
     }
 
-    h1{
-      margin:10px 6px 0;
-      font-size: clamp(40px, 7.6vw, 64px);
-      letter-spacing:.4px;
-      color:rgba(235,245,255,.78);
-      text-shadow: 0 10px 22px rgba(0,0,0,.35);
-    }
-
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      border:1px solid var(--stroke);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: var(--pad);
-      backdrop-filter: blur(10px);
-    }
-
-    .hidden{ display:none !important; }
-
-    .btn{
-      height:var(--btnH);
-      border-radius: 999px;
-      border:1px solid var(--stroke2);
-      background: rgba(255,255,255,.03);
-      color:rgba(235,245,255,.78);
-      font-weight:650;
-      letter-spacing:.2px;
+    header{
       display:flex;
       align-items:center;
-      justify-content:center;
-      padding:0 18px;
-      user-select:none;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .btn:active{ transform: translateY(1px); }
-    .btn.primary{
-      background: linear-gradient(180deg, rgba(47,120,255,.92), rgba(47,120,255,.72));
-      border-color: rgba(120,170,255,.55);
-      color: rgba(0,0,0,.78);
-    }
-    .btn.small{
-      height:44px;
-      font-size:14px;
-      padding:0 14px;
-      font-weight:650;
-    }
-
-    .row{ display:flex; gap:12px; }
-    .row.center{ align-items:center; }
-    .grow{ flex:1; }
-
-    .label{
-      font-size:16px;
-      color:var(--muted);
-      font-weight:650;
-      margin: 12px 4px 8px;
-    }
-    .subtle{
-      font-size:14px;
-      color:var(--muted2);
-      margin: 6px 4px 0;
-    }
-
-    .field{
-      border:2px solid var(--strokeBold);
-      background: rgba(255,255,255,.06);
-      color: rgba(235,245,255,.86);
-      border-radius: 18px;
-      height:54px;
-      padding: 0 14px;
-      font-size:18px;
-      outline:none;
-      width:100%;
-    }
-    .field::placeholder{ color: rgba(235,245,255,.35); }
-    .field:focus{
-      border-color: rgba(90,150,255,.78);
-      box-shadow: 0 0 0 4px rgba(47,120,255,.16);
-    }
-    textarea.field{
-      height:64px;
-      padding: 12px 14px;
-      resize:none;
-      line-height:1.25;
-    }
-
-    /* Home layout */
-    .homeMain{
-      display:flex;
-      flex-direction:column;
-      gap:14px;
-      margin-top:8px;
-    }
-    .homeFooterRow{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
       gap:12px;
-      margin-top:8px;
+      margin-bottom:12px;
     }
-    .footerTiny{
-      margin-top:10px;
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      font-size: 12px;
-      color: rgba(235,245,255,.38);
-    }
-
-    /* Add screen time line: ONE line, dynamic shrink */
-    .timeLine{
-      margin: 4px 4px 14px;
-      color: rgba(235,245,255,.82);
-      font-weight:750;
-      letter-spacing:.3px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      line-height:1.05;
-      font-size: clamp(18px, 6.4vw, 44px);
-    }
-
-    .triple{
-      display:grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 12px;
-    }
-    .triple .miniLabel{
-      margin: 0 4px 8px;
-      color: var(--muted);
-      font-weight:650;
-      font-size:16px;
-    }
-
-    /* Symptoms: smaller, less bold */
-    .symGrid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px 18px;
-      padding: 6px 2px 2px;
-      margin-top: 2px;
-    }
-    .symItem{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding: 4px 6px;
-      border-radius: 14px;
-      transition: background .12s ease, border-color .12s ease;
-    }
-    .box{
-      width:30px;
-      height:30px;
-      border-radius: 8px;
-      border:2px solid rgba(235,245,255,.40);
-      background: rgba(255,255,255,.03);
-      display:grid;
-      place-items:center;
+    .logo{
+      width:52px;height:52px;border-radius:14px;
+      background:linear-gradient(135deg,var(--accent),var(--border));
+      display:flex;align-items:center;justify-content:center;
+      color:#000;font-weight:900;letter-spacing:0.5px;
       flex:0 0 auto;
     }
-    .check{
-      width:14px;
-      height:8px;
-      border-left:3px solid transparent;
-      border-bottom:3px solid transparent;
-      transform: rotate(-45deg);
-      margin-top:-2px;
-    }
-    .symText{
-      font-size:16px;
-      font-weight:500;
-      color: rgba(235,245,255,.76);
-      line-height:1.1;
-    }
-    .symItem.selected{
-      background: rgba(47,120,255,.16);
-    }
-    .symItem.selected .box{
-      border-color: rgba(90,150,255,.90);
-      background: rgba(47,120,255,.18);
-    }
-    .symItem.selected .check{
-      border-left-color: rgba(235,245,255,.92);
-      border-bottom-color: rgba(235,245,255,.92);
-    }
+    h1{margin:0;font-size:22px}
+    .subtitle{color:var(--muted);font-size:13px;margin-top:2px}
 
-    /* Buttons just below symptoms */
-    .panelButtons{
-      display:flex;
-      gap:12px;
-      margin-top: 10px;
-    }
-
-    /* Log entries */
-    .entry{
-      border:1px solid var(--stroke);
-      background: rgba(255,255,255,.03);
-      border-radius: 22px;
-      padding: 14px 14px 12px;
-      margin-top: 12px;
-    }
-    .entryTop{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-end;
-      gap:12px;
-      margin-bottom: 6px;
-    }
-    .entryTime{
-      font-size:14px;
-      color: rgba(235,245,255,.46);
-      white-space:nowrap;
-    }
-    .entryBPHR{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      align-items:baseline;
-    }
-    .bpBig{
-      font-size:34px;
-      font-weight:800;
-      letter-spacing:.2px;
-    }
-    .hrBig{
-      font-size:28px;
-      font-weight:800;
-      color: rgba(235,245,255,.72);
-      white-space:nowrap;
-    }
-    .entryLine{
-      margin-top: 6px;
-      color: rgba(235,245,255,.62);
-      font-size:16px;
-      line-height:1.25;
-    }
-    .entryLine b{
-      color: rgba(235,245,255,.70);
-    }
-
-    /* Date range */
-    .filters{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
+    .panel{
+      border:1px solid var(--line);
+      background:rgba(11,15,20,0.85);
+      border-radius:12px;
+      padding:12px;
       margin-top:10px;
     }
-    .dateField{
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-    }
-    .dateField .miniLabel{
-      margin: 0 4px;
-      color: var(--muted);
-      font-weight:650;
-      font-size:14px;
-    }
-    input[type="date"].field{
-      font-size:16px;
-      padding-right: 10px;
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(12,1fr);
+      gap:10px;
     }
 
-    /* Charts */
-    canvas{
+    .col-2{grid-column:span 2;}
+    .col-3{grid-column:span 3;}
+    .col-4{grid-column:span 4;}
+    .col-5{grid-column:span 5;}
+    .col-6{grid-column:span 6;}
+    .col-7{grid-column:span 7;}
+    .col-8{grid-column:span 8;}
+    .col-12{grid-column:span 12;}
+
+    @media (max-width:900px){
+      .col-2,.col-3,.col-4,.col-5,.col-6,.col-7,.col-8{grid-column:span 12;}
+    }
+
+    label{
+      display:block;
+      font-size:13px;
+      color:var(--muted);
+      margin:0 0 6px 0;
+    }
+
+    input, select, textarea, button{
       width:100%;
-      height:280px;
-      border-radius: 22px;
-      border:1px solid var(--stroke);
-      background: rgba(255,255,255,.02);
-      margin-top: 10px;
+      border-radius:10px;
+      border:1px solid #2a3a45;
+      background:#0a0a0a;
+      color:var(--text);
+      padding:10px 12px;
+      font-size:16px;
+      outline:none;
+    }
+    textarea{min-height:70px;resize:vertical}
+    input:focus, select:focus, textarea:focus, button:focus{
+      border-color:var(--focus);
+      box-shadow:0 0 0 3px rgba(183,229,255,0.18);
     }
 
-    .noteLabel{
-      margin: 12px 4px 8px;
-      color: var(--muted);
-      font-weight:650;
-      font-size:16px;
+    .row-actions{
+      display:flex;gap:10px;flex-wrap:wrap;
+      margin-top:10px;
     }
-    .noteLabel em{
-      font-style:italic;
-      color: rgba(235,245,255,.42);
-      font-weight:600;
+    button{
+      background:var(--accent);
+      color:#000;
+      font-weight:800;
+      cursor:pointer;
+      border:none;
+      padding:11px 12px;
+    }
+    button.secondary{
+      background:#111;
+      color:var(--text);
+      border:1px solid #2a3a45;
+      font-weight:700;
+    }
+    button.danger{
+      background:var(--danger);
+      color:#000;
+    }
+    button.ok{
+      background:var(--ok);
+      color:#000;
+    }
+
+    .pillbar{
+      display:flex;flex-wrap:wrap;gap:8px;
+      margin-top:8px;
+    }
+    .pill{
+      border:1px solid #2a3a45;
+      background:#0b0f14;
+      color:var(--text);
+      padding:8px 10px;
+      border-radius:999px;
+      font-size:14px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .pill[aria-pressed="true"]{
+      border-color:var(--border);
+      background:rgba(126,203,255,0.12);
+    }
+
+    .hint{
+      font-size:12px;color:var(--muted);
+      margin-top:6px;
+    }
+
+    .kpi{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:10px;
+      margin-top:10px;
+    }
+    @media (max-width:900px){ .kpi{grid-template-columns:repeat(2,1fr);} }
+    .kpi .card{
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:rgba(0,0,0,0.35);
+      padding:10px;
+    }
+    .kpi .label{color:var(--muted);font-size:12px}
+    .kpi .value{font-size:18px;font-weight:800;margin-top:4px}
+    .kpi .sub{color:var(--muted);font-size:12px;margin-top:4px}
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:10px;
+      font-size:13px;
+    }
+    th, td{
+      border-bottom:1px solid #1e2a33;
+      padding:10px 8px;
+      vertical-align:top;
+      text-align:left;
+    }
+    th{color:var(--border);font-size:12px;letter-spacing:0.3px}
+    .small{color:var(--muted);font-size:12px}
+    .nowrap{white-space:nowrap}
+
+    .tag{
+      display:inline-block;
+      padding:2px 8px;
+      border-radius:999px;
+      border:1px solid #2a3a45;
+      color:var(--text);
+      font-size:12px;
+      margin:2px 6px 2px 0;
+      background:rgba(255,255,255,0.03);
+    }
+    .flag{
+      display:inline-block;
+      padding:2px 8px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      margin-left:6px;
+    }
+    .flag.warn{background:rgba(255,211,107,0.25); color:var(--warn); border:1px solid rgba(255,211,107,0.45);}
+    .flag.danger{background:rgba(255,107,107,0.18); color:var(--danger); border:1px solid rgba(255,107,107,0.4);}
+    .flag.ok{background:rgba(125,255,178,0.12); color:var(--ok); border:1px solid rgba(125,255,178,0.35);}
+
+    .empty{
+      padding:14px;
+      color:var(--muted);
+      border:1px dashed #2a3a45;
+      border-radius:12px;
+      margin-top:10px;
+    }
+
+    /* Print/PDF report styling */
+    @media print{
+      body{background:#fff;color:#000;padding:0}
+      .app{border:none;border-radius:0;max-width:none;padding:0;background:none}
+      .no-print{display:none !important}
+      table{font-size:11px}
+      th{color:#000}
+      td,th{border-bottom:1px solid #bbb}
+      .panel{border:none;background:none;padding:0;margin:0}
+      .tag,.flag{border:1px solid #999;color:#000;background:none}
     }
   </style>
 </head>
-
 <body>
-  <div class="app">
-    <h1>Vitals Tracker</h1>
+  <div class="app" role="application" aria-label="Vitals Tracker v2">
+    <header>
+      <div class="logo" aria-hidden="true">VT</div>
+      <div>
+        <h1>Vitals Tracker v2</h1>
+        <div class="subtitle">Accessible, local-only BP/HR logging with flags, filters, and VA-ready print/PDF.</div>
+      </div>
+    </header>
 
-    <!-- HOME -->
-    <div id="home" class="card">
-      <div class="homeMain">
-        <button id="btnGoAdd" class="btn primary">Add</button>
-        <button id="btnGoLog" class="btn">Log</button>
-        <button id="btnGoCharts" class="btn">Charts</button>
-
-        <div class="homeFooterRow">
-          <button id="btnInstall" class="btn small">Install</button>
-          <div class="grow"></div>
-          <button id="btnExitHome" class="btn small">Exit</button>
+    <div class="panel no-print" aria-label="New entry">
+      <div class="grid">
+        <div class="col-3">
+          <label for="date">Date</label>
+          <input id="date" type="date" />
+        </div>
+        <div class="col-3">
+          <label for="time">Time</label>
+          <input id="time" type="time" />
+        </div>
+        <div class="col-2">
+          <label for="sys">Systolic</label>
+          <input id="sys" type="number" inputmode="numeric" />
+        </div>
+        <div class="col-2">
+          <label for="dia">Diastolic</label>
+          <input id="dia" type="number" inputmode="numeric" />
+        </div>
+        <div class="col-2">
+          <label for="hr">Heart Rate</label>
+          <input id="hr" type="number" inputmode="numeric" />
         </div>
 
-        <div class="subtle">Data stays on your phone (local only).</div>
+        <div class="col-4">
+          <label for="position">Body position</label>
+          <select id="position">
+            <option>Sitting</option>
+            <option>Standing</option>
+            <option>Lying down</option>
+          </select>
+        </div>
 
-        <div class="footerTiny">
-          <div>v1.15</div>
-          <div>developed by Keyth Jyles</div>
+        <div class="col-4">
+          <label for="meds">Meds taken (optional)</label>
+          <input id="meds" type="text" placeholder="e.g., Lisinopril 10mg, Ivabradine, Propranolol" />
+          <div class="hint">Short list is best. This is for context, not perfection.</div>
+        </div>
+
+        <div class="col-4">
+          <label for="severity">Day type</label>
+          <select id="severity">
+            <option value="typical">Typical</option>
+            <option value="bad">Bad spike day</option>
+            <option value="worst">Worst day</option>
+          </select>
+        </div>
+
+        <div class="col-12">
+          <label>Quick symptom tags</label>
+          <div class="pillbar" id="pillbar" role="group" aria-label="Symptom tags"></div>
+          <div class="grid" style="margin-top:10px">
+            <div class="col-6">
+              <label for="customTag">Add a custom tag (optional)</label>
+              <input id="customTag" type="text" placeholder="e.g., blurred vision, hot ears, shakey, weakness" />
+            </div>
+            <div class="col-6">
+              <label for="symptoms">Symptoms / notes</label>
+              <textarea id="symptoms" placeholder="Write it exactly how it felt. Short is fine."></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row-actions">
+        <button id="saveBtn" onclick="saveEntry()">Save entry</button>
+        <button class="secondary" onclick="resetForm()">Reset fields</button>
+      </div>
+    </div>
+
+    <div class="panel no-print" aria-label="Tools and filters">
+      <div class="grid">
+        <div class="col-4">
+          <label for="q">Search (notes/tags/meds)</label>
+          <input id="q" type="text" placeholder="Type to filter..." oninput="render()" />
+        </div>
+        <div class="col-2">
+          <label for="from">From</label>
+          <input id="from" type="date" onchange="render()" />
+        </div>
+        <div class="col-2">
+          <label for="to">To</label>
+          <input id="to" type="date" onchange="render()" />
+        </div>
+        <div class="col-2">
+          <label for="tagFilter">Tag</label>
+          <select id="tagFilter" onchange="render()">
+            <option value="">All</option>
+          </select>
+        </div>
+        <div class="col-2">
+          <label for="sort">Sort</label>
+          <select id="sort" onchange="render()">
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+          </select>
+        </div>
+
+        <div class="col-12">
+          <label>Alert thresholds (local flags)</label>
+          <div class="grid">
+            <div class="col-2">
+              <label for="tSysHigh">Sys high</label>
+              <input id="tSysHigh" type="number" inputmode="numeric" />
+            </div>
+            <div class="col-2">
+              <label for="tDiaHigh">Dia high</label>
+              <input id="tDiaHigh" type="number" inputmode="numeric" />
+            </div>
+            <div class="col-2">
+              <label for="tSysLow">Sys low</label>
+              <input id="tSysLow" type="number" inputmode="numeric" />
+            </div>
+            <div class="col-2">
+              <label for="tDiaLow">Dia low</label>
+              <input id="tDiaLow" type="number" inputmode="numeric" />
+            </div>
+            <div class="col-2">
+              <label for="tHrHigh">HR high</label>
+              <input id="tHrHigh" type="number" inputmode="numeric" />
+            </div>
+            <div class="col-2">
+              <label for="tHrLow">HR low</label>
+              <input id="tHrLow" type="number" inputmode="numeric" />
+            </div>
+          </div>
+          <div class="row-actions" style="margin-top:10px">
+            <button class="secondary" onclick="saveThresholds()">Save thresholds</button>
+            <button class="secondary" onclick="restoreDefaults()">Restore defaults</button>
+          </div>
+          <div class="hint">Flags are for your tracking/communication. They do not diagnose anything.</div>
+        </div>
+
+        <div class="col-12">
+          <div class="row-actions">
+            <button class="secondary" onclick="exportCSV()">Export CSV</button>
+            <button class="secondary" onclick="backupJSON()">Backup (JSON)</button>
+            <button class="secondary" onclick="document.getElementById('restoreFile').click()">Restore (JSON)</button>
+            <input id="restoreFile" type="file" accept="application/json" style="display:none" onchange="restoreJSON(event)" />
+            <button class="ok" onclick="printReport()">Print / Save as PDF</button>
+            <button class="danger" onclick="clearAll()">Clear all data</button>
+          </div>
+          <div class="hint">Print/PDF creates a clean report of the filtered entries (date range/search/tag).</div>
         </div>
       </div>
     </div>
 
-    <!-- ADD -->
-    <div id="add" class="card hidden">
-      <div id="timeLine" class="timeLine">--:--:-- --, --/--/----</div>
-
-      <div class="triple">
-        <div>
-          <div class="miniLabel">Systolic</div>
-          <input id="sys" class="field" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 132" />
-        </div>
-        <div>
-          <div class="miniLabel">Diastolic</div>
-          <input id="dia" class="field" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 91" />
-        </div>
-        <div>
-          <div class="miniLabel">Heart Rate</div>
-          <input id="hr" class="field" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 72" />
-        </div>
-      </div>
-
-      <div class="noteLabel">Notes <em>(optional)</em></div>
-      <textarea id="notes" class="field" placeholder="optional"></textarea>
-
-      <div class="label">Symptoms</div>
-      <div id="symGrid" class="symGrid"></div>
-
-      <div class="panelButtons">
-        <button id="btnSave" class="btn primary grow">Save</button>
-        <button id="btnBackFromAdd" class="btn grow">Back</button>
-      </div>
+    <div class="panel" aria-label="Summary">
+      <div class="kpi" id="kpi"></div>
     </div>
 
-    <!-- LOG -->
-    <div id="log" class="card hidden">
-      <div class="row center">
-        <button id="btnExportLog" class="btn small">Export</button>
-        <button id="btnAddFromLog" class="btn small">Add</button>
-        <div class="grow"></div>
-        <button id="btnBackFromLog" class="btn small">Back</button>
+    <div class="panel" aria-label="Log">
+      <div class="small" id="countLine"></div>
+      <div id="empty" class="empty" style="display:none">No entries match your filters.</div>
+      <div style="overflow:auto">
+        <table aria-label="Vitals log table">
+          <thead>
+            <tr>
+              <th class="nowrap">Date</th>
+              <th class="nowrap">Time</th>
+              <th class="nowrap">BP</th>
+              <th class="nowrap">HR</th>
+              <th>Flags</th>
+              <th>Position</th>
+              <th>Day</th>
+              <th>Tags</th>
+              <th>Meds</th>
+              <th>Notes</th>
+              <th class="no-print">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="log"></tbody>
+        </table>
       </div>
-
-      <div class="label">Search</div>
-      <input id="search" class="field" placeholder="Type a word: sweaty, dizzy, headache..." />
-
-      <div class="filters">
-        <div class="dateField">
-          <div class="miniLabel">From</div>
-          <input id="fromDate" class="field" type="date" />
-        </div>
-        <div class="dateField">
-          <div class="miniLabel">To</div>
-          <input id="toDate" class="field" type="date" />
-        </div>
-      </div>
-
-      <div id="logList"></div>
     </div>
-
-    <!-- CHARTS -->
-    <div id="charts" class="card hidden">
-      <div class="row center">
-        <button id="btnExportCharts" class="btn small">Export</button>
-        <div class="grow"></div>
-        <button id="btnBackFromCharts" class="btn small">Back</button>
-      </div>
-
-      <div class="subtle">Systolic, Diastolic, and Heart Rate over time.</div>
-
-      <div class="filters">
-        <div class="dateField">
-          <div class="miniLabel">From</div>
-          <input id="chartFrom" class="field" type="date" />
-        </div>
-        <div class="dateField">
-          <div class="miniLabel">To</div>
-          <input id="chartTo" class="field" type="date" />
-        </div>
-      </div>
-
-      <canvas id="chart" width="900" height="520"></canvas>
-    </div>
-
   </div>
 
 <script>
-(() => {
-  "use strict";
+  const STORAGE_KEY = "vitals_v2_entries";
+  const THRESH_KEY  = "vitals_v2_thresholds";
 
-  // =========================
-  // Data model + persistence
-  // =========================
-  const STORAGE_KEY = "vitals_tracker_records_v1";
-  const SYMPTOMS = [
-    "Sweaty","Dizzy","Panic","Brain fog","Chest tight","Headache",
-    "Nausea","Short breath","Hot ears","Shaky","Blurred vision","Weakness"
+  const TAGS = [
+    "Sweaty", "Panic", "Chest tight", "Dizzy", "Nausea", "Blurred vision",
+    "Weakness", "Head pain", "Hot ears", "Shaky", "Short breath", "Stomach pain",
+    "Anxious", "Calm", "Foggy"
   ];
 
-  function numOrNull(v){
-    const n = Number(v);
-    return Number.isFinite(n) ? n : null;
+  // DOM
+  const logEl = document.getElementById("log");
+  const kpiEl = document.getElementById("kpi");
+  const countLine = document.getElementById("countLine");
+  const emptyEl = document.getElementById("empty");
+
+  const dateEl = document.getElementById("date");
+  const timeEl = document.getElementById("time");
+  const sysEl = document.getElementById("sys");
+  const diaEl = document.getElementById("dia");
+  const hrEl  = document.getElementById("hr");
+  const posEl = document.getElementById("position");
+  const medsEl = document.getElementById("meds");
+  const sevEl = document.getElementById("severity");
+  const symptomsEl = document.getElementById("symptoms");
+  const customTagEl = document.getElementById("customTag");
+
+  const qEl = document.getElementById("q");
+  const fromEl = document.getElementById("from");
+  const toEl = document.getElementById("to");
+  const tagFilterEl = document.getElementById("tagFilter");
+  const sortEl = document.getElementById("sort");
+
+  const tSysHigh = document.getElementById("tSysHigh");
+  const tDiaHigh = document.getElementById("tDiaHigh");
+  const tSysLow  = document.getElementById("tSysLow");
+  const tDiaLow  = document.getElementById("tDiaLow");
+  const tHrHigh  = document.getElementById("tHrHigh");
+  const tHrLow   = document.getElementById("tHrLow");
+
+  // State
+  let selectedTags = new Set();
+  let editId = null;
+
+  function nowLocal(){
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth()+1).padStart(2,"0");
+    const dd = String(now.getDate()).padStart(2,"0");
+    const hh = String(now.getHours()).padStart(2,"0");
+    const mi = String(now.getMinutes()).padStart(2,"0");
+    return { date:`${yyyy}-${mm}-${dd}`, time:`${hh}:${mi}` };
   }
 
-  function loadRecords(){
-    try{
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if(!raw) return [];
-      const arr = JSON.parse(raw);
-      if(!Array.isArray(arr)) return [];
-      // Always sort MOST RECENT FIRST
-      return arr
-        .filter(r => r && typeof r.ts === "number")
-        .map(r => ({
-          ts: r.ts,
-          sys: numOrNull(r.sys),
-          dia: numOrNull(r.dia),
-          hr:  numOrNull(r.hr),
-          notes: (r.notes ?? "").toString(),
-          symptoms: Array.isArray(r.symptoms) ? r.symptoms.map(String) : []
-        }))
-        .sort((a,b)=> b.ts - a.ts);
-    }catch{
-      return [];
-    }
+  function getEntries(){
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); }
+    catch { return []; }
+  }
+  function setEntries(entries){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
   }
 
-  function saveRecords(recs){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(recs));
+  function defaultThresholds(){
+    return {
+      sysHigh: 160,
+      diaHigh: 100,
+      sysLow:  90,
+      diaLow:  60,
+      hrHigh:  110,
+      hrLow:   50
+    };
   }
 
-  // =========================
-  // UI helpers
-  // =========================
-  const $ = (id) => document.getElementById(id);
-  const screens = ["home","add","log","charts"];
-
-  function focusTopOfPanel(screen){
-    // Ensure we're at the top without forcing input focus (prevents keyboard pop on Log).
-    window.scrollTo({top:0, left:0, behavior:"auto"});
-
-    if(screen === "add"){
-      // Add screen is fine to focus systolic for faster entry.
-      setTimeout(() => { try{ $("sys").focus({preventScroll:true}); }catch{} }, 0);
-    }
-
-    // LOG: intentionally do NOT focus anything.
-    // CHARTS/HOME: no focus.
+  function getThresholds(){
+    try { return JSON.parse(localStorage.getItem(THRESH_KEY) || "null") || defaultThresholds(); }
+    catch { return defaultThresholds(); }
   }
 
-  function show(screen){
-    for(const s of screens){
-      $(s).classList.toggle("hidden", s !== screen);
-    }
-    if(screen === "log"){ renderLog(); }
-    if(screen === "charts"){ renderCharts(); }
-    if(screen === "add"){
-      clearAddForm();
-      tickTime();
-      adjustTimeFont();
-    }
-    focusTopOfPanel(screen);
+  function setThresholds(t){
+    localStorage.setItem(THRESH_KEY, JSON.stringify(t));
   }
 
-  function fmtDateTime(ts){
-    const d = new Date(ts);
-    const parts = new Intl.DateTimeFormat(undefined, {
-      year:"numeric", month:"2-digit", day:"2-digit",
-      hour:"2-digit", minute:"2-digit", second:"2-digit"
-    }).formatToParts(d);
-    const map = Object.fromEntries(parts.map(p=>[p.type,p.value]));
-    const mm = map.month, dd = map.day, yy = map.year;
-    const hh = map.hour, mi = map.minute, ss = map.second;
-    const dp = map.dayPeriod ? ` ${map.dayPeriod}` : "";
-    return `${mm}/${dd}/${yy}, ${hh}:${mi}:${ss}${dp}`;
+  function restoreDefaults(){
+    const t = defaultThresholds();
+    setThresholds(t);
+    syncThresholdInputs();
+    render();
   }
 
-  function fmtTimeCommaDate(ts){
-    const d = new Date(ts);
-    const time = new Intl.DateTimeFormat(undefined, {
-      hour:"2-digit", minute:"2-digit", second:"2-digit"
-    }).format(d);
-    const date = new Intl.DateTimeFormat(undefined, {
-      month:"2-digit", day:"2-digit", year:"numeric"
-    }).format(d);
-    return `${time}, ${date}`;
+  function syncThresholdInputs(){
+    const t = getThresholds();
+    tSysHigh.value = t.sysHigh;
+    tDiaHigh.value = t.diaHigh;
+    tSysLow.value  = t.sysLow;
+    tDiaLow.value  = t.diaLow;
+    tHrHigh.value  = t.hrHigh;
+    tHrLow.value   = t.hrLow;
   }
 
-  // =========================
-  // Add screen: symptoms grid
-  // =========================
-  const symGrid = $("symGrid");
-  const symState = new Map();
+  function saveThresholds(){
+    const t = {
+      sysHigh: Number(tSysHigh.value || 0),
+      diaHigh: Number(tDiaHigh.value || 0),
+      sysLow:  Number(tSysLow.value || 0),
+      diaLow:  Number(tDiaLow.value || 0),
+      hrHigh:  Number(tHrHigh.value || 0),
+      hrLow:   Number(tHrLow.value || 0)
+    };
+    setThresholds(t);
+    render();
+  }
 
-  function buildSymptoms(){
-    symGrid.innerHTML = "";
-    symState.clear();
-
-    for(const name of SYMPTOMS){
-      const item = document.createElement("div");
-      item.className = "symItem";
-      item.setAttribute("role","checkbox");
-      item.setAttribute("aria-checked","false");
-      item.tabIndex = 0;
-
-      const box = document.createElement("div");
-      box.className = "box";
-      const check = document.createElement("div");
-      check.className = "check";
-      box.appendChild(check);
-
-      const text = document.createElement("div");
-      text.className = "symText";
-      text.textContent = name;
-
-      item.appendChild(box);
-      item.appendChild(text);
-
-      const setSelected = (on) => {
-        item.classList.toggle("selected", on);
-        item.setAttribute("aria-checked", on ? "true" : "false");
-        symState.set(name, on);
+  function buildPills(){
+    const bar = document.getElementById("pillbar");
+    bar.innerHTML = "";
+    TAGS.forEach(tag=>{
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "pill";
+      b.textContent = tag;
+      b.setAttribute("aria-pressed","false");
+      b.onclick = ()=>{
+        if(selectedTags.has(tag)) selectedTags.delete(tag);
+        else selectedTags.add(tag);
+        b.setAttribute("aria-pressed", selectedTags.has(tag) ? "true" : "false");
       };
-
-      setSelected(false);
-
-      const toggle = () => setSelected(!symState.get(name));
-      item.addEventListener("click", toggle);
-      item.addEventListener("keydown", (e) => {
-        if(e.key === "Enter" || e.key === " "){
-          e.preventDefault();
-          toggle();
-        }
-      });
-
-      symGrid.appendChild(item);
-    }
-  }
-
-  function selectedSymptoms(){
-    return SYMPTOMS.filter(s => symState.get(s));
-  }
-
-  function clearAddForm(){
-    $("sys").value = "";
-    $("dia").value = "";
-    $("hr").value = "";
-    $("notes").value = "";
-    for(const k of SYMPTOMS) symState.set(k,false);
-    for(const el of symGrid.querySelectorAll(".symItem")){
-      el.classList.remove("selected");
-      el.setAttribute("aria-checked","false");
-    }
-  }
-
-  // =========================
-  // Time line: dynamic fit (no wrap)
-  // =========================
-  let timeTimer = null;
-
-  function tickTime(){
-    const line = $("timeLine");
-    line.textContent = fmtTimeCommaDate(Date.now());
-    adjustTimeFont();
-    if(timeTimer) clearTimeout(timeTimer);
-    timeTimer = setTimeout(tickTime, 900);
-  }
-
-  function adjustTimeFont(){
-    const el = $("timeLine");
-    if(!el) return;
-    const parent = el.parentElement;
-    if(!parent) return;
-
-    el.style.fontSize = "";
-    const maxW = parent.clientWidth - 8;
-
-    let fs = parseFloat(getComputedStyle(el).fontSize) || 28;
-    let guard = 0;
-    while(el.scrollWidth > maxW && fs > 16 && guard < 30){
-      fs -= 1;
-      el.style.fontSize = fs + "px";
-      guard++;
-    }
-  }
-
-  // =========================
-  // Log screen: filters + render
-  // =========================
-  function parseDateField(v){
-    if(!v) return null;
-    const [y,m,d] = v.split("-").map(Number);
-    if(!y || !m || !d) return null;
-    return new Date(y, m-1, d, 0, 0, 0, 0).getTime();
-  }
-
-  function clampEndOfDay(ts){
-    const d = new Date(ts);
-    d.setHours(23,59,59,999);
-    return d.getTime();
-  }
-
-  function recordMatches(rec, q){
-    if(!q) return true;
-    const s = q.toLowerCase().trim();
-    if(!s) return true;
-
-    const bp = `${rec.sys ?? ""}/${rec.dia ?? ""}`.toLowerCase();
-    const hr = `${rec.hr ?? ""}`.toLowerCase();
-    const notes = (rec.notes || "").toLowerCase();
-    const sym = (rec.symptoms || []).join(", ").toLowerCase();
-    const dt = fmtDateTime(rec.ts).toLowerCase();
-
-    return bp.includes(s) || hr.includes(s) || notes.includes(s) || sym.includes(s) || dt.includes(s);
-  }
-
-  function filteredRecords({fromId,toId,searchId}){
-    const recs = loadRecords(); // MOST RECENT FIRST
-    const q = (searchId ? $(searchId).value : "").trim();
-
-    const fromV = fromId ? $(fromId).value : "";
-    const toV   = toId ? $(toId).value : "";
-
-    const fromTs = parseDateField(fromV);
-    const toMid  = parseDateField(toV);
-    const toTs   = toMid != null ? clampEndOfDay(toMid) : null;
-
-    return recs.filter(r => {
-      if(fromTs != null && r.ts < fromTs) return false;
-      if(toTs != null && r.ts > toTs) return false;
-      return recordMatches(r, q);
+      bar.appendChild(b);
     });
   }
 
+  function normalizeText(s){ return (s || "").toString().toLowerCase(); }
+
+  function flagsFor(entry){
+    const t = getThresholds();
+    const sys = Number(entry.sys);
+    const dia = Number(entry.dia);
+    const hr  = Number(entry.hr);
+
+    const flags = [];
+
+    if(!Number.isNaN(sys) && !Number.isNaN(dia)){
+      if(sys >= t.sysHigh || dia >= t.diaHigh) flags.push({type:"danger", text:"High BP"});
+      else if(sys >= (t.sysHigh-10) || dia >= (t.diaHigh-10)) flags.push({type:"warn", text:"Borderline BP"});
+      if(sys <= t.sysLow || dia <= t.diaLow) flags.push({type:"warn", text:"Low BP"});
+    }
+    if(!Number.isNaN(hr)){
+      if(hr >= t.hrHigh) flags.push({type:"danger", text:"High HR"});
+      else if(hr <= t.hrLow) flags.push({type:"warn", text:"Low HR"});
+    }
+
+    if(entry.severity === "worst") flags.push({type:"danger", text:"Worst day"});
+    else if(entry.severity === "bad") flags.push({type:"warn", text:"Bad day"});
+
+    if(flags.length === 0) flags.push({type:"ok", text:"No flags"});
+    return flags;
+  }
+
+  function validateEntry(entry){
+    const errs = [];
+    if(!entry.date) errs.push("Date is required.");
+    if(!entry.time) errs.push("Time is required.");
+    if(entry.sys === "" || entry.dia === "") errs.push("BP systolic and diastolic are required.");
+    if(entry.hr === "") errs.push("Heart rate is required.");
+    if(Number(entry.sys) <= 0 || Number(entry.dia) <= 0) errs.push("BP must be positive numbers.");
+    if(Number(entry.hr) <= 0) errs.push("HR must be a positive number.");
+    return errs;
+  }
+
+  function saveEntry(){
+    const custom = customTagEl.value.trim();
+    if(custom) selectedTags.add(custom);
+
+    const entry = {
+      id: editId || crypto.randomUUID(),
+      date: dateEl.value,
+      time: timeEl.value,
+      sys: sysEl.value,
+      dia: diaEl.value,
+      hr:  hrEl.value,
+      position: posEl.value,
+      severity: sevEl.value,
+      tags: Array.from(selectedTags),
+      meds: medsEl.value.trim(),
+      notes: symptomsEl.value.trim(),
+      createdAt: Date.now()
+    };
+
+    const errs = validateEntry(entry);
+    if(errs.length){
+      alert(errs.join("\n"));
+      return;
+    }
+
+    const entries = getEntries();
+    const idx = entries.findIndex(e=>e.id === entry.id);
+    if(idx >= 0) entries[idx] = entry;
+    else entries.unshift(entry);
+    setEntries(entries);
+
+    resetForm();
+    render();
+  }
+
+  function resetForm(){
+    editId = null;
+    const n = nowLocal();
+    dateEl.value = n.date;
+    timeEl.value = n.time;
+    sysEl.value = "";
+    diaEl.value = "";
+    hrEl.value = "";
+    posEl.value = "Sitting";
+    medsEl.value = "";
+    sevEl.value = "typical";
+    symptomsEl.value = "";
+    customTagEl.value = "";
+    selectedTags.clear();
+
+    // reset pill pressed states
+    document.querySelectorAll(".pill").forEach(p=>p.setAttribute("aria-pressed","false"));
+
+    document.getElementById("saveBtn").textContent = "Save entry";
+    dateEl.focus();
+  }
+
+  function applyFilters(entries){
+    let out = [...entries];
+
+    const q = normalizeText(qEl.value);
+    const from = fromEl.value ? new Date(fromEl.value + "T00:00:00") : null;
+    const to   = toEl.value ? new Date(toEl.value + "T23:59:59") : null;
+    const tagF = tagFilterEl.value;
+
+    out = out.filter(e=>{
+      const dt = new Date(e.date + "T" + (e.time || "00:00") + ":00");
+      if(from && dt < from) return false;
+      if(to && dt > to) return false;
+
+      if(tagF){
+        const tags = (e.tags || []);
+        if(!tags.includes(tagF)) return false;
+      }
+
+      if(q){
+        const hay = [
+          e.notes || "",
+          e.meds || "",
+          (e.tags || []).join(" "),
+          e.position || "",
+          e.severity || ""
+        ].join(" ").toLowerCase();
+        if(!hay.includes(q)) return false;
+      }
+
+      return true;
+    });
+
+    if(sortEl.value === "oldest"){
+      out.sort((a,b)=>{
+        const da = new Date(a.date+"T"+(a.time||"00:00")+":00").getTime();
+        const db = new Date(b.date+"T"+(b.time||"00:00")+":00").getTime();
+        return da-db;
+      });
+    }else{
+      out.sort((a,b)=>{
+        const da = new Date(a.date+"T"+(a.time||"00:00")+":00").getTime();
+        const db = new Date(b.date+"T"+(b.time||"00:00")+":00").getTime();
+        return db-da;
+      });
+    }
+
+    return out;
+  }
+
+  function updateTagFilter(entries){
+    const all = new Set();
+    entries.forEach(e => (e.tags||[]).forEach(t=>all.add(t)));
+    const current = tagFilterEl.value;
+
+    const opts = ["", ...Array.from(all).sort((a,b)=>a.localeCompare(b))];
+    tagFilterEl.innerHTML = "";
+    opts.forEach(v=>{
+      const o = document.createElement("option");
+      o.value = v;
+      o.textContent = v ? v : "All";
+      tagFilterEl.appendChild(o);
+    });
+    // preserve selection if still exists
+    if(opts.includes(current)) tagFilterEl.value = current;
+  }
+
+  function computeKPIs(filtered){
+    if(filtered.length === 0){
+      return [
+        {label:"Entries", value:"0", sub:"No data in filter"},
+        {label:"Average BP", value:"—", sub:""},
+        {label:"Average HR", value:"—", sub:""},
+        {label:"Most common tag", value:"—", sub:""}
+      ];
+    }
+
+    const avg = (nums)=> Math.round(nums.reduce((a,b)=>a+b,0) / nums.length);
+    const sys = filtered.map(e=>Number(e.sys)).filter(n=>Number.isFinite(n));
+    const dia = filtered.map(e=>Number(e.dia)).filter(n=>Number.isFinite(n));
+    const hr  = filtered.map(e=>Number(e.hr)).filter(n=>Number.isFinite(n));
+
+    const tagCounts = {};
+    filtered.forEach(e => (e.tags||[]).forEach(t=>tagCounts[t]=(tagCounts[t]||0)+1));
+    const topTag = Object.entries(tagCounts).sort((a,b)=>b[1]-a[1])[0]?.[0] || "—";
+
+    const t = getThresholds();
+    const highs = filtered.filter(e => Number(e.sys)>=t.sysHigh || Number(e.dia)>=t.diaHigh).length;
+    const lows  = filtered.filter(e => Number(e.sys)<=t.sysLow  || Number(e.dia)<=t.diaLow).length;
+    const hrHi  = filtered.filter(e => Number(e.hr)>=t.hrHigh).length;
+
+    return [
+      {label:"Entries", value:String(filtered.length), sub:`High BP: ${highs} • Low BP: ${lows} • High HR: ${hrHi}`},
+      {label:"Average BP", value:`${avg(sys)}/${avg(dia)}`, sub:"Within current filter"},
+      {label:"Average HR", value:`${avg(hr)}`, sub:"Within current filter"},
+      {label:"Top tag", value:topTag, sub:"Most frequent symptom tag"}
+    ];
+  }
+
+  function renderKPIs(filtered){
+    const cards = computeKPIs(filtered);
+    kpiEl.innerHTML = "";
+    cards.forEach(c=>{
+      const d = document.createElement("div");
+      d.className = "card";
+      d.innerHTML = `<div class="label">${escapeHtml(c.label)}</div>
+                     <div class="value">${escapeHtml(c.value)}</div>
+                     <div class="sub">${escapeHtml(c.sub || "")}</div>`;
+      kpiEl.appendChild(d);
+    });
+  }
+
+  function renderTable(filtered){
+    logEl.innerHTML = "";
+    if(filtered.length === 0){
+      emptyEl.style.display = "block";
+      return;
+    }
+    emptyEl.style.display = "none";
+
+    filtered.forEach(e=>{
+      const tr = document.createElement("tr");
+      const flags = flagsFor(e);
+      const flagHtml = flags.map(f=>`<span class="flag ${f.type}">${escapeHtml(f.text)}</span>`).join(" ");
+
+      const tagsHtml = (e.tags||[]).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join(" ");
+
+      tr.innerHTML = `
+        <td class="nowrap">${escapeHtml(e.date)}</td>
+        <td class="nowrap">${escapeHtml(e.time)}</td>
+        <td class="nowrap">${escapeHtml(e.sys)}/${escapeHtml(e.dia)}</td>
+        <td class="nowrap">${escapeHtml(e.hr)}</td>
+        <td>${flagHtml}</td>
+        <td>${escapeHtml(e.position || "")}</td>
+        <td>${escapeHtml(e.severity || "")}</td>
+        <td>${tagsHtml || `<span class="small">—</span>`}</td>
+        <td>${escapeHtml(e.meds || "") || `<span class="small">—</span>`}</td>
+        <td>${escapeHtml(e.notes || "") || `<span class="small">—</span>`}</td>
+        <td class="no-print">
+          <div class="row-actions" style="margin:0">
+            <button class="secondary" onclick="startEdit('${e.id}')">Edit</button>
+            <button class="danger" onclick="deleteEntry('${e.id}')">Delete</button>
+          </div>
+        </td>
+      `;
+      logEl.appendChild(tr);
+    });
+  }
+
+  function render(){
+    const entries = getEntries();
+    updateTagFilter(entries);
+
+    const filtered = applyFilters(entries);
+    countLine.textContent = `Showing ${filtered.length} of ${entries.length} total entries.`;
+
+    renderKPIs(filtered);
+    renderTable(filtered);
+  }
+
+  function startEdit(id){
+    const entries = getEntries();
+    const e = entries.find(x=>x.id === id);
+    if(!e) return;
+
+    editId = e.id;
+    dateEl.value = e.date || "";
+    timeEl.value = e.time || "";
+    sysEl.value = e.sys || "";
+    diaEl.value = e.dia || "";
+    hrEl.value  = e.hr || "";
+    posEl.value = e.position || "Sitting";
+    medsEl.value = e.meds || "";
+    sevEl.value = e.severity || "typical";
+    symptomsEl.value = e.notes || "";
+    customTagEl.value = "";
+
+    selectedTags = new Set(e.tags || []);
+    document.querySelectorAll(".pill").forEach(p=>{
+      const tag = p.textContent;
+      p.setAttribute("aria-pressed", selectedTags.has(tag) ? "true" : "false");
+    });
+
+    document.getElementById("saveBtn").textContent = "Save changes";
+    sysEl.focus();
+  }
+
+  function deleteEntry(id){
+    if(!confirm("Delete this entry?")) return;
+    const entries = getEntries().filter(e=>e.id !== id);
+    setEntries(entries);
+    if(editId === id) resetForm();
+    render();
+  }
+
+  function clearAll(){
+    if(!confirm("Delete ALL entries and settings?")) return;
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(THRESH_KEY);
+    restoreDefaults();
+    resetForm();
+    render();
+  }
+
+  function exportCSV(){
+    const entries = applyFilters(getEntries());
+    let csv = "Date,Time,Systolic,Diastolic,HR,Position,DayType,Tags,Meds,Notes\n";
+    entries.forEach(e=>{
+      const tags = (e.tags||[]).join("; ");
+      const row = [
+        e.date, e.time, e.sys, e.dia, e.hr,
+        e.position || "", e.severity || "",
+        tags,
+        csvEscape(e.meds || ""),
+        csvEscape(e.notes || "")
+      ].join(",");
+      csv += row + "\n";
+    });
+    downloadBlob(csv, "text/csv", "vitals_export.csv");
+  }
+
+  function backupJSON(){
+    const payload = {
+      version: "v2",
+      exportedAt: new Date().toISOString(),
+      thresholds: getThresholds(),
+      entries: getEntries()
+    };
+    downloadBlob(JSON.stringify(payload, null, 2), "application/json", "vitals_backup.json");
+  }
+
+  function restoreJSON(evt){
+    const file = evt.target.files?.[0];
+    evt.target.value = "";
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const payload = JSON.parse(reader.result);
+        if(payload?.entries && Array.isArray(payload.entries)){
+          setEntries(payload.entries);
+        }
+        if(payload?.thresholds){
+          setThresholds(payload.thresholds);
+        }
+        syncThresholdInputs();
+        render();
+        alert("Restore complete.");
+      }catch{
+        alert("Restore failed: invalid JSON.");
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function printReport(){
+    // Uses current filters. Print dialog -> Save as PDF.
+    window.print();
+  }
+
+  function downloadBlob(text, mime, filename){
+    const blob = new Blob([text], {type:mime});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    URL.revokeObjectURL(a.href);
+    a.remove();
+  }
+
+  function csvEscape(s){
+    const v = String(s ?? "");
+    const needs = /[",\n]/.test(v);
+    const esc = v.replace(/"/g,'""');
+    return needs ? `"${esc}"` : esc;
+  }
+
   function escapeHtml(s){
-    return String(s)
+    return String(s ?? "")
       .replaceAll("&","&amp;")
       .replaceAll("<","&lt;")
       .replaceAll(">","&gt;")
@@ -703,446 +927,22 @@
       .replaceAll("'","&#039;");
   }
 
-  function renderLog(){
-    const list = $("logList");
-    const recs = filteredRecords({fromId:"fromDate", toId:"toDate", searchId:"search"});
+  // Init
+  (function init(){
+    buildPills();
+    syncThresholdInputs();
 
-    list.innerHTML = "";
-    if(recs.length === 0){
-      const empty = document.createElement("div");
-      empty.className = "subtle";
-      empty.style.marginTop = "10px";
-      empty.textContent = "No matching records.";
-      list.appendChild(empty);
-      return;
-    }
+    const n = nowLocal();
+    dateEl.value = n.date;
+    timeEl.value = n.time;
 
-    // Already most recent first.
-    for(const r of recs){
-      const e = document.createElement("div");
-      e.className = "entry";
-
-      const top = document.createElement("div");
-      top.className = "entryTop";
-
-      const t = document.createElement("div");
-      t.className = "entryTime";
-      t.textContent = fmtDateTime(r.ts);
-
-      top.appendChild(t);
-      e.appendChild(top);
-
-      const line1 = document.createElement("div");
-      line1.className = "entryBPHR";
-
-      const bp = document.createElement("div");
-      bp.className = "bpBig";
-      bp.textContent = `BP ${r.sys ?? "—"}/${r.dia ?? "—"}`;
-
-      const hr = document.createElement("div");
-      hr.className = "hrBig";
-      hr.textContent = `HR ${r.hr ?? "—"}`;
-
-      line1.appendChild(bp);
-      line1.appendChild(hr);
-      e.appendChild(line1);
-
-      const sym = (r.symptoms && r.symptoms.length) ? r.symptoms.join(", ") : "None";
-      const notes = (r.notes && r.notes.trim()) ? r.notes.trim() : "None";
-
-      const l2 = document.createElement("div");
-      l2.className = "entryLine";
-      l2.innerHTML = `<b>Symptoms:</b> ${escapeHtml(sym)}`;
-      e.appendChild(l2);
-
-      const l3 = document.createElement("div");
-      l3.className = "entryLine";
-      l3.innerHTML = `<b>Notes:</b> ${escapeHtml(notes)}`;
-      e.appendChild(l3);
-
-      list.appendChild(e);
-    }
-  }
-
-  // =========================
-  // Export
-  // =========================
-  function downloadText(text, filename){
-    const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }
-
-  function exportText(recs){
-    const lines = recs.map(r => {
-      const dt = fmtDateTime(r.ts);
-      const bp = `BP ${r.sys ?? "—"}/${r.dia ?? "—"}`;
-      const hr = `HR ${r.hr ?? "—"}`;
-      const sym = (r.symptoms && r.symptoms.length) ? r.symptoms.join(", ") : "None";
-      const notes = (r.notes && r.notes.trim()) ? r.notes.trim() : "None";
-      return `${dt}\n${bp} • ${hr}\nSymptoms: ${sym}\nNotes: ${notes}\n`;
+    // keyboard convenience: Enter on HR saves
+    hrEl.addEventListener("keydown",(e)=>{
+      if(e.key === "Enter"){ e.preventDefault(); saveEntry(); }
     });
 
-    const out = lines.join("\n");
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(out).then(() => {
-        alert("Export copied to clipboard.");
-      }).catch(() => {
-        downloadText(out, "vitals_export.txt");
-      });
-    }else{
-      downloadText(out, "vitals_export.txt");
-    }
-  }
-
-  // =========================
-  // Charts
-  // =========================
-  function roundRect(ctx, x,y,w,h,r, fill, stroke){
-    const rr = Math.min(r, w/2, h/2);
-    ctx.beginPath();
-    ctx.moveTo(x+rr,y);
-    ctx.arcTo(x+w,y,x+w,y+h,rr);
-    ctx.arcTo(x+w,y+h,x,y+h,rr);
-    ctx.arcTo(x,y+h,x,y,rr);
-    ctx.arcTo(x,y,x+w,y,rr);
-    ctx.closePath();
-    if(fill){
-      ctx.fillStyle = fill;
-      ctx.fill();
-    }
-    if(stroke){
-      ctx.strokeStyle = stroke;
-      ctx.lineWidth = 1;
-      ctx.stroke();
-    }
-  }
-
-  function drawChartEmpty(ctx, canvas, msg){
-    const W = canvas.width, H = canvas.height;
-    roundRect(ctx, 0,0,W,H,22,"rgba(255,255,255,.02)","rgba(235,245,255,.12)");
-    ctx.fillStyle = "rgba(235,245,255,.50)";
-    ctx.font = "18px system-ui,Segoe UI,Roboto";
-    ctx.fillText(msg, 22, 44);
-  }
-
-  function xTo(i, n, pad, W){
-    if(n<=1) return pad.l;
-    const span = W - pad.l - pad.r;
-    return pad.l + span * (i/(n-1));
-  }
-
-  function yTo(v, yMin, yMax, pad, H){
-    const span = H - pad.t - pad.b;
-    const t = (v - yMin) / (yMax - yMin || 1);
-    return pad.t + span * (1 - t);
-  }
-
-  function drawSeries(ctx, values, yMin, yMax, pad, W, H, color){
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 3;
-    ctx.lineJoin = "round";
-    ctx.lineCap = "round";
-
-    let started = false;
-    ctx.beginPath();
-    for(let i=0;i<values.length;i++){
-      const v = values[i];
-      if(v == null) { started = false; continue; }
-      const x = xTo(i, values.length, pad, W);
-      const y = yTo(v, yMin, yMax, pad, H);
-      if(!started){
-        ctx.moveTo(x,y);
-        started = true;
-      }else{
-        ctx.lineTo(x,y);
-      }
-    }
-    ctx.stroke();
-  }
-
-  function renderCharts(){
-    const canvas = $("chart");
-    const ctx = canvas.getContext("2d");
-
-    // For charts, we want chronological for plotting.
-    const recs = filteredRecords({fromId:"chartFrom", toId:"chartTo", searchId:null}).slice().reverse();
-
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-
-    if(recs.length === 0){
-      drawChartEmpty(ctx, canvas, "No data in range.");
-      return;
-    }
-
-    const sys = recs.map(r => r.sys).filter(v => v != null);
-    const dia = recs.map(r => r.dia).filter(v => v != null);
-    const hr  = recs.map(r => r.hr ).filter(v => v != null);
-
-    const all = [...sys,...dia,...hr].filter(v => v != null);
-    if(all.length === 0){
-      drawChartEmpty(ctx, canvas, "No numeric values.");
-      return;
-    }
-
-    const minV = Math.min(...all);
-    const maxV = Math.max(...all);
-    const padV = Math.max(8, Math.round((maxV-minV)*0.12));
-    const yMin = minV - padV;
-    const yMax = maxV + padV;
-
-    const W = canvas.width, H = canvas.height;
-    const pad = {l:62, r:18, t:18, b:56};
-
-    roundRect(ctx, 0, 0, W, H, 22, "rgba(255,255,255,.02)", "rgba(235,245,255,.12)");
-
-    ctx.font = "16px system-ui,Segoe UI,Roboto";
-    ctx.fillStyle = "rgba(235,245,255,.60)";
-    ctx.strokeStyle = "rgba(235,245,255,.10)";
-    ctx.lineWidth = 1;
-
-    const ticks = 5;
-    for(let i=0;i<=ticks;i++){
-      const y = pad.t + (H - pad.t - pad.b) * (i/ticks);
-      ctx.beginPath();
-      ctx.moveTo(pad.l, y);
-      ctx.lineTo(W - pad.r, y);
-      ctx.stroke();
-
-      const val = Math.round(yMax - (yMax-yMin)*(i/ticks));
-      ctx.fillText(String(val), 16, y+6);
-    }
-
-    // X labels: up to 4
-    const xCount = recs.length;
-    const labelCount = Math.min(4, xCount);
-    for(let i=0;i<labelCount;i++){
-      const idx = Math.round((xCount-1) * (i/(labelCount-1 || 1)));
-      const x = xTo(idx, xCount, pad, W);
-      const d = new Date(recs[idx].ts);
-      const lab = new Intl.DateTimeFormat(undefined, {month:"2-digit", day:"2-digit"}).format(d);
-      ctx.fillStyle = "rgba(235,245,255,.56)";
-      ctx.fillText(lab, x-16, H-22);
-    }
-
-    drawSeries(ctx, recs.map(r=>r.sys), yMin, yMax, pad, W, H, "rgba(79,140,255,.98)");
-    drawSeries(ctx, recs.map(r=>r.dia), yMin, yMax, pad, W, H, "rgba(216,224,240,.88)");
-    drawSeries(ctx, recs.map(r=>r.hr ), yMin, yMax, pad, W, H, "rgba(120,220,180,.92)");
-
-    // Legend
-    const lx = pad.l + 8;
-    let ly = pad.t + 22;
-    ctx.font = "18px system-ui,Segoe UI,Roboto";
-    function legend(text, color){
-      ctx.fillStyle = color;
-      ctx.fillRect(lx, ly-12, 18, 6);
-      ctx.fillStyle = "rgba(235,245,255,.70)";
-      ctx.fillText(text, lx+26, ly-6);
-      ly += 24;
-    }
-    legend("Systolic", "rgba(79,140,255,.98)");
-    legend("Diastolic", "rgba(216,224,240,.88)");
-    legend("Heart Rate", "rgba(120,220,180,.92)");
-  }
-
-  // =========================
-  // Install / "Uninstall" UX
-  // =========================
-  let deferredPrompt = null;
-
-  window.addEventListener("beforeinstallprompt", (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    refreshInstallButton();
-  });
-
-  window.addEventListener("appinstalled", () => {
-    deferredPrompt = null;
-    refreshInstallButton();
-  });
-
-  function isStandalone(){
-    return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
-  }
-
-  function refreshInstallButton(){
-    $("btnInstall").textContent = isStandalone() ? "Uninstall" : "Install";
-  }
-
-  $("btnInstall").addEventListener("click", async () => {
-    if(isStandalone()){
-      alert(
-        "Uninstall:\n\n" +
-        "Android: press-and-hold the app icon → Uninstall.\n" +
-        "Uninstall typically does NOT delete your saved data, but device/browser behavior can vary.\n\n" +
-        "To delete data on purpose: clear site storage in your browser settings."
-      );
-      return;
-    }
-    if(deferredPrompt){
-      deferredPrompt.prompt();
-      try { await deferredPrompt.userChoice; } catch {}
-      deferredPrompt = null;
-      refreshInstallButton();
-      return;
-    }
-    alert("Install is available when your browser offers it (menu → Install app).");
-  });
-
-  // =========================
-  // Exit
-  // =========================
-  $("btnExitHome").addEventListener("click", () => {
-    window.close();
-    setTimeout(() => {
-      alert("If it didn’t close: use your phone’s Back/Home.");
-    }, 200);
-  });
-
-  // =========================
-  // Navigation buttons
-  // =========================
-  $("btnGoAdd").addEventListener("click", () => show("add"));
-  $("btnGoLog").addEventListener("click", () => show("log"));
-  $("btnGoCharts").addEventListener("click", () => show("charts"));
-
-  $("btnBackFromAdd").addEventListener("click", () => show("home"));
-  $("btnBackFromLog").addEventListener("click", () => show("home"));
-  $("btnBackFromCharts").addEventListener("click", () => show("home"));
-
-  // From log -> add
-  $("btnAddFromLog").addEventListener("click", () => show("add"));
-
-  // =========================
-  // Save: Save -> Log, top focus (no input focus on Log)
-  // =========================
-  function intOrNull(v){
-    const t = String(v).trim();
-    if(!t) return null;
-    const n = Number(t);
-    if(!Number.isFinite(n)) return null;
-    return Math.round(n);
-  }
-
-  $("btnSave").addEventListener("click", () => {
-    const sys = intOrNull($("sys").value);
-    const dia = intOrNull($("dia").value);
-    const hr  = intOrNull($("hr").value);
-    const notes = ($("notes").value || "").toString();
-    const symptoms = selectedSymptoms();
-
-    if(sys==null && dia==null && hr==null && !notes.trim() && symptoms.length===0){
-      alert("Enter at least one value (BP, HR, notes, or symptom).");
-      return;
-    }
-
-    const recs = loadRecords();
-    recs.unshift({ ts: Date.now(), sys, dia, hr, notes, symptoms });
-    saveRecords(recs);
-
-    // Ensure log defaults show ALL data (blank filters)
-    $("fromDate").value = "";
-    $("toDate").value = "";
-    $("search").value = "";
-
-    show("log");
-  });
-
-  // =========================
-  // Filters trigger render
-  // =========================
-  ["search","fromDate","toDate"].forEach(id => {
-    $(id).addEventListener("input", () => renderLog());
-    $(id).addEventListener("change", () => renderLog());
-  });
-  ["chartFrom","chartTo"].forEach(id => {
-    $(id).addEventListener("input", () => renderCharts());
-    $(id).addEventListener("change", () => renderCharts());
-  });
-
-  // Export buttons
-  $("btnExportLog").addEventListener("click", () => {
-    const recs = filteredRecords({fromId:"fromDate", toId:"toDate", searchId:"search"});
-    exportText(recs);
-  });
-  $("btnExportCharts").addEventListener("click", () => {
-    const recs = filteredRecords({fromId:"chartFrom", toId:"chartTo", searchId:null});
-    exportText(recs);
-  });
-
-  // =========================
-  // Manifest + SW (single-file)
-  // =========================
-  function injectManifest(){
-    const svg =
-`<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#2f78ff"/>
-      <stop offset="1" stop-color="#0b1324"/>
-    </linearGradient>
-  </defs>
-  <rect width="512" height="512" rx="110" fill="url(#g)"/>
-  <path d="M128 290h70l26-94 44 160 30-98h84" fill="none"
-        stroke="rgba(235,245,255,.92)" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="160" cy="290" r="10" fill="rgba(235,245,255,.92)"/>
-  <circle cx="382" cy="258" r="10" fill="rgba(235,245,255,.92)"/>
-</svg>`;
-    const encoded = encodeURIComponent(svg).replace(/'/g,"%27").replace(/"/g,"%22");
-    const icon = `data:image/svg+xml;charset=utf-8,${encoded}`;
-
-    const manifest = {
-      name: "Vitals Tracker",
-      short_name: "Vitals",
-      start_url: ".",
-      display: "standalone",
-      background_color: "#0b1324",
-      theme_color: "#0b1324",
-      icons: [{ src: icon, sizes: "512x512", type: "image/svg+xml", purpose: "any" }]
-    };
-
-    const blob = new Blob([JSON.stringify(manifest)], {type:"application/manifest+json"});
-    const url = URL.createObjectURL(blob);
-    $("manifestLink").setAttribute("href", url);
-  }
-
-  async function registerSW(){
-    if(!("serviceWorker" in navigator)) return;
-    const swCode =
-`self.addEventListener('install', (e)=>{ self.skipWaiting(); });
-self.addEventListener('activate', (e)=>{ e.waitUntil(self.clients.claim()); });
-self.addEventListener('fetch', (e)=>{ });`;
-    const blob = new Blob([swCode], {type:"text/javascript"});
-    const swUrl = URL.createObjectURL(blob);
-    try { await navigator.serviceWorker.register(swUrl); } catch {}
-  }
-
-  // =========================
-  // Init
-  // =========================
-  buildSymptoms();
-  injectManifest();
-  registerSW();
-  refreshInstallButton();
-
-  $("fromDate").value = "";
-  $("toDate").value = "";
-  $("chartFrom").value = "";
-  $("chartTo").value = "";
-
-  show("home");
-
-  window.addEventListener("resize", () => {
-    if(!$("add").classList.contains("hidden")) adjustTimeFont();
-  });
-
-})();
+    render();
+  })();
 </script>
 </body>
 </html>
