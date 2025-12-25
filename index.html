@@ -426,7 +426,7 @@
         <div class="subtle">Data stays on your phone (local only).</div>
 
         <div class="footerTiny">
-          <div>v1.17</div>
+          <div>v1.18</div>
           <div>developed by Keyth Jyles</div>
         </div>
       </div>
@@ -559,10 +559,16 @@
   const $ = (id) => document.getElementById(id);
   const screens = ["home","add","log","charts"];
 
+  // v1.18: Do not auto-focus fields when opening Add in EDIT mode (prevents keyboard pop-up).
   function focusTopOfPanel(screen){
     window.scrollTo({top:0, left:0, behavior:"auto"});
+
     if(screen === "add"){
-      setTimeout(() => { try{ $("sys").focus({preventScroll:true}); }catch{} }, 0);
+      if(editTs == null){
+        setTimeout(() => { try{ $("sys").focus({preventScroll:true}); }catch{} }, 0);
+      }else{
+        setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 0);
+      }
     }
   }
 
