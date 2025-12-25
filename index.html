@@ -276,7 +276,15 @@
       border-radius: 22px;
       padding: 14px 14px 12px;
       margin-top: 12px;
+      touch-action: manipulation;
     }
+
+    /* v1.18: log entry press feedback */
+    .entry.pressed{
+      background: rgba(47,120,255,.14);
+      border-color: rgba(90,150,255,.55);
+    }
+
     .entry:active{ transform: translateY(1px); }
     .entryTop{
       display:flex;
@@ -830,12 +838,52 @@
       e.setAttribute("role","button");
       e.setAttribute("aria-label","Open entry for editing");
 
-      // Tap/click to edit
-      e.addEventListener("click", () => enterAddEdit(r.ts));
+      // v1.18: Press highlight + confirm-on-release (no action if slide off)
+      let armed = false;
+
+      function clearPressed(){
+        e.classList.remove("pressed");
+        armed = false;
+      }
+
+      e.addEventListener("pointerdown", (ev) => {
+        if(ev.button != null && ev.button !== 0) return;
+        armed = true;
+        e.classList.add("pressed");
+        try { e.setPointerCapture(ev.pointerId); } catch {}
+      });
+
+      e.addEventListener("pointermove", (ev) => {
+        if(!armed) return;
+        const rect = e.getBoundingClientRect();
+        const inside =
+          ev.clientX >= rect.left && ev.clientX <= rect.right &&
+          ev.clientY >= rect.top  && ev.clientY <= rect.bottom;
+
+        // If user slides off, disarm and remove highlight
+        if(!inside){
+          clearPressed();
+        }
+      });
+
+      e.addEventListener("pointercancel", clearPressed);
+
+      e.addEventListener("pointerup", () => {
+        if(!armed) return;
+        e.classList.remove("pressed");
+        armed = false;
+
+        // Confirm AFTER release
+        const ok = confirm("Edit this entry?");
+        if(ok) enterAddEdit(r.ts);
+      });
+
+      // Keyboard support
       e.addEventListener("keydown", (ev) => {
         if(ev.key === "Enter" || ev.key === " "){
           ev.preventDefault();
-          enterAddEdit(r.ts);
+          const ok = confirm("Edit this entry?");
+          if(ok) enterAddEdit(r.ts);
         }
       });
 
