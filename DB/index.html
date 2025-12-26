@@ -1,0 +1,1121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1324" />
+  <title>Vitals Tracker DB</title>
+
+  <link rel="manifest" id="manifestLink" href="#" />
+
+  <style>
+    :root{
+      --bg0:#08101f;
+      --bg1:#0b1324;
+      --panel:#0c1528cc;
+      --stroke:rgba(235,245,255,.16);
+      --stroke2:rgba(235,245,255,.22);
+      --strokeBold:rgba(180,210,255,.42);
+      --text:rgba(235,245,255,.86);
+      --muted:rgba(235,245,255,.58);
+      --muted2:rgba(235,245,255,.42);
+
+      /* Border color (darker than logo, subtle) */
+      --accent:#2b4e7a;
+
+      --shadow:0 14px 40px rgba(0,0,0,.38);
+      --radius:26px;
+      --btnH:56px;
+      --pad:18px;
+      --font: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+
+    body{
+      margin:0;
+      font-family:var(--font);
+      color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 30% 0%, rgba(47,120,255,.22), transparent 55%),
+        radial-gradient(900px 600px at 80% 20%, rgba(91,214,178,.10), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+      display:flex;
+      justify-content:center;
+      padding: max(14px, env(safe-area-inset-top)) 12px max(14px, env(safe-area-inset-bottom));
+    }
+
+    /* Screen border */
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      border:3px solid var(--accent);
+      pointer-events:none;
+      z-index:9999;
+    }
+
+    .app{
+      width:min(520px, 100%);
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    /* Logo occupies same layout space as the prior heading block */
+    .logoTitle{
+      margin:10px 6px 0;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      text-shadow: 0 10px 22px rgba(0,0,0,.35);
+    }
+    .logoTitle svg{
+      width:min(520px, 100%);
+      height:auto;
+      display:block;
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid var(--stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: var(--pad);
+      backdrop-filter: blur(10px);
+    }
+
+    .hidden{ display:none !important; }
+
+    .btn{
+      height:var(--btnH);
+      border-radius: 999px;
+      border:1px solid var(--stroke2);
+      background: rgba(255,255,255,.03);
+      color:rgba(235,245,255,.78);
+      font-weight:650;
+      letter-spacing:.2px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 18px;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      font-size:18px;
+    }
+    .btn:active{ transform: translateY(1px); }
+    .btn.primary{
+      background: linear-gradient(180deg, rgba(47,120,255,.92), rgba(47,120,255,.72));
+      border-color: rgba(120,170,255,.55);
+      color: rgba(0,0,0,.78);
+    }
+    .btn.small{
+      height:44px;
+      font-size:16px;
+      padding:0 14px;
+      font-weight:650;
+      white-space:nowrap;
+    }
+
+    .row{ display:flex; gap:12px; }
+    .row.center{ align-items:center; }
+    .grow{ flex:1; }
+
+    .label{
+      font-size:16px;
+      color:var(--muted);
+      font-weight:650;
+      margin: 12px 4px 8px;
+    }
+    .subtle{
+      font-size:14px;
+      color:var(--muted2);
+      margin: 6px 4px 0;
+    }
+
+    .field{
+      border:2px solid var(--strokeBold);
+      background: rgba(255,255,255,.06);
+      color: rgba(235,245,255,.86);
+      border-radius: 18px;
+      height:54px;
+      padding: 0 14px;
+      font-size:18px;
+      outline:none;
+      width:100%;
+    }
+    .field::placeholder{ color: rgba(235,245,255,.35); }
+    .field:focus{
+      border-color: rgba(90,150,255,.78);
+      box-shadow: 0 0 0 4px rgba(47,120,255,.16);
+    }
+    textarea.field{
+      height:64px;
+      padding: 12px 14px;
+      resize:none;
+      line-height:1.25;
+    }
+
+    .homeMain{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      margin-top:8px;
+    }
+
+    .homeMain > .btn:not(.small){
+      font-size:26px;
+      font-weight:750;
+      letter-spacing:.3px;
+    }
+
+    .homeFooterRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-top:8px;
+      flex-wrap:nowrap;
+    }
+
+    .footerTiny{
+      margin-top:10px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      font-size: 12px;
+      color: rgba(235,245,255,.38);
+    }
+
+    .timeLine{
+      margin: 4px 4px 14px;
+      color: rgba(235,245,255,.82);
+      font-weight:750;
+      letter-spacing:.3px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      line-height:1.05;
+      font-size: clamp(18px, 6.4vw, 44px);
+    }
+
+    .miniLabel{
+      margin: 0 4px 8px;
+      color: var(--muted);
+      font-weight:650;
+      font-size:16px;
+    }
+
+    .symGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 18px;
+      padding: 6px 2px 2px;
+      margin-top: 2px;
+    }
+    .symItem{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding: 4px 6px;
+      border-radius: 14px;
+      transition: background .12s ease, border-color .12s ease;
+    }
+    .box{
+      width:30px;
+      height:30px;
+      border-radius: 8px;
+      border:2px solid rgba(235,245,255,.40);
+      background: rgba(255,255,255,.03);
+      display:grid;
+      place-items:center;
+      flex:0 0 auto;
+    }
+    .check{
+      width:14px;
+      height:8px;
+      border-left:3px solid transparent;
+      border-bottom:3px solid transparent;
+      transform: rotate(-45deg);
+      margin-top:-2px;
+    }
+    .symText{
+      font-size:16px;
+      font-weight:500;
+      color: rgba(235,245,255,.76);
+      line-height:1.1;
+    }
+    .symItem.selected{
+      background: rgba(47,120,255,.16);
+    }
+    .symItem.selected .box{
+      border-color: rgba(90,150,255,.90);
+      background: rgba(47,120,255,.18);
+    }
+    .symItem.selected .check{
+      border-left-color: rgba(235,245,255,.92);
+      border-bottom-color: rgba(235,245,255,.92);
+    }
+
+    .panelButtons{
+      display:flex;
+      gap:12px;
+      margin-top: 10px;
+      flex-wrap:wrap;
+    }
+
+    .entry{
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.03);
+      border-radius: 22px;
+      padding: 14px 14px 12px;
+      margin-top: 12px;
+      touch-action: manipulation;
+    }
+
+    /* press feedback */
+    .entry.pressed{
+      background: rgba(47,120,255,.14);
+      border-color: rgba(90,150,255,.55);
+    }
+
+    .entry:active{ transform: translateY(1px); }
+    .entryTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:12px;
+      margin-bottom: 6px;
+    }
+    .entryTime{
+      font-size:14px;
+      color: rgba(235,245,255,.46);
+      white-space:nowrap;
+    }
+    .entryMain{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:baseline;
+    }
+    .glBig{
+      font-size:34px;
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+    .unitBig{
+      font-size:18px;
+      font-weight:750;
+      color: rgba(235,245,255,.62);
+      white-space:nowrap;
+    }
+    .entryLine{
+      margin-top: 6px;
+      color: rgba(235,245,255,.62);
+      font-size:16px;
+      line-height:1.25;
+    }
+    .entryLine b{
+      color: rgba(235,245,255,.70);
+    }
+
+    .filters{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top:10px;
+    }
+    .dateField{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .dateField .miniLabel{
+      margin: 0 4px;
+      color: var(--muted);
+      font-weight:650;
+      font-size:14px;
+    }
+    input[type="date"].field{
+      font-size:16px;
+      padding-right: 10px;
+    }
+
+    /* Edit mode indicator */
+    .editPill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke2);
+      background: rgba(255,255,255,.03);
+      color: rgba(235,245,255,.70);
+      font-weight:700;
+      letter-spacing:.2px;
+      margin: 0 4px 10px;
+      width: fit-content;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+
+    <!-- Logo/header block: identical footprint; title changed -->
+    <div class="logoTitle" aria-label="Vitals Tracker DB">
+      <svg viewBox="0 0 900 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Vitals Tracker DB">
+        <defs>
+          <linearGradient id="vtg" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#4fa3ff"/>
+            <stop offset="100%" stop-color="#2f78ff"/>
+          </linearGradient>
+          <filter id="vts" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="rgba(0,0,0,.35)"/>
+          </filter>
+        </defs>
+
+        <g transform="translate(46 24)" filter="url(#vts)">
+          <rect x="0" y="0" width="92" height="92" rx="26" fill="rgba(255,255,255,.06)" stroke="rgba(235,245,255,.22)" stroke-width="2"/>
+          <path d="M18 54h18l10-32 16 58 12-36h28" fill="none" stroke="url(#vtg)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+
+        <text x="160" y="92"
+              font-family="system-ui,Segoe UI,Roboto,Helvetica,Arial"
+              font-size="70"
+              font-weight="850"
+              fill="url(#vtg)"
+              letter-spacing=".5"
+              filter="url(#vts)">Vitals Tracker DB</text>
+      </svg>
+    </div>
+
+    <!-- HOME -->
+    <div id="home" class="card">
+      <div class="homeMain">
+        <button id="btnGoAdd" class="btn primary">ADD Reading</button>
+        <button id="btnGoLog" class="btn">Log</button>
+
+        <div class="homeFooterRow">
+          <button id="btnInstall" class="btn small">Install</button>
+          <button id="btnClearAll" class="btn small">Clear Data</button>
+          <div class="grow"></div>
+          <button id="btnExitHome" class="btn small">Exit</button>
+        </div>
+
+        <div class="subtle">Glucose + context + functional impact. Local only.</div>
+
+        <div class="footerTiny">
+          <div>v1.01</div>
+          <div>developed by Keyth Jyles</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADD -->
+    <div id="add" class="card hidden">
+      <div id="editPill" class="editPill hidden">Editing entry</div>
+
+      <div id="timeLine" class="timeLine">--:--:-- --, --/--/----</div>
+
+      <div>
+        <div class="miniLabel">Glucose (mg/dL)</div>
+        <input id="glucose" class="field" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 118" />
+      </div>
+
+      <div class="label">Context</div>
+      <div id="ctxGrid" class="symGrid"></div>
+
+      <div class="label">Functional Impact</div>
+      <div id="fxGrid" class="symGrid"></div>
+
+      <div class="noteLabel">Notes <em>(optional)</em></div>
+      <textarea id="notes" class="field" placeholder="optional"></textarea>
+
+      <div class="panelButtons">
+        <button id="btnSave" class="btn primary grow">Save</button>
+        <button id="btnDelete" class="btn grow hidden">Delete</button>
+        <button id="btnBackFromAdd" class="btn grow">Back</button>
+      </div>
+    </div>
+
+    <!-- LOG -->
+    <div id="log" class="card hidden">
+      <div class="row center">
+        <button id="btnExportLog" class="btn small">Export</button>
+        <button id="btnAddFromLog" class="btn small">ADD</button>
+        <div class="grow"></div>
+        <button id="btnBackFromLog" class="btn small">Back</button>
+      </div>
+
+      <div class="label">Search</div>
+      <input id="search" class="field" placeholder="Type a word: fasting, unable, 185..." />
+
+      <div class="filters">
+        <div class="dateField">
+          <div class="miniLabel">From</div>
+          <input id="fromDate" class="field" type="date" />
+        </div>
+        <div class="dateField">
+          <div class="miniLabel">To</div>
+          <input id="toDate" class="field" type="date" />
+        </div>
+      </div>
+
+      <div id="logList"></div>
+    </div>
+
+  </div>
+
+<script>
+(() => {
+  "use strict";
+
+  // Separate storage key (does NOT collide with BP Vitals Tracker)
+  const STORAGE_KEY = "vitals_tracker_db_records_v101";
+
+  const CONTEXTS = [
+    "Fasting",
+    "Pre-meal",
+    "Post-meal",
+    "Bedtime"
+  ];
+
+  const FUNCTIONAL = [
+    "Normal function",
+    "Limited but functioning",
+    "Had to stop activity",
+    "Unable to leave home",
+    "Required assistance"
+  ];
+
+  function numOrNull(v){
+    const t = String(v ?? "").trim();
+    if(!t) return null;
+    const n = Number(t);
+    return Number.isFinite(n) ? Math.round(n) : null;
+  }
+
+  function loadRecords(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return [];
+      const arr = JSON.parse(raw);
+      if(!Array.isArray(arr)) return [];
+      return arr
+        .filter(r => r && typeof r.ts === "number")
+        .map(r => ({
+          ts: r.ts,
+          glucose: numOrNull(r.glucose),
+          context: (r.context ?? "").toString(),
+          functional: (r.functional ?? "").toString(),
+          notes: (r.notes ?? "").toString()
+        }))
+        .sort((a,b)=> b.ts - a.ts);
+    }catch{
+      return [];
+    }
+  }
+
+  function saveRecords(recs){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(recs));
+  }
+
+  const $ = (id) => document.getElementById(id);
+  const screens = ["home","add","log"];
+
+  // Do not auto-focus in EDIT mode (match your v1.18 behavior)
+  function focusTopOfPanel(screen){
+    window.scrollTo({top:0, left:0, behavior:"auto"});
+    if(screen === "add"){
+      if(editTs == null){
+        setTimeout(() => { try{ $("glucose").focus({preventScroll:true}); }catch{} }, 0);
+      }else{
+        setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 0);
+      }
+    }
+  }
+
+  function show(screen){
+    for(const s of screens){
+      $(s).classList.toggle("hidden", s !== screen);
+    }
+    if(screen === "log"){ renderLog(); }
+    if(screen === "add"){
+      tickTime();
+      adjustTimeFont();
+    }
+    focusTopOfPanel(screen);
+  }
+
+  function fmtDateTime(ts){
+    const d = new Date(ts);
+    const parts = new Intl.DateTimeFormat(undefined, {
+      year:"numeric", month:"2-digit", day:"2-digit",
+      hour:"2-digit", minute:"2-digit", second:"2-digit"
+    }).formatToParts(d);
+    const map = Object.fromEntries(parts.map(p=>[p.type,p.value]));
+    const mm = map.month, dd = map.day, yy = map.year;
+    const hh = map.hour, mi = map.minute, ss = map.second;
+    const dp = map.dayPeriod ? ` ${map.dayPeriod}` : "";
+    return `${mm}/${dd}/${yy}, ${hh}:${mi}:${ss}${dp}`;
+  }
+
+  function fmtTimeCommaDate(ts){
+    const d = new Date(ts);
+    const time = new Intl.DateTimeFormat(undefined, {
+      hour:"2-digit", minute:"2-digit", second:"2-digit"
+    }).format(d);
+    const date = new Intl.DateTimeFormat(undefined, {
+      month:"2-digit", day:"2-digit", year:"numeric"
+    }).format(d);
+    return `${time}, ${date}`;
+  }
+
+  function escapeHtml(s){
+    return String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  // ===== Two single-select grids (context + functional) built using your symptom UI pattern =====
+  function buildSingleSelectGrid(container, options, onChange){
+    container.innerHTML = "";
+
+    function setSelected(label){
+      for(const el of container.querySelectorAll(".symItem")){
+        const t = el.querySelector(".symText")?.textContent || "";
+        const on = (t === label);
+        el.classList.toggle("selected", on);
+        el.setAttribute("aria-checked", on ? "true" : "false");
+      }
+      onChange(label);
+    }
+
+    for(const name of options){
+      const item = document.createElement("div");
+      item.className = "symItem";
+      item.setAttribute("role","checkbox");
+      item.setAttribute("aria-checked","false");
+      item.tabIndex = 0;
+
+      const box = document.createElement("div");
+      box.className = "box";
+      const check = document.createElement("div");
+      check.className = "check";
+      box.appendChild(check);
+
+      const text = document.createElement("div");
+      text.className = "symText";
+      text.textContent = name;
+
+      item.appendChild(box);
+      item.appendChild(text);
+
+      const choose = () => setSelected(name);
+      item.addEventListener("click", choose);
+      item.addEventListener("keydown", (e) => {
+        if(e.key === "Enter" || e.key === " "){
+          e.preventDefault();
+          choose();
+        }
+      });
+
+      container.appendChild(item);
+    }
+
+    return { setSelected };
+  }
+
+  let timeTimer = null;
+  let editTs = null;         // null=new, else edit record by ts
+  let returnScreen = "home";
+
+  let ctxValue = "Fasting";
+  let fxValue = "Normal function";
+
+  const ctxGrid = $("ctxGrid");
+  const fxGrid  = $("fxGrid");
+
+  const ctxUI = buildSingleSelectGrid(ctxGrid, CONTEXTS, (v)=>{ ctxValue = v; });
+  const fxUI  = buildSingleSelectGrid(fxGrid,  FUNCTIONAL, (v)=>{ fxValue  = v; });
+
+  function clearAddForm(){
+    $("glucose").value = "";
+    $("notes").value = "";
+    ctxValue = "Fasting";
+    fxValue  = "Normal function";
+    ctxUI.setSelected(ctxValue);
+    fxUI.setSelected(fxValue);
+  }
+
+  function enterAddNew(from="home"){
+    editTs = null;
+    returnScreen = from;
+    $("editPill").classList.add("hidden");
+    $("btnDelete").classList.add("hidden");
+    clearAddForm();
+    show("add");
+  }
+
+  function enterAddEdit(ts){
+    const recs = loadRecords();
+    const r = recs.find(x => x.ts === ts);
+    if(!r){
+      enterAddNew("log");
+      return;
+    }
+    editTs = ts;
+    returnScreen = "log";
+
+    $("editPill").classList.remove("hidden");
+    $("btnDelete").classList.remove("hidden");
+
+    $("glucose").value = (r.glucose ?? "") === null ? "" : (r.glucose ?? "");
+    $("notes").value = (r.notes ?? "").toString();
+
+    ctxValue = r.context || "Fasting";
+    fxValue  = r.functional || "Normal function";
+    ctxUI.setSelected(ctxValue);
+    fxUI.setSelected(fxValue);
+
+    show("add");
+  }
+
+  function tickTime(){
+    const line = $("timeLine");
+    const ts = (editTs != null) ? editTs : Date.now();
+    line.textContent = fmtTimeCommaDate(ts);
+    adjustTimeFont();
+    if(timeTimer) clearTimeout(timeTimer);
+    timeTimer = setTimeout(tickTime, 900);
+  }
+
+  function adjustTimeFont(){
+    const el = $("timeLine");
+    if(!el) return;
+    const parent = el.parentElement;
+    if(!parent) return;
+
+    el.style.fontSize = "";
+    const maxW = parent.clientWidth - 8;
+
+    let fs = parseFloat(getComputedStyle(el).fontSize) || 28;
+    let guard = 0;
+    while(el.scrollWidth > maxW && fs > 16 && guard < 30){
+      fs -= 1;
+      el.style.fontSize = fs + "px";
+      guard++;
+    }
+  }
+
+  function parseDateField(v){
+    if(!v) return null;
+    const [y,m,d] = v.split("-").map(Number);
+    if(!y || !m || !d) return null;
+    return new Date(y, m-1, d, 0, 0, 0, 0).getTime();
+  }
+
+  function clampEndOfDay(ts){
+    const d = new Date(ts);
+    d.setHours(23,59,59,999);
+    return d.getTime();
+  }
+
+  function recordMatches(rec, q){
+    if(!q) return true;
+    const s = q.toLowerCase().trim();
+    if(!s) return true;
+
+    const g = `${rec.glucose ?? ""}`.toLowerCase();
+    const ctx = (rec.context || "").toLowerCase();
+    const fx  = (rec.functional || "").toLowerCase();
+    const notes = (rec.notes || "").toLowerCase();
+    const dt = fmtDateTime(rec.ts).toLowerCase();
+
+    return g.includes(s) || ctx.includes(s) || fx.includes(s) || notes.includes(s) || dt.includes(s);
+  }
+
+  function filteredRecords({fromId,toId,searchId}){
+    const recs = loadRecords();
+    const q = (searchId ? $(searchId).value : "").trim();
+
+    const fromV = fromId ? $(fromId).value : "";
+    const toV   = toId ? $(toId).value : "";
+
+    const fromTs = parseDateField(fromV);
+    const toMid  = parseDateField(toV);
+    const toTs   = toMid != null ? clampEndOfDay(toMid) : null;
+
+    return recs.filter(r => {
+      if(fromTs != null && r.ts < fromTs) return false;
+      if(toTs != null && r.ts > toTs) return false;
+      return recordMatches(r, q);
+    });
+  }
+
+  function renderLog(){
+    const list = $("logList");
+    const recs = filteredRecords({fromId:"fromDate", toId:"toDate", searchId:"search"});
+
+    list.innerHTML = "";
+    if(recs.length === 0){
+      const empty = document.createElement("div");
+      empty.className = "subtle";
+      empty.style.marginTop = "10px";
+      empty.textContent = "No matching records.";
+      list.appendChild(empty);
+      return;
+    }
+
+    for(const r of recs){
+      const e = document.createElement("div");
+      e.className = "entry";
+      e.tabIndex = 0;
+      e.setAttribute("role","button");
+      e.setAttribute("aria-label","Open entry for editing");
+
+      // Press highlight + confirm-on-release (same behavior pattern as v1.18)
+      let armed = false;
+
+      function clearPressed(){
+        e.classList.remove("pressed");
+        armed = false;
+      }
+
+      e.addEventListener("pointerdown", (ev) => {
+        if(ev.button != null && ev.button !== 0) return;
+        armed = true;
+        e.classList.add("pressed");
+        try { e.setPointerCapture(ev.pointerId); } catch {}
+      });
+
+      e.addEventListener("pointermove", (ev) => {
+        if(!armed) return;
+        const rect = e.getBoundingClientRect();
+        const inside =
+          ev.clientX >= rect.left && ev.clientX <= rect.right &&
+          ev.clientY >= rect.top  && ev.clientY <= rect.bottom;
+
+        if(!inside){
+          clearPressed();
+        }
+      });
+
+      e.addEventListener("pointercancel", clearPressed);
+
+      e.addEventListener("pointerup", () => {
+        if(!armed) return;
+        e.classList.remove("pressed");
+        armed = false;
+
+        const ok = confirm("Edit this entry?");
+        if(ok) enterAddEdit(r.ts);
+      });
+
+      e.addEventListener("keydown", (ev) => {
+        if(ev.key === "Enter" || ev.key === " "){
+          ev.preventDefault();
+          const ok = confirm("Edit this entry?");
+          if(ok) enterAddEdit(r.ts);
+        }
+      });
+
+      const top = document.createElement("div");
+      top.className = "entryTop";
+
+      const t = document.createElement("div");
+      t.className = "entryTime";
+      t.textContent = fmtDateTime(r.ts);
+
+      top.appendChild(t);
+      e.appendChild(top);
+
+      const main = document.createElement("div");
+      main.className = "entryMain";
+
+      const gl = document.createElement("div");
+      gl.className = "glBig";
+      gl.textContent = `GL ${r.glucose ?? "—"}`;
+
+      const unit = document.createElement("div");
+      unit.className = "unitBig";
+      unit.textContent = "mg/dL";
+
+      main.appendChild(gl);
+      main.appendChild(unit);
+      e.appendChild(main);
+
+      const ctx = r.context ? r.context : "—";
+      const fx  = r.functional ? r.functional : "—";
+      const notes = (r.notes && r.notes.trim()) ? r.notes.trim() : "None";
+
+      const l2 = document.createElement("div");
+      l2.className = "entryLine";
+      l2.innerHTML = `<b>Context:</b> ${escapeHtml(ctx)}`;
+      e.appendChild(l2);
+
+      const l3 = document.createElement("div");
+      l3.className = "entryLine";
+      l3.innerHTML = `<b>Functional:</b> ${escapeHtml(fx)}`;
+      e.appendChild(l3);
+
+      const l4 = document.createElement("div");
+      l4.className = "entryLine";
+      l4.innerHTML = `<b>Notes:</b> ${escapeHtml(notes)}`;
+      e.appendChild(l4);
+
+      list.appendChild(e);
+    }
+
+    try { document.activeElement && document.activeElement.blur(); } catch {}
+  }
+
+  function downloadText(text, filename){
+    const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function exportText(recs){
+    const lines = recs.map(r => {
+      const dt = fmtDateTime(r.ts);
+      const gl = `Glucose ${r.glucose ?? "—"} mg/dL`;
+      const ctx = `Context: ${r.context || "—"}`;
+      const fx  = `Functional: ${r.functional || "—"}`;
+      const notes = (r.notes && r.notes.trim()) ? r.notes.trim() : "None";
+      return `${dt}\n${gl}\n${ctx}\n${fx}\nNotes: ${notes}\n`;
+    });
+
+    const out = lines.join("\n");
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(out).then(() => {
+        alert("Export copied to clipboard.");
+      }).catch(() => {
+        downloadText(out, "vitals_db_export.txt");
+      });
+    }else{
+      downloadText(out, "vitals_db_export.txt");
+    }
+  }
+
+  function clearFilters(){
+    $("fromDate").value = "";
+    $("toDate").value = "";
+    $("search").value = "";
+  }
+
+  function clearAllData(){
+    const ok = confirm(
+      "Clear ALL saved data?\n\n" +
+      "This deletes everything stored on this phone for Vitals Tracker DB.\n" +
+      "This cannot be undone."
+    );
+    if(!ok) return;
+
+    try{
+      localStorage.removeItem(STORAGE_KEY);
+    }catch{}
+
+    clearFilters();
+
+    alert("All data cleared.");
+    show("home");
+  }
+
+  // ===== Save / Delete =====
+  function validateAnyInput(glucose, notes){
+    // require at least glucose OR notes (but you will normally have glucose)
+    return !(glucose == null && !String(notes||"").trim());
+  }
+
+  $("btnSave").addEventListener("click", () => {
+    const glucose = numOrNull($("glucose").value);
+    const notes = ($("notes").value || "").toString();
+
+    if(!validateAnyInput(glucose, notes)){
+      alert("Enter at least glucose or a note.");
+      return;
+    }
+
+    const recs = loadRecords();
+
+    if(editTs == null){
+      recs.unshift({ ts: Date.now(), glucose, context: ctxValue, functional: fxValue, notes });
+    }else{
+      const idx = recs.findIndex(r => r.ts === editTs);
+      if(idx >= 0){
+        recs[idx] = { ts: editTs, glucose, context: ctxValue, functional: fxValue, notes };
+      }else{
+        recs.unshift({ ts: Date.now(), glucose, context: ctxValue, functional: fxValue, notes });
+      }
+    }
+
+    recs.sort((a,b)=> b.ts - a.ts);
+    saveRecords(recs);
+
+    $("fromDate").value = "";
+    $("toDate").value = "";
+    $("search").value = "";
+
+    editTs = null;
+    show("log");
+  });
+
+  $("btnDelete").addEventListener("click", () => {
+    if(editTs == null) return;
+    const ok = confirm("Delete this entry? This cannot be undone.");
+    if(!ok) return;
+
+    const recs = loadRecords().filter(r => r.ts !== editTs);
+    saveRecords(recs);
+
+    editTs = null;
+    show("log");
+  });
+
+  // ===== Navigation =====
+  let deferredPrompt = null;
+
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    refreshInstallButton();
+  });
+
+  window.addEventListener("appinstalled", () => {
+    deferredPrompt = null;
+    refreshInstallButton();
+  });
+
+  function isStandalone(){
+    return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  }
+
+  function refreshInstallButton(){
+    $("btnInstall").textContent = isStandalone() ? "Uninstall" : "Install";
+  }
+
+  $("btnInstall").addEventListener("click", async () => {
+    if(isStandalone()){
+      alert(
+        "Uninstall:\n\n" +
+        "Android: press-and-hold the app icon → Uninstall.\n" +
+        "Uninstall typically does NOT delete your saved data, but device/browser behavior can vary.\n\n" +
+        "To delete data on purpose: use Clear Data (home screen)."
+      );
+      return;
+    }
+    if(deferredPrompt){
+      deferredPrompt.prompt();
+      try { await deferredPrompt.userChoice; } catch {}
+      deferredPrompt = null;
+      refreshInstallButton();
+      return;
+    }
+    alert("Install is available when your browser offers it (menu → Install app).");
+  });
+
+  $("btnClearAll").addEventListener("click", clearAllData);
+
+  $("btnExitHome").addEventListener("click", () => {
+    window.close();
+    setTimeout(() => {
+      alert("If it didn’t close: use your phone’s Back/Home.");
+    }, 200);
+  });
+
+  $("btnGoAdd").addEventListener("click", () => enterAddNew("home"));
+  $("btnGoLog").addEventListener("click", () => { editTs=null; show("log"); });
+
+  $("btnBackFromAdd").addEventListener("click", () => { editTs=null; show(returnScreen || "home"); });
+  $("btnBackFromLog").addEventListener("click", () => show("home"));
+
+  $("btnAddFromLog").addEventListener("click", () => enterAddNew("log"));
+
+  ["search","fromDate","toDate"].forEach(id => {
+    $(id).addEventListener("input", () => renderLog());
+    $(id).addEventListener("change", () => renderLog());
+  });
+
+  $("btnExportLog").addEventListener("click", () => {
+    const recs = filteredRecords({fromId:"fromDate", toId:"toDate", searchId:"search"});
+    exportText(recs);
+  });
+
+  // ===== Manifest + SW (same approach as vt) =====
+  function injectManifest(){
+    const svg =
+`<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f78ff"/>
+      <stop offset="1" stop-color="#0b1324"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="110" fill="url(#g)"/>
+  <path d="M128 290h70l26-94 44 160 30-98h84" fill="none"
+        stroke="rgba(235,245,255,.92)" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="160" cy="290" r="10" fill="rgba(235,245,255,.92)"/>
+  <circle cx="382" cy="258" r="10" fill="rgba(235,245,255,.92)"/>
+</svg>`;
+    const encoded = encodeURIComponent(svg).replace(/'/g,"%27").replace(/"/g,"%22");
+    const icon = `data:image/svg+xml;charset=utf-8,${encoded}`;
+
+    const manifest = {
+      name: "Vitals Tracker DB",
+      short_name: "VT DB",
+      start_url: ".",
+      display: "standalone",
+      background_color: "#0b1324",
+      theme_color: "#0b1324",
+      icons: [{ src: icon, sizes: "512x512", type: "image/svg+xml", purpose: "any" }]
+    };
+
+    const blob = new Blob([JSON.stringify(manifest)], {type:"application/manifest+json"});
+    const url = URL.createObjectURL(blob);
+    $("manifestLink").setAttribute("href", url);
+  }
+
+  async function registerSW(){
+    if(!("serviceWorker" in navigator)) return;
+    const swCode =
+`self.addEventListener('install', (e)=>{ self.skipWaiting(); });
+self.addEventListener('activate', (e)=>{ e.waitUntil(self.clients.claim()); });
+self.addEventListener('fetch', (e)=>{ });`;
+    const blob = new Blob([swCode], {type:"text/javascript"});
+    const swUrl = URL.createObjectURL(blob);
+    try { await navigator.serviceWorker.register(swUrl); } catch {}
+  }
+
+  // Init defaults and start
+  ctxUI.setSelected(ctxValue);
+  fxUI.setSelected(fxValue);
+
+  injectManifest();
+  registerSW();
+  refreshInstallButton();
+
+  $("fromDate").value = "";
+  $("toDate").value = "";
+
+  show("home");
+
+  window.addEventListener("resize", () => {
+    if(!$("add").classList.contains("hidden")) adjustTimeFont();
+  });
+
+})();
+</script>
+</body>
+</html>
