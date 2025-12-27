@@ -1,11 +1,11 @@
-<!-- Vitals Tracker v1.19A6 -->
+<!-- Vitals Tracker v1.19A7 -->
 <!--
 Version Detail Notes
-App Version: v1.19A6
-Base: v1.19A5
+App Version: v1.19A7
+Base: v1.19A6
 Surgical changes only:
-- Log: Increase press-hold time by +50% before showing the edit prompt (175ms → 265ms).
-- Charts: Keep date under the day-of-week labels (two-line x-axis labels: DOW on top, MM/DD below).
+- Log: Edit prompt now opens ONLY on press down + release (tap). No press-and-hold. If finger/pointer slides off the entry before release, no action.
+- Modal safety: "Edit" button is NOT immediately active on open (briefly disabled), and initial focus is set to Cancel to prevent accidental instant activation.
 - No other layout/behavior changes.
 -->
 <!doctype html>
@@ -136,6 +136,13 @@ Surgical changes only:
       padding:0 14px;
       font-weight:650;
       white-space:nowrap;
+    }
+
+    /* disabled button safety */
+    .btn:disabled{
+      opacity:.55;
+      filter:saturate(.85);
+      transform:none !important;
     }
 
     .row{ display:flex; gap:12px; }
@@ -522,7 +529,7 @@ Surgical changes only:
         <div class="subtle">Data stays on your phone (local only).</div>
 
         <div class="footerTiny">
-          <div>v1.19A6</div>
+          <div>v1.19A7</div>
           <div>developed by Keyth Jyles</div>
         </div>
       </div>
@@ -623,7 +630,7 @@ Surgical changes only:
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.19A6";
+  const APP_VERSION = "v1.19A7";
   const STORAGE_KEY = "vitals_tracker_records_v1";
   const SYMPTOMS = [
     "Sweaty","Dizzy","Panic","Brain fog","Chest tight","Headache",
@@ -760,16 +767,29 @@ Surgical changes only:
 
   let pendingEditTs = null;
   let modalPrevFocus = null;
+  let modalOpenedAt = 0;
+  let enableEditTimer = null;
 
   function openEditPrompt(ts){
     pendingEditTs = ts;
     modalPrevFocus = document.activeElement || null;
+    modalOpenedAt = Date.now();
 
     const m = $("editModal");
+    const btnEdit = $("btnEditConfirm");
+
+    // Safety: don't let Edit be immediately activatable
+    btnEdit.disabled = true;
+    if(enableEditTimer) clearTimeout(enableEditTimer);
+    enableEditTimer = setTimeout(() => {
+      btnEdit.disabled = false;
+    }, 450);
+
     m.classList.remove("hidden");
 
+    // Safety: focus Cancel so the next tap isn't already on Edit
     setTimeout(() => {
-      try{ $("btnEditConfirm").focus({preventScroll:true}); }catch{}
+      try{ $("btnEditCancel").focus({preventScroll:true}); }catch{}
     }, 0);
   }
 
@@ -780,15 +800,30 @@ Surgical changes only:
   }
 
   function confirmEditPrompt(){
+    if($("btnEditConfirm").disabled) return;
     const ts = pendingEditTs;
     closeEditPrompt();
     if(ts != null) enterAddEdit(ts);
   }
 
-  $("btnEditCancel").addEventListener("click", closeEditPrompt);
-  $("btnEditConfirm").addEventListener("click", confirmEditPrompt);
+  $("btnEditCancel").addEventListener("click", (e) => {
+    e.preventDefault();
+    closeEditPrompt();
+  });
 
+  $("btnEditConfirm").addEventListener("click", (e) => {
+    e.preventDefault();
+    confirmEditPrompt();
+  });
+
+  // Ignore any "ghost click" immediately after opening (defensive)
   $("editModal").addEventListener("click", (e) => {
+    const justOpened = (Date.now() - modalOpenedAt) < 220;
+    if(justOpened) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
     if(e.target === $("editModal")) closeEditPrompt();
   });
 
@@ -1014,9 +1049,6 @@ Surgical changes only:
       return;
     }
 
-    // Press-hold time increased by +50% (175ms -> 265ms)
-    const HOLD_MS = 265;
-
     for(const r of recs){
       const e = document.createElement("div");
       e.className = "entry";
@@ -1024,13 +1056,13 @@ Surgical changes only:
       e.setAttribute("role","button");
       e.setAttribute("aria-label","Open entry for editing");
 
+      // Tap-only behavior:
+      // - pointerdown highlights
+      // - pointerup inside (without sliding off) opens modal
+      // - if slide off before release, no action
       const SLOP_PX = 14;
-
       let tracking = false;
-      let startX = 0, startY = 0;
-      let moved = false;
-      let holdTimer = null;
-      let fired = false;
+      let pointerId = null;
 
       function rectInside(clientX, clientY){
         const rect = e.getBoundingClientRect();
@@ -1040,71 +1072,54 @@ Surgical changes only:
         );
       }
 
-      function clearHold(){
-        if(holdTimer){
-          clearTimeout(holdTimer);
-          holdTimer = null;
-        }
-      }
-
       function clearPress(){
-        clearHold();
         e.classList.remove("pressed");
         tracking = false;
-        moved = false;
-        fired = false;
-      }
-
-      function arm(ev){
-        if(ev.button != null && ev.button !== 0) return;
-
-        tracking = true;
-        moved = false;
-        fired = false;
-
-        startX = ev.clientX;
-        startY = ev.clientY;
-
-        e.classList.add("pressed");
-
-        clearHold();
-        const startClientX = ev.clientX;
-        const startClientY = ev.clientY;
-
-        holdTimer = setTimeout(() => {
-          if(!tracking) return;
-          if(fired) return;
-          if(!moved && rectInside(startClientX, startClientY)){
-            fired = true;
-            e.classList.remove("pressed");
-            openEditPrompt(r.ts);
-          }
-        }, HOLD_MS);
-      }
-
-      function move(ev){
-        if(!tracking) return;
-        const dx = ev.clientX - startX;
-        const dy = ev.clientY - startY;
-        if(Math.hypot(dx,dy) > SLOP_PX) moved = true;
-
-        if(!rectInside(ev.clientX, ev.clientY)){
-          clearPress();
-        }
-      }
-
-      function release(){
-        if(!tracking) return;
-        clearPress();
+        pointerId = null;
       }
 
       e.addEventListener("pointerdown", (ev) => {
+        if(ev.button != null && ev.button !== 0) return;
+        tracking = true;
+        pointerId = ev.pointerId;
+
         try{ e.setPointerCapture(ev.pointerId); }catch{}
-        arm(ev);
+
+        e.classList.add("pressed");
+
+        // Prevent the browser from generating a click that might hit the modal instantly.
+        ev.preventDefault();
+        ev.stopPropagation();
       });
-      e.addEventListener("pointermove", move);
-      e.addEventListener("pointercancel", clearPress);
-      e.addEventListener("pointerup", release);
+
+      e.addEventListener("pointermove", (ev) => {
+        if(!tracking) return;
+        if(pointerId != null && ev.pointerId !== pointerId) return;
+
+        if(!rectInside(ev.clientX, ev.clientY)){
+          // Slide off cancels
+          clearPress();
+        }
+      });
+
+      e.addEventListener("pointercancel", () => clearPress());
+
+      e.addEventListener("pointerup", (ev) => {
+        if(!tracking) return;
+        if(pointerId != null && ev.pointerId !== pointerId) return;
+
+        const inside = rectInside(ev.clientX, ev.clientY);
+        clearPress();
+
+        // Tap release inside => open prompt (no hold required)
+        if(inside){
+          // Open on next tick to decouple from pointerup
+          setTimeout(() => openEditPrompt(r.ts), 0);
+        }
+
+        ev.preventDefault();
+        ev.stopPropagation();
+      });
 
       e.addEventListener("keydown", (ev) => {
         if(ev.key === "Enter" || ev.key === " "){
@@ -1942,10 +1957,10 @@ self.addEventListener('fetch', (e)=>{ });`;
 
 <!--
 Version Detail Notes
-App Version: v1.19A6
-Base: v1.19A5
+App Version: v1.19A7
+Base: v1.19A6
 Surgical changes only:
-- Log: Increase press-hold time by +50% before showing the edit prompt (175ms → 265ms).
-- Charts: Keep date under the day-of-week labels (two-line x-axis labels: DOW on top, MM/DD below).
+- Log: Edit prompt now opens ONLY on press down + release (tap). No press-and-hold. If finger/pointer slides off the entry before release, no action.
+- Modal safety: "Edit" button is NOT immediately active on open (briefly disabled), and initial focus is set to Cancel to prevent accidental instant activation.
 - No other layout/behavior changes.
 -->
