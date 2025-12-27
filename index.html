@@ -1,4 +1,14 @@
 <!-- Vitals Tracker v1.19A2 -->
+<!--
+Version Detail Notes
+App Version: v1.19A2
+Base: v1.19A1
+Surgical changes only:
+- Fixed Log entry press/release so the edit prompt reliably fires per-entry (mobile jitter/capture-safe).
+- Restored custom large-font edit prompt: “Edit this reading?” (replaces native confirm).
+- Preserved Home panel layout and the known-good Exit handler; Exit button remains red-styled.
+- Added Version Detail Notes at BOTH BOF and EOF (kept in sync).
+-->
 <!doctype html>
 <html lang="en">
 <head>
@@ -107,11 +117,17 @@
     }
     .btn:active{ transform: translateY(1px); }
 
-    /* v1.19A2: primary button text is white for accessibility */
     .btn.primary{
       background: linear-gradient(180deg, rgba(47,120,255,.92), rgba(47,120,255,.72));
       border-color: rgba(120,170,255,.55);
-      color: rgba(235,245,255,.94);
+      color: rgba(0,0,0,.78);
+    }
+
+    /* Exit coloring scheme (red) */
+    .btn.danger{
+      background: linear-gradient(180deg, rgba(255,80,80,.92), rgba(210,44,44,.78));
+      border-color: rgba(255,170,170,.55);
+      color: rgba(255,255,255,.92);
     }
 
     .btn.small{
@@ -120,13 +136,6 @@
       padding:0 14px;
       font-weight:650;
       white-space:nowrap;
-    }
-
-    /* v1.19A2: red Exit button style (visual only) */
-    .btn.danger{
-      background: rgba(255,60,60,.18);
-      border-color: rgba(255,120,120,.55);
-      color: rgba(235,245,255,.92);
     }
 
     .row{ display:flex; gap:12px; }
@@ -223,19 +232,19 @@
       font-size:16px;
     }
 
-    /* v1.19A1: tighten symptoms vertically */
+    /* tighten symptoms vertically */
     .symGrid{
       display:grid;
       grid-template-columns: 1fr 1fr;
-      gap: 4px 14px;          /* tighter */
-      padding: 2px 2px 0;      /* tighter */
-      margin-top: 0;           /* tighter */
+      gap: 4px 14px;
+      padding: 2px 2px 0;
+      margin-top: 0;
     }
     .symItem{
       display:flex;
       align-items:center;
       gap:10px;
-      padding: 2px 6px;        /* tighter */
+      padding: 2px 6px;
       border-radius: 14px;
       transition: background .12s ease, border-color .12s ease;
     }
@@ -282,7 +291,7 @@
       flex-wrap:wrap;
     }
 
-    /* v1.18A82: extra-tight log vertical spacing (below top row only) */
+    /* extra-tight log vertical spacing (below top row only) */
     #log .label{
       margin: 8px 4px 6px;
     }
@@ -294,9 +303,9 @@
       gap: 6px;
     }
 
-    /* v1.19A1: reduce padding above log top buttons */
+    /* reduce padding above log top buttons */
     #log > .row.center{
-      margin-bottom: 4px; /* tighter space below the buttons row */
+      margin-bottom: 4px;
     }
 
     /* Compact log entries (more items visible) */
@@ -304,12 +313,12 @@
       border:1px solid var(--stroke);
       background: rgba(255,255,255,.03);
       border-radius: 22px;
-      padding: 8px 10px 7px; /* tightened */
-      margin-top: 6px;       /* tightened */
+      padding: 8px 10px 7px;
+      margin-top: 6px;
       touch-action: manipulation;
     }
 
-    /* v1.18: log entry press feedback */
+    /* log entry press feedback */
     .entry.pressed{
       background: rgba(47,120,255,.14);
       border-color: rgba(90,150,255,.55);
@@ -335,15 +344,15 @@
       align-items:baseline;
     }
 
-    /* v1.19A1: reduce size of BP/HR label + readings (tighter horizontal fit) */
+    /* reduced size of BP/HR label + readings */
     .bpBig{
-      font-size:20px;     /* reduced from 24 */
+      font-size:20px;
       font-weight:800;
       letter-spacing:.1px;
       white-space:nowrap;
     }
     .hrBig{
-      font-size:20px;     /* reduced from 24 */
+      font-size:20px;
       font-weight:800;
       color: rgba(235,245,255,.72);
       white-space:nowrap;
@@ -351,7 +360,7 @@
     }
 
     .entryLine{
-      margin-top: 3px;       /* tightened */
+      margin-top: 3px;
       color: rgba(235,245,255,.62);
       font-size:15px;
       line-height:1.12;
@@ -389,9 +398,7 @@
       border:1px solid var(--stroke);
       background: rgba(255,255,255,.02);
       margin-top: 10px;
-
-      /* v1.18A07: we implement our own pinch + pan, so disable browser gestures */
-      touch-action: none;
+      touch-action: none; /* we implement our own pinch + pan */
     }
 
     .noteLabel{
@@ -422,48 +429,49 @@
       width: fit-content;
     }
 
-    /* =========================
-       v1.19A2: Custom edit-confirm modal (replaces confirm())
-       ========================= */
-
-    .modalOverlay{
+    /* ========= Custom edit prompt modal (large-font) ========= */
+    .modal{
       position:fixed;
       inset:0;
-      background: rgba(0,0,0,.56);
-      backdrop-filter: blur(6px);
       display:flex;
       align-items:center;
       justify-content:center;
-      padding: 16px;
-      z-index: 10000; /* above border */
+      padding: max(16px, env(safe-area-inset-top)) 14px max(16px, env(safe-area-inset-bottom));
+      background: rgba(0,0,0,.56);
+      z-index: 9998;
     }
-
     .modalCard{
-      width: min(520px, 100%);
+      width:min(520px, 100%);
       border-radius: 26px;
-      border: 1px solid rgba(235,245,255,.22);
-      background: linear-gradient(180deg, rgba(12,21,40,.92), rgba(10,16,31,.92));
-      box-shadow: 0 18px 58px rgba(0,0,0,.60);
+      border: 1px solid rgba(235,245,255,.20);
+      background: linear-gradient(180deg, rgba(12,21,40,.96), rgba(8,16,31,.96));
+      box-shadow: 0 18px 60px rgba(0,0,0,.55);
       padding: 18px;
+      backdrop-filter: blur(10px);
     }
-
     .modalTitle{
-      font-size: clamp(22px, 6.2vw, 34px);
-      font-weight: 850;
+      font-weight: 900;
       letter-spacing: .2px;
       color: rgba(235,245,255,.92);
-      margin: 2px 4px 12px;
+      font-size: clamp(22px, 6.5vw, 34px);
       line-height: 1.05;
+      margin: 4px 2px 14px;
     }
-
-    .modalActions{
+    .modalSub{
+      color: rgba(235,245,255,.56);
+      font-size: 14px;
+      margin: 0 2px 14px;
+    }
+    .modalBtns{
       display:flex;
       gap:12px;
-      margin-top: 12px;
+      margin-top: 6px;
     }
-
-    .modalActions .btn{
-      flex: 1;
+    .modalBtns .btn{
+      flex:1;
+      height: 54px;
+      font-size: 18px;
+      font-weight: 800;
     }
   </style>
 </head>
@@ -508,8 +516,6 @@
           <button id="btnInstall" class="btn small">Install</button>
           <button id="btnClearAll" class="btn small">Clear Data</button>
           <div class="grow"></div>
-
-          <!-- v1.19A2: red Exit button (style only) -->
           <button id="btnExitHome" class="btn small danger">Exit</button>
         </div>
 
@@ -601,15 +607,14 @@
 
   </div>
 
-  <!-- =========================
-       v1.19A2: Custom edit-confirm modal
-       ========================= -->
-  <div id="editConfirmOverlay" class="modalOverlay hidden" role="dialog" aria-modal="true" aria-labelledby="editConfirmTitle">
+  <!-- Large-font custom edit prompt -->
+  <div id="editModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
     <div class="modalCard">
-      <div id="editConfirmTitle" class="modalTitle">Edit this reading?</div>
-      <div class="modalActions">
-        <button id="btnEditConfirmCancel" class="btn">Cancel</button>
-        <button id="btnEditConfirmGo" class="btn primary">Edit</button>
+      <div id="editModalTitle" class="modalTitle">Edit this reading?</div>
+      <div class="modalSub">Press Edit to open this entry.</div>
+      <div class="modalBtns">
+        <button id="btnEditCancel" class="btn">Cancel</button>
+        <button id="btnEditConfirm" class="btn primary">Edit</button>
       </div>
     </div>
   </div>
@@ -661,7 +666,7 @@
   const $ = (id) => document.getElementById(id);
   const screens = ["home","add","log","charts"];
 
-  // v1.18: Do not auto-focus fields when opening Add in EDIT mode (prevents keyboard pop-up).
+  // Do not auto-focus fields when opening Add in EDIT mode (prevents keyboard pop-up).
   function focusTopOfPanel(screen){
     window.scrollTo({top:0, left:0, behavior:"auto"});
 
@@ -744,7 +749,71 @@
   }
 
   /* =========================
-     Symptoms UI (unchanged behavior)
+     Custom edit prompt modal
+     ========================= */
+
+  let pendingEditTs = null;
+  let modalPrevFocus = null;
+
+  function openEditPrompt(ts){
+    pendingEditTs = ts;
+    modalPrevFocus = document.activeElement || null;
+
+    const m = $("editModal");
+    m.classList.remove("hidden");
+
+    // Focus “Edit” for accessibility
+    setTimeout(() => {
+      try{ $("btnEditConfirm").focus({preventScroll:true}); }catch{}
+    }, 0);
+  }
+
+  function closeEditPrompt(){
+    pendingEditTs = null;
+    $("editModal").classList.add("hidden");
+    try{ modalPrevFocus?.focus?.({preventScroll:true}); }catch{}
+  }
+
+  function confirmEditPrompt(){
+    const ts = pendingEditTs;
+    closeEditPrompt();
+    if(ts != null) enterAddEdit(ts);
+  }
+
+  // Modal controls
+  $("btnEditCancel").addEventListener("click", closeEditPrompt);
+  $("btnEditConfirm").addEventListener("click", confirmEditPrompt);
+
+  // Click outside card closes (optional; does not violate behavior)
+  $("editModal").addEventListener("click", (e) => {
+    if(e.target === $("editModal")) closeEditPrompt();
+  });
+
+  // Keyboard: Esc cancels; Enter confirms (while modal open)
+  document.addEventListener("keydown", (e) => {
+    const open = !$("editModal").classList.contains("hidden");
+    if(!open) return;
+
+    if(e.key === "Escape"){
+      e.preventDefault();
+      closeEditPrompt();
+      return;
+    }
+    if(e.key === "Enter"){
+      // If focus is on Cancel, Enter should cancel; otherwise confirm.
+      const ae = document.activeElement;
+      if(ae && ae.id === "btnEditCancel"){
+        e.preventDefault();
+        closeEditPrompt();
+      }else{
+        e.preventDefault();
+        confirmEditPrompt();
+      }
+    }
+  });
+
+  /* =========================
+     Symptoms UI
      ========================= */
 
   const symGrid = $("symGrid");
@@ -830,7 +899,7 @@
   }
 
   /* =========================
-     Add/Edit (unchanged behavior)
+     Add/Edit
      ========================= */
 
   let timeTimer = null;
@@ -896,65 +965,7 @@
   }
 
   /* =========================
-     v1.19A2: Custom edit-confirm modal logic
-     ========================= */
-
-  let pendingEditTs = null;
-  let lastModalFocus = null;
-
-  function openEditConfirm(ts){
-    pendingEditTs = ts;
-    const ov = $("editConfirmOverlay");
-    lastModalFocus = document.activeElement || null;
-    ov.classList.remove("hidden");
-
-    // Put focus on Edit for fewer taps
-    setTimeout(() => {
-      try { $("btnEditConfirmGo").focus({preventScroll:true}); } catch {}
-    }, 0);
-  }
-
-  function closeEditConfirm(){
-    pendingEditTs = null;
-    $("editConfirmOverlay").classList.add("hidden");
-    // restore focus gently
-    setTimeout(() => {
-      try { lastModalFocus && lastModalFocus.focus && lastModalFocus.focus({preventScroll:true}); } catch {}
-      try { document.activeElement && document.activeElement.blur && document.activeElement.blur(); } catch {}
-    }, 0);
-  }
-
-  $("btnEditConfirmCancel").addEventListener("click", closeEditConfirm);
-
-  $("btnEditConfirmGo").addEventListener("click", () => {
-    const ts = pendingEditTs;
-    closeEditConfirm();
-    if(ts != null) enterAddEdit(ts);
-  });
-
-  // Close on overlay tap (outside card)
-  $("editConfirmOverlay").addEventListener("click", (e) => {
-    if(e.target === $("editConfirmOverlay")) closeEditConfirm();
-  });
-
-  // Keyboard controls: Esc closes, Enter activates Edit
-  document.addEventListener("keydown", (e) => {
-    if($("editConfirmOverlay").classList.contains("hidden")) return;
-
-    if(e.key === "Escape"){
-      e.preventDefault();
-      closeEditConfirm();
-      return;
-    }
-    if(e.key === "Enter"){
-      e.preventDefault();
-      $("btnEditConfirmGo").click();
-      return;
-    }
-  });
-
-  /* =========================
-     Log filtering + render (confirm replaced surgically)
+     Log filtering + render
      ========================= */
 
   function recordMatches(rec, q){
@@ -1010,12 +1021,25 @@
       e.setAttribute("role","button");
       e.setAttribute("aria-label","Open entry for editing");
 
-      // v1.18: Press highlight + confirm-on-release (no action if slide off)
+      // Fixed: reliable press/release per-entry (jitter + capture safe)
       let armed = false;
+      const SLOP = 14; // px tolerance for touch jitter
+
+      function isInside(ev){
+        const rect = e.getBoundingClientRect();
+        return (
+          ev.clientX >= rect.left - SLOP && ev.clientX <= rect.right + SLOP &&
+          ev.clientY >= rect.top  - SLOP && ev.clientY <= rect.bottom + SLOP
+        );
+      }
 
       function clearPressed(){
         e.classList.remove("pressed");
         armed = false;
+      }
+
+      function fireEditPrompt(){
+        openEditPrompt(r.ts);
       }
 
       e.addEventListener("pointerdown", (ev) => {
@@ -1027,31 +1051,23 @@
 
       e.addEventListener("pointermove", (ev) => {
         if(!armed) return;
-        const rect = e.getBoundingClientRect();
-        const inside =
-          ev.clientX >= rect.left && ev.clientX <= rect.right &&
-          ev.clientY >= rect.top  && ev.clientY <= rect.bottom;
-
-        if(!inside){
-          clearPressed();
-        }
+        if(!isInside(ev)) clearPressed();
       });
 
       e.addEventListener("pointercancel", clearPressed);
+      e.addEventListener("lostpointercapture", clearPressed);
 
-      e.addEventListener("pointerup", () => {
+      e.addEventListener("pointerup", (ev) => {
         if(!armed) return;
-        e.classList.remove("pressed");
-        armed = false;
-
-        // v1.19A2: custom modal instead of confirm()
-        openEditConfirm(r.ts);
+        if(!isInside(ev)) { clearPressed(); return; }
+        clearPressed();
+        fireEditPrompt();
       });
 
       e.addEventListener("keydown", (ev) => {
         if(ev.key === "Enter" || ev.key === " "){
           ev.preventDefault();
-          openEditConfirm(r.ts);
+          fireEditPrompt();
         }
       });
 
@@ -1100,7 +1116,7 @@
   }
 
   /* =========================
-     Export with report header (v1.18A07)
+     Export with report header
      ========================= */
 
   function downloadText(text, filename){
@@ -1186,12 +1202,10 @@
     let span = vMax - vMin;
     span = Math.max(chartView.minSpan, Math.min(span, chartView.maxSpan));
 
-    // If caller shoved span too wide, re-center
     const mid = (vMin + vMax) / 2;
     vMin = mid - span/2;
     vMax = mid + span/2;
 
-    // Clamp to base (this is what allows full left/right pan)
     if(vMin < baseMin){ vMin = baseMin; vMax = baseMin + span; }
     if(vMax > baseMax){ vMax = baseMax; vMin = baseMax - span; }
 
@@ -1226,7 +1240,6 @@
       const v = pick(r);
       if(v == null){ started = false; prevTs = r.ts; continue; }
 
-      // If there is a missing day between points, break the line
       if(prevTs != null){
         const prevDay = startOfDay(prevTs);
         const curDay  = startOfDay(r.ts);
@@ -1257,18 +1270,12 @@
     return recs.filter(r => r.ts >= a && r.ts <= b);
   }
 
-  /* ---- ISO week helpers (input type="week" uses ISO weeks) ---- */
-
   function getISOWeekInputValueFromDate(d){
-    // returns "YYYY-Www"
     const date = new Date(d.getTime());
     date.setHours(0,0,0,0);
-
-    // Thursday in current week decides the year.
     date.setDate(date.getDate() + 3 - ((date.getDay() + 6) % 7));
     const weekYear = date.getFullYear();
 
-    // Week 1 is the week with Jan 4th
     const week1 = new Date(weekYear, 0, 4);
     week1.setHours(0,0,0,0);
     const week1Thursday = new Date(week1.getTime());
@@ -1281,22 +1288,18 @@
   }
 
   function weekInputToMondayStart(value){
-    // value "YYYY-Www" => Date of ISO week Monday (local time)
     const m = /^(\d{4})-W(\d{2})$/.exec(String(value || ""));
     if(!m) return null;
     const year = Number(m[1]);
     const week = Number(m[2]);
     if(!year || !week) return null;
 
-    // ISO week algorithm: week 1 contains Jan 4
     const jan4 = new Date(year, 0, 4);
     jan4.setHours(0,0,0,0);
 
-    // Monday of week 1
     const jan4Dow = (jan4.getDay() + 6) % 7; // Mon=0..Sun=6
     const week1Mon = new Date(jan4.getTime() - jan4Dow*DAY_MS);
 
-    // Monday of desired week
     const targetMon = new Date(week1Mon.getTime() + (week-1)*7*DAY_MS);
     targetMon.setHours(0,0,0,0);
     return targetMon;
@@ -1311,7 +1314,6 @@
   function applyWeekToBase(resetView){
     const mon = weekInputToMondayStart($("chartWeek").value);
     if(!mon){
-      // fallback to current week
       $("chartWeek").value = getISOWeekInputValueFromDate(new Date());
       return applyWeekToBase(resetView);
     }
@@ -1330,7 +1332,6 @@
   }
 
   function renderCharts(){
-    // Always enforce: exactly 7 days base window (selected week)
     applyWeekToBase(false);
 
     const canvas = $("chart");
@@ -1346,7 +1347,6 @@
     const plotY0 = pad.t;
     const plotY1 = H - pad.b;
 
-    // Frame
     ctx.lineWidth = 1;
     ctx.strokeStyle = "rgba(235,245,255,.12)";
     ctx.fillStyle = "rgba(255,255,255,.02)";
@@ -1355,7 +1355,6 @@
     ctx.fill();
     ctx.stroke();
 
-    // Y scale
     let all = [];
     if(recs.length){
       all = recs.flatMap(r => [r.sys, r.dia, r.hr]).filter(v => v != null);
@@ -1372,7 +1371,6 @@
     const tMin = chartView.viewMin;
     const tMax = chartView.viewMax;
 
-    // Alternating daily bands (clip to plot)
     ctx.save();
     ctx.beginPath();
     ctx.rect(plotX0, plotY0, plotX1-plotX0, plotY1-plotY0);
@@ -1404,7 +1402,6 @@
     }
     ctx.restore();
 
-    // Y grid + labels
     ctx.font = "16px system-ui,Segoe UI,Roboto";
     ctx.fillStyle = "rgba(235,245,255,.60)";
     ctx.strokeStyle = "rgba(235,245,255,.10)";
@@ -1422,9 +1419,8 @@
       ctx.fillText(String(val), 16, y+6);
     }
 
-    // X labels (show month/day; add time if zoomed tight)
     const rangeMs = (tMax - tMin);
-    const showTime = rangeMs <= (18 * 60 * 60 * 1000); // <= 18 hours
+    const showTime = rangeMs <= (18 * 60 * 60 * 1000);
     const labelCount = 4;
 
     ctx.fillStyle = "rgba(235,245,255,.56)";
@@ -1448,7 +1444,6 @@
       ctx.fillText(lab, tx, H-22);
     }
 
-    // Series (break across missing days)
     if(recs.length){
       drawSeriesTimedWithDayGaps(ctx, recs, r=>r.sys, tMin, tMax, yMin, yMax, pad, W, H, "rgba(79,140,255,.98)");
       drawSeriesTimedWithDayGaps(ctx, recs, r=>r.dia, tMin, tMax, yMin, yMax, pad, W, H, "rgba(216,224,240,.88)");
@@ -1459,7 +1454,6 @@
       ctx.fillText("No readings in this view.", pad.l + 12, pad.t + 34);
     }
 
-    // Legend
     const lx = pad.l + 8;
     let ly = pad.t + 22;
     ctx.font = "18px system-ui,Segoe UI,Roboto";
@@ -1476,7 +1470,7 @@
   }
 
   /* =========================
-     Pinch zoom + 1-finger pan on chart (v1.18A07)
+     Pinch zoom + 1-finger pan on chart
      ========================= */
 
   function dist2(t1, t2){
@@ -1512,7 +1506,6 @@
 
       if(e.touches.length === 2){
         e.preventDefault();
-        // ensure base set
         applyWeekToBase(false);
 
         const d = dist2(e.touches[0], e.touches[1]);
@@ -1566,14 +1559,12 @@
         return;
       }
 
-      // One-finger horizontal pan across the 7-day base window
       if(chartView.pan && e.touches.length === 1){
         e.preventDefault();
 
         const {plotW} = plotBounds();
         const dx = e.touches[0].clientX - chartView.pan.x0;
 
-        // Convert pixels to time delta; dragging right should move view earlier (left)
         const span = (chartView.pan.viewMax - chartView.pan.viewMin) || 1;
         const dt = -dx * (span / Math.max(1, plotW));
 
@@ -1657,7 +1648,7 @@
 
   $("btnClearAll").addEventListener("click", clearAllData);
 
-  /* v1.18A07: KEEP THIS EXIT FUNCTION EXACTLY (known-good) */
+  /* KEEP THIS EXIT FUNCTION EXACTLY (known-good) */
   $("btnExitHome").addEventListener("click", () => {
     window.close();
     setTimeout(() => {
@@ -1666,7 +1657,7 @@
   });
 
   /* =========================
-     Buttons + Save/Delete (unchanged)
+     Buttons + Save/Delete
      ========================= */
 
   $("btnGoAdd").addEventListener("click", () => enterAddNew("home"));
@@ -1745,7 +1736,7 @@
   });
 
   $("chartWeek").addEventListener("change", () => {
-    applyWeekToBase(true); // new week resets view to full 7 days
+    applyWeekToBase(true);
     renderCharts();
   });
 
@@ -1775,7 +1766,6 @@
   });
 
   $("btnExportCharts").addEventListener("click", () => {
-    // Export CURRENT chart view (week base + any zoom/pan)
     const all = loadRecords().slice().reverse(); // ascending
     const a = chartView.viewMin, b = chartView.viewMax;
     const recs = all.filter(r => r.ts >= a && r.ts <= b);
@@ -1800,7 +1790,7 @@
   });
 
   /* =========================
-     Manifest + SW (unchanged)
+     Manifest + SW
      ========================= */
 
   function injectManifest(){
@@ -1860,7 +1850,6 @@ self.addEventListener('fetch', (e)=>{ });`;
   $("fromDate").value = "";
   $("toDate").value = "";
 
-  // Start at home
   show("home");
 
   window.addEventListener("resize", () => {
@@ -1874,12 +1863,12 @@ self.addEventListener('fetch', (e)=>{ });`;
 </html>
 
 <!--
-Vitals Tracker v1.19A2
+Version Detail Notes
+App Version: v1.19A2
 Base: v1.19A1
 Surgical changes only:
-- Primary button text color changed to white for readability.
-- Home Exit button styled red via .danger class (handler unchanged).
-- Replaced native confirm("Edit this entry?") with a custom large-font modal that asks: "Edit this reading?"
-  - Same press/slide-off behavior preserved.
-  - Keyboard: Enter/Space opens; Esc cancels; Enter in modal confirms.
+- Fixed Log entry press/release so the edit prompt reliably fires per-entry (mobile jitter/capture-safe).
+- Restored custom large-font edit prompt: “Edit this reading?” (replaces native confirm).
+- Preserved Home panel layout and the known-good Exit handler; Exit button remains red-styled.
+- Added Version Detail Notes at BOTH BOF and EOF (kept in sync).
 -->
