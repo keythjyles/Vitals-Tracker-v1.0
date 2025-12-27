@@ -1,4 +1,4 @@
-<!-- Vitals Tracker v1.19A1 -->
+<!-- Vitals Tracker v1.19A2 -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -106,17 +106,27 @@
       font-size:18px;
     }
     .btn:active{ transform: translateY(1px); }
+
+    /* v1.19A2: primary button text is white for accessibility */
     .btn.primary{
       background: linear-gradient(180deg, rgba(47,120,255,.92), rgba(47,120,255,.72));
       border-color: rgba(120,170,255,.55);
-      color: rgba(0,0,0,.78);
+      color: rgba(235,245,255,.94);
     }
+
     .btn.small{
       height:44px;
       font-size:16px;
       padding:0 14px;
       font-weight:650;
       white-space:nowrap;
+    }
+
+    /* v1.19A2: red Exit button style (visual only) */
+    .btn.danger{
+      background: rgba(255,60,60,.18);
+      border-color: rgba(255,120,120,.55);
+      color: rgba(235,245,255,.92);
     }
 
     .row{ display:flex; gap:12px; }
@@ -411,6 +421,50 @@
       margin: 0 4px 10px;
       width: fit-content;
     }
+
+    /* =========================
+       v1.19A2: Custom edit-confirm modal (replaces confirm())
+       ========================= */
+
+    .modalOverlay{
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,.56);
+      backdrop-filter: blur(6px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 16px;
+      z-index: 10000; /* above border */
+    }
+
+    .modalCard{
+      width: min(520px, 100%);
+      border-radius: 26px;
+      border: 1px solid rgba(235,245,255,.22);
+      background: linear-gradient(180deg, rgba(12,21,40,.92), rgba(10,16,31,.92));
+      box-shadow: 0 18px 58px rgba(0,0,0,.60);
+      padding: 18px;
+    }
+
+    .modalTitle{
+      font-size: clamp(22px, 6.2vw, 34px);
+      font-weight: 850;
+      letter-spacing: .2px;
+      color: rgba(235,245,255,.92);
+      margin: 2px 4px 12px;
+      line-height: 1.05;
+    }
+
+    .modalActions{
+      display:flex;
+      gap:12px;
+      margin-top: 12px;
+    }
+
+    .modalActions .btn{
+      flex: 1;
+    }
   </style>
 </head>
 
@@ -454,13 +508,15 @@
           <button id="btnInstall" class="btn small">Install</button>
           <button id="btnClearAll" class="btn small">Clear Data</button>
           <div class="grow"></div>
-          <button id="btnExitHome" class="btn small">Exit</button>
+
+          <!-- v1.19A2: red Exit button (style only) -->
+          <button id="btnExitHome" class="btn small danger">Exit</button>
         </div>
 
         <div class="subtle">Data stays on your phone (local only).</div>
 
         <div class="footerTiny">
-          <div>v1.19A1</div>
+          <div>v1.19A2</div>
           <div>developed by Keyth Jyles</div>
         </div>
       </div>
@@ -545,11 +601,24 @@
 
   </div>
 
+  <!-- =========================
+       v1.19A2: Custom edit-confirm modal
+       ========================= -->
+  <div id="editConfirmOverlay" class="modalOverlay hidden" role="dialog" aria-modal="true" aria-labelledby="editConfirmTitle">
+    <div class="modalCard">
+      <div id="editConfirmTitle" class="modalTitle">Edit this reading?</div>
+      <div class="modalActions">
+        <button id="btnEditConfirmCancel" class="btn">Cancel</button>
+        <button id="btnEditConfirmGo" class="btn primary">Edit</button>
+      </div>
+    </div>
+  </div>
+
 <script>
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.19A1";
+  const APP_VERSION = "v1.19A2";
   const STORAGE_KEY = "vitals_tracker_records_v1";
   const SYMPTOMS = [
     "Sweaty","Dizzy","Panic","Brain fog","Chest tight","Headache",
@@ -827,7 +896,65 @@
   }
 
   /* =========================
-     Log filtering + render (unchanged)
+     v1.19A2: Custom edit-confirm modal logic
+     ========================= */
+
+  let pendingEditTs = null;
+  let lastModalFocus = null;
+
+  function openEditConfirm(ts){
+    pendingEditTs = ts;
+    const ov = $("editConfirmOverlay");
+    lastModalFocus = document.activeElement || null;
+    ov.classList.remove("hidden");
+
+    // Put focus on Edit for fewer taps
+    setTimeout(() => {
+      try { $("btnEditConfirmGo").focus({preventScroll:true}); } catch {}
+    }, 0);
+  }
+
+  function closeEditConfirm(){
+    pendingEditTs = null;
+    $("editConfirmOverlay").classList.add("hidden");
+    // restore focus gently
+    setTimeout(() => {
+      try { lastModalFocus && lastModalFocus.focus && lastModalFocus.focus({preventScroll:true}); } catch {}
+      try { document.activeElement && document.activeElement.blur && document.activeElement.blur(); } catch {}
+    }, 0);
+  }
+
+  $("btnEditConfirmCancel").addEventListener("click", closeEditConfirm);
+
+  $("btnEditConfirmGo").addEventListener("click", () => {
+    const ts = pendingEditTs;
+    closeEditConfirm();
+    if(ts != null) enterAddEdit(ts);
+  });
+
+  // Close on overlay tap (outside card)
+  $("editConfirmOverlay").addEventListener("click", (e) => {
+    if(e.target === $("editConfirmOverlay")) closeEditConfirm();
+  });
+
+  // Keyboard controls: Esc closes, Enter activates Edit
+  document.addEventListener("keydown", (e) => {
+    if($("editConfirmOverlay").classList.contains("hidden")) return;
+
+    if(e.key === "Escape"){
+      e.preventDefault();
+      closeEditConfirm();
+      return;
+    }
+    if(e.key === "Enter"){
+      e.preventDefault();
+      $("btnEditConfirmGo").click();
+      return;
+    }
+  });
+
+  /* =========================
+     Log filtering + render (confirm replaced surgically)
      ========================= */
 
   function recordMatches(rec, q){
@@ -917,15 +1044,14 @@
         e.classList.remove("pressed");
         armed = false;
 
-        const ok = confirm("Edit this entry?");
-        if(ok) enterAddEdit(r.ts);
+        // v1.19A2: custom modal instead of confirm()
+        openEditConfirm(r.ts);
       });
 
       e.addEventListener("keydown", (ev) => {
         if(ev.key === "Enter" || ev.key === " "){
           ev.preventDefault();
-          const ok = confirm("Edit this entry?");
-          if(ok) enterAddEdit(r.ts);
+          openEditConfirm(r.ts);
         }
       });
 
@@ -1748,13 +1874,12 @@ self.addEventListener('fetch', (e)=>{ });`;
 </html>
 
 <!--
-Vitals Tracker v1.19A1
-Base: v1.18A82
-Changes:
-- Reduced BP/HR label+reading size in log entries (24px → 20px) to fit more readings.
-- Reduced space below the Log top button row.
-- Tightened Symptoms grid vertical spacing (gap/padding/item padding) to reclaim room.
-Notes for future edits:
-- Keep Exit handler exactly as-is (known-good).
-- Keep chart min zoom span at 48 hours and full pan across the 7-day base window.
+Vitals Tracker v1.19A2
+Base: v1.19A1
+Surgical changes only:
+- Primary button text color changed to white for readability.
+- Home Exit button styled red via .danger class (handler unchanged).
+- Replaced native confirm("Edit this entry?") with a custom large-font modal that asks: "Edit this reading?"
+  - Same press/slide-off behavior preserved.
+  - Keyboard: Enter/Space opens; Esc cancels; Enter in modal confirms.
 -->
