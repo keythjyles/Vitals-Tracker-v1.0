@@ -1,1443 +1,675 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0b1324" />
-  <title>Vitals Tracker</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Vitals Tracker</title>
+<style>
+  :root{
+    --bg:#0e1116;
+    --panel:#121823;
+    --text:#e8eef6;
+    --muted:#9aa7b5;
+    --border:#4aa3df; /* app border + accents */
+    --btn:#4aa3df;
+    --btnText:#06121a;
+    --danger:#d64545;
+    --dangerHover:#e05858;
+    --input:#0f1620;
+    --inputBorder:#3a4655;
+    --divider:#263241;
+    --focus:#86c9ff;
+  }
 
-  <link rel="manifest" id="manifestLink" href="#" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family: Arial, Helvetica, sans-serif;
+    line-height:1.25;
+  }
 
-  <style>
-    :root{
-      --bg0:#08101f;
-      --bg1:#0b1324;
-      --panel:#0c1528cc;
-      --stroke:rgba(235,245,255,.16);
-      --stroke2:rgba(235,245,255,.22);
-      --strokeBold:rgba(180,210,255,.42);
-      --text:#eaf2ff;
-      --muted:#a9bddf;
-      --good:#7CFFB2;
-      --warn:#ffd27a;
-      --bad:#ff7a7a;
-      --accent:#7aa7ff;
-      --shadow:0 12px 28px rgba(0,0,0,.35);
-      --r:18px;
-      --btnH:52px;
-      --btnFs:16px;
-      --titleFs:18px;
-      --bodyFs:15px;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      --sans: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-    }
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
-    body{
-      margin:0;
-      font-family:var(--sans);
-      background: radial-gradient(1200px 800px at 25% 0%, #122a55 0%, rgba(18,42,85,0) 55%),
-                  radial-gradient(900px 700px at 85% 10%, #1b2b52 0%, rgba(27,43,82,0) 55%),
-                  linear-gradient(180deg, var(--bg0), var(--bg1));
-      color:var(--text);
-    }
-    .wrap{
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 18px 14px 44px;
-    }
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      border: 1px solid var(--stroke);
-      border-radius: var(--r);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
+  .app{
+    max-width:520px;
+    margin:16px auto;
+    border:3px solid var(--border);
+    border-radius:14px;
+    padding:14px;
+    background:linear-gradient(180deg, rgba(18,24,35,0.9), rgba(14,17,22,0.9));
+  }
 
-    /* Header */
-    .header{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      padding:14px 14px 12px;
-      border-bottom: 1px solid var(--stroke);
-      background: linear-gradient(180deg, rgba(10,18,36,.55), rgba(10,18,36,.22));
-      position:sticky;
-      top:0;
-      backdrop-filter: blur(10px);
-      z-index:10;
-    }
-    .logo{
-      width:40px; height:40px;
-      flex:0 0 40px;
-      display:grid;
-      place-items:center;
-      border-radius: 14px;
-      background: rgba(122,167,255,.12);
-      border: 1px solid rgba(122,167,255,.25);
-    }
-    .logo svg{ width:26px; height:26px; }
-    .headText{ flex:1; min-width:0; }
-    .titleRow{
-      display:flex;
-      align-items:baseline;
-      justify-content:space-between;
-      gap:10px;
-    }
-    .appTitle{
-      font-size: 18px;
-      font-weight: 800;
-      letter-spacing:.2px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .ver{
-      font-family: var(--mono);
-      color: var(--muted);
-      font-size: 12px;
-      white-space:nowrap;
-    }
-    .sub{
-      margin-top:2px;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.35;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
+  header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:6px 4px 10px;
+    border-bottom:1px solid var(--divider);
+    margin-bottom:12px;
+  }
 
-    /* Nav */
-    .tabs{
-      display:flex;
-      gap:10px;
-      padding: 10px 12px 0;
-    }
-    .tab{
-      border:1px solid var(--stroke);
-      background: rgba(255,255,255,.04);
-      color: var(--text);
-      padding: 10px 12px;
-      border-radius: 999px;
-      font-weight: 700;
-      font-size: 13px;
-      cursor:pointer;
-      user-select:none;
-    }
-    .tab[aria-selected="true"]{
-      border-color: rgba(122,167,255,.45);
-      background: rgba(122,167,255,.14);
-    }
+  .title{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
 
-    /* Content */
-    .content{ padding: 12px; }
-    .grid{
-      display:grid;
-      gap:12px;
-      grid-template-columns: 1fr;
-    }
-    @media(min-width:860px){
-      .grid.two{ grid-template-columns: 1.1fr .9fr; }
-      .grid.three{ grid-template-columns: 1fr 1fr 1fr; }
-    }
+  .title h1{
+    margin:0;
+    font-size:18px;
+    letter-spacing:0.2px;
+  }
 
-    .panel{
-      background: rgba(12,21,40,.55);
-      border: 1px solid var(--stroke);
-      border-radius: var(--r);
-      padding: 12px;
-    }
-    .panel h3{
-      margin: 0 0 10px;
-      font-size: 14px;
-      color: var(--muted);
-      letter-spacing:.2px;
-    }
+  .title .sub{
+    font-size:12px;
+    color:var(--muted);
+  }
 
-    /* Buttons */
-    .btnRow{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    button{
-      appearance:none;
-      border:1px solid var(--stroke2);
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-      height: var(--btnH);
-      padding: 0 14px;
-      border-radius: 14px;
-      font-weight: 800;
-      font-size: var(--btnFs);
-      cursor:pointer;
-      transition: transform .06s ease, border-color .2s ease, background .2s ease;
-    }
-    button:active{ transform: scale(.99); }
-    button.primary{
-      border-color: rgba(122,167,255,.5);
-      background: rgba(122,167,255,.15);
-    }
-    button.danger{
-      border-color: rgba(255,122,122,.45);
-      background: rgba(255,122,122,.10);
-    }
-    button.ghost{
-      background: rgba(255,255,255,.03);
-    }
-    button:disabled{
-      opacity:.55;
-      cursor:not-allowed;
-    }
+  .badge{
+    font-size:12px;
+    color:var(--muted);
+    border:1px solid var(--divider);
+    border-radius:999px;
+    padding:6px 10px;
+    white-space:nowrap;
+  }
 
-    /* Form */
-    label{
-      display:block;
-      font-size: 12px;
-      color: var(--muted);
-      margin: 10px 0 6px;
-      font-weight: 700;
-    }
-    input, textarea, select{
-      width:100%;
-      border-radius: 14px;
-      border: 1px solid var(--stroke);
-      background: rgba(0,0,0,.18);
-      color: var(--text);
-      padding: 12px 12px;
-      font-size: 15px;
-      outline:none;
-    }
-    textarea{ min-height: 86px; resize: vertical; }
-    .row2{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
-    .row3{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; }
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--divider);
+    border-radius:12px;
+    padding:12px;
+    margin-bottom:12px;
+  }
 
-    /* Log list */
-    .list{ display:flex; flex-direction:column; gap:10px; }
-    .item{
-      border:1px solid var(--stroke);
-      border-radius: 16px;
-      padding: 10px 12px;
-      background: rgba(255,255,255,.04);
-      cursor:pointer;
-    }
-    .itemTop{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      align-items:flex-start;
-    }
-    .meta{
-      color: var(--muted);
-      font-size: 12px;
-      font-family: var(--mono);
-      white-space:nowrap;
-    }
-    .bp{
-      font-size: 16px;
-      font-weight: 900;
-      letter-spacing:.2px;
-    }
-    .pillRow{ margin-top:6px; display:flex; gap:8px; flex-wrap:wrap; }
-    .pill{
-      border:1px solid var(--stroke);
-      background: rgba(255,255,255,.03);
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      color: var(--muted);
-    }
+  .panel h2{
+    margin:0 0 10px 0;
+    font-size:15px;
+  }
 
-    /* Charts */
-    canvas{
-      width:100%;
-      height: 260px;
-      border-radius: 16px;
-      border: 1px solid var(--stroke);
-      background: rgba(0,0,0,.14);
-    }
-    .hint{
-      color: var(--muted);
-      font-size: 12px;
-      line-height:1.35;
-    }
+  .row{
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
 
-    /* Toast */
-    .toast{
-      position:fixed;
-      left:50%;
-      bottom:16px;
-      transform: translateX(-50%);
-      background: rgba(10,18,36,.92);
-      border:1px solid var(--stroke2);
-      padding: 10px 12px;
-      border-radius: 14px;
-      box-shadow: var(--shadow);
-      color: var(--text);
-      font-size: 13px;
-      max-width: 92vw;
-      z-index:999;
-      display:none;
-    }
+  label{
+    display:block;
+    margin:0 0 6px 0;
+    font-size:13px;
+    color:var(--muted);
+  }
 
-    /* Modal */
-    .modalBackdrop{
-      position:fixed; inset:0;
-      background: rgba(0,0,0,.55);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding: 18px 14px;
-      z-index: 1000;
-    }
-    .modal{
-      width:min(720px, 96vw);
-      border-radius: 18px;
-      border:1px solid var(--strokeBold);
-      background: rgba(10,18,36,.92);
-      box-shadow: var(--shadow);
-      padding: 14px;
-    }
-    .modalTitle{
-      font-weight:900;
-      margin: 0 0 8px;
-      font-size: 16px;
-    }
-    .modalActions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top: 12px;
-    }
+  input[type="number"], input[type="text"], textarea, select{
+    width:100%;
+    background:var(--input);
+    color:var(--text);
+    border:1px solid var(--inputBorder);
+    border-radius:10px;
+    padding:10px;
+    font-size:14px;
+    outline:none;
+  }
 
-    .small{
-      font-size: 12px;
-      color: var(--muted);
-      font-family: var(--mono);
-    }
-  </style>
+  input:focus, textarea:focus, select:focus, button:focus{
+    box-shadow:0 0 0 3px rgba(134,201,255,0.25);
+    border-color:var(--focus);
+  }
+
+  textarea{
+    min-height:84px;
+    resize:vertical;
+  }
+
+  .vitals-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:8px;
+  }
+
+  .symptoms-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:8px 10px;
+    margin-top:8px;
+  }
+
+  .check{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+    color:var(--text);
+    user-select:none;
+  }
+
+  .check input{ transform:scale(1.15); }
+
+  .btnrow{
+    display:flex;
+    gap:10px;
+    margin-top:10px;
+  }
+
+  button{
+    width:100%;
+    padding:12px 12px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    background:var(--btn);
+    color:var(--btnText);
+    font-weight:700;
+    font-size:14px;
+  }
+  button:hover{ filter:brightness(1.05); }
+
+  .secondary{
+    background:transparent;
+    color:var(--text);
+    border:1px solid var(--divider);
+    font-weight:700;
+  }
+
+  .danger{
+    background:var(--danger);
+    color:#fff;
+  }
+  .danger:hover{ background:var(--dangerHover); }
+
+  .navrow{
+    display:flex;
+    gap:10px;
+  }
+
+  .tiny{
+    font-size:12px;
+    color:var(--muted);
+    margin-top:8px;
+  }
+
+  .logbox{
+    max-height:260px;
+    overflow:auto;
+    border:1px solid var(--divider);
+    border-radius:12px;
+    padding:10px;
+    background:rgba(0,0,0,0.18);
+  }
+
+  .entry{
+    border-bottom:1px solid var(--divider);
+    padding:10px 0;
+  }
+  .entry:last-child{ border-bottom:none; }
+
+  .entry .t{
+    font-weight:700;
+    font-size:13px;
+  }
+  .entry .m{
+    font-size:13px;
+    margin-top:6px;
+  }
+  .pill{
+    display:inline-block;
+    border:1px solid var(--divider);
+    border-radius:999px;
+    padding:3px 8px;
+    font-size:12px;
+    color:var(--muted);
+    margin-right:6px;
+    margin-top:6px;
+  }
+
+  .hidden{ display:none; }
+</style>
 </head>
-
 <body>
-  <div class="wrap">
-    <div class="card">
-      <div class="header">
-        <div class="logo" aria-hidden="true">
-          <!-- Simple pulse logo -->
-          <svg viewBox="0 0 24 24" fill="none">
-            <path d="M3 12h4l2.2-5.5L13 18l2-6h6" stroke="rgba(122,167,255,.95)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="headText">
-          <div class="titleRow">
-            <div class="appTitle">Vitals Tracker</div>
-            <div class="ver">v1.18</div>
-          </div>
-          <div class="sub" id="subline">Fast BP/HR logging with export + charts</div>
-        </div>
-      </div>
 
-      <div class="tabs" role="tablist" aria-label="Sections">
-        <div class="tab" role="tab" id="tabHome" aria-selected="true" tabindex="0">Home</div>
-        <div class="tab" role="tab" id="tabLog" aria-selected="false" tabindex="-1">Log</div>
-        <div class="tab" role="tab" id="tabCharts" aria-selected="false" tabindex="-1">Charts</div>
-        <div class="tab" role="tab" id="tabTools" aria-selected="false" tabindex="-1">Tools</div>
-      </div>
-
-      <div class="content">
-        <!-- HOME -->
-        <section id="viewHome" class="grid two">
-          <div class="panel">
-            <h3>Quick Add</h3>
-            <div class="grid">
-              <div class="row3">
-                <div>
-                  <label for="sys">Systolic</label>
-                  <input id="sys" inputmode="numeric" placeholder="e.g., 128" />
-                </div>
-                <div>
-                  <label for="dia">Diastolic</label>
-                  <input id="dia" inputmode="numeric" placeholder="e.g., 84" />
-                </div>
-                <div>
-                  <label for="hr">HR</label>
-                  <input id="hr" inputmode="numeric" placeholder="e.g., 74" />
-                </div>
-              </div>
-
-              <div class="row2">
-                <div>
-                  <label for="when">Date & time</label>
-                  <input id="when" type="datetime-local" />
-                </div>
-                <div>
-                  <label for="tag">Tag (optional)</label>
-                  <select id="tag">
-                    <option value="">None</option>
-                    <option value="baseline">Baseline</option>
-                    <option value="post-med">Post-med</option>
-                    <option value="panic">Panic</option>
-                    <option value="heat">Heat intolerance</option>
-                    <option value="sleep">Sleep</option>
-                    <option value="after-food">After food</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="row2">
-                <div>
-                  <label for="sym">Symptoms</label>
-                  <input id="sym" placeholder="e.g., sweaty hands, chest tight" />
-                </div>
-                <div>
-                  <label for="notes">Notes</label>
-                  <input id="notes" placeholder="e.g., took lisinopril 45 min ago" />
-                </div>
-              </div>
-
-              <div class="btnRow">
-                <button class="primary" id="btnAddReading">Add Reading</button>
-                <button class="ghost" id="btnClearForm">Clear Form</button>
-              </div>
-
-              <div class="hint">
-                Tip: Tap any entry in <b>Log</b> to edit or delete. Data is stored in an on-device database (IndexedDB) in v1.18.
-              </div>
-            </div>
-          </div>
-
-          <div class="panel">
-            <h3>Status</h3>
-            <div id="statusBox" class="grid">
-              <div class="hint" id="dbStatus">Database: initializing…</div>
-              <div class="hint" id="countStatus">Entries: 0</div>
-              <div class="hint" id="lastStatus">Last entry: —</div>
-              <div class="btnRow">
-                <button id="btnInstall" class="ghost">Install</button>
-                <button id="btnUninstall" class="ghost">Uninstall</button>
-                <button id="btnExit" class="ghost">Exit</button>
-              </div>
-              <div class="hint">
-                Install may show only in supported browsers. “Uninstall” provides guidance; removal is done via browser/app settings.
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- LOG -->
-        <section id="viewLog" style="display:none" class="grid two">
-          <div class="panel">
-            <h3>Filters</h3>
-            <div class="grid">
-              <div class="row3">
-                <div>
-                  <label for="q">Search</label>
-                  <input id="q" placeholder="symptoms, notes, tag…" />
-                </div>
-                <div>
-                  <label for="from">From</label>
-                  <input id="from" type="date" />
-                </div>
-                <div>
-                  <label for="to">To</label>
-                  <input id="to" type="date" />
-                </div>
-              </div>
-              <div class="btnRow">
-                <button id="btnApplyFilters" class="primary">Apply</button>
-                <button id="btnResetFilters" class="ghost">Reset</button>
-              </div>
-              <div class="hint">Export uses the currently filtered list.</div>
-            </div>
-          </div>
-
-          <div class="panel">
-            <h3>Entries</h3>
-            <div class="list" id="list"></div>
-            <div class="hint" id="emptyHint" style="display:none">No entries found.</div>
-          </div>
-        </section>
-
-        <!-- CHARTS -->
-        <section id="viewCharts" style="display:none" class="grid two">
-          <div class="panel">
-            <h3>Trend (Systolic / Diastolic)</h3>
-            <canvas id="chartBP" width="900" height="260"></canvas>
-            <div class="hint">Showing up to the last 120 filtered entries (oldest → newest).</div>
-          </div>
-          <div class="panel">
-            <h3>Trend (Heart Rate)</h3>
-            <canvas id="chartHR" width="900" height="260"></canvas>
-            <div class="hint">Tap Log → Apply to change the chart dataset.</div>
-          </div>
-        </section>
-
-        <!-- TOOLS -->
-        <section id="viewTools" style="display:none" class="grid two">
-          <div class="panel">
-            <h3>Export</h3>
-            <div class="grid">
-              <div class="btnRow">
-                <button id="btnExportText" class="primary">Export (.txt)</button>
-                <button id="btnExportCSV" class="ghost">Export (CSV)</button>
-                <button id="btnCopyExport" class="ghost">Copy Export</button>
-              </div>
-              <textarea id="exportBox" placeholder="Export preview appears here…" readonly></textarea>
-              <div class="hint">
-                Exports include: timestamp, BP, HR, tag, symptoms, notes.
-              </div>
-            </div>
-          </div>
-
-          <div class="panel">
-            <h3>Data</h3>
-            <div class="grid">
-              <div class="btnRow">
-                <button id="btnBackupJSON" class="ghost">Backup (JSON)</button>
-                <button id="btnRestoreJSON" class="ghost">Restore (JSON)</button>
-                <input id="restoreFile" type="file" accept="application/json" style="display:none" />
-              </div>
-
-              <div class="btnRow">
-                <button id="btnClearData" class="danger">Clear All Data</button>
-              </div>
-
-              <div class="hint">
-                v1.18 stores data in IndexedDB and will auto-import legacy localStorage data (if detected) one time.
-              </div>
-              <div class="small" id="storageMeta">—</div>
-            </div>
-          </div>
-        </section>
-      </div>
+<div class="app" role="application" aria-label="Vitals Tracker">
+  <header>
+    <div class="title">
+      <h1>Vitals Tracker</h1>
+      <div class="sub">Multi-panel baseline rebuild</div>
     </div>
-  </div>
+    <div class="badge" id="panelBadge">Panel 1 of 3</div>
+  </header>
 
-  <!-- Modal -->
-  <div class="modalBackdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="modal">
-      <div class="modalTitle" id="modalTitle">Edit Reading</div>
+  <!-- PANEL 1: ENTER VITALS -->
+  <section class="panel" id="panel1">
+    <h2>Enter Vitals</h2>
 
-      <div class="row3">
-        <div>
-          <label for="mSys">Systolic</label>
-          <input id="mSys" inputmode="numeric" />
-        </div>
-        <div>
-          <label for="mDia">Diastolic</label>
-          <input id="mDia" inputmode="numeric" />
-        </div>
-        <div>
-          <label for="mHR">HR</label>
-          <input id="mHR" inputmode="numeric" />
-        </div>
-      </div>
-
-      <div class="row2">
-        <div>
-          <label for="mWhen">Date & time</label>
-          <input id="mWhen" type="datetime-local" />
-        </div>
-        <div>
-          <label for="mTag">Tag</label>
-          <select id="mTag">
-            <option value="">None</option>
-            <option value="baseline">Baseline</option>
-            <option value="post-med">Post-med</option>
-            <option value="panic">Panic</option>
-            <option value="heat">Heat intolerance</option>
-            <option value="sleep">Sleep</option>
-            <option value="after-food">After food</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="row2">
-        <div>
-          <label for="mSym">Symptoms</label>
-          <input id="mSym" />
-        </div>
-        <div>
-          <label for="mNotes">Notes</label>
-          <input id="mNotes" />
-        </div>
-      </div>
-
-      <div class="modalActions">
-        <button class="primary" id="btnSaveEdit">Save</button>
-        <button class="danger" id="btnDelete">Delete</button>
-        <button class="ghost" id="btnCloseModal">Close</button>
-      </div>
-
-      <div class="hint" style="margin-top:8px" id="modalHint"></div>
+    <label for="when">Timestamp</label>
+    <div class="row">
+      <select id="when" aria-label="Timestamp mode">
+        <option value="now">Now</option>
+        <option value="manual">Manual (edit below)</option>
+      </select>
     </div>
-  </div>
+    <div style="margin-top:8px;">
+      <input type="text" id="manualTime" placeholder="e.g., 12/24/2025 12:05 AM" class="hidden" aria-label="Manual timestamp"/>
+      <div class="tiny" id="nowPreview"></div>
+    </div>
 
-  <div class="toast" id="toast"></div>
+    <div style="margin-top:12px;">
+      <label>SYS / DIA / HR</label>
+      <div class="vitals-grid">
+        <input type="number" id="sys" placeholder="SYS" inputmode="numeric" aria-label="Systolic"/>
+        <input type="number" id="dia" placeholder="DIA" inputmode="numeric" aria-label="Diastolic"/>
+        <input type="number" id="hr"  placeholder="HR"  inputmode="numeric" aria-label="Heart rate"/>
+      </div>
+      <div class="tiny">Enter your measured values exactly as shown on the cuff.</div>
+    </div>
+
+    <div class="btnrow">
+      <button class="secondary" id="clearVitals">Clear</button>
+      <button id="toSymptoms">Next</button>
+    </div>
+  </section>
+
+  <!-- PANEL 2: SYMPTOMS -->
+  <section class="panel hidden" id="panel2">
+    <h2>Symptoms</h2>
+
+    <label>Choose symptoms (two-column list)</label>
+    <div class="symptoms-grid" id="symptomGrid" aria-label="Symptoms list"></div>
+
+    <div style="margin-top:12px;">
+      <label for="customSymptom">Add a symptom (always shows later)</label>
+      <div class="row">
+        <input type="text" id="customSymptom" placeholder="Type symptom name…" aria-label="Custom symptom"/>
+      </div>
+      <div class="btnrow">
+        <button class="secondary" id="addSymptomBtn">Add Symptom</button>
+        <button id="toNotes">Next</button>
+      </div>
+      <div class="tiny">Custom symptoms are saved on this device.</div>
+    </div>
+
+    <div class="btnrow">
+      <button class="secondary" id="backToVitals">Back</button>
+      <button class="danger" id="exitBtn2">Exit</button>
+    </div>
+  </section>
+
+  <!-- PANEL 3: NOTES + SAVE + LOG -->
+  <section class="panel hidden" id="panel3">
+    <h2>Notes & Log</h2>
+
+    <label for="notes">Notes (context, meds, triggers, what happened)</label>
+    <textarea id="notes" placeholder="Example: chest tight, dizzy; took lisinopril; woke up sweating; anxiety spike…" aria-label="Notes"></textarea>
+
+    <div class="btnrow">
+      <button class="secondary" id="backToSymptoms">Back</button>
+      <button id="saveBtn">Save Entry</button>
+    </div>
+
+    <div class="btnrow">
+      <button class="secondary" id="exportCsv">Export CSV</button>
+      <button class="secondary" id="printPdf">Print / PDF</button>
+    </div>
+
+    <div class="btnrow">
+      <button class="secondary" id="clearAll">Clear All Data</button>
+      <button class="danger" id="exitBtn3">Exit</button>
+    </div>
+
+    <div style="margin-top:12px;">
+      <label>Saved Entries</label>
+      <div class="logbox" id="log" aria-label="Saved entries log"></div>
+      <div class="tiny">Stored locally on this device only.</div>
+    </div>
+  </section>
+
+</div>
 
 <script>
-/* =========================
-   Vitals Tracker v1.18
-   - IndexedDB storage
-   - One-time legacy localStorage import
-   - Backup/Restore JSON
-   - Filtered export + charts
-========================= */
+(function(){
+  // Storage keys
+  const KEY_ENTRIES = "vitals_entries";
+  const KEY_CUSTOM_SYM = "vitals_custom_symptoms";
 
-(() => {
-  const VERSION = "1.18";
-  const DB_NAME = "VitalsTrackerDB";
-  const DB_VER = 1;
-  const STORE = "readings";
-  const LEGACY_KEY = "vitals_tracker_entries_v1x"; // best-effort import key (see importLegacy)
+  // Baseline symptom set (simple, common, matches your past logging)
+  const defaultSymptoms = [
+    "Chest tight", "Dizzy", "Nausea", "Sweaty",
+    "Blurred vision", "Weakness", "Headache", "Anxiety",
+    "Panic", "Hot ears", "Itching", "Stomach pain"
+  ];
 
-  const $ = (id) => document.getElementById(id);
+  // Elements
+  const panel1 = document.getElementById("panel1");
+  const panel2 = document.getElementById("panel2");
+  const panel3 = document.getElementById("panel3");
+  const panelBadge = document.getElementById("panelBadge");
 
-  // Tabs/views
-  const tabHome = $("tabHome"), tabLog = $("tabLog"), tabCharts = $("tabCharts"), tabTools = $("tabTools");
-  const viewHome = $("viewHome"), viewLog = $("viewLog"), viewCharts = $("viewCharts"), viewTools = $("viewTools");
+  const whenSel = document.getElementById("when");
+  const manualTime = document.getElementById("manualTime");
+  const nowPreview = document.getElementById("nowPreview");
 
-  // Home inputs
-  const sys = $("sys"), dia = $("dia"), hr = $("hr"), when = $("when"), tag = $("tag"), sym = $("sym"), notes = $("notes");
-  const btnAddReading = $("btnAddReading");
-  const btnClearForm = $("btnClearForm");
+  const sys = document.getElementById("sys");
+  const dia = document.getElementById("dia");
+  const hr  = document.getElementById("hr");
+  const notes = document.getElementById("notes");
 
-  // Status
-  const dbStatus = $("dbStatus"), countStatus = $("countStatus"), lastStatus = $("lastStatus");
-  const storageMeta = $("storageMeta");
+  const symptomGrid = document.getElementById("symptomGrid");
+  const customSymptom = document.getElementById("customSymptom");
 
-  // Log
-  const list = $("list");
-  const emptyHint = $("emptyHint");
-  const q = $("q"), from = $("from"), to = $("to");
-  const btnApplyFilters = $("btnApplyFilters"), btnResetFilters = $("btnResetFilters");
+  const log = document.getElementById("log");
 
-  // Tools
-  const exportBox = $("exportBox");
-  const btnExportText = $("btnExportText"), btnExportCSV = $("btnExportCSV"), btnCopyExport = $("btnCopyExport");
-  const btnClearData = $("btnClearData");
-  const btnBackupJSON = $("btnBackupJSON"), btnRestoreJSON = $("btnRestoreJSON"), restoreFile = $("restoreFile");
-
-  // Modal
-  const modalBackdrop = $("modalBackdrop");
-  const mSys = $("mSys"), mDia = $("mDia"), mHR = $("mHR"), mWhen = $("mWhen"), mTag = $("mTag"), mSym = $("mSym"), mNotes = $("mNotes");
-  const btnSaveEdit = $("btnSaveEdit"), btnDelete = $("btnDelete"), btnCloseModal = $("btnCloseModal");
-  const modalHint = $("modalHint");
-
-  // Charts
-  const chartBP = $("chartBP");
-  const chartHR = $("chartHR");
-
-  // Install/uninstall/exit
-  const btnInstall = $("btnInstall"), btnUninstall = $("btnUninstall"), btnExit = $("btnExit");
-  let deferredPrompt = null;
-
-  // Runtime state
-  let db = null;
-  let currentFilters = { q:"", from:"", to:"" };
-  let currentList = [];  // filtered list (sorted desc by ts)
-  let editId = null;
-
-  // ---------- Utilities ----------
-  const toast = (msg) => {
-    const t = $("toast");
-    t.textContent = msg;
-    t.style.display = "block";
-    clearTimeout(toast._t);
-    toast._t = setTimeout(() => { t.style.display = "none"; }, 2200);
+  // State (current draft entry before save)
+  let draft = {
+    timeMode: "now",
+    timeText: "",
+    sys: "",
+    dia: "",
+    hr: "",
+    symptoms: [],
+    notes: ""
   };
 
-  const pad2 = (n) => String(n).padStart(2,"0");
-  const toLocalDT = (ms) => {
-    const d = new Date(ms);
-    const yyyy = d.getFullYear();
-    const mm = pad2(d.getMonth()+1);
-    const dd = pad2(d.getDate());
-    const hh = pad2(d.getHours());
-    const mi = pad2(d.getMinutes());
-    return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
-  };
-  const parseDTLocal = (val) => {
-    // datetime-local is local time; Date parses as local if "YYYY-MM-DDTHH:MM"
-    const d = new Date(val);
-    const ms = d.getTime();
-    return Number.isFinite(ms) ? ms : Date.now();
-  };
+  function setPanel(n){
+    panel1.classList.toggle("hidden", n!==1);
+    panel2.classList.toggle("hidden", n!==2);
+    panel3.classList.toggle("hidden", n!==3);
+    panelBadge.textContent = `Panel ${n} of 3`;
+  }
 
-  const safeInt = (v) => {
-    const n = parseInt(String(v).trim(), 10);
-    return Number.isFinite(n) ? n : null;
-  };
+  function nowString(){
+    return new Date().toLocaleString();
+  }
 
-  const formatStamp = (ms) => {
-    const d = new Date(ms);
-    // 12/25/2025, 06:00:39 PM
-    return d.toLocaleString(undefined, { year:"numeric", month:"2-digit", day:"2-digit",
-      hour:"2-digit", minute:"2-digit", second:"2-digit" });
-  };
+  function updateNowPreview(){
+    if(whenSel.value === "now"){
+      nowPreview.textContent = `Current time: ${nowString()}`;
+    } else {
+      nowPreview.textContent = "";
+    }
+  }
 
-  const downloadText = (filename, text) => {
-    const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 500);
-  };
+  function loadCustomSymptoms(){
+    try{
+      return JSON.parse(localStorage.getItem(KEY_CUSTOM_SYM) || "[]");
+    }catch{
+      return [];
+    }
+  }
 
-  const downloadJSON = (filename, obj) => {
-    const text = JSON.stringify(obj, null, 2);
-    const blob = new Blob([text], {type:"application/json;charset=utf-8"});
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 500);
-  };
+  function saveCustomSymptoms(list){
+    localStorage.setItem(KEY_CUSTOM_SYM, JSON.stringify(list));
+  }
 
-  // ---------- IndexedDB ----------
-  function openDB(){
-    return new Promise((resolve, reject) => {
-      const req = indexedDB.open(DB_NAME, DB_VER);
-      req.onupgradeneeded = () => {
-        const d = req.result;
-        if (!d.objectStoreNames.contains(STORE)){
-          const s = d.createObjectStore(STORE, { keyPath:"id" });
-          s.createIndex("ts", "ts");
+  function allSymptoms(){
+    const custom = loadCustomSymptoms();
+    // Deduplicate while preserving order
+    const seen = new Set();
+    const merged = [];
+    [...defaultSymptoms, ...custom].forEach(s=>{
+      const k = String(s).trim();
+      if(!k) return;
+      const key = k.toLowerCase();
+      if(seen.has(key)) return;
+      seen.add(key);
+      merged.push(k);
+    });
+    return merged;
+  }
+
+  function renderSymptoms(){
+    symptomGrid.innerHTML = "";
+    const items = allSymptoms();
+
+    items.forEach(name=>{
+      const id = "sym_" + name.toLowerCase().replace(/[^a-z0-9]+/g,"_");
+      const wrap = document.createElement("label");
+      wrap.className = "check";
+      wrap.setAttribute("for", id);
+
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.id = id;
+      cb.value = name;
+      cb.checked = draft.symptoms.includes(name);
+      cb.addEventListener("change", ()=>{
+        if(cb.checked){
+          if(!draft.symptoms.includes(name)) draft.symptoms.push(name);
+        } else {
+          draft.symptoms = draft.symptoms.filter(x=>x!==name);
         }
-      };
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
+      });
+
+      const text = document.createElement("span");
+      text.textContent = name;
+
+      wrap.appendChild(cb);
+      wrap.appendChild(text);
+      symptomGrid.appendChild(wrap);
     });
   }
 
-  function tx(storeName, mode="readonly"){
-    const t = db.transaction(storeName, mode);
-    return t.objectStore(storeName);
-  }
-
-  function id(){
-    // sortable-ish unique id
-    return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-  }
-
-  function dbPutReading(r){
-    return new Promise((resolve, reject) => {
-      const req = tx(STORE,"readwrite").put(r);
-      req.onsuccess = () => resolve(true);
-      req.onerror = () => reject(req.error);
-    });
-  }
-
-  function dbDeleteReading(readingId){
-    return new Promise((resolve, reject) => {
-      const req = tx(STORE,"readwrite").delete(readingId);
-      req.onsuccess = () => resolve(true);
-      req.onerror = () => reject(req.error);
-    });
-  }
-
-  function dbClearAll(){
-    return new Promise((resolve, reject) => {
-      const req = tx(STORE,"readwrite").clear();
-      req.onsuccess = () => resolve(true);
-      req.onerror = () => reject(req.error);
-    });
-  }
-
-  function dbGetAll(){
-    return new Promise((resolve, reject) => {
-      const req = tx(STORE,"readonly").getAll();
-      req.onsuccess = () => resolve(req.result || []);
-      req.onerror = () => reject(req.error);
-    });
-  }
-
-  // ---------- Legacy import (best-effort) ----------
-  async function importLegacyIfPresent(){
-    // Your earlier versions used localStorage; keys varied across edits.
-    // This tries the most likely keys and imports once.
-    const doneKey = "VT_IDB_IMPORTED_V1X";
-    if (localStorage.getItem(doneKey) === "1") return;
-
-    const candidates = [
-      LEGACY_KEY,
-      "vitals_tracker_entries",
-      "VitalsTrackerEntries",
-      "VT_ENTRIES",
-      "readings",
-      "vitals"
-    ];
-
-    let raw = null, usedKey = null;
-    for (const k of candidates){
-      const v = localStorage.getItem(k);
-      if (v && v.trim().length > 2){
-        raw = v; usedKey = k; break;
-      }
+  function getEntries(){
+    try{
+      return JSON.parse(localStorage.getItem(KEY_ENTRIES) || "[]");
+    }catch{
+      return [];
     }
-    if (!raw) return;
-
-    let arr = null;
-    try { arr = JSON.parse(raw); } catch(e){ /* ignore */ }
-    if (!Array.isArray(arr) || arr.length === 0) return;
-
-    // Normalize
-    let imported = 0;
-    for (const x of arr){
-      const r = normalizeLegacy(x);
-      if (!r) continue;
-      // Avoid clobber: new id
-      r.id = id();
-      await dbPutReading(r);
-      imported++;
-    }
-    localStorage.setItem(doneKey, "1");
-    toast(`Imported ${imported} legacy entries (${usedKey})`);
   }
 
-  function normalizeLegacy(x){
-    // Accept multiple shapes
-    // Expected v1.18 shape:
-    // {id, ts, sys, dia, hr, tag, symptoms, notes}
-    if (!x || typeof x !== "object") return null;
-
-    const ts = Number.isFinite(+x.ts) ? +x.ts
-            : x.when ? new Date(x.when).getTime()
-            : x.date ? new Date(x.date).getTime()
-            : x.timestamp ? new Date(x.timestamp).getTime()
-            : Date.now();
-
-    const s = safeInt(x.sys ?? x.systolic ?? x.SYS);
-    const d = safeInt(x.dia ?? x.diastolic ?? x.DIA);
-    const h = safeInt(x.hr ?? x.heartRate ?? x.HR);
-
-    if (s == null || d == null) return null;
-
-    return {
-      id: x.id && typeof x.id === "string" ? x.id : id(),
-      ts: Number.isFinite(ts) ? ts : Date.now(),
-      sys: s,
-      dia: d,
-      hr: h ?? null,
-      tag: (x.tag ?? x.label ?? "").toString().slice(0,40),
-      symptoms: (x.symptoms ?? x.sym ?? "").toString().slice(0,220),
-      notes: (x.notes ?? "").toString().slice(0,320),
-    };
+  function setEntries(entries){
+    localStorage.setItem(KEY_ENTRIES, JSON.stringify(entries));
   }
 
-  // ---------- Filters ----------
-  function applyFiltersToArray(arr, f){
-    const qq = (f.q || "").trim().toLowerCase();
-    const fromMs = f.from ? new Date(f.from + "T00:00").getTime() : null;
-    const toMs = f.to ? new Date(f.to + "T23:59:59").getTime() : null;
+  function renderLog(){
+    const entries = getEntries();
+    log.innerHTML = "";
 
-    return arr.filter(r => {
-      if (fromMs != null && r.ts < fromMs) return false;
-      if (toMs != null && r.ts > toMs) return false;
-      if (!qq) return true;
-      const hay = [
-        r.tag || "",
-        r.symptoms || "",
-        r.notes || "",
-        `${r.sys}/${r.dia}`,
-        r.hr != null ? String(r.hr) : ""
-      ].join(" ").toLowerCase();
-      return hay.includes(qq);
-    });
-  }
-
-  // ---------- Rendering ----------
-  function renderList(){
-    list.innerHTML = "";
-    if (currentList.length === 0){
-      emptyHint.style.display = "block";
-      return;
-    }
-    emptyHint.style.display = "none";
-
-    for (const r of currentList){
+    if(entries.length === 0){
       const div = document.createElement("div");
-      div.className = "item";
-      div.tabIndex = 0;
-      div.setAttribute("role", "button");
-      div.setAttribute("aria-label", `Edit entry ${formatStamp(r.ts)}`);
-      div.addEventListener("click", () => openEdit(r.id));
-      div.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") openEdit(r.id); });
-
-      const top = document.createElement("div");
-      top.className = "itemTop";
-
-      const left = document.createElement("div");
-      const bp = document.createElement("div");
-      bp.className = "bp";
-      bp.textContent = `BP ${r.sys}/${r.dia}${r.hr != null ? ` • HR ${r.hr}` : ""}`;
-
-      const meta = document.createElement("div");
-      meta.className = "meta";
-      meta.textContent = formatStamp(r.ts);
-
-      left.appendChild(bp);
-
-      const pills = document.createElement("div");
-      pills.className = "pillRow";
-
-      if (r.tag){
-        const p = document.createElement("div");
-        p.className = "pill";
-        p.textContent = `Tag: ${r.tag}`;
-        pills.appendChild(p);
-      }
-      if (r.symptoms){
-        const p = document.createElement("div");
-        p.className = "pill";
-        p.textContent = `Symptoms: ${r.symptoms}`;
-        pills.appendChild(p);
-      }
-      if (r.notes){
-        const p = document.createElement("div");
-        p.className = "pill";
-        p.textContent = `Notes: ${r.notes}`;
-        pills.appendChild(p);
-      }
-      left.appendChild(pills);
-
-      top.appendChild(left);
-      top.appendChild(meta);
-
-      div.appendChild(top);
-      list.appendChild(div);
-    }
-  }
-
-  async function refreshAll(){
-    const all = await dbGetAll();
-    // sort newest first
-    all.sort((a,b) => b.ts - a.ts);
-    currentList = applyFiltersToArray(all, currentFilters);
-    // keep sorted newest first for log; charts will reverse
-    renderList();
-    renderStatus(all);
-    renderCharts(currentList);
-    renderExportPreview(currentList);
-    renderStorageMeta(all);
-  }
-
-  function renderStatus(all){
-    countStatus.textContent = `Entries: ${all.length}`;
-    const last = all[0];
-    lastStatus.textContent = `Last entry: ${last ? formatStamp(last.ts) : "—"}`;
-  }
-
-  function renderStorageMeta(all){
-    const first = all.length ? all[all.length-1] : null;
-    const last = all.length ? all[0] : null;
-    storageMeta.textContent = all.length
-      ? `DB ${DB_NAME}/${STORE} • Range: ${formatStamp(first.ts)} → ${formatStamp(last.ts)}`
-      : `DB ${DB_NAME}/${STORE} • Empty`;
-  }
-
-  // ---------- Modal edit ----------
-  async function openEdit(readingId){
-    const all = await dbGetAll();
-    const r = all.find(x => x.id === readingId);
-    if (!r) return;
-
-    editId = r.id;
-    mSys.value = r.sys ?? "";
-    mDia.value = r.dia ?? "";
-    mHR.value  = r.hr ?? "";
-    mWhen.value = toLocalDT(r.ts);
-    mTag.value = r.tag ?? "";
-    mSym.value = r.symptoms ?? "";
-    mNotes.value = r.notes ?? "";
-    modalHint.textContent = `Editing: ${formatStamp(r.ts)} (ID ${r.id.slice(0,10)}…)`;
-
-    modalBackdrop.style.display = "flex";
-    modalBackdrop.setAttribute("aria-hidden","false");
-  }
-
-  function closeModal(){
-    modalBackdrop.style.display = "none";
-    modalBackdrop.setAttribute("aria-hidden","true");
-    editId = null;
-  }
-
-  // ---------- Export ----------
-  function makeExportText(arr){
-    if (!arr.length) return "";
-    // export oldest -> newest
-    const asc = [...arr].sort((a,b) => a.ts - b.ts);
-    return asc.map(r => {
-      const lines = [];
-      lines.push(formatStamp(r.ts));
-      lines.push(`BP ${r.sys}/${r.dia}${r.hr != null ? ` • HR ${r.hr}` : ""}`);
-      if (r.tag) lines.push(`Tag: ${r.tag}`);
-      lines.push(`Symptoms: ${r.symptoms || "None"}`);
-      lines.push(`Notes: ${r.notes || "None"}`);
-      lines.push("");
-      return lines.join("\n");
-    }).join("\n");
-  }
-
-  function makeExportCSV(arr){
-    const asc = [...arr].sort((a,b) => a.ts - b.ts);
-    const esc = (s) => {
-      const v = (s ?? "").toString();
-      if (/[",\n]/.test(v)) return `"${v.replaceAll('"','""')}"`;
-      return v;
-    };
-    const header = ["timestamp","systolic","diastolic","hr","tag","symptoms","notes"].join(",");
-    const rows = asc.map(r => [
-      esc(formatStamp(r.ts)),
-      r.sys ?? "",
-      r.dia ?? "",
-      r.hr ?? "",
-      esc(r.tag ?? ""),
-      esc(r.symptoms ?? ""),
-      esc(r.notes ?? "")
-    ].join(","));
-    return [header, ...rows].join("\n");
-  }
-
-  function renderExportPreview(arr){
-    const text = makeExportText(arr);
-    exportBox.value = text ? text : "";
-    if (!text) exportBox.placeholder = "No data to export (with current filters).";
-  }
-
-  // ---------- Charts (simple canvas line plots) ----------
-  function drawLineChart(canvas, seriesList, yMin=null, yMax=null){
-    const ctx = canvas.getContext("2d");
-    const W = canvas.width, H = canvas.height;
-    ctx.clearRect(0,0,W,H);
-
-    // background grid
-    ctx.globalAlpha = 1;
-    ctx.strokeStyle = "rgba(235,245,255,.10)";
-    ctx.lineWidth = 1;
-
-    const gridY = 5;
-    for (let i=0;i<=gridY;i++){
-      const y = Math.round((H-1) * i / gridY) + 0.5;
-      ctx.beginPath();
-      ctx.moveTo(0,y);
-      ctx.lineTo(W,y);
-      ctx.stroke();
-    }
-
-    // gather data bounds
-    let allVals = [];
-    for (const s of seriesList){
-      allVals = allVals.concat(s.values.filter(v => Number.isFinite(v)));
-    }
-    if (!allVals.length){
-      ctx.fillStyle = "rgba(169,189,223,.85)";
-      ctx.font = "14px " + getComputedStyle(document.documentElement).getPropertyValue('--sans');
-      ctx.fillText("No data", 14, 24);
+      div.className = "entry";
+      div.innerHTML = `<div class="t">No entries yet.</div><div class="m">Add an entry and it will appear here.</div>`;
+      log.appendChild(div);
       return;
     }
-    const minV = (yMin != null) ? yMin : Math.min(...allVals);
-    const maxV = (yMax != null) ? yMax : Math.max(...allVals);
-    const pad = (maxV - minV) * 0.12 || 8;
-    const lo = minV - pad, hi = maxV + pad;
 
-    const n = Math.max(...seriesList.map(s => s.values.length));
-    const xAt = (i) => (n<=1) ? 0 : (i * (W-20) / (n-1)) + 10;
-    const yAt = (v) => {
-      const t = (v - lo) / (hi - lo);
-      return (H-16) - t*(H-28);
-    };
+    entries.forEach(e=>{
+      const div = document.createElement("div");
+      div.className = "entry";
 
-    // axis labels (min/max)
-    ctx.fillStyle = "rgba(169,189,223,.85)";
-    ctx.font = "12px var(--mono)";
-    ctx.fillText(String(Math.round(hi)), 10, 14);
-    ctx.fillText(String(Math.round(lo)), 10, H-6);
+      const vitalsLine = `BP: ${e.sys}/${e.dia} · HR: ${e.hr}`;
+      const sym = Array.isArray(e.symptoms) && e.symptoms.length ? e.symptoms : [];
 
-    // draw each series (no hard-coded colors; use computed accent variants)
-    const base = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || "#7aa7ff";
-    const strokes = [
-      `rgba(122,167,255,.95)`,
-      `rgba(124,255,178,.85)`,
-      `rgba(255,210,122,.85)`
-    ];
-
-    seriesList.forEach((s, idx) => {
-      const vals = s.values;
-      ctx.strokeStyle = strokes[idx % strokes.length];
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      for (let i=0;i<vals.length;i++){
-        const v = vals[i];
-        if (!Number.isFinite(v)) continue;
-        const x = xAt(i);
-        const y = yAt(v);
-        if (i === 0) ctx.moveTo(x,y);
-        else ctx.lineTo(x,y);
-      }
-      ctx.stroke();
+      div.innerHTML = `
+        <div class="t">${escapeHtml(e.time)}</div>
+        <div class="m">${escapeHtml(vitalsLine)}</div>
+        <div class="m">${sym.map(s=>`<span class="pill">${escapeHtml(s)}</span>`).join("") || `<span class="pill">No symptoms</span>`}</div>
+        <div class="m"><span class="pill">Notes</span> ${escapeHtml(e.notes || "-")}</div>
+      `;
+      log.appendChild(div);
     });
   }
 
-  function renderCharts(arr){
-    // chart uses up to last 120 entries, oldest->newest
-    const use = [...arr].sort((a,b) => a.ts - b.ts).slice(-120);
-    const sysVals = use.map(r => r.sys ?? null);
-    const diaVals = use.map(r => r.dia ?? null);
-    const hrVals  = use.map(r => r.hr ?? null);
-
-    drawLineChart(chartBP, [
-      { name:"SYS", values: sysVals },
-      { name:"DIA", values: diaVals }
-    ]);
-
-    drawLineChart(chartHR, [
-      { name:"HR", values: hrVals }
-    ]);
+  function escapeHtml(s){
+    return String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
   }
 
-  // ---------- Navigation ----------
-  function setTab(tab){
-    const tabs = [tabHome, tabLog, tabCharts, tabTools];
-    tabs.forEach(t => t.setAttribute("aria-selected", "false"));
-    tab.setAttribute("aria-selected","true");
-
-    viewHome.style.display = "none";
-    viewLog.style.display = "none";
-    viewCharts.style.display = "none";
-    viewTools.style.display = "none";
-
-    if (tab === tabHome) viewHome.style.display = "grid";
-    if (tab === tabLog) viewLog.style.display = "grid";
-    if (tab === tabCharts) viewCharts.style.display = "grid";
-    if (tab === tabTools) viewTools.style.display = "grid";
+  function clearVitalsInputs(){
+    sys.value = "";
+    dia.value = "";
+    hr.value = "";
   }
 
-  // ---------- PWA: manifest + SW (inline) ----------
-  function setupManifest(){
-    const iconSVG = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-        <defs>
-          <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#0b1324"/>
-            <stop offset="1" stop-color="#122a55"/>
-          </linearGradient>
-        </defs>
-        <rect width="512" height="512" rx="120" fill="url(#g)"/>
-        <path d="M92 264h92l44-110 78 220 44-132h116" fill="none" stroke="#7aa7ff" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    `.trim();
-
-    const svgBlob = new Blob([iconSVG], {type:"image/svg+xml"});
-    const iconUrl = URL.createObjectURL(svgBlob);
-
-    const manifest = {
-      name: "Vitals Tracker",
-      short_name: "Vitals",
-      start_url: ".",
-      display: "standalone",
-      background_color: "#0b1324",
-      theme_color: "#0b1324",
-      icons: [
-        { src: iconUrl, sizes: "512x512", type: "image/svg+xml", purpose: "any maskable" }
-      ]
-    };
-
-    const mBlob = new Blob([JSON.stringify(manifest)], {type:"application/manifest+json"});
-    const mUrl = URL.createObjectURL(mBlob);
-    $("manifestLink").setAttribute("href", mUrl);
+  function validateVitals(){
+    const s = Number(sys.value);
+    const d = Number(dia.value);
+    const h = Number(hr.value);
+    if(!s || !d || !h) return "Enter SYS, DIA, and HR.";
+    if(s < 50 || s > 300) return "SYS looks out of range.";
+    if(d < 30 || d > 200) return "DIA looks out of range.";
+    if(h < 20 || h > 250) return "HR looks out of range.";
+    return "";
   }
 
-  function setupServiceWorker(){
-    // Single-file SW: cache the current page for basic offline use.
-    // Note: On GitHub Pages, scope depends on path; this still usually works.
-    if (!("serviceWorker" in navigator)) return;
-
-    const swCode = `
-      const CACHE = "vt-cache-v${VERSION}";
-      self.addEventListener("install", (e) => {
-        e.waitUntil((async () => {
-          const cache = await caches.open(CACHE);
-          await cache.addAll([self.registration.scope]);
-          self.skipWaiting();
-        })());
-      });
-      self.addEventListener("activate", (e) => {
-        e.waitUntil((async () => {
-          const keys = await caches.keys();
-          await Promise.all(keys.map(k => (k !== CACHE) ? caches.delete(k) : Promise.resolve()));
-          self.clients.claim();
-        })());
-      });
-      self.addEventListener("fetch", (e) => {
-        e.respondWith((async () => {
-          const cached = await caches.match(e.request);
-          if (cached) return cached;
-          try{
-            const res = await fetch(e.request);
-            const cache = await caches.open(CACHE);
-            cache.put(e.request, res.clone());
-            return res;
-          }catch(err){
-            return cached || new Response("Offline", {status:200, headers:{"Content-Type":"text/plain"}});
-          }
-        })());
-      });
-    `.trim();
-
-    const blob = new Blob([swCode], {type:"text/javascript"});
-    const swUrl = URL.createObjectURL(blob);
-
-    navigator.serviceWorker.register(swUrl).catch(() => {
-      // silent; SW isn't critical
-    });
+  function currentTimestampText(){
+    if(whenSel.value === "now") return nowString();
+    const t = manualTime.value.trim();
+    return t || nowString();
   }
 
-  // ---------- Events ----------
-  btnClearForm.addEventListener("click", () => {
-    sys.value = ""; dia.value = ""; hr.value = "";
-    sym.value = ""; notes.value = ""; tag.value = "";
-    when.value = toLocalDT(Date.now());
-    toast("Form cleared");
+  // Navigation buttons
+  document.getElementById("toSymptoms").addEventListener("click", ()=>{
+    const err = validateVitals();
+    if(err){ alert(err); return; }
+
+    draft.sys = sys.value.trim();
+    draft.dia = dia.value.trim();
+    draft.hr  = hr.value.trim();
+
+    draft.timeMode = whenSel.value;
+    draft.timeText = currentTimestampText();
+
+    renderSymptoms();
+    setPanel(2);
   });
 
-  btnAddReading.addEventListener("click", async () => {
-    const s = safeInt(sys.value);
-    const d = safeInt(dia.value);
-    const h = hr.value.trim() ? safeInt(hr.value) : null;
+  document.getElementById("toNotes").addEventListener("click", ()=>{
+    setPanel(3);
+    renderLog();
+  });
 
-    if (s == null || d == null){
-      toast("Enter systolic + diastolic");
-      return;
+  document.getElementById("backToVitals").addEventListener("click", ()=> setPanel(1));
+  document.getElementById("backToSymptoms").addEventListener("click", ()=> setPanel(2));
+
+  // Timestamp mode
+  whenSel.addEventListener("change", ()=>{
+    if(whenSel.value === "manual"){
+      manualTime.classList.remove("hidden");
+      manualTime.focus();
+    } else {
+      manualTime.classList.add("hidden");
+      manualTime.value = "";
     }
-    const ts = when.value ? parseDTLocal(when.value) : Date.now();
+    updateNowPreview();
+  });
 
-    const r = {
-      id: id(),
-      ts,
-      sys: s,
-      dia: d,
-      hr: (h == null ? null : h),
-      tag: tag.value || "",
-      symptoms: sym.value.trim(),
+  // Clear vitals
+  document.getElementById("clearVitals").addEventListener("click", ()=>{
+    clearVitalsInputs();
+    sys.focus();
+  });
+
+  // Add custom symptom
+  document.getElementById("addSymptomBtn").addEventListener("click", ()=>{
+    const name = customSymptom.value.trim();
+    if(!name){ alert("Type a symptom name first."); return; }
+
+    const current = loadCustomSymptoms();
+    const exists = current.some(x=>String(x).toLowerCase() === name.toLowerCase());
+    if(!exists){
+      current.push(name);
+      saveCustomSymptoms(current);
+    }
+
+    customSymptom.value = "";
+    renderSymptoms();
+  });
+
+  // Save entry
+  document.getElementById("saveBtn").addEventListener("click", ()=>{
+    const err = validateVitals();
+    if(err){ alert(err); return; }
+
+    const entry = {
+      time: currentTimestampText(),
+      sys: sys.value.trim(),
+      dia: dia.value.trim(),
+      hr:  hr.value.trim(),
+      symptoms: Array.isArray(draft.symptoms) ? [...draft.symptoms] : [],
       notes: notes.value.trim()
     };
 
-    await dbPutReading(r);
-    toast("Saved");
-    // keep time, clear vitals fields lightly
-    sys.value = ""; dia.value = ""; hr.value = "";
-    await refreshAll();
+    const entries = getEntries();
+    entries.unshift(entry);
+    setEntries(entries);
+
+    // reset draft + inputs
+    draft.symptoms = [];
+    notes.value = "";
+    customSymptom.value = "";
+
+    renderSymptoms();
+    renderLog();
+    alert("Saved.");
   });
 
-  btnApplyFilters.addEventListener("click", async () => {
-    currentFilters = { q: q.value, from: from.value, to: to.value };
-    await refreshAll();
-    toast("Filters applied");
-  });
-
-  btnResetFilters.addEventListener("click", async () => {
-    q.value = ""; from.value = ""; to.value = "";
-    currentFilters = { q:"", from:"", to:"" };
-    await refreshAll();
-    toast("Filters reset");
-  });
-
-  btnExportText.addEventListener("click", async () => {
-    const text = makeExportText(currentList);
-    if (!text){ toast("Nothing to export"); return; }
-    downloadText(`VitalsTracker_v${VERSION}_export.txt`, text);
-    toast("Exported .txt");
-  });
-
-  btnExportCSV.addEventListener("click", async () => {
-    const csv = makeExportCSV(currentList);
-    if (!currentList.length){ toast("Nothing to export"); return; }
-    downloadText(`VitalsTracker_v${VERSION}_export.csv`, csv);
-    toast("Exported CSV");
-  });
-
-  btnCopyExport.addEventListener("click", async () => {
-    const text = makeExportText(currentList);
-    if (!text){ toast("Nothing to copy"); return; }
-    try{
-      await navigator.clipboard.writeText(text);
-      toast("Copied");
-    }catch(e){
-      exportBox.focus();
-      exportBox.select();
-      toast("Select + copy manually");
-    }
-  });
-
-  btnClearData.addEventListener("click", async () => {
-    const ok = confirm("Clear ALL data from this device? This cannot be undone.");
-    if (!ok) return;
-    await dbClearAll();
-    toast("Data cleared");
-    await refreshAll();
-  });
-
-  btnBackupJSON.addEventListener("click", async () => {
-    const all = await dbGetAll();
-    all.sort((a,b) => a.ts - b.ts);
-    downloadJSON(`VitalsTracker_v${VERSION}_backup.json`, {
-      app: "Vitals Tracker",
-      version: VERSION,
-      exportedAt: new Date().toISOString(),
-      count: all.length,
-      readings: all
+  // Export CSV
+  document.getElementById("exportCsv").addEventListener("click", ()=>{
+    const entries = getEntries();
+    const header = ["time","sys","dia","hr","symptoms","notes"];
+    const rows = entries.map(e=>{
+      const sym = (e.symptoms||[]).join("; ");
+      const n = (e.notes||"").replaceAll("\n"," ").trim();
+      return [
+        csvCell(e.time),
+        csvCell(e.sys),
+        csvCell(e.dia),
+        csvCell(e.hr),
+        csvCell(sym),
+        csvCell(n)
+      ].join(",");
     });
-    toast("Backup saved");
+    const csv = [header.join(","), ...rows].join("\n");
+
+    const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "vitals_tracker.csv";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   });
 
-  btnRestoreJSON.addEventListener("click", () => {
-    restoreFile.value = "";
-    restoreFile.click();
-  });
-
-  restoreFile.addEventListener("change", async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try{
-      const text = await file.text();
-      const data = JSON.parse(text);
-      const arr = Array.isArray(data) ? data : data.readings;
-      if (!Array.isArray(arr)) throw new Error("Invalid backup format");
-
-      const ok = confirm(`Restore will ADD ${arr.length} entries into your current database. Continue?`);
-      if (!ok) return;
-
-      let added = 0;
-      for (const x of arr){
-        const r = normalizeLegacy(x);
-        if (!r) continue;
-        r.id = id();
-        await dbPutReading(r);
-        added++;
-      }
-      toast(`Restored ${added} entries`);
-      await refreshAll();
-    }catch(err){
-      toast("Restore failed (bad file)");
-    }
-  });
-
-  // Modal actions
-  btnCloseModal.addEventListener("click", closeModal);
-  modalBackdrop.addEventListener("click", (e) => {
-    if (e.target === modalBackdrop) closeModal();
-  });
-
-  btnSaveEdit.addEventListener("click", async () => {
-    if (!editId) return;
-
-    const s = safeInt(mSys.value);
-    const d = safeInt(mDia.value);
-    const h = mHR.value.trim() ? safeInt(mHR.value) : null;
-
-    if (s == null || d == null){
-      toast("SYS + DIA required");
-      return;
-    }
-
-    const r = {
-      id: editId,
-      ts: mWhen.value ? parseDTLocal(mWhen.value) : Date.now(),
-      sys: s,
-      dia: d,
-      hr: (h == null ? null : h),
-      tag: mTag.value || "",
-      symptoms: mSym.value.trim(),
-      notes: mNotes.value.trim()
-    };
-
-    await dbPutReading(r);
-    toast("Updated");
-    closeModal();
-    await refreshAll();
-  });
-
-  btnDelete.addEventListener("click", async () => {
-    if (!editId) return;
-    const ok = confirm("Delete this entry?");
-    if (!ok) return;
-    await dbDeleteReading(editId);
-    toast("Deleted");
-    closeModal();
-    await refreshAll();
-  });
-
-  // Tabs
-  const tabClick = async (t) => {
-    setTab(t);
-    if (t === tabCharts || t === tabTools) {
-      // ensure visuals are current
-      await refreshAll();
-    }
-  };
-  tabHome.addEventListener("click", () => tabClick(tabHome));
-  tabLog.addEventListener("click", () => tabClick(tabLog));
-  tabCharts.addEventListener("click", () => tabClick(tabCharts));
-  tabTools.addEventListener("click", () => tabClick(tabTools));
-
-  // Install prompt
-  window.addEventListener("beforeinstallprompt", (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    btnInstall.disabled = false;
-  });
-
-  btnInstall.addEventListener("click", async () => {
-    if (!deferredPrompt){
-      toast("Install not available");
-      return;
-    }
-    deferredPrompt.prompt();
-    const choice = await deferredPrompt.userChoice;
-    deferredPrompt = null;
-    toast(choice?.outcome === "accepted" ? "Installing…" : "Install dismissed");
-  });
-
-  btnUninstall.addEventListener("click", () => {
-    alert("To uninstall: open your browser/app settings → Installed apps / Site settings → Vitals Tracker → Uninstall / Remove.");
-  });
-
-  btnExit.addEventListener("click", () => {
-    // Best-effort: some browsers will ignore window.close() unless opened by script.
-    toast("You can close this tab/app.");
-    try{ window.close(); }catch(e){}
-  });
-
-  // ---------- Init ----------
-  async function init(){
-    setupManifest();
-    setupServiceWorker();
-
-    // default "when" = now
-    when.value = toLocalDT(Date.now());
-    btnInstall.disabled = true;
-
-    try{
-      db = await openDB();
-      dbStatus.textContent = `Database: ready (IndexedDB)`;
-      await importLegacyIfPresent();
-      await refreshAll();
-    }catch(err){
-      dbStatus.textContent = "Database: failed to init";
-      toast("DB init failed");
-    }
+  function csvCell(val){
+    const s = String(val ?? "");
+    if(/[",\n]/.test(s)) return `"${s.replaceAll('"','""')}"`;
+    return s;
   }
 
-  init();
+  // Print / PDF
+  document.getElementById("printPdf").addEventListener("click", ()=>{
+    window.print();
+  });
+
+  // Clear all data
+  document.getElementById("clearAll").addEventListener("click", ()=>{
+    const ok = confirm("This deletes all saved entries on this device. Continue?");
+    if(!ok) return;
+    localStorage.removeItem(KEY_ENTRIES);
+    renderLog();
+    alert("Cleared.");
+  });
+
+  // Exit buttons (red)
+  function exitApp(){
+    // Most mobile browsers won’t allow scripted close unless opened by script.
+    // So we provide a clean “exit” by navigating to a blank page.
+    window.location.href = "about:blank";
+  }
+  document.getElementById("exitBtn2").addEventListener("click", exitApp);
+  document.getElementById("exitBtn3").addEventListener("click", exitApp);
+
+  // Initial render
+  updateNowPreview();
+  renderSymptoms();
+  renderLog();
+  setPanel(1);
 })();
 </script>
 </body>
