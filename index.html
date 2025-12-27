@@ -1,4 +1,4 @@
-<!-- Vitals Tracker v1.18A1 (chart updates: true time spacing) -->
+<!-- Vitals Tracker v1.18A2 (chart updates: true time spacing + alternating day bands) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -435,7 +435,7 @@
         <div class="subtle">Data stays on your phone (local only).</div>
 
         <div class="footerTiny">
-          <div>v1.18A1</div>
+          <div>v1.18A2</div>
           <div>developed by Keyth Jyles</div>
         </div>
       </div>
@@ -568,10 +568,8 @@
   const $ = (id) => document.getElementById(id);
   const screens = ["home","add","log","charts"];
 
-  // v1.18: Do not auto-focus fields when opening Add in EDIT mode (prevents keyboard pop-up).
   function focusTopOfPanel(screen){
     window.scrollTo({top:0, left:0, behavior:"auto"});
-
     if(screen === "add"){
       if(editTs == null){
         setTimeout(() => { try{ $("sys").focus({preventScroll:true}); }catch{} }, 0);
@@ -624,7 +622,6 @@
   function buildSymptoms(){
     symGrid.innerHTML = "";
     symState.clear();
-
     for(const name of SYMPTOMS){
       const item = document.createElement("div");
       item.className = "symItem";
@@ -681,8 +678,7 @@
   function setSymSelected(names){
     const set = new Set((names || []).map(String));
     for(const name of SYMPTOMS){
-      const on = set.has(name);
-      symState.set(name, on);
+      symState.set(name, set.has(name));
     }
     for(const el of symGrid.querySelectorAll(".symItem")){
       const label = el.querySelector(".symText")?.textContent || "";
@@ -701,8 +697,8 @@
   }
 
   let timeTimer = null;
-  let editTs = null;          // null = new record, else editing an existing record by ts
-  let returnScreen = "home";  // where Back returns when leaving Add
+  let editTs = null;
+  let returnScreen = "home";
 
   function enterAddNew(from="home"){
     editTs = null;
@@ -716,14 +712,9 @@
   function enterAddEdit(ts){
     const recs = loadRecords();
     const r = recs.find(x => x.ts === ts);
-    if(!r){
-      // If missing, just fall back to add-new
-      enterAddNew("log");
-      return;
-    }
+    if(!r){ enterAddNew("log"); return; }
     editTs = ts;
     returnScreen = "log";
-
     $("editPill").classList.remove("hidden");
     $("btnDelete").classList.remove("hidden");
 
@@ -732,13 +723,11 @@
     $("hr").value  = (r.hr  ?? "") === null ? "" : (r.hr  ?? "");
     $("notes").value = (r.notes ?? "").toString();
     setSymSelected(r.symptoms || []);
-
     show("add");
   }
 
   function tickTime(){
     const line = $("timeLine");
-    // In edit mode, show the record timestamp; otherwise show "now"
     const ts = (editTs != null) ? editTs : Date.now();
     line.textContent = fmtTimeCommaDate(ts);
     adjustTimeFont();
@@ -781,13 +770,11 @@
     if(!q) return true;
     const s = q.toLowerCase().trim();
     if(!s) return true;
-
     const bp = `${rec.sys ?? ""}/${rec.dia ?? ""}`.toLowerCase();
     const hr = `${rec.hr ?? ""}`.toLowerCase();
     const notes = (rec.notes || "").toLowerCase();
     const sym = (rec.symptoms || []).join(", ").toLowerCase();
     const dt = fmtDateTime(rec.ts).toLowerCase();
-
     return bp.includes(s) || hr.includes(s) || notes.includes(s) || sym.includes(s) || dt.includes(s);
   }
 
@@ -821,7 +808,6 @@
   function renderLog(){
     const list = $("logList");
     const recs = filteredRecords({fromId:"fromDate", toId:"toDate", searchId:"search"});
-
     list.innerHTML = "";
     if(recs.length === 0){
       const empty = document.createElement("div");
@@ -839,13 +825,8 @@
       e.setAttribute("role","button");
       e.setAttribute("aria-label","Open entry for editing");
 
-      // v1.18: Press highlight + confirm-on-release (no action if slide off)
       let armed = false;
-
-      function clearPressed(){
-        e.classList.remove("pressed");
-        armed = false;
-      }
+      function clearPressed(){ e.classList.remove("pressed"); armed = false; }
 
       e.addEventListener("pointerdown", (ev) => {
         if(ev.button != null && ev.button !== 0) return;
@@ -860,11 +841,7 @@
         const inside =
           ev.clientX >= rect.left && ev.clientX <= rect.right &&
           ev.clientY >= rect.top  && ev.clientY <= rect.bottom;
-
-        // If user slides off, disarm and remove highlight
-        if(!inside){
-          clearPressed();
-        }
+        if(!inside) clearPressed();
       });
 
       e.addEventListener("pointercancel", clearPressed);
@@ -873,13 +850,10 @@
         if(!armed) return;
         e.classList.remove("pressed");
         armed = false;
-
-        // Confirm AFTER release
         const ok = confirm("Edit this entry?");
         if(ok) enterAddEdit(r.ts);
       });
 
-      // Keyboard support
       e.addEventListener("keydown", (ev) => {
         if(ev.key === "Enter" || ev.key === " "){
           ev.preventDefault();
@@ -975,15 +949,8 @@
     ctx.arcTo(x,y+h,x,y,rr);
     ctx.arcTo(x,y,x+w,y,rr);
     ctx.closePath();
-    if(fill){
-      ctx.fillStyle = fill;
-      ctx.fill();
-    }
-    if(stroke){
-      ctx.strokeStyle = stroke;
-      ctx.lineWidth = 1;
-      ctx.stroke();
-    }
+    if(fill){ ctx.fillStyle = fill; ctx.fill(); }
+    if(stroke){ ctx.strokeStyle = stroke; ctx.lineWidth = 1; ctx.stroke(); }
   }
 
   function drawChartEmpty(ctx, canvas, msg){
@@ -1000,7 +967,7 @@
     return pad.t + span * (1 - t);
   }
 
-  // v1.18A1 chart update: true time spacing on the x-axis
+  // true time spacing
   function xFromTs(ts, tMin, tMax, pad, W){
     const span = W - pad.l - pad.r;
     const denom = (tMax - tMin) || 1;
@@ -1021,21 +988,29 @@
       if(v == null) { started = false; continue; }
       const x = xFromTs(r.ts, tMin, tMax, pad, W);
       const y = yTo(v, yMin, yMax, pad, H);
-      if(!started){
-        ctx.moveTo(x,y);
-        started = true;
-      }else{
-        ctx.lineTo(x,y);
-      }
+      if(!started){ ctx.moveTo(x,y); started = true; }
+      else{ ctx.lineTo(x,y); }
     }
     ctx.stroke();
+  }
+
+  // v1.18A2 chart update: alternating day background bands
+  function startOfDay(ts){
+    const d = new Date(ts);
+    d.setHours(0,0,0,0);
+    return d.getTime();
+  }
+  function endOfDay(ts){
+    const d = new Date(ts);
+    d.setHours(23,59,59,999);
+    return d.getTime();
   }
 
   function renderCharts(){
     const canvas = $("chart");
     const ctx = canvas.getContext("2d");
 
-    // recs ascending by time for time-based x mapping
+    // ascending by time
     const recs = filteredRecords({fromId:"chartFrom", toId:"chartTo", searchId:null}).slice().reverse();
 
     ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -1064,18 +1039,55 @@
     const W = canvas.width, H = canvas.height;
     const pad = {l:62, r:18, t:18, b:56};
 
-    // Time bounds for x-axis (true spacing)
+    // time bounds
     let tMin = recs[0].ts;
     let tMax = recs[recs.length - 1].ts;
+    if(tMax === tMin) tMax = tMin + 1000;
 
-    // Guard: if all readings have identical timestamp, widen by 1 second so x math doesn't collapse
-    if(tMax === tMin){
-      tMax = tMin + 1000;
-    }
-
+    // frame
     roundRect(ctx, 0, 0, W, H, 22, "rgba(255,255,255,.02)", "rgba(235,245,255,.12)");
 
-    // Y grid
+    // chart area
+    const plotX0 = pad.l;
+    const plotX1 = W - pad.r;
+    const plotY0 = pad.t;
+    const plotY1 = H - pad.b;
+
+    // alternating day bands (clip to plot area so it doesn't cover y labels or bottom margin)
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(plotX0, plotY0, plotX1 - plotX0, plotY1 - plotY0);
+    ctx.clip();
+
+    // Determine day range from time bounds (local)
+    const day0 = startOfDay(tMin);
+    const dayN = startOfDay(tMax);
+    const dayMs = 24 * 60 * 60 * 1000;
+
+    let bandIndex = 0;
+    for(let day = day0; day <= dayN + dayMs; day += dayMs){
+      const bandStart = day;
+      const bandEnd = day + dayMs;
+
+      const x0 = xFromTs(Math.max(bandStart, tMin), tMin, tMax, pad, W);
+      const x1 = xFromTs(Math.min(bandEnd,   tMax), tMin, tMax, pad, W);
+
+      if(x1 <= plotX0 || x0 >= plotX1) { bandIndex++; continue; }
+
+      // alternate subtle fills
+      if(bandIndex % 2 === 0){
+        ctx.fillStyle = "rgba(255,255,255,.03)";
+      }else{
+        ctx.fillStyle = "rgba(47,120,255,.06)";
+      }
+
+      ctx.fillRect(x0, plotY0, (x1 - x0), (plotY1 - plotY0));
+      bandIndex++;
+    }
+
+    ctx.restore();
+
+    // y grid
     ctx.font = "16px system-ui,Segoe UI,Roboto";
     ctx.fillStyle = "rgba(235,245,255,.60)";
     ctx.strokeStyle = "rgba(235,245,255,.10)";
@@ -1093,9 +1105,9 @@
       ctx.fillText(String(val), 16, y+6);
     }
 
-    // X labels (time-aware)
+    // x labels
     const rangeMs = (tMax - tMin);
-    const showTime = rangeMs <= (24 * 60 * 60 * 1000); // if within 24h, include HH:MM
+    const showTime = rangeMs <= (24 * 60 * 60 * 1000);
     const labelCount = Math.min(4, recs.length);
 
     ctx.fillStyle = "rgba(235,245,255,.56)";
@@ -1110,22 +1122,21 @@
         ? new Intl.DateTimeFormat(undefined, {month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit"}).format(d)
         : new Intl.DateTimeFormat(undefined, {month:"2-digit", day:"2-digit"}).format(d);
 
-      // keep label on-canvas
       const maxX = W - pad.r - 2;
       const minX = pad.l + 2;
       let tx = x - 24;
       if(tx < minX) tx = minX;
-      if(tx > maxX - 80) tx = maxX - 80;
+      if(tx > maxX - 90) tx = maxX - 90;
 
       ctx.fillText(lab, tx, H-22);
     }
 
-    // Series with true-time x mapping (bunched when close in time)
+    // series
     drawSeriesTimed(ctx, recs, r=>r.sys, tMin, tMax, yMin, yMax, pad, W, H, "rgba(79,140,255,.98)");
     drawSeriesTimed(ctx, recs, r=>r.dia, tMin, tMax, yMin, yMax, pad, W, H, "rgba(216,224,240,.88)");
     drawSeriesTimed(ctx, recs, r=>r.hr , tMin, tMax, yMin, yMax, pad, W, H, "rgba(120,220,180,.92)");
 
-    // Legend
+    // legend
     const lx = pad.l + 8;
     let ly = pad.t + 22;
     ctx.font = "18px system-ui,Segoe UI,Roboto";
@@ -1157,12 +1168,8 @@
     );
     if(!ok) return;
 
-    try{
-      localStorage.removeItem(STORAGE_KEY);
-    }catch{}
-
+    try{ localStorage.removeItem(STORAGE_KEY); }catch{}
     clearFilters();
-
     alert("All data cleared.");
     show("home");
   }
@@ -1212,9 +1219,7 @@
 
   $("btnExitHome").addEventListener("click", () => {
     window.close();
-    setTimeout(() => {
-      alert("If it didn’t close: use your phone’s Back/Home.");
-    }, 200);
+    setTimeout(() => { alert("If it didn’t close: use your phone’s Back/Home."); }, 200);
   });
 
   $("btnGoAdd").addEventListener("click", () => enterAddNew("home"));
@@ -1257,19 +1262,13 @@
       recs.unshift({ ts: Date.now(), sys, dia, hr, notes, symptoms });
     }else{
       const idx = recs.findIndex(r => r.ts === editTs);
-      if(idx >= 0){
-        recs[idx] = { ts: editTs, sys, dia, hr, notes, symptoms };
-      }else{
-        // If record vanished for some reason, fall back to new record
-        recs.unshift({ ts: Date.now(), sys, dia, hr, notes, symptoms });
-      }
+      if(idx >= 0) recs[idx] = { ts: editTs, sys, dia, hr, notes, symptoms };
+      else recs.unshift({ ts: Date.now(), sys, dia, hr, notes, symptoms });
     }
 
-    // Re-sort most recent first (edit preserves original ts; list remains consistent)
     recs.sort((a,b)=> b.ts - a.ts);
     saveRecords(recs);
 
-    // Reset filters so Log shows everything
     $("fromDate").value = "";
     $("toDate").value = "";
     $("search").value = "";
@@ -1282,10 +1281,8 @@
     if(editTs == null) return;
     const ok = confirm("Delete this entry? This cannot be undone.");
     if(!ok) return;
-
     const recs = loadRecords().filter(r => r.ts !== editTs);
     saveRecords(recs);
-
     editTs = null;
     show("log");
   });
@@ -1362,7 +1359,6 @@ self.addEventListener('fetch', (e)=>{ });`;
   $("chartFrom").value = "";
   $("chartTo").value = "";
 
-  // Start at home
   show("home");
 
   window.addEventListener("resize", () => {
