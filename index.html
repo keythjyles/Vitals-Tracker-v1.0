@@ -109,8 +109,7 @@
     .btn.primary{
       background: linear-gradient(180deg, rgba(47,120,255,.92), rgba(47,120,255,.72));
       border-color: rgba(120,170,255,.55);
-      /* v1.19: make primary label readable */
-      color: rgba(255,255,255,.92);
+      color: rgba(0,0,0,.78);
     }
     .btn.small{
       height:44px;
@@ -120,12 +119,15 @@
       white-space:nowrap;
     }
 
-    /* v1.19: red Exit button (style only; handler unchanged) */
+    /* v1.19: Red Exit button styling (handler unchanged) */
     .btn.danger{
-      background: linear-gradient(180deg, rgba(255,80,80,.92), rgba(210,40,40,.78));
+      background: linear-gradient(180deg, rgba(255,70,70,.92), rgba(220,30,30,.72));
       border-color: rgba(255,140,140,.55);
-      color: rgba(255,255,255,.92);
+      color: rgba(235,245,255,.92);
     }
+
+    /* v1.19: Home ADD Reading label white (only) */
+    #btnGoAdd{ color: rgba(235,245,255,.92) !important; }
 
     .row{ display:flex; gap:12px; }
     .row.center{ align-items:center; }
@@ -279,12 +281,25 @@
       flex-wrap:wrap;
     }
 
+    /* v1.18A82: extra-tight log vertical spacing (below top row only) */
+    #log .label{
+      margin: 8px 4px 6px;
+    }
+    #log .filters{
+      margin-top: 8px;
+      gap: 10px;
+    }
+    #log .dateField{
+      gap: 6px;
+    }
+
+    /* Compact log entries (more items visible) */
     .entry{
       border:1px solid var(--stroke);
       background: rgba(255,255,255,.03);
       border-radius: 22px;
-      padding: 14px 14px 12px;
-      margin-top: 12px;
+      padding: 8px 10px 7px; /* tightened */
+      margin-top: 6px;       /* tightened */
       touch-action: manipulation;
     }
 
@@ -299,36 +314,41 @@
       display:flex;
       justify-content:space-between;
       align-items:flex-end;
-      gap:12px;
-      margin-bottom: 6px;
+      gap:10px;
+      margin-bottom: 2px;
     }
     .entryTime{
-      font-size:14px;
+      font-size:13px;
       color: rgba(235,245,255,.46);
       white-space:nowrap;
     }
     .entryBPHR{
       display:flex;
       justify-content:space-between;
-      gap:12px;
+      gap:10px;
       align-items:baseline;
     }
+
+    /* Unified BP/HR label + readings to same smaller size */
     .bpBig{
-      font-size:34px;
+      font-size:24px;
       font-weight:800;
-      letter-spacing:.2px;
+      letter-spacing:.1px;
+      white-space:nowrap;
     }
     .hrBig{
-      font-size:28px;
+      font-size:24px;
       font-weight:800;
       color: rgba(235,245,255,.72);
       white-space:nowrap;
+      letter-spacing:.1px;
     }
+
     .entryLine{
-      margin-top: 6px;
+      margin-top: 3px;       /* tightened */
       color: rgba(235,245,255,.62);
-      font-size:16px;
-      line-height:1.25;
+      font-size:15px;
+      line-height:1.12;
     }
     .entryLine b{
       color: rgba(235,245,255,.70);
@@ -396,11 +416,8 @@
       width: fit-content;
     }
 
-    /* =========================
-       v1.19: Custom confirm modal
-       ========================= */
-
-    .modalBackdrop{
+    /* v1.19: Custom confirm modal (replaces native confirm for "Edit this entry?") */
+    .overlay{
       position:fixed;
       inset:0;
       background: rgba(0,0,0,.55);
@@ -408,35 +425,31 @@
       align-items:center;
       justify-content:center;
       padding: 18px;
-      z-index: 10000; /* above border */
+      z-index: 9998;
     }
-
-    .modalCard{
+    .modal{
       width:min(520px, 100%);
-      border-radius: 26px;
+      background: rgba(16,22,40,.94);
       border:1px solid rgba(235,245,255,.18);
-      background: rgba(16,24,40,.92);
-      box-shadow: 0 18px 60px rgba(0,0,0,.55);
-      backdrop-filter: blur(12px);
+      border-radius: 22px;
+      box-shadow: 0 18px 56px rgba(0,0,0,.55);
       padding: 18px;
+      backdrop-filter: blur(10px);
     }
-
-    .modalTitle{
-      font-size: 26px;
-      font-weight: 850;
+    .modalMsg{
+      font-size: 26px;   /* large for accessibility */
+      font-weight: 800;
       letter-spacing: .2px;
-      color: rgba(235,245,255,.92);
-      margin: 6px 6px 14px;
-      line-height: 1.1;
-      text-align: left;
+      color: rgba(235,245,255,.90);
+      margin: 8px 8px 14px;
+      line-height: 1.15;
     }
-
-    .modalButtons{
+    .modalBtns{
       display:flex;
       gap:12px;
       justify-content:flex-end;
-      margin-top: 10px;
-      flex-wrap:wrap;
+      flex-wrap:nowrap;
+      margin-top: 6px;
     }
   </style>
 </head>
@@ -572,13 +585,13 @@
 
   </div>
 
-  <!-- v1.19: Custom confirm modal (replaces native confirm for Edit) -->
-  <div id="editModal" class="modalBackdrop hidden" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
-    <div class="modalCard">
-      <div id="editModalTitle" class="modalTitle">Edit this reading?</div>
-      <div class="modalButtons">
-        <button id="btnModalCancel" class="btn small">Cancel</button>
-        <button id="btnModalOK" class="btn small primary">Edit</button>
+  <!-- v1.19: Custom confirm modal (Edit this reading?) -->
+  <div id="confirmOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="confirmMsg">
+    <div class="modal">
+      <div id="confirmMsg" class="modalMsg">Edit this reading?</div>
+      <div class="modalBtns">
+        <button id="confirmCancel" class="btn small">Cancel</button>
+        <button id="confirmOk" class="btn small primary">OK</button>
       </div>
     </div>
   </div>
@@ -711,6 +724,70 @@
       .replaceAll('"',"&quot;")
       .replaceAll("'","&#039;");
   }
+
+  /* =========================
+     v1.19: Custom confirm modal for "Edit this reading?"
+     ========================= */
+
+  const confirmState = {
+    open: false,
+    resolve: null,
+    prevFocus: null
+  };
+
+  function openConfirm(){
+    if(confirmState.open) return Promise.resolve(false);
+    confirmState.open = true;
+    confirmState.prevFocus = document.activeElement;
+
+    $("confirmOverlay").classList.remove("hidden");
+
+    // Focus OK for accessibility
+    setTimeout(() => { try{ $("confirmOk").focus({preventScroll:true}); }catch{} }, 0);
+
+    return new Promise((resolve) => {
+      confirmState.resolve = resolve;
+    });
+  }
+
+  function closeConfirm(answer){
+    if(!confirmState.open) return;
+    confirmState.open = false;
+    $("confirmOverlay").classList.add("hidden");
+
+    const res = confirmState.resolve;
+    confirmState.resolve = null;
+
+    // Restore prior focus
+    try{ confirmState.prevFocus && confirmState.prevFocus.focus && confirmState.prevFocus.focus({preventScroll:true}); }catch{}
+
+    if(res) res(!!answer);
+  }
+
+  $("confirmCancel").addEventListener("click", () => closeConfirm(false));
+  $("confirmOk").addEventListener("click", () => closeConfirm(true));
+
+  // Click outside modal = cancel
+  $("confirmOverlay").addEventListener("click", (e) => {
+    if(e.target === $("confirmOverlay")) closeConfirm(false);
+  });
+
+  // Keyboard handling
+  window.addEventListener("keydown", (e) => {
+    if(!$("confirmOverlay")) return;
+    if($("confirmOverlay").classList.contains("hidden")) return;
+
+    if(e.key === "Escape"){
+      e.preventDefault();
+      closeConfirm(false);
+      return;
+    }
+    if(e.key === "Enter"){
+      e.preventDefault();
+      closeConfirm(true);
+      return;
+    }
+  });
 
   /* =========================
      Symptoms UI (unchanged)
@@ -865,7 +942,7 @@
   }
 
   /* =========================
-     Log filtering + render (unchanged)
+     Log filtering + render (unchanged except confirm replacement)
      ========================= */
 
   function recordMatches(rec, q){
@@ -899,57 +976,6 @@
       return recordMatches(r, q);
     });
   }
-
-  /* =========================
-     v1.19: Custom Edit confirm modal
-     ========================= */
-
-  const modal = {
-    open: false,
-    onOK: null,
-    lastFocus: null
-  };
-
-  function showEditModal(onOK){
-    modal.open = true;
-    modal.onOK = typeof onOK === "function" ? onOK : null;
-    modal.lastFocus = document.activeElement;
-
-    $("editModal").classList.remove("hidden");
-
-    // Focus OK button for accessibility
-    setTimeout(() => { try{ $("btnModalOK").focus({preventScroll:true}); }catch{} }, 0);
-  }
-
-  function closeEditModal(){
-    modal.open = false;
-    modal.onOK = null;
-    $("editModal").classList.add("hidden");
-
-    // Restore focus (best effort)
-    setTimeout(() => { try{ modal.lastFocus && modal.lastFocus.focus({preventScroll:true}); }catch{} }, 0);
-  }
-
-  $("btnModalCancel").addEventListener("click", () => closeEditModal());
-  $("btnModalOK").addEventListener("click", () => {
-    const fn = modal.onOK;
-    closeEditModal();
-    try{ fn && fn(); }catch{}
-  });
-
-  // Close on ESC; minimal focus safety
-  document.addEventListener("keydown", (e) => {
-    if(!modal.open) return;
-    if(e.key === "Escape"){
-      e.preventDefault();
-      closeEditModal();
-    }
-  });
-
-  // Click outside card closes (optional; keeps it easy)
-  $("editModal").addEventListener("click", (e) => {
-    if(e.target === $("editModal")) closeEditModal();
-  });
 
   function renderLog(){
     const list = $("logList");
@@ -1001,19 +1027,22 @@
 
       e.addEventListener("pointercancel", clearPressed);
 
-      e.addEventListener("pointerup", () => {
+      e.addEventListener("pointerup", async () => {
         if(!armed) return;
         e.classList.remove("pressed");
         armed = false;
 
-        // v1.19: custom modal replaces native confirm
-        showEditModal(() => enterAddEdit(r.ts));
+        const ok = await openConfirm();
+        closeConfirm(ok); // ensures overlay closes if still open
+        if(ok) enterAddEdit(r.ts);
       });
 
-      e.addEventListener("keydown", (ev) => {
+      e.addEventListener("keydown", async (ev) => {
         if(ev.key === "Enter" || ev.key === " "){
           ev.preventDefault();
-          showEditModal(() => enterAddEdit(r.ts));
+          const ok = await openConfirm();
+          closeConfirm(ok);
+          if(ok) enterAddEdit(r.ts);
         }
       });
 
@@ -1062,7 +1091,7 @@
   }
 
   /* =========================
-     Export with report header (unchanged)
+     Export with report header (v1.18A07)
      ========================= */
 
   function downloadText(text, filename){
@@ -1133,8 +1162,8 @@
     baseMax: 0,   // week end   23:59:59.999
     viewMin: 0,   // pan/zoom view within base
     viewMax: 0,
-    minSpan: 60*60*1000, // 1 hour minimum zoom span
-    maxSpan: 7*DAY_MS,   // 7 days max span (week)
+    minSpan: 48*60*60*1000, // max zoom-in = 48 hours width
+    maxSpan: 7*DAY_MS,      // 7 days max span (week)
     pinch: null,         // {dist, viewMin, viewMax, centerTs}
     pan: null            // {x0, viewMin, viewMax}
   };
@@ -1438,7 +1467,7 @@
   }
 
   /* =========================
-     Pinch zoom + 1-finger pan on chart (unchanged)
+     Pinch zoom + 1-finger pan on chart (v1.18A07)
      ========================= */
 
   function dist2(t1, t2){
