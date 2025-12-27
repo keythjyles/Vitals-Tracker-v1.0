@@ -1,1443 +1,1333 @@
+<!-- VITALS_TRACKER_VERSION: v1.18 (canonical) -->
 <!doctype html>
-<!-- VITALS_TRACKER_VERSION: v1.18 -->
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0b1324" />
-  <title>Vitals Tracker</title>
 
-  <link rel="manifest" id="manifestLink" href="#" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-
-  <style>
-    :root{
-      --bg0:#08101f;
-      --bg1:#0b1324;
-      --panel:#0c1528cc;
-      --stroke:rgba(235,245,255,.16);
-      --stroke2:rgba(235,245,255,.22);
-      --strokeBold:rgba(180,210,255,.42);
-      --text:#eaf2ff;
-      --muted:#a9bddf;
-      --good:#7CFFB2;
-      --warn:#ffd27a;
-      --bad:#ff7a7a;
-      --accent:#7aa7ff;
-      --shadow:0 12px 28px rgba(0,0,0,.35);
-      --r:18px;
-      --btnH:52px;
-      --btnFs:16px;
-      --titleFs:18px;
-      --bodyFs:15px;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      --sans: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-    }
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
-    body{
-      margin:0;
-      font-family:var(--sans);
-      background: radial-gradient(1200px 800px at 25% 0%, #122a55 0%, rgba(18,42,85,0) 55%),
-                  radial-gradient(900px 700px at 85% 10%, #1b2b52 0%, rgba(27,43,82,0) 55%),
-                  linear-gradient(180deg, var(--bg0), var(--bg1));
-      color:var(--text);
-    }
-    .wrap{
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 18px 14px 44px;
-    }
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      border: 1px solid var(--stroke);
-      border-radius: var(--r);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-
-    /* Header */
-    .header{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      padding:14px 14px 12px;
-      border-bottom: 1px solid var(--stroke);
-      background: linear-gradient(180deg, rgba(10,18,36,.55), rgba(10,18,36,.22));
-      position:sticky;
-      top:0;
-      backdrop-filter: blur(10px);
-      z-index:10;
-    }
-    .logo{
-      width:40px; height:40px;
-      flex:0 0 40px;
-      display:grid;
-      place-items:center;
-      border-radius: 14px;
-      background: rgba(122,167,255,.12);
-      border: 1px solid rgba(122,167,255,.25);
-    }
-    .logo svg{ width:26px; height:26px; }
-    .headText{ flex:1; min-width:0; }
-    .titleRow{
-      display:flex;
-      align-items:baseline;
-      justify-content:space-between;
-      gap:10px;
-    }
-    .appTitle{
-      font-size: 18px;
-      font-weight: 800;
-      letter-spacing:.2px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .ver{
-      font-family: var(--mono);
-      color: var(--muted);
-      font-size: 12px;
-      white-space:nowrap;
-    }
-    .sub{
-      margin-top:2px;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.35;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    /* Nav */
-    .tabs{
-      display:flex;
-      gap:10px;
-      padding: 10px 12px 0;
-    }
-    .tab{
-      border:1px solid var(--stroke);
-      background: rgba(255,255,255,.04);
-      color: var(--text);
-      padding: 10px 12px;
-      border-radius: 999px;
-      font-weight: 700;
-      font-size: 13px;
-      cursor:pointer;
-      user-select:none;
-    }
-    .tab[aria-selected="true"]{
-      border-color: rgba(122,167,255,.45);
-      background: rgba(122,167,255,.14);
-    }
-
-    /* Content */
-    .content{ padding: 12px; }
-    .grid{
-      display:grid;
-      gap:12px;
-      grid-template-columns: 1fr;
-    }
-    @media(min-width:860px){
-      .grid.two{ grid-template-columns: 1.1fr .9fr; }
-      .grid.three{ grid-template-columns: 1fr 1fr 1fr; }
-    }
-
-    .panel{
-      background: rgba(12,21,40,.55);
-      border: 1px solid var(--stroke);
-      border-radius: var(--r);
-      padding: 12px;
-    }
-    .panel h3{
-      margin: 0 0 10px;
-      font-size: 14px;
-      color: var(--muted);
-      letter-spacing:.2px;
-    }
-
-    /* Buttons */
-    .btnRow{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    button{
-      appearance:none;
-      border:1px solid var(--stroke2);
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-      height: var(--btnH);
-      padding: 0 14px;
-      border-radius: 14px;
-      font-weight: 800;
-      font-size: var(--btnFs);
-      cursor:pointer;
-      transition: transform .06s ease, border-color .2s ease, background .2s ease;
-    }
-    button:active{ transform: scale(.99); }
-    button.primary{
-      border-color: rgba(122,167,255,.5);
-      background: rgba(122,167,255,.15);
-    }
-    button.danger{
-      border-color: rgba(255,122,122,.45);
-      background: rgba(255,122,122,.10);
-    }
-    button.ghost{
-      background: rgba(255,255,255,.03);
-    }
-    button:disabled{
-      opacity:.55;
-      cursor:not-allowed;
-    }
-
-    /* Form */
-    label{
-      display:block;
-      font-size: 12px;
-      color: var(--muted);
-      margin: 10px 0 6px;
-      font-weight: 700;
-    }
-    input, textarea, select{
-      width:100%;
-      border-radius: 14px;
-      border: 1px solid var(--stroke);
-      background: rgba(0,0,0,.18);
-      color: var(--text);
-      padding: 12px 12px;
-      font-size: 15px;
-      outline:none;
-    }
-    textarea{ min-height: 86px; resize: vertical; }
-    .row2{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
-    .row3{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; }
-
-    /* Log list */
-    .list{ display:flex; flex-direction:column; gap:10px; }
-    .item{
-      border:1px solid var(--stroke);
-      border-radius: 16px;
-      padding: 10px 12px;
-      background: rgba(255,255,255,.04);
-      cursor:pointer;
-    }
-    .itemTop{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      align-items:flex-start;
-    }
-    .meta{
-      color: var(--muted);
-      font-size: 12px;
-      font-family: var(--mono);
-      white-space:nowrap;
-    }
-    .bp{
-      font-size: 16px;
-      font-weight: 900;
-      letter-spacing:.2px;
-    }
-    .pillRow{ margin-top:6px; display:flex; gap:8px; flex-wrap:wrap; }
-    .pill{
-      border:1px solid var(--stroke);
-      background: rgba(255,255,255,.03);
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    /* Charts */
-    canvas{
-      width:100%;
-      height: 260px;
-      border-radius: 16px;
-      border: 1px solid var(--stroke);
-      background: rgba(0,0,0,.14);
-    }
-    .hint{
-      color: var(--muted);
-      font-size: 12px;
-      line-height:1.35;
-    }
-
-    /* Toast */
-    .toast{
-      position:fixed;
-      left:50%;
-      bottom:16px;
-      transform: translateX(-50%);
-      background: rgba(10,18,36,.92);
-      border:1px solid var(--stroke2);
-      padding: 10px 12px;
-      border-radius: 14px;
-      box-shadow: var(--shadow);
-      color: var(--text);
-      font-size: 13px;
-      max-width: 92vw;
-      z-index:999;
-      display:none;
-    }
-
-    /* Modal */
-    .modalBackdrop{
-      position:fixed; inset:0;
-      background: rgba(0,0,0,.55);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding: 18px 14px;
-      z-index: 1000;
-    }
-    .modal{
-      width:min(720px, 96vw);
-      border-radius: 18px;
-      border:1px solid var(--strokeBold);
-      background: rgba(10,18,36,.92);
-      box-shadow: var(--shadow);
-      padding: 14px;
-    }
-    .modalTitle{
-      font-weight:900;
-      margin: 0 0 8px;
-      font-size: 16px;
-    }
-    .modalActions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top: 12px;
-    }
-
-    .small{
-      font-size: 12px;
-      color: var(--muted);
-      font-family: var(--mono);
-    }
-  </style>
-</head>
-
-<body>
-  <div class="wrap">
-    <div class="card">
-      <div class="header">
-        <div class="logo" aria-hidden="true">
-          <!-- Simple pulse logo -->
-          <svg viewBox="0 0 24 24" fill="none">
-            <path d="M3 12h4l2.2-5.5L13 18l2-6h6" stroke="rgba(122,167,255,.95)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="headText">
-          <div class="titleRow">
-            <div class="appTitle">Vitals Tracker</div>
-            <div class="ver">v1.18</div>
-          </div>
-          <div class="sub" id="subline">Fast BP/HR logging with export + charts</div>
-        </div>
-      </div>
-
-      <div class="tabs" role="tablist" aria-label="Sections">
-        <div class="tab" role="tab" id="tabHome" aria-selected="true" tabindex="0">Home</div>
-        <div class="tab" role="tab" id="tabLog" aria-selected="false" tabindex="-1">Log</div>
-        <div class="tab" role="tab" id="tabCharts" aria-selected="false" tabindex="-1">Charts</div>
-        <div class="tab" role="tab" id="tabTools" aria-selected="false" tabindex="-1">Tools</div>
-      </div>
-
-      <div class="content">
-        <!-- HOME -->
-        <section id="viewHome" class="grid two">
-          <div class="panel">
-            <h3>Quick Add</h3>
-            <div class="grid">
-              <div class="row3">
-                <div>
-                  <label for="sys">Systolic</label>
-                  <input id="sys" inputmode="numeric" placeholder="e.g., 128" />
-                </div>
-                <div>
-                  <label for="dia">Diastolic</label>
-                  <input id="dia" inputmode="numeric" placeholder="e.g., 84" />
-                </div>
-                <div>
-                  <label for="hr">HR</label>
-                  <input id="hr" inputmode="numeric" placeholder="e.g., 74" />
-                </div>
-              </div>
-
-              <div class="row2">
-                <div>
-                  <label for="when">Date & time</label>
-                  <input id="when" type="datetime-local" />
-                </div>
-                <div>
-                  <label for="tag">Tag (optional)</label>
-                  <select id="tag">
-                    <option value="">None</option>
-                    <option value="baseline">Baseline</option>
-                    <option value="post-med">Post-med</option>
-                    <option value="panic">Panic</option>
-                    <option value="heat">Heat intolerance</option>
-                    <option value="sleep">Sleep</option>
-                    <option value="after-food">After food</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="row2">
-                <div>
-                  <label for="sym">Symptoms</label>
-                  <input id="sym" placeholder="e.g., sweaty hands, chest tight" />
-                </div>
-                <div>
-                  <label for="notes">Notes</label>
-                  <input id="notes" placeholder="e.g., took lisinopril 45 min ago" />
-                </div>
-              </div>
-
-              <div class="btnRow">
-                <button class="primary" id="btnAddReading">Add Reading</button>
-                <button class="ghost" id="btnClearForm">Clear Form</button>
-              </div>
-
-              <div class="hint">
-                Tip: Tap any entry in <b>Log</b> to edit or delete.
-              </div>
-            </div>
-          </div>
-
-          <div class="panel">
-            <h3>Status</h3>
-            <div id="statusBox" class="grid">
-              <div class="hint" id="dbStatus">Database: initializing…</div>
-              <div class="hint" id="countStatus">Entries: 0</div>
-              <div class="hint" id="lastStatus">Last entry: —</div>
-              <div class="btnRow">
-                <button id="btnInstall" class="ghost">Install</button>
-                <button id="btnUninstall" class="ghost">Uninstall</button>
-                <button id="btnExit" class="ghost">Exit</button>
-              </div>
-              <div class="hint">
-                Install may show only in supported browsers. “Uninstall” provides guidance; removal is done via browser/app settings.
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- LOG -->
-        <section id="viewLog" style="display:none" class="grid two">
-          <div class="panel">
-            <h3>Filters</h3>
-            <div class="grid">
-              <div class="row3">
-                <div>
-                  <label for="q">Search</label>
-                  <input id="q" placeholder="symptoms, notes, tag…" />
-                </div>
-                <div>
-                  <label for="from">From</label>
-                  <input id="from" type="date" />
-                </div>
-                <div>
-                  <label for="to">To</label>
-                  <input id="to" type="date" />
-                </div>
-              </div>
-              <div class="btnRow">
-                <button id="btnApplyFilters" class="primary">Apply</button>
-                <button id="btnResetFilters" class="ghost">Reset</button>
-              </div>
-              <div class="hint">Export uses the currently filtered list.</div>
-            </div>
-          </div>
-
-          <div class="panel">
-            <h3>Entries</h3>
-            <div class="list" id="list"></div>
-            <div class="hint" id="emptyHint" style="display:none">No entries found.</div>
-          </div>
-        </section>
-
-        <!-- CHARTS -->
-        <section id="viewCharts" style="display:none" class="grid two">
-          <div class="panel">
-            <h3>Trend (Systolic / Diastolic)</h3>
-            <canvas id="chartBP" width="900" height="260"></canvas>
-            <div class="hint">Even spacing (last 120 entries).</div>
-          </div>
-          <div class="panel">
-            <h3>Trend (Heart Rate)</h3>
-            <canvas id="chartHR" width="900" height="260"></canvas>
-            <div class="hint">Tap Log → Apply to change the chart dataset.</div>
-          </div>
-        </section>
-
-        <!-- TOOLS -->
-        <section id="viewTools" style="display:none" class="grid two">
-          <div class="panel">
-            <h3>Export</h3>
-            <div class="grid">
-              <div class="btnRow">
-                <button id="btnExportText" class="primary">Export (.txt)</button>
-                <button id="btnExportCSV" class="ghost">Export (CSV)</button>
-                <button id="btnCopyExport" class="ghost">Copy Export</button>
-              </div>
-              <textarea id="exportBox" placeholder="Export preview appears here…" readonly></textarea>
-              <div class="hint">
-                Exports include: timestamp, BP, HR, tag, symptoms, notes.
-              </div>
-            </div>
-          </div>
-
-          <div class="panel">
-            <h3>Data</h3>
-            <div class="grid">
-              <div class="btnRow">
-                <button id="btnBackupJSON" class="ghost">Backup (JSON)</button>
-                <button id="btnRestoreJSON" class="ghost">Restore (JSON)</button>
-                <input id="restoreFile" type="file" accept="application/json" style="display:none" />
-              </div>
-
-              <div class="btnRow">
-                <button id="btnClearData" class="danger">Clear All Data</button>
-              </div>
-
-              <div class="hint">
-                v1.18 stores data in IndexedDB and will auto-import legacy localStorage data (if detected) one time.
-              </div>
-              <div class="small" id="storageMeta">—</div>
-            </div>
-          </div>
-        </section>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal -->
-  <div class="modalBackdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="modal">
-      <div class="modalTitle" id="modalTitle">Edit Reading</div>
-
-      <div class="row3">
-        <div>
-          <label for="mSys">Systolic</label>
-          <input id="mSys" inputmode="numeric" />
-        </div>
-        <div>
-          <label for="mDia">Diastolic</label>
-          <input id="mDia" inputmode="numeric" />
-        </div>
-        <div>
-          <label for="mHR">HR</label>
-          <input id="mHR" inputmode="numeric" />
-        </div>
-      </div>
-
-      <div class="row2">
-        <div>
-          <label for="mWhen">Date & time</label>
-          <input id="mWhen" type="datetime-local" />
-        </div>
-        <div>
-          <label for="mTag">Tag</label>
-          <select id="mTag">
-            <option value="">None</option>
-            <option value="baseline">Baseline</option>
-            <option value="post-med">Post-med</option>
-            <option value="panic">Panic</option>
-            <option value="heat">Heat intolerance</option>
-            <option value="sleep">Sleep</option>
-            <option value="after-food">After food</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="row2">
-        <div>
-          <label for="mSym">Symptoms</label>
-          <input id="mSym" />
-        </div>
-        <div>
-          <label for="mNotes">Notes</label>
-          <input id="mNotes" />
-        </div>
-      </div>
-
-      <div class="modalActions">
-        <button class="primary" id="btnSaveEdit">Save</button>
-        <button class="danger" id="btnDelete">Delete</button>
-        <button class="ghost" id="btnCloseModal">Close</button>
-      </div>
-
-      <div class="hint" style="margin-top:8px" id="modalHint"></div>
-    </div>
-  </div>
-
-  <div class="toast" id="toast"></div>
-
-<script>
-/* =========================
-   Vitals Tracker v1.18
-   - IndexedDB storage
-   - One-time legacy localStorage import
-   - Backup/Restore JSON
-   - Filtered export + charts
-   - Charts: even spacing (no true-time spacing, no day bands)
-========================= */
-
-(() => {
-  const VERSION = "1.18";
-  const DB_NAME = "VitalsTrackerDB";
-  const DB_VER = 1;
-  const STORE = "readings";
-  const LEGACY_KEY = "vitals_tracker_entries_v1x";
-
-  const $ = (id) => document.getElementById(id);
-
-  // Tabs/views
-  const tabHome = $("tabHome"), tabLog = $("tabLog"), tabCharts = $("tabCharts"), tabTools = $("tabTools");
-  const viewHome = $("viewHome"), viewLog = $("viewLog"), viewCharts = $("viewCharts"), viewTools = $("viewTools");
-
-  // Home inputs
-  const sys = $("sys"), dia = $("dia"), hr = $("hr"), when = $("when"), tag = $("tag"), sym = $("sym"), notes = $("notes");
-  const btnAddReading = $("btnAddReading");
-  const btnClearForm = $("btnClearForm");
-
-  // Status
-  const dbStatus = $("dbStatus"), countStatus = $("countStatus"), lastStatus = $("lastStatus");
-  const storageMeta = $("storageMeta");
-
-  // Log
-  const list = $("list");
-  const emptyHint = $("emptyHint");
-  const q = $("q"), from = $("from"), to = $("to");
-  const btnApplyFilters = $("btnApplyFilters"), btnResetFilters = $("btnResetFilters");
-
-  // Tools
-  const exportBox = $("exportBox");
-  const btnExportText = $("btnExportText"), btnExportCSV = $("btnExportCSV"), btnCopyExport = $("btnCopyExport");
-  const btnClearData = $("btnClearData");
-  const btnBackupJSON = $("btnBackupJSON"), btnRestoreJSON = $("btnRestoreJSON"), restoreFile = $("restoreFile");
-
-  // Modal
-  const modalBackdrop = $("modalBackdrop");
-  const mSys = $("mSys"), mDia = $("mDia"), mHR = $("mHR"), mWhen = $("mWhen"), mTag = $("mTag"), mSym = $("mSym"), mNotes = $("mNotes");
-  const btnSaveEdit = $("btnSaveEdit"), btnDelete = $("btnDelete"), btnCloseModal = $("btnCloseModal");
-  const modalHint = $("modalHint");
-
-  // Charts
-  const chartBP = $("chartBP");
-  const chartHR = $("chartHR");
-
-  // Install/uninstall/exit
-  const btnInstall = $("btnInstall"), btnUninstall = $("btnUninstall"), btnExit = $("btnExit");
-  let deferredPrompt = null;
-
-  // Runtime state
-  let db = null;
-  let currentFilters = { q:"", from:"", to:"" };
-  let currentList = [];  // filtered list (sorted desc by ts)
-  let editId = null;
-
-  // ---------- Utilities ----------
-  const toast = (msg) => {
-    const t = $("toast");
-    t.textContent = msg;
-    t.style.display = "block";
-    clearTimeout(toast._t);
-    toast._t = setTimeout(() => { t.style.display = "none"; }, 2200);
-  };
-
-  const pad2 = (n) => String(n).padStart(2,"0");
-  const toLocalDT = (ms) => {
-    const d = new Date(ms);
-    const yyyy = d.getFullYear();
-    const mm = pad2(d.getMonth()+1);
-    const dd = pad2(d.getDate());
-    const hh = pad2(d.getHours());
-    const mi = pad2(d.getMinutes());
-    return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
-  };
-  const parseDTLocal = (val) => {
-    const d = new Date(val);
-    const ms = d.getTime();
-    return Number.isFinite(ms) ? ms : Date.now();
-  };
-
-  const safeInt = (v) => {
-    const n = parseInt(String(v).trim(), 10);
-    return Number.isFinite(n) ? n : null;
-  };
-
-  const formatStamp = (ms) => {
-    const d = new Date(ms);
-    return d.toLocaleString(undefined, {
-      year:"numeric", month:"2-digit", day:"2-digit",
-      hour:"2-digit", minute:"2-digit", second:"2-digit"
-    });
-  };
-
-  const downloadText = (filename, text) => {
-    const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 500);
-  };
-
-  const downloadJSON = (filename, obj) => {
-    const text = JSON.stringify(obj, null, 2);
-    const blob = new Blob([text], {type:"application/json;charset=utf-8"});
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 500);
-  };
-
-  // ---------- IndexedDB ----------
-  function openDB(){
-    return new Promise((resolve, reject) => {
-      const req = indexedDB.open(DB_NAME, DB_VER);
-      req.onupgradeneeded = () => {
-        const d = req.result;
-        if (!d.objectStoreNames.contains(STORE)){
-          const s = d.createObjectStore(STORE, { keyPath:"id" });
-          s.createIndex("ts", "ts");
-        }
-      };
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
-  }
-
-  function tx(storeName, mode="readonly"){
-    const t = db.transaction(storeName, mode);
-    return t.objectStore(storeName);
-  }
-
-  function id(){
-    return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-  }
-
-  function dbPutReading(r){
-    return new Promise((resolve, reject) => {
-      const req = tx(STORE,"readwrite").put(r);
-      req.onsuccess = () => resolve(true);
-      req.onerror = () => reject(req.error);
-    });
-  }
-
-  function dbDeleteReading(readingId){
-    return new Promise((resolve, reject) => {
-      const req = tx(STORE,"readwrite").delete(readingId);
-      req.onsuccess = () => resolve(true);
-      req.onerror = () => reject(req.error);
-    });
-  }
-
-  function dbClearAll(){
-    return new Promise((resolve, reject) => {
-      const req = tx(STORE,"readwrite").clear();
-      req.onsuccess = () => resolve(true);
-      req.onerror = () => reject(req.error);
-    });
-  }
-
-  function dbGetAll(){
-    return new Promise((resolve, reject) => {
-      const req = tx(STORE,"readonly").getAll();
-      req.onsuccess = () => resolve(req.result || []);
-      req.onerror = () => reject(req.error);
-    });
-  }
-
-  // ---------- Legacy import (best-effort) ----------
-  async function importLegacyIfPresent(){
-    const doneKey = "VT_IDB_IMPORTED_V1X";
-    if (localStorage.getItem(doneKey) === "1") return;
-
-    const candidates = [
-      LEGACY_KEY,
-      "vitals_tracker_entries",
-      "VitalsTrackerEntries",
-      "VT_ENTRIES",
-      "readings",
-      "vitals"
-    ];
-
-    let raw = null, usedKey = null;
-    for (const k of candidates){
-      const v = localStorage.getItem(k);
-      if (v && v.trim().length > 2){
-        raw = v; usedKey = k; break;
-      }
-    }
-    if (!raw) return;
-
-    let arr = null;
-    try { arr = JSON.parse(raw); } catch(e){ }
-    if (!Array.isArray(arr) || arr.length === 0) return;
-
-    let imported = 0;
-    for (const x of arr){
-      const r = normalizeLegacy(x);
-      if (!r) continue;
-      r.id = id();
-      await dbPutReading(r);
-      imported++;
-    }
-    localStorage.setItem(doneKey, "1");
-    toast(`Imported ${imported} legacy entries (${usedKey})`);
-  }
-
-  function normalizeLegacy(x){
-    if (!x || typeof x !== "object") return null;
-
-    const ts = Number.isFinite(+x.ts) ? +x.ts
-            : x.when ? new Date(x.when).getTime()
-            : x.date ? new Date(x.date).getTime()
-            : x.timestamp ? new Date(x.timestamp).getTime()
-            : Date.now();
-
-    const s = safeInt(x.sys ?? x.systolic ?? x.SYS);
-    const d = safeInt(x.dia ?? x.diastolic ?? x.DIA);
-    const h = safeInt(x.hr ?? x.heartRate ?? x.HR);
-
-    if (s == null || d == null) return null;
-
-    return {
-      id: x.id && typeof x.id === "string" ? x.id : id(),
-      ts: Number.isFinite(ts) ? ts : Date.now(),
-      sys: s,
-      dia: d,
-      hr: (h == null ? null : h),
-      tag: (x.tag ?? x.label ?? "").toString().slice(0,40),
-      symptoms: (x.symptoms ?? x.sym ?? "").toString().slice(0,220),
-      notes: (x.notes ?? "").toString().slice(0,320),
-    };
-  }
-
-  // ---------- Filters ----------
-  function applyFiltersToArray(arr, f){
-    const qq = (f.q || "").trim().toLowerCase();
-    const fromMs = f.from ? new Date(f.from + "T00:00").getTime() : null;
-    const toMs = f.to ? new Date(f.to + "T23:59:59").getTime() : null;
-
-    return arr.filter(r => {
-      if (fromMs != null && r.ts < fromMs) return false;
-      if (toMs != null && r.ts > toMs) return false;
-      if (!qq) return true;
-      const hay = [
-        r.tag || "",
-        r.symptoms || "",
-        r.notes || "",
-        `${r.sys}/${r.dia}`,
-        r.hr != null ? String(r.hr) : ""
-      ].join(" ").toLowerCase();
-      return hay.includes(qq);
-    });
-  }
-
-  // ---------- Rendering ----------
-  function renderList(){
-    list.innerHTML = "";
-    if (currentList.length === 0){
-      emptyHint.style.display = "block";
-      return;
-    }
-    emptyHint.style.display = "none";
-
-    for (const r of currentList){
-      const div = document.createElement("div");
-      div.className = "item";
-      div.tabIndex = 0;
-      div.setAttribute("role", "button");
-      div.setAttribute("aria-label", `Edit entry ${formatStamp(r.ts)}`);
-      div.addEventListener("click", () => openEdit(r.id));
-      div.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") openEdit(r.id); });
-
-      const top = document.createElement("div");
-      top.className = "itemTop";
-
-      const left = document.createElement("div");
-      const bp = document.createElement("div");
-      bp.className = "bp";
-      bp.textContent = `BP ${r.sys}/${r.dia}${r.hr != null ? ` • HR ${r.hr}` : ""}`;
-
-      const meta = document.createElement("div");
-      meta.className = "meta";
-      meta.textContent = formatStamp(r.ts);
-
-      left.appendChild(bp);
-
-      const pills = document.createElement("div");
-      pills.className = "pillRow";
-
-      if (r.tag){
-        const p = document.createElement("div");
-        p.className = "pill";
-        p.textContent = `Tag: ${r.tag}`;
-        pills.appendChild(p);
-      }
-      if (r.symptoms){
-        const p = document.createElement("div");
-        p.className = "pill";
-        p.textContent = `Symptoms: ${r.symptoms}`;
-        pills.appendChild(p);
-      }
-      if (r.notes){
-        const p = document.createElement("div");
-        p.className = "pill";
-        p.textContent = `Notes: ${r.notes}`;
-        pills.appendChild(p);
-      }
-      left.appendChild(pills);
-
-      top.appendChild(left);
-      top.appendChild(meta);
-
-      div.appendChild(top);
-      list.appendChild(div);
-    }
-  }
-
-  async function refreshAll(){
-    const all = await dbGetAll();
-    all.sort((a,b) => b.ts - a.ts);
-    currentList = applyFiltersToArray(all, currentFilters);
-    renderList();
-    renderStatus(all);
-    renderCharts(currentList);
-    renderExportPreview(currentList);
-    renderStorageMeta(all);
-  }
-
-  function renderStatus(all){
-    countStatus.textContent = `Entries: ${all.length}`;
-    const last = all[0];
-    lastStatus.textContent = `Last entry: ${last ? formatStamp(last.ts) : "—"}`;
-  }
-
-  function renderStorageMeta(all){
-    const first = all.length ? all[all.length-1] : null;
-    const last = all.length ? all[0] : null;
-    storageMeta.textContent = all.length
-      ? `DB ${DB_NAME}/${STORE} • Range: ${formatStamp(first.ts)} → ${formatStamp(last.ts)}`
-      : `DB ${DB_NAME}/${STORE} • Empty`;
-  }
-
-  // ---------- Modal edit ----------
-  async function openEdit(readingId){
-    const all = await dbGetAll();
-    const r = all.find(x => x.id === readingId);
-    if (!r) return;
-
-    editId = r.id;
-    mSys.value = r.sys ?? "";
-    mDia.value = r.dia ?? "";
-    mHR.value  = r.hr ?? "";
-    mWhen.value = toLocalDT(r.ts);
-    mTag.value = r.tag ?? "";
-    mSym.value = r.symptoms ?? "";
-    mNotes.value = r.notes ?? "";
-    modalHint.textContent = `Editing: ${formatStamp(r.ts)} (ID ${r.id.slice(0,10)}…)`;
-
-    modalBackdrop.style.display = "flex";
-    modalBackdrop.setAttribute("aria-hidden","false");
-  }
-
-  function closeModal(){
-    modalBackdrop.style.display = "none";
-    modalBackdrop.setAttribute("aria-hidden","true");
-    editId = null;
-  }
-
-  // ---------- Export ----------
-  function makeExportText(arr){
-    if (!arr.length) return "";
-    const asc = [...arr].sort((a,b) => a.ts - b.ts);
-    return asc.map(r => {
-      const lines = [];
-      lines.push(formatStamp(r.ts));
-      lines.push(`BP ${r.sys}/${r.dia}${r.hr != null ? ` • HR ${r.hr}` : ""}`);
-      if (r.tag) lines.push(`Tag: ${r.tag}`);
-      lines.push(`Symptoms: ${r.symptoms || "None"}`);
-      lines.push(`Notes: ${r.notes || "None"}`);
-      lines.push("");
-      return lines.join("\n");
-    }).join("\n");
-  }
-
-  function makeExportCSV(arr){
-    const asc = [...arr].sort((a,b) => a.ts - b.ts);
-    const esc = (s) => {
-      const v = (s ?? "").toString();
-      if (/[",\n]/.test(v)) return `"${v.replaceAll('"','""')}"`;
-      return v;
-    };
-    const header = ["timestamp","systolic","diastolic","hr","tag","symptoms","notes"].join(",");
-    const rows = asc.map(r => [
-      esc(formatStamp(r.ts)),
-      r.sys ?? "",
-      r.dia ?? "",
-      r.hr ?? "",
-      esc(r.tag ?? ""),
-      esc(r.symptoms ?? ""),
-      esc(r.notes ?? "")
-    ].join(","));
-    return [header, ...rows].join("\n");
-  }
-
-  function renderExportPreview(arr){
-    const text = makeExportText(arr);
-    exportBox.value = text ? text : "";
-    if (!text) exportBox.placeholder = "No data to export (with current filters).";
-  }
-
-  // =========================
-  // Charts v1.18
-  // - Even spacing across last N points
-  // =========================
-  function drawSimpleChart(canvas, seriesList){
-    const ctx = canvas.getContext("2d");
-    const W = canvas.width, H = canvas.height;
-    ctx.clearRect(0,0,W,H);
-
-    const anyVals = seriesList.some(s => s.values.some(v => Number.isFinite(v)));
-    if (!anyVals){
-      ctx.fillStyle = "rgba(169,189,223,.85)";
-      ctx.font = "14px " + getComputedStyle(document.documentElement).getPropertyValue('--sans');
-      ctx.fillText("No data", 14, 24);
-      return;
-    }
-
-    // plot area
-    const L = 10, R = W-10, T = 10, B = H-18;
-    const plotW = Math.max(1, R-L);
-    const plotH = Math.max(1, B-T);
-
-    // horizontal grid
-    ctx.strokeStyle = "rgba(235,245,255,.10)";
-    ctx.lineWidth = 1;
-    const gridY = 5;
-    for (let i=0;i<=gridY;i++){
-      const y = Math.round(T + (plotH * i / gridY)) + 0.5;
-      ctx.beginPath();
-      ctx.moveTo(L,y);
-      ctx.lineTo(R,y);
-      ctx.stroke();
-    }
-
-    // y bounds
-    let allVals = [];
-    for (const s of seriesList){
-      allVals = allVals.concat(s.values.filter(v => Number.isFinite(v)));
-    }
-    const minV = Math.min(...allVals);
-    const maxV = Math.max(...allVals);
-    const pad = (maxV - minV) * 0.12 || 8;
-    const lo = minV - pad, hi = maxV + pad;
-
-    const yAt = (v) => {
-      const t = (v - lo) / (hi - lo);
-      return B - t * plotH;
-    };
-
-    // axis labels
-    ctx.fillStyle = "rgba(169,189,223,.85)";
-    ctx.font = "12px var(--mono)";
-    ctx.fillText(String(Math.round(hi)), L, 12);
-    ctx.fillText(String(Math.round(lo)), L, H-6);
-
-    // x spacing (even)
-    const N = Math.max(...seriesList.map(s => s.values.length));
-    const xAtIndex = (i) => {
-      if (N <= 1) return L + plotW/2;
-      return L + (i/(N-1)) * plotW;
-    };
-
-    // series lines
-    const strokes = [
-      `rgba(122,167,255,.95)`,
-      `rgba(124,255,178,.85)`,
-      `rgba(255,210,122,.85)`
-    ];
-
-    seriesList.forEach((s, idx) => {
-      ctx.strokeStyle = strokes[idx % strokes.length];
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-
-      let started = false;
-      for (let i=0;i<s.values.length;i++){
-        const v = s.values[i];
-        if (!Number.isFinite(v)) continue;
-        const x = xAtIndex(i);
-        const y = yAt(v);
-        if (!started){
-          ctx.moveTo(x,y);
-          started = true;
-        } else {
-          ctx.lineTo(x,y);
-        }
-      }
-      ctx.stroke();
-    });
-  }
-
-  function renderCharts(arr){
-    const useAsc = [...arr].sort((a,b) => a.ts - b.ts).slice(-120);
-    const sysVals = useAsc.map(r => r.sys ?? null);
-    const diaVals = useAsc.map(r => r.dia ?? null);
-    const hrVals  = useAsc.map(r => r.hr ?? null);
-
-    drawSimpleChart(chartBP, [
-      { name:"SYS", values: sysVals },
-      { name:"DIA", values: diaVals }
-    ]);
-
-    drawSimpleChart(chartHR, [
-      { name:"HR", values: hrVals }
-    ]);
-  }
-
-  // ---------- Navigation ----------
-  function setTab(tab){
-    const tabs = [tabHome, tabLog, tabCharts, tabTools];
-    tabs.forEach(t => t.setAttribute("aria-selected", "false"));
-    tab.setAttribute("aria-selected","true");
-
-    viewHome.style.display = "none";
-    viewLog.style.display = "none";
-    viewCharts.style.display = "none";
-    viewTools.style.display = "none";
-
-    if (tab === tabHome) viewHome.style.display = "grid";
-    if (tab === tabLog) viewLog.style.display = "grid";
-    if (tab === tabCharts) viewCharts.style.display = "grid";
-    if (tab === tabTools) viewTools.style.display = "grid";
-  }
-
-  // ---------- PWA: manifest + SW (inline) ----------
-  function setupManifest(){
-    const iconSVG = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-        <defs>
-          <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#0b1324"/>
-            <stop offset="1" stop-color="#122a55"/>
-          </linearGradient>
-        </defs>
-        <rect width="512" height="512" rx="120" fill="url(#g)"/>
-        <path d="M92 264h92l44-110 78 220 44-132h116" fill="none" stroke="#7aa7ff" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    `.trim();
-
-    const svgBlob = new Blob([iconSVG], {type:"image/svg+xml"});
-    const iconUrl = URL.createObjectURL(svgBlob);
-
-    const manifest = {
-      name: "Vitals Tracker",
-      short_name: "Vitals",
-      start_url: ".",
-      display: "standalone",
-      background_color: "#0b1324",
-      theme_color: "#0b1324",
-      icons: [
-        { src: iconUrl, sizes: "512x512", type: "image/svg+xml", purpose: "any maskable" }
-      ]
-    };
-
-    const mBlob = new Blob([JSON.stringify(manifest)], {type:"application/manifest+json"});
-    const mUrl = URL.createObjectURL(mBlob);
-    $("manifestLink").setAttribute("href", mUrl);
-  }
-
-  function setupServiceWorker(){
-    if (!("serviceWorker" in navigator)) return;
-
-    const swCode = `
-      const CACHE = "vt-cache-v${VERSION}";
-      self.addEventListener("install", (e) => {
-        e.waitUntil((async () => {
-          const cache = await caches.open(CACHE);
-          await cache.addAll([self.registration.scope]);
-          self.skipWaiting();
-        })());
-      });
-      self.addEventListener("activate", (e) => {
-        e.waitUntil((async () => {
-          const keys = await caches.keys();
-          await Promise.all(keys.map(k => (k !== CACHE) ? caches.delete(k) : Promise.resolve()));
-          self.clients.claim();
-        })());
-      });
-      self.addEventListener("fetch", (e) => {
-        e.respondWith((async () => {
-          const cached = await caches.match(e.request);
-          if (cached) return cached;
-          try{
-            const res = await fetch(e.request);
-            const cache = await caches.open(CACHE);
-            cache.put(e.request, res.clone());
-            return res;
-          }catch(err){
-            return cached || new Response("Offline", {status:200, headers:{"Content-Type":"text/plain"}});
-          }
-        })());
-      });
-    `.trim();
-
-    const blob = new Blob([swCode], {type:"text/javascript"});
-    const swUrl = URL.createObjectURL(blob);
-
-    navigator.serviceWorker.register(swUrl).catch(() => {});
-  }
-
-  // ---------- Events ----------
-  btnClearForm.addEventListener("click", () => {
-    sys.value = ""; dia.value = ""; hr.value = "";
-    sym.value = ""; notes.value = ""; tag.value = "";
-    when.value = toLocalDT(Date.now());
-    toast("Form cleared");
-  });
-
-  btnAddReading.addEventListener("click", async () => {
-    const s = safeInt(sys.value);
-    const d = safeInt(dia.value);
-    const h = hr.value.trim() ? safeInt(hr.value) : null;
-
-    if (s == null || d == null){
-      toast("Enter systolic + diastolic");
-      return;
-    }
-    const ts = when.value ? parseDTLocal(when.value) : Date.now();
-
-    const r = {
-      id: id(),
-      ts,
-      sys: s,
-      dia: d,
-      hr: (h == null ? null : h),
-      tag: tag.value || "",
-      symptoms: sym.value.trim(),
-      notes: notes.value.trim()
-    };
-
-    await dbPutReading(r);
-    toast("Saved");
-    sys.value = ""; dia.value = ""; hr.value = "";
-    await refreshAll();
-  });
-
-  btnApplyFilters.addEventListener("click", async () => {
-    currentFilters = { q: q.value, from: from.value, to: to.value };
-    await refreshAll();
-    toast("Filters applied");
-  });
-
-  btnResetFilters.addEventListener("click", async () => {
-    q.value = ""; from.value = ""; to.value = "";
-    currentFilters = { q:"", from:"", to:"" };
-    await refreshAll();
-    toast("Filters reset");
-  });
-
-  btnExportText.addEventListener("click", async () => {
-    const text = makeExportText(currentList);
-    if (!text){ toast("Nothing to export"); return; }
-    downloadText(`VitalsTracker_v${VERSION}_export.txt`, text);
-    toast("Exported .txt");
-  });
-
-  btnExportCSV.addEventListener("click", async () => {
-    const csv = makeExportCSV(currentList);
-    if (!currentList.length){ toast("Nothing to export"); return; }
-    downloadText(`VitalsTracker_v${VERSION}_export.csv`, csv);
-    toast("Exported CSV");
-  });
-
-  btnCopyExport.addEventListener("click", async () => {
-    const text = makeExportText(currentList);
-    if (!text){ toast("Nothing to copy"); return; }
-    try{
-      await navigator.clipboard.writeText(text);
-      toast("Copied");
-    }catch(e){
-      exportBox.focus();
-      exportBox.select();
-      toast("Select + copy manually");
-    }
-  });
-
-  btnClearData.addEventListener("click", async () => {
-    const ok = confirm("Clear ALL data from this device? This cannot be undone.");
-    if (!ok) return;
-    await dbClearAll();
-    toast("Data cleared");
-    await refreshAll();
-  });
-
-  btnBackupJSON.addEventListener("click", async () => {
-    const all = await dbGetAll();
-    all.sort((a,b) => a.ts - b.ts);
-    downloadJSON(`VitalsTracker_v${VERSION}_backup.json`, {
-      app: "Vitals Tracker",
-      version: VERSION,
-      exportedAt: new Date().toISOString(),
-      count: all.length,
-      readings: all
-    });
-    toast("Backup saved");
-  });
-
-  btnRestoreJSON.addEventListener("click", () => {
-    restoreFile.value = "";
-    restoreFile.click();
-  });
-
-  restoreFile.addEventListener("change", async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try{
-      const text = await file.text();
-      const data = JSON.parse(text);
-      const arr = Array.isArray(data) ? data : data.readings;
-      if (!Array.isArray(arr)) throw new Error("Invalid backup format");
-
-      const ok = confirm(`Restore will ADD ${arr.length} entries into your current database. Continue?`);
-      if (!ok) return;
-
-      let added = 0;
-      for (const x of arr){
-        const r = normalizeLegacy(x);
-        if (!r) continue;
-        r.id = id();
-        await dbPutReading(r);
-        added++;
-      }
-      toast(`Restored ${added} entries`);
-      await refreshAll();
-    }catch(err){
-      toast("Restore failed (bad file)");
-    }
-  });
-
-  // Modal actions
-  btnCloseModal.addEventListener("click", closeModal);
-  modalBackdrop.addEventListener("click", (e) => {
-    if (e.target === modalBackdrop) closeModal();
-  });
-
-  btnSaveEdit.addEventListener("click", async () => {
-    if (!editId) return;
-
-    const s = safeInt(mSys.value);
-    const d = safeInt(mDia.value);
-    const h = mHR.value.trim() ? safeInt(mHR.value) : null;
-
-    if (s == null || d == null){
-      toast("SYS + DIA required");
-      return;
-    }
-
-    const r = {
-      id: editId,
-      ts: mWhen.value ? parseDTLocal(mWhen.value) : Date.now(),
-      sys: s,
-      dia: d,
-      hr: (h == null ? null : h),
-      tag: mTag.value || "",
-      symptoms: mSym.value.trim(),
-      notes: mNotes.value.trim()
-    };
-
-    await dbPutReading(r);
-    toast("Updated");
-    closeModal();
-    await refreshAll();
-  });
-
-  btnDelete.addEventListener("click", async () => {
-    if (!editId) return;
-    const ok = confirm("Delete this entry?");
-    if (!ok) return;
-    await dbDeleteReading(editId);
-    toast("Deleted");
-    closeModal();
-    await refreshAll();
-  });
-
-  // Tabs
-  const tabClick = async (t) => {
-    setTab(t);
-    if (t === tabCharts || t === tabTools) {
-      await refreshAll();
-    }
-  };
-  tabHome.addEventListener("click", () => tabClick(tabHome));
-  tabLog.addEventListener("click", () => tabClick(tabLog));
-  tabCharts.addEventListener("click", () => tabClick(tabCharts));
-  tabTools.addEventListener("click", () => tabClick(tabTools));
-
-  // Install prompt
-  window.addEventListener("beforeinstallprompt", (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    btnInstall.disabled = false;
-  });
-
-  btnInstall.addEventListener("click", async () => {
-    if (!deferredPrompt){
-      toast("Install not available");
-      return;
-    }
-    deferredPrompt.prompt();
-    const choice = await deferredPrompt.userChoice;
-    deferredPrompt = null;
-    toast(choice?.outcome === "accepted" ? "Installing…" : "Install dismissed");
-  });
-
-  btnUninstall.addEventListener("click", () => {
-    alert("To uninstall: open your browser/app settings → Installed apps / Site settings → Vitals Tracker → Uninstall / Remove.");
-  });
-
-  btnExit.addEventListener("click", () => {
-    toast("You can close this tab/app.");
-    try{ window.close(); }catch(e){}
-  });
-
-  // ---------- Init ----------
-  async function init(){
-    setupManifest();
-    setupServiceWorker();
-
-    when.value = toLocalDT(Date.now());
-    btnInstall.disabled = true;
-
-    try{
-      db = await openDB();
-      dbStatus.textContent = `Database: ready (IndexedDB)`;
-      await importLegacyIfPresent();
-      await refreshAll();
-    }catch(err){
-      dbStatus.textContent = "Database: failed to init";
-      toast("DB init failed");
-    }
-  }
-
-  init();
-})();
-</script>
-</body>
+<html lang="en">  
+<head>  
+  <meta charset="utf-8" />  
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />  
+  <meta name="theme-color" content="#0b1324" />  
+  <title>Vitals Tracker</title>    <link rel="manifest" id="manifestLink" href="#" />    <style>  
+    :root{  
+      --bg0:#08101f;  
+      --bg1:#0b1324;  
+      --panel:#0c1528cc;  
+      --stroke:rgba(235,245,255,.16);  
+      --stroke2:rgba(235,245,255,.22);  
+      --strokeBold:rgba(180,210,255,.42);  
+      --text:rgba(235,245,255,.86);  
+      --muted:rgba(235,245,255,.58);  
+      --muted2:rgba(235,245,255,.42);  
+  
+      /* Border color (darker than logo, subtle) */  
+      --accent:#2b4e7a;  
+  
+      --shadow:0 14px 40px rgba(0,0,0,.38);  
+      --radius:26px;  
+      --btnH:56px;  
+      --pad:18px;  
+      --font: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";  
+    }  
+  
+    *{ box-sizing:border-box; }  
+    html,body{ height:100%; }  
+  
+    body{  
+      margin:0;  
+      font-family:var(--font);  
+      color:var(--text);  
+      background:  
+        radial-gradient(1200px 700px at 30% 0%, rgba(47,120,255,.22), transparent 55%),  
+        radial-gradient(900px 600px at 80% 20%, rgba(91,214,178,.10), transparent 55%),  
+        linear-gradient(180deg, var(--bg1), var(--bg0));  
+      display:flex;  
+      justify-content:center;  
+      padding: max(14px, env(safe-area-inset-top)) 12px max(14px, env(safe-area-inset-bottom));  
+    }  
+  
+    /* Screen border */  
+    body::before{  
+      content:"";  
+      position:fixed;  
+      inset:0;  
+      border:3px solid var(--accent);  
+      pointer-events:none;  
+      z-index:9999;  
+    }  
+  
+    .app{  
+      width:min(520px, 100%);  
+      display:flex;  
+      flex-direction:column;  
+      gap:14px;  
+    }  
+  
+    /* Logo occupies same layout space as the prior heading block */  
+    .logoTitle{  
+      margin:10px 6px 0;  
+      display:flex;  
+      justify-content:center;  
+      align-items:center;  
+      text-shadow: 0 10px 22px rgba(0,0,0,.35);  
+    }  
+    .logoTitle svg{  
+      width:min(520px, 100%);  
+      height:auto;  
+      display:block;  
+    }  
+  
+    .card{  
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));  
+      border:1px solid var(--stroke);  
+      border-radius: var(--radius);  
+      box-shadow: var(--shadow);  
+      padding: var(--pad);  
+      backdrop-filter: blur(10px);  
+    }  
+  
+    .hidden{ display:none !important; }  
+  
+    .btn{  
+      height:var(--btnH);  
+      border-radius: 999px;  
+      border:1px solid var(--stroke2);  
+      background: rgba(255,255,255,.03);  
+      color:rgba(235,245,255,.78);  
+      font-weight:650;  
+      letter-spacing:.2px;  
+      display:flex;  
+      align-items:center;  
+      justify-content:center;  
+      padding:0 18px;  
+      user-select:none;  
+      -webkit-tap-highlight-color: transparent;  
+      font-size:18px;  
+    }  
+    .btn:active{ transform: translateY(1px); }  
+    .btn.primary{  
+      background: linear-gradient(180deg, rgba(47,120,255,.92), rgba(47,120,255,.72));  
+      border-color: rgba(120,170,255,.55);  
+      color: rgba(0,0,0,.78);  
+    }  
+    .btn.small{  
+      height:44px;  
+      font-size:16px;  
+      padding:0 14px;  
+      font-weight:650;  
+      white-space:nowrap;  
+    }  
+  
+    .row{ display:flex; gap:12px; }  
+    .row.center{ align-items:center; }  
+    .grow{ flex:1; }  
+  
+    .label{  
+      font-size:16px;  
+      color:var(--muted);  
+      font-weight:650;  
+      margin: 12px 4px 8px;  
+    }  
+    .subtle{  
+      font-size:14px;  
+      color:var(--muted2);  
+      margin: 6px 4px 0;  
+    }  
+  
+    .field{  
+      border:2px solid var(--strokeBold);  
+      background: rgba(255,255,255,.06);  
+      color: rgba(235,245,255,.86);  
+      border-radius: 18px;  
+      height:54px;  
+      padding: 0 14px;  
+      font-size:18px;  
+      outline:none;  
+      width:100%;  
+    }  
+    .field::placeholder{ color: rgba(235,245,255,.35); }  
+    .field:focus{  
+      border-color: rgba(90,150,255,.78);  
+      box-shadow: 0 0 0 4px rgba(47,120,255,.16);  
+    }  
+    textarea.field{  
+      height:64px;  
+      padding: 12px 14px;  
+      resize:none;  
+      line-height:1.25;  
+    }  
+  
+    .homeMain{  
+      display:flex;  
+      flex-direction:column;  
+      gap:14px;  
+      margin-top:8px;  
+    }  
+  
+    .homeMain > .btn:not(.small){  
+      font-size:26px;  
+      font-weight:750;  
+      letter-spacing:.3px;  
+    }  
+  
+    .homeFooterRow{  
+      display:flex;  
+      align-items:center;  
+      justify-content:space-between;  
+      gap:10px;  
+      margin-top:8px;  
+      flex-wrap:nowrap;  
+    }  
+  
+    .footerTiny{  
+      margin-top:10px;  
+      display:flex;  
+      justify-content:space-between;  
+      gap:10px;  
+      font-size: 12px;  
+      color: rgba(235,245,255,.38);  
+    }  
+  
+    .timeLine{  
+      margin: 4px 4px 14px;  
+      color: rgba(235,245,255,.82);  
+      font-weight:750;  
+      letter-spacing:.3px;  
+      white-space:nowrap;  
+      overflow:hidden;  
+      text-overflow:ellipsis;  
+      line-height:1.05;  
+      font-size: clamp(18px, 6.4vw, 44px);  
+    }  
+  
+    .triple{  
+      display:grid;  
+      grid-template-columns: 1fr 1fr 1fr;  
+      gap: 12px;  
+    }  
+    .triple .miniLabel{  
+      margin: 0 4px 8px;  
+      color: var(--muted);  
+      font-weight:650;  
+      font-size:16px;  
+    }  
+  
+    .symGrid{  
+      display:grid;  
+      grid-template-columns: 1fr 1fr;  
+      gap: 6px 18px;  
+      padding: 6px 2px 2px;  
+      margin-top: 2px;  
+    }  
+    .symItem{  
+      display:flex;  
+      align-items:center;  
+      gap:10px;  
+      padding: 4px 6px;  
+      border-radius: 14px;  
+      transition: background .12s ease, border-color .12s ease;  
+    }  
+    .box{  
+      width:30px;  
+      height:30px;  
+      border-radius: 8px;  
+      border:2px solid rgba(235,245,255,.40);  
+      background: rgba(255,255,255,.03);  
+      display:grid;  
+      place-items:center;  
+      flex:0 0 auto;  
+    }  
+    .check{  
+      width:14px;  
+      height:8px;  
+      border-left:3px solid transparent;  
+      border-bottom:3px solid transparent;  
+      transform: rotate(-45deg);  
+      margin-top:-2px;  
+    }  
+    .symText{  
+      font-size:16px;  
+      font-weight:500;  
+      color: rgba(235,245,255,.76);  
+      line-height:1.1;  
+    }  
+    .symItem.selected{  
+      background: rgba(47,120,255,.16);  
+    }  
+    .symItem.selected .box{  
+      border-color: rgba(90,150,255,.90);  
+      background: rgba(47,120,255,.18);  
+    }  
+    .symItem.selected .check{  
+      border-left-color: rgba(235,245,255,.92);  
+      border-bottom-color: rgba(235,245,255,.92);  
+    }  
+  
+    .panelButtons{  
+      display:flex;  
+      gap:12px;  
+      margin-top: 10px;  
+      flex-wrap:wrap;  
+    }  
+  
+    .entry{  
+      border:1px solid var(--stroke);  
+      background: rgba(255,255,255,.03);  
+      border-radius: 22px;  
+      padding: 14px 14px 12px;  
+      margin-top: 12px;  
+      touch-action: manipulation;  
+    }  
+  
+    /* v1.18: log entry press feedback */  
+    .entry.pressed{  
+      background: rgba(47,120,255,.14);  
+      border-color: rgba(90,150,255,.55);  
+    }  
+  
+    .entry:active{ transform: translateY(1px); }  
+    .entryTop{  
+      display:flex;  
+      justify-content:space-between;  
+      align-items:flex-end;  
+      gap:12px;  
+      margin-bottom: 6px;  
+    }  
+    .entryTime{  
+      font-size:14px;  
+      color: rgba(235,245,255,.46);  
+      white-space:nowrap;  
+    }  
+    .entryBPHR{  
+      display:flex;  
+      justify-content:space-between;  
+      gap:12px;  
+      align-items:baseline;  
+    }  
+    .bpBig{  
+      font-size:34px;  
+      font-weight:800;  
+      letter-spacing:.2px;  
+    }  
+    .hrBig{  
+      font-size:28px;  
+      font-weight:800;  
+      color: rgba(235,245,255,.72);  
+      white-space:nowrap;  
+    }  
+    .entryLine{  
+      margin-top: 6px;  
+      color: rgba(235,245,255,.62);  
+      font-size:16px;  
+      line-height:1.25;  
+    }  
+    .entryLine b{  
+      color: rgba(235,245,255,.70);  
+    }  
+  
+    .filters{  
+      display:grid;  
+      grid-template-columns: 1fr 1fr;  
+      gap: 12px;  
+      margin-top:10px;  
+    }  
+    .dateField{  
+      display:flex;  
+      flex-direction:column;  
+      gap:8px;  
+    }  
+    .dateField .miniLabel{  
+      margin: 0 4px;  
+      color: var(--muted);  
+      font-weight:650;  
+      font-size:14px;  
+    }  
+    input[type="date"].field{  
+      font-size:16px;  
+      padding-right: 10px;  
+    }  
+  
+    canvas{  
+      width:100%;  
+      height:280px;  
+      border-radius: 22px;  
+      border:1px solid var(--stroke);  
+      background: rgba(255,255,255,.02);  
+      margin-top: 10px;  
+    }  
+  
+    .noteLabel{  
+      margin: 12px 4px 8px;  
+      color:var(--muted);  
+      font-weight:650;  
+      font-size:16px;  
+    }  
+    .noteLabel em{  
+      font-style:italic;  
+      color: rgba(235,245,255,.42);  
+      font-weight:600;  
+    }  
+  
+    /* Edit mode indicator */  
+    .editPill{  
+      display:inline-flex;  
+      align-items:center;  
+      gap:8px;  
+      padding: 8px 12px;  
+      border-radius: 999px;  
+      border: 1px solid var(--stroke2);  
+      background: rgba(255,255,255,.03);  
+      color: rgba(235,245,255,.70);  
+      font-weight:700;  
+      letter-spacing:.2px;  
+      margin: 0 4px 10px;  
+      width: fit-content;  
+    }  
+  </style>  </head>  <body>  
+  <div class="app">  <!-- Logo/header block: same footprint as your prior header; icon is embedded in the SVG -->  
+<div class="logoTitle" aria-label="Vitals Tracker">  
+  <svg viewBox="0 0 900 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Vitals Tracker">  
+    <defs>  
+      <linearGradient id="vtg" x1="0" y1="0" x2="1" y2="0">  
+        <stop offset="0%" stop-color="#4fa3ff"/>  
+        <stop offset="100%" stop-color="#2f78ff"/>  
+      </linearGradient>  
+      <filter id="vts" x="-20%" y="-20%" width="140%" height="140%">  
+        <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="rgba(0,0,0,.35)"/>  
+      </filter>  
+    </defs>  
+
+    <!-- Small square logo embedded; no layout change to the header container -->  
+    <g transform="translate(46 24)" filter="url(#vts)">  
+      <rect x="0" y="0" width="92" height="92" rx="26" fill="rgba(255,255,255,.06)" stroke="rgba(235,245,255,.22)" stroke-width="2"/>  
+      <path d="M18 54h18l10-32 16 58 12-36h28" fill="none" stroke="url(#vtg)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>  
+    </g>  
+
+    <text x="160" y="92"  
+          font-family="system-ui,Segoe UI,Roboto,Helvetica,Arial"  
+          font-size="76"  
+          font-weight="850"  
+          fill="url(#vtg)"  
+          letter-spacing=".5"  
+          filter="url(#vts)">Vitals Tracker</text>  
+  </svg>  
+</div>  
+
+<div id="home" class="card">  
+  <div class="homeMain">  
+    <button id="btnGoAdd" class="btn primary">ADD Reading</button>  
+    <button id="btnGoLog" class="btn">Log</button>  
+    <button id="btnGoCharts" class="btn">Charts</button>  
+
+    <div class="homeFooterRow">  
+      <button id="btnInstall" class="btn small">Install</button>  
+      <button id="btnClearAll" class="btn small">Clear Data</button>  
+      <div class="grow"></div>  
+      <button id="btnExitHome" class="btn small">Exit</button>  
+    </div>  
+
+    <div class="subtle">Data stays on your phone (local only).</div>  
+
+    <div class="footerTiny">  
+      <div>v1.18</div>  
+      <div>developed by Keyth Jyles</div>  
+    </div>  
+  </div>  
+</div>  
+
+<div id="add" class="card hidden">  
+  <div id="editPill" class="editPill hidden">Editing entry</div>  
+
+  <div id="timeLine" class="timeLine">--:--:-- --, --/--/----</div>  
+
+  <div class="triple">  
+    <div>  
+      <div class="miniLabel">Systolic</div>  
+      <input id="sys" class="field" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 132" />  
+    </div>  
+    <div>  
+      <div class="miniLabel">Diastolic</div>  
+      <input id="dia" class="field" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 91" />  
+    </div>  
+    <div>  
+      <div class="miniLabel">Heart Rate</div>  
+      <input id="hr" class="field" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 72" />  
+    </div>  
+  </div>  
+
+  <div class="noteLabel">Notes <em>(optional)</em></div>  
+  <textarea id="notes" class="field" placeholder="optional"></textarea>  
+
+  <div class="label">Symptoms</div>  
+  <div id="symGrid" class="symGrid"></div>  
+
+  <div class="panelButtons">  
+    <button id="btnSave" class="btn primary grow">Save</button>  
+    <button id="btnDelete" class="btn grow hidden">Delete</button>  
+    <button id="btnBackFromAdd" class="btn grow">Back</button>  
+  </div>  
+</div>  
+
+<div id="log" class="card hidden">  
+  <div class="row center">  
+    <button id="btnExportLog" class="btn small">Export</button>  
+    <button id="btnAddFromLog" class="btn small">ADD</button>  
+    <div class="grow"></div>  
+    <button id="btnBackFromLog" class="btn small">Back</button>  
+  </div>  
+
+  <div class="label">Search</div>  
+  <input id="search" class="field" placeholder="Type a word: sweaty, dizzy, headache..." />  
+
+  <div class="filters">  
+    <div class="dateField">  
+      <div class="miniLabel">From</div>  
+      <input id="fromDate" class="field" type="date" />  
+    </div>  
+    <div class="dateField">  
+      <div class="miniLabel">To</div>  
+      <input id="toDate" class="field" type="date" />  
+    </div>  
+  </div>  
+
+  <div id="logList"></div>  
+</div>  
+
+<div id="charts" class="card hidden">  
+  <div class="row center">  
+    <button id="btnExportCharts" class="btn small">Export</button>  
+    <div class="grow"></div>  
+    <button id="btnBackFromCharts" class="btn small">Back</button>  
+  </div>  
+
+  <div class="subtle">Systolic, Diastolic, and Heart Rate over time.</div>  
+
+  <div class="filters">  
+    <div class="dateField">  
+      <div class="miniLabel">From</div>  
+      <input id="chartFrom" class="field" type="date" />  
+    </div>  
+    <div class="dateField">  
+      <div class="miniLabel">To</div>  
+      <input id="chartTo" class="field" type="date" />  
+    </div>  
+  </div>  
+
+  <canvas id="chart" width="900" height="520"></canvas>  
+</div>
+
+  </div>  <script>  
+(() => {  
+  "use strict";  
+  
+  const STORAGE_KEY = "vitals_tracker_records_v1";  
+  const SYMPTOMS = [  
+    "Sweaty","Dizzy","Panic","Brain fog","Chest tight","Headache",  
+    "Nausea","Short breath","Hot ears","Shaky","Blurred vision","Weakness"  
+  ];  
+  
+  function numOrNull(v){  
+    const n = Number(v);  
+    return Number.isFinite(n) ? n : null;  
+  }  
+  
+  function loadRecords(){  
+    try{  
+      const raw = localStorage.getItem(STORAGE_KEY);  
+      if(!raw) return [];  
+      const arr = JSON.parse(raw);  
+      if(!Array.isArray(arr)) return [];  
+      return arr  
+        .filter(r => r && typeof r.ts === "number")  
+        .map(r => ({  
+          ts: r.ts,  
+          sys: numOrNull(r.sys),  
+          dia: numOrNull(r.dia),  
+          hr:  numOrNull(r.hr),  
+          notes: (r.notes ?? "").toString(),  
+          symptoms: Array.isArray(r.symptoms) ? r.symptoms.map(String) : []  
+        }))  
+        .sort((a,b)=> b.ts - a.ts);  
+    }catch{  
+      return [];  
+    }  
+  }  
+  
+  function saveRecords(recs){  
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(recs));  
+  }  
+  
+  const $ = (id) => document.getElementById(id);  
+  const screens = ["home","add","log","charts"];  
+  
+  // v1.18: Do not auto-focus fields when opening Add in EDIT mode (prevents keyboard pop-up).  
+  function focusTopOfPanel(screen){  
+    window.scrollTo({top:0, left:0, behavior:"auto"});  
+  
+    if(screen === "add"){  
+      if(editTs == null){  
+        setTimeout(() => { try{ $("sys").focus({preventScroll:true}); }catch{} }, 0);  
+      }else{  
+        setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 0);  
+      }  
+    }  
+  }  
+  
+  function show(screen){  
+    for(const s of screens){  
+      $(s).classList.toggle("hidden", s !== screen);  
+    }  
+    if(screen === "log"){ renderLog(); }  
+    if(screen === "charts"){ renderCharts(); }  
+    if(screen === "add"){  
+      tickTime();  
+      adjustTimeFont();  
+    }  
+    focusTopOfPanel(screen);  
+  }  
+  
+  function fmtDateTime(ts){  
+    const d = new Date(ts);  
+    const parts = new Intl.DateTimeFormat(undefined, {  
+      year:"numeric", month:"2-digit", day:"2-digit",  
+      hour:"2-digit", minute:"2-digit", second:"2-digit"  
+    }).formatToParts(d);  
+    const map = Object.fromEntries(parts.map(p=>[p.type,p.value]));  
+    const mm = map.month, dd = map.day, yy = map.year;  
+    const hh = map.hour, mi = map.minute, ss = map.second;  
+    const dp = map.dayPeriod ? ` ${map.dayPeriod}` : "";  
+    return `${mm}/${dd}/${yy}, ${hh}:${mi}:${ss}${dp}`;  
+  }  
+  
+  function fmtTimeCommaDate(ts){  
+    const d = new Date(ts);  
+    const time = new Intl.DateTimeFormat(undefined, {  
+      hour:"2-digit", minute:"2-digit", second:"2-digit"  
+    }).format(d);  
+    const date = new Intl.DateTimeFormat(undefined, {  
+      month:"2-digit", day:"2-digit", year:"numeric"  
+    }).format(d);  
+    return `${time}, ${date}`;  
+  }  
+  
+  const symGrid = $("symGrid");  
+  const symState = new Map();  
+  
+  function buildSymptoms(){  
+    symGrid.innerHTML = "";  
+    symState.clear();  
+  
+    for(const name of SYMPTOMS){  
+      const item = document.createElement("div");  
+      item.className = "symItem";  
+      item.setAttribute("role","checkbox");  
+      item.setAttribute("aria-checked","false");  
+      item.tabIndex = 0;  
+  
+      const box = document.createElement("div");  
+      box.className = "box";  
+      const check = document.createElement("div");  
+      check.className = "check";  
+      box.appendChild(check);  
+  
+      const text = document.createElement("div");  
+      text.className = "symText";  
+      text.textContent = name;  
+  
+      item.appendChild(box);  
+      item.appendChild(text);  
+  
+      const setSelected = (on) => {  
+        item.classList.toggle("selected", on);  
+        item.setAttribute("aria-checked", on ? "true" : "false");  
+        symState.set(name, on);  
+      };  
+  
+      setSelected(false);  
+  
+      const toggle = () => setSelected(!symState.get(name));  
+      item.addEventListener("click", toggle);  
+      item.addEventListener("keydown", (e) => {  
+        if(e.key === "Enter" || e.key === " "){  
+          e.preventDefault();  
+          toggle();  
+        }  
+      });  
+  
+      symGrid.appendChild(item);  
+    }  
+  }  
+  
+  function selectedSymptoms(){  
+    return SYMPTOMS.filter(s => symState.get(s));  
+  }  
+  
+  function clearSymUI(){  
+    for(const k of SYMPTOMS) symState.set(k,false);  
+    for(const el of symGrid.querySelectorAll(".symItem")){  
+      el.classList.remove("selected");  
+      el.setAttribute("aria-checked","false");  
+    }  
+  }  
+  
+  function setSymSelected(names){  
+    const set = new Set((names || []).map(String));  
+    for(const name of SYMPTOMS){  
+      const on = set.has(name);  
+      symState.set(name, on);  
+    }  
+    for(const el of symGrid.querySelectorAll(".symItem")){  
+      const label = el.querySelector(".symText")?.textContent || "";  
+      const on = set.has(label);  
+      el.classList.toggle("selected", on);  
+      el.setAttribute("aria-checked", on ? "true" : "false");  
+    }  
+  }  
+  
+  function clearAddForm(){  
+    $("sys").value = "";  
+    $("dia").value = "";  
+    $("hr").value = "";  
+    $("notes").value = "";  
+    clearSymUI();  
+  }  
+  
+  let timeTimer = null;  
+  let editTs = null;          // null = new record, else editing an existing record by ts  
+  let returnScreen = "home";  // where Back returns when leaving Add  
+  
+  function enterAddNew(from="home"){  
+    editTs = null;  
+    returnScreen = from;  
+    $("editPill").classList.add("hidden");  
+    $("btnDelete").classList.add("hidden");  
+    clearAddForm();  
+    show("add");  
+  }  
+  
+  function enterAddEdit(ts){  
+    const recs = loadRecords();  
+    const r = recs.find(x => x.ts === ts);  
+    if(!r){  
+      // If missing, just fall back to add-new  
+      enterAddNew("log");  
+      return;  
+    }  
+    editTs = ts;  
+    returnScreen = "log";  
+  
+    $("editPill").classList.remove("hidden");  
+    $("btnDelete").classList.remove("hidden");  
+  
+    $("sys").value = (r.sys ?? "") === null ? "" : (r.sys ?? "");  
+    $("dia").value = (r.dia ?? "") === null ? "" : (r.dia ?? "");  
+    $("hr").value  = (r.hr  ?? "") === null ? "" : (r.hr  ?? "");  
+    $("notes").value = (r.notes ?? "").toString();  
+    setSymSelected(r.symptoms || []);  
+  
+    show("add");  
+  }  
+  
+  function tickTime(){  
+    const line = $("timeLine");  
+    // In edit mode, show the record timestamp; otherwise show "now"  
+    const ts = (editTs != null) ? editTs : Date.now();  
+    line.textContent = fmtTimeCommaDate(ts);  
+    adjustTimeFont();  
+    if(timeTimer) clearTimeout(timeTimer);  
+    timeTimer = setTimeout(tickTime, 900);  
+  }  
+  
+  function adjustTimeFont(){  
+    const el = $("timeLine");  
+    if(!el) return;  
+    const parent = el.parentElement;  
+    if(!parent) return;  
+  
+    el.style.fontSize = "";  
+    const maxW = parent.clientWidth - 8;  
+  
+    let fs = parseFloat(getComputedStyle(el).fontSize) || 28;  
+    let guard = 0;  
+    while(el.scrollWidth > maxW && fs > 16 && guard < 30){  
+      fs -= 1;  
+      el.style.fontSize = fs + "px";  
+      guard++;  
+    }  
+  }  
+  
+  function parseDateField(v){  
+    if(!v) return null;  
+    const [y,m,d] = v.split("-").map(Number);  
+    if(!y || !m || !d) return null;  
+    return new Date(y, m-1, d, 0, 0, 0, 0).getTime();  
+  }  
+  
+  function clampEndOfDay(ts){  
+    const d = new Date(ts);  
+    d.setHours(23,59,59,999);  
+    return d.getTime();  
+  }  
+  
+  function recordMatches(rec, q){  
+    if(!q) return true;  
+    const s = q.toLowerCase().trim();  
+    if(!s) return true;  
+  
+    const bp = `${rec.sys ?? ""}/${rec.dia ?? ""}`.toLowerCase();  
+    const hr = `${rec.hr ?? ""}`.toLowerCase();  
+    const notes = (rec.notes || "").toLowerCase();  
+    const sym = (rec.symptoms || []).join(", ").toLowerCase();  
+    const dt = fmtDateTime(rec.ts).toLowerCase();  
+  
+    return bp.includes(s) || hr.includes(s) || notes.includes(s) || sym.includes(s) || dt.includes(s);  
+  }  
+  
+  function filteredRecords({fromId,toId,searchId}){  
+    const recs = loadRecords();  
+    const q = (searchId ? $(searchId).value : "").trim();  
+  
+    const fromV = fromId ? $(fromId).value : "";  
+    const toV   = toId ? $(toId).value : "";  
+  
+    const fromTs = parseDateField(fromV);  
+    const toMid  = parseDateField(toV);  
+    const toTs   = toMid != null ? clampEndOfDay(toMid) : null;  
+  
+    return recs.filter(r => {  
+      if(fromTs != null && r.ts < fromTs) return false;  
+      if(toTs != null && r.ts > toTs) return false;  
+      return recordMatches(r, q);  
+    });  
+  }  
+  
+  function escapeHtml(s){  
+    return String(s)  
+      .replaceAll("&","&amp;")  
+      .replaceAll("<","&lt;")  
+      .replaceAll(">","&gt;")  
+      .replaceAll('"',"&quot;")  
+      .replaceAll("'","&#039;");  
+  }  
+  
+  function renderLog(){  
+    const list = $("logList");  
+    const recs = filteredRecords({fromId:"fromDate", toId:"toDate", searchId:"search"});  
+  
+    list.innerHTML = "";  
+    if(recs.length === 0){  
+      const empty = document.createElement("div");  
+      empty.className = "subtle";  
+      empty.style.marginTop = "10px";  
+      empty.textContent = "No matching records.";  
+      list.appendChild(empty);  
+      return;  
+    }  
+  
+    for(const r of recs){  
+      const e = document.createElement("div");  
+      e.className = "entry";  
+      e.tabIndex = 0;  
+      e.setAttribute("role","button");  
+      e.setAttribute("aria-label","Open entry for editing");  
+  
+      // v1.18: Press highlight + confirm-on-release (no action if slide off)  
+      let armed = false;  
+  
+      function clearPressed(){  
+        e.classList.remove("pressed");  
+        armed = false;  
+      }  
+  
+      e.addEventListener("pointerdown", (ev) => {  
+        if(ev.button != null && ev.button !== 0) return;  
+        armed = true;  
+        e.classList.add("pressed");  
+        try { e.setPointerCapture(ev.pointerId); } catch {}  
+      });  
+  
+      e.addEventListener("pointermove", (ev) => {  
+        if(!armed) return;  
+        const rect = e.getBoundingClientRect();  
+        const inside =  
+          ev.clientX >= rect.left && ev.clientX <= rect.right &&  
+          ev.clientY >= rect.top  && ev.clientY <= rect.bottom;  
+  
+        // If user slides off, disarm and remove highlight  
+        if(!inside){  
+          clearPressed();  
+        }  
+      });  
+  
+      e.addEventListener("pointercancel", clearPressed);  
+  
+      e.addEventListener("pointerup", () => {  
+        if(!armed) return;  
+        e.classList.remove("pressed");  
+        armed = false;  
+  
+        // Confirm AFTER release  
+        const ok = confirm("Edit this entry?");  
+        if(ok) enterAddEdit(r.ts);  
+      });  
+  
+      // Keyboard support  
+      e.addEventListener("keydown", (ev) => {  
+        if(ev.key === "Enter" || ev.key === " "){  
+          ev.preventDefault();  
+          const ok = confirm("Edit this entry?");  
+          if(ok) enterAddEdit(r.ts);  
+        }  
+      });  
+  
+      const top = document.createElement("div");  
+      top.className = "entryTop";  
+  
+      const t = document.createElement("div");  
+      t.className = "entryTime";  
+      t.textContent = fmtDateTime(r.ts);  
+  
+      top.appendChild(t);  
+      e.appendChild(top);  
+  
+      const line1 = document.createElement("div");  
+      line1.className = "entryBPHR";  
+  
+      const bp = document.createElement("div");  
+      bp.className = "bpBig";  
+      bp.textContent = `BP ${r.sys ?? "—"}/${r.dia ?? "—"}`;  
+  
+      const hr = document.createElement("div");  
+      hr.className = "hrBig";  
+      hr.textContent = `HR ${r.hr ?? "—"}`;  
+  
+      line1.appendChild(bp);  
+      line1.appendChild(hr);  
+      e.appendChild(line1);  
+  
+      const sym = (r.symptoms && r.symptoms.length) ? r.symptoms.join(", ") : "None";  
+      const notes = (r.notes && r.notes.trim()) ? r.notes.trim() : "None";  
+  
+      const l2 = document.createElement("div");  
+      l2.className = "entryLine";  
+      l2.innerHTML = `<b>Symptoms:</b> ${escapeHtml(sym)}`;  
+      e.appendChild(l2);  
+  
+      const l3 = document.createElement("div");  
+      l3.className = "entryLine";  
+      l3.innerHTML = `<b>Notes:</b> ${escapeHtml(notes)}`;  
+      e.appendChild(l3);  
+  
+      list.appendChild(e);  
+    }  
+  
+    try { document.activeElement && document.activeElement.blur(); } catch {}  
+  }  
+  
+  function downloadText(text, filename){  
+    const blob = new Blob([text], {type:"text/plain;charset=utf-8"});  
+    const url = URL.createObjectURL(blob);  
+    const a = document.createElement("a");  
+    a.href = url;  
+    a.download = filename;  
+    document.body.appendChild(a);  
+    a.click();  
+    a.remove();  
+    URL.revokeObjectURL(url);  
+  }  
+  
+  function exportText(recs){  
+    const lines = recs.map(r => {  
+      const dt = fmtDateTime(r.ts);  
+      const bp = `BP ${r.sys ?? "—"}/${r.dia ?? "—"}`;  
+      const hr = `HR ${r.hr ?? "—"}`;  
+      const sym = (r.symptoms && r.symptoms.length) ? r.symptoms.join(", ") : "None";  
+      const notes = (r.notes && r.notes.trim()) ? r.notes.trim() : "None";  
+      return `${dt}\n${bp} • ${hr}\nSymptoms: ${sym}\nNotes: ${notes}\n`;  
+    });  
+  
+    const out = lines.join("\n");  
+    if(navigator.clipboard && navigator.clipboard.writeText){  
+      navigator.clipboard.writeText(out).then(() => {  
+        alert("Export copied to clipboard.");  
+      }).catch(() => {  
+        downloadText(out, "vitals_export.txt");  
+      });  
+    }else{  
+      downloadText(out, "vitals_export.txt");  
+    }  
+  }  
+  
+  function roundRect(ctx, x,y,w,h,r, fill, stroke){  
+    const rr = Math.min(r, w/2, h/2);  
+    ctx.beginPath();  
+    ctx.moveTo(x+rr,y);  
+    ctx.arcTo(x+w,y,x+w,y+h,rr);  
+    ctx.arcTo(x+w,y+h,x,y+h,rr);  
+    ctx.arcTo(x,y+h,x,y,rr);  
+    ctx.arcTo(x,y,x+w,y,rr);  
+    ctx.closePath();  
+    if(fill){  
+      ctx.fillStyle = fill;  
+      ctx.fill();  
+    }  
+    if(stroke){  
+      ctx.strokeStyle = stroke;  
+      ctx.lineWidth = 1;  
+      ctx.stroke();  
+    }  
+  }  
+  
+  function drawChartEmpty(ctx, canvas, msg){  
+    const W = canvas.width, H = canvas.height;  
+    roundRect(ctx, 0,0,W,H,22,"rgba(255,255,255,.02)","rgba(235,245,255,.12)");  
+    ctx.fillStyle = "rgba(235,245,255,.50)";  
+    ctx.font = "18px system-ui,Segoe UI,Roboto";  
+    ctx.fillText(msg, 22, 44);  
+  }  
+  
+  function xTo(i, n, pad, W){  
+    if(n<=1) return pad.l;  
+    const span = W - pad.l - pad.r;  
+    return pad.l + span * (i/(n-1));  
+  }  
+  
+  function yTo(v, yMin, yMax, pad, H){  
+    const span = H - pad.t - pad.b;  
+    const t = (v - yMin) / (yMax - yMin || 1);  
+    return pad.t + span * (1 - t);  
+  }  
+  
+  function drawSeries(ctx, values, yMin, yMax, pad, W, H, color){  
+    ctx.strokeStyle = color;  
+    ctx.lineWidth = 3;  
+    ctx.lineJoin = "round";  
+    ctx.lineCap = "round";  
+  
+    let started = false;  
+    ctx.beginPath();  
+    for(let i=0;i<values.length;i++){  
+      const v = values[i];  
+      if(v == null) { started = false; continue; }  
+      const x = xTo(i, values.length, pad, W);  
+      const y = yTo(v, yMin, yMax, pad, H);  
+      if(!started){  
+        ctx.moveTo(x,y);  
+        started = true;  
+      }else{  
+        ctx.lineTo(x,y);  
+      }  
+    }  
+    ctx.stroke();  
+  }  
+  
+  function renderCharts(){  
+    const canvas = $("chart");  
+    const ctx = canvas.getContext("2d");  
+  
+    const recs = filteredRecords({fromId:"chartFrom", toId:"chartTo", searchId:null}).slice().reverse();  
+  
+    ctx.clearRect(0,0,canvas.width,canvas.height);  
+  
+    if(recs.length === 0){  
+      drawChartEmpty(ctx, canvas, "No data in range.");  
+      return;  
+    }  
+  
+    const sys = recs.map(r => r.sys).filter(v => v != null);  
+    const dia = recs.map(r => r.dia).filter(v => v != null);  
+    const hr  = recs.map(r => r.hr ).filter(v => v != null);  
+  
+    const all = [...sys,...dia,...hr].filter(v => v != null);  
+    if(all.length === 0){  
+      drawChartEmpty(ctx, canvas, "No numeric values.");  
+      return;  
+    }  
+  
+    const minV = Math.min(...all);  
+    const maxV = Math.max(...all);  
+    const padV = Math.max(8, Math.round((maxV-minV)*0.12));  
+    const yMin = minV - padV;  
+    const yMax = maxV + padV;  
+  
+    const W = canvas.width, H = canvas.height;  
+    const pad = {l:62, r:18, t:18, b:56};  
+  
+    roundRect(ctx, 0, 0, W, H, 22, "rgba(255,255,255,.02)", "rgba(235,245,255,.12)");  
+  
+    ctx.font = "16px system-ui,Segoe UI,Roboto";  
+    ctx.fillStyle = "rgba(235,245,255,.60)";  
+    ctx.strokeStyle = "rgba(235,245,255,.10)";  
+    ctx.lineWidth = 1;  
+  
+    const ticks = 5;  
+    for(let i=0;i<=ticks;i++){  
+      const y = pad.t + (H - pad.t - pad.b) * (i/ticks);  
+      ctx.beginPath();  
+      ctx.moveTo(pad.l, y);  
+      ctx.lineTo(W - pad.r, y);  
+      ctx.stroke();  
+  
+      const val = Math.round(yMax - (yMax-yMin)*(i/ticks));  
+      ctx.fillText(String(val), 16, y+6);  
+    }  
+  
+    const xCount = recs.length;  
+    const labelCount = Math.min(4, xCount);  
+    for(let i=0;i<labelCount;i++){  
+      const idx = Math.round((xCount-1) * (i/(labelCount-1 || 1)));  
+      const x = xTo(idx, xCount, pad, W);  
+      const d = new Date(recs[idx].ts);  
+      const lab = new Intl.DateTimeFormat(undefined, {month:"2-digit", day:"2-digit"}).format(d);  
+      ctx.fillStyle = "rgba(235,245,255,.56)";  
+      ctx.fillText(lab, x-16, H-22);  
+    }  
+  
+    drawSeries(ctx, recs.map(r=>r.sys), yMin, yMax, pad, W, H, "rgba(79,140,255,.98)");  
+    drawSeries(ctx, recs.map(r=>r.dia), yMin, yMax, pad, W, H, "rgba(216,224,240,.88)");  
+    drawSeries(ctx, recs.map(r=>r.hr ), yMin, yMax, pad, W, H, "rgba(120,220,180,.92)");  
+  
+    const lx = pad.l + 8;  
+    let ly = pad.t + 22;  
+    ctx.font = "18px system-ui,Segoe UI,Roboto";  
+    function legend(text, color){  
+      ctx.fillStyle = color;  
+      ctx.fillRect(lx, ly-12, 18, 6);  
+      ctx.fillStyle = "rgba(235,245,255,.70)";  
+      ctx.fillText(text, lx+26, ly-6);  
+      ly += 24;  
+    }  
+    legend("Systolic", "rgba(79,140,255,.98)");  
+    legend("Diastolic", "rgba(216,224,240,.88)");  
+    legend("Heart Rate", "rgba(120,220,180,.92)");  
+  }  
+  
+  function clearFilters(){  
+    $("fromDate").value = "";  
+    $("toDate").value = "";  
+    $("search").value = "";  
+    $("chartFrom").value = "";  
+    $("chartTo").value = "";  
+  }  
+  
+  function clearAllData(){  
+    const ok = confirm(  
+      "Clear ALL saved vitals data?\n\n" +  
+      "This deletes everything stored on this phone for Vitals Tracker.\n" +  
+      "This cannot be undone."  
+    );  
+    if(!ok) return;  
+  
+    try{  
+      localStorage.removeItem(STORAGE_KEY);  
+    }catch{}  
+  
+    clearFilters();  
+  
+    alert("All data cleared.");  
+    show("home");  
+  }  
+  
+  let deferredPrompt = null;  
+  
+  window.addEventListener("beforeinstallprompt", (e) => {  
+    e.preventDefault();  
+    deferredPrompt = e;  
+    refreshInstallButton();  
+  });  
+  
+  window.addEventListener("appinstalled", () => {  
+    deferredPrompt = null;  
+    refreshInstallButton();  
+  });  
+  
+  function isStandalone(){  
+    return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;  
+  }  
+  
+  function refreshInstallButton(){  
+    $("btnInstall").textContent = isStandalone() ? "Uninstall" : "Install";  
+  }  
+  
+  $("btnInstall").addEventListener("click", async () => {  
+    if(isStandalone()){  
+      alert(  
+        "Uninstall:\n\n" +  
+        "Android: press-and-hold the app icon → Uninstall.\n" +  
+        "Uninstall typically does NOT delete your saved data, but device/browser behavior can vary.\n\n" +  
+        "To delete data on purpose: use Clear Data (home screen)."  
+      );  
+      return;  
+    }  
+    if(deferredPrompt){  
+      deferredPrompt.prompt();  
+      try { await deferredPrompt.userChoice; } catch {}  
+      deferredPrompt = null;  
+      refreshInstallButton();  
+      return;  
+    }  
+    alert("Install is available when your browser offers it (menu → Install app).");  
+  });  
+  
+  $("btnClearAll").addEventListener("click", clearAllData);  
+  
+  $("btnExitHome").addEventListener("click", () => {  
+    window.close();  
+    setTimeout(() => {  
+      alert("If it didn’t close: use your phone’s Back/Home.");  
+    }, 200);  
+  });  
+  
+  $("btnGoAdd").addEventListener("click", () => enterAddNew("home"));  
+  $("btnGoLog").addEventListener("click", () => { editTs=null; show("log"); });  
+  $("btnGoCharts").addEventListener("click", () => { editTs=null; show("charts"); });  
+  
+  $("btnBackFromAdd").addEventListener("click", () => { editTs=null; show(returnScreen || "home"); });  
+  $("btnBackFromLog").addEventListener("click", () => show("home"));  
+  $("btnBackFromCharts").addEventListener("click", () => show("home"));  
+  
+  $("btnAddFromLog").addEventListener("click", () => enterAddNew("log"));  
+  
+  function intOrNull(v){  
+    const t = String(v).trim();  
+    if(!t) return null;  
+    const n = Number(t);  
+    if(!Number.isFinite(n)) return null;  
+    return Math.round(n);  
+  }  
+  
+  function validateAnyInput(sys,dia,hr,notes,symptoms){  
+    return !(sys==null && dia==null && hr==null && !String(notes||"").trim() && (symptoms||[]).length===0);  
+  }  
+  
+  $("btnSave").addEventListener("click", () => {  
+    const sys = intOrNull($("sys").value);  
+    const dia = intOrNull($("dia").value);  
+    const hr  = intOrNull($("hr").value);  
+    const notes = ($("notes").value || "").toString();  
+    const symptoms = selectedSymptoms();  
+  
+    if(!validateAnyInput(sys,dia,hr,notes,symptoms)){  
+      alert("Enter at least one value (BP, HR, notes, or symptom).");  
+      return;  
+    }  
+  
+    const recs = loadRecords();  
+  
+    if(editTs == null){  
+      recs.unshift({ ts: Date.now(), sys, dia, hr, notes, symptoms });  
+    }else{  
+      const idx = recs.findIndex(r => r.ts === editTs);  
+      if(idx >= 0){  
+        recs[idx] = { ts: editTs, sys, dia, hr, notes, symptoms };  
+      }else{  
+        // If record vanished for some reason, fall back to new record  
+        recs.unshift({ ts: Date.now(), sys, dia, hr, notes, symptoms });  
+      }  
+    }  
+  
+    // Re-sort most recent first (edit preserves original ts; list remains consistent)  
+    recs.sort((a,b)=> b.ts - a.ts);  
+    saveRecords(recs);  
+  
+    // Reset filters so Log shows everything  
+    $("fromDate").value = "";  
+    $("toDate").value = "";  
+    $("search").value = "";  
+  
+    editTs = null;  
+    show("log");  
+  });  
+  
+  $("btnDelete").addEventListener("click", () => {  
+    if(editTs == null) return;  
+    const ok = confirm("Delete this entry? This cannot be undone.");  
+    if(!ok) return;  
+  
+    const recs = loadRecords().filter(r => r.ts !== editTs);  
+    saveRecords(recs);  
+  
+    editTs = null;  
+    show("log");  
+  });  
+  
+  ["search","fromDate","toDate"].forEach(id => {  
+    $(id).addEventListener("input", () => renderLog());  
+    $(id).addEventListener("change", () => renderLog());  
+  });  
+  ["chartFrom","chartTo"].forEach(id => {  
+    $(id).addEventListener("input", () => renderCharts());  
+    $(id).addEventListener("change", () => renderCharts());  
+  });  
+  
+  $("btnExportLog").addEventListener("click", () => {  
+    const recs = filteredRecords({fromId:"fromDate", toId:"toDate", searchId:"search"});  
+    exportText(recs);  
+  });  
+  $("btnExportCharts").addEventListener("click", () => {  
+    const recs = filteredRecords({fromId:"chartFrom", toId:"chartTo", searchId:null});  
+    exportText(recs);  
+  });  
+  
+  function injectManifest(){  
+    const svg =  
+`<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">  
+  <defs>  
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">  
+      <stop offset="0" stop-color="#2f78ff"/>  
+      <stop offset="1" stop-color="#0b1324"/>  
+    </linearGradient>  
+  </defs>  
+  <rect width="512" height="512" rx="110" fill="url(#g)"/>  
+  <path d="M128 290h70l26-94 44 160 30-98h84" fill="none"  
+        stroke="rgba(235,245,255,.92)" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>  
+  <circle cx="160" cy="290" r="10" fill="rgba(235,245,255,.92)"/>  
+  <circle cx="382" cy="258" r="10" fill="rgba(235,245,255,.92)"/>  
+</svg>`;  
+    const encoded = encodeURIComponent(svg).replace(/'/g,"%27").replace(/"/g,"%22");  
+    const icon = `data:image/svg+xml;charset=utf-8,${encoded}`;  
+  
+    const manifest = {  
+      name: "Vitals Tracker",  
+      short_name: "Vitals",  
+      start_url: ".",  
+      display: "standalone",  
+      background_color: "#0b1324",  
+      theme_color: "#0b1324",  
+      icons: [{ src: icon, sizes: "512x512", type: "image/svg+xml", purpose: "any" }]  
+    };  
+  
+    const blob = new Blob([JSON.stringify(manifest)], {type:"application/manifest+json"});  
+    const url = URL.createObjectURL(blob);  
+    $("manifestLink").setAttribute("href", url);  
+  }  
+  
+  async function registerSW(){  
+    if(!("serviceWorker" in navigator)) return;  
+    const swCode =  
+`self.addEventListener('install', (e)=>{ self.skipWaiting(); });  
+self.addEventListener('activate', (e)=>{ e.waitUntil(self.clients.claim()); });  
+self.addEventListener('fetch', (e)=>{ });`;  
+    const blob = new Blob([swCode], {type:"text/javascript"});  
+    const swUrl = URL.createObjectURL(blob);  
+    try { await navigator.serviceWorker.register(swUrl); } catch {}  
+  }  
+  
+  buildSymptoms();  
+  injectManifest();  
+  registerSW();  
+  refreshInstallButton();  
+  
+  $("fromDate").value = "";  
+  $("toDate").value = "";  
+  $("chartFrom").value = "";  
+  $("chartTo").value = "";  
+  
+  // Start at home  
+  show("home");  
+  
+  window.addEventListener("resize", () => {  
+    if(!$("add").classList.contains("hidden")) adjustTimeFont();  
+  });  
+  
+})();  
+</script>  </body>  
 </html>
