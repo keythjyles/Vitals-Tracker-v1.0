@@ -1,10 +1,11 @@
-<!-- Vitals Tracker v1.19B5 -->
+<!-- Vitals Tracker v1.19B6 -->
 <!--
 Version Detail Notes
-App Version: v1.19B5
-Base: v1.19B4
+App Version: v1.19B6
+Base: v1.19B5
 Changes (requested):
-- Home panel now has an accent border matching the screen border (as drawn).
+- Removed the screen border (body::before).
+- Log panel and Charts panel now use the same accent border style as the Home panel.
 - Change nothing else.
 -->
 <!doctype html>
@@ -52,14 +53,7 @@ Changes (requested):
       padding: max(14px, env(safe-area-inset-top)) 12px max(14px, env(safe-area-inset-bottom));
     }
 
-    body::before{
-      content:"";
-      position:fixed;
-      inset:0;
-      border:3px solid var(--accent);
-      pointer-events:none;
-      z-index:9999;
-    }
+    /* v1.19B6: removed screen border (body::before) */
 
     .app{
       width:min(520px, 100%);
@@ -90,11 +84,11 @@ Changes (requested):
       backdrop-filter: blur(10px);
     }
 
-    /* v1.19B5: Home panel accent border to match screen border */
-    #home{
+    /* Accent border used on Home, Log, Charts (matches the old screen border) */
+    #home, #log, #charts{
       position:relative;
     }
-    #home::before{
+    #home::before, #log::before, #charts::before{
       content:"";
       position:absolute;
       inset:-3px;
@@ -103,7 +97,7 @@ Changes (requested):
       pointer-events:none;
       z-index:0;
     }
-    #home > *{
+    #home > *, #log > *, #charts > *{
       position:relative;
       z-index:1;
     }
@@ -549,7 +543,7 @@ Changes (requested):
         <div class="subtle">Data stays on your phone (local only).</div>
 
         <div class="footerTiny">
-          <div>v1.19B5</div>
+          <div>v1.19B6</div>
           <div>developed by Keyth Jyles</div>
         </div>
       </div>
@@ -672,7 +666,7 @@ Optional:
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.19B5";
+  const APP_VERSION = "v1.19B6";
   const STORAGE_KEY = "vitals_tracker_records_v1";
   const SYMPTOMS = [
     "Sweaty","Dizzy","Panic","Brain fog","Chest tight","Headache",
