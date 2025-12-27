@@ -1,17 +1,16 @@
-<!-- Vitals Tracker v1.19B3 -->
+<!-- Vitals Tracker v1.19B4 -->
 <!--
 Version Detail Notes
-App Version: v1.19B3
-Base: v1.19B2
-Surgical changes only (this version):
-- Export popup:
-  - Default focus is NOT on Save .txt (focus goes to Close).
-  - ALL popup buttons are briefly disabled on open to prevent accidental double-tap click-through.
-  - Removed "Copy again" button entirely.
-  - 3 buttons (Close / Share / Save .txt) are forced onto one line, side-by-side.
-  - Save .txt button text uses the same whitish tone as the Home panel "ADD Reading" button.
-- Popups keep the border color matching the screen border (var(--accent)).
-- No other layout/behavior changes. Exit + Home preserved.
+App Version: v1.19B4
+Base: v1.19B3
+Changes (requested):
+- Log Search no longer auto-filters on every keystroke (removes "erratic" behavior).
+- Search bar shortened and a Search button added to the right.
+- Search runs only when:
+  - user taps Search button, OR
+  - user presses Enter in the search field.
+- Date filters still apply immediately on change/input.
+- All other behavior preserved (including frozen Exit handler).
 -->
 <!doctype html>
 <html lang="en">
@@ -34,10 +33,7 @@ Surgical changes only (this version):
       --text:rgba(235,245,255,.86);
       --muted:rgba(235,245,255,.58);
       --muted2:rgba(235,245,255,.42);
-
-      /* Border color (darker than logo, subtle) */
       --accent:#2b4e7a;
-
       --shadow:0 14px 40px rgba(0,0,0,.38);
       --radius:26px;
       --btnH:56px;
@@ -61,7 +57,6 @@ Surgical changes only (this version):
       padding: max(14px, env(safe-area-inset-top)) 12px max(14px, env(safe-area-inset-bottom));
     }
 
-    /* Screen border */
     body::before{
       content:"";
       position:fixed;
@@ -78,7 +73,6 @@ Surgical changes only (this version):
       gap:14px;
     }
 
-    /* Logo occupies same layout space as the prior heading block */
     .logoTitle{
       margin:10px 6px 0;
       display:flex;
@@ -124,10 +118,9 @@ Surgical changes only (this version):
     .btn.primary{
       background: linear-gradient(180deg, rgba(47,120,255,.92), rgba(47,120,255,.72));
       border-color: rgba(120,170,255,.55);
-      color: rgba(0,0,0,.78);
+      color: rgba(235,245,255,.90);
     }
 
-    /* Subtle red Exit coloring scheme (non-blinding) */
     .btn.danger{
       background: linear-gradient(180deg, rgba(255,80,80,.18), rgba(255,80,80,.10));
       border-color: rgba(255,120,120,.42);
@@ -143,7 +136,6 @@ Surgical changes only (this version):
       white-space:nowrap;
     }
 
-    /* disabled button safety */
     .btn:disabled{
       opacity:.55;
       filter:saturate(.85);
@@ -196,7 +188,6 @@ Surgical changes only (this version):
       gap:14px;
       margin-top:8px;
     }
-
     .homeMain > .btn:not(.small){
       font-size:26px;
       font-weight:750;
@@ -245,7 +236,6 @@ Surgical changes only (this version):
       font-size:16px;
     }
 
-    /* tighten symptoms vertically */
     .symGrid{
       display:grid;
       grid-template-columns: 1fr 1fr;
@@ -285,9 +275,7 @@ Surgical changes only (this version):
       color: rgba(235,245,255,.76);
       line-height:1.1;
     }
-    .symItem.selected{
-      background: rgba(47,120,255,.16);
-    }
+    .symItem.selected{ background: rgba(47,120,255,.16); }
     .symItem.selected .box{
       border-color: rgba(90,150,255,.90);
       background: rgba(47,120,255,.18);
@@ -304,24 +292,11 @@ Surgical changes only (this version):
       flex-wrap:wrap;
     }
 
-    /* extra-tight log vertical spacing (below top row only) */
-    #log .label{
-      margin: 8px 4px 6px;
-    }
-    #log .filters{
-      margin-top: 8px;
-      gap: 10px;
-    }
-    #log .dateField{
-      gap: 6px;
-    }
+    #log .label{ margin: 8px 4px 6px; }
+    #log .filters{ margin-top: 8px; gap: 10px; }
+    #log .dateField{ gap: 6px; }
+    #log > .row.center{ margin-bottom: 4px; }
 
-    /* reduce padding above log top buttons */
-    #log > .row.center{
-      margin-bottom: 4px;
-    }
-
-    /* Compact log entries (more items visible) */
     .entry{
       border:1px solid var(--stroke);
       background: rgba(255,255,255,.03);
@@ -330,13 +305,10 @@ Surgical changes only (this version):
       margin-top: 6px;
       touch-action: manipulation;
     }
-
-    /* log entry press feedback */
     .entry.pressed{
       background: rgba(47,120,255,.14);
       border-color: rgba(90,150,255,.55);
     }
-
     .entry:active{ transform: translateY(1px); }
     .entryTop{
       display:flex;
@@ -356,8 +328,6 @@ Surgical changes only (this version):
       gap:10px;
       align-items:baseline;
     }
-
-    /* reduced size of BP/HR label + readings */
     .bpBig{
       font-size:20px;
       font-weight:800;
@@ -371,16 +341,13 @@ Surgical changes only (this version):
       white-space:nowrap;
       letter-spacing:.1px;
     }
-
     .entryLine{
       margin-top: 3px;
       color: rgba(235,245,255,.62);
       font-size:15px;
       line-height:1.12;
     }
-    .entryLine b{
-      color: rgba(235,245,255,.70);
-    }
+    .entryLine b{ color: rgba(235,245,255,.70); }
 
     .filters{
       display:grid;
@@ -404,6 +371,24 @@ Surgical changes only (this version):
       padding-right: 10px;
     }
 
+    /* Search row: field + Search button */
+    .searchRow{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .searchRow .field{
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .searchRow .btn.small{
+      flex: 0 0 auto;
+      height:54px;         /* match field height */
+      font-size:16px;
+      padding: 0 16px;
+      border-radius: 18px; /* matches input curvature better for side-by-side */
+    }
+
     canvas{
       width:100%;
       height:280px;
@@ -411,7 +396,7 @@ Surgical changes only (this version):
       border:1px solid var(--stroke);
       background: rgba(255,255,255,.02);
       margin-top: 10px;
-      touch-action: none; /* we implement our own pinch + pan */
+      touch-action: none;
     }
 
     .noteLabel{
@@ -426,7 +411,6 @@ Surgical changes only (this version):
       font-weight:600;
     }
 
-    /* Edit mode indicator */
     .editPill{
       display:inline-flex;
       align-items:center;
@@ -442,7 +426,6 @@ Surgical changes only (this version):
       width: fit-content;
     }
 
-    /* ========= Custom edit prompt modal (large-font) ========= */
     .modal{
       position:fixed;
       inset:0;
@@ -456,7 +439,7 @@ Surgical changes only (this version):
     .modalCard{
       width:min(520px, 100%);
       border-radius: 26px;
-      border: 2px solid var(--accent); /* matches screen border */
+      border: 2px solid var(--accent);
       background: linear-gradient(180deg, rgba(12,21,40,.96), rgba(8,16,31,.96));
       box-shadow: 0 18px 60px rgba(0,0,0,.55);
       padding: 18px;
@@ -490,7 +473,6 @@ Surgical changes only (this version):
       min-width: 140px;
     }
 
-    /* Export modal: 3 buttons must fit on one line */
     #exportModal .modalBtns{
       flex-wrap: nowrap;
     }
@@ -502,8 +484,6 @@ Surgical changes only (this version):
       padding: 0 10px;
       white-space: nowrap;
     }
-
-    /* Export modal primary (Save) text color: whitish like Home ADD Reading */
     #exportModal .btn.primary{
       color: rgba(235,245,255,.90);
     }
@@ -556,7 +536,7 @@ Surgical changes only (this version):
         <div class="subtle">Data stays on your phone (local only).</div>
 
         <div class="footerTiny">
-          <div>v1.19B3</div>
+          <div>v1.19B4</div>
           <div>developed by Keyth Jyles</div>
         </div>
       </div>
@@ -604,7 +584,10 @@ Surgical changes only (this version):
       </div>
 
       <div class="label">Search</div>
-      <input id="search" class="field" placeholder="Type a word: sweaty, dizzy, headache..." />
+      <div class="searchRow">
+        <input id="search" class="field" placeholder="Type a word: sweaty, dizzy, headache..." />
+        <button id="btnRunSearch" class="btn small">Search</button>
+      </div>
 
       <div class="filters">
         <div class="dateField">
@@ -641,7 +624,6 @@ Surgical changes only (this version):
 
   </div>
 
-  <!-- Large-font custom edit prompt -->
   <div id="editModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
     <div class="modalCard">
       <div id="editModalTitle" class="modalTitle">Edit this reading?</div>
@@ -653,7 +635,6 @@ Surgical changes only (this version):
     </div>
   </div>
 
-  <!-- Export info popup -->
   <div id="exportModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle">
     <div class="modalCard">
       <div id="exportModalTitle" class="modalTitle">Export ready</div>
@@ -678,7 +659,7 @@ Optional:
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.19B3";
+  const APP_VERSION = "v1.19B4";
   const STORAGE_KEY = "vitals_tracker_records_v1";
   const SYMPTOMS = [
     "Sweaty","Dizzy","Panic","Brain fog","Chest tight","Headache",
@@ -826,16 +807,12 @@ Optional:
     const m = $("editModal");
     const btnEdit = $("btnEditConfirm");
 
-    // Safety: don't let Edit be immediately activatable
     btnEdit.disabled = true;
     if(enableEditTimer) clearTimeout(enableEditTimer);
-    enableEditTimer = setTimeout(() => {
-      btnEdit.disabled = false;
-    }, 450);
+    enableEditTimer = setTimeout(() => { btnEdit.disabled = false; }, 450);
 
     m.classList.remove("hidden");
 
-    // Safety: focus Cancel so the next tap isn't already on Edit
     setTimeout(() => {
       try{ $("btnEditCancel").focus({preventScroll:true}); }catch{}
     }, 0);
@@ -854,24 +831,12 @@ Optional:
     if(ts != null) enterAddEdit(ts);
   }
 
-  $("btnEditCancel").addEventListener("click", (e) => {
-    e.preventDefault();
-    closeEditPrompt();
-  });
+  $("btnEditCancel").addEventListener("click", (e) => { e.preventDefault(); closeEditPrompt(); });
+  $("btnEditConfirm").addEventListener("click", (e) => { e.preventDefault(); confirmEditPrompt(); });
 
-  $("btnEditConfirm").addEventListener("click", (e) => {
-    e.preventDefault();
-    confirmEditPrompt();
-  });
-
-  // Ignore any "ghost click" immediately after opening (defensive)
   $("editModal").addEventListener("click", (e) => {
     const justOpened = (Date.now() - modalOpenedAt) < 220;
-    if(justOpened) {
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
+    if(justOpened) { e.preventDefault(); e.stopPropagation(); return; }
     if(e.target === $("editModal")) closeEditPrompt();
   });
 
@@ -900,7 +865,7 @@ Optional:
      Export modal (clipboard/share/save)
      ========================= */
 
-  let exportPayload = null; // { text, filename }
+  let exportPayload = null;
   let exportPrevFocus = null;
   let exportOpenedAt = 0;
   let enableExportTimer = null;
@@ -918,7 +883,6 @@ Optional:
     const btnShare = $("btnExportShare");
     const btnSave  = $("btnExportSave");
 
-    // Brief disable for ALL buttons to prevent double-click-through
     btnClose.disabled = true;
     btnShare.disabled = true;
     btnSave.disabled  = true;
@@ -928,13 +892,10 @@ Optional:
     if(enableExportTimer) clearTimeout(enableExportTimer);
     enableExportTimer = setTimeout(() => {
       btnClose.disabled = false;
-
-      // Share may remain disabled if unsupported
       btnShare.disabled = !isShareAvailable();
       btnSave.disabled  = false;
     }, 450);
 
-    // Default focus is NOT on Save; focus Close.
     setTimeout(() => {
       try{ btnClose.focus({preventScroll:true}); }catch{}
     }, 0);
@@ -950,11 +911,7 @@ Optional:
 
   $("exportModal").addEventListener("click", (e) => {
     const justOpened = (Date.now() - exportOpenedAt) < 220;
-    if(justOpened){
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
+    if(justOpened){ e.preventDefault(); e.stopPropagation(); return; }
     if(e.target === $("exportModal")) closeExportModal();
   });
 
@@ -988,7 +945,6 @@ Optional:
   }
 
   async function saveTextWithPicker(text, suggestedName){
-    // File System Access API (best UX where available)
     const canPick = typeof window.showSaveFilePicker === "function";
     if(!canPick) return false;
 
@@ -1018,9 +974,7 @@ Optional:
         title: "Vitals Tracker Export",
         text: exportPayload.text
       });
-    }catch{
-      // user canceled or share failed; no hard error needed
-    }
+    }catch{}
   });
 
   $("btnExportSave").addEventListener("click", async (e) => {
@@ -1034,11 +988,8 @@ Optional:
         alert("Saved.");
         return;
       }
-    }catch{
-      // fall through to download
-    }
+    }catch{}
 
-    // Fallback: download via <a download>
     downloadText(exportPayload.text, exportPayload.filename || "vitals_report.txt");
   });
 
@@ -1213,6 +1164,7 @@ Optional:
 
   function filteredRecords({fromId,toId,searchId}){
     const recs = loadRecords();
+
     const q = (searchId ? $(searchId).value : "").trim();
 
     const fromV = fromId ? $(fromId).value : "";
@@ -1296,15 +1248,10 @@ Optional:
   }
 
   /* =========================
-     Log tap handling (delegated; fixes “only first record”)
+     Log tap handling (delegated)
      ========================= */
 
-  const logTap = {
-    activeEl: null,
-    activeTs: null,
-    pointerId: null,
-    tracking: false
-  };
+  const logTap = { activeEl:null, activeTs:null, pointerId:null, tracking:false };
 
   function findEntryEl(target){
     if(!target) return null;
@@ -1351,7 +1298,6 @@ Optional:
 
     try{ entry.setPointerCapture(ev.pointerId); }catch{}
 
-    // Prevent native click from doing anything odd
     ev.preventDefault();
     ev.stopPropagation();
   });
@@ -1362,14 +1308,11 @@ Optional:
     if(!logTap.activeEl) return;
 
     if(!rectInside(logTap.activeEl, ev.clientX, ev.clientY)){
-      // Slide off cancels
       clearLogPress();
     }
   });
 
-  $("logList").addEventListener("pointercancel", () => {
-    clearLogPress();
-  });
+  $("logList").addEventListener("pointercancel", () => { clearLogPress(); });
 
   $("logList").addEventListener("pointerup", (ev) => {
     if(!logTap.tracking) return;
@@ -1381,7 +1324,6 @@ Optional:
     const inside = entry ? rectInside(entry, ev.clientX, ev.clientY) : false;
     clearLogPress();
 
-    // Tap release inside => open prompt (no hold required)
     if(inside && ts != null){
       setTimeout(() => openEditPrompt(ts), 0);
     }
@@ -1446,19 +1388,14 @@ Optional:
     const d = String(ts.getDate()).padStart(2,"0");
     const filename = `${filenameBase || "vitals_report"}_${y}-${m}-${d}.txt`;
 
-    // Copy first, then show the export popup with options.
     (async () => {
-      try{
-        await copyToClipboard(out);
-      }catch{
-        // If clipboard fails, still show modal; Save/Download will work.
-      }
+      try{ await copyToClipboard(out); }catch{}
       openExportModal({ text: out, filename });
     })();
   }
 
   /* =========================
-     Charts: fixed 7-day week window + pinch zoom + 1-finger pan
+     Charts (unchanged)
      ========================= */
 
   const chartView = {
@@ -1543,7 +1480,7 @@ Optional:
   }
 
   function recordsInView(){
-    const recs = loadRecords().slice().reverse(); // ascending
+    const recs = loadRecords().slice().reverse();
     const a = chartView.viewMin;
     const b = chartView.viewMax;
     return recs.filter(r => r.ts >= a && r.ts <= b);
@@ -1576,7 +1513,7 @@ Optional:
     const jan4 = new Date(year, 0, 4);
     jan4.setHours(0,0,0,0);
 
-    const jan4Dow = (jan4.getDay() + 6) % 7; // Mon=0..Sun=6
+    const jan4Dow = (jan4.getDay() + 6) % 7;
     const week1Mon = new Date(jan4.getTime() - jan4Dow*DAY_MS);
 
     const targetMon = new Date(week1Mon.getTime() + (week-1)*7*DAY_MS);
@@ -1620,7 +1557,6 @@ Optional:
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
     const W = canvas.width, H = canvas.height;
-    // Slightly larger bottom padding to comfortably fit two-line day labels.
     const pad = {l:62, r:18, t:18, b:92};
     const plotX0 = pad.l;
     const plotX1 = W - pad.r;
@@ -1651,7 +1587,6 @@ Optional:
     const tMin = chartView.viewMin;
     const tMax = chartView.viewMax;
 
-    // Day bands
     ctx.save();
     ctx.beginPath();
     ctx.rect(plotX0, plotY0, plotX1-plotX0, plotY1-plotY0);
@@ -1679,7 +1614,6 @@ Optional:
     }
     ctx.restore();
 
-    // Y grid + labels
     ctx.font = "16px system-ui,Segoe UI,Roboto";
     ctx.fillStyle = "rgba(235,245,255,.60)";
     ctx.strokeStyle = "rgba(235,245,255,.10)";
@@ -1697,7 +1631,6 @@ Optional:
       ctx.fillText(String(val), 16, y+6);
     }
 
-    // X axis: day-of-week labels with date underneath
     const rangeMs = (tMax - tMin);
     const showTime = rangeMs <= (18 * 60 * 60 * 1000);
 
@@ -1730,7 +1663,6 @@ Optional:
       ctx.font = "20px system-ui,Segoe UI,Roboto";
     }
 
-    // Optional time tick labels when zoomed-in (kept)
     if(showTime){
       ctx.fillStyle = "rgba(235,245,255,.56)";
       ctx.font = "14px system-ui,Segoe UI,Roboto";
@@ -1766,7 +1698,6 @@ Optional:
       ctx.fillText("No readings in this view.", pad.l + 12, pad.t + 34);
     }
 
-    // Legend: larger, more evenly spaced lettering
     const lx = pad.l + 10;
     let ly = pad.t + 26;
 
@@ -1786,19 +1717,12 @@ Optional:
     legend("Heart Rate", "rgba(120,220,180,.92)");
   }
 
-  /* =========================
-     Pinch zoom + 1-finger pan on chart
-     ========================= */
-
   function dist2(t1, t2){
     const dx = t2.clientX - t1.clientX;
     const dy = t2.clientY - t1.clientY;
     return Math.hypot(dx, dy);
   }
-
-  function pinchCenterX(t1, t2){
-    return (t1.clientX + t2.clientX) / 2;
-  }
+  function pinchCenterX(t1, t2){ return (t1.clientX + t2.clientX) / 2; }
 
   function attachChartGestures(){
     const canvas = $("chart");
@@ -2047,7 +1971,31 @@ Optional:
     show("log");
   });
 
-  ["search","fromDate","toDate"].forEach(id => {
+  /* =========================
+     SEARCH BEHAVIOR (v1.19B4)
+     - DO NOT auto-search on input.
+     - Search runs only on button click or Enter key.
+     ========================= */
+
+  function runSearch(){
+    renderLog();
+  }
+
+  $("btnRunSearch").addEventListener("click", (e) => {
+    e.preventDefault();
+    runSearch();
+  });
+
+  $("search").addEventListener("keydown", (e) => {
+    if(e.key === "Enter"){
+      e.preventDefault();
+      runSearch();
+      try{ e.target.blur(); }catch{}
+    }
+  });
+
+  /* Date fields still refresh immediately (stable) */
+  ["fromDate","toDate"].forEach(id => {
     $(id).addEventListener("input", () => renderLog());
     $(id).addEventListener("change", () => renderLog());
   });
@@ -2058,7 +2006,15 @@ Optional:
   });
 
   /* =========================
-     Export handlers (with report header + popup)
+     Symptoms helpers
+     ========================= */
+
+  function selectedSymptoms(){
+    return SYMPTOMS.filter(s => symState.get(s));
+  }
+
+  /* =========================
+     Export handlers
      ========================= */
 
   $("btnExportLog").addEventListener("click", () => {
@@ -2084,7 +2040,7 @@ Optional:
   });
 
   $("btnExportCharts").addEventListener("click", () => {
-    const all = loadRecords().slice().reverse(); // ascending
+    const all = loadRecords().slice().reverse();
     const a = chartView.viewMin, b = chartView.viewMax;
     const recs = all.filter(r => r.ts >= a && r.ts <= b);
 
@@ -2179,18 +2135,3 @@ self.addEventListener('fetch', (e)=>{ });`;
 </script>
 </body>
 </html>
-
-<!--
-Version Detail Notes
-App Version: v1.19B3
-Base: v1.19B2
-Surgical changes only (this version):
-- Export popup:
-  - Default focus is NOT on Save .txt (focus goes to Close).
-  - ALL popup buttons are briefly disabled on open to prevent accidental double-tap click-through.
-  - Removed "Copy again" button entirely.
-  - 3 buttons (Close / Share / Save .txt) are forced onto one line, side-by-side.
-  - Save .txt button text uses the same whitish tone as the Home panel "ADD Reading" button.
-- Popups keep the border color matching the screen border (var(--accent)).
-- No other layout/behavior changes. Exit + Home preserved.
--->
