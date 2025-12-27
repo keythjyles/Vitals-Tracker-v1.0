@@ -1,4 +1,4 @@
-<!-- Vitals Tracker v1.18A4 (defaults to last 30 days; label daily highs+lows for Sys/Dia/HR) -->
+<!-- Vitals Tracker v1.18A4 (defaults to last 30 days; day bands; time-accurate x-axis; label daily highs+lows for Sys/Dia/HR; labels 3x) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -20,7 +20,10 @@
       --text:rgba(235,245,255,.86);
       --muted:rgba(235,245,255,.58);
       --muted2:rgba(235,245,255,.42);
+
+      /* Border color (darker than logo, subtle) */
       --accent:#2b4e7a;
+
       --shadow:0 14px 40px rgba(0,0,0,.38);
       --radius:26px;
       --btnH:56px;
@@ -44,6 +47,7 @@
       padding: max(14px, env(safe-area-inset-top)) 12px max(14px, env(safe-area-inset-bottom));
     }
 
+    /* Screen border */
     body::before{
       content:"";
       position:fixed;
@@ -60,6 +64,7 @@
       gap:14px;
     }
 
+    /* Logo occupies same layout space as the prior heading block */
     .logoTitle{
       margin:10px 6px 0;
       display:flex;
@@ -67,7 +72,11 @@
       align-items:center;
       text-shadow: 0 10px 22px rgba(0,0,0,.35);
     }
-    .logoTitle svg{ width:min(520px, 100%); height:auto; display:block; }
+    .logoTitle svg{
+      width:min(520px, 100%);
+      height:auto;
+      display:block;
+    }
 
     .card{
       background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
@@ -149,8 +158,18 @@
       line-height:1.25;
     }
 
-    .homeMain{ display:flex; flex-direction:column; gap:14px; margin-top:8px; }
-    .homeMain > .btn:not(.small){ font-size:26px; font-weight:750; letter-spacing:.3px; }
+    .homeMain{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      margin-top:8px;
+    }
+
+    .homeMain > .btn:not(.small){
+      font-size:26px;
+      font-weight:750;
+      letter-spacing:.3px;
+    }
 
     .homeFooterRow{
       display:flex;
@@ -182,8 +201,17 @@
       font-size: clamp(18px, 6.4vw, 44px);
     }
 
-    .triple{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-    .triple .miniLabel{ margin: 0 4px 8px; color: var(--muted); font-weight:650; font-size:16px; }
+    .triple{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+    .triple .miniLabel{
+      margin: 0 4px 8px;
+      color: var(--muted);
+      font-weight:650;
+      font-size:16px;
+    }
 
     .symGrid{
       display:grid;
@@ -218,12 +246,30 @@
       transform: rotate(-45deg);
       margin-top:-2px;
     }
-    .symText{ font-size:16px; font-weight:500; color: rgba(235,245,255,.76); line-height:1.1; }
-    .symItem.selected{ background: rgba(47,120,255,.16); }
-    .symItem.selected .box{ border-color: rgba(90,150,255,.90); background: rgba(47,120,255,.18); }
-    .symItem.selected .check{ border-left-color: rgba(235,245,255,.92); border-bottom-color: rgba(235,245,255,.92); }
+    .symText{
+      font-size:16px;
+      font-weight:500;
+      color: rgba(235,245,255,.76);
+      line-height:1.1;
+    }
+    .symItem.selected{
+      background: rgba(47,120,255,.16);
+    }
+    .symItem.selected .box{
+      border-color: rgba(90,150,255,.90);
+      background: rgba(47,120,255,.18);
+    }
+    .symItem.selected .check{
+      border-left-color: rgba(235,245,255,.92);
+      border-bottom-color: rgba(235,245,255,.92);
+    }
 
-    .panelButtons{ display:flex; gap:12px; margin-top: 10px; flex-wrap:wrap; }
+    .panelButtons{
+      display:flex;
+      gap:12px;
+      margin-top: 10px;
+      flex-wrap:wrap;
+    }
 
     .entry{
       border:1px solid var(--stroke);
@@ -233,20 +279,74 @@
       margin-top: 12px;
       touch-action: manipulation;
     }
-    .entry.pressed{ background: rgba(47,120,255,.14); border-color: rgba(90,150,255,.55); }
-    .entry:active{ transform: translateY(1px); }
-    .entryTop{ display:flex; justify-content:space-between; align-items:flex-end; gap:12px; margin-bottom: 6px; }
-    .entryTime{ font-size:14px; color: rgba(235,245,255,.46); white-space:nowrap; }
-    .entryBPHR{ display:flex; justify-content:space-between; gap:12px; align-items:baseline; }
-    .bpBig{ font-size:34px; font-weight:800; letter-spacing:.2px; }
-    .hrBig{ font-size:28px; font-weight:800; color: rgba(235,245,255,.72); white-space:nowrap; }
-    .entryLine{ margin-top: 6px; color: rgba(235,245,255,.62); font-size:16px; line-height:1.25; }
-    .entryLine b{ color: rgba(235,245,255,.70); }
 
-    .filters{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top:10px; }
-    .dateField{ display:flex; flex-direction:column; gap:8px; }
-    .dateField .miniLabel{ margin: 0 4px; color: var(--muted); font-weight:650; font-size:14px; }
-    input[type="date"].field{ font-size:16px; padding-right: 10px; }
+    /* v1.18: log entry press feedback */
+    .entry.pressed{
+      background: rgba(47,120,255,.14);
+      border-color: rgba(90,150,255,.55);
+    }
+
+    .entry:active{ transform: translateY(1px); }
+    .entryTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:12px;
+      margin-bottom: 6px;
+    }
+    .entryTime{
+      font-size:14px;
+      color: rgba(235,245,255,.46);
+      white-space:nowrap;
+    }
+    .entryBPHR{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:baseline;
+    }
+    .bpBig{
+      font-size:34px;
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+    .hrBig{
+      font-size:28px;
+      font-weight:800;
+      color: rgba(235,245,255,.72);
+      white-space:nowrap;
+    }
+    .entryLine{
+      margin-top: 6px;
+      color: rgba(235,245,255,.62);
+      font-size:16px;
+      line-height:1.25;
+    }
+    .entryLine b{
+      color: rgba(235,245,255,.70);
+    }
+
+    .filters{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top:10px;
+    }
+    .dateField{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .dateField .miniLabel{
+      margin: 0 4px;
+      color: var(--muted);
+      font-weight:650;
+      font-size:14px;
+    }
+    input[type="date"].field{
+      font-size:16px;
+      padding-right: 10px;
+    }
 
     canvas{
       width:100%;
@@ -257,9 +357,19 @@
       margin-top: 10px;
     }
 
-    .noteLabel{ margin: 12px 4px 8px; color:var(--muted); font-weight:650; font-size:16px; }
-    .noteLabel em{ font-style:italic; color: rgba(235,245,255,.42); font-weight:600; }
+    .noteLabel{
+      margin: 12px 4px 8px;
+      color:var(--muted);
+      font-weight:650;
+      font-size:16px;
+    }
+    .noteLabel em{
+      font-style:italic;
+      color: rgba(235,245,255,.42);
+      font-weight:600;
+    }
 
+    /* Edit mode indicator */
     .editPill{
       display:inline-flex;
       align-items:center;
@@ -331,6 +441,7 @@
 
     <div id="add" class="card hidden">
       <div id="editPill" class="editPill hidden">Editing entry</div>
+
       <div id="timeLine" class="timeLine">--:--:-- --, --/--/----</div>
 
       <div class="triple">
@@ -472,7 +583,10 @@
     }
     if(screen === "log"){ renderLog(); }
     if(screen === "charts"){ renderCharts(); }
-    if(screen === "add"){ tickTime(); adjustTimeFont(); }
+    if(screen === "add"){
+      tickTime();
+      adjustTimeFont();
+    }
     focusTopOfPanel(screen);
   }
 
@@ -514,6 +628,7 @@
   function buildSymptoms(){
     symGrid.innerHTML = "";
     symState.clear();
+
     for(const name of SYMPTOMS){
       const item = document.createElement("div");
       item.className = "symItem";
@@ -555,7 +670,9 @@
     }
   }
 
-  function selectedSymptoms(){ return SYMPTOMS.filter(s => symState.get(s)); }
+  function selectedSymptoms(){
+    return SYMPTOMS.filter(s => symState.get(s));
+  }
 
   function clearSymUI(){
     for(const k of SYMPTOMS) symState.set(k,false);
@@ -567,7 +684,9 @@
 
   function setSymSelected(names){
     const set = new Set((names || []).map(String));
-    for(const name of SYMPTOMS) symState.set(name, set.has(name));
+    for(const name of SYMPTOMS){
+      symState.set(name, set.has(name));
+    }
     for(const el of symGrid.querySelectorAll(".symItem")){
       const label = el.querySelector(".symText")?.textContent || "";
       const on = set.has(label);
@@ -585,8 +704,8 @@
   }
 
   let timeTimer = null;
-  let editTs = null;
-  let returnScreen = "home";
+  let editTs = null;          // null = new record, else editing an existing record by ts
+  let returnScreen = "home";  // where Back returns when leaving Add
 
   function enterAddNew(from="home"){
     editTs = null;
@@ -600,9 +719,13 @@
   function enterAddEdit(ts){
     const recs = loadRecords();
     const r = recs.find(x => x.ts === ts);
-    if(!r){ enterAddNew("log"); return; }
+    if(!r){
+      enterAddNew("log");
+      return;
+    }
     editTs = ts;
     returnScreen = "log";
+
     $("editPill").classList.remove("hidden");
     $("btnDelete").classList.remove("hidden");
 
@@ -611,6 +734,7 @@
     $("hr").value  = (r.hr  ?? "") === null ? "" : (r.hr  ?? "");
     $("notes").value = (r.notes ?? "").toString();
     setSymSelected(r.symptoms || []);
+
     show("add");
   }
 
@@ -658,11 +782,13 @@
     if(!q) return true;
     const s = q.toLowerCase().trim();
     if(!s) return true;
+
     const bp = `${rec.sys ?? ""}/${rec.dia ?? ""}`.toLowerCase();
     const hr = `${rec.hr ?? ""}`.toLowerCase();
     const notes = (rec.notes || "").toLowerCase();
     const sym = (rec.symptoms || []).join(", ").toLowerCase();
     const dt = fmtDateTime(rec.ts).toLowerCase();
+
     return bp.includes(s) || hr.includes(s) || notes.includes(s) || sym.includes(s) || dt.includes(s);
   }
 
@@ -696,6 +822,7 @@
   function renderLog(){
     const list = $("logList");
     const recs = filteredRecords({fromId:"fromDate", toId:"toDate", searchId:"search"});
+
     list.innerHTML = "";
     if(recs.length === 0){
       const empty = document.createElement("div");
@@ -714,7 +841,11 @@
       e.setAttribute("aria-label","Open entry for editing");
 
       let armed = false;
-      function clearPressed(){ e.classList.remove("pressed"); armed = false; }
+
+      function clearPressed(){
+        e.classList.remove("pressed");
+        armed = false;
+      }
 
       e.addEventListener("pointerdown", (ev) => {
         if(ev.button != null && ev.button !== 0) return;
@@ -729,7 +860,10 @@
         const inside =
           ev.clientX >= rect.left && ev.clientX <= rect.right &&
           ev.clientY >= rect.top  && ev.clientY <= rect.bottom;
-        if(!inside) clearPressed();
+
+        if(!inside){
+          clearPressed();
+        }
       });
 
       e.addEventListener("pointercancel", clearPressed);
@@ -738,6 +872,7 @@
         if(!armed) return;
         e.classList.remove("pressed");
         armed = false;
+
         const ok = confirm("Edit this entry?");
         if(ok) enterAddEdit(r.ts);
       });
@@ -837,8 +972,15 @@
     ctx.arcTo(x,y+h,x,y,rr);
     ctx.arcTo(x,y,x+w,y,rr);
     ctx.closePath();
-    if(fill){ ctx.fillStyle = fill; ctx.fill(); }
-    if(stroke){ ctx.strokeStyle = stroke; ctx.lineWidth = 1; ctx.stroke(); }
+    if(fill){
+      ctx.fillStyle = fill;
+      ctx.fill();
+    }
+    if(stroke){
+      ctx.strokeStyle = stroke;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
   }
 
   function drawChartEmpty(ctx, canvas, msg){
@@ -881,48 +1023,53 @@
       if(v == null) { started = false; continue; }
       const x = xFromTs(r.ts, tMin, tMax, pad, W);
       const y = yTo(v, yMin, yMax, pad, H);
-      if(!started){ ctx.moveTo(x,y); started = true; }
-      else{ ctx.lineTo(x,y); }
+      if(!started){
+        ctx.moveTo(x,y);
+        started = true;
+      }else{
+        ctx.lineTo(x,y);
+      }
     }
     ctx.stroke();
-  }
-
-  function drawValueLabel(ctx, x, y, text, plotX0, plotX1, plotY0, plotY1, preferUp=true){
-    // label position preference
-    let tx = x + 8;
-    let ty = preferUp ? (y - 10) : (y + 22);
-
-    ctx.font = "16px system-ui,Segoe UI,Roboto";
-    const w = ctx.measureText(text).width;
-
-    // clamp horizontally
-    if(tx + w + 10 > plotX1) tx = plotX1 - w - 10;
-    if(tx < plotX0 + 6) tx = plotX0 + 6;
-
-    // clamp vertically
-    if(ty < plotY0 + 18) ty = y + 22;
-    if(ty > plotY1 - 6)  ty = plotY1 - 6;
-
-    const padX = 8;
-    const bgW = w + padX*2;
-    const bgH = 22;
-    const bgX = tx - padX;
-    const bgY = ty - bgH + 6;
-
-    ctx.save();
-    roundRect(ctx, bgX, bgY, bgW, bgH, 10, "rgba(0,0,0,.35)", "rgba(235,245,255,.12)");
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = "rgba(0,0,0,.55)";
-    ctx.fillStyle = "rgba(235,245,255,.92)";
-    ctx.strokeText(text, tx, ty);
-    ctx.fillText(text, tx, ty);
-    ctx.restore();
   }
 
   function pickColorForMetric(metric){
     if(metric === "sys") return "rgba(79,140,255,.98)";
     if(metric === "dia") return "rgba(216,224,240,.88)";
-    return "rgba(120,220,180,.92)"; // hr
+    return "rgba(120,220,180,.92)";
+  }
+
+  // 3x sized labels for daily highs/lows
+  function drawValueLabel(ctx, x, y, text, plotX0, plotX1, plotY0, plotY1, preferUp=true){
+    const FONT_PX = 48;  // 3x
+    const PAD_X = 20;
+    const BG_H  = 64;
+
+    let tx = x + 12;
+    let ty = preferUp ? (y - 18) : (y + (FONT_PX * 0.95));
+
+    ctx.font = `${FONT_PX}px system-ui,Segoe UI,Roboto`;
+    const w = ctx.measureText(text).width;
+
+    if(tx + w + PAD_X + 10 > plotX1) tx = plotX1 - w - PAD_X - 10;
+    if(tx < plotX0 + 10) tx = plotX0 + 10;
+
+    if(ty < plotY0 + BG_H) ty = y + (FONT_PX * 0.95);
+    if(ty > plotY1 - 10)   ty = plotY1 - 10;
+
+    const bgW = w + PAD_X*2;
+    const bgX = tx - PAD_X;
+    const bgY = ty - BG_H + 10;
+
+    ctx.save();
+    roundRect(ctx, bgX, bgY, bgW, BG_H, 16, "rgba(0,0,0,.40)", "rgba(235,245,255,.14)");
+
+    ctx.lineWidth = 7;
+    ctx.strokeStyle = "rgba(0,0,0,.62)";
+    ctx.fillStyle = "rgba(235,245,255,.94)";
+    ctx.strokeText(text, tx, ty);
+    ctx.fillText(text, tx, ty);
+    ctx.restore();
   }
 
   function renderCharts(){
@@ -968,7 +1115,7 @@
     const plotY0 = pad.t;
     const plotY1 = H - pad.b;
 
-    // alternating day bands (strong)
+    // alternating day bands (stronger)
     ctx.save();
     ctx.beginPath();
     ctx.rect(plotX0, plotY0, plotX1 - plotX0, plotY1 - plotY0);
@@ -1053,7 +1200,6 @@
     drawSeriesTimed(ctx, recs, r=>r.hr , tMin, tMax, yMin, yMax, pad, W, H, "rgba(120,220,180,.92)");
 
     // Label daily highs + lows for Sys/Dia/HR
-    // For each day, find max and min for each metric. Label them.
     function updateDayExtrema(map, dayStart, metric, ts, val){
       if(val == null) return;
       let entry = map.get(dayStart);
@@ -1072,19 +1218,16 @@
       updateDayExtrema(byDay, d0, "hr",  r.ts, r.hr);
     }
 
-    // Draw labels clipped inside plot
     ctx.save();
     ctx.beginPath();
     ctx.rect(plotX0, plotY0, plotX1 - plotX0, plotY1 - plotY0);
     ctx.clip();
 
-    // helper: draw dot + label (colored dot, white label)
     function dot(x,y,color){
       ctx.fillStyle = color;
       ctx.beginPath();
       ctx.arc(x, y, 3.3, 0, Math.PI*2);
       ctx.fill();
-      // white center for contrast
       ctx.fillStyle = "rgba(235,245,255,.92)";
       ctx.beginPath();
       ctx.arc(x, y, 1.4, 0, Math.PI*2);
@@ -1145,8 +1288,12 @@
     );
     if(!ok) return;
 
-    try{ localStorage.removeItem(STORAGE_KEY); }catch{}
+    try{
+      localStorage.removeItem(STORAGE_KEY);
+    }catch{}
+
     clearFilters();
+
     alert("All data cleared.");
     show("home");
   }
@@ -1196,7 +1343,9 @@
 
   $("btnExitHome").addEventListener("click", () => {
     window.close();
-    setTimeout(() => { alert("If it didn’t close: use your phone’s Back/Home."); }, 200);
+    setTimeout(() => {
+      alert("If it didn’t close: use your phone’s Back/Home.");
+    }, 200);
   });
 
   $("btnGoAdd").addEventListener("click", () => enterAddNew("home"));
@@ -1234,12 +1383,16 @@
     }
 
     const recs = loadRecords();
+
     if(editTs == null){
       recs.unshift({ ts: Date.now(), sys, dia, hr, notes, symptoms });
     }else{
       const idx = recs.findIndex(r => r.ts === editTs);
-      if(idx >= 0) recs[idx] = { ts: editTs, sys, dia, hr, notes, symptoms };
-      else recs.unshift({ ts: Date.now(), sys, dia, hr, notes, symptoms });
+      if(idx >= 0){
+        recs[idx] = { ts: editTs, sys, dia, hr, notes, symptoms };
+      }else{
+        recs.unshift({ ts: Date.now(), sys, dia, hr, notes, symptoms });
+      }
     }
 
     recs.sort((a,b)=> b.ts - a.ts);
@@ -1257,8 +1410,10 @@
     if(editTs == null) return;
     const ok = confirm("Delete this entry? This cannot be undone.");
     if(!ok) return;
+
     const recs = loadRecords().filter(r => r.ts !== editTs);
     saveRecords(recs);
+
     editTs = null;
     show("log");
   });
@@ -1326,7 +1481,6 @@ self.addEventListener('fetch', (e)=>{ });`;
   }
 
   function applyChartDefault30DaysIfEmpty(){
-    // Only set defaults if user hasn't set anything.
     if($("chartFrom").value || $("chartTo").value) return;
     const now = Date.now();
     const from = now - 30 * 24 * 60 * 60 * 1000;
@@ -1339,14 +1493,11 @@ self.addEventListener('fetch', (e)=>{ });`;
   registerSW();
   refreshInstallButton();
 
-  // Log filters default blank
   $("fromDate").value = "";
   $("toDate").value = "";
 
-  // Charts default: last 30 days
   applyChartDefault30DaysIfEmpty();
 
-  // Start at home
   show("home");
 
   window.addEventListener("resize", () => {
