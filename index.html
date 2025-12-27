@@ -3,169 +3,2148 @@
 Version Detail Notes
 App Version: v1.19B5
 Base: v1.19B4
-Surgical change:
-- Home panel framed with same accent border as screen border for visual consistency.
+Changes (requested):
+- Home panel now has an accent border matching the screen border (as drawn).
+- Change nothing else.
 -->
-
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="theme-color" content="#0b1324" />
-<title>Vitals Tracker</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1324" />
+  <title>Vitals Tracker</title>
 
-<link rel="manifest" id="manifestLink" href="#" />
+  <link rel="manifest" id="manifestLink" href="#" />
 
-<style>
-:root{
-  --bg0:#08101f;
-  --bg1:#0b1324;
-  --panel:#0c1528cc;
-  --stroke:rgba(235,245,255,.16);
-  --stroke2:rgba(235,245,255,.22);
-  --strokeBold:rgba(180,210,255,.42);
-  --text:rgba(235,245,255,.86);
-  --muted:rgba(235,245,255,.58);
-  --muted2:rgba(235,245,255,.42);
-  --accent:#2b4e7a;
-  --radius:28px;
-}
+  <style>
+    :root{
+      --bg0:#08101f;
+      --bg1:#0b1324;
+      --panel:#0c1528cc;
+      --stroke:rgba(235,245,255,.16);
+      --stroke2:rgba(235,245,255,.22);
+      --strokeBold:rgba(180,210,255,.42);
+      --text:rgba(235,245,255,.86);
+      --muted:rgba(235,245,255,.58);
+      --muted2:rgba(235,245,255,.42);
+      --accent:#2b4e7a;
+      --shadow:0 14px 40px rgba(0,0,0,.38);
+      --radius:26px;
+      --btnH:56px;
+      --pad:18px;
+      --font: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
 
-*{box-sizing:border-box}
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
 
-body{
-  margin:0;
-  min-height:100vh;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  color:var(--text);
-  background:linear-gradient(180deg,var(--bg0),var(--bg1));
-}
+    body{
+      margin:0;
+      font-family:var(--font);
+      color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 30% 0%, rgba(47,120,255,.22), transparent 55%),
+        radial-gradient(900px 600px at 80% 20%, rgba(91,214,178,.10), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+      display:flex;
+      justify-content:center;
+      padding: max(14px, env(safe-area-inset-top)) 12px max(14px, env(safe-area-inset-bottom));
+    }
 
-/* Screen border */
-body::before{
-  content:"";
-  position:fixed;
-  inset:10px;
-  border:3px solid var(--accent);
-  border-radius:32px;
-  pointer-events:none;
-  z-index:0;
-}
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      border:3px solid var(--accent);
+      pointer-events:none;
+      z-index:9999;
+    }
 
-.app{
-  position:relative;
-  z-index:1;
-  padding:18px;
-}
+    .app{
+      width:min(520px, 100%);
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
 
-/* Cards */
-.card{
-  background:linear-gradient(180deg,rgba(18,30,54,.92),rgba(10,18,36,.92));
-  border:1px solid var(--stroke);
-  border-radius:var(--radius);
-  padding:18px;
-}
+    .logoTitle{
+      margin:10px 6px 0;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      text-shadow: 0 10px 22px rgba(0,0,0,.35);
+    }
+    .logoTitle svg{
+      width:min(520px, 100%);
+      height:auto;
+      display:block;
+    }
 
-/* HOME PANEL ACCENT FRAME (NEW) */
-#home{
-  position:relative;
-  border-color:transparent;
-}
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid var(--stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: var(--pad);
+      backdrop-filter: blur(10px);
+    }
 
-#home::before{
-  content:"";
-  position:absolute;
-  inset:-3px;
-  border:3px solid var(--accent);
-  border-radius:calc(var(--radius) + 3px);
-  pointer-events:none;
-  z-index:1;
-}
+    /* v1.19B5: Home panel accent border to match screen border */
+    #home{
+      position:relative;
+    }
+    #home::before{
+      content:"";
+      position:absolute;
+      inset:-3px;
+      border:3px solid var(--accent);
+      border-radius: calc(var(--radius) + 3px);
+      pointer-events:none;
+      z-index:0;
+    }
+    #home > *{
+      position:relative;
+      z-index:1;
+    }
 
-#home > *{
-  position:relative;
-  z-index:2;
-}
+    .hidden{ display:none !important; }
 
-/* Buttons */
-.btn{
-  width:100%;
-  padding:16px;
-  border-radius:22px;
-  border:1px solid var(--stroke2);
-  background:rgba(255,255,255,.04);
-  color:var(--text);
-  font-size:20px;
-  font-weight:600;
-}
+    .btn{
+      height:var(--btnH);
+      border-radius: 999px;
+      border:1px solid var(--stroke2);
+      background: rgba(255,255,255,.03);
+      color:rgba(235,245,255,.78);
+      font-weight:650;
+      letter-spacing:.2px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 18px;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      font-size:18px;
+    }
+    .btn:active{ transform: translateY(1px); }
 
-.btn.primary{
-  background:linear-gradient(180deg, rgba(47,120,255,.92), rgba(47,120,255,.72));
-  border-color:rgba(120,170,255,.55);
-  color:rgba(235,245,255,.94);
-}
+    .btn.primary{
+      background: linear-gradient(180deg, rgba(47,120,255,.92), rgba(47,120,255,.72));
+      border-color: rgba(120,170,255,.55);
+      color: rgba(235,245,255,.90);
+    }
 
-.btn.small{
-  font-size:16px;
-  padding:12px 16px;
-}
+    .btn.danger{
+      background: linear-gradient(180deg, rgba(255,80,80,.18), rgba(255,80,80,.10));
+      border-color: rgba(255,120,120,.42);
+      color: rgba(255,225,225,.92);
+      box-shadow: 0 10px 26px rgba(0,0,0,.22);
+    }
 
-.btnRow{
-  display:flex;
-  gap:12px;
-}
+    .btn.small{
+      height:44px;
+      font-size:16px;
+      padding:0 14px;
+      font-weight:650;
+      white-space:nowrap;
+    }
 
-.btn.danger{
-  background:rgba(255,80,80,.14);
-  border-color:rgba(255,120,120,.45);
-  color:rgba(235,245,255,.9);
-}
+    .btn:disabled{
+      opacity:.55;
+      filter:saturate(.85);
+      transform:none !important;
+      pointer-events:none;
+    }
 
-/* Footer */
-.footer{
-  margin-top:14px;
-  font-size:13px;
-  color:var(--muted2);
-  display:flex;
-  justify-content:space-between;
-}
-</style>
+    .row{ display:flex; gap:12px; }
+    .row.center{ align-items:center; }
+    .grow{ flex:1; }
+
+    .label{
+      font-size:16px;
+      color:var(--muted);
+      font-weight:650;
+      margin: 12px 4px 8px;
+    }
+    .subtle{
+      font-size:14px;
+      color:var(--muted2);
+      margin: 6px 4px 0;
+    }
+
+    .field{
+      border:2px solid var(--strokeBold);
+      background: rgba(255,255,255,.06);
+      color: rgba(235,245,255,.86);
+      border-radius: 18px;
+      height:54px;
+      padding: 0 14px;
+      font-size:18px;
+      outline:none;
+      width:100%;
+    }
+    .field::placeholder{ color: rgba(235,245,255,.35); }
+    .field:focus{
+      border-color: rgba(90,150,255,.78);
+      box-shadow: 0 0 0 4px rgba(47,120,255,.16);
+    }
+    textarea.field{
+      height:64px;
+      padding: 12px 14px;
+      resize:none;
+      line-height:1.25;
+    }
+
+    .homeMain{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      margin-top:8px;
+    }
+    .homeMain > .btn:not(.small){
+      font-size:26px;
+      font-weight:750;
+      letter-spacing:.3px;
+    }
+
+    .homeFooterRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-top:8px;
+      flex-wrap:nowrap;
+    }
+
+    .footerTiny{
+      margin-top:10px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      font-size: 12px;
+      color: rgba(235,245,255,.38);
+    }
+
+    .timeLine{
+      margin: 4px 4px 14px;
+      color: rgba(235,245,255,.82);
+      font-weight:750;
+      letter-spacing:.3px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      line-height:1.05;
+      font-size: clamp(18px, 6.4vw, 44px);
+    }
+
+    .triple{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+    .triple .miniLabel{
+      margin: 0 4px 8px;
+      color: var(--muted);
+      font-weight:650;
+      font-size:16px;
+    }
+
+    .symGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 14px;
+      padding: 2px 2px 0;
+      margin-top: 0;
+    }
+    .symItem{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding: 2px 6px;
+      border-radius: 14px;
+      transition: background .12s ease, border-color .12s ease;
+    }
+    .box{
+      width:30px;
+      height:30px;
+      border-radius: 8px;
+      border:2px solid rgba(235,245,255,.40);
+      background: rgba(255,255,255,.03);
+      display:grid;
+      place-items:center;
+      flex:0 0 auto;
+    }
+    .check{
+      width:14px;
+      height:8px;
+      border-left:3px solid transparent;
+      border-bottom:3px solid transparent;
+      transform: rotate(-45deg);
+      margin-top:-2px;
+    }
+    .symText{
+      font-size:16px;
+      font-weight:500;
+      color: rgba(235,245,255,.76);
+      line-height:1.1;
+    }
+    .symItem.selected{ background: rgba(47,120,255,.16); }
+    .symItem.selected .box{
+      border-color: rgba(90,150,255,.90);
+      background: rgba(47,120,255,.18);
+    }
+    .symItem.selected .check{
+      border-left-color: rgba(235,245,255,.92);
+      border-bottom-color: rgba(235,245,255,.92);
+    }
+
+    .panelButtons{
+      display:flex;
+      gap:12px;
+      margin-top: 10px;
+      flex-wrap:wrap;
+    }
+
+    #log .label{ margin: 8px 4px 6px; }
+    #log .filters{ margin-top: 8px; gap: 10px; }
+    #log .dateField{ gap: 6px; }
+    #log > .row.center{ margin-bottom: 4px; }
+
+    .entry{
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.03);
+      border-radius: 22px;
+      padding: 8px 10px 7px;
+      margin-top: 6px;
+      touch-action: manipulation;
+    }
+    .entry.pressed{
+      background: rgba(47,120,255,.14);
+      border-color: rgba(90,150,255,.55);
+    }
+    .entry:active{ transform: translateY(1px); }
+    .entryTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:10px;
+      margin-bottom: 2px;
+    }
+    .entryTime{
+      font-size:13px;
+      color: rgba(235,245,255,.46);
+      white-space:nowrap;
+    }
+    .entryBPHR{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:baseline;
+    }
+    .bpBig{
+      font-size:20px;
+      font-weight:800;
+      letter-spacing:.1px;
+      white-space:nowrap;
+    }
+    .hrBig{
+      font-size:20px;
+      font-weight:800;
+      color: rgba(235,245,255,.72);
+      white-space:nowrap;
+      letter-spacing:.1px;
+    }
+    .entryLine{
+      margin-top: 3px;
+      color: rgba(235,245,255,.62);
+      font-size:15px;
+      line-height:1.12;
+    }
+    .entryLine b{ color: rgba(235,245,255,.70); }
+
+    .filters{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top:10px;
+    }
+    .dateField{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .dateField .miniLabel{
+      margin: 0 4px;
+      color: var(--muted);
+      font-weight:650;
+      font-size:14px;
+    }
+    input[type="date"].field, input[type="week"].field{
+      font-size:16px;
+      padding-right: 10px;
+    }
+
+    /* Search row: field + Search button */
+    .searchRow{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .searchRow .field{
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .searchRow .btn.small{
+      flex: 0 0 auto;
+      height:54px;         /* match field height */
+      font-size:16px;
+      padding: 0 16px;
+      border-radius: 18px; /* matches input curvature better for side-by-side */
+    }
+
+    canvas{
+      width:100%;
+      height:280px;
+      border-radius: 22px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.02);
+      margin-top: 10px;
+      touch-action: none;
+    }
+
+    .noteLabel{
+      margin: 12px 4px 8px;
+      color:var(--muted);
+      font-weight:650;
+      font-size:16px;
+    }
+    .noteLabel em{
+      font-style:italic;
+      color: rgba(235,245,255,.42);
+      font-weight:600;
+    }
+
+    .editPill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke2);
+      background: rgba(255,255,255,.03);
+      color: rgba(235,245,255,.70);
+      font-weight:700;
+      letter-spacing:.2px;
+      margin: 0 4px 10px;
+      width: fit-content;
+    }
+
+    .modal{
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: max(16px, env(safe-area-inset-top)) 14px max(16px, env(safe-area-inset-bottom));
+      background: rgba(0,0,0,.56);
+      z-index: 9998;
+    }
+    .modalCard{
+      width:min(520px, 100%);
+      border-radius: 26px;
+      border: 2px solid var(--accent);
+      background: linear-gradient(180deg, rgba(12,21,40,.96), rgba(8,16,31,.96));
+      box-shadow: 0 18px 60px rgba(0,0,0,.55);
+      padding: 18px;
+      backdrop-filter: blur(10px);
+    }
+    .modalTitle{
+      font-weight: 900;
+      letter-spacing: .2px;
+      color: rgba(235,245,255,.92);
+      font-size: clamp(22px, 6.5vw, 34px);
+      line-height: 1.05;
+      margin: 4px 2px 14px;
+    }
+    .modalSub{
+      color: rgba(235,245,255,.56);
+      font-size: 14px;
+      margin: 0 2px 14px;
+      white-space: pre-wrap;
+    }
+    .modalBtns{
+      display:flex;
+      gap:12px;
+      margin-top: 6px;
+      flex-wrap:wrap;
+    }
+    .modalBtns .btn{
+      flex:1;
+      height: 54px;
+      font-size: 18px;
+      font-weight: 800;
+      min-width: 140px;
+    }
+
+    #exportModal .modalBtns{
+      flex-wrap: nowrap;
+    }
+    #exportModal .modalBtns .btn{
+      min-width: 0;
+      flex: 1 1 0;
+      font-size: 16px;
+      height: 52px;
+      padding: 0 10px;
+      white-space: nowrap;
+    }
+    #exportModal .btn.primary{
+      color: rgba(235,245,255,.90);
+    }
+  </style>
 </head>
 
 <body>
-<div class="app">
+  <div class="app">
 
-  <div id="home" class="card">
-    <h1 style="margin-top:0">Vitals Tracker</h1>
+    <div class="logoTitle" aria-label="Vitals Tracker">
+      <svg viewBox="0 0 900 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Vitals Tracker">
+        <defs>
+          <linearGradient id="vtg" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#4fa3ff"/>
+            <stop offset="100%" stop-color="#2f78ff"/>
+          </linearGradient>
+          <filter id="vts" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="rgba(0,0,0,.35)"/>
+          </filter>
+        </defs>
 
-    <button class="btn primary">ADD Reading</button>
-    <div style="height:12px"></div>
-    <button class="btn">Log</button>
-    <div style="height:12px"></div>
-    <button class="btn">Charts</button>
+        <g transform="translate(46 24)" filter="url(#vts)">
+          <rect x="0" y="0" width="92" height="92" rx="26" fill="rgba(255,255,255,.06)" stroke="rgba(235,245,255,.22)" stroke-width="2"/>
+          <path d="M18 54h18l10-32 16 58 12-36h28" fill="none" stroke="url(#vtg)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
 
-    <div style="height:18px"></div>
-
-    <div class="btnRow">
-      <button class="btn small">Uninstall</button>
-      <button class="btn small">Clear Data</button>
-      <button class="btn small danger">Exit</button>
+        <text x="160" y="92"
+              font-family="system-ui,Segoe UI,Roboto,Helvetica,Arial"
+              font-size="76"
+              font-weight="850"
+              fill="url(#vtg)"
+              letter-spacing=".5"
+              filter="url(#vts)">Vitals Tracker</text>
+      </svg>
     </div>
 
-    <div class="footer">
-      <div>v1.19B5</div>
-      <div>developed by Keyth Jyles</div>
+    <div id="home" class="card">
+      <div class="homeMain">
+        <button id="btnGoAdd" class="btn primary">ADD Reading</button>
+        <button id="btnGoLog" class="btn">Log</button>
+        <button id="btnGoCharts" class="btn">Charts</button>
+
+        <div class="homeFooterRow">
+          <button id="btnInstall" class="btn small">Install</button>
+          <button id="btnClearAll" class="btn small">Clear Data</button>
+          <div class="grow"></div>
+          <button id="btnExitHome" class="btn small danger">Exit</button>
+        </div>
+
+        <div class="subtle">Data stays on your phone (local only).</div>
+
+        <div class="footerTiny">
+          <div>v1.19B5</div>
+          <div>developed by Keyth Jyles</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="add" class="card hidden">
+      <div id="editPill" class="editPill hidden">Editing entry</div>
+
+      <div id="timeLine" class="timeLine">--:--:-- --, --/--/----</div>
+
+      <div class="triple">
+        <div>
+          <div class="miniLabel">Systolic</div>
+          <input id="sys" class="field" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 132" />
+        </div>
+        <div>
+          <div class="miniLabel">Diastolic</div>
+          <input id="dia" class="field" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 91" />
+        </div>
+        <div>
+          <div class="miniLabel">Heart Rate</div>
+          <input id="hr" class="field" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 72" />
+        </div>
+      </div>
+
+      <div class="noteLabel">Notes <em>(optional)</em></div>
+      <textarea id="notes" class="field" placeholder="optional"></textarea>
+
+      <div class="label">Symptoms</div>
+      <div id="symGrid" class="symGrid"></div>
+
+      <div class="panelButtons">
+        <button id="btnSave" class="btn primary grow">Save</button>
+        <button id="btnDelete" class="btn grow hidden">Delete</button>
+        <button id="btnBackFromAdd" class="btn grow">Back</button>
+      </div>
+    </div>
+
+    <div id="log" class="card hidden">
+      <div class="row center">
+        <button id="btnExportLog" class="btn small">Export</button>
+        <button id="btnAddFromLog" class="btn small">ADD</button>
+        <div class="grow"></div>
+        <button id="btnBackFromLog" class="btn small">Back</button>
+      </div>
+
+      <div class="label">Search</div>
+      <div class="searchRow">
+        <input id="search" class="field" placeholder="Type a word: sweaty, dizzy, headache..." />
+        <button id="btnRunSearch" class="btn small">Search</button>
+      </div>
+
+      <div class="filters">
+        <div class="dateField">
+          <div class="miniLabel">From</div>
+          <input id="fromDate" class="field" type="date" />
+        </div>
+        <div class="dateField">
+          <div class="miniLabel">To</div>
+          <input id="toDate" class="field" type="date" />
+        </div>
+      </div>
+
+      <div id="logList"></div>
+    </div>
+
+    <div id="charts" class="card hidden">
+      <div class="row center">
+        <button id="btnExportCharts" class="btn small">Export</button>
+        <div class="grow"></div>
+        <button id="btnBackFromCharts" class="btn small">Back</button>
+      </div>
+
+      <div class="subtle">Weekly view (7 days). Pinch to zoom; drag to pan.</div>
+
+      <div class="filters">
+        <div class="dateField" style="grid-column:1 / span 2;">
+          <div class="miniLabel">Week</div>
+          <input id="chartWeek" class="field" type="week" />
+        </div>
+      </div>
+
+      <canvas id="chart" width="900" height="520"></canvas>
+    </div>
+
+  </div>
+
+  <div id="editModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+    <div class="modalCard">
+      <div id="editModalTitle" class="modalTitle">Edit this reading?</div>
+      <div class="modalSub">Press Edit to open this entry.</div>
+      <div class="modalBtns">
+        <button id="btnEditCancel" class="btn">Cancel</button>
+        <button id="btnEditConfirm" class="btn primary">Edit</button>
+      </div>
     </div>
   </div>
 
-</div>
+  <div id="exportModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle">
+    <div class="modalCard">
+      <div id="exportModalTitle" class="modalTitle">Export ready</div>
+      <div id="exportModalSub" class="modalSub">
+Export report was copied to your clipboard.
+
+You can paste it into any messaging app, email, Notes, or any app that accepts text.
+
+Optional:
+- Share sends the report to another app.
+- Save creates a .txt file on your device.
+      </div>
+      <div class="modalBtns">
+        <button id="btnExportClose" class="btn">Close</button>
+        <button id="btnExportShare" class="btn">Share</button>
+        <button id="btnExportSave" class="btn primary">Save .txt</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  "use strict";
+
+  const APP_VERSION = "v1.19B5";
+  const STORAGE_KEY = "vitals_tracker_records_v1";
+  const SYMPTOMS = [
+    "Sweaty","Dizzy","Panic","Brain fog","Chest tight","Headache",
+    "Nausea","Short breath","Hot ears","Shaky","Blurred vision","Weakness"
+  ];
+
+  const DAY_MS = 24*60*60*1000;
+
+  function numOrNull(v){
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function loadRecords(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return [];
+      const arr = JSON.parse(raw);
+      if(!Array.isArray(arr)) return [];
+      return arr
+        .filter(r => r && typeof r.ts === "number")
+        .map(r => ({
+          ts: r.ts,
+          sys: numOrNull(r.sys),
+          dia: numOrNull(r.dia),
+          hr:  numOrNull(r.hr),
+          notes: (r.notes ?? "").toString(),
+          symptoms: Array.isArray(r.symptoms) ? r.symptoms.map(String) : []
+        }))
+        .sort((a,b)=> b.ts - a.ts);
+    }catch{
+      return [];
+    }
+  }
+
+  function saveRecords(recs){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(recs));
+  }
+
+  const $ = (id) => document.getElementById(id);
+  const screens = ["home","add","log","charts"];
+
+  function focusTopOfPanel(screen){
+    window.scrollTo({top:0, left:0, behavior:"auto"});
+
+    if(screen === "add"){
+      if(editTs == null){
+        setTimeout(() => { try{ $("sys").focus({preventScroll:true}); }catch{} }, 0);
+      }else{
+        setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 0);
+      }
+    }
+  }
+
+  function show(screen){
+    for(const s of screens){
+      $(s).classList.toggle("hidden", s !== screen);
+    }
+    if(screen === "log"){ renderLog(); }
+    if(screen === "charts"){
+      initWeekDefaultIfNeeded();
+      applyWeekToBase(true);
+      renderCharts();
+    }
+    if(screen === "add"){
+      tickTime();
+      adjustTimeFont();
+    }
+    focusTopOfPanel(screen);
+  }
+
+  function fmtDateTime(ts){
+    const d = new Date(ts);
+    const parts = new Intl.DateTimeFormat(undefined, {
+      year:"numeric", month:"2-digit", day:"2-digit",
+      hour:"2-digit", minute:"2-digit", second:"2-digit"
+    }).formatToParts(d);
+    const map = Object.fromEntries(parts.map(p=>[p.type,p.value]));
+    const mm = map.month, dd = map.day, yy = map.year;
+    const hh = map.hour, mi = map.minute, ss = map.second;
+    const dp = map.dayPeriod ? ` ${map.dayPeriod}` : "";
+    return `${mm}/${dd}/${yy}, ${hh}:${mi}:${ss}${dp}`;
+  }
+
+  function fmtTimeCommaDate(ts){
+    const d = new Date(ts);
+    const time = new Intl.DateTimeFormat(undefined, {
+      hour:"2-digit", minute:"2-digit", second:"2-digit"
+    }).format(d);
+    const date = new Intl.DateTimeFormat(undefined, {
+      month:"2-digit", day:"2-digit", year:"numeric"
+    }).format(d);
+    return `${time}, ${date}`;
+  }
+
+  function startOfDay(ts){
+    const d = new Date(ts);
+    d.setHours(0,0,0,0);
+    return d.getTime();
+  }
+
+  function clampEndOfDay(ts){
+    const d = new Date(ts);
+    d.setHours(23,59,59,999);
+    return d.getTime();
+  }
+
+  function parseDateField(v){
+    if(!v) return null;
+    const [y,m,d] = v.split("-").map(Number);
+    if(!y || !m || !d) return null;
+    return new Date(y, m-1, d, 0, 0, 0, 0).getTime();
+  }
+
+  function escapeHtml(s){
+    return String(s)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function dowShortFromTs(ts){
+    return new Intl.DateTimeFormat(undefined, { weekday:"short" }).format(new Date(ts));
+  }
+  function mmddFromTs(ts){
+    return new Intl.DateTimeFormat(undefined, { month:"2-digit", day:"2-digit" }).format(new Date(ts));
+  }
+
+  /* =========================
+     Custom edit prompt modal
+     ========================= */
+
+  let pendingEditTs = null;
+  let modalPrevFocus = null;
+  let modalOpenedAt = 0;
+  let enableEditTimer = null;
+
+  function openEditPrompt(ts){
+    pendingEditTs = ts;
+    modalPrevFocus = document.activeElement || null;
+    modalOpenedAt = Date.now();
+
+    const m = $("editModal");
+    const btnEdit = $("btnEditConfirm");
+
+    btnEdit.disabled = true;
+    if(enableEditTimer) clearTimeout(enableEditTimer);
+    enableEditTimer = setTimeout(() => { btnEdit.disabled = false; }, 450);
+
+    m.classList.remove("hidden");
+
+    setTimeout(() => {
+      try{ $("btnEditCancel").focus({preventScroll:true}); }catch{}
+    }, 0);
+  }
+
+  function closeEditPrompt(){
+    pendingEditTs = null;
+    $("editModal").classList.add("hidden");
+    try{ modalPrevFocus?.focus?.({preventScroll:true}); }catch{}
+  }
+
+  function confirmEditPrompt(){
+    if($("btnEditConfirm").disabled) return;
+    const ts = pendingEditTs;
+    closeEditPrompt();
+    if(ts != null) enterAddEdit(ts);
+  }
+
+  $("btnEditCancel").addEventListener("click", (e) => { e.preventDefault(); closeEditPrompt(); });
+  $("btnEditConfirm").addEventListener("click", (e) => { e.preventDefault(); confirmEditPrompt(); });
+
+  $("editModal").addEventListener("click", (e) => {
+    const justOpened = (Date.now() - modalOpenedAt) < 220;
+    if(justOpened) { e.preventDefault(); e.stopPropagation(); return; }
+    if(e.target === $("editModal")) closeEditPrompt();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    const open = !$("editModal").classList.contains("hidden");
+    if(!open) return;
+
+    if(e.key === "Escape"){
+      e.preventDefault();
+      closeEditPrompt();
+      return;
+    }
+    if(e.key === "Enter"){
+      const ae = document.activeElement;
+      if(ae && ae.id === "btnEditCancel"){
+        e.preventDefault();
+        closeEditPrompt();
+      }else{
+        e.preventDefault();
+        confirmEditPrompt();
+      }
+    }
+  });
+
+  /* =========================
+     Export modal (clipboard/share/save)
+     ========================= */
+
+  let exportPayload = null;
+  let exportPrevFocus = null;
+  let exportOpenedAt = 0;
+  let enableExportTimer = null;
+
+  function isShareAvailable(){
+    return !!(navigator.share && typeof navigator.share === "function");
+  }
+
+  function openExportModal(payload){
+    exportPayload = payload;
+    exportPrevFocus = document.activeElement || null;
+    exportOpenedAt = Date.now();
+
+    const btnClose = $("btnExportClose");
+    const btnShare = $("btnExportShare");
+    const btnSave  = $("btnExportSave");
+
+    btnClose.disabled = true;
+    btnShare.disabled = true;
+    btnSave.disabled  = true;
+
+    $("exportModal").classList.remove("hidden");
+
+    if(enableExportTimer) clearTimeout(enableExportTimer);
+    enableExportTimer = setTimeout(() => {
+      btnClose.disabled = false;
+      btnShare.disabled = !isShareAvailable();
+      btnSave.disabled  = false;
+    }, 450);
+
+    setTimeout(() => {
+      try{ btnClose.focus({preventScroll:true}); }catch{}
+    }, 0);
+  }
+
+  function closeExportModal(){
+    exportPayload = null;
+    $("exportModal").classList.add("hidden");
+    try{ exportPrevFocus?.focus?.({preventScroll:true}); }catch{}
+  }
+
+  $("btnExportClose").addEventListener("click", (e) => { e.preventDefault(); closeExportModal(); });
+
+  $("exportModal").addEventListener("click", (e) => {
+    const justOpened = (Date.now() - exportOpenedAt) < 220;
+    if(justOpened){ e.preventDefault(); e.stopPropagation(); return; }
+    if(e.target === $("exportModal")) closeExportModal();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    const open = !$("exportModal").classList.contains("hidden");
+    if(!open) return;
+    if(e.key === "Escape"){
+      e.preventDefault();
+      closeExportModal();
+    }
+  });
+
+  async function copyToClipboard(text){
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+    return false;
+  }
+
+  function downloadText(text, filename){
+    const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  async function saveTextWithPicker(text, suggestedName){
+    const canPick = typeof window.showSaveFilePicker === "function";
+    if(!canPick) return false;
+
+    const opts = {
+      suggestedName: suggestedName || "vitals_report.txt",
+      types: [{ description: "Text", accept: {"text/plain": [".txt"]} }]
+    };
+
+    const handle = await window.showSaveFilePicker(opts);
+    const writable = await handle.createWritable();
+    await writable.write(new Blob([text], {type:"text/plain;charset=utf-8"}));
+    await writable.close();
+    return true;
+  }
+
+  $("btnExportShare").addEventListener("click", async (e) => {
+    e.preventDefault();
+    if(!exportPayload) return;
+    if($("btnExportShare").disabled) return;
+
+    if(!isShareAvailable()){
+      alert("Share is not available on this device/browser.");
+      return;
+    }
+    try{
+      await navigator.share({
+        title: "Vitals Tracker Export",
+        text: exportPayload.text
+      });
+    }catch{}
+  });
+
+  $("btnExportSave").addEventListener("click", async (e) => {
+    e.preventDefault();
+    if(!exportPayload) return;
+    if($("btnExportSave").disabled) return;
+
+    try{
+      const ok = await saveTextWithPicker(exportPayload.text, exportPayload.filename);
+      if(ok){
+        alert("Saved.");
+        return;
+      }
+    }catch{}
+
+    downloadText(exportPayload.text, exportPayload.filename || "vitals_report.txt");
+  });
+
+  /* =========================
+     Symptoms UI
+     ========================= */
+
+  const symGrid = $("symGrid");
+  const symState = new Map();
+
+  function buildSymptoms(){
+    symGrid.innerHTML = "";
+    symState.clear();
+
+    for(const name of SYMPTOMS){
+      const item = document.createElement("div");
+      item.className = "symItem";
+      item.setAttribute("role","checkbox");
+      item.setAttribute("aria-checked","false");
+      item.tabIndex = 0;
+
+      const box = document.createElement("div");
+      box.className = "box";
+      const check = document.createElement("div");
+      check.className = "check";
+      box.appendChild(check);
+
+      const text = document.createElement("div");
+      text.className = "symText";
+      text.textContent = name;
+
+      item.appendChild(box);
+      item.appendChild(text);
+
+      const setSelected = (on) => {
+        item.classList.toggle("selected", on);
+        item.setAttribute("aria-checked", on ? "true" : "false");
+        symState.set(name, on);
+      };
+
+      setSelected(false);
+
+      const toggle = () => setSelected(!symState.get(name));
+      item.addEventListener("click", toggle);
+      item.addEventListener("keydown", (e) => {
+        if(e.key === "Enter" || e.key === " "){
+          e.preventDefault();
+          toggle();
+        }
+      });
+
+      symGrid.appendChild(item);
+    }
+  }
+
+  function selectedSymptoms(){
+    return SYMPTOMS.filter(s => symState.get(s));
+  }
+
+  function clearSymUI(){
+    for(const k of SYMPTOMS) symState.set(k,false);
+    for(const el of symGrid.querySelectorAll(".symItem")){
+      el.classList.remove("selected");
+      el.setAttribute("aria-checked","false");
+    }
+  }
+
+  function setSymSelected(names){
+    const set = new Set((names || []).map(String));
+    for(const name of SYMPTOMS){
+      symState.set(name, set.has(name));
+    }
+    for(const el of symGrid.querySelectorAll(".symItem")){
+      const label = el.querySelector(".symText")?.textContent || "";
+      const on = set.has(label);
+      el.classList.toggle("selected", on);
+      el.setAttribute("aria-checked", on ? "true" : "false");
+    }
+  }
+
+  function clearAddForm(){
+    $("sys").value = "";
+    $("dia").value = "";
+    $("hr").value = "";
+    $("notes").value = "";
+    clearSymUI();
+  }
+
+  /* =========================
+     Add/Edit
+     ========================= */
+
+  let timeTimer = null;
+  let editTs = null;
+  let returnScreen = "home";
+
+  function enterAddNew(from="home"){
+    editTs = null;
+    returnScreen = from;
+    $("editPill").classList.add("hidden");
+    $("btnDelete").classList.add("hidden");
+    clearAddForm();
+    show("add");
+  }
+
+  function enterAddEdit(ts){
+    const recs = loadRecords();
+    const r = recs.find(x => x.ts === ts);
+    if(!r){
+      enterAddNew("log");
+      return;
+    }
+    editTs = ts;
+    returnScreen = "log";
+
+    $("editPill").classList.remove("hidden");
+    $("btnDelete").classList.remove("hidden");
+
+    $("sys").value = (r.sys ?? "") === null ? "" : (r.sys ?? "");
+    $("dia").value = (r.dia ?? "") === null ? "" : (r.dia ?? "");
+    $("hr").value  = (r.hr  ?? "") === null ? "" : (r.hr  ?? "");
+    $("notes").value = (r.notes ?? "").toString();
+    setSymSelected(r.symptoms || []);
+
+    show("add");
+  }
+
+  function tickTime(){
+    const line = $("timeLine");
+    const ts = (editTs != null) ? editTs : Date.now();
+    line.textContent = fmtTimeCommaDate(ts);
+    adjustTimeFont();
+    if(timeTimer) clearTimeout(timeTimer);
+    timeTimer = setTimeout(tickTime, 900);
+  }
+
+  function adjustTimeFont(){
+    const el = $("timeLine");
+    if(!el) return;
+    const parent = el.parentElement;
+    if(!parent) return;
+
+    el.style.fontSize = "";
+    const maxW = parent.clientWidth - 8;
+
+    let fs = parseFloat(getComputedStyle(el).fontSize) || 28;
+    let guard = 0;
+    while(el.scrollWidth > maxW && fs > 16 && guard < 30){
+      fs -= 1;
+      el.style.fontSize = fs + "px";
+      guard++;
+    }
+  }
+
+  /* =========================
+     Log filtering + render
+     ========================= */
+
+  function recordMatches(rec, q){
+    if(!q) return true;
+    const s = q.toLowerCase().trim();
+    if(!s) return true;
+
+    const bp = `${rec.sys ?? ""}/${rec.dia ?? ""}`.toLowerCase();
+    const hr = `${rec.hr ?? ""}`.toLowerCase();
+    const notes = (rec.notes || "").toLowerCase();
+    const sym = (rec.symptoms || []).join(", ").toLowerCase();
+    const dt = fmtDateTime(rec.ts).toLowerCase();
+
+    return bp.includes(s) || hr.includes(s) || notes.includes(s) || sym.includes(s) || dt.includes(s);
+  }
+
+  function filteredRecords({fromId,toId,searchId}){
+    const recs = loadRecords();
+
+    const q = (searchId ? $(searchId).value : "").trim();
+
+    const fromV = fromId ? $(fromId).value : "";
+    const toV   = toId ? $(toId).value : "";
+
+    const fromTs = parseDateField(fromV);
+    const toMid  = parseDateField(toV);
+    const toTs   = toMid != null ? clampEndOfDay(toMid) : null;
+
+    return recs.filter(r => {
+      if(fromTs != null && r.ts < fromTs) return false;
+      if(toTs != null && r.ts > toTs) return false;
+      return recordMatches(r, q);
+    });
+  }
+
+  function renderLog(){
+    const list = $("logList");
+    const recs = filteredRecords({fromId:"fromDate", toId:"toDate", searchId:"search"});
+
+    list.innerHTML = "";
+    if(recs.length === 0){
+      const empty = document.createElement("div");
+      empty.className = "subtle";
+      empty.style.marginTop = "10px";
+      empty.textContent = "No matching records.";
+      list.appendChild(empty);
+      return;
+    }
+
+    for(const r of recs){
+      const e = document.createElement("div");
+      e.className = "entry";
+      e.tabIndex = 0;
+      e.setAttribute("role","button");
+      e.setAttribute("aria-label","Open entry for editing");
+      e.dataset.ts = String(r.ts);
+
+      const top = document.createElement("div");
+      top.className = "entryTop";
+
+      const t = document.createElement("div");
+      t.className = "entryTime";
+      t.textContent = fmtDateTime(r.ts);
+
+      top.appendChild(t);
+      e.appendChild(top);
+
+      const line1 = document.createElement("div");
+      line1.className = "entryBPHR";
+
+      const bp = document.createElement("div");
+      bp.className = "bpBig";
+      bp.textContent = `BP ${r.sys ?? "—"}/${r.dia ?? "—"}`;
+
+      const hr = document.createElement("div");
+      hr.className = "hrBig";
+      hr.textContent = `HR ${r.hr ?? "—"}`;
+
+      line1.appendChild(bp);
+      line1.appendChild(hr);
+      e.appendChild(line1);
+
+      const sym = (r.symptoms && r.symptoms.length) ? r.symptoms.join(", ") : "None";
+      const notes = (r.notes && r.notes.trim()) ? r.notes.trim() : "None";
+
+      const l2 = document.createElement("div");
+      l2.className = "entryLine";
+      l2.innerHTML = `<b>Symptoms:</b> ${escapeHtml(sym)}`;
+      e.appendChild(l2);
+
+      const l3 = document.createElement("div");
+      l3.className = "entryLine";
+      l3.innerHTML = `<b>Notes:</b> ${escapeHtml(notes)}`;
+      e.appendChild(l3);
+
+      list.appendChild(e);
+    }
+
+    try { document.activeElement && document.activeElement.blur(); } catch {}
+  }
+
+  /* =========================
+     Log tap handling (delegated)
+     ========================= */
+
+  const logTap = { activeEl:null, activeTs:null, pointerId:null, tracking:false };
+
+  function findEntryEl(target){
+    if(!target) return null;
+    const el = target.closest ? target.closest(".entry") : null;
+    if(!el) return null;
+    if(el.closest && el.closest("#logList") !== $("logList")) return null;
+    return el;
+  }
+
+  function rectInside(el, clientX, clientY){
+    const SLOP_PX = 14;
+    const rect = el.getBoundingClientRect();
+    return (
+      clientX >= rect.left - SLOP_PX && clientX <= rect.right + SLOP_PX &&
+      clientY >= rect.top  - SLOP_PX && clientY <= rect.bottom + SLOP_PX
+    );
+  }
+
+  function clearLogPress(){
+    if(logTap.activeEl) logTap.activeEl.classList.remove("pressed");
+    logTap.activeEl = null;
+    logTap.activeTs = null;
+    logTap.pointerId = null;
+    logTap.tracking = false;
+  }
+
+  $("logList").addEventListener("pointerdown", (ev) => {
+    if($("log").classList.contains("hidden")) return;
+    if(ev.button != null && ev.button !== 0) return;
+
+    const entry = findEntryEl(ev.target);
+    if(!entry) return;
+
+    const ts = Number(entry.dataset.ts);
+    if(!Number.isFinite(ts)) return;
+
+    clearLogPress();
+    logTap.activeEl = entry;
+    logTap.activeTs = ts;
+    logTap.pointerId = ev.pointerId;
+    logTap.tracking = true;
+
+    entry.classList.add("pressed");
+
+    try{ entry.setPointerCapture(ev.pointerId); }catch{}
+
+    ev.preventDefault();
+    ev.stopPropagation();
+  });
+
+  $("logList").addEventListener("pointermove", (ev) => {
+    if(!logTap.tracking) return;
+    if(logTap.pointerId != null && ev.pointerId !== logTap.pointerId) return;
+    if(!logTap.activeEl) return;
+
+    if(!rectInside(logTap.activeEl, ev.clientX, ev.clientY)){
+      clearLogPress();
+    }
+  });
+
+  $("logList").addEventListener("pointercancel", () => { clearLogPress(); });
+
+  $("logList").addEventListener("pointerup", (ev) => {
+    if(!logTap.tracking) return;
+    if(logTap.pointerId != null && ev.pointerId !== logTap.pointerId) return;
+
+    const entry = logTap.activeEl;
+    const ts = logTap.activeTs;
+
+    const inside = entry ? rectInside(entry, ev.clientX, ev.clientY) : false;
+    clearLogPress();
+
+    if(inside && ts != null){
+      setTimeout(() => openEditPrompt(ts), 0);
+    }
+
+    ev.preventDefault();
+    ev.stopPropagation();
+  });
+
+  $("logList").addEventListener("keydown", (ev) => {
+    const entry = findEntryEl(ev.target);
+    if(!entry) return;
+    if(ev.key === "Enter" || ev.key === " "){
+      const ts = Number(entry.dataset.ts);
+      if(!Number.isFinite(ts)) return;
+      ev.preventDefault();
+      openEditPrompt(ts);
+    }
+  });
+
+  /* =========================
+     Export with report header
+     ========================= */
+
+  function buildReportHeader({title, rangeLabel, notes}){
+    const now = fmtDateTime(Date.now());
+    const lines = [
+      "Vitals Tracker — Export Report",
+      `App Version: ${APP_VERSION}`,
+      `Report: ${title}`,
+      `Generated: ${now}`,
+      rangeLabel ? `Range: ${rangeLabel}` : "",
+      "",
+      "How this data was captured:",
+      "- Readings are entered manually into Vitals Tracker on this device.",
+      "- Data is stored locally on the phone (no cloud sync, no account).",
+      "- Each record may include BP (systolic/diastolic), Heart Rate, Symptoms, and Notes.",
+      "",
+      notes ? notes : "",
+      "",
+      "------------------------------",
+      ""
+    ].filter(Boolean);
+    return lines.join("\n");
+  }
+
+  function exportReport(recs, headerInfo, filenameBase){
+    const header = buildReportHeader(headerInfo);
+
+    const lines = recs.map(r => {
+      const dt = fmtDateTime(r.ts);
+      const bp = `BP ${r.sys ?? "—"}/${r.dia ?? "—"}`;
+      const hr = `HR ${r.hr ?? "—"}`;
+      const sym = (r.symptoms && r.symptoms.length) ? r.symptoms.join(", ") : "None";
+      const notes = (r.notes && r.notes.trim()) ? r.notes.trim() : "None";
+      return `${dt}\n${bp} • ${hr}\nSymptoms: ${sym}\nNotes: ${notes}\n`;
+    });
+
+    const out = header + lines.join("\n");
+    const ts = new Date();
+    const y = ts.getFullYear();
+    const m = String(ts.getMonth()+1).padStart(2,"0");
+    const d = String(ts.getDate()).padStart(2,"0");
+    const filename = `${filenameBase || "vitals_report"}_${y}-${m}-${d}.txt`;
+
+    (async () => {
+      try{ await copyToClipboard(out); }catch{}
+      openExportModal({ text: out, filename });
+    })();
+  }
+
+  /* =========================
+     Charts (unchanged)
+     ========================= */
+
+  const chartView = {
+    baseMin: 0,
+    baseMax: 0,
+    viewMin: 0,
+    viewMax: 0,
+    minSpan: 48*60*60*1000,
+    maxSpan: 7*DAY_MS,
+    pinch: null,
+    pan: null
+  };
+
+  function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+
+  function clampViewToBase(){
+    const baseMin = chartView.baseMin, baseMax = chartView.baseMax;
+    let vMin = chartView.viewMin, vMax = chartView.viewMax;
+
+    let span = vMax - vMin;
+    span = Math.max(chartView.minSpan, Math.min(span, chartView.maxSpan));
+
+    const mid = (vMin + vMax) / 2;
+    vMin = mid - span/2;
+    vMax = mid + span/2;
+
+    if(vMin < baseMin){ vMin = baseMin; vMax = baseMin + span; }
+    if(vMax > baseMax){ vMax = baseMax; vMin = baseMax - span; }
+
+    chartView.viewMin = vMin;
+    chartView.viewMax = vMax;
+  }
+
+  function xFromTs(ts, tMin, tMax, pad, W){
+    const span = W - pad.l - pad.r;
+    const denom = (tMax - tMin) || 1;
+    const u = (ts - tMin) / denom;
+    return pad.l + span * u;
+  }
+
+  function yTo(v, yMin, yMax, pad, H){
+    const span = H - pad.t - pad.b;
+    const t = (v - yMin) / (yMax - yMin || 1);
+    return pad.t + span * (1 - t);
+  }
+
+  function drawSeriesTimedWithDayGaps(ctx, recs, pick, tMin, tMax, yMin, yMax, pad, W, H, color){
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 3;
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+
+    let started = false;
+    let prevTs = null;
+
+    ctx.beginPath();
+    for(const r of recs){
+      const v = pick(r);
+      if(v == null){ started = false; prevTs = r.ts; continue; }
+
+      if(prevTs != null){
+        const prevDay = startOfDay(prevTs);
+        const curDay  = startOfDay(r.ts);
+        if(curDay - prevDay > DAY_MS){
+          started = false;
+        }
+      }
+
+      const x = xFromTs(r.ts, tMin, tMax, pad, W);
+      const y = yTo(v, yMin, yMax, pad, H);
+
+      if(!started){
+        ctx.moveTo(x,y);
+        started = true;
+      }else{
+        ctx.lineTo(x,y);
+      }
+
+      prevTs = r.ts;
+    }
+    ctx.stroke();
+  }
+
+  function recordsInView(){
+    const recs = loadRecords().slice().reverse();
+    const a = chartView.viewMin;
+    const b = chartView.viewMax;
+    return recs.filter(r => r.ts >= a && r.ts <= b);
+  }
+
+  function getISOWeekInputValueFromDate(d){
+    const date = new Date(d.getTime());
+    date.setHours(0,0,0,0);
+    date.setDate(date.getDate() + 3 - ((date.getDay() + 6) % 7));
+    const weekYear = date.getFullYear();
+
+    const week1 = new Date(weekYear, 0, 4);
+    week1.setHours(0,0,0,0);
+    const week1Thursday = new Date(week1.getTime());
+    week1Thursday.setDate(week1Thursday.getDate() + 3 - ((week1Thursday.getDay() + 6) % 7));
+
+    const diffDays = Math.round((date - week1Thursday) / DAY_MS);
+    const weekNo = 1 + Math.floor(diffDays / 7);
+
+    return `${weekYear}-W${String(weekNo).padStart(2,"0")}`;
+  }
+
+  function weekInputToMondayStart(value){
+    const m = /^(\d{4})-W(\d{2})$/.exec(String(value || ""));
+    if(!m) return null;
+    const year = Number(m[1]);
+    const week = Number(m[2]);
+    if(!year || !week) return null;
+
+    const jan4 = new Date(year, 0, 4);
+    jan4.setHours(0,0,0,0);
+
+    const jan4Dow = (jan4.getDay() + 6) % 7;
+    const week1Mon = new Date(jan4.getTime() - jan4Dow*DAY_MS);
+
+    const targetMon = new Date(week1Mon.getTime() + (week-1)*7*DAY_MS);
+    targetMon.setHours(0,0,0,0);
+    return targetMon;
+  }
+
+  function initWeekDefaultIfNeeded(){
+    if(!$("chartWeek").value){
+      $("chartWeek").value = getISOWeekInputValueFromDate(new Date());
+    }
+  }
+
+  function applyWeekToBase(resetView){
+    const mon = weekInputToMondayStart($("chartWeek").value);
+    if(!mon){
+      $("chartWeek").value = getISOWeekInputValueFromDate(new Date());
+      return applyWeekToBase(resetView);
+    }
+    const baseMin = mon.getTime();
+    const baseMax = baseMin + 7*DAY_MS - 1;
+
+    chartView.baseMin = baseMin;
+    chartView.baseMax = baseMax;
+
+    if(resetView || !chartView.viewMin || !chartView.viewMax){
+      chartView.viewMin = baseMin;
+      chartView.viewMax = baseMax;
+    }else{
+      clampViewToBase();
+    }
+  }
+
+  function renderCharts(){
+    applyWeekToBase(false);
+
+    const canvas = $("chart");
+    const ctx = canvas.getContext("2d");
+
+    const recs = recordsInView();
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    const W = canvas.width, H = canvas.height;
+    const pad = {l:62, r:18, t:18, b:92};
+    const plotX0 = pad.l;
+    const plotX1 = W - pad.r;
+    const plotY0 = pad.t;
+    const plotY1 = H - pad.b;
+
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgba(235,245,255,.12)";
+    ctx.fillStyle = "rgba(255,255,255,.02)";
+    ctx.beginPath();
+    ctx.roundRect ? ctx.roundRect(0,0,W,H,22) : (ctx.rect(0,0,W,H));
+    ctx.fill();
+    ctx.stroke();
+
+    let all = [];
+    if(recs.length){
+      all = recs.flatMap(r => [r.sys, r.dia, r.hr]).filter(v => v != null);
+    }
+    let yMin = 40, yMax = 180;
+    if(all.length){
+      const minV = Math.min(...all);
+      const maxV = Math.max(...all);
+      const padV = Math.max(8, Math.round((maxV-minV)*0.12));
+      yMin = minV - padV;
+      yMax = maxV + padV;
+    }
+
+    const tMin = chartView.viewMin;
+    const tMax = chartView.viewMax;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(plotX0, plotY0, plotX1-plotX0, plotY1-plotY0);
+    ctx.clip();
+
+    const weekStart = startOfDay(chartView.baseMin);
+    for(let i=0;i<7;i++){
+      const bandStart = weekStart + i*DAY_MS;
+      const bandEnd = bandStart + DAY_MS;
+
+      const a = Math.max(bandStart, tMin);
+      const b = Math.min(bandEnd,   tMax);
+      if(b <= a) continue;
+
+      let x0 = xFromTs(a, tMin, tMax, pad, W);
+      let x1 = xFromTs(b, tMin, tMax, pad, W);
+      x0 = Math.max(x0, plotX0);
+      x1 = Math.min(x1, plotX1);
+      if(x1 <= x0) continue;
+
+      ctx.fillStyle = (i % 2 === 0)
+        ? "rgba(255,255,255,.14)"
+        : "rgba(47,120,255,.26)";
+      ctx.fillRect(x0, plotY0, (x1 - x0), (plotY1 - plotY0));
+    }
+    ctx.restore();
+
+    ctx.font = "16px system-ui,Segoe UI,Roboto";
+    ctx.fillStyle = "rgba(235,245,255,.60)";
+    ctx.strokeStyle = "rgba(235,245,255,.10)";
+    ctx.lineWidth = 1;
+
+    const ticks = 5;
+    for(let i=0;i<=ticks;i++){
+      const y = pad.t + (H - pad.t - pad.b) * (i/ticks);
+      ctx.beginPath();
+      ctx.moveTo(pad.l, y);
+      ctx.lineTo(W - pad.r, y);
+      ctx.stroke();
+
+      const val = Math.round(yMax - (yMax-yMin)*(i/ticks));
+      ctx.fillText(String(val), 16, y+6);
+    }
+
+    const rangeMs = (tMax - tMin);
+    const showTime = rangeMs <= (18 * 60 * 60 * 1000);
+
+    ctx.fillStyle = "rgba(235,245,255,.90)";
+    ctx.font = "20px system-ui,Segoe UI,Roboto";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "alphabetic";
+
+    const yDow = H - 44;
+    const yDate = H - 22;
+
+    const weekStartLabel = startOfDay(chartView.baseMin);
+
+    for(let i=0;i<7;i++){
+      const dayStart = weekStartLabel + i*DAY_MS;
+      const dayCenter = dayStart + (DAY_MS/2);
+      if(dayCenter < tMin || dayCenter > tMax) continue;
+
+      const x = xFromTs(dayCenter, tMin, tMax, pad, W);
+      const dow = dowShortFromTs(dayStart);
+      const md = mmddFromTs(dayStart);
+
+      ctx.fillText(dow, x, yDow);
+
+      ctx.fillStyle = "rgba(235,245,255,.70)";
+      ctx.font = "16px system-ui,Segoe UI,Roboto";
+      ctx.fillText(md, x, yDate);
+
+      ctx.fillStyle = "rgba(235,245,255,.90)";
+      ctx.font = "20px system-ui,Segoe UI,Roboto";
+    }
+
+    if(showTime){
+      ctx.fillStyle = "rgba(235,245,255,.56)";
+      ctx.font = "14px system-ui,Segoe UI,Roboto";
+      ctx.textAlign = "left";
+
+      const labelCount = 4;
+      for(let i=0;i<labelCount;i++){
+        const ts = tMin + rangeMs * (i/(labelCount-1 || 1));
+        const x = xFromTs(ts, tMin, tMax, pad, W);
+
+        const d = new Date(ts);
+        const lab = new Intl.DateTimeFormat(undefined, {hour:"2-digit", minute:"2-digit"}).format(d);
+
+        const maxX = W - pad.r - 2;
+        const minX = pad.l + 2;
+        let tx = x - 18;
+        if(tx < minX) tx = minX;
+        if(tx > maxX - 54) tx = maxX - 54;
+
+        ctx.fillText(lab, tx, H - 66);
+      }
+    }
+
+    ctx.textAlign = "start";
+
+    if(recs.length){
+      drawSeriesTimedWithDayGaps(ctx, recs, r=>r.sys, tMin, tMax, yMin, yMax, pad, W, H, "rgba(79,140,255,.98)");
+      drawSeriesTimedWithDayGaps(ctx, recs, r=>r.dia, tMin, tMax, yMin, yMax, pad, W, H, "rgba(216,224,240,.88)");
+      drawSeriesTimedWithDayGaps(ctx, recs, r=>r.hr , tMin, tMax, yMin, yMax, pad, W, H, "rgba(120,220,180,.92)");
+    }else{
+      ctx.fillStyle = "rgba(235,245,255,.46)";
+      ctx.font = "18px system-ui,Segoe UI,Roboto";
+      ctx.fillText("No readings in this view.", pad.l + 12, pad.t + 34);
+    }
+
+    const lx = pad.l + 10;
+    let ly = pad.t + 26;
+
+    ctx.font = "22px system-ui,Segoe UI,Roboto";
+    ctx.textAlign = "start";
+
+    function legend(text, color){
+      ctx.fillStyle = color;
+      ctx.fillRect(lx, ly-14, 26, 8);
+      ctx.fillStyle = "rgba(235,245,255,.88)";
+      const spaced = text.split("").join(" ");
+      ctx.fillText(spaced, lx+38, ly-6);
+      ly += 32;
+    }
+    legend("Systolic", "rgba(79,140,255,.98)");
+    legend("Diastolic", "rgba(216,224,240,.88)");
+    legend("Heart Rate", "rgba(120,220,180,.92)");
+  }
+
+  function dist2(t1, t2){
+    const dx = t2.clientX - t1.clientX;
+    const dy = t2.clientY - t1.clientY;
+    return Math.hypot(dx, dy);
+  }
+  function pinchCenterX(t1, t2){ return (t1.clientX + t2.clientX) / 2; }
+
+  function attachChartGestures(){
+    const canvas = $("chart");
+
+    function plotBounds(){
+      const rect = canvas.getBoundingClientRect();
+      const padL = 62;
+      const padR = 18;
+      const plotW = Math.max(1, rect.width - (padL + padR));
+      return {rect, padL, padR, plotW};
+    }
+
+    function screenXToTs(screenX){
+      const {rect, padL, plotW} = plotBounds();
+      const xIn = clamp(screenX - rect.left - padL, 0, plotW);
+      const u = xIn / plotW;
+      return chartView.viewMin + u * (chartView.viewMax - chartView.viewMin);
+    }
+
+    canvas.addEventListener("touchstart", (e) => {
+      if($("charts").classList.contains("hidden")) return;
+
+      if(e.touches.length === 2){
+        e.preventDefault();
+        applyWeekToBase(false);
+
+        const d = dist2(e.touches[0], e.touches[1]);
+        const cx = pinchCenterX(e.touches[0], e.touches[1]);
+        const centerTs = screenXToTs(cx);
+
+        chartView.pinch = {
+          dist: d,
+          viewMin: chartView.viewMin,
+          viewMax: chartView.viewMax,
+          centerTs
+        };
+        chartView.pan = null;
+        return;
+      }
+
+      if(e.touches.length === 1){
+        e.preventDefault();
+        applyWeekToBase(false);
+
+        chartView.pan = {
+          x0: e.touches[0].clientX,
+          viewMin: chartView.viewMin,
+          viewMax: chartView.viewMax
+        };
+        chartView.pinch = null;
+      }
+    }, {passive:false});
+
+    canvas.addEventListener("touchmove", (e) => {
+      if($("charts").classList.contains("hidden")) return;
+
+      if(chartView.pinch && e.touches.length === 2){
+        e.preventDefault();
+
+        const p = chartView.pinch;
+        const newDist = dist2(e.touches[0], e.touches[1]);
+        const scale = newDist / (p.dist || 1);
+
+        const startSpan = p.viewMax - p.viewMin;
+        let newSpan = startSpan / (scale || 1);
+        newSpan = clamp(newSpan, chartView.minSpan, chartView.maxSpan);
+
+        let vMin = p.centerTs - newSpan/2;
+        let vMax = p.centerTs + newSpan/2;
+
+        chartView.viewMin = vMin;
+        chartView.viewMax = vMax;
+        clampViewToBase();
+        renderCharts();
+        return;
+      }
+
+      if(chartView.pan && e.touches.length === 1){
+        e.preventDefault();
+
+        const {plotW} = plotBounds();
+        const dx = e.touches[0].clientX - chartView.pan.x0;
+
+        const span = (chartView.pan.viewMax - chartView.pan.viewMin) || 1;
+        const dt = -dx * (span / Math.max(1, plotW));
+
+        chartView.viewMin = chartView.pan.viewMin + dt;
+        chartView.viewMax = chartView.pan.viewMax + dt;
+        clampViewToBase();
+        renderCharts();
+      }
+    }, {passive:false});
+
+    function endGestures(){
+      chartView.pinch = null;
+      chartView.pan = null;
+    }
+    canvas.addEventListener("touchend", endGestures, {passive:true});
+    canvas.addEventListener("touchcancel", endGestures, {passive:true});
+  }
+
+  /* =========================
+     Clear Data + Install + Exit (Exit preserved)
+     ========================= */
+
+  function clearAllData(){
+    const ok = confirm(
+      "Clear ALL saved vitals data?\n\n" +
+      "This deletes everything stored on this phone for Vitals Tracker.\n" +
+      "This cannot be undone."
+    );
+    if(!ok) return;
+
+    try{ localStorage.removeItem(STORAGE_KEY); }catch{}
+
+    $("fromDate").value = "";
+    $("toDate").value = "";
+    $("search").value = "";
+
+    alert("All data cleared.");
+    show("home");
+  }
+
+  let deferredPrompt = null;
+
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    refreshInstallButton();
+  });
+
+  window.addEventListener("appinstalled", () => {
+    deferredPrompt = null;
+    refreshInstallButton();
+  });
+
+  function isStandalone(){
+    return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  }
+
+  function refreshInstallButton(){
+    $("btnInstall").textContent = isStandalone() ? "Uninstall" : "Install";
+  }
+
+  $("btnInstall").addEventListener("click", async () => {
+    if(isStandalone()){
+      alert(
+        "Uninstall:\n\n" +
+        "Android: press-and-hold the app icon → Uninstall.\n" +
+        "Uninstall typically does NOT delete your saved data, but device/browser behavior can vary.\n\n" +
+        "To delete data on purpose: use Clear Data (home screen)."
+      );
+      return;
+    }
+    if(deferredPrompt){
+      deferredPrompt.prompt();
+      try { await deferredPrompt.userChoice; } catch {}
+      deferredPrompt = null;
+      refreshInstallButton();
+      return;
+    }
+    alert("Install is available when your browser offers it (menu → Install app).");
+  });
+
+  $("btnClearAll").addEventListener("click", clearAllData);
+
+  /* KEEP THIS EXIT FUNCTION EXACTLY (known-good) */
+  $("btnExitHome").addEventListener("click", () => {
+    window.close();
+    setTimeout(() => {
+      alert("If it didn’t close: use your phone’s Back/Home.");
+    }, 200);
+  });
+
+  /* =========================
+     Buttons + Save/Delete
+     ========================= */
+
+  $("btnGoAdd").addEventListener("click", () => enterAddNew("home"));
+  $("btnGoLog").addEventListener("click", () => { editTs=null; show("log"); });
+  $("btnGoCharts").addEventListener("click", () => { editTs=null; show("charts"); });
+
+  $("btnBackFromAdd").addEventListener("click", () => { editTs=null; show(returnScreen || "home"); });
+  $("btnBackFromLog").addEventListener("click", () => show("home"));
+  $("btnBackFromCharts").addEventListener("click", () => show("home"));
+
+  $("btnAddFromLog").addEventListener("click", () => enterAddNew("log"));
+
+  function intOrNull(v){
+    const t = String(v).trim();
+    if(!t) return null;
+    const n = Number(t);
+    if(!Number.isFinite(n)) return null;
+    return Math.round(n);
+  }
+
+  function validateAnyInput(sys,dia,hr,notes,symptoms){
+    return !(sys==null && dia==null && hr==null && !String(notes||"").trim() && (symptoms||[]).length===0);
+  }
+
+  $("btnSave").addEventListener("click", () => {
+    const sys = intOrNull($("sys").value);
+    const dia = intOrNull($("dia").value);
+    const hr  = intOrNull($("hr").value);
+    const notes = ($("notes").value || "").toString();
+    const symptoms = selectedSymptoms();
+
+    if(!validateAnyInput(sys,dia,hr,notes,symptoms)){
+      alert("Enter at least one value (BP, HR, notes, or symptom).");
+      return;
+    }
+
+    const recs = loadRecords();
+
+    if(editTs == null){
+      recs.unshift({ ts: Date.now(), sys, dia, hr, notes, symptoms });
+    }else{
+      const idx = recs.findIndex(r => r.ts === editTs);
+      if(idx >= 0){
+        recs[idx] = { ts: editTs, sys, dia, hr, notes, symptoms };
+      }else{
+        recs.unshift({ ts: Date.now(), sys, dia, hr, notes, symptoms });
+      }
+    }
+
+    recs.sort((a,b)=> b.ts - a.ts);
+    saveRecords(recs);
+
+    $("fromDate").value = "";
+    $("toDate").value = "";
+    $("search").value = "";
+
+    editTs = null;
+    show("log");
+  });
+
+  $("btnDelete").addEventListener("click", () => {
+    if(editTs == null) return;
+    const ok = confirm("Delete this entry? This cannot be undone.");
+    if(!ok) return;
+
+    const recs = loadRecords().filter(r => r.ts !== editTs);
+    saveRecords(recs);
+
+    editTs = null;
+    show("log");
+  });
+
+  /* =========================
+     SEARCH BEHAVIOR (v1.19B4)
+     - DO NOT auto-search on input.
+     - Search runs only on button click or Enter key.
+     ========================= */
+
+  function runSearch(){
+    renderLog();
+  }
+
+  $("btnRunSearch").addEventListener("click", (e) => {
+    e.preventDefault();
+    runSearch();
+  });
+
+  $("search").addEventListener("keydown", (e) => {
+    if(e.key === "Enter"){
+      e.preventDefault();
+      runSearch();
+      try{ e.target.blur(); }catch{}
+    }
+  });
+
+  /* Date fields still refresh immediately (stable) */
+  ["fromDate","toDate"].forEach(id => {
+    $(id).addEventListener("input", () => renderLog());
+    $(id).addEventListener("change", () => renderLog());
+  });
+
+  $("chartWeek").addEventListener("change", () => {
+    applyWeekToBase(true);
+    renderCharts();
+  });
+
+  /* =========================
+     Symptoms helpers
+     ========================= */
+
+  function selectedSymptoms(){
+    return SYMPTOMS.filter(s => symState.get(s));
+  }
+
+  /* =========================
+     Export handlers
+     ========================= */
+
+  $("btnExportLog").addEventListener("click", () => {
+    const recs = filteredRecords({fromId:"fromDate", toId:"toDate", searchId:"search"});
+    const rangeLabel = (() => {
+      const f = $("fromDate").value;
+      const t = $("toDate").value;
+      if(f && t) return `${f} to ${t}`;
+      if(f) return `From ${f}`;
+      if(t) return `Up to ${t}`;
+      return "All log entries (filtered by search/date if set)";
+    })();
+
+    exportReport(
+      recs,
+      {
+        title: "Log Export",
+        rangeLabel,
+        notes: "This report reflects the Log screen filters (Search + optional From/To dates)."
+      },
+      "vitals_log_report"
+    );
+  });
+
+  $("btnExportCharts").addEventListener("click", () => {
+    const all = loadRecords().slice().reverse();
+    const a = chartView.viewMin, b = chartView.viewMax;
+    const recs = all.filter(r => r.ts >= a && r.ts <= b);
+
+    const weekVal = $("chartWeek").value || "";
+    const baseRange = `${fmtDateTime(chartView.baseMin)} to ${fmtDateTime(chartView.baseMax)}`;
+    const viewRange = `${fmtDateTime(chartView.viewMin)} to ${fmtDateTime(chartView.viewMax)}`;
+
+    exportReport(
+      recs,
+      {
+        title: "Charts Export (Weekly View)",
+        rangeLabel: `Selected week: ${weekVal} | Base week: ${baseRange} | Exported view: ${viewRange}`,
+        notes:
+          "What you are looking at:\n" +
+          "- The Charts screen shows exactly 7 days at a time (weekly view).\n" +
+          "- You can pinch to zoom in, then drag left/right to pan within that 7-day week.\n" +
+          "- This export contains the entries that fall within the CURRENT visible chart view (after zoom/pan)."
+      },
+      "vitals_charts_report"
+    );
+  });
+
+  /* =========================
+     Manifest + SW
+     ========================= */
+
+  function injectManifest(){
+    const svg =
+`<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f78ff"/>
+      <stop offset="1" stop-color="#0b1324"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="110" fill="url(#g)"/>
+  <path d="M128 290h70l26-94 44 160 30-98h84" fill="none"
+        stroke="rgba(235,245,255,.92)" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="160" cy="290" r="10" fill="rgba(235,245,255,.92)"/>
+  <circle cx="382" cy="258" r="10" fill="rgba(235,245,255,.92)"/>
+</svg>`;
+    const encoded = encodeURIComponent(svg).replace(/'/g,"%27").replace(/"/g,"%22");
+    const icon = `data:image/svg+xml;charset=utf-8,${encoded}`;
+
+    const manifest = {
+      name: "Vitals Tracker",
+      short_name: "Vitals",
+      start_url: ".",
+      display: "standalone",
+      background_color: "#0b1324",
+      theme_color: "#0b1324",
+      icons: [{ src: icon, sizes: "512x512", type: "image/svg+xml", purpose: "any" }]
+    };
+
+    const blob = new Blob([JSON.stringify(manifest)], {type:"application/manifest+json"});
+    const url = URL.createObjectURL(blob);
+    $("manifestLink").setAttribute("href", url);
+  }
+
+  async function registerSW(){
+    if(!("serviceWorker" in navigator)) return;
+    const swCode =
+`self.addEventListener('install', (e)=>{ self.skipWaiting(); });
+self.addEventListener('activate', (e)=>{ e.waitUntil(self.clients.claim()); });
+self.addEventListener('fetch', (e)=>{ });`;
+    const blob = new Blob([swCode], {type:"text/javascript"});
+    const swUrl = URL.createObjectURL(blob);
+    try { await navigator.serviceWorker.register(swUrl); } catch {}
+  }
+
+  /* =========================
+     Init
+     ========================= */
+
+  buildSymptoms();
+  injectManifest();
+  registerSW();
+  refreshInstallButton();
+  attachChartGestures();
+
+  $("fromDate").value = "";
+  $("toDate").value = "";
+
+  show("home");
+
+  window.addEventListener("resize", () => {
+    if(!$("add").classList.contains("hidden")) adjustTimeFont();
+    if(!$("charts").classList.contains("hidden")) renderCharts();
+  });
+
+})();
+</script>
 </body>
 </html>
-
-<!--
-Version Detail Notes
-App Version: v1.19B5
-Base: v1.19B4
-- Home panel framed with accent border matching screen border.
--->
