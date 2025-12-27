@@ -1,4 +1,4 @@
-<!-- Vitals Tracker v1.18A2 (chart updates: true time spacing + alternating day bands) -->
+<!-- Vitals Tracker v1.18A2 (chart updates: true time spacing + STRONGER alternating day bands) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -390,7 +390,6 @@
 <body>
   <div class="app">
 
-    <!-- Logo/header block: same footprint as your prior header; icon is embedded in the SVG -->
     <div class="logoTitle" aria-label="Vitals Tracker">
       <svg viewBox="0 0 900 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Vitals Tracker">
         <defs>
@@ -403,7 +402,6 @@
           </filter>
         </defs>
 
-        <!-- Small square logo embedded; no layout change to the header container -->
         <g transform="translate(46 24)" filter="url(#vts)">
           <rect x="0" y="0" width="92" height="92" rx="26" fill="rgba(255,255,255,.06)" stroke="rgba(235,245,255,.22)" stroke-width="2"/>
           <path d="M18 54h18l10-32 16 58 12-36h28" fill="none" stroke="url(#vtg)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -967,7 +965,6 @@
     return pad.t + span * (1 - t);
   }
 
-  // true time spacing
   function xFromTs(ts, tMin, tMax, pad, W){
     const span = W - pad.l - pad.r;
     const denom = (tMax - tMin) || 1;
@@ -994,15 +991,9 @@
     ctx.stroke();
   }
 
-  // v1.18A2 chart update: alternating day background bands
   function startOfDay(ts){
     const d = new Date(ts);
     d.setHours(0,0,0,0);
-    return d.getTime();
-  }
-  function endOfDay(ts){
-    const d = new Date(ts);
-    d.setHours(23,59,59,999);
     return d.getTime();
   }
 
@@ -1010,7 +1001,6 @@
     const canvas = $("chart");
     const ctx = canvas.getContext("2d");
 
-    // ascending by time
     const recs = filteredRecords({fromId:"chartFrom", toId:"chartTo", searchId:null}).slice().reverse();
 
     ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -1039,47 +1029,46 @@
     const W = canvas.width, H = canvas.height;
     const pad = {l:62, r:18, t:18, b:56};
 
-    // time bounds
     let tMin = recs[0].ts;
     let tMax = recs[recs.length - 1].ts;
     if(tMax === tMin) tMax = tMin + 1000;
 
-    // frame
     roundRect(ctx, 0, 0, W, H, 22, "rgba(255,255,255,.02)", "rgba(235,245,255,.12)");
 
-    // chart area
     const plotX0 = pad.l;
     const plotX1 = W - pad.r;
     const plotY0 = pad.t;
     const plotY1 = H - pad.b;
 
-    // alternating day bands (clip to plot area so it doesn't cover y labels or bottom margin)
+    // STRONGER alternating day bands (visible on mobile)
     ctx.save();
     ctx.beginPath();
     ctx.rect(plotX0, plotY0, plotX1 - plotX0, plotY1 - plotY0);
     ctx.clip();
 
-    // Determine day range from time bounds (local)
+    const dayMs = 24 * 60 * 60 * 1000;
     const day0 = startOfDay(tMin);
     const dayN = startOfDay(tMax);
-    const dayMs = 24 * 60 * 60 * 1000;
 
     let bandIndex = 0;
-    for(let day = day0; day <= dayN + dayMs; day += dayMs){
+    for(let day = day0; day <= dayN; day += dayMs){
       const bandStart = day;
       const bandEnd = day + dayMs;
 
-      const x0 = xFromTs(Math.max(bandStart, tMin), tMin, tMax, pad, W);
-      const x1 = xFromTs(Math.min(bandEnd,   tMax), tMin, tMax, pad, W);
+      const a = Math.max(bandStart, tMin);
+      const b = Math.min(bandEnd,   tMax);
+      if(b <= a) { bandIndex++; continue; }
 
-      if(x1 <= plotX0 || x0 >= plotX1) { bandIndex++; continue; }
+      let x0 = xFromTs(a, tMin, tMax, pad, W);
+      let x1 = xFromTs(b, tMin, tMax, pad, W);
 
-      // alternate subtle fills
-      if(bandIndex % 2 === 0){
-        ctx.fillStyle = "rgba(255,255,255,.03)";
-      }else{
-        ctx.fillStyle = "rgba(47,120,255,.06)";
-      }
+      x0 = Math.max(x0, plotX0);
+      x1 = Math.min(x1, plotX1);
+      if(x1 <= x0) { bandIndex++; continue; }
+
+      ctx.fillStyle = (bandIndex % 2 === 0)
+        ? "rgba(255,255,255,.14)"   // bumped up
+        : "rgba(47,120,255,.24)";   // bumped up
 
       ctx.fillRect(x0, plotY0, (x1 - x0), (plotY1 - plotY0));
       bandIndex++;
@@ -1131,12 +1120,10 @@
       ctx.fillText(lab, tx, H-22);
     }
 
-    // series
     drawSeriesTimed(ctx, recs, r=>r.sys, tMin, tMax, yMin, yMax, pad, W, H, "rgba(79,140,255,.98)");
     drawSeriesTimed(ctx, recs, r=>r.dia, tMin, tMax, yMin, yMax, pad, W, H, "rgba(216,224,240,.88)");
     drawSeriesTimed(ctx, recs, r=>r.hr , tMin, tMax, yMin, yMax, pad, W, H, "rgba(120,220,180,.92)");
 
-    // legend
     const lx = pad.l + 8;
     let ly = pad.t + 22;
     ctx.font = "18px system-ui,Segoe UI,Roboto";
