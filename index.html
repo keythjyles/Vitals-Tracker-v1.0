@@ -1,12 +1,13 @@
-<!-- Vitals Tracker v1.19B6 -->
+<!-- Vitals Tracker v1.19B7 -->
 <!--
 Version Detail Notes
-App Version: v1.19B6
-Base: v1.19B5
+App Version: v1.19B7
+Base: v1.19B6 (derived from v1.19B5)
 Changes (requested):
-- Removed the screen border (body::before).
-- Log panel and Charts panel now use the same accent border style as the Home panel.
-- Change nothing else.
+- Remove the screen border (body::before).
+- Home / Add / Log / Charts panels all use the same accent border (matching prior screen border).
+- Modals (edit/export) use the same accent border style.
+- No other behavior changes.
 -->
 <!doctype html>
 <html lang="en">
@@ -53,8 +54,6 @@ Changes (requested):
       padding: max(14px, env(safe-area-inset-top)) 12px max(14px, env(safe-area-inset-bottom));
     }
 
-    /* v1.19B6: removed screen border (body::before) */
-
     .app{
       width:min(520px, 100%);
       display:flex;
@@ -84,11 +83,11 @@ Changes (requested):
       backdrop-filter: blur(10px);
     }
 
-    /* Accent border used on Home, Log, Charts (matches the old screen border) */
-    #home, #log, #charts{
+    /* v1.19B7: unified accent border for all panels */
+    .accentFrame{
       position:relative;
     }
-    #home::before, #log::before, #charts::before{
+    .accentFrame::before{
       content:"";
       position:absolute;
       inset:-3px;
@@ -97,7 +96,7 @@ Changes (requested):
       pointer-events:none;
       z-index:0;
     }
-    #home > *, #log > *, #charts > *{
+    .accentFrame > *{
       position:relative;
       z-index:1;
     }
@@ -446,7 +445,7 @@ Changes (requested):
     .modalCard{
       width:min(520px, 100%);
       border-radius: 26px;
-      border: 2px solid var(--accent);
+      border: 3px solid var(--accent); /* v1.19B7: match panel accent border thickness */
       background: linear-gradient(180deg, rgba(12,21,40,.96), rgba(8,16,31,.96));
       box-shadow: 0 18px 60px rgba(0,0,0,.55);
       padding: 18px;
@@ -527,7 +526,7 @@ Changes (requested):
       </svg>
     </div>
 
-    <div id="home" class="card">
+    <div id="home" class="card accentFrame">
       <div class="homeMain">
         <button id="btnGoAdd" class="btn primary">ADD Reading</button>
         <button id="btnGoLog" class="btn">Log</button>
@@ -543,13 +542,13 @@ Changes (requested):
         <div class="subtle">Data stays on your phone (local only).</div>
 
         <div class="footerTiny">
-          <div>v1.19B6</div>
+          <div>v1.19B7</div>
           <div>developed by Keyth Jyles</div>
         </div>
       </div>
     </div>
 
-    <div id="add" class="card hidden">
+    <div id="add" class="card accentFrame hidden">
       <div id="editPill" class="editPill hidden">Editing entry</div>
 
       <div id="timeLine" class="timeLine">--:--:-- --, --/--/----</div>
@@ -582,7 +581,7 @@ Changes (requested):
       </div>
     </div>
 
-    <div id="log" class="card hidden">
+    <div id="log" class="card accentFrame hidden">
       <div class="row center">
         <button id="btnExportLog" class="btn small">Export</button>
         <button id="btnAddFromLog" class="btn small">ADD</button>
@@ -610,7 +609,7 @@ Changes (requested):
       <div id="logList"></div>
     </div>
 
-    <div id="charts" class="card hidden">
+    <div id="charts" class="card accentFrame hidden">
       <div class="row center">
         <button id="btnExportCharts" class="btn small">Export</button>
         <div class="grow"></div>
@@ -666,7 +665,7 @@ Optional:
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.19B6";
+  const APP_VERSION = "v1.19B7";
   const STORAGE_KEY = "vitals_tracker_records_v1";
   const SYMPTOMS = [
     "Sweaty","Dizzy","Panic","Brain fog","Chest tight","Headache",
@@ -2141,4 +2140,4 @@ self.addEventListener('fetch', (e)=>{ });`;
 })();
 </script>
 </body>
-</html>
+  </html>
