@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- VITALS_TRACKER_VERSION: v1.19 -->
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -55,6 +56,8 @@
       box-shadow: var(--shadow);
       overflow:hidden;
     }
+
+    /* Header */
     .header{
       display:flex;
       gap:12px;
@@ -108,6 +111,7 @@
       text-overflow:ellipsis;
     }
 
+    /* Nav */
     .tabs{
       display:flex;
       gap:10px;
@@ -129,6 +133,7 @@
       background: rgba(122,167,255,.14);
     }
 
+    /* Content */
     .content{ padding: 12px; }
     .grid{
       display:grid;
@@ -153,6 +158,7 @@
       letter-spacing:.2px;
     }
 
+    /* Buttons */
     .btnRow{
       display:flex;
       gap:10px;
@@ -188,6 +194,7 @@
       cursor:not-allowed;
     }
 
+    /* Form */
     label{
       display:block;
       font-size: 12px;
@@ -209,6 +216,7 @@
     .row2{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
     .row3{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; }
 
+    /* Log list */
     .list{ display:flex; flex-direction:column; gap:10px; }
     .item{
       border:1px solid var(--stroke);
@@ -244,6 +252,7 @@
       color: var(--muted);
     }
 
+    /* Charts */
     canvas{
       width:100%;
       height: 260px;
@@ -257,6 +266,7 @@
       line-height:1.35;
     }
 
+    /* Toast */
     .toast{
       position:fixed;
       left:50%;
@@ -274,6 +284,7 @@
       display:none;
     }
 
+    /* Modal */
     .modalBackdrop{
       position:fixed; inset:0;
       background: rgba(0,0,0,.55);
@@ -316,6 +327,7 @@
     <div class="card">
       <div class="header">
         <div class="logo" aria-hidden="true">
+          <!-- Simple pulse logo -->
           <svg viewBox="0 0 24 24" fill="none">
             <path d="M3 12h4l2.2-5.5L13 18l2-6h6" stroke="rgba(122,167,255,.95)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
@@ -393,7 +405,7 @@
               </div>
 
               <div class="hint">
-                Tip: Tap any entry in <b>Log</b> to edit or delete. Charts now use true time spacing (bunched during crises).
+                Tip: Tap any entry in <b>Log</b> to edit or delete. Charts now show true time spacing + alternating day bands.
               </div>
             </div>
           </div>
@@ -455,7 +467,7 @@
           <div class="panel">
             <h3>Trend (Systolic / Diastolic)</h3>
             <canvas id="chartBP" width="900" height="260"></canvas>
-            <div class="hint">Time axis is true spacing. Each day is banded (alternating background) for quick visual grouping.</div>
+            <div class="hint">True time spacing; alternating day bands for visual day separation (last 120 entries).</div>
           </div>
           <div class="panel">
             <h3>Trend (Heart Rate)</h3>
@@ -570,9 +582,11 @@
 <script>
 /* =========================
    Vitals Tracker v1.19
-   - Charts: TRUE time spacing (bunched vs spread)
-   - Charts: alternating day background bands
-   - IndexedDB storage + legacy import + backup/restore
+   - IndexedDB storage
+   - One-time legacy localStorage import
+   - Backup/Restore JSON
+   - Filtered export + charts
+   - NEW in v1.19: charts use true time spacing + alternating day bands
 ========================= */
 
 (() => {
@@ -626,7 +640,7 @@
   // Runtime state
   let db = null;
   let currentFilters = { q:"", from:"", to:"" };
-  let currentList = [];
+  let currentList = [];  // filtered list (sorted desc by ts)
   let editId = null;
 
   // ---------- Utilities ----------
@@ -661,10 +675,8 @@
 
   const formatStamp = (ms) => {
     const d = new Date(ms);
-    return d.toLocaleString(undefined, {
-      year:"numeric", month:"2-digit", day:"2-digit",
-      hour:"2-digit", minute:"2-digit", second:"2-digit"
-    });
+    return d.toLocaleString(undefined, { year:"numeric", month:"2-digit", day:"2-digit",
+      hour:"2-digit", minute:"2-digit", second:"2-digit" });
   };
 
   const downloadText = (filename, text) => {
@@ -990,19 +1002,23 @@
     if (!text) exportBox.placeholder = "No data to export (with current filters).";
   }
 
-  // ---------- Charts (TRUE time spacing + alternating day bands) ----------
+  // =========================
+  // Charts v1.19 changes
+  // - True time spacing on X axis
+  // - Alternating day background bands
+  // =========================
   function startOfDayLocal(ms){
     const d = new Date(ms);
     d.setHours(0,0,0,0);
     return d.getTime();
   }
 
-  function drawTimeSeriesChart(canvas, seriesList, xTimesAsc){
+  function drawTimeSeriesChart(canvas, seriesList, timesAsc){
     const ctx = canvas.getContext("2d");
     const W = canvas.width, H = canvas.height;
     ctx.clearRect(0,0,W,H);
 
-    if (!xTimesAsc || xTimesAsc.length === 0){
+    if (!timesAsc || timesAsc.length === 0){
       ctx.fillStyle = "rgba(169,189,223,.85)";
       ctx.font = "14px " + getComputedStyle(document.documentElement).getPropertyValue('--sans');
       ctx.fillText("No data", 14, 24);
@@ -1014,29 +1030,31 @@
     const plotW = Math.max(1, R-L);
     const plotH = Math.max(1, B-T);
 
-    let tMin = xTimesAsc[0];
-    let tMax = xTimesAsc[xTimesAsc.length-1];
+    let tMin = timesAsc[0];
+    let tMax = timesAsc[timesAsc.length-1];
     if (!Number.isFinite(tMin) || !Number.isFinite(tMax)){
-      tMin = Date.now()-3600e3;
+      tMin = Date.now() - 3600e3;
       tMax = Date.now();
     }
-    if (tMax === tMin) tMax = tMin + 60*1000; // prevent divide-by-zero
+    if (tMax === tMin) tMax = tMin + 60*1000;
 
     const xAt = (t) => L + ((t - tMin) / (tMax - tMin)) * plotW;
 
-    // alternating day bands
+    // day bands
     const day0 = startOfDayLocal(tMin);
     const dayEnd = startOfDayLocal(tMax) + 24*60*60*1000;
     let dayIndex = 0;
 
     for (let day = day0; day < dayEnd; day += 24*60*60*1000){
-      const x0 = xAt(Math.max(day, tMin));
-      const x1 = xAt(Math.min(day + 24*60*60*1000, tMax));
-      if (x1 <= x0) continue;
+      const a = Math.max(day, tMin);
+      const b = Math.min(day + 24*60*60*1000, tMax);
+      if (b <= a) continue;
 
-      // alternate subtle shading
-      ctx.fillStyle = dayIndex % 2 === 0 ? "rgba(235,245,255,.04)" : "rgba(0,0,0,.00)";
-      ctx.fillRect(x0, T, x1 - x0, plotH);
+      const x0 = xAt(a);
+      const x1 = xAt(b);
+
+      ctx.fillStyle = (dayIndex % 2 === 0) ? "rgba(235,245,255,.04)" : "rgba(0,0,0,0)";
+      ctx.fillRect(x0, T, Math.max(0, x1 - x0), plotH);
 
       // day boundary line
       ctx.strokeStyle = "rgba(235,245,255,.09)";
@@ -1061,7 +1079,7 @@
       ctx.stroke();
     }
 
-    // gather y-bounds from all series
+    // y bounds
     let allVals = [];
     for (const s of seriesList){
       allVals = allVals.concat(s.values.filter(v => Number.isFinite(v)));
@@ -1082,13 +1100,13 @@
       return B - t * plotH;
     };
 
-    // axis labels (top/bottom)
+    // axis labels
     ctx.fillStyle = "rgba(169,189,223,.85)";
     ctx.font = "12px var(--mono)";
     ctx.fillText(String(Math.round(hi)), L, 12);
     ctx.fillText(String(Math.round(lo)), L, H-6);
 
-    // draw series
+    // series lines
     const strokes = [
       `rgba(122,167,255,.95)`,
       `rgba(124,255,178,.85)`,
@@ -1103,7 +1121,7 @@
       let started = false;
       for (let i=0;i<s.values.length;i++){
         const v = s.values[i];
-        const t = xTimesAsc[i];
+        const t = timesAsc[i];
         if (!Number.isFinite(v) || !Number.isFinite(t)) continue;
         const x = xAt(t);
         const y = yAt(v);
@@ -1116,21 +1134,11 @@
       }
       ctx.stroke();
     });
-
-    // right boundary line
-    ctx.strokeStyle = "rgba(235,245,255,.09)";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(R + 0.5, T);
-    ctx.lineTo(R + 0.5, B);
-    ctx.stroke();
   }
 
   function renderCharts(arr){
-    // Use up to the last 120 entries, but chart in ASC time so spacing reflects reality.
     const useAsc = [...arr].sort((a,b) => a.ts - b.ts).slice(-120);
     const times = useAsc.map(r => r.ts);
-
     const sysVals = useAsc.map(r => r.sys ?? null);
     const diaVals = useAsc.map(r => r.dia ?? null);
     const hrVals  = useAsc.map(r => r.hr ?? null);
@@ -1474,4 +1482,4 @@
 })();
 </script>
 </body>
-</html>
+  </html>
