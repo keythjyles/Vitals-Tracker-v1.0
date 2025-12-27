@@ -1,4 +1,4 @@
-<!-- Vitals Tracker v1.18A -->
+<!-- Vitals Tracker v1.18A1 (chart updates: true time spacing) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -435,7 +435,7 @@
         <div class="subtle">Data stays on your phone (local only).</div>
 
         <div class="footerTiny">
-          <div>v1.18</div>
+          <div>v1.18A1</div>
           <div>developed by Keyth Jyles</div>
         </div>
       </div>
@@ -994,19 +994,21 @@
     ctx.fillText(msg, 22, 44);
   }
 
-  function xTo(i, n, pad, W){
-    if(n<=1) return pad.l;
-    const span = W - pad.l - pad.r;
-    return pad.l + span * (i/(n-1));
-  }
-
   function yTo(v, yMin, yMax, pad, H){
     const span = H - pad.t - pad.b;
     const t = (v - yMin) / (yMax - yMin || 1);
     return pad.t + span * (1 - t);
   }
 
-  function drawSeries(ctx, values, yMin, yMax, pad, W, H, color){
+  // v1.18A1 chart update: true time spacing on the x-axis
+  function xFromTs(ts, tMin, tMax, pad, W){
+    const span = W - pad.l - pad.r;
+    const denom = (tMax - tMin) || 1;
+    const u = (ts - tMin) / denom;
+    return pad.l + span * u;
+  }
+
+  function drawSeriesTimed(ctx, recs, pick, tMin, tMax, yMin, yMax, pad, W, H, color){
     ctx.strokeStyle = color;
     ctx.lineWidth = 3;
     ctx.lineJoin = "round";
@@ -1014,10 +1016,10 @@
 
     let started = false;
     ctx.beginPath();
-    for(let i=0;i<values.length;i++){
-      const v = values[i];
+    for(const r of recs){
+      const v = pick(r);
       if(v == null) { started = false; continue; }
-      const x = xTo(i, values.length, pad, W);
+      const x = xFromTs(r.ts, tMin, tMax, pad, W);
       const y = yTo(v, yMin, yMax, pad, H);
       if(!started){
         ctx.moveTo(x,y);
@@ -1033,6 +1035,7 @@
     const canvas = $("chart");
     const ctx = canvas.getContext("2d");
 
+    // recs ascending by time for time-based x mapping
     const recs = filteredRecords({fromId:"chartFrom", toId:"chartTo", searchId:null}).slice().reverse();
 
     ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -1042,11 +1045,11 @@
       return;
     }
 
-    const sys = recs.map(r => r.sys).filter(v => v != null);
-    const dia = recs.map(r => r.dia).filter(v => v != null);
-    const hr  = recs.map(r => r.hr ).filter(v => v != null);
+    const sysVals = recs.map(r => r.sys).filter(v => v != null);
+    const diaVals = recs.map(r => r.dia).filter(v => v != null);
+    const hrVals  = recs.map(r => r.hr ).filter(v => v != null);
 
-    const all = [...sys,...dia,...hr].filter(v => v != null);
+    const all = [...sysVals,...diaVals,...hrVals].filter(v => v != null);
     if(all.length === 0){
       drawChartEmpty(ctx, canvas, "No numeric values.");
       return;
@@ -1061,8 +1064,18 @@
     const W = canvas.width, H = canvas.height;
     const pad = {l:62, r:18, t:18, b:56};
 
+    // Time bounds for x-axis (true spacing)
+    let tMin = recs[0].ts;
+    let tMax = recs[recs.length - 1].ts;
+
+    // Guard: if all readings have identical timestamp, widen by 1 second so x math doesn't collapse
+    if(tMax === tMin){
+      tMax = tMin + 1000;
+    }
+
     roundRect(ctx, 0, 0, W, H, 22, "rgba(255,255,255,.02)", "rgba(235,245,255,.12)");
 
+    // Y grid
     ctx.font = "16px system-ui,Segoe UI,Roboto";
     ctx.fillStyle = "rgba(235,245,255,.60)";
     ctx.strokeStyle = "rgba(235,245,255,.10)";
@@ -1080,21 +1093,39 @@
       ctx.fillText(String(val), 16, y+6);
     }
 
-    const xCount = recs.length;
-    const labelCount = Math.min(4, xCount);
+    // X labels (time-aware)
+    const rangeMs = (tMax - tMin);
+    const showTime = rangeMs <= (24 * 60 * 60 * 1000); // if within 24h, include HH:MM
+    const labelCount = Math.min(4, recs.length);
+
+    ctx.fillStyle = "rgba(235,245,255,.56)";
+    ctx.font = "16px system-ui,Segoe UI,Roboto";
+
     for(let i=0;i<labelCount;i++){
-      const idx = Math.round((xCount-1) * (i/(labelCount-1 || 1)));
-      const x = xTo(idx, xCount, pad, W);
-      const d = new Date(recs[idx].ts);
-      const lab = new Intl.DateTimeFormat(undefined, {month:"2-digit", day:"2-digit"}).format(d);
-      ctx.fillStyle = "rgba(235,245,255,.56)";
-      ctx.fillText(lab, x-16, H-22);
+      const ts = tMin + rangeMs * (i/(labelCount-1 || 1));
+      const x = xFromTs(ts, tMin, tMax, pad, W);
+
+      const d = new Date(ts);
+      const lab = showTime
+        ? new Intl.DateTimeFormat(undefined, {month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit"}).format(d)
+        : new Intl.DateTimeFormat(undefined, {month:"2-digit", day:"2-digit"}).format(d);
+
+      // keep label on-canvas
+      const maxX = W - pad.r - 2;
+      const minX = pad.l + 2;
+      let tx = x - 24;
+      if(tx < minX) tx = minX;
+      if(tx > maxX - 80) tx = maxX - 80;
+
+      ctx.fillText(lab, tx, H-22);
     }
 
-    drawSeries(ctx, recs.map(r=>r.sys), yMin, yMax, pad, W, H, "rgba(79,140,255,.98)");
-    drawSeries(ctx, recs.map(r=>r.dia), yMin, yMax, pad, W, H, "rgba(216,224,240,.88)");
-    drawSeries(ctx, recs.map(r=>r.hr ), yMin, yMax, pad, W, H, "rgba(120,220,180,.92)");
+    // Series with true-time x mapping (bunched when close in time)
+    drawSeriesTimed(ctx, recs, r=>r.sys, tMin, tMax, yMin, yMax, pad, W, H, "rgba(79,140,255,.98)");
+    drawSeriesTimed(ctx, recs, r=>r.dia, tMin, tMax, yMin, yMax, pad, W, H, "rgba(216,224,240,.88)");
+    drawSeriesTimed(ctx, recs, r=>r.hr , tMin, tMax, yMin, yMax, pad, W, H, "rgba(120,220,180,.92)");
 
+    // Legend
     const lx = pad.l + 8;
     let ly = pad.t + 22;
     ctx.font = "18px system-ui,Segoe UI,Roboto";
