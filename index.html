@@ -1,11 +1,11 @@
-<!-- Vitals Tracker v1.19A5 -->
+<!-- Vitals Tracker v1.19A6 -->
 <!--
 Version Detail Notes
-App Version: v1.19A5
-Base: v1.19A4
+App Version: v1.19A6
+Base: v1.19A5
 Surgical changes only:
-- Log: Make edit prompt a consistent short-press-hold for ALL records (including the first). Hold time reduced by ~50%.
-- Charts: Day-of-week labels made more visible (larger font + higher contrast + slightly higher placement).
+- Log: Increase press-hold time by +50% before showing the edit prompt (175ms → 265ms).
+- Charts: Keep date under the day-of-week labels (two-line x-axis labels: DOW on top, MM/DD below).
 - No other layout/behavior changes.
 -->
 <!doctype html>
@@ -522,7 +522,7 @@ Surgical changes only:
         <div class="subtle">Data stays on your phone (local only).</div>
 
         <div class="footerTiny">
-          <div>v1.19A5</div>
+          <div>v1.19A6</div>
           <div>developed by Keyth Jyles</div>
         </div>
       </div>
@@ -623,7 +623,7 @@ Surgical changes only:
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.19A5";
+  const APP_VERSION = "v1.19A6";
   const STORAGE_KEY = "vitals_tracker_records_v1";
   const SYMPTOMS = [
     "Sweaty","Dizzy","Panic","Brain fog","Chest tight","Headache",
@@ -666,7 +666,6 @@ Surgical changes only:
   const $ = (id) => document.getElementById(id);
   const screens = ["home","add","log","charts"];
 
-  // Do not auto-focus fields when opening Add in EDIT mode (prevents keyboard pop-up).
   function focusTopOfPanel(screen){
     window.scrollTo({top:0, left:0, behavior:"auto"});
 
@@ -750,6 +749,9 @@ Surgical changes only:
 
   function dowShortFromTs(ts){
     return new Intl.DateTimeFormat(undefined, { weekday:"short" }).format(new Date(ts));
+  }
+  function mmddFromTs(ts){
+    return new Intl.DateTimeFormat(undefined, { month:"2-digit", day:"2-digit" }).format(new Date(ts));
   }
 
   /* =========================
@@ -1012,8 +1014,8 @@ Surgical changes only:
       return;
     }
 
-    // Consistent press-hold time for ALL entries (including first), reduced ~50%
-    const HOLD_MS = 175;
+    // Press-hold time increased by +50% (175ms -> 265ms)
+    const HOLD_MS = 265;
 
     for(const r of recs){
       const e = document.createElement("div");
@@ -1029,7 +1031,6 @@ Surgical changes only:
       let moved = false;
       let holdTimer = null;
       let fired = false;
-      let pointerId = null;
 
       function rectInside(clientX, clientY){
         const rect = e.getBoundingClientRect();
@@ -1052,7 +1053,6 @@ Surgical changes only:
         tracking = false;
         moved = false;
         fired = false;
-        pointerId = null;
       }
 
       function arm(ev){
@@ -1061,7 +1061,6 @@ Surgical changes only:
         tracking = true;
         moved = false;
         fired = false;
-        pointerId = ev.pointerId ?? null;
 
         startX = ev.clientX;
         startY = ev.clientY;
@@ -1069,11 +1068,13 @@ Surgical changes only:
         e.classList.add("pressed");
 
         clearHold();
+        const startClientX = ev.clientX;
+        const startClientY = ev.clientY;
+
         holdTimer = setTimeout(() => {
           if(!tracking) return;
           if(fired) return;
-          // Must still be inside and not moved
-          if(!moved && rectInside(ev.clientX, ev.clientY)){
+          if(!moved && rectInside(startClientX, startClientY)){
             fired = true;
             e.classList.remove("pressed");
             openEditPrompt(r.ts);
@@ -1087,15 +1088,13 @@ Surgical changes only:
         const dy = ev.clientY - startY;
         if(Math.hypot(dx,dy) > SLOP_PX) moved = true;
 
-        // Cancel if they slide off the entry
         if(!rectInside(ev.clientX, ev.clientY)){
           clearPress();
         }
       }
 
-      function release(ev){
+      function release(){
         if(!tracking) return;
-        // If timer hasn't fired, do nothing. (Prevents "first fires immediately" behavior.)
         clearPress();
       }
 
@@ -1384,7 +1383,8 @@ Surgical changes only:
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
     const W = canvas.width, H = canvas.height;
-    const pad = {l:62, r:18, t:18, b:78}; // a bit more bottom room for labels
+    // Slightly larger bottom padding to comfortably fit two-line day labels.
+    const pad = {l:62, r:18, t:18, b:92};
     const plotX0 = pad.l;
     const plotX1 = W - pad.r;
     const plotY0 = pad.t;
@@ -1460,7 +1460,7 @@ Surgical changes only:
       ctx.fillText(String(val), 16, y+6);
     }
 
-    // X axis: day-of-week labels at day centers
+    // X axis: day-of-week labels with date underneath
     const rangeMs = (tMax - tMin);
     const showTime = rangeMs <= (18 * 60 * 60 * 1000);
 
@@ -1469,17 +1469,29 @@ Surgical changes only:
     ctx.textAlign = "center";
     ctx.textBaseline = "alphabetic";
 
+    const yDow = H - 44;
+    const yDate = H - 22;
+
     for(let i=0;i<7;i++){
       const dayStart = weekStart + i*DAY_MS;
       const dayCenter = dayStart + (DAY_MS/2);
       if(dayCenter < tMin || dayCenter > tMax) continue;
 
       const x = xFromTs(dayCenter, tMin, tMax, pad, W);
-      const lab = dowShortFromTs(dayStart);
-      ctx.fillText(lab, x, H - 24);
+      const dow = dowShortFromTs(dayStart);
+      const md = mmddFromTs(dayStart);
+
+      ctx.fillText(dow, x, yDow);
+
+      ctx.fillStyle = "rgba(235,245,255,.70)";
+      ctx.font = "16px system-ui,Segoe UI,Roboto";
+      ctx.fillText(md, x, yDate);
+
+      ctx.fillStyle = "rgba(235,245,255,.90)";
+      ctx.font = "20px system-ui,Segoe UI,Roboto";
     }
 
-    // Optional time tick labels when zoomed-in (kept, slightly higher)
+    // Optional time tick labels when zoomed-in (kept)
     if(showTime){
       ctx.fillStyle = "rgba(235,245,255,.56)";
       ctx.font = "14px system-ui,Segoe UI,Roboto";
@@ -1499,7 +1511,7 @@ Surgical changes only:
         if(tx < minX) tx = minX;
         if(tx > maxX - 54) tx = maxX - 54;
 
-        ctx.fillText(lab, tx, H - 44);
+        ctx.fillText(lab, tx, H - 66);
       }
     }
 
@@ -1930,10 +1942,10 @@ self.addEventListener('fetch', (e)=>{ });`;
 
 <!--
 Version Detail Notes
-App Version: v1.19A5
-Base: v1.19A4
+App Version: v1.19A6
+Base: v1.19A5
 Surgical changes only:
-- Log: Make edit prompt a consistent short-press-hold for ALL records (including the first). Hold time reduced by ~50%.
-- Charts: Day-of-week labels made more visible (larger font + higher contrast + slightly higher placement).
+- Log: Increase press-hold time by +50% before showing the edit prompt (175ms → 265ms).
+- Charts: Keep date under the day-of-week labels (two-line x-axis labels: DOW on top, MM/DD below).
 - No other layout/behavior changes.
 -->
