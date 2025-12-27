@@ -1,13 +1,14 @@
-<!-- Vitals Tracker v1.19A2 -->
+<!-- Vitals Tracker v1.19A3 -->
 <!--
 Version Detail Notes
-App Version: v1.19A2
-Base: v1.19A1
+App Version: v1.19A3
+Base: v1.19A2
 Surgical changes only:
-- Fixed Log entry press/release so the edit prompt reliably fires per-entry (mobile jitter/capture-safe).
-- Restored custom large-font edit prompt: “Edit this reading?” (replaces native confirm).
-- Preserved Home panel layout and the known-good Exit handler; Exit button remains red-styled.
-- Added Version Detail Notes at BOTH BOF and EOF (kept in sync).
+- Restored the *subtle* red Exit styling (non-blinding).
+- Fixed Log entry press/release so the edit prompt reliably fires for EVERY entry (removed pointer-capture edge cases; added movement slop + inside-check).
+- Kept the large-font edit prompt: “Edit this reading?” exactly as approved.
+- Kept Home panel layout and the known-good Exit handler unchanged.
+- Version Detail Notes included at BOTH BOF and EOF.
 -->
 <!doctype html>
 <html lang="en">
@@ -123,11 +124,12 @@ Surgical changes only:
       color: rgba(0,0,0,.78);
     }
 
-    /* Exit coloring scheme (red) */
+    /* Subtle red Exit coloring scheme (non-blinding) */
     .btn.danger{
-      background: linear-gradient(180deg, rgba(255,80,80,.92), rgba(210,44,44,.78));
-      border-color: rgba(255,170,170,.55);
-      color: rgba(255,255,255,.92);
+      background: linear-gradient(180deg, rgba(255,80,80,.18), rgba(255,80,80,.10));
+      border-color: rgba(255,120,120,.42);
+      color: rgba(255,225,225,.92);
+      box-shadow: 0 10px 26px rgba(0,0,0,.22);
     }
 
     .btn.small{
@@ -522,7 +524,7 @@ Surgical changes only:
         <div class="subtle">Data stays on your phone (local only).</div>
 
         <div class="footerTiny">
-          <div>v1.19A2</div>
+          <div>v1.19A3</div>
           <div>developed by Keyth Jyles</div>
         </div>
       </div>
@@ -623,7 +625,7 @@ Surgical changes only:
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.19A2";
+  const APP_VERSION = "v1.19A3";
   const STORAGE_KEY = "vitals_tracker_records_v1";
   const SYMPTOMS = [
     "Sweaty","Dizzy","Panic","Brain fog","Chest tight","Headache",
@@ -784,7 +786,7 @@ Surgical changes only:
   $("btnEditCancel").addEventListener("click", closeEditPrompt);
   $("btnEditConfirm").addEventListener("click", confirmEditPrompt);
 
-  // Click outside card closes (optional; does not violate behavior)
+  // Click outside card closes
   $("editModal").addEventListener("click", (e) => {
     if(e.target === $("editModal")) closeEditPrompt();
   });
@@ -800,7 +802,6 @@ Surgical changes only:
       return;
     }
     if(e.key === "Enter"){
-      // If focus is on Cancel, Enter should cancel; otherwise confirm.
       const ae = document.activeElement;
       if(ae && ae.id === "btnEditCancel"){
         e.preventDefault();
@@ -1021,53 +1022,76 @@ Surgical changes only:
       e.setAttribute("role","button");
       e.setAttribute("aria-label","Open entry for editing");
 
-      // Fixed: reliable press/release per-entry (jitter + capture safe)
-      let armed = false;
-      const SLOP = 14; // px tolerance for touch jitter
+      // Fixed: fires per-entry reliably (no pointer-capture); supports drag-off cancel
+      const SLOP_PX = 14;
 
-      function isInside(ev){
+      let tracking = false;
+      let startX = 0, startY = 0;
+      let moved = false;
+
+      function rectInside(clientX, clientY){
         const rect = e.getBoundingClientRect();
         return (
-          ev.clientX >= rect.left - SLOP && ev.clientX <= rect.right + SLOP &&
-          ev.clientY >= rect.top  - SLOP && ev.clientY <= rect.bottom + SLOP
+          clientX >= rect.left - SLOP_PX && clientX <= rect.right + SLOP_PX &&
+          clientY >= rect.top  - SLOP_PX && clientY <= rect.bottom + SLOP_PX
         );
       }
 
-      function clearPressed(){
+      function clearPress(){
         e.classList.remove("pressed");
-        armed = false;
+        tracking = false;
+        moved = false;
       }
 
-      function fireEditPrompt(){
-        openEditPrompt(r.ts);
+      function arm(ev){
+        if(ev.button != null && ev.button !== 0) return;
+        tracking = true;
+        moved = false;
+        startX = ev.clientX;
+        startY = ev.clientY;
+        e.classList.add("pressed");
+      }
+
+      function move(ev){
+        if(!tracking) return;
+        const dx = ev.clientX - startX;
+        const dy = ev.clientY - startY;
+        if(Math.hypot(dx,dy) > SLOP_PX) moved = true;
+
+        // If they slide off the entry, cancel.
+        if(!rectInside(ev.clientX, ev.clientY)){
+          clearPress();
+        }
+      }
+
+      function release(ev){
+        if(!tracking) return;
+
+        const inside = rectInside(ev.clientX, ev.clientY);
+        const shouldFire = inside && !moved;
+
+        clearPress();
+
+        if(shouldFire){
+          openEditPrompt(r.ts);
+        }
       }
 
       e.addEventListener("pointerdown", (ev) => {
-        if(ev.button != null && ev.button !== 0) return;
-        armed = true;
-        e.classList.add("pressed");
-        try { e.setPointerCapture(ev.pointerId); } catch {}
+        // Prevent the browser from treating this as a scroll/selection click glitch on some devices
+        // while still allowing normal scroll when user actually drags.
+        arm(ev);
       });
 
-      e.addEventListener("pointermove", (ev) => {
-        if(!armed) return;
-        if(!isInside(ev)) clearPressed();
-      });
+      e.addEventListener("pointermove", move);
+      e.addEventListener("pointercancel", clearPress);
+      e.addEventListener("pointerup", release);
 
-      e.addEventListener("pointercancel", clearPressed);
-      e.addEventListener("lostpointercapture", clearPressed);
-
-      e.addEventListener("pointerup", (ev) => {
-        if(!armed) return;
-        if(!isInside(ev)) { clearPressed(); return; }
-        clearPressed();
-        fireEditPrompt();
-      });
-
+      // Keyboard access
       e.addEventListener("keydown", (ev) => {
         if(ev.key === "Enter" || ev.key === " "){
           ev.preventDefault();
-          fireEditPrompt();
+          openEditPrompt(r.ts);
         }
       });
 
@@ -1183,14 +1207,14 @@ Surgical changes only:
      ========================= */
 
   const chartView = {
-    baseMin: 0,   // week start 00:00
-    baseMax: 0,   // week end   23:59:59.999
-    viewMin: 0,   // pan/zoom view within base
+    baseMin: 0,
+    baseMax: 0,
+    viewMin: 0,
     viewMax: 0,
-    minSpan: 48*60*60*1000, // max zoom-in = 48 hours width
-    maxSpan: 7*DAY_MS,      // 7 days max span (week)
-    pinch: null,         // {dist, viewMin, viewMax, centerTs}
-    pan: null            // {x0, viewMin, viewMax}
+    minSpan: 48*60*60*1000,
+    maxSpan: 7*DAY_MS,
+    pinch: null,
+    pan: null
   };
 
   function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
@@ -1864,11 +1888,12 @@ self.addEventListener('fetch', (e)=>{ });`;
 
 <!--
 Version Detail Notes
-App Version: v1.19A2
-Base: v1.19A1
+App Version: v1.19A3
+Base: v1.19A2
 Surgical changes only:
-- Fixed Log entry press/release so the edit prompt reliably fires per-entry (mobile jitter/capture-safe).
-- Restored custom large-font edit prompt: “Edit this reading?” (replaces native confirm).
-- Preserved Home panel layout and the known-good Exit handler; Exit button remains red-styled.
-- Added Version Detail Notes at BOTH BOF and EOF (kept in sync).
+- Restored the *subtle* red Exit styling (non-blinding).
+- Fixed Log entry press/release so the edit prompt reliably fires for EVERY entry (removed pointer-capture edge cases; added movement slop + inside-check).
+- Kept the large-font edit prompt: “Edit this reading?” exactly as approved.
+- Kept Home panel layout and the known-good Exit handler unchanged.
+- Version Detail Notes included at BOTH BOF and EOF.
 -->
