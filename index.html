@@ -1,4 +1,4 @@
-<!-- Vitals Tracker v1.18A81 -->
+<!-- Vitals Tracker v1.18A82 -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -271,13 +271,25 @@
       flex-wrap:wrap;
     }
 
-    /* v1.18A81: compact log entry (more items visible) */
+    /* v1.18A82: extra-tight log vertical spacing (below top row only) */
+    #log .label{
+      margin: 8px 4px 6px;
+    }
+    #log .filters{
+      margin-top: 8px;
+      gap: 10px;
+    }
+    #log .dateField{
+      gap: 6px;
+    }
+
+    /* Compact log entries (more items visible) */
     .entry{
       border:1px solid var(--stroke);
       background: rgba(255,255,255,.03);
       border-radius: 22px;
-      padding: 10px 10px 8px; /* tightened */
-      margin-top: 8px;        /* tightened */
+      padding: 8px 10px 7px; /* tightened */
+      margin-top: 6px;       /* tightened */
       touch-action: manipulation;
     }
 
@@ -292,22 +304,22 @@
       display:flex;
       justify-content:space-between;
       align-items:flex-end;
-      gap:10px;              /* tightened */
-      margin-bottom: 2px;    /* tightened */
+      gap:10px;
+      margin-bottom: 2px;
     }
     .entryTime{
-      font-size:13px;        /* slightly smaller */
+      font-size:13px;
       color: rgba(235,245,255,.46);
       white-space:nowrap;
     }
     .entryBPHR{
       display:flex;
       justify-content:space-between;
-      gap:10px;              /* tightened */
+      gap:10px;
       align-items:baseline;
     }
 
-    /* v1.18A81: unify BP/HR label + readings to same smaller size */
+    /* Unified BP/HR label + readings to same smaller size */
     .bpBig{
       font-size:24px;
       font-weight:800;
@@ -323,10 +335,10 @@
     }
 
     .entryLine{
-      margin-top: 4px;       /* tightened */
+      margin-top: 3px;       /* tightened */
       color: rgba(235,245,255,.62);
-      font-size:15px;        /* slightly smaller */
-      line-height:1.15;      /* tighter */
+      font-size:15px;
+      line-height:1.12;
     }
     .entryLine b{
       color: rgba(235,245,255,.70);
@@ -442,7 +454,7 @@
         <div class="subtle">Data stays on your phone (local only).</div>
 
         <div class="footerTiny">
-          <div>v1.18A81</div>
+          <div>v1.18A82</div>
           <div>developed by Keyth Jyles</div>
         </div>
       </div>
@@ -531,7 +543,7 @@
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.18A81";
+  const APP_VERSION = "v1.18A82";
   const STORAGE_KEY = "vitals_tracker_records_v1";
   const SYMPTOMS = [
     "Sweaty","Dizzy","Panic","Brain fog","Chest tight","Headache",
@@ -1027,7 +1039,7 @@
     baseMax: 0,   // week end   23:59:59.999
     viewMin: 0,   // pan/zoom view within base
     viewMax: 0,
-    minSpan: 48*60*60*1000, // v1.18A81: max zoom-in = 48 hours width
+    minSpan: 48*60*60*1000, // max zoom-in = 48 hours width
     maxSpan: 7*DAY_MS,      // 7 days max span (week)
     pinch: null,         // {dist, viewMin, viewMax, centerTs}
     pan: null            // {x0, viewMin, viewMax}
