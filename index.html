@@ -1,13 +1,16 @@
-<!-- Vitals Tracker v1.19B2 -->
+<!-- Vitals Tracker v1.19B3 -->
 <!--
 Version Detail Notes
-App Version: v1.19B2
-Base: v1.19A7
-Surgical changes only:
-- Log: Fixed “edit prompt only works on first record” by switching Log selection to event-delegation (reliable per-row tap/release).
-- Export: After export, show a popup explaining clipboard + paste + save.
-  Includes buttons: Copy again, Share (if supported), Save .txt (picker if supported; otherwise downloads).
-- Popup: Added border to match screen border accent color.
+App Version: v1.19B3
+Base: v1.19B2
+Surgical changes only (this version):
+- Export popup:
+  - Default focus is NOT on Save .txt (focus goes to Close).
+  - ALL popup buttons are briefly disabled on open to prevent accidental double-tap click-through.
+  - Removed "Copy again" button entirely.
+  - 3 buttons (Close / Share / Save .txt) are forced onto one line, side-by-side.
+  - Save .txt button text uses the same whitish tone as the Home panel "ADD Reading" button.
+- Popups keep the border color matching the screen border (var(--accent)).
 - No other layout/behavior changes. Exit + Home preserved.
 -->
 <!doctype html>
@@ -145,6 +148,7 @@ Surgical changes only:
       opacity:.55;
       filter:saturate(.85);
       transform:none !important;
+      pointer-events:none;
     }
 
     .row{ display:flex; gap:12px; }
@@ -452,7 +456,7 @@ Surgical changes only:
     .modalCard{
       width:min(520px, 100%);
       border-radius: 26px;
-      border: 3px solid var(--accent); /* v1.19B2: match screen border */
+      border: 2px solid var(--accent); /* matches screen border */
       background: linear-gradient(180deg, rgba(12,21,40,.96), rgba(8,16,31,.96));
       box-shadow: 0 18px 60px rgba(0,0,0,.55);
       padding: 18px;
@@ -484,6 +488,24 @@ Surgical changes only:
       font-size: 18px;
       font-weight: 800;
       min-width: 140px;
+    }
+
+    /* Export modal: 3 buttons must fit on one line */
+    #exportModal .modalBtns{
+      flex-wrap: nowrap;
+    }
+    #exportModal .modalBtns .btn{
+      min-width: 0;
+      flex: 1 1 0;
+      font-size: 16px;
+      height: 52px;
+      padding: 0 10px;
+      white-space: nowrap;
+    }
+
+    /* Export modal primary (Save) text color: whitish like Home ADD Reading */
+    #exportModal .btn.primary{
+      color: rgba(235,245,255,.90);
     }
   </style>
 </head>
@@ -534,7 +556,7 @@ Surgical changes only:
         <div class="subtle">Data stays on your phone (local only).</div>
 
         <div class="footerTiny">
-          <div>v1.19B2</div>
+          <div>v1.19B3</div>
           <div>developed by Keyth Jyles</div>
         </div>
       </div>
@@ -646,7 +668,6 @@ Optional:
       </div>
       <div class="modalBtns">
         <button id="btnExportClose" class="btn">Close</button>
-        <button id="btnExportCopy" class="btn">Copy again</button>
         <button id="btnExportShare" class="btn">Share</button>
         <button id="btnExportSave" class="btn primary">Save .txt</button>
       </div>
@@ -657,7 +678,7 @@ Optional:
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.19B2";
+  const APP_VERSION = "v1.19B3";
   const STORAGE_KEY = "vitals_tracker_records_v1";
   const SYMPTOMS = [
     "Sweaty","Dizzy","Panic","Brain fog","Chest tight","Headache",
@@ -882,6 +903,7 @@ Optional:
   let exportPayload = null; // { text, filename }
   let exportPrevFocus = null;
   let exportOpenedAt = 0;
+  let enableExportTimer = null;
 
   function isShareAvailable(){
     return !!(navigator.share && typeof navigator.share === "function");
@@ -892,11 +914,29 @@ Optional:
     exportPrevFocus = document.activeElement || null;
     exportOpenedAt = Date.now();
 
-    $("btnExportShare").disabled = !isShareAvailable();
+    const btnClose = $("btnExportClose");
+    const btnShare = $("btnExportShare");
+    const btnSave  = $("btnExportSave");
+
+    // Brief disable for ALL buttons to prevent double-click-through
+    btnClose.disabled = true;
+    btnShare.disabled = true;
+    btnSave.disabled  = true;
 
     $("exportModal").classList.remove("hidden");
+
+    if(enableExportTimer) clearTimeout(enableExportTimer);
+    enableExportTimer = setTimeout(() => {
+      btnClose.disabled = false;
+
+      // Share may remain disabled if unsupported
+      btnShare.disabled = !isShareAvailable();
+      btnSave.disabled  = false;
+    }, 450);
+
+    // Default focus is NOT on Save; focus Close.
     setTimeout(() => {
-      try{ $("btnExportClose").focus({preventScroll:true}); }catch{}
+      try{ btnClose.focus({preventScroll:true}); }catch{}
     }, 0);
   }
 
@@ -964,20 +1004,11 @@ Optional:
     return true;
   }
 
-  $("btnExportCopy").addEventListener("click", async (e) => {
-    e.preventDefault();
-    if(!exportPayload) return;
-    try{
-      await copyToClipboard(exportPayload.text);
-      alert("Copied to clipboard.");
-    }catch{
-      alert("Clipboard copy failed on this browser.");
-    }
-  });
-
   $("btnExportShare").addEventListener("click", async (e) => {
     e.preventDefault();
     if(!exportPayload) return;
+    if($("btnExportShare").disabled) return;
+
     if(!isShareAvailable()){
       alert("Share is not available on this device/browser.");
       return;
@@ -995,6 +1026,7 @@ Optional:
   $("btnExportSave").addEventListener("click", async (e) => {
     e.preventDefault();
     if(!exportPayload) return;
+    if($("btnExportSave").disabled) return;
 
     try{
       const ok = await saveTextWithPicker(exportPayload.text, exportPayload.filename);
@@ -1677,8 +1709,10 @@ Optional:
     const yDow = H - 44;
     const yDate = H - 22;
 
+    const weekStartLabel = startOfDay(chartView.baseMin);
+
     for(let i=0;i<7;i++){
-      const dayStart = weekStart + i*DAY_MS;
+      const dayStart = weekStartLabel + i*DAY_MS;
       const dayCenter = dayStart + (DAY_MS/2);
       if(dayCenter < tMin || dayCenter > tMax) continue;
 
@@ -2148,12 +2182,15 @@ self.addEventListener('fetch', (e)=>{ });`;
 
 <!--
 Version Detail Notes
-App Version: v1.19B2
-Base: v1.19A7
-Surgical changes only:
-- Log: Fixed “edit prompt only works on first record” by switching Log selection to event-delegation (reliable per-row tap/release).
-- Export: After export, show a popup explaining clipboard + paste + save.
-  Includes buttons: Copy again, Share (if supported), Save .txt (picker if supported; otherwise downloads).
-- Popup: Added border to match screen border accent color.
+App Version: v1.19B3
+Base: v1.19B2
+Surgical changes only (this version):
+- Export popup:
+  - Default focus is NOT on Save .txt (focus goes to Close).
+  - ALL popup buttons are briefly disabled on open to prevent accidental double-tap click-through.
+  - Removed "Copy again" button entirely.
+  - 3 buttons (Close / Share / Save .txt) are forced onto one line, side-by-side.
+  - Save .txt button text uses the same whitish tone as the Home panel "ADD Reading" button.
+- Popups keep the border color matching the screen border (var(--accent)).
 - No other layout/behavior changes. Exit + Home preserved.
 -->
