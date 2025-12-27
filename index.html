@@ -1,5 +1,4 @@
 <!doctype html>
-<!-- VITALS_TRACKER_VERSION: v1.18 -->
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -405,7 +404,7 @@
               </div>
 
               <div class="hint">
-                Tip: Tap any entry in <b>Log</b> to edit or delete.
+                Tip: Tap any entry in <b>Log</b> to edit or delete. Data is stored in an on-device database (IndexedDB) in v1.18.
               </div>
             </div>
           </div>
@@ -467,7 +466,7 @@
           <div class="panel">
             <h3>Trend (Systolic / Diastolic)</h3>
             <canvas id="chartBP" width="900" height="260"></canvas>
-            <div class="hint">Even spacing (last 120 entries).</div>
+            <div class="hint">Showing up to the last 120 filtered entries (oldest → newest).</div>
           </div>
           <div class="panel">
             <h3>Trend (Heart Rate)</h3>
@@ -586,7 +585,6 @@
    - One-time legacy localStorage import
    - Backup/Restore JSON
    - Filtered export + charts
-   - Charts: even spacing (no true-time spacing, no day bands)
 ========================= */
 
 (() => {
@@ -594,7 +592,7 @@
   const DB_NAME = "VitalsTrackerDB";
   const DB_VER = 1;
   const STORE = "readings";
-  const LEGACY_KEY = "vitals_tracker_entries_v1x";
+  const LEGACY_KEY = "vitals_tracker_entries_v1x"; // best-effort import key (see importLegacy)
 
   const $ = (id) => document.getElementById(id);
 
@@ -663,6 +661,7 @@
     return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
   };
   const parseDTLocal = (val) => {
+    // datetime-local is local time; Date parses as local if "YYYY-MM-DDTHH:MM"
     const d = new Date(val);
     const ms = d.getTime();
     return Number.isFinite(ms) ? ms : Date.now();
@@ -675,10 +674,9 @@
 
   const formatStamp = (ms) => {
     const d = new Date(ms);
-    return d.toLocaleString(undefined, {
-      year:"numeric", month:"2-digit", day:"2-digit",
-      hour:"2-digit", minute:"2-digit", second:"2-digit"
-    });
+    // 12/25/2025, 06:00:39 PM
+    return d.toLocaleString(undefined, { year:"numeric", month:"2-digit", day:"2-digit",
+      hour:"2-digit", minute:"2-digit", second:"2-digit" });
   };
 
   const downloadText = (filename, text) => {
@@ -726,6 +724,7 @@
   }
 
   function id(){
+    // sortable-ish unique id
     return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
   }
 
@@ -763,6 +762,8 @@
 
   // ---------- Legacy import (best-effort) ----------
   async function importLegacyIfPresent(){
+    // Your earlier versions used localStorage; keys varied across edits.
+    // This tries the most likely keys and imports once.
     const doneKey = "VT_IDB_IMPORTED_V1X";
     if (localStorage.getItem(doneKey) === "1") return;
 
@@ -785,13 +786,15 @@
     if (!raw) return;
 
     let arr = null;
-    try { arr = JSON.parse(raw); } catch(e){ }
+    try { arr = JSON.parse(raw); } catch(e){ /* ignore */ }
     if (!Array.isArray(arr) || arr.length === 0) return;
 
+    // Normalize
     let imported = 0;
     for (const x of arr){
       const r = normalizeLegacy(x);
       if (!r) continue;
+      // Avoid clobber: new id
       r.id = id();
       await dbPutReading(r);
       imported++;
@@ -801,6 +804,9 @@
   }
 
   function normalizeLegacy(x){
+    // Accept multiple shapes
+    // Expected v1.18 shape:
+    // {id, ts, sys, dia, hr, tag, symptoms, notes}
     if (!x || typeof x !== "object") return null;
 
     const ts = Number.isFinite(+x.ts) ? +x.ts
@@ -820,7 +826,7 @@
       ts: Number.isFinite(ts) ? ts : Date.now(),
       sys: s,
       dia: d,
-      hr: (h == null ? null : h),
+      hr: h ?? null,
       tag: (x.tag ?? x.label ?? "").toString().slice(0,40),
       symptoms: (x.symptoms ?? x.sym ?? "").toString().slice(0,220),
       notes: (x.notes ?? "").toString().slice(0,320),
@@ -913,8 +919,10 @@
 
   async function refreshAll(){
     const all = await dbGetAll();
+    // sort newest first
     all.sort((a,b) => b.ts - a.ts);
     currentList = applyFiltersToArray(all, currentFilters);
+    // keep sorted newest first for log; charts will reverse
     renderList();
     renderStatus(all);
     renderCharts(currentList);
@@ -965,6 +973,7 @@
   // ---------- Export ----------
   function makeExportText(arr){
     if (!arr.length) return "";
+    // export oldest -> newest
     const asc = [...arr].sort((a,b) => a.ts - b.ts);
     return asc.map(r => {
       const lines = [];
@@ -1004,69 +1013,57 @@
     if (!text) exportBox.placeholder = "No data to export (with current filters).";
   }
 
-  // =========================
-  // Charts v1.18
-  // - Even spacing across last N points
-  // =========================
-  function drawSimpleChart(canvas, seriesList){
+  // ---------- Charts (simple canvas line plots) ----------
+  function drawLineChart(canvas, seriesList, yMin=null, yMax=null){
     const ctx = canvas.getContext("2d");
     const W = canvas.width, H = canvas.height;
     ctx.clearRect(0,0,W,H);
 
-    const anyVals = seriesList.some(s => s.values.some(v => Number.isFinite(v)));
-    if (!anyVals){
+    // background grid
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = "rgba(235,245,255,.10)";
+    ctx.lineWidth = 1;
+
+    const gridY = 5;
+    for (let i=0;i<=gridY;i++){
+      const y = Math.round((H-1) * i / gridY) + 0.5;
+      ctx.beginPath();
+      ctx.moveTo(0,y);
+      ctx.lineTo(W,y);
+      ctx.stroke();
+    }
+
+    // gather data bounds
+    let allVals = [];
+    for (const s of seriesList){
+      allVals = allVals.concat(s.values.filter(v => Number.isFinite(v)));
+    }
+    if (!allVals.length){
       ctx.fillStyle = "rgba(169,189,223,.85)";
       ctx.font = "14px " + getComputedStyle(document.documentElement).getPropertyValue('--sans');
       ctx.fillText("No data", 14, 24);
       return;
     }
-
-    // plot area
-    const L = 10, R = W-10, T = 10, B = H-18;
-    const plotW = Math.max(1, R-L);
-    const plotH = Math.max(1, B-T);
-
-    // horizontal grid
-    ctx.strokeStyle = "rgba(235,245,255,.10)";
-    ctx.lineWidth = 1;
-    const gridY = 5;
-    for (let i=0;i<=gridY;i++){
-      const y = Math.round(T + (plotH * i / gridY)) + 0.5;
-      ctx.beginPath();
-      ctx.moveTo(L,y);
-      ctx.lineTo(R,y);
-      ctx.stroke();
-    }
-
-    // y bounds
-    let allVals = [];
-    for (const s of seriesList){
-      allVals = allVals.concat(s.values.filter(v => Number.isFinite(v)));
-    }
-    const minV = Math.min(...allVals);
-    const maxV = Math.max(...allVals);
+    const minV = (yMin != null) ? yMin : Math.min(...allVals);
+    const maxV = (yMax != null) ? yMax : Math.max(...allVals);
     const pad = (maxV - minV) * 0.12 || 8;
     const lo = minV - pad, hi = maxV + pad;
 
+    const n = Math.max(...seriesList.map(s => s.values.length));
+    const xAt = (i) => (n<=1) ? 0 : (i * (W-20) / (n-1)) + 10;
     const yAt = (v) => {
       const t = (v - lo) / (hi - lo);
-      return B - t * plotH;
+      return (H-16) - t*(H-28);
     };
 
-    // axis labels
+    // axis labels (min/max)
     ctx.fillStyle = "rgba(169,189,223,.85)";
     ctx.font = "12px var(--mono)";
-    ctx.fillText(String(Math.round(hi)), L, 12);
-    ctx.fillText(String(Math.round(lo)), L, H-6);
+    ctx.fillText(String(Math.round(hi)), 10, 14);
+    ctx.fillText(String(Math.round(lo)), 10, H-6);
 
-    // x spacing (even)
-    const N = Math.max(...seriesList.map(s => s.values.length));
-    const xAtIndex = (i) => {
-      if (N <= 1) return L + plotW/2;
-      return L + (i/(N-1)) * plotW;
-    };
-
-    // series lines
+    // draw each series (no hard-coded colors; use computed accent variants)
+    const base = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || "#7aa7ff";
     const strokes = [
       `rgba(122,167,255,.95)`,
       `rgba(124,255,178,.85)`,
@@ -1074,39 +1071,35 @@
     ];
 
     seriesList.forEach((s, idx) => {
+      const vals = s.values;
       ctx.strokeStyle = strokes[idx % strokes.length];
       ctx.lineWidth = 2;
       ctx.beginPath();
-
-      let started = false;
-      for (let i=0;i<s.values.length;i++){
-        const v = s.values[i];
+      for (let i=0;i<vals.length;i++){
+        const v = vals[i];
         if (!Number.isFinite(v)) continue;
-        const x = xAtIndex(i);
+        const x = xAt(i);
         const y = yAt(v);
-        if (!started){
-          ctx.moveTo(x,y);
-          started = true;
-        } else {
-          ctx.lineTo(x,y);
-        }
+        if (i === 0) ctx.moveTo(x,y);
+        else ctx.lineTo(x,y);
       }
       ctx.stroke();
     });
   }
 
   function renderCharts(arr){
-    const useAsc = [...arr].sort((a,b) => a.ts - b.ts).slice(-120);
-    const sysVals = useAsc.map(r => r.sys ?? null);
-    const diaVals = useAsc.map(r => r.dia ?? null);
-    const hrVals  = useAsc.map(r => r.hr ?? null);
+    // chart uses up to last 120 entries, oldest->newest
+    const use = [...arr].sort((a,b) => a.ts - b.ts).slice(-120);
+    const sysVals = use.map(r => r.sys ?? null);
+    const diaVals = use.map(r => r.dia ?? null);
+    const hrVals  = use.map(r => r.hr ?? null);
 
-    drawSimpleChart(chartBP, [
+    drawLineChart(chartBP, [
       { name:"SYS", values: sysVals },
       { name:"DIA", values: diaVals }
     ]);
 
-    drawSimpleChart(chartHR, [
+    drawLineChart(chartHR, [
       { name:"HR", values: hrVals }
     ]);
   }
@@ -1164,6 +1157,8 @@
   }
 
   function setupServiceWorker(){
+    // Single-file SW: cache the current page for basic offline use.
+    // Note: On GitHub Pages, scope depends on path; this still usually works.
     if (!("serviceWorker" in navigator)) return;
 
     const swCode = `
@@ -1201,7 +1196,9 @@
     const blob = new Blob([swCode], {type:"text/javascript"});
     const swUrl = URL.createObjectURL(blob);
 
-    navigator.serviceWorker.register(swUrl).catch(() => {});
+    navigator.serviceWorker.register(swUrl).catch(() => {
+      // silent; SW isn't critical
+    });
   }
 
   // ---------- Events ----------
@@ -1236,6 +1233,7 @@
 
     await dbPutReading(r);
     toast("Saved");
+    // keep time, clear vitals fields lightly
     sys.value = ""; dia.value = ""; hr.value = "";
     await refreshAll();
   });
@@ -1382,6 +1380,7 @@
   const tabClick = async (t) => {
     setTab(t);
     if (t === tabCharts || t === tabTools) {
+      // ensure visuals are current
       await refreshAll();
     }
   };
@@ -1413,6 +1412,7 @@
   });
 
   btnExit.addEventListener("click", () => {
+    // Best-effort: some browsers will ignore window.close() unless opened by script.
     toast("You can close this tab/app.");
     try{ window.close(); }catch(e){}
   });
@@ -1422,6 +1422,7 @@
     setupManifest();
     setupServiceWorker();
 
+    // default "when" = now
     when.value = toLocalDT(Date.now());
     btnInstall.disabled = true;
 
