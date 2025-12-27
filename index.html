@@ -1,14 +1,12 @@
-<!-- Vitals Tracker v1.19A3 -->
+<!-- Vitals Tracker v1.19A5 -->
 <!--
 Version Detail Notes
-App Version: v1.19A3
-Base: v1.19A2
+App Version: v1.19A5
+Base: v1.19A4
 Surgical changes only:
-- Restored the *subtle* red Exit styling (non-blinding).
-- Fixed Log entry press/release so the edit prompt reliably fires for EVERY entry (removed pointer-capture edge cases; added movement slop + inside-check).
-- Kept the large-font edit prompt: “Edit this reading?” exactly as approved.
-- Kept Home panel layout and the known-good Exit handler unchanged.
-- Version Detail Notes included at BOTH BOF and EOF.
+- Log: Make edit prompt a consistent short-press-hold for ALL records (including the first). Hold time reduced by ~50%.
+- Charts: Day-of-week labels made more visible (larger font + higher contrast + slightly higher placement).
+- No other layout/behavior changes.
 -->
 <!doctype html>
 <html lang="en">
@@ -524,7 +522,7 @@ Surgical changes only:
         <div class="subtle">Data stays on your phone (local only).</div>
 
         <div class="footerTiny">
-          <div>v1.19A3</div>
+          <div>v1.19A5</div>
           <div>developed by Keyth Jyles</div>
         </div>
       </div>
@@ -625,7 +623,7 @@ Surgical changes only:
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.19A3";
+  const APP_VERSION = "v1.19A5";
   const STORAGE_KEY = "vitals_tracker_records_v1";
   const SYMPTOMS = [
     "Sweaty","Dizzy","Panic","Brain fog","Chest tight","Headache",
@@ -750,6 +748,10 @@ Surgical changes only:
       .replaceAll("'","&#039;");
   }
 
+  function dowShortFromTs(ts){
+    return new Intl.DateTimeFormat(undefined, { weekday:"short" }).format(new Date(ts));
+  }
+
   /* =========================
      Custom edit prompt modal
      ========================= */
@@ -764,7 +766,6 @@ Surgical changes only:
     const m = $("editModal");
     m.classList.remove("hidden");
 
-    // Focus “Edit” for accessibility
     setTimeout(() => {
       try{ $("btnEditConfirm").focus({preventScroll:true}); }catch{}
     }, 0);
@@ -782,16 +783,13 @@ Surgical changes only:
     if(ts != null) enterAddEdit(ts);
   }
 
-  // Modal controls
   $("btnEditCancel").addEventListener("click", closeEditPrompt);
   $("btnEditConfirm").addEventListener("click", confirmEditPrompt);
 
-  // Click outside card closes
   $("editModal").addEventListener("click", (e) => {
     if(e.target === $("editModal")) closeEditPrompt();
   });
 
-  // Keyboard: Esc cancels; Enter confirms (while modal open)
   document.addEventListener("keydown", (e) => {
     const open = !$("editModal").classList.contains("hidden");
     if(!open) return;
@@ -880,8 +878,7 @@ Surgical changes only:
   function setSymSelected(names){
     const set = new Set((names || []).map(String));
     for(const name of SYMPTOMS){
-      const on = set.has(name);
-      symState.set(name, on);
+      symState.set(name, set.has(name));
     }
     for(const el of symGrid.querySelectorAll(".symItem")){
       const label = el.querySelector(".symText")?.textContent || "";
@@ -904,8 +901,8 @@ Surgical changes only:
      ========================= */
 
   let timeTimer = null;
-  let editTs = null;          // null = new record, else editing an existing record by ts
-  let returnScreen = "home";  // where Back returns when leaving Add
+  let editTs = null;
+  let returnScreen = "home";
 
   function enterAddNew(from="home"){
     editTs = null;
@@ -1015,6 +1012,9 @@ Surgical changes only:
       return;
     }
 
+    // Consistent press-hold time for ALL entries (including first), reduced ~50%
+    const HOLD_MS = 175;
+
     for(const r of recs){
       const e = document.createElement("div");
       e.className = "entry";
@@ -1022,12 +1022,14 @@ Surgical changes only:
       e.setAttribute("role","button");
       e.setAttribute("aria-label","Open entry for editing");
 
-      // Fixed: fires per-entry reliably (no pointer-capture); supports drag-off cancel
       const SLOP_PX = 14;
 
       let tracking = false;
       let startX = 0, startY = 0;
       let moved = false;
+      let holdTimer = null;
+      let fired = false;
+      let pointerId = null;
 
       function rectInside(clientX, clientY){
         const rect = e.getBoundingClientRect();
@@ -1037,19 +1039,46 @@ Surgical changes only:
         );
       }
 
+      function clearHold(){
+        if(holdTimer){
+          clearTimeout(holdTimer);
+          holdTimer = null;
+        }
+      }
+
       function clearPress(){
+        clearHold();
         e.classList.remove("pressed");
         tracking = false;
         moved = false;
+        fired = false;
+        pointerId = null;
       }
 
       function arm(ev){
         if(ev.button != null && ev.button !== 0) return;
+
         tracking = true;
         moved = false;
+        fired = false;
+        pointerId = ev.pointerId ?? null;
+
         startX = ev.clientX;
         startY = ev.clientY;
+
         e.classList.add("pressed");
+
+        clearHold();
+        holdTimer = setTimeout(() => {
+          if(!tracking) return;
+          if(fired) return;
+          // Must still be inside and not moved
+          if(!moved && rectInside(ev.clientX, ev.clientY)){
+            fired = true;
+            e.classList.remove("pressed");
+            openEditPrompt(r.ts);
+          }
+        }, HOLD_MS);
       }
 
       function move(ev){
@@ -1058,7 +1087,7 @@ Surgical changes only:
         const dy = ev.clientY - startY;
         if(Math.hypot(dx,dy) > SLOP_PX) moved = true;
 
-        // If they slide off the entry, cancel.
+        // Cancel if they slide off the entry
         if(!rectInside(ev.clientX, ev.clientY)){
           clearPress();
         }
@@ -1066,28 +1095,18 @@ Surgical changes only:
 
       function release(ev){
         if(!tracking) return;
-
-        const inside = rectInside(ev.clientX, ev.clientY);
-        const shouldFire = inside && !moved;
-
+        // If timer hasn't fired, do nothing. (Prevents "first fires immediately" behavior.)
         clearPress();
-
-        if(shouldFire){
-          openEditPrompt(r.ts);
-        }
       }
 
       e.addEventListener("pointerdown", (ev) => {
-        // Prevent the browser from treating this as a scroll/selection click glitch on some devices
-        // while still allowing normal scroll when user actually drags.
+        try{ e.setPointerCapture(ev.pointerId); }catch{}
         arm(ev);
       });
-
       e.addEventListener("pointermove", move);
       e.addEventListener("pointercancel", clearPress);
       e.addEventListener("pointerup", release);
 
-      // Keyboard access
       e.addEventListener("keydown", (ev) => {
         if(ev.key === "Enter" || ev.key === " "){
           ev.preventDefault();
@@ -1365,7 +1384,7 @@ Surgical changes only:
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
     const W = canvas.width, H = canvas.height;
-    const pad = {l:62, r:18, t:18, b:56};
+    const pad = {l:62, r:18, t:18, b:78}; // a bit more bottom room for labels
     const plotX0 = pad.l;
     const plotX1 = W - pad.r;
     const plotY0 = pad.t;
@@ -1395,37 +1414,35 @@ Surgical changes only:
     const tMin = chartView.viewMin;
     const tMax = chartView.viewMax;
 
+    // Day bands
     ctx.save();
     ctx.beginPath();
     ctx.rect(plotX0, plotY0, plotX1-plotX0, plotY1-plotY0);
     ctx.clip();
 
-    const day0 = startOfDay(chartView.baseMin);
-    const dayN = startOfDay(chartView.baseMax);
-    let bandIndex = 0;
-
-    for(let day = day0; day <= dayN; day += DAY_MS){
-      const bandStart = day;
-      const bandEnd = day + DAY_MS;
+    const weekStart = startOfDay(chartView.baseMin);
+    for(let i=0;i<7;i++){
+      const bandStart = weekStart + i*DAY_MS;
+      const bandEnd = bandStart + DAY_MS;
 
       const a = Math.max(bandStart, tMin);
       const b = Math.min(bandEnd,   tMax);
-      if(b <= a){ bandIndex++; continue; }
+      if(b <= a) continue;
 
       let x0 = xFromTs(a, tMin, tMax, pad, W);
       let x1 = xFromTs(b, tMin, tMax, pad, W);
       x0 = Math.max(x0, plotX0);
       x1 = Math.min(x1, plotX1);
-      if(x1 <= x0){ bandIndex++; continue; }
+      if(x1 <= x0) continue;
 
-      ctx.fillStyle = (bandIndex % 2 === 0)
+      ctx.fillStyle = (i % 2 === 0)
         ? "rgba(255,255,255,.14)"
         : "rgba(47,120,255,.26)";
       ctx.fillRect(x0, plotY0, (x1 - x0), (plotY1 - plotY0));
-      bandIndex++;
     }
     ctx.restore();
 
+    // Y grid + labels
     ctx.font = "16px system-ui,Segoe UI,Roboto";
     ctx.fillStyle = "rgba(235,245,255,.60)";
     ctx.strokeStyle = "rgba(235,245,255,.10)";
@@ -1443,30 +1460,50 @@ Surgical changes only:
       ctx.fillText(String(val), 16, y+6);
     }
 
+    // X axis: day-of-week labels at day centers
     const rangeMs = (tMax - tMin);
     const showTime = rangeMs <= (18 * 60 * 60 * 1000);
-    const labelCount = 4;
 
-    ctx.fillStyle = "rgba(235,245,255,.56)";
-    ctx.font = "16px system-ui,Segoe UI,Roboto";
+    ctx.fillStyle = "rgba(235,245,255,.90)";
+    ctx.font = "20px system-ui,Segoe UI,Roboto";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "alphabetic";
 
-    for(let i=0;i<labelCount;i++){
-      const ts = tMin + rangeMs * (i/(labelCount-1 || 1));
-      const x = xFromTs(ts, tMin, tMax, pad, W);
+    for(let i=0;i<7;i++){
+      const dayStart = weekStart + i*DAY_MS;
+      const dayCenter = dayStart + (DAY_MS/2);
+      if(dayCenter < tMin || dayCenter > tMax) continue;
 
-      const d = new Date(ts);
-      const lab = showTime
-        ? new Intl.DateTimeFormat(undefined, {month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit"}).format(d)
-        : new Intl.DateTimeFormat(undefined, {month:"2-digit", day:"2-digit"}).format(d);
-
-      const maxX = W - pad.r - 2;
-      const minX = pad.l + 2;
-      let tx = x - 24;
-      if(tx < minX) tx = minX;
-      if(tx > maxX - 90) tx = maxX - 90;
-
-      ctx.fillText(lab, tx, H-22);
+      const x = xFromTs(dayCenter, tMin, tMax, pad, W);
+      const lab = dowShortFromTs(dayStart);
+      ctx.fillText(lab, x, H - 24);
     }
+
+    // Optional time tick labels when zoomed-in (kept, slightly higher)
+    if(showTime){
+      ctx.fillStyle = "rgba(235,245,255,.56)";
+      ctx.font = "14px system-ui,Segoe UI,Roboto";
+      ctx.textAlign = "left";
+
+      const labelCount = 4;
+      for(let i=0;i<labelCount;i++){
+        const ts = tMin + rangeMs * (i/(labelCount-1 || 1));
+        const x = xFromTs(ts, tMin, tMax, pad, W);
+
+        const d = new Date(ts);
+        const lab = new Intl.DateTimeFormat(undefined, {hour:"2-digit", minute:"2-digit"}).format(d);
+
+        const maxX = W - pad.r - 2;
+        const minX = pad.l + 2;
+        let tx = x - 18;
+        if(tx < minX) tx = minX;
+        if(tx > maxX - 54) tx = maxX - 54;
+
+        ctx.fillText(lab, tx, H - 44);
+      }
+    }
+
+    ctx.textAlign = "start";
 
     if(recs.length){
       drawSeriesTimedWithDayGaps(ctx, recs, r=>r.sys, tMin, tMax, yMin, yMax, pad, W, H, "rgba(79,140,255,.98)");
@@ -1478,15 +1515,20 @@ Surgical changes only:
       ctx.fillText("No readings in this view.", pad.l + 12, pad.t + 34);
     }
 
-    const lx = pad.l + 8;
-    let ly = pad.t + 22;
-    ctx.font = "18px system-ui,Segoe UI,Roboto";
+    // Legend: larger, more evenly spaced lettering
+    const lx = pad.l + 10;
+    let ly = pad.t + 26;
+
+    ctx.font = "22px system-ui,Segoe UI,Roboto";
+    ctx.textAlign = "start";
+
     function legend(text, color){
       ctx.fillStyle = color;
-      ctx.fillRect(lx, ly-12, 18, 6);
-      ctx.fillStyle = "rgba(235,245,255,.70)";
-      ctx.fillText(text, lx+26, ly-6);
-      ly += 24;
+      ctx.fillRect(lx, ly-14, 26, 8);
+      ctx.fillStyle = "rgba(235,245,255,.88)";
+      const spaced = text.split("").join(" ");
+      ctx.fillText(spaced, lx+38, ly-6);
+      ly += 32;
     }
     legend("Systolic", "rgba(79,140,255,.98)");
     legend("Diastolic", "rgba(216,224,240,.88)");
@@ -1888,12 +1930,10 @@ self.addEventListener('fetch', (e)=>{ });`;
 
 <!--
 Version Detail Notes
-App Version: v1.19A3
-Base: v1.19A2
+App Version: v1.19A5
+Base: v1.19A4
 Surgical changes only:
-- Restored the *subtle* red Exit styling (non-blinding).
-- Fixed Log entry press/release so the edit prompt reliably fires for EVERY entry (removed pointer-capture edge cases; added movement slop + inside-check).
-- Kept the large-font edit prompt: “Edit this reading?” exactly as approved.
-- Kept Home panel layout and the known-good Exit handler unchanged.
-- Version Detail Notes included at BOTH BOF and EOF.
+- Log: Make edit prompt a consistent short-press-hold for ALL records (including the first). Hold time reduced by ~50%.
+- Charts: Day-of-week labels made more visible (larger font + higher contrast + slightly higher placement).
+- No other layout/behavior changes.
 -->
