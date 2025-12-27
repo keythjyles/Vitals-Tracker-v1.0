@@ -1,12 +1,13 @@
-<!-- Vitals Tracker v1.19B1 -->
+<!-- Vitals Tracker v1.19B2 -->
 <!--
 Version Detail Notes
-App Version: v1.19B1
+App Version: v1.19B2
 Base: v1.19A7
 Surgical changes only:
 - Log: Fixed “edit prompt only works on first record” by switching Log selection to event-delegation (reliable per-row tap/release).
 - Export: After export, show a popup explaining clipboard + paste + save.
   Includes buttons: Copy again, Share (if supported), Save .txt (picker if supported; otherwise downloads).
+- Popup: Added border to match screen border accent color.
 - No other layout/behavior changes. Exit + Home preserved.
 -->
 <!doctype html>
@@ -451,7 +452,7 @@ Surgical changes only:
     .modalCard{
       width:min(520px, 100%);
       border-radius: 26px;
-      border: 1px solid rgba(235,245,255,.20);
+      border: 3px solid var(--accent); /* v1.19B2: match screen border */
       background: linear-gradient(180deg, rgba(12,21,40,.96), rgba(8,16,31,.96));
       box-shadow: 0 18px 60px rgba(0,0,0,.55);
       padding: 18px;
@@ -533,7 +534,7 @@ Surgical changes only:
         <div class="subtle">Data stays on your phone (local only).</div>
 
         <div class="footerTiny">
-          <div>v1.19B1</div>
+          <div>v1.19B2</div>
           <div>developed by Keyth Jyles</div>
         </div>
       </div>
@@ -656,7 +657,7 @@ Optional:
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.19B1";
+  const APP_VERSION = "v1.19B2";
   const STORAGE_KEY = "vitals_tracker_records_v1";
   const SYMPTOMS = [
     "Sweaty","Dizzy","Panic","Brain fog","Chest tight","Headache",
@@ -2147,11 +2148,12 @@ self.addEventListener('fetch', (e)=>{ });`;
 
 <!--
 Version Detail Notes
-App Version: v1.19B1
+App Version: v1.19B2
 Base: v1.19A7
 Surgical changes only:
 - Log: Fixed “edit prompt only works on first record” by switching Log selection to event-delegation (reliable per-row tap/release).
 - Export: After export, show a popup explaining clipboard + paste + save.
   Includes buttons: Copy again, Share (if supported), Save .txt (picker if supported; otherwise downloads).
+- Popup: Added border to match screen border accent color.
 - No other layout/behavior changes. Exit + Home preserved.
 -->
