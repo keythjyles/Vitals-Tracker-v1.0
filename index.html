@@ -1,4 +1,4 @@
-<!-- Vitals Tracker v1.18A2 (chart updates: true time spacing + STRONGER alternating day bands) -->
+<!-- Vitals Tracker v1.18A3 (true time spacing + strong day bands + label daily systolic high) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -64,7 +64,6 @@
       gap:14px;
     }
 
-    /* Logo occupies same layout space as the prior heading block */
     .logoTitle{
       margin:10px 6px 0;
       display:flex;
@@ -279,13 +278,10 @@
       margin-top: 12px;
       touch-action: manipulation;
     }
-
-    /* v1.18: log entry press feedback */
     .entry.pressed{
       background: rgba(47,120,255,.14);
       border-color: rgba(90,150,255,.55);
     }
-
     .entry:active{ transform: translateY(1px); }
     .entryTop{
       display:flex;
@@ -369,7 +365,6 @@
       font-weight:600;
     }
 
-    /* Edit mode indicator */
     .editPill{
       display:inline-flex;
       align-items:center;
@@ -433,7 +428,7 @@
         <div class="subtle">Data stays on your phone (local only).</div>
 
         <div class="footerTiny">
-          <div>v1.18A2</div>
+          <div>v1.18A3</div>
           <div>developed by Keyth Jyles</div>
         </div>
       </div>
@@ -997,6 +992,42 @@
     return d.getTime();
   }
 
+  function drawValueLabel(ctx, x, y, text, plotX0, plotX1, plotY0, plotY1){
+    // prefer label slightly above-right; clamp inside plot area
+    let tx = x + 8;
+    let ty = y - 10;
+
+    ctx.font = "16px system-ui,Segoe UI,Roboto";
+    const w = ctx.measureText(text).width;
+
+    // clamp horizontally (leave a small padding)
+    if(tx + w + 10 > plotX1) tx = plotX1 - w - 10;
+    if(tx < plotX0 + 6) tx = plotX0 + 6;
+
+    // clamp vertically
+    if(ty < plotY0 + 18) ty = y + 18;
+    if(ty > plotY1 - 6) ty = plotY1 - 6;
+
+    // subtle background pill for readability
+    const padX = 8, padY = 6;
+    const bgW = w + padX*2;
+    const bgH = 22;
+    const bgX = tx - padX;
+    const bgY = ty - bgH + padY;
+
+    ctx.save();
+    ctx.globalAlpha = 1;
+    roundRect(ctx, bgX, bgY, bgW, bgH, 10, "rgba(0,0,0,.35)", "rgba(235,245,255,.12)");
+
+    // text (stroke + fill)
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "rgba(0,0,0,.55)";
+    ctx.fillStyle = "rgba(235,245,255,.92)";
+    ctx.strokeText(text, tx, ty);
+    ctx.fillText(text, tx, ty);
+    ctx.restore();
+  }
+
   function renderCharts(){
     const canvas = $("chart");
     const ctx = canvas.getContext("2d");
@@ -1040,7 +1071,7 @@
     const plotY0 = pad.t;
     const plotY1 = H - pad.b;
 
-    // STRONGER alternating day bands (visible on mobile)
+    // strong alternating day bands (visible on mobile)
     ctx.save();
     ctx.beginPath();
     ctx.rect(plotX0, plotY0, plotX1 - plotX0, plotY1 - plotY0);
@@ -1067,13 +1098,12 @@
       if(x1 <= x0) { bandIndex++; continue; }
 
       ctx.fillStyle = (bandIndex % 2 === 0)
-        ? "rgba(255,255,255,.14)"   // bumped up
-        : "rgba(47,120,255,.24)";   // bumped up
+        ? "rgba(255,255,255,.16)"
+        : "rgba(47,120,255,.28)";
 
       ctx.fillRect(x0, plotY0, (x1 - x0), (plotY1 - plotY0));
       bandIndex++;
     }
-
     ctx.restore();
 
     // y grid
@@ -1120,10 +1150,44 @@
       ctx.fillText(lab, tx, H-22);
     }
 
+    // series
     drawSeriesTimed(ctx, recs, r=>r.sys, tMin, tMax, yMin, yMax, pad, W, H, "rgba(79,140,255,.98)");
     drawSeriesTimed(ctx, recs, r=>r.dia, tMin, tMax, yMin, yMax, pad, W, H, "rgba(216,224,240,.88)");
     drawSeriesTimed(ctx, recs, r=>r.hr , tMin, tMax, yMin, yMax, pad, W, H, "rgba(120,220,180,.92)");
 
+    // v1.18A3: label DAILY HIGH (SYSTOLIC) with numeric value
+    // Choose the highest systolic reading within each day, and label it near the plotted point.
+    const bestByDay = new Map(); // dayStart -> {ts, sys}
+    for(const r of recs){
+      if(r.sys == null) continue;
+      const d0 = startOfDay(r.ts);
+      const cur = bestByDay.get(d0);
+      if(!cur || r.sys > cur.sys){
+        bestByDay.set(d0, { ts: r.ts, sys: r.sys });
+      }
+    }
+
+    // draw labels clipped to plot area
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(plotX0, plotY0, plotX1 - plotX0, plotY1 - plotY0);
+    ctx.clip();
+
+    for(const {ts, sys} of bestByDay.values()){
+      const x = xFromTs(ts, tMin, tMax, pad, W);
+      const y = yTo(sys, yMin, yMax, pad, H);
+
+      // small dot at the exact high point
+      ctx.fillStyle = "rgba(235,245,255,.92)";
+      ctx.beginPath();
+      ctx.arc(x, y, 3.2, 0, Math.PI*2);
+      ctx.fill();
+
+      drawValueLabel(ctx, x, y, String(sys), plotX0, plotX1, plotY0, plotY1);
+    }
+    ctx.restore();
+
+    // legend
     const lx = pad.l + 8;
     let ly = pad.t + 22;
     ctx.font = "18px system-ui,Segoe UI,Roboto";
