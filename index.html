@@ -1,12 +1,13 @@
-<!-- Vitals Tracker v1.19A7 -->
+<!-- Vitals Tracker v1.19B1 -->
 <!--
 Version Detail Notes
-App Version: v1.19A7
-Base: v1.19A6
+App Version: v1.19B1
+Base: v1.19A7
 Surgical changes only:
-- Log: Edit prompt now opens ONLY on press down + release (tap). No press-and-hold. If finger/pointer slides off the entry before release, no action.
-- Modal safety: "Edit" button is NOT immediately active on open (briefly disabled), and initial focus is set to Cancel to prevent accidental instant activation.
-- No other layout/behavior changes.
+- Log: Fixed “edit prompt only works on first record” by switching Log selection to event-delegation (reliable per-row tap/release).
+- Export: After export, show a popup explaining clipboard + paste + save.
+  Includes buttons: Copy again, Share (if supported), Save .txt (picker if supported; otherwise downloads).
+- No other layout/behavior changes. Exit + Home preserved.
 -->
 <!doctype html>
 <html lang="en">
@@ -468,17 +469,20 @@ Surgical changes only:
       color: rgba(235,245,255,.56);
       font-size: 14px;
       margin: 0 2px 14px;
+      white-space: pre-wrap;
     }
     .modalBtns{
       display:flex;
       gap:12px;
       margin-top: 6px;
+      flex-wrap:wrap;
     }
     .modalBtns .btn{
       flex:1;
       height: 54px;
       font-size: 18px;
       font-weight: 800;
+      min-width: 140px;
     }
   </style>
 </head>
@@ -529,7 +533,7 @@ Surgical changes only:
         <div class="subtle">Data stays on your phone (local only).</div>
 
         <div class="footerTiny">
-          <div>v1.19A7</div>
+          <div>v1.19B1</div>
           <div>developed by Keyth Jyles</div>
         </div>
       </div>
@@ -626,11 +630,33 @@ Surgical changes only:
     </div>
   </div>
 
+  <!-- Export info popup -->
+  <div id="exportModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle">
+    <div class="modalCard">
+      <div id="exportModalTitle" class="modalTitle">Export ready</div>
+      <div id="exportModalSub" class="modalSub">
+Export report was copied to your clipboard.
+
+You can paste it into any messaging app, email, Notes, or any app that accepts text.
+
+Optional:
+- Share sends the report to another app.
+- Save creates a .txt file on your device.
+      </div>
+      <div class="modalBtns">
+        <button id="btnExportClose" class="btn">Close</button>
+        <button id="btnExportCopy" class="btn">Copy again</button>
+        <button id="btnExportShare" class="btn">Share</button>
+        <button id="btnExportSave" class="btn primary">Save .txt</button>
+      </div>
+    </div>
+  </div>
+
 <script>
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.19A7";
+  const APP_VERSION = "v1.19B1";
   const STORAGE_KEY = "vitals_tracker_records_v1";
   const SYMPTOMS = [
     "Sweaty","Dizzy","Panic","Brain fog","Chest tight","Headache",
@@ -849,6 +875,141 @@ Surgical changes only:
   });
 
   /* =========================
+     Export modal (clipboard/share/save)
+     ========================= */
+
+  let exportPayload = null; // { text, filename }
+  let exportPrevFocus = null;
+  let exportOpenedAt = 0;
+
+  function isShareAvailable(){
+    return !!(navigator.share && typeof navigator.share === "function");
+  }
+
+  function openExportModal(payload){
+    exportPayload = payload;
+    exportPrevFocus = document.activeElement || null;
+    exportOpenedAt = Date.now();
+
+    $("btnExportShare").disabled = !isShareAvailable();
+
+    $("exportModal").classList.remove("hidden");
+    setTimeout(() => {
+      try{ $("btnExportClose").focus({preventScroll:true}); }catch{}
+    }, 0);
+  }
+
+  function closeExportModal(){
+    exportPayload = null;
+    $("exportModal").classList.add("hidden");
+    try{ exportPrevFocus?.focus?.({preventScroll:true}); }catch{}
+  }
+
+  $("btnExportClose").addEventListener("click", (e) => { e.preventDefault(); closeExportModal(); });
+
+  $("exportModal").addEventListener("click", (e) => {
+    const justOpened = (Date.now() - exportOpenedAt) < 220;
+    if(justOpened){
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    if(e.target === $("exportModal")) closeExportModal();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    const open = !$("exportModal").classList.contains("hidden");
+    if(!open) return;
+    if(e.key === "Escape"){
+      e.preventDefault();
+      closeExportModal();
+    }
+  });
+
+  async function copyToClipboard(text){
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+    return false;
+  }
+
+  function downloadText(text, filename){
+    const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  async function saveTextWithPicker(text, suggestedName){
+    // File System Access API (best UX where available)
+    const canPick = typeof window.showSaveFilePicker === "function";
+    if(!canPick) return false;
+
+    const opts = {
+      suggestedName: suggestedName || "vitals_report.txt",
+      types: [{ description: "Text", accept: {"text/plain": [".txt"]} }]
+    };
+
+    const handle = await window.showSaveFilePicker(opts);
+    const writable = await handle.createWritable();
+    await writable.write(new Blob([text], {type:"text/plain;charset=utf-8"}));
+    await writable.close();
+    return true;
+  }
+
+  $("btnExportCopy").addEventListener("click", async (e) => {
+    e.preventDefault();
+    if(!exportPayload) return;
+    try{
+      await copyToClipboard(exportPayload.text);
+      alert("Copied to clipboard.");
+    }catch{
+      alert("Clipboard copy failed on this browser.");
+    }
+  });
+
+  $("btnExportShare").addEventListener("click", async (e) => {
+    e.preventDefault();
+    if(!exportPayload) return;
+    if(!isShareAvailable()){
+      alert("Share is not available on this device/browser.");
+      return;
+    }
+    try{
+      await navigator.share({
+        title: "Vitals Tracker Export",
+        text: exportPayload.text
+      });
+    }catch{
+      // user canceled or share failed; no hard error needed
+    }
+  });
+
+  $("btnExportSave").addEventListener("click", async (e) => {
+    e.preventDefault();
+    if(!exportPayload) return;
+
+    try{
+      const ok = await saveTextWithPicker(exportPayload.text, exportPayload.filename);
+      if(ok){
+        alert("Saved.");
+        return;
+      }
+    }catch{
+      // fall through to download
+    }
+
+    // Fallback: download via <a download>
+    downloadText(exportPayload.text, exportPayload.filename || "vitals_report.txt");
+  });
+
+  /* =========================
      Symptoms UI
      ========================= */
 
@@ -1055,78 +1216,7 @@ Surgical changes only:
       e.tabIndex = 0;
       e.setAttribute("role","button");
       e.setAttribute("aria-label","Open entry for editing");
-
-      // Tap-only behavior:
-      // - pointerdown highlights
-      // - pointerup inside (without sliding off) opens modal
-      // - if slide off before release, no action
-      const SLOP_PX = 14;
-      let tracking = false;
-      let pointerId = null;
-
-      function rectInside(clientX, clientY){
-        const rect = e.getBoundingClientRect();
-        return (
-          clientX >= rect.left - SLOP_PX && clientX <= rect.right + SLOP_PX &&
-          clientY >= rect.top  - SLOP_PX && clientY <= rect.bottom + SLOP_PX
-        );
-      }
-
-      function clearPress(){
-        e.classList.remove("pressed");
-        tracking = false;
-        pointerId = null;
-      }
-
-      e.addEventListener("pointerdown", (ev) => {
-        if(ev.button != null && ev.button !== 0) return;
-        tracking = true;
-        pointerId = ev.pointerId;
-
-        try{ e.setPointerCapture(ev.pointerId); }catch{}
-
-        e.classList.add("pressed");
-
-        // Prevent the browser from generating a click that might hit the modal instantly.
-        ev.preventDefault();
-        ev.stopPropagation();
-      });
-
-      e.addEventListener("pointermove", (ev) => {
-        if(!tracking) return;
-        if(pointerId != null && ev.pointerId !== pointerId) return;
-
-        if(!rectInside(ev.clientX, ev.clientY)){
-          // Slide off cancels
-          clearPress();
-        }
-      });
-
-      e.addEventListener("pointercancel", () => clearPress());
-
-      e.addEventListener("pointerup", (ev) => {
-        if(!tracking) return;
-        if(pointerId != null && ev.pointerId !== pointerId) return;
-
-        const inside = rectInside(ev.clientX, ev.clientY);
-        clearPress();
-
-        // Tap release inside => open prompt (no hold required)
-        if(inside){
-          // Open on next tick to decouple from pointerup
-          setTimeout(() => openEditPrompt(r.ts), 0);
-        }
-
-        ev.preventDefault();
-        ev.stopPropagation();
-      });
-
-      e.addEventListener("keydown", (ev) => {
-        if(ev.key === "Enter" || ev.key === " "){
-          ev.preventDefault();
-          openEditPrompt(r.ts);
-        }
-      });
+      e.dataset.ts = String(r.ts);
 
       const top = document.createElement("div");
       top.className = "entryTop";
@@ -1173,20 +1263,114 @@ Surgical changes only:
   }
 
   /* =========================
-     Export with report header
+     Log tap handling (delegated; fixes “only first record”)
      ========================= */
 
-  function downloadText(text, filename){
-    const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+  const logTap = {
+    activeEl: null,
+    activeTs: null,
+    pointerId: null,
+    tracking: false
+  };
+
+  function findEntryEl(target){
+    if(!target) return null;
+    const el = target.closest ? target.closest(".entry") : null;
+    if(!el) return null;
+    if(el.closest && el.closest("#logList") !== $("logList")) return null;
+    return el;
   }
+
+  function rectInside(el, clientX, clientY){
+    const SLOP_PX = 14;
+    const rect = el.getBoundingClientRect();
+    return (
+      clientX >= rect.left - SLOP_PX && clientX <= rect.right + SLOP_PX &&
+      clientY >= rect.top  - SLOP_PX && clientY <= rect.bottom + SLOP_PX
+    );
+  }
+
+  function clearLogPress(){
+    if(logTap.activeEl) logTap.activeEl.classList.remove("pressed");
+    logTap.activeEl = null;
+    logTap.activeTs = null;
+    logTap.pointerId = null;
+    logTap.tracking = false;
+  }
+
+  $("logList").addEventListener("pointerdown", (ev) => {
+    if($("log").classList.contains("hidden")) return;
+    if(ev.button != null && ev.button !== 0) return;
+
+    const entry = findEntryEl(ev.target);
+    if(!entry) return;
+
+    const ts = Number(entry.dataset.ts);
+    if(!Number.isFinite(ts)) return;
+
+    clearLogPress();
+    logTap.activeEl = entry;
+    logTap.activeTs = ts;
+    logTap.pointerId = ev.pointerId;
+    logTap.tracking = true;
+
+    entry.classList.add("pressed");
+
+    try{ entry.setPointerCapture(ev.pointerId); }catch{}
+
+    // Prevent native click from doing anything odd
+    ev.preventDefault();
+    ev.stopPropagation();
+  });
+
+  $("logList").addEventListener("pointermove", (ev) => {
+    if(!logTap.tracking) return;
+    if(logTap.pointerId != null && ev.pointerId !== logTap.pointerId) return;
+    if(!logTap.activeEl) return;
+
+    if(!rectInside(logTap.activeEl, ev.clientX, ev.clientY)){
+      // Slide off cancels
+      clearLogPress();
+    }
+  });
+
+  $("logList").addEventListener("pointercancel", () => {
+    clearLogPress();
+  });
+
+  $("logList").addEventListener("pointerup", (ev) => {
+    if(!logTap.tracking) return;
+    if(logTap.pointerId != null && ev.pointerId !== logTap.pointerId) return;
+
+    const entry = logTap.activeEl;
+    const ts = logTap.activeTs;
+
+    const inside = entry ? rectInside(entry, ev.clientX, ev.clientY) : false;
+    clearLogPress();
+
+    // Tap release inside => open prompt (no hold required)
+    if(inside && ts != null){
+      setTimeout(() => openEditPrompt(ts), 0);
+    }
+
+    ev.preventDefault();
+    ev.stopPropagation();
+  });
+
+  $("logList").addEventListener("keydown", (ev) => {
+    const entry = findEntryEl(ev.target);
+    if(!entry) return;
+    if(ev.key === "Enter" || ev.key === " "){
+      const ts = Number(entry.dataset.ts);
+      if(!Number.isFinite(ts)) return;
+      ev.preventDefault();
+      openEditPrompt(ts);
+    }
+  });
+
+  /* =========================
+     Export with report header
+     ========================= */
 
   function buildReportHeader({title, rangeLabel, notes}){
     const now = fmtDateTime(Date.now());
@@ -1210,7 +1394,7 @@ Surgical changes only:
     return lines.join("\n");
   }
 
-  function exportReport(recs, headerInfo, filename){
+  function exportReport(recs, headerInfo, filenameBase){
     const header = buildReportHeader(headerInfo);
 
     const lines = recs.map(r => {
@@ -1223,16 +1407,21 @@ Surgical changes only:
     });
 
     const out = header + lines.join("\n");
+    const ts = new Date();
+    const y = ts.getFullYear();
+    const m = String(ts.getMonth()+1).padStart(2,"0");
+    const d = String(ts.getDate()).padStart(2,"0");
+    const filename = `${filenameBase || "vitals_report"}_${y}-${m}-${d}.txt`;
 
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(out).then(() => {
-        alert("Export report copied to clipboard.");
-      }).catch(() => {
-        downloadText(out, filename);
-      });
-    }else{
-      downloadText(out, filename);
-    }
+    // Copy first, then show the export popup with options.
+    (async () => {
+      try{
+        await copyToClipboard(out);
+      }catch{
+        // If clipboard fails, still show modal; Save/Download will work.
+      }
+      openExportModal({ text: out, filename });
+    })();
   }
 
   /* =========================
@@ -1834,7 +2023,7 @@ Surgical changes only:
   });
 
   /* =========================
-     Export handlers (with report header)
+     Export handlers (with report header + popup)
      ========================= */
 
   $("btnExportLog").addEventListener("click", () => {
@@ -1847,6 +2036,7 @@ Surgical changes only:
       if(t) return `Up to ${t}`;
       return "All log entries (filtered by search/date if set)";
     })();
+
     exportReport(
       recs,
       {
@@ -1854,7 +2044,7 @@ Surgical changes only:
         rangeLabel,
         notes: "This report reflects the Log screen filters (Search + optional From/To dates)."
       },
-      "vitals_log_report.txt"
+      "vitals_log_report"
     );
   });
 
@@ -1878,7 +2068,7 @@ Surgical changes only:
           "- You can pinch to zoom in, then drag left/right to pan within that 7-day week.\n" +
           "- This export contains the entries that fall within the CURRENT visible chart view (after zoom/pan)."
       },
-      "vitals_charts_report.txt"
+      "vitals_charts_report"
     );
   });
 
@@ -1957,10 +2147,11 @@ self.addEventListener('fetch', (e)=>{ });`;
 
 <!--
 Version Detail Notes
-App Version: v1.19A7
-Base: v1.19A6
+App Version: v1.19B1
+Base: v1.19A7
 Surgical changes only:
-- Log: Edit prompt now opens ONLY on press down + release (tap). No press-and-hold. If finger/pointer slides off the entry before release, no action.
-- Modal safety: "Edit" button is NOT immediately active on open (briefly disabled), and initial focus is set to Cancel to prevent accidental instant activation.
-- No other layout/behavior changes.
+- Log: Fixed “edit prompt only works on first record” by switching Log selection to event-delegation (reliable per-row tap/release).
+- Export: After export, show a popup explaining clipboard + paste + save.
+  Includes buttons: Copy again, Share (if supported), Save .txt (picker if supported; otherwise downloads).
+- No other layout/behavior changes. Exit + Home preserved.
 -->
