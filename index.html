@@ -1,4 +1,4 @@
-<!-- Vitals Tracker v1.18A82 -->
+<!-- Vitals Tracker v1.19 -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -109,7 +109,8 @@
     .btn.primary{
       background: linear-gradient(180deg, rgba(47,120,255,.92), rgba(47,120,255,.72));
       border-color: rgba(120,170,255,.55);
-      color: rgba(0,0,0,.78);
+      /* v1.19: make primary label readable */
+      color: rgba(255,255,255,.92);
     }
     .btn.small{
       height:44px;
@@ -117,6 +118,13 @@
       padding:0 14px;
       font-weight:650;
       white-space:nowrap;
+    }
+
+    /* v1.19: red Exit button (style only; handler unchanged) */
+    .btn.danger{
+      background: linear-gradient(180deg, rgba(255,80,80,.92), rgba(210,40,40,.78));
+      border-color: rgba(255,140,140,.55);
+      color: rgba(255,255,255,.92);
     }
 
     .row{ display:flex; gap:12px; }
@@ -271,25 +279,12 @@
       flex-wrap:wrap;
     }
 
-    /* v1.18A82: extra-tight log vertical spacing (below top row only) */
-    #log .label{
-      margin: 8px 4px 6px;
-    }
-    #log .filters{
-      margin-top: 8px;
-      gap: 10px;
-    }
-    #log .dateField{
-      gap: 6px;
-    }
-
-    /* Compact log entries (more items visible) */
     .entry{
       border:1px solid var(--stroke);
       background: rgba(255,255,255,.03);
       border-radius: 22px;
-      padding: 8px 10px 7px; /* tightened */
-      margin-top: 6px;       /* tightened */
+      padding: 14px 14px 12px;
+      margin-top: 12px;
       touch-action: manipulation;
     }
 
@@ -304,41 +299,36 @@
       display:flex;
       justify-content:space-between;
       align-items:flex-end;
-      gap:10px;
-      margin-bottom: 2px;
+      gap:12px;
+      margin-bottom: 6px;
     }
     .entryTime{
-      font-size:13px;
+      font-size:14px;
       color: rgba(235,245,255,.46);
       white-space:nowrap;
     }
     .entryBPHR{
       display:flex;
       justify-content:space-between;
-      gap:10px;
+      gap:12px;
       align-items:baseline;
     }
-
-    /* Unified BP/HR label + readings to same smaller size */
     .bpBig{
-      font-size:24px;
+      font-size:34px;
       font-weight:800;
-      letter-spacing:.1px;
-      white-space:nowrap;
+      letter-spacing:.2px;
     }
     .hrBig{
-      font-size:24px;
+      font-size:28px;
       font-weight:800;
       color: rgba(235,245,255,.72);
       white-space:nowrap;
-      letter-spacing:.1px;
     }
-
     .entryLine{
-      margin-top: 3px;       /* tightened */
+      margin-top: 6px;
       color: rgba(235,245,255,.62);
-      font-size:15px;
-      line-height:1.12;
+      font-size:16px;
+      line-height:1.25;
     }
     .entryLine b{
       color: rgba(235,245,255,.70);
@@ -405,6 +395,49 @@
       margin: 0 4px 10px;
       width: fit-content;
     }
+
+    /* =========================
+       v1.19: Custom confirm modal
+       ========================= */
+
+    .modalBackdrop{
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,.55);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+      z-index: 10000; /* above border */
+    }
+
+    .modalCard{
+      width:min(520px, 100%);
+      border-radius: 26px;
+      border:1px solid rgba(235,245,255,.18);
+      background: rgba(16,24,40,.92);
+      box-shadow: 0 18px 60px rgba(0,0,0,.55);
+      backdrop-filter: blur(12px);
+      padding: 18px;
+    }
+
+    .modalTitle{
+      font-size: 26px;
+      font-weight: 850;
+      letter-spacing: .2px;
+      color: rgba(235,245,255,.92);
+      margin: 6px 6px 14px;
+      line-height: 1.1;
+      text-align: left;
+    }
+
+    .modalButtons{
+      display:flex;
+      gap:12px;
+      justify-content:flex-end;
+      margin-top: 10px;
+      flex-wrap:wrap;
+    }
   </style>
 </head>
 
@@ -448,13 +481,13 @@
           <button id="btnInstall" class="btn small">Install</button>
           <button id="btnClearAll" class="btn small">Clear Data</button>
           <div class="grow"></div>
-          <button id="btnExitHome" class="btn small">Exit</button>
+          <button id="btnExitHome" class="btn small danger">Exit</button>
         </div>
 
         <div class="subtle">Data stays on your phone (local only).</div>
 
         <div class="footerTiny">
-          <div>v1.18A82</div>
+          <div>v1.19</div>
           <div>developed by Keyth Jyles</div>
         </div>
       </div>
@@ -539,11 +572,22 @@
 
   </div>
 
+  <!-- v1.19: Custom confirm modal (replaces native confirm for Edit) -->
+  <div id="editModal" class="modalBackdrop hidden" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+    <div class="modalCard">
+      <div id="editModalTitle" class="modalTitle">Edit this reading?</div>
+      <div class="modalButtons">
+        <button id="btnModalCancel" class="btn small">Cancel</button>
+        <button id="btnModalOK" class="btn small primary">Edit</button>
+      </div>
+    </div>
+  </div>
+
 <script>
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.18A82";
+  const APP_VERSION = "v1.19";
   const STORAGE_KEY = "vitals_tracker_records_v1";
   const SYMPTOMS = [
     "Sweaty","Dizzy","Panic","Brain fog","Chest tight","Headache",
@@ -856,6 +900,57 @@
     });
   }
 
+  /* =========================
+     v1.19: Custom Edit confirm modal
+     ========================= */
+
+  const modal = {
+    open: false,
+    onOK: null,
+    lastFocus: null
+  };
+
+  function showEditModal(onOK){
+    modal.open = true;
+    modal.onOK = typeof onOK === "function" ? onOK : null;
+    modal.lastFocus = document.activeElement;
+
+    $("editModal").classList.remove("hidden");
+
+    // Focus OK button for accessibility
+    setTimeout(() => { try{ $("btnModalOK").focus({preventScroll:true}); }catch{} }, 0);
+  }
+
+  function closeEditModal(){
+    modal.open = false;
+    modal.onOK = null;
+    $("editModal").classList.add("hidden");
+
+    // Restore focus (best effort)
+    setTimeout(() => { try{ modal.lastFocus && modal.lastFocus.focus({preventScroll:true}); }catch{} }, 0);
+  }
+
+  $("btnModalCancel").addEventListener("click", () => closeEditModal());
+  $("btnModalOK").addEventListener("click", () => {
+    const fn = modal.onOK;
+    closeEditModal();
+    try{ fn && fn(); }catch{}
+  });
+
+  // Close on ESC; minimal focus safety
+  document.addEventListener("keydown", (e) => {
+    if(!modal.open) return;
+    if(e.key === "Escape"){
+      e.preventDefault();
+      closeEditModal();
+    }
+  });
+
+  // Click outside card closes (optional; keeps it easy)
+  $("editModal").addEventListener("click", (e) => {
+    if(e.target === $("editModal")) closeEditModal();
+  });
+
   function renderLog(){
     const list = $("logList");
     const recs = filteredRecords({fromId:"fromDate", toId:"toDate", searchId:"search"});
@@ -911,15 +1006,14 @@
         e.classList.remove("pressed");
         armed = false;
 
-        const ok = confirm("Edit this entry?");
-        if(ok) enterAddEdit(r.ts);
+        // v1.19: custom modal replaces native confirm
+        showEditModal(() => enterAddEdit(r.ts));
       });
 
       e.addEventListener("keydown", (ev) => {
         if(ev.key === "Enter" || ev.key === " "){
           ev.preventDefault();
-          const ok = confirm("Edit this entry?");
-          if(ok) enterAddEdit(r.ts);
+          showEditModal(() => enterAddEdit(r.ts));
         }
       });
 
@@ -968,7 +1062,7 @@
   }
 
   /* =========================
-     Export with report header (v1.18A07)
+     Export with report header (unchanged)
      ========================= */
 
   function downloadText(text, filename){
@@ -1039,8 +1133,8 @@
     baseMax: 0,   // week end   23:59:59.999
     viewMin: 0,   // pan/zoom view within base
     viewMax: 0,
-    minSpan: 48*60*60*1000, // max zoom-in = 48 hours width
-    maxSpan: 7*DAY_MS,      // 7 days max span (week)
+    minSpan: 60*60*1000, // 1 hour minimum zoom span
+    maxSpan: 7*DAY_MS,   // 7 days max span (week)
     pinch: null,         // {dist, viewMin, viewMax, centerTs}
     pan: null            // {x0, viewMin, viewMax}
   };
@@ -1344,7 +1438,7 @@
   }
 
   /* =========================
-     Pinch zoom + 1-finger pan on chart (v1.18A07)
+     Pinch zoom + 1-finger pan on chart (unchanged)
      ========================= */
 
   function dist2(t1, t2){
