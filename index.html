@@ -1,4 +1,4 @@
-<!-- Vitals Tracker v1.18A3 (true time spacing + strong day bands + label daily systolic high) -->
+<!-- Vitals Tracker v1.18A4 (defaults to last 30 days; label daily highs+lows for Sys/Dia/HR) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -20,10 +20,7 @@
       --text:rgba(235,245,255,.86);
       --muted:rgba(235,245,255,.58);
       --muted2:rgba(235,245,255,.42);
-
-      /* Border color (darker than logo, subtle) */
       --accent:#2b4e7a;
-
       --shadow:0 14px 40px rgba(0,0,0,.38);
       --radius:26px;
       --btnH:56px;
@@ -47,7 +44,6 @@
       padding: max(14px, env(safe-area-inset-top)) 12px max(14px, env(safe-area-inset-bottom));
     }
 
-    /* Screen border */
     body::before{
       content:"";
       position:fixed;
@@ -71,11 +67,7 @@
       align-items:center;
       text-shadow: 0 10px 22px rgba(0,0,0,.35);
     }
-    .logoTitle svg{
-      width:min(520px, 100%);
-      height:auto;
-      display:block;
-    }
+    .logoTitle svg{ width:min(520px, 100%); height:auto; display:block; }
 
     .card{
       background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
@@ -157,18 +149,8 @@
       line-height:1.25;
     }
 
-    .homeMain{
-      display:flex;
-      flex-direction:column;
-      gap:14px;
-      margin-top:8px;
-    }
-
-    .homeMain > .btn:not(.small){
-      font-size:26px;
-      font-weight:750;
-      letter-spacing:.3px;
-    }
+    .homeMain{ display:flex; flex-direction:column; gap:14px; margin-top:8px; }
+    .homeMain > .btn:not(.small){ font-size:26px; font-weight:750; letter-spacing:.3px; }
 
     .homeFooterRow{
       display:flex;
@@ -200,17 +182,8 @@
       font-size: clamp(18px, 6.4vw, 44px);
     }
 
-    .triple{
-      display:grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 12px;
-    }
-    .triple .miniLabel{
-      margin: 0 4px 8px;
-      color: var(--muted);
-      font-weight:650;
-      font-size:16px;
-    }
+    .triple{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    .triple .miniLabel{ margin: 0 4px 8px; color: var(--muted); font-weight:650; font-size:16px; }
 
     .symGrid{
       display:grid;
@@ -245,30 +218,12 @@
       transform: rotate(-45deg);
       margin-top:-2px;
     }
-    .symText{
-      font-size:16px;
-      font-weight:500;
-      color: rgba(235,245,255,.76);
-      line-height:1.1;
-    }
-    .symItem.selected{
-      background: rgba(47,120,255,.16);
-    }
-    .symItem.selected .box{
-      border-color: rgba(90,150,255,.90);
-      background: rgba(47,120,255,.18);
-    }
-    .symItem.selected .check{
-      border-left-color: rgba(235,245,255,.92);
-      border-bottom-color: rgba(235,245,255,.92);
-    }
+    .symText{ font-size:16px; font-weight:500; color: rgba(235,245,255,.76); line-height:1.1; }
+    .symItem.selected{ background: rgba(47,120,255,.16); }
+    .symItem.selected .box{ border-color: rgba(90,150,255,.90); background: rgba(47,120,255,.18); }
+    .symItem.selected .check{ border-left-color: rgba(235,245,255,.92); border-bottom-color: rgba(235,245,255,.92); }
 
-    .panelButtons{
-      display:flex;
-      gap:12px;
-      margin-top: 10px;
-      flex-wrap:wrap;
-    }
+    .panelButtons{ display:flex; gap:12px; margin-top: 10px; flex-wrap:wrap; }
 
     .entry{
       border:1px solid var(--stroke);
@@ -278,71 +233,20 @@
       margin-top: 12px;
       touch-action: manipulation;
     }
-    .entry.pressed{
-      background: rgba(47,120,255,.14);
-      border-color: rgba(90,150,255,.55);
-    }
+    .entry.pressed{ background: rgba(47,120,255,.14); border-color: rgba(90,150,255,.55); }
     .entry:active{ transform: translateY(1px); }
-    .entryTop{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-end;
-      gap:12px;
-      margin-bottom: 6px;
-    }
-    .entryTime{
-      font-size:14px;
-      color: rgba(235,245,255,.46);
-      white-space:nowrap;
-    }
-    .entryBPHR{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      align-items:baseline;
-    }
-    .bpBig{
-      font-size:34px;
-      font-weight:800;
-      letter-spacing:.2px;
-    }
-    .hrBig{
-      font-size:28px;
-      font-weight:800;
-      color: rgba(235,245,255,.72);
-      white-space:nowrap;
-    }
-    .entryLine{
-      margin-top: 6px;
-      color: rgba(235,245,255,.62);
-      font-size:16px;
-      line-height:1.25;
-    }
-    .entryLine b{
-      color: rgba(235,245,255,.70);
-    }
+    .entryTop{ display:flex; justify-content:space-between; align-items:flex-end; gap:12px; margin-bottom: 6px; }
+    .entryTime{ font-size:14px; color: rgba(235,245,255,.46); white-space:nowrap; }
+    .entryBPHR{ display:flex; justify-content:space-between; gap:12px; align-items:baseline; }
+    .bpBig{ font-size:34px; font-weight:800; letter-spacing:.2px; }
+    .hrBig{ font-size:28px; font-weight:800; color: rgba(235,245,255,.72); white-space:nowrap; }
+    .entryLine{ margin-top: 6px; color: rgba(235,245,255,.62); font-size:16px; line-height:1.25; }
+    .entryLine b{ color: rgba(235,245,255,.70); }
 
-    .filters{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top:10px;
-    }
-    .dateField{
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-    }
-    .dateField .miniLabel{
-      margin: 0 4px;
-      color: var(--muted);
-      font-weight:650;
-      font-size:14px;
-    }
-    input[type="date"].field{
-      font-size:16px;
-      padding-right: 10px;
-    }
+    .filters{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top:10px; }
+    .dateField{ display:flex; flex-direction:column; gap:8px; }
+    .dateField .miniLabel{ margin: 0 4px; color: var(--muted); font-weight:650; font-size:14px; }
+    input[type="date"].field{ font-size:16px; padding-right: 10px; }
 
     canvas{
       width:100%;
@@ -353,17 +257,8 @@
       margin-top: 10px;
     }
 
-    .noteLabel{
-      margin: 12px 4px 8px;
-      color:var(--muted);
-      font-weight:650;
-      font-size:16px;
-    }
-    .noteLabel em{
-      font-style:italic;
-      color: rgba(235,245,255,.42);
-      font-weight:600;
-    }
+    .noteLabel{ margin: 12px 4px 8px; color:var(--muted); font-weight:650; font-size:16px; }
+    .noteLabel em{ font-style:italic; color: rgba(235,245,255,.42); font-weight:600; }
 
     .editPill{
       display:inline-flex;
@@ -428,7 +323,7 @@
         <div class="subtle">Data stays on your phone (local only).</div>
 
         <div class="footerTiny">
-          <div>v1.18A3</div>
+          <div>v1.18A4</div>
           <div>developed by Keyth Jyles</div>
         </div>
       </div>
@@ -436,7 +331,6 @@
 
     <div id="add" class="card hidden">
       <div id="editPill" class="editPill hidden">Editing entry</div>
-
       <div id="timeLine" class="timeLine">--:--:-- --, --/--/----</div>
 
       <div class="triple">
@@ -578,10 +472,7 @@
     }
     if(screen === "log"){ renderLog(); }
     if(screen === "charts"){ renderCharts(); }
-    if(screen === "add"){
-      tickTime();
-      adjustTimeFont();
-    }
+    if(screen === "add"){ tickTime(); adjustTimeFont(); }
     focusTopOfPanel(screen);
   }
 
@@ -607,6 +498,14 @@
       month:"2-digit", day:"2-digit", year:"numeric"
     }).format(d);
     return `${time}, ${date}`;
+  }
+
+  function toDateInputValue(ts){
+    const d = new Date(ts);
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,"0");
+    const da = String(d.getDate()).padStart(2,"0");
+    return `${y}-${m}-${da}`;
   }
 
   const symGrid = $("symGrid");
@@ -656,9 +555,7 @@
     }
   }
 
-  function selectedSymptoms(){
-    return SYMPTOMS.filter(s => symState.get(s));
-  }
+  function selectedSymptoms(){ return SYMPTOMS.filter(s => symState.get(s)); }
 
   function clearSymUI(){
     for(const k of SYMPTOMS) symState.set(k,false);
@@ -670,9 +567,7 @@
 
   function setSymSelected(names){
     const set = new Set((names || []).map(String));
-    for(const name of SYMPTOMS){
-      symState.set(name, set.has(name));
-    }
+    for(const name of SYMPTOMS) symState.set(name, set.has(name));
     for(const el of symGrid.querySelectorAll(".symItem")){
       const label = el.querySelector(".symText")?.textContent || "";
       const on = set.has(label);
@@ -967,6 +862,12 @@
     return pad.l + span * u;
   }
 
+  function startOfDay(ts){
+    const d = new Date(ts);
+    d.setHours(0,0,0,0);
+    return d.getTime();
+  }
+
   function drawSeriesTimed(ctx, recs, pick, tMin, tMax, yMin, yMax, pad, W, H, color){
     ctx.strokeStyle = color;
     ctx.lineWidth = 3;
@@ -986,46 +887,42 @@
     ctx.stroke();
   }
 
-  function startOfDay(ts){
-    const d = new Date(ts);
-    d.setHours(0,0,0,0);
-    return d.getTime();
-  }
-
-  function drawValueLabel(ctx, x, y, text, plotX0, plotX1, plotY0, plotY1){
-    // prefer label slightly above-right; clamp inside plot area
+  function drawValueLabel(ctx, x, y, text, plotX0, plotX1, plotY0, plotY1, preferUp=true){
+    // label position preference
     let tx = x + 8;
-    let ty = y - 10;
+    let ty = preferUp ? (y - 10) : (y + 22);
 
     ctx.font = "16px system-ui,Segoe UI,Roboto";
     const w = ctx.measureText(text).width;
 
-    // clamp horizontally (leave a small padding)
+    // clamp horizontally
     if(tx + w + 10 > plotX1) tx = plotX1 - w - 10;
     if(tx < plotX0 + 6) tx = plotX0 + 6;
 
     // clamp vertically
-    if(ty < plotY0 + 18) ty = y + 18;
-    if(ty > plotY1 - 6) ty = plotY1 - 6;
+    if(ty < plotY0 + 18) ty = y + 22;
+    if(ty > plotY1 - 6)  ty = plotY1 - 6;
 
-    // subtle background pill for readability
-    const padX = 8, padY = 6;
+    const padX = 8;
     const bgW = w + padX*2;
     const bgH = 22;
     const bgX = tx - padX;
-    const bgY = ty - bgH + padY;
+    const bgY = ty - bgH + 6;
 
     ctx.save();
-    ctx.globalAlpha = 1;
     roundRect(ctx, bgX, bgY, bgW, bgH, 10, "rgba(0,0,0,.35)", "rgba(235,245,255,.12)");
-
-    // text (stroke + fill)
     ctx.lineWidth = 3;
     ctx.strokeStyle = "rgba(0,0,0,.55)";
     ctx.fillStyle = "rgba(235,245,255,.92)";
     ctx.strokeText(text, tx, ty);
     ctx.fillText(text, tx, ty);
     ctx.restore();
+  }
+
+  function pickColorForMetric(metric){
+    if(metric === "sys") return "rgba(79,140,255,.98)";
+    if(metric === "dia") return "rgba(216,224,240,.88)";
+    return "rgba(120,220,180,.92)"; // hr
   }
 
   function renderCharts(){
@@ -1071,7 +968,7 @@
     const plotY0 = pad.t;
     const plotY1 = H - pad.b;
 
-    // strong alternating day bands (visible on mobile)
+    // alternating day bands (strong)
     ctx.save();
     ctx.beginPath();
     ctx.rect(plotX0, plotY0, plotX1 - plotX0, plotY1 - plotY0);
@@ -1106,7 +1003,7 @@
     }
     ctx.restore();
 
-    // y grid
+    // y grid + labels
     ctx.font = "16px system-ui,Segoe UI,Roboto";
     ctx.fillStyle = "rgba(235,245,255,.60)";
     ctx.strokeStyle = "rgba(235,245,255,.10)";
@@ -1155,36 +1052,65 @@
     drawSeriesTimed(ctx, recs, r=>r.dia, tMin, tMax, yMin, yMax, pad, W, H, "rgba(216,224,240,.88)");
     drawSeriesTimed(ctx, recs, r=>r.hr , tMin, tMax, yMin, yMax, pad, W, H, "rgba(120,220,180,.92)");
 
-    // v1.18A3: label DAILY HIGH (SYSTOLIC) with numeric value
-    // Choose the highest systolic reading within each day, and label it near the plotted point.
-    const bestByDay = new Map(); // dayStart -> {ts, sys}
-    for(const r of recs){
-      if(r.sys == null) continue;
-      const d0 = startOfDay(r.ts);
-      const cur = bestByDay.get(d0);
-      if(!cur || r.sys > cur.sys){
-        bestByDay.set(d0, { ts: r.ts, sys: r.sys });
-      }
+    // Label daily highs + lows for Sys/Dia/HR
+    // For each day, find max and min for each metric. Label them.
+    function updateDayExtrema(map, dayStart, metric, ts, val){
+      if(val == null) return;
+      let entry = map.get(dayStart);
+      if(!entry){ entry = { sys:{}, dia:{}, hr:{} }; map.set(dayStart, entry); }
+      const obj = entry[metric];
+
+      if(obj.maxVal == null || val > obj.maxVal){ obj.maxVal = val; obj.maxTs = ts; }
+      if(obj.minVal == null || val < obj.minVal){ obj.minVal = val; obj.minTs = ts; }
     }
 
-    // draw labels clipped to plot area
+    const byDay = new Map();
+    for(const r of recs){
+      const d0 = startOfDay(r.ts);
+      updateDayExtrema(byDay, d0, "sys", r.ts, r.sys);
+      updateDayExtrema(byDay, d0, "dia", r.ts, r.dia);
+      updateDayExtrema(byDay, d0, "hr",  r.ts, r.hr);
+    }
+
+    // Draw labels clipped inside plot
     ctx.save();
     ctx.beginPath();
     ctx.rect(plotX0, plotY0, plotX1 - plotX0, plotY1 - plotY0);
     ctx.clip();
 
-    for(const {ts, sys} of bestByDay.values()){
-      const x = xFromTs(ts, tMin, tMax, pad, W);
-      const y = yTo(sys, yMin, yMax, pad, H);
-
-      // small dot at the exact high point
+    // helper: draw dot + label (colored dot, white label)
+    function dot(x,y,color){
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(x, y, 3.3, 0, Math.PI*2);
+      ctx.fill();
+      // white center for contrast
       ctx.fillStyle = "rgba(235,245,255,.92)";
       ctx.beginPath();
-      ctx.arc(x, y, 3.2, 0, Math.PI*2);
+      ctx.arc(x, y, 1.4, 0, Math.PI*2);
       ctx.fill();
-
-      drawValueLabel(ctx, x, y, String(sys), plotX0, plotX1, plotY0, plotY1);
     }
+
+    for(const dayEntry of byDay.values()){
+      for(const metric of ["sys","dia","hr"]){
+        const m = dayEntry[metric];
+        if(m.maxVal != null && m.maxTs != null){
+          const x = xFromTs(m.maxTs, tMin, tMax, pad, W);
+          const y = yTo(m.maxVal, yMin, yMax, pad, H);
+          const c = pickColorForMetric(metric);
+          dot(x,y,c);
+          drawValueLabel(ctx, x, y, String(m.maxVal), plotX0, plotX1, plotY0, plotY1, true);
+        }
+        if(m.minVal != null && m.minTs != null){
+          const x = xFromTs(m.minTs, tMin, tMax, pad, W);
+          const y = yTo(m.minVal, yMin, yMax, pad, H);
+          const c = pickColorForMetric(metric);
+          dot(x,y,c);
+          drawValueLabel(ctx, x, y, String(m.minVal), plotX0, plotX1, plotY0, plotY1, false);
+        }
+      }
+    }
+
     ctx.restore();
 
     // legend
@@ -1308,7 +1234,6 @@
     }
 
     const recs = loadRecords();
-
     if(editTs == null){
       recs.unshift({ ts: Date.now(), sys, dia, hr, notes, symptoms });
     }else{
@@ -1400,16 +1325,28 @@ self.addEventListener('fetch', (e)=>{ });`;
     try { await navigator.serviceWorker.register(swUrl); } catch {}
   }
 
+  function applyChartDefault30DaysIfEmpty(){
+    // Only set defaults if user hasn't set anything.
+    if($("chartFrom").value || $("chartTo").value) return;
+    const now = Date.now();
+    const from = now - 30 * 24 * 60 * 60 * 1000;
+    $("chartFrom").value = toDateInputValue(from);
+    $("chartTo").value = toDateInputValue(now);
+  }
+
   buildSymptoms();
   injectManifest();
   registerSW();
   refreshInstallButton();
 
+  // Log filters default blank
   $("fromDate").value = "";
   $("toDate").value = "";
-  $("chartFrom").value = "";
-  $("chartTo").value = "";
 
+  // Charts default: last 30 days
+  applyChartDefault30DaysIfEmpty();
+
+  // Start at home
   show("home");
 
   window.addEventListener("resize", () => {
