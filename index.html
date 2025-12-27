@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- VITALS_TRACKER_VERSION: v1.19 -->
+<!-- VITALS_TRACKER_VERSION: v1.18 -->
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -335,7 +335,7 @@
         <div class="headText">
           <div class="titleRow">
             <div class="appTitle">Vitals Tracker</div>
-            <div class="ver">v1.19</div>
+            <div class="ver">v1.18</div>
           </div>
           <div class="sub" id="subline">Fast BP/HR logging with export + charts</div>
         </div>
@@ -405,7 +405,7 @@
               </div>
 
               <div class="hint">
-                Tip: Tap any entry in <b>Log</b> to edit or delete. Charts now show true time spacing + alternating day bands.
+                Tip: Tap any entry in <b>Log</b> to edit or delete.
               </div>
             </div>
           </div>
@@ -467,7 +467,7 @@
           <div class="panel">
             <h3>Trend (Systolic / Diastolic)</h3>
             <canvas id="chartBP" width="900" height="260"></canvas>
-            <div class="hint">True time spacing; alternating day bands for visual day separation (last 120 entries).</div>
+            <div class="hint">Even spacing (last 120 entries).</div>
           </div>
           <div class="panel">
             <h3>Trend (Heart Rate)</h3>
@@ -507,7 +507,7 @@
               </div>
 
               <div class="hint">
-                v1.19 stores data in IndexedDB and will auto-import legacy localStorage data (if detected) one time.
+                v1.18 stores data in IndexedDB and will auto-import legacy localStorage data (if detected) one time.
               </div>
               <div class="small" id="storageMeta">—</div>
             </div>
@@ -581,16 +581,16 @@
 
 <script>
 /* =========================
-   Vitals Tracker v1.19
+   Vitals Tracker v1.18
    - IndexedDB storage
    - One-time legacy localStorage import
    - Backup/Restore JSON
    - Filtered export + charts
-   - NEW in v1.19: charts use true time spacing + alternating day bands
+   - Charts: even spacing (no true-time spacing, no day bands)
 ========================= */
 
 (() => {
-  const VERSION = "1.19";
+  const VERSION = "1.18";
   const DB_NAME = "VitalsTrackerDB";
   const DB_VER = 1;
   const STORE = "readings";
@@ -675,8 +675,10 @@
 
   const formatStamp = (ms) => {
     const d = new Date(ms);
-    return d.toLocaleString(undefined, { year:"numeric", month:"2-digit", day:"2-digit",
-      hour:"2-digit", minute:"2-digit", second:"2-digit" });
+    return d.toLocaleString(undefined, {
+      year:"numeric", month:"2-digit", day:"2-digit",
+      hour:"2-digit", minute:"2-digit", second:"2-digit"
+    });
   };
 
   const downloadText = (filename, text) => {
@@ -1003,22 +1005,16 @@
   }
 
   // =========================
-  // Charts v1.19 changes
-  // - True time spacing on X axis
-  // - Alternating day background bands
+  // Charts v1.18
+  // - Even spacing across last N points
   // =========================
-  function startOfDayLocal(ms){
-    const d = new Date(ms);
-    d.setHours(0,0,0,0);
-    return d.getTime();
-  }
-
-  function drawTimeSeriesChart(canvas, seriesList, timesAsc){
+  function drawSimpleChart(canvas, seriesList){
     const ctx = canvas.getContext("2d");
     const W = canvas.width, H = canvas.height;
     ctx.clearRect(0,0,W,H);
 
-    if (!timesAsc || timesAsc.length === 0){
+    const anyVals = seriesList.some(s => s.values.some(v => Number.isFinite(v)));
+    if (!anyVals){
       ctx.fillStyle = "rgba(169,189,223,.85)";
       ctx.font = "14px " + getComputedStyle(document.documentElement).getPropertyValue('--sans');
       ctx.fillText("No data", 14, 24);
@@ -1029,43 +1025,6 @@
     const L = 10, R = W-10, T = 10, B = H-18;
     const plotW = Math.max(1, R-L);
     const plotH = Math.max(1, B-T);
-
-    let tMin = timesAsc[0];
-    let tMax = timesAsc[timesAsc.length-1];
-    if (!Number.isFinite(tMin) || !Number.isFinite(tMax)){
-      tMin = Date.now() - 3600e3;
-      tMax = Date.now();
-    }
-    if (tMax === tMin) tMax = tMin + 60*1000;
-
-    const xAt = (t) => L + ((t - tMin) / (tMax - tMin)) * plotW;
-
-    // day bands
-    const day0 = startOfDayLocal(tMin);
-    const dayEnd = startOfDayLocal(tMax) + 24*60*60*1000;
-    let dayIndex = 0;
-
-    for (let day = day0; day < dayEnd; day += 24*60*60*1000){
-      const a = Math.max(day, tMin);
-      const b = Math.min(day + 24*60*60*1000, tMax);
-      if (b <= a) continue;
-
-      const x0 = xAt(a);
-      const x1 = xAt(b);
-
-      ctx.fillStyle = (dayIndex % 2 === 0) ? "rgba(235,245,255,.04)" : "rgba(0,0,0,0)";
-      ctx.fillRect(x0, T, Math.max(0, x1 - x0), plotH);
-
-      // day boundary line
-      ctx.strokeStyle = "rgba(235,245,255,.09)";
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(x0 + 0.5, T);
-      ctx.lineTo(x0 + 0.5, B);
-      ctx.stroke();
-
-      dayIndex++;
-    }
 
     // horizontal grid
     ctx.strokeStyle = "rgba(235,245,255,.10)";
@@ -1084,12 +1043,6 @@
     for (const s of seriesList){
       allVals = allVals.concat(s.values.filter(v => Number.isFinite(v)));
     }
-    if (!allVals.length){
-      ctx.fillStyle = "rgba(169,189,223,.85)";
-      ctx.font = "14px " + getComputedStyle(document.documentElement).getPropertyValue('--sans');
-      ctx.fillText("No data", 14, 24);
-      return;
-    }
     const minV = Math.min(...allVals);
     const maxV = Math.max(...allVals);
     const pad = (maxV - minV) * 0.12 || 8;
@@ -1106,6 +1059,13 @@
     ctx.fillText(String(Math.round(hi)), L, 12);
     ctx.fillText(String(Math.round(lo)), L, H-6);
 
+    // x spacing (even)
+    const N = Math.max(...seriesList.map(s => s.values.length));
+    const xAtIndex = (i) => {
+      if (N <= 1) return L + plotW/2;
+      return L + (i/(N-1)) * plotW;
+    };
+
     // series lines
     const strokes = [
       `rgba(122,167,255,.95)`,
@@ -1121,9 +1081,8 @@
       let started = false;
       for (let i=0;i<s.values.length;i++){
         const v = s.values[i];
-        const t = timesAsc[i];
-        if (!Number.isFinite(v) || !Number.isFinite(t)) continue;
-        const x = xAt(t);
+        if (!Number.isFinite(v)) continue;
+        const x = xAtIndex(i);
         const y = yAt(v);
         if (!started){
           ctx.moveTo(x,y);
@@ -1138,19 +1097,18 @@
 
   function renderCharts(arr){
     const useAsc = [...arr].sort((a,b) => a.ts - b.ts).slice(-120);
-    const times = useAsc.map(r => r.ts);
     const sysVals = useAsc.map(r => r.sys ?? null);
     const diaVals = useAsc.map(r => r.dia ?? null);
     const hrVals  = useAsc.map(r => r.hr ?? null);
 
-    drawTimeSeriesChart(chartBP, [
+    drawSimpleChart(chartBP, [
       { name:"SYS", values: sysVals },
       { name:"DIA", values: diaVals }
-    ], times);
+    ]);
 
-    drawTimeSeriesChart(chartHR, [
+    drawSimpleChart(chartHR, [
       { name:"HR", values: hrVals }
-    ], times);
+    ]);
   }
 
   // ---------- Navigation ----------
@@ -1482,4 +1440,4 @@
 })();
 </script>
 </body>
-  </html>
+</html>
