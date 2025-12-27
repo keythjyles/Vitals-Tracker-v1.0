@@ -1,4 +1,4 @@
-<!-- Vitals Tracker v1.18A4 (defaults to last 30 days; label daily highs+lows for Sys/Dia/HR) -->
+<!-- Vitals Tracker v1.18A6 -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -20,7 +20,10 @@
       --text:rgba(235,245,255,.86);
       --muted:rgba(235,245,255,.58);
       --muted2:rgba(235,245,255,.42);
+
+      /* Border color (darker than logo, subtle) */
       --accent:#2b4e7a;
+
       --shadow:0 14px 40px rgba(0,0,0,.38);
       --radius:26px;
       --btnH:56px;
@@ -44,6 +47,7 @@
       padding: max(14px, env(safe-area-inset-top)) 12px max(14px, env(safe-area-inset-bottom));
     }
 
+    /* Screen border */
     body::before{
       content:"";
       position:fixed;
@@ -60,6 +64,7 @@
       gap:14px;
     }
 
+    /* Logo occupies same layout space as the prior heading block */
     .logoTitle{
       margin:10px 6px 0;
       display:flex;
@@ -67,7 +72,11 @@
       align-items:center;
       text-shadow: 0 10px 22px rgba(0,0,0,.35);
     }
-    .logoTitle svg{ width:min(520px, 100%); height:auto; display:block; }
+    .logoTitle svg{
+      width:min(520px, 100%);
+      height:auto;
+      display:block;
+    }
 
     .card{
       background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
@@ -149,8 +158,18 @@
       line-height:1.25;
     }
 
-    .homeMain{ display:flex; flex-direction:column; gap:14px; margin-top:8px; }
-    .homeMain > .btn:not(.small){ font-size:26px; font-weight:750; letter-spacing:.3px; }
+    .homeMain{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      margin-top:8px;
+    }
+
+    .homeMain > .btn:not(.small){
+      font-size:26px;
+      font-weight:750;
+      letter-spacing:.3px;
+    }
 
     .homeFooterRow{
       display:flex;
@@ -182,8 +201,17 @@
       font-size: clamp(18px, 6.4vw, 44px);
     }
 
-    .triple{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-    .triple .miniLabel{ margin: 0 4px 8px; color: var(--muted); font-weight:650; font-size:16px; }
+    .triple{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+    .triple .miniLabel{
+      margin: 0 4px 8px;
+      color: var(--muted);
+      font-weight:650;
+      font-size:16px;
+    }
 
     .symGrid{
       display:grid;
@@ -218,12 +246,30 @@
       transform: rotate(-45deg);
       margin-top:-2px;
     }
-    .symText{ font-size:16px; font-weight:500; color: rgba(235,245,255,.76); line-height:1.1; }
-    .symItem.selected{ background: rgba(47,120,255,.16); }
-    .symItem.selected .box{ border-color: rgba(90,150,255,.90); background: rgba(47,120,255,.18); }
-    .symItem.selected .check{ border-left-color: rgba(235,245,255,.92); border-bottom-color: rgba(235,245,255,.92); }
+    .symText{
+      font-size:16px;
+      font-weight:500;
+      color: rgba(235,245,255,.76);
+      line-height:1.1;
+    }
+    .symItem.selected{
+      background: rgba(47,120,255,.16);
+    }
+    .symItem.selected .box{
+      border-color: rgba(90,150,255,.90);
+      background: rgba(47,120,255,.18);
+    }
+    .symItem.selected .check{
+      border-left-color: rgba(235,245,255,.92);
+      border-bottom-color: rgba(235,245,255,.92);
+    }
 
-    .panelButtons{ display:flex; gap:12px; margin-top: 10px; flex-wrap:wrap; }
+    .panelButtons{
+      display:flex;
+      gap:12px;
+      margin-top: 10px;
+      flex-wrap:wrap;
+    }
 
     .entry{
       border:1px solid var(--stroke);
@@ -233,20 +279,74 @@
       margin-top: 12px;
       touch-action: manipulation;
     }
-    .entry.pressed{ background: rgba(47,120,255,.14); border-color: rgba(90,150,255,.55); }
-    .entry:active{ transform: translateY(1px); }
-    .entryTop{ display:flex; justify-content:space-between; align-items:flex-end; gap:12px; margin-bottom: 6px; }
-    .entryTime{ font-size:14px; color: rgba(235,245,255,.46); white-space:nowrap; }
-    .entryBPHR{ display:flex; justify-content:space-between; gap:12px; align-items:baseline; }
-    .bpBig{ font-size:34px; font-weight:800; letter-spacing:.2px; }
-    .hrBig{ font-size:28px; font-weight:800; color: rgba(235,245,255,.72); white-space:nowrap; }
-    .entryLine{ margin-top: 6px; color: rgba(235,245,255,.62); font-size:16px; line-height:1.25; }
-    .entryLine b{ color: rgba(235,245,255,.70); }
 
-    .filters{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top:10px; }
-    .dateField{ display:flex; flex-direction:column; gap:8px; }
-    .dateField .miniLabel{ margin: 0 4px; color: var(--muted); font-weight:650; font-size:14px; }
-    input[type="date"].field{ font-size:16px; padding-right: 10px; }
+    /* v1.18: log entry press feedback */
+    .entry.pressed{
+      background: rgba(47,120,255,.14);
+      border-color: rgba(90,150,255,.55);
+    }
+
+    .entry:active{ transform: translateY(1px); }
+    .entryTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:12px;
+      margin-bottom: 6px;
+    }
+    .entryTime{
+      font-size:14px;
+      color: rgba(235,245,255,.46);
+      white-space:nowrap;
+    }
+    .entryBPHR{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:baseline;
+    }
+    .bpBig{
+      font-size:34px;
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+    .hrBig{
+      font-size:28px;
+      font-weight:800;
+      color: rgba(235,245,255,.72);
+      white-space:nowrap;
+    }
+    .entryLine{
+      margin-top: 6px;
+      color: rgba(235,245,255,.62);
+      font-size:16px;
+      line-height:1.25;
+    }
+    .entryLine b{
+      color: rgba(235,245,255,.70);
+    }
+
+    .filters{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top:10px;
+    }
+    .dateField{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .dateField .miniLabel{
+      margin: 0 4px;
+      color: var(--muted);
+      font-weight:650;
+      font-size:14px;
+    }
+    input[type="date"].field{
+      font-size:16px;
+      padding-right: 10px;
+    }
 
     canvas{
       width:100%;
@@ -255,11 +355,23 @@
       border:1px solid var(--stroke);
       background: rgba(255,255,255,.02);
       margin-top: 10px;
+      /* allow custom two-finger zoom handling */
+      touch-action: none;
     }
 
-    .noteLabel{ margin: 12px 4px 8px; color:var(--muted); font-weight:650; font-size:16px; }
-    .noteLabel em{ font-style:italic; color: rgba(235,245,255,.42); font-weight:600; }
+    .noteLabel{
+      margin: 12px 4px 8px;
+      color:var(--muted);
+      font-weight:650;
+      font-size:16px;
+    }
+    .noteLabel em{
+      font-style:italic;
+      color: rgba(235,245,255,.42);
+      font-weight:600;
+    }
 
+    /* Edit mode indicator */
     .editPill{
       display:inline-flex;
       align-items:center;
@@ -323,7 +435,7 @@
         <div class="subtle">Data stays on your phone (local only).</div>
 
         <div class="footerTiny">
-          <div>v1.18A4</div>
+          <div>v1.18A6</div>
           <div>developed by Keyth Jyles</div>
         </div>
       </div>
@@ -331,6 +443,7 @@
 
     <div id="add" class="card hidden">
       <div id="editPill" class="editPill hidden">Editing entry</div>
+
       <div id="timeLine" class="timeLine">--:--:-- --, --/--/----</div>
 
       <div class="triple">
@@ -393,16 +506,16 @@
         <button id="btnBackFromCharts" class="btn small">Back</button>
       </div>
 
-      <div class="subtle">Systolic, Diastolic, and Heart Rate over time.</div>
+      <div class="subtle">Last 7 days (pinch to zoom).</div>
 
       <div class="filters">
         <div class="dateField">
           <div class="miniLabel">From</div>
-          <input id="chartFrom" class="field" type="date" />
+          <input id="chartFrom" class="field" type="date" disabled />
         </div>
         <div class="dateField">
           <div class="miniLabel">To</div>
-          <input id="chartTo" class="field" type="date" />
+          <input id="chartTo" class="field" type="date" disabled />
         </div>
       </div>
 
@@ -471,8 +584,14 @@
       $(s).classList.toggle("hidden", s !== screen);
     }
     if(screen === "log"){ renderLog(); }
-    if(screen === "charts"){ renderCharts(); }
-    if(screen === "add"){ tickTime(); adjustTimeFont(); }
+    if(screen === "charts"){
+      initSevenDayWindow(true);
+      renderCharts();
+    }
+    if(screen === "add"){
+      tickTime();
+      adjustTimeFont();
+    }
     focusTopOfPanel(screen);
   }
 
@@ -508,12 +627,32 @@
     return `${y}-${m}-${da}`;
   }
 
+  function startOfDay(ts){
+    const d = new Date(ts);
+    d.setHours(0,0,0,0);
+    return d.getTime();
+  }
+
+  function parseDateField(v){
+    if(!v) return null;
+    const [y,m,d] = v.split("-").map(Number);
+    if(!y || !m || !d) return null;
+    return new Date(y, m-1, d, 0, 0, 0, 0).getTime();
+  }
+
+  function clampEndOfDay(ts){
+    const d = new Date(ts);
+    d.setHours(23,59,59,999);
+    return d.getTime();
+  }
+
   const symGrid = $("symGrid");
   const symState = new Map();
 
   function buildSymptoms(){
     symGrid.innerHTML = "";
     symState.clear();
+
     for(const name of SYMPTOMS){
       const item = document.createElement("div");
       item.className = "symItem";
@@ -555,7 +694,9 @@
     }
   }
 
-  function selectedSymptoms(){ return SYMPTOMS.filter(s => symState.get(s)); }
+  function selectedSymptoms(){
+    return SYMPTOMS.filter(s => symState.get(s));
+  }
 
   function clearSymUI(){
     for(const k of SYMPTOMS) symState.set(k,false);
@@ -567,7 +708,9 @@
 
   function setSymSelected(names){
     const set = new Set((names || []).map(String));
-    for(const name of SYMPTOMS) symState.set(name, set.has(name));
+    for(const name of SYMPTOMS){
+      symState.set(name, set.has(name));
+    }
     for(const el of symGrid.querySelectorAll(".symItem")){
       const label = el.querySelector(".symText")?.textContent || "";
       const on = set.has(label);
@@ -585,8 +728,8 @@
   }
 
   let timeTimer = null;
-  let editTs = null;
-  let returnScreen = "home";
+  let editTs = null;          // null = new record, else editing an existing record by ts
+  let returnScreen = "home";  // where Back returns when leaving Add
 
   function enterAddNew(from="home"){
     editTs = null;
@@ -600,9 +743,13 @@
   function enterAddEdit(ts){
     const recs = loadRecords();
     const r = recs.find(x => x.ts === ts);
-    if(!r){ enterAddNew("log"); return; }
+    if(!r){
+      enterAddNew("log");
+      return;
+    }
     editTs = ts;
     returnScreen = "log";
+
     $("editPill").classList.remove("hidden");
     $("btnDelete").classList.remove("hidden");
 
@@ -611,6 +758,7 @@
     $("hr").value  = (r.hr  ?? "") === null ? "" : (r.hr  ?? "");
     $("notes").value = (r.notes ?? "").toString();
     setSymSelected(r.symptoms || []);
+
     show("add");
   }
 
@@ -641,28 +789,17 @@
     }
   }
 
-  function parseDateField(v){
-    if(!v) return null;
-    const [y,m,d] = v.split("-").map(Number);
-    if(!y || !m || !d) return null;
-    return new Date(y, m-1, d, 0, 0, 0, 0).getTime();
-  }
-
-  function clampEndOfDay(ts){
-    const d = new Date(ts);
-    d.setHours(23,59,59,999);
-    return d.getTime();
-  }
-
   function recordMatches(rec, q){
     if(!q) return true;
     const s = q.toLowerCase().trim();
     if(!s) return true;
+
     const bp = `${rec.sys ?? ""}/${rec.dia ?? ""}`.toLowerCase();
     const hr = `${rec.hr ?? ""}`.toLowerCase();
     const notes = (rec.notes || "").toLowerCase();
     const sym = (rec.symptoms || []).join(", ").toLowerCase();
     const dt = fmtDateTime(rec.ts).toLowerCase();
+
     return bp.includes(s) || hr.includes(s) || notes.includes(s) || sym.includes(s) || dt.includes(s);
   }
 
@@ -696,6 +833,7 @@
   function renderLog(){
     const list = $("logList");
     const recs = filteredRecords({fromId:"fromDate", toId:"toDate", searchId:"search"});
+
     list.innerHTML = "";
     if(recs.length === 0){
       const empty = document.createElement("div");
@@ -714,7 +852,11 @@
       e.setAttribute("aria-label","Open entry for editing");
 
       let armed = false;
-      function clearPressed(){ e.classList.remove("pressed"); armed = false; }
+
+      function clearPressed(){
+        e.classList.remove("pressed");
+        armed = false;
+      }
 
       e.addEventListener("pointerdown", (ev) => {
         if(ev.button != null && ev.button !== 0) return;
@@ -837,8 +979,15 @@
     ctx.arcTo(x,y+h,x,y,rr);
     ctx.arcTo(x,y,x+w,y,rr);
     ctx.closePath();
-    if(fill){ ctx.fillStyle = fill; ctx.fill(); }
-    if(stroke){ ctx.strokeStyle = stroke; ctx.lineWidth = 1; ctx.stroke(); }
+    if(fill){
+      ctx.fillStyle = fill;
+      ctx.fill();
+    }
+    if(stroke){
+      ctx.strokeStyle = stroke;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
   }
 
   function drawChartEmpty(ctx, canvas, msg){
@@ -862,148 +1011,173 @@
     return pad.l + span * u;
   }
 
-  function startOfDay(ts){
-    const d = new Date(ts);
-    d.setHours(0,0,0,0);
-    return d.getTime();
+  /* ==========================
+     v1.18A6: forced 7-day window + pinch zoom
+     ========================== */
+
+  const DAY_MS = 24*60*60*1000;
+
+  const chartView = {
+    baseMin: 0,
+    baseMax: 0,
+    viewMin: 0,
+    viewMax: 0,
+    minSpan: 60*60*1000,     // 1 hour minimum zoom span
+    maxSpan: 7*DAY_MS,       // cannot exceed last 7 days
+    pinch: null              // {dist, viewMin, viewMax, centerTs}
+  };
+
+  function initSevenDayWindow(resetZoom){
+    const now = Date.now();
+    chartView.baseMax = now;
+    chartView.baseMin = now - 7*DAY_MS;
+
+    if(resetZoom || !chartView.viewMin || !chartView.viewMax){
+      chartView.viewMin = chartView.baseMin;
+      chartView.viewMax = chartView.baseMax;
+    }else{
+      // keep existing zoom, but clamp to base bounds (rolling window)
+      clampViewToBase();
+    }
+
+    // Force the UI date fields to show the forced range (disabled inputs)
+    $("chartFrom").value = toDateInputValue(chartView.baseMin);
+    $("chartTo").value   = toDateInputValue(chartView.baseMax);
   }
 
-  function drawSeriesTimed(ctx, recs, pick, tMin, tMax, yMin, yMax, pad, W, H, color){
+  function clampViewToBase(){
+    const baseMin = chartView.baseMin, baseMax = chartView.baseMax;
+    let vMin = chartView.viewMin, vMax = chartView.viewMax;
+    let span = vMax - vMin;
+
+    span = Math.max(chartView.minSpan, Math.min(span, chartView.maxSpan));
+
+    const mid = (vMin + vMax) / 2;
+    vMin = mid - span/2;
+    vMax = mid + span/2;
+
+    if(vMin < baseMin){ vMin = baseMin; vMax = baseMin + span; }
+    if(vMax > baseMax){ vMax = baseMax; vMin = baseMax - span; }
+
+    chartView.viewMin = vMin;
+    chartView.viewMax = vMax;
+  }
+
+  function recordsInView(){
+    const recs = loadRecords().slice().reverse(); // ascending ts
+    const a = chartView.viewMin;
+    const b = chartView.viewMax;
+    return recs.filter(r => r.ts >= a && r.ts <= b);
+  }
+
+  function drawSeriesTimedWithDayGaps(ctx, recs, pick, tMin, tMax, yMin, yMax, pad, W, H, color){
     ctx.strokeStyle = color;
     ctx.lineWidth = 3;
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
 
     let started = false;
+    let prevTs = null;
+
     ctx.beginPath();
     for(const r of recs){
       const v = pick(r);
-      if(v == null) { started = false; continue; }
+      if(v == null){ started = false; prevTs = r.ts; continue; }
+
+      // If there is a full missing day between points, break the line
+      if(prevTs != null){
+        const prevDay = startOfDay(prevTs);
+        const curDay  = startOfDay(r.ts);
+        if(curDay - prevDay > DAY_MS){
+          started = false;
+        }
+      }
+
       const x = xFromTs(r.ts, tMin, tMax, pad, W);
       const y = yTo(v, yMin, yMax, pad, H);
-      if(!started){ ctx.moveTo(x,y); started = true; }
-      else{ ctx.lineTo(x,y); }
+
+      if(!started){
+        ctx.moveTo(x,y);
+        started = true;
+      }else{
+        ctx.lineTo(x,y);
+      }
+
+      prevTs = r.ts;
     }
     ctx.stroke();
   }
 
-  function drawValueLabel(ctx, x, y, text, plotX0, plotX1, plotY0, plotY1, preferUp=true){
-    // label position preference
-    let tx = x + 8;
-    let ty = preferUp ? (y - 10) : (y + 22);
-
-    ctx.font = "16px system-ui,Segoe UI,Roboto";
-    const w = ctx.measureText(text).width;
-
-    // clamp horizontally
-    if(tx + w + 10 > plotX1) tx = plotX1 - w - 10;
-    if(tx < plotX0 + 6) tx = plotX0 + 6;
-
-    // clamp vertically
-    if(ty < plotY0 + 18) ty = y + 22;
-    if(ty > plotY1 - 6)  ty = plotY1 - 6;
-
-    const padX = 8;
-    const bgW = w + padX*2;
-    const bgH = 22;
-    const bgX = tx - padX;
-    const bgY = ty - bgH + 6;
-
-    ctx.save();
-    roundRect(ctx, bgX, bgY, bgW, bgH, 10, "rgba(0,0,0,.35)", "rgba(235,245,255,.12)");
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = "rgba(0,0,0,.55)";
-    ctx.fillStyle = "rgba(235,245,255,.92)";
-    ctx.strokeText(text, tx, ty);
-    ctx.fillText(text, tx, ty);
-    ctx.restore();
-  }
-
-  function pickColorForMetric(metric){
-    if(metric === "sys") return "rgba(79,140,255,.98)";
-    if(metric === "dia") return "rgba(216,224,240,.88)";
-    return "rgba(120,220,180,.92)"; // hr
-  }
-
   function renderCharts(){
+    // Rolling window: keep base bounds current (last 7 days) but do NOT reset zoom if user already zoomed
+    initSevenDayWindow(false);
+
     const canvas = $("chart");
     const ctx = canvas.getContext("2d");
 
-    const recs = filteredRecords({fromId:"chartFrom", toId:"chartTo", searchId:null}).slice().reverse();
-
+    const recs = recordsInView(); // ascending, within current zoom view
     ctx.clearRect(0,0,canvas.width,canvas.height);
-
-    if(recs.length === 0){
-      drawChartEmpty(ctx, canvas, "No data in range.");
-      return;
-    }
-
-    const sysVals = recs.map(r => r.sys).filter(v => v != null);
-    const diaVals = recs.map(r => r.dia).filter(v => v != null);
-    const hrVals  = recs.map(r => r.hr ).filter(v => v != null);
-
-    const all = [...sysVals,...diaVals,...hrVals].filter(v => v != null);
-    if(all.length === 0){
-      drawChartEmpty(ctx, canvas, "No numeric values.");
-      return;
-    }
-
-    const minV = Math.min(...all);
-    const maxV = Math.max(...all);
-    const padV = Math.max(8, Math.round((maxV-minV)*0.12));
-    const yMin = minV - padV;
-    const yMax = maxV + padV;
 
     const W = canvas.width, H = canvas.height;
     const pad = {l:62, r:18, t:18, b:56};
-
-    let tMin = recs[0].ts;
-    let tMax = recs[recs.length - 1].ts;
-    if(tMax === tMin) tMax = tMin + 1000;
-
-    roundRect(ctx, 0, 0, W, H, 22, "rgba(255,255,255,.02)", "rgba(235,245,255,.12)");
-
     const plotX0 = pad.l;
     const plotX1 = W - pad.r;
     const plotY0 = pad.t;
     const plotY1 = H - pad.b;
 
-    // alternating day bands (strong)
+    // Always show chart frame even if no data
+    roundRect(ctx, 0, 0, W, H, 22, "rgba(255,255,255,.02)", "rgba(235,245,255,.12)");
+
+    // Determine Y scale: if no data, use a sensible default range
+    let all = [];
+    if(recs.length){
+      all = recs.flatMap(r => [r.sys, r.dia, r.hr]).filter(v => v != null);
+    }
+    let yMin = 40, yMax = 180;
+    if(all.length){
+      const minV = Math.min(...all);
+      const maxV = Math.max(...all);
+      const padV = Math.max(8, Math.round((maxV-minV)*0.12));
+      yMin = minV - padV;
+      yMax = maxV + padV;
+    }
+
+    const tMin = chartView.viewMin;
+    const tMax = chartView.viewMax;
+
+    // Day bands (visible, alternating)
     ctx.save();
     ctx.beginPath();
-    ctx.rect(plotX0, plotY0, plotX1 - plotX0, plotY1 - plotY0);
+    ctx.rect(plotX0, plotY0, plotX1-plotX0, plotY1-plotY0);
     ctx.clip();
 
-    const dayMs = 24 * 60 * 60 * 1000;
     const day0 = startOfDay(tMin);
     const dayN = startOfDay(tMax);
-
     let bandIndex = 0;
-    for(let day = day0; day <= dayN; day += dayMs){
+
+    for(let day = day0; day <= dayN; day += DAY_MS){
       const bandStart = day;
-      const bandEnd = day + dayMs;
+      const bandEnd = day + DAY_MS;
 
       const a = Math.max(bandStart, tMin);
       const b = Math.min(bandEnd,   tMax);
-      if(b <= a) { bandIndex++; continue; }
+      if(b <= a){ bandIndex++; continue; }
 
       let x0 = xFromTs(a, tMin, tMax, pad, W);
       let x1 = xFromTs(b, tMin, tMax, pad, W);
-
       x0 = Math.max(x0, plotX0);
       x1 = Math.min(x1, plotX1);
-      if(x1 <= x0) { bandIndex++; continue; }
+      if(x1 <= x0){ bandIndex++; continue; }
 
       ctx.fillStyle = (bandIndex % 2 === 0)
-        ? "rgba(255,255,255,.16)"
-        : "rgba(47,120,255,.28)";
-
+        ? "rgba(255,255,255,.14)"
+        : "rgba(47,120,255,.26)";
       ctx.fillRect(x0, plotY0, (x1 - x0), (plotY1 - plotY0));
       bandIndex++;
     }
     ctx.restore();
 
-    // y grid + labels
+    // Y grid + labels
     ctx.font = "16px system-ui,Segoe UI,Roboto";
     ctx.fillStyle = "rgba(235,245,255,.60)";
     ctx.strokeStyle = "rgba(235,245,255,.10)";
@@ -1021,10 +1195,10 @@
       ctx.fillText(String(val), 16, y+6);
     }
 
-    // x labels
+    // X labels (4)
     const rangeMs = (tMax - tMin);
     const showTime = rangeMs <= (24 * 60 * 60 * 1000);
-    const labelCount = Math.min(4, recs.length);
+    const labelCount = 4;
 
     ctx.fillStyle = "rgba(235,245,255,.56)";
     ctx.font = "16px system-ui,Segoe UI,Roboto";
@@ -1047,73 +1221,19 @@
       ctx.fillText(lab, tx, H-22);
     }
 
-    // series
-    drawSeriesTimed(ctx, recs, r=>r.sys, tMin, tMax, yMin, yMax, pad, W, H, "rgba(79,140,255,.98)");
-    drawSeriesTimed(ctx, recs, r=>r.dia, tMin, tMax, yMin, yMax, pad, W, H, "rgba(216,224,240,.88)");
-    drawSeriesTimed(ctx, recs, r=>r.hr , tMin, tMax, yMin, yMax, pad, W, H, "rgba(120,220,180,.92)");
-
-    // Label daily highs + lows for Sys/Dia/HR
-    // For each day, find max and min for each metric. Label them.
-    function updateDayExtrema(map, dayStart, metric, ts, val){
-      if(val == null) return;
-      let entry = map.get(dayStart);
-      if(!entry){ entry = { sys:{}, dia:{}, hr:{} }; map.set(dayStart, entry); }
-      const obj = entry[metric];
-
-      if(obj.maxVal == null || val > obj.maxVal){ obj.maxVal = val; obj.maxTs = ts; }
-      if(obj.minVal == null || val < obj.minVal){ obj.minVal = val; obj.minTs = ts; }
+    // Series (break across missing days)
+    if(recs.length){
+      drawSeriesTimedWithDayGaps(ctx, recs, r=>r.sys, tMin, tMax, yMin, yMax, pad, W, H, "rgba(79,140,255,.98)");
+      drawSeriesTimedWithDayGaps(ctx, recs, r=>r.dia, tMin, tMax, yMin, yMax, pad, W, H, "rgba(216,224,240,.88)");
+      drawSeriesTimedWithDayGaps(ctx, recs, r=>r.hr , tMin, tMax, yMin, yMax, pad, W, H, "rgba(120,220,180,.92)");
+    }else{
+      // No data message (still shows bands and axis)
+      ctx.fillStyle = "rgba(235,245,255,.46)";
+      ctx.font = "18px system-ui,Segoe UI,Roboto";
+      ctx.fillText("No readings in this 7-day window.", pad.l + 12, pad.t + 34);
     }
 
-    const byDay = new Map();
-    for(const r of recs){
-      const d0 = startOfDay(r.ts);
-      updateDayExtrema(byDay, d0, "sys", r.ts, r.sys);
-      updateDayExtrema(byDay, d0, "dia", r.ts, r.dia);
-      updateDayExtrema(byDay, d0, "hr",  r.ts, r.hr);
-    }
-
-    // Draw labels clipped inside plot
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(plotX0, plotY0, plotX1 - plotX0, plotY1 - plotY0);
-    ctx.clip();
-
-    // helper: draw dot + label (colored dot, white label)
-    function dot(x,y,color){
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.arc(x, y, 3.3, 0, Math.PI*2);
-      ctx.fill();
-      // white center for contrast
-      ctx.fillStyle = "rgba(235,245,255,.92)";
-      ctx.beginPath();
-      ctx.arc(x, y, 1.4, 0, Math.PI*2);
-      ctx.fill();
-    }
-
-    for(const dayEntry of byDay.values()){
-      for(const metric of ["sys","dia","hr"]){
-        const m = dayEntry[metric];
-        if(m.maxVal != null && m.maxTs != null){
-          const x = xFromTs(m.maxTs, tMin, tMax, pad, W);
-          const y = yTo(m.maxVal, yMin, yMax, pad, H);
-          const c = pickColorForMetric(metric);
-          dot(x,y,c);
-          drawValueLabel(ctx, x, y, String(m.maxVal), plotX0, plotX1, plotY0, plotY1, true);
-        }
-        if(m.minVal != null && m.minTs != null){
-          const x = xFromTs(m.minTs, tMin, tMax, pad, W);
-          const y = yTo(m.minVal, yMin, yMax, pad, H);
-          const c = pickColorForMetric(metric);
-          dot(x,y,c);
-          drawValueLabel(ctx, x, y, String(m.minVal), plotX0, plotX1, plotY0, plotY1, false);
-        }
-      }
-    }
-
-    ctx.restore();
-
-    // legend
+    // Legend
     const lx = pad.l + 8;
     let ly = pad.t + 22;
     ctx.font = "18px system-ui,Segoe UI,Roboto";
@@ -1129,14 +1249,6 @@
     legend("Heart Rate", "rgba(120,220,180,.92)");
   }
 
-  function clearFilters(){
-    $("fromDate").value = "";
-    $("toDate").value = "";
-    $("search").value = "";
-    $("chartFrom").value = "";
-    $("chartTo").value = "";
-  }
-
   function clearAllData(){
     const ok = confirm(
       "Clear ALL saved vitals data?\n\n" +
@@ -1146,7 +1258,11 @@
     if(!ok) return;
 
     try{ localStorage.removeItem(STORAGE_KEY); }catch{}
-    clearFilters();
+
+    $("fromDate").value = "";
+    $("toDate").value = "";
+    $("search").value = "";
+
     alert("All data cleared.");
     show("home");
   }
@@ -1194,9 +1310,12 @@
 
   $("btnClearAll").addEventListener("click", clearAllData);
 
+  /* v1.18A6: KEEP THIS EXIT FUNCTION EXACTLY (known-good) */
   $("btnExitHome").addEventListener("click", () => {
     window.close();
-    setTimeout(() => { alert("If it didn’t close: use your phone’s Back/Home."); }, 200);
+    setTimeout(() => {
+      alert("If it didn’t close: use your phone’s Back/Home.");
+    }, 200);
   });
 
   $("btnGoAdd").addEventListener("click", () => enterAddNew("home"));
@@ -1234,12 +1353,16 @@
     }
 
     const recs = loadRecords();
+
     if(editTs == null){
       recs.unshift({ ts: Date.now(), sys, dia, hr, notes, symptoms });
     }else{
       const idx = recs.findIndex(r => r.ts === editTs);
-      if(idx >= 0) recs[idx] = { ts: editTs, sys, dia, hr, notes, symptoms };
-      else recs.unshift({ ts: Date.now(), sys, dia, hr, notes, symptoms });
+      if(idx >= 0){
+        recs[idx] = { ts: editTs, sys, dia, hr, notes, symptoms };
+      }else{
+        recs.unshift({ ts: Date.now(), sys, dia, hr, notes, symptoms });
+      }
     }
 
     recs.sort((a,b)=> b.ts - a.ts);
@@ -1257,8 +1380,10 @@
     if(editTs == null) return;
     const ok = confirm("Delete this entry? This cannot be undone.");
     if(!ok) return;
+
     const recs = loadRecords().filter(r => r.ts !== editTs);
     saveRecords(recs);
+
     editTs = null;
     show("log");
   });
@@ -1267,17 +1392,17 @@
     $(id).addEventListener("input", () => renderLog());
     $(id).addEventListener("change", () => renderLog());
   });
-  ["chartFrom","chartTo"].forEach(id => {
-    $(id).addEventListener("input", () => renderCharts());
-    $(id).addEventListener("change", () => renderCharts());
-  });
 
   $("btnExportLog").addEventListener("click", () => {
     const recs = filteredRecords({fromId:"fromDate", toId:"toDate", searchId:"search"});
     exportText(recs);
   });
+
   $("btnExportCharts").addEventListener("click", () => {
-    const recs = filteredRecords({fromId:"chartFrom", toId:"chartTo", searchId:null});
+    // Export based on CURRENT zoom view (still within forced last 7 days)
+    const all = loadRecords();
+    const a = chartView.viewMin, b = chartView.viewMax;
+    const recs = all.filter(r => r.ts >= a && r.ts <= b);
     exportText(recs);
   });
 
@@ -1325,13 +1450,85 @@ self.addEventListener('fetch', (e)=>{ });`;
     try { await navigator.serviceWorker.register(swUrl); } catch {}
   }
 
-  function applyChartDefault30DaysIfEmpty(){
-    // Only set defaults if user hasn't set anything.
-    if($("chartFrom").value || $("chartTo").value) return;
-    const now = Date.now();
-    const from = now - 30 * 24 * 60 * 60 * 1000;
-    $("chartFrom").value = toDateInputValue(from);
-    $("chartTo").value = toDateInputValue(now);
+  /* ==========================
+     Pinch zoom handlers (two fingers)
+     ========================== */
+
+  function dist2(t1, t2){
+    const dx = t2.clientX - t1.clientX;
+    const dy = t2.clientY - t1.clientY;
+    return Math.hypot(dx, dy);
+  }
+
+  function pinchCenterX(t1, t2){
+    return (t1.clientX + t2.clientX) / 2;
+  }
+
+  function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+
+  function attachPinchZoom(){
+    const canvas = $("chart");
+
+    function plotBounds(){
+      const rect = canvas.getBoundingClientRect();
+      // Map screen X to plot X ratio using our canvas padding assumptions
+      // (good enough; keeps pinch stable without needing exact dpi scaling)
+      const padL = 62;
+      const padR = 18;
+      const plotW = Math.max(1, rect.width - (padL + padR));
+      return {rect, padL, padR, plotW};
+    }
+
+    canvas.addEventListener("touchstart", (e) => {
+      if(e.touches.length !== 2) return;
+      e.preventDefault();
+
+      // rolling window keeps moving; lock base and view before pinch
+      initSevenDayWindow(false);
+
+      const d = dist2(e.touches[0], e.touches[1]);
+      const {rect, padL, plotW} = plotBounds();
+      const cx = pinchCenterX(e.touches[0], e.touches[1]);
+      const xIn = clamp(cx - rect.left - padL, 0, plotW);
+      const u = xIn / plotW;
+      const centerTs = chartView.viewMin + u * (chartView.viewMax - chartView.viewMin);
+
+      chartView.pinch = {
+        dist: d,
+        viewMin: chartView.viewMin,
+        viewMax: chartView.viewMax,
+        centerTs
+      };
+    }, {passive:false});
+
+    canvas.addEventListener("touchmove", (e) => {
+      if(!chartView.pinch) return;
+      if(e.touches.length !== 2) return;
+      e.preventDefault();
+
+      const p = chartView.pinch;
+      const newDist = dist2(e.touches[0], e.touches[1]);
+      const scale = newDist / (p.dist || 1);
+
+      const startSpan = p.viewMax - p.viewMin;
+      let newSpan = startSpan / (scale || 1);
+      newSpan = clamp(newSpan, chartView.minSpan, chartView.maxSpan);
+
+      let vMin = p.centerTs - newSpan/2;
+      let vMax = p.centerTs + newSpan/2;
+
+      chartView.viewMin = vMin;
+      chartView.viewMax = vMax;
+      clampViewToBase();
+
+      renderCharts();
+    }, {passive:false});
+
+    function endPinch(){
+      chartView.pinch = null;
+    }
+    canvas.addEventListener("touchend", endPinch, {passive:true});
+    canvas.addEventListener("touchcancel", endPinch, {passive:true});
   }
 
   buildSymptoms();
@@ -1339,21 +1536,22 @@ self.addEventListener('fetch', (e)=>{ });`;
   registerSW();
   refreshInstallButton();
 
-  // Log filters default blank
   $("fromDate").value = "";
   $("toDate").value = "";
+  $("chartFrom").value = "";
+  $("chartTo").value = "";
 
-  // Charts default: last 30 days
-  applyChartDefault30DaysIfEmpty();
+  attachPinchZoom();
 
   // Start at home
   show("home");
 
   window.addEventListener("resize", () => {
     if(!$("add").classList.contains("hidden")) adjustTimeFont();
+    if(!$("charts").classList.contains("hidden")) renderCharts();
   });
 
 })();
 </script>
 </body>
-</html>
+  </html>
