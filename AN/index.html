@@ -1,20 +1,29 @@
-<!-- Angel Numbers Tracker v1.0B9 -->
+<!-- Angel Numbers Tracker v1.0B11 -->
 <!--
 Version Detail Notes
-App Version (internal): v1.0B9
+App Version (internal): v1.0B11
 Home display label (visual only): v1.333  (DO NOT CHANGE unless user instructs)
-Base: v1.0B8
+Base: v1.0B9
 
 Changes (requested):
-1) Add screen Date/Time editability:
-   - When adding a NEW entry: Date/Time is NOT editable (no Date/Time input shown).
-   - When EDITING an existing entry: Date/Time IS editable (Date/Time input shown).
-   - The headline timeLine still displays the current time for new entries, and the entry time for edits.
+1) Log list must be scrollable up/down:
+   - Ensure Log panel content can scroll reliably (explicit log list overflow + padding).
+
+2) Angel Number Card is too tall / vertically hard to use:
+   - Make Card modal more compact (smaller title spacing + smaller action buttons).
+   - Keep buttons accessible (sticky action row).
+   - Reduce vertical bloat in card body.
+
+3) Remove the X in the top-right corner of the Calendar Day popup list:
+   - Day modal uses Close button only (no X).
+
+4) Edit/Add panel not scrollable; buttons not accessible:
+   - Ensure Add/Edit panel scrolls.
+   - Make Add/Edit action buttons sticky at bottom so Save/Delete/Back are always reachable.
 
 Required persistence:
 - Keep EOF comment block.
 -->
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -22,7 +31,6 @@ Required persistence:
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1324" />
   <title>Angel Numbers Tracker</title>
-
   <link rel="manifest" id="manifestLink" href="#" />
 
   <style>
@@ -99,14 +107,13 @@ Required persistence:
       flex:1;
       overflow:hidden;
       border-radius: var(--radius);
-      /* Allow vertical panning; horizontal is taken only when clearly horizontal */
       touch-action: pan-y;
     }
 
-    /* MAIN PANEL CARD — now has the consistent dark-blue border */
+    /* MAIN PANEL CARD — consistent dark-blue border */
     .card{
       background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      border:3px solid var(--accentBorder);              /* CONSISTENT BLUE BORDER */
+      border:3px solid var(--accentBorder);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       padding: var(--pad);
@@ -117,6 +124,23 @@ Required persistence:
       overflow:auto;
       -webkit-overflow-scrolling: touch;
       touch-action: pan-y;
+      overscroll-behavior: contain;
+    }
+
+    /* Ensure Add/Edit panel can always scroll and has room for sticky buttons */
+    #add{
+      overflow-y:auto;
+      padding-bottom: calc(var(--pad) + 78px);
+    }
+
+    /* Ensure Log is scrollable and content doesn't get clipped */
+    #log{
+      overflow-y:auto;
+      padding-bottom: 18px;
+    }
+    #logList{
+      margin-top: 10px;
+      overflow: visible; /* panel scrolls; do not create nested scroll trap */
     }
 
     .hidden{ display:none !important; }
@@ -308,19 +332,30 @@ Required persistence:
       flex-wrap:wrap;
     }
 
+    /* Sticky action row on Add/Edit so buttons are always accessible */
+    #add .panelButtons{
+      position: sticky;
+      bottom: 0;
+      z-index: 10;
+      padding-top: 12px;
+      padding-bottom: 6px;
+      background: linear-gradient(180deg, rgba(11,19,36,0), rgba(11,19,36,.70) 35%, rgba(11,19,36,.92));
+      border-top: 1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(10px);
+    }
+
     #log .label{ margin: 8px 4px 6px; }
     #log .filters{ margin-top: 8px; gap: 10px; }
     #log .dateField{ gap: 6px; }
     #log > .row.center{ margin-bottom: 4px; }
 
-    /* Log entry cards (tight) */
     .entry{
       border:1px solid var(--themeLine);
       background: rgba(255,255,255,.03);
       border-radius: 18px;
       padding: 8px 10px 8px;
       margin-top: 6px;
-      touch-action: pan-y; /* allow vertical scroll through entries */
+      touch-action: pan-y;
       -webkit-tap-highlight-color: transparent;
       user-select:none;
     }
@@ -493,6 +528,39 @@ Required persistence:
       touch-action: manipulation;
     }
 
+    /* Card modal: compact + sticky buttons */
+    #cardModal .modalCard{
+      display:flex;
+      flex-direction:column;
+      max-height: calc(100vh - 56px);
+      padding: 14px;
+    }
+    #cardModal .modalTitle{
+      margin: 2px 2px 8px;
+      font-size: clamp(20px, 6vw, 30px);
+    }
+    #cardModal #cardBody{
+      font-size: 13px;
+      line-height: 1.22;
+      margin-bottom: 10px;
+    }
+    #cardModal .modalBtns{
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
+      padding-top: 10px;
+      padding-bottom: 6px;
+      margin-top: 0;
+      background: linear-gradient(180deg, rgba(11,19,36,0), rgba(11,19,36,.76) 35%, rgba(11,19,36,.94));
+      border-top: 1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(10px);
+    }
+    #cardModal .modalBtns .btn{
+      height: 48px;
+      font-size: 16px;
+      min-width: 110px;
+    }
+
     /* Calendar */
     .calTop{
       display:flex;
@@ -555,7 +623,7 @@ Required persistence:
       color: rgba(235,245,255,.44);
     }
 
-    /* Day popup list (tighter, clickable number) */
+    /* Day popup list */
     .dayHint{
       margin: 2px 2px 8px;
       color: rgba(235,245,255,.52);
@@ -639,7 +707,6 @@ Required persistence:
       line-height: 1.1;
     }
 
-    /* Touch lock overlay (ONLY used briefly after swipe or modal open) */
     .touchLock{
       position:fixed;
       inset:0;
@@ -649,7 +716,6 @@ Required persistence:
     }
     .touchLock.on{ pointer-events:auto; }
 
-    /* Pull-to-refresh indicator (Home only) */
     .ptr{
       position: sticky;
       top: 0;
@@ -674,7 +740,6 @@ Required persistence:
       transform: translateY(0);
     }
 
-    /* Heart modal animation */
     .heartWrap{
       display:flex;
       align-items:center;
@@ -695,7 +760,6 @@ Required persistence:
       100%{ transform: scale(1.00); opacity: 1; }
     }
 
-    /* accentFrame retained but no longer responsible for the visible blue border */
     .accentFrame{ position:relative; }
   </style>
 </head>
@@ -704,7 +768,6 @@ Required persistence:
   <div class="touchLock" id="touchLock"></div>
 
   <div class="app" id="appRoot">
-
     <div class="logoTitle" aria-label="Angel Numbers Tracker">
       <svg viewBox="0 0 900 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Angel Numbers Tracker">
         <defs>
@@ -888,13 +951,13 @@ Required persistence:
     <div class="modalCard">
       <div class="modalTitle" id="exportModalTitle">Export ready</div>
       <div class="modalSub" id="exportModalSub">
-Export report was copied to your clipboard.
-
-You can paste it into any messaging app, email, Notes, or any app that accepts text.
+Export report was copied to your clipboard.  You can paste it into any messaging app, email, Notes, or any app that accepts text.
 
 Optional:
-- Share sends the report to another app.
-- Save creates a .txt file on your device.
+
+Share sends the report to another app.
+
+Save creates a .txt file on your device.
       </div>
       <div class="modalBtns" style="flex-wrap:nowrap;">
         <button id="btnExportClose" class="btn" style="min-width:0; flex:1 1 0; font-size:16px; height:52px;">Close</button>
@@ -920,12 +983,9 @@ Optional:
     </div>
   </div>
 
-  <!-- Day modal -->
+  <!-- Day modal (NO X BUTTON; Close button only) -->
   <div id="dayModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="dayTitle">
     <div class="modalCard">
-      <div class="xCloseRow">
-        <button class="xBtn" id="btnDayX" aria-label="Close">×</button>
-      </div>
       <div class="modalTitle" id="dayTitle">—</div>
       <div class="modalSub" id="dayBody">—</div>
       <div class="modalBtns">
@@ -988,7 +1048,7 @@ Optional:
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.0B9";
+  const APP_VERSION = "v1.0B11";
   const HOME_VERSION_LABEL = "v1.333";
   const STORAGE_KEY = "angel_numbers_records_v1";
   const DAY_MS = 24*60*60*1000;
@@ -1030,7 +1090,8 @@ Optional:
     "1414": "Grounded change. Build stability while adjusting—practical updates, not chaos.",
     "1515": "Change with intention. Choose the transition you want; don’t drift into it.",
     "2020": "Balance and reflection. Look at both sides; correct course gently.",
-    "2222": "Deep alignment. Commit to balance; trust the process over the impulse."
+    "2222": "Deep alignment. Commit to balance; trust the process over the impulse.",
+    "2424": "Reinforced signal (repeated block 24): a theme repeating until you notice it."
   };
 
   /* ===== Storage ===== */
@@ -1219,7 +1280,7 @@ Optional:
     return {pattern, meaning: lens ? `${fallback}\n${lens}` : fallback};
   }
 
-  /* ===== Touch lock (robust, never “stuck on”) ===== */
+  /* ===== Touch lock ===== */
 
   let lockTimer = null;
   function lockTouches(ms=200){
@@ -1237,7 +1298,7 @@ Optional:
 
   /* ===== Screens ===== */
 
-  const swipeCycle = ["home","calendar","log"]; // right swipe cycle
+  const swipeCycle = ["home","calendar","log"];
   let currentScreen = "home";
   let returnScreen = "home";
   let animating = false;
@@ -1271,13 +1332,13 @@ Optional:
     focusTopOfPanel(screen);
   }
 
-  /* ===== Swipe “wheel” (works on Log again; cancels entry tap when horizontal) ===== */
+  /* ===== Swipe “wheel” ===== */
 
   const drag = {
     active:false,
     x0:0, y0:0,
     dx:0, dy:0,
-    intent:null,    // "h" | "v"
+    intent:null,
     from:null, to:null,
     width:0,
     dir:null
@@ -1468,8 +1529,8 @@ Optional:
   function clearAddForm(){
     $("anum").value = "";
     $("notes").value = "";
-    // NEW entry: no dt input, so we do not set it.
     updateMeaningUI();
+    try{ $("add").scrollTop = 0; }catch{}
   }
 
   function enterAddNew(from="home"){
@@ -1705,10 +1766,10 @@ Optional:
       </div>
 
       <div>Date/Time: ${escapeHtml(dt)}</div>
-      <div style="margin-top:10px;">Number: ${escapeHtml(num)}</div>
-      <div style="margin-top:10px;">Notes: ${escapeHtml(notes)}</div>
-      <div style="margin-top:10px;">Pattern: ${escapeHtml(pat)}</div>
-      <div style="margin-top:10px;">Meaning: ${escapeHtml(meaning)}</div>
+      <div style="margin-top:8px;">Number: ${escapeHtml(num)}</div>
+      <div style="margin-top:8px;">Notes: ${escapeHtml(notes)}</div>
+      <div style="margin-top:8px;">Pattern: ${escapeHtml(pat)}</div>
+      <div style="margin-top:8px;">Meaning: ${escapeHtml(meaning)}</div>
     `;
   }
 
@@ -1869,7 +1930,6 @@ Optional:
     unlockTouches();
   }
 
-  $("btnDayX").addEventListener("click", (e)=>{ e.preventDefault(); closeDayModal(); });
   $("btnDayClose").addEventListener("click", (e)=>{ e.preventDefault(); closeDayModal(); });
 
   $("dayModal").addEventListener("click", (e)=>{
@@ -1900,7 +1960,7 @@ Optional:
     );
   });
 
-  /* ===== Log tap-to-open (does not block scroll; cancelled by horizontal swipe) ===== */
+  /* ===== Log tap-to-open ===== */
 
   let pendingOpenTs = null;
   let enableOpenTimer = null;
@@ -1946,7 +2006,6 @@ Optional:
     if(e.key === "Enter"){ e.preventDefault(); confirmEditPrompt(); }
   });
 
-  // Tap detection: only triggers if the finger does not move (scroll = movement)
   const tap = { active:false, ts:null, x0:0, y0:0, moved:false, el:null };
 
   function cancelEntryTap(){
@@ -2335,7 +2394,6 @@ Optional:
 
   $("btnAddFromLog").addEventListener("click", () => enterAddNew("log"));
 
-  // dtEdit change applies ONLY in edit mode (dt editor is hidden otherwise)
   $("dtEdit").addEventListener("change", () => {
     const ts = fromLocalDatetimeValue($("dtEdit").value);
     if(ts != null){
@@ -2355,8 +2413,6 @@ Optional:
       return;
     }
 
-    // NEW entry: Date/Time is not editable; use now.
-    // EDIT entry: Date/Time editable; use dtEdit value (fallback to existing editTs).
     const tsWanted = (editOriginalTs == null)
       ? Date.now()
       : (fromLocalDatetimeValue($("dtEdit").value) ?? editTs ?? Date.now());
@@ -2623,7 +2679,7 @@ self.addEventListener('fetch', (e)=>{ });`;
     }
   });
 
-  /* ===== Home pull-to-refresh (reload to pull updated version) ===== */
+  /* ===== Home pull-to-refresh ===== */
 
   const ptr = {
     active:false,
@@ -2746,20 +2802,18 @@ self.addEventListener('fetch', (e)=>{ });`;
 
 })();
 </script>
-
 </body>
 </html>
 
 <!--
 EOF Version Detail Notes (required)
 App: Angel Numbers Tracker
-Actual Version: v1.0B9
+Actual Version: v1.0B11
 Home Label (visual only): v1.333 (do not change unless instructed)
-Base: v1.0B8
+Base: v1.0B9
 Changes:
-- Add screen: Date/Time input removed for NEW entries; Date/Time remains editable only when EDITING an existing entry.
-- Home: pull-down refresh implemented (reload on release past threshold) to “update version”.
-- Wheel swipe restored on Log (and other cycle screens) using strict horizontal intent; no longer blocked by log entries.
-- Log: vertical scrolling preserved; entry tap-to-open remains and is cancelled when swipe is horizontal.
-- Borders: consistent dark-blue border applied directly to all main panels via .card (matches modal border hue).
+- Log: ensured panel scrolling remains reliable; log list no longer risks nested scroll traps; extra bottom padding prevents clipping.
+- Card modal: reduced vertical bloat (smaller typography/margins), and made action buttons sticky so they remain accessible.
+- Day modal: removed the top-right X; Close button is the only close control (plus backdrop + Esc).
+- Add/Edit: panel scroll hardened and action buttons made sticky so Save/Delete/Back are always reachable.
 -->
