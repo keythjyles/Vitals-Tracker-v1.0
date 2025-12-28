@@ -1,23 +1,30 @@
-<!-- Angel Numbers Tracker v1.0B7 -->
+<!-- Angel Numbers Tracker v1.0B8 -->
 <!--
 Version Detail Notes
-App Version (internal): v1.0B7
+App Version (internal): v1.0B8
 Home display label (visual only): v1.333  (DO NOT CHANGE unless user instructs)
-Base: v1.0B6
+Base: v1.0B7
 
-Fixes / changes (requested) — NO LAYOUT CHANGES:
-- Angel Number Card:
-  - Notes moved to the top (immediately below Number) when present; consistent ordering across card/export/log where notes+meaning appear.
-  - Add the small app logo row inside the card modal (was missing).
-- Day list (Calendar day modal):
-  - Add label: "Select Angel Number to View or Edit."
-  - Make Angel Number appear blue like a clickable link.
-  - Reduce extra vertical spacing/padding for a tighter list (no layout scaling/magnification).
-- Theme border consistency:
-  - Apply the subtle dark-blue theme border color consistently to list items/cards (without changing border widths/radii/layout).
-- Log list scrolling:
-  - Make vertical scrolling harder to hijack by swipe-wheel: stricter horizontal engagement + do not start wheel swipe when the touch begins on log entries/inputs/buttons.
-  - Remove any accidental scroll trapping; keep log panel naturally scrollable.
+Changes (requested):
+1) Home: Pull down on Home panel to refresh/update version (hard reload).
+   - Works only on Home.
+   - Requires: start at top of Home scroll, pull down past threshold, then release.
+   - Does not interfere with normal scrolling on other screens.
+
+2) Swiping left/right (wheel navigation):
+   - Restored on Log screen.
+   - Works when the gesture is clearly horizontal anywhere on the Log panel (including on entries).
+   - Horizontal swipe cancels any pending “tap-to-open” entry selection.
+
+3) Log list scrollability:
+   - Ensure Log panel scrolls normally.
+   - No scroll trapping from touch handlers or swipe logic.
+   - Entries do not block vertical scroll.
+
+4) Blue border consistency:
+   - All main panels (Home/Add/Log/Calendar) now use the SAME dark-blue border directly on the .card.
+   - Removed reliance on accentFrame pseudo-border for main panels (kept accentFrame class harmless).
+   - Modals already use the same border and remain consistent.
 
 Required persistence:
 - Keep EOF comment block.
@@ -45,11 +52,11 @@ Required persistence:
       --muted:rgba(235,245,255,.58);
       --muted2:rgba(235,245,255,.42);
 
-      /* DARK BLUE theme border (requested) */
+      /* DARK BLUE theme border */
       --accentBorder: rgba(43,78,122,.85);   /* dark blue */
       --accentGlow: rgba(43,78,122,.18);
 
-      /* Subtle theme border for internal cards/lists (same hue, lighter) */
+      /* Subtle theme border for internal cards/lists */
       --themeLine: rgba(43,78,122,.55);
       --themeLineSoft: rgba(43,78,122,.28);
 
@@ -107,13 +114,14 @@ Required persistence:
       flex:1;
       overflow:hidden;
       border-radius: var(--radius);
-      /* Let vertical scroll happen naturally; we take horizontal only when clearly horizontal */
+      /* Allow vertical panning; horizontal is taken only when clearly horizontal */
       touch-action: pan-y;
     }
 
+    /* MAIN PANEL CARD — now has the consistent dark-blue border */
     .card{
       background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      border:1px solid var(--stroke);
+      border:3px solid var(--accentBorder);              /* CONSISTENT BLUE BORDER */
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       padding: var(--pad);
@@ -125,20 +133,6 @@ Required persistence:
       -webkit-overflow-scrolling: touch;
       touch-action: pan-y;
     }
-
-    /* DARK BLUE border around each panel */
-    .accentFrame{ position:relative; }
-    .accentFrame::before{
-      content:"";
-      position:absolute;
-      inset:-3px;
-      border:3px solid var(--accentBorder);
-      border-radius: calc(var(--radius) + 3px);
-      pointer-events:none;
-      z-index:0;
-      box-shadow: 0 0 0 1px var(--accentGlow);
-    }
-    .accentFrame > *{ position:relative; z-index:1; }
 
     .hidden{ display:none !important; }
 
@@ -341,7 +335,7 @@ Required persistence:
       border-radius: 18px;
       padding: 8px 10px 8px;
       margin-top: 6px;
-      touch-action: pan-y;
+      touch-action: pan-y; /* allow vertical scroll through entries */
       -webkit-tap-highlight-color: transparent;
       user-select:none;
     }
@@ -588,13 +582,13 @@ Required persistence:
       margin-top: 0;
       display:flex;
       flex-direction:column;
-      gap: 6px; /* tighter */
+      gap: 6px;
     }
     .dayItem{
       border:1px solid var(--themeLine);
       background: rgba(255,255,255,.02);
       border-radius: 16px;
-      padding: 8px 10px; /* tighter */
+      padding: 8px 10px;
       display:flex;
       align-items:baseline;
       justify-content:space-between;
@@ -608,7 +602,7 @@ Required persistence:
       font-size: 22px;
       font-weight: 950;
       letter-spacing:.3px;
-      color: rgba(79,163,255,.92); /* link-like blue */
+      color: rgba(79,163,255,.92);
       white-space:nowrap;
       text-decoration: underline;
       text-underline-offset: 3px;
@@ -618,7 +612,7 @@ Required persistence:
       display:flex;
       flex-direction:column;
       align-items:flex-end;
-      gap:1px; /* tighter */
+      gap:1px;
       min-width: 0;
     }
     .dayTime{
@@ -670,6 +664,31 @@ Required persistence:
     }
     .touchLock.on{ pointer-events:auto; }
 
+    /* Pull-to-refresh indicator (Home only) */
+    .ptr{
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      margin: -10px 0 8px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      height: 28px;
+      color: rgba(235,245,255,.55);
+      font-size: 12px;
+      font-weight: 750;
+      letter-spacing: .2px;
+      user-select:none;
+      pointer-events:none;
+      opacity: 0;
+      transform: translateY(-6px);
+      transition: opacity 160ms ease, transform 160ms ease;
+    }
+    .ptr.on{
+      opacity: 1;
+      transform: translateY(0);
+    }
+
     /* Heart modal animation */
     .heartWrap{
       display:flex;
@@ -690,6 +709,9 @@ Required persistence:
       70%{ transform: scale(1.06); opacity: 1; }
       100%{ transform: scale(1.00); opacity: 1; }
     }
+
+    /* accentFrame retained but no longer responsible for the visible blue border */
+    .accentFrame{ position:relative; }
   </style>
 </head>
 
@@ -744,6 +766,8 @@ Required persistence:
     <div class="screenArea" id="screenArea">
 
       <div id="home" class="card accentFrame">
+        <div id="ptrHome" class="ptr">Pull down to refresh</div>
+
         <div class="homeMain">
           <button id="btnGoAdd" class="btn primary">ADD Angel Number</button>
           <button id="btnGoLog" class="btn">Log</button>
@@ -824,7 +848,6 @@ Required persistence:
           </div>
         </div>
 
-        <!-- Keep list inside the scrolling panel; DO NOT add extra wrappers that can break scrolling -->
         <div id="logList"></div>
       </div>
 
@@ -977,7 +1000,7 @@ Optional:
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.0B7";
+  const APP_VERSION = "v1.0B8";
   const HOME_VERSION_LABEL = "v1.333";
   const STORAGE_KEY = "angel_numbers_records_v1";
   const DAY_MS = 24*60*60*1000;
@@ -1260,7 +1283,7 @@ Optional:
     focusTopOfPanel(screen);
   }
 
-  /* ===== Swipe “wheel” (stricter horizontal detection; never blocks vertical scroll) ===== */
+  /* ===== Swipe “wheel” (works on Log again; cancels entry tap when horizontal) ===== */
 
   const drag = {
     active:false,
@@ -1292,14 +1315,10 @@ Optional:
     if(!(ev.touches && ev.touches.length === 1)) return;
     if(!swipeCycle.includes(currentScreen)) return;
 
-    /* Critical: do not start wheel swipe when user is clearly trying to scroll/tap inside log entries or controls */
+    // Do NOT block swiping on log entries anymore. We rely on intent detection.
+    // Only avoid starting swipe on form controls where horizontal movement is often text-cursor related.
     const t = ev.target;
-    if(currentScreen === "log"){
-      if(t && t.closest && t.closest(".entry, input, textarea, button, .field")) return;
-    }
-    if(currentScreen === "calendar"){
-      if(t && t.closest && t.closest("input, textarea, button, .field")) return;
-    }
+    if(t && t.closest && t.closest("input, textarea, select")) return;
 
     drag.active = true;
     drag.intent = null;
@@ -1329,7 +1348,7 @@ Optional:
     fromEl.style.transition = "none";
     toEl.style.transition = "none";
 
-    const startX = (dir === "right") ? -drag.width : drag.width; // opposite swipe direction
+    const startX = (dir === "right") ? -drag.width : drag.width;
     setTransform(fromEl, 0);
     setTransform(toEl, startX);
   }
@@ -1343,14 +1362,15 @@ Optional:
     drag.dx = x - drag.x0;
     drag.dy = y - drag.y0;
 
-    // Decide intent only when obvious (STRONGER thresholds to protect vertical scroll)
     if(!drag.intent){
       const ax = Math.abs(drag.dx);
       const ay = Math.abs(drag.dy);
 
-      // must be clearly horizontal
-      if(ax > 22 && ax > ay + 14){
+      // Must be clearly horizontal to claim the gesture (protect vertical scrolling)
+      if(ax > 18 && ax > ay + 12){
         drag.intent = "h";
+        // If a log-entry tap is in progress, cancel it immediately.
+        if(typeof cancelEntryTap === "function") cancelEntryTap();
       }else if(ay > 18 && ay > ax + 8){
         drag.intent = "v";
         drag.active = false;
@@ -1375,7 +1395,6 @@ Optional:
     const w = drag.width || 1;
     const clamped = Math.max(-w, Math.min(w, drag.dx));
 
-    // finger-tracking “wheel”
     setTransform(fromEl, clamped);
     const base = (dir === "right") ? -w : w;
     setTransform(toEl, base + clamped);
@@ -1390,7 +1409,6 @@ Optional:
     const w = drag.width || 1;
     const dx = drag.dx;
 
-    // reset drag state immediately
     drag.active = false;
     drag.intent = null;
     drag.dir = null;
@@ -1400,7 +1418,7 @@ Optional:
     animating = true;
 
     const progress = Math.min(1, Math.abs(dx) / w);
-    const commit = progress >= 0.22; // keep same commit
+    const commit = progress >= 0.22;
 
     const dir = (dx >= 0) ? "right" : "left";
     const fromEl = $(from);
@@ -1427,8 +1445,6 @@ Optional:
 
         focusTopOfPanel(currentScreen);
         animating = false;
-
-        // brief lock AFTER swipe only (prevents accidental taps)
         lockTouches(140);
       }, 235);
     }else{
@@ -1563,7 +1579,6 @@ Optional:
 
   function filteredRecords({fromId,toId,searchId}){
     const recs = loadRecords();
-
     const q = (searchId ? $(searchId).value : "").trim();
 
     const fromV = fromId ? $(fromId).value : "";
@@ -1665,7 +1680,7 @@ Optional:
     }
   });
 
-  /* ===== Card modal (return-to-origin) ===== */
+  /* ===== Card modal ===== */
 
   let cardTs = null;
   let cardReturn = { type: "screen", screen: "log" };
@@ -1677,7 +1692,6 @@ Optional:
     const meaning = rec.meaning?.trim() ? rec.meaning.trim() : "None";
     const notes = rec.notes?.trim() ? rec.notes.trim() : "None";
 
-    /* Notes are primary when present: show immediately under Number. */
     return `
       <div class="cardLogoRow">
         <div class="cardLogoIcon" aria-hidden="true">
@@ -1802,7 +1816,7 @@ Optional:
     }
   });
 
-  /* ===== Day modal (concise list) ===== */
+  /* ===== Day modal ===== */
 
   let dayModalDate = null;
 
@@ -1895,7 +1909,7 @@ Optional:
     );
   });
 
-  /* ===== Log tap-to-open WITHOUT killing scroll ===== */
+  /* ===== Log tap-to-open (does not block scroll; cancelled by horizontal swipe) ===== */
 
   let pendingOpenTs = null;
   let enableOpenTimer = null;
@@ -1944,6 +1958,17 @@ Optional:
   // Tap detection: only triggers if the finger does not move (scroll = movement)
   const tap = { active:false, ts:null, x0:0, y0:0, moved:false, el:null };
 
+  function cancelEntryTap(){
+    if(!tap.active) return;
+    if(tap.el) tap.el.classList.remove("pressed");
+    tap.active = false;
+    tap.ts = null;
+    tap.el = null;
+    tap.moved = true;
+  }
+  // expose for swipe cancel
+  window.cancelEntryTap = cancelEntryTap;
+
   $("logList").addEventListener("touchstart", (ev) => {
     if(!(ev.touches && ev.touches.length === 1)) return;
     const target = ev.target.closest ? ev.target.closest(".entry") : null;
@@ -1960,7 +1985,6 @@ Optional:
     tap.moved = false;
 
     target.classList.add("pressed");
-    // IMPORTANT: do NOT preventDefault; scrolling must work
   }, {passive:true});
 
   $("logList").addEventListener("touchmove", (ev) => {
@@ -2104,7 +2128,7 @@ Optional:
     const now = fmtDateTime(Date.now());
     const lines = [
       "Angel Numbers Tracker — Export Report",
-      `App Version: ${APP_VERSION}`,
+      `App Version: v1.0B8`,
       `Report: ${title}`,
       `Generated: ${now}`,
       rangeLabel ? `Range: ${rangeLabel}` : "",
@@ -2604,6 +2628,112 @@ self.addEventListener('fetch', (e)=>{ });`;
     }
   });
 
+  /* ===== Home pull-to-refresh (reload to pull updated version) ===== */
+
+  const ptr = {
+    active:false,
+    y0:0,
+    pulling:false,
+    threshold: 64,
+    max: 120,
+    ready:false
+  };
+
+  function setPtr(on, text){
+    const el = $("ptrHome");
+    if(!el) return;
+    if(on){
+      el.classList.add("on");
+      if(text) el.textContent = text;
+    }else{
+      el.classList.remove("on");
+      el.textContent = "Pull down to refresh";
+    }
+  }
+
+  function homeCanStartPtr(ev){
+    if(currentScreen !== "home") return false;
+    if(animating) return false;
+    if(!(ev.touches && ev.touches.length === 1)) return false;
+
+    // Only when the Home panel is scrolled to the very top.
+    const home = $("home");
+    if(!home) return false;
+    if(home.scrollTop > 0) return false;
+
+    // Do not start if touching a button (avoid accidental refresh)
+    const t = ev.target;
+    if(t && t.closest && t.closest("button, input, textarea, select")) return false;
+
+    return true;
+  }
+
+  function ptrStart(ev){
+    if(!homeCanStartPtr(ev)) return;
+    ptr.active = true;
+    ptr.pulling = false;
+    ptr.ready = false;
+    ptr.y0 = ev.touches[0].clientY;
+    setPtr(true, "Pull down to refresh");
+  }
+
+  function ptrMove(ev){
+    if(!ptr.active) return;
+    if(!(ev.touches && ev.touches.length === 1)) return;
+
+    const y = ev.touches[0].clientY;
+    const dy = y - ptr.y0;
+
+    // Only react to downward pull
+    if(dy <= 8){
+      setPtr(true, "Pull down to refresh");
+      ptr.ready = false;
+      return;
+    }
+
+    ptr.pulling = true;
+
+    // Prevent the browser from hijacking (when possible) once we are pulling
+    ev.preventDefault();
+
+    const amt = Math.min(ptr.max, dy);
+    if(amt >= ptr.threshold){
+      ptr.ready = true;
+      setPtr(true, "Release to refresh");
+    }else{
+      ptr.ready = false;
+      setPtr(true, "Pull down to refresh");
+    }
+  }
+
+  function ptrEnd(){
+    if(!ptr.active) return;
+    const doRefresh = ptr.ready;
+
+    ptr.active = false;
+    ptr.pulling = false;
+    ptr.ready = false;
+
+    if(doRefresh){
+      setPtr(true, "Refreshing…");
+      // Hard reload to ensure updated file/version is loaded
+      setTimeout(() => {
+        try{ location.reload(); }catch{ setPtr(false); }
+      }, 140);
+    }else{
+      setPtr(false);
+    }
+  }
+
+  function attachHomePTR(){
+    const home = $("home");
+    if(!home) return;
+    home.addEventListener("touchstart", ptrStart, {passive:true});
+    home.addEventListener("touchmove", ptrMove, {passive:false});
+    home.addEventListener("touchend", ptrEnd, {passive:true});
+    home.addEventListener("touchcancel", ptrEnd, {passive:true});
+  }
+
   /* ===== Init ===== */
 
   injectManifest();
@@ -2616,6 +2746,8 @@ self.addEventListener('fetch', (e)=>{ });`;
   $("toDate").value = "";
 
   attachSwipes();
+  attachHomePTR();
+
   showInstant("home");
 
   window.addEventListener("resize", () => {
@@ -2632,12 +2764,12 @@ self.addEventListener('fetch', (e)=>{ });`;
 <!--
 EOF Version Detail Notes (required)
 App: Angel Numbers Tracker
-Actual Version: v1.0B7
+Actual Version: v1.0B8
 Home Label (visual only): v1.333 (do not change unless instructed)
-Base: v1.0B6
+Base: v1.0B7
 Changes:
-- Angel Number Card: notes shown immediately below number (primary) + small logo row added; same ordering applied to log + exports.
-- Day modal: added instruction label; tighter list spacing; number styled as blue link.
-- Theme border consistency: internal list/card borders use subtle dark-blue theme line.
-- Scroll protection: wheel swipe is stricter and does not start when touching log entries/controls; vertical scrolling should remain natural.
+- Home: pull-down refresh implemented (reload on release past threshold) to “update version”.
+- Wheel swipe restored on Log (and other cycle screens) using strict horizontal intent; no longer blocked by log entries.
+- Log: vertical scrolling preserved; entry tap-to-open remains and is cancelled when swipe is horizontal.
+- Borders: consistent dark-blue border applied directly to all main panels via .card (matches modal border hue).
 -->
