@@ -5,15 +5,19 @@ App Version (internal): v1.0B7
 Home display label (visual only): v1.333  (DO NOT CHANGE unless user instructs)
 Base: v1.0B6
 
-Fixes / changes (requested):
-- Angel Number Card: Notes are now PRIMARY when present.
-  - Notes appear directly under the Number (above Pattern/Meaning).
-  - This order is used consistently in:
-    - Card modal display
-    - Card text copy/export
-    - Log list preview order (Notes before Meaning)
-- Angel Number Card now shows the logo (small) inside the card modal.
-- NO layout magnification changes. No global sizing changes.
+Fixes / changes (requested) — NO LAYOUT CHANGES:
+- Angel Number Card:
+  - Notes moved to the top (immediately below Number) when present; consistent ordering across card/export/log where notes+meaning appear.
+  - Add the small app logo row inside the card modal (was missing).
+- Day list (Calendar day modal):
+  - Add label: "Select Angel Number to View or Edit."
+  - Make Angel Number appear blue like a clickable link.
+  - Reduce extra vertical spacing/padding for a tighter list (no layout scaling/magnification).
+- Theme border consistency:
+  - Apply the subtle dark-blue theme border color consistently to list items/cards (without changing border widths/radii/layout).
+- Log list scrolling:
+  - Make vertical scrolling harder to hijack by swipe-wheel: stricter horizontal engagement + do not start wheel swipe when the touch begins on log entries/inputs/buttons.
+  - Remove any accidental scroll trapping; keep log panel naturally scrollable.
 
 Required persistence:
 - Keep EOF comment block.
@@ -41,9 +45,13 @@ Required persistence:
       --muted:rgba(235,245,255,.58);
       --muted2:rgba(235,245,255,.42);
 
-      /* DARK BLUE panel border (requested) */
+      /* DARK BLUE theme border (requested) */
       --accentBorder: rgba(43,78,122,.85);   /* dark blue */
       --accentGlow: rgba(43,78,122,.18);
+
+      /* Subtle theme border for internal cards/lists (same hue, lighter) */
+      --themeLine: rgba(43,78,122,.55);
+      --themeLineSoft: rgba(43,78,122,.28);
 
       --shadow:0 14px 40px rgba(0,0,0,.38);
       --radius:26px;
@@ -272,7 +280,7 @@ Required persistence:
     }
 
     .meaningCard{
-      border:1px solid var(--stroke);
+      border:1px solid var(--themeLine);
       background: rgba(255,255,255,.03);
       border-radius: 22px;
       padding: 12px 12px 10px;
@@ -294,7 +302,7 @@ Required persistence:
     .patternPill{
       font-size:13px;
       color: rgba(235,245,255,.70);
-      border: 1px solid var(--stroke2);
+      border: 1px solid var(--themeLineSoft);
       background: rgba(255,255,255,.03);
       padding: 6px 10px;
       border-radius: 999px;
@@ -328,7 +336,7 @@ Required persistence:
 
     /* Log entry cards (tight) */
     .entry{
-      border:1px solid var(--stroke);
+      border:1px solid var(--themeLine);
       background: rgba(255,255,255,.03);
       border-radius: 18px;
       padding: 8px 10px 8px;
@@ -422,7 +430,7 @@ Required persistence:
       gap:8px;
       padding: 8px 12px;
       border-radius: 999px;
-      border: 1px solid var(--stroke2);
+      border: 1px solid var(--themeLineSoft);
       background: rgba(255,255,255,.03);
       color: rgba(235,245,255,.70);
       font-weight:700;
@@ -568,18 +576,25 @@ Required persistence:
       color: rgba(235,245,255,.44);
     }
 
-    /* Day popup list (concise) */
+    /* Day popup list (tighter, clickable number) */
+    .dayHint{
+      margin: 2px 2px 8px;
+      color: rgba(235,245,255,.52);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .1px;
+    }
     .dayList{
-      margin-top: 6px;
+      margin-top: 0;
       display:flex;
       flex-direction:column;
-      gap: 8px;
+      gap: 6px; /* tighter */
     }
     .dayItem{
-      border:1px solid rgba(235,245,255,.12);
+      border:1px solid var(--themeLine);
       background: rgba(255,255,255,.02);
       border-radius: 16px;
-      padding: 10px 12px;
+      padding: 8px 10px; /* tighter */
       display:flex;
       align-items:baseline;
       justify-content:space-between;
@@ -593,14 +608,17 @@ Required persistence:
       font-size: 22px;
       font-weight: 950;
       letter-spacing:.3px;
-      color: rgba(235,245,255,.90);
+      color: rgba(79,163,255,.92); /* link-like blue */
       white-space:nowrap;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-thickness: 2px;
     }
     .dayMeta{
       display:flex;
       flex-direction:column;
       align-items:flex-end;
-      gap:2px;
+      gap:1px; /* tighter */
       min-width: 0;
     }
     .dayTime{
@@ -613,6 +631,33 @@ Required persistence:
       color: rgba(235,245,255,.62);
       font-weight:800;
       white-space:nowrap;
+    }
+
+    /* Card modal logo row (small) */
+    .cardLogoRow{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding: 2px 0 6px;
+      user-select:none;
+    }
+    .cardLogoIcon{
+      width:44px;
+      height:44px;
+      border-radius: 14px;
+      border: 1px solid var(--themeLineSoft);
+      background: rgba(255,255,255,.04);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex: 0 0 auto;
+    }
+    .cardLogoText{
+      font-weight: 850;
+      letter-spacing:.2px;
+      color: rgba(235,245,255,.72);
+      font-size: 16px;
+      line-height: 1.1;
     }
 
     /* Touch lock overlay (ONLY used briefly after swipe or modal open) */
@@ -644,30 +689,6 @@ Required persistence:
       0%{ transform: scale(.78); opacity: 0; }
       70%{ transform: scale(1.06); opacity: 1; }
       100%{ transform: scale(1.00); opacity: 1; }
-    }
-
-    /* Angel Card (modal) small logo row (no global layout changes) */
-    .cardLogoRow{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      margin: 0 0 8px;
-    }
-    .cardLogoRow svg{
-      width:34px;
-      height:34px;
-      flex:0 0 auto;
-      display:block;
-    }
-    .cardLogoText{
-      font-weight:850;
-      letter-spacing:.2px;
-      color: rgba(235,245,255,.82);
-      font-size:14px;
-      line-height:1.1;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
     }
   </style>
 </head>
@@ -1239,7 +1260,7 @@ Optional:
     focusTopOfPanel(screen);
   }
 
-  /* ===== Swipe “wheel” (strict horizontal detection; never blocks vertical scroll) ===== */
+  /* ===== Swipe “wheel” (stricter horizontal detection; never blocks vertical scroll) ===== */
 
   const drag = {
     active:false,
@@ -1270,6 +1291,15 @@ Optional:
     if(animating) return;
     if(!(ev.touches && ev.touches.length === 1)) return;
     if(!swipeCycle.includes(currentScreen)) return;
+
+    /* Critical: do not start wheel swipe when user is clearly trying to scroll/tap inside log entries or controls */
+    const t = ev.target;
+    if(currentScreen === "log"){
+      if(t && t.closest && t.closest(".entry, input, textarea, button, .field")) return;
+    }
+    if(currentScreen === "calendar"){
+      if(t && t.closest && t.closest("input, textarea, button, .field")) return;
+    }
 
     drag.active = true;
     drag.intent = null;
@@ -1313,16 +1343,15 @@ Optional:
     drag.dx = x - drag.x0;
     drag.dy = y - drag.y0;
 
-    // Decide intent only when obvious
+    // Decide intent only when obvious (STRONGER thresholds to protect vertical scroll)
     if(!drag.intent){
       const ax = Math.abs(drag.dx);
       const ay = Math.abs(drag.dy);
 
-      // stricter: must be clearly horizontal
-      if(ax > 14 && ax > ay + 10){
+      // must be clearly horizontal
+      if(ax > 22 && ax > ay + 14){
         drag.intent = "h";
-        // once horizontal, prevent browser scroll while dragging horizontally
-      }else if(ay > 16 && ay > ax + 6){
+      }else if(ay > 18 && ay > ax + 8){
         drag.intent = "v";
         drag.active = false;
         return;
@@ -1371,7 +1400,7 @@ Optional:
     animating = true;
 
     const progress = Math.min(1, Math.abs(dx) / w);
-    const commit = progress >= 0.22; // slightly easier commit
+    const commit = progress >= 0.22; // keep same commit
 
     const dir = (dx >= 0) ? "right" : "left";
     const fromEl = $(from);
@@ -1570,7 +1599,9 @@ Optional:
       e.className = "entry";
       e.dataset.ts = String(r.ts);
 
-      // Notes before Meaning (primary when present) for consistency
+      const notesLine = (r.notes && r.notes.trim()) ? r.notes.trim() : "None";
+      const meaningLine = (r.meaning && r.meaning.trim()) ? r.meaning.trim() : "None";
+
       e.innerHTML = `
         <div class="entryTop">
           <div class="entryTime">${escapeHtml(fmtDateTime(r.ts))}</div>
@@ -1579,8 +1610,8 @@ Optional:
           <div class="entryNumber">${escapeHtml(r.number || "—")}</div>
           <div class="entryPattern">${escapeHtml(r.pattern || "—")}</div>
         </div>
-        <div class="entryLine"><b>Notes:</b> ${escapeHtml((r.notes && r.notes.trim()) ? r.notes.trim() : "None")}</div>
-        <div class="entryLine"><b>Meaning:</b> ${escapeHtml((r.meaning && r.meaning.trim()) ? r.meaning.trim() : "None")}</div>
+        <div class="entryLine"><b>Notes:</b> ${escapeHtml(notesLine)}</div>
+        <div class="entryLine"><b>Meaning:</b> ${escapeHtml(meaningLine)}</div>
       `;
       list.appendChild(e);
     }
@@ -1613,6 +1644,7 @@ Optional:
   function closeConfirm(){
     confirmState = null;
     $("confirmModal").classList.add("hidden");
+    unlockTouches();
   }
 
   $("btnConfirmCancel").addEventListener("click", (e)=>{ e.preventDefault(); closeConfirm(); });
@@ -1638,63 +1670,59 @@ Optional:
   let cardTs = null;
   let cardReturn = { type: "screen", screen: "log" };
 
-  function buildCardText(rec){
-    const notes = rec.notes?.trim() ? rec.notes.trim() : "None";
-    const meaning = rec.meaning?.trim() ? rec.meaning.trim() : "None";
-    const lines = [
-      "Angel Number Card",
-      `Date/Time: ${fmtDateTime(rec.ts)}`,
-      `Number: ${rec.number || "—"}`,
-      `Notes: ${notes}`,
-      `Pattern: ${rec.pattern || "—"}`,
-      `Meaning: ${meaning}`
-    ];
-    return lines.join("\n");
-  }
-
   function buildCardHtml(rec){
     const dt = fmtDateTime(rec.ts);
     const num = rec.number || "—";
-    const notes = rec.notes?.trim() ? rec.notes.trim() : "None";
-    const pattern = rec.pattern || "—";
+    const pat = rec.pattern || "—";
     const meaning = rec.meaning?.trim() ? rec.meaning.trim() : "None";
+    const notes = rec.notes?.trim() ? rec.notes.trim() : "None";
 
-    // Small logo (same motif), placed inside modal body
-    const logoSvg =
-`<svg viewBox="0 0 92 92" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-  <defs>
-    <linearGradient id="cg" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#8a6bff"/>
-      <stop offset="55%" stop-color="#4fa3ff"/>
-      <stop offset="100%" stop-color="#2f78ff"/>
-    </linearGradient>
-  </defs>
-  <rect x="2" y="2" width="88" height="88" rx="24" fill="rgba(255,255,255,.04)" stroke="rgba(235,245,255,.18)" stroke-width="2"/>
-  <ellipse cx="46" cy="24" rx="20" ry="8" fill="none" stroke="rgba(235,245,255,.85)" stroke-width="4" opacity=".92"/>
-  <path d="M46 50
-           C34 42, 22 44, 16 54
-           C24 58, 32 66, 38 76
-           C40 66, 43 58, 46 50Z"
-        fill="none" stroke="url(#cg)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M46 50
-           C58 42, 70 44, 76 54
-           C68 58, 60 66, 54 76
-           C52 66, 49 58, 46 50Z"
-        fill="none" stroke="url(#cg)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
-
-    // Notes directly under Number (primary)
+    /* Notes are primary when present: show immediately under Number. */
     return `
       <div class="cardLogoRow">
-        ${logoSvg}
+        <div class="cardLogoIcon" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="cg" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#8a6bff"/>
+                <stop offset="55%" stop-color="#4fa3ff"/>
+                <stop offset="100%" stop-color="#2f78ff"/>
+              </linearGradient>
+            </defs>
+            <ellipse cx="32" cy="16" rx="14" ry="6" fill="none" stroke="rgba(235,245,255,.88)" stroke-width="4"/>
+            <path d="M32 30 C24 26, 16 27, 12 34 C18 36, 22 41, 26 49 C27 42, 29 36, 32 30Z"
+                  fill="none" stroke="url(#cg)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M32 30 C40 26, 48 27, 52 34 C46 36, 42 41, 38 49 C37 42, 35 36, 32 30Z"
+                  fill="none" stroke="url(#cg)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
         <div class="cardLogoText">Angel Numbers Tracker</div>
       </div>
+
       <div>Date/Time: ${escapeHtml(dt)}</div>
-      <div>Number: ${escapeHtml(num)}</div>
-      <div>Notes: ${escapeHtml(notes)}</div>
-      <div>Pattern: ${escapeHtml(pattern)}</div>
-      <div>Meaning: ${escapeHtml(meaning)}</div>
+      <div style="margin-top:10px;">Number: ${escapeHtml(num)}</div>
+      <div style="margin-top:10px;">Notes: ${escapeHtml(notes)}</div>
+      <div style="margin-top:10px;">Pattern: ${escapeHtml(pat)}</div>
+      <div style="margin-top:10px;">Meaning: ${escapeHtml(meaning)}</div>
     `;
+  }
+
+  function buildCardText(rec){
+    const dt = fmtDateTime(rec.ts);
+    const num = rec.number || "—";
+    const pat = rec.pattern || "—";
+    const meaning = rec.meaning?.trim() ? rec.meaning.trim() : "None";
+    const notes = rec.notes?.trim() ? rec.notes.trim() : "None";
+
+    const lines = [
+      "Angel Number Card",
+      `Date/Time: ${dt}`,
+      `Number: ${num}`,
+      `Notes: ${notes}`,
+      `Pattern: ${pat}`,
+      `Meaning: ${meaning}`
+    ];
+    return lines.join("\n");
   }
 
   function openCard(ts, origin){
@@ -1712,8 +1740,11 @@ Optional:
 
   function closeCard(){
     $("cardModal").classList.add("hidden");
+    $("cardBody").textContent = "—";
     const ret = cardReturn;
     cardTs = null;
+
+    unlockTouches();
 
     if(ret && ret.type === "day" && Number.isFinite(ret.dayStartTs)){
       openDayModal(ret.dayStartTs);
@@ -1755,7 +1786,9 @@ Optional:
     if(cardTs == null) return;
     const ts = cardTs;
     $("cardModal").classList.add("hidden");
+    $("cardBody").textContent = "—";
     cardTs = null;
+    unlockTouches();
     enterAddEdit(ts);
   });
 
@@ -1810,8 +1843,15 @@ Optional:
       wrap.appendChild(item);
     }
 
+    const container = document.createElement("div");
+    const hint = document.createElement("div");
+    hint.className = "dayHint";
+    hint.textContent = "Select Angel Number to View or Edit.";
+    container.appendChild(hint);
+    container.appendChild(wrap);
+
     $("dayBody").textContent = "";
-    $("dayBody").appendChild(wrap);
+    $("dayBody").appendChild(container);
 
     $("dayModal").classList.remove("hidden");
     lockTouches(120);
@@ -1821,6 +1861,7 @@ Optional:
     dayModalDate = null;
     $("dayModal").classList.add("hidden");
     $("dayBody").textContent = "—";
+    unlockTouches();
   }
 
   $("btnDayX").addEventListener("click", (e)=>{ e.preventDefault(); closeDayModal(); });
@@ -1875,6 +1916,7 @@ Optional:
   function closeEditPrompt(){
     pendingOpenTs = null;
     $("editModal").classList.add("hidden");
+    unlockTouches();
   }
 
   function confirmEditPrompt(){
@@ -2018,6 +2060,7 @@ Optional:
   function closeExportModal(){
     exportPayload = null;
     $("exportModal").classList.add("hidden");
+    unlockTouches();
   }
 
   $("btnExportClose").addEventListener("click", (e)=>{ e.preventDefault(); closeExportModal(); });
@@ -2082,12 +2125,11 @@ Optional:
   function exportReport(recs, headerInfo, filenameBase){
     const header = buildReportHeader(headerInfo);
 
-    // Notes directly under Number (primary)
     const lines = recs.map(r => {
       const dt = fmtDateTime(r.ts);
       const num = `Number: ${r.number || "—"}`;
-      const notes = (r.notes && r.notes.trim()) ? r.notes.trim() : "None";
       const pat = `Pattern: ${r.pattern || "—"}`;
+      const notes = (r.notes && r.notes.trim()) ? r.notes.trim() : "None";
       const meaning = (r.meaning && r.meaning.trim()) ? r.meaning.trim() : "None";
       return `${dt}\n${num}\nNotes: ${notes}\n${pat}\nMeaning: ${meaning}\n`;
     });
@@ -2524,7 +2566,7 @@ self.addEventListener('fetch', (e)=>{ });`;
     $("versionModal").classList.remove("hidden");
     lockTouches(120);
   }
-  function closeVersionModal(){ $("versionModal").classList.add("hidden"); }
+  function closeVersionModal(){ $("versionModal").classList.add("hidden"); unlockTouches(); }
   $("btnVerX").addEventListener("click", (e)=>{ e.preventDefault(); closeVersionModal(); });
   $("btnVerClose").addEventListener("click", (e)=>{ e.preventDefault(); closeVersionModal(); });
   $("versionModal").addEventListener("click", (e)=>{ if(e.target === $("versionModal")) closeVersionModal(); });
@@ -2543,7 +2585,7 @@ self.addEventListener('fetch', (e)=>{ });`;
   });
 
   function openHeart(){ $("heartModal").classList.remove("hidden"); lockTouches(120); }
-  function closeHeart(){ $("heartModal").classList.add("hidden"); }
+  function closeHeart(){ $("heartModal").classList.add("hidden"); unlockTouches(); }
   $("btnHeartX").addEventListener("click", (e)=>{ e.preventDefault(); closeHeart(); });
   $("btnHeartClose").addEventListener("click", (e)=>{ e.preventDefault(); closeHeart(); });
   $("heartModal").addEventListener("click", (e)=>{ if(e.target === $("heartModal")) closeHeart(); });
@@ -2594,7 +2636,8 @@ Actual Version: v1.0B7
 Home Label (visual only): v1.333 (do not change unless instructed)
 Base: v1.0B6
 Changes:
-- Angel Number Card: Notes moved directly under Number (primary) and applied consistently to card modal + copy/export + log preview order.
-- Angel Number Card modal now displays a small logo inside the card.
-- No layout magnification changes; no global sizing changes.
+- Angel Number Card: notes shown immediately below number (primary) + small logo row added; same ordering applied to log + exports.
+- Day modal: added instruction label; tighter list spacing; number styled as blue link.
+- Theme border consistency: internal list/card borders use subtle dark-blue theme line.
+- Scroll protection: wheel swipe is stricter and does not start when touching log entries/controls; vertical scrolling should remain natural.
 -->
