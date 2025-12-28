@@ -1,0 +1,2197 @@
+<!-- Angel Numbers Tracker v1.0A1 -->
+<!--
+Single-file, offline-first PWA.
+Base UI/UX derived from Vitals Tracker v1.19B7 (Keyth Jyles).
+Purpose: Log “angel number” sightings + auto-meaning (cultural/numerology) + weekly charts + export.
+-->
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1324" />
+  <title>Angel Numbers Tracker</title>
+
+  <link rel="manifest" id="manifestLink" href="#" />
+
+  <style>
+    :root{
+      --bg0:#08101f;
+      --bg1:#0b1324;
+      --panel:#0c1528cc;
+      --stroke:rgba(235,245,255,.16);
+      --stroke2:rgba(235,245,255,.22);
+      --strokeBold:rgba(180,210,255,.42);
+      --text:rgba(235,245,255,.86);
+      --muted:rgba(235,245,255,.58);
+      --muted2:rgba(235,245,255,.42);
+      --accent:#2b4e7a;
+      --shadow:0 14px 40px rgba(0,0,0,.38);
+      --radius:26px;
+      --btnH:56px;
+      --pad:18px;
+      --font: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+
+    body{
+      margin:0;
+      font-family:var(--font);
+      color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 30% 0%, rgba(47,120,255,.22), transparent 55%),
+        radial-gradient(900px 600px at 80% 20%, rgba(155,120,255,.10), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+      display:flex;
+      justify-content:center;
+      padding: max(14px, env(safe-area-inset-top)) 12px max(14px, env(safe-area-inset-bottom));
+    }
+
+    .app{
+      width:min(520px, 100%);
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    .logoTitle{
+      margin:10px 6px 0;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      text-shadow: 0 10px 22px rgba(0,0,0,.35);
+    }
+    .logoTitle svg{
+      width:min(520px, 100%);
+      height:auto;
+      display:block;
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid var(--stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: var(--pad);
+      backdrop-filter: blur(10px);
+    }
+
+    /* Unified accent border for all panels/modals */
+    .accentFrame{
+      position:relative;
+    }
+    .accentFrame::before{
+      content:"";
+      position:absolute;
+      inset:-3px;
+      border:3px solid var(--accent);
+      border-radius: calc(var(--radius) + 3px);
+      pointer-events:none;
+      z-index:0;
+    }
+    .accentFrame > *{
+      position:relative;
+      z-index:1;
+    }
+
+    .hidden{ display:none !important; }
+
+    .btn{
+      height:var(--btnH);
+      border-radius: 999px;
+      border:1px solid var(--stroke2);
+      background: rgba(255,255,255,.03);
+      color:rgba(235,245,255,.78);
+      font-weight:650;
+      letter-spacing:.2px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 18px;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      font-size:18px;
+    }
+    .btn:active{ transform: translateY(1px); }
+
+    .btn.primary{
+      background: linear-gradient(180deg, rgba(47,120,255,.92), rgba(47,120,255,.72));
+      border-color: rgba(120,170,255,.55);
+      color: rgba(235,245,255,.90);
+    }
+
+    .btn.danger{
+      background: linear-gradient(180deg, rgba(255,80,80,.18), rgba(255,80,80,.10));
+      border-color: rgba(255,120,120,.42);
+      color: rgba(255,225,225,.92);
+      box-shadow: 0 10px 26px rgba(0,0,0,.22);
+    }
+
+    .btn.small{
+      height:44px;
+      font-size:16px;
+      padding:0 14px;
+      font-weight:650;
+      white-space:nowrap;
+    }
+
+    .btn:disabled{
+      opacity:.55;
+      filter:saturate(.85);
+      transform:none !important;
+      pointer-events:none;
+    }
+
+    .row{ display:flex; gap:12px; }
+    .row.center{ align-items:center; }
+    .grow{ flex:1; }
+
+    .label{
+      font-size:16px;
+      color:var(--muted);
+      font-weight:650;
+      margin: 12px 4px 8px;
+    }
+    .subtle{
+      font-size:14px;
+      color:var(--muted2);
+      margin: 6px 4px 0;
+    }
+
+    .field{
+      border:2px solid var(--strokeBold);
+      background: rgba(255,255,255,.06);
+      color: rgba(235,245,255,.86);
+      border-radius: 18px;
+      height:54px;
+      padding: 0 14px;
+      font-size:18px;
+      outline:none;
+      width:100%;
+    }
+    .field::placeholder{ color: rgba(235,245,255,.35); }
+    .field:focus{
+      border-color: rgba(90,150,255,.78);
+      box-shadow: 0 0 0 4px rgba(47,120,255,.16);
+    }
+    textarea.field{
+      height:84px;
+      padding: 12px 14px;
+      resize:none;
+      line-height:1.25;
+    }
+
+    .homeMain{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      margin-top:8px;
+    }
+    .homeMain > .btn:not(.small){
+      font-size:26px;
+      font-weight:750;
+      letter-spacing:.3px;
+    }
+
+    .homeFooterRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-top:8px;
+      flex-wrap:nowrap;
+    }
+
+    .footerTiny{
+      margin-top:10px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      font-size: 12px;
+      color: rgba(235,245,255,.38);
+    }
+
+    .timeLine{
+      margin: 4px 4px 14px;
+      color: rgba(235,245,255,.82);
+      font-weight:750;
+      letter-spacing:.3px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      line-height:1.05;
+      font-size: clamp(18px, 6.4vw, 44px);
+    }
+
+    .meaningCard{
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.03);
+      border-radius: 22px;
+      padding: 12px 12px 10px;
+      margin-top: 10px;
+    }
+    .meaningTop{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom: 6px;
+    }
+    .numBig{
+      font-size:26px;
+      font-weight:900;
+      letter-spacing:.3px;
+      white-space:nowrap;
+    }
+    .patternPill{
+      font-size:13px;
+      color: rgba(235,245,255,.70);
+      border: 1px solid var(--stroke2);
+      background: rgba(255,255,255,.03);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight:750;
+      white-space:nowrap;
+    }
+    .meaningText{
+      color: rgba(235,245,255,.74);
+      font-size:15px;
+      line-height:1.18;
+      white-space: pre-wrap;
+    }
+    .disclaimer{
+      margin-top:8px;
+      color: rgba(235,245,255,.44);
+      font-size:12px;
+      line-height:1.25;
+    }
+
+    .panelButtons{
+      display:flex;
+      gap:12px;
+      margin-top: 12px;
+      flex-wrap:wrap;
+    }
+
+    #log .label{ margin: 8px 4px 6px; }
+    #log .filters{ margin-top: 8px; gap: 10px; }
+    #log .dateField{ gap: 6px; }
+    #log > .row.center{ margin-bottom: 4px; }
+
+    .entry{
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.03);
+      border-radius: 22px;
+      padding: 10px 10px 9px;
+      margin-top: 6px;
+      touch-action: manipulation;
+    }
+    .entry.pressed{
+      background: rgba(47,120,255,.14);
+      border-color: rgba(90,150,255,.55);
+    }
+    .entry:active{ transform: translateY(1px); }
+
+    .entryTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:10px;
+      margin-bottom: 2px;
+    }
+    .entryTime{
+      font-size:13px;
+      color: rgba(235,245,255,.46);
+      white-space:nowrap;
+    }
+    .entryMain{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:baseline;
+    }
+    .entryNumber{
+      font-size:22px;
+      font-weight:900;
+      letter-spacing:.2px;
+      white-space:nowrap;
+    }
+    .entryPattern{
+      font-size:14px;
+      color: rgba(235,245,255,.68);
+      font-weight:800;
+      white-space:nowrap;
+    }
+    .entryLine{
+      margin-top: 6px;
+      color: rgba(235,245,255,.62);
+      font-size:15px;
+      line-height:1.12;
+    }
+    .entryLine b{ color: rgba(235,245,255,.70); }
+
+    .filters{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top:10px;
+    }
+    .dateField{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .dateField .miniLabel{
+      margin: 0 4px;
+      color: var(--muted);
+      font-weight:650;
+      font-size:14px;
+    }
+    input[type="date"].field, input[type="week"].field{
+      font-size:16px;
+      padding-right: 10px;
+    }
+
+    .searchRow{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .searchRow .field{
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .searchRow .btn.small{
+      flex: 0 0 auto;
+      height:54px;
+      font-size:16px;
+      padding: 0 16px;
+      border-radius: 18px;
+    }
+
+    canvas{
+      width:100%;
+      height:280px;
+      border-radius: 22px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.02);
+      margin-top: 10px;
+      touch-action: none;
+    }
+
+    .editPill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke2);
+      background: rgba(255,255,255,.03);
+      color: rgba(235,245,255,.70);
+      font-weight:700;
+      letter-spacing:.2px;
+      margin: 0 4px 10px;
+      width: fit-content;
+    }
+
+    .modal{
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: max(16px, env(safe-area-inset-top)) 14px max(16px, env(safe-area-inset-bottom));
+      background: rgba(0,0,0,.56);
+      z-index: 9998;
+    }
+    .modalCard{
+      width:min(520px, 100%);
+      border-radius: 26px;
+      border: 3px solid var(--accent);
+      background: linear-gradient(180deg, rgba(12,21,40,.96), rgba(8,16,31,.96));
+      box-shadow: 0 18px 60px rgba(0,0,0,.55);
+      padding: 18px;
+      backdrop-filter: blur(10px);
+    }
+    .modalTitle{
+      font-weight: 900;
+      letter-spacing: .2px;
+      color: rgba(235,245,255,.92);
+      font-size: clamp(22px, 6.5vw, 34px);
+      line-height: 1.05;
+      margin: 4px 2px 14px;
+    }
+    .modalSub{
+      color: rgba(235,245,255,.56);
+      font-size: 14px;
+      margin: 0 2px 14px;
+      white-space: pre-wrap;
+    }
+    .modalBtns{
+      display:flex;
+      gap:12px;
+      margin-top: 6px;
+      flex-wrap:wrap;
+    }
+    .modalBtns .btn{
+      flex:1;
+      height: 54px;
+      font-size: 18px;
+      font-weight: 800;
+      min-width: 140px;
+    }
+
+    #exportModal .modalBtns{
+      flex-wrap: nowrap;
+    }
+    #exportModal .modalBtns .btn{
+      min-width: 0;
+      flex: 1 1 0;
+      font-size: 16px;
+      height: 52px;
+      padding: 0 10px;
+      white-space: nowrap;
+    }
+    #exportModal .btn.primary{
+      color: rgba(235,245,255,.90);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+
+    <div class="logoTitle" aria-label="Angel Numbers Tracker">
+      <svg viewBox="0 0 900 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Angel Numbers Tracker">
+        <defs>
+          <linearGradient id="angG" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#8a6bff"/>
+            <stop offset="55%" stop-color="#4fa3ff"/>
+            <stop offset="100%" stop-color="#2f78ff"/>
+          </linearGradient>
+          <filter id="angS" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="rgba(0,0,0,.35)"/>
+          </filter>
+        </defs>
+
+        <!-- Icon block (wings + halo) -->
+        <g transform="translate(46 24)" filter="url(#angS)">
+          <rect x="0" y="0" width="92" height="92" rx="26" fill="rgba(255,255,255,.06)" stroke="rgba(235,245,255,.22)" stroke-width="2"/>
+
+          <!-- Halo -->
+          <ellipse cx="46" cy="24" rx="20" ry="8" fill="none" stroke="rgba(235,245,255,.88)" stroke-width="4" opacity=".92"/>
+
+          <!-- Wings (minimal, symmetric) -->
+          <path d="M46 50
+                   C34 42, 22 44, 16 54
+                   C24 58, 32 66, 38 76
+                   C40 66, 43 58, 46 50Z"
+                fill="none" stroke="url(#angG)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+
+          <path d="M46 50
+                   C58 42, 70 44, 76 54
+                   C68 58, 60 66, 54 76
+                   C52 66, 49 58, 46 50Z"
+                fill="none" stroke="url(#angG)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+
+          <!-- Subtle center spark -->
+          <path d="M46 34 L46 42" stroke="rgba(235,245,255,.82)" stroke-width="4" stroke-linecap="round"/>
+          <path d="M42 38 L50 38" stroke="rgba(235,245,255,.82)" stroke-width="4" stroke-linecap="round"/>
+        </g>
+
+        <text x="160" y="92"
+              font-family="system-ui,Segoe UI,Roboto,Helvetica,Arial"
+              font-size="66"
+              font-weight="860"
+              fill="url(#angG)"
+              letter-spacing=".6"
+              filter="url(#angS)">Angel Numbers Tracker</text>
+      </svg>
+    </div>
+
+    <div id="home" class="card accentFrame">
+      <div class="homeMain">
+        <button id="btnGoAdd" class="btn primary">ADD Sighting</button>
+        <button id="btnGoLog" class="btn">Log</button>
+        <button id="btnGoCharts" class="btn">Charts</button>
+
+        <div class="homeFooterRow">
+          <button id="btnInstall" class="btn small">Install</button>
+          <button id="btnClearAll" class="btn small">Clear Data</button>
+          <div class="grow"></div>
+          <button id="btnExitHome" class="btn small danger">Exit</button>
+        </div>
+
+        <div class="subtle">Local-only. No accounts. No cloud.</div>
+
+        <div class="footerTiny">
+          <div>v1.0A1</div>
+          <div>developed by Keyth Jyles</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="add" class="card accentFrame hidden">
+      <div id="editPill" class="editPill hidden">Editing entry</div>
+
+      <div id="timeLine" class="timeLine">--:--:-- --, --/--/----</div>
+
+      <div class="label">Number</div>
+      <input id="anum" class="field" inputmode="numeric" placeholder="e.g., 111, 1212, 777" />
+
+      <div id="meaningCard" class="meaningCard">
+        <div class="meaningTop">
+          <div id="numBig" class="numBig">—</div>
+          <div id="patternPill" class="patternPill">Pattern: —</div>
+        </div>
+        <div id="meaningText" class="meaningText">Enter a number to see its commonly shared meaning.</div>
+        <div class="disclaimer">
+          Cultural note: these meanings come from numerology/“angel number” traditions and vary by source.
+          Treat as reflective prompts, not facts or predictions.
+        </div>
+      </div>
+
+      <div class="label">Notes <span style="color:var(--muted2); font-weight:650;">(optional)</span></div>
+      <textarea id="notes" class="field" placeholder="Where did you see it? What were you thinking/feeling?"></textarea>
+
+      <div class="panelButtons">
+        <button id="btnSave" class="btn primary grow">Save</button>
+        <button id="btnDelete" class="btn grow hidden">Delete</button>
+        <button id="btnBackFromAdd" class="btn grow">Back</button>
+      </div>
+    </div>
+
+    <div id="log" class="card accentFrame hidden">
+      <div class="row center">
+        <button id="btnExportLog" class="btn small">Export</button>
+        <button id="btnAddFromLog" class="btn small">ADD</button>
+        <div class="grow"></div>
+        <button id="btnBackFromLog" class="btn small">Back</button>
+      </div>
+
+      <div class="label">Search</div>
+      <div class="searchRow">
+        <input id="search" class="field" placeholder="Try: 111, mirror, reset, new start..." />
+        <button id="btnRunSearch" class="btn small">Search</button>
+      </div>
+
+      <div class="filters">
+        <div class="dateField">
+          <div class="miniLabel">From</div>
+          <input id="fromDate" class="field" type="date" />
+        </div>
+        <div class="dateField">
+          <div class="miniLabel">To</div>
+          <input id="toDate" class="field" type="date" />
+        </div>
+      </div>
+
+      <div id="logList"></div>
+    </div>
+
+    <div id="charts" class="card accentFrame hidden">
+      <div class="row center">
+        <button id="btnExportCharts" class="btn small">Export</button>
+        <div class="grow"></div>
+        <button id="btnBackFromCharts" class="btn small">Back</button>
+      </div>
+
+      <div class="subtle">Weekly view (7 days). Pinch to zoom; drag to pan.</div>
+
+      <div class="filters">
+        <div class="dateField" style="grid-column:1 / span 2;">
+          <div class="miniLabel">Week</div>
+          <input id="chartWeek" class="field" type="week" />
+        </div>
+      </div>
+
+      <canvas id="chart" width="900" height="520"></canvas>
+    </div>
+
+  </div>
+
+  <div id="editModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+    <div class="modalCard">
+      <div id="editModalTitle" class="modalTitle">Edit this sighting?</div>
+      <div class="modalSub">Press Edit to open this entry.</div>
+      <div class="modalBtns">
+        <button id="btnEditCancel" class="btn">Cancel</button>
+        <button id="btnEditConfirm" class="btn primary">Edit</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="exportModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle">
+    <div class="modalCard">
+      <div id="exportModalTitle" class="modalTitle">Export ready</div>
+      <div id="exportModalSub" class="modalSub">
+Export report was copied to your clipboard.
+
+You can paste it into any messaging app, email, Notes, or any app that accepts text.
+
+Optional:
+- Share sends the report to another app.
+- Save creates a .txt file on your device.
+      </div>
+      <div class="modalBtns">
+        <button id="btnExportClose" class="btn">Close</button>
+        <button id="btnExportShare" class="btn">Share</button>
+        <button id="btnExportSave" class="btn primary">Save .txt</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  "use strict";
+
+  const APP_VERSION = "v1.0A1";
+  const STORAGE_KEY = "angel_numbers_records_v1";
+  const DAY_MS = 24*60*60*1000;
+
+  /* =========================
+     Meanings (cultural / numerology)
+     ========================= */
+
+  const DIGIT_MEANING = {
+    "0": "0 is often linked with wholeness, source, and fresh cycles—an invitation to reset and widen perspective.",
+    "1": "1 is often linked with new beginnings, initiative, focus, and the power of attention.",
+    "2": "2 is often linked with balance, partnership, patience, and alignment through cooperation.",
+    "3": "3 is often linked with creativity, expression, growth, and encouragement to communicate.",
+    "4": "4 is often linked with stability, foundations, discipline, and building what lasts.",
+    "5": "5 is often linked with change, adaptability, movement, and a call to embrace transition.",
+    "6": "6 is often linked with care, responsibility, home, and recalibrating priorities toward wellbeing.",
+    "7": "7 is often linked with insight, inner wisdom, spiritual inquiry, and learning through reflection.",
+    "8": "8 is often linked with strength, momentum, material mastery, and confident stewardship of resources.",
+    "9": "9 is often linked with closure, compassion, integration, and completing a cycle with grace."
+  };
+
+  // Commonly discussed sequences
+  const ANGEL_MAP = {
+    "000": "Reset and re-center. A ‘clean slate’ moment—expand perspective and begin again.",
+    "111": "Focus and intention. A reminder to notice your thoughts and aim them deliberately.",
+    "222": "Balance and alignment. Patience—let partnerships and decisions settle into place.",
+    "333": "Creativity and support. Express yourself; keep building and communicating clearly.",
+    "444": "Foundations and stability. Stay disciplined; the work you’re doing is structural.",
+    "555": "Change and movement. A shift is underway—adapt, release the old, step forward.",
+    "666": "Recalibration. Check priorities; return to what’s healthy and truly important.",
+    "777": "Insight and learning. Trust your inner guidance; deepen study and reflection.",
+    "888": "Momentum and abundance. Good stewardship; practical progress and strong energy.",
+    "999": "Completion. Close a chapter; integrate lessons; make room for what’s next.",
+
+    "1010": "Fresh cycle + alignment. A restart with a clear direction—stay awake and intentional.",
+    "1111": "Gateway / heightened awareness. Focus your intent; clarify what you’re building.",
+    "1212": "Realignment and growth. Keep moving—small consistent steps bring a new level.",
+    "1234": "Step-by-step progress. Keep it simple; the path is sequential and workable.",
+    "1313": "Transform through creativity. Express and restructure; iterate without fear.",
+    "1414": "Grounded change. Build stability while adjusting—practical updates, not chaos.",
+    "1515": "Change with intention. Choose the transition you want; don’t drift into it.",
+    "1616": "Perspective shift. Let go of noise; rebuild from values and calm attention.",
+    "1717": "Confidence through insight. Trust what you’ve learned; make the next move.",
+    "1818": "Momentum + mastery. Strong forward push—be disciplined with resources.",
+    "1919": "Closure into renewal. Finish clean; then start the next cycle with clarity.",
+
+    "2020": "Balance and reflection. Look at both sides; correct course gently.",
+    "2121": "Alignment in partnership. Coordination and timing—let pieces meet in the middle.",
+    "2222": "Deep alignment. Commit to balance; trust the process over the impulse."
+  };
+
+  /* =========================
+     Utilities
+     ========================= */
+
+  const $ = (id) => document.getElementById(id);
+  const screens = ["home","add","log","charts"];
+
+  function numOrNull(v){
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function loadRecords(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return [];
+      const arr = JSON.parse(raw);
+      if(!Array.isArray(arr)) return [];
+      return arr
+        .filter(r => r && typeof r.ts === "number")
+        .map(r => ({
+          ts: r.ts,
+          number: (r.number ?? "").toString(),
+          pattern: (r.pattern ?? "").toString(),
+          meaning: (r.meaning ?? "").toString(),
+          notes: (r.notes ?? "").toString()
+        }))
+        .sort((a,b)=> b.ts - a.ts);
+    }catch{
+      return [];
+    }
+  }
+
+  function saveRecords(recs){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(recs));
+  }
+
+  function fmtDateTime(ts){
+    const d = new Date(ts);
+    const parts = new Intl.DateTimeFormat(undefined, {
+      year:"numeric", month:"2-digit", day:"2-digit",
+      hour:"2-digit", minute:"2-digit", second:"2-digit"
+    }).formatToParts(d);
+    const map = Object.fromEntries(parts.map(p=>[p.type,p.value]));
+    const mm = map.month, dd = map.day, yy = map.year;
+    const hh = map.hour, mi = map.minute, ss = map.second;
+    const dp = map.dayPeriod ? ` ${map.dayPeriod}` : "";
+    return `${mm}/${dd}/${yy}, ${hh}:${mi}:${ss}${dp}`;
+  }
+
+  function fmtTimeCommaDate(ts){
+    const d = new Date(ts);
+    const time = new Intl.DateTimeFormat(undefined, {
+      hour:"2-digit", minute:"2-digit", second:"2-digit"
+    }).format(d);
+    const date = new Intl.DateTimeFormat(undefined, {
+      month:"2-digit", day:"2-digit", year:"numeric"
+    }).format(d);
+    return `${time}, ${date}`;
+  }
+
+  function startOfDay(ts){
+    const d = new Date(ts);
+    d.setHours(0,0,0,0);
+    return d.getTime();
+  }
+
+  function clampEndOfDay(ts){
+    const d = new Date(ts);
+    d.setHours(23,59,59,999);
+    return d.getTime();
+  }
+
+  function parseDateField(v){
+    if(!v) return null;
+    const [y,m,d] = v.split("-").map(Number);
+    if(!y || !m || !d) return null;
+    return new Date(y, m-1, d, 0, 0, 0, 0).getTime();
+  }
+
+  function escapeHtml(s){
+    return String(s)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function dowShortFromTs(ts){
+    return new Intl.DateTimeFormat(undefined, { weekday:"short" }).format(new Date(ts));
+  }
+  function mmddFromTs(ts){
+    return new Intl.DateTimeFormat(undefined, { month:"2-digit", day:"2-digit" }).format(new Date(ts));
+  }
+
+  function focusTopOfPanel(screen){
+    window.scrollTo({top:0, left:0, behavior:"auto"});
+    if(screen === "add"){
+      if(editTs == null){
+        setTimeout(() => { try{ $("anum").focus({preventScroll:true}); }catch{} }, 0);
+      }else{
+        setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 0);
+      }
+    }
+  }
+
+  function show(screen){
+    for(const s of screens){
+      $(s).classList.toggle("hidden", s !== screen);
+    }
+    if(screen === "log"){ renderLog(); }
+    if(screen === "charts"){
+      initWeekDefaultIfNeeded();
+      applyWeekToBase(true);
+      renderCharts();
+    }
+    if(screen === "add"){
+      tickTime();
+      adjustTimeFont();
+      updateMeaningUI();
+    }
+    focusTopOfPanel(screen);
+  }
+
+  /* =========================
+     Angel number parsing + pattern detection
+     ========================= */
+
+  function normalizeNumberInput(raw){
+    const s = String(raw ?? "").trim();
+    // Keep digits only; allow user to type spaces or separators
+    const digits = s.replace(/[^\d]/g, "");
+    return digits;
+  }
+
+  function isAllSame(s){
+    if(!s || s.length < 2) return false;
+    return s.split("").every(ch => ch === s[0]);
+  }
+
+  function isPalindrome(s){
+    if(!s || s.length < 3) return false;
+    const rev = s.split("").reverse().join("");
+    return rev === s;
+  }
+
+  function isRepeatedHalf(s){
+    if(!s || s.length < 4) return false;
+    if(s.length % 2 !== 0) return false;
+    const half = s.slice(0, s.length/2);
+    return half + half === s;
+  }
+
+  function isAscendingSeq(s){
+    if(!s || s.length < 3) return false;
+    for(let i=1;i<s.length;i++){
+      const a = s.charCodeAt(i-1) - 48;
+      const b = s.charCodeAt(i) - 48;
+      if(b !== a + 1) return false;
+    }
+    return true;
+  }
+
+  function isDescendingSeq(s){
+    if(!s || s.length < 3) return false;
+    for(let i=1;i<s.length;i++){
+      const a = s.charCodeAt(i-1) - 48;
+      const b = s.charCodeAt(i) - 48;
+      if(b !== a - 1) return false;
+    }
+    return true;
+  }
+
+  function detectPattern(s){
+    if(!s) return "—";
+    if(isAllSame(s)) return `Repeating ${s[0]}s`;
+    if(isAscendingSeq(s)) return "Sequential (up)";
+    if(isDescendingSeq(s)) return "Sequential (down)";
+    if(isRepeatedHalf(s)) return "Double pattern";
+    if(isPalindrome(s)) return "Mirror (palindrome)";
+    if(s.length === 3 && s[0] === s[2] && s[0] !== s[1]) return "Sandwich pattern";
+    return "Mixed pattern";
+  }
+
+  function digitSummary(s){
+    // Dominant digit for repeating patterns
+    if(isAllSame(s)) return DIGIT_MEANING[s[0]] || "";
+    // If mostly one digit, offer that
+    const counts = {};
+    for(const ch of s){ counts[ch] = (counts[ch]||0) + 1; }
+    let best = null, bestN = 0;
+    for(const [k,v] of Object.entries(counts)){
+      if(v > bestN){ bestN = v; best = k; }
+    }
+    if(best && bestN >= Math.max(2, Math.ceil(s.length * 0.6))){
+      return DIGIT_MEANING[best] || "";
+    }
+    // Otherwise use sum-of-digits as a reflective angle
+    const sum = s.split("").reduce((a,ch)=>a + (ch.charCodeAt(0)-48), 0);
+    const root = ((sum - 1) % 9) + 1; // 1-9
+    const rootLine = DIGIT_MEANING[String(root)] || "";
+    return rootLine ? `Digit-sum lens (${sum} → ${root}): ${rootLine}` : "";
+  }
+
+  function deriveMeaning(s, pattern){
+    if(!s) return {pattern:"—", meaning:"Enter a number to see its commonly shared meaning."};
+
+    // Direct lookup
+    if(ANGEL_MAP[s]){
+      return {pattern, meaning: ANGEL_MAP[s]};
+    }
+
+    // Common shorthand: 4 digits repeating like 4444, 7777
+    if(isAllSame(s) && s.length >= 2){
+      const d = s[0];
+      const base = DIGIT_MEANING[d] || "A repeating pattern—often treated as a heightened emphasis.";
+      return {pattern, meaning: `Emphasis pattern (${s}): ${base}`};
+    }
+
+    // Sequential meanings
+    if(pattern === "Sequential (up)"){
+      return {pattern, meaning: "Step-by-step progress. Keep it simple, keep moving, and let momentum build."};
+    }
+    if(pattern === "Sequential (down)"){
+      return {pattern, meaning: "Release and simplify. Let go of what’s extra and return to essentials."};
+    }
+
+    // Double pattern meanings (e.g., 1212, 3434)
+    if(pattern === "Double pattern"){
+      const half = s.slice(0, s.length/2);
+      const lens = digitSummary(half);
+      return {pattern, meaning: `Reinforced signal (repeated block ${half}): a theme repeating until you notice it.\n${lens}`.trim()};
+    }
+
+    // Mirror meanings
+    if(pattern === "Mirror (palindrome)"){
+      const lens = digitSummary(s);
+      return {pattern, meaning: `Reflection and alignment. Consider what’s being mirrored back—choices, habits, or timing.\n${lens}`.trim()};
+    }
+
+    // Fallback: digit lens
+    const lens = digitSummary(s);
+    const fallback =
+      "A general interpretation is heightened awareness: notice your thoughts, environment, and choices—then act deliberately.";
+    return {pattern, meaning: lens ? `${fallback}\n${lens}` : fallback};
+  }
+
+  /* =========================
+     Add/Edit flow
+     ========================= */
+
+  let timeTimer = null;
+  let editTs = null;
+  let returnScreen = "home";
+
+  function clearAddForm(){
+    $("anum").value = "";
+    $("notes").value = "";
+    updateMeaningUI();
+  }
+
+  function enterAddNew(from="home"){
+    editTs = null;
+    returnScreen = from;
+    $("editPill").classList.add("hidden");
+    $("btnDelete").classList.add("hidden");
+    clearAddForm();
+    show("add");
+  }
+
+  function enterAddEdit(ts){
+    const recs = loadRecords();
+    const r = recs.find(x => x.ts === ts);
+    if(!r){
+      enterAddNew("log");
+      return;
+    }
+    editTs = ts;
+    returnScreen = "log";
+
+    $("editPill").classList.remove("hidden");
+    $("btnDelete").classList.remove("hidden");
+
+    $("anum").value = r.number || "";
+    $("notes").value = (r.notes || "").toString();
+    updateMeaningUI(r.pattern || "", r.meaning || "");
+
+    show("add");
+  }
+
+  function tickTime(){
+    const line = $("timeLine");
+    const ts = (editTs != null) ? editTs : Date.now();
+    line.textContent = fmtTimeCommaDate(ts);
+    adjustTimeFont();
+    if(timeTimer) clearTimeout(timeTimer);
+    timeTimer = setTimeout(tickTime, 900);
+  }
+
+  function adjustTimeFont(){
+    const el = $("timeLine");
+    if(!el) return;
+    const parent = el.parentElement;
+    if(!parent) return;
+
+    el.style.fontSize = "";
+    const maxW = parent.clientWidth - 8;
+
+    let fs = parseFloat(getComputedStyle(el).fontSize) || 28;
+    let guard = 0;
+    while(el.scrollWidth > maxW && fs > 16 && guard < 30){
+      fs -= 1;
+      el.style.fontSize = fs + "px";
+      guard++;
+    }
+  }
+
+  function updateMeaningUI(forcedPattern="", forcedMeaning=""){
+    const raw = $("anum").value;
+    const n = normalizeNumberInput(raw);
+
+    const pattern = forcedPattern || detectPattern(n);
+    const out = forcedMeaning ? {pattern, meaning: forcedMeaning} : deriveMeaning(n, pattern);
+
+    $("numBig").textContent = n ? n : "—";
+    $("patternPill").textContent = `Pattern: ${out.pattern || pattern || "—"}`;
+    $("meaningText").textContent = out.meaning || "—";
+  }
+
+  $("anum").addEventListener("input", () => {
+    // Keep cursor behavior friendly: do not rewrite field, only compute meaning.
+    updateMeaningUI();
+  });
+
+  function validateAnyInput(number, notes){
+    return !!(String(number||"").trim() || String(notes||"").trim());
+  }
+
+  /* =========================
+     Log filtering + render
+     ========================= */
+
+  function recordMatches(rec, q){
+    if(!q) return true;
+    const s = q.toLowerCase().trim();
+    if(!s) return true;
+
+    const num = (rec.number || "").toLowerCase();
+    const pat = (rec.pattern || "").toLowerCase();
+    const meaning = (rec.meaning || "").toLowerCase();
+    const notes = (rec.notes || "").toLowerCase();
+    const dt = fmtDateTime(rec.ts).toLowerCase();
+
+    return num.includes(s) || pat.includes(s) || meaning.includes(s) || notes.includes(s) || dt.includes(s);
+  }
+
+  function filteredRecords({fromId,toId,searchId}){
+    const recs = loadRecords();
+
+    const q = (searchId ? $(searchId).value : "").trim();
+
+    const fromV = fromId ? $(fromId).value : "";
+    const toV   = toId ? $(toId).value : "";
+
+    const fromTs = parseDateField(fromV);
+    const toMid  = parseDateField(toV);
+    const toTs   = toMid != null ? clampEndOfDay(toMid) : null;
+
+    return recs.filter(r => {
+      if(fromTs != null && r.ts < fromTs) return false;
+      if(toTs != null && r.ts > toTs) return false;
+      return recordMatches(r, q);
+    });
+  }
+
+  function renderLog(){
+    const list = $("logList");
+    const recs = filteredRecords({fromId:"fromDate", toId:"toDate", searchId:"search"});
+
+    list.innerHTML = "";
+    if(recs.length === 0){
+      const empty = document.createElement("div");
+      empty.className = "subtle";
+      empty.style.marginTop = "10px";
+      empty.textContent = "No matching records.";
+      list.appendChild(empty);
+      return;
+    }
+
+    for(const r of recs){
+      const e = document.createElement("div");
+      e.className = "entry";
+      e.tabIndex = 0;
+      e.setAttribute("role","button");
+      e.setAttribute("aria-label","Open entry for editing");
+      e.dataset.ts = String(r.ts);
+
+      const top = document.createElement("div");
+      top.className = "entryTop";
+
+      const t = document.createElement("div");
+      t.className = "entryTime";
+      t.textContent = fmtDateTime(r.ts);
+
+      top.appendChild(t);
+      e.appendChild(top);
+
+      const main = document.createElement("div");
+      main.className = "entryMain";
+
+      const n = document.createElement("div");
+      n.className = "entryNumber";
+      n.textContent = r.number ? r.number : "—";
+
+      const p = document.createElement("div");
+      p.className = "entryPattern";
+      p.textContent = r.pattern ? r.pattern : "—";
+
+      main.appendChild(n);
+      main.appendChild(p);
+      e.appendChild(main);
+
+      const meaning = (r.meaning && r.meaning.trim()) ? r.meaning.trim() : "None";
+      const notes = (r.notes && r.notes.trim()) ? r.notes.trim() : "None";
+
+      const l2 = document.createElement("div");
+      l2.className = "entryLine";
+      l2.innerHTML = `<b>Meaning:</b> ${escapeHtml(meaning)}`;
+      e.appendChild(l2);
+
+      const l3 = document.createElement("div");
+      l3.className = "entryLine";
+      l3.innerHTML = `<b>Notes:</b> ${escapeHtml(notes)}`;
+      e.appendChild(l3);
+
+      list.appendChild(e);
+    }
+
+    try { document.activeElement && document.activeElement.blur(); } catch {}
+  }
+
+  /* =========================
+     Edit prompt modal
+     ========================= */
+
+  let pendingEditTs = null;
+  let modalPrevFocus = null;
+  let modalOpenedAt = 0;
+  let enableEditTimer = null;
+
+  function openEditPrompt(ts){
+    pendingEditTs = ts;
+    modalPrevFocus = document.activeElement || null;
+    modalOpenedAt = Date.now();
+
+    const m = $("editModal");
+    const btnEdit = $("btnEditConfirm");
+
+    btnEdit.disabled = true;
+    if(enableEditTimer) clearTimeout(enableEditTimer);
+    enableEditTimer = setTimeout(() => { btnEdit.disabled = false; }, 450);
+
+    m.classList.remove("hidden");
+
+    setTimeout(() => {
+      try{ $("btnEditCancel").focus({preventScroll:true}); }catch{}
+    }, 0);
+  }
+
+  function closeEditPrompt(){
+    pendingEditTs = null;
+    $("editModal").classList.add("hidden");
+    try{ modalPrevFocus?.focus?.({preventScroll:true}); }catch{}
+  }
+
+  function confirmEditPrompt(){
+    if($("btnEditConfirm").disabled) return;
+    const ts = pendingEditTs;
+    closeEditPrompt();
+    if(ts != null) enterAddEdit(ts);
+  }
+
+  $("btnEditCancel").addEventListener("click", (e) => { e.preventDefault(); closeEditPrompt(); });
+  $("btnEditConfirm").addEventListener("click", (e) => { e.preventDefault(); confirmEditPrompt(); });
+
+  $("editModal").addEventListener("click", (e) => {
+    const justOpened = (Date.now() - modalOpenedAt) < 220;
+    if(justOpened) { e.preventDefault(); e.stopPropagation(); return; }
+    if(e.target === $("editModal")) closeEditPrompt();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    const open = !$("editModal").classList.contains("hidden");
+    if(!open) return;
+
+    if(e.key === "Escape"){
+      e.preventDefault();
+      closeEditPrompt();
+      return;
+    }
+    if(e.key === "Enter"){
+      const ae = document.activeElement;
+      if(ae && ae.id === "btnEditCancel"){
+        e.preventDefault();
+        closeEditPrompt();
+      }else{
+        e.preventDefault();
+        confirmEditPrompt();
+      }
+    }
+  });
+
+  /* =========================
+     Export modal (clipboard/share/save)
+     ========================= */
+
+  let exportPayload = null;
+  let exportPrevFocus = null;
+  let exportOpenedAt = 0;
+  let enableExportTimer = null;
+
+  function isShareAvailable(){
+    return !!(navigator.share && typeof navigator.share === "function");
+  }
+
+  function openExportModal(payload){
+    exportPayload = payload;
+    exportPrevFocus = document.activeElement || null;
+    exportOpenedAt = Date.now();
+
+    const btnClose = $("btnExportClose");
+    const btnShare = $("btnExportShare");
+    const btnSave  = $("btnExportSave");
+
+    btnClose.disabled = true;
+    btnShare.disabled = true;
+    btnSave.disabled  = true;
+
+    $("exportModal").classList.remove("hidden");
+
+    if(enableExportTimer) clearTimeout(enableExportTimer);
+    enableExportTimer = setTimeout(() => {
+      btnClose.disabled = false;
+      btnShare.disabled = !isShareAvailable();
+      btnSave.disabled  = false;
+    }, 450);
+
+    setTimeout(() => {
+      try{ btnClose.focus({preventScroll:true}); }catch{}
+    }, 0);
+  }
+
+  function closeExportModal(){
+    exportPayload = null;
+    $("exportModal").classList.add("hidden");
+    try{ exportPrevFocus?.focus?.({preventScroll:true}); }catch{}
+  }
+
+  $("btnExportClose").addEventListener("click", (e) => { e.preventDefault(); closeExportModal(); });
+
+  $("exportModal").addEventListener("click", (e) => {
+    const justOpened = (Date.now() - exportOpenedAt) < 220;
+    if(justOpened){ e.preventDefault(); e.stopPropagation(); return; }
+    if(e.target === $("exportModal")) closeExportModal();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    const open = !$("exportModal").classList.contains("hidden");
+    if(!open) return;
+    if(e.key === "Escape"){
+      e.preventDefault();
+      closeExportModal();
+    }
+  });
+
+  async function copyToClipboard(text){
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+    return false;
+  }
+
+  function downloadText(text, filename){
+    const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  async function saveTextWithPicker(text, suggestedName){
+    const canPick = typeof window.showSaveFilePicker === "function";
+    if(!canPick) return false;
+
+    const opts = {
+      suggestedName: suggestedName || "angel_numbers_report.txt",
+      types: [{ description: "Text", accept: {"text/plain": [".txt"]} }]
+    };
+
+    const handle = await window.showSaveFilePicker(opts);
+    const writable = await handle.createWritable();
+    await writable.write(new Blob([text], {type:"text/plain;charset=utf-8"}));
+    await writable.close();
+    return true;
+  }
+
+  $("btnExportShare").addEventListener("click", async (e) => {
+    e.preventDefault();
+    if(!exportPayload) return;
+    if($("btnExportShare").disabled) return;
+
+    if(!isShareAvailable()){
+      alert("Share is not available on this device/browser.");
+      return;
+    }
+    try{
+      await navigator.share({
+        title: "Angel Numbers Tracker Export",
+        text: exportPayload.text
+      });
+    }catch{}
+  });
+
+  $("btnExportSave").addEventListener("click", async (e) => {
+    e.preventDefault();
+    if(!exportPayload) return;
+    if($("btnExportSave").disabled) return;
+
+    try{
+      const ok = await saveTextWithPicker(exportPayload.text, exportPayload.filename);
+      if(ok){
+        alert("Saved.");
+        return;
+      }
+    }catch{}
+
+    downloadText(exportPayload.text, exportPayload.filename || "angel_numbers_report.txt");
+  });
+
+  /* =========================
+     Log tap handling (delegated)
+     ========================= */
+
+  const logTap = { activeEl:null, activeTs:null, pointerId:null, tracking:false };
+
+  function findEntryEl(target){
+    if(!target) return null;
+    const el = target.closest ? target.closest(".entry") : null;
+    if(!el) return null;
+    if(el.closest && el.closest("#logList") !== $("logList")) return null;
+    return el;
+  }
+
+  function rectInside(el, clientX, clientY){
+    const SLOP_PX = 14;
+    const rect = el.getBoundingClientRect();
+    return (
+      clientX >= rect.left - SLOP_PX && clientX <= rect.right + SLOP_PX &&
+      clientY >= rect.top  - SLOP_PX && clientY <= rect.bottom + SLOP_PX
+    );
+  }
+
+  function clearLogPress(){
+    if(logTap.activeEl) logTap.activeEl.classList.remove("pressed");
+    logTap.activeEl = null;
+    logTap.activeTs = null;
+    logTap.pointerId = null;
+    logTap.tracking = false;
+  }
+
+  $("logList").addEventListener("pointerdown", (ev) => {
+    if($("log").classList.contains("hidden")) return;
+    if(ev.button != null && ev.button !== 0) return;
+
+    const entry = findEntryEl(ev.target);
+    if(!entry) return;
+
+    const ts = Number(entry.dataset.ts);
+    if(!Number.isFinite(ts)) return;
+
+    clearLogPress();
+    logTap.activeEl = entry;
+    logTap.activeTs = ts;
+    logTap.pointerId = ev.pointerId;
+    logTap.tracking = true;
+
+    entry.classList.add("pressed");
+
+    try{ entry.setPointerCapture(ev.pointerId); }catch{}
+
+    ev.preventDefault();
+    ev.stopPropagation();
+  });
+
+  $("logList").addEventListener("pointermove", (ev) => {
+    if(!logTap.tracking) return;
+    if(logTap.pointerId != null && ev.pointerId !== logTap.pointerId) return;
+    if(!logTap.activeEl) return;
+
+    if(!rectInside(logTap.activeEl, ev.clientX, ev.clientY)){
+      clearLogPress();
+    }
+  });
+
+  $("logList").addEventListener("pointercancel", () => { clearLogPress(); });
+
+  $("logList").addEventListener("pointerup", (ev) => {
+    if(!logTap.tracking) return;
+    if(logTap.pointerId != null && ev.pointerId !== logTap.pointerId) return;
+
+    const entry = logTap.activeEl;
+    const ts = logTap.activeTs;
+
+    const inside = entry ? rectInside(entry, ev.clientX, ev.clientY) : false;
+    clearLogPress();
+
+    if(inside && ts != null){
+      setTimeout(() => openEditPrompt(ts), 0);
+    }
+
+    ev.preventDefault();
+    ev.stopPropagation();
+  });
+
+  $("logList").addEventListener("keydown", (ev) => {
+    const entry = findEntryEl(ev.target);
+    if(!entry) return;
+    if(ev.key === "Enter" || ev.key === " "){
+      const ts = Number(entry.dataset.ts);
+      if(!Number.isFinite(ts)) return;
+      ev.preventDefault();
+      openEditPrompt(ts);
+    }
+  });
+
+  /* =========================
+     Export with report header
+     ========================= */
+
+  function buildReportHeader({title, rangeLabel, notes}){
+    const now = fmtDateTime(Date.now());
+    const lines = [
+      "Angel Numbers Tracker — Export Report",
+      `App Version: ${APP_VERSION}`,
+      `Report: ${title}`,
+      `Generated: ${now}`,
+      rangeLabel ? `Range: ${rangeLabel}` : "",
+      "",
+      "How this data was captured:",
+      "- Sightings are entered manually into Angel Numbers Tracker on this device.",
+      "- Data is stored locally on the phone (no cloud sync, no account).",
+      "- Each record may include the number, pattern type, a cultural/numerology meaning, and optional notes.",
+      "",
+      notes ? notes : "",
+      "",
+      "------------------------------",
+      ""
+    ].filter(Boolean);
+    return lines.join("\n");
+  }
+
+  function exportReport(recs, headerInfo, filenameBase){
+    const header = buildReportHeader(headerInfo);
+
+    const lines = recs.map(r => {
+      const dt = fmtDateTime(r.ts);
+      const num = `Number: ${r.number || "—"}`;
+      const pat = `Pattern: ${r.pattern || "—"}`;
+      const meaning = (r.meaning && r.meaning.trim()) ? r.meaning.trim() : "None";
+      const notes = (r.notes && r.notes.trim()) ? r.notes.trim() : "None";
+      return `${dt}\n${num}\n${pat}\nMeaning: ${meaning}\nNotes: ${notes}\n`;
+    });
+
+    const out = header + lines.join("\n");
+    const ts = new Date();
+    const y = ts.getFullYear();
+    const m = String(ts.getMonth()+1).padStart(2,"0");
+    const d = String(ts.getDate()).padStart(2,"0");
+    const filename = `${filenameBase || "angel_numbers_report"}_${y}-${m}-${d}.txt`;
+
+    (async () => {
+      try{ await copyToClipboard(out); }catch{}
+      openExportModal({ text: out, filename });
+    })();
+  }
+
+  /* =========================
+     Charts (weekly, frequency over time)
+     - Time-true view (pinch/pan) preserved.
+     - Y axis = count of sightings.
+     ========================= */
+
+  const chartView = {
+    baseMin: 0,
+    baseMax: 0,
+    viewMin: 0,
+    viewMax: 0,
+    minSpan: 48*60*60*1000,
+    maxSpan: 7*DAY_MS,
+    pinch: null,
+    pan: null
+  };
+
+  function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+
+  function clampViewToBase(){
+    const baseMin = chartView.baseMin, baseMax = chartView.baseMax;
+    let vMin = chartView.viewMin, vMax = chartView.viewMax;
+
+    let span = vMax - vMin;
+    span = Math.max(chartView.minSpan, Math.min(span, chartView.maxSpan));
+
+    const mid = (vMin + vMax) / 2;
+    vMin = mid - span/2;
+    vMax = mid + span/2;
+
+    if(vMin < baseMin){ vMin = baseMin; vMax = baseMin + span; }
+    if(vMax > baseMax){ vMax = baseMax; vMin = baseMax - span; }
+
+    chartView.viewMin = vMin;
+    chartView.viewMax = vMax;
+  }
+
+  function xFromTs(ts, tMin, tMax, pad, W){
+    const span = W - pad.l - pad.r;
+    const denom = (tMax - tMin) || 1;
+    const u = (ts - tMin) / denom;
+    return pad.l + span * u;
+  }
+
+  function yTo(v, yMin, yMax, pad, H){
+    const span = H - pad.t - pad.b;
+    const t = (v - yMin) / (yMax - yMin || 1);
+    return pad.t + span * (1 - t);
+  }
+
+  function getISOWeekInputValueFromDate(d){
+    const date = new Date(d.getTime());
+    date.setHours(0,0,0,0);
+    date.setDate(date.getDate() + 3 - ((date.getDay() + 6) % 7));
+    const weekYear = date.getFullYear();
+
+    const week1 = new Date(weekYear, 0, 4);
+    week1.setHours(0,0,0,0);
+    const week1Thursday = new Date(week1.getTime());
+    week1Thursday.setDate(week1Thursday.getDate() + 3 - ((week1Thursday.getDay() + 6) % 7));
+
+    const diffDays = Math.round((date - week1Thursday) / DAY_MS);
+    const weekNo = 1 + Math.floor(diffDays / 7);
+
+    return `${weekYear}-W${String(weekNo).padStart(2,"0")}`;
+  }
+
+  function weekInputToMondayStart(value){
+    const m = /^(\d{4})-W(\d{2})$/.exec(String(value || ""));
+    if(!m) return null;
+    const year = Number(m[1]);
+    const week = Number(m[2]);
+    if(!year || !week) return null;
+
+    const jan4 = new Date(year, 0, 4);
+    jan4.setHours(0,0,0,0);
+
+    const jan4Dow = (jan4.getDay() + 6) % 7;
+    const week1Mon = new Date(jan4.getTime() - jan4Dow*DAY_MS);
+
+    const targetMon = new Date(week1Mon.getTime() + (week-1)*7*DAY_MS);
+    targetMon.setHours(0,0,0,0);
+    return targetMon;
+  }
+
+  function initWeekDefaultIfNeeded(){
+    if(!$("chartWeek").value){
+      $("chartWeek").value = getISOWeekInputValueFromDate(new Date());
+    }
+  }
+
+  function applyWeekToBase(resetView){
+    const mon = weekInputToMondayStart($("chartWeek").value);
+    if(!mon){
+      $("chartWeek").value = getISOWeekInputValueFromDate(new Date());
+      return applyWeekToBase(resetView);
+    }
+    const baseMin = mon.getTime();
+    const baseMax = baseMin + 7*DAY_MS - 1;
+
+    chartView.baseMin = baseMin;
+    chartView.baseMax = baseMax;
+
+    if(resetView || !chartView.viewMin || !chartView.viewMax){
+      chartView.viewMin = baseMin;
+      chartView.viewMax = baseMax;
+    }else{
+      clampViewToBase();
+    }
+  }
+
+  function recordsInView(){
+    const recs = loadRecords().slice().reverse();
+    const a = chartView.viewMin;
+    const b = chartView.viewMax;
+    return recs.filter(r => r.ts >= a && r.ts <= b);
+  }
+
+  function buildDailyCounts(recs, baseMin){
+    const counts = new Array(7).fill(0);
+    for(const r of recs){
+      const dayStart = startOfDay(r.ts);
+      const idx = Math.floor((dayStart - baseMin) / DAY_MS);
+      if(idx >= 0 && idx < 7) counts[idx] += 1;
+    }
+    return counts;
+  }
+
+  function drawCountsLine(ctx, counts, tMin, tMax, yMin, yMax, pad, W, H){
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "rgba(138,107,255,.92)";
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+
+    // plot at center of each day bucket
+    const baseMin = startOfDay(chartView.baseMin);
+    const pts = [];
+    for(let i=0;i<7;i++){
+      const dayCenter = baseMin + i*DAY_MS + DAY_MS/2;
+      if(dayCenter < tMin || dayCenter > tMax) continue;
+      pts.push({ts: dayCenter, v: counts[i]});
+    }
+
+    ctx.beginPath();
+    let started = false;
+    for(const p of pts){
+      const x = xFromTs(p.ts, tMin, tMax, pad, W);
+      const y = yTo(p.v, yMin, yMax, pad, H);
+      if(!started){ ctx.moveTo(x,y); started = true; }
+      else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+
+    // points
+    ctx.fillStyle = "rgba(235,245,255,.92)";
+    for(const p of pts){
+      const x = xFromTs(p.ts, tMin, tMax, pad, W);
+      const y = yTo(p.v, yMin, yMax, pad, H);
+      ctx.beginPath();
+      ctx.arc(x, y, 5.5, 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+
+  function renderCharts(){
+    applyWeekToBase(false);
+
+    const canvas = $("chart");
+    const ctx = canvas.getContext("2d");
+
+    const recs = recordsInView();
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    const W = canvas.width, H = canvas.height;
+    const pad = {l:62, r:18, t:18, b:92};
+    const plotX0 = pad.l;
+    const plotX1 = W - pad.r;
+    const plotY0 = pad.t;
+    const plotY1 = H - pad.b;
+
+    // frame
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgba(235,245,255,.12)";
+    ctx.fillStyle = "rgba(255,255,255,.02)";
+    ctx.beginPath();
+    ctx.roundRect ? ctx.roundRect(0,0,W,H,22) : (ctx.rect(0,0,W,H));
+    ctx.fill();
+    ctx.stroke();
+
+    const tMin = chartView.viewMin;
+    const tMax = chartView.viewMax;
+
+    // day bands (within current view)
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(plotX0, plotY0, plotX1-plotX0, plotY1-plotY0);
+    ctx.clip();
+
+    const weekStart = startOfDay(chartView.baseMin);
+    for(let i=0;i<7;i++){
+      const bandStart = weekStart + i*DAY_MS;
+      const bandEnd = bandStart + DAY_MS;
+
+      const a = Math.max(bandStart, tMin);
+      const b = Math.min(bandEnd,   tMax);
+      if(b <= a) continue;
+
+      let x0 = xFromTs(a, tMin, tMax, pad, W);
+      let x1 = xFromTs(b, tMin, tMax, pad, W);
+      x0 = Math.max(x0, plotX0);
+      x1 = Math.min(x1, plotX1);
+      if(x1 <= x0) continue;
+
+      ctx.fillStyle = (i % 2 === 0)
+        ? "rgba(255,255,255,.14)"
+        : "rgba(47,120,255,.22)";
+      ctx.fillRect(x0, plotY0, (x1 - x0), (plotY1 - plotY0));
+    }
+    ctx.restore();
+
+    // compute daily counts for the selected base week (but display within view)
+    const allWeek = loadRecords().filter(r => r.ts >= chartView.baseMin && r.ts <= chartView.baseMax);
+    const counts = buildDailyCounts(allWeek, startOfDay(chartView.baseMin));
+    const maxCount = Math.max(1, ...counts);
+
+    // y range
+    let yMin = 0;
+    let yMax = Math.max(3, maxCount + 1);
+
+    // grid + y labels
+    ctx.font = "16px system-ui,Segoe UI,Roboto";
+    ctx.fillStyle = "rgba(235,245,255,.60)";
+    ctx.strokeStyle = "rgba(235,245,255,.10)";
+    ctx.lineWidth = 1;
+
+    const ticks = 4;
+    for(let i=0;i<=ticks;i++){
+      const y = pad.t + (H - pad.t - pad.b) * (i/ticks);
+      ctx.beginPath();
+      ctx.moveTo(pad.l, y);
+      ctx.lineTo(W - pad.r, y);
+      ctx.stroke();
+
+      const val = Math.round(yMax - (yMax-yMin)*(i/ticks));
+      ctx.fillText(String(val), 16, y+6);
+    }
+
+    // x labels (days)
+    ctx.fillStyle = "rgba(235,245,255,.90)";
+    ctx.font = "20px system-ui,Segoe UI,Roboto";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "alphabetic";
+
+    const yDow = H - 44;
+    const yDate = H - 22;
+    const weekStartLabel = startOfDay(chartView.baseMin);
+
+    for(let i=0;i<7;i++){
+      const dayStart = weekStartLabel + i*DAY_MS;
+      const dayCenter = dayStart + (DAY_MS/2);
+      if(dayCenter < tMin || dayCenter > tMax) continue;
+
+      const x = xFromTs(dayCenter, tMin, tMax, pad, W);
+      const dow = dowShortFromTs(dayStart);
+      const md = mmddFromTs(dayStart);
+
+      ctx.fillText(dow, x, yDow);
+
+      ctx.fillStyle = "rgba(235,245,255,.70)";
+      ctx.font = "16px system-ui,Segoe UI,Roboto";
+      ctx.fillText(md, x, yDate);
+
+      ctx.fillStyle = "rgba(235,245,255,.90)";
+      ctx.font = "20px system-ui,Segoe UI,Roboto";
+    }
+    ctx.textAlign = "start";
+
+    // line + points
+    drawCountsLine(ctx, counts, tMin, tMax, yMin, yMax, pad, W, H);
+
+    // legend
+    const lx = pad.l + 10;
+    const ly = pad.t + 30;
+
+    ctx.font = "22px system-ui,Segoe UI,Roboto";
+    ctx.fillStyle = "rgba(138,107,255,.92)";
+    ctx.fillRect(lx, ly-14, 26, 8);
+    ctx.fillStyle = "rgba(235,245,255,.88)";
+    ctx.fillText("S i g h t i n g s", lx+38, ly-6);
+
+    // empty message (if truly none in base week)
+    const total = counts.reduce((a,b)=>a+b,0);
+    if(total === 0){
+      ctx.fillStyle = "rgba(235,245,255,.46)";
+      ctx.font = "18px system-ui,Segoe UI,Roboto";
+      ctx.fillText("No sightings in this week.", pad.l + 12, pad.t + 64);
+    }
+  }
+
+  function dist2(t1, t2){
+    const dx = t2.clientX - t1.clientX;
+    const dy = t2.clientY - t1.clientY;
+    return Math.hypot(dx, dy);
+  }
+  function pinchCenterX(t1, t2){ return (t1.clientX + t2.clientX) / 2; }
+
+  function attachChartGestures(){
+    const canvas = $("chart");
+
+    function plotBounds(){
+      const rect = canvas.getBoundingClientRect();
+      const padL = 62;
+      const padR = 18;
+      const plotW = Math.max(1, rect.width - (padL + padR));
+      return {rect, padL, padR, plotW};
+    }
+
+    function screenXToTs(screenX){
+      const {rect, padL, plotW} = plotBounds();
+      const xIn = clamp(screenX - rect.left - padL, 0, plotW);
+      const u = xIn / plotW;
+      return chartView.viewMin + u * (chartView.viewMax - chartView.viewMin);
+    }
+
+    canvas.addEventListener("touchstart", (e) => {
+      if($("charts").classList.contains("hidden")) return;
+
+      if(e.touches.length === 2){
+        e.preventDefault();
+        applyWeekToBase(false);
+
+        const d = dist2(e.touches[0], e.touches[1]);
+        const cx = pinchCenterX(e.touches[0], e.touches[1]);
+        const centerTs = screenXToTs(cx);
+
+        chartView.pinch = {
+          dist: d,
+          viewMin: chartView.viewMin,
+          viewMax: chartView.viewMax,
+          centerTs
+        };
+        chartView.pan = null;
+        return;
+      }
+
+      if(e.touches.length === 1){
+        e.preventDefault();
+        applyWeekToBase(false);
+
+        chartView.pan = {
+          x0: e.touches[0].clientX,
+          viewMin: chartView.viewMin,
+          viewMax: chartView.viewMax
+        };
+        chartView.pinch = null;
+      }
+    }, {passive:false});
+
+    canvas.addEventListener("touchmove", (e) => {
+      if($("charts").classList.contains("hidden")) return;
+
+      if(chartView.pinch && e.touches.length === 2){
+        e.preventDefault();
+
+        const p = chartView.pinch;
+        const newDist = dist2(e.touches[0], e.touches[1]);
+        const scale = newDist / (p.dist || 1);
+
+        const startSpan = p.viewMax - p.viewMin;
+        let newSpan = startSpan / (scale || 1);
+        newSpan = clamp(newSpan, chartView.minSpan, chartView.maxSpan);
+
+        let vMin = p.centerTs - newSpan/2;
+        let vMax = p.centerTs + newSpan/2;
+
+        chartView.viewMin = vMin;
+        chartView.viewMax = vMax;
+        clampViewToBase();
+        renderCharts();
+        return;
+      }
+
+      if(chartView.pan && e.touches.length === 1){
+        e.preventDefault();
+
+        const {plotW} = plotBounds();
+        const dx = e.touches[0].clientX - chartView.pan.x0;
+
+        const span = (chartView.pan.viewMax - chartView.pan.viewMin) || 1;
+        const dt = -dx * (span / Math.max(1, plotW));
+
+        chartView.viewMin = chartView.pan.viewMin + dt;
+        chartView.viewMax = chartView.pan.viewMax + dt;
+        clampViewToBase();
+        renderCharts();
+      }
+    }, {passive:false});
+
+    function endGestures(){
+      chartView.pinch = null;
+      chartView.pan = null;
+    }
+    canvas.addEventListener("touchend", endGestures, {passive:true});
+    canvas.addEventListener("touchcancel", endGestures, {passive:true});
+  }
+
+  /* =========================
+     Clear Data + Install + Exit (Exit preserved)
+     ========================= */
+
+  function clearAllData(){
+    const ok = confirm(
+      "Clear ALL saved angel-number data?\n\n" +
+      "This deletes everything stored on this phone for Angel Numbers Tracker.\n" +
+      "This cannot be undone."
+    );
+    if(!ok) return;
+
+    try{ localStorage.removeItem(STORAGE_KEY); }catch{}
+
+    $("fromDate").value = "";
+    $("toDate").value = "";
+    $("search").value = "";
+
+    alert("All data cleared.");
+    show("home");
+  }
+
+  let deferredPrompt = null;
+
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    refreshInstallButton();
+  });
+
+  window.addEventListener("appinstalled", () => {
+    deferredPrompt = null;
+    refreshInstallButton();
+  });
+
+  function isStandalone(){
+    return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  }
+
+  function refreshInstallButton(){
+    $("btnInstall").textContent = isStandalone() ? "Uninstall" : "Install";
+  }
+
+  $("btnInstall").addEventListener("click", async () => {
+    if(isStandalone()){
+      alert(
+        "Uninstall:\n\n" +
+        "Android: press-and-hold the app icon → Uninstall.\n" +
+        "Uninstall typically does NOT delete your saved data, but device/browser behavior can vary.\n\n" +
+        "To delete data on purpose: use Clear Data (home screen)."
+      );
+      return;
+    }
+    if(deferredPrompt){
+      deferredPrompt.prompt();
+      try { await deferredPrompt.userChoice; } catch {}
+      deferredPrompt = null;
+      refreshInstallButton();
+      return;
+    }
+    alert("Install is available when your browser offers it (menu → Install app).");
+  });
+
+  $("btnClearAll").addEventListener("click", clearAllData);
+
+  /* KEEP THIS EXIT FUNCTION EXACTLY (known-good) */
+  $("btnExitHome").addEventListener("click", () => {
+    window.close();
+    setTimeout(() => {
+      alert("If it didn’t close: use your phone’s Back/Home.");
+    }, 200);
+  });
+
+  /* =========================
+     Buttons + Save/Delete
+     ========================= */
+
+  $("btnGoAdd").addEventListener("click", () => enterAddNew("home"));
+  $("btnGoLog").addEventListener("click", () => { editTs=null; show("log"); });
+  $("btnGoCharts").addEventListener("click", () => { editTs=null; show("charts"); });
+
+  $("btnBackFromAdd").addEventListener("click", () => { editTs=null; show(returnScreen || "home"); });
+  $("btnBackFromLog").addEventListener("click", () => show("home"));
+  $("btnBackFromCharts").addEventListener("click", () => show("home"));
+
+  $("btnAddFromLog").addEventListener("click", () => enterAddNew("log"));
+
+  $("btnSave").addEventListener("click", () => {
+    const number = normalizeNumberInput($("anum").value);
+    const notes = ($("notes").value || "").toString();
+
+    if(!validateAnyInput(number, notes)){
+      alert("Enter a number or a note.");
+      return;
+    }
+
+    // If they only typed notes, still allow save, but number shown as blank.
+    const pattern = number ? detectPattern(number) : "—";
+    const meaning = number ? deriveMeaning(number, pattern).meaning : "—";
+
+    const recs = loadRecords();
+
+    if(editTs == null){
+      recs.unshift({ ts: Date.now(), number, pattern, meaning, notes });
+    }else{
+      const idx = recs.findIndex(r => r.ts === editTs);
+      if(idx >= 0){
+        recs[idx] = { ts: editTs, number, pattern, meaning, notes };
+      }else{
+        recs.unshift({ ts: Date.now(), number, pattern, meaning, notes });
+      }
+    }
+
+    recs.sort((a,b)=> b.ts - a.ts);
+    saveRecords(recs);
+
+    $("fromDate").value = "";
+    $("toDate").value = "";
+    $("search").value = "";
+
+    editTs = null;
+    show("log");
+  });
+
+  $("btnDelete").addEventListener("click", () => {
+    if(editTs == null) return;
+    const ok = confirm("Delete this entry? This cannot be undone.");
+    if(!ok) return;
+
+    const recs = loadRecords().filter(r => r.ts !== editTs);
+    saveRecords(recs);
+
+    editTs = null;
+    show("log");
+  });
+
+  /* =========================
+     SEARCH BEHAVIOR
+     - Search runs only on button click or Enter key.
+     ========================= */
+
+  function runSearch(){
+    renderLog();
+  }
+
+  $("btnRunSearch").addEventListener("click", (e) => {
+    e.preventDefault();
+    runSearch();
+  });
+
+  $("search").addEventListener("keydown", (e) => {
+    if(e.key === "Enter"){
+      e.preventDefault();
+      runSearch();
+      try{ e.target.blur(); }catch{}
+    }
+  });
+
+  ["fromDate","toDate"].forEach(id => {
+    $(id).addEventListener("input", () => renderLog());
+    $(id).addEventListener("change", () => renderLog());
+  });
+
+  $("chartWeek").addEventListener("change", () => {
+    applyWeekToBase(true);
+    renderCharts();
+  });
+
+  /* =========================
+     Export handlers
+     ========================= */
+
+  $("btnExportLog").addEventListener("click", () => {
+    const recs = filteredRecords({fromId:"fromDate", toId:"toDate", searchId:"search"});
+    const rangeLabel = (() => {
+      const f = $("fromDate").value;
+      const t = $("toDate").value;
+      if(f && t) return `${f} to ${t}`;
+      if(f) return `From ${f}`;
+      if(t) return `Up to ${t}`;
+      return "All log entries (filtered by search/date if set)";
+    })();
+
+    exportReport(
+      recs,
+      {
+        title: "Log Export",
+        rangeLabel,
+        notes: "This report reflects the Log screen filters (Search + optional From/To dates)."
+      },
+      "angel_numbers_log_report"
+    );
+  });
+
+  $("btnExportCharts").addEventListener("click", () => {
+    const all = loadRecords().slice().reverse();
+    const a = chartView.viewMin, b = chartView.viewMax;
+    const recs = all.filter(r => r.ts >= a && r.ts <= b);
+
+    const weekVal = $("chartWeek").value || "";
+    const baseRange = `${fmtDateTime(chartView.baseMin)} to ${fmtDateTime(chartView.baseMax)}`;
+    const viewRange = `${fmtDateTime(chartView.viewMin)} to ${fmtDateTime(chartView.viewMax)}`;
+
+    exportReport(
+      recs,
+      {
+        title: "Charts Export (Weekly View)",
+        rangeLabel: `Selected week: ${weekVal} | Base week: ${baseRange} | Exported view: ${viewRange}`,
+        notes:
+          "What you are looking at:\n" +
+          "- The Charts screen shows exactly 7 days at a time (weekly view).\n" +
+          "- You can pinch to zoom in, then drag left/right to pan within that 7-day week.\n" +
+          "- The chart displays sighting frequency (count).\n" +
+          "- This export contains entries that fall within the CURRENT visible chart view (after zoom/pan)."
+      },
+      "angel_numbers_charts_report"
+    );
+  });
+
+  /* =========================
+     Manifest + SW
+     ========================= */
+
+  function injectManifest(){
+    const svg =
+`<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8a6bff"/>
+      <stop offset="55%" stop-color="#2f78ff"/>
+      <stop offset="100%" stop-color="#0b1324"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="110" fill="url(#g)"/>
+  <ellipse cx="256" cy="150" rx="110" ry="44" fill="none" stroke="rgba(235,245,255,.92)" stroke-width="26"/>
+  <path d="M256 240
+           C196 210, 140 220, 112 270
+           C154 294, 190 330, 214 380
+           C226 330, 240 285, 256 240Z"
+        fill="none" stroke="rgba(235,245,255,.92)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M256 240
+           C316 210, 372 220, 400 270
+           C358 294, 322 330, 298 380
+           C286 330, 272 285, 256 240Z"
+        fill="none" stroke="rgba(235,245,255,.92)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+    const encoded = encodeURIComponent(svg).replace(/'/g,"%27").replace(/"/g,"%22");
+    const icon = `data:image/svg+xml;charset=utf-8,${encoded}`;
+
+    const manifest = {
+      name: "Angel Numbers Tracker",
+      short_name: "AngelNums",
+      start_url: ".",
+      display: "standalone",
+      background_color: "#0b1324",
+      theme_color: "#0b1324",
+      icons: [{ src: icon, sizes: "512x512", type: "image/svg+xml", purpose: "any" }]
+    };
+
+    const blob = new Blob([JSON.stringify(manifest)], {type:"application/manifest+json"});
+    const url = URL.createObjectURL(blob);
+    $("manifestLink").setAttribute("href", url);
+  }
+
+  async function registerSW(){
+    if(!("serviceWorker" in navigator)) return;
+    const swCode =
+`self.addEventListener('install', (e)=>{ self.skipWaiting(); });
+self.addEventListener('activate', (e)=>{ e.waitUntil(self.clients.claim()); });
+self.addEventListener('fetch', (e)=>{ });`;
+    const blob = new Blob([swCode], {type:"text/javascript"});
+    const swUrl = URL.createObjectURL(blob);
+    try { await navigator.serviceWorker.register(swUrl); } catch {}
+  }
+
+  /* =========================
+     Init
+     ========================= */
+
+  injectManifest();
+  registerSW();
+  refreshInstallButton();
+  attachChartGestures();
+
+  $("fromDate").value = "";
+  $("toDate").value = "";
+
+  show("home");
+
+  window.addEventListener("resize", () => {
+    if(!$("add").classList.contains("hidden")) adjustTimeFont();
+    if(!$("charts").classList.contains("hidden")) renderCharts();
+  });
+
+})();
+</script>
+</body>
+  </html>
