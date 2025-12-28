@@ -1,19 +1,23 @@
-<!-- Angel Numbers Tracker v1.0B13 -->
+<!-- Angel Numbers Tracker v1.1A2 -->
 <!--
 Version Detail Notes
-App Version (internal): v1.0B13
+App Version (internal): v1.1A2
 Home display label (visual only): v1.333  (DO NOT CHANGE unless user instructs)
-Base: v1.0B12
+Base: v1.1A1 (canonical)
 
 Changes (requested):
-1) Remove Log panel entirely.
-2) Add new "Identify" panel (theme-matched) to quickly identify an Angel Number’s characteristics/meaning.
-   - Home: replace Log button with Identify button (placed just below ADD).
-   - Swipe rotation: Identify replaces Log in the left/right swipe cycle.
-3) Identify panel:
-   - Input field for a number.
-   - Results area beneath showing pattern, meaning, and supporting lenses.
-4) Keep EOF comment block.
+1) Home panel is now the Identify experience (Identify is the “home”).
+   - Large title: “Identify Angel Number”
+   - Number input + Identify action at top
+   - Characteristics/results shown beneath (pattern, meaning, supporting lenses)
+2) Home actions (buttons):
+   - Add to Calendar (opens Add/Edit panel prefilled with identified number; Save adds entry)
+   - View Calendar
+   - Export
+   - Exit
+3) Version number sits at the bottom of the screen (small).
+   - Quadruple-tap anywhere on the screen (panel area) pops up the Version modal.
+4) Keep logo across top; keep BOF/EOF comment blocks.
 -->
 <!doctype html>
 <html lang="en">
@@ -213,27 +217,6 @@ Changes (requested):
       padding-right: 10px;
     }
 
-    .homeMain{
-      display:flex;
-      flex-direction:column;
-      gap:14px;
-      margin-top:8px;
-    }
-    .homeMain > .btn:not(.small){
-      font-size:26px;
-      font-weight:750;
-      letter-spacing:.3px;
-    }
-
-    .homeFooterRow{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-top:8px;
-      flex-wrap:nowrap;
-    }
-
     .footerTiny{
       margin-top:10px;
       display:flex;
@@ -336,85 +319,54 @@ Changes (requested):
       margin-top: 0;
     }
 
-    /* ===== IDENTIFY: theme-matched quick meaning lookup ===== */
-    #identify{
+    /* ===== HOME (Identify as home) ===== */
+    #home{
       overflow:hidden;
       display:flex;
       flex-direction:column;
       gap: 0;
       padding-bottom: 0;
     }
-    #identifyScroll{
+    #homeScroll{
       flex: 1;
       overflow:auto;
       -webkit-overflow-scrolling: touch;
-      padding-bottom: calc(12px + env(safe-area-inset-bottom));
+      padding-bottom: calc(10px + env(safe-area-inset-bottom));
       touch-action: pan-y;
       overscroll-behavior: contain;
     }
-    .identifyTopRow{
+    .homeTitle{
+      margin: 6px 2px 10px;
+      font-weight: 950;
+      letter-spacing: .2px;
+      color: rgba(235,245,255,.92);
+      font-size: clamp(26px, 7.6vw, 44px);
+      line-height: 1.02;
+    }
+    .homeTopRow{
       display:flex;
       gap:10px;
       align-items:center;
       margin-bottom: 10px;
     }
-    .identifyTopRow .btn.small{
+    .homeTopRow .btn.small{
       height:54px;
       border-radius: 18px;
       font-size:16px;
       padding: 0 16px;
-    }
-    .resultCard{
-      border:1px solid var(--themeLine);
-      background: rgba(255,255,255,.03);
-      border-radius: 22px;
-      padding: 12px 12px 10px;
-      margin-top: 10px;
-    }
-    .resultHdr{
-      display:flex;
-      align-items:baseline;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom: 6px;
-    }
-    .resultNum{
-      font-size:28px;
-      font-weight:950;
-      letter-spacing:.3px;
       white-space:nowrap;
     }
-    .resultBody{
-      color: rgba(235,245,255,.80);
-      font-size:16px;
-      line-height:1.30;
-      white-space: pre-wrap;
-    }
-    .resultMeta{
-      margin-top:10px;
-      padding-top:10px;
-      border-top: 1px solid rgba(255,255,255,.08);
-      color: rgba(235,245,255,.68);
-      font-size:14px;
-      line-height:1.28;
-      white-space: pre-wrap;
-    }
-    .metaLine{ margin-top:6px; }
-    .metaLine b{ color: rgba(235,245,255,.78); }
 
-    .editPill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: 1px solid var(--themeLineSoft);
-      background: rgba(255,255,255,.03);
-      color: rgba(235,245,255,.70);
-      font-weight:700;
-      letter-spacing:.2px;
-      margin: 0 4px 10px;
-      width: fit-content;
+    .homeActions{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      margin-top: 12px;
+    }
+    .homeActions .btn{
+      font-size:22px;
+      font-weight:780;
+      letter-spacing:.25px;
     }
 
     /* Modal (unified) */
@@ -788,19 +740,40 @@ Changes (requested):
 
     <div class="screenArea" id="screenArea">
 
+      <!-- HOME (Identify) -->
       <div id="home" class="card accentFrame">
         <div id="ptrHome" class="ptr">Pull down to refresh</div>
 
-        <div class="homeMain">
-          <button id="btnGoAdd" class="btn primary">ADD Angel Number</button>
-          <button id="btnGoIdentify" class="btn">Identify</button>
-          <button id="btnGoCalendar" class="btn">Calendar</button>
+        <div id="homeScroll">
+          <div class="homeTitle">Identify Angel Number</div>
 
-          <div class="homeFooterRow">
-            <button id="btnInstall" class="btn small">Install</button>
-            <button id="btnClearAll" class="btn small">Clear Data</button>
-            <div class="grow"></div>
-            <button id="btnExitHome" class="btn small danger">Exit</button>
+          <div class="homeTopRow">
+            <input id="homeIdNum" class="field" inputmode="numeric" placeholder="Enter a number (e.g., 1111, 1212, 1234)" />
+            <button id="btnHomeIdentify" class="btn small">Identify</button>
+          </div>
+
+          <div class="meaningCard" id="homeMeaningCard">
+            <div class="meaningTop">
+              <div id="homeNumBig" class="numBig">—</div>
+              <div id="homePatternPill" class="patternPill">Pattern: —</div>
+            </div>
+            <div id="homeMeaningText" class="meaningText">
+              Enter a number above, then tap Identify (or just type) to see its commonly shared meaning.
+            </div>
+
+            <div id="homeMeta" class="meaningText" style="margin-top:10px; color: rgba(235,245,255,.78); font-size:14px; line-height:1.28;"></div>
+
+            <div class="disclaimer">
+              Cultural note: these meanings come from numerology/“angel number” traditions and vary by source.
+              Treat as reflective prompts, not facts or predictions.
+            </div>
+          </div>
+
+          <div class="homeActions">
+            <button id="btnAddToCalendar" class="btn primary">Add to Calendar</button>
+            <button id="btnViewCalendar" class="btn">View Calendar</button>
+            <button id="btnHomeExport" class="btn">Export</button>
+            <button id="btnExitHome" class="btn danger">Exit</button>
           </div>
 
           <div class="subtle">Inspired by a real Angel.</div>
@@ -816,7 +789,15 @@ Changes (requested):
       <!-- ADD/EDIT -->
       <div id="add" class="card accentFrame hidden">
         <div id="addScroll">
-          <div id="editPill" class="editPill hidden">Editing entry</div>
+          <div id="editPill" class="editPill hidden" style="
+            display:inline-flex; align-items:center; gap:8px;
+            padding: 8px 12px; border-radius: 999px;
+            border: 1px solid var(--themeLineSoft);
+            background: rgba(255,255,255,.03);
+            color: rgba(235,245,255,.70);
+            font-weight:700; letter-spacing:.2px;
+            margin: 0 4px 10px; width: fit-content;
+          ">Editing entry</div>
 
           <div id="timeLine" class="timeLine">--:--:-- --, --/--/----</div>
 
@@ -850,44 +831,6 @@ Changes (requested):
             <button id="btnSave" class="btn primary grow">Save</button>
             <button id="btnDelete" class="btn grow hidden">Delete</button>
             <button id="btnBackFromAdd" class="btn grow">Back</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- IDENTIFY -->
-      <div id="identify" class="card accentFrame hidden">
-        <div id="identifyScroll">
-          <div class="row center">
-            <button id="btnIdentifyClear" class="btn small">Clear</button>
-            <div class="grow"></div>
-            <button id="btnBackFromIdentify" class="btn small">Back</button>
-          </div>
-
-          <div class="label">Identify Angel Number Meaning</div>
-
-          <div class="identifyTopRow">
-            <input id="idNum" class="field" inputmode="numeric" placeholder="Enter a number (e.g., 1111, 1212, 1234)" />
-            <button id="btnIdentify" class="btn small">Identify</button>
-          </div>
-
-          <div id="idResultCard" class="resultCard">
-            <div class="resultHdr">
-              <div id="idResultNum" class="resultNum">—</div>
-              <div id="idPatternPill" class="patternPill">Pattern: —</div>
-            </div>
-
-            <div id="idMeaning" class="resultBody">
-              Enter a number above, then tap Identify (or just type) to see its commonly shared meaning.
-            </div>
-
-            <div id="idMeta" class="resultMeta">
-              <div class="metaLine"><b>How to use:</b> Treat the meaning as a reflective prompt—what it “means” depends on context and personal interpretation.</div>
-            </div>
-
-            <div class="disclaimer" style="margin-top:10px;">
-              Cultural note: these meanings come from numerology/“angel number” traditions and vary by source.
-              Treat as reflective prompts, not facts or predictions.
-            </div>
           </div>
         </div>
       </div>
@@ -1050,7 +993,7 @@ Save creates a .txt file on your device.
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.0B13";
+  const APP_VERSION = "v1.1A2";
   const HOME_VERSION_LABEL = "v1.333";
   const STORAGE_KEY = "angel_numbers_records_v1";
   const DAY_MS = 24*60*60*1000;
@@ -1277,7 +1220,7 @@ Save creates a .txt file on your device.
   }
 
   function buildIdentifyMeta(n, pattern){
-    if(!n) return "—";
+    if(!n) return "";
     const lens = digitSummary(n);
     const mapped = ANGEL_MAP[n] ? "Direct map: recognized as a common “named” angel number." : "Direct map: not in the preset list; derived from pattern + digit lenses.";
     const digits = n.split("").join(" • ");
@@ -1310,7 +1253,7 @@ Save creates a .txt file on your device.
 
   /* ===== Screens ===== */
 
-  const swipeCycle = ["home","identify","calendar"];
+  const swipeCycle = ["home","calendar"];
   let currentScreen = "home";
   let returnScreen = "home";
   let animating = false;
@@ -1324,17 +1267,17 @@ Save creates a .txt file on your device.
       }else{
         setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 0);
       }
-    }else if(screen === "identify"){
-      try{ $("identifyScroll").scrollTop = 0; }catch{}
-      setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 0);
     }else{
       try{ document.activeElement?.blur(); }catch{}
+      if(screen === "home"){
+        try{ $("homeScroll").scrollTop = 0; }catch{}
+      }
     }
   }
 
   function showInstant(screen){
     unlockTouches();
-    for(const s of ["home","add","identify","calendar"]){
+    for(const s of ["home","add","calendar"]){
       $(s).classList.toggle("hidden", s !== screen);
       $(s).style.transform = "";
       $(s).style.transition = "";
@@ -1343,7 +1286,6 @@ Save creates a .txt file on your device.
 
     if(screen === "calendar") { initMonthDefaultIfNeeded(); renderCalendar(); }
     if(screen === "add") { tickTime(); adjustTimeFont(); updateMeaningUI(); }
-    if(screen === "identify") { updateIdentifyUI(true); }
 
     focusTopOfPanel(screen);
   }
@@ -1500,7 +1442,6 @@ Save creates a .txt file on your device.
         currentScreen = to;
 
         if(currentScreen === "calendar") { initMonthDefaultIfNeeded(); renderCalendar(); }
-        if(currentScreen === "identify") { updateIdentifyUI(true); }
 
         focusTopOfPanel(currentScreen);
         animating = false;
@@ -1560,6 +1501,19 @@ Save creates a .txt file on your device.
 
     clearAddForm();
     showInstant("add");
+  }
+
+  function enterAddNewPrefilled(number, notesText, from="home"){
+    enterAddNew(from);
+    const n = normalizeNumberInput(number);
+    if(n){
+      $("anum").value = n;
+      updateMeaningUI();
+    }
+    if(notesText){
+      $("notes").value = String(notesText);
+    }
+    setTimeout(()=>{ try{ $("notes").focus({preventScroll:true}); }catch{} }, 0);
   }
 
   function enterAddEdit(ts){
@@ -1628,59 +1582,39 @@ Save creates a .txt file on your device.
     return !!(String(number||"").trim() || String(notes||"").trim());
   }
 
-  /* ===== Identify panel ===== */
+  /* ===== HOME Identify (primary) ===== */
 
-  function updateIdentifyUI(forceNoScroll=false){
-    const raw = $("idNum").value;
+  function renderHomeIdentify(){
+    const raw = $("homeIdNum").value;
     const n = normalizeNumberInput(raw);
 
     if(!n){
-      $("idResultNum").textContent = "—";
-      $("idPatternPill").textContent = "Pattern: —";
-      $("idMeaning").textContent =
+      $("homeNumBig").textContent = "—";
+      $("homePatternPill").textContent = "Pattern: —";
+      $("homeMeaningText").textContent =
         "Enter a number above, then tap Identify (or just type) to see its commonly shared meaning.";
-      $("idMeta").textContent = "";
-      const meta = document.createElement("div");
-      meta.className = "metaLine";
-      meta.innerHTML = "<b>How to use:</b> Treat the meaning as a reflective prompt—what it “means” depends on context and personal interpretation.";
-      $("idMeta").appendChild(meta);
-      if(forceNoScroll){
-        try{ $("identifyScroll").scrollTop = 0; }catch{}
-      }
+      $("homeMeta").textContent =
+        "How to use: Treat the meaning as a reflective prompt—what it “means” depends on context and personal interpretation.";
       return;
     }
 
     const pattern = detectPattern(n);
     const out = deriveMeaning(n, pattern);
 
-    $("idResultNum").textContent = n;
-    $("idPatternPill").textContent = `Pattern: ${out.pattern || pattern || "—"}`;
-    $("idMeaning").textContent = out.meaning || "—";
-
-    const metaText = buildIdentifyMeta(n, out.pattern || pattern || "—");
-    $("idMeta").textContent = metaText;
-
-    if(forceNoScroll){
-      // keep the input visible; do not jump the user down.
-      // no scroll change needed.
-    }
+    $("homeNumBig").textContent = n;
+    $("homePatternPill").textContent = `Pattern: ${out.pattern || pattern || "—"}`;
+    $("homeMeaningText").textContent = out.meaning || "—";
+    $("homeMeta").textContent = buildIdentifyMeta(n, out.pattern || pattern || "—");
   }
 
-  $("idNum").addEventListener("input", () => updateIdentifyUI(false));
-  $("btnIdentify").addEventListener("click", (e)=>{ e.preventDefault(); updateIdentifyUI(false); try{ $("idNum").blur(); }catch{} });
-  $("idNum").addEventListener("keydown", (e)=>{
+  $("homeIdNum").addEventListener("input", renderHomeIdentify);
+  $("btnHomeIdentify").addEventListener("click", (e)=>{ e.preventDefault(); renderHomeIdentify(); try{ $("homeIdNum").blur(); }catch{} });
+  $("homeIdNum").addEventListener("keydown", (e)=>{
     if(e.key === "Enter"){
       e.preventDefault();
-      updateIdentifyUI(false);
+      renderHomeIdentify();
       try{ e.target.blur(); }catch{}
     }
-  });
-
-  $("btnIdentifyClear").addEventListener("click", (e)=>{
-    e.preventDefault();
-    $("idNum").value = "";
-    updateIdentifyUI(true);
-    try{ $("idNum").focus({preventScroll:true}); }catch{}
   });
 
   /* ===== Confirm modal ===== */
@@ -2179,66 +2113,18 @@ Save creates a .txt file on your device.
     }
   }
 
-  /* ===== Clear / Install / Exit ===== */
+  /* ===== Install / Exit ===== */
 
   let deferredPrompt = null;
 
   window.addEventListener("beforeinstallprompt", (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    refreshInstallButton();
   });
 
-  window.addEventListener("appinstalled", () => {
-    deferredPrompt = null;
-    refreshInstallButton();
-  });
-
-  function isStandalone(){
-    return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  function isShareAvailable(){
+    return !!(navigator.share && typeof navigator.share === "function");
   }
-
-  function refreshInstallButton(){
-    $("btnInstall").textContent = isStandalone() ? "Uninstall" : "Install";
-  }
-
-  $("btnInstall").addEventListener("click", async () => {
-    if(isStandalone()){
-      alert(
-        "Uninstall:\n\n" +
-        "Android: press-and-hold the app icon → Uninstall.\n" +
-        "Uninstall typically does NOT delete your saved data, but device/browser behavior can vary.\n\n" +
-        "To delete data on purpose: use Clear Data (home screen)."
-      );
-      return;
-    }
-    if(deferredPrompt){
-      deferredPrompt.prompt();
-      try { await deferredPrompt.userChoice; } catch {}
-      deferredPrompt = null;
-      refreshInstallButton();
-      return;
-    }
-    alert("Install is available when your browser offers it (menu → Install app).");
-  });
-
-  function clearAllData(){
-    openConfirm({
-      title: "Clear all data?",
-      message:
-        "This deletes everything stored on this phone for Angel Numbers Tracker.\n\n" +
-        "This cannot be undone.",
-      okText: "Clear",
-      cancelText: "Cancel",
-      danger: true,
-      onOk: () => {
-        try{ localStorage.removeItem(STORAGE_KEY); }catch{}
-        alert("All data cleared.");
-        showInstant("home");
-      }
-    });
-  }
-  $("btnClearAll").addEventListener("click", clearAllData);
 
   /* KEEP THIS EXIT FUNCTION EXACTLY (known-good) */
   $("btnExitHome").addEventListener("click", () => {
@@ -2250,12 +2136,37 @@ Save creates a .txt file on your device.
 
   /* ===== Buttons + Save/Delete + Exports ===== */
 
-  $("btnGoAdd").addEventListener("click", () => enterAddNew("home"));
-  $("btnGoIdentify").addEventListener("click", () => showInstant("identify"));
-  $("btnGoCalendar").addEventListener("click", () => showInstant("calendar"));
+  $("btnAddToCalendar").addEventListener("click", () => {
+    const n = normalizeNumberInput($("homeIdNum").value);
+    if(!n){
+      alert("Enter a number first.");
+      return;
+    }
+    const pattern = detectPattern(n);
+    const meaning = deriveMeaning(n, pattern).meaning;
+    // Prefill Add screen number; notes left empty (user can add context).
+    enterAddNewPrefilled(n, "", "home");
+    // Also prime the add meaning UI to match the home meaning.
+    updateMeaningUI(pattern, meaning);
+  });
+
+  $("btnViewCalendar").addEventListener("click", () => showInstant("calendar"));
+
+  $("btnHomeExport").addEventListener("click", () => {
+    // Home export = All entries (respects local storage)
+    const recs = loadRecords().slice().reverse(); // chronological
+    exportReport(
+      recs,
+      {
+        title: "All Entries Export",
+        rangeLabel: "All saved entries",
+        notes: "This export contains all saved entries currently stored on this device."
+      },
+      "angel_numbers_all"
+    );
+  });
 
   $("btnBackFromAdd").addEventListener("click", () => { editTs=null; editOriginalTs=null; showInstant(returnScreen || "home"); });
-  $("btnBackFromIdentify").addEventListener("click", () => showInstant("home"));
   $("btnBackFromCalendar").addEventListener("click", () => showInstant("home"));
 
   $("dtEdit").addEventListener("change", () => {
@@ -2468,15 +2379,16 @@ self.addEventListener('fetch', (e)=>{ });`;
   $("btnVerClose").addEventListener("click", (e)=>{ e.preventDefault(); closeVersionModal(); });
   $("versionModal").addEventListener("click", (e)=>{ if(e.target === $("versionModal")) closeVersionModal(); });
 
-  let logoTapCount = 0;
-  let logoTapTimer = null;
-  document.querySelector(".logoTitle").addEventListener("click", () => {
+  // Quadruple-tap anywhere on the screen area -> version modal
+  let quadTapCount = 0;
+  let quadTapTimer = null;
+  $("screenArea").addEventListener("click", () => {
     if(animating) return;
-    logoTapCount++;
-    if(logoTapTimer) clearTimeout(logoTapTimer);
-    logoTapTimer = setTimeout(()=>{ logoTapCount=0; }, 650);
-    if(logoTapCount >= 4){
-      logoTapCount = 0;
+    quadTapCount++;
+    if(quadTapTimer) clearTimeout(quadTapTimer);
+    quadTapTimer = setTimeout(()=>{ quadTapCount=0; }, 650);
+    if(quadTapCount >= 4){
+      quadTapCount = 0;
       openVersionModal();
     }
   });
@@ -2487,10 +2399,13 @@ self.addEventListener('fetch', (e)=>{ });`;
   $("btnHeartClose").addEventListener("click", (e)=>{ e.preventDefault(); closeHeart(); });
   $("heartModal").addEventListener("click", (e)=>{ if(e.target === $("heartModal")) closeHeart(); });
 
+  // Keep the existing hidden heart easter egg on version label (5 taps)
   let vTapCount = 0;
   let vTapTimer = null;
   $("homeVerLabel").textContent = HOME_VERSION_LABEL;
-  $("homeVerLabel").addEventListener("click", () => {
+  $("homeVerLabel").addEventListener("click", (e) => {
+    // prevent the click from also counting toward the screenArea quadruple tap burst
+    e.stopPropagation();
     if(animating) return;
     vTapCount++;
     if(vTapTimer) clearTimeout(vTapTimer);
@@ -2605,13 +2520,14 @@ self.addEventListener('fetch', (e)=>{ });`;
 
   injectManifest();
   registerSW();
-  refreshInstallButton();
 
   seedTestDataIfEmpty();
 
   attachSwipes();
   attachHomePTR();
 
+  // Home is Identify now
+  renderHomeIdentify();
   showInstant("home");
 
   window.addEventListener("resize", () => {
@@ -2627,13 +2543,14 @@ self.addEventListener('fetch', (e)=>{ });`;
 <!--
 EOF Version Detail Notes (required)
 App: Angel Numbers Tracker
-Actual Version: v1.0B13
+Actual Version: v1.1A2
 Home Label (visual only): v1.333 (do not change unless instructed)
-Base: v1.0B12
+Base: v1.1A1 (canonical)
 Changes:
-- Removed Log panel entirely.
-- Added Identify panel (theme-matched) for quick Angel Number meaning lookup (pattern + meaning + supporting lenses).
-- Home screen: replaced Log button with Identify button (positioned directly under ADD).
-- Swipe cycle: Identify replaces Log in left/right rotation (home ↔ identify ↔ calendar).
-- No changes to storage, exports, calendar day browsing, card modal, or Add/Edit behavior.
+- Home panel is now Identify (primary).
+- Home layout: large “Identify Angel Number” title + number input + results/characteristics.
+- Home actions: Add to Calendar (prefilled Add screen), View Calendar, Export (all entries), Exit.
+- Version label remains at bottom; quadruple-tap anywhere on the screen area opens Version modal.
+- Swipe cycle updated: home ↔ calendar.
+- Add/Edit, calendar day browsing, card modal, exports remain consistent.
 -->
