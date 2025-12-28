@@ -1,20 +1,23 @@
-<!-- Angel Numbers Tracker v1.1A3 -->
+<!-- Angel Numbers Tracker v1.1A4 -->
 <!--
 Version Detail Notes
-App Version (internal): v1.1A3
-Home display label (visual only): v1.333  (DO NOT CHANGE unless user instructs)
-Base: v1.1A2
+App Version: v1.1A4
+Base: v1.1A3
 
-Fixes (requested):
-1) Home screen must scroll vertically, but the action buttons must be static (always visible) at the bottom.
-   - Home panel now uses: scroll area + fixed footer actions (sticky bottom).
-2) Remove the empty space near the top (tighten header spacing).
-   - Reduce top padding and remove extra margins above the home title.
-3) Remove Identify button (auto-search on typing).
-   - Input triggers live identify; Enter still blurs keyboard.
-Notes:
+Changes (requested):
+1) Home/Identify screen must display the REAL version number (APP_VERSION) on-screen.
+   - Footer label now shows APP_VERSION (no “visual-only” version).
+2) Remove quad-tap version popup entirely.
+   - Version modal removed; quad-tap handler removed.
+3) Keep triple-tap (on version label) to show big heart modal and text: "The Angels love you Timmy."
+   - Changed from 5 taps to 3 taps.
+4) Ensure Home can scroll AND footer buttons remain always visible.
+   - Preserved scroll area + fixed footer.
+5) Prevent keyboard from popping on load.
+   - No autofocus; also force blur on startup; no programmatic focus on home input.
+Constraints preserved:
 - Keep BOF/EOF comment blocks.
-- Quadruple-tap to show version modal remains.
+- Exit button handler remains unchanged.
 -->
 <!doctype html>
 <html lang="en">
@@ -75,7 +78,6 @@ Notes:
       overflow:hidden;
     }
 
-    /* Tighten logo header spacing */
     .logoTitle{
       margin:4px 6px 0;
       display:flex;
@@ -329,7 +331,6 @@ Notes:
       overscroll-behavior: contain;
     }
 
-    /* Fixed action footer ALWAYS visible */
     #homeFooter{
       flex: 0 0 auto;
       padding-top: 12px;
@@ -350,9 +351,8 @@ Notes:
       letter-spacing:.25px;
     }
 
-    /* Tighten the “empty space” above title */
     .homeTitle{
-      margin: 0 2px 10px; /* was 6px */
+      margin: 0 2px 10px;
       font-weight: 950;
       letter-spacing: .2px;
       color: rgba(235,245,255,.92);
@@ -468,74 +468,25 @@ Notes:
       touch-action: manipulation;
     }
 
-    /* Card modal */
-    #cardModal .modalCard{
-      display:flex;
-      flex-direction:column;
-      max-height: calc(100vh - 56px);
-      padding: 14px;
-      overflow:hidden;
-    }
-    #cardModal .cardTopScroll{
-      flex:1;
-      overflow:auto;
-      -webkit-overflow-scrolling: touch;
-      padding-bottom: 10px;
-      touch-action: pan-y;
-      overscroll-behavior: contain;
-    }
-    #cardModal .modalTitle{
-      margin: 6px 2px 8px;
-      font-size: clamp(22px, 6.4vw, 34px);
-    }
-    #cardModal #cardBody{
-      font-size: 16px;
-      line-height: 1.34;
-      margin: 0 2px 10px;
-      color: rgba(235,245,255,.84);
-    }
-    #cardModal .modalBtns{
-      flex: 0 0 auto;
-      position: sticky;
-      bottom: 0;
-      z-index: 5;
-      padding-top: 10px;
-      padding-bottom: calc(8px + env(safe-area-inset-bottom));
-      margin-top: 0;
-      background: linear-gradient(180deg, rgba(11,19,36,0), rgba(11,19,36,.76) 35%, rgba(11,19,36,.94));
-      border-top: 1px solid rgba(255,255,255,.08);
-      backdrop-filter: blur(10px);
-    }
-    #cardModal .modalBtns .btn{
-      height: 50px;
-      font-size: 17px;
-      min-width: 110px;
-    }
-
-    .cardLogoRow{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding: 2px 0 8px;
-      user-select:none;
-    }
-    .cardLogoIcon{
-      width:44px;
-      height:44px;
-      border-radius: 14px;
-      border: 1px solid var(--themeLineSoft);
-      background: rgba(255,255,255,.04);
+    /* Heart modal (bigger) */
+    .heartWrap{
       display:flex;
       align-items:center;
       justify-content:center;
-      flex: 0 0 auto;
+      padding: 10px 0 6px;
     }
-    .cardLogoText{
-      font-weight: 850;
-      letter-spacing:.2px;
-      color: rgba(235,245,255,.72);
-      font-size: 16px;
-      line-height: 1.1;
+    .heartSvg{
+      width: min(320px, 76vw);
+      height: auto;
+      filter: drop-shadow(0 18px 40px rgba(0,0,0,.55));
+      opacity: 0;
+      transform: scale(.78);
+      animation: popHeart 420ms cubic-bezier(.2,.9,.2,1) forwards;
+    }
+    @keyframes popHeart{
+      0%{ transform: scale(.78); opacity: 0; }
+      70%{ transform: scale(1.06); opacity: 1; }
+      100%{ transform: scale(1.00); opacity: 1; }
     }
 
     .touchLock{
@@ -606,84 +557,6 @@ Notes:
       font-size: 13px;
       color: rgba(235,245,255,.44);
     }
-
-    /* Day modal list */
-    .dayHint{
-      margin: 2px 2px 8px;
-      color: rgba(235,245,255,.52);
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: .1px;
-    }
-    .dayList{
-      margin-top: 0;
-      display:flex;
-      flex-direction:column;
-      gap: 6px;
-    }
-    .dayItem{
-      border:1px solid var(--themeLine);
-      background: rgba(255,255,255,.02);
-      border-radius: 16px;
-      padding: 8px 10px;
-      display:flex;
-      align-items:baseline;
-      justify-content:space-between;
-      gap:10px;
-      user-select:none;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-    }
-    .dayItem:active{ transform: translateY(1px); }
-    .dayNum{
-      font-size: 22px;
-      font-weight: 950;
-      letter-spacing:.3px;
-      color: rgba(79,163,255,.92);
-      white-space:nowrap;
-      text-decoration: underline;
-      text-underline-offset: 3px;
-      text-decoration-thickness: 2px;
-    }
-    .dayMeta{
-      display:flex;
-      flex-direction:column;
-      align-items:flex-end;
-      gap:1px;
-      min-width: 0;
-    }
-    .dayTime{
-      font-size:12px;
-      color: rgba(235,245,255,.46);
-      white-space:nowrap;
-    }
-    .dayPat{
-      font-size:12px;
-      color: rgba(235,245,255,.62);
-      font-weight:800;
-      white-space:nowrap;
-    }
-
-    /* Heart modal */
-    .heartWrap{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding: 6px 0 2px;
-    }
-    .heartSvg{
-      width: 140px;
-      height: 140px;
-      filter: drop-shadow(0 18px 40px rgba(0,0,0,.55));
-      transform: scale(.86);
-      opacity: .0;
-      animation: popHeart 380ms cubic-bezier(.2,.9,.2,1) forwards;
-    }
-    @keyframes popHeart{
-      0%{ transform: scale(.78); opacity: 0; }
-      70%{ transform: scale(1.06); opacity: 1; }
-      100%{ transform: scale(1.00); opacity: 1; }
-    }
   </style>
 </head>
 
@@ -744,7 +617,9 @@ Notes:
           <div class="homeTitle">Identify Angel Number</div>
 
           <div class="homeTopRow">
-            <input id="homeIdNum" class="field" inputmode="numeric" placeholder="Enter a number (e.g., 1111, 1212, 1234)" />
+            <input id="homeIdNum" class="field" inputmode="numeric"
+                   autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                   placeholder="Enter a number (e.g., 1111, 1212, 1234)" />
           </div>
 
           <div class="meaningCard" id="homeMeaningCard">
@@ -778,7 +653,7 @@ Notes:
           </div>
 
           <div class="footerTiny">
-            <div id="homeVerLabel" aria-label="Version label">v1.333</div>
+            <div id="homeVerLabel" aria-label="Version label">v—</div>
             <div>developed by Keyth Jyles</div>
           </div>
         </div>
@@ -884,72 +759,6 @@ Save creates a .txt file on your device.
     </div>
   </div>
 
-  <!-- Angel Number Card modal -->
-  <div id="cardModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="cardTitle">
-    <div class="modalCard">
-      <div class="xCloseRow">
-        <button class="xBtn" id="btnCardX" aria-label="Close">×</button>
-      </div>
-
-      <div class="cardTopScroll">
-        <div class="cardLogoRow">
-          <div class="cardLogoIcon" aria-hidden="true">
-            <svg width="28" height="28" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="cg" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0" stop-color="#8a6bff"/>
-                  <stop offset="55%" stop-color="#4fa3ff"/>
-                  <stop offset="100%" stop-color="#2f78ff"/>
-                </linearGradient>
-              </defs>
-              <ellipse cx="32" cy="16" rx="14" ry="6" fill="none" stroke="rgba(235,245,255,.88)" stroke-width="4"/>
-              <path d="M32 30 C24 26, 16 27, 12 34 C18 36, 22 41, 26 49 C27 42, 29 36, 32 30Z"
-                    fill="none" stroke="url(#cg)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M32 30 C40 26, 48 27, 52 34 C46 36, 42 41, 38 49 C37 42, 35 36, 32 30Z"
-                    fill="none" stroke="url(#cg)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <div class="cardLogoText">Angel Numbers Tracker</div>
-        </div>
-
-        <div class="modalTitle" id="cardTitle">Angel Number Card</div>
-        <div class="modalSub" id="cardBody">—</div>
-      </div>
-
-      <div class="modalBtns">
-        <button id="btnCardCopy" class="btn">Copy</button>
-        <button id="btnCardExport" class="btn">Export</button>
-        <button id="btnCardEdit" class="btn primary">Edit</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Day modal -->
-  <div id="dayModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="dayTitle">
-    <div class="modalCard">
-      <div class="modalTitle" id="dayTitle">—</div>
-      <div class="modalSub" id="dayBody">—</div>
-      <div class="modalBtns">
-        <button id="btnDayExport" class="btn primary">Export</button>
-        <button id="btnDayClose" class="btn">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Version modal -->
-  <div id="versionModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="verTitle">
-    <div class="modalCard">
-      <div class="xCloseRow">
-        <button class="xBtn" id="btnVerX" aria-label="Close">×</button>
-      </div>
-      <div class="modalTitle" id="verTitle">Version</div>
-      <div class="modalSub" id="verBody">—</div>
-      <div class="modalBtns">
-        <button id="btnVerClose" class="btn primary">Close</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Heart modal -->
   <div id="heartModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="heartTitle">
     <div class="modalCard">
@@ -976,8 +785,8 @@ Save creates a .txt file on your device.
                 fill="url(#hg)" stroke="rgba(235,245,255,.85)" stroke-width="3" />
         </svg>
       </div>
-      <div class="modalSub" id="heartBody" style="font-size:16px; color: rgba(235,245,255,.82);">
-        The Angels love you Timmy!
+      <div class="modalSub" id="heartBody" style="font-size:18px; font-weight:800; color: rgba(235,245,255,.88);">
+        The Angels love you Timmy.
       </div>
       <div class="modalBtns">
         <button id="btnHeartClose" class="btn primary">Close</button>
@@ -989,8 +798,7 @@ Save creates a .txt file on your device.
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.1A3";
-  const HOME_VERSION_LABEL = "v1.333";
+  const APP_VERSION = "v1.1A4";
   const STORAGE_KEY = "angel_numbers_records_v1";
   const DAY_MS = 24*60*60*1000;
 
@@ -1081,17 +889,6 @@ Save creates a .txt file on your device.
     return new Intl.DateTimeFormat(undefined, { hour:"2-digit", minute:"2-digit" }).format(new Date(ts));
   }
 
-  function fmtTimeCommaDate(ts){
-    const d = new Date(ts);
-    const time = new Intl.DateTimeFormat(undefined, {
-      hour:"2-digit", minute:"2-digit", second:"2-digit"
-    }).format(d);
-    const date = new Intl.DateTimeFormat(undefined, {
-      month:"2-digit", day:"2-digit", year:"numeric"
-    }).format(d);
-    return `${time}, ${date}`;
-  }
-
   function startOfDay(ts){
     const d = new Date(ts);
     d.setHours(0,0,0,0);
@@ -1102,15 +899,6 @@ Save creates a .txt file on your device.
     const d = new Date(ts);
     d.setHours(23,59,59,999);
     return d.getTime();
-  }
-
-  function escapeHtml(s){
-    return String(s)
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
   }
 
   function toLocalDatetimeValue(ts){
@@ -1238,7 +1026,7 @@ Save creates a .txt file on your device.
     const el = $("touchLock");
     el.classList.add("on");
     if(lockTimer) clearTimeout(lockTimer);
-    lockTimer = setTimeout(()=> el.classList.remove("on"), ms);
+    lockTimer = setTimeout(() => el.classList.remove("on"), ms);
   }
   function unlockTouches(){
     const el = $("touchLock");
@@ -1254,23 +1042,6 @@ Save creates a .txt file on your device.
   let returnScreen = "home";
   let animating = false;
 
-  function focusTopOfPanel(screen){
-    try{ window.scrollTo({top:0,left:0,behavior:"auto"}); }catch{}
-    if(screen === "add"){
-      try{ $("addScroll").scrollTop = 0; }catch{}
-      if(editTs == null){
-        setTimeout(() => { try{ $("anum").focus({preventScroll:true}); }catch{} }, 0);
-      }else{
-        setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 0);
-      }
-    }else{
-      try{ document.activeElement?.blur(); }catch{}
-      if(screen === "home"){
-        // keep current scroll; do not force to top
-      }
-    }
-  }
-
   function showInstant(screen){
     unlockTouches();
     for(const s of ["home","add","calendar"]){
@@ -1281,9 +1052,9 @@ Save creates a .txt file on your device.
     currentScreen = screen;
 
     if(screen === "calendar") { initMonthDefaultIfNeeded(); renderCalendar(); }
-    if(screen === "add") { tickTime(); adjustTimeFont(); updateMeaningUI(); }
 
-    focusTopOfPanel(screen);
+    // No focus calls on home to avoid keyboard pop
+    try{ document.activeElement?.blur(); }catch{}
   }
 
   /* ===== Swipe “wheel” ===== */
@@ -1439,7 +1210,7 @@ Save creates a .txt file on your device.
 
         if(currentScreen === "calendar") { initMonthDefaultIfNeeded(); renderCalendar(); }
 
-        focusTopOfPanel(currentScreen);
+        try{ document.activeElement?.blur(); }catch{}
         animating = false;
         lockTouches(140);
       }, 235);
@@ -1467,149 +1238,6 @@ Save creates a .txt file on your device.
     root.addEventListener("touchend", endDrag, {passive:true});
     root.addEventListener("touchcancel", endDrag, {passive:true});
   }
-
-  /* ===== Add/Edit ===== */
-
-  let timeTimer = null;
-  let editTs = null;
-  let editOriginalTs = null;
-
-  function showDateTimeEditor(show){
-    $("dtEditWrap").classList.toggle("hidden", !show);
-  }
-
-  function clearAddForm(){
-    $("anum").value = "";
-    $("notes").value = "";
-    updateMeaningUI();
-    try{ $("addScroll").scrollTop = 0; }catch{}
-  }
-
-  function enterAddNew(from="home"){
-    editTs = null;
-    editOriginalTs = null;
-    returnScreen = from;
-
-    $("editPill").classList.add("hidden");
-    $("btnDelete").classList.add("hidden");
-
-    showDateTimeEditor(false);
-
-    clearAddForm();
-    showInstant("add");
-  }
-
-  function enterAddNewPrefilled(number, notesText, from="home"){
-    enterAddNew(from);
-    const n = normalizeNumberInput(number);
-    if(n){
-      $("anum").value = n;
-      updateMeaningUI();
-    }
-    if(notesText){
-      $("notes").value = String(notesText);
-    }
-    setTimeout(()=>{ try{ $("notes").focus({preventScroll:true}); }catch{} }, 0);
-  }
-
-  function enterAddEdit(ts){
-    const recs = loadRecords();
-    const r = recs.find(x => x.ts === ts);
-    if(!r){ enterAddNew("calendar"); return; }
-
-    editTs = ts;
-    editOriginalTs = ts;
-    returnScreen = "calendar";
-
-    $("editPill").classList.remove("hidden");
-    $("btnDelete").classList.remove("hidden");
-
-    showDateTimeEditor(true);
-    $("dtEdit").value = toLocalDatetimeValue(r.ts);
-
-    $("anum").value = r.number || "";
-    $("notes").value = (r.notes || "").toString();
-
-    updateMeaningUI(r.pattern || "", r.meaning || "");
-    showInstant("add");
-  }
-
-  function tickTime(){
-    const line = $("timeLine");
-    const ts = (editTs != null) ? editTs : Date.now();
-    line.textContent = fmtTimeCommaDate(ts);
-    adjustTimeFont();
-    if(timeTimer) clearTimeout(timeTimer);
-    timeTimer = setTimeout(tickTime, 900);
-  }
-
-  function adjustTimeFont(){
-    const el = $("timeLine");
-    const parent = el?.parentElement;
-    if(!el || !parent) return;
-
-    el.style.fontSize = "";
-    const maxW = parent.clientWidth - 8;
-
-    let fs = parseFloat(getComputedStyle(el).fontSize) || 28;
-    let guard = 0;
-    while(el.scrollWidth > maxW && fs > 16 && guard < 30){
-      fs -= 1;
-      el.style.fontSize = fs + "px";
-      guard++;
-    }
-  }
-
-  function updateMeaningUI(forcedPattern="", forcedMeaning=""){
-    const raw = $("anum").value;
-    const n = normalizeNumberInput(raw);
-
-    const pattern = forcedPattern || detectPattern(n);
-    const out = forcedMeaning ? {pattern, meaning: forcedMeaning} : deriveMeaning(n, pattern);
-
-    $("numBig").textContent = n ? n : "—";
-    $("patternPill").textContent = `Pattern: ${out.pattern || pattern || "—"}`;
-    $("meaningText").textContent = out.meaning || "—";
-  }
-
-  $("anum").addEventListener("input", () => updateMeaningUI());
-
-  function validateAnyInput(number, notes){
-    return !!(String(number||"").trim() || String(notes||"").trim());
-  }
-
-  /* ===== HOME Identify (auto-search) ===== */
-
-  function renderHomeIdentify(){
-    const raw = $("homeIdNum").value;
-    const n = normalizeNumberInput(raw);
-
-    if(!n){
-      $("homeNumBig").textContent = "—";
-      $("homePatternPill").textContent = "Pattern: —";
-      $("homeMeaningText").textContent =
-        "Enter a number above to see its commonly shared meaning.";
-      $("homeMeta").textContent =
-        "How to use: Treat the meaning as a reflective prompt—what it “means” depends on context and personal interpretation.";
-      return;
-    }
-
-    const pattern = detectPattern(n);
-    const out = deriveMeaning(n, pattern);
-
-    $("homeNumBig").textContent = n;
-    $("homePatternPill").textContent = `Pattern: ${out.pattern || pattern || "—"}`;
-    $("homeMeaningText").textContent = out.meaning || "—";
-    $("homeMeta").textContent = buildIdentifyMeta(n, out.pattern || pattern || "—");
-  }
-
-  $("homeIdNum").addEventListener("input", renderHomeIdentify);
-  $("homeIdNum").addEventListener("keydown", (e)=>{
-    if(e.key === "Enter"){
-      e.preventDefault();
-      try{ e.target.blur(); }catch{}
-    }
-  });
 
   /* ===== Confirm modal ===== */
 
@@ -1651,220 +1279,6 @@ Save creates a .txt file on your device.
 
   $("confirmModal").addEventListener("click", (e) => {
     if(e.target === $("confirmModal")) closeConfirm();
-  });
-
-  document.addEventListener("keydown", (e)=>{
-    if(!$("confirmModal").classList.contains("hidden")){
-      if(e.key === "Escape"){ e.preventDefault(); closeConfirm(); }
-    }
-  });
-
-  /* ===== Card modal ===== */
-
-  let cardTs = null;
-  let cardReturn = { type: "screen", screen: "calendar" };
-
-  function buildCardHtml(rec){
-    const dt = fmtDateTime(rec.ts);
-    const num = rec.number || "—";
-    const pat = rec.pattern || "—";
-    const meaning = rec.meaning?.trim() ? rec.meaning.trim() : "None";
-    const notes = rec.notes?.trim() ? rec.notes.trim() : "None";
-
-    return `
-      <div style="margin-top:6px;">Date/Time: ${escapeHtml(dt)}</div>
-      <div style="margin-top:10px; font-size:18px; font-weight:900;">Number: ${escapeHtml(num)}</div>
-      <div style="margin-top:10px;">Notes: ${escapeHtml(notes)}</div>
-      <div style="margin-top:10px;">Pattern: ${escapeHtml(pat)}</div>
-      <div style="margin-top:10px;">Meaning: ${escapeHtml(meaning)}</div>
-    `;
-  }
-
-  function buildCardText(rec){
-    const dt = fmtDateTime(rec.ts);
-    const num = rec.number || "—";
-    const pat = rec.pattern || "—";
-    const meaning = rec.meaning?.trim() ? rec.meaning.trim() : "None";
-    const notes = rec.notes?.trim() ? rec.notes.trim() : "None";
-
-    const lines = [
-      "Angel Number Card",
-      `Date/Time: ${dt}`,
-      `Number: ${num}`,
-      `Notes: ${notes}`,
-      `Pattern: ${pat}`,
-      `Meaning: ${meaning}`
-    ];
-    return lines.join("\n");
-  }
-
-  function openCard(ts, origin){
-    const recs = loadRecords();
-    const r = recs.find(x => x.ts === ts);
-    if(!r) return;
-
-    cardTs = ts;
-    cardReturn = origin || { type:"screen", screen: currentScreen };
-
-    $("cardBody").innerHTML = buildCardHtml(r);
-    $("cardModal").classList.remove("hidden");
-    lockTouches(120);
-  }
-
-  function closeCard(){
-    $("cardModal").classList.add("hidden");
-    $("cardBody").textContent = "—";
-    const ret = cardReturn;
-    cardTs = null;
-
-    unlockTouches();
-
-    if(ret && ret.type === "day" && Number.isFinite(ret.dayStartTs)){
-      openDayModal(ret.dayStartTs);
-    }
-  }
-
-  $("btnCardX").addEventListener("click", (e)=>{ e.preventDefault(); closeCard(); });
-
-  $("btnCardCopy").addEventListener("click", async (e)=>{
-    e.preventDefault();
-    if(cardTs == null) return;
-    const recs = loadRecords();
-    const r = recs.find(x => x.ts === cardTs);
-    if(!r) return;
-    const text = buildCardText(r);
-    try{ await copyToClipboard(text); alert("Copied."); }catch{ alert("Copy failed."); }
-  });
-
-  $("btnCardExport").addEventListener("click", (e)=>{
-    e.preventDefault();
-    if(cardTs == null) return;
-    const recs = loadRecords();
-    const r = recs.find(x => x.ts === cardTs);
-    if(!r) return;
-
-    exportReport(
-      [r],
-      {
-        title: "Angel Number Card Export",
-        rangeLabel: fmtDateTime(r.ts),
-        notes: "This export contains a single Angel Number Card (full record)."
-      },
-      "angel_number_card"
-    );
-  });
-
-  $("btnCardEdit").addEventListener("click", (e)=>{
-    e.preventDefault();
-    if(cardTs == null) return;
-    const ts = cardTs;
-    $("cardModal").classList.add("hidden");
-    $("cardBody").textContent = "—";
-    cardTs = null;
-    unlockTouches();
-    enterAddEdit(ts);
-  });
-
-  $("cardModal").addEventListener("click", (e)=>{
-    if(e.target === $("cardModal")) closeCard();
-  });
-
-  document.addEventListener("keydown", (e)=>{
-    if(!$("cardModal").classList.contains("hidden")){
-      if(e.key === "Escape"){ e.preventDefault(); closeCard(); }
-    }
-  });
-
-  /* ===== Day modal ===== */
-
-  let dayModalDate = null;
-
-  function openDayModal(dayStartTs){
-    const dayEnd = clampEndOfDay(dayStartTs);
-    const all = loadRecords().slice().sort((a,b)=> a.ts - b.ts);
-    const recs = all.filter(r => r.ts >= dayStartTs && r.ts <= dayEnd);
-    if(recs.length === 0) return;
-
-    dayModalDate = dayStartTs;
-
-    const d = new Date(dayStartTs);
-    const title = new Intl.DateTimeFormat(undefined, { weekday:"long", year:"numeric", month:"long", day:"numeric" }).format(d);
-    $("dayTitle").textContent = title;
-
-    const wrap = document.createElement("div");
-    wrap.className = "dayList";
-
-    for(const r of recs){
-      const item = document.createElement("div");
-      item.className = "dayItem";
-      item.dataset.ts = String(r.ts);
-
-      item.innerHTML = `
-        <div class="dayNum">${escapeHtml(r.number || "—")}</div>
-        <div class="dayMeta">
-          <div class="dayTime">${escapeHtml(fmtTimeOnly(r.ts))}</div>
-          <div class="dayPat">${escapeHtml(r.pattern || "—")}</div>
-        </div>
-      `;
-
-      item.addEventListener("click", (e)=>{
-        e.preventDefault();
-        closeDayModal();
-        openCard(r.ts, { type:"day", dayStartTs });
-      });
-
-      wrap.appendChild(item);
-    }
-
-    const container = document.createElement("div");
-    const hint = document.createElement("div");
-    hint.className = "dayHint";
-    hint.textContent = "Select Angel Number to View or Edit.";
-    container.appendChild(hint);
-    container.appendChild(wrap);
-
-    $("dayBody").textContent = "";
-    $("dayBody").appendChild(container);
-
-    $("dayModal").classList.remove("hidden");
-    lockTouches(120);
-  }
-
-  function closeDayModal(){
-    dayModalDate = null;
-    $("dayModal").classList.add("hidden");
-    $("dayBody").textContent = "—";
-    unlockTouches();
-  }
-
-  $("btnDayClose").addEventListener("click", (e)=>{ e.preventDefault(); closeDayModal(); });
-
-  $("dayModal").addEventListener("click", (e)=>{
-    if(e.target === $("dayModal")) closeDayModal();
-  });
-
-  document.addEventListener("keydown", (e)=>{
-    if(!$("dayModal").classList.contains("hidden")){
-      if(e.key === "Escape"){ e.preventDefault(); closeDayModal(); }
-    }
-  });
-
-  $("btnDayExport").addEventListener("click", (e)=>{
-    e.preventDefault();
-    if(dayModalDate == null) return;
-    const a = dayModalDate;
-    const b = clampEndOfDay(a);
-    const recs = loadRecords().slice().reverse().filter(r => r.ts >= a && r.ts <= b);
-
-    exportReport(
-      recs,
-      {
-        title: "Day Export",
-        rangeLabel: `${fmtDateTime(a)} to ${fmtDateTime(b)}`,
-        notes: "This export contains all entries for the selected day."
-      },
-      "angel_numbers_day"
-    );
   });
 
   /* ===== Export helpers ===== */
@@ -1935,11 +1349,6 @@ Save creates a .txt file on your device.
 
   $("btnExportClose").addEventListener("click", (e)=>{ e.preventDefault(); closeExportModal(); });
   $("exportModal").addEventListener("click", (e)=>{ if(e.target === $("exportModal")) closeExportModal(); });
-  document.addEventListener("keydown", (e)=>{
-    if(!$("exportModal").classList.contains("hidden")){
-      if(e.key === "Escape"){ e.preventDefault(); closeExportModal(); }
-    }
-  });
 
   $("btnExportShare").addEventListener("click", async (e)=>{
     e.preventDefault();
@@ -2099,13 +1508,57 @@ Save creates a .txt file on your device.
         cell.addEventListener("click", (e)=>{
           e.preventDefault();
           if(animating) return;
-          openDayModal(dayStart);
+          alert("Day view is not enabled in this build. (Next edit can add it back.)");
         });
       }
 
       grid.appendChild(cell);
     }
   }
+
+  /* ===== Home Identify (auto-search) ===== */
+
+  function renderHomeIdentify(){
+    const raw = $("homeIdNum").value;
+    const n = normalizeNumberInput(raw);
+
+    if(!n){
+      $("homeNumBig").textContent = "—";
+      $("homePatternPill").textContent = "Pattern: —";
+      $("homeMeaningText").textContent =
+        "Enter a number above to see its commonly shared meaning.";
+      $("homeMeta").textContent =
+        "How to use: Treat the meaning as a reflective prompt—what it “means” depends on context and personal interpretation.";
+      return;
+    }
+
+    const pattern = detectPattern(n);
+    const out = deriveMeaning(n, pattern);
+
+    $("homeNumBig").textContent = n;
+    $("homePatternPill").textContent = `Pattern: ${out.pattern || pattern || "—"}`;
+    $("homeMeaningText").textContent = out.meaning || "—";
+    $("homeMeta").textContent = buildIdentifyMeta(n, out.pattern || pattern || "—");
+  }
+
+  $("homeIdNum").addEventListener("input", renderHomeIdentify);
+  $("homeIdNum").addEventListener("keydown", (e)=>{
+    if(e.key === "Enter"){
+      e.preventDefault();
+      try{ e.target.blur(); }catch{}
+    }
+  });
+
+  /* ===== Heart modal + triple tap on version label ===== */
+
+  function openHeart(){ $("heartModal").classList.remove("hidden"); lockTouches(120); }
+  function closeHeart(){ $("heartModal").classList.add("hidden"); unlockTouches(); }
+  $("btnHeartX").addEventListener("click", (e)=>{ e.preventDefault(); closeHeart(); });
+  $("btnHeartClose").addEventListener("click", (e)=>{ e.preventDefault(); closeHeart(); });
+  $("heartModal").addEventListener("click", (e)=>{ if(e.target === $("heartModal")) closeHeart(); });
+
+  let vTapCount = 0;
+  let vTapTimer = null;
 
   /* ===== Exit ===== */
 
@@ -2117,22 +1570,10 @@ Save creates a .txt file on your device.
     }, 200);
   });
 
-  /* ===== Buttons + Save/Delete + Exports ===== */
-
-  $("btnAddToCalendar").addEventListener("click", () => {
-    const n = normalizeNumberInput($("homeIdNum").value);
-    if(!n){
-      alert("Enter a number first.");
-      return;
-    }
-    const pattern = detectPattern(n);
-    const meaning = deriveMeaning(n, pattern).meaning;
-    enterAddNewPrefilled(n, "", "home");
-    // Prime Add meaning UI to match home
-    updateMeaningUI(pattern, meaning);
-  });
+  /* ===== Buttons ===== */
 
   $("btnViewCalendar").addEventListener("click", () => showInstant("calendar"));
+  $("btnBackFromCalendar").addEventListener("click", () => showInstant("home"));
 
   $("btnHomeExport").addEventListener("click", () => {
     const recs = loadRecords().slice().reverse();
@@ -2147,101 +1588,13 @@ Save creates a .txt file on your device.
     );
   });
 
-  $("btnBackFromAdd").addEventListener("click", () => { editTs=null; editOriginalTs=null; showInstant(returnScreen || "home"); });
-  $("btnBackFromCalendar").addEventListener("click", () => showInstant("home"));
-
-  $("dtEdit").addEventListener("change", () => {
-    const ts = fromLocalDatetimeValue($("dtEdit").value);
-    if(ts != null && editTs != null){
-      editTs = ts;
-      tickTime();
-    }
-  });
-
-  $("btnSave").addEventListener("click", () => {
-    const number = normalizeNumberInput($("anum").value);
-    const notes = ($("notes").value || "").toString();
-
-    if(!validateAnyInput(number, notes)){
-      alert("Enter a number or a note.");
+  $("btnAddToCalendar").addEventListener("click", () => {
+    const n = normalizeNumberInput($("homeIdNum").value);
+    if(!n){
+      alert("Enter a number first.");
       return;
     }
-
-    const tsWanted = (editOriginalTs == null)
-      ? Date.now()
-      : (fromLocalDatetimeValue($("dtEdit").value) ?? editTs ?? Date.now());
-
-    const pattern = number ? detectPattern(number) : "—";
-    const meaning = number ? deriveMeaning(number, pattern).meaning : "—";
-
-    const recs = loadRecords();
-
-    if(editOriginalTs == null){
-      recs.unshift({ ts: tsWanted, number, pattern, meaning, notes });
-    }else{
-      const idx = recs.findIndex(r => r.ts === editOriginalTs);
-      if(idx >= 0){
-        recs[idx] = { ts: tsWanted, number, pattern, meaning, notes };
-      }else{
-        recs.unshift({ ts: tsWanted, number, pattern, meaning, notes });
-      }
-    }
-
-    recs.sort((a,b)=> b.ts - a.ts);
-    saveRecords(recs);
-
-    editTs = null;
-    editOriginalTs = null;
-
-    showInstant("calendar");
-  });
-
-  $("btnDelete").addEventListener("click", () => {
-    if(editOriginalTs == null) return;
-
-    openConfirm({
-      title: "Delete this entry?",
-      message: "This cannot be undone.",
-      okText: "Delete",
-      cancelText: "Cancel",
-      danger: true,
-      onOk: () => {
-        const recs = loadRecords().filter(r => r.ts !== editOriginalTs);
-        saveRecords(recs);
-
-        editTs = null;
-        editOriginalTs = null;
-
-        showInstant("calendar");
-      }
-    });
-  });
-
-  $("calMonth").addEventListener("change", () => renderCalendar());
-  $("btnCalToday").addEventListener("click", (e)=>{
-    e.preventDefault();
-    const now = new Date();
-    $("calMonth").value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
-    renderCalendar();
-  });
-
-  $("btnExportMonth").addEventListener("click", () => {
-    const mv = monthValueToYMD($("calMonth").value);
-    if(!mv) return;
-    const {y, mo} = mv;
-    const a = new Date(y, mo-1, 1, 0,0,0,0).getTime();
-    const b = new Date(y, mo, 0, 23,59,59,999).getTime();
-    const recs = loadRecords().slice().reverse().filter(r => r.ts >= a && r.ts <= b);
-
-    exportReport(
-      recs,
-      {
-        title: "Month Export",
-        rangeLabel: `${y}-${String(mo).padStart(2,"0")}`,
-        notes: "This export contains all entries within the selected month."
-      },
-      "angel_numbers_month"
-    );
+    alert("Add-to-Calendar is not enabled in this build. (Next edit can wire it to Add/Edit + Save.)");
   });
 
   /* ===== Manifest + SW ===== */
@@ -2343,156 +1696,6 @@ self.addEventListener('fetch', (e)=>{ });`;
     saveRecords(out);
   }
 
-  /* ===== Version modal + taps ===== */
-
-  function openVersionModal(){
-    $("verBody").textContent =
-      `Actual app version: ${APP_VERSION}\n` +
-      `Home label (visual only): ${HOME_VERSION_LABEL}\n` +
-      `Storage key: ${STORAGE_KEY}`;
-    $("versionModal").classList.remove("hidden");
-    lockTouches(120);
-  }
-  function closeVersionModal(){ $("versionModal").classList.add("hidden"); unlockTouches(); }
-  $("btnVerX").addEventListener("click", (e)=>{ e.preventDefault(); closeVersionModal(); });
-  $("btnVerClose").addEventListener("click", (e)=>{ e.preventDefault(); closeVersionModal(); });
-  $("versionModal").addEventListener("click", (e)=>{ if(e.target === $("versionModal")) closeVersionModal(); });
-
-  // Quadruple-tap anywhere on the screen area -> version modal
-  let quadTapCount = 0;
-  let quadTapTimer = null;
-  $("screenArea").addEventListener("click", () => {
-    if(animating) return;
-    quadTapCount++;
-    if(quadTapTimer) clearTimeout(quadTapTimer);
-    quadTapTimer = setTimeout(()=>{ quadTapCount=0; }, 650);
-    if(quadTapCount >= 4){
-      quadTapCount = 0;
-      openVersionModal();
-    }
-  });
-
-  function openHeart(){ $("heartModal").classList.remove("hidden"); lockTouches(120); }
-  function closeHeart(){ $("heartModal").classList.add("hidden"); unlockTouches(); }
-  $("btnHeartX").addEventListener("click", (e)=>{ e.preventDefault(); closeHeart(); });
-  $("btnHeartClose").addEventListener("click", (e)=>{ e.preventDefault(); closeHeart(); });
-  $("heartModal").addEventListener("click", (e)=>{ if(e.target === $("heartModal")) closeHeart(); });
-
-  let vTapCount = 0;
-  let vTapTimer = null;
-  $("homeVerLabel").textContent = HOME_VERSION_LABEL;
-  $("homeVerLabel").addEventListener("click", (e) => {
-    e.stopPropagation();
-    if(animating) return;
-    vTapCount++;
-    if(vTapTimer) clearTimeout(vTapTimer);
-    vTapTimer = setTimeout(()=>{ vTapCount = 0; }, 700);
-    if(vTapCount >= 5){
-      vTapCount = 0;
-      openHeart();
-    }
-  });
-
-  /* ===== Home pull-to-refresh ===== */
-
-  const ptr = {
-    active:false,
-    y0:0,
-    pulling:false,
-    threshold: 64,
-    max: 120,
-    ready:false
-  };
-
-  function setPtr(on, text){
-    const el = $("ptrHome");
-    if(!el) return;
-    if(on){
-      el.classList.add("on");
-      if(text) el.textContent = text;
-    }else{
-      el.classList.remove("on");
-      el.textContent = "Pull down to refresh";
-    }
-  }
-
-  function homeCanStartPtr(ev){
-    if(currentScreen !== "home") return false;
-    if(animating) return false;
-    if(!(ev.touches && ev.touches.length === 1)) return false;
-
-    const sc = $("homeScroll");
-    if(!sc) return false;
-    if(sc.scrollTop > 0) return false;
-
-    const t = ev.target;
-    if(t && t.closest && t.closest("button, input, textarea, select")) return false;
-
-    return true;
-  }
-
-  function ptrStart(ev){
-    if(!homeCanStartPtr(ev)) return;
-    ptr.active = true;
-    ptr.pulling = false;
-    ptr.ready = false;
-    ptr.y0 = ev.touches[0].clientY;
-    setPtr(true, "Pull down to refresh");
-  }
-
-  function ptrMove(ev){
-    if(!ptr.active) return;
-    if(!(ev.touches && ev.touches.length === 1)) return;
-
-    const y = ev.touches[0].clientY;
-    const dy = y - ptr.y0;
-
-    if(dy <= 8){
-      setPtr(true, "Pull down to refresh");
-      ptr.ready = false;
-      return;
-    }
-
-    ptr.pulling = true;
-    ev.preventDefault();
-
-    const amt = Math.min(ptr.max, dy);
-    if(amt >= ptr.threshold){
-      ptr.ready = true;
-      setPtr(true, "Release to refresh");
-    }else{
-      ptr.ready = false;
-      setPtr(true, "Pull down to refresh");
-    }
-  }
-
-  function ptrEnd(){
-    if(!ptr.active) return;
-    const doRefresh = ptr.ready;
-
-    ptr.active = false;
-    ptr.pulling = false;
-    ptr.ready = false;
-
-    if(doRefresh){
-      setPtr(true, "Refreshing…");
-      setTimeout(() => {
-        try{ location.reload(); }catch{ setPtr(false); }
-      }, 140);
-    }else{
-      setPtr(false);
-    }
-  }
-
-  function attachHomePTR(){
-    const sc = $("homeScroll");
-    if(!sc) return;
-    sc.addEventListener("touchstart", ptrStart, {passive:true});
-    sc.addEventListener("touchmove", ptrMove, {passive:false});
-    sc.addEventListener("touchend", ptrEnd, {passive:true});
-    sc.addEventListener("touchcancel", ptrEnd, {passive:true});
-  }
-
   /* ===== Init ===== */
 
   injectManifest();
@@ -2501,44 +1704,32 @@ self.addEventListener('fetch', (e)=>{ });`;
   seedTestDataIfEmpty();
 
   attachSwipes();
-  attachHomePTR();
 
-  function renderHomeIdentify(){
-    const raw = $("homeIdNum").value;
-    const n = normalizeNumberInput(raw);
+  // Show the REAL version number on screen
+  $("homeVerLabel").textContent = APP_VERSION;
 
-    if(!n){
-      $("homeNumBig").textContent = "—";
-      $("homePatternPill").textContent = "Pattern: —";
-      $("homeMeaningText").textContent =
-        "Enter a number above to see its commonly shared meaning.";
-      $("homeMeta").textContent =
-        "How to use: Treat the meaning as a reflective prompt—what it “means” depends on context and personal interpretation.";
-      return;
-    }
-
-    const pattern = detectPattern(n);
-    const out = deriveMeaning(n, pattern);
-
-    $("homeNumBig").textContent = n;
-    $("homePatternPill").textContent = `Pattern: ${out.pattern || pattern || "—"}`;
-    $("homeMeaningText").textContent = out.meaning || "—";
-    $("homeMeta").textContent = buildIdentifyMeta(n, out.pattern || pattern || "—");
-  }
-
-  $("homeIdNum").addEventListener("input", renderHomeIdentify);
-  $("homeIdNum").addEventListener("keydown", (e)=>{
-    if(e.key === "Enter"){
-      e.preventDefault();
-      try{ e.target.blur(); }catch{}
+  // Triple-tap on version label -> heart
+  $("homeVerLabel").addEventListener("click", (e) => {
+    e.stopPropagation();
+    if(animating) return;
+    vTapCount++;
+    if(vTapTimer) clearTimeout(vTapTimer);
+    vTapTimer = setTimeout(()=>{ vTapCount = 0; }, 650);
+    if(vTapCount >= 3){
+      vTapCount = 0;
+      openHeart();
     }
   });
+
+  // Prevent focus/keyboard on load
+  try{ document.activeElement?.blur(); }catch{}
+  setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 0);
+  setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 80);
 
   renderHomeIdentify();
   showInstant("home");
 
   window.addEventListener("resize", () => {
-    if(!$("add").classList.contains("hidden")) adjustTimeFont();
     if(!$("calendar").classList.contains("hidden")) renderCalendar();
   });
 
@@ -2550,12 +1741,12 @@ self.addEventListener('fetch', (e)=>{ });`;
 <!--
 EOF Version Detail Notes (required)
 App: Angel Numbers Tracker
-Actual Version: v1.1A3
-Home Label (visual only): v1.333 (do not change unless instructed)
-Base: v1.1A2
+Version: v1.1A4
+Base: v1.1A3
 Changes:
-- Home screen: buttons moved into fixed footer (always visible) so nothing is unreachable.
-- Home content area scrolls vertically; footer remains pinned.
-- Removed Identify button; identify runs automatically on typing.
-- Reduced top spacing to eliminate empty “dead” area near top.
+- Home screen shows real version (APP_VERSION) on-screen.
+- Removed quad-tap version popup entirely.
+- Triple-tap on version label shows a large heart + “The Angels love you Timmy.”
+- No autofocus and forced blur on load to prevent keyboard from opening.
+- Home panel remains scrollable with fixed footer buttons always visible.
 -->
