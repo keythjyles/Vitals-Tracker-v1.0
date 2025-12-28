@@ -1,16 +1,13 @@
-<!-- Angel Numbers Tracker v1.1B1 -->
+<!-- Angel Numbers Tracker v1.1B2 -->
 <!--
 Version Detail Notes
-App Version: v1.1B1
-Base: v1.1A9
+App Version: v1.1B2
+Base: v1.1B1
 
 Changes (requested):
-- Pull-down-to-refresh: custom pull gesture at top of Home and Calendar scroll to reload.
-- Remove version number under logo (top-of-screen).
-- Edit modal renamed to "View & Update"; remove X close on this modal; add a bottom "Close" button.
-- Angel Card: expand meaning output to always include the digit-sum lens (sum → reduction/root), plus thorough characteristics and prompts.
-- Identify panel + Edit modal both use the expanded Angel Card builder.
-- BOF/EOF comment blocks preserved; Exit handler unchanged.
+- Pull-to-refresh: "Release to refresh" threshold increased to 225px (and percent scaled to that).
+- Identify Home: Exit button is now smaller and sits beside Export (same row).
+- Day List modal: removed the X close button (bottom Close remains).
 -->
 <!doctype html>
 <html lang="en">
@@ -130,7 +127,7 @@ Changes (requested):
     .ptrHint{ opacity:.90; }
     .ptrSmall{ opacity:.60; font-weight:800; }
 
-    /* New deck for smooth panel swipe */
+    /* Deck */
     .deck{
       position:absolute;
       inset:0;
@@ -328,7 +325,7 @@ Changes (requested):
       line-height:1.25;
     }
 
-    /* HOME layout: scroll content + fixed footer */
+    /* HOME layout */
     #home{
       display:flex;
       flex-direction:column;
@@ -366,6 +363,17 @@ Changes (requested):
     }
     .homeActions .btn.wide{
       grid-column: 1 / -1;
+    }
+    .homeActions .btn.tight{
+      height: 48px;
+      font-size: 16px;
+      font-weight: 820;
+    }
+    .homeActions .btn.exitSmall{
+      background: linear-gradient(180deg, rgba(255,80,80,.18), rgba(255,80,80,.10));
+      border-color: rgba(255,120,120,.42);
+      color: rgba(255,225,225,.92);
+      box-shadow: 0 10px 26px rgba(0,0,0,.22);
     }
 
     .homeTitle{
@@ -555,7 +563,7 @@ Changes (requested):
       color: rgba(235,245,255,.44);
     }
 
-    /* Day list (tight) */
+    /* Day list */
     .dayLogoRow{
       display:flex;
       justify-content:center;
@@ -684,7 +692,7 @@ Changes (requested):
       </div>
 
       <div class="deck" id="deck">
-        <!-- HOME (Identify) -->
+        <!-- HOME -->
         <div id="home" class="card">
           <div id="homeScroll">
             <div class="homeTitle">Identify Angel Number</div>
@@ -724,8 +732,9 @@ Enter a number to see a thorough Angel Card (summary, digit-sum lens, characteri
               <button id="btnAddToCalendar" class="btn primary wide">Add to Calendar</button>
               <button id="btnViewCalendar" class="btn">View Calendar</button>
               <button id="btnInstall" class="btn">Install</button>
-              <button id="btnHomeExport" class="btn">Export</button>
-              <button id="btnExitHome" class="btn danger wide">Exit</button>
+
+              <button id="btnHomeExport" class="btn tight">Export</button>
+              <button id="btnExitHome" class="btn tight exitSmall">Exit</button>
             </div>
 
             <div class="footerTiny">
@@ -803,13 +812,9 @@ Save creates a .txt file on your device.
     </div>
   </div>
 
-  <!-- Day list modal -->
+  <!-- Day list modal (NO X) -->
   <div id="dayListModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="dayListTitle">
     <div class="modalCard">
-      <div class="xCloseRow">
-        <button class="xBtn" id="btnDayListX" aria-label="Close">×</button>
-      </div>
-
       <div class="dayLogoRow" aria-hidden="true" id="dayLogoRow"></div>
 
       <div class="modalTitle" id="dayListTitle">Day</div>
@@ -891,7 +896,7 @@ Save creates a .txt file on your device.
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.1B1";
+  const APP_VERSION = "v1.1B2";
   const STORAGE_KEY = "angel_numbers_records_v1";
   const DAY_MS = 24*60*60*1000;
 
@@ -946,87 +951,36 @@ Save creates a .txt file on your device.
     }
   }
 
-  /* ===== Numerology Lenses (thorough, always includes digit-sum lens) ===== */
+  /* ===== Numerology Lenses ===== */
 
   const DIGIT_ARCHETYPES = {
-    "0": {
-      core: "Source • reset • wholeness",
-      strengths: ["fresh perspective", "clearing space", "beginning again"],
-      cautions: ["avoid drifting", "avoid ambiguity; choose a direction"],
-      prompts: ["What needs a reset?", "What are you returning to?", "What is the simplest next step?"]
-    },
-    "1": {
-      core: "Initiation • focus • leadership",
-      strengths: ["clarity", "self-direction", "decisive action"],
-      cautions: ["avoid impatience", "avoid ego-driven decisions"],
-      prompts: ["What do you want to start?", "Where should your attention go?", "What is the single priority?"]
-    },
-    "2": {
-      core: "Balance • partnership • diplomacy",
-      strengths: ["patience", "coordination", "listening"],
-      cautions: ["avoid indecision", "avoid over-accommodating"],
-      prompts: ["What needs balance?", "Who is part of this?", "What agreement needs clarity?"]
-    },
-    "3": {
-      core: "Expression • creativity • growth",
-      strengths: ["communication", "optimism", "creative output"],
-      cautions: ["avoid scattered effort", "avoid saying yes to everything"],
-      prompts: ["What needs to be expressed?", "What would you create today?", "What message is waiting?"]
-    },
-    "4": {
-      core: "Structure • foundation • discipline",
-      strengths: ["stability", "planning", "reliability"],
-      cautions: ["avoid rigidity", "avoid over-control"],
-      prompts: ["What foundation are you building?", "What routine supports you?", "What needs strengthening?"]
-    },
-    "5": {
-      core: "Change • movement • adaptability",
-      strengths: ["flexibility", "learning through experience", "momentum"],
-      cautions: ["avoid chaos", "avoid impulsive choices"],
-      prompts: ["What is changing?", "What can you release?", "What new option is opening?"]
-    },
-    "6": {
-      core: "Care • responsibility • home",
-      strengths: ["nurturing", "repairing", "prioritizing wellbeing"],
-      cautions: ["avoid over-responsibility", "avoid guilt-driven decisions"],
-      prompts: ["What needs care?", "What boundary protects you?", "What is your real priority?"]
-    },
-    "7": {
-      core: "Insight • inner wisdom • study",
-      strengths: ["reflection", "discernment", "depth"],
-      cautions: ["avoid isolation", "avoid analysis paralysis"],
-      prompts: ["What do you know inwardly?", "What needs research?", "What truth needs quiet?"]
-    },
-    "8": {
-      core: "Power • stewardship • material mastery",
-      strengths: ["execution", "authority", "results"],
-      cautions: ["avoid dominance", "avoid over-identifying with outcomes"],
-      prompts: ["What are you stewarding?", "Where do you need strength?", "What is the practical move?"]
-    },
-    "9": {
-      core: "Completion • compassion • integration",
-      strengths: ["closure", "forgiveness", "wisdom through endings"],
-      cautions: ["avoid clinging to the past", "avoid martyrdom"],
-      prompts: ["What needs closure?", "What lesson is complete?", "What can you release with grace?"]
-    }
+    "0": { core: "Source • reset • wholeness", strengths: ["fresh perspective","clearing space","beginning again"], cautions: ["avoid drifting","avoid ambiguity; choose a direction"], prompts: ["What needs a reset?","What are you returning to?","What is the simplest next step?"] },
+    "1": { core: "Initiation • focus • leadership", strengths: ["clarity","self-direction","decisive action"], cautions: ["avoid impatience","avoid ego-driven decisions"], prompts: ["What do you want to start?","Where should your attention go?","What is the single priority?"] },
+    "2": { core: "Balance • partnership • diplomacy", strengths: ["patience","coordination","listening"], cautions: ["avoid indecision","avoid over-accommodating"], prompts: ["What needs balance?","Who is part of this?","What agreement needs clarity?"] },
+    "3": { core: "Expression • creativity • growth", strengths: ["communication","optimism","creative output"], cautions: ["avoid scattered effort","avoid saying yes to everything"], prompts: ["What needs to be expressed?","What would you create today?","What message is waiting?"] },
+    "4": { core: "Structure • foundation • discipline", strengths: ["stability","planning","reliability"], cautions: ["avoid rigidity","avoid over-control"], prompts: ["What foundation are you building?","What routine supports you?","What needs strengthening?"] },
+    "5": { core: "Change • movement • adaptability", strengths: ["flexibility","learning through experience","momentum"], cautions: ["avoid chaos","avoid impulsive choices"], prompts: ["What is changing?","What can you release?","What new option is opening?"] },
+    "6": { core: "Care • responsibility • home", strengths: ["nurturing","repairing","prioritizing wellbeing"], cautions: ["avoid over-responsibility","avoid guilt-driven decisions"], prompts: ["What needs care?","What boundary protects you?","What is your real priority?"] },
+    "7": { core: "Insight • inner wisdom • study", strengths: ["reflection","discernment","depth"], cautions: ["avoid isolation","avoid analysis paralysis"], prompts: ["What do you know inwardly?","What needs research?","What truth needs quiet?"] },
+    "8": { core: "Power • stewardship • material mastery", strengths: ["execution","authority","results"], cautions: ["avoid dominance","avoid over-identifying with outcomes"], prompts: ["What are you stewarding?","Where do you need strength?","What is the practical move?"] },
+    "9": { core: "Completion • compassion • integration", strengths: ["closure","forgiveness","wisdom through endings"], cautions: ["avoid clinging to the past","avoid martyrdom"], prompts: ["What needs closure?","What lesson is complete?","What can you release with grace?"] }
   };
 
-  // A few common composites (kept concise; digit-sum lens + dominant digit lens does the heavy lifting)
   const ANGEL_MAP = {
-    "000": "Reset and re-center. A clean slate moment—expand perspective and begin again.",
-    "111": "Focus and intention. Notice your thoughts; aim them deliberately.",
-    "222": "Balance and alignment. Patience and cooperation; let the situation stabilize.",
-    "333": "Creativity and support. Communicate clearly; build through expression.",
-    "444": "Foundations and stability. Stay disciplined; the work is structural.",
-    "555": "Change and movement. A shift is underway—adapt and step forward.",
-    "666": "Recalibration. Check priorities; return to wellbeing and what matters.",
-    "777": "Insight and learning. Trust inner guidance; deepen study and reflection.",
-    "888": "Momentum and stewardship. Practical progress; strong execution energy.",
-    "999": "Completion. Close a chapter; integrate lessons; make room for what’s next.",
-    "1010": "Fresh cycle + alignment. A restart with clear direction—stay intentional.",
-    "1111": "Heightened awareness. Clarify what you’re building; align focus with intention.",
-    "1212": "Realignment and growth. Keep moving; small consistent steps compound.",
-    "1234": "Step-by-step progress. Keep it simple; the path is sequential and workable."
+    "000":"Reset and re-center. A clean slate moment—expand perspective and begin again.",
+    "111":"Focus and intention. Notice your thoughts; aim them deliberately.",
+    "222":"Balance and alignment. Patience and cooperation; let the situation stabilize.",
+    "333":"Creativity and support. Communicate clearly; build through expression.",
+    "444":"Foundations and stability. Stay disciplined; the work is structural.",
+    "555":"Change and movement. A shift is underway—adapt and step forward.",
+    "666":"Recalibration. Check priorities; return to wellbeing and what matters.",
+    "777":"Insight and learning. Trust inner guidance; deepen study and reflection.",
+    "888":"Momentum and stewardship. Practical progress; strong execution energy.",
+    "999":"Completion. Close a chapter; integrate lessons; make room for what’s next.",
+    "1010":"Fresh cycle + alignment. A restart with clear direction—stay intentional.",
+    "1111":"Heightened awareness. Clarify what you’re building; align focus with intention.",
+    "1212":"Realignment and growth. Keep moving; small consistent steps compound.",
+    "1234":"Step-by-step progress. Keep it simple; the path is sequential and workable."
   };
 
   /* ===== Storage ===== */
@@ -1178,6 +1132,15 @@ Save creates a .txt file on your device.
     return !!(navigator.share && typeof navigator.share === "function");
   }
 
+  function escapeHtml(s){
+    return String(s ?? "")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+  }
+
   /* ===== Pattern detection ===== */
 
   function isAllSame(s){ return !!(s && s.length >= 2 && s.split("").every(ch => ch === s[0])); }
@@ -1211,13 +1174,12 @@ Save creates a .txt file on your device.
     return "Mixed pattern";
   }
 
-  /* ===== Digit-sum lens (always included) ===== */
+  /* ===== Digit-sum lens ===== */
 
   function digitSumSteps(n){
     const digits = n.split("").map(ch => ch.charCodeAt(0)-48).filter(x => x>=0 && x<=9);
     const sum = digits.reduce((a,b)=>a+b,0);
 
-    // reduce to a single digit 1-9; allow 0 if n is all zeros
     let root = 0;
     if(digits.length && digits.every(x=>x===0)){
       root = 0;
@@ -1272,7 +1234,6 @@ Save creates a .txt file on your device.
 
     const mapped = ANGEL_MAP[n] || "";
 
-    // Pattern lens (short and practical)
     let patternLens = "";
     if(pattern === "Sequential (up)") patternLens = "Pattern lens: steady progress—build in order; keep moving forward one step at a time.";
     else if(pattern === "Sequential (down)") patternLens = "Pattern lens: simplify and release—reduce complexity; return to essentials.";
@@ -1289,7 +1250,6 @@ Save creates a .txt file on your device.
       patternLens = "Pattern lens: mixed—interpret through digit emphasis + digit-sum lens + current context.";
     }
 
-    // Summary headline: combine mapped + root emphasis
     const rootCore = rootA ? rootA.core : `${rootDigit}: (no archetype)`;
     const domCore = domA ? domA.core : `${domTop}: (no archetype)`;
 
@@ -1303,7 +1263,6 @@ Save creates a .txt file on your device.
       overviewLines.push(`Dominant digit emphasis: aligns with the digit-sum lens (${domCore}).`);
     }
 
-    // Dominant digits description
     const domDesc = dom.map(x => `${x.d}×${x.c}`).join("  |  ");
     const domArchetypes = dom
       .slice(0, Math.min(4, dom.length))
@@ -1311,13 +1270,11 @@ Save creates a .txt file on your device.
       .filter(Boolean)
       .join("\n");
 
-    // Prompts/Actions: prioritize root prompts; then dominant prompts
     const prompts = [];
     if(rootA?.prompts?.length) prompts.push(...rootA.prompts);
     if(domA?.prompts?.length && domTop !== rootDigit) prompts.push(...domA.prompts);
     const promptsUnique = [...new Set(prompts)].slice(0, 6);
 
-    // Strengths/Cautions: root then dominant
     const strengths = [];
     const cautions = [];
     if(rootA?.strengths?.length) strengths.push(...rootA.strengths);
@@ -1329,7 +1286,6 @@ Save creates a .txt file on your device.
     const strengthsUnique = [...new Set(strengths)].slice(0, 6);
     const cautionsUnique = [...new Set(cautions)].slice(0, 6);
 
-    // Compose Angel Card text (thorough)
     const lines = [];
     lines.push(`ANGEL CARD — ${n}`);
     lines.push(`Pattern: ${pattern}`);
@@ -1365,7 +1321,6 @@ Save creates a .txt file on your device.
       lines.push("");
     }
 
-    // Practical next-step heuristic
     lines.push("Quick method:");
     lines.push("• Read the overview.");
     lines.push("• Use the digit-sum lens as the ‘main theme’.");
@@ -1649,11 +1604,10 @@ Save creates a .txt file on your device.
   }
 
   let currentDayKey = null;
-  let currentDayRecs = [];
   function openDayList(dayKey, recs){
     ensureDayLogo();
     currentDayKey = dayKey;
-    currentDayRecs = (recs || []).slice().sort((a,b)=> a.ts - b.ts);
+    const currentDayRecs = (recs || []).slice().sort((a,b)=> a.ts - b.ts);
 
     $("dayListTitle").textContent = fmtDayTitle(dayKey);
     $("dayListSub").textContent = "Tap a number to view the Angel Card.";
@@ -1704,20 +1658,9 @@ Save creates a .txt file on your device.
     $("dayListModal").classList.add("hidden");
     unlockTouches();
   }
-  function closeDayList(){ closeDayListImmediate(); }
 
-  $("btnDayListX").addEventListener("click", (e)=>{ e.preventDefault(); closeDayList(); });
-  $("btnDayListClose").addEventListener("click", (e)=>{ e.preventDefault(); closeDayList(); });
-  $("dayListModal").addEventListener("click", (e)=>{ if(e.target === $("dayListModal")) closeDayList(); });
-
-  function escapeHtml(s){
-    return String(s ?? "")
-      .replace(/&/g,"&amp;")
-      .replace(/</g,"&lt;")
-      .replace(/>/g,"&gt;")
-      .replace(/"/g,"&quot;")
-      .replace(/'/g,"&#039;");
-  }
+  $("btnDayListClose").addEventListener("click", (e)=>{ e.preventDefault(); closeDayListImmediate(); });
+  $("dayListModal").addEventListener("click", (e)=>{ if(e.target === $("dayListModal")) closeDayListImmediate(); });
 
   function renderCalendar(){
     const mv = monthValueToYMD($("calMonth").value);
@@ -1874,7 +1817,7 @@ Save creates a .txt file on your device.
     }
   });
 
-  /* ===== Smooth panel swipe (edge only, 150px) ===== */
+  /* ===== Smooth panel swipe (edge only) ===== */
 
   const EDGE = 150;
   const deck = $("deck");
@@ -1978,8 +1921,8 @@ Save creates a .txt file on your device.
     const w = getWidth();
     let nextX = baseX + dx;
 
-    const minX = -w; // calendar
-    const maxX = 0;  // home
+    const minX = -w;
+    const maxX = 0;
 
     if(nextX > maxX){
       const over = nextX - maxX;
@@ -2009,7 +1952,7 @@ Save creates a .txt file on your device.
     const m = /translate3d\(([-\d.]+)px/.exec(matrix);
     const curX = m ? Number(m[1]) : deckTargetXForIndex(deckIndex);
 
-    const progress = (-curX) / w; // 0..1
+    const progress = (-curX) / w;
     const deltaToHome = Math.abs(progress - 0);
     const deltaToCal  = Math.abs(progress - 1);
 
@@ -2035,6 +1978,9 @@ Save creates a .txt file on your device.
   }
 
   /* ===== Pull-to-refresh (custom) ===== */
+
+  const PTR_THRESHOLD = 225;
+  const PTR_MAX = Math.max(260, PTR_THRESHOLD + 35);
 
   let ptrActive = false;
   let ptrStartY = 0;
@@ -2089,13 +2035,12 @@ Save creates a .txt file on your device.
         return;
       }
 
-      // prevent native overscroll bounce from feeling weird
       e.preventDefault();
 
-      const pull = Math.min(140, dy);
-      const pct = Math.round((pull / 120) * 100);
+      const pull = Math.min(PTR_MAX, dy);
+      const pct = Math.max(0, Math.min(100, Math.round((pull / PTR_THRESHOLD) * 100)));
 
-      if(pull > 86){
+      if(pull >= PTR_THRESHOLD){
         ptrSet(true, "Release to refresh", `${pct}%`);
         ptrTriggered = true;
       }else{
@@ -2323,11 +2268,10 @@ self.addEventListener('fetch', (e)=>{ });`;
 
 <!--
 EOF Version Detail Notes
-App Version: v1.1B1
-Base: v1.1A9
+App Version: v1.1B2
+Base: v1.1B1
 Changes:
-- Added pull-down-to-refresh overlay + reload gesture at top of Home/Calendar scroll.
-- Removed top-of-screen version text under logo (kept footer version label).
-- Edit modal: renamed to View & Update; removed X close; added bottom Close button; Angel Card shown fully.
-- Angel Card builder: always includes digit-sum lens (sum → reduction/root) and thorough characteristics/prompts.
+- Pull-to-refresh threshold increased to 225px (Release to refresh).
+- Identify Home: Exit button smaller and placed beside Export.
+- Day List modal: removed X close button (bottom Close remains).
 -->
