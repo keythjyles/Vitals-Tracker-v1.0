@@ -1,23 +1,20 @@
-<!-- Angel Numbers Tracker v1.1A2 -->
+<!-- Angel Numbers Tracker v1.1A3 -->
 <!--
 Version Detail Notes
-App Version (internal): v1.1A2
+App Version (internal): v1.1A3
 Home display label (visual only): v1.333  (DO NOT CHANGE unless user instructs)
-Base: v1.1A1 (canonical)
+Base: v1.1A2
 
-Changes (requested):
-1) Home panel is now the Identify experience (Identify is the “home”).
-   - Large title: “Identify Angel Number”
-   - Number input + Identify action at top
-   - Characteristics/results shown beneath (pattern, meaning, supporting lenses)
-2) Home actions (buttons):
-   - Add to Calendar (opens Add/Edit panel prefilled with identified number; Save adds entry)
-   - View Calendar
-   - Export
-   - Exit
-3) Version number sits at the bottom of the screen (small).
-   - Quadruple-tap anywhere on the screen (panel area) pops up the Version modal.
-4) Keep logo across top; keep BOF/EOF comment blocks.
+Fixes (requested):
+1) Home screen must scroll vertically, but the action buttons must be static (always visible) at the bottom.
+   - Home panel now uses: scroll area + fixed footer actions (sticky bottom).
+2) Remove the empty space near the top (tighten header spacing).
+   - Reduce top padding and remove extra margins above the home title.
+3) Remove Identify button (auto-search on typing).
+   - Input triggers live identify; Enter still blurs keyboard.
+Notes:
+- Keep BOF/EOF comment blocks.
+- Quadruple-tap to show version modal remains.
 -->
 <!doctype html>
 <html lang="en">
@@ -40,11 +37,8 @@ Changes (requested):
       --muted:rgba(235,245,255,.58);
       --muted2:rgba(235,245,255,.42);
 
-      /* DARK BLUE theme border */
       --accentBorder: rgba(43,78,122,.85);
       --accentGlow: rgba(43,78,122,.18);
-
-      /* Subtle theme border for internal cards/lists */
       --themeLine: rgba(43,78,122,.55);
       --themeLineSoft: rgba(43,78,122,.28);
 
@@ -77,12 +71,13 @@ Changes (requested):
       height: 100%;
       display:flex;
       flex-direction:column;
-      gap:14px;
+      gap:12px;
       overflow:hidden;
     }
 
+    /* Tighten logo header spacing */
     .logoTitle{
-      margin:10px 6px 0;
+      margin:4px 6px 0;
       display:flex;
       justify-content:center;
       align-items:center;
@@ -105,7 +100,6 @@ Changes (requested):
       touch-action: pan-y;
     }
 
-    /* MAIN PANEL CARD — consistent dark-blue border */
     .card{
       background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
       border:3px solid var(--accentBorder);
@@ -175,7 +169,6 @@ Changes (requested):
     .row.center{ align-items:center; }
     .grow{ flex:1; }
 
-    /* Tighten vertical space */
     .label{
       font-size:15px;
       color:var(--muted);
@@ -291,7 +284,7 @@ Changes (requested):
       flex-wrap:wrap;
     }
 
-    /* ===== ADD/EDIT: make panel a flex layout with internal scroller + fixed footer buttons ===== */
+    /* ===== ADD/EDIT layout with internal scroller + fixed footer ===== */
     #add{
       overflow:hidden;
       display:flex;
@@ -319,7 +312,7 @@ Changes (requested):
       margin-top: 0;
     }
 
-    /* ===== HOME (Identify as home) ===== */
+    /* ===== HOME (Identify as home): scroll content + fixed footer buttons ===== */
     #home{
       overflow:hidden;
       display:flex;
@@ -331,45 +324,77 @@ Changes (requested):
       flex: 1;
       overflow:auto;
       -webkit-overflow-scrolling: touch;
-      padding-bottom: calc(10px + env(safe-area-inset-bottom));
+      padding-bottom: 10px;
       touch-action: pan-y;
       overscroll-behavior: contain;
     }
+
+    /* Fixed action footer ALWAYS visible */
+    #homeFooter{
+      flex: 0 0 auto;
+      padding-top: 12px;
+      padding-bottom: calc(8px + env(safe-area-inset-bottom));
+      background: linear-gradient(180deg, rgba(11,19,36,0), rgba(11,19,36,.72) 32%, rgba(11,19,36,.94));
+      border-top: 1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(10px);
+    }
+    #homeFooter .homeActions{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      margin:0;
+    }
+    #homeFooter .homeActions .btn{
+      font-size:22px;
+      font-weight:780;
+      letter-spacing:.25px;
+    }
+
+    /* Tighten the “empty space” above title */
     .homeTitle{
-      margin: 6px 2px 10px;
+      margin: 0 2px 10px; /* was 6px */
       font-weight: 950;
       letter-spacing: .2px;
       color: rgba(235,245,255,.92);
       font-size: clamp(26px, 7.6vw, 44px);
       line-height: 1.02;
     }
+
     .homeTopRow{
       display:flex;
       gap:10px;
       align-items:center;
       margin-bottom: 10px;
     }
-    .homeTopRow .btn.small{
-      height:54px;
-      border-radius: 18px;
-      font-size:16px;
-      padding: 0 16px;
-      white-space:nowrap;
-    }
 
-    .homeActions{
+    .accentFrame{ position:relative; }
+
+    /* Pull-to-refresh hint */
+    .ptr{
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      margin: -10px 0 8px;
       display:flex;
-      flex-direction:column;
-      gap:12px;
-      margin-top: 12px;
+      align-items:center;
+      justify-content:center;
+      height: 28px;
+      color: rgba(235,245,255,.55);
+      font-size: 12px;
+      font-weight: 750;
+      letter-spacing: .2px;
+      user-select:none;
+      pointer-events:none;
+      opacity: 0;
+      transform: translateY(-6px);
+      transition: opacity 160ms ease, transform 160ms ease;
     }
-    .homeActions .btn{
-      font-size:22px;
-      font-weight:780;
-      letter-spacing:.25px;
+    .ptr.on{
+      opacity: 1;
+      transform: translateY(0);
     }
 
-    /* Modal (unified) */
+    /* Modal */
     .modal{
       position:fixed;
       inset:0;
@@ -422,7 +447,6 @@ Changes (requested):
       min-width: 140px;
     }
 
-    /* Close X (top-right) */
     .xCloseRow{
       display:flex;
       justify-content:flex-end;
@@ -444,7 +468,7 @@ Changes (requested):
       touch-action: manipulation;
     }
 
-    /* Card modal: logo to top + bigger body text + sticky buttons */
+    /* Card modal */
     #cardModal .modalCard{
       display:flex;
       flex-direction:column;
@@ -488,7 +512,6 @@ Changes (requested):
       min-width: 110px;
     }
 
-    /* Card modal logo row (small) */
     .cardLogoRow{
       display:flex;
       align-items:center;
@@ -514,6 +537,15 @@ Changes (requested):
       font-size: 16px;
       line-height: 1.1;
     }
+
+    .touchLock{
+      position:fixed;
+      inset:0;
+      z-index: 9997;
+      background: transparent;
+      pointer-events:none;
+    }
+    .touchLock.on{ pointer-events:auto; }
 
     /* Calendar */
     .calTop{
@@ -567,9 +599,7 @@ Changes (requested):
       background: rgba(43,78,122,.22);
       box-shadow: 0 12px 24px rgba(0,0,0,.18);
     }
-    .calCell.outMonth{
-      opacity:.42;
-    }
+    .calCell.outMonth{ opacity:.42; }
 
     .calHint{
       margin-top:10px;
@@ -577,7 +607,7 @@ Changes (requested):
       color: rgba(235,245,255,.44);
     }
 
-    /* Day popup list */
+    /* Day modal list */
     .dayHint{
       margin: 2px 2px 8px;
       color: rgba(235,245,255,.52);
@@ -634,39 +664,7 @@ Changes (requested):
       white-space:nowrap;
     }
 
-    .touchLock{
-      position:fixed;
-      inset:0;
-      z-index: 9997;
-      background: transparent;
-      pointer-events:none;
-    }
-    .touchLock.on{ pointer-events:auto; }
-
-    .ptr{
-      position: sticky;
-      top: 0;
-      z-index: 5;
-      margin: -10px 0 8px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      height: 28px;
-      color: rgba(235,245,255,.55);
-      font-size: 12px;
-      font-weight: 750;
-      letter-spacing: .2px;
-      user-select:none;
-      pointer-events:none;
-      opacity: 0;
-      transform: translateY(-6px);
-      transition: opacity 160ms ease, transform 160ms ease;
-    }
-    .ptr.on{
-      opacity: 1;
-      transform: translateY(0);
-    }
-
+    /* Heart modal */
     .heartWrap{
       display:flex;
       align-items:center;
@@ -686,8 +684,6 @@ Changes (requested):
       70%{ transform: scale(1.06); opacity: 1; }
       100%{ transform: scale(1.00); opacity: 1; }
     }
-
-    .accentFrame{ position:relative; }
   </style>
 </head>
 
@@ -749,7 +745,6 @@ Changes (requested):
 
           <div class="homeTopRow">
             <input id="homeIdNum" class="field" inputmode="numeric" placeholder="Enter a number (e.g., 1111, 1212, 1234)" />
-            <button id="btnHomeIdentify" class="btn small">Identify</button>
           </div>
 
           <div class="meaningCard" id="homeMeaningCard">
@@ -758,7 +753,7 @@ Changes (requested):
               <div id="homePatternPill" class="patternPill">Pattern: —</div>
             </div>
             <div id="homeMeaningText" class="meaningText">
-              Enter a number above, then tap Identify (or just type) to see its commonly shared meaning.
+              Enter a number above to see its commonly shared meaning.
             </div>
 
             <div id="homeMeta" class="meaningText" style="margin-top:10px; color: rgba(235,245,255,.78); font-size:14px; line-height:1.28;"></div>
@@ -769,15 +764,18 @@ Changes (requested):
             </div>
           </div>
 
+          <div class="subtle">Inspired by a real Angel.</div>
+          <div class="subtle">Local-only. No accounts. No cloud.</div>
+        </div>
+
+        <!-- Fixed footer buttons ALWAYS visible -->
+        <div id="homeFooter">
           <div class="homeActions">
             <button id="btnAddToCalendar" class="btn primary">Add to Calendar</button>
             <button id="btnViewCalendar" class="btn">View Calendar</button>
             <button id="btnHomeExport" class="btn">Export</button>
             <button id="btnExitHome" class="btn danger">Exit</button>
           </div>
-
-          <div class="subtle">Inspired by a real Angel.</div>
-          <div class="subtle">Local-only. No accounts. No cloud.</div>
 
           <div class="footerTiny">
             <div id="homeVerLabel" aria-label="Version label">v1.333</div>
@@ -801,7 +799,6 @@ Changes (requested):
 
           <div id="timeLine" class="timeLine">--:--:-- --, --/--/----</div>
 
-          <!-- Date/Time edit controls: shown ONLY when editing -->
           <div id="dtEditWrap" class="hidden">
             <div class="label">Date/Time</div>
             <input id="dtEdit" class="field" type="datetime-local" />
@@ -895,7 +892,6 @@ Save creates a .txt file on your device.
       </div>
 
       <div class="cardTopScroll">
-        <!-- Logo row at top -->
         <div class="cardLogoRow">
           <div class="cardLogoIcon" aria-hidden="true">
             <svg width="28" height="28" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
@@ -928,7 +924,7 @@ Save creates a .txt file on your device.
     </div>
   </div>
 
-  <!-- Day modal (NO X BUTTON; Close button only) -->
+  <!-- Day modal -->
   <div id="dayModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="dayTitle">
     <div class="modalCard">
       <div class="modalTitle" id="dayTitle">—</div>
@@ -993,7 +989,7 @@ Save creates a .txt file on your device.
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.1A2";
+  const APP_VERSION = "v1.1A3";
   const HOME_VERSION_LABEL = "v1.333";
   const STORAGE_KEY = "angel_numbers_records_v1";
   const DAY_MS = 24*60*60*1000;
@@ -1270,7 +1266,7 @@ Save creates a .txt file on your device.
     }else{
       try{ document.activeElement?.blur(); }catch{}
       if(screen === "home"){
-        try{ $("homeScroll").scrollTop = 0; }catch{}
+        // keep current scroll; do not force to top
       }
     }
   }
@@ -1582,7 +1578,7 @@ Save creates a .txt file on your device.
     return !!(String(number||"").trim() || String(notes||"").trim());
   }
 
-  /* ===== HOME Identify (primary) ===== */
+  /* ===== HOME Identify (auto-search) ===== */
 
   function renderHomeIdentify(){
     const raw = $("homeIdNum").value;
@@ -1592,7 +1588,7 @@ Save creates a .txt file on your device.
       $("homeNumBig").textContent = "—";
       $("homePatternPill").textContent = "Pattern: —";
       $("homeMeaningText").textContent =
-        "Enter a number above, then tap Identify (or just type) to see its commonly shared meaning.";
+        "Enter a number above to see its commonly shared meaning.";
       $("homeMeta").textContent =
         "How to use: Treat the meaning as a reflective prompt—what it “means” depends on context and personal interpretation.";
       return;
@@ -1608,11 +1604,9 @@ Save creates a .txt file on your device.
   }
 
   $("homeIdNum").addEventListener("input", renderHomeIdentify);
-  $("btnHomeIdentify").addEventListener("click", (e)=>{ e.preventDefault(); renderHomeIdentify(); try{ $("homeIdNum").blur(); }catch{} });
   $("homeIdNum").addEventListener("keydown", (e)=>{
     if(e.key === "Enter"){
       e.preventDefault();
-      renderHomeIdentify();
       try{ e.target.blur(); }catch{}
     }
   });
@@ -2113,18 +2107,7 @@ Save creates a .txt file on your device.
     }
   }
 
-  /* ===== Install / Exit ===== */
-
-  let deferredPrompt = null;
-
-  window.addEventListener("beforeinstallprompt", (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-  });
-
-  function isShareAvailable(){
-    return !!(navigator.share && typeof navigator.share === "function");
-  }
+  /* ===== Exit ===== */
 
   /* KEEP THIS EXIT FUNCTION EXACTLY (known-good) */
   $("btnExitHome").addEventListener("click", () => {
@@ -2144,17 +2127,15 @@ Save creates a .txt file on your device.
     }
     const pattern = detectPattern(n);
     const meaning = deriveMeaning(n, pattern).meaning;
-    // Prefill Add screen number; notes left empty (user can add context).
     enterAddNewPrefilled(n, "", "home");
-    // Also prime the add meaning UI to match the home meaning.
+    // Prime Add meaning UI to match home
     updateMeaningUI(pattern, meaning);
   });
 
   $("btnViewCalendar").addEventListener("click", () => showInstant("calendar"));
 
   $("btnHomeExport").addEventListener("click", () => {
-    // Home export = All entries (respects local storage)
-    const recs = loadRecords().slice().reverse(); // chronological
+    const recs = loadRecords().slice().reverse();
     exportReport(
       recs,
       {
@@ -2171,11 +2152,9 @@ Save creates a .txt file on your device.
 
   $("dtEdit").addEventListener("change", () => {
     const ts = fromLocalDatetimeValue($("dtEdit").value);
-    if(ts != null){
-      if(editTs != null){
-        editTs = ts;
-        tickTime();
-      }
+    if(ts != null && editTs != null){
+      editTs = ts;
+      tickTime();
     }
   });
 
@@ -2399,12 +2378,10 @@ self.addEventListener('fetch', (e)=>{ });`;
   $("btnHeartClose").addEventListener("click", (e)=>{ e.preventDefault(); closeHeart(); });
   $("heartModal").addEventListener("click", (e)=>{ if(e.target === $("heartModal")) closeHeart(); });
 
-  // Keep the existing hidden heart easter egg on version label (5 taps)
   let vTapCount = 0;
   let vTapTimer = null;
   $("homeVerLabel").textContent = HOME_VERSION_LABEL;
   $("homeVerLabel").addEventListener("click", (e) => {
-    // prevent the click from also counting toward the screenArea quadruple tap burst
     e.stopPropagation();
     if(animating) return;
     vTapCount++;
@@ -2444,9 +2421,9 @@ self.addEventListener('fetch', (e)=>{ });`;
     if(animating) return false;
     if(!(ev.touches && ev.touches.length === 1)) return false;
 
-    const home = $("home");
-    if(!home) return false;
-    if(home.scrollTop > 0) return false;
+    const sc = $("homeScroll");
+    if(!sc) return false;
+    if(sc.scrollTop > 0) return false;
 
     const t = ev.target;
     if(t && t.closest && t.closest("button, input, textarea, select")) return false;
@@ -2508,12 +2485,12 @@ self.addEventListener('fetch', (e)=>{ });`;
   }
 
   function attachHomePTR(){
-    const home = $("home");
-    if(!home) return;
-    home.addEventListener("touchstart", ptrStart, {passive:true});
-    home.addEventListener("touchmove", ptrMove, {passive:false});
-    home.addEventListener("touchend", ptrEnd, {passive:true});
-    home.addEventListener("touchcancel", ptrEnd, {passive:true});
+    const sc = $("homeScroll");
+    if(!sc) return;
+    sc.addEventListener("touchstart", ptrStart, {passive:true});
+    sc.addEventListener("touchmove", ptrMove, {passive:false});
+    sc.addEventListener("touchend", ptrEnd, {passive:true});
+    sc.addEventListener("touchcancel", ptrEnd, {passive:true});
   }
 
   /* ===== Init ===== */
@@ -2526,7 +2503,37 @@ self.addEventListener('fetch', (e)=>{ });`;
   attachSwipes();
   attachHomePTR();
 
-  // Home is Identify now
+  function renderHomeIdentify(){
+    const raw = $("homeIdNum").value;
+    const n = normalizeNumberInput(raw);
+
+    if(!n){
+      $("homeNumBig").textContent = "—";
+      $("homePatternPill").textContent = "Pattern: —";
+      $("homeMeaningText").textContent =
+        "Enter a number above to see its commonly shared meaning.";
+      $("homeMeta").textContent =
+        "How to use: Treat the meaning as a reflective prompt—what it “means” depends on context and personal interpretation.";
+      return;
+    }
+
+    const pattern = detectPattern(n);
+    const out = deriveMeaning(n, pattern);
+
+    $("homeNumBig").textContent = n;
+    $("homePatternPill").textContent = `Pattern: ${out.pattern || pattern || "—"}`;
+    $("homeMeaningText").textContent = out.meaning || "—";
+    $("homeMeta").textContent = buildIdentifyMeta(n, out.pattern || pattern || "—");
+  }
+
+  $("homeIdNum").addEventListener("input", renderHomeIdentify);
+  $("homeIdNum").addEventListener("keydown", (e)=>{
+    if(e.key === "Enter"){
+      e.preventDefault();
+      try{ e.target.blur(); }catch{}
+    }
+  });
+
   renderHomeIdentify();
   showInstant("home");
 
@@ -2543,14 +2550,12 @@ self.addEventListener('fetch', (e)=>{ });`;
 <!--
 EOF Version Detail Notes (required)
 App: Angel Numbers Tracker
-Actual Version: v1.1A2
+Actual Version: v1.1A3
 Home Label (visual only): v1.333 (do not change unless instructed)
-Base: v1.1A1 (canonical)
+Base: v1.1A2
 Changes:
-- Home panel is now Identify (primary).
-- Home layout: large “Identify Angel Number” title + number input + results/characteristics.
-- Home actions: Add to Calendar (prefilled Add screen), View Calendar, Export (all entries), Exit.
-- Version label remains at bottom; quadruple-tap anywhere on the screen area opens Version modal.
-- Swipe cycle updated: home ↔ calendar.
-- Add/Edit, calendar day browsing, card modal, exports remain consistent.
+- Home screen: buttons moved into fixed footer (always visible) so nothing is unreachable.
+- Home content area scrolls vertically; footer remains pinned.
+- Removed Identify button; identify runs automatically on typing.
+- Reduced top spacing to eliminate empty “dead” area near top.
 -->
