@@ -1,8 +1,12 @@
-<!-- Angel Numbers Tracker v1.0A1 -->
+<!-- Angel Numbers Tracker v1.0A2 -->
 <!--
 Single-file, offline-first PWA.
 Base UI/UX derived from Vitals Tracker v1.19B7 (Keyth Jyles).
 Purpose: Log “angel number” sightings + auto-meaning (cultural/numerology) + weekly charts + export.
+
+v1.0A2 changes:
+- FIX: Export report header now preserves intentional blank lines (removed filter(Boolean)).
+  This prevents the first record from appearing indented under wrapped bullet lines.
 -->
 
 <!doctype html>
@@ -528,7 +532,7 @@ Purpose: Log “angel number” sightings + auto-meaning (cultural/numerology) +
         <div class="subtle">Local-only. No accounts. No cloud.</div>
 
         <div class="footerTiny">
-          <div>v1.0A1</div>
+          <div>v1.0A2</div>
           <div>developed by Keyth Jyles</div>
         </div>
       </div>
@@ -648,7 +652,7 @@ Optional:
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.0A1";
+  const APP_VERSION = "v1.0A2";
   const STORAGE_KEY = "angel_numbers_records_v1";
   const DAY_MS = 24*60*60*1000;
 
@@ -705,11 +709,6 @@ Optional:
 
   const $ = (id) => document.getElementById(id);
   const screens = ["home","add","log","charts"];
-
-  function numOrNull(v){
-    const n = Number(v);
-    return Number.isFinite(n) ? n : null;
-  }
 
   function loadRecords(){
     try{
@@ -830,7 +829,6 @@ Optional:
 
   function normalizeNumberInput(raw){
     const s = String(raw ?? "").trim();
-    // Keep digits only; allow user to type spaces or separators
     const digits = s.replace(/[^\d]/g, "");
     return digits;
   }
@@ -885,9 +883,7 @@ Optional:
   }
 
   function digitSummary(s){
-    // Dominant digit for repeating patterns
     if(isAllSame(s)) return DIGIT_MEANING[s[0]] || "";
-    // If mostly one digit, offer that
     const counts = {};
     for(const ch of s){ counts[ch] = (counts[ch]||0) + 1; }
     let best = null, bestN = 0;
@@ -897,9 +893,8 @@ Optional:
     if(best && bestN >= Math.max(2, Math.ceil(s.length * 0.6))){
       return DIGIT_MEANING[best] || "";
     }
-    // Otherwise use sum-of-digits as a reflective angle
     const sum = s.split("").reduce((a,ch)=>a + (ch.charCodeAt(0)-48), 0);
-    const root = ((sum - 1) % 9) + 1; // 1-9
+    const root = ((sum - 1) % 9) + 1;
     const rootLine = DIGIT_MEANING[String(root)] || "";
     return rootLine ? `Digit-sum lens (${sum} → ${root}): ${rootLine}` : "";
   }
@@ -907,19 +902,16 @@ Optional:
   function deriveMeaning(s, pattern){
     if(!s) return {pattern:"—", meaning:"Enter a number to see its commonly shared meaning."};
 
-    // Direct lookup
     if(ANGEL_MAP[s]){
       return {pattern, meaning: ANGEL_MAP[s]};
     }
 
-    // Common shorthand: 4 digits repeating like 4444, 7777
     if(isAllSame(s) && s.length >= 2){
       const d = s[0];
       const base = DIGIT_MEANING[d] || "A repeating pattern—often treated as a heightened emphasis.";
       return {pattern, meaning: `Emphasis pattern (${s}): ${base}`};
     }
 
-    // Sequential meanings
     if(pattern === "Sequential (up)"){
       return {pattern, meaning: "Step-by-step progress. Keep it simple, keep moving, and let momentum build."};
     }
@@ -927,20 +919,17 @@ Optional:
       return {pattern, meaning: "Release and simplify. Let go of what’s extra and return to essentials."};
     }
 
-    // Double pattern meanings (e.g., 1212, 3434)
     if(pattern === "Double pattern"){
       const half = s.slice(0, s.length/2);
       const lens = digitSummary(half);
       return {pattern, meaning: `Reinforced signal (repeated block ${half}): a theme repeating until you notice it.\n${lens}`.trim()};
     }
 
-    // Mirror meanings
     if(pattern === "Mirror (palindrome)"){
       const lens = digitSummary(s);
       return {pattern, meaning: `Reflection and alignment. Consider what’s being mirrored back—choices, habits, or timing.\n${lens}`.trim()};
     }
 
-    // Fallback: digit lens
     const lens = digitSummary(s);
     const fallback =
       "A general interpretation is heightened awareness: notice your thoughts, environment, and choices—then act deliberately.";
@@ -1030,7 +1019,6 @@ Optional:
   }
 
   $("anum").addEventListener("input", () => {
-    // Keep cursor behavior friendly: do not rewrite field, only compute meaning.
     updateMeaningUI();
   });
 
@@ -1155,14 +1143,12 @@ Optional:
     modalPrevFocus = document.activeElement || null;
     modalOpenedAt = Date.now();
 
-    const m = $("editModal");
     const btnEdit = $("btnEditConfirm");
-
     btnEdit.disabled = true;
     if(enableEditTimer) clearTimeout(enableEditTimer);
     enableEditTimer = setTimeout(() => { btnEdit.disabled = false; }, 450);
 
-    m.classList.remove("hidden");
+    $("editModal").classList.remove("hidden");
 
     setTimeout(() => {
       try{ $("btnEditCancel").focus({preventScroll:true}); }catch{}
@@ -1446,23 +1432,26 @@ Optional:
 
   function buildReportHeader({title, rangeLabel, notes}){
     const now = fmtDateTime(Date.now());
-    const lines = [
-      "Angel Numbers Tracker — Export Report",
-      `App Version: ${APP_VERSION}`,
-      `Report: ${title}`,
-      `Generated: ${now}`,
-      rangeLabel ? `Range: ${rangeLabel}` : "",
-      "",
-      "How this data was captured:",
-      "- Sightings are entered manually into Angel Numbers Tracker on this device.",
-      "- Data is stored locally on the phone (no cloud sync, no account).",
-      "- Each record may include the number, pattern type, a cultural/numerology meaning, and optional notes.",
-      "",
-      notes ? notes : "",
-      "",
-      "------------------------------",
-      ""
-    ].filter(Boolean);
+
+    const lines = [];
+    lines.push("Angel Numbers Tracker — Export Report");
+    lines.push(`App Version: ${APP_VERSION}`);
+    lines.push(`Report: ${title}`);
+    lines.push(`Generated: ${now}`);
+    if(rangeLabel) lines.push(`Range: ${rangeLabel}`);
+    lines.push("");
+    lines.push("How this data was captured:");
+    lines.push("- Sightings are entered manually into Angel Numbers Tracker on this device.");
+    lines.push("- Data is stored locally on the phone (no cloud sync, no account).");
+    lines.push("- Each record may include the number, pattern type, a cultural/numerology meaning, and optional notes.");
+    lines.push("");
+    if(notes){
+      lines.push(String(notes).trim());
+      lines.push("");
+    }
+    lines.push("------------------------------");
+    lines.push("");
+
     return lines.join("\n");
   }
 
@@ -1479,6 +1468,7 @@ Optional:
     });
 
     const out = header + lines.join("\n");
+
     const ts = new Date();
     const y = ts.getFullYear();
     const m = String(ts.getMonth()+1).padStart(2,"0");
@@ -1493,8 +1483,6 @@ Optional:
 
   /* =========================
      Charts (weekly, frequency over time)
-     - Time-true view (pinch/pan) preserved.
-     - Y axis = count of sightings.
      ========================= */
 
   const chartView = {
@@ -1625,7 +1613,6 @@ Optional:
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
 
-    // plot at center of each day bucket
     const baseMin = startOfDay(chartView.baseMin);
     const pts = [];
     for(let i=0;i<7;i++){
@@ -1644,7 +1631,6 @@ Optional:
     }
     ctx.stroke();
 
-    // points
     ctx.fillStyle = "rgba(235,245,255,.92)";
     for(const p of pts){
       const x = xFromTs(p.ts, tMin, tMax, pad, W);
@@ -1671,7 +1657,6 @@ Optional:
     const plotY0 = pad.t;
     const plotY1 = H - pad.b;
 
-    // frame
     ctx.lineWidth = 1;
     ctx.strokeStyle = "rgba(235,245,255,.12)";
     ctx.fillStyle = "rgba(255,255,255,.02)";
@@ -1683,7 +1668,6 @@ Optional:
     const tMin = chartView.viewMin;
     const tMax = chartView.viewMax;
 
-    // day bands (within current view)
     ctx.save();
     ctx.beginPath();
     ctx.rect(plotX0, plotY0, plotX1-plotX0, plotY1-plotY0);
@@ -1711,16 +1695,13 @@ Optional:
     }
     ctx.restore();
 
-    // compute daily counts for the selected base week (but display within view)
     const allWeek = loadRecords().filter(r => r.ts >= chartView.baseMin && r.ts <= chartView.baseMax);
     const counts = buildDailyCounts(allWeek, startOfDay(chartView.baseMin));
     const maxCount = Math.max(1, ...counts);
 
-    // y range
     let yMin = 0;
     let yMax = Math.max(3, maxCount + 1);
 
-    // grid + y labels
     ctx.font = "16px system-ui,Segoe UI,Roboto";
     ctx.fillStyle = "rgba(235,245,255,.60)";
     ctx.strokeStyle = "rgba(235,245,255,.10)";
@@ -1738,7 +1719,6 @@ Optional:
       ctx.fillText(String(val), 16, y+6);
     }
 
-    // x labels (days)
     ctx.fillStyle = "rgba(235,245,255,.90)";
     ctx.font = "20px system-ui,Segoe UI,Roboto";
     ctx.textAlign = "center";
@@ -1768,10 +1748,8 @@ Optional:
     }
     ctx.textAlign = "start";
 
-    // line + points
     drawCountsLine(ctx, counts, tMin, tMax, yMin, yMax, pad, W, H);
 
-    // legend
     const lx = pad.l + 10;
     const ly = pad.t + 30;
 
@@ -1781,7 +1759,6 @@ Optional:
     ctx.fillStyle = "rgba(235,245,255,.88)";
     ctx.fillText("S i g h t i n g s", lx+38, ly-6);
 
-    // empty message (if truly none in base week)
     const total = counts.reduce((a,b)=>a+b,0);
     if(total === 0){
       ctx.fillStyle = "rgba(235,245,255,.46)";
@@ -1993,7 +1970,6 @@ Optional:
       return;
     }
 
-    // If they only typed notes, still allow save, but number shown as blank.
     const pattern = number ? detectPattern(number) : "—";
     const meaning = number ? deriveMeaning(number, pattern).meaning : "—";
 
@@ -2035,7 +2011,6 @@ Optional:
 
   /* =========================
      SEARCH BEHAVIOR
-     - Search runs only on button click or Enter key.
      ========================= */
 
   function runSearch(){
@@ -2194,4 +2169,4 @@ self.addEventListener('fetch', (e)=>{ });`;
 })();
 </script>
 </body>
-  </html>
+</html>
