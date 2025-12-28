@@ -1,20 +1,17 @@
-<!-- Angel Numbers Tracker v1.1A7 -->
+<!-- Angel Numbers Tracker v1.1A8 -->
 <!--
 Version Detail Notes
-App Version: v1.1A7
+App Version: v1.1A8
 Base: v1.1A6
 
 Changes (requested):
-1) Update all version mentions to v1.1A7.
-2) Edge-swipe starts within 150px of left/right edge.
-3) Build Day List popup:
-   - Logo at top
-   - Instruction line
-   - Vertically tight clickable list of angel numbers for that day
-   - Click a number to view details
-4) Remove “in-app only” wording from Add popup subtext.
-5) Remove Copy/Export from Add popup (no copy/export from Add screen).
-6) Remove Export button from Calendar screen (no calendar export button).
+- Update ALL version mentions to current version.
+- Smoother left/right panel swipe experience (edge-swipe start within 150px; animated, velocity-aware snap).
+- Add Day List popup: logo at top + tight clickable list for that day + instruction to tap a number to view details.
+- Adding an entry stores and displays date/time; date/time editable in Edit Record screen.
+- Remove “in app only” from Add popup.
+- Remove Copy/Export from Add popup.
+- Remove Export button from Calendar screen (calendar itself has nothing meaningful visible to export).
 
 Notes:
 - BOF/EOF comment blocks preserved.
@@ -114,10 +111,28 @@ Notes:
       flex:1;
       overflow:hidden;
       border-radius: var(--radius);
-      touch-action: pan-y; /* allow vertical pan */
+      touch-action: pan-y;
+    }
+
+    /* New deck for smooth panel swipe */
+    .deck{
+      position:absolute;
+      inset:0;
+      display:flex;
+      width:200%;
+      height:100%;
+      transform: translate3d(0,0,0);
+      will-change: transform;
+    }
+    .deck.anim{
+      transition: transform 260ms cubic-bezier(.2,.9,.2,1);
     }
 
     .card{
+      flex: 0 0 50%;
+      width: 50%;
+      height: 100%;
+
       background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
       border:3px solid var(--accentBorder);
       border-radius: var(--radius);
@@ -125,11 +140,9 @@ Notes:
       padding: var(--pad);
       backdrop-filter: blur(10px);
 
-      position:absolute;
-      inset:0;
-
       overflow:hidden;
       touch-action: pan-y;
+      position:relative;
     }
 
     .hidden{ display:none !important; }
@@ -524,60 +537,76 @@ Notes:
       color: rgba(235,245,255,.44);
     }
 
-    /* Day list modal */
-    .miniLogo{
+    /* Day list (tight) */
+    .dayLogoRow{
       display:flex;
       justify-content:center;
-      align-items:center;
-      margin: 2px 0 10px;
+      margin: 2px 0 6px;
       user-select:none;
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
     }
-    .miniLogo svg{
-      width: 260px;
-      max-width: 100%;
+    .dayLogoRow svg{
+      width: 92%;
       height: auto;
-      display:block;
-      opacity: .95;
+      max-width: 420px;
+      opacity: .96;
       filter: drop-shadow(0 10px 22px rgba(0,0,0,.35));
     }
-    .dayListWrap{
-      border: 1px solid rgba(235,245,255,.10);
+    .dayList{
+      border:1px solid rgba(235,245,255,.10);
       background: rgba(255,255,255,.02);
       border-radius: 18px;
-      padding: 8px;
-      max-height: 46vh;
-      overflow:auto;
-      -webkit-overflow-scrolling: touch;
+      overflow:hidden;
     }
     .dayItem{
-      width:100%;
-      border-radius: 14px;
-      border: 1px solid rgba(235,245,255,.14);
-      background: rgba(255,255,255,.03);
-      color: rgba(235,245,255,.86);
-      font-weight: 850;
-      font-size: 18px;
-      height: 44px;              /* vertically tight */
-      padding: 0 12px;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap: 10px;
-      margin: 6px 0;
+      gap:10px;
+      padding: 10px 12px;
+      border-top:1px solid rgba(235,245,255,.08);
       user-select:none;
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
-      text-align:left;
+      cursor:pointer;
     }
+    .dayItem:first-child{ border-top:none; }
     .dayItem:active{ transform: translateY(1px); }
-    .dayItem small{
-      font-weight: 800;
+    .dayLeft{
+      display:flex;
+      align-items:baseline;
+      gap:10px;
+      min-width:0;
+    }
+    .dayTime{
       font-size: 12px;
-      color: rgba(235,245,255,.52);
+      font-weight: 900;
       letter-spacing:.2px;
+      color: rgba(235,245,255,.62);
       white-space:nowrap;
+    }
+    .dayNum{
+      font-size: 16px;
+      font-weight: 950;
+      color: rgba(235,245,255,.90);
+      white-space:nowrap;
+    }
+    .dayNotes{
+      margin-left:auto;
+      font-size: 12px;
+      color: rgba(235,245,255,.48);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 45%;
+    }
+    .chev{
+      font-size: 16px;
+      font-weight: 900;
+      color: rgba(235,245,255,.55);
+      margin-left: 10px;
+      flex:0 0 auto;
     }
   </style>
 </head>
@@ -629,76 +658,76 @@ Notes:
       </svg>
     </div>
 
-    <!-- Version under logo -->
     <div class="verUnderLogo" id="verUnderLogo">v—</div>
 
     <div class="screenArea" id="screenArea">
-      <!-- HOME (Identify) -->
-      <div id="home" class="card">
-        <div id="homeScroll">
-          <div class="homeTitle">Identify Angel Number</div>
+      <div class="deck" id="deck">
+        <!-- HOME (Identify) -->
+        <div id="home" class="card">
+          <div id="homeScroll">
+            <div class="homeTitle">Identify Angel Number</div>
 
-          <div class="homeTopRow">
-            <input id="homeIdNum" class="field" inputmode="numeric"
-                   autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-                   placeholder="Enter a number (e.g., 1111, 1212, 1234)" />
-          </div>
-
-          <div class="meaningCard" id="homeMeaningCard">
-            <div class="meaningTop">
-              <div id="homeNumBig" class="numBig">—</div>
-              <div id="homePatternPill" class="patternPill">Pattern: —</div>
+            <div class="homeTopRow">
+              <input id="homeIdNum" class="field" inputmode="numeric"
+                     autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                     placeholder="Enter a number (e.g., 1111, 1212, 1234)" />
             </div>
 
-            <div id="homeMeaningText" class="meaningText">
-              Enter a number above to see its commonly shared meaning.
-            </div>
+            <div class="meaningCard" id="homeMeaningCard">
+              <div class="meaningTop">
+                <div id="homeNumBig" class="numBig">—</div>
+                <div id="homePatternPill" class="patternPill">Pattern: —</div>
+              </div>
 
-            <div id="homeMeta" class="metaScroll">
+              <div id="homeMeaningText" class="meaningText">
+                Enter a number above to see its commonly shared meaning.
+              </div>
+
+              <div id="homeMeta" class="metaScroll">
 How to use: Treat the meaning as a reflective prompt—what it “means” depends on context and personal interpretation.
+              </div>
+
+              <div class="disclaimer">
+                Cultural note: these meanings come from numerology/“angel number” traditions and vary by source.
+                Treat as reflective prompts, not facts or predictions.
+              </div>
             </div>
 
-            <div class="disclaimer">
-              Cultural note: these meanings come from numerology/“angel number” traditions and vary by source.
-              Treat as reflective prompts, not facts or predictions.
+            <div class="subtle">Inspired by a real Angel.</div>
+            <div class="subtle">Local-only. No accounts. No cloud.</div>
+          </div>
+
+          <div id="homeFooter">
+            <div class="homeActions">
+              <button id="btnAddToCalendar" class="btn primary">Add to Calendar</button>
+              <button id="btnViewCalendar" class="btn">View Calendar</button>
+              <button id="btnHomeExport" class="btn">Export</button>
+              <button id="btnExitHome" class="btn danger">Exit</button>
+            </div>
+
+            <div class="footerTiny">
+              <div id="homeVerLabel" aria-label="Version label">v—</div>
+              <div>developed by Keyth Jyles</div>
             </div>
           </div>
-
-          <div class="subtle">Inspired by a real Angel.</div>
-          <div class="subtle">Local-only. No accounts. No cloud.</div>
         </div>
 
-        <!-- Fixed footer buttons ALWAYS visible -->
-        <div id="homeFooter">
-          <div class="homeActions">
-            <button id="btnAddToCalendar" class="btn primary">Add to Calendar</button>
-            <button id="btnViewCalendar" class="btn">View Calendar</button>
-            <button id="btnHomeExport" class="btn">Export</button>
-            <button id="btnExitHome" class="btn danger">Exit</button>
+        <!-- CALENDAR -->
+        <div id="calendar" class="card">
+          <div class="row center">
+            <div class="grow"></div>
+            <button id="btnBackFromCalendar" class="btn small">Back</button>
           </div>
 
-          <div class="footerTiny">
-            <div id="homeVerLabel" aria-label="Version label">v—</div>
-            <div>developed by Keyth Jyles</div>
+          <div class="calTop">
+            <input id="calMonth" class="field" type="month" />
+            <button id="btnCalToday" class="btn small">Today</button>
           </div>
-        </div>
-      </div>
 
-      <!-- CALENDAR -->
-      <div id="calendar" class="card hidden">
-        <div class="row center">
-          <div class="grow"></div>
-          <button id="btnBackFromCalendar" class="btn small">Back</button>
+          <div class="calGrid" id="calDowRow"></div>
+          <div class="calGrid" id="calGrid"></div>
+          <div class="calHint">Tap a highlighted day to view entries.</div>
         </div>
-
-        <div class="calTop">
-          <input id="calMonth" class="field" type="month" />
-          <button id="btnCalToday" class="btn small">Today</button>
-        </div>
-
-        <div class="calGrid" id="calDowRow"></div>
-        <div class="calGrid" id="calGrid"></div>
-        <div class="calHint">Tap a highlighted day to view entries.</div>
       </div>
     </div>
   </div>
@@ -733,7 +762,7 @@ Save creates a .txt file on your device.
     </div>
   </div>
 
-  <!-- Add-to-Calendar modal (new flow) -->
+  <!-- Add-to-Calendar modal -->
   <div id="addCalModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="addCalTitle">
     <div class="modalCard">
       <div class="xCloseRow">
@@ -741,7 +770,7 @@ Save creates a .txt file on your device.
       </div>
 
       <div class="modalTitle" id="addCalTitle">Add to Calendar</div>
-      <div class="modalSub" id="addCalSub">This adds an entry to the calendar on this device (local-only).</div>
+      <div class="modalSub" id="addCalSub">This adds an entry to your calendar on this device.</div>
 
       <div class="label" style="margin-top:6px;">Number</div>
       <div id="addCalNumber" class="field" style="display:flex; align-items:center; font-weight:900;">—</div>
@@ -756,63 +785,55 @@ Save creates a .txt file on your device.
     </div>
   </div>
 
-  <!-- Day List modal -->
+  <!-- Day list modal -->
   <div id="dayListModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="dayListTitle">
     <div class="modalCard">
       <div class="xCloseRow">
         <button class="xBtn" id="btnDayListX" aria-label="Close">×</button>
       </div>
 
-      <div class="miniLogo" aria-hidden="true">
-        <svg viewBox="0 0 900 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Angel Numbers Tracker">
-          <defs>
-            <linearGradient id="angG2" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#8a6bff"/>
-              <stop offset="55%" stop-color="#4fa3ff"/>
-              <stop offset="100%" stop-color="#2f78ff"/>
-            </linearGradient>
-            <filter id="angS2" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="rgba(0,0,0,.35)"/>
-            </filter>
-          </defs>
+      <div class="dayLogoRow" aria-hidden="true" id="dayLogoRow"></div>
 
-          <g transform="translate(46 24)" filter="url(#angS2)">
-            <rect x="0" y="0" width="92" height="92" rx="26" fill="rgba(255,255,255,.06)" stroke="rgba(235,245,255,.22)" stroke-width="2"/>
-            <ellipse cx="46" cy="24" rx="20" ry="8" fill="none" stroke="rgba(235,245,255,.88)" stroke-width="4" opacity=".92"/>
+      <div class="modalTitle" id="dayListTitle">Day</div>
+      <div class="modalSub" id="dayListSub">Tap a number to view details.</div>
 
-            <path d="M46 50
-                     C34 42, 22 44, 16 54
-                     C24 58, 32 66, 38 76
-                     C40 66, 43 58, 46 50Z"
-                  fill="none" stroke="url(#angG2)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-
-            <path d="M46 50
-                     C58 42, 70 44, 76 54
-                     C68 58, 60 66, 54 76
-                     C52 66, 49 58, 46 50Z"
-                  fill="none" stroke="url(#angG2)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-
-            <path d="M46 34 L46 42" stroke="rgba(235,245,255,.82)" stroke-width="4" stroke-linecap="round"/>
-            <path d="42 38 L50 38" stroke="rgba(235,245,255,.82)" stroke-width="4" stroke-linecap="round"/>
-          </g>
-
-          <text x="160" y="92"
-                font-family="system-ui,Segoe UI,Roboto,Helvetica,Arial"
-                font-size="66"
-                font-weight="860"
-                fill="url(#angG2)"
-                letter-spacing=".6"
-                filter="url(#angS2)">Angel Numbers Tracker</text>
-        </svg>
-      </div>
-
-      <div class="modalTitle" id="dayListTitle">Day Entries</div>
-      <div class="modalSub" id="dayListSub">Click a number to view the details.</div>
-
-      <div class="dayListWrap" id="dayListWrap"></div>
+      <div class="dayList" id="dayList"></div>
 
       <div class="modalBtns">
         <button id="btnDayListClose" class="btn primary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit record modal -->
+  <div id="editModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+    <div class="modalCard">
+      <div class="xCloseRow">
+        <button class="xBtn" id="btnEditX" aria-label="Close">×</button>
+      </div>
+
+      <div class="modalTitle" id="editTitle">Edit Entry</div>
+      <div class="modalSub" id="editSub">Update date/time, number, or notes.</div>
+
+      <div class="label" style="margin-top:6px;">Date &amp; time</div>
+      <input id="editDT" class="field" type="datetime-local" />
+
+      <div class="label">Number</div>
+      <input id="editNum" class="field" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="e.g., 1111" />
+
+      <div class="label">Notes (optional)</div>
+      <textarea id="editNotes" class="field" placeholder="Notes..."></textarea>
+
+      <div class="label">Pattern</div>
+      <div id="editPattern" class="field" style="display:flex; align-items:center; font-weight:900; color: rgba(235,245,255,.84);">—</div>
+
+      <div class="label">Meaning</div>
+      <div id="editMeaning" class="metaScroll" style="max-height: 170px;">—</div>
+
+      <div class="modalBtns">
+        <button id="btnEditSave" class="btn primary">Save</button>
+        <button id="btnEditDelete" class="btn danger">Delete</button>
+        <button id="btnEditCancel" class="btn">Cancel</button>
       </div>
     </div>
   </div>
@@ -856,7 +877,7 @@ Save creates a .txt file on your device.
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.1A7";
+  const APP_VERSION = "v1.1A8";
   const STORAGE_KEY = "angel_numbers_records_v1";
   const DAY_MS = 24*60*60*1000;
 
@@ -912,6 +933,7 @@ Save creates a .txt file on your device.
       return arr
         .filter(r => r && typeof r.ts === "number")
         .map(r => ({
+          id: (r.id ?? "").toString() || makeId(r.ts),
           ts: r.ts,
           number: (r.number ?? "").toString(),
           pattern: (r.pattern ?? "").toString(),
@@ -934,6 +956,21 @@ Save creates a .txt file on your device.
     saveRecords(recs);
   }
 
+  function updateRecordById(id, patch){
+    const recs = loadRecords();
+    const idx = recs.findIndex(r => r.id === id);
+    if(idx < 0) return false;
+    recs[idx] = { ...recs[idx], ...patch };
+    recs.sort((a,b)=> b.ts - a.ts);
+    saveRecords(recs);
+    return true;
+  }
+
+  function deleteRecordById(id){
+    const recs = loadRecords().filter(r => r.id !== id);
+    saveRecords(recs);
+  }
+
   /* ===== Utilities ===== */
 
   function fmtDateTime(ts){
@@ -949,9 +986,14 @@ Save creates a .txt file on your device.
     return `${mm}/${dd}/${yy}, ${hh}:${mi}:${ss}${dp}`;
   }
 
-  function fmtDate(ts){
+  function fmtDayTitle(ts){
     const d = new Date(ts);
     return new Intl.DateTimeFormat(undefined, { weekday:"long", year:"numeric", month:"long", day:"numeric" }).format(d);
+  }
+
+  function fmtTimeShort(ts){
+    const d = new Date(ts);
+    return new Intl.DateTimeFormat(undefined, { hour:"2-digit", minute:"2-digit" }).format(d);
   }
 
   function startOfDay(ts){
@@ -963,6 +1005,30 @@ Save creates a .txt file on your device.
   function normalizeNumberInput(raw){
     const s = String(raw ?? "").trim();
     return s.replace(/[^\d]/g, "");
+  }
+
+  function makeId(seedTs){
+    const r = Math.random().toString(16).slice(2);
+    return `an_${seedTs}_${r}`;
+  }
+
+  function toDTLocalValue(ts){
+    const d = new Date(ts);
+    const pad = (n)=>String(n).padStart(2,"0");
+    const y = d.getFullYear();
+    const m = pad(d.getMonth()+1);
+    const da = pad(d.getDate());
+    const hh = pad(d.getHours());
+    const mi = pad(d.getMinutes());
+    return `${y}-${m}-${da}T${hh}:${mi}`;
+  }
+
+  function fromDTLocalValue(v){
+    const s = String(v || "").trim();
+    if(!s) return null;
+    const d = new Date(s);
+    const t = d.getTime();
+    return Number.isFinite(t) ? t : null;
   }
 
   async function copyToClipboard(text){
@@ -1114,19 +1180,6 @@ Save creates a .txt file on your device.
     el.classList.remove("on");
     if(lockTimer) clearTimeout(lockTimer);
     lockTimer = null;
-  }
-
-  /* ===== Screens ===== */
-
-  let currentScreen = "home";
-  function showInstant(screen){
-    unlockTouches();
-    for(const s of ["home","calendar"]){
-      $(s).classList.toggle("hidden", s !== screen);
-    }
-    currentScreen = screen;
-    if(screen === "calendar") { initMonthDefaultIfNeeded(); renderCalendar(); }
-    try{ document.activeElement?.blur(); }catch{}
   }
 
   /* ===== Styled modals ===== */
@@ -1326,89 +1379,21 @@ Save creates a .txt file on your device.
     const n = String($("addCalNumber").textContent || "").trim();
     const notes = String($("addCalNotes").value || "").trim();
 
-    const pattern = lastIdentify.pattern || detectPattern(n);
-    const meaning = lastIdentify.meaning || deriveMeaning(n, detectPattern(n)).meaning;
+    const pattern = detectPattern(n);
+    const meaning = deriveMeaning(n, pattern).meaning;
 
     const ts = Date.now();
-    const rec = { ts, number: n, pattern, meaning, notes };
+    const rec = { id: makeId(ts), ts, number: n, pattern, meaning, notes };
 
     addRecord(rec);
     closeAddCalModal();
     openInfo("Added", `Saved:\n\n${n}\n${fmtDateTime(ts)}`);
+    if(getDeckIndex() === 1){
+      renderCalendar();
+    }
   });
 
-  /* ===== Day List modal ===== */
-
-  let dayListState = { dayStart: null, recs: [] };
-
-  function openDayListModal(dayStart, recs){
-    dayListState = { dayStart, recs: Array.isArray(recs) ? recs.slice() : [] };
-    const title = fmtDate(dayStart);
-    $("dayListTitle").textContent = title;
-    $("dayListSub").textContent = "Click a number to view the details.";
-    renderDayListItems();
-    $("dayListModal").classList.remove("hidden");
-    lockTouches(140);
-    try{ document.activeElement?.blur(); }catch{}
-  }
-
-  function closeDayListModal(){
-    $("dayListModal").classList.add("hidden");
-    unlockTouches();
-    dayListState = { dayStart: null, recs: [] };
-  }
-
-  function renderDayListItems(){
-    const wrap = $("dayListWrap");
-    wrap.innerHTML = "";
-
-    const recs = (dayListState.recs || []).slice().sort((a,b)=> a.ts - b.ts);
-    if(recs.length === 0){
-      const empty = document.createElement("div");
-      empty.className = "modalSub";
-      empty.style.margin = "6px 2px 0";
-      empty.textContent = "No entries found for this day.";
-      wrap.appendChild(empty);
-      return;
-    }
-
-    for(const r of recs){
-      const btn = document.createElement("button");
-      btn.className = "dayItem";
-      btn.type = "button";
-
-      const left = document.createElement("div");
-      left.textContent = r.number || "—";
-
-      const right = document.createElement("small");
-      right.textContent = new Intl.DateTimeFormat(undefined, { hour:"2-digit", minute:"2-digit" }).format(new Date(r.ts));
-
-      btn.appendChild(left);
-      btn.appendChild(right);
-
-      btn.addEventListener("click", (e)=>{
-        e.preventDefault();
-        const details = [
-          `Number: ${r.number || "—"}`,
-          `Time: ${fmtDateTime(r.ts)}`,
-          `Pattern: ${r.pattern || "—"}`,
-          `Notes: ${(r.notes && r.notes.trim()) ? r.notes.trim() : "None"}`,
-          "",
-          `Meaning:`,
-          `${(r.meaning && r.meaning.trim()) ? r.meaning.trim() : "None"}`
-        ].join("\n");
-        openInfo("Entry Details", details);
-      });
-
-      wrap.appendChild(btn);
-    }
-  }
-
-  $("btnDayListX").addEventListener("click", (e)=>{ e.preventDefault(); closeDayListModal(); });
-  $("btnDayListClose").addEventListener("click", (e)=>{ e.preventDefault(); closeDayListModal(); });
-  $("dayListModal").addEventListener("click", (e)=>{ if(e.target === $("dayListModal")) closeDayListModal(); });
-
-  /* ===== Calendar ===== */
+  /* ===== Calendar + day list ===== */
 
   const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
@@ -1442,6 +1427,76 @@ Save creates a .txt file on your device.
       map.set(k, arr);
     }
     return map;
+  }
+
+  function ensureDayLogo(){
+    const wrap = $("dayLogoRow");
+    if(wrap.childNodes.length) return;
+    const svg = document.querySelector(".logoTitle svg");
+    if(!svg) return;
+    wrap.appendChild(svg.cloneNode(true));
+  }
+
+  let currentDayKey = null;
+  let currentDayRecs = [];
+  function openDayList(dayKey, recs){
+    ensureDayLogo();
+    currentDayKey = dayKey;
+    currentDayRecs = (recs || []).slice().sort((a,b)=> a.ts - b.ts);
+
+    $("dayListTitle").textContent = fmtDayTitle(dayKey);
+    $("dayListSub").textContent = "Tap a number to view details.";
+
+    const list = $("dayList");
+    list.innerHTML = "";
+
+    if(currentDayRecs.length === 0){
+      const empty = document.createElement("div");
+      empty.className = "dayItem";
+      empty.style.cursor = "default";
+      empty.innerHTML = `<div class="dayLeft"><div class="dayTime">—</div><div class="dayNum">No entries</div></div>`;
+      list.appendChild(empty);
+    }else{
+      for(const r of currentDayRecs){
+        const item = document.createElement("div");
+        item.className = "dayItem";
+        const note = (r.notes || "").trim().replace(/\s+/g," ");
+        const noteShort = note ? note : "";
+        item.innerHTML =
+          `<div class="dayLeft">
+             <div class="dayTime">${escapeHtml(fmtTimeShort(r.ts))}</div>
+             <div class="dayNum">${escapeHtml(r.number || "—")}</div>
+           </div>
+           <div class="dayNotes">${escapeHtml(noteShort)}</div>
+           <div class="chev">›</div>`;
+        item.addEventListener("click", (e)=>{
+          e.preventDefault();
+          openEditModal(r.id);
+        });
+        list.appendChild(item);
+      }
+    }
+
+    $("dayListModal").classList.remove("hidden");
+    lockTouches(140);
+  }
+
+  function closeDayList(){
+    $("dayListModal").classList.add("hidden");
+    unlockTouches();
+  }
+
+  $("btnDayListX").addEventListener("click", (e)=>{ e.preventDefault(); closeDayList(); });
+  $("btnDayListClose").addEventListener("click", (e)=>{ e.preventDefault(); closeDayList(); });
+  $("dayListModal").addEventListener("click", (e)=>{ if(e.target === $("dayListModal")) closeDayList(); });
+
+  function escapeHtml(s){
+    return String(s ?? "")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
   }
 
   function renderCalendar(){
@@ -1489,7 +1544,7 @@ Save creates a .txt file on your device.
         cell.classList.add("hasData");
         cell.addEventListener("click", (e)=>{
           e.preventDefault();
-          openDayListModal(dayStart, recs);
+          openDayList(dayStart, recs);
         });
       }
 
@@ -1497,89 +1552,269 @@ Save creates a .txt file on your device.
     }
   }
 
-  /* ===== “Edge swipe” only (so scrolling works) =====
-     Start swipe only if touch begins within EDGE px from left/right.
-  */
+  /* ===== Edit modal (date/time editable) ===== */
 
-  const EDGE = 150;
-  const drag = {
-    active:false,
-    x0:0, y0:0,
-    dx:0, dy:0,
-    intent:null
-  };
-  let animating = false;
+  let editId = null;
 
-  function startDrag(ev){
-    if(animating) return;
-    if(!(ev.touches && ev.touches.length === 1)) return;
+  function openEditModal(id){
+    const recs = loadRecords();
+    const r = recs.find(x => x.id === id);
+    if(!r){
+      openInfo("Not found", "That entry could not be found.");
+      return;
+    }
+    editId = id;
 
-    const t = ev.target;
-    if(t && t.closest && t.closest("input, textarea, select, button")) return;
-    if(t && t.closest && t.closest(".dayListWrap, .metaScroll, #homeScroll, #calendar, .modalCard")) return;
+    $("editDT").value = toDTLocalValue(r.ts);
+    $("editNum").value = r.number || "";
+    $("editNotes").value = r.notes || "";
 
-    if(currentScreen !== "home" && currentScreen !== "calendar") return;
+    const pat = detectPattern(r.number || "");
+    const out = deriveMeaning(r.number || "", pat);
 
-    const x = ev.touches[0].clientX;
-    const w = $("screenArea").clientWidth || window.innerWidth;
+    $("editPattern").textContent = out.pattern || pat || "—";
+    $("editMeaning").textContent = out.meaning || "—";
 
-    const nearLeft = x <= EDGE;
-    const nearRight = x >= (w - EDGE);
-    if(!nearLeft && !nearRight) return;
+    $("editModal").classList.remove("hidden");
+    lockTouches(140);
 
-    drag.active = true;
-    drag.intent = null;
-    drag.x0 = x;
-    drag.y0 = ev.touches[0].clientY;
-    drag.dx = 0;
-    drag.dy = 0;
+    try{ document.activeElement?.blur(); }catch{}
   }
 
-  function moveDrag(ev){
-    if(!drag.active) return;
+  function closeEditModal(){
+    editId = null;
+    $("editModal").classList.add("hidden");
+    unlockTouches();
+    try{ document.activeElement?.blur(); }catch{}
+  }
+
+  function refreshEditDerived(){
+    const n = normalizeNumberInput($("editNum").value);
+    const pat = detectPattern(n);
+    const out = deriveMeaning(n, pat);
+    $("editPattern").textContent = out.pattern || pat || "—";
+    $("editMeaning").textContent = out.meaning || "—";
+  }
+
+  $("editNum").addEventListener("input", refreshEditDerived);
+
+  $("btnEditX").addEventListener("click", (e)=>{ e.preventDefault(); closeEditModal(); });
+  $("btnEditCancel").addEventListener("click", (e)=>{ e.preventDefault(); closeEditModal(); });
+  $("editModal").addEventListener("click", (e)=>{ if(e.target === $("editModal")) closeEditModal(); });
+
+  $("btnEditSave").addEventListener("click", ()=>{
+    if(!editId) return;
+
+    const newTs = fromDTLocalValue($("editDT").value);
+    if(!newTs){
+      openInfo("Invalid date/time", "Please set a valid date and time.");
+      return;
+    }
+    const n = normalizeNumberInput($("editNum").value);
+    if(!n){
+      openInfo("Invalid number", "Please enter a number.");
+      return;
+    }
+    const notes = String($("editNotes").value || "").trim();
+
+    const pat = detectPattern(n);
+    const out = deriveMeaning(n, pat);
+
+    const ok = updateRecordById(editId, {
+      ts: newTs,
+      number: n,
+      pattern: out.pattern || pat || "—",
+      meaning: out.meaning || "—",
+      notes
+    });
+
+    if(!ok){
+      openInfo("Save failed", "Could not save changes.");
+      return;
+    }
+
+    closeEditModal();
+    renderCalendar();
+
+    if(currentDayKey !== null){
+      const dayMap = buildDayIndexMap(loadRecords());
+      const updated = dayMap.get(currentDayKey) || [];
+      openDayList(currentDayKey, updated);
+    }
+  });
+
+  $("btnEditDelete").addEventListener("click", ()=>{
+    if(!editId) return;
+    const id = editId;
+    deleteRecordById(id);
+    closeEditModal();
+    renderCalendar();
+
+    if(currentDayKey !== null){
+      const dayMap = buildDayIndexMap(loadRecords());
+      const updated = dayMap.get(currentDayKey) || [];
+      openDayList(currentDayKey, updated);
+    }
+  });
+
+  /* ===== Smooth panel swipe (edge only, 150px) ===== */
+
+  const EDGE = 150;
+  const deck = $("deck");
+  const screenArea = $("screenArea");
+
+  let deckIndex = 0; // 0 home, 1 calendar
+  let dragging = false;
+  let intent = null;
+  let x0=0, y0=0;
+  let baseX=0;
+  let lastX=0, lastT=0;
+  let vx=0;
+  let blockSwipe = false;
+
+  function getWidth(){
+    return screenArea.clientWidth || window.innerWidth;
+  }
+
+  function setDeckX(px, animate=false){
+    if(animate) deck.classList.add("anim");
+    else deck.classList.remove("anim");
+    deck.style.transform = `translate3d(${px}px,0,0)`;
+  }
+
+  function deckTargetXForIndex(idx){
+    const w = getWidth();
+    return -idx * w;
+  }
+
+  function getDeckIndex(){ return deckIndex; }
+
+  function snapToIndex(idx, animate=true){
+    idx = Math.max(0, Math.min(1, idx));
+    deckIndex = idx;
+    setDeckX(deckTargetXForIndex(deckIndex), animate);
+    try{ document.activeElement?.blur(); }catch{}
+    if(deckIndex === 1){
+      initMonthDefaultIfNeeded();
+      renderCalendar();
+    }
+  }
+
+  function shouldStartEdgeSwipe(ev){
+    if(blockSwipe) return false;
+    if(!(ev.touches && ev.touches.length === 1)) return false;
+
+    const target = ev.target;
+    if(target && target.closest && target.closest("input, textarea, select")) return false;
+    if(target && target.closest && target.closest(".modalCard, .modal")) return false;
+
+    const x = ev.touches[0].clientX;
+    const w = getWidth();
+    const nearLeft = x <= EDGE;
+    const nearRight = x >= (w - EDGE);
+    return nearLeft || nearRight;
+  }
+
+  function onTouchStart(ev){
+    if(!shouldStartEdgeSwipe(ev)) return;
+
+    dragging = true;
+    intent = null;
+    x0 = ev.touches[0].clientX;
+    y0 = ev.touches[0].clientY;
+
+    baseX = deckTargetXForIndex(deckIndex);
+    setDeckX(baseX, false);
+
+    lastX = x0;
+    lastT = performance.now();
+    vx = 0;
+  }
+
+  function onTouchMove(ev){
+    if(!dragging) return;
     if(!(ev.touches && ev.touches.length === 1)) return;
 
     const x = ev.touches[0].clientX;
     const y = ev.touches[0].clientY;
-    drag.dx = x - drag.x0;
-    drag.dy = y - drag.y0;
+    const dx = x - x0;
+    const dy = y - y0;
 
-    if(!drag.intent){
-      const ax = Math.abs(drag.dx);
-      const ay = Math.abs(drag.dy);
-      if(ax > 18 && ax > ay + 12){
-        drag.intent = "h";
-      }else if(ay > 18 && ay > ax + 8){
-        drag.active = false;
-        drag.intent = null;
+    if(!intent){
+      const ax = Math.abs(dx);
+      const ay = Math.abs(dy);
+      if(ax > 14 && ax > ay + 10){
+        intent = "h";
+      }else if(ay > 14 && ay > ax + 8){
+        dragging = false;
+        intent = null;
         return;
       }else{
         return;
       }
     }
 
-    if(drag.intent !== "h") return;
+    if(intent !== "h") return;
 
     ev.preventDefault();
+
+    const w = getWidth();
+    let nextX = baseX + dx;
+
+    const minX = -w; // calendar
+    const maxX = 0;  // home
+
+    if(nextX > maxX){
+      const over = nextX - maxX;
+      nextX = maxX + over * 0.22;
+    }else if(nextX < minX){
+      const over = nextX - minX;
+      nextX = minX + over * 0.22;
+    }
+
+    const now = performance.now();
+    const dt = Math.max(1, now - lastT);
+    const instV = (x - lastX) / dt;
+    vx = vx * 0.75 + instV * 0.25;
+    lastX = x;
+    lastT = now;
+
+    setDeckX(nextX, false);
   }
 
-  function endDrag(){
-    if(!drag.active) return;
-    const dx = drag.dx;
-    drag.active = false;
+  function onTouchEnd(){
+    if(!dragging) return;
 
-    if(Math.abs(dx) < 60) return;
+    dragging = false;
 
-    if(currentScreen === "home") showInstant("calendar");
-    else showInstant("home");
+    const w = getWidth();
+    const matrix = deck.style.transform || "";
+    const m = /translate3d\(([-\d.]+)px/.exec(matrix);
+    const curX = m ? Number(m[1]) : deckTargetXForIndex(deckIndex);
+
+    const progress = (-curX) / w; // 0..1
+    const deltaToHome = Math.abs(progress - 0);
+    const deltaToCal  = Math.abs(progress - 1);
+
+    const fling = vx;
+    const FLING_V = 0.65;
+
+    let target = deckIndex;
+    if(Math.abs(fling) > FLING_V){
+      if(fling < 0) target = 1;
+      else target = 0;
+    }else{
+      target = (deltaToHome <= deltaToCal) ? 0 : 1;
+    }
+
+    snapToIndex(target, true);
   }
 
-  function attachEdgeSwipe(){
-    const root = $("screenArea");
-    root.addEventListener("touchstart", startDrag, {passive:true});
-    root.addEventListener("touchmove", moveDrag, {passive:false});
-    root.addEventListener("touchend", endDrag, {passive:true});
-    root.addEventListener("touchcancel", endDrag, {passive:true});
+  function attachSmoothEdgeSwipe(){
+    screenArea.addEventListener("touchstart", onTouchStart, {passive:true});
+    screenArea.addEventListener("touchmove", onTouchMove, {passive:false});
+    screenArea.addEventListener("touchend", onTouchEnd, {passive:true});
+    screenArea.addEventListener("touchcancel", onTouchEnd, {passive:true});
   }
 
   /* ===== Manifest + SW ===== */
@@ -1672,7 +1907,7 @@ self.addEventListener('fetch', (e)=>{ });`;
           const pattern = detectPattern(number);
           const meaning = deriveMeaning(number, pattern).meaning;
 
-          out.push({ ts, number, pattern, meaning, notes: (i===0 ? "Test data (remove later)" : "") });
+          out.push({ id: makeId(ts), ts, number, pattern, meaning, notes: (i===0 ? "Test data (remove later)" : "") });
         }
       }
     }
@@ -1689,7 +1924,6 @@ self.addEventListener('fetch', (e)=>{ });`;
   function attachVersionTripleTap(){
     $("homeVerLabel").addEventListener("click", (e) => {
       e.stopPropagation();
-      if(animating) return;
       vTapCount++;
       if(vTapTimer) clearTimeout(vTapTimer);
       vTapTimer = setTimeout(()=>{ vTapCount = 0; }, 650);
@@ -1712,8 +1946,8 @@ self.addEventListener('fetch', (e)=>{ });`;
 
   /* ===== Buttons ===== */
 
-  $("btnViewCalendar").addEventListener("click", () => showInstant("calendar"));
-  $("btnBackFromCalendar").addEventListener("click", () => showInstant("home"));
+  $("btnViewCalendar").addEventListener("click", () => snapToIndex(1, true));
+  $("btnBackFromCalendar").addEventListener("click", () => snapToIndex(0, true));
 
   $("btnHomeExport").addEventListener("click", () => {
     const recs = loadRecords().slice().reverse();
@@ -1752,17 +1986,21 @@ self.addEventListener('fetch', (e)=>{ });`;
   $("verUnderLogo").textContent = APP_VERSION;
 
   attachVersionTripleTap();
-  attachEdgeSwipe();
+  attachSmoothEdgeSwipe();
+
+  initMonthDefaultIfNeeded();
+  renderCalendar();
 
   try{ document.activeElement?.blur(); }catch{}
   setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 0);
   setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 80);
 
   renderHomeIdentify();
-  showInstant("home");
+  snapToIndex(0, false);
 
   window.addEventListener("resize", () => {
-    if(!$("calendar").classList.contains("hidden")) renderCalendar();
+    setDeckX(deckTargetXForIndex(deckIndex), false);
+    if(deckIndex === 1) renderCalendar();
   });
 
 })();
@@ -1771,13 +2009,12 @@ self.addEventListener('fetch', (e)=>{ });`;
 </html>
 
 <!--
-Version Detail Notes (EOF)
-App Version: v1.1A7
+EOF Version Detail Notes
+App Version: v1.1A8
 Base: v1.1A6
 Changes:
-- All version mentions updated to v1.1A7.
-- Edge-swipe starts within 150px of left/right edge.
-- Day List popup built: logo + instruction + tight clickable list; click shows details.
-- Add popup text adjusted; removed Copy/Export from Add screen.
-- Removed Calendar export button.
+- Smooth deck-based edge swipe (150px) with animated snap + velocity.
+- Day list modal + Edit modal with editable date/time.
+- Add popup simplified (no copy/export; removed “in app only” phrasing).
+- Calendar export button removed.
 -->
