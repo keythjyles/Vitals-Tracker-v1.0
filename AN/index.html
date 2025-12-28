@@ -1,12 +1,39 @@
 <!-- Angel Numbers Tracker v1.0B12 -->
+<!--
+Version Detail Notes
+App Version (internal): v1.0B12
+Home display label (visual only): v1.333  (DO NOT CHANGE unless user instructs)
+Base: v1.0B11
+
+Changes (requested):
+1) Log list box gets its own scrollable container:
+   - Log screen header + search + date filters stay fixed.
+   - Entries scroll inside a dedicated list box container.
+
+2) Edit/Add panel scrollability:
+   - Add/Edit content scrolls inside its own container.
+   - Action buttons remain reachable as a fixed footer row.
+
+3) Card readability (bigger text, less wasted space):
+   - Increased key text size in the Angel Number Card modal.
+   - Tightened vertical spacing to reduce “dead” space.
+   - Kept action buttons accessible.
+
+4) Logo placement:
+   - In the Angel Number Card modal, the logo row is now at the top.
+
+Required persistence:
+- Keep EOF comment block.
+-->
 <!doctype html>
+
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1324" />
   <title>Angel Numbers Tracker</title>
-
+  <link rel="manifest" id="manifestLink" href="#" />
   <style>
     :root{
       --bg0:#08101f;
@@ -15,805 +42,2841 @@
       --stroke:rgba(235,245,255,.16);
       --stroke2:rgba(235,245,255,.22);
       --strokeBold:rgba(180,210,255,.42);
-      --text:rgba(235,245,255,.90);
-      --muted:rgba(235,245,255,.60);
+      --text:rgba(235,245,255,.86);
+      --muted:rgba(235,245,255,.58);
       --muted2:rgba(235,245,255,.42);
-      --accent:#2b4e7a;
-      --shadow:0 16px 40px rgba(0,0,0,.35);
-      --radius:22px;
-      --radius2:26px;
-      --gap:14px;
 
-      --btnH:54px;
-      --btnR:26px;
+      /* DARK BLUE theme border */
+      --accentBorder: rgba(43,78,122,.85);
+      --accentGlow: rgba(43,78,122,.18);
+
+      /* Subtle theme border for internal cards/lists */
+      --themeLine: rgba(43,78,122,.55);
+      --themeLineSoft: rgba(43,78,122,.28);
+
+      --shadow:0 14px 40px rgba(0,0,0,.38);
+      --radius:26px;
+      --btnH:56px;
       --pad:18px;
+      --font: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
     }
 
     *{ box-sizing:border-box; }
-    html, body{ height:100%; }
+    html,body{ height:100%; }
+
     body{
       margin:0;
-      background:
-        radial-gradient(1200px 800px at 20% 10%, #1a2c66aa 0%, transparent 55%),
-        radial-gradient(900px 650px at 75% 25%, #2b6fb466 0%, transparent 55%),
-        linear-gradient(180deg, var(--bg1), var(--bg0));
+      font-family:var(--font);
       color:var(--text);
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      overflow:hidden; /* app-style (panels manage their own scroll areas) */
+      background:
+        radial-gradient(1200px 700px at 30% 0%, rgba(47,120,255,.22), transparent 55%),
+        radial-gradient(900px 600px at 80% 20%, rgba(155,120,255,.10), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+      display:flex;
+      justify-content:center;
+      padding: max(14px, env(safe-area-inset-top)) 12px max(14px, env(safe-area-inset-bottom));
+      overflow:hidden;
     }
 
-    .wrap{
-      height:100%;
+    .app{
+      width:min(520px, 100%);
+      height: 100%;
       display:flex;
       flex-direction:column;
-      align-items:center;
-      justify-content:flex-start;
-      padding:18px 14px calc(18px + env(safe-area-inset-bottom)) 14px;
       gap:14px;
+      overflow:hidden;
     }
 
-    /* Header */
-    .hdr{
-      width:min(720px, 100%);
+    .logoTitle{
+      margin:10px 6px 0;
       display:flex;
-      align-items:center;
-      gap:12px;
-      padding:8px 6px 0 6px;
-    }
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      user-select:none;
-    }
-    .logo{
-      width:44px;
-      height:44px;
-      border-radius:14px;
-      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
-      border:1px solid rgba(255,255,255,.12);
-      display:flex;
-      align-items:center;
       justify-content:center;
-      box-shadow: 0 10px 26px rgba(0,0,0,.25);
-    }
-    .title{
-      font-size:40px;
-      font-weight:800;
-      letter-spacing:.3px;
-      line-height:1;
-      background: linear-gradient(180deg, rgba(210, 190, 255, .96), rgba(150, 150, 255, .74));
-      -webkit-background-clip:text;
-      background-clip:text;
-      color:transparent;
-      text-shadow: 0 10px 26px rgba(0,0,0,.28);
-    }
-
-    /* Panel */
-    .panel{
-      width:min(720px, 100%);
-      border-radius:var(--radius2);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      border:1px solid rgba(255,255,255,.10);
-      box-shadow: var(--shadow);
-      padding:16px;
-    }
-    .panelInner{
-      border-radius:var(--radius);
-      background: linear-gradient(180deg, rgba(8,16,31,.55), rgba(8,16,31,.35));
-      border:2px solid rgba(43,78,122,.55);
-      padding:18px;
-    }
-
-    /* Buttons */
-    .row{
-      display:flex;
-      gap:14px;
       align-items:center;
-      justify-content:space-between;
-    }
-    .btn{
-      height:var(--btnH);
-      padding:0 22px;
-      border-radius:var(--btnR);
-      background: rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.14);
-      color:var(--text);
-      font-weight:700;
-      letter-spacing:.2px;
-      box-shadow: 0 12px 26px rgba(0,0,0,.20);
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      cursor:pointer;
+      text-shadow: 0 10px 22px rgba(0,0,0,.35);
       user-select:none;
       -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
-    .btn:active{ transform: translateY(1px); }
-    .btnPrimary{
-      background: linear-gradient(180deg, rgba(70,140,255,.95), rgba(50,120,240,.75));
-      border:1px solid rgba(140,190,255,.35);
-      color:#061021;
-    }
-    .btnGhost{
-      background: rgba(255,255,255,.04);
+    .logoTitle svg{
+      width:min(520px, 100%);
+      height:auto;
+      display:block;
     }
 
-    /* Form */
-    .label{
-      color:var(--muted);
-      font-weight:800;
-      letter-spacing:.2px;
-      margin-top:14px;
-      margin-bottom:8px;
-      font-size:30px;
-    }
-    .fieldRow{
-      display:flex;
-      gap:14px;
-      align-items:center;
-    }
-    input, select, textarea{
-      width:100%;
-      border-radius:22px;
-      background: rgba(255,255,255,.05);
-      border:2px solid rgba(255,255,255,.14);
-      color:var(--text);
-      padding:14px 16px;
-      font-size:22px;
-      outline:none;
-    }
-    input::placeholder, textarea::placeholder{ color: rgba(235,245,255,.34); }
-    textarea{
-      min-height:110px;
-      resize:vertical;
-    }
-    .miniLabel{
-      color:var(--muted);
-      font-weight:800;
-      letter-spacing:.2px;
-      font-size:18px;
-      margin:12px 0 8px 0;
-    }
-
-    /* LOG LAYOUT */
-    .logShell{
-      /* IMPORTANT: allow an internal scroll area while panel stays fixed */
-      display:flex;
-      flex-direction:column;
-      gap:14px;
-      height: calc(100vh - 210px);
-      max-height: 920px;
-      min-height: 420px;
-    }
-
-    /* This is the ONLY behavioral/layout change in v1.0B12:
-       the log list becomes its own scrollable container */
-    .logList{
+    .screenArea{
+      position:relative;
       flex:1;
-      min-height:0;               /* critical for flexbox scrolling */
-      overflow-y:auto;            /* scrollable */
-      -webkit-overflow-scrolling: touch; /* smooth iOS/Android momentum */
-      padding-right:6px;          /* keep scrollbar off text */
-      overscroll-behavior: contain;
+      overflow:hidden;
+      border-radius: var(--radius);
       touch-action: pan-y;
     }
 
+    /* MAIN PANEL CARD — consistent dark-blue border */
     .card{
-      border-radius:22px;
-      background: rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.10);
-      padding:14px 14px 14px 14px;
-      margin-bottom:14px;
-      box-shadow: 0 12px 28px rgba(0,0,0,.18);
-      cursor:pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .card:active{ transform: translateY(1px); }
-    .cardTop{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-    }
-    .dt{
-      color:rgba(235,245,255,.50);
-      font-weight:700;
-      letter-spacing:.2px;
-      font-size:20px;
-      margin-bottom:8px;
-    }
-    .num{
-      font-size:42px;
-      font-weight:900;
-      letter-spacing:.5px;
-      line-height:1;
-    }
-    .pat{
-      color:rgba(235,245,255,.58);
-      font-weight:800;
-      font-size:22px;
-      margin-top:10px;
-      white-space:nowrap;
-    }
-    .line{
-      margin-top:10px;
-      color:rgba(235,245,255,.78);
-      font-size:20px;
-    }
-    .line b{ color:rgba(235,245,255,.92); }
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:3px solid var(--accentBorder);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: var(--pad);
+      backdrop-filter: blur(10px);
 
-    /* Modal */
-    .modalBack{
-      position:fixed;
+      position:absolute;
       inset:0;
-      background: rgba(0,0,0,.55);
-      display:none;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+      overscroll-behavior: contain;
+    }
+
+    .hidden{ display:none !important; }
+
+    .btn{
+      height:var(--btnH);
+      border-radius: 999px;
+      border:1px solid var(--stroke2);
+      background: rgba(255,255,255,.03);
+      color:rgba(235,245,255,.78);
+      font-weight:650;
+      letter-spacing:.2px;
+      display:flex;
       align-items:center;
       justify-content:center;
-      padding:18px;
-      z-index:50;
+      padding:0 18px;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      font-size:18px;
+      touch-action: manipulation;
     }
-    .modal{
-      width:min(720px, 100%);
-      border-radius:28px;
-      background: linear-gradient(180deg, rgba(8,16,31,.96), rgba(8,16,31,.78));
-      border:2px solid rgba(43,78,122,.55);
-      box-shadow: 0 24px 70px rgba(0,0,0,.55);
-      overflow:hidden;
+    .btn:active{ transform: translateY(1px); }
+
+    .btn.primary{
+      background: linear-gradient(180deg, rgba(47,120,255,.92), rgba(47,120,255,.72));
+      border-color: rgba(120,170,255,.55);
+      color: rgba(235,245,255,.90);
     }
-    .modalHead{
+
+    .btn.danger{
+      background: linear-gradient(180deg, rgba(255,80,80,.18), rgba(255,80,80,.10));
+      border-color: rgba(255,120,120,.42);
+      color: rgba(255,225,225,.92);
+      box-shadow: 0 10px 26px rgba(0,0,0,.22);
+    }
+
+    .btn.small{
+      height:44px;
+      font-size:16px;
+      padding:0 14px;
+      font-weight:650;
+      white-space:nowrap;
+    }
+
+    .btn:disabled{
+      opacity:.55;
+      filter:saturate(.85);
+      transform:none !important;
+      pointer-events:none;
+    }
+
+    .row{ display:flex; gap:12px; }
+    .row.center{ align-items:center; }
+    .grow{ flex:1; }
+
+    /* Tighten vertical space */
+    .label{
+      font-size:15px;
+      color:var(--muted);
+      font-weight:650;
+      margin: 10px 4px 6px;
+    }
+    .subtle{
+      font-size:14px;
+      color:var(--muted2);
+      margin: 6px 4px 0;
+    }
+
+    .field{
+      border:2px solid var(--strokeBold);
+      background: rgba(255,255,255,.06);
+      color: rgba(235,245,255,.86);
+      border-radius: 18px;
+      height:54px;
+      padding: 0 14px;
+      font-size:18px;
+      outline:none;
+      width:100%;
+    }
+    .field::placeholder{ color: rgba(235,245,255,.35); }
+    .field:focus{
+      border-color: rgba(90,150,255,.78);
+      box-shadow: 0 0 0 4px rgba(47,120,255,.16);
+    }
+    textarea.field{
+      height:84px;
+      padding: 12px 14px;
+      resize:none;
+      line-height:1.25;
+    }
+    input[type="date"].field,
+    input[type="datetime-local"].field,
+    input[type="month"].field{
+      font-size:16px;
+      padding-right: 10px;
+    }
+
+    .homeMain{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      margin-top:8px;
+    }
+    .homeMain > .btn:not(.small){
+      font-size:26px;
+      font-weight:750;
+      letter-spacing:.3px;
+    }
+
+    .homeFooterRow{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      padding:16px 16px 10px 16px;
-      border-bottom:1px solid rgba(255,255,255,.10);
+      gap:10px;
+      margin-top:8px;
+      flex-wrap:nowrap;
+    }
+
+    .footerTiny{
+      margin-top:10px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      font-size: 12px;
+      color: rgba(235,245,255,.38);
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    .timeLine{
+      margin: 4px 4px 10px;
+      color: rgba(235,245,255,.82);
+      font-weight:750;
+      letter-spacing:.3px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      line-height:1.05;
+      font-size: clamp(18px, 6.4vw, 44px);
+    }
+
+    .meaningCard{
+      border:1px solid var(--themeLine);
+      background: rgba(255,255,255,.03);
+      border-radius: 22px;
+      padding: 12px 12px 10px;
+      margin-top: 10px;
+    }
+    .meaningTop{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom: 6px;
+    }
+    .numBig{
+      font-size:26px;
+      font-weight:900;
+      letter-spacing:.3px;
+      white-space:nowrap;
+    }
+    .patternPill{
+      font-size:13px;
+      color: rgba(235,245,255,.70);
+      border: 1px solid var(--themeLineSoft);
+      background: rgba(255,255,255,.03);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight:750;
+      white-space:nowrap;
+    }
+    .meaningText{
+      color: rgba(235,245,255,.74);
+      font-size:15px;
+      line-height:1.18;
+      white-space: pre-wrap;
+    }
+    .disclaimer{
+      margin-top:8px;
+      color: rgba(235,245,255,.44);
+      font-size:12px;
+      line-height:1.25;
+    }
+
+    .panelButtons{
+      display:flex;
+      gap:12px;
+      margin-top: 12px;
+      flex-wrap:wrap;
+    }
+
+    /* ===== ADD/EDIT: make panel a flex layout with internal scroller + fixed footer buttons ===== */
+    #add{
+      overflow:hidden;               /* prevent body-scroll traps */
+      display:flex;
+      flex-direction:column;
+      gap: 0;
+      padding-bottom: 0;            /* footer handles spacing */
+    }
+    #addScroll{
+      flex: 1;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 12px;
+      touch-action: pan-y;
+      overscroll-behavior: contain;
+    }
+    #addFooter{
+      flex: 0 0 auto;
+      padding-top: 12px;
+      padding-bottom: calc(6px + env(safe-area-inset-bottom));
+      background: linear-gradient(180deg, rgba(11,19,36,0), rgba(11,19,36,.70) 35%, rgba(11,19,36,.92));
+      border-top: 1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(10px);
+    }
+    #addFooter .panelButtons{
+      margin-top: 0;
+    }
+
+    /* ===== LOG: fixed header/filters; scroll entries inside a list box ===== */
+    #log{
+      overflow:hidden;              /* no whole-panel scroll */
+      display:flex;
+      flex-direction:column;
+      gap: 0;
+      padding-bottom: 0;
+    }
+    #logHeader{
+      flex: 0 0 auto;
+      padding-bottom: 10px;
+    }
+    #logHeader .label{ margin: 8px 4px 6px; }
+
+    #logListBox{
+      flex: 1 1 auto;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      border: 1px solid var(--themeLineSoft);
+      background: rgba(255,255,255,.015);
+      border-radius: 22px;
+      padding: 10px 10px calc(12px + env(safe-area-inset-bottom));
+      margin-top: 10px;
+      touch-action: pan-y;
+      overscroll-behavior: contain;
+    }
+    #logList{
+      margin-top: 0;
+    }
+
+    .entry{
+      border:1px solid var(--themeLine);
+      background: rgba(255,255,255,.03);
+      border-radius: 18px;
+      padding: 10px 12px 10px;
+      margin-top: 8px;
+      touch-action: pan-y;
+      -webkit-tap-highlight-color: transparent;
+      user-select:none;
+    }
+    .entry:first-child{ margin-top: 0; }
+
+    .entry.pressed{
+      background: rgba(47,120,255,.12);
+      border-color: rgba(90,150,255,.45);
+    }
+
+    .entryTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:10px;
+      margin-bottom: 2px;
+    }
+    .entryTime{
+      font-size:12px;
+      color: rgba(235,245,255,.46);
+      white-space:nowrap;
+    }
+    .entryMain{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:baseline;
+      margin-top: 2px;
+    }
+    .entryNumber{
+      font-size:24px;               /* slightly bigger for readability */
+      font-weight:950;
+      letter-spacing:.2px;
+      white-space:nowrap;
+    }
+    .entryPattern{
+      font-size:14px;
+      color: rgba(235,245,255,.72);
+      font-weight:850;
+      white-space:nowrap;
+    }
+    .entryLine{
+      margin-top: 6px;
+      color: rgba(235,245,255,.70); /* more readable */
+      font-size:15px;              /* bigger text */
+      line-height:1.2;
+    }
+    .entryLine b{ color: rgba(235,245,255,.78); }
+
+    .filters{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top:10px;
+    }
+    .dateField{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .dateField .miniLabel{
+      margin: 0 4px;
+      color: var(--muted);
+      font-weight:650;
+      font-size:14px;
+    }
+
+    .searchRow{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .searchRow .field{
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .searchRow .btn.small{
+      flex: 0 0 auto;
+      height:54px;
+      font-size:16px;
+      padding: 0 16px;
+      border-radius: 18px;
+    }
+
+    .editPill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--themeLineSoft);
+      background: rgba(255,255,255,.03);
+      color: rgba(235,245,255,.70);
+      font-weight:700;
+      letter-spacing:.2px;
+      margin: 0 4px 10px;
+      width: fit-content;
+    }
+
+    /* Modal (unified) */
+    .modal{
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: max(16px, env(safe-area-inset-top)) 14px max(16px, env(safe-area-inset-bottom));
+      background: rgba(0,0,0,.56);
+      z-index: 9998;
+      touch-action: none;
+    }
+    .modalCard{
+      width:min(520px, 100%);
+      border-radius: 26px;
+      border: 3px solid var(--accentBorder);
+      background: linear-gradient(180deg, rgba(12,21,40,.96), rgba(8,16,31,.96));
+      box-shadow: 0 18px 60px rgba(0,0,0,.55);
+      padding: 16px;
+      backdrop-filter: blur(10px);
+      max-height: calc(100vh - 60px);
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
     }
     .modalTitle{
-      font-size:30px;
-      font-weight:900;
-      letter-spacing:.2px;
+      font-weight: 900;
+      letter-spacing: .2px;
+      color: rgba(235,245,255,.92);
+      font-size: clamp(22px, 6.5vw, 34px);
+      line-height: 1.05;
+      margin: 4px 2px 10px;
     }
-    .xbtn{
-      width:54px;
-      height:54px;
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.05);
-      color:var(--text);
-      font-weight:900;
-      font-size:22px;
-      cursor:pointer;
-    }
-    .modalBody{
-      padding:16px;
+    .modalSub{
+      color: rgba(235,245,255,.72);
+      font-size: 15px;
+      margin: 0 2px 12px;
+      white-space: pre-wrap;
+      line-height: 1.28;
     }
     .modalBtns{
       display:flex;
-      gap:14px;
-      padding:0 16px 16px 16px;
+      gap:12px;
+      margin-top: 6px;
+      flex-wrap:wrap;
     }
-    .modalBtns .btn{ flex:1; }
+    .modalBtns .btn{
+      flex:1;
+      height: 54px;
+      font-size: 18px;
+      font-weight: 800;
+      min-width: 140px;
+    }
 
-    /* Edit modal scroll (existing behavior kept; it will scroll within modal body if needed) */
-    .modalBodyScroll{
-      max-height: calc(100vh - 260px);
+    /* Close X (top-right) */
+    .xCloseRow{
+      display:flex;
+      justify-content:flex-end;
+      margin: -6px -6px 6px;
+    }
+    .xBtn{
+      width:44px; height:44px;
+      border-radius: 14px;
+      border:1px solid var(--stroke2);
+      background: rgba(255,255,255,.03);
+      color: rgba(235,245,255,.82);
+      font-weight: 900;
+      font-size: 18px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    /* Card modal: move logo to top + bigger body text + sticky buttons */
+    #cardModal .modalCard{
+      display:flex;
+      flex-direction:column;
+      max-height: calc(100vh - 56px);
+      padding: 14px;
+      overflow:hidden;
+    }
+    #cardModal .cardTopScroll{
+      flex:1;
       overflow:auto;
       -webkit-overflow-scrolling: touch;
-      padding-right:6px;
+      padding-bottom: 10px;
+      touch-action: pan-y;
+      overscroll-behavior: contain;
+    }
+    #cardModal .modalTitle{
+      margin: 6px 2px 8px;
+      font-size: clamp(22px, 6.4vw, 34px);
+    }
+    #cardModal #cardBody{
+      font-size: 16px;              /* bigger */
+      line-height: 1.34;            /* easier to read */
+      margin: 0 2px 10px;
+      color: rgba(235,245,255,.84);
+    }
+    #cardModal .modalBtns{
+      flex: 0 0 auto;
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
+      padding-top: 10px;
+      padding-bottom: calc(8px + env(safe-area-inset-bottom));
+      margin-top: 0;
+      background: linear-gradient(180deg, rgba(11,19,36,0), rgba(11,19,36,.76) 35%, rgba(11,19,36,.94));
+      border-top: 1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(10px);
+    }
+    #cardModal .modalBtns .btn{
+      height: 50px;
+      font-size: 17px;
+      min-width: 110px;
     }
 
-    .foot{
-      width:min(720px, 100%);
-      color:rgba(235,245,255,.38);
-      text-align:center;
-      font-weight:700;
+    /* Card modal logo row (small) */
+    .cardLogoRow{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding: 2px 0 8px;
+      user-select:none;
+    }
+    .cardLogoIcon{
+      width:44px;
+      height:44px;
+      border-radius: 14px;
+      border: 1px solid var(--themeLineSoft);
+      background: rgba(255,255,255,.04);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex: 0 0 auto;
+    }
+    .cardLogoText{
+      font-weight: 850;
       letter-spacing:.2px;
-      padding:6px 0 0 0;
+      color: rgba(235,245,255,.72);
+      font-size: 16px;
+      line-height: 1.1;
+    }
+
+    /* Calendar */
+    .calTop{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      margin-top: 10px;
+    }
+    .calTop .field{ height:52px; border-radius: 18px; }
+    .calTop .btn.small{ height:52px; border-radius: 18px; }
+
+    .calGrid{
+      margin-top: 12px;
+      display:grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      width:100%;
+    }
+    .calDow{
+      text-align:center;
+      font-size: 12px;
+      color: rgba(235,245,255,.54);
+      font-weight: 800;
+      letter-spacing:.2px;
+      padding: 2px 0 4px;
       user-select:none;
     }
 
-    @media (max-width:520px){
-      .title{ font-size:34px; }
-      .label{ font-size:28px; }
-      input, select, textarea{ font-size:20px; }
-      .logShell{ height: calc(100vh - 220px); }
+    .calCell{
+      border:1px solid rgba(235,245,255,.10);
+      background: rgba(255,255,255,.02);
+      border-radius: 16px;
+      min-height: 56px;
+      padding: 8px 8px 6px;
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-start;
+      gap:6px;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
+    .calCell .dnum{
+      font-weight: 900;
+      font-size: 14px;
+      color: rgba(235,245,255,.76);
+      line-height: 1;
+    }
+    .calCell.hasData{
+      border-color: rgba(90,150,255,.45);
+      background: rgba(43,78,122,.22);
+      box-shadow: 0 12px 24px rgba(0,0,0,.18);
+    }
+    .calCell.outMonth{
+      opacity:.42;
+    }
+
+    .calHint{
+      margin-top:10px;
+      font-size: 13px;
+      color: rgba(235,245,255,.44);
+    }
+
+    /* Day popup list */
+    .dayHint{
+      margin: 2px 2px 8px;
+      color: rgba(235,245,255,.52);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .1px;
+    }
+    .dayList{
+      margin-top: 0;
+      display:flex;
+      flex-direction:column;
+      gap: 6px;
+    }
+    .dayItem{
+      border:1px solid var(--themeLine);
+      background: rgba(255,255,255,.02);
+      border-radius: 16px;
+      padding: 8px 10px;
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:10px;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .dayItem:active{ transform: translateY(1px); }
+    .dayNum{
+      font-size: 22px;
+      font-weight: 950;
+      letter-spacing:.3px;
+      color: rgba(79,163,255,.92);
+      white-space:nowrap;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-thickness: 2px;
+    }
+    .dayMeta{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:1px;
+      min-width: 0;
+    }
+    .dayTime{
+      font-size:12px;
+      color: rgba(235,245,255,.46);
+      white-space:nowrap;
+    }
+    .dayPat{
+      font-size:12px;
+      color: rgba(235,245,255,.62);
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .touchLock{
+      position:fixed;
+      inset:0;
+      z-index: 9997;
+      background: transparent;
+      pointer-events:none;
+    }
+    .touchLock.on{ pointer-events:auto; }
+
+    .ptr{
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      margin: -10px 0 8px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      height: 28px;
+      color: rgba(235,245,255,.55);
+      font-size: 12px;
+      font-weight: 750;
+      letter-spacing: .2px;
+      user-select:none;
+      pointer-events:none;
+      opacity: 0;
+      transform: translateY(-6px);
+      transition: opacity 160ms ease, transform 160ms ease;
+    }
+    .ptr.on{
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .heartWrap{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 6px 0 2px;
+    }
+    .heartSvg{
+      width: 140px;
+      height: 140px;
+      filter: drop-shadow(0 18px 40px rgba(0,0,0,.55));
+      transform: scale(.86);
+      opacity: .0;
+      animation: popHeart 380ms cubic-bezier(.2,.9,.2,1) forwards;
+    }
+    @keyframes popHeart{
+      0%{ transform: scale(.78); opacity: 0; }
+      70%{ transform: scale(1.06); opacity: 1; }
+      100%{ transform: scale(1.00); opacity: 1; }
+    }
+
+    .accentFrame{ position:relative; }
   </style>
 </head>
-
 <body>
-  <div class="wrap">
-    <div class="hdr">
-      <div class="brand">
-        <div class="logo" aria-hidden="true">
-          <!-- simple wings + halo mark (inline SVG, no external assets) -->
-          <svg width="28" height="28" viewBox="0 0 64 64" fill="none">
-            <path d="M20 41c-6-2-10-7-10-13 0-6 4-11 10-13 2 7 5 13 10 18-5 3-8 6-10 8Z" stroke="rgba(200,220,255,.88)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M44 41c6-2 10-7 10-13 0-6-4-11-10-13-2 7-5 13-10 18 5 3 8 6 10 8Z" stroke="rgba(200,220,255,.88)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M22 44c4 6 10 9 10 9s6-3 10-9c-4-3-7-5-10-6-3 1-6 3-10 6Z" stroke="rgba(120,180,255,.95)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M22 14c3-4 17-4 20 0" stroke="rgba(235,245,255,.65)" stroke-width="3" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <div class="title">Angel Numbers Tracker</div>
-      </div>
+  <div class="touchLock" id="touchLock"></div>
+
+  <div class="app" id="appRoot">
+    <div class="logoTitle" aria-label="Angel Numbers Tracker">
+      <svg viewBox="0 0 900 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Angel Numbers Tracker">
+        <defs>
+          <linearGradient id="angG" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#8a6bff"/>
+            <stop offset="55%" stop-color="#4fa3ff"/>
+            <stop offset="100%" stop-color="#2f78ff"/>
+          </linearGradient>
+          <filter id="angS" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="rgba(0,0,0,.35)"/>
+          </filter>
+        </defs>
+        <g transform="translate(46 24)" filter="url(#angS)">
+          <rect x="0" y="0" width="92" height="92" rx="26" fill="rgba(255,255,255,.06)" stroke="rgba(235,245,255,.22)" stroke-width="2"/>
+          <ellipse cx="46" cy="24" rx="20" ry="8" fill="none" stroke="rgba(235,245,255,.88)" stroke-width="4" opacity=".92"/>
+
+          <path d="M46 50
+                   C34 42, 22 44, 16 54
+                   C24 58, 32 66, 38 76
+                   C40 66, 43 58, 46 50Z"
+                fill="none" stroke="url(#angG)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+
+          <path d="M46 50
+                   C58 42, 70 44, 76 54
+                   C68 58, 60 66, 54 76
+                   C52 66, 49 58, 46 50Z"
+                fill="none" stroke="url(#angG)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+
+          <path d="M46 34 L46 42" stroke="rgba(235,245,255,.82)" stroke-width="4" stroke-linecap="round"/>
+          <path d="42 38 L50 38" stroke="rgba(235,245,255,.82)" stroke-width="4" stroke-linecap="round"/>
+        </g>
+
+        <text x="160" y="92"
+              font-family="system-ui,Segoe UI,Roboto,Helvetica,Arial"
+              font-size="66"
+              font-weight="860"
+              fill="url(#angG)"
+              letter-spacing=".6"
+              filter="url(#angS)">Angel Numbers Tracker</text>
+      </svg>
     </div>
 
-    <div class="panel">
-      <div class="panelInner" id="mainPanel">
-        <!-- LOG PANEL (primary screen) -->
-        <div class="logShell" id="logShell">
-          <div class="row">
-            <button class="btn" id="btnExport">Export</button>
-            <button class="btn" id="btnAdd">ADD</button>
-            <button class="btn" id="btnBack">Back</button>
+    <div class="screenArea" id="screenArea">
+
+      <div id="home" class="card accentFrame">
+        <div id="ptrHome" class="ptr">Pull down to refresh</div>
+
+        <div class="homeMain">
+          <button id="btnGoAdd" class="btn primary">ADD Angel Number</button>
+          <button id="btnGoLog" class="btn">Log</button>
+          <button id="btnGoCalendar" class="btn">Calendar</button>
+
+          <div class="homeFooterRow">
+            <button id="btnInstall" class="btn small">Install</button>
+            <button id="btnClearAll" class="btn small">Clear Data</button>
+            <div class="grow"></div>
+            <button id="btnExitHome" class="btn small danger">Exit</button>
           </div>
 
-          <div class="label" style="margin-top:6px;">Search</div>
-          <div class="fieldRow">
-            <input id="q" type="text" placeholder="Try: 111, mirror, reset, new" />
-            <button class="btn" id="btnSearch">Search</button>
+          <div class="subtle">Inspired by a real Angel.</div>
+          <div class="subtle">Local-only. No accounts. No cloud.</div>
+
+          <div class="footerTiny">
+            <div id="homeVerLabel" aria-label="Version label">v1.333</div>
+            <div>developed by Keyth Jyles</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADD/EDIT -->
+      <div id="add" class="card accentFrame hidden">
+        <div id="addScroll">
+          <div id="editPill" class="editPill hidden">Editing entry</div>
+
+          <div id="timeLine" class="timeLine">--:--:-- --, --/--/----</div>
+
+          <!-- Date/Time edit controls: shown ONLY when editing -->
+          <div id="dtEditWrap" class="hidden">
+            <div class="label">Date/Time</div>
+            <input id="dtEdit" class="field" type="datetime-local" />
           </div>
 
-          <div class="fieldRow" style="gap:18px;">
-            <div style="flex:1;">
+          <div class="label">Number</div>
+          <input id="anum" class="field" inputmode="numeric" placeholder="e.g., 111, 1212, 777" />
+
+          <div id="meaningCard" class="meaningCard">
+            <div class="meaningTop">
+              <div id="numBig" class="numBig">—</div>
+              <div id="patternPill" class="patternPill">Pattern: —</div>
+            </div>
+            <div id="meaningText" class="meaningText">Enter a number to see its commonly shared meaning.</div>
+            <div class="disclaimer">
+              Cultural note: these meanings come from numerology/“angel number” traditions and vary by source.
+              Treat as reflective prompts, not facts or predictions.
+            </div>
+          </div>
+
+          <div class="label">Notes <span style="color:var(--muted2); font-weight:650;">(optional)</span></div>
+          <textarea id="notes" class="field" placeholder="Where did you see it? What were you thinking/feeling?"></textarea>
+        </div>
+
+        <div id="addFooter">
+          <div class="panelButtons">
+            <button id="btnSave" class="btn primary grow">Save</button>
+            <button id="btnDelete" class="btn grow hidden">Delete</button>
+            <button id="btnBackFromAdd" class="btn grow">Back</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOG -->
+      <div id="log" class="card accentFrame hidden">
+        <div id="logHeader">
+          <div class="row center">
+            <button id="btnExportLog" class="btn small">Export</button>
+            <button id="btnAddFromLog" class="btn small">ADD</button>
+            <div class="grow"></div>
+            <button id="btnBackFromLog" class="btn small">Back</button>
+          </div>
+
+          <div class="label">Search</div>
+          <div class="searchRow">
+            <input id="search" class="field" placeholder="Try: 111, mirror, reset, new start..." />
+            <button id="btnRunSearch" class="btn small">Search</button>
+          </div>
+
+          <div class="filters">
+            <div class="dateField">
               <div class="miniLabel">From</div>
-              <input id="from" type="date" />
+              <input id="fromDate" class="field" type="date" />
             </div>
-            <div style="flex:1;">
+            <div class="dateField">
               <div class="miniLabel">To</div>
-              <input id="to" type="date" />
+              <input id="toDate" class="field" type="date" />
             </div>
           </div>
+        </div>
 
-          <!-- THIS is the scrollable log list container -->
-          <div class="logList" id="logList" aria-label="Angel number log list"></div>
+        <div id="logListBox" aria-label="Log list box">
+          <div id="logList"></div>
         </div>
       </div>
-    </div>
 
-    <div class="foot" id="foot">v1.0B12</div>
+      <!-- CALENDAR -->
+      <div id="calendar" class="card accentFrame hidden">
+        <div class="row center">
+          <button id="btnExportMonth" class="btn small">Export</button>
+          <div class="grow"></div>
+          <button id="btnBackFromCalendar" class="btn small">Back</button>
+        </div>
+
+        <div class="calTop">
+          <input id="calMonth" class="field" type="month" />
+          <button id="btnCalToday" class="btn small">Today</button>
+        </div>
+
+        <div class="calGrid" id="calDowRow"></div>
+        <div class="calGrid" id="calGrid"></div>
+        <div class="calHint">Tap a highlighted day to view entries.</div>
+      </div>
+
+    </div>
   </div>
 
-  <!-- CARD MODAL -->
-  <div class="modalBack" id="cardModalBack" role="dialog" aria-modal="true">
-    <div class="modal">
-      <div class="modalHead">
-        <div class="modalTitle">Angel Number Card</div>
-        <button class="xbtn" id="cardClose">×</button>
+  <!-- Edit prompt modal -->
+  <div id="editModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+    <div class="modalCard">
+      <div class="modalTitle" id="editModalTitle">Open this entry?</div>
+      <div class="modalSub" id="editModalSub">Press Open to view the Angel Number Card.</div>
+      <div class="modalBtns">
+        <button id="btnEditCancel" class="btn">Cancel</button>
+        <button id="btnEditConfirm" class="btn primary">Open</button>
       </div>
-      <div class="modalBody">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
-          <div class="logo" style="width:52px;height:52px;border-radius:16px;">
-            <svg width="30" height="30" viewBox="0 0 64 64" fill="none">
-              <path d="M20 41c-6-2-10-7-10-13 0-6 4-11 10-13 2 7 5 13 10 18-5 3-8 6-10 8Z" stroke="rgba(200,220,255,.88)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M44 41c6-2 10-7 10-13 0-6-4-11-10-13-2 7-5 13-10 18 5 3 8 6 10 8Z" stroke="rgba(200,220,255,.88)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M22 44c4 6 10 9 10 9s6-3 10-9c-4-3-7-5-10-6-3 1-6 3-10 6Z" stroke="rgba(120,180,255,.95)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M22 14c3-4 17-4 20 0" stroke="rgba(235,245,255,.65)" stroke-width="3" stroke-linecap="round"/>
+    </div>
+  </div>
+
+  <!-- Confirm modal -->
+  <div id="confirmModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="modalCard">
+      <div class="modalTitle" id="confirmTitle">Confirm</div>
+      <div class="modalSub" id="confirmSub">—</div>
+      <div class="modalBtns">
+        <button id="btnConfirmCancel" class="btn">Cancel</button>
+        <button id="btnConfirmOk" class="btn primary">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export modal -->
+  <div id="exportModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle">
+    <div class="modalCard">
+      <div class="modalTitle" id="exportModalTitle">Export ready</div>
+      <div class="modalSub" id="exportModalSub">
+Export report was copied to your clipboard.  You can paste it into any messaging app, email, Notes, or any app that accepts text.  Optional:
+
+Share sends the report to another app.
+
+Save creates a .txt file on your device.
+</div>
+<div class="modalBtns" style="flex-wrap:nowrap;">
+<button id="btnExportClose" class="btn" style="min-width:0; flex:1 1 0; font-size:16px; height:52px;">Close</button>
+<button id="btnExportShare" class="btn" style="min-width:0; flex:1 1 0; font-size:16px; height:52px;">Share</button>
+<button id="btnExportSave" class="btn primary" style="min-width:0; flex:1 1 0; font-size:16px; height:52px;">Save .txt</button>
+</div>
+</div>
+
+  </div>
+
+  <!-- Angel Number Card modal -->
+  <div id="cardModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="cardTitle">
+    <div class="modalCard">
+      <div class="xCloseRow">
+        <button class="xBtn" id="btnCardX" aria-label="Close">×</button>
+      </div>
+
+      <div class="cardTopScroll">
+        <!-- Logo row now at the top (requested) -->
+        <div class="cardLogoRow">
+          <div class="cardLogoIcon" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="cg" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#8a6bff"/>
+                  <stop offset="55%" stop-color="#4fa3ff"/>
+                  <stop offset="100%" stop-color="#2f78ff"/>
+                </linearGradient>
+              </defs>
+              <ellipse cx="32" cy="16" rx="14" ry="6" fill="none" stroke="rgba(235,245,255,.88)" stroke-width="4"/>
+              <path d="M32 30 C24 26, 16 27, 12 34 C18 36, 22 41, 26 49 C27 42, 29 36, 32 30Z"
+                    fill="none" stroke="url(#cg)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M32 30 C40 26, 48 27, 52 34 C46 36, 42 41, 38 49 C37 42, 35 36, 32 30Z"
+                    fill="none" stroke="url(#cg)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </div>
-          <div style="font-weight:900;font-size:22px;color:rgba(235,245,255,.78);">Angel Numbers Tracker</div>
+          <div class="cardLogoText">Angel Numbers Tracker</div>
         </div>
 
-        <div class="modalBodyScroll">
-          <div class="line"><b>Date/Time:</b> <span id="m_dt"></span></div>
-          <div class="line" style="margin-top:10px;"><b>Number:</b> <span id="m_num"></span></div>
-          <div class="line" style="margin-top:10px;"><b>Notes:</b> <span id="m_notes"></span></div>
-          <div class="line" style="margin-top:10px;"><b>Pattern:</b> <span id="m_pat"></span></div>
-          <div class="line" style="margin-top:10px;"><b>Meaning:</b> <span id="m_mean"></span></div>
-        </div>
+        <div class="modalTitle" id="cardTitle">Angel Number Card</div>
+        <div class="modalSub" id="cardBody">—</div>
       </div>
+
       <div class="modalBtns">
-        <button class="btn" id="btnCopy">Copy</button>
-        <button class="btn" id="btnExportOne">Export</button>
+        <button id="btnCardCopy" class="btn">Copy</button>
+        <button id="btnCardExport" class="btn">Export</button>
+        <button id="btnCardEdit" class="btn primary">Edit</button>
       </div>
-      <div class="modalBtns" style="padding-top:0;">
-        <button class="btn btnPrimary" id="btnEdit">Edit</button>
+    </div>
+
+  </div>
+
+  <!-- Day modal (NO X BUTTON; Close button only) -->
+  <div id="dayModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="dayTitle">
+    <div class="modalCard">
+      <div class="modalTitle" id="dayTitle">—</div>
+      <div class="modalSub" id="dayBody">—</div>
+      <div class="modalBtns">
+        <button id="btnDayExport" class="btn primary">Export</button>
+        <button id="btnDayClose" class="btn">Close</button>
       </div>
     </div>
   </div>
 
-  <!-- EDIT MODAL -->
-  <div class="modalBack" id="editModalBack" role="dialog" aria-modal="true">
-    <div class="modal">
-      <div class="modalHead">
-        <div class="modalTitle">Edit Entry</div>
-        <button class="xbtn" id="editClose">×</button>
+  <!-- Version modal -->
+  <div id="versionModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="verTitle">
+    <div class="modalCard">
+      <div class="xCloseRow">
+        <button class="xBtn" id="btnVerX" aria-label="Close">×</button>
       </div>
-      <div class="modalBody">
-        <div class="modalBodyScroll">
-          <div class="miniLabel">Date/Time</div>
-          <input id="e_dt" type="datetime-local" />
+      <div class="modalTitle" id="verTitle">Version</div>
+      <div class="modalSub" id="verBody">—</div>
+      <div class="modalBtns">
+        <button id="btnVerClose" class="btn primary">Close</button>
+      </div>
+    </div>
+  </div>
 
-          <div class="miniLabel">Number</div>
-          <input id="e_num" type="text" inputmode="numeric" placeholder="e.g., 111, 1010, 7777" />
-
-          <div class="miniLabel">Pattern</div>
-          <input id="e_pat" type="text" placeholder="e.g., Repeating 7s, Mirror, Mixed pattern" />
-
-          <div class="miniLabel">Meaning</div>
-          <textarea id="e_mean" placeholder="Meaning / interpretation"></textarea>
-
-          <div class="miniLabel">Notes</div>
-          <textarea id="e_notes" placeholder="Optional notes"></textarea>
-        </div>
+  <!-- Heart modal -->
+  <div id="heartModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="heartTitle">
+    <div class="modalCard">
+      <div class="xCloseRow">
+        <button class="xBtn" id="btnHeartX" aria-label="Close">×</button>
+      </div>
+      <div class="modalTitle" id="heartTitle">A message</div>
+      <div class="heartWrap" aria-hidden="true">
+        <svg class="heartSvg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="hg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#ff6aa6"/>
+              <stop offset="55%" stop-color="#b56bff"/>
+              <stop offset="100%" stop-color="#4fa3ff"/>
+            </linearGradient>
+          </defs>
+          <path d="M60 104
+                   C60 104, 18 78, 18 46
+                   C18 30, 30 20, 44 20
+                   C52 20, 57 24, 60 28
+                   C63 24, 68 20, 76 20
+                   C90 20, 102 30, 102 46
+                   C102 78, 60 104, 60 104Z"
+                fill="url(#hg)" stroke="rgba(235,245,255,.85)" stroke-width="3" />
+        </svg>
+      </div>
+      <div class="modalSub" id="heartBody" style="font-size:16px; color: rgba(235,245,255,.82);">
+        The Angels love you Timmy!
       </div>
       <div class="modalBtns">
-        <button class="btn" id="btnDelete">Delete</button>
-        <button class="btn btnPrimary" id="btnSave">Save</button>
+        <button id="btnHeartClose" class="btn primary">Close</button>
       </div>
     </div>
   </div>
 
   <script>
-    /* ===== Angel Numbers Tracker v1.0B12 =====
-       Change in this version:
-       - Log list is now its own scrollable container (.logList) with flex + overflow-y:auto,
-         ensuring the list area can be dragged/moved up and down on mobile.
-       Nothing else intentionally changed.
-    */
+(() => {
+  "use strict";
 
-    const APP_VERSION = "v1.0B12";
-    const LS_KEY = "angel_numbers_tracker_records_v1";
+  const APP_VERSION = "v1.0B12";
+  const HOME_VERSION_LABEL = "v1.333";
+  const STORAGE_KEY = "angel_numbers_records_v1";
+  const DAY_MS = 24*60*60*1000;
 
-    /** @type {{id:string, ts:number, num:string, pattern:string, meaning:string, notes:string}[]} */
-    let records = [];
-    let activeId = null;
+  const TEST_DATA_ENABLED = true;
 
-    const $ = (id) => document.getElementById(id);
+  const $ = (id) => document.getElementById(id);
 
-    function pad2(n){ return String(n).padStart(2,"0"); }
+  /* ===== Meanings ===== */
 
-    function tsToDisplay(ts){
-      const d = new Date(ts);
-      const mm = pad2(d.getMonth()+1);
-      const dd = pad2(d.getDate());
-      const yy = d.getFullYear();
-      let hh = d.getHours();
-      const ampm = hh >= 12 ? "PM" : "AM";
-      hh = hh % 12; if(hh===0) hh=12;
-      const mi = pad2(d.getMinutes());
-      const ss = pad2(d.getSeconds());
-      return `${mm}/${dd}/${yy}, ${hh}:${mi}:${ss} ${ampm}`;
+  const DIGIT_MEANING = {
+    "0": "0 is often linked with wholeness, source, and fresh cycles—an invitation to reset and widen perspective.",
+    "1": "1 is often linked with new beginnings, initiative, focus, and the power of attention.",
+    "2": "2 is often linked with balance, partnership, patience, and alignment through cooperation.",
+    "3": "3 is often linked with creativity, expression, growth, and encouragement to communicate.",
+    "4": "4 is often linked with stability, foundations, discipline, and building what lasts.",
+    "5": "5 is often linked with change, adaptability, movement, and a call to embrace transition.",
+    "6": "6 is often linked with care, responsibility, home, and recalibrating priorities toward wellbeing.",
+    "7": "7 is often linked with insight, inner wisdom, spiritual inquiry, and learning through reflection.",
+    "8": "8 is often linked with strength, momentum, material mastery, and confident stewardship of resources.",
+    "9": "9 is often linked with closure, compassion, integration, and completing a cycle with grace."
+  };
+
+  const ANGEL_MAP = {
+    "000": "Reset and re-center. A ‘clean slate’ moment—expand perspective and begin again.",
+    "111": "Focus and intention. A reminder to notice your thoughts and aim them deliberately.",
+    "222": "Balance and alignment. Patience—let partnerships and decisions settle into place.",
+    "333": "Creativity and support. Express yourself; keep building and communicating clearly.",
+    "444": "Foundations and stability. Stay disciplined; the work you’re doing is structural.",
+    "555": "Change and movement. A shift is underway—adapt, release the old, step forward.",
+    "666": "Recalibration. Check priorities; return to what’s healthy and truly important.",
+    "777": "Insight and learning. Trust your inner guidance; deepen study and reflection.",
+    "888": "Momentum and abundance. Good stewardship; practical progress and strong energy.",
+    "999": "Completion. Close a chapter; integrate lessons; make room for what’s next.",
+    "1010": "Fresh cycle + alignment. A restart with a clear direction—stay awake and intentional.",
+    "1111": "Gateway / heightened awareness. Focus your intent; clarify what you’re building.",
+    "1212": "Realignment and growth. Keep moving—small consistent steps bring a new level.",
+    "1234": "Step-by-step progress. Keep it simple; the path is sequential and workable.",
+    "1414": "Grounded change. Build stability while adjusting—practical updates, not chaos.",
+    "1515": "Change with intention. Choose the transition you want; don’t drift into it.",
+    "2020": "Balance and reflection. Look at both sides; correct course gently.",
+    "2222": "Deep alignment. Commit to balance; trust the process over the impulse.",
+    "2424": "Reinforced signal (repeated block 24): a theme repeating until you notice it."
+  };
+
+  /* ===== Storage ===== */
+
+  function loadRecords(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return [];
+      const arr = JSON.parse(raw);
+      if(!Array.isArray(arr)) return [];
+      return arr
+        .filter(r => r && typeof r.ts === "number")
+        .map(r => ({
+          ts: r.ts,
+          number: (r.number ?? "").toString(),
+          pattern: (r.pattern ?? "").toString(),
+          meaning: (r.meaning ?? "").toString(),
+          notes: (r.notes ?? "").toString()
+        }))
+        .sort((a,b)=> b.ts - a.ts);
+    }catch{
+      return [];
+    }
+  }
+
+  function saveRecords(recs){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(recs));
+  }
+
+  /* ===== Utilities ===== */
+
+  function fmtDateTime(ts){
+    const d = new Date(ts);
+    const parts = new Intl.DateTimeFormat(undefined, {
+      year:"numeric", month:"2-digit", day:"2-digit",
+      hour:"2-digit", minute:"2-digit", second:"2-digit"
+    }).formatToParts(d);
+    const map = Object.fromEntries(parts.map(p=>[p.type,p.value]));
+    const mm = map.month, dd = map.day, yy = map.year;
+    const hh = map.hour, mi = map.minute, ss = map.second;
+    const dp = map.dayPeriod ? ` ${map.dayPeriod}` : "";
+    return `${mm}/${dd}/${yy}, ${hh}:${mi}:${ss}${dp}`;
+  }
+
+  function fmtTimeOnly(ts){
+    return new Intl.DateTimeFormat(undefined, { hour:"2-digit", minute:"2-digit" }).format(new Date(ts));
+  }
+
+  function fmtTimeCommaDate(ts){
+    const d = new Date(ts);
+    const time = new Intl.DateTimeFormat(undefined, {
+      hour:"2-digit", minute:"2-digit", second:"2-digit"
+    }).format(d);
+    const date = new Intl.DateTimeFormat(undefined, {
+      month:"2-digit", day:"2-digit", year:"numeric"
+    }).format(d);
+    return `${time}, ${date}`;
+  }
+
+  function startOfDay(ts){
+    const d = new Date(ts);
+    d.setHours(0,0,0,0);
+    return d.getTime();
+  }
+
+  function clampEndOfDay(ts){
+    const d = new Date(ts);
+    d.setHours(23,59,59,999);
+    return d.getTime();
+  }
+
+  function parseDateField(v){
+    if(!v) return null;
+    const [y,m,d] = v.split("-").map(Number);
+    if(!y || !m || !d) return null;
+    return new Date(y, m-1, d, 0, 0, 0, 0).getTime();
+  }
+
+  function escapeHtml(s){
+    return String(s)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function toLocalDatetimeValue(ts){
+    const d = new Date(ts);
+    const pad = (n)=> String(n).padStart(2,"0");
+    const yyyy = d.getFullYear();
+    const mm = pad(d.getMonth()+1);
+    const dd = pad(d.getDate());
+    const hh = pad(d.getHours());
+    const mi = pad(d.getMinutes());
+    return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+  }
+
+  function fromLocalDatetimeValue(v){
+    if(!v) return null;
+    const d = new Date(v);
+    const ts = d.getTime();
+    return Number.isFinite(ts) ? ts : null;
+  }
+
+  function normalizeNumberInput(raw){
+    const s = String(raw ?? "").trim();
+    return s.replace(/[^\d]/g, "");
+  }
+
+  /* ===== Pattern + meaning ===== */
+
+  function isAllSame(s){ return !!(s && s.length >= 2 && s.split("").every(ch => ch === s[0])); }
+  function isPalindrome(s){ if(!s || s.length < 3) return false; return s === s.split("").reverse().join(""); }
+  function isRepeatedHalf(s){ if(!s || s.length < 4 || s.length % 2) return false; const h=s.slice(0,s.length/2); return h+h===s; }
+  function isAscendingSeq(s){
+    if(!s || s.length < 3) return false;
+    for(let i=1;i<s.length;i++){
+      const a=s.charCodeAt(i-1)-48, b=s.charCodeAt(i)-48;
+      if(b !== a+1) return false;
+    }
+    return true;
+  }
+  function isDescendingSeq(s){
+    if(!s || s.length < 3) return false;
+    for(let i=1;i<s.length;i++){
+      const a=s.charCodeAt(i-1)-48, b=s.charCodeAt(i)-48;
+      if(b !== a-1) return false;
+    }
+    return true;
+  }
+
+  function detectPattern(s){
+    if(!s) return "—";
+    if(isAllSame(s)) return `Repeating ${s[0]}s`;
+    if(isAscendingSeq(s)) return "Sequential (up)";
+    if(isDescendingSeq(s)) return "Sequential (down)";
+    if(isRepeatedHalf(s)) return "Double pattern";
+    if(isPalindrome(s)) return "Mirror (palindrome)";
+    if(s.length === 3 && s[0] === s[2] && s[0] !== s[1]) return "Sandwich pattern";
+    return "Mixed pattern";
+  }
+
+  function digitSummary(s){
+    if(isAllSame(s)) return DIGIT_MEANING[s[0]] || "";
+    const counts = {};
+    for(const ch of s){ counts[ch] = (counts[ch]||0) + 1; }
+    let best=null, bestN=0;
+    for(const [k,v] of Object.entries(counts)){ if(v>bestN){ bestN=v; best=k; } }
+    if(best && bestN >= Math.max(2, Math.ceil(s.length * 0.6))){
+      return DIGIT_MEANING[best] || "";
+    }
+    const sum = s.split("").reduce((a,ch)=>a+(ch.charCodeAt(0)-48),0);
+    const root = ((sum - 1) % 9) + 1;
+    const rootLine = DIGIT_MEANING[String(root)] || "";
+    return rootLine ? `Digit-sum lens (${sum} → ${root}): ${rootLine}` : "";
+  }
+
+  function deriveMeaning(s, pattern){
+    if(!s) return {pattern:"—", meaning:"Enter a number to see its commonly shared meaning."};
+
+    if(ANGEL_MAP[s]) return {pattern, meaning: ANGEL_MAP[s]};
+
+    if(isAllSame(s) && s.length >= 2){
+      const d=s[0];
+      const base = DIGIT_MEANING[d] || "A repeating pattern—often treated as a heightened emphasis.";
+      return {pattern, meaning: `Emphasis pattern (${s}): ${base}`};
     }
 
-    function tsToInput(ts){
-      const d = new Date(ts);
-      const yyyy = d.getFullYear();
-      const mm = pad2(d.getMonth()+1);
-      const dd = pad2(d.getDate());
-      const hh = pad2(d.getHours());
-      const mi = pad2(d.getMinutes());
-      return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+    if(pattern === "Sequential (up)") return {pattern, meaning:"Step-by-step progress. Keep it simple, keep moving, and let momentum build."};
+    if(pattern === "Sequential (down)") return {pattern, meaning:"Release and simplify. Let go of what’s extra and return to essentials."};
+
+    if(pattern === "Double pattern"){
+      const half = s.slice(0, s.length/2);
+      const lens = digitSummary(half);
+      return {pattern, meaning: `Reinforced signal (repeated block ${half}): a theme repeating until you notice it.\n${lens}`.trim()};
     }
 
-    function inputToTs(val){
-      // datetime-local => local time
-      const d = new Date(val);
-      return isNaN(d.getTime()) ? Date.now() : d.getTime();
+    if(pattern === "Mirror (palindrome)"){
+      const lens = digitSummary(s);
+      return {pattern, meaning: `Reflection and alignment. Consider what’s being mirrored back—choices, habits, or timing.\n${lens}`.trim()};
     }
 
-    function load(){
-      try{
-        const raw = localStorage.getItem(LS_KEY);
-        records = raw ? JSON.parse(raw) : [];
-        if(!Array.isArray(records)) records = [];
-      }catch{
-        records = [];
+    const lens = digitSummary(s);
+    const fallback = "A general interpretation is heightened awareness: notice your thoughts, environment, and choices—then act deliberately.";
+    return {pattern, meaning: lens ? `${fallback}\n${lens}` : fallback};
+  }
+
+  /* ===== Touch lock ===== */
+
+  let lockTimer = null;
+  function lockTouches(ms=200){
+    const el = $("touchLock");
+    el.classList.add("on");
+    if(lockTimer) clearTimeout(lockTimer);
+    lockTimer = setTimeout(()=> el.classList.remove("on"), ms);
+  }
+  function unlockTouches(){
+    const el = $("touchLock");
+    el.classList.remove("on");
+    if(lockTimer) clearTimeout(lockTimer);
+    lockTimer = null;
+  }
+
+  /* ===== Screens ===== */
+
+  const swipeCycle = ["home","calendar","log"];
+  let currentScreen = "home";
+  let returnScreen = "home";
+  let animating = false;
+
+  function focusTopOfPanel(screen){
+    try{ window.scrollTo({top:0,left:0,behavior:"auto"}); }catch{}
+    if(screen === "add"){
+      try{ $("addScroll").scrollTop = 0; }catch{}
+      if(editTs == null){
+        setTimeout(() => { try{ $("anum").focus({preventScroll:true}); }catch{} }, 0);
+      }else{
+        setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 0);
       }
+    }else if(screen === "log"){
+      try{ $("logListBox").scrollTop = 0; }catch{}
+      try{ document.activeElement?.blur(); }catch{}
+    }else{
+      try{ document.activeElement?.blur(); }catch{}
     }
+  }
 
-    function save(){
-      localStorage.setItem(LS_KEY, JSON.stringify(records));
+  function showInstant(screen){
+    unlockTouches();
+    for(const s of ["home","add","log","calendar"]){
+      $(s).classList.toggle("hidden", s !== screen);
+      $(s).style.transform = "";
+      $(s).style.transition = "";
     }
+    currentScreen = screen;
 
-    function uid(){
-      return Math.random().toString(16).slice(2) + "-" + Date.now().toString(16);
-    }
+    if(screen === "log") renderLog();
+    if(screen === "calendar") { initMonthDefaultIfNeeded(); renderCalendar(); }
+    if(screen === "add") { tickTime(); adjustTimeFont(); updateMeaningUI(); }
 
-    function norm(s){ return (s||"").toString().trim().toLowerCase(); }
+    focusTopOfPanel(screen);
+  }
 
-    function inRange(ts, fromStr, toStr){
-      // from/to are yyyy-mm-dd
-      const d = new Date(ts);
-      const day = `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
-      if(fromStr && day < fromStr) return false;
-      if(toStr && day > toStr) return false;
-      return true;
-    }
+  /* ===== Swipe “wheel” ===== */
 
-    function filterRecords(){
-      const q = norm($("q").value);
-      const from = $("from").value;
-      const to = $("to").value;
+  const drag = {
+    active:false,
+    x0:0, y0:0,
+    dx:0, dy:0,
+    intent:null,
+    from:null, to:null,
+    width:0,
+    dir:null
+  };
 
-      let out = records.slice().sort((a,b)=>b.ts-a.ts);
+  function nextInCycleRight(from){
+    const i = swipeCycle.indexOf(from);
+    if(i < 0) return null;
+    return swipeCycle[(i+1) % swipeCycle.length];
+  }
+  function nextInCycleLeft(from){
+    const i = swipeCycle.indexOf(from);
+    if(i < 0) return null;
+    return swipeCycle[(i-1+swipeCycle.length) % swipeCycle.length];
+  }
 
-      if(q){
-        out = out.filter(r=>{
-          const hay = [
-            r.num, r.pattern, r.meaning, r.notes, tsToDisplay(r.ts)
-          ].map(norm).join(" | ");
-          return hay.includes(q);
-        });
-      }
-      out = out.filter(r=>inRange(r.ts, from, to));
-      return out;
-    }
+  function setTransform(el, x){
+    el.style.transform = `translateX(${x}px)`;
+  }
 
-    function render(){
-      const list = $("logList");
-      list.innerHTML = "";
-      const items = filterRecords();
+  function startDrag(ev){
+    if(animating) return;
+    if(!(ev.touches && ev.touches.length === 1)) return;
+    if(!swipeCycle.includes(currentScreen)) return;
 
-      if(items.length === 0){
-        const empty = document.createElement("div");
-        empty.style.color = "rgba(235,245,255,.55)";
-        empty.style.fontWeight = "800";
-        empty.style.padding = "14px 6px";
-        empty.textContent = "No entries match your filters.";
-        list.appendChild(empty);
+    const t = ev.target;
+    if(t && t.closest && t.closest("input, textarea, select")) return;
+
+    drag.active = true;
+    drag.intent = null;
+    drag.dir = null;
+    drag.x0 = ev.touches[0].clientX;
+    drag.y0 = ev.touches[0].clientY;
+    drag.dx = 0;
+    drag.dy = 0;
+    drag.from = currentScreen;
+    drag.to = null;
+    drag.width = $("screenArea").clientWidth || window.innerWidth;
+  }
+
+  function prepareTarget(dir){
+    if(drag.dir === dir && drag.to) return;
+    drag.dir = dir;
+
+    const target = (dir === "right") ? nextInCycleRight(drag.from) : nextInCycleLeft(drag.from);
+    if(!target) return;
+
+    drag.to = target;
+
+    const fromEl = $(drag.from);
+    const toEl = $(drag.to);
+
+    toEl.classList.remove("hidden");
+    fromEl.style.transition = "none";
+    toEl.style.transition = "none";
+
+    const startX = (dir === "right") ? -drag.width : drag.width;
+    setTransform(fromEl, 0);
+    setTransform(toEl, startX);
+  }
+
+  function moveDrag(ev){
+    if(!drag.active) return;
+    if(!(ev.touches && ev.touches.length === 1)) return;
+
+    const x = ev.touches[0].clientX;
+    const y = ev.touches[0].clientY;
+    drag.dx = x - drag.x0;
+    drag.dy = y - drag.y0;
+
+    if(!drag.intent){
+      const ax = Math.abs(drag.dx);
+      const ay = Math.abs(drag.dy);
+
+      if(ax > 18 && ax > ay + 12){
+        drag.intent = "h";
+        if(typeof cancelEntryTap === "function") cancelEntryTap();
+      }else if(ay > 18 && ay > ax + 8){
+        drag.intent = "v";
+        drag.active = false;
+        return;
+      }else{
         return;
       }
+    }
 
-      for(const r of items){
-        const card = document.createElement("div");
-        card.className = "card";
-        card.dataset.id = r.id;
+    if(drag.intent !== "h") return;
 
-        const top = document.createElement("div");
-        top.className = "cardTop";
+    ev.preventDefault();
 
-        const left = document.createElement("div");
-        const dt = document.createElement("div");
-        dt.className = "dt";
-        dt.textContent = tsToDisplay(r.ts);
+    const dir = (drag.dx >= 0) ? "right" : "left";
+    prepareTarget(dir);
+    if(!drag.to) return;
 
-        const num = document.createElement("div");
-        num.className = "num";
-        num.textContent = r.num || "(no number)";
+    const fromEl = $(drag.from);
+    const toEl = $(drag.to);
 
-        left.appendChild(dt);
-        left.appendChild(num);
+    const w = drag.width || 1;
+    const clamped = Math.max(-w, Math.min(w, drag.dx));
 
-        const right = document.createElement("div");
-        right.className = "pat";
-        right.textContent = r.pattern || "";
+    setTransform(fromEl, clamped);
+    const base = (dir === "right") ? -w : w;
+    setTransform(toEl, base + clamped);
+  }
 
-        top.appendChild(left);
-        top.appendChild(right);
+  function endDrag(){
+    if(!drag.active && drag.intent !== "h") return;
 
-        const notes = document.createElement("div");
-        notes.className = "line";
-        notes.innerHTML = `<b>Notes:</b> ${escapeHtml(r.notes || "None")}`;
+    const hadHorizontal = (drag.intent === "h" && drag.to);
+    const from = drag.from;
+    const to = drag.to;
+    const w = drag.width || 1;
+    const dx = drag.dx;
 
-        const meaning = document.createElement("div");
-        meaning.className = "line";
-        meaning.innerHTML = `<b>Meaning:</b> ${escapeHtml(r.meaning || "")}`;
+    drag.active = false;
+    drag.intent = null;
+    drag.dir = null;
 
-        card.appendChild(top);
-        card.appendChild(notes);
-        card.appendChild(meaning);
+    if(!hadHorizontal) return;
 
-        card.addEventListener("click", ()=>openCard(r.id));
-        list.appendChild(card);
+    animating = true;
+
+    const progress = Math.min(1, Math.abs(dx) / w);
+    const commit = progress >= 0.22;
+
+    const dir = (dx >= 0) ? "right" : "left";
+    const fromEl = $(from);
+    const toEl = $(to);
+
+    fromEl.style.transition = "transform 220ms cubic-bezier(.2,.9,.2,1)";
+    toEl.style.transition   = "transform 220ms cubic-bezier(.2,.9,.2,1)";
+
+    if(commit){
+      setTransform(fromEl, (dir === "right") ? w : -w);
+      setTransform(toEl, 0);
+
+      setTimeout(() => {
+        fromEl.classList.add("hidden");
+        fromEl.style.transition = "";
+        toEl.style.transition = "";
+        fromEl.style.transform = "";
+        toEl.style.transform = "";
+
+        currentScreen = to;
+
+        if(currentScreen === "log") renderLog();
+        if(currentScreen === "calendar") { initMonthDefaultIfNeeded(); renderCalendar(); }
+
+        focusTopOfPanel(currentScreen);
+        animating = false;
+        lockTouches(140);
+      }, 235);
+    }else{
+      setTransform(fromEl, 0);
+      setTransform(toEl, (dir === "right") ? -w : w);
+
+      setTimeout(() => {
+        toEl.classList.add("hidden");
+        fromEl.style.transition = "";
+        toEl.style.transition = "";
+        fromEl.style.transform = "";
+        toEl.style.transform = "";
+
+        animating = false;
+        lockTouches(90);
+      }, 235);
+    }
+  }
+
+  function attachSwipes(){
+    const root = $("screenArea");
+    root.addEventListener("touchstart", startDrag, {passive:true});
+    root.addEventListener("touchmove", moveDrag, {passive:false});
+    root.addEventListener("touchend", endDrag, {passive:true});
+    root.addEventListener("touchcancel", endDrag, {passive:true});
+  }
+
+  /* ===== Add/Edit ===== */
+
+  let timeTimer = null;
+  let editTs = null;
+  let editOriginalTs = null;
+
+  function showDateTimeEditor(show){
+    $("dtEditWrap").classList.toggle("hidden", !show);
+  }
+
+  function clearAddForm(){
+    $("anum").value = "";
+    $("notes").value = "";
+    updateMeaningUI();
+    try{ $("addScroll").scrollTop = 0; }catch{}
+  }
+
+  function enterAddNew(from="home"){
+    editTs = null;
+    editOriginalTs = null;
+    returnScreen = from;
+
+    $("editPill").classList.add("hidden");
+    $("btnDelete").classList.add("hidden");
+
+    showDateTimeEditor(false);
+
+    clearAddForm();
+    showInstant("add");
+  }
+
+  function enterAddEdit(ts){
+    const recs = loadRecords();
+    const r = recs.find(x => x.ts === ts);
+    if(!r){ enterAddNew("log"); return; }
+
+    editTs = ts;
+    editOriginalTs = ts;
+    returnScreen = "log";
+
+    $("editPill").classList.remove("hidden");
+    $("btnDelete").classList.remove("hidden");
+
+    showDateTimeEditor(true);
+    $("dtEdit").value = toLocalDatetimeValue(r.ts);
+
+    $("anum").value = r.number || "";
+    $("notes").value = (r.notes || "").toString();
+
+    updateMeaningUI(r.pattern || "", r.meaning || "");
+    showInstant("add");
+  }
+
+  function tickTime(){
+    const line = $("timeLine");
+    const ts = (editTs != null) ? editTs : Date.now();
+    line.textContent = fmtTimeCommaDate(ts);
+    adjustTimeFont();
+    if(timeTimer) clearTimeout(timeTimer);
+    timeTimer = setTimeout(tickTime, 900);
+  }
+
+  function adjustTimeFont(){
+    const el = $("timeLine");
+    const parent = el?.parentElement;
+    if(!el || !parent) return;
+
+    el.style.fontSize = "";
+    const maxW = parent.clientWidth - 8;
+
+    let fs = parseFloat(getComputedStyle(el).fontSize) || 28;
+    let guard = 0;
+    while(el.scrollWidth > maxW && fs > 16 && guard < 30){
+      fs -= 1;
+      el.style.fontSize = fs + "px";
+      guard++;
+    }
+  }
+
+  function updateMeaningUI(forcedPattern="", forcedMeaning=""){
+    const raw = $("anum").value;
+    const n = normalizeNumberInput(raw);
+
+    const pattern = forcedPattern || detectPattern(n);
+    const out = forcedMeaning ? {pattern, meaning: forcedMeaning} : deriveMeaning(n, pattern);
+
+    $("numBig").textContent = n ? n : "—";
+    $("patternPill").textContent = `Pattern: ${out.pattern || pattern || "—"}`;
+    $("meaningText").textContent = out.meaning || "—";
+  }
+
+  $("anum").addEventListener("input", () => updateMeaningUI());
+
+  function validateAnyInput(number, notes){
+    return !!(String(number||"").trim() || String(notes||"").trim());
+  }
+
+  /* ===== Log filter + render ===== */
+
+  function recordMatches(rec, q){
+    if(!q) return true;
+    const s = q.toLowerCase().trim();
+    if(!s) return true;
+
+    const num = (rec.number || "").toLowerCase();
+    const pat = (rec.pattern || "").toLowerCase();
+    const meaning = (rec.meaning || "").toLowerCase();
+    const notes = (rec.notes || "").toLowerCase();
+    const dt = fmtDateTime(rec.ts).toLowerCase();
+
+    return num.includes(s) || pat.includes(s) || meaning.includes(s) || notes.includes(s) || dt.includes(s);
+  }
+
+  function filteredRecords({fromId,toId,searchId}){
+    const recs = loadRecords();
+    const q = (searchId ? $(searchId).value : "").trim();
+
+    const fromV = fromId ? $(fromId).value : "";
+    const toV   = toId ? $(toId).value : "";
+
+    const fromTs = parseDateField(fromV);
+    const toMid  = parseDateField(toV);
+    const toTs   = toMid != null ? clampEndOfDay(toMid) : null;
+
+    return recs.filter(r => {
+      if(fromTs != null && r.ts < fromTs) return false;
+      if(toTs != null && r.ts > toTs) return false;
+      return recordMatches(r, q);
+    });
+  }
+
+  function renderLog(){
+    const list = $("logList");
+    const recs = filteredRecords({fromId:"fromDate", toId:"toDate", searchId:"search"});
+
+    list.innerHTML = "";
+    if(recs.length === 0){
+      const empty = document.createElement("div");
+      empty.className = "subtle";
+      empty.style.marginTop = "6px";
+      empty.textContent = "No matching records.";
+      list.appendChild(empty);
+      return;
+    }
+
+    for(const r of recs){
+      const e = document.createElement("div");
+      e.className = "entry";
+      e.dataset.ts = String(r.ts);
+
+      const notesLine = (r.notes && r.notes.trim()) ? r.notes.trim() : "None";
+      const meaningLine = (r.meaning && r.meaning.trim()) ? r.meaning.trim() : "None";
+
+      e.innerHTML = `
+        <div class="entryTop">
+          <div class="entryTime">${escapeHtml(fmtDateTime(r.ts))}</div>
+        </div>
+        <div class="entryMain">
+          <div class="entryNumber">${escapeHtml(r.number || "—")}</div>
+          <div class="entryPattern">${escapeHtml(r.pattern || "—")}</div>
+        </div>
+        <div class="entryLine"><b>Notes:</b> ${escapeHtml(notesLine)}</div>
+        <div class="entryLine"><b>Meaning:</b> ${escapeHtml(meaningLine)}</div>
+      `;
+      list.appendChild(e);
+    }
+  }
+
+  /* ===== Confirm modal ===== */
+
+  let confirmState = null;
+
+  function openConfirm({title, message, okText="OK", cancelText="Cancel", danger=false, onOk}){
+    confirmState = { onOk };
+    $("confirmTitle").textContent = title || "Confirm";
+    $("confirmSub").textContent = message || "—";
+
+    $("btnConfirmOk").textContent = okText;
+    $("btnConfirmCancel").textContent = cancelText;
+
+    if(danger){
+      $("btnConfirmOk").classList.remove("primary");
+      $("btnConfirmOk").classList.add("danger");
+    }else{
+      $("btnConfirmOk").classList.remove("danger");
+      $("btnConfirmOk").classList.add("primary");
+    }
+
+    $("confirmModal").classList.remove("hidden");
+    lockTouches(120);
+  }
+
+  function closeConfirm(){
+    confirmState = null;
+    $("confirmModal").classList.add("hidden");
+    unlockTouches();
+  }
+
+  $("btnConfirmCancel").addEventListener("click", (e)=>{ e.preventDefault(); closeConfirm(); });
+  $("btnConfirmOk").addEventListener("click", (e)=>{
+    e.preventDefault();
+    const fn = confirmState?.onOk;
+    closeConfirm();
+    try{ fn && fn(); }catch{}
+  });
+
+  $("confirmModal").addEventListener("click", (e) => {
+    if(e.target === $("confirmModal")) closeConfirm();
+  });
+
+  document.addEventListener("keydown", (e)=>{
+    if(!$("confirmModal").classList.contains("hidden")){
+      if(e.key === "Escape"){ e.preventDefault(); closeConfirm(); }
+    }
+  });
+
+  /* ===== Card modal ===== */
+
+  let cardTs = null;
+  let cardReturn = { type: "screen", screen: "log" };
+
+  function buildCardHtml(rec){
+    const dt = fmtDateTime(rec.ts);
+    const num = rec.number || "—";
+    const pat = rec.pattern || "—";
+    const meaning = rec.meaning?.trim() ? rec.meaning.trim() : "None";
+    const notes = rec.notes?.trim() ? rec.notes.trim() : "None";
+
+    return `
+      <div style="margin-top:6px;">Date/Time: ${escapeHtml(dt)}</div>
+      <div style="margin-top:10px; font-size:18px; font-weight:900;">Number: ${escapeHtml(num)}</div>
+      <div style="margin-top:10px;">Notes: ${escapeHtml(notes)}</div>
+      <div style="margin-top:10px;">Pattern: ${escapeHtml(pat)}</div>
+      <div style="margin-top:10px;">Meaning: ${escapeHtml(meaning)}</div>
+    `;
+  }
+
+  function buildCardText(rec){
+    const dt = fmtDateTime(rec.ts);
+    const num = rec.number || "—";
+    const pat = rec.pattern || "—";
+    const meaning = rec.meaning?.trim() ? rec.meaning.trim() : "None";
+    const notes = rec.notes?.trim() ? rec.notes.trim() : "None";
+
+    const lines = [
+      "Angel Number Card",
+      `Date/Time: ${dt}`,
+      `Number: ${num}`,
+      `Notes: ${notes}`,
+      `Pattern: ${pat}`,
+      `Meaning: ${meaning}`
+    ];
+    return lines.join("\n");
+  }
+
+  function openCard(ts, origin){
+    const recs = loadRecords();
+    const r = recs.find(x => x.ts === ts);
+    if(!r) return;
+
+    cardTs = ts;
+    cardReturn = origin || { type:"screen", screen: currentScreen };
+
+    $("cardBody").innerHTML = buildCardHtml(r);
+    $("cardModal").classList.remove("hidden");
+    lockTouches(120);
+  }
+
+  function closeCard(){
+    $("cardModal").classList.add("hidden");
+    $("cardBody").textContent = "—";
+    const ret = cardReturn;
+    cardTs = null;
+
+    unlockTouches();
+
+    if(ret && ret.type === "day" && Number.isFinite(ret.dayStartTs)){
+      openDayModal(ret.dayStartTs);
+    }
+  }
+
+  $("btnCardX").addEventListener("click", (e)=>{ e.preventDefault(); closeCard(); });
+
+  $("btnCardCopy").addEventListener("click", async (e)=>{
+    e.preventDefault();
+    if(cardTs == null) return;
+    const recs = loadRecords();
+    const r = recs.find(x => x.ts === cardTs);
+    if(!r) return;
+    const text = buildCardText(r);
+    try{ await copyToClipboard(text); alert("Copied."); }catch{ alert("Copy failed."); }
+  });
+
+  $("btnCardExport").addEventListener("click", (e)=>{
+    e.preventDefault();
+    if(cardTs == null) return;
+    const recs = loadRecords();
+    const r = recs.find(x => x.ts === cardTs);
+    if(!r) return;
+
+    exportReport(
+      [r],
+      {
+        title: "Angel Number Card Export",
+        rangeLabel: fmtDateTime(r.ts),
+        notes: "This export contains a single Angel Number Card (full record)."
+      },
+      "angel_number_card"
+    );
+  });
+
+  $("btnCardEdit").addEventListener("click", (e)=>{
+    e.preventDefault();
+    if(cardTs == null) return;
+    const ts = cardTs;
+    $("cardModal").classList.add("hidden");
+    $("cardBody").textContent = "—";
+    cardTs = null;
+    unlockTouches();
+    enterAddEdit(ts);
+  });
+
+  $("cardModal").addEventListener("click", (e)=>{
+    if(e.target === $("cardModal")) closeCard();
+  });
+
+  document.addEventListener("keydown", (e)=>{
+    if(!$("cardModal").classList.contains("hidden")){
+      if(e.key === "Escape"){ e.preventDefault(); closeCard(); }
+    }
+  });
+
+  /* ===== Day modal ===== */
+
+  let dayModalDate = null;
+
+  function openDayModal(dayStartTs){
+    const dayEnd = clampEndOfDay(dayStartTs);
+    const all = loadRecords().slice().sort((a,b)=> a.ts - b.ts);
+    const recs = all.filter(r => r.ts >= dayStartTs && r.ts <= dayEnd);
+    if(recs.length === 0) return;
+
+    dayModalDate = dayStartTs;
+
+    const d = new Date(dayStartTs);
+    const title = new Intl.DateTimeFormat(undefined, { weekday:"long", year:"numeric", month:"long", day:"numeric" }).format(d);
+    $("dayTitle").textContent = title;
+
+    const wrap = document.createElement("div");
+    wrap.className = "dayList";
+
+    for(const r of recs){
+      const item = document.createElement("div");
+      item.className = "dayItem";
+      item.dataset.ts = String(r.ts);
+
+      item.innerHTML = `
+        <div class="dayNum">${escapeHtml(r.number || "—")}</div>
+        <div class="dayMeta">
+          <div class="dayTime">${escapeHtml(fmtTimeOnly(r.ts))}</div>
+          <div class="dayPat">${escapeHtml(r.pattern || "—")}</div>
+        </div>
+      `;
+
+      item.addEventListener("click", (e)=>{
+        e.preventDefault();
+        closeDayModal();
+        openCard(r.ts, { type:"day", dayStartTs });
+      });
+
+      wrap.appendChild(item);
+    }
+
+    const container = document.createElement("div");
+    const hint = document.createElement("div");
+    hint.className = "dayHint";
+    hint.textContent = "Select Angel Number to View or Edit.";
+    container.appendChild(hint);
+    container.appendChild(wrap);
+
+    $("dayBody").textContent = "";
+    $("dayBody").appendChild(container);
+
+    $("dayModal").classList.remove("hidden");
+    lockTouches(120);
+  }
+
+  function closeDayModal(){
+    dayModalDate = null;
+    $("dayModal").classList.add("hidden");
+    $("dayBody").textContent = "—";
+    unlockTouches();
+  }
+
+  $("btnDayClose").addEventListener("click", (e)=>{ e.preventDefault(); closeDayModal(); });
+
+  $("dayModal").addEventListener("click", (e)=>{
+    if(e.target === $("dayModal")) closeDayModal();
+  });
+
+  document.addEventListener("keydown", (e)=>{
+    if(!$("dayModal").classList.contains("hidden")){
+      if(e.key === "Escape"){ e.preventDefault(); closeDayModal(); }
+    }
+  });
+
+  $("btnDayExport").addEventListener("click", (e)=>{
+    e.preventDefault();
+    if(dayModalDate == null) return;
+    const a = dayModalDate;
+    const b = clampEndOfDay(a);
+    const recs = loadRecords().slice().reverse().filter(r => r.ts >= a && r.ts <= b);
+
+    exportReport(
+      recs,
+      {
+        title: "Day Export",
+        rangeLabel: `${fmtDateTime(a)} to ${fmtDateTime(b)}`,
+        notes: "This export contains all entries for the selected day."
+      },
+      "angel_numbers_day"
+    );
+  });
+
+  /* ===== Log tap-to-open ===== */
+
+  let pendingOpenTs = null;
+  let enableOpenTimer = null;
+
+  function openEditPrompt(ts){
+    pendingOpenTs = ts;
+
+    const btnOpen = $("btnEditConfirm");
+    btnOpen.disabled = true;
+    if(enableOpenTimer) clearTimeout(enableOpenTimer);
+    enableOpenTimer = setTimeout(() => { btnOpen.disabled = false; }, 220);
+
+    $("editModalSub").textContent = "Press Open to view the Angel Number Card.";
+    $("editModal").classList.remove("hidden");
+    lockTouches(120);
+  }
+
+  function closeEditPrompt(){
+    pendingOpenTs = null;
+    $("editModal").classList.add("hidden");
+    unlockTouches();
+  }
+
+  function confirmEditPrompt(){
+    if($("btnEditConfirm").disabled) return;
+    const ts = pendingOpenTs;
+    closeEditPrompt();
+    if(ts != null){
+      openCard(ts, { type:"screen", screen:"log" });
+    }
+  }
+
+  $("btnEditCancel").addEventListener("click", (e) => { e.preventDefault(); closeEditPrompt(); });
+  $("btnEditConfirm").addEventListener("click", (e) => { e.preventDefault(); confirmEditPrompt(); });
+
+  $("editModal").addEventListener("click", (e) => {
+    if(e.target === $("editModal")) closeEditPrompt();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if($("editModal").classList.contains("hidden")) return;
+    if(e.key === "Escape"){ e.preventDefault(); closeEditPrompt(); return; }
+    if(e.key === "Enter"){ e.preventDefault(); confirmEditPrompt(); }
+  });
+
+  const tap = { active:false, ts:null, x0:0, y0:0, moved:false, el:null };
+
+  function cancelEntryTap(){
+    if(!tap.active) return;
+    if(tap.el) tap.el.classList.remove("pressed");
+    tap.active = false;
+    tap.ts = null;
+    tap.el = null;
+    tap.moved = true;
+  }
+  window.cancelEntryTap = cancelEntryTap;
+
+  $("logList").addEventListener("touchstart", (ev) => {
+    if(!(ev.touches && ev.touches.length === 1)) return;
+    const target = ev.target.closest ? ev.target.closest(".entry") : null;
+    if(!target) return;
+
+    const ts = Number(target.dataset.ts);
+    if(!Number.isFinite(ts)) return;
+
+    tap.active = true;
+    tap.ts = ts;
+    tap.el = target;
+    tap.x0 = ev.touches[0].clientX;
+    tap.y0 = ev.touches[0].clientY;
+    tap.moved = false;
+
+    target.classList.add("pressed");
+  }, {passive:true});
+
+  $("logList").addEventListener("touchmove", (ev) => {
+    if(!tap.active) return;
+    const x = ev.touches[0].clientX;
+    const y = ev.touches[0].clientY;
+    const dx = x - tap.x0;
+    const dy = y - tap.y0;
+
+    if(Math.abs(dx) > 10 || Math.abs(dy) > 10){
+      tap.moved = true;
+      if(tap.el) tap.el.classList.remove("pressed");
+    }
+  }, {passive:true});
+
+  $("logList").addEventListener("touchend", () => {
+    if(!tap.active) return;
+
+    const wasTap = !tap.moved && tap.ts != null;
+    if(tap.el) tap.el.classList.remove("pressed");
+    const ts = tap.ts;
+
+    tap.active = false;
+    tap.ts = null;
+    tap.el = null;
+
+    if(wasTap && ts != null){
+      setTimeout(() => openEditPrompt(ts), 0);
+    }
+  }, {passive:true});
+
+  $("logList").addEventListener("touchcancel", () => {
+    if(tap.el) tap.el.classList.remove("pressed");
+    tap.active = false; tap.ts=null; tap.el=null;
+  }, {passive:true});
+
+  /* ===== Export helpers ===== */
+
+  let exportPayload = null;
+
+  function isShareAvailable(){
+    return !!(navigator.share && typeof navigator.share === "function");
+  }
+
+  async function copyToClipboard(text){
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+    return false;
+  }
+
+  function downloadText(text, filename){
+    const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  async function saveTextWithPicker(text, suggestedName){
+    const canPick = typeof window.showSaveFilePicker === "function";
+    if(!canPick) return false;
+
+    const opts = {
+      suggestedName: suggestedName || "angel_numbers_report.txt",
+      types: [{ description: "Text", accept: {"text/plain": [".txt"]} }]
+    };
+
+    const handle = await window.showSaveFilePicker(opts);
+    const writable = await handle.createWritable();
+    await writable.write(new Blob([text], {type:"text/plain;charset=utf-8"}));
+    await writable.close();
+    return true;
+  }
+
+  function openExportModal(payload){
+    exportPayload = payload;
+    $("exportModal").classList.remove("hidden");
+    lockTouches(120);
+
+    $("btnExportClose").disabled = true;
+    $("btnExportShare").disabled = true;
+    $("btnExportSave").disabled  = true;
+
+    setTimeout(() => {
+      $("btnExportClose").disabled = false;
+      $("btnExportShare").disabled = !isShareAvailable();
+      $("btnExportSave").disabled  = false;
+    }, 200);
+  }
+
+  function closeExportModal(){
+    exportPayload = null;
+    $("exportModal").classList.add("hidden");
+    unlockTouches();
+  }
+
+  $("btnExportClose").addEventListener("click", (e)=>{ e.preventDefault(); closeExportModal(); });
+  $("exportModal").addEventListener("click", (e)=>{ if(e.target === $("exportModal")) closeExportModal(); });
+  document.addEventListener("keydown", (e)=>{
+    if(!$("exportModal").classList.contains("hidden")){
+      if(e.key === "Escape"){ e.preventDefault(); closeExportModal(); }
+    }
+  });
+
+  $("btnExportShare").addEventListener("click", async (e)=>{
+    e.preventDefault();
+    if(!exportPayload) return;
+    if($("btnExportShare").disabled) return;
+    if(!isShareAvailable()){
+      alert("Share is not available on this device/browser.");
+      return;
+    }
+    try{
+      await navigator.share({
+        title: "Angel Numbers Tracker Export",
+        text: exportPayload.text
+      });
+    }catch{}
+  });
+
+  $("btnExportSave").addEventListener("click", async (e)=>{
+    e.preventDefault();
+    if(!exportPayload) return;
+    if($("btnExportSave").disabled) return;
+
+    try{
+      const ok = await saveTextWithPicker(exportPayload.text, exportPayload.filename);
+      if(ok){ alert("Saved."); return; }
+    }catch{}
+
+    downloadText(exportPayload.text, exportPayload.filename || "angel_numbers_report.txt");
+  });
+
+  function buildReportHeader({title, rangeLabel, notes}){
+    const now = fmtDateTime(Date.now());
+    const lines = [
+      "Angel Numbers Tracker — Export Report",
+      `App Version: ${APP_VERSION}`,
+      `Report: ${title}`,
+      `Generated: ${now}`,
+      rangeLabel ? `Range: ${rangeLabel}` : "",
+      "",
+      "How this data was captured:",
+      "- Sightings are entered manually into Angel Numbers Tracker on this device.",
+      "- Data is stored locally on the phone (no cloud sync, no account).",
+      "- Each record may include the number, pattern type, a cultural/numerology meaning, and optional notes.",
+      "",
+      notes ? notes : "",
+      "",
+      "------------------------------",
+      ""
+    ].filter(Boolean);
+    return lines.join("\n");
+  }
+
+  function exportReport(recs, headerInfo, filenameBase){
+    const header = buildReportHeader(headerInfo);
+
+    const lines = recs.map(r => {
+      const dt = fmtDateTime(r.ts);
+      const num = `Number: ${r.number || "—"}`;
+      const pat = `Pattern: ${r.pattern || "—"}`;
+      const notes = (r.notes && r.notes.trim()) ? r.notes.trim() : "None";
+      const meaning = (r.meaning && r.meaning.trim()) ? r.meaning.trim() : "None";
+      return `${dt}\n${num}\nNotes: ${notes}\n${pat}\nMeaning: ${meaning}\n`;
+    });
+
+    const out = header + lines.join("\n");
+    const ts = new Date();
+    const y = ts.getFullYear();
+    const m = String(ts.getMonth()+1).padStart(2,"0");
+    const d = String(ts.getDate()).padStart(2,"0");
+    const filename = `${filenameBase || "angel_numbers_report"}_${y}-${m}-${d}.txt`;
+
+    (async () => {
+      try{ await copyToClipboard(out); }catch{}
+      openExportModal({ text: out, filename });
+    })();
+  }
+
+  /* ===== Calendar ===== */
+
+  const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+  function initMonthDefaultIfNeeded(){
+    if($("calMonth").value) return;
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth()+1).padStart(2,"0");
+    $("calMonth").value = `${y}-${m}`;
+  }
+
+  function monthValueToYMD(value){
+    const m = /^(\d{4})-(\d{2})$/.exec(String(value || ""));
+    if(!m) return null;
+    const y = Number(m[1]);
+    const mo = Number(m[2]);
+    if(!y || !mo) return null;
+    return { y, mo };
+  }
+
+  function buildDayIndexMap(recs){
+    const map = new Map();
+    for(const r of recs){
+      const k = startOfDay(r.ts);
+      const arr = map.get(k) || [];
+      arr.push(r);
+      map.set(k, arr);
+    }
+    for(const [k, arr] of map.entries()){
+      arr.sort((a,b)=> a.ts - b.ts);
+      map.set(k, arr);
+    }
+    return map;
+  }
+
+  function renderCalendar(){
+    const mv = monthValueToYMD($("calMonth").value);
+    if(!mv) return;
+
+    const {y, mo} = mv;
+    const first = new Date(y, mo-1, 1);
+    const firstDow = first.getDay();
+    const totalCells = 42;
+
+    const gridStart = new Date(y, mo-1, 1 - firstDow);
+    gridStart.setHours(0,0,0,0);
+
+    const all = loadRecords();
+    const dayMap = buildDayIndexMap(all);
+
+    const dowRow = $("calDowRow");
+    dowRow.innerHTML = "";
+    for(const d of DOW){
+      const el = document.createElement("div");
+      el.className = "calDow";
+      el.textContent = d;
+      dowRow.appendChild(el);
+    }
+
+    const grid = $("calGrid");
+    grid.innerHTML = "";
+
+    for(let i=0;i<totalCells;i++){
+      const d = new Date(gridStart.getTime() + i*DAY_MS);
+      const dayStart = d.getTime();
+      const inMonth = (d.getMonth() === (mo-1));
+
+      const cell = document.createElement("div");
+      cell.className = "calCell" + (inMonth ? "" : " outMonth");
+
+      const dn = document.createElement("div");
+      dn.className = "dnum";
+      dn.textContent = String(d.getDate());
+      cell.appendChild(dn);
+
+      const recs = dayMap.get(dayStart) || [];
+      if(recs.length > 0){
+        cell.classList.add("hasData");
+        cell.addEventListener("click", (e)=>{
+          e.preventDefault();
+          if(animating) return;
+          openDayModal(dayStart);
+        });
+      }
+
+      grid.appendChild(cell);
+    }
+  }
+
+  /* ===== Clear / Install / Exit ===== */
+
+  let deferredPrompt = null;
+
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    refreshInstallButton();
+  });
+
+  window.addEventListener("appinstalled", () => {
+    deferredPrompt = null;
+    refreshInstallButton();
+  });
+
+  function isStandalone(){
+    return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  }
+
+  function refreshInstallButton(){
+    $("btnInstall").textContent = isStandalone() ? "Uninstall" : "Install";
+  }
+
+  $("btnInstall").addEventListener("click", async () => {
+    if(isStandalone()){
+      alert(
+        "Uninstall:\n\n" +
+        "Android: press-and-hold the app icon → Uninstall.\n" +
+        "Uninstall typically does NOT delete your saved data, but device/browser behavior can vary.\n\n" +
+        "To delete data on purpose: use Clear Data (home screen)."
+      );
+      return;
+    }
+    if(deferredPrompt){
+      deferredPrompt.prompt();
+      try { await deferredPrompt.userChoice; } catch {}
+      deferredPrompt = null;
+      refreshInstallButton();
+      return;
+    }
+    alert("Install is available when your browser offers it (menu → Install app).");
+  });
+
+  function clearAllData(){
+    openConfirm({
+      title: "Clear all data?",
+      message:
+        "This deletes everything stored on this phone for Angel Numbers Tracker.\n\n" +
+        "This cannot be undone.",
+      okText: "Clear",
+      cancelText: "Cancel",
+      danger: true,
+      onOk: () => {
+        try{ localStorage.removeItem(STORAGE_KEY); }catch{}
+        $("fromDate").value = "";
+        $("toDate").value = "";
+        $("search").value = "";
+        alert("All data cleared.");
+        showInstant("home");
+      }
+    });
+  }
+  $("btnClearAll").addEventListener("click", clearAllData);
+
+  /* KEEP THIS EXIT FUNCTION EXACTLY (known-good) */
+  $("btnExitHome").addEventListener("click", () => {
+    window.close();
+    setTimeout(() => {
+      alert("If it didn’t close: use your phone’s Back/Home.");
+    }, 200);
+  });
+
+  /* ===== Buttons + Save/Delete + Search + Exports ===== */
+
+  $("btnGoAdd").addEventListener("click", () => enterAddNew("home"));
+  $("btnGoLog").addEventListener("click", () => showInstant("log"));
+  $("btnGoCalendar").addEventListener("click", () => showInstant("calendar"));
+
+  $("btnBackFromAdd").addEventListener("click", () => { editTs=null; editOriginalTs=null; showInstant(returnScreen || "home"); });
+  $("btnBackFromLog").addEventListener("click", () => showInstant("home"));
+  $("btnBackFromCalendar").addEventListener("click", () => showInstant("home"));
+
+  $("btnAddFromLog").addEventListener("click", () => enterAddNew("log"));
+
+  $("dtEdit").addEventListener("change", () => {
+    const ts = fromLocalDatetimeValue($("dtEdit").value);
+    if(ts != null){
+      if(editTs != null){
+        editTs = ts;
+        tickTime();
+      }
+    }
+  });
+
+  $("btnSave").addEventListener("click", () => {
+    const number = normalizeNumberInput($("anum").value);
+    const notes = ($("notes").value || "").toString();
+
+    if(!validateAnyInput(number, notes)){
+      alert("Enter a number or a note.");
+      return;
+    }
+
+    const tsWanted = (editOriginalTs == null)
+      ? Date.now()
+      : (fromLocalDatetimeValue($("dtEdit").value) ?? editTs ?? Date.now());
+
+    const pattern = number ? detectPattern(number) : "—";
+    const meaning = number ? deriveMeaning(number, pattern).meaning : "—";
+
+    const recs = loadRecords();
+
+    if(editOriginalTs == null){
+      recs.unshift({ ts: tsWanted, number, pattern, meaning, notes });
+    }else{
+      const idx = recs.findIndex(r => r.ts === editOriginalTs);
+      if(idx >= 0){
+        recs[idx] = { ts: tsWanted, number, pattern, meaning, notes };
+      }else{
+        recs.unshift({ ts: tsWanted, number, pattern, meaning, notes });
       }
     }
 
-    function escapeHtml(s){
-      return (s||"").toString()
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-    }
+    recs.sort((a,b)=> b.ts - a.ts);
+    saveRecords(recs);
 
-    function openCard(id){
-      const r = records.find(x=>x.id===id);
-      if(!r) return;
-      activeId = id;
-      $("m_dt").textContent = tsToDisplay(r.ts);
-      $("m_num").textContent = r.num || "";
-      $("m_notes").textContent = r.notes || "None";
-      $("m_pat").textContent = r.pattern || "";
-      $("m_mean").textContent = r.meaning || "";
-      showModal($("cardModalBack"), true);
-    }
+    $("fromDate").value = "";
+    $("toDate").value = "";
+    $("search").value = "";
 
-    function closeCard(){
-      showModal($("cardModalBack"), false);
-    }
+    editTs = null;
+    editOriginalTs = null;
 
-    function openEdit(id){
-      const r = records.find(x=>x.id===id);
-      if(!r) return;
-      activeId = id;
-      $("e_dt").value = tsToInput(r.ts);
-      $("e_num").value = r.num || "";
-      $("e_pat").value = r.pattern || "";
-      $("e_mean").value = r.meaning || "";
-      $("e_notes").value = r.notes || "";
-      showModal($("editModalBack"), true);
-    }
+    showInstant("log");
+    try{ $("logListBox").scrollTop = 0; }catch{}
+  });
 
-    function closeEdit(){
-      showModal($("editModalBack"), false);
-    }
+  $("btnDelete").addEventListener("click", () => {
+    if(editOriginalTs == null) return;
 
-    function showModal(el, on){
-      el.style.display = on ? "flex" : "none";
-    }
+    openConfirm({
+      title: "Delete this entry?",
+      message: "This cannot be undone.",
+      okText: "Delete",
+      cancelText: "Cancel",
+      danger: true,
+      onOk: () => {
+        const recs = loadRecords().filter(r => r.ts !== editOriginalTs);
+        saveRecords(recs);
 
-    function addNew(){
-      // quick add: create blank entry then open edit
-      const now = Date.now();
-      const r = { id: uid(), ts: now, num: "", pattern: "", meaning: "", notes: "" };
-      records.push(r);
-      save();
-      render();
-      openEdit(r.id);
-    }
+        editTs = null;
+        editOriginalTs = null;
 
-    function saveEdit(){
-      const r = records.find(x=>x.id===activeId);
-      if(!r) return;
-      r.ts = inputToTs($("e_dt").value || tsToInput(Date.now()));
-      r.num = ($("e_num").value || "").trim();
-      r.pattern = ($("e_pat").value || "").trim();
-      r.meaning = ($("e_mean").value || "").trim();
-      r.notes = ($("e_notes").value || "").trim();
-      save();
-      render();
-      closeEdit();
-      closeCard();
-    }
-
-    function deleteActive(){
-      const idx = records.findIndex(x=>x.id===activeId);
-      if(idx < 0) return;
-      if(!confirm("Delete this entry?")) return;
-      records.splice(idx, 1);
-      save();
-      render();
-      closeEdit();
-      closeCard();
-    }
-
-    function exportAll(){
-      const items = filterRecords().slice().sort((a,b)=>b.ts-a.ts);
-      const now = new Date();
-      const gen = now.toLocaleString();
-
-      const rangeTxt = (() => {
-        const from = $("from").value;
-        const to = $("to").value;
-        const q = $("q").value.trim();
-        let t = "All log entries (filtered by search/date if set)";
-        if(from || to || q) t = "Filtered log entries (current Search + From/To)";
-        return t;
-      })();
-
-      let out = "";
-      out += "Angel Numbers Tracker — Export Report\n";
-      out += `App Version: ${APP_VERSION}\n`;
-      out += "Report: Log Export\n";
-      out += `Generated: ${gen}\n`;
-      out += `Range: ${rangeTxt}\n`;
-      out += "How this data was captured:\n";
-      out += "- Sightings are entered manually into Angel Numbers Tracker on this device.\n";
-      out += "- Data is stored locally on the phone (no cloud sync, no account).\n";
-      out += "- Each record may include the number, pattern type, a cultural/numerology meaning, and optional notes.\n";
-      out += "This report reflects the Log screen filters (Search + optional From/To dates).\n";
-      out += "------------------------------\n";
-
-      for(const r of items){
-        out += `${tsToDisplay(r.ts)}\n`;
-        out += `Number: ${r.num || ""}\n`;
-        out += `Pattern: ${r.pattern || ""}\n`;
-        out += `Meaning: ${r.meaning || ""}\n`;
-        out += `Notes: ${r.notes || "None"}\n\n`;
+        showInstant("log");
+        try{ $("logListBox").scrollTop = 0; }catch{}
       }
+    });
+  });
 
-      downloadText(out, `Angel_Numbers_Export_${now.getFullYear()}-${pad2(now.getMonth()+1)}-${pad2(now.getDate())}.txt`);
+  function runSearch(){
+    renderLog();
+    try{ $("logListBox").scrollTop = 0; }catch{}
+  }
+
+  $("btnRunSearch").addEventListener("click", (e)=>{ e.preventDefault(); runSearch(); });
+  $("search").addEventListener("keydown", (e)=>{
+    if(e.key === "Enter"){
+      e.preventDefault();
+      runSearch();
+      try{ e.target.blur(); }catch{}
     }
+  });
 
-    function exportOne(id){
-      const r = records.find(x=>x.id===id);
-      if(!r) return;
-      const now = new Date();
-      let out = "";
-      out += "Angel Numbers Tracker — Export Report\n";
-      out += `App Version: ${APP_VERSION}\n`;
-      out += "Report: Single Entry\n";
-      out += `Generated: ${now.toLocaleString()}\n`;
-      out += "------------------------------\n";
-      out += `${tsToDisplay(r.ts)}\n`;
-      out += `Number: ${r.num || ""}\n`;
-      out += `Pattern: ${r.pattern || ""}\n`;
-      out += `Meaning: ${r.meaning || ""}\n`;
-      out += `Notes: ${r.notes || "None"}\n`;
-      downloadText(out, `Angel_Number_${(r.num||"entry")}_${now.getFullYear()}-${pad2(now.getMonth()+1)}-${pad2(now.getDate())}.txt`);
-    }
+  ["fromDate","toDate"].forEach(id => {
+    $(id).addEventListener("input", () => { renderLog(); try{ $("logListBox").scrollTop = 0; }catch{} });
+    $(id).addEventListener("change", () => { renderLog(); try{ $("logListBox").scrollTop = 0; }catch{} });
+  });
 
-    function downloadText(text, filename){
-      const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(()=>URL.revokeObjectURL(url), 800);
-    }
+  $("calMonth").addEventListener("change", () => renderCalendar());
+  $("btnCalToday").addEventListener("click", (e)=>{
+    e.preventDefault();
+    const now = new Date();
+    $("calMonth").value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
+    renderCalendar();
+  });
 
-    async function copyActive(){
-      const r = records.find(x=>x.id===activeId);
-      if(!r) return;
-      const txt =
-        `Angel Number Card\n` +
-        `Date/Time: ${tsToDisplay(r.ts)}\n` +
-        `Number: ${r.num || ""}\n` +
-        `Pattern: ${r.pattern || ""}\n` +
-        `Meaning: ${r.meaning || ""}\n` +
-        `Notes: ${r.notes || "None"}\n`;
-      try{
-        await navigator.clipboard.writeText(txt);
-        alert("Copied.");
-      }catch{
-        alert("Copy failed on this device/browser.");
+  $("btnExportLog").addEventListener("click", () => {
+    const recs = filteredRecords({fromId:"fromDate", toId:"toDate", searchId:"search"});
+    const rangeLabel = (() => {
+      const f = $("fromDate").value;
+      const t = $("toDate").value;
+      if(f && t) return `${f} to ${t}`;
+      if(f) return `From ${f}`;
+      if(t) return `Up to ${t}`;
+      return "All log entries (filtered by search/date if set)";
+    })();
+
+    exportReport(
+      recs,
+      {
+        title: "Log Export",
+        rangeLabel,
+        notes: "This report reflects the Log screen filters (Search + optional From/To dates)."
+      },
+      "angel_numbers_log_report"
+    );
+  });
+
+  $("btnExportMonth").addEventListener("click", () => {
+    const mv = monthValueToYMD($("calMonth").value);
+    if(!mv) return;
+    const {y, mo} = mv;
+    const a = new Date(y, mo-1, 1, 0,0,0,0).getTime();
+    const b = new Date(y, mo, 0, 23,59,59,999).getTime();
+    const recs = loadRecords().slice().reverse().filter(r => r.ts >= a && r.ts <= b);
+
+    exportReport(
+      recs,
+      {
+        title: "Month Export",
+        rangeLabel: `${y}-${String(mo).padStart(2,"0")}`,
+        notes: "This export contains all entries within the selected month."
+      },
+      "angel_numbers_month"
+    );
+  });
+
+  /* ===== Manifest + SW ===== */
+
+  function injectManifest(){
+    const svg =
+`<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8a6bff"/>
+      <stop offset="55%" stop-color="#2f78ff"/>
+      <stop offset="100%" stop-color="#0b1324"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="110" fill="url(#g)"/>
+  <ellipse cx="256" cy="150" rx="110" ry="44" fill="none" stroke="rgba(235,245,255,.92)" stroke-width="26"/>
+  <path d="M256 240
+           C196 210, 140 220, 112 270
+           C154 294, 190 330, 214 380
+           C226 330, 240 285, 256 240Z"
+        fill="none" stroke="rgba(235,245,255,.92)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M256 240
+           C316 210, 372 220, 400 270
+           C358 294, 322 330, 298 380
+           C286 330, 272 285, 256 240Z"
+        fill="none" stroke="rgba(235,245,255,.92)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+    const encoded = encodeURIComponent(svg).replace(/'/g,"%27").replace(/"/g,"%22");
+    const icon = `data:image/svg+xml;charset=utf-8,${encoded}`;
+
+    const manifest = {
+      name: "Angel Numbers Tracker",
+      short_name: "AngelNums",
+      start_url: ".",
+      display: "standalone",
+      background_color: "#0b1324",
+      theme_color: "#0b1324",
+      icons: [{ src: icon, sizes: "512x512", type: "image/svg+xml", purpose: "any" }]
+    };
+
+    const blob = new Blob([JSON.stringify(manifest)], {type:"application/manifest+json"});
+    const url = URL.createObjectURL(blob);
+    $("manifestLink").setAttribute("href", url);
+  }
+
+  async function registerSW(){
+    if(!("serviceWorker" in navigator)) return;
+    const swCode =
+`self.addEventListener('install', (e)=>{ self.skipWaiting(); });
+self.addEventListener('activate', (e)=>{ e.waitUntil(self.clients.claim()); });
+self.addEventListener('fetch', (e)=>{ });`;
+    const blob = new Blob([swCode], {type:"text/javascript"});
+    const swUrl = URL.createObjectURL(blob);
+    try { await navigator.serviceWorker.register(swUrl); } catch {}
+  }
+
+  /* ===== Test data seeding ===== */
+
+  function seedTestDataIfEmpty(){
+    if(!TEST_DATA_ENABLED) return;
+    const existing = loadRecords();
+    if(existing.length > 0) return;
+
+    const now = new Date();
+    const months = [
+      { y: now.getFullYear(), m: now.getMonth() },
+      { y: new Date(now.getFullYear(), now.getMonth()-1, 1).getFullYear(),
+        m: new Date(now.getFullYear(), now.getMonth()-1, 1).getMonth() }
+    ];
+
+    const sampleNums = ["111","222","333","444","555","777","888","999","1212","1010","2222","2424","99099","1234"];
+    const out = [];
+
+    function randInt(a,b){ return Math.floor(a + Math.random()*(b-a+1)); }
+
+    for(const mm of months){
+      const daysToFill = randInt(10, 14);
+      const usedDays = new Set();
+      while(usedDays.size < daysToFill){
+        usedDays.add(randInt(1, 27));
       }
-    }
+      for(const day of usedDays){
+        const nEntries = randInt(1, 4);
+        for(let i=0;i<nEntries;i++){
+          const hr = randInt(8, 22);
+          const mi = randInt(0, 59);
+          const ts = new Date(mm.y, mm.m, day, hr, mi, 0, 0).getTime();
 
-    function wire(){
-      $("foot").textContent = APP_VERSION;
+          const number = sampleNums[randInt(0, sampleNums.length-1)];
+          const pattern = detectPattern(number);
+          const meaning = deriveMeaning(number, pattern).meaning;
 
-      $("btnSearch").addEventListener("click", render);
-      $("q").addEventListener("keydown", (e)=>{ if(e.key==="Enter"){ e.preventDefault(); render(); }});
-      $("from").addEventListener("change", render);
-      $("to").addEventListener("change", render);
-
-      $("btnExport").addEventListener("click", exportAll);
-      $("btnAdd").addEventListener("click", addNew);
-      $("btnBack").addEventListener("click", ()=>history.back());
-
-      $("cardClose").addEventListener("click", closeCard);
-      $("cardModalBack").addEventListener("click", (e)=>{ if(e.target === $("cardModalBack")) closeCard(); });
-
-      $("btnCopy").addEventListener("click", copyActive);
-      $("btnExportOne").addEventListener("click", ()=>exportOne(activeId));
-      $("btnEdit").addEventListener("click", ()=>{ closeCard(); openEdit(activeId); });
-
-      $("editClose").addEventListener("click", closeEdit);
-      $("editModalBack").addEventListener("click", (e)=>{ if(e.target === $("editModalBack")) closeEdit(); });
-
-      $("btnSave").addEventListener("click", saveEdit);
-      $("btnDelete").addEventListener("click", deleteActive);
-
-      // Seed minimal demo data if empty (kept consistent with prior behavior)
-      if(records.length === 0){
-        records.push(
-          {id:uid(), ts:Date.now()-1000*60*60*24*1, num:"7777", pattern:"Repeating 7s", meaning:"Emphasis pattern (7777): 7 is often linked with insight, inner wisdom, spiritual inquiry, and learning through reflection.", notes:"Website"},
-          {id:uid(), ts:Date.now()-1000*60*60*28, num:"101010", pattern:"Mixed pattern", meaning:"A general interpretation is heightened awareness: notice your thoughts, environment, and choices—then act deliberately. Digit-sum lens (3 → 3): 3 is often linked with creativity, expression, growth, and encouragement to communicate.", notes:"On my phone"}
-        );
-        save();
+          out.push({ ts, number, pattern, meaning, notes: (i===0 ? "Test data (remove later)" : "") });
+        }
       }
     }
 
-    load();
-    wire();
-    render();
-  </script>
+    out.sort((a,b)=> b.ts - a.ts);
+    saveRecords(out);
+  }
+
+  /* ===== Version modal + taps ===== */
+
+  function openVersionModal(){
+    $("verBody").textContent =
+      `Actual app version: ${APP_VERSION}\n` +
+      `Home label (visual only): ${HOME_VERSION_LABEL}\n` +
+      `Storage key: ${STORAGE_KEY}`;
+    $("versionModal").classList.remove("hidden");
+    lockTouches(120);
+  }
+  function closeVersionModal(){ $("versionModal").classList.add("hidden"); unlockTouches(); }
+  $("btnVerX").addEventListener("click", (e)=>{ e.preventDefault(); closeVersionModal(); });
+  $("btnVerClose").addEventListener("click", (e)=>{ e.preventDefault(); closeVersionModal(); });
+  $("versionModal").addEventListener("click", (e)=>{ if(e.target === $("versionModal")) closeVersionModal(); });
+
+  let logoTapCount = 0;
+  let logoTapTimer = null;
+  document.querySelector(".logoTitle").addEventListener("click", () => {
+    if(animating) return;
+    logoTapCount++;
+    if(logoTapTimer) clearTimeout(logoTapTimer);
+    logoTapTimer = setTimeout(()=>{ logoTapCount=0; }, 650);
+    if(logoTapCount >= 4){
+      logoTapCount = 0;
+      openVersionModal();
+    }
+  });
+
+  function openHeart(){ $("heartModal").classList.remove("hidden"); lockTouches(120); }
+  function closeHeart(){ $("heartModal").classList.add("hidden"); unlockTouches(); }
+  $("btnHeartX").addEventListener("click", (e)=>{ e.preventDefault(); closeHeart(); });
+  $("btnHeartClose").addEventListener("click", (e)=>{ e.preventDefault(); closeHeart(); });
+  $("heartModal").addEventListener("click", (e)=>{ if(e.target === $("heartModal")) closeHeart(); });
+
+  let vTapCount = 0;
+  let vTapTimer = null;
+  $("homeVerLabel").textContent = HOME_VERSION_LABEL;
+  $("homeVerLabel").addEventListener("click", () => {
+    if(animating) return;
+    vTapCount++;
+    if(vTapTimer) clearTimeout(vTapTimer);
+    vTapTimer = setTimeout(()=>{ vTapCount = 0; }, 700);
+    if(vTapCount >= 5){
+      vTapCount = 0;
+      openHeart();
+    }
+  });
+
+  /* ===== Home pull-to-refresh ===== */
+
+  const ptr = {
+    active:false,
+    y0:0,
+    pulling:false,
+    threshold: 64,
+    max: 120,
+    ready:false
+  };
+
+  function setPtr(on, text){
+    const el = $("ptrHome");
+    if(!el) return;
+    if(on){
+      el.classList.add("on");
+      if(text) el.textContent = text;
+    }else{
+      el.classList.remove("on");
+      el.textContent = "Pull down to refresh";
+    }
+  }
+
+  function homeCanStartPtr(ev){
+    if(currentScreen !== "home") return false;
+    if(animating) return false;
+    if(!(ev.touches && ev.touches.length === 1)) return false;
+
+    const home = $("home");
+    if(!home) return false;
+    if(home.scrollTop > 0) return false;
+
+    const t = ev.target;
+    if(t && t.closest && t.closest("button, input, textarea, select")) return false;
+
+    return true;
+  }
+
+  function ptrStart(ev){
+    if(!homeCanStartPtr(ev)) return;
+    ptr.active = true;
+    ptr.pulling = false;
+    ptr.ready = false;
+    ptr.y0 = ev.touches[0].clientY;
+    setPtr(true, "Pull down to refresh");
+  }
+
+  function ptrMove(ev){
+    if(!ptr.active) return;
+    if(!(ev.touches && ev.touches.length === 1)) return;
+
+    const y = ev.touches[0].clientY;
+    const dy = y - ptr.y0;
+
+    if(dy <= 8){
+      setPtr(true, "Pull down to refresh");
+      ptr.ready = false;
+      return;
+    }
+
+    ptr.pulling = true;
+    ev.preventDefault();
+
+    const amt = Math.min(ptr.max, dy);
+    if(amt >= ptr.threshold){
+      ptr.ready = true;
+      setPtr(true, "Release to refresh");
+    }else{
+      ptr.ready = false;
+      setPtr(true, "Pull down to refresh");
+    }
+  }
+
+  function ptrEnd(){
+    if(!ptr.active) return;
+    const doRefresh = ptr.ready;
+
+    ptr.active = false;
+    ptr.pulling = false;
+    ptr.ready = false;
+
+    if(doRefresh){
+      setPtr(true, "Refreshing…");
+      setTimeout(() => {
+        try{ location.reload(); }catch{ setPtr(false); }
+      }, 140);
+    }else{
+      setPtr(false);
+    }
+  }
+
+  function attachHomePTR(){
+    const home = $("home");
+    if(!home) return;
+    home.addEventListener("touchstart", ptrStart, {passive:true});
+    home.addEventListener("touchmove", ptrMove, {passive:false});
+    home.addEventListener("touchend", ptrEnd, {passive:true});
+    home.addEventListener("touchcancel", ptrEnd, {passive:true});
+  }
+
+  /* ===== Init ===== */
+
+  injectManifest();
+  registerSW();
+  refreshInstallButton();
+
+  seedTestDataIfEmpty();
+
+  $("fromDate").value = "";
+  $("toDate").value = "";
+
+  attachSwipes();
+  attachHomePTR();
+
+  showInstant("home");
+
+  window.addEventListener("resize", () => {
+    if(!$("add").classList.contains("hidden")) adjustTimeFont();
+    if(!$("calendar").classList.contains("hidden")) renderCalendar();
+  });
+
+})();
+</script>
 </body>
 </html>
 
 <!--
-Version Detail Notes
-App Version: v1.0B12
-Base: Prior v1.0B11 (per user stream)
-Changes (requested):
-- FIX: Log panel list is now its own scrollable container (flex + overflow-y:auto + momentum scrolling).
-- Nothing else intentionally changed.
+EOF Version Detail Notes (required)
+App: Angel Numbers Tracker
+Actual Version: v1.0B12
+Home Label (visual only): v1.333 (do not change unless instructed)
+Base: v1.0B11
+Changes:
+- Log: header/filters fixed; entries now scroll inside a dedicated log list box container (#logListBox) for reliable up/down scrolling.
+- Add/Edit: content now scrolls inside #addScroll; action buttons are in a fixed footer (#addFooter) so Save/Delete/Back are always reachable.
+- Card modal: logo row moved to the top; increased body text size for readability and tightened spacing; action buttons remain accessible with sticky footer.
+- General: reduced some vertical bloat in labels/spacing without changing app behavior.
 -->
