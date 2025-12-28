@@ -1,14 +1,13 @@
-<!-- Angel Numbers Tracker v1.0A3 -->
+<!-- Angel Numbers Tracker v1.0A4 -->
 <!--
 Single-file, offline-first PWA.
 Base UI/UX derived from Vitals Tracker v1.19B7 (Keyth Jyles).
 Purpose: Log “angel number” sightings + auto-meaning (cultural/numerology) + weekly charts + export.
 
-CHANGE NOTES (v1.0A3):
-- Visual-only Home label now shows: v1.333 (DO NOT change unless user explicitly requests).
-- Actual app version remains accurately tracked in code: APP_VERSION = "v1.0A3".
-- Home panel includes line: "Inspired by a real Angel."
-- Export header formatting tightened so the divider and first record start at column 0 consistently.
+v1.0A4 changes:
+- Replace native delete/clear confirm() popups with the app-styled modal (matching Edit prompt).
+- Any confirmation dialogs now use the unified modal format.
+- Home panel display version label remains v1.333 (visual-only per your instruction).
 -->
 
 <!doctype html>
@@ -535,7 +534,7 @@ CHANGE NOTES (v1.0A3):
         <div class="subtle">Inspired by a real Angel.</div>
 
         <div class="footerTiny">
-          <!-- VISUAL LABEL ONLY — do not change unless user says so -->
+          <!-- Visual-only label per instruction. Do not change unless explicitly told. -->
           <div>v1.333</div>
           <div>developed by Keyth Jyles</div>
         </div>
@@ -632,6 +631,18 @@ CHANGE NOTES (v1.0A3):
     </div>
   </div>
 
+  <!-- Unified confirm modal (Delete / Clear Data / future confirmations) -->
+  <div id="confirmModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="modalCard">
+      <div id="confirmTitle" class="modalTitle">Confirm</div>
+      <div id="confirmSub" class="modalSub">—</div>
+      <div class="modalBtns">
+        <button id="btnConfirmCancel" class="btn">Cancel</button>
+        <button id="btnConfirmDo" class="btn danger">Delete</button>
+      </div>
+    </div>
+  </div>
+
   <div id="exportModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle">
     <div class="modalCard">
       <div id="exportModalTitle" class="modalTitle">Export ready</div>
@@ -656,8 +667,7 @@ Optional:
 (() => {
   "use strict";
 
-  // Actual tracked version (do not confuse with the Home visual label "v1.333")
-  const APP_VERSION = "v1.0A3";
+  const APP_VERSION = "v1.0A4";          // real version (tracked in code)
   const STORAGE_KEY = "angel_numbers_records_v1";
   const DAY_MS = 24*60*60*1000;
 
@@ -899,7 +909,7 @@ Optional:
       return DIGIT_MEANING[best] || "";
     }
     const sum = s.split("").reduce((a,ch)=>a + (ch.charCodeAt(0)-48), 0);
-    const root = ((sum - 1) % 9) + 1; // 1-9
+    const root = ((sum - 1) % 9) + 1;
     const rootLine = DIGIT_MEANING[String(root)] || "";
     return rootLine ? `Digit-sum lens (${sum} → ${root}): ${rootLine}` : "";
   }
@@ -1206,6 +1216,91 @@ Optional:
   });
 
   /* =========================
+     Unified confirm modal (Delete/Clear/etc.)
+     ========================= */
+
+  let confirmAction = null;
+  let confirmPrevFocus = null;
+  let confirmOpenedAt = 0;
+  let enableConfirmTimer = null;
+
+  function setConfirmButtonStyle(className){
+    const btn = $("btnConfirmDo");
+    btn.className = "btn"; // reset
+    if(className) btn.classList.add(...String(className).split(/\s+/).filter(Boolean));
+  }
+
+  function openConfirmModal({ title, sub, confirmText, confirmClass, onConfirm }){
+    confirmAction = (typeof onConfirm === "function") ? onConfirm : null;
+    confirmPrevFocus = document.activeElement || null;
+    confirmOpenedAt = Date.now();
+
+    $("confirmTitle").textContent = title || "Confirm";
+    $("confirmSub").textContent = sub || "—";
+
+    $("btnConfirmDo").textContent = confirmText || "OK";
+    setConfirmButtonStyle(confirmClass || "danger");
+
+    $("btnConfirmDo").disabled = true;
+    $("btnConfirmCancel").disabled = true;
+
+    $("confirmModal").classList.remove("hidden");
+
+    if(enableConfirmTimer) clearTimeout(enableConfirmTimer);
+    enableConfirmTimer = setTimeout(() => {
+      $("btnConfirmDo").disabled = false;
+      $("btnConfirmCancel").disabled = false;
+    }, 450);
+
+    setTimeout(() => {
+      try{ $("btnConfirmCancel").focus({preventScroll:true}); }catch{}
+    }, 0);
+  }
+
+  function closeConfirmModal(){
+    confirmAction = null;
+    $("confirmModal").classList.add("hidden");
+    try{ confirmPrevFocus?.focus?.({preventScroll:true}); }catch{}
+  }
+
+  function runConfirmAction(){
+    if($("btnConfirmDo").disabled) return;
+    const fn = confirmAction;
+    closeConfirmModal();
+    try{ fn && fn(); }catch{}
+  }
+
+  $("btnConfirmCancel").addEventListener("click", (e) => { e.preventDefault(); closeConfirmModal(); });
+  $("btnConfirmDo").addEventListener("click", (e) => { e.preventDefault(); runConfirmAction(); });
+
+  $("confirmModal").addEventListener("click", (e) => {
+    const justOpened = (Date.now() - confirmOpenedAt) < 220;
+    if(justOpened){ e.preventDefault(); e.stopPropagation(); return; }
+    if(e.target === $("confirmModal")) closeConfirmModal();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    const open = !$("confirmModal").classList.contains("hidden");
+    if(!open) return;
+
+    if(e.key === "Escape"){
+      e.preventDefault();
+      closeConfirmModal();
+      return;
+    }
+    if(e.key === "Enter"){
+      const ae = document.activeElement;
+      if(ae && ae.id === "btnConfirmCancel"){
+        e.preventDefault();
+        closeConfirmModal();
+      }else{
+        e.preventDefault();
+        runConfirmAction();
+      }
+    }
+  });
+
+  /* =========================
      Export modal (clipboard/share/save)
      ========================= */
 
@@ -1439,27 +1534,24 @@ Optional:
 
   function buildReportHeader({title, rangeLabel, notes}){
     const now = fmtDateTime(Date.now());
-
-    // Construct explicitly to avoid any accidental leading whitespace on the divider/first record.
-    let out = "";
-    out += "Angel Numbers Tracker — Export Report\n";
-    out += `App Version: ${APP_VERSION}\n`;
-    out += `Report: ${title}\n`;
-    out += `Generated: ${now}\n`;
-    if(rangeLabel) out += `Range: ${rangeLabel}\n`;
-    out += "\n";
-    out += "How this data was captured:\n";
-    out += "- Sightings are entered manually into Angel Numbers Tracker on this device.\n";
-    out += "- Data is stored locally on the phone (no cloud sync, no account).\n";
-    out += "- Each record may include the number, pattern type, a cultural/numerology meaning, and optional notes.\n";
-    out += "\n";
-    if(notes){
-      out += String(notes).trimEnd() + "\n";
-      out += "\n";
-    }
-    out += "------------------------------\n";
-    out += "\n";
-    return out;
+    const lines = [
+      "Angel Numbers Tracker — Export Report",
+      `App Version: ${APP_VERSION}`,
+      `Report: ${title}`,
+      `Generated: ${now}`,
+      rangeLabel ? `Range: ${rangeLabel}` : "",
+      "",
+      "How this data was captured:",
+      "- Sightings are entered manually into Angel Numbers Tracker on this device.",
+      "- Data is stored locally on the phone (no cloud sync, no account).",
+      "- Each record may include the number, pattern type, a cultural/numerology meaning, and optional notes.",
+      "",
+      notes ? notes : "",
+      "",
+      "------------------------------",
+      ""
+    ].filter(Boolean);
+    return lines.join("\n");
   }
 
   function exportReport(recs, headerInfo, filenameBase){
@@ -1653,7 +1745,6 @@ Optional:
     const canvas = $("chart");
     const ctx = canvas.getContext("2d");
 
-    const recs = recordsInView();
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
     const W = canvas.width, H = canvas.height;
@@ -1881,25 +1972,28 @@ Optional:
   }
 
   /* =========================
-     Clear Data + Install + Exit
+     Clear Data + Install + Exit (Exit preserved)
      ========================= */
 
-  function clearAllData(){
-    const ok = confirm(
-      "Clear ALL saved angel-number data?\n\n" +
-      "This deletes everything stored on this phone for Angel Numbers Tracker.\n" +
-      "This cannot be undone."
-    );
-    if(!ok) return;
+  function clearAllDataFlow(){
+    openConfirmModal({
+      title: "Clear ALL data?",
+      sub:
+        "This deletes everything stored on this phone for Angel Numbers Tracker.\n" +
+        "This cannot be undone.",
+      confirmText: "Clear",
+      confirmClass: "danger",
+      onConfirm: () => {
+        try{ localStorage.removeItem(STORAGE_KEY); }catch{}
 
-    try{ localStorage.removeItem(STORAGE_KEY); }catch{}
+        $("fromDate").value = "";
+        $("toDate").value = "";
+        $("search").value = "";
 
-    $("fromDate").value = "";
-    $("toDate").value = "";
-    $("search").value = "";
-
-    alert("All data cleared.");
-    show("home");
+        alert("All data cleared.");
+        show("home");
+      }
+    });
   }
 
   let deferredPrompt = null;
@@ -1943,7 +2037,7 @@ Optional:
     alert("Install is available when your browser offers it (menu → Install app).");
   });
 
-  $("btnClearAll").addEventListener("click", clearAllData);
+  $("btnClearAll").addEventListener("click", clearAllDataFlow);
 
   /* KEEP THIS EXIT FUNCTION EXACTLY (known-good) */
   $("btnExitHome").addEventListener("click", () => {
@@ -2003,23 +2097,34 @@ Optional:
     show("log");
   });
 
-  $("btnDelete").addEventListener("click", () => {
+  function deleteCurrentEntryFlow(){
     if(editTs == null) return;
-    const ok = confirm("Delete this entry? This cannot be undone.");
-    if(!ok) return;
+    const tsToDelete = editTs;
 
-    const recs = loadRecords().filter(r => r.ts !== editTs);
-    saveRecords(recs);
+    openConfirmModal({
+      title: "Delete this entry?",
+      sub: "This cannot be undone.",
+      confirmText: "Delete",
+      confirmClass: "danger",
+      onConfirm: () => {
+        const recs = loadRecords().filter(r => r.ts !== tsToDelete);
+        saveRecords(recs);
+        editTs = null;
+        show("log");
+      }
+    });
+  }
 
-    editTs = null;
-    show("log");
-  });
+  $("btnDelete").addEventListener("click", deleteCurrentEntryFlow);
 
   /* =========================
      SEARCH BEHAVIOR
+     - Search runs only on button click or Enter key.
      ========================= */
 
-  function runSearch(){ renderLog(); }
+  function runSearch(){
+    renderLog();
+  }
 
   $("btnRunSearch").addEventListener("click", (e) => {
     e.preventDefault();
