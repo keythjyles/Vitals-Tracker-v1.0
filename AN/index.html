@@ -1,12 +1,14 @@
-<!-- Angel Numbers Tracker v1.0A2 -->
+<!-- Angel Numbers Tracker v1.0A3 -->
 <!--
 Single-file, offline-first PWA.
 Base UI/UX derived from Vitals Tracker v1.19B7 (Keyth Jyles).
 Purpose: Log “angel number” sightings + auto-meaning (cultural/numerology) + weekly charts + export.
 
-v1.0A2 changes:
-- FIX: Export report header now preserves intentional blank lines (removed filter(Boolean)).
-  This prevents the first record from appearing indented under wrapped bullet lines.
+CHANGE NOTES (v1.0A3):
+- Visual-only Home label now shows: v1.333 (DO NOT change unless user explicitly requests).
+- Actual app version remains accurately tracked in code: APP_VERSION = "v1.0A3".
+- Home panel includes line: "Inspired by a real Angel."
+- Export header formatting tightened so the divider and first record start at column 0 consistently.
 -->
 
 <!doctype html>
@@ -530,9 +532,11 @@ v1.0A2 changes:
         </div>
 
         <div class="subtle">Local-only. No accounts. No cloud.</div>
+        <div class="subtle">Inspired by a real Angel.</div>
 
         <div class="footerTiny">
-          <div>v1.0A2</div>
+          <!-- VISUAL LABEL ONLY — do not change unless user says so -->
+          <div>v1.333</div>
           <div>developed by Keyth Jyles</div>
         </div>
       </div>
@@ -652,7 +656,8 @@ Optional:
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.0A2";
+  // Actual tracked version (do not confuse with the Home visual label "v1.333")
+  const APP_VERSION = "v1.0A3";
   const STORAGE_KEY = "angel_numbers_records_v1";
   const DAY_MS = 24*60*60*1000;
 
@@ -894,7 +899,7 @@ Optional:
       return DIGIT_MEANING[best] || "";
     }
     const sum = s.split("").reduce((a,ch)=>a + (ch.charCodeAt(0)-48), 0);
-    const root = ((sum - 1) % 9) + 1;
+    const root = ((sum - 1) % 9) + 1; // 1-9
     const rootLine = DIGIT_MEANING[String(root)] || "";
     return rootLine ? `Digit-sum lens (${sum} → ${root}): ${rootLine}` : "";
   }
@@ -1143,12 +1148,14 @@ Optional:
     modalPrevFocus = document.activeElement || null;
     modalOpenedAt = Date.now();
 
+    const m = $("editModal");
     const btnEdit = $("btnEditConfirm");
+
     btnEdit.disabled = true;
     if(enableEditTimer) clearTimeout(enableEditTimer);
     enableEditTimer = setTimeout(() => { btnEdit.disabled = false; }, 450);
 
-    $("editModal").classList.remove("hidden");
+    m.classList.remove("hidden");
 
     setTimeout(() => {
       try{ $("btnEditCancel").focus({preventScroll:true}); }catch{}
@@ -1433,26 +1440,26 @@ Optional:
   function buildReportHeader({title, rangeLabel, notes}){
     const now = fmtDateTime(Date.now());
 
-    const lines = [];
-    lines.push("Angel Numbers Tracker — Export Report");
-    lines.push(`App Version: ${APP_VERSION}`);
-    lines.push(`Report: ${title}`);
-    lines.push(`Generated: ${now}`);
-    if(rangeLabel) lines.push(`Range: ${rangeLabel}`);
-    lines.push("");
-    lines.push("How this data was captured:");
-    lines.push("- Sightings are entered manually into Angel Numbers Tracker on this device.");
-    lines.push("- Data is stored locally on the phone (no cloud sync, no account).");
-    lines.push("- Each record may include the number, pattern type, a cultural/numerology meaning, and optional notes.");
-    lines.push("");
+    // Construct explicitly to avoid any accidental leading whitespace on the divider/first record.
+    let out = "";
+    out += "Angel Numbers Tracker — Export Report\n";
+    out += `App Version: ${APP_VERSION}\n`;
+    out += `Report: ${title}\n`;
+    out += `Generated: ${now}\n`;
+    if(rangeLabel) out += `Range: ${rangeLabel}\n`;
+    out += "\n";
+    out += "How this data was captured:\n";
+    out += "- Sightings are entered manually into Angel Numbers Tracker on this device.\n";
+    out += "- Data is stored locally on the phone (no cloud sync, no account).\n";
+    out += "- Each record may include the number, pattern type, a cultural/numerology meaning, and optional notes.\n";
+    out += "\n";
     if(notes){
-      lines.push(String(notes).trim());
-      lines.push("");
+      out += String(notes).trimEnd() + "\n";
+      out += "\n";
     }
-    lines.push("------------------------------");
-    lines.push("");
-
-    return lines.join("\n");
+    out += "------------------------------\n";
+    out += "\n";
+    return out;
   }
 
   function exportReport(recs, headerInfo, filenameBase){
@@ -1468,7 +1475,6 @@ Optional:
     });
 
     const out = header + lines.join("\n");
-
     const ts = new Date();
     const y = ts.getFullYear();
     const m = String(ts.getMonth()+1).padStart(2,"0");
@@ -1875,7 +1881,7 @@ Optional:
   }
 
   /* =========================
-     Clear Data + Install + Exit (Exit preserved)
+     Clear Data + Install + Exit
      ========================= */
 
   function clearAllData(){
@@ -2013,9 +2019,7 @@ Optional:
      SEARCH BEHAVIOR
      ========================= */
 
-  function runSearch(){
-    renderLog();
-  }
+  function runSearch(){ renderLog(); }
 
   $("btnRunSearch").addEventListener("click", (e) => {
     e.preventDefault();
@@ -2169,4 +2173,4 @@ self.addEventListener('fetch', (e)=>{ });`;
 })();
 </script>
 </body>
-</html>
+  </html>
