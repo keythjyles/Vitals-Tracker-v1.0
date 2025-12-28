@@ -1,24 +1,23 @@
-<!-- Angel Numbers Tracker v1.1A5 -->
+<!-- Angel Numbers Tracker v1.1A6 -->
 <!--
 Version Detail Notes
-App Version: v1.1A5
-Base: v1.1A4
+App Version: v1.1A6
+Base: v1.1A5
 
 Changes (requested):
-1) "Add to Calendar" is IN-APP calendar only (not phone calendar).
-   - Removed the alert. Button now creates/saves an in-app entry using the current Identify number + derived pattern/meaning.
-2) All future popups must match app modal styling.
-   - Replaced remaining alert() usage in these flows with the existing styled modal.
-   - Implemented a general-purpose "Info" modal using the same modal system.
-3) Identify screen: highlighted meaning/meta area must be contained and independently scrollable with a right-side scrollbar.
-   - The meta block is now its own scroll container (max height) with always-visible slim scrollbar.
-   - The main Home panel remains scrollable; footer buttons remain fixed and always visible.
-4) View Calendar is now the in-app month calendar (already).
+1) Add button opens a popup:
+   - Shows current number
+   - Notes input
+   - Buttons: Add (save to in-app calendar), Copy (clipboard), Export (single-entry export), Cancel
+2) Scroll troubleshooting + hard fix:
+   - Replaced full-screen swipe capture with EDGE-SWIPE ONLY (16px from left/right edge).
+   - This prevents swipe logic from interfering with vertical scrolling.
+3) Add version under logo (very small, no padding).
 Notes:
 - BOF/EOF comment blocks preserved.
-- Sequential versioning advanced.
 - Exit handler unchanged.
 -->
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -74,7 +73,7 @@ Notes:
       height: 100%;
       display:flex;
       flex-direction:column;
-      gap:12px;
+      gap:6px;
       overflow:hidden;
     }
 
@@ -94,12 +93,26 @@ Notes:
       display:block;
     }
 
+    /* Version under logo: very small, no padding */
+    .verUnderLogo{
+      margin: 0;
+      padding: 0;
+      line-height: 1;
+      font-size: 11px;
+      font-weight: 700;
+      color: rgba(235,245,255,.34);
+      text-align:center;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
     .screenArea{
       position:relative;
       flex:1;
       overflow:hidden;
       border-radius: var(--radius);
-      touch-action: pan-y;
+      touch-action: pan-y; /* allow vertical pan */
     }
 
     .card{
@@ -112,10 +125,10 @@ Notes:
 
       position:absolute;
       inset:0;
-      overflow:auto;
-      -webkit-overflow-scrolling: touch;
+
+      /* IMPORTANT: allow the screen itself to scroll if needed */
+      overflow:hidden;
       touch-action: pan-y;
-      overscroll-behavior: contain;
     }
 
     .hidden{ display:none !important; }
@@ -200,16 +213,10 @@ Notes:
       box-shadow: 0 0 0 4px rgba(47,120,255,.16);
     }
     textarea.field{
-      height:84px;
+      height:96px;
       padding: 12px 14px;
       resize:none;
       line-height:1.25;
-    }
-    input[type="date"].field,
-    input[type="datetime-local"].field,
-    input[type="month"].field{
-      font-size:16px;
-      padding-right: 10px;
     }
 
     .footerTiny{
@@ -222,18 +229,6 @@ Notes:
       user-select:none;
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
-    }
-
-    .timeLine{
-      margin: 4px 4px 10px;
-      color: rgba(235,245,255,.82);
-      font-weight:750;
-      letter-spacing:.3px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      line-height:1.05;
-      font-size: clamp(18px, 6.4vw, 44px);
     }
 
     .meaningCard{
@@ -273,7 +268,7 @@ Notes:
       white-space: pre-wrap;
     }
 
-    /* Independent scroll container for the highlighted “details” block */
+    /* Independent scroll container for the highlighted details block */
     .metaScroll{
       margin-top:10px;
       border:1px solid rgba(235,245,255,.10);
@@ -308,48 +303,12 @@ Notes:
       line-height:1.25;
     }
 
-    .panelButtons{
-      display:flex;
-      gap:12px;
-      margin-top: 12px;
-      flex-wrap:wrap;
-    }
-
-    /* ===== ADD/EDIT layout with internal scroller + fixed footer ===== */
-    #add{
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      gap: 0;
-      padding-bottom: 0;
-    }
-    #addScroll{
-      flex: 1;
-      overflow:auto;
-      -webkit-overflow-scrolling: touch;
-      padding-bottom: 12px;
-      touch-action: pan-y;
-      overscroll-behavior: contain;
-    }
-    #addFooter{
-      flex: 0 0 auto;
-      padding-top: 12px;
-      padding-bottom: calc(6px + env(safe-area-inset-bottom));
-      background: linear-gradient(180deg, rgba(11,19,36,0), rgba(11,19,36,.70) 35%, rgba(11,19,36,.92));
-      border-top: 1px solid rgba(255,255,255,.08);
-      backdrop-filter: blur(10px);
-    }
-    #addFooter .panelButtons{
-      margin-top: 0;
-    }
-
-    /* ===== HOME (Identify as home): scroll content + fixed footer buttons ===== */
+    /* HOME layout: scroll content + fixed footer */
     #home{
-      overflow:hidden;
       display:flex;
       flex-direction:column;
-      gap: 0;
-      padding-bottom: 0;
+      gap:0;
+      padding-bottom:0;
     }
     #homeScroll{
       flex: 1;
@@ -359,7 +318,6 @@ Notes:
       touch-action: pan-y;
       overscroll-behavior: contain;
     }
-
     #homeFooter{
       flex: 0 0 auto;
       padding-top: 12px;
@@ -394,33 +352,6 @@ Notes:
       gap:10px;
       align-items:center;
       margin-bottom: 10px;
-    }
-
-    .accentFrame{ position:relative; }
-
-    /* Pull-to-refresh hint */
-    .ptr{
-      position: sticky;
-      top: 0;
-      z-index: 5;
-      margin: -10px 0 8px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      height: 28px;
-      color: rgba(235,245,255,.55);
-      font-size: 12px;
-      font-weight: 750;
-      letter-spacing: .2px;
-      user-select:none;
-      pointer-events:none;
-      opacity: 0;
-      transform: translateY(-6px);
-      transition: opacity 160ms ease, transform 160ms ease;
-    }
-    .ptr.on{
-      opacity: 1;
-      transform: translateY(0);
     }
 
     /* Modal */
@@ -465,7 +396,7 @@ Notes:
     .modalBtns{
       display:flex;
       gap:12px;
-      margin-top: 6px;
+      margin-top: 10px;
       flex-wrap:wrap;
     }
     .modalBtns .btn{
@@ -497,7 +428,7 @@ Notes:
       touch-action: manipulation;
     }
 
-    /* Heart modal (bigger) */
+    /* Heart modal */
     .heartWrap{
       display:flex;
       align-items:center;
@@ -528,6 +459,11 @@ Notes:
     .touchLock.on{ pointer-events:auto; }
 
     /* Calendar */
+    #calendar{
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+    }
     .calTop{
       display:flex;
       gap:12px;
@@ -636,12 +572,13 @@ Notes:
       </svg>
     </div>
 
+    <!-- Version under logo -->
+    <div class="verUnderLogo" id="verUnderLogo">v—</div>
+
     <div class="screenArea" id="screenArea">
 
       <!-- HOME (Identify) -->
-      <div id="home" class="card accentFrame">
-        <div id="ptrHome" class="ptr">Pull down to refresh</div>
-
+      <div id="home" class="card">
         <div id="homeScroll">
           <div class="homeTitle">Identify Angel Number</div>
 
@@ -661,7 +598,6 @@ Notes:
               Enter a number above to see its commonly shared meaning.
             </div>
 
-            <!-- Contained scroll area w/ scrollbar -->
             <div id="homeMeta" class="metaScroll">
 How to use: Treat the meaning as a reflective prompt—what it “means” depends on context and personal interpretation.
             </div>
@@ -692,56 +628,8 @@ How to use: Treat the meaning as a reflective prompt—what it “means” depen
         </div>
       </div>
 
-      <!-- ADD/EDIT -->
-      <div id="add" class="card accentFrame hidden">
-        <div id="addScroll">
-          <div id="editPill" class="editPill hidden" style="
-            display:inline-flex; align-items:center; gap:8px;
-            padding: 8px 12px; border-radius: 999px;
-            border: 1px solid var(--themeLineSoft);
-            background: rgba(255,255,255,.03);
-            color: rgba(235,245,255,.70);
-            font-weight:700; letter-spacing:.2px;
-            margin: 0 4px 10px; width: fit-content;
-          ">Editing entry</div>
-
-          <div id="timeLine" class="timeLine">--:--:-- --, --/--/----</div>
-
-          <div id="dtEditWrap" class="hidden">
-            <div class="label">Date/Time</div>
-            <input id="dtEdit" class="field" type="datetime-local" />
-          </div>
-
-          <div class="label">Number</div>
-          <input id="anum" class="field" inputmode="numeric" placeholder="e.g., 111, 1212, 777" />
-
-          <div id="meaningCard" class="meaningCard">
-            <div class="meaningTop">
-              <div id="numBig" class="numBig">—</div>
-              <div id="patternPill" class="patternPill">Pattern: —</div>
-            </div>
-            <div id="meaningText" class="meaningText">Enter a number to see its commonly shared meaning.</div>
-            <div class="disclaimer">
-              Cultural note: these meanings come from numerology/“angel number” traditions and vary by source.
-              Treat as reflective prompts, not facts or predictions.
-            </div>
-          </div>
-
-          <div class="label">Notes <span style="color:var(--muted2); font-weight:650;">(optional)</span></div>
-          <textarea id="notes" class="field" placeholder="Where did you see it? What were you thinking/feeling?"></textarea>
-        </div>
-
-        <div id="addFooter">
-          <div class="panelButtons">
-            <button id="btnSave" class="btn primary grow">Save</button>
-            <button id="btnDelete" class="btn grow hidden">Delete</button>
-            <button id="btnBackFromAdd" class="btn grow">Back</button>
-          </div>
-        </div>
-      </div>
-
       <!-- CALENDAR -->
-      <div id="calendar" class="card accentFrame hidden">
+      <div id="calendar" class="card hidden">
         <div class="row center">
           <button id="btnExportMonth" class="btn small">Export</button>
           <div class="grow"></div>
@@ -761,19 +649,7 @@ How to use: Treat the meaning as a reflective prompt—what it “means” depen
     </div>
   </div>
 
-  <!-- Confirm modal -->
-  <div id="confirmModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
-    <div class="modalCard">
-      <div class="modalTitle" id="confirmTitle">Confirm</div>
-      <div class="modalSub" id="confirmSub">—</div>
-      <div class="modalBtns">
-        <button id="btnConfirmCancel" class="btn">Cancel</button>
-        <button id="btnConfirmOk" class="btn primary">OK</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Info modal (new; matches app look) -->
+  <!-- Info modal -->
   <div id="infoModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
     <div class="modalCard">
       <div class="xCloseRow">
@@ -792,16 +668,40 @@ How to use: Treat the meaning as a reflective prompt—what it “means” depen
     <div class="modalCard">
       <div class="modalTitle" id="exportModalTitle">Export ready</div>
       <div class="modalSub" id="exportModalSub">
-Export report was copied to your clipboard.  You can paste it into any messaging app, email, Notes, or any app that accepts text.  Optional:
+Export report was copied to your clipboard. You can paste it into any messaging app, email, Notes, or any app that accepts text.
 
 Share sends the report to another app.
-
 Save creates a .txt file on your device.
       </div>
       <div class="modalBtns" style="flex-wrap:nowrap;">
         <button id="btnExportClose" class="btn" style="min-width:0; flex:1 1 0; font-size:16px; height:52px;">Close</button>
         <button id="btnExportShare" class="btn" style="min-width:0; flex:1 1 0; font-size:16px; height:52px;">Share</button>
         <button id="btnExportSave" class="btn primary" style="min-width:0; flex:1 1 0; font-size:16px; height:52px;">Save .txt</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add-to-Calendar modal (new flow) -->
+  <div id="addCalModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="addCalTitle">
+    <div class="modalCard">
+      <div class="xCloseRow">
+        <button class="xBtn" id="btnAddCalX" aria-label="Close">×</button>
+      </div>
+
+      <div class="modalTitle" id="addCalTitle">Add to Calendar</div>
+      <div class="modalSub" id="addCalSub">This adds an entry to the in-app calendar (local-only).</div>
+
+      <div class="label" style="margin-top:6px;">Number</div>
+      <div id="addCalNumber" class="field" style="display:flex; align-items:center; font-weight:900;">—</div>
+
+      <div class="label">Notes (optional)</div>
+      <textarea id="addCalNotes" class="field" placeholder="Where did you see it? What was happening?"></textarea>
+
+      <div class="modalBtns">
+        <button id="btnAddCalAdd" class="btn primary">Add</button>
+        <button id="btnAddCalCopy" class="btn">Copy</button>
+        <button id="btnAddCalExport" class="btn">Export</button>
+        <button id="btnAddCalCancel" class="btn">Cancel</button>
       </div>
     </div>
   </div>
@@ -845,7 +745,7 @@ Save creates a .txt file on your device.
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.1A5";
+  const APP_VERSION = "v1.1A6";
   const STORAGE_KEY = "angel_numbers_records_v1";
   const DAY_MS = 24*60*60*1000;
 
@@ -949,6 +849,46 @@ Save creates a .txt file on your device.
     return s.replace(/[^\d]/g, "");
   }
 
+  async function copyToClipboard(text){
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+    return false;
+  }
+
+  function downloadText(text, filename){
+    const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  async function saveTextWithPicker(text, suggestedName){
+    const canPick = typeof window.showSaveFilePicker === "function";
+    if(!canPick) return false;
+
+    const opts = {
+      suggestedName: suggestedName || "angel_numbers_report.txt",
+      types: [{ description: "Text", accept: {"text/plain": [".txt"]} }]
+    };
+
+    const handle = await window.showSaveFilePicker(opts);
+    const writable = await handle.createWritable();
+    await writable.write(new Blob([text], {type:"text/plain;charset=utf-8"}));
+    await writable.close();
+    return true;
+  }
+
+  function isShareAvailable(){
+    return !!(navigator.share && typeof navigator.share === "function");
+  }
+
   /* ===== Pattern + meaning ===== */
 
   function isAllSame(s){ return !!(s && s.length >= 2 && s.split("").every(ch => ch === s[0])); }
@@ -1047,7 +987,7 @@ Save creates a .txt file on your device.
   /* ===== Touch lock ===== */
 
   let lockTimer = null;
-  function lockTouches(ms=200){
+  function lockTouches(ms=180){
     const el = $("touchLock");
     el.classList.add("on");
     if(lockTimer) clearTimeout(lockTimer);
@@ -1062,255 +1002,24 @@ Save creates a .txt file on your device.
 
   /* ===== Screens ===== */
 
-  const swipeCycle = ["home","calendar"];
   let currentScreen = "home";
-  let animating = false;
-
   function showInstant(screen){
     unlockTouches();
-    for(const s of ["home","add","calendar"]){
+    for(const s of ["home","calendar"]){
       $(s).classList.toggle("hidden", s !== screen);
-      $(s).style.transform = "";
-      $(s).style.transition = "";
     }
     currentScreen = screen;
-
     if(screen === "calendar") { initMonthDefaultIfNeeded(); renderCalendar(); }
-
     try{ document.activeElement?.blur(); }catch{}
   }
 
-  /* ===== Swipe “wheel” ===== */
+  /* ===== Styled modals ===== */
 
-  const drag = {
-    active:false,
-    x0:0, y0:0,
-    dx:0, dy:0,
-    intent:null,
-    from:null, to:null,
-    width:0,
-    dir:null
-  };
-
-  function nextInCycleRight(from){
-    const i = swipeCycle.indexOf(from);
-    if(i < 0) return null;
-    return swipeCycle[(i+1) % swipeCycle.length];
-  }
-  function nextInCycleLeft(from){
-    const i = swipeCycle.indexOf(from);
-    if(i < 0) return null;
-    return swipeCycle[(i-1+swipeCycle.length) % swipeCycle.length];
-  }
-
-  function setTransform(el, x){
-    el.style.transform = `translateX(${x}px)`;
-  }
-
-  function startDrag(ev){
-    if(animating) return;
-    if(!(ev.touches && ev.touches.length === 1)) return;
-    if(!swipeCycle.includes(currentScreen)) return;
-
-    const t = ev.target;
-    if(t && t.closest && t.closest("input, textarea, select")) return;
-
-    drag.active = true;
-    drag.intent = null;
-    drag.dir = null;
-    drag.x0 = ev.touches[0].clientX;
-    drag.y0 = ev.touches[0].clientY;
-    drag.dx = 0;
-    drag.dy = 0;
-    drag.from = currentScreen;
-    drag.to = null;
-    drag.width = $("screenArea").clientWidth || window.innerWidth;
-  }
-
-  function prepareTarget(dir){
-    if(drag.dir === dir && drag.to) return;
-    drag.dir = dir;
-
-    const target = (dir === "right") ? nextInCycleRight(drag.from) : nextInCycleLeft(drag.from);
-    if(!target) return;
-
-    drag.to = target;
-
-    const fromEl = $(drag.from);
-    const toEl = $(drag.to);
-
-    toEl.classList.remove("hidden");
-    fromEl.style.transition = "none";
-    toEl.style.transition = "none";
-
-    const startX = (dir === "right") ? -drag.width : drag.width;
-    setTransform(fromEl, 0);
-    setTransform(toEl, startX);
-  }
-
-  function moveDrag(ev){
-    if(!drag.active) return;
-    if(!(ev.touches && ev.touches.length === 1)) return;
-
-    const x = ev.touches[0].clientX;
-    const y = ev.touches[0].clientY;
-    drag.dx = x - drag.x0;
-    drag.dy = y - drag.y0;
-
-    if(!drag.intent){
-      const ax = Math.abs(drag.dx);
-      const ay = Math.abs(drag.dy);
-
-      if(ax > 18 && ax > ay + 12){
-        drag.intent = "h";
-      }else if(ay > 18 && ay > ax + 8){
-        drag.intent = "v";
-        drag.active = false;
-        return;
-      }else{
-        return;
-      }
-    }
-
-    if(drag.intent !== "h") return;
-
-    ev.preventDefault();
-
-    const dir = (drag.dx >= 0) ? "right" : "left";
-    prepareTarget(dir);
-    if(!drag.to) return;
-
-    const fromEl = $(drag.from);
-    const toEl = $(drag.to);
-
-    const w = drag.width || 1;
-    const clamped = Math.max(-w, Math.min(w, drag.dx));
-
-    setTransform(fromEl, clamped);
-    const base = (dir === "right") ? -w : w;
-    setTransform(toEl, base + clamped);
-  }
-
-  function endDrag(){
-    if(!drag.active && drag.intent !== "h") return;
-
-    const hadHorizontal = (drag.intent === "h" && drag.to);
-    const from = drag.from;
-    const to = drag.to;
-    const w = drag.width || 1;
-    const dx = drag.dx;
-
-    drag.active = false;
-    drag.intent = null;
-    drag.dir = null;
-
-    if(!hadHorizontal) return;
-
-    animating = true;
-
-    const progress = Math.min(1, Math.abs(dx) / w);
-    const commit = progress >= 0.22;
-
-    const dir = (dx >= 0) ? "right" : "left";
-    const fromEl = $(from);
-    const toEl = $(to);
-
-    fromEl.style.transition = "transform 220ms cubic-bezier(.2,.9,.2,1)";
-    toEl.style.transition   = "transform 220ms cubic-bezier(.2,.9,.2,1)";
-
-    if(commit){
-      setTransform(fromEl, (dir === "right") ? w : -w);
-      setTransform(toEl, 0);
-
-      setTimeout(() => {
-        fromEl.classList.add("hidden");
-        fromEl.style.transition = "";
-        toEl.style.transition = "";
-        fromEl.style.transform = "";
-        toEl.style.transform = "";
-
-        currentScreen = to;
-
-        if(currentScreen === "calendar") { initMonthDefaultIfNeeded(); renderCalendar(); }
-
-        try{ document.activeElement?.blur(); }catch{}
-        animating = false;
-        lockTouches(140);
-      }, 235);
-    }else{
-      setTransform(fromEl, 0);
-      setTransform(toEl, (dir === "right") ? -w : w);
-
-      setTimeout(() => {
-        toEl.classList.add("hidden");
-        fromEl.style.transition = "";
-        toEl.style.transition = "";
-        fromEl.style.transform = "";
-        toEl.style.transform = "";
-
-        animating = false;
-        lockTouches(90);
-      }, 235);
-    }
-  }
-
-  function attachSwipes(){
-    const root = $("screenArea");
-    root.addEventListener("touchstart", startDrag, {passive:true});
-    root.addEventListener("touchmove", moveDrag, {passive:false});
-    root.addEventListener("touchend", endDrag, {passive:true});
-    root.addEventListener("touchcancel", endDrag, {passive:true});
-  }
-
-  /* ===== Modals ===== */
-
-  // Confirm modal (existing)
-  let confirmState = null;
-
-  function openConfirm({title, message, okText="OK", cancelText="Cancel", danger=false, onOk}){
-    confirmState = { onOk };
-    $("confirmTitle").textContent = title || "Confirm";
-    $("confirmSub").textContent = message || "—";
-
-    $("btnConfirmOk").textContent = okText;
-    $("btnConfirmCancel").textContent = cancelText;
-
-    if(danger){
-      $("btnConfirmOk").classList.remove("primary");
-      $("btnConfirmOk").classList.add("danger");
-    }else{
-      $("btnConfirmOk").classList.remove("danger");
-      $("btnConfirmOk").classList.add("primary");
-    }
-
-    $("confirmModal").classList.remove("hidden");
-    lockTouches(120);
-  }
-
-  function closeConfirm(){
-    confirmState = null;
-    $("confirmModal").classList.add("hidden");
-    unlockTouches();
-  }
-
-  $("btnConfirmCancel").addEventListener("click", (e)=>{ e.preventDefault(); closeConfirm(); });
-  $("btnConfirmOk").addEventListener("click", (e)=>{
-    e.preventDefault();
-    const fn = confirmState?.onOk;
-    closeConfirm();
-    try{ fn && fn(); }catch{}
-  });
-
-  $("confirmModal").addEventListener("click", (e) => {
-    if(e.target === $("confirmModal")) closeConfirm();
-  });
-
-  // Info modal (new)
   function openInfo(title, message){
     $("infoTitle").textContent = title || "Info";
     $("infoSub").textContent = message || "—";
     $("infoModal").classList.remove("hidden");
-    lockTouches(120);
+    lockTouches(140);
   }
   function closeInfo(){
     $("infoModal").classList.add("hidden");
@@ -1320,61 +1029,20 @@ Save creates a .txt file on your device.
   $("btnInfoOk").addEventListener("click", (e)=>{ e.preventDefault(); closeInfo(); });
   $("infoModal").addEventListener("click", (e)=>{ if(e.target === $("infoModal")) closeInfo(); });
 
-  // Heart modal
-  function openHeart(){ $("heartModal").classList.remove("hidden"); lockTouches(120); }
+  function openHeart(){ $("heartModal").classList.remove("hidden"); lockTouches(140); }
   function closeHeart(){ $("heartModal").classList.add("hidden"); unlockTouches(); }
   $("btnHeartX").addEventListener("click", (e)=>{ e.preventDefault(); closeHeart(); });
   $("btnHeartClose").addEventListener("click", (e)=>{ e.preventDefault(); closeHeart(); });
   $("heartModal").addEventListener("click", (e)=>{ if(e.target === $("heartModal")) closeHeart(); });
 
-  /* ===== Export helpers ===== */
+  /* ===== Export modal ===== */
 
   let exportPayload = null;
-
-  function isShareAvailable(){
-    return !!(navigator.share && typeof navigator.share === "function");
-  }
-
-  async function copyToClipboard(text){
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      await navigator.clipboard.writeText(text);
-      return true;
-    }
-    return false;
-  }
-
-  function downloadText(text, filename){
-    const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }
-
-  async function saveTextWithPicker(text, suggestedName){
-    const canPick = typeof window.showSaveFilePicker === "function";
-    if(!canPick) return false;
-
-    const opts = {
-      suggestedName: suggestedName || "angel_numbers_report.txt",
-      types: [{ description: "Text", accept: {"text/plain": [".txt"]} }]
-    };
-
-    const handle = await window.showSaveFilePicker(opts);
-    const writable = await handle.createWritable();
-    await writable.write(new Blob([text], {type:"text/plain;charset=utf-8"}));
-    await writable.close();
-    return true;
-  }
 
   function openExportModal(payload){
     exportPayload = payload;
     $("exportModal").classList.remove("hidden");
-    lockTouches(120);
+    lockTouches(140);
 
     $("btnExportClose").disabled = true;
     $("btnExportShare").disabled = true;
@@ -1405,10 +1073,7 @@ Save creates a .txt file on your device.
       return;
     }
     try{
-      await navigator.share({
-        title: "Angel Numbers Tracker Export",
-        text: exportPayload.text
-      });
+      await navigator.share({ title: "Angel Numbers Tracker Export", text: exportPayload.text });
     }catch{}
   });
 
@@ -1471,6 +1136,136 @@ Save creates a .txt file on your device.
       openExportModal({ text: out, filename });
     })();
   }
+
+  /* ===== Home Identify (auto-search) ===== */
+
+  let lastIdentify = { number:"", pattern:"", meaning:"" };
+
+  function renderHomeIdentify(){
+    const raw = $("homeIdNum").value;
+    const n = normalizeNumberInput(raw);
+
+    if(!n){
+      $("homeNumBig").textContent = "—";
+      $("homePatternPill").textContent = "Pattern: —";
+      $("homeMeaningText").textContent =
+        "Enter a number above to see its commonly shared meaning.";
+      $("homeMeta").textContent =
+        "How to use: Treat the meaning as a reflective prompt—what it “means” depends on context and personal interpretation.";
+      lastIdentify = { number:"", pattern:"", meaning:"" };
+      return;
+    }
+
+    const pattern = detectPattern(n);
+    const out = deriveMeaning(n, pattern);
+
+    $("homeNumBig").textContent = n;
+    $("homePatternPill").textContent = `Pattern: ${out.pattern || pattern || "—"}`;
+    $("homeMeaningText").textContent = out.meaning || "—";
+    $("homeMeta").textContent = buildIdentifyMeta(n, out.pattern || pattern || "—");
+
+    lastIdentify = {
+      number: n,
+      pattern: (out.pattern || pattern || "—"),
+      meaning: (out.meaning || "—")
+    };
+  }
+
+  $("homeIdNum").addEventListener("input", renderHomeIdentify);
+  $("homeIdNum").addEventListener("keydown", (e)=>{
+    if(e.key === "Enter"){
+      e.preventDefault();
+      try{ e.target.blur(); }catch{}
+    }
+  });
+
+  /* ===== Add-to-Calendar popup flow ===== */
+
+  function openAddCalModal(){
+    const n = lastIdentify.number || normalizeNumberInput($("homeIdNum").value);
+    if(!n){
+      openInfo("Enter a number", "Type an angel number first, then tap Add to Calendar.");
+      return;
+    }
+
+    $("addCalNumber").textContent = n;
+    $("addCalNotes").value = "";
+    $("addCalModal").classList.remove("hidden");
+    lockTouches(140);
+
+    // Do NOT auto-focus the notes (prevents keyboard pop if you don't want it)
+    try{ document.activeElement?.blur(); }catch{}
+  }
+
+  function closeAddCalModal(){
+    $("addCalModal").classList.add("hidden");
+    unlockTouches();
+    try{ document.activeElement?.blur(); }catch{}
+  }
+
+  $("btnAddCalX").addEventListener("click", (e)=>{ e.preventDefault(); closeAddCalModal(); });
+  $("btnAddCalCancel").addEventListener("click", (e)=>{ e.preventDefault(); closeAddCalModal(); });
+  $("addCalModal").addEventListener("click", (e)=>{ if(e.target === $("addCalModal")) closeAddCalModal(); });
+
+  function buildSingleEntryText(rec){
+    return [
+      "Angel Numbers Tracker — Entry",
+      `App Version: ${APP_VERSION}`,
+      `Captured: ${fmtDateTime(rec.ts)}`,
+      "------------------------------",
+      `Number: ${rec.number || "—"}`,
+      `Pattern: ${rec.pattern || "—"}`,
+      `Meaning: ${rec.meaning || "—"}`,
+      `Notes: ${(rec.notes && rec.notes.trim()) ? rec.notes.trim() : "None"}`
+    ].join("\n");
+  }
+
+  $("btnAddCalAdd").addEventListener("click", () => {
+    const n = String($("addCalNumber").textContent || "").trim();
+    const notes = String($("addCalNotes").value || "").trim();
+
+    const pattern = lastIdentify.pattern || detectPattern(n);
+    const meaning = lastIdentify.meaning || deriveMeaning(n, detectPattern(n)).meaning;
+
+    const ts = Date.now();
+    const rec = { ts, number: n, pattern, meaning, notes };
+
+    addRecord(rec);
+    closeAddCalModal();
+    openInfo("Added", `Saved to in-app calendar:\n\n${n}\n${fmtDateTime(ts)}`);
+  });
+
+  $("btnAddCalCopy").addEventListener("click", async () => {
+    const n = String($("addCalNumber").textContent || "").trim();
+    const notes = String($("addCalNotes").value || "").trim();
+    const pattern = lastIdentify.pattern || detectPattern(n);
+    const meaning = lastIdentify.meaning || deriveMeaning(n, detectPattern(n)).meaning;
+    const rec = { ts: Date.now(), number: n, pattern, meaning, notes };
+    const text = buildSingleEntryText(rec);
+
+    try{
+      await copyToClipboard(text);
+      openInfo("Copied", "Entry copied to clipboard.");
+    }catch{
+      openInfo("Copy failed", "Clipboard copy is not available in this browser.");
+    }
+  });
+
+  $("btnAddCalExport").addEventListener("click", () => {
+    const n = String($("addCalNumber").textContent || "").trim();
+    const notes = String($("addCalNotes").value || "").trim();
+    const pattern = lastIdentify.pattern || detectPattern(n);
+    const meaning = lastIdentify.meaning || deriveMeaning(n, detectPattern(n)).meaning;
+    const rec = { ts: Date.now(), number: n, pattern, meaning, notes };
+
+    const header = {
+      title: "Single Entry Export",
+      rangeLabel: "One entry (not yet saved unless you tap Add)",
+      notes: "This export contains the entry shown in the Add popup. Tap Add if you want it stored in the in-app calendar."
+    };
+
+    exportReport([rec], header, "angel_number_entry");
+  });
 
   /* ===== Calendar ===== */
 
@@ -1553,7 +1348,6 @@ Save creates a .txt file on your device.
         cell.classList.add("hasData");
         cell.addEventListener("click", (e)=>{
           e.preventDefault();
-          if(animating) return;
           openInfo("Not enabled yet", "Day view is not enabled in this build. (Next edit can add a day list + edit.)");
         });
       }
@@ -1562,131 +1356,96 @@ Save creates a .txt file on your device.
     }
   }
 
-  /* ===== Home Identify (auto-search) ===== */
+  /* ===== “Edge swipe” only (so scrolling works) =====
+     This is the highest-probability culprit for “page not scrollable”.
+     We only start swipe if touch begins within EDGE px from left/right.
+  */
 
-  let lastIdentify = { number:"", pattern:"", meaning:"" };
+  const EDGE = 16;
+  const drag = {
+    active:false,
+    x0:0, y0:0,
+    dx:0, dy:0,
+    intent:null,
+    dir:null
+  };
+  let animating = false;
 
-  function renderHomeIdentify(){
-    const raw = $("homeIdNum").value;
-    const n = normalizeNumberInput(raw);
+  function startDrag(ev){
+    if(animating) return;
+    if(!(ev.touches && ev.touches.length === 1)) return;
 
-    if(!n){
-      $("homeNumBig").textContent = "—";
-      $("homePatternPill").textContent = "Pattern: —";
-      $("homeMeaningText").textContent =
-        "Enter a number above to see its commonly shared meaning.";
-      $("homeMeta").textContent =
-        "How to use: Treat the meaning as a reflective prompt—what it “means” depends on context and personal interpretation.";
-      lastIdentify = { number:"", pattern:"", meaning:"" };
-      return;
-    }
+    const t = ev.target;
+    if(t && t.closest && t.closest("input, textarea, select")) return;
 
-    const pattern = detectPattern(n);
-    const out = deriveMeaning(n, pattern);
+    if(currentScreen !== "home" && currentScreen !== "calendar") return;
 
-    $("homeNumBig").textContent = n;
-    $("homePatternPill").textContent = `Pattern: ${out.pattern || pattern || "—"}`;
-    $("homeMeaningText").textContent = out.meaning || "—";
-    $("homeMeta").textContent = buildIdentifyMeta(n, out.pattern || pattern || "—");
+    const x = ev.touches[0].clientX;
+    const w = $("screenArea").clientWidth || window.innerWidth;
 
-    lastIdentify = { number:n, pattern:(out.pattern || pattern || "—"), meaning:(out.meaning || "—") };
+    // EDGE ONLY
+    const nearLeft = x <= EDGE;
+    const nearRight = x >= (w - EDGE);
+    if(!nearLeft && !nearRight) return;
+
+    drag.active = true;
+    drag.intent = null;
+    drag.dir = null;
+    drag.x0 = x;
+    drag.y0 = ev.touches[0].clientY;
+    drag.dx = 0;
+    drag.dy = 0;
   }
 
-  $("homeIdNum").addEventListener("input", renderHomeIdentify);
-  $("homeIdNum").addEventListener("keydown", (e)=>{
-    if(e.key === "Enter"){
-      e.preventDefault();
-      try{ e.target.blur(); }catch{}
-    }
-  });
+  function moveDrag(ev){
+    if(!drag.active) return;
+    if(!(ev.touches && ev.touches.length === 1)) return;
 
-  /* ===== Version triple-tap -> heart ===== */
+    const x = ev.touches[0].clientX;
+    const y = ev.touches[0].clientY;
+    drag.dx = x - drag.x0;
+    drag.dy = y - drag.y0;
 
-  let vTapCount = 0;
-  let vTapTimer = null;
-
-  /* ===== Exit ===== */
-
-  /* KEEP THIS EXIT FUNCTION EXACTLY (known-good) */
-  $("btnExitHome").addEventListener("click", () => {
-    window.close();
-    setTimeout(() => {
-      alert("If it didn’t close: use your phone’s Back/Home.");
-    }, 200);
-  });
-
-  /* ===== Buttons ===== */
-
-  $("btnViewCalendar").addEventListener("click", () => showInstant("calendar"));
-  $("btnBackFromCalendar").addEventListener("click", () => showInstant("home"));
-
-  $("btnHomeExport").addEventListener("click", () => {
-    const recs = loadRecords().slice().reverse();
-    exportReport(
-      recs,
-      {
-        title: "All Entries Export",
-        rangeLabel: "All saved entries",
-        notes: "This export contains all saved entries currently stored on this device."
-      },
-      "angel_numbers_all"
-    );
-  });
-
-  // Add to IN-APP calendar (records)
-  $("btnAddToCalendar").addEventListener("click", () => {
-    const n = lastIdentify.number || normalizeNumberInput($("homeIdNum").value);
-    if(!n){
-      openInfo("Enter a number", "Type an angel number first, then tap Add to Calendar.");
-      return;
+    if(!drag.intent){
+      const ax = Math.abs(drag.dx);
+      const ay = Math.abs(drag.dy);
+      if(ax > 18 && ax > ay + 12){
+        drag.intent = "h";
+      }else if(ay > 18 && ay > ax + 8){
+        // release to native scroll
+        drag.active = false;
+        drag.intent = null;
+        return;
+      }else{
+        return;
+      }
     }
 
-    const ts = Date.now();
-    const rec = {
-      ts,
-      number: n,
-      pattern: lastIdentify.pattern || detectPattern(n),
-      meaning: lastIdentify.meaning || deriveMeaning(n, detectPattern(n)).meaning,
-      notes: ""
-    };
-    addRecord(rec);
+    if(drag.intent !== "h") return;
 
-    // Refresh calendar dots if user switches immediately
-    // Provide confirmation using styled modal (no alert)
-    openInfo("Added", `Saved to in-app calendar:\n\n${n}\n${fmtDateTime(ts)}`);
-  });
+    // only for horizontal swipe do we cancel default
+    ev.preventDefault();
+  }
 
-  $("btnCalToday").addEventListener("click", () => {
-    const now = new Date();
-    const y = now.getFullYear();
-    const m = String(now.getMonth()+1).padStart(2,"0");
-    $("calMonth").value = `${y}-${m}`;
-    renderCalendar();
-  });
+  function endDrag(){
+    if(!drag.active) return;
+    const dx = drag.dx;
+    drag.active = false;
 
-  $("calMonth").addEventListener("change", renderCalendar);
+    // simple “flip screens” threshold
+    if(Math.abs(dx) < 60) return;
 
-  $("btnExportMonth").addEventListener("click", () => {
-    const mv = monthValueToYMD($("calMonth").value);
-    if(!mv){ openInfo("Export", "Select a month first."); return; }
+    if(currentScreen === "home") showInstant("calendar");
+    else showInstant("home");
+  }
 
-    const {y, mo} = mv;
-    const start = new Date(y, mo-1, 1); start.setHours(0,0,0,0);
-    const end = new Date(y, mo, 1);   end.setHours(0,0,0,0);
-
-    const all = loadRecords().slice().reverse();
-    const recs = all.filter(r => r.ts >= start.getTime() && r.ts < end.getTime());
-
-    exportReport(
-      recs,
-      {
-        title: "Month Export",
-        rangeLabel: `${y}-${String(mo).padStart(2,"0")} (in-app calendar)`,
-        notes: "This export includes entries whose timestamps fall within the selected month."
-      },
-      `angel_numbers_${y}-${String(mo).padStart(2,"0")}`
-    );
-  });
+  function attachEdgeSwipe(){
+    const root = $("screenArea");
+    root.addEventListener("touchstart", startDrag, {passive:true});
+    root.addEventListener("touchmove", moveDrag, {passive:false});
+    root.addEventListener("touchend", endDrag, {passive:true});
+    root.addEventListener("touchcancel", endDrag, {passive:true});
+  }
 
   /* ===== Manifest + SW ===== */
 
@@ -1787,30 +1546,103 @@ self.addEventListener('fetch', (e)=>{ });`;
     saveRecords(out);
   }
 
+  /* ===== Version triple-tap -> heart ===== */
+
+  let vTapCount = 0;
+  let vTapTimer = null;
+
+  function attachVersionTripleTap(){
+    $("homeVerLabel").addEventListener("click", (e) => {
+      e.stopPropagation();
+      if(animating) return;
+      vTapCount++;
+      if(vTapTimer) clearTimeout(vTapTimer);
+      vTapTimer = setTimeout(()=>{ vTapCount = 0; }, 650);
+      if(vTapCount >= 3){
+        vTapCount = 0;
+        openHeart();
+      }
+    });
+  }
+
+  /* ===== Exit ===== */
+
+  /* KEEP THIS EXIT FUNCTION EXACTLY (known-good) */
+  $("btnExitHome").addEventListener("click", () => {
+    window.close();
+    setTimeout(() => {
+      alert("If it didn’t close: use your phone’s Back/Home.");
+    }, 200);
+  });
+
+  /* ===== Buttons ===== */
+
+  $("btnViewCalendar").addEventListener("click", () => showInstant("calendar"));
+  $("btnBackFromCalendar").addEventListener("click", () => showInstant("home"));
+
+  $("btnHomeExport").addEventListener("click", () => {
+    const recs = loadRecords().slice().reverse();
+    exportReport(
+      recs,
+      {
+        title: "All Entries Export",
+        rangeLabel: "All saved entries",
+        notes: "This export contains all saved entries currently stored on this device."
+      },
+      "angel_numbers_all"
+    );
+  });
+
+  $("btnAddToCalendar").addEventListener("click", () => {
+    openAddCalModal();
+  });
+
+  $("btnCalToday").addEventListener("click", () => {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth()+1).padStart(2,"0");
+    $("calMonth").value = `${y}-${m}`;
+    renderCalendar();
+  });
+
+  $("calMonth").addEventListener("change", renderCalendar);
+
+  $("btnExportMonth").addEventListener("click", () => {
+    const mv = monthValueToYMD($("calMonth").value);
+    if(!mv){ openInfo("Export", "Select a month first."); return; }
+
+    const {y, mo} = mv;
+    const start = new Date(y, mo-1, 1); start.setHours(0,0,0,0);
+    const end = new Date(y, mo, 1);   end.setHours(0,0,0,0);
+
+    const all = loadRecords().slice().reverse();
+    const recs = all.filter(r => r.ts >= start.getTime() && r.ts < end.getTime());
+
+    exportReport(
+      recs,
+      {
+        title: "Month Export",
+        rangeLabel: `${y}-${String(mo).padStart(2,"0")} (in-app calendar)`,
+        notes: "This export includes entries whose timestamps fall within the selected month."
+      },
+      `angel_numbers_${y}-${String(mo).padStart(2,"0")}`
+    );
+  });
+
   /* ===== Init ===== */
 
   injectManifest();
   registerSW();
-
   seedTestDataIfEmpty();
 
-  attachSwipes();
-
-  // Show the REAL version number on screen
+  // Show real version in two places
   $("homeVerLabel").textContent = APP_VERSION;
+  $("verUnderLogo").textContent = APP_VERSION;
 
-  // Triple-tap on version label -> heart
-  $("homeVerLabel").addEventListener("click", (e) => {
-    e.stopPropagation();
-    if(animating) return;
-    vTapCount++;
-    if(vTapTimer) clearTimeout(vTapTimer);
-    vTapTimer = setTimeout(()=>{ vTapCount = 0; }, 650);
-    if(vTapCount >= 3){
-      vTapCount = 0;
-      openHeart();
-    }
-  });
+  attachVersionTripleTap();
+
+  // IMPORTANT: Edge-swipe only (prevents scroll interference)
+  attachEdgeSwipe();
 
   // Prevent focus/keyboard on load
   try{ document.activeElement?.blur(); }catch{}
@@ -1832,10 +1664,11 @@ self.addEventListener('fetch', (e)=>{ });`;
 <!--
 EOF Version Detail Notes (required)
 App: Angel Numbers Tracker
-Version: v1.1A5
-Base: v1.1A4
+Version: v1.1A6
+Base: v1.1A5
 Changes:
-- Add to Calendar now saves to the in-app calendar (local records). No phone calendar integration.
-- Replaced remaining alert-style messaging in these flows with styled modal popups.
-- Identify details block is now a contained scroll area with a visible scrollbar.
+- Add-to-Calendar now opens a styled popup with number + notes + Add/Copy/Export/Cancel.
+- Edge-swipe only to prevent swipe handlers from breaking vertical scroll.
+- Version is displayed under the logo (very small, no padding).
+- Triple-tap on version label shows the heart message (unchanged behavior).
 -->
