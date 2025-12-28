@@ -1,32 +1,21 @@
-<!-- Angel Numbers Tracker v1.0B12 -->
+<!-- Angel Numbers Tracker v1.0B13 -->
 <!--
 Version Detail Notes
-App Version (internal): v1.0B12
+App Version (internal): v1.0B13
 Home display label (visual only): v1.333  (DO NOT CHANGE unless user instructs)
-Base: v1.0B11
+Base: v1.0B12
 
 Changes (requested):
-1) Log list box gets its own scrollable container:
-   - Log screen header + search + date filters stay fixed.
-   - Entries scroll inside a dedicated list box container.
-
-2) Edit/Add panel scrollability:
-   - Add/Edit content scrolls inside its own container.
-   - Action buttons remain reachable as a fixed footer row.
-
-3) Card readability (bigger text, less wasted space):
-   - Increased key text size in the Angel Number Card modal.
-   - Tightened vertical spacing to reduce “dead” space.
-   - Kept action buttons accessible.
-
-4) Logo placement:
-   - In the Angel Number Card modal, the logo row is now at the top.
-
-Required persistence:
-- Keep EOF comment block.
+1) Remove Log panel entirely.
+2) Add new "Identify" panel (theme-matched) to quickly identify an Angel Number’s characteristics/meaning.
+   - Home: replace Log button with Identify button (placed just below ADD).
+   - Swipe rotation: Identify replaces Log in the left/right swipe cycle.
+3) Identify panel:
+   - Input field for a number.
+   - Results area beneath showing pattern, meaning, and supporting lenses.
+4) Keep EOF comment block.
 -->
 <!doctype html>
-
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -34,6 +23,7 @@ Required persistence:
   <meta name="theme-color" content="#0b1324" />
   <title>Angel Numbers Tracker</title>
   <link rel="manifest" id="manifestLink" href="#" />
+
   <style>
     :root{
       --bg0:#08101f;
@@ -320,11 +310,11 @@ Required persistence:
 
     /* ===== ADD/EDIT: make panel a flex layout with internal scroller + fixed footer buttons ===== */
     #add{
-      overflow:hidden;               /* prevent body-scroll traps */
+      overflow:hidden;
       display:flex;
       flex-direction:column;
       gap: 0;
-      padding-bottom: 0;            /* footer handles spacing */
+      padding-bottom: 0;
     }
     #addScroll{
       flex: 1;
@@ -346,126 +336,71 @@ Required persistence:
       margin-top: 0;
     }
 
-    /* ===== LOG: fixed header/filters; scroll entries inside a list box ===== */
-    #log{
-      overflow:hidden;              /* no whole-panel scroll */
+    /* ===== IDENTIFY: theme-matched quick meaning lookup ===== */
+    #identify{
+      overflow:hidden;
       display:flex;
       flex-direction:column;
       gap: 0;
       padding-bottom: 0;
     }
-    #logHeader{
-      flex: 0 0 auto;
-      padding-bottom: 10px;
-    }
-    #logHeader .label{ margin: 8px 4px 6px; }
-
-    #logListBox{
-      flex: 1 1 auto;
+    #identifyScroll{
+      flex: 1;
       overflow:auto;
       -webkit-overflow-scrolling: touch;
-      border: 1px solid var(--themeLineSoft);
-      background: rgba(255,255,255,.015);
-      border-radius: 22px;
-      padding: 10px 10px calc(12px + env(safe-area-inset-bottom));
-      margin-top: 10px;
+      padding-bottom: calc(12px + env(safe-area-inset-bottom));
       touch-action: pan-y;
       overscroll-behavior: contain;
     }
-    #logList{
-      margin-top: 0;
-    }
-
-    .entry{
-      border:1px solid var(--themeLine);
-      background: rgba(255,255,255,.03);
-      border-radius: 18px;
-      padding: 10px 12px 10px;
-      margin-top: 8px;
-      touch-action: pan-y;
-      -webkit-tap-highlight-color: transparent;
-      user-select:none;
-    }
-    .entry:first-child{ margin-top: 0; }
-
-    .entry.pressed{
-      background: rgba(47,120,255,.12);
-      border-color: rgba(90,150,255,.45);
-    }
-
-    .entryTop{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-end;
-      gap:10px;
-      margin-bottom: 2px;
-    }
-    .entryTime{
-      font-size:12px;
-      color: rgba(235,245,255,.46);
-      white-space:nowrap;
-    }
-    .entryMain{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      align-items:baseline;
-      margin-top: 2px;
-    }
-    .entryNumber{
-      font-size:24px;               /* slightly bigger for readability */
-      font-weight:950;
-      letter-spacing:.2px;
-      white-space:nowrap;
-    }
-    .entryPattern{
-      font-size:14px;
-      color: rgba(235,245,255,.72);
-      font-weight:850;
-      white-space:nowrap;
-    }
-    .entryLine{
-      margin-top: 6px;
-      color: rgba(235,245,255,.70); /* more readable */
-      font-size:15px;              /* bigger text */
-      line-height:1.2;
-    }
-    .entryLine b{ color: rgba(235,245,255,.78); }
-
-    .filters{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top:10px;
-    }
-    .dateField{
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-    }
-    .dateField .miniLabel{
-      margin: 0 4px;
-      color: var(--muted);
-      font-weight:650;
-      font-size:14px;
-    }
-
-    .searchRow{
+    .identifyTopRow{
       display:flex;
       gap:10px;
       align-items:center;
+      margin-bottom: 10px;
     }
-    .searchRow .field{
-      flex: 1 1 auto;
-      min-width: 0;
-    }
-    .searchRow .btn.small{
-      flex: 0 0 auto;
+    .identifyTopRow .btn.small{
       height:54px;
+      border-radius: 18px;
       font-size:16px;
       padding: 0 16px;
-      border-radius: 18px;
     }
+    .resultCard{
+      border:1px solid var(--themeLine);
+      background: rgba(255,255,255,.03);
+      border-radius: 22px;
+      padding: 12px 12px 10px;
+      margin-top: 10px;
+    }
+    .resultHdr{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom: 6px;
+    }
+    .resultNum{
+      font-size:28px;
+      font-weight:950;
+      letter-spacing:.3px;
+      white-space:nowrap;
+    }
+    .resultBody{
+      color: rgba(235,245,255,.80);
+      font-size:16px;
+      line-height:1.30;
+      white-space: pre-wrap;
+    }
+    .resultMeta{
+      margin-top:10px;
+      padding-top:10px;
+      border-top: 1px solid rgba(255,255,255,.08);
+      color: rgba(235,245,255,.68);
+      font-size:14px;
+      line-height:1.28;
+      white-space: pre-wrap;
+    }
+    .metaLine{ margin-top:6px; }
+    .metaLine b{ color: rgba(235,245,255,.78); }
 
     .editPill{
       display:inline-flex;
@@ -557,7 +492,7 @@ Required persistence:
       touch-action: manipulation;
     }
 
-    /* Card modal: move logo to top + bigger body text + sticky buttons */
+    /* Card modal: logo to top + bigger body text + sticky buttons */
     #cardModal .modalCard{
       display:flex;
       flex-direction:column;
@@ -578,8 +513,8 @@ Required persistence:
       font-size: clamp(22px, 6.4vw, 34px);
     }
     #cardModal #cardBody{
-      font-size: 16px;              /* bigger */
-      line-height: 1.34;            /* easier to read */
+      font-size: 16px;
+      line-height: 1.34;
       margin: 0 2px 10px;
       color: rgba(235,245,255,.84);
     }
@@ -803,6 +738,7 @@ Required persistence:
     .accentFrame{ position:relative; }
   </style>
 </head>
+
 <body>
   <div class="touchLock" id="touchLock"></div>
 
@@ -819,6 +755,7 @@ Required persistence:
             <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="rgba(0,0,0,.35)"/>
           </filter>
         </defs>
+
         <g transform="translate(46 24)" filter="url(#angS)">
           <rect x="0" y="0" width="92" height="92" rx="26" fill="rgba(255,255,255,.06)" stroke="rgba(235,245,255,.22)" stroke-width="2"/>
           <ellipse cx="46" cy="24" rx="20" ry="8" fill="none" stroke="rgba(235,245,255,.88)" stroke-width="4" opacity=".92"/>
@@ -856,7 +793,7 @@ Required persistence:
 
         <div class="homeMain">
           <button id="btnGoAdd" class="btn primary">ADD Angel Number</button>
-          <button id="btnGoLog" class="btn">Log</button>
+          <button id="btnGoIdentify" class="btn">Identify</button>
           <button id="btnGoCalendar" class="btn">Calendar</button>
 
           <div class="homeFooterRow">
@@ -917,36 +854,41 @@ Required persistence:
         </div>
       </div>
 
-      <!-- LOG -->
-      <div id="log" class="card accentFrame hidden">
-        <div id="logHeader">
+      <!-- IDENTIFY -->
+      <div id="identify" class="card accentFrame hidden">
+        <div id="identifyScroll">
           <div class="row center">
-            <button id="btnExportLog" class="btn small">Export</button>
-            <button id="btnAddFromLog" class="btn small">ADD</button>
+            <button id="btnIdentifyClear" class="btn small">Clear</button>
             <div class="grow"></div>
-            <button id="btnBackFromLog" class="btn small">Back</button>
+            <button id="btnBackFromIdentify" class="btn small">Back</button>
           </div>
 
-          <div class="label">Search</div>
-          <div class="searchRow">
-            <input id="search" class="field" placeholder="Try: 111, mirror, reset, new start..." />
-            <button id="btnRunSearch" class="btn small">Search</button>
+          <div class="label">Identify Angel Number Meaning</div>
+
+          <div class="identifyTopRow">
+            <input id="idNum" class="field" inputmode="numeric" placeholder="Enter a number (e.g., 1111, 1212, 1234)" />
+            <button id="btnIdentify" class="btn small">Identify</button>
           </div>
 
-          <div class="filters">
-            <div class="dateField">
-              <div class="miniLabel">From</div>
-              <input id="fromDate" class="field" type="date" />
+          <div id="idResultCard" class="resultCard">
+            <div class="resultHdr">
+              <div id="idResultNum" class="resultNum">—</div>
+              <div id="idPatternPill" class="patternPill">Pattern: —</div>
             </div>
-            <div class="dateField">
-              <div class="miniLabel">To</div>
-              <input id="toDate" class="field" type="date" />
+
+            <div id="idMeaning" class="resultBody">
+              Enter a number above, then tap Identify (or just type) to see its commonly shared meaning.
+            </div>
+
+            <div id="idMeta" class="resultMeta">
+              <div class="metaLine"><b>How to use:</b> Treat the meaning as a reflective prompt—what it “means” depends on context and personal interpretation.</div>
+            </div>
+
+            <div class="disclaimer" style="margin-top:10px;">
+              Cultural note: these meanings come from numerology/“angel number” traditions and vary by source.
+              Treat as reflective prompts, not facts or predictions.
             </div>
           </div>
-        </div>
-
-        <div id="logListBox" aria-label="Log list box">
-          <div id="logList"></div>
         </div>
       </div>
 
@@ -968,18 +910,6 @@ Required persistence:
         <div class="calHint">Tap a highlighted day to view entries.</div>
       </div>
 
-    </div>
-  </div>
-
-  <!-- Edit prompt modal -->
-  <div id="editModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
-    <div class="modalCard">
-      <div class="modalTitle" id="editModalTitle">Open this entry?</div>
-      <div class="modalSub" id="editModalSub">Press Open to view the Angel Number Card.</div>
-      <div class="modalBtns">
-        <button id="btnEditCancel" class="btn">Cancel</button>
-        <button id="btnEditConfirm" class="btn primary">Open</button>
-      </div>
     </div>
   </div>
 
@@ -1005,14 +935,13 @@ Export report was copied to your clipboard.  You can paste it into any messaging
 Share sends the report to another app.
 
 Save creates a .txt file on your device.
-</div>
-<div class="modalBtns" style="flex-wrap:nowrap;">
-<button id="btnExportClose" class="btn" style="min-width:0; flex:1 1 0; font-size:16px; height:52px;">Close</button>
-<button id="btnExportShare" class="btn" style="min-width:0; flex:1 1 0; font-size:16px; height:52px;">Share</button>
-<button id="btnExportSave" class="btn primary" style="min-width:0; flex:1 1 0; font-size:16px; height:52px;">Save .txt</button>
-</div>
-</div>
-
+      </div>
+      <div class="modalBtns" style="flex-wrap:nowrap;">
+        <button id="btnExportClose" class="btn" style="min-width:0; flex:1 1 0; font-size:16px; height:52px;">Close</button>
+        <button id="btnExportShare" class="btn" style="min-width:0; flex:1 1 0; font-size:16px; height:52px;">Share</button>
+        <button id="btnExportSave" class="btn primary" style="min-width:0; flex:1 1 0; font-size:16px; height:52px;">Save .txt</button>
+      </div>
+    </div>
   </div>
 
   <!-- Angel Number Card modal -->
@@ -1023,7 +952,7 @@ Save creates a .txt file on your device.
       </div>
 
       <div class="cardTopScroll">
-        <!-- Logo row now at the top (requested) -->
+        <!-- Logo row at top -->
         <div class="cardLogoRow">
           <div class="cardLogoIcon" aria-hidden="true">
             <svg width="28" height="28" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
@@ -1054,7 +983,6 @@ Save creates a .txt file on your device.
         <button id="btnCardEdit" class="btn primary">Edit</button>
       </div>
     </div>
-
   </div>
 
   <!-- Day modal (NO X BUTTON; Close button only) -->
@@ -1122,7 +1050,7 @@ Save creates a .txt file on your device.
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.0B12";
+  const APP_VERSION = "v1.0B13";
   const HOME_VERSION_LABEL = "v1.333";
   const STORAGE_KEY = "angel_numbers_records_v1";
   const DAY_MS = 24*60*60*1000;
@@ -1237,13 +1165,6 @@ Save creates a .txt file on your device.
     return d.getTime();
   }
 
-  function parseDateField(v){
-    if(!v) return null;
-    const [y,m,d] = v.split("-").map(Number);
-    if(!y || !m || !d) return null;
-    return new Date(y, m-1, d, 0, 0, 0, 0).getTime();
-  }
-
   function escapeHtml(s){
     return String(s)
       .replaceAll("&","&amp;")
@@ -1310,6 +1231,7 @@ Save creates a .txt file on your device.
   }
 
   function digitSummary(s){
+    if(!s) return "";
     if(isAllSame(s)) return DIGIT_MEANING[s[0]] || "";
     const counts = {};
     for(const ch of s){ counts[ch] = (counts[ch]||0) + 1; }
@@ -1354,6 +1276,22 @@ Save creates a .txt file on your device.
     return {pattern, meaning: lens ? `${fallback}\n${lens}` : fallback};
   }
 
+  function buildIdentifyMeta(n, pattern){
+    if(!n) return "—";
+    const lens = digitSummary(n);
+    const mapped = ANGEL_MAP[n] ? "Direct map: recognized as a common “named” angel number." : "Direct map: not in the preset list; derived from pattern + digit lenses.";
+    const digits = n.split("").join(" • ");
+    const uniqueDigits = [...new Set(n.split(""))].sort().join(", ");
+
+    const lines = [];
+    lines.push(`Digits: ${digits}`);
+    if(uniqueDigits) lines.push(`Unique digits: ${uniqueDigits}`);
+    lines.push(mapped);
+    if(lens) lines.push(lens);
+    lines.push(`Pattern method: repeating / sequential / double-block / mirror / sandwich / mixed.`);
+    return lines.join("\n");
+  }
+
   /* ===== Touch lock ===== */
 
   let lockTimer = null;
@@ -1372,7 +1310,7 @@ Save creates a .txt file on your device.
 
   /* ===== Screens ===== */
 
-  const swipeCycle = ["home","calendar","log"];
+  const swipeCycle = ["home","identify","calendar"];
   let currentScreen = "home";
   let returnScreen = "home";
   let animating = false;
@@ -1386,9 +1324,9 @@ Save creates a .txt file on your device.
       }else{
         setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 0);
       }
-    }else if(screen === "log"){
-      try{ $("logListBox").scrollTop = 0; }catch{}
-      try{ document.activeElement?.blur(); }catch{}
+    }else if(screen === "identify"){
+      try{ $("identifyScroll").scrollTop = 0; }catch{}
+      setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 0);
     }else{
       try{ document.activeElement?.blur(); }catch{}
     }
@@ -1396,16 +1334,16 @@ Save creates a .txt file on your device.
 
   function showInstant(screen){
     unlockTouches();
-    for(const s of ["home","add","log","calendar"]){
+    for(const s of ["home","add","identify","calendar"]){
       $(s).classList.toggle("hidden", s !== screen);
       $(s).style.transform = "";
       $(s).style.transition = "";
     }
     currentScreen = screen;
 
-    if(screen === "log") renderLog();
     if(screen === "calendar") { initMonthDefaultIfNeeded(); renderCalendar(); }
     if(screen === "add") { tickTime(); adjustTimeFont(); updateMeaningUI(); }
+    if(screen === "identify") { updateIdentifyUI(true); }
 
     focusTopOfPanel(screen);
   }
@@ -1493,7 +1431,6 @@ Save creates a .txt file on your device.
 
       if(ax > 18 && ax > ay + 12){
         drag.intent = "h";
-        if(typeof cancelEntryTap === "function") cancelEntryTap();
       }else if(ay > 18 && ay > ax + 8){
         drag.intent = "v";
         drag.active = false;
@@ -1562,8 +1499,8 @@ Save creates a .txt file on your device.
 
         currentScreen = to;
 
-        if(currentScreen === "log") renderLog();
         if(currentScreen === "calendar") { initMonthDefaultIfNeeded(); renderCalendar(); }
+        if(currentScreen === "identify") { updateIdentifyUI(true); }
 
         focusTopOfPanel(currentScreen);
         animating = false;
@@ -1628,11 +1565,11 @@ Save creates a .txt file on your device.
   function enterAddEdit(ts){
     const recs = loadRecords();
     const r = recs.find(x => x.ts === ts);
-    if(!r){ enterAddNew("log"); return; }
+    if(!r){ enterAddNew("calendar"); return; }
 
     editTs = ts;
     editOriginalTs = ts;
-    returnScreen = "log";
+    returnScreen = "calendar";
 
     $("editPill").classList.remove("hidden");
     $("btnDelete").classList.remove("hidden");
@@ -1691,76 +1628,60 @@ Save creates a .txt file on your device.
     return !!(String(number||"").trim() || String(notes||"").trim());
   }
 
-  /* ===== Log filter + render ===== */
+  /* ===== Identify panel ===== */
 
-  function recordMatches(rec, q){
-    if(!q) return true;
-    const s = q.toLowerCase().trim();
-    if(!s) return true;
+  function updateIdentifyUI(forceNoScroll=false){
+    const raw = $("idNum").value;
+    const n = normalizeNumberInput(raw);
 
-    const num = (rec.number || "").toLowerCase();
-    const pat = (rec.pattern || "").toLowerCase();
-    const meaning = (rec.meaning || "").toLowerCase();
-    const notes = (rec.notes || "").toLowerCase();
-    const dt = fmtDateTime(rec.ts).toLowerCase();
-
-    return num.includes(s) || pat.includes(s) || meaning.includes(s) || notes.includes(s) || dt.includes(s);
-  }
-
-  function filteredRecords({fromId,toId,searchId}){
-    const recs = loadRecords();
-    const q = (searchId ? $(searchId).value : "").trim();
-
-    const fromV = fromId ? $(fromId).value : "";
-    const toV   = toId ? $(toId).value : "";
-
-    const fromTs = parseDateField(fromV);
-    const toMid  = parseDateField(toV);
-    const toTs   = toMid != null ? clampEndOfDay(toMid) : null;
-
-    return recs.filter(r => {
-      if(fromTs != null && r.ts < fromTs) return false;
-      if(toTs != null && r.ts > toTs) return false;
-      return recordMatches(r, q);
-    });
-  }
-
-  function renderLog(){
-    const list = $("logList");
-    const recs = filteredRecords({fromId:"fromDate", toId:"toDate", searchId:"search"});
-
-    list.innerHTML = "";
-    if(recs.length === 0){
-      const empty = document.createElement("div");
-      empty.className = "subtle";
-      empty.style.marginTop = "6px";
-      empty.textContent = "No matching records.";
-      list.appendChild(empty);
+    if(!n){
+      $("idResultNum").textContent = "—";
+      $("idPatternPill").textContent = "Pattern: —";
+      $("idMeaning").textContent =
+        "Enter a number above, then tap Identify (or just type) to see its commonly shared meaning.";
+      $("idMeta").textContent = "";
+      const meta = document.createElement("div");
+      meta.className = "metaLine";
+      meta.innerHTML = "<b>How to use:</b> Treat the meaning as a reflective prompt—what it “means” depends on context and personal interpretation.";
+      $("idMeta").appendChild(meta);
+      if(forceNoScroll){
+        try{ $("identifyScroll").scrollTop = 0; }catch{}
+      }
       return;
     }
 
-    for(const r of recs){
-      const e = document.createElement("div");
-      e.className = "entry";
-      e.dataset.ts = String(r.ts);
+    const pattern = detectPattern(n);
+    const out = deriveMeaning(n, pattern);
 
-      const notesLine = (r.notes && r.notes.trim()) ? r.notes.trim() : "None";
-      const meaningLine = (r.meaning && r.meaning.trim()) ? r.meaning.trim() : "None";
+    $("idResultNum").textContent = n;
+    $("idPatternPill").textContent = `Pattern: ${out.pattern || pattern || "—"}`;
+    $("idMeaning").textContent = out.meaning || "—";
 
-      e.innerHTML = `
-        <div class="entryTop">
-          <div class="entryTime">${escapeHtml(fmtDateTime(r.ts))}</div>
-        </div>
-        <div class="entryMain">
-          <div class="entryNumber">${escapeHtml(r.number || "—")}</div>
-          <div class="entryPattern">${escapeHtml(r.pattern || "—")}</div>
-        </div>
-        <div class="entryLine"><b>Notes:</b> ${escapeHtml(notesLine)}</div>
-        <div class="entryLine"><b>Meaning:</b> ${escapeHtml(meaningLine)}</div>
-      `;
-      list.appendChild(e);
+    const metaText = buildIdentifyMeta(n, out.pattern || pattern || "—");
+    $("idMeta").textContent = metaText;
+
+    if(forceNoScroll){
+      // keep the input visible; do not jump the user down.
+      // no scroll change needed.
     }
   }
+
+  $("idNum").addEventListener("input", () => updateIdentifyUI(false));
+  $("btnIdentify").addEventListener("click", (e)=>{ e.preventDefault(); updateIdentifyUI(false); try{ $("idNum").blur(); }catch{} });
+  $("idNum").addEventListener("keydown", (e)=>{
+    if(e.key === "Enter"){
+      e.preventDefault();
+      updateIdentifyUI(false);
+      try{ e.target.blur(); }catch{}
+    }
+  });
+
+  $("btnIdentifyClear").addEventListener("click", (e)=>{
+    e.preventDefault();
+    $("idNum").value = "";
+    updateIdentifyUI(true);
+    try{ $("idNum").focus({preventScroll:true}); }catch{}
+  });
 
   /* ===== Confirm modal ===== */
 
@@ -1813,7 +1734,7 @@ Save creates a .txt file on your device.
   /* ===== Card modal ===== */
 
   let cardTs = null;
-  let cardReturn = { type: "screen", screen: "log" };
+  let cardReturn = { type: "screen", screen: "calendar" };
 
   function buildCardHtml(rec){
     const dt = fmtDateTime(rec.ts);
@@ -2017,116 +1938,6 @@ Save creates a .txt file on your device.
       "angel_numbers_day"
     );
   });
-
-  /* ===== Log tap-to-open ===== */
-
-  let pendingOpenTs = null;
-  let enableOpenTimer = null;
-
-  function openEditPrompt(ts){
-    pendingOpenTs = ts;
-
-    const btnOpen = $("btnEditConfirm");
-    btnOpen.disabled = true;
-    if(enableOpenTimer) clearTimeout(enableOpenTimer);
-    enableOpenTimer = setTimeout(() => { btnOpen.disabled = false; }, 220);
-
-    $("editModalSub").textContent = "Press Open to view the Angel Number Card.";
-    $("editModal").classList.remove("hidden");
-    lockTouches(120);
-  }
-
-  function closeEditPrompt(){
-    pendingOpenTs = null;
-    $("editModal").classList.add("hidden");
-    unlockTouches();
-  }
-
-  function confirmEditPrompt(){
-    if($("btnEditConfirm").disabled) return;
-    const ts = pendingOpenTs;
-    closeEditPrompt();
-    if(ts != null){
-      openCard(ts, { type:"screen", screen:"log" });
-    }
-  }
-
-  $("btnEditCancel").addEventListener("click", (e) => { e.preventDefault(); closeEditPrompt(); });
-  $("btnEditConfirm").addEventListener("click", (e) => { e.preventDefault(); confirmEditPrompt(); });
-
-  $("editModal").addEventListener("click", (e) => {
-    if(e.target === $("editModal")) closeEditPrompt();
-  });
-
-  document.addEventListener("keydown", (e) => {
-    if($("editModal").classList.contains("hidden")) return;
-    if(e.key === "Escape"){ e.preventDefault(); closeEditPrompt(); return; }
-    if(e.key === "Enter"){ e.preventDefault(); confirmEditPrompt(); }
-  });
-
-  const tap = { active:false, ts:null, x0:0, y0:0, moved:false, el:null };
-
-  function cancelEntryTap(){
-    if(!tap.active) return;
-    if(tap.el) tap.el.classList.remove("pressed");
-    tap.active = false;
-    tap.ts = null;
-    tap.el = null;
-    tap.moved = true;
-  }
-  window.cancelEntryTap = cancelEntryTap;
-
-  $("logList").addEventListener("touchstart", (ev) => {
-    if(!(ev.touches && ev.touches.length === 1)) return;
-    const target = ev.target.closest ? ev.target.closest(".entry") : null;
-    if(!target) return;
-
-    const ts = Number(target.dataset.ts);
-    if(!Number.isFinite(ts)) return;
-
-    tap.active = true;
-    tap.ts = ts;
-    tap.el = target;
-    tap.x0 = ev.touches[0].clientX;
-    tap.y0 = ev.touches[0].clientY;
-    tap.moved = false;
-
-    target.classList.add("pressed");
-  }, {passive:true});
-
-  $("logList").addEventListener("touchmove", (ev) => {
-    if(!tap.active) return;
-    const x = ev.touches[0].clientX;
-    const y = ev.touches[0].clientY;
-    const dx = x - tap.x0;
-    const dy = y - tap.y0;
-
-    if(Math.abs(dx) > 10 || Math.abs(dy) > 10){
-      tap.moved = true;
-      if(tap.el) tap.el.classList.remove("pressed");
-    }
-  }, {passive:true});
-
-  $("logList").addEventListener("touchend", () => {
-    if(!tap.active) return;
-
-    const wasTap = !tap.moved && tap.ts != null;
-    if(tap.el) tap.el.classList.remove("pressed");
-    const ts = tap.ts;
-
-    tap.active = false;
-    tap.ts = null;
-    tap.el = null;
-
-    if(wasTap && ts != null){
-      setTimeout(() => openEditPrompt(ts), 0);
-    }
-  }, {passive:true});
-
-  $("logList").addEventListener("touchcancel", () => {
-    if(tap.el) tap.el.classList.remove("pressed");
-    tap.active = false; tap.ts=null; tap.el=null;
-  }, {passive:true});
 
   /* ===== Export helpers ===== */
 
@@ -2422,9 +2233,6 @@ Save creates a .txt file on your device.
       danger: true,
       onOk: () => {
         try{ localStorage.removeItem(STORAGE_KEY); }catch{}
-        $("fromDate").value = "";
-        $("toDate").value = "";
-        $("search").value = "";
         alert("All data cleared.");
         showInstant("home");
       }
@@ -2440,17 +2248,15 @@ Save creates a .txt file on your device.
     }, 200);
   });
 
-  /* ===== Buttons + Save/Delete + Search + Exports ===== */
+  /* ===== Buttons + Save/Delete + Exports ===== */
 
   $("btnGoAdd").addEventListener("click", () => enterAddNew("home"));
-  $("btnGoLog").addEventListener("click", () => showInstant("log"));
+  $("btnGoIdentify").addEventListener("click", () => showInstant("identify"));
   $("btnGoCalendar").addEventListener("click", () => showInstant("calendar"));
 
   $("btnBackFromAdd").addEventListener("click", () => { editTs=null; editOriginalTs=null; showInstant(returnScreen || "home"); });
-  $("btnBackFromLog").addEventListener("click", () => showInstant("home"));
+  $("btnBackFromIdentify").addEventListener("click", () => showInstant("home"));
   $("btnBackFromCalendar").addEventListener("click", () => showInstant("home"));
-
-  $("btnAddFromLog").addEventListener("click", () => enterAddNew("log"));
 
   $("dtEdit").addEventListener("change", () => {
     const ts = fromLocalDatetimeValue($("dtEdit").value);
@@ -2494,15 +2300,10 @@ Save creates a .txt file on your device.
     recs.sort((a,b)=> b.ts - a.ts);
     saveRecords(recs);
 
-    $("fromDate").value = "";
-    $("toDate").value = "";
-    $("search").value = "";
-
     editTs = null;
     editOriginalTs = null;
 
-    showInstant("log");
-    try{ $("logListBox").scrollTop = 0; }catch{}
+    showInstant("calendar");
   });
 
   $("btnDelete").addEventListener("click", () => {
@@ -2521,29 +2322,9 @@ Save creates a .txt file on your device.
         editTs = null;
         editOriginalTs = null;
 
-        showInstant("log");
-        try{ $("logListBox").scrollTop = 0; }catch{}
+        showInstant("calendar");
       }
     });
-  });
-
-  function runSearch(){
-    renderLog();
-    try{ $("logListBox").scrollTop = 0; }catch{}
-  }
-
-  $("btnRunSearch").addEventListener("click", (e)=>{ e.preventDefault(); runSearch(); });
-  $("search").addEventListener("keydown", (e)=>{
-    if(e.key === "Enter"){
-      e.preventDefault();
-      runSearch();
-      try{ e.target.blur(); }catch{}
-    }
-  });
-
-  ["fromDate","toDate"].forEach(id => {
-    $(id).addEventListener("input", () => { renderLog(); try{ $("logListBox").scrollTop = 0; }catch{} });
-    $(id).addEventListener("change", () => { renderLog(); try{ $("logListBox").scrollTop = 0; }catch{} });
   });
 
   $("calMonth").addEventListener("change", () => renderCalendar());
@@ -2552,28 +2333,6 @@ Save creates a .txt file on your device.
     const now = new Date();
     $("calMonth").value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
     renderCalendar();
-  });
-
-  $("btnExportLog").addEventListener("click", () => {
-    const recs = filteredRecords({fromId:"fromDate", toId:"toDate", searchId:"search"});
-    const rangeLabel = (() => {
-      const f = $("fromDate").value;
-      const t = $("toDate").value;
-      if(f && t) return `${f} to ${t}`;
-      if(f) return `From ${f}`;
-      if(t) return `Up to ${t}`;
-      return "All log entries (filtered by search/date if set)";
-    })();
-
-    exportReport(
-      recs,
-      {
-        title: "Log Export",
-        rangeLabel,
-        notes: "This report reflects the Log screen filters (Search + optional From/To dates)."
-      },
-      "angel_numbers_log_report"
-    );
   });
 
   $("btnExportMonth").addEventListener("click", () => {
@@ -2850,9 +2609,6 @@ self.addEventListener('fetch', (e)=>{ });`;
 
   seedTestDataIfEmpty();
 
-  $("fromDate").value = "";
-  $("toDate").value = "";
-
   attachSwipes();
   attachHomePTR();
 
@@ -2864,19 +2620,20 @@ self.addEventListener('fetch', (e)=>{ });`;
   });
 
 })();
-</script>
+  </script>
 </body>
 </html>
 
 <!--
 EOF Version Detail Notes (required)
 App: Angel Numbers Tracker
-Actual Version: v1.0B12
+Actual Version: v1.0B13
 Home Label (visual only): v1.333 (do not change unless instructed)
-Base: v1.0B11
+Base: v1.0B12
 Changes:
-- Log: header/filters fixed; entries now scroll inside a dedicated log list box container (#logListBox) for reliable up/down scrolling.
-- Add/Edit: content now scrolls inside #addScroll; action buttons are in a fixed footer (#addFooter) so Save/Delete/Back are always reachable.
-- Card modal: logo row moved to the top; increased body text size for readability and tightened spacing; action buttons remain accessible with sticky footer.
-- General: reduced some vertical bloat in labels/spacing without changing app behavior.
+- Removed Log panel entirely.
+- Added Identify panel (theme-matched) for quick Angel Number meaning lookup (pattern + meaning + supporting lenses).
+- Home screen: replaced Log button with Identify button (positioned directly under ADD).
+- Swipe cycle: Identify replaces Log in left/right rotation (home ↔ identify ↔ calendar).
+- No changes to storage, exports, calendar day browsing, card modal, or Add/Edit behavior.
 -->
