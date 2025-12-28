@@ -6,20 +6,21 @@ Home display label (visual only): v1.333  (DO NOT CHANGE unless user instructs)
 Base: v1.0B11
 
 Changes (requested):
-1) Log list must be scrollable up/down:
-   - Log panel is now a fixed-height flex column.
-   - #logList is the dedicated vertical scroll region (overflow-y:auto + min-height:0).
+1) Log list box gets its own scrollable container:
+   - Log screen header + search + date filters stay fixed.
+   - Entries scroll inside a dedicated list box container.
 
-2) Angel Number Card is too tall / vertically hard to use:
-   - Kept the compact Card modal + sticky action row from B11 (no regression).
+2) Edit/Add panel scrollability:
+   - Add/Edit content scrolls inside its own container.
+   - Action buttons remain reachable as a fixed footer row.
 
-3) Remove the X in the top-right corner of the Calendar Day popup list:
-   - Day modal uses Close button only (no X). (Already in B11; preserved.)
+3) Card readability (bigger text, less wasted space):
+   - Increased key text size in the Angel Number Card modal.
+   - Tightened vertical spacing to reduce “dead” space.
+   - Kept action buttons accessible.
 
-4) Edit/Add panel not scrollable; buttons not accessible:
-   - Add/Edit panel is now a fixed-height flex column.
-   - New #addScroll is the dedicated vertical scroll region.
-   - Save/Delete/Back buttons live in a bottom action bar that always remains visible.
+4) Logo placement:
+   - In the Angel Number Card modal, the logo row is now at the top.
 
 Required persistence:
 - Keep EOF comment block.
@@ -46,7 +47,7 @@ Required persistence:
       --muted2:rgba(235,245,255,.42);
 
       /* DARK BLUE theme border */
-      --accentBorder: rgba(43,78,122,.85);   /* dark blue */
+      --accentBorder: rgba(43,78,122,.85);
       --accentGlow: rgba(43,78,122,.18);
 
       /* Subtle theme border for internal cards/lists */
@@ -108,7 +109,6 @@ Required persistence:
       overflow:hidden;
       border-radius: var(--radius);
       touch-action: pan-y;
-      min-height:0;
     }
 
     /* MAIN PANEL CARD — consistent dark-blue border */
@@ -122,60 +122,11 @@ Required persistence:
 
       position:absolute;
       inset:0;
-
-      /* Default panels can scroll */
       overflow:auto;
       -webkit-overflow-scrolling: touch;
       touch-action: pan-y;
       overscroll-behavior: contain;
-      min-height:0;
     }
-
-    /* ===== B12: Dedicated scroll regions for Add/Edit + Log ===== */
-
-    /* Add/Edit becomes a fixed-height flex column:
-       - #addScroll is the vertical scroller
-       - .panelButtons is a persistent bottom action bar */
-    #add{
-      overflow:hidden;              /* prevent whole-panel scroll; child scrolls */
-      display:flex;
-      flex-direction:column;
-      min-height:0;
-      touch-action: pan-y;
-    }
-    #addScroll{
-      flex: 1 1 auto;
-      min-height: 0;               /* critical for flex scrolling on Android */
-      overflow-y:auto;
-      -webkit-overflow-scrolling: touch;
-      padding-bottom: 18px;        /* breathing room above action bar */
-      touch-action: pan-y;
-      overscroll-behavior: contain;
-    }
-
-    /* Log becomes a fixed-height flex column:
-       - #logList is the vertical scroller */
-    #log{
-      overflow:hidden;              /* prevent whole-panel scroll; list scrolls */
-      display:flex;
-      flex-direction:column;
-      min-height:0;
-      touch-action: pan-y;
-    }
-    #logList{
-      flex: 1 1 auto;
-      min-height: 0;               /* critical for flex scrolling on Android */
-      margin-top: 10px;
-      overflow-y:auto;
-      -webkit-overflow-scrolling: touch;
-      padding-bottom: 18px;
-      touch-action: pan-y;
-      overscroll-behavior: contain;
-    }
-
-    /* Ensure Log header/filters don’t compress oddly */
-    #log > .row.center{ flex: 0 0 auto; }
-    #log .label, #log .searchRow, #log .filters{ flex: 0 0 auto; }
 
     .hidden{ display:none !important; }
 
@@ -230,11 +181,12 @@ Required persistence:
     .row.center{ align-items:center; }
     .grow{ flex:1; }
 
+    /* Tighten vertical space */
     .label{
-      font-size:16px;
+      font-size:15px;
       color:var(--muted);
       font-weight:650;
-      margin: 12px 4px 8px;
+      margin: 10px 4px 6px;
     }
     .subtle{
       font-size:14px;
@@ -305,7 +257,7 @@ Required persistence:
     }
 
     .timeLine{
-      margin: 4px 4px 14px;
+      margin: 4px 4px 10px;
       color: rgba(235,245,255,.82);
       font-weight:750;
       letter-spacing:.3px;
@@ -366,32 +318,76 @@ Required persistence:
       flex-wrap:wrap;
     }
 
-    /* B12: Persistent action bar (not dependent on scrolling) */
-    #add .panelButtons{
+    /* ===== ADD/EDIT: make panel a flex layout with internal scroller + fixed footer buttons ===== */
+    #add{
+      overflow:hidden;               /* prevent body-scroll traps */
+      display:flex;
+      flex-direction:column;
+      gap: 0;
+      padding-bottom: 0;            /* footer handles spacing */
+    }
+    #addScroll{
+      flex: 1;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 12px;
+      touch-action: pan-y;
+      overscroll-behavior: contain;
+    }
+    #addFooter{
       flex: 0 0 auto;
       padding-top: 12px;
-      padding-bottom: 6px;
-      margin-top: 0;
+      padding-bottom: calc(6px + env(safe-area-inset-bottom));
       background: linear-gradient(180deg, rgba(11,19,36,0), rgba(11,19,36,.70) 35%, rgba(11,19,36,.92));
       border-top: 1px solid rgba(255,255,255,.08);
       backdrop-filter: blur(10px);
     }
+    #addFooter .panelButtons{
+      margin-top: 0;
+    }
 
-    #log .label{ margin: 8px 4px 6px; }
-    #log .filters{ margin-top: 8px; gap: 10px; }
-    #log .dateField{ gap: 6px; }
-    #log > .row.center{ margin-bottom: 4px; }
+    /* ===== LOG: fixed header/filters; scroll entries inside a list box ===== */
+    #log{
+      overflow:hidden;              /* no whole-panel scroll */
+      display:flex;
+      flex-direction:column;
+      gap: 0;
+      padding-bottom: 0;
+    }
+    #logHeader{
+      flex: 0 0 auto;
+      padding-bottom: 10px;
+    }
+    #logHeader .label{ margin: 8px 4px 6px; }
+
+    #logListBox{
+      flex: 1 1 auto;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      border: 1px solid var(--themeLineSoft);
+      background: rgba(255,255,255,.015);
+      border-radius: 22px;
+      padding: 10px 10px calc(12px + env(safe-area-inset-bottom));
+      margin-top: 10px;
+      touch-action: pan-y;
+      overscroll-behavior: contain;
+    }
+    #logList{
+      margin-top: 0;
+    }
 
     .entry{
       border:1px solid var(--themeLine);
       background: rgba(255,255,255,.03);
       border-radius: 18px;
-      padding: 8px 10px 8px;
-      margin-top: 6px;
+      padding: 10px 12px 10px;
+      margin-top: 8px;
       touch-action: pan-y;
       -webkit-tap-highlight-color: transparent;
       user-select:none;
     }
+    .entry:first-child{ margin-top: 0; }
+
     .entry.pressed{
       background: rgba(47,120,255,.12);
       border-color: rgba(90,150,255,.45);
@@ -417,24 +413,24 @@ Required persistence:
       margin-top: 2px;
     }
     .entryNumber{
-      font-size:22px;
-      font-weight:900;
+      font-size:24px;               /* slightly bigger for readability */
+      font-weight:950;
       letter-spacing:.2px;
       white-space:nowrap;
     }
     .entryPattern{
       font-size:14px;
-      color: rgba(235,245,255,.68);
-      font-weight:800;
+      color: rgba(235,245,255,.72);
+      font-weight:850;
       white-space:nowrap;
     }
     .entryLine{
-      margin-top: 4px;
-      color: rgba(235,245,255,.62);
-      font-size:14px;
-      line-height:1.12;
+      margin-top: 6px;
+      color: rgba(235,245,255,.70); /* more readable */
+      font-size:15px;              /* bigger text */
+      line-height:1.2;
     }
-    .entryLine b{ color: rgba(235,245,255,.70); }
+    .entryLine b{ color: rgba(235,245,255,.78); }
 
     .filters{
       display:grid;
@@ -516,11 +512,11 @@ Required persistence:
       color: rgba(235,245,255,.92);
       font-size: clamp(22px, 6.5vw, 34px);
       line-height: 1.05;
-      margin: 4px 2px 12px;
+      margin: 4px 2px 10px;
     }
     .modalSub{
-      color: rgba(235,245,255,.66);
-      font-size: 14px;
+      color: rgba(235,245,255,.72);
+      font-size: 15px;
       margin: 0 2px 12px;
       white-space: pre-wrap;
       line-height: 1.28;
@@ -561,37 +557,75 @@ Required persistence:
       touch-action: manipulation;
     }
 
-    /* Card modal: compact + sticky buttons */
+    /* Card modal: move logo to top + bigger body text + sticky buttons */
     #cardModal .modalCard{
       display:flex;
       flex-direction:column;
       max-height: calc(100vh - 56px);
       padding: 14px;
+      overflow:hidden;
+    }
+    #cardModal .cardTopScroll{
+      flex:1;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 10px;
+      touch-action: pan-y;
+      overscroll-behavior: contain;
     }
     #cardModal .modalTitle{
-      margin: 2px 2px 8px;
-      font-size: clamp(20px, 6vw, 30px);
+      margin: 6px 2px 8px;
+      font-size: clamp(22px, 6.4vw, 34px);
     }
     #cardModal #cardBody{
-      font-size: 13px;
-      line-height: 1.22;
-      margin-bottom: 10px;
+      font-size: 16px;              /* bigger */
+      line-height: 1.34;            /* easier to read */
+      margin: 0 2px 10px;
+      color: rgba(235,245,255,.84);
     }
     #cardModal .modalBtns{
+      flex: 0 0 auto;
       position: sticky;
       bottom: 0;
       z-index: 5;
       padding-top: 10px;
-      padding-bottom: 6px;
+      padding-bottom: calc(8px + env(safe-area-inset-bottom));
       margin-top: 0;
       background: linear-gradient(180deg, rgba(11,19,36,0), rgba(11,19,36,.76) 35%, rgba(11,19,36,.94));
       border-top: 1px solid rgba(255,255,255,.08);
       backdrop-filter: blur(10px);
     }
     #cardModal .modalBtns .btn{
-      height: 48px;
-      font-size: 16px;
+      height: 50px;
+      font-size: 17px;
       min-width: 110px;
+    }
+
+    /* Card modal logo row (small) */
+    .cardLogoRow{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding: 2px 0 8px;
+      user-select:none;
+    }
+    .cardLogoIcon{
+      width:44px;
+      height:44px;
+      border-radius: 14px;
+      border: 1px solid var(--themeLineSoft);
+      background: rgba(255,255,255,.04);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex: 0 0 auto;
+    }
+    .cardLogoText{
+      font-weight: 850;
+      letter-spacing:.2px;
+      color: rgba(235,245,255,.72);
+      font-size: 16px;
+      line-height: 1.1;
     }
 
     /* Calendar */
@@ -711,33 +745,6 @@ Required persistence:
       color: rgba(235,245,255,.62);
       font-weight:800;
       white-space:nowrap;
-    }
-
-    /* Card modal logo row (small) */
-    .cardLogoRow{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding: 2px 0 6px;
-      user-select:none;
-    }
-    .cardLogoIcon{
-      width:44px;
-      height:44px;
-      border-radius: 14px;
-      border: 1px solid var(--themeLineSoft);
-      background: rgba(255,255,255,.04);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      flex: 0 0 auto;
-    }
-    .cardLogoText{
-      font-weight: 850;
-      letter-spacing:.2px;
-      color: rgba(235,245,255,.72);
-      font-size: 16px;
-      line-height: 1.1;
     }
 
     .touchLock{
@@ -871,8 +878,8 @@ Required persistence:
         </div>
       </div>
 
+      <!-- ADD/EDIT -->
       <div id="add" class="card accentFrame hidden">
-        <!-- B12: scrollable content lives in #addScroll -->
         <div id="addScroll">
           <div id="editPill" class="editPill hidden">Editing entry</div>
 
@@ -903,43 +910,49 @@ Required persistence:
           <textarea id="notes" class="field" placeholder="Where did you see it? What were you thinking/feeling?"></textarea>
         </div>
 
-        <!-- B12: persistent action bar (always visible) -->
-        <div class="panelButtons">
-          <button id="btnSave" class="btn primary grow">Save</button>
-          <button id="btnDelete" class="btn grow hidden">Delete</button>
-          <button id="btnBackFromAdd" class="btn grow">Back</button>
+        <div id="addFooter">
+          <div class="panelButtons">
+            <button id="btnSave" class="btn primary grow">Save</button>
+            <button id="btnDelete" class="btn grow hidden">Delete</button>
+            <button id="btnBackFromAdd" class="btn grow">Back</button>
+          </div>
         </div>
       </div>
 
+      <!-- LOG -->
       <div id="log" class="card accentFrame hidden">
-        <div class="row center">
-          <button id="btnExportLog" class="btn small">Export</button>
-          <button id="btnAddFromLog" class="btn small">ADD</button>
-          <div class="grow"></div>
-          <button id="btnBackFromLog" class="btn small">Back</button>
-        </div>
-
-        <div class="label">Search</div>
-        <div class="searchRow">
-          <input id="search" class="field" placeholder="Try: 111, mirror, reset, new start..." />
-          <button id="btnRunSearch" class="btn small">Search</button>
-        </div>
-
-        <div class="filters">
-          <div class="dateField">
-            <div class="miniLabel">From</div>
-            <input id="fromDate" class="field" type="date" />
+        <div id="logHeader">
+          <div class="row center">
+            <button id="btnExportLog" class="btn small">Export</button>
+            <button id="btnAddFromLog" class="btn small">ADD</button>
+            <div class="grow"></div>
+            <button id="btnBackFromLog" class="btn small">Back</button>
           </div>
-          <div class="dateField">
-            <div class="miniLabel">To</div>
-            <input id="toDate" class="field" type="date" />
+
+          <div class="label">Search</div>
+          <div class="searchRow">
+            <input id="search" class="field" placeholder="Try: 111, mirror, reset, new start..." />
+            <button id="btnRunSearch" class="btn small">Search</button>
+          </div>
+
+          <div class="filters">
+            <div class="dateField">
+              <div class="miniLabel">From</div>
+              <input id="fromDate" class="field" type="date" />
+            </div>
+            <div class="dateField">
+              <div class="miniLabel">To</div>
+              <input id="toDate" class="field" type="date" />
+            </div>
           </div>
         </div>
 
-        <!-- B12: this is the dedicated vertical scroller -->
-        <div id="logList"></div>
+        <div id="logListBox" aria-label="Log list box">
+          <div id="logList"></div>
+        </div>
       </div>
 
+      <!-- CALENDAR -->
       <div id="calendar" class="card accentFrame hidden">
         <div class="row center">
           <button id="btnExportMonth" class="btn small">Export</button>
@@ -1011,8 +1024,33 @@ Save creates a .txt file on your device.
       <div class="xCloseRow">
         <button class="xBtn" id="btnCardX" aria-label="Close">×</button>
       </div>
-      <div class="modalTitle" id="cardTitle">Angel Number Card</div>
-      <div class="modalSub" id="cardBody">—</div>
+
+      <div class="cardTopScroll">
+        <!-- Logo row now at the top (requested) -->
+        <div class="cardLogoRow">
+          <div class="cardLogoIcon" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="cg" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#8a6bff"/>
+                  <stop offset="55%" stop-color="#4fa3ff"/>
+                  <stop offset="100%" stop-color="#2f78ff"/>
+                </linearGradient>
+              </defs>
+              <ellipse cx="32" cy="16" rx="14" ry="6" fill="none" stroke="rgba(235,245,255,.88)" stroke-width="4"/>
+              <path d="M32 30 C24 26, 16 27, 12 34 C18 36, 22 41, 26 49 C27 42, 29 36, 32 30Z"
+                    fill="none" stroke="url(#cg)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M32 30 C40 26, 48 27, 52 34 C46 36, 42 41, 38 49 C37 42, 35 36, 32 30Z"
+                    fill="none" stroke="url(#cg)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="cardLogoText">Angel Numbers Tracker</div>
+        </div>
+
+        <div class="modalTitle" id="cardTitle">Angel Number Card</div>
+        <div class="modalSub" id="cardBody">—</div>
+      </div>
+
       <div class="modalBtns">
         <button id="btnCardCopy" class="btn">Copy</button>
         <button id="btnCardExport" class="btn">Export</button>
@@ -1351,7 +1389,7 @@ Save creates a .txt file on your device.
         setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 0);
       }
     }else if(screen === "log"){
-      try{ $("logList").scrollTop = 0; }catch{}
+      try{ $("logListBox").scrollTop = 0; }catch{}
       try{ document.activeElement?.blur(); }catch{}
     }else{
       try{ document.activeElement?.blur(); }catch{}
@@ -1697,7 +1735,7 @@ Save creates a .txt file on your device.
     if(recs.length === 0){
       const empty = document.createElement("div");
       empty.className = "subtle";
-      empty.style.marginTop = "10px";
+      empty.style.marginTop = "6px";
       empty.textContent = "No matching records.";
       list.appendChild(empty);
       return;
@@ -1787,31 +1825,11 @@ Save creates a .txt file on your device.
     const notes = rec.notes?.trim() ? rec.notes.trim() : "None";
 
     return `
-      <div class="cardLogoRow">
-        <div class="cardLogoIcon" aria-hidden="true">
-          <svg width="28" height="28" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="cg" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#8a6bff"/>
-                <stop offset="55%" stop-color="#4fa3ff"/>
-                <stop offset="100%" stop-color="#2f78ff"/>
-              </linearGradient>
-            </defs>
-            <ellipse cx="32" cy="16" rx="14" ry="6" fill="none" stroke="rgba(235,245,255,.88)" stroke-width="4"/>
-            <path d="M32 30 C24 26, 16 27, 12 34 C18 36, 22 41, 26 49 C27 42, 29 36, 32 30Z"
-                  fill="none" stroke="url(#cg)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M32 30 C40 26, 48 27, 52 34 C46 36, 42 41, 38 49 C37 42, 35 36, 32 30Z"
-                  fill="none" stroke="url(#cg)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="cardLogoText">Angel Numbers Tracker</div>
-      </div>
-
-      <div>Date/Time: ${escapeHtml(dt)}</div>
-      <div style="margin-top:8px;">Number: ${escapeHtml(num)}</div>
-      <div style="margin-top:8px;">Notes: ${escapeHtml(notes)}</div>
-      <div style="margin-top:8px;">Pattern: ${escapeHtml(pat)}</div>
-      <div style="margin-top:8px;">Meaning: ${escapeHtml(meaning)}</div>
+      <div style="margin-top:6px;">Date/Time: ${escapeHtml(dt)}</div>
+      <div style="margin-top:10px; font-size:18px; font-weight:900;">Number: ${escapeHtml(num)}</div>
+      <div style="margin-top:10px;">Notes: ${escapeHtml(notes)}</div>
+      <div style="margin-top:10px;">Pattern: ${escapeHtml(pat)}</div>
+      <div style="margin-top:10px;">Meaning: ${escapeHtml(meaning)}</div>
     `;
   }
 
@@ -2486,6 +2504,7 @@ Save creates a .txt file on your device.
     editOriginalTs = null;
 
     showInstant("log");
+    try{ $("logListBox").scrollTop = 0; }catch{}
   });
 
   $("btnDelete").addEventListener("click", () => {
@@ -2505,11 +2524,15 @@ Save creates a .txt file on your device.
         editOriginalTs = null;
 
         showInstant("log");
+        try{ $("logListBox").scrollTop = 0; }catch{}
       }
     });
   });
 
-  function runSearch(){ renderLog(); }
+  function runSearch(){
+    renderLog();
+    try{ $("logListBox").scrollTop = 0; }catch{}
+  }
 
   $("btnRunSearch").addEventListener("click", (e)=>{ e.preventDefault(); runSearch(); });
   $("search").addEventListener("keydown", (e)=>{
@@ -2521,8 +2544,8 @@ Save creates a .txt file on your device.
   });
 
   ["fromDate","toDate"].forEach(id => {
-    $(id).addEventListener("input", () => renderLog());
-    $(id).addEventListener("change", () => renderLog());
+    $(id).addEventListener("input", () => { renderLog(); try{ $("logListBox").scrollTop = 0; }catch{} });
+    $(id).addEventListener("change", () => { renderLog(); try{ $("logListBox").scrollTop = 0; }catch{} });
   });
 
   $("calMonth").addEventListener("change", () => renderCalendar());
@@ -2854,8 +2877,8 @@ Actual Version: v1.0B12
 Home Label (visual only): v1.333 (do not change unless instructed)
 Base: v1.0B11
 Changes:
-- Log: #log is now a fixed-height flex column; #logList is the dedicated vertical scroll region (overflow-y:auto + min-height:0) for reliable swipe up/down scrolling.
-- Add/Edit: introduced #addScroll as the dedicated vertical scroll region; Save/Delete/Back moved into a persistent bottom action bar so buttons are always reachable.
-- Card modal: preserved compact layout and sticky action row (no regression).
-- Day modal: preserved Close-only behavior (no top-right X).
+- Log: header/filters fixed; entries now scroll inside a dedicated log list box container (#logListBox) for reliable up/down scrolling.
+- Add/Edit: content now scrolls inside #addScroll; action buttons are in a fixed footer (#addFooter) so Save/Delete/Back are always reachable.
+- Card modal: logo row moved to the top; increased body text size for readability and tightened spacing; action buttons remain accessible with sticky footer.
+- General: reduced some vertical bloat in labels/spacing without changing app behavior.
 -->
