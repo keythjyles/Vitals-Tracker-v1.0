@@ -1,13 +1,17 @@
-<!-- Angel Numbers Tracker v1.0A4 -->
+<!-- Angel Numbers Tracker v1.0B1 -->
 <!--
-Single-file, offline-first PWA.
-Base UI/UX derived from Vitals Tracker v1.19B7 (Keyth Jyles).
-Purpose: Log “angel number” sightings + auto-meaning (cultural/numerology) + weekly charts + export.
+Base: v1.0A4
+B-series focus: charting + calendar + record inspection.
 
-v1.0A4 changes:
-- Replace native delete/clear confirm() popups with the app-styled modal (matching Edit prompt).
-- Any confirmation dialogs now use the unified modal format.
-- Home panel display version label remains v1.333 (visual-only per your instruction).
+v1.0B1 changes:
+- Charts now plot sightings as time-spaced data points (as recorded) so “bunches” are visible.
+- Line breaks when there is a gap >= 24 hours between consecutive points.
+- Isolated points (no neighbor within 24h on either side) render as a larger, more visible dot.
+- Charts screen adds a monthly calendar grid showing daily sightings; each sighting is clickable.
+- Clicking a sighting opens a Record modal (styled like Edit/Delete modals) with:
+  - Copy (clipboard), Export (export modal), Save .txt, Edit.
+- Quadruple-tap the top logo to reveal the actual tracked app version (APP_VERSION).
+- Home panel display label stays v1.333 (visual-only; do not change unless explicitly instructed).
 -->
 
 <!doctype html>
@@ -68,6 +72,8 @@ v1.0A4 changes:
       justify-content:center;
       align-items:center;
       text-shadow: 0 10px 22px rgba(0,0,0,.35);
+      -webkit-tap-highlight-color: transparent;
+      user-select:none;
     }
     .logoTitle svg{
       width:min(520px, 100%);
@@ -84,7 +90,6 @@ v1.0A4 changes:
       backdrop-filter: blur(10px);
     }
 
-    /* Unified accent border for all panels/modals */
     .accentFrame{
       position:relative;
     }
@@ -119,6 +124,7 @@ v1.0A4 changes:
       user-select:none;
       -webkit-tap-highlight-color: transparent;
       font-size:18px;
+      white-space:nowrap;
     }
     .btn:active{ transform: translateY(1px); }
 
@@ -140,7 +146,6 @@ v1.0A4 changes:
       font-size:16px;
       padding:0 14px;
       font-weight:650;
-      white-space:nowrap;
     }
 
     .btn:disabled{
@@ -164,6 +169,8 @@ v1.0A4 changes:
       font-size:14px;
       color:var(--muted2);
       margin: 6px 4px 0;
+      line-height:1.25;
+      white-space: pre-wrap;
     }
 
     .field{
@@ -355,7 +362,7 @@ v1.0A4 changes:
       font-weight:650;
       font-size:14px;
     }
-    input[type="date"].field, input[type="week"].field{
+    input[type="date"].field, input[type="week"].field, input[type="month"].field{
       font-size:16px;
       padding-right: 10px;
     }
@@ -427,7 +434,7 @@ v1.0A4 changes:
       color: rgba(235,245,255,.92);
       font-size: clamp(22px, 6.5vw, 34px);
       line-height: 1.05;
-      margin: 4px 2px 14px;
+      margin: 4px 2px 12px;
     }
     .modalSub{
       color: rgba(235,245,255,.56);
@@ -460,8 +467,120 @@ v1.0A4 changes:
       padding: 0 10px;
       white-space: nowrap;
     }
-    #exportModal .btn.primary{
-      color: rgba(235,245,255,.90);
+
+    /* Calendar */
+    .calWrap{
+      margin-top: 14px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.02);
+      border-radius: 22px;
+      padding: 12px;
+    }
+    .calHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom: 10px;
+      flex-wrap:wrap;
+    }
+    .calTitle{
+      font-weight:900;
+      color: rgba(235,245,255,.86);
+      letter-spacing:.2px;
+      font-size:18px;
+      margin: 0 2px;
+      white-space:nowrap;
+    }
+    .calGrid{
+      display:grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+    .calDow{
+      font-size:12px;
+      color: rgba(235,245,255,.46);
+      font-weight:800;
+      text-align:center;
+      padding: 2px 0 6px;
+      user-select:none;
+    }
+    .dayCell{
+      min-height: 72px;
+      border-radius: 16px;
+      border:1px solid rgba(235,245,255,.10);
+      background: rgba(255,255,255,.02);
+      padding: 8px 8px 6px;
+      overflow:hidden;
+    }
+    .dayCell.off{
+      opacity:.38;
+      background: rgba(255,255,255,.01);
+    }
+    .dayTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      margin-bottom: 6px;
+    }
+    .dayNum{
+      font-weight:900;
+      color: rgba(235,245,255,.78);
+      font-size:14px;
+      line-height:1;
+    }
+    .dayCount{
+      font-size:12px;
+      color: rgba(235,245,255,.44);
+      font-weight:800;
+      line-height:1;
+      white-space:nowrap;
+    }
+    .chips{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+    }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding: 6px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(235,245,255,.16);
+      background: rgba(47,120,255,.10);
+      color: rgba(235,245,255,.82);
+      font-weight:850;
+      font-size: 12px;
+      letter-spacing:.2px;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      max-width:100%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .chip:active{ transform: translateY(1px); }
+    .chip .t{
+      font-size: 11px;
+      color: rgba(235,245,255,.55);
+      font-weight:900;
+      margin-left: 6px;
+    }
+
+    .monoBox{
+      border:1px solid rgba(235,245,255,.14);
+      background: rgba(255,255,255,.03);
+      border-radius: 18px;
+      padding: 12px;
+      color: rgba(235,245,255,.78);
+      font-size: 13px;
+      line-height: 1.25;
+      white-space: pre-wrap;
+      max-height: 44vh;
+      overflow:auto;
     }
   </style>
 </head>
@@ -469,7 +588,7 @@ v1.0A4 changes:
 <body>
   <div class="app">
 
-    <div class="logoTitle" aria-label="Angel Numbers Tracker">
+    <div id="logoTap" class="logoTitle" aria-label="Angel Numbers Tracker">
       <svg viewBox="0 0 900 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Angel Numbers Tracker">
         <defs>
           <linearGradient id="angG" x1="0" y1="0" x2="1" y2="0">
@@ -482,27 +601,13 @@ v1.0A4 changes:
           </filter>
         </defs>
 
-        <!-- Icon block (wings + halo) -->
         <g transform="translate(46 24)" filter="url(#angS)">
           <rect x="0" y="0" width="92" height="92" rx="26" fill="rgba(255,255,255,.06)" stroke="rgba(235,245,255,.22)" stroke-width="2"/>
-
-          <!-- Halo -->
           <ellipse cx="46" cy="24" rx="20" ry="8" fill="none" stroke="rgba(235,245,255,.88)" stroke-width="4" opacity=".92"/>
-
-          <!-- Wings (minimal, symmetric) -->
-          <path d="M46 50
-                   C34 42, 22 44, 16 54
-                   C24 58, 32 66, 38 76
-                   C40 66, 43 58, 46 50Z"
+          <path d="M46 50 C34 42, 22 44, 16 54 C24 58, 32 66, 38 76 C40 66, 43 58, 46 50Z"
                 fill="none" stroke="url(#angG)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-
-          <path d="M46 50
-                   C58 42, 70 44, 76 54
-                   C68 58, 60 66, 54 76
-                   C52 66, 49 58, 46 50Z"
+          <path d="M46 50 C58 42, 70 44, 76 54 C68 58, 60 66, 54 76 C52 66, 49 58, 46 50Z"
                 fill="none" stroke="url(#angG)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-
-          <!-- Subtle center spark -->
           <path d="M46 34 L46 42" stroke="rgba(235,245,255,.82)" stroke-width="4" stroke-linecap="round"/>
           <path d="M42 38 L50 38" stroke="rgba(235,245,255,.82)" stroke-width="4" stroke-linecap="round"/>
         </g>
@@ -534,7 +639,6 @@ v1.0A4 changes:
         <div class="subtle">Inspired by a real Angel.</div>
 
         <div class="footerTiny">
-          <!-- Visual-only label per instruction. Do not change unless explicitly told. -->
           <div>v1.333</div>
           <div>developed by Keyth Jyles</div>
         </div>
@@ -606,7 +710,7 @@ v1.0A4 changes:
         <button id="btnBackFromCharts" class="btn small">Back</button>
       </div>
 
-      <div class="subtle">Weekly view (7 days). Pinch to zoom; drag to pan.</div>
+      <div class="subtle">Time-spaced points (as recorded). Line breaks at ≥24h gaps. Pinch to zoom; drag to pan.</div>
 
       <div class="filters">
         <div class="dateField" style="grid-column:1 / span 2;">
@@ -616,6 +720,21 @@ v1.0A4 changes:
       </div>
 
       <canvas id="chart" width="900" height="520"></canvas>
+
+      <div class="calWrap">
+        <div class="calHeader">
+          <div class="calTitle" id="calTitle">Monthly Calendar</div>
+          <div style="flex:1"></div>
+          <div style="min-width: 170px;">
+            <input id="calMonth" class="field" type="month" />
+          </div>
+        </div>
+        <div class="calGrid" id="calDow"></div>
+        <div class="calGrid" id="calGrid"></div>
+        <div class="subtle" style="margin-top:10px;">
+          Tap any pill to open that record. Edit from the record popup.
+        </div>
+      </div>
     </div>
 
   </div>
@@ -631,7 +750,6 @@ v1.0A4 changes:
     </div>
   </div>
 
-  <!-- Unified confirm modal (Delete / Clear Data / future confirmations) -->
   <div id="confirmModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
     <div class="modalCard">
       <div id="confirmTitle" class="modalTitle">Confirm</div>
@@ -639,6 +757,23 @@ v1.0A4 changes:
       <div class="modalBtns">
         <button id="btnConfirmCancel" class="btn">Cancel</button>
         <button id="btnConfirmDo" class="btn danger">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="recordModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="recordTitle">
+    <div class="modalCard">
+      <div id="recordTitle" class="modalTitle">Record</div>
+      <div id="recordSub" class="modalSub">—</div>
+
+      <div id="recordBox" class="monoBox">—</div>
+
+      <div class="modalBtns" style="margin-top:12px;">
+        <button id="btnRecordClose" class="btn">Close</button>
+        <button id="btnRecordCopy" class="btn">Copy</button>
+        <button id="btnRecordExport" class="btn">Export</button>
+        <button id="btnRecordSave" class="btn primary">Save .txt</button>
+        <button id="btnRecordEdit" class="btn primary">Edit</button>
       </div>
     </div>
   </div>
@@ -667,7 +802,7 @@ Optional:
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.0A4";          // real version (tracked in code)
+  const APP_VERSION = "v1.0B1";
   const STORAGE_KEY = "angel_numbers_records_v1";
   const DAY_MS = 24*60*60*1000;
 
@@ -688,7 +823,6 @@ Optional:
     "9": "9 is often linked with closure, compassion, integration, and completing a cycle with grace."
   };
 
-  // Commonly discussed sequences
   const ANGEL_MAP = {
     "000": "Reset and re-center. A ‘clean slate’ moment—expand perspective and begin again.",
     "111": "Focus and intention. A reminder to notice your thoughts and aim them deliberately.",
@@ -774,6 +908,11 @@ Optional:
     return `${time}, ${date}`;
   }
 
+  function fmtHM(ts){
+    const d = new Date(ts);
+    return new Intl.DateTimeFormat(undefined, { hour:"2-digit", minute:"2-digit" }).format(d);
+  }
+
   function startOfDay(ts){
     const d = new Date(ts);
     d.setHours(0,0,0,0);
@@ -802,13 +941,6 @@ Optional:
       .replaceAll("'","&#039;");
   }
 
-  function dowShortFromTs(ts){
-    return new Intl.DateTimeFormat(undefined, { weekday:"short" }).format(new Date(ts));
-  }
-  function mmddFromTs(ts){
-    return new Intl.DateTimeFormat(undefined, { month:"2-digit", day:"2-digit" }).format(new Date(ts));
-  }
-
   function focusTopOfPanel(screen){
     window.scrollTo({top:0, left:0, behavior:"auto"});
     if(screen === "add"){
@@ -828,7 +960,9 @@ Optional:
     if(screen === "charts"){
       initWeekDefaultIfNeeded();
       applyWeekToBase(true);
+      initMonthDefaultIfNeeded();
       renderCharts();
+      renderCalendar();
     }
     if(screen === "add"){
       tickTime();
@@ -837,6 +971,26 @@ Optional:
     }
     focusTopOfPanel(screen);
   }
+
+  /* =========================
+     Quad-tap logo: reveal real version
+     ========================= */
+
+  let tapCount = 0;
+  let tapTimer = null;
+
+  $("logoTap").addEventListener("click", () => {
+    tapCount++;
+    if(tapTimer) clearTimeout(tapTimer);
+    tapTimer = setTimeout(() => { tapCount = 0; }, 900);
+
+    if(tapCount >= 4){
+      tapCount = 0;
+      clearTimeout(tapTimer);
+      tapTimer = null;
+      alert(`App Version (actual): ${APP_VERSION}`);
+    }
+  });
 
   /* =========================
      Angel number parsing + pattern detection
@@ -1033,9 +1187,7 @@ Optional:
     $("meaningText").textContent = out.meaning || "—";
   }
 
-  $("anum").addEventListener("input", () => {
-    updateMeaningUI();
-  });
+  $("anum").addEventListener("input", () => { updateMeaningUI(); });
 
   function validateAnyInput(number, notes){
     return !!(String(number||"").trim() || String(notes||"").trim());
@@ -1061,7 +1213,6 @@ Optional:
 
   function filteredRecords({fromId,toId,searchId}){
     const recs = loadRecords();
-
     const q = (searchId ? $(searchId).value : "").trim();
 
     const fromV = fromId ? $(fromId).value : "";
@@ -1145,7 +1296,7 @@ Optional:
   }
 
   /* =========================
-     Edit prompt modal
+     Edit prompt modal (Log press)
      ========================= */
 
   let pendingEditTs = null;
@@ -1216,7 +1367,7 @@ Optional:
   });
 
   /* =========================
-     Unified confirm modal (Delete/Clear/etc.)
+     Unified confirm modal
      ========================= */
 
   let confirmAction = null;
@@ -1226,7 +1377,7 @@ Optional:
 
   function setConfirmButtonStyle(className){
     const btn = $("btnConfirmDo");
-    btn.className = "btn"; // reset
+    btn.className = "btn";
     if(className) btn.classList.add(...String(className).split(/\s+/).filter(Boolean));
   }
 
@@ -1433,7 +1584,181 @@ Optional:
   });
 
   /* =========================
-     Log tap handling (delegated)
+     Record modal (click from calendar)
+     ========================= */
+
+  let recordTs = null;
+  let recordPrevFocus = null;
+  let recordOpenedAt = 0;
+  let enableRecordTimer = null;
+
+  function buildSingleRecordText(rec){
+    const dt = fmtDateTime(rec.ts);
+    const num = `Number: ${rec.number || "—"}`;
+    const pat = `Pattern: ${rec.pattern || "—"}`;
+    const meaning = (rec.meaning && rec.meaning.trim()) ? rec.meaning.trim() : "None";
+    const notes = (rec.notes && rec.notes.trim()) ? rec.notes.trim() : "None";
+    return `${dt}\n${num}\n${pat}\nMeaning: ${meaning}\nNotes: ${notes}\n`;
+  }
+
+  function openRecordModal(ts){
+    const recs = loadRecords();
+    const r = recs.find(x => x.ts === ts);
+    if(!r) return;
+
+    recordTs = ts;
+    recordPrevFocus = document.activeElement || null;
+    recordOpenedAt = Date.now();
+
+    const num = r.number ? r.number : "—";
+    $("recordTitle").textContent = `Record: ${num}`;
+    $("recordSub").textContent = fmtDateTime(r.ts);
+
+    const body = buildSingleRecordText(r);
+    $("recordBox").textContent = body;
+
+    const btns = ["btnRecordClose","btnRecordCopy","btnRecordExport","btnRecordSave","btnRecordEdit"].map($);
+    btns.forEach(b => b.disabled = true);
+
+    $("recordModal").classList.remove("hidden");
+
+    if(enableRecordTimer) clearTimeout(enableRecordTimer);
+    enableRecordTimer = setTimeout(() => {
+      btns.forEach(b => b.disabled = false);
+    }, 450);
+
+    setTimeout(() => {
+      try{ $("btnRecordClose").focus({preventScroll:true}); }catch{}
+    }, 0);
+  }
+
+  function closeRecordModal(){
+    recordTs = null;
+    $("recordModal").classList.add("hidden");
+    try{ recordPrevFocus?.focus?.({preventScroll:true}); }catch{}
+  }
+
+  $("btnRecordClose").addEventListener("click", (e) => { e.preventDefault(); closeRecordModal(); });
+
+  $("recordModal").addEventListener("click", (e) => {
+    const justOpened = (Date.now() - recordOpenedAt) < 220;
+    if(justOpened){ e.preventDefault(); e.stopPropagation(); return; }
+    if(e.target === $("recordModal")) closeRecordModal();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    const open = !$("recordModal").classList.contains("hidden");
+    if(!open) return;
+    if(e.key === "Escape"){
+      e.preventDefault();
+      closeRecordModal();
+    }
+  });
+
+  $("btnRecordCopy").addEventListener("click", async (e) => {
+    e.preventDefault();
+    if(recordTs == null) return;
+    const recs = loadRecords();
+    const r = recs.find(x => x.ts === recordTs);
+    if(!r) return;
+
+    const out = buildSingleRecordText(r);
+    try{ await copyToClipboard(out); }catch{}
+    alert("Copied.");
+  });
+
+  function buildReportHeader({title, rangeLabel, notes}){
+    const now = fmtDateTime(Date.now());
+    const lines = [
+      "Angel Numbers Tracker — Export Report",
+      `App Version: ${APP_VERSION}`,
+      `Report: ${title}`,
+      `Generated: ${now}`,
+      rangeLabel ? `Range: ${rangeLabel}` : "",
+      "",
+      "How this data was captured:",
+      "- Sightings are entered manually into Angel Numbers Tracker on this device.",
+      "- Data is stored locally on the phone (no cloud sync, no account).",
+      "- Each record may include the number, pattern type, a cultural/numerology meaning, and optional notes.",
+      "",
+      notes ? notes : "",
+      "",
+      "------------------------------",
+      ""
+    ].filter(Boolean);
+    return lines.join("\n");
+  }
+
+  function exportReport(recs, headerInfo, filenameBase){
+    const header = buildReportHeader(headerInfo);
+
+    const lines = recs.map(r => buildSingleRecordText(r));
+    const out = header + lines.join("\n");
+
+    const ts = new Date();
+    const y = ts.getFullYear();
+    const m = String(ts.getMonth()+1).padStart(2,"0");
+    const d = String(ts.getDate()).padStart(2,"0");
+    const filename = `${filenameBase || "angel_numbers_report"}_${y}-${m}-${d}.txt`;
+
+    (async () => {
+      try{ await copyToClipboard(out); }catch{}
+      openExportModal({ text: out, filename });
+    })();
+  }
+
+  $("btnRecordExport").addEventListener("click", (e) => {
+    e.preventDefault();
+    if(recordTs == null) return;
+    const recs = loadRecords();
+    const r = recs.find(x => x.ts === recordTs);
+    if(!r) return;
+
+    exportReport(
+      [r],
+      {
+        title: "Record Detail",
+        rangeLabel: fmtDateTime(r.ts),
+        notes: "This report contains exactly one selected record."
+      },
+      "angel_numbers_record"
+    );
+  });
+
+  $("btnRecordSave").addEventListener("click", async (e) => {
+    e.preventDefault();
+    if(recordTs == null) return;
+    const recs = loadRecords();
+    const r = recs.find(x => x.ts === recordTs);
+    if(!r) return;
+
+    const out = buildSingleRecordText(r);
+    const ts = new Date(r.ts);
+    const y = ts.getFullYear();
+    const m = String(ts.getMonth()+1).padStart(2,"0");
+    const d = String(ts.getDate()).padStart(2,"0");
+    const filename = `angel_numbers_record_${y}-${m}-${d}.txt`;
+
+    try{
+      const ok = await saveTextWithPicker(out, filename);
+      if(ok){
+        alert("Saved.");
+        return;
+      }
+    }catch{}
+
+    downloadText(out, filename);
+  });
+
+  $("btnRecordEdit").addEventListener("click", (e) => {
+    e.preventDefault();
+    const ts = recordTs;
+    closeRecordModal();
+    if(ts != null) enterAddEdit(ts);
+  });
+
+  /* =========================
+     Log press handling (delegated)
      ========================= */
 
   const logTap = { activeEl:null, activeTs:null, pointerId:null, tracking:false };
@@ -1529,58 +1854,7 @@ Optional:
   });
 
   /* =========================
-     Export with report header
-     ========================= */
-
-  function buildReportHeader({title, rangeLabel, notes}){
-    const now = fmtDateTime(Date.now());
-    const lines = [
-      "Angel Numbers Tracker — Export Report",
-      `App Version: ${APP_VERSION}`,
-      `Report: ${title}`,
-      `Generated: ${now}`,
-      rangeLabel ? `Range: ${rangeLabel}` : "",
-      "",
-      "How this data was captured:",
-      "- Sightings are entered manually into Angel Numbers Tracker on this device.",
-      "- Data is stored locally on the phone (no cloud sync, no account).",
-      "- Each record may include the number, pattern type, a cultural/numerology meaning, and optional notes.",
-      "",
-      notes ? notes : "",
-      "",
-      "------------------------------",
-      ""
-    ].filter(Boolean);
-    return lines.join("\n");
-  }
-
-  function exportReport(recs, headerInfo, filenameBase){
-    const header = buildReportHeader(headerInfo);
-
-    const lines = recs.map(r => {
-      const dt = fmtDateTime(r.ts);
-      const num = `Number: ${r.number || "—"}`;
-      const pat = `Pattern: ${r.pattern || "—"}`;
-      const meaning = (r.meaning && r.meaning.trim()) ? r.meaning.trim() : "None";
-      const notes = (r.notes && r.notes.trim()) ? r.notes.trim() : "None";
-      return `${dt}\n${num}\n${pat}\nMeaning: ${meaning}\nNotes: ${notes}\n`;
-    });
-
-    const out = header + lines.join("\n");
-    const ts = new Date();
-    const y = ts.getFullYear();
-    const m = String(ts.getMonth()+1).padStart(2,"0");
-    const d = String(ts.getDate()).padStart(2,"0");
-    const filename = `${filenameBase || "angel_numbers_report"}_${y}-${m}-${d}.txt`;
-
-    (async () => {
-      try{ await copyToClipboard(out); }catch{}
-      openExportModal({ text: out, filename });
-    })();
-  }
-
-  /* =========================
-     Charts (weekly, frequency over time)
+     Charts: time-spaced points + 24h break logic
      ========================= */
 
   const chartView = {
@@ -1588,7 +1862,7 @@ Optional:
     baseMax: 0,
     viewMin: 0,
     viewMax: 0,
-    minSpan: 48*60*60*1000,
+    minSpan: 6*60*60*1000,     // 6 hours (zoom in)
     maxSpan: 7*DAY_MS,
     pinch: null,
     pan: null
@@ -1688,55 +1962,9 @@ Optional:
     }
   }
 
-  function recordsInView(){
-    const recs = loadRecords().slice().reverse();
-    const a = chartView.viewMin;
-    const b = chartView.viewMax;
-    return recs.filter(r => r.ts >= a && r.ts <= b);
-  }
-
-  function buildDailyCounts(recs, baseMin){
-    const counts = new Array(7).fill(0);
-    for(const r of recs){
-      const dayStart = startOfDay(r.ts);
-      const idx = Math.floor((dayStart - baseMin) / DAY_MS);
-      if(idx >= 0 && idx < 7) counts[idx] += 1;
-    }
-    return counts;
-  }
-
-  function drawCountsLine(ctx, counts, tMin, tMax, yMin, yMax, pad, W, H){
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = "rgba(138,107,255,.92)";
-    ctx.lineJoin = "round";
-    ctx.lineCap = "round";
-
-    const baseMin = startOfDay(chartView.baseMin);
-    const pts = [];
-    for(let i=0;i<7;i++){
-      const dayCenter = baseMin + i*DAY_MS + DAY_MS/2;
-      if(dayCenter < tMin || dayCenter > tMax) continue;
-      pts.push({ts: dayCenter, v: counts[i]});
-    }
-
-    ctx.beginPath();
-    let started = false;
-    for(const p of pts){
-      const x = xFromTs(p.ts, tMin, tMax, pad, W);
-      const y = yTo(p.v, yMin, yMax, pad, H);
-      if(!started){ ctx.moveTo(x,y); started = true; }
-      else ctx.lineTo(x,y);
-    }
-    ctx.stroke();
-
-    ctx.fillStyle = "rgba(235,245,255,.92)";
-    for(const p of pts){
-      const x = xFromTs(p.ts, tMin, tMax, pad, W);
-      const y = yTo(p.v, yMin, yMax, pad, H);
-      ctx.beginPath();
-      ctx.arc(x, y, 5.5, 0, Math.PI*2);
-      ctx.fill();
-    }
+  function getWeekRecordsInBase(){
+    const all = loadRecords().slice().reverse(); // oldest -> newest
+    return all.filter(r => r.ts >= chartView.baseMin && r.ts <= chartView.baseMax);
   }
 
   function renderCharts(){
@@ -1754,6 +1982,7 @@ Optional:
     const plotY0 = pad.t;
     const plotY1 = H - pad.b;
 
+    // Frame
     ctx.lineWidth = 1;
     ctx.strokeStyle = "rgba(235,245,255,.12)";
     ctx.fillStyle = "rgba(255,255,255,.02)";
@@ -1765,6 +1994,7 @@ Optional:
     const tMin = chartView.viewMin;
     const tMax = chartView.viewMax;
 
+    // Day bands (alternate)
     ctx.save();
     ctx.beginPath();
     ctx.rect(plotX0, plotY0, plotX1-plotX0, plotY1-plotY0);
@@ -1786,36 +2016,27 @@ Optional:
       if(x1 <= x0) continue;
 
       ctx.fillStyle = (i % 2 === 0)
-        ? "rgba(255,255,255,.14)"
-        : "rgba(47,120,255,.22)";
+        ? "rgba(255,255,255,.12)"
+        : "rgba(47,120,255,.18)";
       ctx.fillRect(x0, plotY0, (x1 - x0), (plotY1 - plotY0));
     }
     ctx.restore();
 
-    const allWeek = loadRecords().filter(r => r.ts >= chartView.baseMin && r.ts <= chartView.baseMax);
-    const counts = buildDailyCounts(allWeek, startOfDay(chartView.baseMin));
-    const maxCount = Math.max(1, ...counts);
+    // Y-axis is “Activity lane” (simple)
+    const yMin = 0;
+    const yMax = 2;
+    const yLane = 1;
 
-    let yMin = 0;
-    let yMax = Math.max(3, maxCount + 1);
-
-    ctx.font = "16px system-ui,Segoe UI,Roboto";
-    ctx.fillStyle = "rgba(235,245,255,.60)";
+    // Horizontal guide
     ctx.strokeStyle = "rgba(235,245,255,.10)";
     ctx.lineWidth = 1;
+    const y = yTo(yLane, yMin, yMax, pad, H);
+    ctx.beginPath();
+    ctx.moveTo(pad.l, y);
+    ctx.lineTo(W - pad.r, y);
+    ctx.stroke();
 
-    const ticks = 4;
-    for(let i=0;i<=ticks;i++){
-      const y = pad.t + (H - pad.t - pad.b) * (i/ticks);
-      ctx.beginPath();
-      ctx.moveTo(pad.l, y);
-      ctx.lineTo(W - pad.r, y);
-      ctx.stroke();
-
-      const val = Math.round(yMax - (yMax-yMin)*(i/ticks));
-      ctx.fillText(String(val), 16, y+6);
-    }
-
+    // X labels (dow + date)
     ctx.fillStyle = "rgba(235,245,255,.90)";
     ctx.font = "20px system-ui,Segoe UI,Roboto";
     ctx.textAlign = "center";
@@ -1831,8 +2052,8 @@ Optional:
       if(dayCenter < tMin || dayCenter > tMax) continue;
 
       const x = xFromTs(dayCenter, tMin, tMax, pad, W);
-      const dow = dowShortFromTs(dayStart);
-      const md = mmddFromTs(dayStart);
+      const dow = new Intl.DateTimeFormat(undefined, { weekday:"short" }).format(new Date(dayStart));
+      const md = new Intl.DateTimeFormat(undefined, { month:"2-digit", day:"2-digit" }).format(new Date(dayStart));
 
       ctx.fillText(dow, x, yDow);
 
@@ -1845,23 +2066,83 @@ Optional:
     }
     ctx.textAlign = "start";
 
-    drawCountsLine(ctx, counts, tMin, tMax, yMin, yMax, pad, W, H);
-
-    const lx = pad.l + 10;
-    const ly = pad.t + 30;
-
-    ctx.font = "22px system-ui,Segoe UI,Roboto";
-    ctx.fillStyle = "rgba(138,107,255,.92)";
-    ctx.fillRect(lx, ly-14, 26, 8);
-    ctx.fillStyle = "rgba(235,245,255,.88)";
-    ctx.fillText("S i g h t i n g s", lx+38, ly-6);
-
-    const total = counts.reduce((a,b)=>a+b,0);
-    if(total === 0){
+    // Plot records (as recorded)
+    const recs = getWeekRecordsInBase().filter(r => r.ts >= tMin && r.ts <= tMax);
+    if(recs.length === 0){
       ctx.fillStyle = "rgba(235,245,255,.46)";
       ctx.font = "18px system-ui,Segoe UI,Roboto";
-      ctx.fillText("No sightings in this week.", pad.l + 12, pad.t + 64);
+      ctx.fillText("No sightings in this view.", pad.l + 12, pad.t + 40);
+      return;
     }
+
+    const gapBreak = 24*60*60*1000; // 24 hours
+
+    // Lines (break on gap >= 24h)
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(plotX0, plotY0, plotX1-plotX0, plotY1-plotY0);
+    ctx.clip();
+
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "rgba(138,107,255,.88)";
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+
+    ctx.beginPath();
+    for(let i=0;i<recs.length;i++){
+      const r = recs[i];
+      const x = xFromTs(r.ts, tMin, tMax, pad, W);
+      const yy = yTo(yLane, yMin, yMax, pad, H);
+
+      if(i === 0){
+        ctx.moveTo(x, yy);
+      }else{
+        const prev = recs[i-1];
+        const gap = r.ts - prev.ts;
+        if(gap >= gapBreak){
+          // break line
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(x, yy);
+        }else{
+          ctx.lineTo(x, yy);
+        }
+      }
+    }
+    ctx.stroke();
+
+    // Points (isolated large)
+    for(let i=0;i<recs.length;i++){
+      const r = recs[i];
+      const x = xFromTs(r.ts, tMin, tMax, pad, W);
+      const yy = yTo(yLane, yMin, yMax, pad, H);
+
+      const prevGap = (i>0) ? (r.ts - recs[i-1].ts) : Infinity;
+      const nextGap = (i<recs.length-1) ? (recs[i+1].ts - r.ts) : Infinity;
+
+      const isolated = (prevGap >= gapBreak) && (nextGap >= gapBreak);
+      const radius = isolated ? 8.0 : 4.2;
+
+      ctx.fillStyle = "rgba(235,245,255,.92)";
+      ctx.beginPath();
+      ctx.arc(x, yy, radius, 0, Math.PI*2);
+      ctx.fill();
+
+      // subtle halo for isolated points
+      if(isolated){
+        ctx.strokeStyle = "rgba(138,107,255,.72)";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(x, yy, radius+5, 0, Math.PI*2);
+        ctx.stroke();
+      }
+    }
+    ctx.restore();
+
+    // Legend
+    ctx.font = "16px system-ui,Segoe UI,Roboto";
+    ctx.fillStyle = "rgba(235,245,255,.58)";
+    ctx.fillText("Points = sightings (time-spaced). Breaks = ≥24h gaps.", pad.l + 10, pad.t + 18);
   }
 
   function dist2(t1, t2){
@@ -1970,6 +2251,147 @@ Optional:
     canvas.addEventListener("touchend", endGestures, {passive:true});
     canvas.addEventListener("touchcancel", endGestures, {passive:true});
   }
+
+  /* =========================
+     Monthly Calendar (clickable pills)
+     ========================= */
+
+  function initMonthDefaultIfNeeded(){
+    if(!$("calMonth").value){
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,"0");
+      $("calMonth").value = `${y}-${m}`;
+    }
+  }
+
+  function monthValueToFirstDay(value){
+    const m = /^(\d{4})-(\d{2})$/.exec(String(value || ""));
+    if(!m) return null;
+    const y = Number(m[1]);
+    const mo = Number(m[2]);
+    if(!y || !mo) return null;
+    const d = new Date(y, mo-1, 1, 0,0,0,0);
+    return d;
+  }
+
+  function monthLabelFromValue(value){
+    const first = monthValueToFirstDay(value);
+    if(!first) return "Monthly Calendar";
+    return new Intl.DateTimeFormat(undefined, { month:"long", year:"numeric" }).format(first);
+  }
+
+  function renderCalendar(){
+    const mv = $("calMonth").value;
+    const first = monthValueToFirstDay(mv);
+    if(!first) return;
+
+    $("calTitle").textContent = `Monthly Calendar — ${monthLabelFromValue(mv)}`;
+
+    // DOW header
+    const dow = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+    const dowEl = $("calDow");
+    dowEl.innerHTML = "";
+    dow.forEach(d => {
+      const el = document.createElement("div");
+      el.className = "calDow";
+      el.textContent = d;
+      dowEl.appendChild(el);
+    });
+
+    // Determine grid start (Monday)
+    const start = new Date(first.getTime());
+    const dow0 = (start.getDay() + 6) % 7; // Mon=0..Sun=6
+    start.setDate(start.getDate() - dow0);
+    start.setHours(0,0,0,0);
+
+    // Grid end: 6 rows * 7 days = 42 cells
+    const cells = [];
+    for(let i=0;i<42;i++){
+      const d = new Date(start.getTime() + i*DAY_MS);
+      cells.push(d);
+    }
+
+    // Collect records for month (and edges visible)
+    const all = loadRecords().slice().reverse(); // old->new
+    const monthStart = new Date(first.getFullYear(), first.getMonth(), 1, 0,0,0,0).getTime();
+    const monthEnd = new Date(first.getFullYear(), first.getMonth()+1, 0, 23,59,59,999).getTime();
+
+    // We'll allow display for edge days too, but records outside month won't be shown unless day is in month.
+    const mapByDay = new Map(); // key yyyy-mm-dd -> records
+    for(const r of all){
+      if(r.ts < monthStart - 7*DAY_MS || r.ts > monthEnd + 7*DAY_MS) continue;
+      const d = new Date(r.ts);
+      const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+      if(!mapByDay.has(key)) mapByDay.set(key, []);
+      mapByDay.get(key).push(r);
+    }
+    // sort each day by time ascending
+    for(const [k, arr] of mapByDay.entries()){
+      arr.sort((a,b)=> a.ts - b.ts);
+    }
+
+    const grid = $("calGrid");
+    grid.innerHTML = "";
+
+    for(const d of cells){
+      const y = d.getFullYear();
+      const m = d.getMonth();
+      const day = d.getDate();
+
+      const inMonth = (m === first.getMonth() && y === first.getFullYear());
+      const cell = document.createElement("div");
+      cell.className = "dayCell" + (inMonth ? "" : " off");
+
+      const top = document.createElement("div");
+      top.className = "dayTop";
+
+      const dn = document.createElement("div");
+      dn.className = "dayNum";
+      dn.textContent = String(day);
+
+      const key = `${y}-${String(m+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+      const arr = mapByDay.get(key) || [];
+      const count = (inMonth ? arr.length : 0);
+
+      const dc = document.createElement("div");
+      dc.className = "dayCount";
+      dc.textContent = count ? `${count}` : "";
+
+      top.appendChild(dn);
+      top.appendChild(dc);
+      cell.appendChild(top);
+
+      const chips = document.createElement("div");
+      chips.className = "chips";
+
+      if(inMonth && arr.length){
+        for(const r of arr){
+          const ch = document.createElement("div");
+          ch.className = "chip";
+          const num = r.number || "—";
+          const tm = fmtHM(r.ts);
+          ch.textContent = num;
+          const t = document.createElement("span");
+          t.className = "t";
+          t.textContent = tm;
+          ch.appendChild(t);
+
+          ch.addEventListener("click", (e) => {
+            e.preventDefault();
+            openRecordModal(r.ts);
+          });
+
+          chips.appendChild(ch);
+        }
+      }
+
+      cell.appendChild(chips);
+      grid.appendChild(cell);
+    }
+  }
+
+  $("calMonth").addEventListener("change", () => { renderCalendar(); });
 
   /* =========================
      Clear Data + Install + Exit (Exit preserved)
@@ -2119,17 +2541,11 @@ Optional:
 
   /* =========================
      SEARCH BEHAVIOR
-     - Search runs only on button click or Enter key.
      ========================= */
 
-  function runSearch(){
-    renderLog();
-  }
+  function runSearch(){ renderLog(); }
 
-  $("btnRunSearch").addEventListener("click", (e) => {
-    e.preventDefault();
-    runSearch();
-  });
+  $("btnRunSearch").addEventListener("click", (e) => { e.preventDefault(); runSearch(); });
 
   $("search").addEventListener("keydown", (e) => {
     if(e.key === "Enter"){
@@ -2191,9 +2607,10 @@ Optional:
         rangeLabel: `Selected week: ${weekVal} | Base week: ${baseRange} | Exported view: ${viewRange}`,
         notes:
           "What you are looking at:\n" +
-          "- The Charts screen shows exactly 7 days at a time (weekly view).\n" +
+          "- The Charts screen shows exactly 7 days at a time (weekly base).\n" +
           "- You can pinch to zoom in, then drag left/right to pan within that 7-day week.\n" +
-          "- The chart displays sighting frequency (count).\n" +
+          "- Points are plotted at their true timestamps.\n" +
+          "- Lines break when gaps are 24 hours or more.\n" +
           "- This export contains entries that fall within the CURRENT visible chart view (after zoom/pan)."
       },
       "angel_numbers_charts_report"
@@ -2216,15 +2633,9 @@ Optional:
   </defs>
   <rect width="512" height="512" rx="110" fill="url(#g)"/>
   <ellipse cx="256" cy="150" rx="110" ry="44" fill="none" stroke="rgba(235,245,255,.92)" stroke-width="26"/>
-  <path d="M256 240
-           C196 210, 140 220, 112 270
-           C154 294, 190 330, 214 380
-           C226 330, 240 285, 256 240Z"
+  <path d="M256 240 C196 210, 140 220, 112 270 C154 294, 190 330, 214 380 C226 330, 240 285, 256 240Z"
         fill="none" stroke="rgba(235,245,255,.92)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M256 240
-           C316 210, 372 220, 400 270
-           C358 294, 322 330, 298 380
-           C286 330, 272 285, 256 240Z"
+  <path d="M256 240 C316 210, 372 220, 400 270 C358 294, 322 330, 298 380 C286 330, 272 285, 256 240Z"
         fill="none" stroke="rgba(235,245,255,.92)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
     const encoded = encodeURIComponent(svg).replace(/'/g,"%27").replace(/"/g,"%22");
@@ -2272,7 +2683,10 @@ self.addEventListener('fetch', (e)=>{ });`;
 
   window.addEventListener("resize", () => {
     if(!$("add").classList.contains("hidden")) adjustTimeFont();
-    if(!$("charts").classList.contains("hidden")) renderCharts();
+    if(!$("charts").classList.contains("hidden")){
+      renderCharts();
+      renderCalendar();
+    }
   });
 
 })();
