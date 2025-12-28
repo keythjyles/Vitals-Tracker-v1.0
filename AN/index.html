@@ -1,23 +1,19 @@
-<!-- Angel Numbers Tracker v1.1A6 -->
+<!-- Angel Numbers Tracker v1.1A2 -->
 <!--
-Version Detail Notes
-App Version: v1.1A6
-Base: v1.1A5
-
-Changes (requested):
-1) Add button opens a popup:
-   - Shows current number
-   - Notes input
-   - Buttons: Add (save to in-app calendar), Copy (clipboard), Export (single-entry export), Cancel
-2) Scroll troubleshooting + hard fix:
-   - Replaced full-screen swipe capture with EDGE-SWIPE ONLY (16px from left/right edge).
-   - This prevents swipe logic from interfering with vertical scrolling.
-3) Add version under logo (very small, no padding).
-Notes:
-- BOF/EOF comment blocks preserved.
-- Exit handler unchanged.
+Version Detail Notes (BOF)
+App: Angel Numbers Tracker
+Version: v1.1A2
+Base: v1.1A1 (conceptual baseline)
+Key changes:
+- Home panel is Identify (with fixed bottom actions + scrollable meaning/details area).
+- Start swipe left/right only when touch starts within 150px of screen edge.
+- Calendar day list popup implemented: tight list of entries for a day; tap an entry to view details.
+- Add-to-Calendar opens a popup (number + notes + Add). Removed “in app only” wording and removed Copy/Export from Add popup.
+- Removed Export button from Calendar screen.
+- Version shown under logo (small, no padding). Triple-tap version shows heart modal message.
+- No autofocus on number field to prevent keyboard on load.
+- Scroll fixes: middle content scrolls; meaning/details area has its own right-side scrollbar.
 -->
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -25,1650 +21,1740 @@ Notes:
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1324" />
   <title>Angel Numbers Tracker</title>
+
   <link rel="manifest" id="manifestLink" href="#" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
   <style>
     :root{
       --bg0:#08101f;
       --bg1:#0b1324;
       --panel:#0c1528cc;
+
       --stroke:rgba(235,245,255,.16);
       --stroke2:rgba(235,245,255,.22);
       --strokeBold:rgba(180,210,255,.42);
-      --text:rgba(235,245,255,.86);
-      --muted:rgba(235,245,255,.58);
+      --accent:#2b4e7a;
+
+      --text:rgba(235,245,255,.88);
+      --muted:rgba(235,245,255,.60);
       --muted2:rgba(235,245,255,.42);
 
-      --accentBorder: rgba(43,78,122,.85);
-      --accentGlow: rgba(43,78,122,.18);
-      --themeLine: rgba(43,78,122,.55);
-      --themeLineSoft: rgba(43,78,122,.28);
+      --btnBlue1:#2f6fff;
+      --btnBlue2:#1b4fd8;
 
-      --shadow:0 14px 40px rgba(0,0,0,.38);
+      --danger1:#3a0e16;
+      --danger2:#6b1022;
+
       --radius:26px;
-      --btnH:56px;
-      --pad:18px;
-      --font: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      --radius2:18px;
+      --shadow:0 18px 40px rgba(0,0,0,.45);
+
+      --pad:16px;
+      --headerH:84px;
+      --footerH:210px; /* accommodates 4 buttons + spacing */
+      --safeB: env(safe-area-inset-bottom, 0px);
+      --safeT: env(safe-area-inset-top, 0px);
     }
 
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
-
+    *{box-sizing:border-box}
+    html,body{height:100%}
     body{
       margin:0;
-      font-family:var(--font);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
       color:var(--text);
       background:
-        radial-gradient(1200px 700px at 30% 0%, rgba(47,120,255,.22), transparent 55%),
-        radial-gradient(900px 600px at 80% 20%, rgba(155,120,255,.10), transparent 55%),
-        linear-gradient(180deg, var(--bg1), var(--bg0));
-      display:flex;
-      justify-content:center;
-      padding: max(14px, env(safe-area-inset-top)) 12px max(14px, env(safe-area-inset-bottom));
+        radial-gradient(1200px 650px at 30% -10%, rgba(45,120,255,.20), transparent 60%),
+        radial-gradient(900px 500px at 85% 0%, rgba(150,80,255,.18), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
       overflow:hidden;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      touch-action: manipulation;
     }
 
     .app{
-      width:min(520px, 100%);
-      height: 100%;
+      position:relative;
+      height:100%;
+      width:100%;
       display:flex;
       flex-direction:column;
-      gap:6px;
-      overflow:hidden;
+      padding-top:calc(var(--safeT) + 10px);
+      padding-left:12px;
+      padding-right:12px;
+      padding-bottom:calc(var(--safeB) + 10px);
+      gap:10px;
     }
 
-    .logoTitle{
-      margin:4px 6px 0;
+    /* Top logo bar */
+    .topbar{
+      height:var(--headerH);
       display:flex;
-      justify-content:center;
-      align-items:center;
-      text-shadow: 0 10px 22px rgba(0,0,0,.35);
-      user-select:none;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-    }
-    .logoTitle svg{
-      width:min(520px, 100%);
-      height:auto;
-      display:block;
+      align-items:flex-start;
+      gap:12px;
+      padding:8px 10px 0 10px;
     }
 
-    /* Version under logo: very small, no padding */
-    .verUnderLogo{
-      margin: 0;
-      padding: 0;
-      line-height: 1;
-      font-size: 11px;
-      font-weight: 700;
-      color: rgba(235,245,255,.34);
-      text-align:center;
-      user-select:none;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-    }
-
-    .screenArea{
-      position:relative;
-      flex:1;
-      overflow:hidden;
-      border-radius: var(--radius);
-      touch-action: pan-y; /* allow vertical pan */
-    }
-
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      border:3px solid var(--accentBorder);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: var(--pad);
-      backdrop-filter: blur(10px);
-
-      position:absolute;
-      inset:0;
-
-      /* IMPORTANT: allow the screen itself to scroll if needed */
-      overflow:hidden;
-      touch-action: pan-y;
-    }
-
-    .hidden{ display:none !important; }
-
-    .btn{
-      height:var(--btnH);
-      border-radius: 999px;
-      border:1px solid var(--stroke2);
-      background: rgba(255,255,255,.03);
-      color:rgba(235,245,255,.78);
-      font-weight:650;
-      letter-spacing:.2px;
+    .logoBadge{
+      width:52px;
+      height:52px;
+      border-radius:16px;
+      background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+      border:1px solid rgba(235,245,255,.14);
+      box-shadow: 0 10px 25px rgba(0,0,0,.35);
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:0 18px;
-      user-select:none;
-      -webkit-tap-highlight-color: transparent;
-      font-size:18px;
-      touch-action: manipulation;
+      flex:0 0 auto;
+      margin-top:2px;
     }
-    .btn:active{ transform: translateY(1px); }
+    .logoBadge svg{width:36px;height:36px;opacity:.95}
 
-    .btn.primary{
-      background: linear-gradient(180deg, rgba(47,120,255,.92), rgba(47,120,255,.72));
-      border-color: rgba(120,170,255,.55);
-      color: rgba(235,245,255,.90);
-    }
-
-    .btn.danger{
-      background: linear-gradient(180deg, rgba(255,80,80,.18), rgba(255,80,80,.10));
-      border-color: rgba(255,120,120,.42);
-      color: rgba(255,225,225,.92);
-      box-shadow: 0 10px 26px rgba(0,0,0,.22);
-    }
-
-    .btn.small{
-      height:44px;
-      font-size:16px;
-      padding:0 14px;
-      font-weight:650;
-      white-space:nowrap;
-    }
-
-    .btn:disabled{
-      opacity:.55;
-      filter:saturate(.85);
-      transform:none !important;
-      pointer-events:none;
-    }
-
-    .row{ display:flex; gap:12px; }
-    .row.center{ align-items:center; }
-    .grow{ flex:1; }
-
-    .label{
-      font-size:15px;
-      color:var(--muted);
-      font-weight:650;
-      margin: 10px 4px 6px;
-    }
-    .subtle{
-      font-size:14px;
-      color:var(--muted2);
-      margin: 6px 4px 0;
-    }
-
-    .field{
-      border:2px solid var(--strokeBold);
-      background: rgba(255,255,255,.06);
-      color: rgba(235,245,255,.86);
-      border-radius: 18px;
-      height:54px;
-      padding: 0 14px;
-      font-size:18px;
-      outline:none;
-      width:100%;
-    }
-    .field::placeholder{ color: rgba(235,245,255,.35); }
-    .field:focus{
-      border-color: rgba(90,150,255,.78);
-      box-shadow: 0 0 0 4px rgba(47,120,255,.16);
-    }
-    textarea.field{
-      height:96px;
-      padding: 12px 14px;
-      resize:none;
-      line-height:1.25;
-    }
-
-    .footerTiny{
-      margin-top:10px;
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      font-size: 12px;
-      color: rgba(235,245,255,.38);
-      user-select:none;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-    }
-
-    .meaningCard{
-      border:1px solid var(--themeLine);
-      background: rgba(255,255,255,.03);
-      border-radius: 22px;
-      padding: 12px 12px 10px;
-      margin-top: 10px;
-    }
-    .meaningTop{
-      display:flex;
-      align-items:baseline;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom: 6px;
-    }
-    .numBig{
-      font-size:26px;
-      font-weight:900;
-      letter-spacing:.3px;
-      white-space:nowrap;
-    }
-    .patternPill{
-      font-size:13px;
-      color: rgba(235,245,255,.70);
-      border: 1px solid var(--themeLineSoft);
-      background: rgba(255,255,255,.03);
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-weight:750;
-      white-space:nowrap;
-    }
-    .meaningText{
-      color: rgba(235,245,255,.74);
-      font-size:15px;
-      line-height:1.18;
-      white-space: pre-wrap;
-    }
-
-    /* Independent scroll container for the highlighted details block */
-    .metaScroll{
-      margin-top:10px;
-      border:1px solid rgba(235,245,255,.10);
-      background: rgba(255,255,255,.02);
-      border-radius: 16px;
-      padding: 10px 10px;
-      max-height: 190px;
-      overflow:auto;
-      -webkit-overflow-scrolling: touch;
-      white-space: pre-wrap;
-      line-height: 1.24;
-      color: rgba(235,245,255,.78);
-      font-size:14px;
-      scrollbar-width: thin;
-      scrollbar-color: rgba(235,245,255,.28) rgba(255,255,255,.06);
-    }
-    .metaScroll::-webkit-scrollbar{ width: 8px; }
-    .metaScroll::-webkit-scrollbar-track{
-      background: rgba(255,255,255,.05);
-      border-radius: 999px;
-    }
-    .metaScroll::-webkit-scrollbar-thumb{
-      background: rgba(235,245,255,.22);
-      border-radius: 999px;
-      border: 2px solid rgba(255,255,255,.04);
-    }
-
-    .disclaimer{
-      margin-top:8px;
-      color: rgba(235,245,255,.44);
-      font-size:12px;
-      line-height:1.25;
-    }
-
-    /* HOME layout: scroll content + fixed footer */
-    #home{
+    .brandWrap{
+      flex:1 1 auto;
+      min-width:0;
+      padding-top:4px;
       display:flex;
       flex-direction:column;
       gap:0;
-      padding-bottom:0;
     }
-    #homeScroll{
-      flex: 1;
-      overflow:auto;
-      -webkit-overflow-scrolling: touch;
-      padding-bottom: 10px;
-      touch-action: pan-y;
-      overscroll-behavior: contain;
-    }
-    #homeFooter{
-      flex: 0 0 auto;
-      padding-top: 12px;
-      padding-bottom: calc(8px + env(safe-area-inset-bottom));
-      background: linear-gradient(180deg, rgba(11,19,36,0), rgba(11,19,36,.72) 32%, rgba(11,19,36,.94));
-      border-top: 1px solid rgba(255,255,255,.08);
-      backdrop-filter: blur(10px);
-    }
-    #homeFooter .homeActions{
-      display:flex;
-      flex-direction:column;
-      gap:12px;
+    .brand{
+      font-weight:800;
+      letter-spacing:.2px;
+      font-size:40px;
+      line-height:1.05;
+      background:linear-gradient(90deg, rgba(180,120,255,.95), rgba(70,140,255,.95));
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+      text-shadow: 0 14px 35px rgba(0,0,0,.35);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
       margin:0;
     }
-    #homeFooter .homeActions .btn{
-      font-size:22px;
-      font-weight:780;
-      letter-spacing:.25px;
+    .versionTop{
+      margin:0;
+      padding:0;              /* no padding per request */
+      font-size:12px;
+      line-height:1;
+      color:rgba(235,245,255,.35);
+      letter-spacing:.2px;
+      user-select:none;
+      width:fit-content;
     }
 
-    .homeTitle{
-      margin: 0 2px 10px;
-      font-weight: 950;
-      letter-spacing: .2px;
-      color: rgba(235,245,255,.92);
-      font-size: clamp(26px, 7.6vw, 44px);
-      line-height: 1.02;
+    /* Main card */
+    .card{
+      position:relative;
+      flex:1 1 auto;
+      width:100%;
+      border-radius:34px;
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid rgba(235,245,255,.14);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      padding:0;
+      display:flex;
+      flex-direction:column;
     }
 
-    .homeTopRow{
+    .cardInner{
+      position:relative;
+      height:100%;
+      width:100%;
+      border-radius:34px;
+      border:1px solid rgba(43,78,122,.55);
+      margin:0;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      background:
+        radial-gradient(900px 420px at 35% 10%, rgba(60,120,255,.12), transparent 60%),
+        radial-gradient(650px 420px at 90% 15%, rgba(160,80,255,.10), transparent 55%),
+        linear-gradient(180deg, rgba(12,21,40,.72), rgba(10,18,35,.76));
+    }
+
+    /* Horizontal panels */
+    .panelStrip{
+      position:relative;
+      width:200%;
+      height:100%;
+      display:flex;
+      transform:translateX(0%);
+      transition: transform 220ms ease;
+    }
+    .panel{
+      width:50%;
+      height:100%;
+      display:flex;
+      flex-direction:column;
+      padding:18px 18px 0 18px;
+      gap:12px;
+      overflow:hidden;
+    }
+
+    /* Identify panel layout: scrollable middle + fixed footer buttons */
+    .panelTitle{
+      font-size:44px;
+      font-weight:800;
+      letter-spacing:.2px;
+      margin:4px 0 0 0;
+      color:rgba(235,245,255,.90);
+      text-shadow: 0 16px 35px rgba(0,0,0,.35);
+    }
+
+    .inputRow{
       display:flex;
       gap:10px;
       align-items:center;
-      margin-bottom: 10px;
     }
 
-    /* Modal */
-    .modal{
-      position:fixed;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding: max(16px, env(safe-area-inset-top)) 14px max(16px, env(safe-area-inset-bottom));
-      background: rgba(0,0,0,.56);
-      z-index: 9998;
-      touch-action: none;
+    .field{
+      flex:1 1 auto;
+      height:64px;
+      border-radius:20px;
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid rgba(235,245,255,.14);
+      outline:none;
+      color:rgba(235,245,255,.88);
+      font-size:24px;
+      padding:0 18px;
+      box-shadow: inset 0 0 0 2px rgba(40,110,255,.20);
     }
-    .modalCard{
-      width:min(520px, 100%);
-      border-radius: 26px;
-      border: 3px solid var(--accentBorder);
-      background: linear-gradient(180deg, rgba(12,21,40,.96), rgba(8,16,31,.96));
-      box-shadow: 0 18px 60px rgba(0,0,0,.55);
-      padding: 16px;
-      backdrop-filter: blur(10px);
-      max-height: calc(100vh - 60px);
+    .field:focus{
+      border-color: rgba(160,200,255,.34);
+      box-shadow: inset 0 0 0 2px rgba(40,110,255,.34), 0 8px 20px rgba(0,0,0,.25);
+    }
+
+    .midScroll{
+      position:relative;
+      flex:1 1 auto;
+      min-height:0;
       overflow:auto;
-      -webkit-overflow-scrolling: touch;
+      -webkit-overflow-scrolling:touch;
+      padding-right:2px;
+      padding-bottom:10px;
     }
-    .modalTitle{
-      font-weight: 900;
-      letter-spacing: .2px;
-      color: rgba(235,245,255,.92);
-      font-size: clamp(22px, 6.5vw, 34px);
-      line-height: 1.05;
-      margin: 4px 2px 10px;
+
+    .detailsCard{
+      border-radius:26px;
+      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025));
+      border:1px solid rgba(235,245,255,.13);
+      padding:16px 16px 12px 16px;
+      box-shadow: inset 0 0 0 1px rgba(43,78,122,.22);
     }
-    .modalSub{
-      color: rgba(235,245,255,.72);
-      font-size: 15px;
-      margin: 0 2px 12px;
-      white-space: pre-wrap;
-      line-height: 1.28;
-    }
-    .modalBtns{
+
+    .detailsTop{
       display:flex;
       gap:12px;
-      margin-top: 10px;
-      flex-wrap:wrap;
+      align-items:flex-start;
+      justify-content:space-between;
+      margin-bottom:8px;
     }
-    .modalBtns .btn{
-      flex:1;
-      height: 54px;
-      font-size: 18px;
-      font-weight: 800;
-      min-width: 140px;
+    .bigNum{
+      font-size:54px;
+      font-weight:900;
+      line-height:1;
+      letter-spacing:.6px;
+      margin:0;
+    }
+    .pill{
+      flex:0 0 auto;
+      border-radius:999px;
+      padding:10px 14px;
+      font-size:18px;
+      color:rgba(235,245,255,.72);
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(235,245,255,.12);
+      align-self:flex-start;
+      margin-top:6px;
     }
 
-    .xCloseRow{
-      display:flex;
-      justify-content:flex-end;
-      margin: -6px -6px 6px;
+    .meaningScroll{
+      max-height:300px; /* internal scroll region requested */
+      overflow:auto;
+      -webkit-overflow-scrolling:touch;
+      padding-right:10px; /* space for scrollbar */
     }
-    .xBtn{
-      width:44px; height:44px;
-      border-radius: 14px;
-      border:1px solid var(--stroke2);
-      background: rgba(255,255,255,.03);
-      color: rgba(235,245,255,.82);
-      font-weight: 900;
-      font-size: 18px;
+    /* force visible scrollbar feel on WebKit */
+    .meaningScroll::-webkit-scrollbar{width:8px}
+    .meaningScroll::-webkit-scrollbar-thumb{
+      background:rgba(235,245,255,.18);
+      border-radius:999px;
+    }
+    .meaningScroll::-webkit-scrollbar-track{
+      background:rgba(0,0,0,.12);
+      border-radius:999px;
+    }
+
+    .para{
+      margin:10px 0;
+      color:rgba(235,245,255,.74);
+      font-size:18px;
+      line-height:1.35;
+    }
+    .meta{
+      margin:10px 0 0 0;
+      color:rgba(235,245,255,.55);
+      font-size:18px;
+      line-height:1.35;
+      white-space:pre-wrap;
+    }
+    .divider{
+      height:1px;
+      background:rgba(235,245,255,.10);
+      margin:14px 0 10px 0;
+    }
+    .hint{
+      margin:10px 0 0 0;
+      color:rgba(235,245,255,.42);
+      font-size:16px;
+      line-height:1.25;
+    }
+
+    .subFooter{
+      margin-top:12px;
+      color:rgba(235,245,255,.38);
+      font-size:16px;
+      line-height:1.25;
+    }
+
+    .btnDock{
+      position:relative;
+      flex:0 0 auto;
+      padding:10px 0 calc(12px + var(--safeB)) 0;
+      background:linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.18));
+    }
+
+    .btnStack{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .btn{
+      width:100%;
+      height:78px;
+      border-radius:999px;
+      border:1px solid rgba(235,245,255,.16);
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      color:rgba(235,245,255,.82);
+      font-size:34px;
+      font-weight:800;
+      letter-spacing:.2px;
       display:flex;
       align-items:center;
       justify-content:center;
       user-select:none;
       -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
+      box-shadow: 0 16px 30px rgba(0,0,0,.28);
+    }
+    .btn:active{transform:translateY(1px)}
+    .btnPrimary{
+      background:linear-gradient(180deg, rgba(47,111,255,.95), rgba(27,79,216,.95));
+      border-color: rgba(170,210,255,.26);
+      color:white;
+      text-shadow: 0 10px 20px rgba(0,0,0,.25);
+    }
+    .btnDanger{
+      background:linear-gradient(180deg, rgba(107,16,34,.72), rgba(58,14,22,.78));
+      border-color: rgba(255,140,160,.18);
+      color:rgba(255,235,238,.92);
+    }
+
+    .tinyFooterRow{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 4px 0 4px;
+      color:rgba(235,245,255,.28);
+      font-size:14px;
+      user-select:none;
+    }
+
+    /* Calendar panel */
+    .calHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding-top:4px;
+    }
+    .calTitle{
+      font-size:32px;
+      font-weight:900;
+      margin:6px 0 0 0;
+      color:rgba(235,245,255,.88);
+    }
+    .calControls{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      margin-top:6px;
+    }
+    .chipBtn{
+      height:56px;
+      padding:0 18px;
+      border-radius:999px;
+      border:1px solid rgba(235,245,255,.14);
+      background:rgba(255,255,255,.04);
+      color:rgba(235,245,255,.72);
+      font-size:22px;
+      font-weight:700;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .chipBtn:active{transform:translateY(1px)}
+
+    .monthRow{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      margin-top:4px;
+    }
+    select.monthSelect{
+      flex:1 1 auto;
+      height:58px;
+      border-radius:20px;
+      border:1px solid rgba(235,245,255,.14);
+      background:rgba(255,255,255,.04);
+      color:rgba(235,245,255,.80);
+      font-size:22px;
+      padding:0 16px;
+      outline:none;
+    }
+
+    .dow{
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
+      gap:10px;
+      margin-top:10px;
+      padding:0 2px;
+      color:rgba(235,245,255,.40);
+      font-weight:800;
+      font-size:16px;
+      text-transform:uppercase;
+      letter-spacing:.7px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
+      gap:10px;
+      margin-top:12px;
+      padding-bottom:12px;
+      overflow:auto;
+      -webkit-overflow-scrolling:touch;
+      flex:1 1 auto;
+      min-height:0;
+    }
+    .day{
+      position:relative;
+      height:70px;
+      border-radius:18px;
+      border:1px solid rgba(235,245,255,.10);
+      background:rgba(255,255,255,.03);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:rgba(235,245,255,.52);
+      font-size:20px;
+      font-weight:800;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .day.isOther{opacity:.35}
+    .day.isToday{
+      border-color: rgba(160,200,255,.30);
+      box-shadow: inset 0 0 0 2px rgba(40,110,255,.18);
+    }
+    .day.hasEntries{
+      border-color: rgba(47,111,255,.26);
+      box-shadow: inset 0 0 0 2px rgba(47,111,255,.16);
+      color:rgba(235,245,255,.74);
+    }
+
+    .calHint{
+      color:rgba(235,245,255,.34);
+      font-size:16px;
+      padding:10px 4px 14px 4px;
+    }
+
+    /* Modal system */
+    .modalShade{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.55);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      z-index:999;
+    }
+    .modalShade.show{display:flex}
+    .modal{
+      width:min(520px, 100%);
+      border-radius:30px;
+      background:linear-gradient(180deg, rgba(10,18,35,.94), rgba(8,14,28,.96));
+      border:1px solid rgba(43,78,122,.65);
+      box-shadow: 0 30px 70px rgba(0,0,0,.55);
+      position:relative;
+      overflow:hidden;
+    }
+    .modalInner{
+      padding:18px 18px 16px 18px;
+    }
+    .modalX{
+      position:absolute;
+      top:14px;
+      right:14px;
+      width:56px;
+      height:56px;
+      border-radius:18px;
+      border:1px solid rgba(235,245,255,.14);
+      background:rgba(255,255,255,.04);
+      color:rgba(235,245,255,.75);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:30px;
+      font-weight:900;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .modalX:active{transform:translateY(1px)}
+
+    .modalTitle{
+      margin:6px 0 8px 0;
+      font-size:40px;
+      font-weight:900;
+      color:rgba(235,245,255,.90);
+    }
+    .modalText{
+      color:rgba(235,245,255,.66);
+      font-size:18px;
+      line-height:1.35;
+      margin:0 0 12px 0;
+    }
+
+    .modalFieldLabel{
+      font-size:18px;
+      font-weight:800;
+      color:rgba(235,245,255,.55);
+      margin:12px 0 6px 0;
+    }
+    .modalInput{
+      width:100%;
+      height:60px;
+      border-radius:18px;
+      border:1px solid rgba(235,245,255,.14);
+      background:rgba(255,255,255,.04);
+      color:rgba(235,245,255,.86);
+      outline:none;
+      font-size:22px;
+      padding:0 16px;
+    }
+    .modalTextarea{
+      width:100%;
+      height:96px;
+      border-radius:18px;
+      border:1px solid rgba(235,245,255,.14);
+      background:rgba(255,255,255,.04);
+      color:rgba(235,245,255,.86);
+      outline:none;
+      font-size:18px;
+      padding:14px 16px;
+      resize:none;
+    }
+
+    .modalBtns2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-top:14px;
+    }
+    .modalBtn{
+      height:68px;
+      border-radius:999px;
+      border:1px solid rgba(235,245,255,.16);
+      background:rgba(255,255,255,.05);
+      color:rgba(235,245,255,.80);
+      font-size:28px;
+      font-weight:900;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .modalBtn:active{transform:translateY(1px)}
+    .modalBtnPrimary{
+      background:linear-gradient(180deg, rgba(47,111,255,.95), rgba(27,79,216,.95));
+      border-color: rgba(170,210,255,.26);
+      color:white;
+    }
+
+    /* Day list modal */
+    .dayListWrap{
+      margin-top:10px;
+      border-radius:22px;
+      border:1px solid rgba(235,245,255,.12);
+      background:rgba(255,255,255,.03);
+      overflow:hidden;
+      max-height:360px;
+    }
+    .dayList{
+      overflow:auto;
+      -webkit-overflow-scrolling:touch;
+      max-height:360px;
+    }
+    .dayRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:10px 14px; /* vertically tight */
+      border-bottom:1px solid rgba(235,245,255,.08);
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .dayRow:last-child{border-bottom:none}
+    .dayRow:active{background:rgba(255,255,255,.04)}
+    .dayRowNum{
+      font-size:26px;
+      font-weight:950;
+      letter-spacing:.4px;
+      color:rgba(235,245,255,.86);
+    }
+    .dayRowTime{
+      font-size:16px;
+      font-weight:800;
+      color:rgba(235,245,255,.45);
+    }
+    .dayRowNote{
+      margin-top:2px;
+      font-size:14px;
+      color:rgba(235,245,255,.40);
+      line-height:1.2;
+      max-width:100%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .dayRowLeft{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width:0;
     }
 
     /* Heart modal */
-    .heartWrap{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding: 10px 0 6px;
-    }
-    .heartSvg{
-      width: min(320px, 76vw);
-      height: auto;
-      filter: drop-shadow(0 18px 40px rgba(0,0,0,.55));
-      opacity: 0;
-      transform: scale(.78);
-      animation: popHeart 420ms cubic-bezier(.2,.9,.2,1) forwards;
-    }
-    @keyframes popHeart{
-      0%{ transform: scale(.78); opacity: 0; }
-      70%{ transform: scale(1.06); opacity: 1; }
-      100%{ transform: scale(1.00); opacity: 1; }
-    }
-
-    .touchLock{
-      position:fixed;
-      inset:0;
-      z-index: 9997;
-      background: transparent;
-      pointer-events:none;
-    }
-    .touchLock.on{ pointer-events:auto; }
-
-    /* Calendar */
-    #calendar{
-      overflow:auto;
-      -webkit-overflow-scrolling: touch;
-      touch-action: pan-y;
-    }
-    .calTop{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      margin-top: 10px;
-    }
-    .calTop .field{ height:52px; border-radius: 18px; }
-    .calTop .btn.small{ height:52px; border-radius: 18px; }
-
-    .calGrid{
-      margin-top: 12px;
-      display:grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 8px;
-      width:100%;
-    }
-    .calDow{
+    .heartBig{
+      font-size:110px;
+      line-height:1;
       text-align:center;
-      font-size: 12px;
-      color: rgba(235,245,255,.54);
-      font-weight: 800;
-      letter-spacing:.2px;
-      padding: 2px 0 4px;
-      user-select:none;
+      margin:8px 0 0 0;
+      filter: drop-shadow(0 18px 30px rgba(0,0,0,.35));
+    }
+    .heartMsg{
+      text-align:center;
+      font-size:28px;
+      font-weight:900;
+      margin:8px 0 18px 0;
+      color:rgba(235,245,255,.90);
     }
 
-    .calCell{
-      border:1px solid rgba(235,245,255,.10);
-      background: rgba(255,255,255,.02);
-      border-radius: 16px;
-      min-height: 56px;
-      padding: 8px 8px 6px;
-      display:flex;
-      flex-direction:column;
-      justify-content:flex-start;
-      gap:6px;
-      user-select:none;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-    }
-    .calCell .dnum{
-      font-weight: 900;
-      font-size: 14px;
-      color: rgba(235,245,255,.76);
-      line-height: 1;
-    }
-    .calCell.hasData{
-      border-color: rgba(90,150,255,.45);
-      background: rgba(43,78,122,.22);
-      box-shadow: 0 12px 24px rgba(0,0,0,.18);
-    }
-    .calCell.outMonth{ opacity:.42; }
-
-    .calHint{
-      margin-top:10px;
-      font-size: 13px;
-      color: rgba(235,245,255,.44);
+    /* Small utility */
+    .srOnly{
+      position:absolute;
+      left:-9999px;
+      top:auto;
+      width:1px;height:1px;
+      overflow:hidden;
     }
   </style>
 </head>
 
 <body>
-  <div class="touchLock" id="touchLock"></div>
-
   <div class="app" id="appRoot">
-    <div class="logoTitle" aria-label="Angel Numbers Tracker">
-      <svg viewBox="0 0 900 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Angel Numbers Tracker">
-        <defs>
-          <linearGradient id="angG" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stop-color="#8a6bff"/>
-            <stop offset="55%" stop-color="#4fa3ff"/>
-            <stop offset="100%" stop-color="#2f78ff"/>
-          </linearGradient>
-          <filter id="angS" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="rgba(0,0,0,.35)"/>
-          </filter>
-        </defs>
-
-        <g transform="translate(46 24)" filter="url(#angS)">
-          <rect x="0" y="0" width="92" height="92" rx="26" fill="rgba(255,255,255,.06)" stroke="rgba(235,245,255,.22)" stroke-width="2"/>
-          <ellipse cx="46" cy="24" rx="20" ry="8" fill="none" stroke="rgba(235,245,255,.88)" stroke-width="4" opacity=".92"/>
-
-          <path d="M46 50
-                   C34 42, 22 44, 16 54
-                   C24 58, 32 66, 38 76
-                   C40 66, 43 58, 46 50Z"
-                fill="none" stroke="url(#angG)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-
-          <path d="M46 50
-                   C58 42, 70 44, 76 54
-                   C68 58, 60 66, 54 76
-                   C52 66, 49 58, 46 50Z"
-                fill="none" stroke="url(#angG)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-
-          <path d="M46 34 L46 42" stroke="rgba(235,245,255,.82)" stroke-width="4" stroke-linecap="round"/>
-          <path d="42 38 L50 38" stroke="rgba(235,245,255,.82)" stroke-width="4" stroke-linecap="round"/>
-        </g>
-
-        <text x="160" y="92"
-              font-family="system-ui,Segoe UI,Roboto,Helvetica,Arial"
-              font-size="66"
-              font-weight="860"
-              fill="url(#angG)"
-              letter-spacing=".6"
-              filter="url(#angS)">Angel Numbers Tracker</text>
-      </svg>
-    </div>
-
-    <!-- Version under logo -->
-    <div class="verUnderLogo" id="verUnderLogo">v—</div>
-
-    <div class="screenArea" id="screenArea">
-
-      <!-- HOME (Identify) -->
-      <div id="home" class="card">
-        <div id="homeScroll">
-          <div class="homeTitle">Identify Angel Number</div>
-
-          <div class="homeTopRow">
-            <input id="homeIdNum" class="field" inputmode="numeric"
-                   autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-                   placeholder="Enter a number (e.g., 1111, 1212, 1234)" />
-          </div>
-
-          <div class="meaningCard" id="homeMeaningCard">
-            <div class="meaningTop">
-              <div id="homeNumBig" class="numBig">—</div>
-              <div id="homePatternPill" class="patternPill">Pattern: —</div>
-            </div>
-
-            <div id="homeMeaningText" class="meaningText">
-              Enter a number above to see its commonly shared meaning.
-            </div>
-
-            <div id="homeMeta" class="metaScroll">
-How to use: Treat the meaning as a reflective prompt—what it “means” depends on context and personal interpretation.
-            </div>
-
-            <div class="disclaimer">
-              Cultural note: these meanings come from numerology/“angel number” traditions and vary by source.
-              Treat as reflective prompts, not facts or predictions.
-            </div>
-          </div>
-
-          <div class="subtle">Inspired by a real Angel.</div>
-          <div class="subtle">Local-only. No accounts. No cloud.</div>
-        </div>
-
-        <!-- Fixed footer buttons ALWAYS visible -->
-        <div id="homeFooter">
-          <div class="homeActions">
-            <button id="btnAddToCalendar" class="btn primary">Add to Calendar</button>
-            <button id="btnViewCalendar" class="btn">View Calendar</button>
-            <button id="btnHomeExport" class="btn">Export</button>
-            <button id="btnExitHome" class="btn danger">Exit</button>
-          </div>
-
-          <div class="footerTiny">
-            <div id="homeVerLabel" aria-label="Version label">v—</div>
-            <div>developed by Keyth Jyles</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- CALENDAR -->
-      <div id="calendar" class="card hidden">
-        <div class="row center">
-          <button id="btnExportMonth" class="btn small">Export</button>
-          <div class="grow"></div>
-          <button id="btnBackFromCalendar" class="btn small">Back</button>
-        </div>
-
-        <div class="calTop">
-          <input id="calMonth" class="field" type="month" />
-          <button id="btnCalToday" class="btn small">Today</button>
-        </div>
-
-        <div class="calGrid" id="calDowRow"></div>
-        <div class="calGrid" id="calGrid"></div>
-        <div class="calHint">Tap a highlighted day to view entries.</div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Info modal -->
-  <div id="infoModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
-    <div class="modalCard">
-      <div class="xCloseRow">
-        <button class="xBtn" id="btnInfoX" aria-label="Close">×</button>
-      </div>
-      <div class="modalTitle" id="infoTitle">Info</div>
-      <div class="modalSub" id="infoSub">—</div>
-      <div class="modalBtns">
-        <button id="btnInfoOk" class="btn primary">OK</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Export modal -->
-  <div id="exportModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle">
-    <div class="modalCard">
-      <div class="modalTitle" id="exportModalTitle">Export ready</div>
-      <div class="modalSub" id="exportModalSub">
-Export report was copied to your clipboard. You can paste it into any messaging app, email, Notes, or any app that accepts text.
-
-Share sends the report to another app.
-Save creates a .txt file on your device.
-      </div>
-      <div class="modalBtns" style="flex-wrap:nowrap;">
-        <button id="btnExportClose" class="btn" style="min-width:0; flex:1 1 0; font-size:16px; height:52px;">Close</button>
-        <button id="btnExportShare" class="btn" style="min-width:0; flex:1 1 0; font-size:16px; height:52px;">Share</button>
-        <button id="btnExportSave" class="btn primary" style="min-width:0; flex:1 1 0; font-size:16px; height:52px;">Save .txt</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Add-to-Calendar modal (new flow) -->
-  <div id="addCalModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="addCalTitle">
-    <div class="modalCard">
-      <div class="xCloseRow">
-        <button class="xBtn" id="btnAddCalX" aria-label="Close">×</button>
-      </div>
-
-      <div class="modalTitle" id="addCalTitle">Add to Calendar</div>
-      <div class="modalSub" id="addCalSub">This adds an entry to the in-app calendar (local-only).</div>
-
-      <div class="label" style="margin-top:6px;">Number</div>
-      <div id="addCalNumber" class="field" style="display:flex; align-items:center; font-weight:900;">—</div>
-
-      <div class="label">Notes (optional)</div>
-      <textarea id="addCalNotes" class="field" placeholder="Where did you see it? What was happening?"></textarea>
-
-      <div class="modalBtns">
-        <button id="btnAddCalAdd" class="btn primary">Add</button>
-        <button id="btnAddCalCopy" class="btn">Copy</button>
-        <button id="btnAddCalExport" class="btn">Export</button>
-        <button id="btnAddCalCancel" class="btn">Cancel</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Heart modal -->
-  <div id="heartModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="heartTitle">
-    <div class="modalCard">
-      <div class="xCloseRow">
-        <button class="xBtn" id="btnHeartX" aria-label="Close">×</button>
-      </div>
-      <div class="modalTitle" id="heartTitle">A message</div>
-      <div class="heartWrap" aria-hidden="true">
-        <svg class="heartSvg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="hg" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#ff6aa6"/>
-              <stop offset="55%" stop-color="#b56bff"/>
-              <stop offset="100%" stop-color="#4fa3ff"/>
-            </linearGradient>
-          </defs>
-          <path d="M60 104
-                   C60 104, 18 78, 18 46
-                   C18 30, 30 20, 44 20
-                   C52 20, 57 24, 60 28
-                   C63 24, 68 20, 76 20
-                   C90 20, 102 30, 102 46
-                   C102 78, 60 104, 60 104Z"
-                fill="url(#hg)" stroke="rgba(235,245,255,.85)" stroke-width="3" />
+    <div class="topbar">
+      <div class="logoBadge" aria-hidden="true">
+        <svg viewBox="0 0 64 64" fill="none">
+          <path d="M32 10c8 0 14 6 14 14" stroke="rgba(235,245,255,.75)" stroke-width="3.4" stroke-linecap="round"/>
+          <path d="M18 22c-7 3-10 8-10 14 0 9 8 16 18 16 2 0 4-.3 6-1.1" stroke="rgba(120,170,255,.85)" stroke-width="3.6" stroke-linecap="round"/>
+          <path d="M46 22c7 3 10 8 10 14 0 9-8 16-18 16-2 0-4-.3-6-1.1" stroke="rgba(180,120,255,.85)" stroke-width="3.6" stroke-linecap="round"/>
+          <path d="M20 36c6 0 8 10 12 10s6-10 12-10" stroke="rgba(235,245,255,.70)" stroke-width="3.2" stroke-linecap="round"/>
+          <path d="M32 46v8" stroke="rgba(235,245,255,.55)" stroke-width="3.2" stroke-linecap="round"/>
         </svg>
       </div>
-      <div class="modalSub" id="heartBody" style="font-size:18px; font-weight:800; color: rgba(235,245,255,.88);">
-        The Angels love you Timmy.
+      <div class="brandWrap">
+        <h1 class="brand">Angel Numbers Tracker</h1>
+        <div class="versionTop" id="versionTop" title="Triple-tap">v1.1A2</div>
       </div>
-      <div class="modalBtns">
-        <button id="btnHeartClose" class="btn primary">Close</button>
+    </div>
+
+    <div class="card">
+      <div class="cardInner">
+        <div class="panelStrip" id="panelStrip">
+          <!-- Panel 0: Identify -->
+          <section class="panel" id="panelIdentify" aria-label="Identify Angel Number">
+            <div class="panelTitle">Identify Angel Number</div>
+
+            <div class="inputRow">
+              <input
+                id="numInput"
+                class="field"
+                inputmode="numeric"
+                autocomplete="off"
+                autocapitalize="off"
+                spellcheck="false"
+                placeholder="Enter a number (e.g., 1111)"
+              />
+            </div>
+
+            <div class="midScroll" id="identifyMidScroll">
+              <div class="detailsCard">
+                <div class="detailsTop">
+                  <p class="bigNum" id="bigNum">—</p>
+                  <div class="pill" id="patternPill">Pattern: —</div>
+                </div>
+
+                <div class="meaningScroll" id="meaningScroll">
+                  <div class="para" id="meaningText">
+                    Enter a number above to see its commonly shared meaning.
+                  </div>
+
+                  <div class="divider"></div>
+
+                  <div class="meta" id="lensText">
+How to use: Treat the meaning as a reflective prompt—what it “means” depends on context and personal interpretation.
+
+Cultural note: these meanings come from numerology/“angel number” traditions and vary by source. Treat as reflective prompts, not facts or predictions.
+                  </div>
+                </div>
+
+                <div class="subFooter" id="tagline">Inspired by a real Angel.</div>
+                <div class="subFooter">Local-only. No accounts. No cloud.</div>
+              </div>
+            </div>
+
+            <div class="btnDock">
+              <div class="btnStack">
+                <div class="btn btnPrimary" id="btnAddToCalendar">Add to Calendar</div>
+                <div class="btn" id="btnViewCalendar">View Calendar</div>
+                <div class="btn" id="btnExportAll">Export</div>
+                <div class="btn btnDanger" id="btnExit">Exit</div>
+              </div>
+
+              <div class="tinyFooterRow">
+                <div id="footerLeft">v1.1A2</div>
+                <div id="footerRight">developed by Keyth Jyles</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Panel 1: Calendar -->
+          <section class="panel" id="panelCalendar" aria-label="Calendar">
+            <div class="calHeader">
+              <div class="calTitle">Calendar</div>
+              <div class="calControls">
+                <div class="chipBtn" id="btnToday">Today</div>
+                <div class="chipBtn" id="btnBackToIdentify">Back</div>
+              </div>
+            </div>
+
+            <div class="monthRow">
+              <select class="monthSelect" id="monthSelect" aria-label="Month"></select>
+            </div>
+
+            <div class="dow">
+              <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+            </div>
+
+            <div class="grid" id="calGrid" aria-label="Calendar grid"></div>
+
+            <div class="calHint">Tap a highlighted day to view entries.</div>
+
+            <div class="btnDock">
+              <div class="btnStack">
+                <div class="btn" id="btnCalBackHome">Back</div>
+                <div class="btn btnDanger" id="btnCalExit">Exit</div>
+              </div>
+
+              <div class="tinyFooterRow">
+                <div>v1.1A2</div>
+                <div></div>
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Modal Shade -->
+  <div class="modalShade" id="modalShade" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal" id="modalBox">
+      <div class="modalX" id="modalX" aria-label="Close">×</div>
+      <div class="modalInner" id="modalInner"></div>
     </div>
   </div>
 
   <script>
-(() => {
-  "use strict";
-
-  const APP_VERSION = "v1.1A6";
-  const STORAGE_KEY = "angel_numbers_records_v1";
-  const DAY_MS = 24*60*60*1000;
-
-  const TEST_DATA_ENABLED = true;
-
-  const $ = (id) => document.getElementById(id);
-
-  /* ===== Meanings ===== */
-
-  const DIGIT_MEANING = {
-    "0": "0 is often linked with wholeness, source, and fresh cycles—an invitation to reset and widen perspective.",
-    "1": "1 is often linked with new beginnings, initiative, focus, and the power of attention.",
-    "2": "2 is often linked with balance, partnership, patience, and alignment through cooperation.",
-    "3": "3 is often linked with creativity, expression, growth, and encouragement to communicate.",
-    "4": "4 is often linked with stability, foundations, discipline, and building what lasts.",
-    "5": "5 is often linked with change, adaptability, movement, and a call to embrace transition.",
-    "6": "6 is often linked with care, responsibility, home, and recalibrating priorities toward wellbeing.",
-    "7": "7 is often linked with insight, inner wisdom, spiritual inquiry, and learning through reflection.",
-    "8": "8 is often linked with strength, momentum, material mastery, and confident stewardship of resources.",
-    "9": "9 is often linked with closure, compassion, integration, and completing a cycle with grace."
-  };
-
-  const ANGEL_MAP = {
-    "000": "Reset and re-center. A ‘clean slate’ moment—expand perspective and begin again.",
-    "111": "Focus and intention. A reminder to notice your thoughts and aim them deliberately.",
-    "222": "Balance and alignment. Patience—let partnerships and decisions settle into place.",
-    "333": "Creativity and support. Express yourself; keep building and communicating clearly.",
-    "444": "Foundations and stability. Stay disciplined; the work you’re doing is structural.",
-    "555": "Change and movement. A shift is underway—adapt, release the old, step forward.",
-    "666": "Recalibration. Check priorities; return to what’s healthy and truly important.",
-    "777": "Insight and learning. Trust your inner guidance; deepen study and reflection.",
-    "888": "Momentum and abundance. Good stewardship; practical progress and strong energy.",
-    "999": "Completion. Close a chapter; integrate lessons; make room for what’s next.",
-    "1010": "Fresh cycle + alignment. A restart with a clear direction—stay awake and intentional.",
-    "1111": "Gateway / heightened awareness. Focus your intent; clarify what you’re building.",
-    "1212": "Realignment and growth. Keep moving—small consistent steps bring a new level.",
-    "1234": "Step-by-step progress. Keep it simple; the path is sequential and workable.",
-    "1414": "Grounded change. Build stability while adjusting—practical updates, not chaos.",
-    "1515": "Change with intention. Choose the transition you want; don’t drift into it.",
-    "2020": "Balance and reflection. Look at both sides; correct course gently.",
-    "2222": "Deep alignment. Commit to balance; trust the process over the impulse.",
-    "2424": "Reinforced signal (repeated block 24): a theme repeating until you notice it."
-  };
-
-  /* ===== Storage ===== */
-
-  function loadRecords(){
-    try{
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if(!raw) return [];
-      const arr = JSON.parse(raw);
-      if(!Array.isArray(arr)) return [];
-      return arr
-        .filter(r => r && typeof r.ts === "number")
-        .map(r => ({
-          ts: r.ts,
-          number: (r.number ?? "").toString(),
-          pattern: (r.pattern ?? "").toString(),
-          meaning: (r.meaning ?? "").toString(),
-          notes: (r.notes ?? "").toString()
-        }))
-        .sort((a,b)=> b.ts - a.ts);
-    }catch{
-      return [];
-    }
-  }
-
-  function saveRecords(recs){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(recs));
-  }
-
-  function addRecord(rec){
-    const recs = loadRecords();
-    recs.unshift(rec);
-    saveRecords(recs);
-  }
-
-  /* ===== Utilities ===== */
-
-  function fmtDateTime(ts){
-    const d = new Date(ts);
-    const parts = new Intl.DateTimeFormat(undefined, {
-      year:"numeric", month:"2-digit", day:"2-digit",
-      hour:"2-digit", minute:"2-digit", second:"2-digit"
-    }).formatToParts(d);
-    const map = Object.fromEntries(parts.map(p=>[p.type,p.value]));
-    const mm = map.month, dd = map.day, yy = map.year;
-    const hh = map.hour, mi = map.minute, ss = map.second;
-    const dp = map.dayPeriod ? ` ${map.dayPeriod}` : "";
-    return `${mm}/${dd}/${yy}, ${hh}:${mi}:${ss}${dp}`;
-  }
-
-  function startOfDay(ts){
-    const d = new Date(ts);
-    d.setHours(0,0,0,0);
-    return d.getTime();
-  }
-
-  function normalizeNumberInput(raw){
-    const s = String(raw ?? "").trim();
-    return s.replace(/[^\d]/g, "");
-  }
-
-  async function copyToClipboard(text){
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      await navigator.clipboard.writeText(text);
-      return true;
-    }
-    return false;
-  }
-
-  function downloadText(text, filename){
-    const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }
-
-  async function saveTextWithPicker(text, suggestedName){
-    const canPick = typeof window.showSaveFilePicker === "function";
-    if(!canPick) return false;
-
-    const opts = {
-      suggestedName: suggestedName || "angel_numbers_report.txt",
-      types: [{ description: "Text", accept: {"text/plain": [".txt"]} }]
-    };
-
-    const handle = await window.showSaveFilePicker(opts);
-    const writable = await handle.createWritable();
-    await writable.write(new Blob([text], {type:"text/plain;charset=utf-8"}));
-    await writable.close();
-    return true;
-  }
-
-  function isShareAvailable(){
-    return !!(navigator.share && typeof navigator.share === "function");
-  }
-
-  /* ===== Pattern + meaning ===== */
-
-  function isAllSame(s){ return !!(s && s.length >= 2 && s.split("").every(ch => ch === s[0])); }
-  function isPalindrome(s){ if(!s || s.length < 3) return false; return s === s.split("").reverse().join(""); }
-  function isRepeatedHalf(s){ if(!s || s.length < 4 || s.length % 2) return false; const h=s.slice(0,s.length/2); return h+h===s; }
-  function isAscendingSeq(s){
-    if(!s || s.length < 3) return false;
-    for(let i=1;i<s.length;i++){
-      const a=s.charCodeAt(i-1)-48, b=s.charCodeAt(i)-48;
-      if(b !== a+1) return false;
-    }
-    return true;
-  }
-  function isDescendingSeq(s){
-    if(!s || s.length < 3) return false;
-    for(let i=1;i<s.length;i++){
-      const a=s.charCodeAt(i-1)-48, b=s.charCodeAt(i)-48;
-      if(b !== a-1) return false;
-    }
-    return true;
-  }
-
-  function detectPattern(s){
-    if(!s) return "—";
-    if(isAllSame(s)) return `Repeating ${s[0]}s`;
-    if(isAscendingSeq(s)) return "Sequential (up)";
-    if(isDescendingSeq(s)) return "Sequential (down)";
-    if(isRepeatedHalf(s)) return "Double pattern";
-    if(isPalindrome(s)) return "Mirror (palindrome)";
-    if(s.length === 3 && s[0] === s[2] && s[0] !== s[1]) return "Sandwich pattern";
-    return "Mixed pattern";
-  }
-
-  function digitSummary(s){
-    if(!s) return "";
-    if(isAllSame(s)) return DIGIT_MEANING[s[0]] || "";
-    const counts = {};
-    for(const ch of s){ counts[ch] = (counts[ch]||0) + 1; }
-    let best=null, bestN=0;
-    for(const [k,v] of Object.entries(counts)){ if(v>bestN){ bestN=v; best=k; } }
-    if(best && bestN >= Math.max(2, Math.ceil(s.length * 0.6))){
-      return DIGIT_MEANING[best] || "";
-    }
-    const sum = s.split("").reduce((a,ch)=>a+(ch.charCodeAt(0)-48),0);
-    const root = ((sum - 1) % 9) + 1;
-    const rootLine = DIGIT_MEANING[String(root)] || "";
-    return rootLine ? `Digit-sum lens (${sum} → ${root}): ${rootLine}` : "";
-  }
-
-  function deriveMeaning(s, pattern){
-    if(!s) return {pattern:"—", meaning:"Enter a number to see its commonly shared meaning."};
-
-    if(ANGEL_MAP[s]) return {pattern, meaning: ANGEL_MAP[s]};
-
-    if(isAllSame(s) && s.length >= 2){
-      const d=s[0];
-      const base = DIGIT_MEANING[d] || "A repeating pattern—often treated as a heightened emphasis.";
-      return {pattern, meaning: `Emphasis pattern (${s}): ${base}`};
-    }
-
-    if(pattern === "Sequential (up)") return {pattern, meaning:"Step-by-step progress. Keep it simple, keep moving, and let momentum build."};
-    if(pattern === "Sequential (down)") return {pattern, meaning:"Release and simplify. Let go of what’s extra and return to essentials."};
-
-    if(pattern === "Double pattern"){
-      const half = s.slice(0, s.length/2);
-      const lens = digitSummary(half);
-      return {pattern, meaning: `Reinforced signal (repeated block ${half}): a theme repeating until you notice it.\n${lens}`.trim()};
-    }
-
-    if(pattern === "Mirror (palindrome)"){
-      const lens = digitSummary(s);
-      return {pattern, meaning: `Reflection and alignment. Consider what’s being mirrored back—choices, habits, or timing.\n${lens}`.trim()};
-    }
-
-    const lens = digitSummary(s);
-    const fallback = "A general interpretation is heightened awareness: notice your thoughts, environment, and choices—then act deliberately.";
-    return {pattern, meaning: lens ? `${fallback}\n${lens}` : fallback};
-  }
-
-  function buildIdentifyMeta(n, pattern){
-    if(!n) return "How to use: Treat the meaning as a reflective prompt—what it “means” depends on context and personal interpretation.";
-    const lens = digitSummary(n);
-    const mapped = ANGEL_MAP[n] ? "Direct map: recognized as a common “named” angel number." : "Direct map: not in the preset list; derived from pattern + digit lenses.";
-    const digits = n.split("").join(" • ");
-    const uniqueDigits = [...new Set(n.split(""))].sort().join(", ");
-
-    const lines = [];
-    lines.push(`Digits: ${digits}`);
-    if(uniqueDigits) lines.push(`Unique digits: ${uniqueDigits}`);
-    lines.push(mapped);
-    if(lens) lines.push(lens);
-    lines.push(`Pattern method: repeating / sequential / double-block / mirror / sandwich / mixed.`);
-    return lines.join("\n");
-  }
-
-  /* ===== Touch lock ===== */
-
-  let lockTimer = null;
-  function lockTouches(ms=180){
-    const el = $("touchLock");
-    el.classList.add("on");
-    if(lockTimer) clearTimeout(lockTimer);
-    lockTimer = setTimeout(() => el.classList.remove("on"), ms);
-  }
-  function unlockTouches(){
-    const el = $("touchLock");
-    el.classList.remove("on");
-    if(lockTimer) clearTimeout(lockTimer);
-    lockTimer = null;
-  }
-
-  /* ===== Screens ===== */
-
-  let currentScreen = "home";
-  function showInstant(screen){
-    unlockTouches();
-    for(const s of ["home","calendar"]){
-      $(s).classList.toggle("hidden", s !== screen);
-    }
-    currentScreen = screen;
-    if(screen === "calendar") { initMonthDefaultIfNeeded(); renderCalendar(); }
-    try{ document.activeElement?.blur(); }catch{}
-  }
-
-  /* ===== Styled modals ===== */
-
-  function openInfo(title, message){
-    $("infoTitle").textContent = title || "Info";
-    $("infoSub").textContent = message || "—";
-    $("infoModal").classList.remove("hidden");
-    lockTouches(140);
-  }
-  function closeInfo(){
-    $("infoModal").classList.add("hidden");
-    unlockTouches();
-  }
-  $("btnInfoX").addEventListener("click", (e)=>{ e.preventDefault(); closeInfo(); });
-  $("btnInfoOk").addEventListener("click", (e)=>{ e.preventDefault(); closeInfo(); });
-  $("infoModal").addEventListener("click", (e)=>{ if(e.target === $("infoModal")) closeInfo(); });
-
-  function openHeart(){ $("heartModal").classList.remove("hidden"); lockTouches(140); }
-  function closeHeart(){ $("heartModal").classList.add("hidden"); unlockTouches(); }
-  $("btnHeartX").addEventListener("click", (e)=>{ e.preventDefault(); closeHeart(); });
-  $("btnHeartClose").addEventListener("click", (e)=>{ e.preventDefault(); closeHeart(); });
-  $("heartModal").addEventListener("click", (e)=>{ if(e.target === $("heartModal")) closeHeart(); });
-
-  /* ===== Export modal ===== */
-
-  let exportPayload = null;
-
-  function openExportModal(payload){
-    exportPayload = payload;
-    $("exportModal").classList.remove("hidden");
-    lockTouches(140);
-
-    $("btnExportClose").disabled = true;
-    $("btnExportShare").disabled = true;
-    $("btnExportSave").disabled  = true;
-
-    setTimeout(() => {
-      $("btnExportClose").disabled = false;
-      $("btnExportShare").disabled = !isShareAvailable();
-      $("btnExportSave").disabled  = false;
-    }, 200);
-  }
-
-  function closeExportModal(){
-    exportPayload = null;
-    $("exportModal").classList.add("hidden");
-    unlockTouches();
-  }
-
-  $("btnExportClose").addEventListener("click", (e)=>{ e.preventDefault(); closeExportModal(); });
-  $("exportModal").addEventListener("click", (e)=>{ if(e.target === $("exportModal")) closeExportModal(); });
-
-  $("btnExportShare").addEventListener("click", async (e)=>{
-    e.preventDefault();
-    if(!exportPayload) return;
-    if($("btnExportShare").disabled) return;
-    if(!isShareAvailable()){
-      openInfo("Share not available", "Share is not available on this device/browser.");
-      return;
-    }
-    try{
-      await navigator.share({ title: "Angel Numbers Tracker Export", text: exportPayload.text });
-    }catch{}
-  });
-
-  $("btnExportSave").addEventListener("click", async (e)=>{
-    e.preventDefault();
-    if(!exportPayload) return;
-    if($("btnExportSave").disabled) return;
-
-    try{
-      const ok = await saveTextWithPicker(exportPayload.text, exportPayload.filename);
-      if(ok){ openInfo("Saved", "Saved."); return; }
-    }catch{}
-
-    downloadText(exportPayload.text, exportPayload.filename || "angel_numbers_report.txt");
-  });
-
-  function buildReportHeader({title, rangeLabel, notes}){
-    const now = fmtDateTime(Date.now());
-    const lines = [
-      "Angel Numbers Tracker — Export Report",
-      `App Version: ${APP_VERSION}`,
-      `Report: ${title}`,
-      `Generated: ${now}`,
-      rangeLabel ? `Range: ${rangeLabel}` : "",
-      "",
-      "How this data was captured:",
-      "- Sightings are entered manually into Angel Numbers Tracker on this device.",
-      "- Data is stored locally on the phone (no cloud sync, no account).",
-      "- Each record may include the number, pattern type, a cultural/numerology meaning, and optional notes.",
-      "",
-      notes ? notes : "",
-      "",
-      "------------------------------",
-      ""
-    ].filter(Boolean);
-    return lines.join("\n");
-  }
-
-  function exportReport(recs, headerInfo, filenameBase){
-    const header = buildReportHeader(headerInfo);
-
-    const lines = recs.map(r => {
-      const dt = fmtDateTime(r.ts);
-      const num = `Number: ${r.number || "—"}`;
-      const pat = `Pattern: ${r.pattern || "—"}`;
-      const notes = (r.notes && r.notes.trim()) ? r.notes.trim() : "None";
-      const meaning = (r.meaning && r.meaning.trim()) ? r.meaning.trim() : "None";
-      return `${dt}\n${num}\nNotes: ${notes}\n${pat}\nMeaning: ${meaning}\n`;
-    });
-
-    const out = header + lines.join("\n");
-    const ts = new Date();
-    const y = ts.getFullYear();
-    const m = String(ts.getMonth()+1).padStart(2,"0");
-    const d = String(ts.getDate()).padStart(2,"0");
-    const filename = `${filenameBase || "angel_numbers_report"}_${y}-${m}-${d}.txt`;
-
-    (async () => {
-      try{ await copyToClipboard(out); }catch{}
-      openExportModal({ text: out, filename });
-    })();
-  }
-
-  /* ===== Home Identify (auto-search) ===== */
-
-  let lastIdentify = { number:"", pattern:"", meaning:"" };
-
-  function renderHomeIdentify(){
-    const raw = $("homeIdNum").value;
-    const n = normalizeNumberInput(raw);
-
-    if(!n){
-      $("homeNumBig").textContent = "—";
-      $("homePatternPill").textContent = "Pattern: —";
-      $("homeMeaningText").textContent =
-        "Enter a number above to see its commonly shared meaning.";
-      $("homeMeta").textContent =
-        "How to use: Treat the meaning as a reflective prompt—what it “means” depends on context and personal interpretation.";
-      lastIdentify = { number:"", pattern:"", meaning:"" };
-      return;
-    }
-
-    const pattern = detectPattern(n);
-    const out = deriveMeaning(n, pattern);
-
-    $("homeNumBig").textContent = n;
-    $("homePatternPill").textContent = `Pattern: ${out.pattern || pattern || "—"}`;
-    $("homeMeaningText").textContent = out.meaning || "—";
-    $("homeMeta").textContent = buildIdentifyMeta(n, out.pattern || pattern || "—");
-
-    lastIdentify = {
-      number: n,
-      pattern: (out.pattern || pattern || "—"),
-      meaning: (out.meaning || "—")
-    };
-  }
-
-  $("homeIdNum").addEventListener("input", renderHomeIdentify);
-  $("homeIdNum").addEventListener("keydown", (e)=>{
-    if(e.key === "Enter"){
-      e.preventDefault();
-      try{ e.target.blur(); }catch{}
-    }
-  });
-
-  /* ===== Add-to-Calendar popup flow ===== */
-
-  function openAddCalModal(){
-    const n = lastIdentify.number || normalizeNumberInput($("homeIdNum").value);
-    if(!n){
-      openInfo("Enter a number", "Type an angel number first, then tap Add to Calendar.");
-      return;
-    }
-
-    $("addCalNumber").textContent = n;
-    $("addCalNotes").value = "";
-    $("addCalModal").classList.remove("hidden");
-    lockTouches(140);
-
-    // Do NOT auto-focus the notes (prevents keyboard pop if you don't want it)
-    try{ document.activeElement?.blur(); }catch{}
-  }
-
-  function closeAddCalModal(){
-    $("addCalModal").classList.add("hidden");
-    unlockTouches();
-    try{ document.activeElement?.blur(); }catch{}
-  }
-
-  $("btnAddCalX").addEventListener("click", (e)=>{ e.preventDefault(); closeAddCalModal(); });
-  $("btnAddCalCancel").addEventListener("click", (e)=>{ e.preventDefault(); closeAddCalModal(); });
-  $("addCalModal").addEventListener("click", (e)=>{ if(e.target === $("addCalModal")) closeAddCalModal(); });
-
-  function buildSingleEntryText(rec){
-    return [
-      "Angel Numbers Tracker — Entry",
-      `App Version: ${APP_VERSION}`,
-      `Captured: ${fmtDateTime(rec.ts)}`,
-      "------------------------------",
-      `Number: ${rec.number || "—"}`,
-      `Pattern: ${rec.pattern || "—"}`,
-      `Meaning: ${rec.meaning || "—"}`,
-      `Notes: ${(rec.notes && rec.notes.trim()) ? rec.notes.trim() : "None"}`
-    ].join("\n");
-  }
-
-  $("btnAddCalAdd").addEventListener("click", () => {
-    const n = String($("addCalNumber").textContent || "").trim();
-    const notes = String($("addCalNotes").value || "").trim();
-
-    const pattern = lastIdentify.pattern || detectPattern(n);
-    const meaning = lastIdentify.meaning || deriveMeaning(n, detectPattern(n)).meaning;
-
-    const ts = Date.now();
-    const rec = { ts, number: n, pattern, meaning, notes };
-
-    addRecord(rec);
-    closeAddCalModal();
-    openInfo("Added", `Saved to in-app calendar:\n\n${n}\n${fmtDateTime(ts)}`);
-  });
-
-  $("btnAddCalCopy").addEventListener("click", async () => {
-    const n = String($("addCalNumber").textContent || "").trim();
-    const notes = String($("addCalNotes").value || "").trim();
-    const pattern = lastIdentify.pattern || detectPattern(n);
-    const meaning = lastIdentify.meaning || deriveMeaning(n, detectPattern(n)).meaning;
-    const rec = { ts: Date.now(), number: n, pattern, meaning, notes };
-    const text = buildSingleEntryText(rec);
-
-    try{
-      await copyToClipboard(text);
-      openInfo("Copied", "Entry copied to clipboard.");
-    }catch{
-      openInfo("Copy failed", "Clipboard copy is not available in this browser.");
-    }
-  });
-
-  $("btnAddCalExport").addEventListener("click", () => {
-    const n = String($("addCalNumber").textContent || "").trim();
-    const notes = String($("addCalNotes").value || "").trim();
-    const pattern = lastIdentify.pattern || detectPattern(n);
-    const meaning = lastIdentify.meaning || deriveMeaning(n, detectPattern(n)).meaning;
-    const rec = { ts: Date.now(), number: n, pattern, meaning, notes };
-
-    const header = {
-      title: "Single Entry Export",
-      rangeLabel: "One entry (not yet saved unless you tap Add)",
-      notes: "This export contains the entry shown in the Add popup. Tap Add if you want it stored in the in-app calendar."
-    };
-
-    exportReport([rec], header, "angel_number_entry");
-  });
-
-  /* ===== Calendar ===== */
-
-  const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-
-  function initMonthDefaultIfNeeded(){
-    if($("calMonth").value) return;
-    const now = new Date();
-    const y = now.getFullYear();
-    const m = String(now.getMonth()+1).padStart(2,"0");
-    $("calMonth").value = `${y}-${m}`;
-  }
-
-  function monthValueToYMD(value){
-    const m = /^(\d{4})-(\d{2})$/.exec(String(value || ""));
-    if(!m) return null;
-    const y = Number(m[1]);
-    const mo = Number(m[2]);
-    if(!y || !mo) return null;
-    return { y, mo };
-  }
-
-  function buildDayIndexMap(recs){
-    const map = new Map();
-    for(const r of recs){
-      const k = startOfDay(r.ts);
-      const arr = map.get(k) || [];
-      arr.push(r);
-      map.set(k, arr);
-    }
-    for(const [k, arr] of map.entries()){
-      arr.sort((a,b)=> a.ts - b.ts);
-      map.set(k, arr);
-    }
-    return map;
-  }
-
-  function renderCalendar(){
-    const mv = monthValueToYMD($("calMonth").value);
-    if(!mv) return;
-
-    const {y, mo} = mv;
-    const first = new Date(y, mo-1, 1);
-    const firstDow = first.getDay();
-    const totalCells = 42;
-
-    const gridStart = new Date(y, mo-1, 1 - firstDow);
-    gridStart.setHours(0,0,0,0);
-
-    const all = loadRecords();
-    const dayMap = buildDayIndexMap(all);
-
-    const dowRow = $("calDowRow");
-    dowRow.innerHTML = "";
-    for(const d of DOW){
-      const el = document.createElement("div");
-      el.className = "calDow";
-      el.textContent = d;
-      dowRow.appendChild(el);
-    }
-
-    const grid = $("calGrid");
-    grid.innerHTML = "";
-
-    for(let i=0;i<totalCells;i++){
-      const d = new Date(gridStart.getTime() + i*DAY_MS);
-      const dayStart = d.getTime();
-      const inMonth = (d.getMonth() === (mo-1));
-
-      const cell = document.createElement("div");
-      cell.className = "calCell" + (inMonth ? "" : " outMonth");
-
-      const dn = document.createElement("div");
-      dn.className = "dnum";
-      dn.textContent = String(d.getDate());
-      cell.appendChild(dn);
-
-      const recs = dayMap.get(dayStart) || [];
-      if(recs.length > 0){
-        cell.classList.add("hasData");
-        cell.addEventListener("click", (e)=>{
-          e.preventDefault();
-          openInfo("Not enabled yet", "Day view is not enabled in this build. (Next edit can add a day list + edit.)");
+    (function(){
+      "use strict";
+
+      /* =========================
+         Version / Constants
+      ========================== */
+      const APP_NAME = "Angel Numbers Tracker";
+      const APP_VERSION = "v1.1A2";
+      const LS_KEY = "angel_numbers_tracker_records_v1";
+      const SW_CACHE = "angel-numbers-cache-v1.1A2";
+
+      /* =========================
+         Basic Helpers
+      ========================== */
+      const $ = (id)=>document.getElementById(id);
+
+      function nowISO(){
+        return new Date().toISOString();
+      }
+      function toLocalDateParts(d){
+        const y = d.getFullYear();
+        const m = d.getMonth()+1;
+        const day = d.getDate();
+        const pad = (n)=>String(n).padStart(2,"0");
+        return { y, m, day, key:`${y}-${pad(m)}-${pad(day)}` };
+      }
+      function fmtTimeLocal(iso){
+        const d = new Date(iso);
+        const hh = String(d.getHours()).padStart(2,"0");
+        const mm = String(d.getMinutes()).padStart(2,"0");
+        return `${hh}:${mm}`;
+      }
+      function escapeHtml(s){
+        return String(s||"").replace(/[&<>"']/g,(c)=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+      }
+
+      /* =========================
+         Storage
+      ========================== */
+      function loadRecords(){
+        try{
+          const raw = localStorage.getItem(LS_KEY);
+          if(!raw) return [];
+          const arr = JSON.parse(raw);
+          if(!Array.isArray(arr)) return [];
+          return arr.filter(r=>r && typeof r==="object");
+        }catch(_e){
+          return [];
+        }
+      }
+      function saveRecords(recs){
+        localStorage.setItem(LS_KEY, JSON.stringify(recs));
+      }
+
+      let records = loadRecords();
+
+      /* =========================
+         Meanings / Patterns
+      ========================== */
+
+      function digitsOnly(s){
+        return String(s||"").replace(/\D+/g,"").slice(0, 32);
+      }
+
+      function isAllSame(str){
+        return str.length>0 && str.split("").every(ch=>ch===str[0]);
+      }
+
+      function isSequentialUp(str){
+        if(str.length<3) return false;
+        for(let i=1;i<str.length;i++){
+          const a = Number(str[i-1]);
+          const b = Number(str[i]);
+          if(Number.isNaN(a)||Number.isNaN(b)) return false;
+          if((a+1)%10 !== b) return false;
+        }
+        return true;
+      }
+
+      function isSequentialDown(str){
+        if(str.length<3) return false;
+        for(let i=1;i<str.length;i++){
+          const a = Number(str[i-1]);
+          const b = Number(str[i]);
+          if(Number.isNaN(a)||Number.isNaN(b)) return false;
+          if((a+9)%10 !== b) return false;
+        }
+        return true;
+      }
+
+      function isMirror(str){
+        if(str.length<4) return false;
+        const half = Math.floor(str.length/2);
+        const left = str.slice(0, half);
+        const right = str.slice(str.length-half);
+        return left === right.split("").reverse().join("");
+      }
+
+      function isDoubleBlock(str){
+        if(str.length!==4) return false;
+        return (str[0]===str[1] && str[2]===str[3] && str[0]!==str[2]);
+      }
+
+      function isSandwich(str){
+        if(str.length<3) return false;
+        return str[0]===str[str.length-1] && str[0]!==str[1];
+      }
+
+      function patternLabel(numStr){
+        if(!numStr) return "—";
+        if(isAllSame(numStr)){
+          return `Repeating ${numStr[0]}s`;
+        }
+        if(isSequentialUp(numStr)) return "Sequential up";
+        if(isSequentialDown(numStr)) return "Sequential down";
+        if(isDoubleBlock(numStr)) return "Double-block";
+        if(isMirror(numStr)) return "Mirror";
+        if(isSandwich(numStr)) return "Sandwich";
+        return "Mixed pattern";
+      }
+
+      const digitThemes = {
+        0: "0 is often linked with resets, potential, and the idea of returning to center.",
+        1: "1 is often linked with new beginnings, initiative, clarity, and taking the first step.",
+        2: "2 is often linked with balance, relationships, patience, and cooperation.",
+        3: "3 is often linked with creativity, expression, growth, and encouragement to communicate.",
+        4: "4 is often linked with stability, foundations, structure, and steady progress.",
+        5: "5 is often linked with change, adaptability, movement, and a call to embrace transition.",
+        6: "6 is often linked with responsibility, home, care, and restoring harmony.",
+        7: "7 is often linked with reflection, insight, spiritual study, and trust in inner guidance.",
+        8: "8 is often linked with strength, power, abundance, and long-range results.",
+        9: "9 is often linked with completion, compassion, release, and closing a chapter."
+      };
+
+      const presetMeanings = {
+        "11":"Alignment and heightened awareness—notice what you’re thinking and choose deliberately.",
+        "22":"Build it for real—patience, structure, and practical steps.",
+        "33":"Creative expansion—express, connect, and grow through communication.",
+        "44":"Foundations and protection—tighten routines, systems, and stability.",
+        "55":"Change and movement—embrace transition, adapt, and move with it.",
+        "66":"Home and care—restore balance, responsibility, and support.",
+        "77":"Deep insight—reflection, learning, and trust your inner signals.",
+        "88":"Strength and results—discipline, power, and long-range outcomes.",
+        "99":"Completion and release—wrap up, forgive, let go, and step forward.",
+        "111":"New cycle—focus intentions and act on the next step.",
+        "222":"Balance and timing—cooperate, wait, and keep steady.",
+        "333":"Expression and creativity—share truth, create, connect.",
+        "444":"Stability and structure—secure the foundation and keep going.",
+        "555":"Major change—adapt quickly, trust the shift, move forward.",
+        "666":"Re-center—care for home, mind, body, obligations.",
+        "777":"Insight and guidance—study, reflect, trust the quiet signal.",
+        "888":"Abundance and power—results, momentum, disciplined effort.",
+        "999":"Endings and renewal—finish the chapter and begin again.",
+        "1010":"Awareness and choice—notice the moment and act intentionally.",
+        "1212":"A mirrored prompt—balance your inner/outer, keep faith with action."
+      };
+
+      function digitSum(nStr){
+        let sum = 0;
+        for(const ch of nStr) sum += Number(ch)||0;
+        return sum;
+      }
+      function reduceToDigit(n){
+        while(n>9){
+          let s=0;
+          for(const ch of String(n)) s += Number(ch)||0;
+          n = s;
+        }
+        return n;
+      }
+
+      function buildMeaning(numStr){
+        if(!numStr) return {
+          title:"—",
+          pattern:"—",
+          main:"Enter a number above to see its commonly shared meaning.",
+          meta:"",
+          source:""
+        };
+
+        const pat = patternLabel(numStr);
+        const unique = Array.from(new Set(numStr.split("")));
+        const sum = digitSum(numStr);
+        const root = reduceToDigit(sum);
+
+        const preset = presetMeanings[numStr] || null;
+
+        let main = "";
+        let source = "";
+        if(preset){
+          main = preset;
+          source = "Direct map: preset meaning";
+        }else{
+          // derive from pattern + digit lenses
+          if(isAllSame(numStr)){
+            const d = Number(numStr[0]);
+            main = `Emphasis pattern (${numStr}): ${digitThemes[d] || ""}`.trim();
+            source = "Direct map: not in the preset list; derived from pattern + digit lenses.";
+          }else{
+            // pick most frequent digit
+            const counts = {};
+            for(const ch of numStr) counts[ch]=(counts[ch]||0)+1;
+            let best = numStr[0], bestC = counts[best]||1;
+            for(const k in counts){
+              if(counts[k]>bestC){ best=k; bestC=counts[k]; }
+            }
+            const d = Number(best);
+            main = (digitThemes[d] || "A general interpretation is heightened awareness: notice your thoughts, environment, and choices—then act deliberately.");
+            source = "Direct map: not in the preset list; derived from pattern + digit lenses.";
+          }
+        }
+
+        const meta =
+`Digits: ${numStr.split("").join(" • ")}
+Unique digits: ${unique.join(", ")}
+${source}
+Digit-sum lens (${sum} → ${root}): ${digitThemes[root] || ""}
+
+Pattern method: repeating / sequential / double-block / mirror / sandwich / mixed.`;
+
+        return {
+          title:numStr,
+          pattern:pat,
+          main,
+          meta
+        };
+      }
+
+      /* =========================
+         UI State / Navigation
+      ========================== */
+      let currentPanel = 0; // 0 Identify, 1 Calendar
+
+      const panelStrip = $("panelStrip");
+
+      function setPanel(idx){
+        currentPanel = Math.max(0, Math.min(1, idx));
+        panelStrip.style.transform = `translateX(${currentPanel===0 ? "0%" : "-50%"})`;
+      }
+
+      /* swipe left/right only if touch starts within 150px of edge */
+      const EDGE_PX = 150;
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let touchStartTime = 0;
+      let touchArmed = false;
+
+      function onTouchStart(e){
+        if(!e.touches || e.touches.length!==1) return;
+        const t = e.touches[0];
+        touchStartX = t.clientX;
+        touchStartY = t.clientY;
+        touchStartTime = Date.now();
+
+        const w = window.innerWidth || document.documentElement.clientWidth;
+        const nearLeft = touchStartX <= EDGE_PX;
+        const nearRight = touchStartX >= (w - EDGE_PX);
+        touchArmed = nearLeft || nearRight;
+      }
+
+      function onTouchMove(e){
+        // no-op; we decide on end
+      }
+
+      function onTouchEnd(e){
+        if(!touchArmed) return;
+        touchArmed = false;
+
+        const dt = Date.now() - touchStartTime;
+        if(dt > 650) return;
+
+        const t = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : null;
+        if(!t) return;
+
+        const dx = t.clientX - touchStartX;
+        const dy = t.clientY - touchStartY;
+
+        // horizontal intent
+        if(Math.abs(dx) < 40) return;
+        if(Math.abs(dy) > 90) return;
+
+        if(dx < -60){
+          // swipe left
+          setPanel(1);
+          renderCalendar();
+        }else if(dx > 60){
+          // swipe right
+          setPanel(0);
+        }
+      }
+
+      document.addEventListener("touchstart", onTouchStart, {passive:true});
+      document.addEventListener("touchmove", onTouchMove, {passive:true});
+      document.addEventListener("touchend", onTouchEnd, {passive:true});
+
+      /* =========================
+         Identify Panel Behavior
+      ========================== */
+      const numInput = $("numInput");
+      const bigNum = $("bigNum");
+      const patternPill = $("patternPill");
+      const meaningText = $("meaningText");
+      const lensText = $("lensText");
+
+      let currentMeaning = buildMeaning("");
+
+      function updateIdentifyFromInput(){
+        const raw = digitsOnly(numInput.value);
+        if(numInput.value !== raw) numInput.value = raw;
+
+        currentMeaning = buildMeaning(raw);
+
+        bigNum.textContent = currentMeaning.title || "—";
+        patternPill.textContent = `Pattern: ${currentMeaning.pattern || "—"}`;
+        meaningText.textContent = currentMeaning.main || "";
+        lensText.textContent =
+`How to use: Treat the meaning as a reflective prompt—what it “means” depends on context and personal interpretation.
+
+${currentMeaning.meta || ""}
+
+Cultural note: these meanings come from numerology/“angel number” traditions and vary by source. Treat as reflective prompts, not facts or predictions.`;
+      }
+
+      numInput.addEventListener("input", updateIdentifyFromInput);
+
+      // Prevent keyboard pop on load: do not focus.
+      window.addEventListener("load", ()=>{
+        updateIdentifyFromInput();
+      }, {once:true});
+
+      /* =========================
+         Modal System
+      ========================== */
+      const modalShade = $("modalShade");
+      const modalInner = $("modalInner");
+      const modalX = $("modalX");
+
+      let modalOnClose = null;
+
+      function closeModal(){
+        modalShade.classList.remove("show");
+        modalShade.setAttribute("aria-hidden","true");
+        modalInner.innerHTML = "";
+        if(typeof modalOnClose === "function"){
+          const fn = modalOnClose;
+          modalOnClose = null;
+          try{ fn(); }catch(_e){}
+        }
+      }
+
+      function openModal(html, onClose){
+        modalOnClose = (typeof onClose==="function") ? onClose : null;
+        modalInner.innerHTML = html;
+        modalShade.classList.add("show");
+        modalShade.setAttribute("aria-hidden","false");
+      }
+
+      modalX.addEventListener("click", closeModal);
+      modalShade.addEventListener("click", (e)=>{
+        if(e.target === modalShade) closeModal();
+      });
+
+      /* =========================
+         Add to Calendar Modal
+      ========================== */
+      function openAddModal(prefillNumber){
+        const number = digitsOnly(prefillNumber || "");
+        const html =
+          `<div class="modalTitle">Add to Calendar</div>
+           <div class="modalText">Add a sighting with optional notes.</div>
+
+           <div class="modalFieldLabel">Number</div>
+           <input class="modalInput" id="addNum" inputmode="numeric" autocomplete="off" spellcheck="false" value="${escapeHtml(number)}" />
+
+           <div class="modalFieldLabel">Notes (optional)</div>
+           <textarea class="modalTextarea" id="addNotes" placeholder="Where did you see it? What was happening?"></textarea>
+
+           <div class="modalBtns2">
+             <div class="modalBtn modalBtnPrimary" id="addDo">Add</div>
+             <div class="modalBtn" id="addCancel">Cancel</div>
+           </div>`;
+
+        openModal(html);
+
+        const addNum = $("addNum");
+        const addNotes = $("addNotes");
+
+        $("addCancel").addEventListener("click", closeModal);
+
+        $("addDo").addEventListener("click", ()=>{
+          const num = digitsOnly(addNum.value);
+          const notes = String(addNotes.value || "").trim();
+          if(!num){
+            // keep popup style consistent (use same modal for errors)
+            openModal(
+              `<div class="modalTitle">Missing number</div>
+               <div class="modalText">Please enter a number to add.</div>
+               <div class="modalBtns2">
+                 <div class="modalBtn modalBtnPrimary" id="okOnly">OK</div>
+                 <div class="modalBtn" id="backToAdd">Back</div>
+               </div>`,
+              null
+            );
+            $("okOnly").addEventListener("click", closeModal);
+            $("backToAdd").addEventListener("click", ()=>openAddModal(""));
+            return;
+          }
+          const rec = {
+            id: cryptoRandomId(),
+            number: num,
+            notes,
+            createdAt: nowISO()
+          };
+          records.unshift(rec);
+          saveRecords(records);
+          closeModal();
+          renderCalendar(); // refresh highlights
         });
       }
 
-      grid.appendChild(cell);
-    }
-  }
-
-  /* ===== “Edge swipe” only (so scrolling works) =====
-     This is the highest-probability culprit for “page not scrollable”.
-     We only start swipe if touch begins within EDGE px from left/right.
-  */
-
-  const EDGE = 16;
-  const drag = {
-    active:false,
-    x0:0, y0:0,
-    dx:0, dy:0,
-    intent:null,
-    dir:null
-  };
-  let animating = false;
-
-  function startDrag(ev){
-    if(animating) return;
-    if(!(ev.touches && ev.touches.length === 1)) return;
-
-    const t = ev.target;
-    if(t && t.closest && t.closest("input, textarea, select")) return;
-
-    if(currentScreen !== "home" && currentScreen !== "calendar") return;
-
-    const x = ev.touches[0].clientX;
-    const w = $("screenArea").clientWidth || window.innerWidth;
-
-    // EDGE ONLY
-    const nearLeft = x <= EDGE;
-    const nearRight = x >= (w - EDGE);
-    if(!nearLeft && !nearRight) return;
-
-    drag.active = true;
-    drag.intent = null;
-    drag.dir = null;
-    drag.x0 = x;
-    drag.y0 = ev.touches[0].clientY;
-    drag.dx = 0;
-    drag.dy = 0;
-  }
-
-  function moveDrag(ev){
-    if(!drag.active) return;
-    if(!(ev.touches && ev.touches.length === 1)) return;
-
-    const x = ev.touches[0].clientX;
-    const y = ev.touches[0].clientY;
-    drag.dx = x - drag.x0;
-    drag.dy = y - drag.y0;
-
-    if(!drag.intent){
-      const ax = Math.abs(drag.dx);
-      const ay = Math.abs(drag.dy);
-      if(ax > 18 && ax > ay + 12){
-        drag.intent = "h";
-      }else if(ay > 18 && ay > ax + 8){
-        // release to native scroll
-        drag.active = false;
-        drag.intent = null;
-        return;
-      }else{
-        return;
-      }
-    }
-
-    if(drag.intent !== "h") return;
-
-    // only for horizontal swipe do we cancel default
-    ev.preventDefault();
-  }
-
-  function endDrag(){
-    if(!drag.active) return;
-    const dx = drag.dx;
-    drag.active = false;
-
-    // simple “flip screens” threshold
-    if(Math.abs(dx) < 60) return;
-
-    if(currentScreen === "home") showInstant("calendar");
-    else showInstant("home");
-  }
-
-  function attachEdgeSwipe(){
-    const root = $("screenArea");
-    root.addEventListener("touchstart", startDrag, {passive:true});
-    root.addEventListener("touchmove", moveDrag, {passive:false});
-    root.addEventListener("touchend", endDrag, {passive:true});
-    root.addEventListener("touchcancel", endDrag, {passive:true});
-  }
-
-  /* ===== Manifest + SW ===== */
-
-  function injectManifest(){
-    const svg =
-`<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#8a6bff"/>
-      <stop offset="55%" stop-color="#2f78ff"/>
-      <stop offset="100%" stop-color="#0b1324"/>
-    </linearGradient>
-  </defs>
-  <rect width="512" height="512" rx="110" fill="url(#g)"/>
-  <ellipse cx="256" cy="150" rx="110" ry="44" fill="none" stroke="rgba(235,245,255,.92)" stroke-width="26"/>
-  <path d="M256 240
-           C196 210, 140 220, 112 270
-           C154 294, 190 330, 214 380
-           C226 330, 240 285, 256 240Z"
-        fill="none" stroke="rgba(235,245,255,.92)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M256 240
-           C316 210, 372 220, 400 270
-           C358 294, 322 330, 298 380
-           C286 330, 272 285, 256 240Z"
-        fill="none" stroke="rgba(235,245,255,.92)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
-    const encoded = encodeURIComponent(svg).replace(/'/g,"%27").replace(/"/g,"%22");
-    const icon = `data:image/svg+xml;charset=utf-8,${encoded}`;
-
-    const manifest = {
-      name: "Angel Numbers Tracker",
-      short_name: "AngelNums",
-      start_url: ".",
-      display: "standalone",
-      background_color: "#0b1324",
-      theme_color: "#0b1324",
-      icons: [{ src: icon, sizes: "512x512", type: "image/svg+xml", purpose: "any" }]
-    };
-
-    const blob = new Blob([JSON.stringify(manifest)], {type:"application/manifest+json"});
-    const url = URL.createObjectURL(blob);
-    $("manifestLink").setAttribute("href", url);
-  }
-
-  async function registerSW(){
-    if(!("serviceWorker" in navigator)) return;
-    const swCode =
-`self.addEventListener('install', (e)=>{ self.skipWaiting(); });
-self.addEventListener('activate', (e)=>{ e.waitUntil(self.clients.claim()); });
-self.addEventListener('fetch', (e)=>{ });`;
-    const blob = new Blob([swCode], {type:"text/javascript"});
-    const swUrl = URL.createObjectURL(blob);
-    try { await navigator.serviceWorker.register(swUrl); } catch {}
-  }
-
-  /* ===== Test data seeding ===== */
-
-  function seedTestDataIfEmpty(){
-    if(!TEST_DATA_ENABLED) return;
-    const existing = loadRecords();
-    if(existing.length > 0) return;
-
-    const now = new Date();
-    const months = [
-      { y: now.getFullYear(), m: now.getMonth() },
-      { y: new Date(now.getFullYear(), now.getMonth()-1, 1).getFullYear(),
-        m: new Date(now.getFullYear(), now.getMonth()-1, 1).getMonth() }
-    ];
-
-    const sampleNums = ["111","222","333","444","555","777","888","999","1212","1010","2222","2424","99099","1234"];
-    const out = [];
-
-    function randInt(a,b){ return Math.floor(a + Math.random()*(b-a+1)); }
-
-    for(const mm of months){
-      const daysToFill = randInt(10, 14);
-      const usedDays = new Set();
-      while(usedDays.size < daysToFill){
-        usedDays.add(randInt(1, 27));
-      }
-      for(const day of usedDays){
-        const nEntries = randInt(1, 3);
-        for(let i=0;i<nEntries;i++){
-          const hr = randInt(8, 22);
-          const mi = randInt(0, 59);
-          const ts = new Date(mm.y, mm.m, day, hr, mi, 0, 0).getTime();
-
-          const number = sampleNums[randInt(0, sampleNums.length-1)];
-          const pattern = detectPattern(number);
-          const meaning = deriveMeaning(number, pattern).meaning;
-
-          out.push({ ts, number, pattern, meaning, notes: (i===0 ? "Test data (remove later)" : "") });
+      function cryptoRandomId(){
+        try{
+          const a = new Uint8Array(12);
+          crypto.getRandomValues(a);
+          return Array.from(a).map(x=>x.toString(16).padStart(2,"0")).join("");
+        }catch(_e){
+          return String(Math.random()).slice(2) + String(Date.now());
         }
       }
-    }
 
-    out.sort((a,b)=> b.ts - a.ts);
-    saveRecords(out);
-  }
+      /* =========================
+         Export (global)
+      ========================== */
+      function buildExportText(){
+        const d = new Date();
+        const stamp = d.toLocaleString();
 
-  /* ===== Version triple-tap -> heart ===== */
+        const lines = [];
+        lines.push(`${APP_NAME} — Export Report`);
+        lines.push(`App Version: ${APP_VERSION}`);
+        lines.push(`Report: Full Export`);
+        lines.push(`Generated: ${stamp}`);
+        lines.push(`Range: All entries`);
+        lines.push(`How this data was captured:`);
+        lines.push(`- Sightings are entered manually into ${APP_NAME} on this device.`);
+        lines.push(`- Data is stored locally on the phone (no cloud sync, no account).`);
+        lines.push(`- Each record may include the number and optional notes.`);
+        lines.push(`----------------------------------------------`);
 
-  let vTapCount = 0;
-  let vTapTimer = null;
-
-  function attachVersionTripleTap(){
-    $("homeVerLabel").addEventListener("click", (e) => {
-      e.stopPropagation();
-      if(animating) return;
-      vTapCount++;
-      if(vTapTimer) clearTimeout(vTapTimer);
-      vTapTimer = setTimeout(()=>{ vTapCount = 0; }, 650);
-      if(vTapCount >= 3){
-        vTapCount = 0;
-        openHeart();
+        const sorted = [...records].sort((a,b)=>String(b.createdAt||"").localeCompare(String(a.createdAt||"")));
+        for(const r of sorted){
+          const ts = r.createdAt ? new Date(r.createdAt).toLocaleString() : "";
+          lines.push(`${ts}`);
+          lines.push(`Number: ${r.number || ""}`);
+          if(r.notes) lines.push(`Notes: ${r.notes}`);
+          lines.push("");
+        }
+        return lines.join("\n");
       }
-    });
-  }
 
-  /* ===== Exit ===== */
+      async function copyToClipboard(text){
+        try{
+          await navigator.clipboard.writeText(text);
+          return true;
+        }catch(_e){
+          // fallback
+          try{
+            const ta = document.createElement("textarea");
+            ta.value = text;
+            ta.style.position="fixed";
+            ta.style.left="-9999px";
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            const ok = document.execCommand("copy");
+            document.body.removeChild(ta);
+            return !!ok;
+          }catch(_e2){
+            return false;
+          }
+        }
+      }
 
-  /* KEEP THIS EXIT FUNCTION EXACTLY (known-good) */
-  $("btnExitHome").addEventListener("click", () => {
-    window.close();
-    setTimeout(() => {
-      alert("If it didn’t close: use your phone’s Back/Home.");
-    }, 200);
-  });
+      function openExportModal(){
+        const html =
+          `<div class="modalTitle">Export</div>
+           <div class="modalText">Copy a full report to clipboard.</div>
+           <div class="modalBtns2">
+             <div class="modalBtn modalBtnPrimary" id="doCopy">Copy</div>
+             <div class="modalBtn" id="cancelExport">Cancel</div>
+           </div>`;
+        openModal(html);
 
-  /* ===== Buttons ===== */
+        $("cancelExport").addEventListener("click", closeModal);
 
-  $("btnViewCalendar").addEventListener("click", () => showInstant("calendar"));
-  $("btnBackFromCalendar").addEventListener("click", () => showInstant("home"));
+        $("doCopy").addEventListener("click", async ()=>{
+          const text = buildExportText();
+          const ok = await copyToClipboard(text);
+          if(ok){
+            openModal(
+              `<div class="modalTitle">Copied</div>
+               <div class="modalText">Export report copied to clipboard.</div>
+               <div class="modalBtns2">
+                 <div class="modalBtn modalBtnPrimary" id="okCopy">OK</div>
+                 <div class="modalBtn" id="closeCopy">Close</div>
+               </div>`
+            );
+            $("okCopy").addEventListener("click", closeModal);
+            $("closeCopy").addEventListener("click", closeModal);
+          }else{
+            openModal(
+              `<div class="modalTitle">Copy failed</div>
+               <div class="modalText">Clipboard access was blocked. You can try again.</div>
+               <div class="modalBtns2">
+                 <div class="modalBtn modalBtnPrimary" id="tryAgain">Try</div>
+                 <div class="modalBtn" id="cancelFail">Cancel</div>
+               </div>`
+            );
+            $("tryAgain").addEventListener("click", openExportModal);
+            $("cancelFail").addEventListener("click", closeModal);
+          }
+        });
+      }
 
-  $("btnHomeExport").addEventListener("click", () => {
-    const recs = loadRecords().slice().reverse();
-    exportReport(
-      recs,
-      {
-        title: "All Entries Export",
-        rangeLabel: "All saved entries",
-        notes: "This export contains all saved entries currently stored on this device."
-      },
-      "angel_numbers_all"
-    );
-  });
+      /* =========================
+         Calendar
+      ========================== */
+      const monthSelect = $("monthSelect");
+      const calGrid = $("calGrid");
 
-  $("btnAddToCalendar").addEventListener("click", () => {
-    openAddCalModal();
-  });
+      function monthKey(y, m){
+        return `${y}-${String(m).padStart(2,"0")}`;
+      }
 
-  $("btnCalToday").addEventListener("click", () => {
-    const now = new Date();
-    const y = now.getFullYear();
-    const m = String(now.getMonth()+1).padStart(2,"0");
-    $("calMonth").value = `${y}-${m}`;
-    renderCalendar();
-  });
+      function buildMonthOptions(){
+        // build +/- 24 months around now
+        const now = new Date();
+        const baseY = now.getFullYear();
+        const baseM = now.getMonth()+1;
 
-  $("calMonth").addEventListener("change", renderCalendar);
+        monthSelect.innerHTML = "";
+        const opts = [];
+        for(let i=-24; i<=24; i++){
+          const d = new Date(baseY, (baseM-1)+i, 1);
+          const y = d.getFullYear();
+          const m = d.getMonth()+1;
+          const label = d.toLocaleString(undefined, { month:"long", year:"numeric" });
+          opts.push({ y, m, key: monthKey(y,m), label });
+        }
+        for(const o of opts){
+          const opt = document.createElement("option");
+          opt.value = o.key;
+          opt.textContent = o.label;
+          monthSelect.appendChild(opt);
+        }
 
-  $("btnExportMonth").addEventListener("click", () => {
-    const mv = monthValueToYMD($("calMonth").value);
-    if(!mv){ openInfo("Export", "Select a month first."); return; }
+        const curKey = monthKey(baseY, baseM);
+        monthSelect.value = curKey;
+      }
 
-    const {y, mo} = mv;
-    const start = new Date(y, mo-1, 1); start.setHours(0,0,0,0);
-    const end = new Date(y, mo, 1);   end.setHours(0,0,0,0);
+      function entriesByDayKey(){
+        const map = new Map();
+        for(const r of records){
+          const dt = r.createdAt ? new Date(r.createdAt) : null;
+          if(!dt || Number.isNaN(dt.getTime())) continue;
+          const k = toLocalDateParts(dt).key;
+          if(!map.has(k)) map.set(k, []);
+          map.get(k).push(r);
+        }
+        // sort each day newest first
+        for(const [k, arr] of map.entries()){
+          arr.sort((a,b)=>String(b.createdAt||"").localeCompare(String(a.createdAt||"")));
+          map.set(k, arr);
+        }
+        return map;
+      }
 
-    const all = loadRecords().slice().reverse();
-    const recs = all.filter(r => r.ts >= start.getTime() && r.ts < end.getTime());
+      function renderCalendar(){
+        if(currentPanel !== 1) return;
 
-    exportReport(
-      recs,
-      {
-        title: "Month Export",
-        rangeLabel: `${y}-${String(mo).padStart(2,"0")} (in-app calendar)`,
-        notes: "This export includes entries whose timestamps fall within the selected month."
-      },
-      `angel_numbers_${y}-${String(mo).padStart(2,"0")}`
-    );
-  });
+        const val = monthSelect.value;
+        const [yy, mm] = val.split("-").map(Number);
+        const y = yy, m = mm;
 
-  /* ===== Init ===== */
+        const first = new Date(y, m-1, 1);
+        const firstDow = first.getDay(); // 0 Sun
+        const daysInMonth = new Date(y, m, 0).getDate();
 
-  injectManifest();
-  registerSW();
-  seedTestDataIfEmpty();
+        // previous month tail
+        const prevDays = new Date(y, m-1, 0).getDate();
 
-  // Show real version in two places
-  $("homeVerLabel").textContent = APP_VERSION;
-  $("verUnderLogo").textContent = APP_VERSION;
+        // build 6 weeks (42 cells)
+        const cells = [];
+        for(let i=0;i<42;i++){
+          const dayNum = i - firstDow + 1;
+          let cellY=y, cellM=m, cellD=dayNum, isOther=false;
 
-  attachVersionTripleTap();
+          if(dayNum <= 0){
+            isOther = true;
+            cellM = m-1;
+            cellY = y;
+            if(cellM<=0){ cellM=12; cellY=y-1; }
+            cellD = prevDays + dayNum;
+          }else if(dayNum > daysInMonth){
+            isOther = true;
+            cellM = m+1;
+            cellY = y;
+            if(cellM>=13){ cellM=1; cellY=y+1; }
+            cellD = dayNum - daysInMonth;
+          }
 
-  // IMPORTANT: Edge-swipe only (prevents scroll interference)
-  attachEdgeSwipe();
+          const d = new Date(cellY, cellM-1, cellD);
+          const key = toLocalDateParts(d).key;
+          cells.push({ y:cellY, m:cellM, d:cellD, key, isOther });
+        }
 
-  // Prevent focus/keyboard on load
-  try{ document.activeElement?.blur(); }catch{}
-  setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 0);
-  setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 80);
+        const dayMap = entriesByDayKey();
+        const todayKey = toLocalDateParts(new Date()).key;
 
-  renderHomeIdentify();
-  showInstant("home");
+        calGrid.innerHTML = "";
+        for(const c of cells){
+          const div = document.createElement("div");
+          div.className = "day";
+          div.textContent = String(c.d);
 
-  window.addEventListener("resize", () => {
-    if(!$("calendar").classList.contains("hidden")) renderCalendar();
-  });
+          if(c.isOther) div.classList.add("isOther");
+          if(c.key === todayKey) div.classList.add("isToday");
+          const has = dayMap.has(c.key) && dayMap.get(c.key).length>0;
+          if(has) div.classList.add("hasEntries");
 
-})();
+          div.addEventListener("click", ()=>{
+            if(!has) return;
+            openDayListModal(c.key, dayMap.get(c.key));
+          });
+
+          calGrid.appendChild(div);
+        }
+      }
+
+      function openDayListModal(dayKey, dayEntries){
+        const dayLabel = (()=>{
+          const [y,m,d] = dayKey.split("-").map(Number);
+          const dt = new Date(y, (m-1), d);
+          return dt.toLocaleDateString(undefined, { weekday:"long", year:"numeric", month:"long", day:"numeric" });
+        })();
+
+        const rows = dayEntries.map(r=>{
+          const t = fmtTimeLocal(r.createdAt);
+          const note = r.notes ? escapeHtml(r.notes) : "";
+          const noteLine = note ? `<div class="dayRowNote">${note}</div>` : `<div class="dayRowNote" style="opacity:.35">No notes</div>`;
+          return `
+            <div class="dayRow" data-id="${escapeHtml(r.id)}">
+              <div class="dayRowLeft">
+                <div class="dayRowNum">${escapeHtml(r.number || "")}</div>
+                ${noteLine}
+              </div>
+              <div class="dayRowTime">${escapeHtml(t)}</div>
+            </div>`;
+        }).join("");
+
+        const html =
+          `<div class="modalTitle">Day List</div>
+           <div class="modalText">${escapeHtml(dayLabel)}<br><span style="color:rgba(235,245,255,.45);font-weight:800">Click a number to view details.</span></div>
+           <div class="dayListWrap">
+             <div class="dayList" id="dayList">${rows}</div>
+           </div>
+           <div class="modalBtns2" style="margin-top:14px">
+             <div class="modalBtn modalBtnPrimary" id="dayOk">OK</div>
+             <div class="modalBtn" id="dayClose">Close</div>
+           </div>`;
+
+        openModal(html);
+
+        $("dayOk").addEventListener("click", closeModal);
+        $("dayClose").addEventListener("click", closeModal);
+
+        const list = $("dayList");
+        list.addEventListener("click", (e)=>{
+          const row = e.target.closest(".dayRow");
+          if(!row) return;
+          const id = row.getAttribute("data-id");
+          const rec = records.find(r=>r.id===id);
+          if(!rec) return;
+          openEntryDetailModal(rec);
+        });
+      }
+
+      function openEntryDetailModal(rec){
+        const dt = rec.createdAt ? new Date(rec.createdAt) : new Date();
+        const stamp = dt.toLocaleString();
+        const note = rec.notes ? escapeHtml(rec.notes) : "";
+
+        const html =
+          `<div class="modalTitle">Entry</div>
+           <div class="modalText">${escapeHtml(stamp)}</div>
+
+           <div class="modalFieldLabel">Number</div>
+           <div style="font-size:44px;font-weight:950;letter-spacing:.6px;color:rgba(235,245,255,.92)">${escapeHtml(rec.number || "")}</div>
+
+           <div class="modalFieldLabel">Notes</div>
+           <textarea class="modalTextarea" id="editNotes" placeholder="Notes (optional)">${note}</textarea>
+
+           <div class="modalBtns2">
+             <div class="modalBtn modalBtnPrimary" id="saveEntry">Save</div>
+             <div class="modalBtn" id="deleteEntry">Delete</div>
+           </div>
+           <div class="modalBtns2" style="margin-top:12px">
+             <div class="modalBtn" id="closeEntry">Close</div>
+             <div class="modalBtn" id="noop2" style="opacity:.35"> </div>
+           </div>`;
+
+        openModal(html);
+
+        $("closeEntry").addEventListener("click", closeModal);
+
+        $("saveEntry").addEventListener("click", ()=>{
+          const notes = String($("editNotes").value || "").trim();
+          const idx = records.findIndex(r=>r.id===rec.id);
+          if(idx>=0){
+            records[idx].notes = notes;
+            saveRecords(records);
+          }
+          closeModal();
+          renderCalendar();
+        });
+
+        $("deleteEntry").addEventListener("click", ()=>{
+          openModal(
+            `<div class="modalTitle">Delete entry?</div>
+             <div class="modalText">This will remove the entry from the in-app calendar.</div>
+             <div class="modalBtns2">
+               <div class="modalBtn modalBtnPrimary" id="confirmDel">Delete</div>
+               <div class="modalBtn" id="cancelDel">Cancel</div>
+             </div>`
+          );
+          $("cancelDel").addEventListener("click", closeModal);
+          $("confirmDel").addEventListener("click", ()=>{
+            records = records.filter(r=>r.id!==rec.id);
+            saveRecords(records);
+            closeModal();
+            renderCalendar();
+          });
+        });
+      }
+
+      /* =========================
+         Buttons / Actions
+      ========================== */
+      $("btnAddToCalendar").addEventListener("click", ()=>{
+        const n = digitsOnly(numInput.value);
+        openAddModal(n);
+      });
+
+      $("btnViewCalendar").addEventListener("click", ()=>{
+        setPanel(1);
+        renderCalendar();
+      });
+
+      $("btnExportAll").addEventListener("click", ()=>{
+        openExportModal();
+      });
+
+      $("btnBackToIdentify").addEventListener("click", ()=>{
+        setPanel(0);
+      });
+
+      $("btnToday").addEventListener("click", ()=>{
+        const d = new Date();
+        const key = monthKey(d.getFullYear(), d.getMonth()+1);
+        monthSelect.value = key;
+        renderCalendar();
+      });
+
+      $("btnCalBackHome").addEventListener("click", ()=>{
+        setPanel(0);
+      });
+
+      /* Exit handler (best-effort for PWA) */
+      function exitApp(){
+        try{
+          window.close();
+          setTimeout(()=>{ alert("If this tab did not close, you can close it manually."); }, 350);
+        }catch(_e){
+          alert("You can close this tab to exit.");
+        }
+      }
+      $("btnExit").addEventListener("click", exitApp);
+      $("btnCalExit").addEventListener("click", exitApp);
+
+      /* =========================
+         Month select
+      ========================== */
+      buildMonthOptions();
+      monthSelect.addEventListener("change", renderCalendar);
+
+      /* =========================
+         Version triple-tap heart
+      ========================== */
+      const versionTop = $("versionTop");
+      let tapCount = 0;
+      let tapTimer = null;
+
+      function resetTap(){
+        tapCount = 0;
+        if(tapTimer){ clearTimeout(tapTimer); tapTimer=null; }
+      }
+
+      function onVersionTap(){
+        tapCount++;
+        if(tapTimer) clearTimeout(tapTimer);
+        tapTimer = setTimeout(resetTap, 520);
+
+        if(tapCount >= 3){
+          resetTap();
+          openModal(
+            `<div class="modalTitle" style="text-align:center"> </div>
+             <div class="heartBig">❤</div>
+             <div class="heartMsg">The Angels love you Timmy.</div>
+             <div class="modalBtns2">
+               <div class="modalBtn modalBtnPrimary" id="heartOk">OK</div>
+               <div class="modalBtn" id="heartClose">Close</div>
+             </div>`
+          );
+          $("heartOk").addEventListener("click", closeModal);
+          $("heartClose").addEventListener("click", closeModal);
+        }
+      }
+
+      versionTop.addEventListener("click", onVersionTap);
+
+      /* =========================
+         Service Worker (offline)
+      ========================== */
+      function registerServiceWorker(){
+        if(!("serviceWorker" in navigator)) return;
+
+        // Minimal SW: cache this page shell. Single-file app, so caching root is enough.
+        const swCode = `
+          const CACHE = ${JSON.stringify(SW_CACHE)};
+          self.addEventListener('install', (e)=>{
+            e.waitUntil((async()=>{
+              const cache = await caches.open(CACHE);
+              try{
+                await cache.addAll(['./']);
+              }catch(_e){}
+              self.skipWaiting();
+            })());
+          });
+          self.addEventListener('activate', (e)=>{
+            e.waitUntil((async()=>{
+              const keys = await caches.keys();
+              await Promise.all(keys.map(k => (k===CACHE) ? null : caches.delete(k)));
+              self.clients.claim();
+            })());
+          });
+          self.addEventListener('fetch', (e)=>{
+            const req = e.request;
+            const url = new URL(req.url);
+            if(req.method !== 'GET') return;
+            if(url.origin !== location.origin) return;
+            e.respondWith((async()=>{
+              const cache = await caches.open(CACHE);
+              const cached = await cache.match(req, {ignoreSearch:true});
+              if(cached) return cached;
+              try{
+                const fresh = await fetch(req);
+                try{ cache.put(req, fresh.clone()); }catch(_e){}
+                return fresh;
+              }catch(_e){
+                const fallback = await cache.match('./');
+                return fallback || new Response('Offline', {status:503, headers:{'Content-Type':'text/plain'}});
+              }
+            })());
+          });
+        `;
+
+        try{
+          const blob = new Blob([swCode], {type:"text/javascript"});
+          const url = URL.createObjectURL(blob);
+          navigator.serviceWorker.register(url).catch(()=>{});
+        }catch(_e){}
+      }
+
+      /* =========================
+         Manifest (dynamic)
+      ========================== */
+      function buildManifest(){
+        const manifest = {
+          name: APP_NAME,
+          short_name: "Angel Numbers",
+          start_url: "./",
+          display: "standalone",
+          background_color: "#0b1324",
+          theme_color: "#0b1324",
+          icons: [
+            {
+              src: "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
+                <svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+                  <defs>
+                    <linearGradient id="g" x1="0" x2="1" y1="0" y2="0">
+                      <stop offset="0" stop-color="#b478ff"/>
+                      <stop offset="1" stop-color="#4690ff"/>
+                    </linearGradient>
+                  </defs>
+                  <rect width="192" height="192" rx="44" fill="#0b1324"/>
+                  <rect x="14" y="14" width="164" height="164" rx="40" fill="rgba(255,255,255,.06)" stroke="rgba(235,245,255,.14)"/>
+                  <path d="M96 36c26 0 46 20 46 46" stroke="rgba(235,245,255,.75)" stroke-width="10" stroke-linecap="round"/>
+                  <path d="M54 70c-24 10-34 28-34 48 0 30 26 54 60 54 7 0 14-1 20-4" stroke="#4690ff" stroke-width="10" stroke-linecap="round"/>
+                  <path d="M138 70c24 10 34 28 34 48 0 30-26 54-60 54-7 0-14-1-20-4" stroke="#b478ff" stroke-width="10" stroke-linecap="round"/>
+                  <path d="M60 112c20 0 26 30 36 30s16-30 36-30" stroke="rgba(235,245,255,.70)" stroke-width="9" stroke-linecap="round"/>
+                  <path d="M96 142v24" stroke="rgba(235,245,255,.55)" stroke-width="9" stroke-linecap="round"/>
+                  <text x="96" y="108" text-anchor="middle" font-size="18" font-family="system-ui,Segoe UI,Roboto,Arial" fill="url(#g)" font-weight="800">ANGEL</text>
+                </svg>
+              `),
+              sizes: "192x192",
+              type: "image/svg+xml"
+            }
+          ]
+        };
+
+        const blob = new Blob([JSON.stringify(manifest)], {type:"application/manifest+json"});
+        const url = URL.createObjectURL(blob);
+        $("manifestLink").setAttribute("href", url);
+      }
+
+      buildManifest();
+      registerServiceWorker();
+
+      /* =========================
+         Initialize
+      ========================== */
+      // Set initial panel and render calendar only when opened
+      setPanel(0);
+
+      // Keep version text consistent
+      $("versionTop").textContent = APP_VERSION;
+      $("footerLeft").textContent = APP_VERSION;
+
+    })();
   </script>
-</body>
-</html>
 
-<!--
-EOF Version Detail Notes (required)
-App: Angel Numbers Tracker
-Version: v1.1A6
-Base: v1.1A5
-Changes:
-- Add-to-Calendar now opens a styled popup with number + notes + Add/Copy/Export/Cancel.
-- Edge-swipe only to prevent swipe handlers from breaking vertical scroll.
-- Version is displayed under the logo (very small, no padding).
-- Triple-tap on version label shows the heart message (unchanged behavior).
--->
+  <!--
+  Version Detail Notes (EOF)
+  App: Angel Numbers Tracker
+  Version: v1.1A2
+  Notes:
+  - Swipe navigation only triggers when touch starts within 150px of left/right screen edge.
+  - Identify screen: no autofocus; internal meaning box scrolls with right-side scrollbar; bottom buttons stay visible.
+  - Calendar: month view with day highlights; tapping highlighted day opens Day List popup; tapping entry opens Entry detail popup (edit notes/delete).
+  - Add popup: number + notes + Add/Cancel (no copy/export; no “in app only” wording).
+  - Export: available from Identify only (copies full report to clipboard).
+  -->
+</body>
+   </html>
