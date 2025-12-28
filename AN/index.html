@@ -1,25 +1,25 @@
-<!-- Angel Numbers Tracker v1.0B11 -->
+<!-- Angel Numbers Tracker v1.0B12 -->
 <!--
 Version Detail Notes
-App Version (internal): v1.0B11
+App Version (internal): v1.0B12
 Home display label (visual only): v1.333  (DO NOT CHANGE unless user instructs)
-Base: v1.0B9
+Base: v1.0B11
 
 Changes (requested):
 1) Log list must be scrollable up/down:
-   - Ensure Log panel content can scroll reliably (explicit log list overflow + padding).
+   - Log panel is now a fixed-height flex column.
+   - #logList is the dedicated vertical scroll region (overflow-y:auto + min-height:0).
 
 2) Angel Number Card is too tall / vertically hard to use:
-   - Make Card modal more compact (smaller title spacing + smaller action buttons).
-   - Keep buttons accessible (sticky action row).
-   - Reduce vertical bloat in card body.
+   - Kept the compact Card modal + sticky action row from B11 (no regression).
 
 3) Remove the X in the top-right corner of the Calendar Day popup list:
-   - Day modal uses Close button only (no X).
+   - Day modal uses Close button only (no X). (Already in B11; preserved.)
 
 4) Edit/Add panel not scrollable; buttons not accessible:
-   - Ensure Add/Edit panel scrolls.
-   - Make Add/Edit action buttons sticky at bottom so Save/Delete/Back are always reachable.
+   - Add/Edit panel is now a fixed-height flex column.
+   - New #addScroll is the dedicated vertical scroll region.
+   - Save/Delete/Back buttons live in a bottom action bar that always remains visible.
 
 Required persistence:
 - Keep EOF comment block.
@@ -108,6 +108,7 @@ Required persistence:
       overflow:hidden;
       border-radius: var(--radius);
       touch-action: pan-y;
+      min-height:0;
     }
 
     /* MAIN PANEL CARD — consistent dark-blue border */
@@ -121,27 +122,60 @@ Required persistence:
 
       position:absolute;
       inset:0;
+
+      /* Default panels can scroll */
       overflow:auto;
       -webkit-overflow-scrolling: touch;
       touch-action: pan-y;
       overscroll-behavior: contain;
+      min-height:0;
     }
 
-    /* Ensure Add/Edit panel can always scroll and has room for sticky buttons */
+    /* ===== B12: Dedicated scroll regions for Add/Edit + Log ===== */
+
+    /* Add/Edit becomes a fixed-height flex column:
+       - #addScroll is the vertical scroller
+       - .panelButtons is a persistent bottom action bar */
     #add{
+      overflow:hidden;              /* prevent whole-panel scroll; child scrolls */
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+      touch-action: pan-y;
+    }
+    #addScroll{
+      flex: 1 1 auto;
+      min-height: 0;               /* critical for flex scrolling on Android */
       overflow-y:auto;
-      padding-bottom: calc(var(--pad) + 78px);
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 18px;        /* breathing room above action bar */
+      touch-action: pan-y;
+      overscroll-behavior: contain;
     }
 
-    /* Ensure Log is scrollable and content doesn't get clipped */
+    /* Log becomes a fixed-height flex column:
+       - #logList is the vertical scroller */
     #log{
-      overflow-y:auto;
-      padding-bottom: 18px;
+      overflow:hidden;              /* prevent whole-panel scroll; list scrolls */
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+      touch-action: pan-y;
     }
     #logList{
+      flex: 1 1 auto;
+      min-height: 0;               /* critical for flex scrolling on Android */
       margin-top: 10px;
-      overflow: visible; /* panel scrolls; do not create nested scroll trap */
+      overflow-y:auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 18px;
+      touch-action: pan-y;
+      overscroll-behavior: contain;
     }
+
+    /* Ensure Log header/filters don’t compress oddly */
+    #log > .row.center{ flex: 0 0 auto; }
+    #log .label, #log .searchRow, #log .filters{ flex: 0 0 auto; }
 
     .hidden{ display:none !important; }
 
@@ -332,13 +366,12 @@ Required persistence:
       flex-wrap:wrap;
     }
 
-    /* Sticky action row on Add/Edit so buttons are always accessible */
+    /* B12: Persistent action bar (not dependent on scrolling) */
     #add .panelButtons{
-      position: sticky;
-      bottom: 0;
-      z-index: 10;
+      flex: 0 0 auto;
       padding-top: 12px;
       padding-bottom: 6px;
+      margin-top: 0;
       background: linear-gradient(180deg, rgba(11,19,36,0), rgba(11,19,36,.70) 35%, rgba(11,19,36,.92));
       border-top: 1px solid rgba(255,255,255,.08);
       backdrop-filter: blur(10px);
@@ -798,7 +831,7 @@ Required persistence:
                 fill="none" stroke="url(#angG)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
 
           <path d="M46 34 L46 42" stroke="rgba(235,245,255,.82)" stroke-width="4" stroke-linecap="round"/>
-          <path d="M42 38 L50 38" stroke="rgba(235,245,255,.82)" stroke-width="4" stroke-linecap="round"/>
+          <path d="42 38 L50 38" stroke="rgba(235,245,255,.82)" stroke-width="4" stroke-linecap="round"/>
         </g>
 
         <text x="160" y="92"
@@ -839,34 +872,38 @@ Required persistence:
       </div>
 
       <div id="add" class="card accentFrame hidden">
-        <div id="editPill" class="editPill hidden">Editing entry</div>
+        <!-- B12: scrollable content lives in #addScroll -->
+        <div id="addScroll">
+          <div id="editPill" class="editPill hidden">Editing entry</div>
 
-        <div id="timeLine" class="timeLine">--:--:-- --, --/--/----</div>
+          <div id="timeLine" class="timeLine">--:--:-- --, --/--/----</div>
 
-        <!-- Date/Time edit controls: shown ONLY when editing -->
-        <div id="dtEditWrap" class="hidden">
-          <div class="label">Date/Time</div>
-          <input id="dtEdit" class="field" type="datetime-local" />
+          <!-- Date/Time edit controls: shown ONLY when editing -->
+          <div id="dtEditWrap" class="hidden">
+            <div class="label">Date/Time</div>
+            <input id="dtEdit" class="field" type="datetime-local" />
+          </div>
+
+          <div class="label">Number</div>
+          <input id="anum" class="field" inputmode="numeric" placeholder="e.g., 111, 1212, 777" />
+
+          <div id="meaningCard" class="meaningCard">
+            <div class="meaningTop">
+              <div id="numBig" class="numBig">—</div>
+              <div id="patternPill" class="patternPill">Pattern: —</div>
+            </div>
+            <div id="meaningText" class="meaningText">Enter a number to see its commonly shared meaning.</div>
+            <div class="disclaimer">
+              Cultural note: these meanings come from numerology/“angel number” traditions and vary by source.
+              Treat as reflective prompts, not facts or predictions.
+            </div>
+          </div>
+
+          <div class="label">Notes <span style="color:var(--muted2); font-weight:650;">(optional)</span></div>
+          <textarea id="notes" class="field" placeholder="Where did you see it? What were you thinking/feeling?"></textarea>
         </div>
 
-        <div class="label">Number</div>
-        <input id="anum" class="field" inputmode="numeric" placeholder="e.g., 111, 1212, 777" />
-
-        <div id="meaningCard" class="meaningCard">
-          <div class="meaningTop">
-            <div id="numBig" class="numBig">—</div>
-            <div id="patternPill" class="patternPill">Pattern: —</div>
-          </div>
-          <div id="meaningText" class="meaningText">Enter a number to see its commonly shared meaning.</div>
-          <div class="disclaimer">
-            Cultural note: these meanings come from numerology/“angel number” traditions and vary by source.
-            Treat as reflective prompts, not facts or predictions.
-          </div>
-        </div>
-
-        <div class="label">Notes <span style="color:var(--muted2); font-weight:650;">(optional)</span></div>
-        <textarea id="notes" class="field" placeholder="Where did you see it? What were you thinking/feeling?"></textarea>
-
+        <!-- B12: persistent action bar (always visible) -->
         <div class="panelButtons">
           <button id="btnSave" class="btn primary grow">Save</button>
           <button id="btnDelete" class="btn grow hidden">Delete</button>
@@ -899,6 +936,7 @@ Required persistence:
           </div>
         </div>
 
+        <!-- B12: this is the dedicated vertical scroller -->
         <div id="logList"></div>
       </div>
 
@@ -1048,7 +1086,7 @@ Save creates a .txt file on your device.
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.0B11";
+  const APP_VERSION = "v1.0B12";
   const HOME_VERSION_LABEL = "v1.333";
   const STORAGE_KEY = "angel_numbers_records_v1";
   const DAY_MS = 24*60*60*1000;
@@ -1306,11 +1344,15 @@ Save creates a .txt file on your device.
   function focusTopOfPanel(screen){
     try{ window.scrollTo({top:0,left:0,behavior:"auto"}); }catch{}
     if(screen === "add"){
+      try{ $("addScroll").scrollTop = 0; }catch{}
       if(editTs == null){
         setTimeout(() => { try{ $("anum").focus({preventScroll:true}); }catch{} }, 0);
       }else{
         setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 0);
       }
+    }else if(screen === "log"){
+      try{ $("logList").scrollTop = 0; }catch{}
+      try{ document.activeElement?.blur(); }catch{}
     }else{
       try{ document.activeElement?.blur(); }catch{}
     }
@@ -1530,7 +1572,7 @@ Save creates a .txt file on your device.
     $("anum").value = "";
     $("notes").value = "";
     updateMeaningUI();
-    try{ $("add").scrollTop = 0; }catch{}
+    try{ $("addScroll").scrollTop = 0; }catch{}
   }
 
   function enterAddNew(from="home"){
@@ -2808,12 +2850,12 @@ self.addEventListener('fetch', (e)=>{ });`;
 <!--
 EOF Version Detail Notes (required)
 App: Angel Numbers Tracker
-Actual Version: v1.0B11
+Actual Version: v1.0B12
 Home Label (visual only): v1.333 (do not change unless instructed)
-Base: v1.0B9
+Base: v1.0B11
 Changes:
-- Log: ensured panel scrolling remains reliable; log list no longer risks nested scroll traps; extra bottom padding prevents clipping.
-- Card modal: reduced vertical bloat (smaller typography/margins), and made action buttons sticky so they remain accessible.
-- Day modal: removed the top-right X; Close button is the only close control (plus backdrop + Esc).
-- Add/Edit: panel scroll hardened and action buttons made sticky so Save/Delete/Back are always reachable.
+- Log: #log is now a fixed-height flex column; #logList is the dedicated vertical scroll region (overflow-y:auto + min-height:0) for reliable swipe up/down scrolling.
+- Add/Edit: introduced #addScroll as the dedicated vertical scroll region; Save/Delete/Back moved into a persistent bottom action bar so buttons are always reachable.
+- Card modal: preserved compact layout and sticky action row (no regression).
+- Day modal: preserved Close-only behavior (no top-right X).
 -->
