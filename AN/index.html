@@ -1,20 +1,14 @@
-<!-- Angel Numbers Tracker v1.1A8 -->
+<!-- Angel Numbers Tracker v1.1A9 -->
 <!--
 Version Detail Notes
-App Version: v1.1A8
-Base: v1.1A6
+App Version: v1.1A9
+Base: v1.1A8
 
 Changes (requested):
-- Update ALL version mentions to current version.
-- Smoother left/right panel swipe experience (edge-swipe start within 150px; animated, velocity-aware snap).
-- Add Day List popup: logo at top + tight clickable list for that day + instruction to tap a number to view details.
-- Adding an entry stores and displays date/time; date/time editable in Edit Record screen.
-- Remove “in app only” from Add popup.
-- Remove Copy/Export from Add popup.
-- Remove Export button from Calendar screen (calendar itself has nothing meaningful visible to export).
-
-Notes:
-- BOF/EOF comment blocks preserved.
+- Home/Identify panel: add Install button; reorganize footer/button area to fit 5 actions (Add, View Calendar, Install, Export, Exit) by shrinking button heights slightly and using a 2-row grid.
+- Calendar: remove Today button; keep Month selector + Back on the same line.
+- Day List: tapping an item now opens the entry card (Edit Entry modal) reliably (was blocked by touch-lock timing).
+- Version advanced; BOF/EOF comment blocks preserved.
 - Exit handler unchanged.
 -->
 <!doctype html>
@@ -234,7 +228,7 @@ Notes:
     }
 
     .footerTiny{
-      margin-top:10px;
+      margin-top:8px;
       display:flex;
       justify-content:space-between;
       gap:10px;
@@ -334,22 +328,28 @@ Notes:
     }
     #homeFooter{
       flex: 0 0 auto;
-      padding-top: 12px;
+      padding-top: 10px;
       padding-bottom: calc(8px + env(safe-area-inset-bottom));
       background: linear-gradient(180deg, rgba(11,19,36,0), rgba(11,19,36,.72) 32%, rgba(11,19,36,.94));
       border-top: 1px solid rgba(255,255,255,.08);
       backdrop-filter: blur(10px);
     }
-    #homeFooter .homeActions{
-      display:flex;
-      flex-direction:column;
-      gap:12px;
+
+    /* NEW: home action area fits 5 buttons */
+    .homeActions{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
       margin:0;
     }
-    #homeFooter .homeActions .btn{
-      font-size:22px;
-      font-weight:780;
-      letter-spacing:.25px;
+    .homeActions .btn{
+      height: 52px;           /* shrink just enough */
+      font-size: 18px;
+      font-weight: 820;
+      letter-spacing: .2px;
+    }
+    .homeActions .btn.wide{
+      grid-column: 1 / -1;
     }
 
     .homeTitle{
@@ -478,14 +478,16 @@ Notes:
       -webkit-overflow-scrolling: touch;
       touch-action: pan-y;
     }
-    .calTop{
+
+    /* NEW: calendar top row (Month + Back in same row) */
+    .calBar{
       display:flex;
       gap:12px;
       align-items:center;
       margin-top: 10px;
     }
-    .calTop .field{ height:52px; border-radius: 18px; }
-    .calTop .btn.small{ height:52px; border-radius: 18px; }
+    .calBar .field{ height:52px; border-radius: 18px; }
+    .calBar .btn.small{ height:52px; border-radius: 18px; }
 
     .calGrid{
       margin-top: 12px;
@@ -699,10 +701,11 @@ How to use: Treat the meaning as a reflective prompt—what it “means” depen
 
           <div id="homeFooter">
             <div class="homeActions">
-              <button id="btnAddToCalendar" class="btn primary">Add to Calendar</button>
+              <button id="btnAddToCalendar" class="btn primary wide">Add to Calendar</button>
               <button id="btnViewCalendar" class="btn">View Calendar</button>
+              <button id="btnInstall" class="btn">Install</button>
               <button id="btnHomeExport" class="btn">Export</button>
-              <button id="btnExitHome" class="btn danger">Exit</button>
+              <button id="btnExitHome" class="btn danger wide">Exit</button>
             </div>
 
             <div class="footerTiny">
@@ -714,14 +717,9 @@ How to use: Treat the meaning as a reflective prompt—what it “means” depen
 
         <!-- CALENDAR -->
         <div id="calendar" class="card">
-          <div class="row center">
-            <div class="grow"></div>
-            <button id="btnBackFromCalendar" class="btn small">Back</button>
-          </div>
-
-          <div class="calTop">
+          <div class="calBar">
             <input id="calMonth" class="field" type="month" />
-            <button id="btnCalToday" class="btn small">Today</button>
+            <button id="btnBackFromCalendar" class="btn small">Back</button>
           </div>
 
           <div class="calGrid" id="calDowRow"></div>
@@ -877,13 +875,62 @@ Save creates a .txt file on your device.
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.1A8";
+  const APP_VERSION = "v1.1A9";
   const STORAGE_KEY = "angel_numbers_records_v1";
   const DAY_MS = 24*60*60*1000;
 
   const TEST_DATA_ENABLED = true;
 
   const $ = (id) => document.getElementById(id);
+
+  /* ===== PWA Install ===== */
+
+  let deferredInstallPrompt = null;
+
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    updateInstallButton();
+  });
+
+  window.addEventListener("appinstalled", () => {
+    deferredInstallPrompt = null;
+    updateInstallButton(true);
+  });
+
+  async function tryInstall(){
+    if(!deferredInstallPrompt){
+      openInfo("Install", "Install is only available when your browser offers it.\n\nTip: In Chrome, you can also use the menu ⋮ → Install app (if shown).");
+      return;
+    }
+    try{
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+    }catch{}
+    deferredInstallPrompt = null;
+    updateInstallButton();
+  }
+
+  function updateInstallButton(installedMaybe=false){
+    const btn = $("btnInstall");
+    if(!btn) return;
+
+    // If installed, Chrome may not fire beforeinstallprompt again; treat as not available.
+    if(installedMaybe){
+      btn.disabled = true;
+      btn.textContent = "Installed";
+      return;
+    }
+
+    if(deferredInstallPrompt){
+      btn.disabled = false;
+      btn.textContent = "Install";
+    }else{
+      // still show button but disabled (so layout stays consistent)
+      btn.disabled = true;
+      btn.textContent = "Install";
+    }
+  }
 
   /* ===== Meanings ===== */
 
@@ -1169,7 +1216,7 @@ Save creates a .txt file on your device.
   /* ===== Touch lock ===== */
 
   let lockTimer = null;
-  function lockTouches(ms=180){
+  function lockTouches(ms=140){
     const el = $("touchLock");
     el.classList.add("on");
     if(lockTimer) clearTimeout(lockTimer);
@@ -1188,7 +1235,7 @@ Save creates a .txt file on your device.
     $("infoTitle").textContent = title || "Info";
     $("infoSub").textContent = message || "—";
     $("infoModal").classList.remove("hidden");
-    lockTouches(140);
+    lockTouches(120);
   }
   function closeInfo(){
     $("infoModal").classList.add("hidden");
@@ -1198,7 +1245,7 @@ Save creates a .txt file on your device.
   $("btnInfoOk").addEventListener("click", (e)=>{ e.preventDefault(); closeInfo(); });
   $("infoModal").addEventListener("click", (e)=>{ if(e.target === $("infoModal")) closeInfo(); });
 
-  function openHeart(){ $("heartModal").classList.remove("hidden"); lockTouches(140); }
+  function openHeart(){ $("heartModal").classList.remove("hidden"); lockTouches(120); }
   function closeHeart(){ $("heartModal").classList.add("hidden"); unlockTouches(); }
   $("btnHeartX").addEventListener("click", (e)=>{ e.preventDefault(); closeHeart(); });
   $("btnHeartClose").addEventListener("click", (e)=>{ e.preventDefault(); closeHeart(); });
@@ -1211,7 +1258,7 @@ Save creates a .txt file on your device.
   function openExportModal(payload){
     exportPayload = payload;
     $("exportModal").classList.remove("hidden");
-    lockTouches(140);
+    lockTouches(120);
 
     $("btnExportClose").disabled = true;
     $("btnExportShare").disabled = true;
@@ -1360,7 +1407,7 @@ Save creates a .txt file on your device.
     $("addCalNumber").textContent = n;
     $("addCalNotes").value = "";
     $("addCalModal").classList.remove("hidden");
-    lockTouches(140);
+    lockTouches(90);
 
     try{ document.activeElement?.blur(); }catch{}
   }
@@ -1469,21 +1516,36 @@ Save creates a .txt file on your device.
            </div>
            <div class="dayNotes">${escapeHtml(noteShort)}</div>
            <div class="chev">›</div>`;
-        item.addEventListener("click", (e)=>{
-          e.preventDefault();
-          openEditModal(r.id);
-        });
+
+        // Use pointerup/click both; and DO NOT let touchLock block opening
+        const open = (e) => {
+          try{ e.preventDefault(); }catch{}
+          try{ e.stopPropagation(); }catch{}
+          // Close day list first (prevents overlay swallowing the next modal)
+          closeDayListImmediate();
+          // Then open edit shortly after (next frame)
+          requestAnimationFrame(() => {
+            openEditModal(r.id);
+          });
+        };
+        item.addEventListener("click", open, {passive:false});
+        item.addEventListener("pointerup", open, {passive:false});
+
         list.appendChild(item);
       }
     }
 
     $("dayListModal").classList.remove("hidden");
-    lockTouches(140);
+    // Minimal lock only to avoid double-taps on open; does not block item taps
+    lockTouches(60);
   }
 
-  function closeDayList(){
+  function closeDayListImmediate(){
     $("dayListModal").classList.add("hidden");
     unlockTouches();
+  }
+  function closeDayList(){
+    closeDayListImmediate();
   }
 
   $("btnDayListX").addEventListener("click", (e)=>{ e.preventDefault(); closeDayList(); });
@@ -1545,7 +1607,7 @@ Save creates a .txt file on your device.
         cell.addEventListener("click", (e)=>{
           e.preventDefault();
           openDayList(dayStart, recs);
-        });
+        }, {passive:false});
       }
 
       grid.appendChild(cell);
@@ -1576,7 +1638,7 @@ Save creates a .txt file on your device.
     $("editMeaning").textContent = out.meaning || "—";
 
     $("editModal").classList.remove("hidden");
-    lockTouches(140);
+    lockTouches(80);
 
     try{ document.activeElement?.blur(); }catch{}
   }
@@ -1966,12 +2028,9 @@ self.addEventListener('fetch', (e)=>{ });`;
     openAddCalModal();
   });
 
-  $("btnCalToday").addEventListener("click", () => {
-    const now = new Date();
-    const y = now.getFullYear();
-    const m = String(now.getMonth()+1).padStart(2,"0");
-    $("calMonth").value = `${y}-${m}`;
-    renderCalendar();
+  $("btnInstall").addEventListener("click", (e) => {
+    e.preventDefault();
+    tryInstall();
   });
 
   $("calMonth").addEventListener("change", renderCalendar);
@@ -1990,6 +2049,8 @@ self.addEventListener('fetch', (e)=>{ });`;
 
   initMonthDefaultIfNeeded();
   renderCalendar();
+
+  updateInstallButton();
 
   try{ document.activeElement?.blur(); }catch{}
   setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 0);
@@ -2010,11 +2071,10 @@ self.addEventListener('fetch', (e)=>{ });`;
 
 <!--
 EOF Version Detail Notes
-App Version: v1.1A8
-Base: v1.1A6
+App Version: v1.1A9
+Base: v1.1A8
 Changes:
-- Smooth deck-based edge swipe (150px) with animated snap + velocity.
-- Day list modal + Edit modal with editable date/time.
-- Add popup simplified (no copy/export; removed “in app only” phrasing).
-- Calendar export button removed.
+- Home: added Install button; reorganized actions into a 2-column grid; reduced button height slightly to fit.
+- Calendar: removed Today button; Month + Back on same line.
+- Day list item tap now opens Edit Entry reliably (close day list first, then open edit).
 -->
