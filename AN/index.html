@@ -1,17 +1,8 @@
-<!-- Angel Numbers Tracker v1.0B1 -->
+<!-- Angel Numbers Tracker v1.0B2 -->
 <!--
-Base: v1.0A4
-B-series focus: charting + calendar + record inspection.
-
-v1.0B1 changes:
-- Charts now plot sightings as time-spaced data points (as recorded) so “bunches” are visible.
-- Line breaks when there is a gap >= 24 hours between consecutive points.
-- Isolated points (no neighbor within 24h on either side) render as a larger, more visible dot.
-- Charts screen adds a monthly calendar grid showing daily sightings; each sighting is clickable.
-- Clicking a sighting opens a Record modal (styled like Edit/Delete modals) with:
-  - Copy (clipboard), Export (export modal), Save .txt, Edit.
-- Quadruple-tap the top logo to reveal the actual tracked app version (APP_VERSION).
-- Home panel display label stays v1.333 (visual-only; do not change unless explicitly instructed).
+Single-file, offline-first PWA.
+Base UI/UX derived from Vitals Tracker v1.19B7 (Keyth Jyles).
+Purpose: Log “angel number” sightings + auto-meaning (cultural/numerology) + charting + export.
 -->
 
 <!doctype html>
@@ -57,6 +48,7 @@ v1.0B1 changes:
       display:flex;
       justify-content:center;
       padding: max(14px, env(safe-area-inset-top)) 12px max(14px, env(safe-area-inset-bottom));
+      overscroll-behavior: none;
     }
 
     .app{
@@ -64,6 +56,7 @@ v1.0B1 changes:
       display:flex;
       flex-direction:column;
       gap:14px;
+      touch-action: manipulation;
     }
 
     .logoTitle{
@@ -74,6 +67,7 @@ v1.0B1 changes:
       text-shadow: 0 10px 22px rgba(0,0,0,.35);
       -webkit-tap-highlight-color: transparent;
       user-select:none;
+      touch-action: manipulation;
     }
     .logoTitle svg{
       width:min(520px, 100%);
@@ -88,8 +82,10 @@ v1.0B1 changes:
       box-shadow: var(--shadow);
       padding: var(--pad);
       backdrop-filter: blur(10px);
+      position:relative;
     }
 
+    /* Unified accent border for all panels/modals */
     .accentFrame{
       position:relative;
     }
@@ -124,7 +120,7 @@ v1.0B1 changes:
       user-select:none;
       -webkit-tap-highlight-color: transparent;
       font-size:18px;
-      white-space:nowrap;
+      touch-action: manipulation;
     }
     .btn:active{ transform: translateY(1px); }
 
@@ -146,6 +142,8 @@ v1.0B1 changes:
       font-size:16px;
       padding:0 14px;
       font-weight:650;
+      white-space:nowrap;
+      border-radius: 18px;
     }
 
     .btn:disabled{
@@ -170,7 +168,6 @@ v1.0B1 changes:
       color:var(--muted2);
       margin: 6px 4px 0;
       line-height:1.25;
-      white-space: pre-wrap;
     }
 
     .field{
@@ -434,13 +431,14 @@ v1.0B1 changes:
       color: rgba(235,245,255,.92);
       font-size: clamp(22px, 6.5vw, 34px);
       line-height: 1.05;
-      margin: 4px 2px 12px;
+      margin: 4px 2px 14px;
     }
     .modalSub{
       color: rgba(235,245,255,.56);
       font-size: 14px;
       margin: 0 2px 14px;
       white-space: pre-wrap;
+      user-select:text;
     }
     .modalBtns{
       display:flex;
@@ -467,120 +465,85 @@ v1.0B1 changes:
       padding: 0 10px;
       white-space: nowrap;
     }
+    #exportModal .btn.primary{
+      color: rgba(235,245,255,.90);
+    }
+
+    .recordBox{
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.03);
+      border-radius: 22px;
+      padding: 12px 12px 10px;
+      margin-top: 10px;
+    }
+    .recordLine{
+      margin-top:8px;
+      color: rgba(235,245,255,.72);
+      font-size:15px;
+      line-height:1.18;
+      white-space: pre-wrap;
+      user-select:text;
+    }
+    .recordLine b{ color: rgba(235,245,255,.86); }
 
     /* Calendar */
     .calWrap{
-      margin-top: 14px;
+      margin-top: 12px;
       border:1px solid var(--stroke);
       background: rgba(255,255,255,.02);
       border-radius: 22px;
       padding: 12px;
     }
-    .calHeader{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom: 10px;
-      flex-wrap:wrap;
-    }
-    .calTitle{
-      font-weight:900;
-      color: rgba(235,245,255,.86);
-      letter-spacing:.2px;
-      font-size:18px;
-      margin: 0 2px;
-      white-space:nowrap;
-    }
     .calGrid{
       display:grid;
       grid-template-columns: repeat(7, 1fr);
       gap: 8px;
+      margin-top: 10px;
     }
     .calDow{
       font-size:12px;
-      color: rgba(235,245,255,.46);
-      font-weight:800;
+      color: rgba(235,245,255,.50);
       text-align:center;
-      padding: 2px 0 6px;
-      user-select:none;
-    }
-    .dayCell{
-      min-height: 72px;
-      border-radius: 16px;
-      border:1px solid rgba(235,245,255,.10);
-      background: rgba(255,255,255,.02);
-      padding: 8px 8px 6px;
-      overflow:hidden;
-    }
-    .dayCell.off{
-      opacity:.38;
-      background: rgba(255,255,255,.01);
-    }
-    .dayTop{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:8px;
-      margin-bottom: 6px;
-    }
-    .dayNum{
-      font-weight:900;
-      color: rgba(235,245,255,.78);
-      font-size:14px;
-      line-height:1;
-    }
-    .dayCount{
-      font-size:12px;
-      color: rgba(235,245,255,.44);
-      font-weight:800;
-      line-height:1;
-      white-space:nowrap;
-    }
-    .chips{
-      display:flex;
-      flex-wrap:wrap;
-      gap:6px;
-    }
-    .chip{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding: 6px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(235,245,255,.16);
-      background: rgba(47,120,255,.10);
-      color: rgba(235,245,255,.82);
-      font-weight:850;
-      font-size: 12px;
+      font-weight:750;
       letter-spacing:.2px;
+    }
+    .calDay{
+      border:1px solid rgba(235,245,255,.12);
+      background: rgba(255,255,255,.02);
+      border-radius: 14px;
+      padding: 8px 8px 7px;
+      min-height: 62px;
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      justify-content:flex-start;
       cursor:pointer;
       user-select:none;
       -webkit-tap-highlight-color: transparent;
-      max-width:100%;
+      touch-action: manipulation;
+    }
+    .calDay.off{
+      opacity:.35;
+      cursor:default;
+    }
+    .calN{
+      font-size:12px;
+      color: rgba(235,245,255,.66);
+      font-weight:850;
+      letter-spacing:.2px;
+    }
+    .calNums{
+      font-size:12px;
+      color: rgba(235,245,255,.70);
+      line-height:1.15;
+      white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
-      white-space:nowrap;
     }
-    .chip:active{ transform: translateY(1px); }
-    .chip .t{
-      font-size: 11px;
-      color: rgba(235,245,255,.55);
-      font-weight:900;
-      margin-left: 6px;
-    }
-
-    .monoBox{
-      border:1px solid rgba(235,245,255,.14);
-      background: rgba(255,255,255,.03);
-      border-radius: 18px;
-      padding: 12px;
-      color: rgba(235,245,255,.78);
-      font-size: 13px;
-      line-height: 1.25;
-      white-space: pre-wrap;
-      max-height: 44vh;
-      overflow:auto;
+    .calCnt{
+      font-size:11px;
+      color: rgba(235,245,255,.46);
+      margin-top:auto;
     }
   </style>
 </head>
@@ -588,7 +551,7 @@ v1.0B1 changes:
 <body>
   <div class="app">
 
-    <div id="logoTap" class="logoTitle" aria-label="Angel Numbers Tracker">
+    <div id="logoArea" class="logoTitle" aria-label="Angel Numbers Tracker">
       <svg viewBox="0 0 900 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Angel Numbers Tracker">
         <defs>
           <linearGradient id="angG" x1="0" y1="0" x2="1" y2="0">
@@ -601,13 +564,27 @@ v1.0B1 changes:
           </filter>
         </defs>
 
+        <!-- Icon block (wings + halo) -->
         <g transform="translate(46 24)" filter="url(#angS)">
           <rect x="0" y="0" width="92" height="92" rx="26" fill="rgba(255,255,255,.06)" stroke="rgba(235,245,255,.22)" stroke-width="2"/>
+
+          <!-- Halo -->
           <ellipse cx="46" cy="24" rx="20" ry="8" fill="none" stroke="rgba(235,245,255,.88)" stroke-width="4" opacity=".92"/>
-          <path d="M46 50 C34 42, 22 44, 16 54 C24 58, 32 66, 38 76 C40 66, 43 58, 46 50Z"
+
+          <!-- Wings (minimal, symmetric) -->
+          <path d="M46 50
+                   C34 42, 22 44, 16 54
+                   C24 58, 32 66, 38 76
+                   C40 66, 43 58, 46 50Z"
                 fill="none" stroke="url(#angG)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M46 50 C58 42, 70 44, 76 54 C68 58, 60 66, 54 76 C52 66, 49 58, 46 50Z"
+
+          <path d="M46 50
+                   C58 42, 70 44, 76 54
+                   C68 58, 60 66, 54 76
+                   C52 66, 49 58, 46 50Z"
                 fill="none" stroke="url(#angG)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+
+          <!-- Subtle center spark -->
           <path d="M46 34 L46 42" stroke="rgba(235,245,255,.82)" stroke-width="4" stroke-linecap="round"/>
           <path d="M42 38 L50 38" stroke="rgba(235,245,255,.82)" stroke-width="4" stroke-linecap="round"/>
         </g>
@@ -624,7 +601,7 @@ v1.0B1 changes:
 
     <div id="home" class="card accentFrame">
       <div class="homeMain">
-        <button id="btnGoAdd" class="btn primary">ADD Sighting</button>
+        <button id="btnGoAdd" class="btn primary">ADD Angel Number</button>
         <button id="btnGoLog" class="btn">Log</button>
         <button id="btnGoCharts" class="btn">Charts</button>
 
@@ -639,6 +616,7 @@ v1.0B1 changes:
         <div class="subtle">Inspired by a real Angel.</div>
 
         <div class="footerTiny">
+          <!-- VISUAL LABEL ONLY. Do not change unless user instructs. -->
           <div>v1.333</div>
           <div>developed by Keyth Jyles</div>
         </div>
@@ -710,7 +688,7 @@ v1.0B1 changes:
         <button id="btnBackFromCharts" class="btn small">Back</button>
       </div>
 
-      <div class="subtle">Time-spaced points (as recorded). Line breaks at ≥24h gaps. Pinch to zoom; drag to pan.</div>
+      <div class="subtle">Weekly view (7 days). Pinch to zoom; drag to pan.</div>
 
       <div class="filters">
         <div class="dateField" style="grid-column:1 / span 2;">
@@ -722,23 +700,26 @@ v1.0B1 changes:
       <canvas id="chart" width="900" height="520"></canvas>
 
       <div class="calWrap">
-        <div class="calHeader">
-          <div class="calTitle" id="calTitle">Monthly Calendar</div>
-          <div style="flex:1"></div>
-          <div style="min-width: 170px;">
+        <div class="row center" style="gap:10px;">
+          <div class="grow">
+            <div class="miniLabel" style="margin:0 4px 6px; color:var(--muted); font-weight:650; font-size:14px;">Calendar Month</div>
             <input id="calMonth" class="field" type="month" />
           </div>
+          <button id="btnCalToday" class="btn small" style="height:54px;">Today</button>
         </div>
-        <div class="calGrid" id="calDow"></div>
-        <div class="calGrid" id="calGrid"></div>
-        <div class="subtle" style="margin-top:10px;">
-          Tap any pill to open that record. Edit from the record popup.
+
+        <div class="calGrid" style="margin-top:12px;">
+          <div class="calDow">Sun</div><div class="calDow">Mon</div><div class="calDow">Tue</div><div class="calDow">Wed</div><div class="calDow">Thu</div><div class="calDow">Fri</div><div class="calDow">Sat</div>
         </div>
+        <div id="calGrid" class="calGrid" aria-label="Calendar grid"></div>
+
+        <div class="subtle">Tap a day to view sightings.</div>
       </div>
     </div>
 
   </div>
 
+  <!-- Edit prompt -->
   <div id="editModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
     <div class="modalCard">
       <div id="editModalTitle" class="modalTitle">Edit this sighting?</div>
@@ -750,34 +731,66 @@ v1.0B1 changes:
     </div>
   </div>
 
+  <!-- Unified confirm modal (for delete/clear/etc.) -->
   <div id="confirmModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
     <div class="modalCard">
       <div id="confirmTitle" class="modalTitle">Confirm</div>
       <div id="confirmSub" class="modalSub">—</div>
       <div class="modalBtns">
         <button id="btnConfirmCancel" class="btn">Cancel</button>
-        <button id="btnConfirmDo" class="btn danger">Delete</button>
+        <button id="btnConfirmOk" class="btn primary">OK</button>
       </div>
     </div>
   </div>
 
+  <!-- Record detail modal (shared by Log + Calendar + future chart selection) -->
   <div id="recordModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="recordTitle">
     <div class="modalCard">
-      <div id="recordTitle" class="modalTitle">Record</div>
+      <div id="recordTitle" class="modalTitle">Sighting</div>
       <div id="recordSub" class="modalSub">—</div>
 
-      <div id="recordBox" class="monoBox">—</div>
+      <div id="recordBox" class="recordBox">
+        <div class="meaningTop">
+          <div id="recordNum" class="numBig">—</div>
+          <div id="recordPat" class="patternPill">Pattern: —</div>
+        </div>
+        <div id="recordMeaning" class="meaningText">—</div>
+        <div class="recordLine"><b>Notes:</b> <span id="recordNotes">—</span></div>
+      </div>
 
-      <div class="modalBtns" style="margin-top:12px;">
+      <div class="modalBtns">
         <button id="btnRecordClose" class="btn">Close</button>
         <button id="btnRecordCopy" class="btn">Copy</button>
         <button id="btnRecordExport" class="btn">Export</button>
-        <button id="btnRecordSave" class="btn primary">Save .txt</button>
         <button id="btnRecordEdit" class="btn primary">Edit</button>
       </div>
     </div>
   </div>
 
+  <!-- Day list modal (calendar day can contain multiple records) -->
+  <div id="dayModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="dayTitle">
+    <div class="modalCard">
+      <div id="dayTitle" class="modalTitle">Day</div>
+      <div id="daySub" class="modalSub">Tap a sighting to open details.</div>
+      <div id="dayList"></div>
+      <div class="modalBtns">
+        <button id="btnDayClose" class="btn primary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Version modal (quad-tap logo) -->
+  <div id="versionModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="versionTitle">
+    <div class="modalCard">
+      <div id="versionTitle" class="modalTitle">Version</div>
+      <div id="versionSub" class="modalSub">—</div>
+      <div class="modalBtns">
+        <button id="btnVersionClose" class="btn primary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export modal -->
   <div id="exportModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle">
     <div class="modalCard">
       <div id="exportModalTitle" class="modalTitle">Export ready</div>
@@ -802,7 +815,7 @@ Optional:
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.0B1";
+  const APP_VERSION = "v1.0B2";          // actual tracked version (code)
   const STORAGE_KEY = "angel_numbers_records_v1";
   const DAY_MS = 24*60*60*1000;
 
@@ -908,14 +921,14 @@ Optional:
     return `${time}, ${date}`;
   }
 
-  function fmtHM(ts){
-    const d = new Date(ts);
-    return new Intl.DateTimeFormat(undefined, { hour:"2-digit", minute:"2-digit" }).format(d);
-  }
-
   function startOfDay(ts){
     const d = new Date(ts);
     d.setHours(0,0,0,0);
+    return d.getTime();
+  }
+  function endOfDay(ts){
+    const d = new Date(ts);
+    d.setHours(23,59,59,999);
     return d.getTime();
   }
 
@@ -960,7 +973,7 @@ Optional:
     if(screen === "charts"){
       initWeekDefaultIfNeeded();
       applyWeekToBase(true);
-      initMonthDefaultIfNeeded();
+      ensureCalendarDefault();
       renderCharts();
       renderCalendar();
     }
@@ -971,26 +984,6 @@ Optional:
     }
     focusTopOfPanel(screen);
   }
-
-  /* =========================
-     Quad-tap logo: reveal real version
-     ========================= */
-
-  let tapCount = 0;
-  let tapTimer = null;
-
-  $("logoTap").addEventListener("click", () => {
-    tapCount++;
-    if(tapTimer) clearTimeout(tapTimer);
-    tapTimer = setTimeout(() => { tapCount = 0; }, 900);
-
-    if(tapCount >= 4){
-      tapCount = 0;
-      clearTimeout(tapTimer);
-      tapTimer = null;
-      alert(`App Version (actual): ${APP_VERSION}`);
-    }
-  });
 
   /* =========================
      Angel number parsing + pattern detection
@@ -1100,8 +1093,7 @@ Optional:
     }
 
     const lens = digitSummary(s);
-    const fallback =
-      "A general interpretation is heightened awareness: notice your thoughts, environment, and choices—then act deliberately.";
+    const fallback = "A general interpretation is heightened awareness: notice your thoughts, environment, and choices—then act deliberately.";
     return {pattern, meaning: lens ? `${fallback}\n${lens}` : fallback};
   }
 
@@ -1187,7 +1179,9 @@ Optional:
     $("meaningText").textContent = out.meaning || "—";
   }
 
-  $("anum").addEventListener("input", () => { updateMeaningUI(); });
+  $("anum").addEventListener("input", () => {
+    updateMeaningUI();
+  });
 
   function validateAnyInput(number, notes){
     return !!(String(number||"").trim() || String(notes||"").trim());
@@ -1248,7 +1242,7 @@ Optional:
       e.className = "entry";
       e.tabIndex = 0;
       e.setAttribute("role","button");
-      e.setAttribute("aria-label","Open entry for editing");
+      e.setAttribute("aria-label","Open entry details");
       e.dataset.ts = String(r.ts);
 
       const top = document.createElement("div");
@@ -1296,7 +1290,266 @@ Optional:
   }
 
   /* =========================
-     Edit prompt modal (Log press)
+     Unified confirm modal (formatted like others)
+     ========================= */
+
+  let confirmState = null;
+  let confirmPrevFocus = null;
+  let confirmOpenedAt = 0;
+  let enableConfirmTimer = null;
+
+  function openConfirmModal({title, message, okLabel="OK", okClass="primary"}, onOk){
+    confirmPrevFocus = document.activeElement || null;
+    confirmOpenedAt = Date.now();
+    confirmState = { onOk };
+
+    $("confirmTitle").textContent = title || "Confirm";
+    $("confirmSub").textContent = message || "—";
+    const okBtn = $("btnConfirmOk");
+
+    okBtn.textContent = okLabel;
+    okBtn.className = "btn " + (okClass === "danger" ? "danger" : "primary");
+
+    $("btnConfirmCancel").disabled = true;
+    okBtn.disabled = true;
+
+    $("confirmModal").classList.remove("hidden");
+
+    if(enableConfirmTimer) clearTimeout(enableConfirmTimer);
+    enableConfirmTimer = setTimeout(() => {
+      $("btnConfirmCancel").disabled = false;
+      okBtn.disabled = false;
+    }, 450);
+
+    setTimeout(() => {
+      try{ $("btnConfirmCancel").focus({preventScroll:true}); }catch{}
+    }, 0);
+  }
+
+  function closeConfirmModal(){
+    confirmState = null;
+    $("confirmModal").classList.add("hidden");
+    try{ confirmPrevFocus?.focus?.({preventScroll:true}); }catch{}
+  }
+
+  $("btnConfirmCancel").addEventListener("click", (e) => { e.preventDefault(); closeConfirmModal(); });
+  $("btnConfirmOk").addEventListener("click", (e) => {
+    e.preventDefault();
+    if($("btnConfirmOk").disabled) return;
+    const fn = confirmState?.onOk;
+    closeConfirmModal();
+    try{ fn && fn(); }catch{}
+  });
+
+  $("confirmModal").addEventListener("click", (e) => {
+    const justOpened = (Date.now() - confirmOpenedAt) < 220;
+    if(justOpened){ e.preventDefault(); e.stopPropagation(); return; }
+    if(e.target === $("confirmModal")) closeConfirmModal();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    const open = !$("confirmModal").classList.contains("hidden");
+    if(!open) return;
+
+    if(e.key === "Escape"){
+      e.preventDefault();
+      closeConfirmModal();
+      return;
+    }
+    if(e.key === "Enter"){
+      e.preventDefault();
+      if(!$("btnConfirmOk").disabled) $("btnConfirmOk").click();
+    }
+  });
+
+  /* =========================
+     Record detail modal (shared card for Log + Calendar)
+     ========================= */
+
+  let recordOpenTs = null;
+  let recordPrevFocus = null;
+  let recordOpenedAt = 0;
+
+  function recordToText(r){
+    const lines = [
+      "Angel Numbers Tracker — Sighting",
+      `App Version: ${APP_VERSION}`,
+      `Date/Time: ${fmtDateTime(r.ts)}`,
+      `Number: ${r.number || "—"}`,
+      `Pattern: ${r.pattern || "—"}`,
+      "",
+      "Meaning:",
+      (r.meaning || "None").toString(),
+      "",
+      "Notes:",
+      (r.notes || "None").toString()
+    ];
+    return lines.join("\n");
+  }
+
+  function openRecordModal(ts){
+    const recs = loadRecords();
+    const r = recs.find(x => x.ts === ts);
+    if(!r) return;
+
+    recordOpenTs = ts;
+    recordPrevFocus = document.activeElement || null;
+    recordOpenedAt = Date.now();
+
+    $("recordTitle").textContent = "Sighting";
+    $("recordSub").textContent = fmtDateTime(r.ts);
+
+    $("recordNum").textContent = r.number || "—";
+    $("recordPat").textContent = `Pattern: ${r.pattern || "—"}`;
+    $("recordMeaning").textContent = (r.meaning && r.meaning.trim()) ? r.meaning.trim() : "None";
+    $("recordNotes").textContent = (r.notes && r.notes.trim()) ? r.notes.trim() : "None";
+
+    $("recordModal").classList.remove("hidden");
+
+    setTimeout(() => {
+      try{ $("btnRecordClose").focus({preventScroll:true}); }catch{}
+    }, 0);
+  }
+
+  function closeRecordModal(){
+    recordOpenTs = null;
+    $("recordModal").classList.add("hidden");
+    try{ recordPrevFocus?.focus?.({preventScroll:true}); }catch{}
+  }
+
+  $("btnRecordClose").addEventListener("click", (e) => { e.preventDefault(); closeRecordModal(); });
+
+  $("recordModal").addEventListener("click", (e) => {
+    const justOpened = (Date.now() - recordOpenedAt) < 220;
+    if(justOpened){ e.preventDefault(); e.stopPropagation(); return; }
+    if(e.target === $("recordModal")) closeRecordModal();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    const open = !$("recordModal").classList.contains("hidden");
+    if(!open) return;
+    if(e.key === "Escape"){
+      e.preventDefault();
+      closeRecordModal();
+    }
+  });
+
+  $("btnRecordEdit").addEventListener("click", (e) => {
+    e.preventDefault();
+    const ts = recordOpenTs;
+    closeRecordModal();
+    if(ts != null) enterAddEdit(ts);
+  });
+
+  $("btnRecordCopy").addEventListener("click", async (e) => {
+    e.preventDefault();
+    const ts = recordOpenTs;
+    if(ts == null) return;
+    const r = loadRecords().find(x => x.ts === ts);
+    if(!r) return;
+    try{
+      await copyToClipboard(recordToText(r));
+      alert("Copied.");
+    }catch{
+      alert("Copy failed on this device/browser.");
+    }
+  });
+
+  $("btnRecordExport").addEventListener("click", (e) => {
+    e.preventDefault();
+    const ts = recordOpenTs;
+    if(ts == null) return;
+    const r = loadRecords().find(x => x.ts === ts);
+    if(!r) return;
+
+    const text = recordToText(r);
+    const dt = new Date(r.ts);
+    const y = dt.getFullYear();
+    const m = String(dt.getMonth()+1).padStart(2,"0");
+    const d = String(dt.getDate()).padStart(2,"0");
+    const filename = `angel_number_${y}-${m}-${d}_${String(dt.getHours()).padStart(2,"0")}${String(dt.getMinutes()).padStart(2,"0")}.txt`;
+
+    (async () => {
+      try{ await copyToClipboard(text); }catch{}
+      openExportModal({ text, filename });
+    })();
+  });
+
+  /* =========================
+     Day modal (calendar)
+     ========================= */
+
+  let dayOpenedAt = 0;
+
+  function openDayModal(dayTs){
+    const dayStart = startOfDay(dayTs);
+    const dayEnd = endOfDay(dayTs);
+
+    const recs = loadRecords()
+      .filter(r => r.ts >= dayStart && r.ts <= dayEnd)
+      .sort((a,b)=> b.ts - a.ts);
+
+    $("dayTitle").textContent = new Intl.DateTimeFormat(undefined, { weekday:"long", year:"numeric", month:"2-digit", day:"2-digit" }).format(new Date(dayStart));
+    $("daySub").textContent = recs.length ? "Tap a sighting to open details." : "No sightings for this day.";
+    const host = $("dayList");
+    host.innerHTML = "";
+
+    if(recs.length){
+      for(const r of recs){
+        const e = document.createElement("div");
+        e.className = "entry";
+        e.style.marginTop = "10px";
+        e.setAttribute("role","button");
+        e.tabIndex = 0;
+        e.dataset.ts = String(r.ts);
+
+        e.innerHTML = `
+          <div class="entryTop"><div class="entryTime">${escapeHtml(fmtDateTime(r.ts))}</div></div>
+          <div class="entryMain">
+            <div class="entryNumber">${escapeHtml(r.number || "—")}</div>
+            <div class="entryPattern">${escapeHtml(r.pattern || "—")}</div>
+          </div>
+          <div class="entryLine"><b>Meaning:</b> ${escapeHtml((r.meaning && r.meaning.trim()) ? r.meaning.trim() : "None")}</div>
+          <div class="entryLine"><b>Notes:</b> ${escapeHtml((r.notes && r.notes.trim()) ? r.notes.trim() : "None")}</div>
+        `;
+
+        e.addEventListener("click", () => {
+          closeDayModal();
+          openRecordModal(r.ts);
+        });
+        e.addEventListener("keydown", (ev) => {
+          if(ev.key === "Enter" || ev.key === " "){
+            ev.preventDefault();
+            closeDayModal();
+            openRecordModal(r.ts);
+          }
+        });
+
+        host.appendChild(e);
+      }
+    }
+
+    dayOpenedAt = Date.now();
+    $("dayModal").classList.remove("hidden");
+    setTimeout(() => {
+      try{ $("btnDayClose").focus({preventScroll:true}); }catch{}
+    }, 0);
+  }
+
+  function closeDayModal(){
+    $("dayModal").classList.add("hidden");
+  }
+
+  $("btnDayClose").addEventListener("click", (e) => { e.preventDefault(); closeDayModal(); });
+
+  $("dayModal").addEventListener("click", (e) => {
+    const justOpened = (Date.now() - dayOpenedAt) < 220;
+    if(justOpened){ e.preventDefault(); e.stopPropagation(); return; }
+    if(e.target === $("dayModal")) closeDayModal();
+  });
+
+  /* =========================
+     Edit prompt modal (Log click)
      ========================= */
 
   let pendingEditTs = null;
@@ -1362,91 +1615,6 @@ Optional:
       }else{
         e.preventDefault();
         confirmEditPrompt();
-      }
-    }
-  });
-
-  /* =========================
-     Unified confirm modal
-     ========================= */
-
-  let confirmAction = null;
-  let confirmPrevFocus = null;
-  let confirmOpenedAt = 0;
-  let enableConfirmTimer = null;
-
-  function setConfirmButtonStyle(className){
-    const btn = $("btnConfirmDo");
-    btn.className = "btn";
-    if(className) btn.classList.add(...String(className).split(/\s+/).filter(Boolean));
-  }
-
-  function openConfirmModal({ title, sub, confirmText, confirmClass, onConfirm }){
-    confirmAction = (typeof onConfirm === "function") ? onConfirm : null;
-    confirmPrevFocus = document.activeElement || null;
-    confirmOpenedAt = Date.now();
-
-    $("confirmTitle").textContent = title || "Confirm";
-    $("confirmSub").textContent = sub || "—";
-
-    $("btnConfirmDo").textContent = confirmText || "OK";
-    setConfirmButtonStyle(confirmClass || "danger");
-
-    $("btnConfirmDo").disabled = true;
-    $("btnConfirmCancel").disabled = true;
-
-    $("confirmModal").classList.remove("hidden");
-
-    if(enableConfirmTimer) clearTimeout(enableConfirmTimer);
-    enableConfirmTimer = setTimeout(() => {
-      $("btnConfirmDo").disabled = false;
-      $("btnConfirmCancel").disabled = false;
-    }, 450);
-
-    setTimeout(() => {
-      try{ $("btnConfirmCancel").focus({preventScroll:true}); }catch{}
-    }, 0);
-  }
-
-  function closeConfirmModal(){
-    confirmAction = null;
-    $("confirmModal").classList.add("hidden");
-    try{ confirmPrevFocus?.focus?.({preventScroll:true}); }catch{}
-  }
-
-  function runConfirmAction(){
-    if($("btnConfirmDo").disabled) return;
-    const fn = confirmAction;
-    closeConfirmModal();
-    try{ fn && fn(); }catch{}
-  }
-
-  $("btnConfirmCancel").addEventListener("click", (e) => { e.preventDefault(); closeConfirmModal(); });
-  $("btnConfirmDo").addEventListener("click", (e) => { e.preventDefault(); runConfirmAction(); });
-
-  $("confirmModal").addEventListener("click", (e) => {
-    const justOpened = (Date.now() - confirmOpenedAt) < 220;
-    if(justOpened){ e.preventDefault(); e.stopPropagation(); return; }
-    if(e.target === $("confirmModal")) closeConfirmModal();
-  });
-
-  document.addEventListener("keydown", (e) => {
-    const open = !$("confirmModal").classList.contains("hidden");
-    if(!open) return;
-
-    if(e.key === "Escape"){
-      e.preventDefault();
-      closeConfirmModal();
-      return;
-    }
-    if(e.key === "Enter"){
-      const ae = document.activeElement;
-      if(ae && ae.id === "btnConfirmCancel"){
-        e.preventDefault();
-        closeConfirmModal();
-      }else{
-        e.preventDefault();
-        runConfirmAction();
       }
     }
   });
@@ -1584,184 +1752,12 @@ Optional:
   });
 
   /* =========================
-     Record modal (click from calendar)
+     Log tap handling (delegated)
+     - Short tap opens the formatted record card (detail modal).
+     - Long press highlight still exists, but we keep behavior: release opens prompt.
      ========================= */
 
-  let recordTs = null;
-  let recordPrevFocus = null;
-  let recordOpenedAt = 0;
-  let enableRecordTimer = null;
-
-  function buildSingleRecordText(rec){
-    const dt = fmtDateTime(rec.ts);
-    const num = `Number: ${rec.number || "—"}`;
-    const pat = `Pattern: ${rec.pattern || "—"}`;
-    const meaning = (rec.meaning && rec.meaning.trim()) ? rec.meaning.trim() : "None";
-    const notes = (rec.notes && rec.notes.trim()) ? rec.notes.trim() : "None";
-    return `${dt}\n${num}\n${pat}\nMeaning: ${meaning}\nNotes: ${notes}\n`;
-  }
-
-  function openRecordModal(ts){
-    const recs = loadRecords();
-    const r = recs.find(x => x.ts === ts);
-    if(!r) return;
-
-    recordTs = ts;
-    recordPrevFocus = document.activeElement || null;
-    recordOpenedAt = Date.now();
-
-    const num = r.number ? r.number : "—";
-    $("recordTitle").textContent = `Record: ${num}`;
-    $("recordSub").textContent = fmtDateTime(r.ts);
-
-    const body = buildSingleRecordText(r);
-    $("recordBox").textContent = body;
-
-    const btns = ["btnRecordClose","btnRecordCopy","btnRecordExport","btnRecordSave","btnRecordEdit"].map($);
-    btns.forEach(b => b.disabled = true);
-
-    $("recordModal").classList.remove("hidden");
-
-    if(enableRecordTimer) clearTimeout(enableRecordTimer);
-    enableRecordTimer = setTimeout(() => {
-      btns.forEach(b => b.disabled = false);
-    }, 450);
-
-    setTimeout(() => {
-      try{ $("btnRecordClose").focus({preventScroll:true}); }catch{}
-    }, 0);
-  }
-
-  function closeRecordModal(){
-    recordTs = null;
-    $("recordModal").classList.add("hidden");
-    try{ recordPrevFocus?.focus?.({preventScroll:true}); }catch{}
-  }
-
-  $("btnRecordClose").addEventListener("click", (e) => { e.preventDefault(); closeRecordModal(); });
-
-  $("recordModal").addEventListener("click", (e) => {
-    const justOpened = (Date.now() - recordOpenedAt) < 220;
-    if(justOpened){ e.preventDefault(); e.stopPropagation(); return; }
-    if(e.target === $("recordModal")) closeRecordModal();
-  });
-
-  document.addEventListener("keydown", (e) => {
-    const open = !$("recordModal").classList.contains("hidden");
-    if(!open) return;
-    if(e.key === "Escape"){
-      e.preventDefault();
-      closeRecordModal();
-    }
-  });
-
-  $("btnRecordCopy").addEventListener("click", async (e) => {
-    e.preventDefault();
-    if(recordTs == null) return;
-    const recs = loadRecords();
-    const r = recs.find(x => x.ts === recordTs);
-    if(!r) return;
-
-    const out = buildSingleRecordText(r);
-    try{ await copyToClipboard(out); }catch{}
-    alert("Copied.");
-  });
-
-  function buildReportHeader({title, rangeLabel, notes}){
-    const now = fmtDateTime(Date.now());
-    const lines = [
-      "Angel Numbers Tracker — Export Report",
-      `App Version: ${APP_VERSION}`,
-      `Report: ${title}`,
-      `Generated: ${now}`,
-      rangeLabel ? `Range: ${rangeLabel}` : "",
-      "",
-      "How this data was captured:",
-      "- Sightings are entered manually into Angel Numbers Tracker on this device.",
-      "- Data is stored locally on the phone (no cloud sync, no account).",
-      "- Each record may include the number, pattern type, a cultural/numerology meaning, and optional notes.",
-      "",
-      notes ? notes : "",
-      "",
-      "------------------------------",
-      ""
-    ].filter(Boolean);
-    return lines.join("\n");
-  }
-
-  function exportReport(recs, headerInfo, filenameBase){
-    const header = buildReportHeader(headerInfo);
-
-    const lines = recs.map(r => buildSingleRecordText(r));
-    const out = header + lines.join("\n");
-
-    const ts = new Date();
-    const y = ts.getFullYear();
-    const m = String(ts.getMonth()+1).padStart(2,"0");
-    const d = String(ts.getDate()).padStart(2,"0");
-    const filename = `${filenameBase || "angel_numbers_report"}_${y}-${m}-${d}.txt`;
-
-    (async () => {
-      try{ await copyToClipboard(out); }catch{}
-      openExportModal({ text: out, filename });
-    })();
-  }
-
-  $("btnRecordExport").addEventListener("click", (e) => {
-    e.preventDefault();
-    if(recordTs == null) return;
-    const recs = loadRecords();
-    const r = recs.find(x => x.ts === recordTs);
-    if(!r) return;
-
-    exportReport(
-      [r],
-      {
-        title: "Record Detail",
-        rangeLabel: fmtDateTime(r.ts),
-        notes: "This report contains exactly one selected record."
-      },
-      "angel_numbers_record"
-    );
-  });
-
-  $("btnRecordSave").addEventListener("click", async (e) => {
-    e.preventDefault();
-    if(recordTs == null) return;
-    const recs = loadRecords();
-    const r = recs.find(x => x.ts === recordTs);
-    if(!r) return;
-
-    const out = buildSingleRecordText(r);
-    const ts = new Date(r.ts);
-    const y = ts.getFullYear();
-    const m = String(ts.getMonth()+1).padStart(2,"0");
-    const d = String(ts.getDate()).padStart(2,"0");
-    const filename = `angel_numbers_record_${y}-${m}-${d}.txt`;
-
-    try{
-      const ok = await saveTextWithPicker(out, filename);
-      if(ok){
-        alert("Saved.");
-        return;
-      }
-    }catch{}
-
-    downloadText(out, filename);
-  });
-
-  $("btnRecordEdit").addEventListener("click", (e) => {
-    e.preventDefault();
-    const ts = recordTs;
-    closeRecordModal();
-    if(ts != null) enterAddEdit(ts);
-  });
-
-  /* =========================
-     Log press handling (delegated)
-     ========================= */
-
-  const logTap = { activeEl:null, activeTs:null, pointerId:null, tracking:false };
+  const logTap = { activeEl:null, activeTs:null, pointerId:null, tracking:false, downAt:0 };
 
   function findEntryEl(target){
     if(!target) return null;
@@ -1786,6 +1782,7 @@ Optional:
     logTap.activeTs = null;
     logTap.pointerId = null;
     logTap.tracking = false;
+    logTap.downAt = 0;
   }
 
   $("logList").addEventListener("pointerdown", (ev) => {
@@ -1803,6 +1800,7 @@ Optional:
     logTap.activeTs = ts;
     logTap.pointerId = ev.pointerId;
     logTap.tracking = true;
+    logTap.downAt = Date.now();
 
     entry.classList.add("pressed");
 
@@ -1830,12 +1828,19 @@ Optional:
 
     const entry = logTap.activeEl;
     const ts = logTap.activeTs;
+    const heldMs = logTap.downAt ? (Date.now() - logTap.downAt) : 0;
 
     const inside = entry ? rectInside(entry, ev.clientX, ev.clientY) : false;
     clearLogPress();
 
     if(inside && ts != null){
-      setTimeout(() => openEditPrompt(ts), 0);
+      // Short tap: open record details card
+      if(heldMs < 420){
+        setTimeout(() => openRecordModal(ts), 0);
+      }else{
+        // Longer hold: open edit prompt (existing behavior)
+        setTimeout(() => openEditPrompt(ts), 0);
+      }
     }
 
     ev.preventDefault();
@@ -1849,12 +1854,68 @@ Optional:
       const ts = Number(entry.dataset.ts);
       if(!Number.isFinite(ts)) return;
       ev.preventDefault();
-      openEditPrompt(ts);
+      openRecordModal(ts);
     }
   });
 
   /* =========================
-     Charts: time-spaced points + 24h break logic
+     Export with report header
+     ========================= */
+
+  function buildReportHeader({title, rangeLabel, notes}){
+    const now = fmtDateTime(Date.now());
+    // IMPORTANT: no indentation before first record. Ensure the separator ends with a blank line.
+    const lines = [
+      "Angel Numbers Tracker — Export Report",
+      `App Version: ${APP_VERSION}`,
+      `Report: ${title}`,
+      `Generated: ${now}`,
+      rangeLabel ? `Range: ${rangeLabel}` : "",
+      "",
+      "How this data was captured:",
+      "- Sightings are entered manually into Angel Numbers Tracker on this device.",
+      "- Data is stored locally on the phone (no cloud sync, no account).",
+      "- Each record may include the number, pattern type, a cultural/numerology meaning, and optional notes.",
+      "",
+      notes ? notes : "",
+      "",
+      "------------------------------",
+      "" // blank line so the first record starts at column 1 (no indentation)
+    ].filter(Boolean);
+    return lines.join("\n");
+  }
+
+  function exportReport(recs, headerInfo, filenameBase){
+    const header = buildReportHeader(headerInfo);
+
+    const lines = recs.map(r => {
+      const dt = fmtDateTime(r.ts);
+      const num = `Number: ${r.number || "—"}`;
+      const pat = `Pattern: ${r.pattern || "—"}`;
+      const meaning = (r.meaning && r.meaning.trim()) ? r.meaning.trim() : "None";
+      const notes = (r.notes && r.notes.trim()) ? r.notes.trim() : "None";
+      // Keep each record block flush-left
+      return `${dt}\n${num}\n${pat}\nMeaning: ${meaning}\nNotes: ${notes}\n`;
+    });
+
+    const out = header + lines.join("\n");
+    const ts = new Date();
+    const y = ts.getFullYear();
+    const m = String(ts.getMonth()+1).padStart(2,"0");
+    const d = String(ts.getDate()).padStart(2,"0");
+    const filename = `${filenameBase || "angel_numbers_report"}_${y}-${m}-${d}.txt`;
+
+    (async () => {
+      try{ await copyToClipboard(out); }catch{}
+      openExportModal({ text: out, filename });
+    })();
+  }
+
+  /* =========================
+     Charts (weekly, time-true points)
+     - Points plotted at actual timestamps.
+     - Line breaks if gap >= 24 hours.
+     - Isolated point (no neighbor within 24h before/after) draws a bigger dot.
      ========================= */
 
   const chartView = {
@@ -1862,7 +1923,7 @@ Optional:
     baseMax: 0,
     viewMin: 0,
     viewMax: 0,
-    minSpan: 6*60*60*1000,     // 6 hours (zoom in)
+    minSpan: 48*60*60*1000,
     maxSpan: 7*DAY_MS,
     pinch: null,
     pan: null
@@ -1962,9 +2023,76 @@ Optional:
     }
   }
 
-  function getWeekRecordsInBase(){
-    const all = loadRecords().slice().reverse(); // oldest -> newest
-    return all.filter(r => r.ts >= chartView.baseMin && r.ts <= chartView.baseMax);
+  function recordsInView(){
+    const recs = loadRecords().slice().reverse(); // ascending
+    const a = chartView.viewMin;
+    const b = chartView.viewMax;
+    return recs.filter(r => r.ts >= a && r.ts <= b);
+  }
+
+  function drawTimePoints(ctx, recsAsc, tMin, tMax, pad, W, H){
+    // y = cumulative count within the same calendar day (step-like). This makes "bunches" visible.
+    const dayCounts = new Map(); // dayStart -> countSoFar
+    const pts = recsAsc.map(r => {
+      const ds = startOfDay(r.ts);
+      const c = (dayCounts.get(ds) || 0) + 1;
+      dayCounts.set(ds, c);
+      return { ts: r.ts, y: c, rec: r };
+    });
+
+    const yMax = Math.max(3, ...pts.map(p => p.y));
+    const yMin = 0;
+
+    // line segments (break if gap >= 24h)
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "rgba(138,107,255,.92)";
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+
+    ctx.beginPath();
+    let started = false;
+
+    for(let i=0;i<pts.length;i++){
+      const p = pts[i];
+      const prev = (i>0) ? pts[i-1] : null;
+
+      const x = xFromTs(p.ts, tMin, tMax, pad, W);
+      const y = yTo(p.y, yMin, yMax, pad, H);
+
+      const gap = prev ? (p.ts - prev.ts) : null;
+      const breakLine = (gap != null && gap >= DAY_MS);
+
+      if(!started || breakLine){
+        ctx.moveTo(x,y);
+        started = true;
+      }else{
+        ctx.lineTo(x,y);
+      }
+    }
+    ctx.stroke();
+
+    // points: bigger if isolated (no neighbor within 24h before/after)
+    ctx.fillStyle = "rgba(235,245,255,.92)";
+    for(let i=0;i<pts.length;i++){
+      const p = pts[i];
+      const prev = (i>0) ? pts[i-1] : null;
+      const next = (i<pts.length-1) ? pts[i+1] : null;
+
+      const prevNear = prev ? ((p.ts - prev.ts) < DAY_MS) : false;
+      const nextNear = next ? ((next.ts - p.ts) < DAY_MS) : false;
+      const isolated = !(prevNear || nextNear);
+
+      const rad = isolated ? 7.0 : 4.2;
+
+      const x = xFromTs(p.ts, tMin, tMax, pad, W);
+      const y = yTo(p.y, yMin, yMax, pad, H);
+
+      ctx.beginPath();
+      ctx.arc(x, y, rad, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    return {yMin, yMax};
   }
 
   function renderCharts(){
@@ -1973,6 +2101,7 @@ Optional:
     const canvas = $("chart");
     const ctx = canvas.getContext("2d");
 
+    const recsAsc = recordsInView(); // ascending
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
     const W = canvas.width, H = canvas.height;
@@ -1982,7 +2111,7 @@ Optional:
     const plotY0 = pad.t;
     const plotY1 = H - pad.b;
 
-    // Frame
+    // frame
     ctx.lineWidth = 1;
     ctx.strokeStyle = "rgba(235,245,255,.12)";
     ctx.fillStyle = "rgba(255,255,255,.02)";
@@ -1994,7 +2123,7 @@ Optional:
     const tMin = chartView.viewMin;
     const tMax = chartView.viewMax;
 
-    // Day bands (alternate)
+    // day bands (within current view)
     ctx.save();
     ctx.beginPath();
     ctx.rect(plotX0, plotY0, plotX1-plotX0, plotY1-plotY0);
@@ -2016,27 +2145,28 @@ Optional:
       if(x1 <= x0) continue;
 
       ctx.fillStyle = (i % 2 === 0)
-        ? "rgba(255,255,255,.12)"
-        : "rgba(47,120,255,.18)";
+        ? "rgba(255,255,255,.14)"
+        : "rgba(47,120,255,.22)";
       ctx.fillRect(x0, plotY0, (x1 - x0), (plotY1 - plotY0));
     }
     ctx.restore();
 
-    // Y-axis is “Activity lane” (simple)
-    const yMin = 0;
-    const yMax = 2;
-    const yLane = 1;
-
-    // Horizontal guide
+    // grid
+    ctx.font = "16px system-ui,Segoe UI,Roboto";
+    ctx.fillStyle = "rgba(235,245,255,.60)";
     ctx.strokeStyle = "rgba(235,245,255,.10)";
     ctx.lineWidth = 1;
-    const y = yTo(yLane, yMin, yMax, pad, H);
-    ctx.beginPath();
-    ctx.moveTo(pad.l, y);
-    ctx.lineTo(W - pad.r, y);
-    ctx.stroke();
 
-    // X labels (dow + date)
+    const ticks = 4;
+    for(let i=0;i<=ticks;i++){
+      const y = pad.t + (H - pad.t - pad.b) * (i/ticks);
+      ctx.beginPath();
+      ctx.moveTo(pad.l, y);
+      ctx.lineTo(W - pad.r, y);
+      ctx.stroke();
+    }
+
+    // x labels (days)
     ctx.fillStyle = "rgba(235,245,255,.90)";
     ctx.font = "20px system-ui,Segoe UI,Roboto";
     ctx.textAlign = "center";
@@ -2066,83 +2196,30 @@ Optional:
     }
     ctx.textAlign = "start";
 
-    // Plot records (as recorded)
-    const recs = getWeekRecordsInBase().filter(r => r.ts >= tMin && r.ts <= tMax);
-    if(recs.length === 0){
+    // plot points
+    const yRange = drawTimePoints(ctx, recsAsc, tMin, tMax, pad, W, H);
+
+    // legend
+    const lx = pad.l + 10;
+    const ly = pad.t + 30;
+
+    ctx.font = "22px system-ui,Segoe UI,Roboto";
+    ctx.fillStyle = "rgba(138,107,255,.92)";
+    ctx.fillRect(lx, ly-14, 26, 8);
+    ctx.fillStyle = "rgba(235,245,255,.88)";
+    ctx.fillText("S i g h t i n g s", lx+38, ly-6);
+
+    // y label hints
+    ctx.fillStyle = "rgba(235,245,255,.46)";
+    ctx.font = "14px system-ui,Segoe UI,Roboto";
+    ctx.fillText("Y = sightings within that day (step count)", pad.l + 10, pad.t + 58);
+
+    // empty message
+    if(recsAsc.length === 0){
       ctx.fillStyle = "rgba(235,245,255,.46)";
       ctx.font = "18px system-ui,Segoe UI,Roboto";
-      ctx.fillText("No sightings in this view.", pad.l + 12, pad.t + 40);
-      return;
+      ctx.fillText("No sightings in this view.", pad.l + 12, pad.t + 84);
     }
-
-    const gapBreak = 24*60*60*1000; // 24 hours
-
-    // Lines (break on gap >= 24h)
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(plotX0, plotY0, plotX1-plotX0, plotY1-plotY0);
-    ctx.clip();
-
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = "rgba(138,107,255,.88)";
-    ctx.lineJoin = "round";
-    ctx.lineCap = "round";
-
-    ctx.beginPath();
-    for(let i=0;i<recs.length;i++){
-      const r = recs[i];
-      const x = xFromTs(r.ts, tMin, tMax, pad, W);
-      const yy = yTo(yLane, yMin, yMax, pad, H);
-
-      if(i === 0){
-        ctx.moveTo(x, yy);
-      }else{
-        const prev = recs[i-1];
-        const gap = r.ts - prev.ts;
-        if(gap >= gapBreak){
-          // break line
-          ctx.stroke();
-          ctx.beginPath();
-          ctx.moveTo(x, yy);
-        }else{
-          ctx.lineTo(x, yy);
-        }
-      }
-    }
-    ctx.stroke();
-
-    // Points (isolated large)
-    for(let i=0;i<recs.length;i++){
-      const r = recs[i];
-      const x = xFromTs(r.ts, tMin, tMax, pad, W);
-      const yy = yTo(yLane, yMin, yMax, pad, H);
-
-      const prevGap = (i>0) ? (r.ts - recs[i-1].ts) : Infinity;
-      const nextGap = (i<recs.length-1) ? (recs[i+1].ts - r.ts) : Infinity;
-
-      const isolated = (prevGap >= gapBreak) && (nextGap >= gapBreak);
-      const radius = isolated ? 8.0 : 4.2;
-
-      ctx.fillStyle = "rgba(235,245,255,.92)";
-      ctx.beginPath();
-      ctx.arc(x, yy, radius, 0, Math.PI*2);
-      ctx.fill();
-
-      // subtle halo for isolated points
-      if(isolated){
-        ctx.strokeStyle = "rgba(138,107,255,.72)";
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.arc(x, yy, radius+5, 0, Math.PI*2);
-        ctx.stroke();
-      }
-    }
-    ctx.restore();
-
-    // Legend
-    ctx.font = "16px system-ui,Segoe UI,Roboto";
-    ctx.fillStyle = "rgba(235,245,255,.58)";
-    ctx.fillText("Points = sightings (time-spaced). Breaks = ≥24h gaps.", pad.l + 10, pad.t + 18);
   }
 
   function dist2(t1, t2){
@@ -2253,10 +2330,10 @@ Optional:
   }
 
   /* =========================
-     Monthly Calendar (clickable pills)
+     Calendar (month view)
      ========================= */
 
-  function initMonthDefaultIfNeeded(){
+  function ensureCalendarDefault(){
     if(!$("calMonth").value){
       const d = new Date();
       const y = d.getFullYear();
@@ -2265,157 +2342,131 @@ Optional:
     }
   }
 
-  function monthValueToFirstDay(value){
-    const m = /^(\d{4})-(\d{2})$/.exec(String(value || ""));
-    if(!m) return null;
-    const y = Number(m[1]);
-    const mo = Number(m[2]);
-    if(!y || !mo) return null;
-    const d = new Date(y, mo-1, 1, 0,0,0,0);
-    return d;
-  }
-
-  function monthLabelFromValue(value){
-    const first = monthValueToFirstDay(value);
-    if(!first) return "Monthly Calendar";
-    return new Intl.DateTimeFormat(undefined, { month:"long", year:"numeric" }).format(first);
+  function dayKey(ts){
+    const d = new Date(ts);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
   }
 
   function renderCalendar(){
-    const mv = $("calMonth").value;
-    const first = monthValueToFirstDay(mv);
-    if(!first) return;
+    ensureCalendarDefault();
+    const val = $("calMonth").value;
+    const m = /^(\d{4})-(\d{2})$/.exec(String(val||""));
+    if(!m) return;
 
-    $("calTitle").textContent = `Monthly Calendar — ${monthLabelFromValue(mv)}`;
+    const year = Number(m[1]);
+    const month = Number(m[2]) - 1; // 0-based
+    if(!Number.isFinite(year) || !Number.isFinite(month)) return;
 
-    // DOW header
-    const dow = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-    const dowEl = $("calDow");
-    dowEl.innerHTML = "";
-    dow.forEach(d => {
-      const el = document.createElement("div");
-      el.className = "calDow";
-      el.textContent = d;
-      dowEl.appendChild(el);
-    });
+    const first = new Date(year, month, 1);
+    first.setHours(0,0,0,0);
 
-    // Determine grid start (Monday)
-    const start = new Date(first.getTime());
-    const dow0 = (start.getDay() + 6) % 7; // Mon=0..Sun=6
-    start.setDate(start.getDate() - dow0);
-    start.setHours(0,0,0,0);
+    const firstDow = first.getDay(); // 0=Sun
+    const daysInMonth = new Date(year, month+1, 0).getDate();
 
-    // Grid end: 6 rows * 7 days = 42 cells
-    const cells = [];
-    for(let i=0;i<42;i++){
-      const d = new Date(start.getTime() + i*DAY_MS);
-      cells.push(d);
-    }
-
-    // Collect records for month (and edges visible)
-    const all = loadRecords().slice().reverse(); // old->new
-    const monthStart = new Date(first.getFullYear(), first.getMonth(), 1, 0,0,0,0).getTime();
-    const monthEnd = new Date(first.getFullYear(), first.getMonth()+1, 0, 23,59,59,999).getTime();
-
-    // We'll allow display for edge days too, but records outside month won't be shown unless day is in month.
-    const mapByDay = new Map(); // key yyyy-mm-dd -> records
-    for(const r of all){
-      if(r.ts < monthStart - 7*DAY_MS || r.ts > monthEnd + 7*DAY_MS) continue;
+    // Map day->records
+    const recs = loadRecords();
+    const dayMap = new Map();
+    for(const r of recs){
       const d = new Date(r.ts);
-      const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-      if(!mapByDay.has(key)) mapByDay.set(key, []);
-      mapByDay.get(key).push(r);
+      if(d.getFullYear() !== year || d.getMonth() !== month) continue;
+      const k = dayKey(r.ts);
+      if(!dayMap.has(k)) dayMap.set(k, []);
+      dayMap.get(k).push(r);
     }
-    // sort each day by time ascending
-    for(const [k, arr] of mapByDay.entries()){
+    for(const [k, arr] of dayMap.entries()){
       arr.sort((a,b)=> a.ts - b.ts);
     }
 
     const grid = $("calGrid");
     grid.innerHTML = "";
 
-    for(const d of cells){
-      const y = d.getFullYear();
-      const m = d.getMonth();
-      const day = d.getDate();
+    const totalCells = Math.ceil((firstDow + daysInMonth) / 7) * 7;
+    for(let cell=0; cell<totalCells; cell++){
+      const dayNum = cell - firstDow + 1;
+      const inMonth = dayNum >= 1 && dayNum <= daysInMonth;
 
-      const inMonth = (m === first.getMonth() && y === first.getFullYear());
-      const cell = document.createElement("div");
-      cell.className = "dayCell" + (inMonth ? "" : " off");
+      const el = document.createElement("div");
+      el.className = "calDay" + (inMonth ? "" : " off");
 
-      const top = document.createElement("div");
-      top.className = "dayTop";
-
-      const dn = document.createElement("div");
-      dn.className = "dayNum";
-      dn.textContent = String(day);
-
-      const key = `${y}-${String(m+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
-      const arr = mapByDay.get(key) || [];
-      const count = (inMonth ? arr.length : 0);
-
-      const dc = document.createElement("div");
-      dc.className = "dayCount";
-      dc.textContent = count ? `${count}` : "";
-
-      top.appendChild(dn);
-      top.appendChild(dc);
-      cell.appendChild(top);
-
-      const chips = document.createElement("div");
-      chips.className = "chips";
-
-      if(inMonth && arr.length){
-        for(const r of arr){
-          const ch = document.createElement("div");
-          ch.className = "chip";
-          const num = r.number || "—";
-          const tm = fmtHM(r.ts);
-          ch.textContent = num;
-          const t = document.createElement("span");
-          t.className = "t";
-          t.textContent = tm;
-          ch.appendChild(t);
-
-          ch.addEventListener("click", (e) => {
-            e.preventDefault();
-            openRecordModal(r.ts);
-          });
-
-          chips.appendChild(ch);
-        }
+      if(!inMonth){
+        el.innerHTML = `<div class="calN"> </div><div class="calNums"></div><div class="calCnt"></div>`;
+        grid.appendChild(el);
+        continue;
       }
 
-      cell.appendChild(chips);
-      grid.appendChild(cell);
+      const d = new Date(year, month, dayNum);
+      d.setHours(0,0,0,0);
+      const k = dayKey(d.getTime());
+      const arr = dayMap.get(k) || [];
+
+      const nums = arr.map(r => r.number || "—").slice(0,3).join(", ");
+      const extra = arr.length > 3 ? ` +${arr.length-3}` : "";
+      const cnt = arr.length ? `${arr.length} sighting${arr.length===1?"":"s"}` : "—";
+
+      el.innerHTML = `
+        <div class="calN">${dayNum}</div>
+        <div class="calNums">${escapeHtml(arr.length ? (nums + extra) : "")}</div>
+        <div class="calCnt">${escapeHtml(arr.length ? cnt : "No sightings")}</div>
+      `;
+
+      if(arr.length){
+        el.addEventListener("click", () => openDayModal(d.getTime()));
+        el.addEventListener("keydown", (ev) => {
+          if(ev.key === "Enter" || ev.key === " "){
+            ev.preventDefault();
+            openDayModal(d.getTime());
+          }
+        });
+        el.tabIndex = 0;
+        el.setAttribute("role","button");
+        el.setAttribute("aria-label", `Open day ${dayNum}`);
+      }else{
+        el.addEventListener("click", () => openDayModal(d.getTime()));
+        el.tabIndex = 0;
+        el.setAttribute("role","button");
+        el.setAttribute("aria-label", `Open day ${dayNum}`);
+      }
+
+      grid.appendChild(el);
     }
   }
 
-  $("calMonth").addEventListener("change", () => { renderCalendar(); });
+  $("calMonth").addEventListener("change", () => {
+    renderCalendar();
+  });
+
+  $("btnCalToday").addEventListener("click", () => {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,"0");
+    $("calMonth").value = `${y}-${m}`;
+    renderCalendar();
+  });
 
   /* =========================
      Clear Data + Install + Exit (Exit preserved)
      ========================= */
 
-  function clearAllDataFlow(){
-    openConfirmModal({
-      title: "Clear ALL data?",
-      sub:
-        "This deletes everything stored on this phone for Angel Numbers Tracker.\n" +
-        "This cannot be undone.",
-      confirmText: "Clear",
-      confirmClass: "danger",
-      onConfirm: () => {
+  function clearAllData(){
+    openConfirmModal(
+      {
+        title: "Clear all data?",
+        message:
+          "Clear ALL saved angel-number data?\n\n" +
+          "This deletes everything stored on this phone for Angel Numbers Tracker.\n" +
+          "This cannot be undone.",
+        okLabel: "Clear",
+        okClass: "danger"
+      },
+      () => {
         try{ localStorage.removeItem(STORAGE_KEY); }catch{}
-
         $("fromDate").value = "";
         $("toDate").value = "";
         $("search").value = "";
-
         alert("All data cleared.");
         show("home");
       }
-    });
+    );
   }
 
   let deferredPrompt = null;
@@ -2459,7 +2510,7 @@ Optional:
     alert("Install is available when your browser offers it (menu → Install app).");
   });
 
-  $("btnClearAll").addEventListener("click", clearAllDataFlow);
+  $("btnClearAll").addEventListener("click", clearAllData);
 
   /* KEEP THIS EXIT FUNCTION EXACTLY (known-good) */
   $("btnExitHome").addEventListener("click", () => {
@@ -2519,33 +2570,38 @@ Optional:
     show("log");
   });
 
-  function deleteCurrentEntryFlow(){
+  // Delete confirmation must match modal formatting
+  $("btnDelete").addEventListener("click", () => {
     if(editTs == null) return;
-    const tsToDelete = editTs;
-
-    openConfirmModal({
-      title: "Delete this entry?",
-      sub: "This cannot be undone.",
-      confirmText: "Delete",
-      confirmClass: "danger",
-      onConfirm: () => {
-        const recs = loadRecords().filter(r => r.ts !== tsToDelete);
+    const ts = editTs;
+    openConfirmModal(
+      {
+        title: "Delete this entry?",
+        message: "Delete this entry?\n\nThis cannot be undone.",
+        okLabel: "Delete",
+        okClass: "danger"
+      },
+      () => {
+        const recs = loadRecords().filter(r => r.ts !== ts);
         saveRecords(recs);
         editTs = null;
         show("log");
       }
-    });
-  }
-
-  $("btnDelete").addEventListener("click", deleteCurrentEntryFlow);
+    );
+  });
 
   /* =========================
      SEARCH BEHAVIOR
      ========================= */
 
-  function runSearch(){ renderLog(); }
+  function runSearch(){
+    renderLog();
+  }
 
-  $("btnRunSearch").addEventListener("click", (e) => { e.preventDefault(); runSearch(); });
+  $("btnRunSearch").addEventListener("click", (e) => {
+    e.preventDefault();
+    runSearch();
+  });
 
   $("search").addEventListener("keydown", (e) => {
     if(e.key === "Enter"){
@@ -2607,15 +2663,149 @@ Optional:
         rangeLabel: `Selected week: ${weekVal} | Base week: ${baseRange} | Exported view: ${viewRange}`,
         notes:
           "What you are looking at:\n" +
-          "- The Charts screen shows exactly 7 days at a time (weekly base).\n" +
+          "- The Charts screen shows exactly 7 days at a time (weekly view).\n" +
           "- You can pinch to zoom in, then drag left/right to pan within that 7-day week.\n" +
-          "- Points are plotted at their true timestamps.\n" +
-          "- Lines break when gaps are 24 hours or more.\n" +
+          "- Data points are plotted at the exact recorded timestamps.\n" +
+          "- Lines break if there is a >=24 hour gap between entries.\n" +
           "- This export contains entries that fall within the CURRENT visible chart view (after zoom/pan)."
       },
       "angel_numbers_charts_report"
     );
   });
+
+  /* =========================
+     Version popup (quad-tap logo) - formatted like others
+     ========================= */
+
+  let tapTimes = [];
+  function openVersionModal(){
+    $("versionSub").textContent =
+      `Actual Version (code): ${APP_VERSION}\n` +
+      `Storage Key: ${STORAGE_KEY}\n` +
+      `Local-only PWA (no cloud)\n\n` +
+      `Note: Home panel version label is visual only.`;
+    $("versionModal").classList.remove("hidden");
+    setTimeout(() => { try{ $("btnVersionClose").focus({preventScroll:true}); }catch{} }, 0);
+  }
+  function closeVersionModal(){
+    $("versionModal").classList.add("hidden");
+  }
+  $("btnVersionClose").addEventListener("click", (e) => { e.preventDefault(); closeVersionModal(); });
+  $("versionModal").addEventListener("click", (e) => { if(e.target === $("versionModal")) closeVersionModal(); });
+  document.addEventListener("keydown", (e) => {
+    const open = !$("versionModal").classList.contains("hidden");
+    if(!open) return;
+    if(e.key === "Escape"){
+      e.preventDefault();
+      closeVersionModal();
+    }
+  });
+
+  $("logoArea").addEventListener("click", () => {
+    const now = Date.now();
+    tapTimes = tapTimes.filter(t => (now - t) <= 900);
+    tapTimes.push(now);
+    if(tapTimes.length >= 4){
+      tapTimes = [];
+      openVersionModal();
+    }
+  });
+
+  /* =========================
+     Swipe navigation (home/log/charts only)
+     - Swipe left: Home -> Log -> Charts -> Home
+     - Swipe right: reverse
+     - Disabled on Add panel and inside modals/canvas interactions
+     ========================= */
+
+  const swipe = {x0:0, y0:0, t0:0, active:false};
+
+  function currentPanel(){
+    for(const s of ["home","log","charts","add"]){
+      if(!$(s).classList.contains("hidden")) return s;
+    }
+    return "home";
+  }
+
+  function anyModalOpen(){
+    const ids = ["editModal","exportModal","confirmModal","recordModal","dayModal","versionModal"];
+    return ids.some(id => !$(id).classList.contains("hidden"));
+  }
+
+  function canSwipeHere(evTarget){
+    if(anyModalOpen()) return false;
+    const p = currentPanel();
+    if(!(p === "home" || p === "log" || p === "charts")) return false;
+
+    // Do not swipe if gesture starts on input/textarea/button
+    const t = evTarget;
+    if(!t) return true;
+    const tag = (t.tagName || "").toLowerCase();
+    if(tag === "input" || tag === "textarea" || tag === "button" || tag === "select") return false;
+
+    // Do not swipe-start on chart canvas (it has pinch/pan)
+    if(t.closest && t.closest("#chart")) return false;
+
+    return true;
+  }
+
+  function goNextPanel(){
+    const p = currentPanel();
+    if(p === "home") show("log");
+    else if(p === "log") show("charts");
+    else if(p === "charts") show("home");
+  }
+  function goPrevPanel(){
+    const p = currentPanel();
+    if(p === "home") show("charts");
+    else if(p === "charts") show("log");
+    else if(p === "log") show("home");
+  }
+
+  document.addEventListener("touchstart", (e) => {
+    if(!e.touches || e.touches.length !== 1) return;
+    if(!canSwipeHere(e.target)) return;
+
+    swipe.x0 = e.touches[0].clientX;
+    swipe.y0 = e.touches[0].clientY;
+    swipe.t0 = Date.now();
+    swipe.active = true;
+  }, {passive:true});
+
+  document.addEventListener("touchmove", (e) => {
+    if(!swipe.active) return;
+    if(!e.touches || e.touches.length !== 1) return;
+
+    const dx = e.touches[0].clientX - swipe.x0;
+    const dy = e.touches[0].clientY - swipe.y0;
+
+    // If user scrolls vertically, cancel swipe
+    if(Math.abs(dy) > 24 && Math.abs(dy) > Math.abs(dx)){
+      swipe.active = false;
+    }
+  }, {passive:true});
+
+  document.addEventListener("touchend", (e) => {
+    if(!swipe.active) return;
+    swipe.active = false;
+
+    const t = Date.now() - swipe.t0;
+    if(t > 650) return;
+
+    const touch = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : null;
+    if(!touch) return;
+
+    const dx = touch.clientX - swipe.x0;
+    const dy = touch.clientY - swipe.y0;
+
+    if(Math.abs(dy) > 70) return;
+
+    if(dx <= -80){
+      goNextPanel();
+    }else if(dx >= 80){
+      goPrevPanel();
+    }
+  }, {passive:true});
 
   /* =========================
      Manifest + SW
@@ -2633,9 +2823,15 @@ Optional:
   </defs>
   <rect width="512" height="512" rx="110" fill="url(#g)"/>
   <ellipse cx="256" cy="150" rx="110" ry="44" fill="none" stroke="rgba(235,245,255,.92)" stroke-width="26"/>
-  <path d="M256 240 C196 210, 140 220, 112 270 C154 294, 190 330, 214 380 C226 330, 240 285, 256 240Z"
+  <path d="M256 240
+           C196 210, 140 220, 112 270
+           C154 294, 190 330, 214 380
+           C226 330, 240 285, 256 240Z"
         fill="none" stroke="rgba(235,245,255,.92)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M256 240 C316 210, 372 220, 400 270 C358 294, 322 330, 298 380 C286 330, 272 285, 256 240Z"
+  <path d="M256 240
+           C316 210, 372 220, 400 270
+           C358 294, 322 330, 298 380
+           C286 330, 272 285, 256 240Z"
         fill="none" stroke="rgba(235,245,255,.92)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
     const encoded = encodeURIComponent(svg).replace(/'/g,"%27").replace(/"/g,"%22");
@@ -2692,4 +2888,21 @@ self.addEventListener('fetch', (e)=>{ });`;
 })();
 </script>
 </body>
-  </html>
+</html>
+
+<!--
+Version Detail Notes (EOF)
+App Version: v1.0B2
+Base: v1.0B1 concept (B-series focuses on charting + calendar)
+Changes (requested in this edit):
+- Version popup (quad-tap logo) now uses the same modal styling as other popups.
+- Home button label updated to: "ADD Angel Number".
+- Record “sighting card” is now a unified Record Detail modal that includes all record info (timestamp, number, pattern, meaning, notes).
+  - This card opens from Log (short tap) and from Calendar (day selection → sighting selection).
+- Swipe navigation enabled only for Home, Log, Charts:
+  - Swipe left: Home → Log → Charts → Home (wrap)
+  - Swipe right: reverse (wrap)
+  - Swipe disabled on Add panel, on inputs/buttons, inside modals, and on chart canvas (so pinch/pan is not disrupted).
+Notes:
+- Home panel version label remains "v1.333" (visual label only) and is not tied to APP_VERSION.
+-->
