@@ -1,26 +1,23 @@
-<!-- Angel Numbers Tracker v1.0B5 -->
+<!-- Angel Numbers Tracker v1.0B6 -->
 <!--
 Version Detail Notes
-App Version (internal): v1.0B5
+App Version (internal): v1.0B6
 Home display label (visual only): v1.333  (DO NOT CHANGE unless user instructs)
-Base: v1.0B4
-Focus (B): Calendar + interaction polish.
+Base: v1.0B5
 
-Changes in v1.0B5 (requested):
-- Swipe navigation now tracks finger movement in real time (panel follows finger), then snaps smoothly.
-  - Right swipe cycle: Home -> Calendar -> Log -> Home (incoming panel slides in from LEFT, opposite swipe).
-  - Prevent accidental taps while swiping; brief interaction lock after swipe.
-- Calendar: do NOT display any numbers/readings in cells. Only highlight days with data (clickable).
-  - Tap highlighted day -> Day popup listing entries (tight list).
-  - Tap entry -> Angel Number Card popup.
-- Angel Number Card / Day popup / Version popup / Confirm popup all share the same formatted modal styling.
-- Card list formatting tightened (reduced vertical padding/margins).
-- Closing Angel Number Card returns to the originating UI context:
-  - If opened from Day popup, returns to Day popup.
-  - If opened from Log, returns to Log.
-- Blue border around each panel (more visible).
-- Log list scroll fixed: entry-press logic no longer blocks vertical scrolling.
-- Update version notes at top + EOF.
+Fixes / changes (requested):
+- Panel borders changed to DARK BLUE (more subtle than bright blue).
+- Swipe feels like a “wheel”:
+  - Panel follows finger 1:1 (no lag).
+  - Adjacent panel is always present and moves in seamlessly during drag.
+  - Horizontal swipe engagement is stricter so vertical scrolling is not hijacked.
+  - No interaction lock during drag; only a brief lock after swipe completion.
+- Calendar day popup list redesigned:
+  - Tight, clean, clickable list (primarily the number + small time/pattern).
+  - Removed bulky card spacing.
+- Log panel scrolling fixed:
+  - Removed anything that can trap scroll (no full-screen lock during normal scroll).
+  - Tap-to-open detection no longer interferes with vertical scrolling.
 
 Required persistence:
 - Keep EOF comment block.
@@ -48,8 +45,9 @@ Required persistence:
       --muted:rgba(235,245,255,.58);
       --muted2:rgba(235,245,255,.42);
 
-      /* More visible blue border */
-      --accent:#2f78ff;
+      /* DARK BLUE panel border (requested) */
+      --accentBorder: rgba(43,78,122,.85);   /* dark blue */
+      --accentGlow: rgba(43,78,122,.18);
 
       --shadow:0 14px 40px rgba(0,0,0,.38);
       --radius:26px;
@@ -105,6 +103,8 @@ Required persistence:
       flex:1;
       overflow:hidden;
       border-radius: var(--radius);
+      /* Let vertical scroll happen naturally; we take horizontal only when clearly horizontal */
+      touch-action: pan-y;
     }
 
     .card{
@@ -119,20 +119,20 @@ Required persistence:
       inset:0;
       overflow:auto;
       -webkit-overflow-scrolling: touch;
-      touch-action: pan-y; /* allow vertical scrolling by default */
+      touch-action: pan-y;
     }
 
-    /* Blue border around each panel */
+    /* DARK BLUE border around each panel */
     .accentFrame{ position:relative; }
     .accentFrame::before{
       content:"";
       position:absolute;
       inset:-3px;
-      border:3px solid rgba(47,120,255,.75);
+      border:3px solid var(--accentBorder);
       border-radius: calc(var(--radius) + 3px);
       pointer-events:none;
       z-index:0;
-      box-shadow: 0 0 0 1px rgba(47,120,255,.18);
+      box-shadow: 0 0 0 1px var(--accentGlow);
     }
     .accentFrame > *{ position:relative; z-index:1; }
 
@@ -330,20 +330,20 @@ Required persistence:
     #log .dateField{ gap: 6px; }
     #log > .row.center{ margin-bottom: 4px; }
 
-    /* Tighter entry cards (remove excess vertical space) */
+    /* Log entry cards (tight) */
     .entry{
       border:1px solid var(--stroke);
       background: rgba(255,255,255,.03);
       border-radius: 18px;
       padding: 8px 10px 8px;
       margin-top: 6px;
-      touch-action: pan-y; /* critical: allow scrolling on list */
+      touch-action: pan-y;
       -webkit-tap-highlight-color: transparent;
       user-select:none;
     }
     .entry.pressed{
-      background: rgba(47,120,255,.14);
-      border-color: rgba(90,150,255,.55);
+      background: rgba(47,120,255,.12);
+      border-color: rgba(90,150,255,.45);
     }
 
     .entryTop{
@@ -450,7 +450,7 @@ Required persistence:
     .modalCard{
       width:min(520px, 100%);
       border-radius: 26px;
-      border: 3px solid rgba(47,120,255,.75);
+      border: 3px solid var(--accentBorder);
       background: linear-gradient(180deg, rgba(12,21,40,.96), rgba(8,16,31,.96));
       box-shadow: 0 18px 60px rgba(0,0,0,.55);
       padding: 16px;
@@ -557,14 +557,11 @@ Required persistence:
       color: rgba(235,245,255,.76);
       line-height: 1;
     }
-
-    /* Highlight only, no readings displayed */
     .calCell.hasData{
-      border-color: rgba(90,150,255,.55);
-      background: rgba(47,120,255,.16);
+      border-color: rgba(90,150,255,.45);
+      background: rgba(43,78,122,.22);
       box-shadow: 0 12px 24px rgba(0,0,0,.18);
     }
-
     .calCell.outMonth{
       opacity:.42;
     }
@@ -575,20 +572,54 @@ Required persistence:
       color: rgba(235,245,255,.44);
     }
 
-    /* Swipe animation / dragging */
-    .dragLayer{
-      position:absolute;
-      inset:0;
-      overflow:hidden;
-      border-radius: var(--radius);
+    /* Day popup list (concise) */
+    .dayList{
+      margin-top: 6px;
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+    }
+    .dayItem{
+      border:1px solid rgba(235,245,255,.12);
+      background: rgba(255,255,255,.02);
+      border-radius: 16px;
+      padding: 10px 12px;
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:10px;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .dayItem:active{ transform: translateY(1px); }
+    .dayNum{
+      font-size: 22px;
+      font-weight: 950;
+      letter-spacing:.3px;
+      color: rgba(235,245,255,.90);
+      white-space:nowrap;
+    }
+    .dayMeta{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:2px;
+      min-width: 0;
+    }
+    .dayTime{
+      font-size:12px;
+      color: rgba(235,245,255,.46);
+      white-space:nowrap;
+    }
+    .dayPat{
+      font-size:12px;
+      color: rgba(235,245,255,.62);
+      font-weight:800;
+      white-space:nowrap;
     }
 
-    .screenDrag{
-      position:absolute;
-      inset:0;
-      will-change: transform;
-    }
-
+    /* Touch lock overlay (ONLY used briefly after swipe or modal open) */
     .touchLock{
       position:fixed;
       inset:0;
@@ -752,6 +783,7 @@ Required persistence:
           </div>
         </div>
 
+        <!-- Keep list inside the scrolling panel; DO NOT add extra wrappers that can break scrolling -->
         <div id="logList"></div>
       </div>
 
@@ -904,19 +936,16 @@ Optional:
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.0B5";                // actual version tracked in code
-  const HOME_VERSION_LABEL = "v1.333";         // visual-only label on home; do not change unless instructed
+  const APP_VERSION = "v1.0B6";
+  const HOME_VERSION_LABEL = "v1.333";
   const STORAGE_KEY = "angel_numbers_records_v1";
   const DAY_MS = 24*60*60*1000;
 
-  // Test data (seed only if no saved records). Remove by setting false.
   const TEST_DATA_ENABLED = true;
 
   const $ = (id) => document.getElementById(id);
 
-  /* =========================
-     Meanings (cultural / numerology)
-     ========================= */
+  /* ===== Meanings ===== */
 
   const DIGIT_MEANING = {
     "0": "0 is often linked with wholeness, source, and fresh cycles—an invitation to reset and widen perspective.",
@@ -952,9 +981,7 @@ Optional:
     "2222": "Deep alignment. Commit to balance; trust the process over the impulse."
   };
 
-  /* =========================
-     Storage
-     ========================= */
+  /* ===== Storage ===== */
 
   function loadRecords(){
     try{
@@ -981,9 +1008,7 @@ Optional:
     localStorage.setItem(STORAGE_KEY, JSON.stringify(recs));
   }
 
-  /* =========================
-     Utilities
-     ========================= */
+  /* ===== Utilities ===== */
 
   function fmtDateTime(ts){
     const d = new Date(ts);
@@ -996,6 +1021,10 @@ Optional:
     const hh = map.hour, mi = map.minute, ss = map.second;
     const dp = map.dayPeriod ? ` ${map.dayPeriod}` : "";
     return `${mm}/${dd}/${yy}, ${hh}:${mi}:${ss}${dp}`;
+  }
+
+  function fmtTimeOnly(ts){
+    return new Intl.DateTimeFormat(undefined, { hour:"2-digit", minute:"2-digit" }).format(new Date(ts));
   }
 
   function fmtTimeCommaDate(ts){
@@ -1060,40 +1089,24 @@ Optional:
     return s.replace(/[^\d]/g, "");
   }
 
-  /* =========================
-     Pattern detection + meaning
-     ========================= */
+  /* ===== Pattern + meaning ===== */
 
-  function isAllSame(s){
-    if(!s || s.length < 2) return false;
-    return s.split("").every(ch => ch === s[0]);
-  }
-  function isPalindrome(s){
-    if(!s || s.length < 3) return false;
-    const rev = s.split("").reverse().join("");
-    return rev === s;
-  }
-  function isRepeatedHalf(s){
-    if(!s || s.length < 4) return false;
-    if(s.length % 2 !== 0) return false;
-    const half = s.slice(0, s.length/2);
-    return half + half === s;
-  }
+  function isAllSame(s){ return !!(s && s.length >= 2 && s.split("").every(ch => ch === s[0])); }
+  function isPalindrome(s){ if(!s || s.length < 3) return false; return s === s.split("").reverse().join(""); }
+  function isRepeatedHalf(s){ if(!s || s.length < 4 || s.length % 2) return false; const h=s.slice(0,s.length/2); return h+h===s; }
   function isAscendingSeq(s){
     if(!s || s.length < 3) return false;
     for(let i=1;i<s.length;i++){
-      const a = s.charCodeAt(i-1) - 48;
-      const b = s.charCodeAt(i) - 48;
-      if(b !== a + 1) return false;
+      const a=s.charCodeAt(i-1)-48, b=s.charCodeAt(i)-48;
+      if(b !== a+1) return false;
     }
     return true;
   }
   function isDescendingSeq(s){
     if(!s || s.length < 3) return false;
     for(let i=1;i<s.length;i++){
-      const a = s.charCodeAt(i-1) - 48;
-      const b = s.charCodeAt(i) - 48;
-      if(b !== a - 1) return false;
+      const a=s.charCodeAt(i-1)-48, b=s.charCodeAt(i)-48;
+      if(b !== a-1) return false;
     }
     return true;
   }
@@ -1113,14 +1126,12 @@ Optional:
     if(isAllSame(s)) return DIGIT_MEANING[s[0]] || "";
     const counts = {};
     for(const ch of s){ counts[ch] = (counts[ch]||0) + 1; }
-    let best = null, bestN = 0;
-    for(const [k,v] of Object.entries(counts)){
-      if(v > bestN){ bestN = v; best = k; }
-    }
+    let best=null, bestN=0;
+    for(const [k,v] of Object.entries(counts)){ if(v>bestN){ bestN=v; best=k; } }
     if(best && bestN >= Math.max(2, Math.ceil(s.length * 0.6))){
       return DIGIT_MEANING[best] || "";
     }
-    const sum = s.split("").reduce((a,ch)=>a + (ch.charCodeAt(0)-48), 0);
+    const sum = s.split("").reduce((a,ch)=>a+(ch.charCodeAt(0)-48),0);
     const root = ((sum - 1) % 9) + 1;
     const rootLine = DIGIT_MEANING[String(root)] || "";
     return rootLine ? `Digit-sum lens (${sum} → ${root}): ${rootLine}` : "";
@@ -1129,22 +1140,16 @@ Optional:
   function deriveMeaning(s, pattern){
     if(!s) return {pattern:"—", meaning:"Enter a number to see its commonly shared meaning."};
 
-    if(ANGEL_MAP[s]){
-      return {pattern, meaning: ANGEL_MAP[s]};
-    }
+    if(ANGEL_MAP[s]) return {pattern, meaning: ANGEL_MAP[s]};
 
     if(isAllSame(s) && s.length >= 2){
-      const d = s[0];
+      const d=s[0];
       const base = DIGIT_MEANING[d] || "A repeating pattern—often treated as a heightened emphasis.";
       return {pattern, meaning: `Emphasis pattern (${s}): ${base}`};
     }
 
-    if(pattern === "Sequential (up)"){
-      return {pattern, meaning: "Step-by-step progress. Keep it simple, keep moving, and let momentum build."};
-    }
-    if(pattern === "Sequential (down)"){
-      return {pattern, meaning: "Release and simplify. Let go of what’s extra and return to essentials."};
-    }
+    if(pattern === "Sequential (up)") return {pattern, meaning:"Step-by-step progress. Keep it simple, keep moving, and let momentum build."};
+    if(pattern === "Sequential (down)") return {pattern, meaning:"Release and simplify. Let go of what’s extra and return to essentials."};
 
     if(pattern === "Double pattern"){
       const half = s.slice(0, s.length/2);
@@ -1162,20 +1167,28 @@ Optional:
     return {pattern, meaning: lens ? `${fallback}\n${lens}` : fallback};
   }
 
-  /* =========================
-     Screen control
-     ========================= */
+  /* ===== Touch lock (robust, never “stuck on”) ===== */
+
+  let lockTimer = null;
+  function lockTouches(ms=200){
+    const el = $("touchLock");
+    el.classList.add("on");
+    if(lockTimer) clearTimeout(lockTimer);
+    lockTimer = setTimeout(()=> el.classList.remove("on"), ms);
+  }
+  function unlockTouches(){
+    const el = $("touchLock");
+    el.classList.remove("on");
+    if(lockTimer) clearTimeout(lockTimer);
+    lockTimer = null;
+  }
+
+  /* ===== Screens ===== */
 
   const swipeCycle = ["home","calendar","log"]; // right swipe cycle
   let currentScreen = "home";
   let returnScreen = "home";
   let animating = false;
-
-  function lockTouches(ms=360){
-    const el = $("touchLock");
-    el.classList.add("on");
-    setTimeout(()=> el.classList.remove("on"), ms);
-  }
 
   function focusTopOfPanel(screen){
     try{ window.scrollTo({top:0,left:0,behavior:"auto"}); }catch{}
@@ -1191,9 +1204,10 @@ Optional:
   }
 
   function showInstant(screen){
+    unlockTouches();
     for(const s of ["home","add","log","calendar"]){
       $(s).classList.toggle("hidden", s !== screen);
-      $(s).style.transform = ""; // clear any drag transforms
+      $(s).style.transform = "";
       $(s).style.transition = "";
     }
     currentScreen = screen;
@@ -1205,23 +1219,16 @@ Optional:
     focusTopOfPanel(screen);
   }
 
-  /* =========================
-     Real-time swipe dragging (finger tracking)
-     ========================= */
+  /* ===== Swipe “wheel” (strict horizontal detection; never blocks vertical scroll) ===== */
 
   const drag = {
     active:false,
-    x0:0,
-    y0:0,
-    dx:0,
-    dy:0,
-    startedOn:null,
-    intent:null,       // "h" or "v"
-    from:null,
-    to:null,
+    x0:0, y0:0,
+    dx:0, dy:0,
+    intent:null,    // "h" | "v"
+    from:null, to:null,
     width:0,
-    raf:0,
-    started:false
+    dir:null
   };
 
   function nextInCycleRight(from){
@@ -1245,8 +1252,8 @@ Optional:
     if(!swipeCycle.includes(currentScreen)) return;
 
     drag.active = true;
-    drag.started = false;
     drag.intent = null;
+    drag.dir = null;
     drag.x0 = ev.touches[0].clientX;
     drag.y0 = ev.touches[0].clientY;
     drag.dx = 0;
@@ -1254,8 +1261,27 @@ Optional:
     drag.from = currentScreen;
     drag.to = null;
     drag.width = $("screenArea").clientWidth || window.innerWidth;
+  }
 
-    // allow default scrolling until horizontal intent is confirmed
+  function prepareTarget(dir){
+    if(drag.dir === dir && drag.to) return;
+    drag.dir = dir;
+
+    const target = (dir === "right") ? nextInCycleRight(drag.from) : nextInCycleLeft(drag.from);
+    if(!target) return;
+
+    drag.to = target;
+
+    const fromEl = $(drag.from);
+    const toEl = $(drag.to);
+
+    toEl.classList.remove("hidden");
+    fromEl.style.transition = "none";
+    toEl.style.transition = "none";
+
+    const startX = (dir === "right") ? -drag.width : drag.width; // opposite swipe direction
+    setTransform(fromEl, 0);
+    setTransform(toEl, startX);
   }
 
   function moveDrag(ev){
@@ -1267,101 +1293,76 @@ Optional:
     drag.dx = x - drag.x0;
     drag.dy = y - drag.y0;
 
+    // Decide intent only when obvious
     if(!drag.intent){
-      // establish intent
-      if(Math.abs(drag.dx) > 14 && Math.abs(drag.dy) < 18){
+      const ax = Math.abs(drag.dx);
+      const ay = Math.abs(drag.dy);
+
+      // stricter: must be clearly horizontal
+      if(ax > 14 && ax > ay + 10){
         drag.intent = "h";
-      }else if(Math.abs(drag.dy) > 18 && Math.abs(drag.dy) > Math.abs(drag.dx) + 10){
+        // once horizontal, prevent browser scroll while dragging horizontally
+      }else if(ay > 16 && ay > ax + 6){
         drag.intent = "v";
+        drag.active = false;
+        return;
       }else{
         return;
       }
     }
 
-    if(drag.intent === "v"){
-      // release to normal scrolling
-      drag.active = false;
-      return;
-    }
+    if(drag.intent !== "h") return;
 
-    // horizontal drag -> prevent underlying interactions and scroll
+    // Now we own the gesture horizontally
     ev.preventDefault();
-    lockTouches(180);
 
-    // Determine direction and target panel
     const dir = (drag.dx >= 0) ? "right" : "left";
-    const target = (dir === "right") ? nextInCycleRight(drag.from) : nextInCycleLeft(drag.from);
-    if(!target) return;
+    prepareTarget(dir);
+    if(!drag.to) return;
 
-    if(drag.to !== target){
-      drag.to = target;
-      // ensure target is visible and positioned off-screen correctly
-      $(drag.to).classList.remove("hidden");
-      $(drag.to).style.transition = "none";
-      $(drag.from).style.transition = "none";
+    const fromEl = $(drag.from);
+    const toEl = $(drag.to);
 
-      // incoming is opposite the swipe direction:
-      // - right swipe => incoming from LEFT (-width)
-      // - left swipe  => incoming from RIGHT (+width)
-      const startX = (dir === "right") ? -drag.width : drag.width;
-      setTransform($(drag.to), startX);
-      setTransform($(drag.from), 0);
-      drag.started = true;
-    }
+    const w = drag.width || 1;
+    const clamped = Math.max(-w, Math.min(w, drag.dx));
 
-    if(!drag.started) return;
-
-    // clamp dx to width
-    const clamped = Math.max(-drag.width, Math.min(drag.width, drag.dx));
-
-    // move panels with finger
-    // from panel moves with finger, to panel follows behind:
-    // - right swipe: from moves +dx, to starts at -w then +dx
-    // - left swipe:  from moves +dx (negative), to starts at +w then +dx
-    setTransform($(drag.from), clamped);
-
-    const base = (dir === "right") ? -drag.width : drag.width;
-    setTransform($(drag.to), base + clamped);
+    // finger-tracking “wheel”
+    setTransform(fromEl, clamped);
+    const base = (dir === "right") ? -w : w;
+    setTransform(toEl, base + clamped);
   }
 
   function endDrag(){
     if(!drag.active && drag.intent !== "h") return;
 
+    const hadHorizontal = (drag.intent === "h" && drag.to);
     const from = drag.from;
     const to = drag.to;
-    const width = drag.width || 1;
+    const w = drag.width || 1;
     const dx = drag.dx;
 
-    // reset drag state early to avoid reentry
-    const hadHorizontal = (drag.intent === "h" && to);
+    // reset drag state immediately
     drag.active = false;
     drag.intent = null;
+    drag.dir = null;
 
-    if(!hadHorizontal){
-      return;
-    }
+    if(!hadHorizontal) return;
 
     animating = true;
-    lockTouches(520);
 
-    // decide snap
-    const progress = Math.min(1, Math.abs(dx) / width);
-    const commit = progress >= 0.28;
+    const progress = Math.min(1, Math.abs(dx) / w);
+    const commit = progress >= 0.22; // slightly easier commit
 
     const dir = (dx >= 0) ? "right" : "left";
     const fromEl = $(from);
     const toEl = $(to);
 
-    fromEl.style.transition = "transform 240ms cubic-bezier(.2,.9,.2,1)";
-    toEl.style.transition   = "transform 240ms cubic-bezier(.2,.9,.2,1)";
+    fromEl.style.transition = "transform 220ms cubic-bezier(.2,.9,.2,1)";
+    toEl.style.transition   = "transform 220ms cubic-bezier(.2,.9,.2,1)";
 
     if(commit){
-      // complete transition
-      const endFrom = (dir === "right") ? width : -width;
-      const endTo = 0;
-
-      setTransform(fromEl, endFrom);
-      setTransform(toEl, endTo);
+      setTransform(fromEl, (dir === "right") ? w : -w);
+      setTransform(toEl, 0);
 
       setTimeout(() => {
         fromEl.classList.add("hidden");
@@ -1378,17 +1379,14 @@ Optional:
         focusTopOfPanel(currentScreen);
         animating = false;
 
-        // brief lock after swipe
-        lockTouches(180);
-      }, 255);
+        // brief lock AFTER swipe only (prevents accidental taps)
+        lockTouches(140);
+      }, 235);
     }else{
-      // revert
-      const revertTo = (dir === "right") ? -width : width;
       setTransform(fromEl, 0);
-      setTransform(toEl, revertTo);
+      setTransform(toEl, (dir === "right") ? -w : w);
 
       setTimeout(() => {
-        // hide target again
         toEl.classList.add("hidden");
         fromEl.style.transition = "";
         toEl.style.transition = "";
@@ -1396,8 +1394,8 @@ Optional:
         toEl.style.transform = "";
 
         animating = false;
-        lockTouches(120);
-      }, 255);
+        lockTouches(90);
+      }, 235);
     }
   }
 
@@ -1409,9 +1407,7 @@ Optional:
     root.addEventListener("touchcancel", endDrag, {passive:true});
   }
 
-  /* =========================
-     Add/Edit flow
-     ========================= */
+  /* ===== Add/Edit ===== */
 
   let timeTimer = null;
   let editTs = null;
@@ -1439,10 +1435,7 @@ Optional:
   function enterAddEdit(ts){
     const recs = loadRecords();
     const r = recs.find(x => x.ts === ts);
-    if(!r){
-      enterAddNew("log");
-      return;
-    }
+    if(!r){ enterAddNew("log"); return; }
 
     editTs = ts;
     editOriginalTs = ts;
@@ -1503,9 +1496,7 @@ Optional:
     return !!(String(number||"").trim() || String(notes||"").trim());
   }
 
-  /* =========================
-     Log filtering + render
-     ========================= */
+  /* ===== Log filter + render ===== */
 
   function recordMatches(rec, q){
     if(!q) return true;
@@ -1574,9 +1565,7 @@ Optional:
     }
   }
 
-  /* =========================
-     Unified confirm modal
-     ========================= */
+  /* ===== Confirm modal ===== */
 
   let confirmState = null;
 
@@ -1597,7 +1586,7 @@ Optional:
     }
 
     $("confirmModal").classList.remove("hidden");
-    lockTouches(220);
+    lockTouches(120);
   }
 
   function closeConfirm(){
@@ -1623,12 +1612,10 @@ Optional:
     }
   });
 
-  /* =========================
-     Card modal (return-to-origin behavior)
-     ========================= */
+  /* ===== Card modal (return-to-origin) ===== */
 
   let cardTs = null;
-  let cardReturn = { type: "screen", screen: "log" }; // or {type:"day", dayStartTs}
+  let cardReturn = { type: "screen", screen: "log" };
 
   function buildCardText(rec){
     const lines = [
@@ -1652,7 +1639,7 @@ Optional:
 
     $("cardBody").textContent = buildCardText(r);
     $("cardModal").classList.remove("hidden");
-    lockTouches(220);
+    lockTouches(120);
   }
 
   function closeCard(){
@@ -1660,12 +1647,8 @@ Optional:
     const ret = cardReturn;
     cardTs = null;
 
-    // Return to what triggered the card
     if(ret && ret.type === "day" && Number.isFinite(ret.dayStartTs)){
-      // reopen day modal
       openDayModal(ret.dayStartTs);
-    }else{
-      // default: underlying screen already visible
     }
   }
 
@@ -1718,9 +1701,7 @@ Optional:
     }
   });
 
-  /* =========================
-     Day modal (tight list)
-     ========================= */
+  /* ===== Day modal (concise list) ===== */
 
   let dayModalDate = null;
 
@@ -1736,36 +1717,36 @@ Optional:
     const title = new Intl.DateTimeFormat(undefined, { weekday:"long", year:"numeric", month:"long", day:"numeric" }).format(d);
     $("dayTitle").textContent = title;
 
-    // build tight clickable list
     const wrap = document.createElement("div");
-    wrap.style.marginTop = "6px";
+    wrap.className = "dayList";
 
     for(const r of recs){
-      const chip = document.createElement("div");
-      chip.className = "entry";
-      chip.style.marginTop = "6px";
-      chip.dataset.ts = String(r.ts);
-      chip.innerHTML = `
-        <div class="entryTop"><div class="entryTime">${escapeHtml(fmtDateTime(r.ts))}</div></div>
-        <div class="entryMain">
-          <div class="entryNumber">${escapeHtml(r.number || "—")}</div>
-          <div class="entryPattern">${escapeHtml(r.pattern || "—")}</div>
+      const item = document.createElement("div");
+      item.className = "dayItem";
+      item.dataset.ts = String(r.ts);
+
+      item.innerHTML = `
+        <div class="dayNum">${escapeHtml(r.number || "—")}</div>
+        <div class="dayMeta">
+          <div class="dayTime">${escapeHtml(fmtTimeOnly(r.ts))}</div>
+          <div class="dayPat">${escapeHtml(r.pattern || "—")}</div>
         </div>
       `;
-      chip.addEventListener("click", (e)=>{
+
+      item.addEventListener("click", (e)=>{
         e.preventDefault();
-        // close day, open card, and ensure closing card returns here
         closeDayModal();
         openCard(r.ts, { type:"day", dayStartTs });
       });
-      wrap.appendChild(chip);
+
+      wrap.appendChild(item);
     }
 
     $("dayBody").textContent = "";
     $("dayBody").appendChild(wrap);
 
     $("dayModal").classList.remove("hidden");
-    lockTouches(220);
+    lockTouches(120);
   }
 
   function closeDayModal(){
@@ -1805,26 +1786,22 @@ Optional:
     );
   });
 
-  /* =========================
-     Log: press-to-open prompt without blocking scroll
-     ========================= */
+  /* ===== Log tap-to-open WITHOUT killing scroll ===== */
 
   let pendingOpenTs = null;
-  let modalOpenedAt = 0;
   let enableOpenTimer = null;
 
   function openEditPrompt(ts){
     pendingOpenTs = ts;
-    modalOpenedAt = Date.now();
 
     const btnOpen = $("btnEditConfirm");
     btnOpen.disabled = true;
     if(enableOpenTimer) clearTimeout(enableOpenTimer);
-    enableOpenTimer = setTimeout(() => { btnOpen.disabled = false; }, 240);
+    enableOpenTimer = setTimeout(() => { btnOpen.disabled = false; }, 220);
 
     $("editModalSub").textContent = "Press Open to view the Angel Number Card.";
     $("editModal").classList.remove("hidden");
-    lockTouches(220);
+    lockTouches(120);
   }
 
   function closeEditPrompt(){
@@ -1845,8 +1822,6 @@ Optional:
   $("btnEditConfirm").addEventListener("click", (e) => { e.preventDefault(); confirmEditPrompt(); });
 
   $("editModal").addEventListener("click", (e) => {
-    const justOpened = (Date.now() - modalOpenedAt) < 220;
-    if(justOpened) { e.preventDefault(); e.stopPropagation(); return; }
     if(e.target === $("editModal")) closeEditPrompt();
   });
 
@@ -1856,13 +1831,14 @@ Optional:
     if(e.key === "Enter"){ e.preventDefault(); confirmEditPrompt(); }
   });
 
-  // Delegated tap logic: only treat as "tap" if finger does not move (scrolling remains smooth)
+  // Tap detection: only triggers if the finger does not move (scroll = movement)
   const tap = { active:false, ts:null, x0:0, y0:0, moved:false, el:null };
 
   $("logList").addEventListener("touchstart", (ev) => {
     if(!(ev.touches && ev.touches.length === 1)) return;
     const target = ev.target.closest ? ev.target.closest(".entry") : null;
     if(!target) return;
+
     const ts = Number(target.dataset.ts);
     if(!Number.isFinite(ts)) return;
 
@@ -1872,8 +1848,9 @@ Optional:
     tap.x0 = ev.touches[0].clientX;
     tap.y0 = ev.touches[0].clientY;
     tap.moved = false;
+
     target.classList.add("pressed");
-    // DO NOT preventDefault here; allow scroll to start normally
+    // IMPORTANT: do NOT preventDefault; scrolling must work
   }, {passive:true});
 
   $("logList").addEventListener("touchmove", (ev) => {
@@ -1882,6 +1859,7 @@ Optional:
     const y = ev.touches[0].clientY;
     const dx = x - tap.x0;
     const dy = y - tap.y0;
+
     if(Math.abs(dx) > 10 || Math.abs(dy) > 10){
       tap.moved = true;
       if(tap.el) tap.el.classList.remove("pressed");
@@ -1890,6 +1868,7 @@ Optional:
 
   $("logList").addEventListener("touchend", () => {
     if(!tap.active) return;
+
     const wasTap = !tap.moved && tap.ts != null;
     if(tap.el) tap.el.classList.remove("pressed");
     const ts = tap.ts;
@@ -1908,9 +1887,7 @@ Optional:
     tap.active = false; tap.ts=null; tap.el=null;
   }, {passive:true});
 
-  /* =========================
-     Export helpers
-     ========================= */
+  /* ===== Export helpers ===== */
 
   let exportPayload = null;
 
@@ -1957,7 +1934,7 @@ Optional:
   function openExportModal(payload){
     exportPayload = payload;
     $("exportModal").classList.remove("hidden");
-    lockTouches(220);
+    lockTouches(120);
 
     $("btnExportClose").disabled = true;
     $("btnExportShare").disabled = true;
@@ -1967,7 +1944,7 @@ Optional:
       $("btnExportClose").disabled = false;
       $("btnExportShare").disabled = !isShareAvailable();
       $("btnExportSave").disabled  = false;
-    }, 240);
+    }, 200);
   }
 
   function closeExportModal(){
@@ -2059,9 +2036,7 @@ Optional:
     })();
   }
 
-  /* =========================
-     Calendar (month view)
-     ========================= */
+  /* ===== Calendar ===== */
 
   const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
@@ -2151,9 +2126,7 @@ Optional:
     }
   }
 
-  /* =========================
-     Clear Data + Install + Exit (Exit preserved)
-     ========================= */
+  /* ===== Clear / Install / Exit ===== */
 
   let deferredPrompt = null;
 
@@ -2225,9 +2198,7 @@ Optional:
     }, 200);
   });
 
-  /* =========================
-     Buttons + Save/Delete + Search + Exports
-     ========================= */
+  /* ===== Buttons + Save/Delete + Search + Exports ===== */
 
   $("btnGoAdd").addEventListener("click", () => enterAddNew("home"));
   $("btnGoLog").addEventListener("click", () => showInstant("log"));
@@ -2375,9 +2346,7 @@ Optional:
     );
   });
 
-  /* =========================
-     Manifest + SW
-     ========================= */
+  /* ===== Manifest + SW ===== */
 
   function injectManifest(){
     const svg =
@@ -2431,9 +2400,7 @@ self.addEventListener('fetch', (e)=>{ });`;
     try { await navigator.serviceWorker.register(swUrl); } catch {}
   }
 
-  /* =========================
-     Test data seeding
-     ========================= */
+  /* ===== Test data seeding ===== */
 
   function seedTestDataIfEmpty(){
     if(!TEST_DATA_ENABLED) return;
@@ -2478,9 +2445,7 @@ self.addEventListener('fetch', (e)=>{ });`;
     saveRecords(out);
   }
 
-  /* =========================
-     Version modal + taps
-     ========================= */
+  /* ===== Version modal + taps ===== */
 
   function openVersionModal(){
     $("verBody").textContent =
@@ -2488,14 +2453,13 @@ self.addEventListener('fetch', (e)=>{ });`;
       `Home label (visual only): ${HOME_VERSION_LABEL}\n` +
       `Storage key: ${STORAGE_KEY}`;
     $("versionModal").classList.remove("hidden");
-    lockTouches(220);
+    lockTouches(120);
   }
   function closeVersionModal(){ $("versionModal").classList.add("hidden"); }
   $("btnVerX").addEventListener("click", (e)=>{ e.preventDefault(); closeVersionModal(); });
   $("btnVerClose").addEventListener("click", (e)=>{ e.preventDefault(); closeVersionModal(); });
   $("versionModal").addEventListener("click", (e)=>{ if(e.target === $("versionModal")) closeVersionModal(); });
 
-  // Quad-tap logo
   let logoTapCount = 0;
   let logoTapTimer = null;
   document.querySelector(".logoTitle").addEventListener("click", () => {
@@ -2509,8 +2473,7 @@ self.addEventListener('fetch', (e)=>{ });`;
     }
   });
 
-  // Five taps on v1.333 label -> heart modal
-  function openHeart(){ $("heartModal").classList.remove("hidden"); lockTouches(220); }
+  function openHeart(){ $("heartModal").classList.remove("hidden"); lockTouches(120); }
   function closeHeart(){ $("heartModal").classList.add("hidden"); }
   $("btnHeartX").addEventListener("click", (e)=>{ e.preventDefault(); closeHeart(); });
   $("btnHeartClose").addEventListener("click", (e)=>{ e.preventDefault(); closeHeart(); });
@@ -2530,9 +2493,7 @@ self.addEventListener('fetch', (e)=>{ });`;
     }
   });
 
-  /* =========================
-     Init
-     ========================= */
+  /* ===== Init ===== */
 
   injectManifest();
   registerSW();
@@ -2560,13 +2521,12 @@ self.addEventListener('fetch', (e)=>{ });`;
 <!--
 EOF Version Detail Notes (required)
 App: Angel Numbers Tracker
-Actual Version: v1.0B5
+Actual Version: v1.0B6
 Home Label (visual only): v1.333 (do not change unless instructed)
-Base: v1.0B4
+Base: v1.0B5
 Changes:
-- Finger-tracking swipe navigation (panel follows finger), snap commit/revert, brief interaction lock.
-- Calendar cells show only highlight for days with data (no readings displayed).
-- Day popup lists entries tightly; entry opens Angel Number Card; closing card returns to day popup when applicable.
-- Log scroll fixed (tap detection no longer blocks vertical scrolling).
-- Panel borders made more visibly blue.
+- Panel border changed to dark blue.
+- Swipe “wheel” improved: stricter horizontal detection; finger-tracking; no locks during drag; brief lock after swipe only.
+- Calendar day popup list simplified to a concise clickable list (number + time + pattern).
+- Log scrolling protected: tap-to-open logic does not block vertical scrolling.
 -->
