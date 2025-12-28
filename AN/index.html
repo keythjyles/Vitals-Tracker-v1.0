@@ -1,23 +1,23 @@
-<!-- Angel Numbers Tracker v1.1A4 -->
+<!-- Angel Numbers Tracker v1.1A5 -->
 <!--
 Version Detail Notes
-App Version: v1.1A4
-Base: v1.1A3
+App Version: v1.1A5
+Base: v1.1A4
 
 Changes (requested):
-1) Home/Identify screen must display the REAL version number (APP_VERSION) on-screen.
-   - Footer label now shows APP_VERSION (no “visual-only” version).
-2) Remove quad-tap version popup entirely.
-   - Version modal removed; quad-tap handler removed.
-3) Keep triple-tap (on version label) to show big heart modal and text: "The Angels love you Timmy."
-   - Changed from 5 taps to 3 taps.
-4) Ensure Home can scroll AND footer buttons remain always visible.
-   - Preserved scroll area + fixed footer.
-5) Prevent keyboard from popping on load.
-   - No autofocus; also force blur on startup; no programmatic focus on home input.
-Constraints preserved:
-- Keep BOF/EOF comment blocks.
-- Exit button handler remains unchanged.
+1) "Add to Calendar" is IN-APP calendar only (not phone calendar).
+   - Removed the alert. Button now creates/saves an in-app entry using the current Identify number + derived pattern/meaning.
+2) All future popups must match app modal styling.
+   - Replaced remaining alert() usage in these flows with the existing styled modal.
+   - Implemented a general-purpose "Info" modal using the same modal system.
+3) Identify screen: highlighted meaning/meta area must be contained and independently scrollable with a right-side scrollbar.
+   - The meta block is now its own scroll container (max height) with always-visible slim scrollbar.
+   - The main Home panel remains scrollable; footer buttons remain fixed and always visible.
+4) View Calendar is now the in-app month calendar (already).
+Notes:
+- BOF/EOF comment blocks preserved.
+- Sequential versioning advanced.
+- Exit handler unchanged.
 -->
 <!doctype html>
 <html lang="en">
@@ -272,6 +272,35 @@ Constraints preserved:
       line-height:1.18;
       white-space: pre-wrap;
     }
+
+    /* Independent scroll container for the highlighted “details” block */
+    .metaScroll{
+      margin-top:10px;
+      border:1px solid rgba(235,245,255,.10);
+      background: rgba(255,255,255,.02);
+      border-radius: 16px;
+      padding: 10px 10px;
+      max-height: 190px;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      white-space: pre-wrap;
+      line-height: 1.24;
+      color: rgba(235,245,255,.78);
+      font-size:14px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(235,245,255,.28) rgba(255,255,255,.06);
+    }
+    .metaScroll::-webkit-scrollbar{ width: 8px; }
+    .metaScroll::-webkit-scrollbar-track{
+      background: rgba(255,255,255,.05);
+      border-radius: 999px;
+    }
+    .metaScroll::-webkit-scrollbar-thumb{
+      background: rgba(235,245,255,.22);
+      border-radius: 999px;
+      border: 2px solid rgba(255,255,255,.04);
+    }
+
     .disclaimer{
       margin-top:8px;
       color: rgba(235,245,255,.44);
@@ -627,11 +656,15 @@ Constraints preserved:
               <div id="homeNumBig" class="numBig">—</div>
               <div id="homePatternPill" class="patternPill">Pattern: —</div>
             </div>
+
             <div id="homeMeaningText" class="meaningText">
               Enter a number above to see its commonly shared meaning.
             </div>
 
-            <div id="homeMeta" class="meaningText" style="margin-top:10px; color: rgba(235,245,255,.78); font-size:14px; line-height:1.28;"></div>
+            <!-- Contained scroll area w/ scrollbar -->
+            <div id="homeMeta" class="metaScroll">
+How to use: Treat the meaning as a reflective prompt—what it “means” depends on context and personal interpretation.
+            </div>
 
             <div class="disclaimer">
               Cultural note: these meanings come from numerology/“angel number” traditions and vary by source.
@@ -740,6 +773,20 @@ Constraints preserved:
     </div>
   </div>
 
+  <!-- Info modal (new; matches app look) -->
+  <div id="infoModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+    <div class="modalCard">
+      <div class="xCloseRow">
+        <button class="xBtn" id="btnInfoX" aria-label="Close">×</button>
+      </div>
+      <div class="modalTitle" id="infoTitle">Info</div>
+      <div class="modalSub" id="infoSub">—</div>
+      <div class="modalBtns">
+        <button id="btnInfoOk" class="btn primary">OK</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Export modal -->
   <div id="exportModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle">
     <div class="modalCard">
@@ -798,7 +845,7 @@ Save creates a .txt file on your device.
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.1A4";
+  const APP_VERSION = "v1.1A5";
   const STORAGE_KEY = "angel_numbers_records_v1";
   const DAY_MS = 24*60*60*1000;
 
@@ -870,6 +917,12 @@ Save creates a .txt file on your device.
     localStorage.setItem(STORAGE_KEY, JSON.stringify(recs));
   }
 
+  function addRecord(rec){
+    const recs = loadRecords();
+    recs.unshift(rec);
+    saveRecords(recs);
+  }
+
   /* ===== Utilities ===== */
 
   function fmtDateTime(ts){
@@ -885,38 +938,10 @@ Save creates a .txt file on your device.
     return `${mm}/${dd}/${yy}, ${hh}:${mi}:${ss}${dp}`;
   }
 
-  function fmtTimeOnly(ts){
-    return new Intl.DateTimeFormat(undefined, { hour:"2-digit", minute:"2-digit" }).format(new Date(ts));
-  }
-
   function startOfDay(ts){
     const d = new Date(ts);
     d.setHours(0,0,0,0);
     return d.getTime();
-  }
-
-  function clampEndOfDay(ts){
-    const d = new Date(ts);
-    d.setHours(23,59,59,999);
-    return d.getTime();
-  }
-
-  function toLocalDatetimeValue(ts){
-    const d = new Date(ts);
-    const pad = (n)=> String(n).padStart(2,"0");
-    const yyyy = d.getFullYear();
-    const mm = pad(d.getMonth()+1);
-    const dd = pad(d.getDate());
-    const hh = pad(d.getHours());
-    const mi = pad(d.getMinutes());
-    return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
-  }
-
-  function fromLocalDatetimeValue(v){
-    if(!v) return null;
-    const d = new Date(v);
-    const ts = d.getTime();
-    return Number.isFinite(ts) ? ts : null;
   }
 
   function normalizeNumberInput(raw){
@@ -1004,7 +1029,7 @@ Save creates a .txt file on your device.
   }
 
   function buildIdentifyMeta(n, pattern){
-    if(!n) return "";
+    if(!n) return "How to use: Treat the meaning as a reflective prompt—what it “means” depends on context and personal interpretation.";
     const lens = digitSummary(n);
     const mapped = ANGEL_MAP[n] ? "Direct map: recognized as a common “named” angel number." : "Direct map: not in the preset list; derived from pattern + digit lenses.";
     const digits = n.split("").join(" • ");
@@ -1039,7 +1064,6 @@ Save creates a .txt file on your device.
 
   const swipeCycle = ["home","calendar"];
   let currentScreen = "home";
-  let returnScreen = "home";
   let animating = false;
 
   function showInstant(screen){
@@ -1053,7 +1077,6 @@ Save creates a .txt file on your device.
 
     if(screen === "calendar") { initMonthDefaultIfNeeded(); renderCalendar(); }
 
-    // No focus calls on home to avoid keyboard pop
     try{ document.activeElement?.blur(); }catch{}
   }
 
@@ -1239,8 +1262,9 @@ Save creates a .txt file on your device.
     root.addEventListener("touchcancel", endDrag, {passive:true});
   }
 
-  /* ===== Confirm modal ===== */
+  /* ===== Modals ===== */
 
+  // Confirm modal (existing)
   let confirmState = null;
 
   function openConfirm({title, message, okText="OK", cancelText="Cancel", danger=false, onOk}){
@@ -1280,6 +1304,28 @@ Save creates a .txt file on your device.
   $("confirmModal").addEventListener("click", (e) => {
     if(e.target === $("confirmModal")) closeConfirm();
   });
+
+  // Info modal (new)
+  function openInfo(title, message){
+    $("infoTitle").textContent = title || "Info";
+    $("infoSub").textContent = message || "—";
+    $("infoModal").classList.remove("hidden");
+    lockTouches(120);
+  }
+  function closeInfo(){
+    $("infoModal").classList.add("hidden");
+    unlockTouches();
+  }
+  $("btnInfoX").addEventListener("click", (e)=>{ e.preventDefault(); closeInfo(); });
+  $("btnInfoOk").addEventListener("click", (e)=>{ e.preventDefault(); closeInfo(); });
+  $("infoModal").addEventListener("click", (e)=>{ if(e.target === $("infoModal")) closeInfo(); });
+
+  // Heart modal
+  function openHeart(){ $("heartModal").classList.remove("hidden"); lockTouches(120); }
+  function closeHeart(){ $("heartModal").classList.add("hidden"); unlockTouches(); }
+  $("btnHeartX").addEventListener("click", (e)=>{ e.preventDefault(); closeHeart(); });
+  $("btnHeartClose").addEventListener("click", (e)=>{ e.preventDefault(); closeHeart(); });
+  $("heartModal").addEventListener("click", (e)=>{ if(e.target === $("heartModal")) closeHeart(); });
 
   /* ===== Export helpers ===== */
 
@@ -1355,7 +1401,7 @@ Save creates a .txt file on your device.
     if(!exportPayload) return;
     if($("btnExportShare").disabled) return;
     if(!isShareAvailable()){
-      alert("Share is not available on this device/browser.");
+      openInfo("Share not available", "Share is not available on this device/browser.");
       return;
     }
     try{
@@ -1373,7 +1419,7 @@ Save creates a .txt file on your device.
 
     try{
       const ok = await saveTextWithPicker(exportPayload.text, exportPayload.filename);
-      if(ok){ alert("Saved."); return; }
+      if(ok){ openInfo("Saved", "Saved."); return; }
     }catch{}
 
     downloadText(exportPayload.text, exportPayload.filename || "angel_numbers_report.txt");
@@ -1508,7 +1554,7 @@ Save creates a .txt file on your device.
         cell.addEventListener("click", (e)=>{
           e.preventDefault();
           if(animating) return;
-          alert("Day view is not enabled in this build. (Next edit can add it back.)");
+          openInfo("Not enabled yet", "Day view is not enabled in this build. (Next edit can add a day list + edit.)");
         });
       }
 
@@ -1517,6 +1563,8 @@ Save creates a .txt file on your device.
   }
 
   /* ===== Home Identify (auto-search) ===== */
+
+  let lastIdentify = { number:"", pattern:"", meaning:"" };
 
   function renderHomeIdentify(){
     const raw = $("homeIdNum").value;
@@ -1529,6 +1577,7 @@ Save creates a .txt file on your device.
         "Enter a number above to see its commonly shared meaning.";
       $("homeMeta").textContent =
         "How to use: Treat the meaning as a reflective prompt—what it “means” depends on context and personal interpretation.";
+      lastIdentify = { number:"", pattern:"", meaning:"" };
       return;
     }
 
@@ -1539,6 +1588,8 @@ Save creates a .txt file on your device.
     $("homePatternPill").textContent = `Pattern: ${out.pattern || pattern || "—"}`;
     $("homeMeaningText").textContent = out.meaning || "—";
     $("homeMeta").textContent = buildIdentifyMeta(n, out.pattern || pattern || "—");
+
+    lastIdentify = { number:n, pattern:(out.pattern || pattern || "—"), meaning:(out.meaning || "—") };
   }
 
   $("homeIdNum").addEventListener("input", renderHomeIdentify);
@@ -1549,13 +1600,7 @@ Save creates a .txt file on your device.
     }
   });
 
-  /* ===== Heart modal + triple tap on version label ===== */
-
-  function openHeart(){ $("heartModal").classList.remove("hidden"); lockTouches(120); }
-  function closeHeart(){ $("heartModal").classList.add("hidden"); unlockTouches(); }
-  $("btnHeartX").addEventListener("click", (e)=>{ e.preventDefault(); closeHeart(); });
-  $("btnHeartClose").addEventListener("click", (e)=>{ e.preventDefault(); closeHeart(); });
-  $("heartModal").addEventListener("click", (e)=>{ if(e.target === $("heartModal")) closeHeart(); });
+  /* ===== Version triple-tap -> heart ===== */
 
   let vTapCount = 0;
   let vTapTimer = null;
@@ -1588,13 +1633,59 @@ Save creates a .txt file on your device.
     );
   });
 
+  // Add to IN-APP calendar (records)
   $("btnAddToCalendar").addEventListener("click", () => {
-    const n = normalizeNumberInput($("homeIdNum").value);
+    const n = lastIdentify.number || normalizeNumberInput($("homeIdNum").value);
     if(!n){
-      alert("Enter a number first.");
+      openInfo("Enter a number", "Type an angel number first, then tap Add to Calendar.");
       return;
     }
-    alert("Add-to-Calendar is not enabled in this build. (Next edit can wire it to Add/Edit + Save.)");
+
+    const ts = Date.now();
+    const rec = {
+      ts,
+      number: n,
+      pattern: lastIdentify.pattern || detectPattern(n),
+      meaning: lastIdentify.meaning || deriveMeaning(n, detectPattern(n)).meaning,
+      notes: ""
+    };
+    addRecord(rec);
+
+    // Refresh calendar dots if user switches immediately
+    // Provide confirmation using styled modal (no alert)
+    openInfo("Added", `Saved to in-app calendar:\n\n${n}\n${fmtDateTime(ts)}`);
+  });
+
+  $("btnCalToday").addEventListener("click", () => {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth()+1).padStart(2,"0");
+    $("calMonth").value = `${y}-${m}`;
+    renderCalendar();
+  });
+
+  $("calMonth").addEventListener("change", renderCalendar);
+
+  $("btnExportMonth").addEventListener("click", () => {
+    const mv = monthValueToYMD($("calMonth").value);
+    if(!mv){ openInfo("Export", "Select a month first."); return; }
+
+    const {y, mo} = mv;
+    const start = new Date(y, mo-1, 1); start.setHours(0,0,0,0);
+    const end = new Date(y, mo, 1);   end.setHours(0,0,0,0);
+
+    const all = loadRecords().slice().reverse();
+    const recs = all.filter(r => r.ts >= start.getTime() && r.ts < end.getTime());
+
+    exportReport(
+      recs,
+      {
+        title: "Month Export",
+        rangeLabel: `${y}-${String(mo).padStart(2,"0")} (in-app calendar)`,
+        notes: "This export includes entries whose timestamps fall within the selected month."
+      },
+      `angel_numbers_${y}-${String(mo).padStart(2,"0")}`
+    );
   });
 
   /* ===== Manifest + SW ===== */
@@ -1677,7 +1768,7 @@ self.addEventListener('fetch', (e)=>{ });`;
         usedDays.add(randInt(1, 27));
       }
       for(const day of usedDays){
-        const nEntries = randInt(1, 4);
+        const nEntries = randInt(1, 3);
         for(let i=0;i<nEntries;i++){
           const hr = randInt(8, 22);
           const mi = randInt(0, 59);
@@ -1741,12 +1832,10 @@ self.addEventListener('fetch', (e)=>{ });`;
 <!--
 EOF Version Detail Notes (required)
 App: Angel Numbers Tracker
-Version: v1.1A4
-Base: v1.1A3
+Version: v1.1A5
+Base: v1.1A4
 Changes:
-- Home screen shows real version (APP_VERSION) on-screen.
-- Removed quad-tap version popup entirely.
-- Triple-tap on version label shows a large heart + “The Angels love you Timmy.”
-- No autofocus and forced blur on load to prevent keyboard from opening.
-- Home panel remains scrollable with fixed footer buttons always visible.
+- Add to Calendar now saves to the in-app calendar (local records). No phone calendar integration.
+- Replaced remaining alert-style messaging in these flows with styled modal popups.
+- Identify details block is now a contained scroll area with a visible scrollbar.
 -->
