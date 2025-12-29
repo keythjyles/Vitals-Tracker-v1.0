@@ -2,20 +2,21 @@
 
 <!--
 Birthday Code
-Version: v1.1A2
+Version: v1.1A3
 URL: https://keythjyles.github.io/Vitals-Tracker-v1.0/BC/
 
 Version Notes:
-- Fixed Year input to allow normal 4-digit entry.
-- Removed questions, mantra, and source sections from report.
-- Reordered report: Numerology first; Birthday Code immediately after Numerology.
-- Added Birthday Date (day-of-month) numerology lens with commentary.
-- Simplified language to plain, relatable sentences.
+- Added an inspirational closing section that appears AFTER comparing all readings.
+- Reduced repetition by giving each lens distinct, non-overlapping wording and focus.
+- Improved numerology: distinct copy for Life Path, Birthday Number, and Birthday Date (day-of-month).
+- Restored year entry to a normal 4-digit numeric-text field (no frozen spinner behavior).
+- Removed system popups; replaced with app-styled modal.
 - Deterministic output preserved.
 --><html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1220">
 <title>Birthday Code</title>
 <style>
   :root{
@@ -23,250 +24,920 @@ Version Notes:
     --panel:#121a2e;
     --card:#0f172a;
     --accent:#6fb3ff;
+    --accent2:#8b5cf6;
     --text:#e7ecf3;
     --muted:#a9b2c7;
     --border:rgba(255,255,255,.12);
+    --shadow: 0 16px 44px rgba(0,0,0,.45);
+    --r:16px;
   }
   *{box-sizing:border-box}
   body{
     margin:0;
-    background:radial-gradient(1200px 600px at 20% -10%, #15214a 0%, transparent 60%), var(--bg);
+    background:
+      radial-gradient(1200px 600px at 20% -10%, rgba(111,179,255,.22) 0%, transparent 60%),
+      radial-gradient(1000px 520px at 90% 0%, rgba(139,92,246,.18) 0%, transparent 60%),
+      var(--bg);
     color:var(--text);
     font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
   }
-  .wrap{max-width:860px;margin:0 auto;padding:16px}
+  .wrap{max-width:900px;margin:0 auto;padding:16px 14px 20px}
   header{
     background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,0));
     border:1px solid var(--border);
-    border-radius:16px;
+    border-radius:18px;
     padding:16px;
     display:flex;align-items:center;gap:12px;
+    box-shadow: var(--shadow);
+    overflow:hidden;
+    position:relative;
   }
+  header:before{
+    content:"";
+    position:absolute;inset:-2px;
+    background:
+      radial-gradient(700px 180px at 18% 0%, rgba(111,179,255,.28), transparent 55%),
+      radial-gradient(700px 180px at 82% 0%, rgba(139,92,246,.26), transparent 55%);
+    filter: blur(12px);
+    opacity:.55;
+    pointer-events:none;
+  }
+  .brand{position:relative;z-index:1;display:flex;align-items:center;gap:12px;width:100%}
   .logo{
-    width:36px;height:36px;border-radius:10px;
+    width:40px;height:40px;border-radius:12px;
     background:linear-gradient(135deg,#7cc3ff,#4f7cff);
-    display:grid;place-items:center;color:#00122b;font-weight:700;
+    display:grid;place-items:center;color:#06122b;font-weight:900;
+    box-shadow: 0 10px 28px rgba(0,0,0,.35);
+    border:1px solid rgba(255,255,255,.16);
+    flex:0 0 auto;
   }
-  h1{font-size:22px;margin:0}
-  .sub{color:var(--muted);font-size:13px}
-  .panel{
-    margin-top:14px;
-    background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,0));
-    border:1px solid var(--border);
-    border-radius:16px;
-    padding:16px;
-  }
-  .row{display:flex;gap:12px;flex-wrap:wrap}
-  label{font-size:12px;color:var(--muted)}
-  select,input{
-    width:100%;
-    background:var(--card);
-    color:var(--text);
-    border:1px solid var(--border);
-    border-radius:12px;
-    padding:12px;
-    font-size:16px;
-  }
-  .col{flex:1;min-width:140px}
-  .btn{
-    margin-top:12px;
-    background:linear-gradient(135deg,#6fb3ff,#4f7cff);
-    color:#04122b;
-    border:none;border-radius:14px;
-    padding:14px 16px;
-    font-size:16px;font-weight:700;
-    cursor:pointer;
-  }
-  .btn.secondary{
-    background:transparent;color:var(--muted);
-    border:1px solid var(--border);
-    cursor:not-allowed;
-  }
-  .btn.secondary.enabled{cursor:pointer;color:var(--text)}
-  .report{
-    margin-top:14px;
-    background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,0));
-    border:1px solid var(--border);
-    border-radius:16px;
-    padding:16px;
-  }
-  .report h2{margin:0 0 8px 0;font-size:18px}
-  .meta{color:var(--muted);font-size:13px;margin-bottom:12px}
-  .section{
-    background:var(--panel);
-    border:1px solid var(--border);
-    border-radius:14px;
-    padding:14px;
-    margin-top:10px;
-  }
-  .section h3{margin:0 0 8px 0;font-size:16px}
-  .p{margin:6px 0;line-height:1.5}
-  footer{
-    margin:16px 0 8px;
-    color:var(--muted);
+  h1{font-size:22px;margin:0;letter-spacing:.2px}
+  .sub{color:var(--muted);font-size:13px;margin-top:2px}
+  .pill{
+    margin-left:auto;
+    position:relative;z-index:1;
     font-size:12px;
-    text-align:center;
-  }
-</style>
+    color:var(--muted);
+    padding:7px 10px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    background:rgba(255,255,255,.03);
+    white-space:nowrap;
+  }.panel{ margin-top:14px; background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,0)); border:1px solid var(--border); border-radius:18px; padding:16px; box-shadow: var(--shadow); } .row{display:flex;gap:12px;flex-wrap:wrap} label{font-size:12px;color:var(--muted);display:block;margin:0 0 6px} select,input{ width:100%; background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:14px; padding:12px; font-size:16px; outline:none; } select:focus,input:focus{ border-color: rgba(111,179,255,.55); box-shadow: 0 0 0 4px rgba(111,179,255,.12); } .col{flex:1;min-width:150px} .btnRow{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px} @media(min-width:720px){ .btnRow{grid-template-columns:1fr 1fr} }
+
+.btn{ background:linear-gradient(135deg,#6fb3ff,#4f7cff); color:#04122b; border:none;border-radius:16px; padding:14px 16px; font-size:16px;font-weight:900; cursor:pointer; box-shadow: var(--shadow); user-select:none; } .btn:active{transform: translateY(1px)} .btn.secondary{ background:transparent; color:rgba(231,236,243,.92); border:1px solid var(--border); box-shadow:none; } .btn[disabled]{ opacity:.45; cursor:not-allowed; transform:none !important; }
+
+.report{ margin-top:14px; background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,0)); border:1px solid var(--border); border-radius:18px; overflow:hidden; box-shadow: var(--shadow); } .reportTop{ padding:14px 16px 12px; border-bottom:1px solid var(--border); background: radial-gradient(720px 220px at 22% 0%, rgba(111,179,255,.18), transparent 60%), radial-gradient(720px 220px at 82% 0%, rgba(139,92,246,.16), transparent 60%), linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,0)); } .reportTop h2{margin:0;font-size:18px;letter-spacing:.2px} .meta{color:var(--muted);font-size:13px;margin-top:6px} .reportBody{ padding:14px 16px; max-height: 66vh; overflow:auto; }
+
+.section{ background:rgba(18,26,46,.88); border:1px solid var(--border); border-radius:16px; padding:14px; margin:0 0 12px; } .section:last-child{margin-bottom:0} .section h3{ margin:0 0 8px; font-size:16px; display:flex;align-items:center;gap:10px; } .dot{ width:10px;height:10px;border-radius:99px; background:rgba(111,179,255,.90); box-shadow: 0 0 0 4px rgba(111,179,255,.12); flex:0 0 auto; } .dot.purple{background:rgba(139,92,246,.88);box-shadow:0 0 0 4px rgba(139,92,246,.12)} .dot.green{background:rgba(110,255,198,.82);box-shadow:0 0 0 4px rgba(110,255,198,.10)} .dot.gold{background:rgba(255,214,126,.90);box-shadow:0 0 0 4px rgba(255,214,126,.11)} .dot.red{background:rgba(255,120,120,.88);box-shadow:0 0 0 4px rgba(255,120,120,.10)} .p{margin:6px 0;line-height:1.55;color:rgba(231,236,243,.92)} .muted{color:var(--muted)} .kvs{ display:grid; grid-template-columns: 1fr; gap:10px; margin-top:10px; } @media(min-width:720px){ .kvs{grid-template-columns: 1fr 1fr} } .kv{ background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.10); border-radius:14px; padding:10px 10px; } .kv .k{font-size:11px;color:var(--muted);letter-spacing:.2px} .kv .v{margin-top:6px;font-size:14px;line-height:1.4} .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px} .chip{ padding:7px 10px;border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.03); font-size:12px;color:rgba(231,236,243,.92); white-space:nowrap; }
+
+footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-align:center; }
+
+/* App-styled modal (no system popups) */ .modalBack{ position:fixed;inset:0; display:none; align-items:center; justify-content:center; padding:18px; background: rgba(0,0,0,.58); z-index:9999; } .modalBack.show{display:flex} .modal{ width:min(520px, 100%); border-radius:18px; border:1px solid rgba(255,255,255,.16); background: radial-gradient(720px 260px at 20% 0%, rgba(111,179,255,.14), transparent 60%), radial-gradient(720px 260px at 80% 0%, rgba(139,92,246,.14), transparent 60%), linear-gradient(180deg, rgba(14,20,40,.96), rgba(10,14,28,.96)); box-shadow: 0 18px 52px rgba(0,0,0,.60); overflow:hidden; } .modalHead{ padding:12px 14px; border-bottom:1px solid rgba(255,255,255,.12); display:flex;align-items:center;justify-content:space-between;gap:12px; } .modalTitle{margin:0;font-size:13px;font-weight:900;letter-spacing:.25px} .modalClose{ cursor:pointer; border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.03); color:rgba(231,236,243,.92); border-radius:12px; padding:8px 10px; font-weight:900; } .modalBody{padding:12px 14px 14px;font-size:13px;line-height:1.5;color:rgba(231,236,243,.92)} </style>
+
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div class="logo">BC</div>
-    <div>
-      <h1>Birthday Code</h1>
-      <div class="sub">Intriguing, grounded interpretations</div>
+    <div class="brand">
+      <div class="logo">BC</div>
+      <div>
+        <h1>Birthday Code</h1>
+        <div class="sub">Intriguing, grounded interpretations</div>
+      </div>
+      <div class="pill">v1.1A3</div>
     </div>
   </header>  <div class="panel">
     <div class="row">
       <div class="col">
-        <label>Month</label>
+        <label for="month">Month</label>
         <select id="month"></select>
       </div>
       <div class="col">
-        <label>Day</label>
+        <label for="day">Day</label>
         <select id="day"></select>
       </div>
       <div class="col">
-        <label>Year</label>
-        <input id="year" type="number" placeholder="e.g. 1984" min="1000" max="3000">
+        <label for="year">Year</label>
+        <input id="year" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="e.g. 1984">
       </div>
     </div>
-    <button class="btn" id="gen">Generate Birthday Code</button>
-    <button class="btn secondary" id="export">Export Report</button>
+    <div class="btnRow">
+      <button class="btn" id="gen" type="button">Generate Birthday Code</button>
+      <button class="btn secondary" id="export" type="button" disabled>Export Report</button>
+    </div>
   </div>  <div class="report" id="report">
-    <h2>Birthday Report</h2>
-    <div class="meta">No report yet.</div>
+    <div class="reportTop">
+      <h2>Birthday Report</h2>
+      <div class="meta" id="meta">No report yet.</div>
+    </div>
+    <div class="reportBody" id="body"></div>
   </div>  <footer>
-    v1.1A2 · Developed by Keyth Jyles
+    v1.1A3 · Developed by Keyth Jyles
   </footer>
+</div><div class="modalBack" id="modalBack" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal">
+    <div class="modalHead">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="dot red" aria-hidden="true"></span>
+        <h3 class="modalTitle" id="modalTitle">Notice</h3>
+      </div>
+      <button class="modalClose" id="modalClose" type="button">Close</button>
+    </div>
+    <div class="modalBody" id="modalText"></div>
+  </div>
 </div><script>
-const months = [
-  {n:"January",d:31},{n:"February",d:28},{n:"March",d:31},{n:"April",d:30},
-  {n:"May",d:31},{n:"June",d:30},{n:"July",d:31},{n:"August",d:31},
-  {n:"September",d:30},{n:"October",d:31},{n:"November",d:30},{n:"December",d:31}
-];
-const monthSel=document.getElementById('month');
-const daySel=document.getElementById('day');
-const yearInp=document.getElementById('year');
-const report=document.getElementById('report');
-const exportBtn=document.getElementById('export');
+(function(){
+  "use strict";
 
-months.forEach((m,i)=>{
-  const o=document.createElement('option');
-  o.value=i; o.textContent=m.n; monthSel.appendChild(o);
-});
-monthSel.selectedIndex=0;
-
-function isLeap(y){return (y%4===0 && y%100!==0) || (y%400===0)}
-function fillDays(){
-  const m=months[monthSel.value];
-  let d=m.d;
-  const y=parseInt(yearInp.value,10);
-  if(monthSel.value==1 && isLeap(y)) d=29;
-  daySel.innerHTML="";
-  for(let i=1;i<=d;i++){
-    const o=document.createElement('option');
-    o.value=i; o.textContent=i; daySel.appendChild(o);
-  }
-}
-monthSel.onchange=fillDays;
-yearInp.oninput=fillDays;
-fillDays();
-
-function reduce(num){
-  const masters=[11,22,33];
-  while(num>9 && !masters.includes(num)){
-    num = String(num).split('').reduce((a,b)=>a+Number(b),0);
-  }
-  return num;
-}
-
-function lifePath(y,m,d){
-  return reduce(Number(String(y)+String(m+1).padStart(2,'0')+String(d).padStart(2,'0')));
-}
-
-function sunSign(m,d){
-  const ranges=[
-    ["Capricorn",[12,22],[1,19]],["Aquarius",[1,20],[2,18]],
-    ["Pisces",[2,19],[3,20]],["Aries",[3,21],[4,19]],
-    ["Taurus",[4,20],[5,20]],["Gemini",[5,21],[6,20]],
-    ["Cancer",[6,21],[7,22]],["Leo",[7,23],[8,22]],
-    ["Virgo",[8,23],[9,22]],["Libra",[9,23],[10,22]],
-    ["Scorpio",[10,23],[11,21]],["Sagittarius",[11,22],[12,21]]
-  ];
-  for(const r of ranges){
-    if((m+1===r[1][0] && d>=r[1][1]) || (m+1===r[2][0] && d<=r[2][1])) return r[0];
-  }
-  return "Capricorn";
-}
-
-function chineseZodiac(y){
-  const z=["Rat","Ox","Tiger","Rabbit","Dragon","Snake","Horse","Goat","Monkey","Rooster","Dog","Pig"];
-  return z[(y-4)%12];
-}
-
-document.getElementById('gen').onclick=()=>{
-  const y=parseInt(yearInp.value,10);
-  if(!y || y<1000){ alert("Enter a valid 4-digit year."); return; }
-  const m=monthSel.value|0;
-  const d=daySel.value|0;
-
-  const lp=lifePath(y,m,d);
-  const bdayNum=reduce(d);
-  const dateNum=d;
-  const sign=sunSign(m,d);
-  const cz=chineseZodiac(y);
-  const seed = `${y}${String(m+1).padStart(2,'0')}${String(d).padStart(2,'0')}`;
-
-  report.innerHTML = `
-    <h2>Birthday Report</h2>
-    <div class="meta">Birthday: ${months[m].n} ${d}, ${y} · Deterministic Seed: ${seed}</div>
-
-    <div class="section">
-      <h3>Numerology</h3>
-      <p class="p"><strong>Life Path ${lp}:</strong> You move through life with a steady inner push. When something matters, you stay with it. You learn by doing, not by talking it out.</p>
-      <p class="p"><strong>Birthday Number ${bdayNum}:</strong> You prefer clear goals and real results. You don’t like wasted effort. You’re practical, even when you’re being creative.</p>
-      <p class="p"><strong>Birthday Date ${dateNum}:</strong> The day you were born shows how you act day to day. You tend to take responsibility early. People often rely on you because you follow through.</p>
-    </div>
-
-    <div class="section">
-      <h3>Birthday Code</h3>
-      <p class="p">You are at your best when things are real and concrete. You notice what works and what doesn’t. When pressure shows up, you usually get more focused instead of backing off.</p>
-      <p class="p">You don’t need constant excitement. You need purpose. Once you see the point, you commit.</p>
-    </div>
-
-    <div class="section">
-      <h3>Western Astrology</h3>
-      <p class="p"><strong>${sign}:</strong> You are sensitive to your environment and to people, even if you don’t show it much. You trust your instincts and tend to act on them quietly.</p>
-    </div>
-
-    <div class="section">
-      <h3>Chinese Zodiac</h3>
-      <p class="p"><strong>${cz}:</strong> You adapt well when situations change. You pay attention, then move at the right moment. You don’t rush without a reason.</p>
-    </div>
-
-    <div class="section">
-      <h3>Overlapping Traits</h3>
-      <p class="p">A steady nature. Strong follow-through. A preference for actions over words. You are usually underestimated until results show up.</p>
-    </div>
-  `;
-
-  exportBtn.classList.add('enabled');
-  exportBtn.classList.remove('secondary');
-  exportBtn.onclick=()=>{
-    const text = report.innerText;
-    const blob = new Blob([text],{type:"text/plain"});
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(blob);
-    a.download=`Birthday_Code_${seed}.txt`;
-    a.click();
-    URL.revokeObjectURL(a.href);
+  const APP = {
+    name: "Birthday Code",
+    version: "v1.1A3",
+    url: "https://keythjyles.github.io/Vitals-Tracker-v1.0/BC/",
+    cacheText: ""
   };
-};
+
+  const months = [
+    {n:"January",d:31},{n:"February",d:28},{n:"March",d:31},{n:"April",d:30},
+    {n:"May",d:31},{n:"June",d:30},{n:"July",d:31},{n:"August",d:31},
+    {n:"September",d:30},{n:"October",d:31},{n:"November",d:30},{n:"December",d:31}
+  ];
+
+  const el = {
+    month: document.getElementById('month'),
+    day: document.getElementById('day'),
+    year: document.getElementById('year'),
+    gen: document.getElementById('gen'),
+    exportBtn: document.getElementById('export'),
+    meta: document.getElementById('meta'),
+    body: document.getElementById('body'),
+    modalBack: document.getElementById('modalBack'),
+    modalTitle: document.getElementById('modalTitle'),
+    modalText: document.getElementById('modalText'),
+    modalClose: document.getElementById('modalClose')
+  };
+
+  function showModal(title, text){
+    el.modalTitle.textContent = String(title || "Notice");
+    el.modalText.textContent = String(text || "");
+    el.modalBack.classList.add("show");
+  }
+  function hideModal(){ el.modalBack.classList.remove("show"); }
+  el.modalClose.addEventListener("click", hideModal);
+  el.modalBack.addEventListener("click", (e)=>{ if(e.target===el.modalBack) hideModal(); });
+  document.addEventListener("keydown", (e)=>{ if(e.key==="Escape") hideModal(); });
+
+  function isLeap(y){ return (y%4===0 && y%100!==0) || (y%400===0); }
+  function pad2(n){ return String(n).padStart(2,"0"); }
+
+  function sanitizeYear(){
+    const raw = String(el.year.value || "");
+    const digits = raw.replace(/[^\d]/g,"").slice(0,4);
+    if(digits !== raw) el.year.value = digits;
+    return digits;
+  }
+
+  function daysInMonth(mIndex, y){
+    if(mIndex===1) return isLeap(y) ? 29 : 28;
+    return months[mIndex].d;
+  }
+
+  function fillMonths(){
+    el.month.innerHTML = "";
+    months.forEach((m,i)=>{
+      const o=document.createElement('option');
+      o.value=i; o.textContent=m.n;
+      el.month.appendChild(o);
+    });
+  }
+
+  function fillDays(){
+    const m = Number(el.month.value || 0);
+    const yDigits = sanitizeYear();
+    const y = Number(yDigits || "2000");
+    const max = daysInMonth(m, y);
+    const current = Number(el.day.value || 1);
+
+    el.day.innerHTML = "";
+    for(let d=1; d<=max; d++){
+      const o=document.createElement('option');
+      o.value=d; o.textContent=d;
+      el.day.appendChild(o);
+    }
+    el.day.value = String(Math.min(current, max));
+  }
+
+  // Deterministic RNG for phrasing variation
+  function makeRng(seed){
+    let x = (seed >>> 0) || 1;
+    return function(){
+      x ^= (x << 13); x >>>= 0;
+      x ^= (x >>> 17); x >>>= 0;
+      x ^= (x << 5);  x >>>= 0;
+      return (x >>> 0) / 4294967296;
+    };
+  }
+  function pick(rng, arr){ return arr[Math.floor(rng()*arr.length)]; }
+
+  // Numerology helpers
+  function reduceNumber(n){
+    let x = Math.abs(Number(n) || 0);
+    const masters = [11,22,33];
+    const digitSum = (v)=> String(v).split("").reduce((a,b)=>a + (b>="0" && b<="9" ? Number(b) : 0), 0);
+    while(x>9 && !masters.includes(x)){
+      x = digitSum(x);
+    }
+    return x;
+  }
+  function lifePath(y,m,d){
+    const s = String(y) + pad2(m+1) + pad2(d);
+    const sum = s.split("").reduce((a,b)=>a + Number(b), 0);
+    return reduceNumber(sum);
+  }
+
+  // Western Sun sign (tropical, by month/day)
+  function sunSign(m,d){
+    const ranges = [
+      ["Capricorn",[12,22],[1,19]],
+      ["Aquarius",[1,20],[2,18]],
+      ["Pisces",[2,19],[3,20]],
+      ["Aries",[3,21],[4,19]],
+      ["Taurus",[4,20],[5,20]],
+      ["Gemini",[5,21],[6,20]],
+      ["Cancer",[6,21],[7,22]],
+      ["Leo",[7,23],[8,22]],
+      ["Virgo",[8,23],[9,22]],
+      ["Libra",[9,23],[10,22]],
+      ["Scorpio",[10,23],[11,21]],
+      ["Sagittarius",[11,22],[12,21]]
+    ];
+    const mm = m+1;
+    for(const r of ranges){
+      const sm=r[1][0], sd=r[1][1], em=r[2][0], ed=r[2][1];
+      if(sm<=em){
+        if((mm>sm || (mm===sm && d>=sd)) && (mm<em || (mm===em && d<=ed))) return r[0];
+      }else{
+        if((mm>sm || (mm===sm && d>=sd)) || (mm<em || (mm===em && d<=ed))) return r[0];
+      }
+    }
+    return "Unknown";
+  }
+
+  // Chinese Zodiac (12-year cycle). Note: Lunar New Year boundary can shift for Jan/Feb births.
+  function chineseZodiac(y){
+    const z=["Rat","Ox","Tiger","Rabbit","Dragon","Snake","Horse","Goat","Monkey","Rooster","Dog","Pig"];
+    const base = 2008; // Rat
+    const idx = ((y - base) % 12 + 12) % 12;
+    return z[idx];
+  }
+
+  // Trait tags used only for overlap logic (not shown as jargon)
+  const TRAITS = {
+    lp: {
+      1:{tags:["independence","initiative","leadership"], text:[
+        "You do better when you can steer. You are not built to be micromanaged.",
+        "You like starting things. You dislike waiting for permission.",
+        "When you believe in something, you move first and explain later."
+      ]},
+      2:{tags:["harmony","intuition","partnership"], text:[
+        "You read people well. You notice tone and tension fast.",
+        "You’re good at smoothing rough edges without making a scene.",
+        "You often carry the role of peacekeeper, even when you didn’t ask for it."
+      ]},
+      3:{tags:["expression","creativity","optimism"], text:[
+        "You process life by talking, writing, or creating something from it.",
+        "You can lift a room. Your energy changes the mood.",
+        "When you’re at your best, you’re playful, sharp, and honest."
+      ]},
+      4:{tags:["structure","discipline","reliability"], text:[
+        "You do not trust chaos. You trust work.",
+        "You build your life in steps. You care about what holds up over time.",
+        "People count on you because you follow through."
+      ]},
+      5:{tags:["freedom","adaptability","change"], text:[
+        "You need movement. Stagnation drains you.",
+        "You learn by trying, not by planning forever.",
+        "You can reset fast after change. You’re harder to trap than people think."
+      ]},
+      6:{tags:["care","responsibility","service"], text:[
+        "You take care of people. Sometimes too much.",
+        "You want things to feel safe, stable, and right at home.",
+        "You can be the strongest person in the room without raising your voice."
+      ]},
+      7:{tags:["analysis","truth","discernment"], text:[
+        "You think deeply. You do not enjoy shallow talk.",
+        "You’re good at spotting what doesn’t add up.",
+        "You need solitude to feel clear. It’s not isolation. It’s maintenance."
+      ]},
+      8:{tags:["ambition","results","strategy"], text:[
+        "You respect strength and competence. You don’t respect excuses.",
+        "You think in outcomes. You want something you can point to.",
+        "You can carry heavy responsibility, but you need control over the plan."
+      ]},
+      9:{tags:["compassion","wisdom","closure"], text:[
+        "You see the bigger picture. You notice what people are going through.",
+        "You can end a chapter cleanly when others keep reopening it.",
+        "You’re at your best when you’re doing something that matters beyond yourself."
+      ]},
+      11:{tags:["intuition","inspiration","sensitivity"], text:[
+        "You feel the signal early. You notice meaning in small details.",
+        "You can inspire people, but you also absorb their noise if you’re not careful.",
+        "When you trust your instincts, you’re hard to mislead."
+      ]},
+      22:{tags:["structure","mastery","impact"], text:[
+        "You can take a big idea and make it real.",
+        "You don’t just dream. You design.",
+        "You’re built for long projects. You don’t quit when the middle gets ugly."
+      ]},
+      33:{tags:["care","teaching","healing"], text:[
+        "You naturally guide people. They feel safe around you.",
+        "You give more than you take. That’s a strength and a risk.",
+        "Your presence can calm chaos—when you keep your own boundaries."
+      ]}
+    },
+    bn: {
+      1:{tags:["independence","initiative"], text:[
+        "You act fast when you see the point.",
+        "You prefer clear choices over endless options."
+      ]},
+      2:{tags:["harmony","partnership"], text:[
+        "You work best with the right person beside you.",
+        "You notice what others need without being told."
+      ]},
+      3:{tags:["expression","humor"], text:[
+        "You lighten the mood when things get heavy.",
+        "You’re persuasive without trying too hard."
+      ]},
+      4:{tags:["structure","reliability"], text:[
+        "You like plans that make sense.",
+        "You trust effort. You distrust shortcuts."
+      ]},
+      5:{tags:["freedom","change"], text:[
+        "You need room to move.",
+        "You adjust quickly when life shifts."
+      ]},
+      6:{tags:["care","responsibility"], text:[
+        "You feel responsible for the outcome.",
+        "You’re protective of people you love."
+      ]},
+      7:{tags:["analysis","truth"], text:[
+        "You see patterns others miss.",
+        "You don’t believe words until actions match."
+      ]},
+      8:{tags:["results","strategy"], text:[
+        "You want a result that holds up under pressure.",
+        "You’re good at making hard calls."
+      ]},
+      9:{tags:["compassion","closure"], text:[
+        "You’re empathetic, but you also know when it’s time to move on.",
+        "You carry lessons forward instead of carrying resentment."
+      ]},
+      11:{tags:["intuition","inspiration"], text:[
+        "You pick up signals fast.",
+        "You can spark hope in people when they are stuck."
+      ]},
+      22:{tags:["structure","impact"], text:[
+        "You’re practical about big goals.",
+        "You build toward something real."
+      ]},
+      33:{tags:["care","healing"], text:[
+        "You give comfort and direction.",
+        "People feel better after talking to you."
+      ]}
+    },
+    sun: {
+      Aries:{tags:["initiative","directness"], text:[
+        "You’re direct. You’d rather deal with the truth than dance around it.",
+        "You don’t like hesitation. If it needs doing, you’d rather start."
+      ]},
+      Taurus:{tags:["reliability","steadiness"], text:[
+        "You’re steady. You don’t change your mind every five minutes.",
+        "You value comfort, quality, and loyalty."
+      ]},
+      Gemini:{tags:["adaptability","expression"], text:[
+        "You’re quick. You connect ideas fast.",
+        "You do better with variety than with monotony."
+      ]},
+      Cancer:{tags:["care","intuition"], text:[
+        "You care deeply, even if you keep it private.",
+        "You remember what people said. You remember how it felt."
+      ]},
+      Leo:{tags:["confidence","expression"], text:[
+        "You have presence. People notice when you decide to show up.",
+        "You give warmth, but you want respect back."
+      ]},
+      Virgo:{tags:["analysis","reliability"], text:[
+        "You notice details. You can’t unsee what’s off.",
+        "You fix problems quietly and feel annoyed when nobody notices."
+      ]},
+      Libra:{tags:["harmony","fairness"], text:[
+        "You care about fairness. You can’t relax when things feel lopsided.",
+        "You try to keep peace without losing the truth."
+      ]},
+      Scorpio:{tags:["truth","focus"], text:[
+        "You’re intense in a controlled way.",
+        "You do not trust easily. When you do, you’re loyal."
+      ]},
+      Sagittarius:{tags:["freedom","directness"], text:[
+        "You value freedom. You don’t like being boxed in.",
+        "You’d rather be honest than popular."
+      ]},
+      Capricorn:{tags:["discipline","results"], text:[
+        "You’re built for the long game.",
+        "You respect effort. You respect competence."
+      ]},
+      Aquarius:{tags:["independence","innovation"], text:[
+        "You think differently. You see angles others miss.",
+        "You want space to be yourself without being questioned."
+      ]},
+      Pisces:{tags:["intuition","compassion"], text:[
+        "You’re sensitive in a strong way.",
+        "You feel people. You also need recovery time."
+      ]}
+    },
+    cz: {
+      Rat:{tags:["strategy","adaptability"], text:[
+        "You’re resourceful. You find a way around problems.",
+        "You notice opportunities before other people do."
+      ]},
+      Ox:{tags:["steadiness","discipline"], text:[
+        "You’re steady and stubborn in a good way.",
+        "You keep going when others give up."
+      ]},
+      Tiger:{tags:["courage","initiative"], text:[
+        "You move boldly when something matters.",
+        "You dislike being controlled."
+      ]},
+      Rabbit:{tags:["harmony","intuition"], text:[
+        "You’re tactful. You know what to say and when.",
+        "You avoid unnecessary conflict, but you remember everything."
+      ]},
+      Dragon:{tags:["confidence","impact"], text:[
+        "You have big energy when you commit.",
+        "You don’t aim small."
+      ]},
+      Snake:{tags:["truth","strategy"], text:[
+        "You read between the lines.",
+        "You’re patient, and you plan quietly."
+      ]},
+      Horse:{tags:["freedom","drive"], text:[
+        "You need movement and forward motion.",
+        "You get restless when life becomes too small."
+      ]},
+      Goat:{tags:["compassion","creativity"], text:[
+        "You’re gentle, but not weak.",
+        "You’re driven by meaning and feeling."
+      ]},
+      Monkey:{tags:["adaptability","strategy"], text:[
+        "You find clever solutions fast.",
+        "You can turn a problem into a game and still win."
+      ]},
+      Rooster:{tags:["directness","reliability"], text:[
+        "You speak plainly and prefer clear standards.",
+        "You notice what’s sloppy and want it fixed."
+      ]},
+      Dog:{tags:["loyalty","fairness"], text:[
+        "You protect your people.",
+        "You care about what’s right, not just what’s easy."
+      ]},
+      Pig:{tags:["compassion","steadiness"], text:[
+        "You’re warm and genuine.",
+        "You keep going. You don’t abandon people easily."
+      ]}
+    }
+  };
+
+  const CODE_LINES = {
+    independence: [
+      "You move best when you can choose your next step.",
+      "You don’t need applause. You need control over your direction."
+    ],
+    structure: [
+      "You calm down when there is a plan.",
+      "Your strength is consistency. You build momentum through repeatable effort."
+    ],
+    truth: [
+      "You want what’s real. You do not enjoy pretending.",
+      "You’d rather hear the hard truth than be fed something soft."
+    ],
+    care: [
+      "You naturally protect people. You notice what they don’t say.",
+      "Your loyalty is not a slogan. It shows up in actions."
+    ],
+    freedom: [
+      "You need room to breathe and move.",
+      "When you feel trapped, your patience drops fast."
+    ],
+    strategy: [
+      "You think ahead. You watch patterns before you act.",
+      "You make better moves than people expect because you don’t rush."
+    ],
+    results: [
+      "You respect results. You respect effort that holds up.",
+      "You don’t like wasted motion. You like progress you can measure."
+    ],
+    intuition: [
+      "You pick up signals fast, even if you can’t explain it right away.",
+      "Your instincts are usually right. The trick is trusting them without overthinking."
+    ],
+    harmony: [
+      "You prefer calm. You don’t enjoy drama.",
+      "You can keep peace without losing your backbone."
+    ],
+    adaptability: [
+      "You adjust quickly when things change.",
+      "You can pivot without falling apart."
+    ],
+    discipline: [
+      "You are stronger when you keep a routine.",
+      "You do well with responsibility, but you need recovery time."
+    ],
+    confidence: [
+      "When you decide, you become hard to stop.",
+      "People feel your certainty even when you’re quiet."
+    ]
+  };
+
+  const INSPIRATION = {
+    independence: [
+      "Give yourself permission to choose the hard thing that frees you.",
+      "Stop shrinking your goals to fit other people’s comfort."
+    ],
+    structure: [
+      "Pick one thing. Make it simple. Do it daily. Let the results stack.",
+      "Small routines create big stability. That is your advantage."
+    ],
+    truth: [
+      "Say the real thing kindly, but say it.",
+      "Your life gets lighter when you stop carrying stories that aren’t true."
+    ],
+    care: [
+      "Keep your heart open, but protect your time and energy.",
+      "Your love is powerful. Aim it where it is returned."
+    ],
+    freedom: [
+      "Choose momentum over perfection.",
+      "If you feel stuck, change something small today and keep moving."
+    ],
+    strategy: [
+      "Trust your timing. Not everything requires speed.",
+      "Your best wins come from patient focus, not noise."
+    ],
+    results: [
+      "Measure your progress, not your mood.",
+      "Do the work that moves the needle. Ignore the rest."
+    ],
+    intuition: [
+      "Your instincts are information. Treat them with respect.",
+      "When you feel the signal, pause—then act on purpose."
+    ],
+    harmony: [
+      "You can be peaceful and still be firm.",
+      "Calm is a strength. Keep it, even when others can’t."
+    ],
+    adaptability: [
+      "Change is not a threat to you. It is a tool.",
+      "You can start again without losing who you are."
+    ],
+    discipline: [
+      "Your future is built by what you repeat.",
+      "Consistency beats intensity. Keep going."
+    ],
+    confidence: [
+      "Show up like you belong there. You usually do.",
+      "Stop waiting to feel ready. You get ready by moving."
+    ]
+  };
+
+  function computeOverlaps(tagLists){
+    const counts = new Map();
+    tagLists.forEach(list=>{
+      list.forEach(t=> counts.set(t, (counts.get(t)||0)+1));
+    });
+    const overlaps = [];
+    for(const [k,v] of counts.entries()){
+      if(v>=2) overlaps.push({t:k,c:v});
+    }
+    overlaps.sort((a,b)=>b.c-a.c || a.t.localeCompare(b.t));
+    return overlaps;
+  }
+
+  function title(t){
+    return t.charAt(0).toUpperCase() + t.slice(1);
+  }
+
+  function chipsHTML(traits){
+    if(!traits.length) return "";
+    return `<div class="chips">${traits.map(x=>`<span class="chip">${title(x)}</span>`).join("")}</div>`;
+  }
+
+  function sec(dotClass, head, inner){
+    return `<div class="section"><h3><span class="dot ${dotClass}" aria-hidden="true"></span>${head}</h3>${inner}</div>`;
+  }
+
+  function kvGrid(items){
+    return `<div class="kvs">` + items.map(it=>{
+      return `<div class="kv"><div class="k">${it.k}</div><div class="v">${it.v}</div></div>`;
+    }).join("") + `</div>`;
+  }
+
+  function renderReport(data){
+    // Numerology (distinct roles)
+    const numGrid = kvGrid([
+      {k:"Life Path", v:`${data.lp}`},
+      {k:"Birthday Number", v:`${data.bn}`},
+      {k:"Birthday Date (day)", v:`${data.dayRaw} → ${data.dayReduced}`}
+    ]);
+
+    const numerologyText = `
+      ${numGrid}
+      <p class="p"><strong>Life Path:</strong> ${data.lpLine1} ${data.lpLine2}</p>
+      <p class="p"><strong>Birthday Number:</strong> ${data.bnLine1} ${data.bnLine2}</p>
+      <p class="p"><strong>Birthday Date:</strong> ${data.dayLine1} ${data.dayLine2}</p>
+    `;
+
+    // Birthday Code immediately after Numerology
+    const codeText = `
+      <p class="p">${data.codeLine1}</p>
+      <p class="p">${data.codeLine2}</p>
+      <p class="p"><strong>In plain terms:</strong> ${data.codeLine3}</p>
+    `;
+
+    // Astrology (personality tone)
+    const astroText = `
+      <p class="p"><strong>${data.sun}:</strong> ${data.sunLine1}</p>
+      <p class="p">${data.sunLine2}</p>
+    `;
+
+    // Chinese Zodiac (behavioral style)
+    const czText = `
+      <p class="p"><strong>${data.cz}:</strong> ${data.czLine1}</p>
+      <p class="p">${data.czLine2}</p>
+      <p class="p muted">Note: If born in Jan/Feb, Lunar New Year can shift the zodiac sign.</p>
+    `;
+
+    // Overlaps (compare all readings)
+    const overlapLead = data.overlaps.length
+      ? "When multiple readings repeat the same idea, that’s usually the part that feels most accurate."
+      : "No single theme dominates across all readings. That often means you’re versatile and situation-aware.";
+
+    const overlapText = `
+      <p class="p">${overlapLead}</p>
+      ${data.overlaps.length ? chipsHTML(data.overlaps.map(o=>o.t)) : ""}
+      <p class="p"><strong>What keeps showing up about you:</strong> ${data.overlapSentence}</p>
+      <p class="p"><strong>What is different (so it doesn’t feel repetitive):</strong> ${data.uniqueSentence}</p>
+    `;
+
+    // Inspirational closing AFTER comparison
+    const inspireText = `
+      <p class="p"><strong>Your next move:</strong> ${data.inspire1}</p>
+      <p class="p">${data.inspire2}</p>
+    `;
+
+    el.body.innerHTML =
+      sec("green","Numerology", numerologyText) +
+      sec("", "Birthday Code", codeText) +
+      sec("", "Western Astrology", astroText) +
+      sec("purple","Chinese Zodiac", czText) +
+      sec("gold","Compared Themes", overlapText) +
+      sec("green","Inspiration", inspireText);
+  }
+
+  function reportToText(data){
+    const lines = [];
+    lines.push(`${APP.name} — Birthday Report`);
+    lines.push(`Version: ${APP.version}`);
+    lines.push(`URL: ${APP.url}`);
+    lines.push(`Generated (local): ${new Date().toLocaleString()}`);
+    lines.push(`Birthday: ${data.dateStr}`);
+    lines.push(`Deterministic Seed: ${data.seed}`);
+    lines.push("");
+
+    lines.push("NUMEROLOGY");
+    lines.push(`Life Path: ${data.lp}`);
+    lines.push(`Birthday Number: ${data.bn}`);
+    lines.push(`Birthday Date (day): ${data.dayRaw} -> ${data.dayReduced}`);
+    lines.push(`Life Path: ${data.lpLine1} ${data.lpLine2}`);
+    lines.push(`Birthday Number: ${data.bnLine1} ${data.bnLine2}`);
+    lines.push(`Birthday Date: ${data.dayLine1} ${data.dayLine2}`);
+    lines.push("");
+
+    lines.push("BIRTHDAY CODE");
+    lines.push(data.codeLine1);
+    lines.push(data.codeLine2);
+    lines.push(`In plain terms: ${data.codeLine3}`);
+    lines.push("");
+
+    lines.push("WESTERN ASTROLOGY");
+    lines.push(`${data.sun}: ${data.sunLine1}`);
+    lines.push(data.sunLine2);
+    lines.push("");
+
+    lines.push("CHINESE ZODIAC");
+    lines.push(`${data.cz}: ${data.czLine1}`);
+    lines.push(data.czLine2);
+    lines.push("Note: Jan/Feb births may shift by Lunar New Year.");
+    lines.push("");
+
+    lines.push("COMPARED THEMES");
+    lines.push(data.overlaps.length ? "Repeated themes: " + data.overlaps.map(o=>title(o.t)).join(", ") : "No dominant repeats.");
+    lines.push(`What keeps showing up: ${data.overlapSentence}`);
+    lines.push(`What is different: ${data.uniqueSentence}`);
+    lines.push("");
+
+    lines.push("INSPIRATION");
+    lines.push(`Your next move: ${data.inspire1}`);
+    lines.push(data.inspire2);
+    lines.push("");
+    lines.push("— End of Report —");
+    return lines.join("\n");
+  }
+
+  function downloadText(filename, text){
+    const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=> URL.revokeObjectURL(url), 5000);
+  }
+
+  function buildData(m, d, y){
+    const seed = (y * 10000) + ((m+1) * 100) + d;
+    const rng = makeRng(seed);
+
+    const lp = lifePath(y,m,d);
+    const bn = reduceNumber(d);
+    const dayRaw = d;
+    const dayReduced = reduceNumber(d);
+
+    const sun = sunSign(m,d);
+    const cz = chineseZodiac(y);
+
+    const lpBlock = TRAITS.lp[lp] || TRAITS.lp[4];
+    const bnBlock = TRAITS.bn[bn] || TRAITS.bn[4];
+    const sunBlock = TRAITS.sun[sun] || TRAITS.sun.Capricorn;
+    const czBlock = TRAITS.cz[cz] || TRAITS.cz.Ox;
+
+    // Make Birthday Date lens distinct: it speaks about "daily style"
+    const dayBase = TRAITS.bn[dayReduced] || TRAITS.bn[4];
+
+    // Overlaps (compare all readings)
+    const overlaps = computeOverlaps([lpBlock.tags, bnBlock.tags, dayBase.tags, sunBlock.tags, czBlock.tags]);
+
+    // Pick top overlap theme for code + inspiration (fallback if none)
+    const topTheme = overlaps[0]?.t || pick(rng, ["structure","truth","strategy","care","freedom","results","intuition","independence"]);
+
+    // Build "unique" angle so it doesn't repeat: choose one tag from each lens that is NOT the top overlap if possible
+    function uniqueTag(list){
+      const filtered = list.filter(t=>t !== topTheme);
+      return filtered.length ? pick(rng, filtered) : pick(rng, list);
+    }
+    const uLP = uniqueTag(lpBlock.tags);
+    const uBN = uniqueTag(bnBlock.tags);
+    const uSUN = uniqueTag(sunBlock.tags);
+    const uCZ = uniqueTag(czBlock.tags);
+
+    // Assemble short, plain sentences with variation
+    const lpLines = lpBlock.text;
+    const bnLines = bnBlock.text;
+    const sunLines = sunBlock.text;
+    const czLines = czBlock.text;
+    const dayLines = (dayRaw === dayReduced)
+      ? [
+          "This is your day-to-day style. It’s the part people feel quickly.",
+          "It shows up in habits, pace, and what you tolerate."
+        ]
+      : [
+          "This is your day-to-day style. It’s the part people feel quickly.",
+          "It starts strong, then settles into a simpler core over time."
+        ];
+
+    const codeA = [
+      "When things get real, you get clearer.",
+      "You do not need drama to be powerful.",
+      "You are steady when others scatter."
+    ];
+    const codeB = [
+      "You’re at your best with a clear goal and a clean plan.",
+      "You prefer honest progress over loud promises.",
+      "You don’t want perfect. You want solid."
+    ];
+
+    const codeThemeLines = CODE_LINES[topTheme] || CODE_LINES.structure;
+    const codeLine1 = pick(rng, codeA);
+    const codeLine2 = pick(rng, codeB);
+    const codeLine3 = pick(rng, codeThemeLines);
+
+    // Overlap sentence and unique sentence (to avoid repeating the same message)
+    const overlapSentence = overlaps.length
+      ? `The strongest repeat is ${title(topTheme)}. That’s the thread you return to when life gets loud.`
+      : `Your readings don’t pile onto one theme. That usually means you adapt well and change gears when needed.`;
+
+    const uniqueSentence =
+      `Your numbers lean into ${title(uLP)} and ${title(uBN)}. Your sign adds ${title(uSUN)}. Your zodiac adds ${title(uCZ)}. That mix keeps you from being “one-note.”`;
+
+    // Inspiration after comparison
+    const inspPool = INSPIRATION[topTheme] || INSPIRATION.structure;
+    const inspire1 = pick(rng, inspPool);
+    const inspire2 = pick(rng, [
+      "Pick the next right step and take it today. Small wins restore confidence fast.",
+      "Do one thing that proves to you that you are still in control of your direction.",
+      "You don’t need a new life. You need one clean decision and follow-through.",
+      "Keep it simple. Keep it honest. Keep moving."
+    ]);
+
+    return {
+      seed,
+      dateStr: `${months[m].n} ${d}, ${y}`,
+
+      lp, bn, dayRaw, dayReduced,
+      sun, cz,
+
+      overlaps,
+
+      lpLine1: pick(rng, lpLines),
+      lpLine2: pick(rng, lpLines.filter(x=>x!==lpLines[0])),
+
+      bnLine1: pick(rng, bnLines),
+      bnLine2: pick(rng, bnLines.filter(x=>x!==bnLines[0])),
+
+      dayLine1: pick(rng, dayLines),
+      dayLine2: pick(rng, dayLines.filter(x=>x!==dayLines[0])),
+
+      sunLine1: pick(rng, sunLines),
+      sunLine2: pick(rng, sunLines.filter(x=>x!==sunLines[0])),
+
+      czLine1: pick(rng, czLines),
+      czLine2: pick(rng, czLines.filter(x=>x!==czLines[0])),
+
+      codeLine1, codeLine2, codeLine3,
+
+      overlapSentence,
+      uniqueSentence,
+
+      inspire1, inspire2
+    };
+  }
+
+  // Init UI
+  fillMonths();
+  el.month.value = "0";
+  el.year.value = "1984";
+  fillDays();
+
+  el.month.addEventListener("change", fillDays);
+  el.year.addEventListener("input", fillDays);
+
+  el.gen.addEventListener("click", ()=>{
+    const yDigits = sanitizeYear();
+    const y = Number(yDigits);
+    if(!yDigits || yDigits.length !== 4 || !Number.isFinite(y) || y < 1800 || y > 2200){
+      showModal("Invalid Year", "Enter a 4-digit year between 1800 and 2200.");
+      return;
+    }
+    const m = Number(el.month.value || 0);
+    const d = Number(el.day.value || 1);
+    const maxD = daysInMonth(m, y);
+    if(d < 1 || d > maxD){
+      showModal("Invalid Day", "That day does not exist for the selected month/year.");
+      fillDays();
+      return;
+    }
+
+    const data = buildData(m, d, y);
+    el.meta.textContent = `Birthday: ${data.dateStr} · Deterministic Seed: ${String(data.seed)}`;
+
+    renderReport(data);
+
+    APP.cacheText = reportToText(data);
+    el.exportBtn.disabled = false;
+  });
+
+  el.exportBtn.addEventListener("click", ()=>{
+    if(!APP.cacheText){
+      showModal("No Report Yet", "Generate a report first, then export it.");
+      return;
+    }
+    const yDigits = sanitizeYear();
+    const y = Number(yDigits);
+    const m = Number(el.month.value || 0) + 1;
+    const d = Number(el.day.value || 1);
+    const seed = `${y}${pad2(m)}${pad2(d)}`;
+    downloadText(`BirthdayCode_${seed}_${APP.version}.txt`, APP.cacheText);
+  });
+
+})();
 </script></body>
 </html>
 <!--
 Birthday Code
-Version: v1.1A2
-URL: https://keythjyles.github.io/Vitals-Tracker-v1.0/BC/EOF -->
+Version: v1.1A3
+URL: https://keythjyles.github.io/Vitals-Tracker-v1.0/BC/EOF Notes:
+
+Inspirational section is shown AFTER the “Compared Themes” section.
+
+Report avoids repetition by giving each lens a distinct focus and by summarizing unique contributions. -->
