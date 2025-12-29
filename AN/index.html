@@ -1,14 +1,11 @@
 <!--
-Angel Numbers Tracker — BOF Version Detail Notes
-App Version: v1.2A7
-Base: v1.2A6
+Angel Code — BOF Version Detail Notes
+App Version: v1.2A8
+Base: v1.2A7
 Changes (requested):
-- Home: DELETE the title (no more clipping); shift content up.
-- Home: Add "Angel Card Number" header inside the Angel Card panel, above the BIG number.
-- Edit/View (Angel Card) modal: add an Export button.
-- Edit/View (Angel Card) modal: remove the other data above the Angel Card (move entry details BELOW the Angel Card behind a toggle).
-- Home Export: export the CURRENT identified number/card (not “all entries”).
-- Advance version and update BOF/EOF notes every edit.
+- Rebrand: "Angel Numbers" → "Angel Code"; remove "Tracker" everywhere (UI + exports + manifest).
+- Home: delete the “Pattern + headline” area above the Angel Card (remove that whole block).
+- Advance version and update BOF/EOF notes.
 -->
 <!doctype html>
 <html lang="en">
@@ -16,7 +13,7 @@ Changes (requested):
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1324" />
-  <title>Angel Numbers Tracker</title>
+  <title>Angel Code</title>
   <link rel="manifest" id="manifestLink" href="#" />
   <style>
     :root{
@@ -267,31 +264,6 @@ Changes (requested):
       margin-top: 10px;
     }
 
-    .meaningTop{
-      display:flex;
-      align-items:center;
-      justify-content:flex-end;
-      gap:10px;
-      margin-bottom: 8px;
-    }
-
-    .patternPill{
-      font-size:13px;
-      color: rgba(235,245,255,.70);
-      border: 1px solid var(--themeLineSoft);
-      background: rgba(255,255,255,.03);
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-weight:750;
-      white-space:nowrap;
-    }
-    .meaningText{
-      color: rgba(235,245,255,.80);
-      font-size:15px;
-      line-height:1.18;
-      white-space: pre-wrap;
-    }
-
     .metaScroll{
       margin-top:10px;
       border:1px solid rgba(235,245,255,.10);
@@ -320,7 +292,7 @@ Changes (requested):
     }
 
     .angelCardFrame{
-      margin-top: 10px;
+      margin-top: 0; /* keep tight now that we removed the block above */
       border: 2px solid rgba(90,150,255,.40);
       background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.02));
       border-radius: 20px;
@@ -339,7 +311,6 @@ Changes (requested):
       box-shadow: inset 0 0 0 1px rgba(255,255,255,.03);
     }
 
-    /* BIG number lives INSIDE the angel panel, below the header line */
     .angelBigNum{
       font-size:72px;
       font-weight:950;
@@ -406,7 +377,7 @@ Changes (requested):
       gap:10px;
       align-items:center;
       margin-bottom: 8px;
-      margin-top: 2px; /* shift up since title is removed */
+      margin-top: 2px;
     }
     .homeTopRow .field{
       flex: 1;
@@ -530,7 +501,6 @@ Changes (requested):
       touch-action: manipulation;
     }
 
-    /* Added popup formatting */
     .addedBigNum{
       font-size: 34px;
       font-weight: 950;
@@ -710,7 +680,6 @@ Changes (requested):
       flex:0 0 auto;
     }
 
-    /* Edit details toggle (below angel card) */
     .detailsToggleRow{
       display:flex;
       justify-content:flex-start;
@@ -738,8 +707,8 @@ Changes (requested):
   <div class="touchLock" id="touchLock"></div>
 
   <div class="app" id="appRoot">
-    <div class="logoTitle" aria-label="Angel Numbers Tracker">
-      <svg viewBox="0 0 900 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Angel Numbers Tracker">
+    <div class="logoTitle" aria-label="Angel Code">
+      <svg viewBox="0 0 900 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Angel Code">
         <defs>
           <linearGradient id="angG" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stop-color="#8a6bff"/>
@@ -773,7 +742,7 @@ Changes (requested):
               font-weight="860"
               fill="url(#angG)"
               letter-spacing=".6"
-              filter="url(#angS)">Angel Numbers Tracker</text>
+              filter="url(#angS)">Angel Code</text>
       </svg>
     </div>
 
@@ -789,8 +758,6 @@ Changes (requested):
         <div id="home" class="card">
           <div id="homeScroll">
             <div class="homeShell" id="homeShell">
-              <!-- TITLE REMOVED (per request) -->
-
               <div class="homeTopRow">
                 <input id="homeIdNum" class="field" inputmode="numeric"
                        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
@@ -802,14 +769,9 @@ Changes (requested):
                 Swipe left to view Calendar.
               </div>
 
-              <!-- Hidden until Submit -->
               <div id="homeAfterSubmit" class="hidden">
                 <div class="meaningCard" id="homeMeaningCard">
-                  <div class="meaningTop">
-                    <div id="homePatternPill" class="patternPill">Pattern: —</div>
-                  </div>
-
-                  <div id="homeMeaningText" class="meaningText">—</div>
+                  <!-- REMOVED: Pattern pill + headline block (per request) -->
 
                   <div class="angelCardFrame" id="homeAngelFrame">
                     <div id="homeAngelHeader" class="angelHeaderLine">Angel Card Number: —</div>
@@ -870,7 +832,6 @@ Changes (requested):
       <div class="modalTitle" id="infoTitle">Info</div>
       <div class="modalSub" id="infoSub">—</div>
 
-      <!-- Added formatting block (only shown for Added) -->
       <div id="addedBlock" class="hidden">
         <div class="addedBigNum" id="addedBigNum">—</div>
         <div class="addedMeta" id="addedMeta">—</div>
@@ -972,14 +933,12 @@ Save creates a .txt file on your device.
       <div class="modalTitle" id="editTitle">View &amp; Update</div>
       <div class="modalSub" id="editSub">Angel Card first. Entry details are below.</div>
 
-      <!-- Angel Card FIRST (no other data above it) -->
       <div class="angelCardFrame">
         <div id="editAngelHeader" class="angelHeaderLine">Angel Card Number: —</div>
         <div id="editAngelBig" class="angelBigNum">—</div>
         <div id="editAngelCard" class="metaScroll" style="max-height: 260px; margin-top:0;">—</div>
       </div>
 
-      <!-- Details toggle -->
       <div class="detailsToggleRow">
         <button id="btnToggleDetails" class="btn">Show Details</button>
       </div>
@@ -1011,8 +970,8 @@ Save creates a .txt file on your device.
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.2A7";
-  const STORAGE_KEY = "angel_numbers_records_v2_2025_12_29"; // unchanged
+  const APP_VERSION = "v1.2A8";
+  const STORAGE_KEY = "angel_numbers_records_v2_2025_12_29"; // keep existing data
 
   const DAY_MS = 24*60*60*1000;
   const $ = (id) => document.getElementById(id);
@@ -1057,7 +1016,7 @@ Save creates a .txt file on your device.
       "Android:\n" +
       "• Long-press the app icon → Uninstall\n" +
       "or\n" +
-      "• Settings → Apps → Angel Numbers Tracker → Uninstall\n\n" +
+      "• Settings → Apps → Angel Code → Uninstall\n\n" +
       "iPhone/iPad:\n" +
       "• Long-press the app icon → Remove App\n\n" +
       "If you installed from Chrome, removing the app icon uninstalls the PWA.";
@@ -1087,35 +1046,54 @@ Save creates a .txt file on your device.
     }
   }
 
-  const DIGIT_ARCHETYPES = {
-    "0": { core: "Fresh start • reset • open possibilities", strengths: ["starting over","clearing clutter","seeing the big picture"], cautions: ["don’t drift","pick one next step"], prompts: ["What needs a reset?","What would a clean start look like?","What is the simplest next step?"] },
-    "1": { core: "New beginnings • focus • personal strength", strengths: ["clarity","confidence","taking the lead"], cautions: ["don’t rush","don’t let pride decide"], prompts: ["What do you want to begin?","What deserves your focus today?","What one thing matters most?"] },
-    "2": { core: "Balance • teamwork • patience", strengths: ["calm","cooperation","listening"], cautions: ["don’t get stuck","don’t over-please"], prompts: ["Where do you need balance?","Who can you work with?","What conversation needs clarity?"] },
-    "3": { core: "Expression • creativity • encouragement", strengths: ["communication","optimism","creative momentum"], cautions: ["don’t scatter your energy","don’t overcommit"], prompts: ["What needs to be said?","What can you create today?","Where can you bring more joy?"] },
-    "4": { core: "Stability • structure • discipline", strengths: ["planning","reliability","building foundations"], cautions: ["don’t be too rigid","avoid over-control"], prompts: ["What routine would help?","What needs strengthening?","What are you building long-term?"] },
-    "5": { core: "Change • flexibility • learning by doing", strengths: ["adaptability","growth","forward motion"], cautions: ["avoid chaos","don’t act on impulse"], prompts: ["What is changing?","What can you let go of?","What new option is opening?"] },
-    "6": { core: "Care • home • responsibility", strengths: ["supporting others","healing","protecting what matters"], cautions: ["avoid carrying everything","avoid guilt decisions"], prompts: ["What needs care right now?","What boundary would help?","What truly matters today?"] },
-    "7": { core: "Inner wisdom • insight • reflection", strengths: ["discernment","depth","learning"], cautions: ["don’t isolate too much","avoid overthinking"], prompts: ["What do you know inside?","What needs research?","What truth needs quiet time?"] },
-    "8": { core: "Practical success • power • money/work lessons", strengths: ["execution","leadership","results"], cautions: ["avoid control battles","don’t tie worth to outcomes"], prompts: ["What are you responsible for?","Where do you need strength?","What practical move helps most?"] },
-    "9": { core: "Completion • forgiveness • letting go", strengths: ["closure","compassion","wisdom from endings"], cautions: ["don’t cling to the past","avoid self-sacrifice"], prompts: ["What needs closure?","What lesson is complete?","What can you release with peace?"] }
-  };
+  async function copyToClipboard(text){
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+    return false;
+  }
 
-  const ANGEL_MAP = {
-    "000":"Reset and begin again. A clean-slate moment—breathe, clear your head, and choose a new direction.",
-    "111":"Focus your thoughts. What you keep thinking about is what you feed—aim your attention on what you want to build.",
-    "222":"Balance and patience. Let things settle; work with others and keep the peace where you can.",
-    "333":"Speak up and create. Express yourself; your voice and ideas matter right now.",
-    "444":"Build your foundation. Stay steady, stay disciplined—this is about structure and stability.",
-    "555":"Change is moving. Adjust, stay flexible, and step forward instead of freezing.",
-    "666":"Re-center your priorities. Come back to health, home, and what truly matters.",
-    "777":"Trust your inner guidance. Slow down and listen; learn, reflect, and follow what feels true.",
-    "888":"Strong momentum. Practical progress—take smart action and manage your resources well.",
-    "999":"A chapter is closing. Wrap things up, forgive, and make room for what’s next.",
-    "1010":"A fresh cycle with direction. Start clean and stay intentional.",
-    "1111":"Heightened awareness. Notice what you’re thinking and choosing—align with your best path.",
-    "1212":"Realignment and growth. Keep going; small steady steps add up.",
-    "1234":"Step-by-step progress. Keep it simple; do the next right thing."
-  };
+  function downloadText(text, filename){
+    const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  async function saveTextWithPicker(text, suggestedName){
+    const canPick = typeof window.showSaveFilePicker === "function";
+    if(!canPick) return false;
+
+    const opts = {
+      suggestedName: suggestedName || "angel_code_report.txt",
+      types: [{ description: "Text", accept: {"text/plain": [".txt"]} }]
+    };
+
+    const handle = await window.showSaveFilePicker(opts);
+    const writable = await handle.createWritable();
+    await writable.write(new Blob([text], {type:"text/plain;charset=utf-8"}));
+    await writable.close();
+    return true;
+  }
+
+  function isShareAvailable(){
+    return !!(navigator.share && typeof navigator.share === "function");
+  }
+
+  function escapeHtml(s){
+    return String(s ?? "")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+  }
 
   function loadRecords(){
     try{
@@ -1200,7 +1178,7 @@ Save creates a .txt file on your device.
 
   function makeId(seedTs){
     const r = Math.random().toString(16).slice(2);
-    return `an_${seedTs}_${r}`;
+    return `ac_${seedTs}_${r}`;
   }
 
   function toDTLocalValue(ts){
@@ -1211,7 +1189,7 @@ Save creates a .txt file on your device.
     const da = pad(d.getDate());
     const hh = pad(d.getHours());
     const mi = pad(d.getMinutes());
-    return `${y}-${m}-${da}T${hh}:${mi}`; // no seconds
+    return `${y}-${m}-${da}T${hh}:${mi}`;
   }
 
   function fromDTLocalValue(v){
@@ -1220,55 +1198,6 @@ Save creates a .txt file on your device.
     const d = new Date(s);
     const t = d.getTime();
     return Number.isFinite(t) ? t : null;
-  }
-
-  async function copyToClipboard(text){
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      await navigator.clipboard.writeText(text);
-      return true;
-    }
-    return false;
-  }
-
-  function downloadText(text, filename){
-    const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }
-
-  async function saveTextWithPicker(text, suggestedName){
-    const canPick = typeof window.showSaveFilePicker === "function";
-    if(!canPick) return false;
-
-    const opts = {
-      suggestedName: suggestedName || "angel_numbers_report.txt",
-      types: [{ description: "Text", accept: {"text/plain": [".txt"]} }]
-    };
-
-    const handle = await window.showSaveFilePicker(opts);
-    const writable = await handle.createWritable();
-    await writable.write(new Blob([text], {type:"text/plain;charset=utf-8"}));
-    await writable.close();
-    return true;
-  }
-
-  function isShareAvailable(){
-    return !!(navigator.share && typeof navigator.share === "function");
-  }
-
-  function escapeHtml(s){
-    return String(s ?? "")
-      .replace(/&/g,"&amp;")
-      .replace(/</g,"&lt;")
-      .replace(/>/g,"&gt;")
-      .replace(/"/g,"&quot;")
-      .replace(/'/g,"&#039;");
   }
 
   function isAllSame(s){ return !!(s && s.length >= 2 && s.split("").every(ch => ch === s[0])); }
@@ -1302,6 +1231,36 @@ Save creates a .txt file on your device.
     return "Mixed pattern";
   }
 
+  const DIGIT_ARCHETYPES = {
+    "0": { core: "Fresh start • reset • open possibilities", strengths: ["starting over","clearing clutter","seeing the big picture"], cautions: ["don’t drift","pick one next step"], prompts: ["What needs a reset?","What would a clean start look like?","What is the simplest next step?"] },
+    "1": { core: "New beginnings • focus • personal strength", strengths: ["clarity","confidence","taking the lead"], cautions: ["don’t rush","don’t let pride decide"], prompts: ["What do you want to begin?","What deserves your focus today?","What one thing matters most?"] },
+    "2": { core: "Balance • teamwork • patience", strengths: ["calm","cooperation","listening"], cautions: ["don’t get stuck","don’t over-please"], prompts: ["Where do you need balance?","Who can you work with?","What conversation needs clarity?"] },
+    "3": { core: "Expression • creativity • encouragement", strengths: ["communication","optimism","creative momentum"], cautions: ["don’t scatter your energy","don’t overcommit"], prompts: ["What needs to be said?","What can you create today?","Where can you bring more joy?"] },
+    "4": { core: "Stability • structure • discipline", strengths: ["planning","reliability","building foundations"], cautions: ["don’t be too rigid","avoid over-control"], prompts: ["What routine would help?","What needs strengthening?","What are you building long-term?"] },
+    "5": { core: "Change • flexibility • learning by doing", strengths: ["adaptability","growth","forward motion"], cautions: ["avoid chaos","don’t act on impulse"], prompts: ["What is changing?","What can you let go of?","What new option is opening?"] },
+    "6": { core: "Care • home • responsibility", strengths: ["supporting others","healing","protecting what matters"], cautions: ["avoid carrying everything","avoid guilt decisions"], prompts: ["What needs care right now?","What boundary would help?","What truly matters today?"] },
+    "7": { core: "Inner wisdom • insight • reflection", strengths: ["discernment","depth","learning"], cautions: ["don’t isolate too much","avoid overthinking"], prompts: ["What do you know inside?","What needs research?","What truth needs quiet time?"] },
+    "8": { core: "Practical success • power • money/work lessons", strengths: ["execution","leadership","results"], cautions: ["avoid control battles","don’t tie worth to outcomes"], prompts: ["What are you responsible for?","Where do you need strength?","What practical move helps most?"] },
+    "9": { core: "Completion • forgiveness • letting go", strengths: ["closure","compassion","wisdom from endings"], cautions: ["don’t cling to the past","avoid self-sacrifice"], prompts: ["What needs closure?","What lesson is complete?","What can you release with peace?"] }
+  };
+
+  const ANGEL_MAP = {
+    "000":"Reset and begin again. A clean-slate moment—breathe, clear your head, and choose a new direction.",
+    "111":"Focus your thoughts. What you keep thinking about is what you feed—aim your attention on what you want to build.",
+    "222":"Balance and patience. Let things settle; work with others and keep the peace where you can.",
+    "333":"Speak up and create. Express yourself; your voice and ideas matter right now.",
+    "444":"Build your foundation. Stay steady, stay disciplined—this is about structure and stability.",
+    "555":"Change is moving. Adjust, stay flexible, and step forward instead of freezing.",
+    "666":"Re-center your priorities. Come back to health, home, and what truly matters.",
+    "777":"Trust your inner guidance. Slow down and listen; learn, reflect, and follow what feels true.",
+    "888":"Strong momentum. Practical progress—take smart action and manage your resources well.",
+    "999":"A chapter is closing. Wrap things up, forgive, and make room for what’s next.",
+    "1010":"A fresh cycle with direction. Start clean and stay intentional.",
+    "1111":"Heightened awareness. Notice what you’re thinking and choosing—align with your best path.",
+    "1212":"Realignment and growth. Keep going; small steady steps add up.",
+    "1234":"Step-by-step progress. Keep it simple; do the next right thing."
+  };
+
   function digitSumSteps(n){
     const digits = n.split("").map(ch => ch.charCodeAt(0)-48).filter(x => x>=0 && x<=9);
     const sum = digits.reduce((a,b)=>a+b,0);
@@ -1332,7 +1291,6 @@ Save creates a .txt file on your device.
     return items.map(x => `• ${x}`).join("\n");
   }
 
-  // IMPORTANT: cardText does NOT include "Angel Card Number" / "Pattern" header lines
   function buildAngelCard(n){
     if(!n){
       return { pattern: "—", headline: "—", cardText: "—" };
@@ -1504,7 +1462,7 @@ Save creates a .txt file on your device.
       return;
     }
     try{
-      await navigator.share({ title: "Angel Numbers Tracker Export", text: exportPayload.text });
+      await navigator.share({ title: "Angel Code Export", text: exportPayload.text });
     }catch{}
   });
 
@@ -1518,20 +1476,20 @@ Save creates a .txt file on your device.
       if(ok){ openInfo("Saved", "Saved.", {mode:"info"}); return; }
     }catch{}
 
-    downloadText(exportPayload.text, exportPayload.filename || "angel_numbers_report.txt");
+    downloadText(exportPayload.text, exportPayload.filename || "angel_code_report.txt");
   });
 
   function buildReportHeader({title, rangeLabel, notes}){
     const now = fmtDateTime(Date.now());
     const lines = [
-      "Angel Numbers Tracker — Export Report",
+      "Angel Code — Export Report",
       `App Version: ${APP_VERSION}`,
       `Report: ${title}`,
       `Generated: ${now}`,
       rangeLabel ? `Range: ${rangeLabel}` : "",
       "",
       "How this data was captured:",
-      "- Sightings are entered manually into Angel Numbers Tracker on this device.",
+      "- Sightings are entered manually into Angel Code on this device.",
       "- Data is stored locally on the phone (no cloud sync, no account).",
       "- Each record includes date/time, number, Angel Card text, and optional notes.",
       "",
@@ -1559,7 +1517,7 @@ Save creates a .txt file on your device.
     const y = ts.getFullYear();
     const m = String(ts.getMonth()+1).padStart(2,"0");
     const d = String(ts.getDate()).padStart(2,"0");
-    const filename = `${filenameBase || "angel_numbers_report"}_${y}-${m}-${d}.txt`;
+    const filename = `${filenameBase || "angel_code_report"}_${y}-${m}-${d}.txt`;
 
     (async () => {
       try{ await copyToClipboard(out); }catch{}
@@ -1576,9 +1534,6 @@ Save creates a .txt file on your device.
 
   function renderHomeCardFromNumber(n){
     const card = buildAngelCard(n);
-
-    $("homePatternPill").textContent = `Pattern: ${card.pattern || "—"}`;
-    $("homeMeaningText").textContent = card.headline || "—";
 
     $("homeAngelHeader").textContent = `Angel Card Number: ${n || "—"}`;
     $("homeAngelBigNum").textContent = n || "—";
@@ -1979,7 +1934,6 @@ Save creates a .txt file on your device.
     reopenDayListForTs(ts);
   });
 
-  // Export button inside View/Edit modal: export THIS entry
   $("btnEditExport").addEventListener("click", (e)=>{
     e.preventDefault();
     if(!editId){
@@ -1999,7 +1953,7 @@ Save creates a .txt file on your device.
         rangeLabel: fmtDateTime(r.ts),
         notes: "This export contains the single entry currently open in the Angel Card view."
       },
-      "angel_numbers_entry"
+      "angel_code_entry"
     );
   });
 
@@ -2273,8 +2227,8 @@ Save creates a .txt file on your device.
     const icon = `data:image/svg+xml;charset=utf-8,${encoded}`;
 
     const manifest = {
-      name: "Angel Numbers Tracker",
-      short_name: "AngelNums",
+      name: "Angel Code",
+      short_name: "AngelCode",
       start_url: ".",
       display: "standalone",
       background_color: "#0b1324",
@@ -2331,7 +2285,7 @@ self.addEventListener('fetch', (e)=>{ });`;
         rangeLabel: `Current identify: ${n} (not saved unless you Add to Calendar)`,
         notes: "This export contains the CURRENT identified number and its Angel Card from the Home screen."
       },
-      "angel_numbers_current"
+      "angel_code_current"
     );
   }
 
@@ -2400,13 +2354,10 @@ self.addEventListener('fetch', (e)=>{ });`;
 
 <!--
 EOF Version Detail Notes
-App Version: v1.2A7
-Base: v1.2A6
+App Version: v1.2A8
+Base: v1.2A7
 Changes:
-- Home: deleted the title entirely (no more clipping); content shifts up.
-- Home: Angel Card panel now includes header line "Angel Card Number: X" above the BIG number.
-- View/Edit (Angel Card) modal: Angel Card is shown first with no other data above it.
-- View/Edit modal: entry details moved below the Angel Card behind a Show/Hide Details toggle.
-- View/Edit modal: added Export button to export the currently open entry.
-- Home Export now exports the CURRENT identified number/card (not all entries).
+- Rebrand to "Angel Code" (removed “Tracker” and “Angel Numbers” text across UI/export/manifest/title).
+- Home: removed the entire Pattern/headline area above the Angel Card (circled block).
+- Preserved storage key to keep existing data.
 -->
