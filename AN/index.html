@@ -1,4 +1,16 @@
-<!-- Angel Numbers Tracker v1.2A1 -->
+<!--
+Angel Numbers Tracker — BOF Version Detail Notes
+App Version: v1.2A2
+Base: v1.2A1
+Changes (requested):
+- Disable test data seeding (live/real data only).
+- Home opening view shows ONLY: input + Submit + one-line instructions.
+- After Submit, the rest of Home becomes visible (Angel Card + actions).
+- The bordered Home container “collapses” to fit visible content before Submit, then expands after Submit.
+- Remove the extra separator line under the swipe note (duplicate info).
+- Combine instructions onto one line to save vertical space.
+- Add BOF version notes (this block) to mirror EOF notes.
+-->
 <!doctype html>
 <html lang="en">
 <head>
@@ -134,17 +146,24 @@
       flex: 0 0 50%;
       width: 50%;
       height: 100%;
-
       background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
       border:3px solid var(--accentBorder);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       padding: var(--pad);
       backdrop-filter: blur(10px);
-
       overflow:hidden;
       touch-action: pan-y;
       position:relative;
+    }
+
+    /* Home card: remove full-height border so the inner container can "collapse" */
+    #home.card{
+      border:none;
+      box-shadow:none;
+      background: transparent;
+      backdrop-filter: none;
+      padding: 0;
     }
 
     .hidden{ display:none !important; }
@@ -274,9 +293,9 @@
       white-space:nowrap;
     }
     .meaningText{
-      color: rgba(235,245,255,.82);
+      color: rgba(235,245,255,.80);
       font-size:15px;
-      line-height:1.22;
+      line-height:1.18;
       white-space: pre-wrap;
     }
 
@@ -307,7 +326,7 @@
       border: 2px solid rgba(255,255,255,.04);
     }
 
-    /* Angel Card "card" frame (used in View & Update + Identify Home) */
+    /* Angel Card "card" frame */
     .angelCardFrame{
       margin-top: 6px;
       border: 2px solid rgba(90,150,255,.40);
@@ -337,29 +356,69 @@
       flex-direction:column;
       gap:0;
       padding-bottom:0;
+      height: 100%;
     }
+
+    /* Inner bordered container that collapses/expands with content */
     #homeScroll{
       flex: 1;
       overflow:auto;
       -webkit-overflow-scrolling: touch;
-      padding-bottom: 10px;
+      padding: 0 0 10px;
       touch-action: pan-y;
       overscroll-behavior: contain;
     }
-    #homeFooter{
-      flex: 0 0 auto;
-      padding-top: 10px;
-      padding-bottom: calc(8px + env(safe-area-inset-bottom));
-      background: linear-gradient(180deg, rgba(11,19,36,0), rgba(11,19,36,.72) 32%, rgba(11,19,36,.94));
-      border-top: 1px solid rgba(255,255,255,.08);
+    .homeShell{
+      margin: 10px 12px 0;
+      border-radius: var(--radius);
+      border:3px solid var(--accentBorder);
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      box-shadow: var(--shadow);
+      padding: var(--pad);
       backdrop-filter: blur(10px);
+    }
+
+    .homeTitle{
+      margin: 0 2px 10px;
+      font-weight: 950;
+      letter-spacing: .2px;
+      color: rgba(235,245,255,.92);
+      font-size: clamp(26px, 7.6vw, 44px);
+      line-height: 1.02;
+    }
+
+    .homeTopRow{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      margin-bottom: 8px;
+    }
+    .homeTopRow .field{
+      flex: 1;
+      height: 56px;
+      border-radius: 22px;
+    }
+    .homeTopRow .btn{
+      height: 56px;
+      border-radius: 999px;
+      min-width: 126px;
+      font-weight: 850;
+      font-size: 20px;
+      padding: 0 22px;
+    }
+
+    .homeInstrOneLine{
+      margin: 0 2px 0;
+      color: rgba(235,245,255,.52);
+      font-size: 14px;
+      line-height: 1.25;
     }
 
     .homeActions{
       display:grid;
       grid-template-columns: 1fr 1fr;
       gap:10px;
-      margin:0;
+      margin: 12px 0 0;
     }
     .homeActions .btn{
       height: 52px;
@@ -380,22 +439,6 @@
       border-color: rgba(255,120,120,.42);
       color: rgba(255,225,225,.92);
       box-shadow: 0 10px 26px rgba(0,0,0,.22);
-    }
-
-    .homeTitle{
-      margin: 0 2px 10px;
-      font-weight: 950;
-      letter-spacing: .2px;
-      color: rgba(235,245,255,.92);
-      font-size: clamp(26px, 7.6vw, 44px);
-      line-height: 1.02;
-    }
-
-    .homeTopRow{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      margin-bottom: 8px;
     }
 
     /* Modal */
@@ -699,61 +742,56 @@
         <!-- HOME -->
         <div id="home" class="card">
           <div id="homeScroll">
-            <div class="homeTitle">Identify Angel Number</div>
+            <div class="homeShell" id="homeShell">
+              <div class="homeTitle">Identify Angel Number</div>
 
-            <!-- CHANGED: Only input + Submit visible at first -->
-            <div class="homeTopRow">
-              <input id="homeIdNum" class="field" inputmode="numeric"
-                     autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-                     placeholder="Enter a number (example: 1111)" />
-              <button id="btnSubmit" class="btn primary" style="height:54px; padding:0 16px; font-weight:900;">Submit</button>
-            </div>
-
-            <div class="subtle" id="homeInstructions">
-              Enter a number to generate the Angel Number Card.
-            </div>
-            <div class="subtle" id="homeSwipeHint">
-              Swipe left or right to view calendar.
-            </div>
-
-            <!-- Hidden until Submit -->
-            <div id="homeGenerated" class="hidden">
-              <div class="meaningCard" id="homeMeaningCard">
-                <div class="meaningTop">
-                  <div id="homeNumBig" class="numBig">—</div>
-                  <div id="homePatternPill" class="patternPill">Pattern: —</div>
-                </div>
-
-                <div id="homeMeaningText" class="meaningText">—</div>
-
-                <div class="angelCardFrame" id="homeAngelFrame">
-                  <div id="homeMeta" class="metaScroll"></div>
-                </div>
-
-                <div class="disclaimer">
-                  Cultural note: these meanings come from numerology and “angel number” traditions and vary by source.
-                  Use them as reflection prompts, not facts or predictions.
-                </div>
+              <div class="homeTopRow">
+                <input id="homeIdNum" class="field" inputmode="numeric"
+                       autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                       placeholder="Enter a number (example: 1111, 1212, 1234)" />
+                <button id="btnHomeSubmit" class="btn primary">Submit</button>
               </div>
 
-              <div class="subtle">Inspired by a real Angel.</div>
-              <div class="subtle">Local-only. No accounts. No cloud.</div>
-            </div>
-          </div>
+              <div class="homeInstrOneLine" id="homeInstrLine">
+                Enter a number to generate the Angel Number Card. Swipe left or right to view calendar.
+              </div>
 
-          <div id="homeFooter" class="hidden">
-            <div class="homeActions">
-              <button id="btnAddToCalendar" class="btn primary wide">Add to Calendar</button>
-              <button id="btnViewCalendar" class="btn">View Calendar</button>
-              <button id="btnInstall" class="btn">Install</button>
+              <!-- Hidden until Submit -->
+              <div id="homeAfterSubmit" class="hidden">
+                <div class="meaningCard" id="homeMeaningCard">
+                  <div class="meaningTop">
+                    <div id="homeNumBig" class="numBig">—</div>
+                    <div id="homePatternPill" class="patternPill">Pattern: —</div>
+                  </div>
 
-              <button id="btnHomeExport" class="btn tight">Export</button>
-              <button id="btnExitHome" class="btn tight exitSmall">Exit</button>
-            </div>
+                  <div id="homeMeaningText" class="meaningText">—</div>
 
-            <div class="footerTiny">
-              <div id="homeVerLabel" aria-label="Version label">v—</div>
-              <div>developed by Keyth Jyles</div>
+                  <div class="angelCardFrame" id="homeAngelFrame">
+                    <div id="homeMeta" class="metaScroll">—</div>
+                  </div>
+
+                  <div class="disclaimer">
+                    Cultural note: these meanings come from numerology/“angel number” traditions and can vary.
+                    Use them as gentle prompts for reflection, not as facts or predictions.
+                  </div>
+                </div>
+
+                <div class="subtle">Inspired by a real Angel.</div>
+                <div class="subtle">Local-only. No accounts. No cloud.</div>
+
+                <div class="homeActions">
+                  <button id="btnAddToCalendar" class="btn primary wide">Add to Calendar</button>
+                  <button id="btnViewCalendar" class="btn">View Calendar</button>
+                  <button id="btnInstall" class="btn">Install</button>
+                  <button id="btnHomeExport" class="btn tight">Export</button>
+                  <button id="btnExitHome" class="btn tight exitSmall">Exit</button>
+                </div>
+
+                <div class="footerTiny">
+                  <div id="homeVerLabel" aria-label="Version label">v—</div>
+                  <div>developed by Keyth Jyles</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -810,9 +848,8 @@ Save creates a .txt file on your device.
       <div class="xCloseRow">
         <button class="xBtn" id="btnAddCalX" aria-label="Close">×</button>
       </div>
-
       <div class="modalTitle" id="addCalTitle">Add to Calendar</div>
-      <div class="modalSub" id="addCalSub">This saves an entry on this device.</div>
+      <div class="modalSub" id="addCalSub">This saves an entry to your calendar on this device.</div>
 
       <div class="label" style="margin-top:6px;">Number</div>
       <div id="addCalNumber" class="field" style="display:flex; align-items:center; font-weight:900;">—</div>
@@ -831,7 +868,6 @@ Save creates a .txt file on your device.
   <div id="dayListModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="dayListTitle">
     <div class="modalCard">
       <div class="dayLogoRow" aria-hidden="true" id="dayLogoRow"></div>
-
       <div class="modalTitle" id="dayListTitle">Day</div>
       <div class="modalSub" id="dayListSub">Tap a number to view details.</div>
 
@@ -847,15 +883,15 @@ Save creates a .txt file on your device.
   <div id="editModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="editTitle">
     <div class="modalCard">
       <div class="modalTitle" id="editTitle">View &amp; Update</div>
-      <div class="modalSub" id="editSub">Edit the entry, then Save.</div>
+      <div class="modalSub" id="editSub">This is the Angel Card. Everything below is saved with the entry.</div>
 
       <div class="label" style="margin-top:6px;">Date &amp; time</div>
       <input id="editDT" class="field" type="datetime-local" />
 
       <div class="label">Number</div>
-      <input id="editNum" class="field" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Example: 1111" />
+      <input id="editNum" class="field" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="e.g., 1111" />
 
-      <div class="label">Notes</div>
+      <div class="label">Notes (saved with entry)</div>
       <textarea id="editNotes" class="field" placeholder="Notes..."></textarea>
 
       <div class="label">Pattern</div>
@@ -913,11 +949,10 @@ Save creates a .txt file on your device.
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.2A1";
+  const APP_VERSION = "v1.2A2";
   const STORAGE_KEY = "angel_numbers_records_v1";
   const DAY_MS = 24*60*60*1000;
 
-  // TEST DATA IS OFF (live use)
   const TEST_DATA_ENABLED = false;
 
   const $ = (id) => document.getElementById(id);
@@ -969,87 +1004,36 @@ Save creates a .txt file on your device.
     }
   }
 
-  /* ===== Simple, everyday-language meanings ===== */
+  /* ===== Numerology Lenses (plain-language) ===== */
 
   const DIGIT_ARCHETYPES = {
-    "0": {
-      core: "Reset and fresh start",
-      strengths: ["clearing space", "starting over", "seeing the bigger picture"],
-      cautions: ["don’t drift—pick one next step", "avoid staying vague"],
-      prompts: ["What needs a reset?", "What can you simplify today?", "What is the next small step?"]
-    },
-    "1": {
-      core: "New beginning and focus",
-      strengths: ["clear direction", "confidence", "taking initiative"],
-      cautions: ["don’t rush", "don’t force outcomes"],
-      prompts: ["What do you want to begin?", "Where should your attention go?", "What is one decision you can make today?"]
-    },
-    "2": {
-      core: "Balance and partnership",
-      strengths: ["patience", "cooperation", "steady progress"],
-      cautions: ["don’t delay forever", "don’t ignore your own needs"],
-      prompts: ["What needs balancing?", "Who do you need to talk with?", "Where can you be a little more patient?"]
-    },
-    "3": {
-      core: "Expression and creativity",
-      strengths: ["communication", "optimism", "creative ideas"],
-      cautions: ["don’t scatter your energy", "don’t overcommit"],
-      prompts: ["What needs to be said?", "What do you want to create?", "What is one thing you can finish?"]
-    },
-    "4": {
-      core: "Stability and structure",
-      strengths: ["planning", "building foundations", "reliability"],
-      cautions: ["don’t get rigid", "don’t over-control"],
-      prompts: ["What foundation are you building?", "What routine helps you?", "What needs strengthening?"]
-    },
-    "5": {
-      core: "Change and flexibility",
-      strengths: ["adaptability", "learning fast", "momentum"],
-      cautions: ["don’t create chaos", "don’t act on impulse"],
-      prompts: ["What is changing?", "What can you let go of?", "What new option is opening up?"]
-    },
-    "6": {
-      core: "Care and responsibility",
-      strengths: ["supporting others", "repairing what matters", "home and wellbeing"],
-      cautions: ["don’t carry everything alone", "don’t decide from guilt"],
-      prompts: ["What needs care right now?", "What boundary protects you?", "What is your real priority today?"]
-    },
-    "7": {
-      core: "Inner wisdom and reflection",
-      strengths: ["insight", "learning", "good judgment"],
-      cautions: ["don’t isolate too much", "don’t overthink forever"],
-      prompts: ["What do you already know inside?", "What needs research?", "What truth needs quiet time?"]
-    },
-    "8": {
-      core: "Strength and practical results",
-      strengths: ["execution", "leadership", "building security"],
-      cautions: ["don’t push too hard", "don’t measure your worth by results"],
-      prompts: ["What are you building?", "Where do you need to be firm?", "What practical step moves this forward?"]
-    },
-    "9": {
-      core: "Completion and letting go",
-      strengths: ["closure", "compassion", "big-picture learning"],
-      cautions: ["don’t cling to the past", "don’t over-sacrifice"],
-      prompts: ["What needs closure?", "What lesson is complete?", "What can you release with peace?"]
-    }
+    "0": { core: "Fresh start • reset • open possibilities", strengths: ["starting over","clearing clutter","seeing the big picture"], cautions: ["don’t drift","pick one next step"], prompts: ["What needs a reset?","What would a clean start look like?","What is the simplest next step?"] },
+    "1": { core: "New beginnings • focus • personal strength", strengths: ["clarity","confidence","taking the lead"], cautions: ["don’t rush","don’t let pride decide"], prompts: ["What do you want to begin?","What deserves your focus today?","What one thing matters most?"] },
+    "2": { core: "Balance • teamwork • patience", strengths: ["calm","cooperation","listening"], cautions: ["don’t get stuck","don’t over-please"], prompts: ["Where do you need balance?","Who can you work with?","What conversation needs clarity?"] },
+    "3": { core: "Expression • creativity • encouragement", strengths: ["communication","optimism","creative momentum"], cautions: ["don’t scatter your energy","don’t overcommit"], prompts: ["What needs to be said?","What can you create today?","Where can you bring more joy?"] },
+    "4": { core: "Stability • structure • discipline", strengths: ["planning","reliability","building foundations"], cautions: ["don’t be too rigid","avoid over-control"], prompts: ["What routine would help?","What needs strengthening?","What are you building long-term?"] },
+    "5": { core: "Change • flexibility • learning by doing", strengths: ["adaptability","growth","forward motion"], cautions: ["avoid chaos","don’t act on impulse"], prompts: ["What is changing?","What can you let go of?","What new option is opening?"] },
+    "6": { core: "Care • home • responsibility", strengths: ["supporting others","healing","protecting what matters"], cautions: ["avoid carrying everything","avoid guilt decisions"], prompts: ["What needs care right now?","What boundary would help?","What truly matters today?"] },
+    "7": { core: "Inner wisdom • insight • reflection", strengths: ["discernment","depth","learning"], cautions: ["don’t isolate too much","avoid overthinking"], prompts: ["What do you know inside?","What needs research?","What truth needs quiet time?"] },
+    "8": { core: "Practical success • power • money/work lessons", strengths: ["execution","leadership","results"], cautions: ["avoid control battles","don’t tie worth to outcomes"], prompts: ["What are you responsible for?","Where do you need strength?","What practical move helps most?"] },
+    "9": { core: "Completion • forgiveness • letting go", strengths: ["closure","compassion","wisdom from endings"], cautions: ["don’t cling to the past","avoid self-sacrifice"], prompts: ["What needs closure?","What lesson is complete?","What can you release with peace?"] }
   };
 
-  // A small set of common “known” meanings; everything else is generated from pattern + digit-sum.
   const ANGEL_MAP = {
-    "000": "A reset moment. Clear your mind, simplify, and begin again.",
-    "111": "Focus your thoughts and intentions. Aim at what you want to build.",
-    "222": "Balance and patience. Cooperation helps; let things settle.",
-    "333": "Express yourself. Speak up, create, and keep moving.",
-    "444": "Build the foundation. Stay steady, practical, and consistent.",
-    "555": "Change is in motion. Stay flexible and choose the next step.",
-    "666": "Re-center. Check priorities and take care of yourself.",
-    "777": "Trust your inner sense. Learn, reflect, and move with wisdom.",
-    "888": "Practical momentum. Strong follow-through and responsibility.",
-    "999": "A chapter is closing. Finish what matters and make room for new.",
-    "1010": "A new cycle is starting. Keep your attention clear and focused.",
-    "1111": "Heightened awareness. Notice your thoughts and align your choices.",
-    "1212": "Realignment and growth. Small steady steps add up.",
-    "1234": "Step-by-step progress. Keep it simple and move in order."
+    "000":"Reset and begin again. A clean-slate moment—breathe, clear your head, and choose a new direction.",
+    "111":"Focus your thoughts. What you keep thinking about is what you feed—aim your attention on what you want to build.",
+    "222":"Balance and patience. Let things settle; work with others and keep the peace where you can.",
+    "333":"Speak up and create. Express yourself; your voice and ideas matter right now.",
+    "444":"Build your foundation. Stay steady, stay disciplined—this is about structure and stability.",
+    "555":"Change is moving. Adjust, stay flexible, and step forward instead of freezing.",
+    "666":"Re-center your priorities. Come back to health, home, and what truly matters.",
+    "777":"Trust your inner guidance. Slow down and listen; learn, reflect, and follow what feels true.",
+    "888":"Strong momentum. Practical progress—take smart action and manage your resources well.",
+    "999":"A chapter is closing. Wrap things up, forgive, and make room for what’s next.",
+    "1010":"A fresh cycle with direction. Start clean and stay intentional.",
+    "1111":"Heightened awareness. Notice what you’re thinking and choosing—align with your best path.",
+    "1212":"Realignment and growth. Keep going; small steady steps add up.",
+    "1234":"Step-by-step progress. Keep it simple; do the next right thing."
   };
 
   /* ===== Storage ===== */
@@ -1210,10 +1194,6 @@ Save creates a .txt file on your device.
       .replace(/'/g,"&#039;");
   }
 
-  function listBullets(items){
-    return items.map(x => `• ${x}`).join("\n");
-  }
-
   /* ===== Pattern detection ===== */
 
   function isAllSame(s){ return !!(s && s.length >= 2 && s.split("").every(ch => ch === s[0])); }
@@ -1239,10 +1219,10 @@ Save creates a .txt file on your device.
   function detectPattern(s){
     if(!s) return "—";
     if(isAllSame(s)) return `Repeating ${s[0]}s`;
-    if(isAscendingSeq(s)) return "Sequential (up)";
-    if(isDescendingSeq(s)) return "Sequential (down)";
-    if(isRepeatedHalf(s)) return "Double pattern";
-    if(isPalindrome(s)) return "Mirror (palindrome)";
+    if(isAscendingSeq(s)) return "Counting up (in order)";
+    if(isDescendingSeq(s)) return "Counting down (in order)";
+    if(isRepeatedHalf(s)) return "Repeat pattern (double)";
+    if(isPalindrome(s)) return "Mirror pattern";
     if(s.length === 3 && s[0] === s[2] && s[0] !== s[1]) return "Sandwich pattern";
     return "Mixed pattern";
   }
@@ -1275,129 +1255,118 @@ Save creates a .txt file on your device.
     return entries.map(([d,c]) => ({ d, c }));
   }
 
-  function buildAngelCardPlain(n){
+  function listBullets(items){
+    return items.map(x => `• ${x}`).join("\n");
+  }
+
+  function buildAngelCard(n){
     if(!n){
       return {
         pattern: "—",
-        headline: "",
-        cardText: ""
+        headline: "—",
+        summary: "",
+        cardText: "—"
       };
     }
 
     const pattern = detectPattern(n);
     const steps = digitSumSteps(n);
     const rootDigit = String(steps.root);
-    const rootA = DIGIT_ARCHETYPES[rootDigit] || null;
 
     const dom = dominantDigits(n);
     const domTop = dom[0]?.d ?? rootDigit;
+
+    const rootA = DIGIT_ARCHETYPES[rootDigit] || null;
     const domA = DIGIT_ARCHETYPES[domTop] || null;
 
     const mapped = ANGEL_MAP[n] || "";
 
-    // Plain-language pattern lens
-    let patternLens = "";
-    if(pattern === "Sequential (up)") patternLens = "Pattern lens: step-by-step progress. Keep it simple and move forward one step at a time.";
-    else if(pattern === "Sequential (down)") patternLens = "Pattern lens: simplifying. You may be letting go or reducing stress and complexity.";
-    else if(pattern === "Double pattern"){
-      const half = n.slice(0, n.length/2);
-      patternLens = `Pattern lens: a repeated message. "${half}" shows up twice, so the theme is being emphasized.`;
-    } else if(pattern === "Mirror (palindrome)") {
-      patternLens = "Pattern lens: reflection. Notice what is being mirrored back to you in your choices and mood.";
-    } else if(/^Repeating/.test(pattern)) {
-      patternLens = "Pattern lens: extra emphasis. Repeating digits tend to ‘turn up the volume’ on that digit’s theme.";
-    } else if(pattern === "Sandwich pattern") {
-      patternLens = "Pattern lens: a theme on the outside with a different focus in the middle. Notice what is ‘held’ by the repeating edges.";
-    } else {
-      patternLens = "Pattern lens: mixed. Use the digit-sum theme and your real-life context to connect meaning.";
-    }
+    const mainTheme = rootA ? rootA.core : `Theme: ${rootDigit}`;
+    const headline = mapped ? mapped : `Main theme: ${mainTheme}.`;
 
-    // Headline: known mapping or generated
-    const headline = mapped
-      ? mapped
-      : (rootA ? `Main theme: ${rootA.core}.` : "A reflective prompt. Meaning depends on your situation.");
+    let patternLens = "";
+    if(pattern === "Counting up (in order)") patternLens = "Pattern note: it looks like a step-by-step climb. Keep it simple and keep moving.";
+    else if(pattern === "Counting down (in order)") patternLens = "Pattern note: it looks like simplifying. Let go of extra weight and return to basics.";
+    else if(pattern === "Repeat pattern (double)"){
+      const half = n.slice(0, n.length/2);
+      patternLens = `Pattern note: "${half}" repeats. When something repeats, it’s asking for extra attention.`;
+    } else if(pattern === "Mirror pattern") {
+      patternLens = "Pattern note: it mirrors itself. Consider what life is reflecting back to you right now.";
+    } else if(/^Repeating/.test(pattern)) {
+      patternLens = "Pattern note: repeating digits turn up the volume on the main theme.";
+    } else if(pattern === "Sandwich pattern") {
+      patternLens = "Pattern note: the outer digits ‘frame’ the middle digit. Notice what the middle might represent in your situation.";
+    } else {
+      patternLens = "Pattern note: a mix. Use the main theme plus what was happening when you noticed the number.";
+    }
 
     const domDesc = dom.map(x => `${x.d}×${x.c}`).join("  |  ");
 
+    const prompts = [];
+    if(rootA?.prompts?.length) prompts.push(...rootA.prompts);
+    if(domA?.prompts?.length && domTop !== rootDigit) prompts.push(...domA.prompts);
+    const promptsUnique = [...new Set(prompts)].slice(0, 6);
+
     const strengths = [];
     const cautions = [];
-    const prompts = [];
-
     if(rootA?.strengths?.length) strengths.push(...rootA.strengths);
-    if(rootA?.cautions?.length) cautions.push(...rootA.cautions);
-    if(rootA?.prompts?.length) prompts.push(...rootA.prompts);
+    if(domA?.strengths?.length && domTop !== rootDigit) strengths.push(...domA.strengths);
 
-    if(domA && domTop !== rootDigit){
-      if(domA.strengths?.length) strengths.push(...domA.strengths);
-      if(domA.cautions?.length) cautions.push(...domA.cautions);
-      if(domA.prompts?.length) prompts.push(...domA.prompts);
-    }
+    if(rootA?.cautions?.length) cautions.push(...rootA.cautions);
+    if(domA?.cautions?.length && domTop !== rootDigit) cautions.push(...domA.cautions);
 
     const strengthsUnique = [...new Set(strengths)].slice(0, 6);
     const cautionsUnique = [...new Set(cautions)].slice(0, 6);
-    const promptsUnique = [...new Set(prompts)].slice(0, 6);
-
-    const whatNow = [
-      "Pause for 10 seconds and notice what you were thinking about when you saw the number.",
-      "Pick one small action that matches the main theme (not a big life overhaul).",
-      "If the number keeps repeating, treat it like a reminder—not a warning."
-    ];
 
     const lines = [];
     lines.push(`ANGEL CARD — ${n}`);
     lines.push(`Pattern: ${pattern}`);
     lines.push("");
-
     lines.push("Overview");
-    lines.push(headline);
+    lines.push(`Main theme: ${mapped ? mapped : mainTheme}.`);
     lines.push("");
-
-    lines.push("Pattern lens");
+    lines.push("Why this pattern matters");
     lines.push(patternLens);
     lines.push("");
-
-    lines.push("Digit-sum lens");
-    lines.push(`Digit math: ${steps.stepStr}`);
-    if(rootA) lines.push(`Main theme: ${rootA.core}`);
+    lines.push("Simple number lens (digit-sum)");
+    lines.push(`Add the digits: ${steps.stepStr}`);
+    lines.push(`Main theme digit: ${mainTheme}`);
     lines.push("");
-
     lines.push("Digit emphasis");
-    lines.push(`What stands out: ${domDesc}`);
-    if(domA && domTop !== rootDigit) lines.push(`Extra emphasis: ${domA.core}`);
+    lines.push(`What shows up most: ${domDesc}`);
     lines.push("");
-
-    lines.push("What it may be nudging you toward");
-    lines.push(listBullets(whatNow));
-    lines.push("");
-
-    if(promptsUnique.length){
-      lines.push("Practical prompts");
-      lines.push(listBullets(promptsUnique));
-      lines.push("");
-    }
 
     if(strengthsUnique.length){
-      lines.push("Helpful traits to lean on");
+      lines.push("Helpful qualities");
       lines.push(listBullets(strengthsUnique));
       lines.push("");
     }
 
     if(cautionsUnique.length){
-      lines.push("Things to watch for");
+      lines.push("Watch-outs");
       lines.push(listBullets(cautionsUnique));
       lines.push("");
     }
 
-    lines.push("Quick method");
-    lines.push("• Read the overview in plain language.");
-    lines.push("• Use the digit-sum as the main theme.");
-    lines.push("• Use the pattern as the ‘tone’ of the message.");
-    lines.push("• Apply it to what you were doing or thinking right then.");
+    if(promptsUnique.length){
+      lines.push("Questions you can ask yourself");
+      lines.push(listBullets(promptsUnique));
+      lines.push("");
+    }
+
+    lines.push("Quick way to use this");
+    lines.push("• Think back to what you were doing or thinking when you saw the number.");
+    lines.push("• Read the main theme as the ‘headline’.");
+    lines.push("• Use the pattern note as ‘how it shows up’ in real life.");
+    lines.push("• Choose one small action that fits your situation.");
+
+    const cardText = lines.join("\n");
 
     return {
       pattern,
       headline,
-      cardText: lines.join("\n")
+      summary: `Digit-sum: ${steps.stepStr}.`,
+      cardText
     };
   }
 
@@ -1506,7 +1475,7 @@ Save creates a .txt file on your device.
       "How this data was captured:",
       "- Sightings are entered manually into Angel Numbers Tracker on this device.",
       "- Data is stored locally on the phone (no cloud sync, no account).",
-      "- Each record may include the number, the Angel Card, and optional notes.",
+      "- Each record includes date/time, number, Angel Card text, and optional notes.",
       "",
       notes ? notes : "",
       "",
@@ -1540,19 +1509,22 @@ Save creates a .txt file on your device.
     })();
   }
 
-  /* ===== Home Identify (Submit -> reveal) ===== */
+  /* ===== Home Identify (Submit-driven) ===== */
 
-  let lastIdentify = { number:"", pattern:"", cardText:"", headline:"" };
-  let revealed = false;
+  let lastIdentify = { number:"", pattern:"", cardText:"" };
+  let homeRevealed = false;
 
-  function resetHomeOutput(){
-    $("homeGenerated").classList.add("hidden");
-    $("homeFooter").classList.add("hidden");
-    revealed = false;
+  function setHomeRevealed(on){
+    homeRevealed = !!on;
+    if(homeRevealed){
+      $("homeAfterSubmit").classList.remove("hidden");
+    }else{
+      $("homeAfterSubmit").classList.add("hidden");
+    }
   }
 
-  function setHomeOutput(n){
-    const card = buildAngelCardPlain(n);
+  function renderHomeCardFromNumber(n){
+    const card = buildAngelCard(n);
 
     $("homeNumBig").textContent = n;
     $("homePatternPill").textContent = `Pattern: ${card.pattern || "—"}`;
@@ -1562,42 +1534,30 @@ Save creates a .txt file on your device.
     lastIdentify = {
       number: n,
       pattern: card.pattern || "—",
-      cardText: card.cardText || "—",
-      headline: card.headline || "—"
+      cardText: card.cardText || "—"
     };
   }
 
-  function revealHome(){
-    if(revealed) return;
-    $("homeGenerated").classList.remove("hidden");
-    $("homeFooter").classList.remove("hidden");
-    revealed = true;
-  }
-
-  function handleSubmit(){
+  function submitHome(){
     const n = normalizeNumberInput($("homeIdNum").value);
     if(!n){
-      openInfo("Please enter a number", "Type an angel number, then press Submit.");
+      openInfo("Enter a number", "Please type an angel number, then tap Submit.");
       return;
     }
-    setHomeOutput(n);
-    revealHome();
-    try{ $("homeIdNum").blur(); }catch{}
+    setHomeRevealed(true);
+    renderHomeCardFromNumber(n);
+    try{ document.activeElement?.blur(); }catch{}
   }
 
-  $("btnSubmit").addEventListener("click", (e)=>{ e.preventDefault(); handleSubmit(); });
+  $("btnHomeSubmit").addEventListener("click", (e)=>{
+    e.preventDefault();
+    submitHome();
+  });
 
   $("homeIdNum").addEventListener("keydown", (e)=>{
     if(e.key === "Enter"){
       e.preventDefault();
-      handleSubmit();
-    }
-  });
-
-  // If user edits number after reveal, keep it simple: require Submit again to refresh.
-  $("homeIdNum").addEventListener("input", ()=>{
-    if(revealed){
-      // no live update; user presses Submit to refresh
+      submitHome();
     }
   });
 
@@ -1606,7 +1566,7 @@ Save creates a .txt file on your device.
   function openAddCalModal(){
     const n = lastIdentify.number || normalizeNumberInput($("homeIdNum").value);
     if(!n){
-      openInfo("Enter a number", "Type an angel number first, then press Submit.");
+      openInfo("Enter a number", "Type an angel number first, then tap Submit. After that, you can add it to your calendar.");
       return;
     }
 
@@ -1632,7 +1592,7 @@ Save creates a .txt file on your device.
     const n = String($("addCalNumber").textContent || "").trim();
     const notes = String($("addCalNotes").value || "").trim();
 
-    const card = buildAngelCardPlain(n);
+    const card = buildAngelCard(n);
 
     const ts = Date.now();
     const rec = { id: makeId(ts), ts, number: n, pattern: card.pattern || "—", meaning: card.cardText || "—", notes };
@@ -1698,7 +1658,7 @@ Save creates a .txt file on your device.
     const currentDayRecs = (recs || []).slice().sort((a,b)=> a.ts - b.ts);
 
     $("dayListTitle").textContent = fmtDayTitle(dayKey);
-    $("dayListSub").textContent = "Tap a number to view details.";
+    $("dayListSub").textContent = "Tap a number to view the Angel Card.";
 
     const list = $("dayList");
     list.innerHTML = "";
@@ -1821,7 +1781,7 @@ Save creates a .txt file on your device.
     $("editNotes").value = r.notes || "";
 
     const n = normalizeNumberInput(r.number || "");
-    const card = buildAngelCardPlain(n);
+    const card = buildAngelCard(n);
 
     $("editPattern").textContent = card.pattern || "—";
     $("editAngelCard").textContent = card.cardText || "—";
@@ -1841,7 +1801,7 @@ Save creates a .txt file on your device.
 
   function refreshEditDerived(){
     const n = normalizeNumberInput($("editNum").value);
-    const card = buildAngelCardPlain(n);
+    const card = buildAngelCard(n);
     $("editPattern").textContent = card.pattern || "—";
     $("editAngelCard").textContent = card.cardText || "—";
   }
@@ -1874,7 +1834,7 @@ Save creates a .txt file on your device.
     }
     const notes = String($("editNotes").value || "").trim();
 
-    const card = buildAngelCardPlain(n);
+    const card = buildAngelCard(n);
 
     const ok = updateRecordById(editId, {
       ts: newTs,
@@ -1891,8 +1851,6 @@ Save creates a .txt file on your device.
 
     closeEditModal();
     renderCalendar();
-
-    // FIX preserved: reopen day list for UPDATED day
     reopenDayListForTs(newTs);
   });
 
@@ -2218,13 +2176,11 @@ self.addEventListener('fetch', (e)=>{ });`;
     try { await navigator.serviceWorker.register(swUrl); } catch {}
   }
 
-  /* ===== Test data seeding (OFF) ===== */
+  /* ===== Test data seeding (disabled) ===== */
 
   function seedTestDataIfEmpty(){
     if(!TEST_DATA_ENABLED) return;
-    const existing = loadRecords();
-    if(existing.length > 0) return;
-    // Intentionally no seeding when disabled.
+    // Intentionally disabled in v1.2A2
   }
 
   /* ===== Version triple-tap -> heart ===== */
@@ -2233,7 +2189,9 @@ self.addEventListener('fetch', (e)=>{ });`;
   let vTapTimer = null;
 
   function attachVersionTripleTap(){
-    $("homeVerLabel").addEventListener("click", (e) => {
+    const el = $("homeVerLabel");
+    if(!el) return;
+    el.addEventListener("click", (e) => {
       e.stopPropagation();
       vTapCount++;
       if(vTapTimer) clearTimeout(vTapTimer);
@@ -2248,45 +2206,50 @@ self.addEventListener('fetch', (e)=>{ });`;
   /* ===== Exit ===== */
 
   /* KEEP THIS EXIT FUNCTION EXACTLY (known-good) */
-  $("btnExitHome").addEventListener("click", () => {
-    window.close();
-    setTimeout(() => {
-      alert("If it didn’t close: use your phone’s Back/Home.");
-    }, 200);
-  });
+  function attachExit(){
+    const btn = $("btnExitHome");
+    if(!btn) return;
+    btn.addEventListener("click", () => {
+      window.close();
+      setTimeout(() => {
+        alert("If it didn’t close: use your phone’s Back/Home.");
+      }, 200);
+    });
+  }
 
   /* ===== Buttons ===== */
 
-  $("btnViewCalendar").addEventListener("click", () => snapToIndex(1, true));
-  $("btnBackFromCalendar").addEventListener("click", () => snapToIndex(0, true));
+  function attachButtons(){
+    const btnView = $("btnViewCalendar");
+    if(btnView) btnView.addEventListener("click", () => snapToIndex(1, true));
 
-  $("btnHomeExport").addEventListener("click", () => {
-    const recs = loadRecords().slice().reverse();
-    exportReport(
-      recs,
-      {
-        title: "All Entries Export",
-        rangeLabel: "All saved entries",
-        notes: "This export contains all saved entries currently stored on this device."
-      },
-      "angel_numbers_all"
-    );
-  });
+    $("btnBackFromCalendar").addEventListener("click", () => snapToIndex(0, true));
 
-  $("btnAddToCalendar").addEventListener("click", () => {
-    if(!revealed){
-      openInfo("Submit first", "Press Submit to generate the Angel Number Card first.");
-      return;
-    }
-    openAddCalModal();
-  });
+    const btnExport = $("btnHomeExport");
+    if(btnExport) btnExport.addEventListener("click", () => {
+      const recs = loadRecords().slice().reverse();
+      exportReport(
+        recs,
+        {
+          title: "All Entries Export",
+          rangeLabel: "All saved entries",
+          notes: "This export contains all saved entries currently stored on this device."
+        },
+        "angel_numbers_all"
+      );
+    });
 
-  $("btnInstall").addEventListener("click", (e) => {
-    e.preventDefault();
-    tryInstall();
-  });
+    const btnAdd = $("btnAddToCalendar");
+    if(btnAdd) btnAdd.addEventListener("click", () => openAddCalModal());
 
-  $("calMonth").addEventListener("change", renderCalendar);
+    const btnInstall = $("btnInstall");
+    if(btnInstall) btnInstall.addEventListener("click", (e) => {
+      e.preventDefault();
+      tryInstall();
+    });
+
+    $("calMonth").addEventListener("change", renderCalendar);
+  }
 
   /* ===== Init ===== */
 
@@ -2294,8 +2257,13 @@ self.addEventListener('fetch', (e)=>{ });`;
   registerSW();
   seedTestDataIfEmpty();
 
+  setHomeRevealed(false);
+
+  // Version label is hidden until submit; still set it now.
   $("homeVerLabel").textContent = APP_VERSION;
 
+  attachButtons();
+  attachExit();
   attachVersionTripleTap();
   attachSmoothEdgeSwipe();
   attachPullToRefresh();
@@ -2309,7 +2277,6 @@ self.addEventListener('fetch', (e)=>{ });`;
   setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 0);
   setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 80);
 
-  resetHomeOutput();
   snapToIndex(0, false);
 
   window.addEventListener("resize", () => {
@@ -2324,13 +2291,12 @@ self.addEventListener('fetch', (e)=>{ });`;
 
 <!--
 EOF Version Detail Notes
-App Version: v1.2A1
-Base: v1.2A0
+App Version: v1.2A2
+Base: v1.2A1
 Changes:
-- Test data turned OFF (live use; no seeding).
-- Home panel updated: only input + Submit + simple instructions visible on load.
-- Angel Card + footer actions are hidden until Submit is pressed, then revealed.
-- Wording simplified to everyday language throughout the Angel Card output.
-- Swipe hint added under the “enter a number” instruction line.
-- Preserved fix: after Save/Delete in View & Update, Day List reopens for the correct day computed from updated timestamp.
+- Disabled test data seeding (live use only).
+- Home shows only input + Submit + one-line instruction until Submit is pressed.
+- After Submit, the Angel Card and actions appear and the bordered container expands to fit.
+- Removed the extra duplicate separator/line beneath the swipe note (instruction is now one line).
+- Added BOF version notes block to mirror EOF.
 -->
