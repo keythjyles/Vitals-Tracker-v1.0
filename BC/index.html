@@ -2,15 +2,13 @@
 
 <!--
 Birthday Code
-Version: v1.1A3
+Version: v1.1A4
 URL: https://keythjyles.github.io/Vitals-Tracker-v1.0/BC/
 
 Version Notes:
-- Added an inspirational closing section that appears AFTER comparing all readings.
-- Reduced repetition by giving each lens distinct, non-overlapping wording and focus.
-- Improved numerology: distinct copy for Life Path, Birthday Number, and Birthday Date (day-of-month).
-- Restored year entry to a normal 4-digit numeric-text field (no frozen spinner behavior).
-- Removed system popups; replaced with app-styled modal.
+- Buttons: renamed to “Generate Report” and “Export”; forced side-by-side layout (all screen sizes).
+- Reduced repetition: added deterministic unique-line selection to prevent repeating the same sentence in the report.
+- No prompts, no mantra, no sources in the report (remains removed).
 - Deterministic output preserved.
 --><html lang="en">
 <head>
@@ -83,7 +81,9 @@ Version Notes:
     border:1px solid var(--border);
     background:rgba(255,255,255,.03);
     white-space:nowrap;
-  }.panel{ margin-top:14px; background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,0)); border:1px solid var(--border); border-radius:18px; padding:16px; box-shadow: var(--shadow); } .row{display:flex;gap:12px;flex-wrap:wrap} label{font-size:12px;color:var(--muted);display:block;margin:0 0 6px} select,input{ width:100%; background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:14px; padding:12px; font-size:16px; outline:none; } select:focus,input:focus{ border-color: rgba(111,179,255,.55); box-shadow: 0 0 0 4px rgba(111,179,255,.12); } .col{flex:1;min-width:150px} .btnRow{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px} @media(min-width:720px){ .btnRow{grid-template-columns:1fr 1fr} }
+  }.panel{ margin-top:14px; background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,0)); border:1px solid var(--border); border-radius:18px; padding:16px; box-shadow: var(--shadow); } .row{display:flex;gap:12px;flex-wrap:wrap} label{font-size:12px;color:var(--muted);display:block;margin:0 0 6px} select,input{ width:100%; background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:14px; padding:12px; font-size:16px; outline:none; } select:focus,input:focus{ border-color: rgba(111,179,255,.55); box-shadow: 0 0 0 4px rgba(111,179,255,.12); } .col{flex:1;min-width:150px}
+
+/* Buttons: always side-by-side */ .btnRow{ display:flex; gap:10px; margin-top:12px; } .btnRow .btn{flex:1; min-width:0}
 
 .btn{ background:linear-gradient(135deg,#6fb3ff,#4f7cff); color:#04122b; border:none;border-radius:16px; padding:14px 16px; font-size:16px;font-weight:900; cursor:pointer; box-shadow: var(--shadow); user-select:none; } .btn:active{transform: translateY(1px)} .btn.secondary{ background:transparent; color:rgba(231,236,243,.92); border:1px solid var(--border); box-shadow:none; } .btn[disabled]{ opacity:.45; cursor:not-allowed; transform:none !important; }
 
@@ -105,7 +105,7 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
         <h1>Birthday Code</h1>
         <div class="sub">Intriguing, grounded interpretations</div>
       </div>
-      <div class="pill">v1.1A3</div>
+      <div class="pill">v1.1A4</div>
     </div>
   </header>  <div class="panel">
     <div class="row">
@@ -123,8 +123,8 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
       </div>
     </div>
     <div class="btnRow">
-      <button class="btn" id="gen" type="button">Generate Birthday Code</button>
-      <button class="btn secondary" id="export" type="button" disabled>Export Report</button>
+      <button class="btn" id="gen" type="button">Generate Report</button>
+      <button class="btn secondary" id="export" type="button" disabled>Export</button>
     </div>
   </div>  <div class="report" id="report">
     <div class="reportTop">
@@ -133,7 +133,7 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
     </div>
     <div class="reportBody" id="body"></div>
   </div>  <footer>
-    v1.1A3 · Developed by Keyth Jyles
+    v1.1A4 · Developed by Keyth Jyles
   </footer>
 </div><div class="modalBack" id="modalBack" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="modal">
@@ -152,7 +152,7 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
 
   const APP = {
     name: "Birthday Code",
-    version: "v1.1A3",
+    version: "v1.1A4",
     url: "https://keythjyles.github.io/Vitals-Tracker-v1.0/BC/",
     cacheText: ""
   };
@@ -239,6 +239,29 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
   }
   function pick(rng, arr){ return arr[Math.floor(rng()*arr.length)]; }
 
+  // Deterministic unique selection (prevents exact sentence repeats across the report)
+  function pickUnique(rng, arr, used){
+    if(!arr || !arr.length) return "";
+    let tries = 0;
+    while(tries < 10){
+      const s = pick(rng, arr);
+      if(!used.has(s)){
+        used.add(s);
+        return s;
+      }
+      tries++;
+    }
+    // Fallback: first unused, else first
+    for(const s of arr){
+      if(!used.has(s)){
+        used.add(s);
+        return s;
+      }
+    }
+    used.add(arr[0]);
+    return arr[0];
+  }
+
   // Numerology helpers
   function reduceNumber(n){
     let x = Math.abs(Number(n) || 0);
@@ -291,7 +314,7 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
     return z[idx];
   }
 
-  // Trait tags used only for overlap logic (not shown as jargon)
+  // Trait tags used only for overlap logic
   const TRAITS = {
     lp: {
       1:{tags:["independence","initiative","leadership"], text:[
@@ -329,10 +352,10 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
         "You’re good at spotting what doesn’t add up.",
         "You need solitude to feel clear. It’s not isolation. It’s maintenance."
       ]},
-      8:{tags:["ambition","results","strategy"], text:[
-        "You respect strength and competence. You don’t respect excuses.",
+      8:{tags:["results","strategy","ambition"], text:[
+        "You respect competence. You don’t respect excuses.",
         "You think in outcomes. You want something you can point to.",
-        "You can carry heavy responsibility, but you need control over the plan."
+        "You can carry responsibility, but you need control over the plan."
       ]},
       9:{tags:["compassion","wisdom","closure"], text:[
         "You see the bigger picture. You notice what people are going through.",
@@ -344,15 +367,15 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
         "You can inspire people, but you also absorb their noise if you’re not careful.",
         "When you trust your instincts, you’re hard to mislead."
       ]},
-      22:{tags:["structure","mastery","impact"], text:[
+      22:{tags:["structure","impact","mastery"], text:[
         "You can take a big idea and make it real.",
         "You don’t just dream. You design.",
         "You’re built for long projects. You don’t quit when the middle gets ugly."
       ]},
       33:{tags:["care","teaching","healing"], text:[
-        "You naturally guide people. They feel safe around you.",
+        "You naturally guide people. People feel safe around you.",
         "You give more than you take. That’s a strength and a risk.",
-        "Your presence can calm chaos—when you keep your own boundaries."
+        "Your presence can calm chaos—when you keep boundaries."
       ]}
     },
     bn: {
@@ -385,7 +408,7 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
         "You don’t believe words until actions match."
       ]},
       8:{tags:["results","strategy"], text:[
-        "You want a result that holds up under pressure.",
+        "You want progress you can measure.",
         "You’re good at making hard calls."
       ]},
       9:{tags:["compassion","closure"], text:[
@@ -415,7 +438,7 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
         "You value comfort, quality, and loyalty."
       ]},
       Gemini:{tags:["adaptability","expression"], text:[
-        "You’re quick. You connect ideas fast.",
+        "You connect ideas fast. You notice links other people miss.",
         "You do better with variety than with monotony."
       ]},
       Cancer:{tags:["care","intuition"], text:[
@@ -522,7 +545,7 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
     ],
     care: [
       "You naturally protect people. You notice what they don’t say.",
-      "Your loyalty is not a slogan. It shows up in actions."
+      "Your loyalty shows up in actions, not speeches."
     ],
     freedom: [
       "You need room to breathe and move.",
@@ -533,12 +556,12 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
       "You make better moves than people expect because you don’t rush."
     ],
     results: [
-      "You respect results. You respect effort that holds up.",
+      "You respect results that hold up under pressure.",
       "You don’t like wasted motion. You like progress you can measure."
     ],
     intuition: [
       "You pick up signals fast, even if you can’t explain it right away.",
-      "Your instincts are usually right. The trick is trusting them without overthinking."
+      "Your instincts are usually right. The trick is trusting them without spiraling."
     ],
     harmony: [
       "You prefer calm. You don’t enjoy drama.",
@@ -622,9 +645,7 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
     return overlaps;
   }
 
-  function title(t){
-    return t.charAt(0).toUpperCase() + t.slice(1);
-  }
+  function title(t){ return t.charAt(0).toUpperCase() + t.slice(1); }
 
   function chipsHTML(traits){
     if(!traits.length) return "";
@@ -642,7 +663,6 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
   }
 
   function renderReport(data){
-    // Numerology (distinct roles)
     const numGrid = kvGrid([
       {k:"Life Path", v:`${data.lp}`},
       {k:"Birthday Number", v:`${data.bn}`},
@@ -656,27 +676,23 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
       <p class="p"><strong>Birthday Date:</strong> ${data.dayLine1} ${data.dayLine2}</p>
     `;
 
-    // Birthday Code immediately after Numerology
     const codeText = `
       <p class="p">${data.codeLine1}</p>
       <p class="p">${data.codeLine2}</p>
       <p class="p"><strong>In plain terms:</strong> ${data.codeLine3}</p>
     `;
 
-    // Astrology (personality tone)
     const astroText = `
       <p class="p"><strong>${data.sun}:</strong> ${data.sunLine1}</p>
       <p class="p">${data.sunLine2}</p>
     `;
 
-    // Chinese Zodiac (behavioral style)
     const czText = `
       <p class="p"><strong>${data.cz}:</strong> ${data.czLine1}</p>
       <p class="p">${data.czLine2}</p>
       <p class="p muted">Note: If born in Jan/Feb, Lunar New Year can shift the zodiac sign.</p>
     `;
 
-    // Overlaps (compare all readings)
     const overlapLead = data.overlaps.length
       ? "When multiple readings repeat the same idea, that’s usually the part that feels most accurate."
       : "No single theme dominates across all readings. That often means you’re versatile and situation-aware.";
@@ -685,10 +701,9 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
       <p class="p">${overlapLead}</p>
       ${data.overlaps.length ? chipsHTML(data.overlaps.map(o=>o.t)) : ""}
       <p class="p"><strong>What keeps showing up about you:</strong> ${data.overlapSentence}</p>
-      <p class="p"><strong>What is different (so it doesn’t feel repetitive):</strong> ${data.uniqueSentence}</p>
+      <p class="p"><strong>What is different:</strong> ${data.uniqueSentence}</p>
     `;
 
-    // Inspirational closing AFTER comparison
     const inspireText = `
       <p class="p"><strong>Your next move:</strong> ${data.inspire1}</p>
       <p class="p">${data.inspire2}</p>
@@ -768,6 +783,7 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
   function buildData(m, d, y){
     const seed = (y * 10000) + ((m+1) * 100) + d;
     const rng = makeRng(seed);
+    const used = new Set(); // prevents repeating exact sentences
 
     const lp = lifePath(y,m,d);
     const bn = reduceNumber(d);
@@ -782,16 +798,12 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
     const sunBlock = TRAITS.sun[sun] || TRAITS.sun.Capricorn;
     const czBlock = TRAITS.cz[cz] || TRAITS.cz.Ox;
 
-    // Make Birthday Date lens distinct: it speaks about "daily style"
     const dayBase = TRAITS.bn[dayReduced] || TRAITS.bn[4];
 
-    // Overlaps (compare all readings)
     const overlaps = computeOverlaps([lpBlock.tags, bnBlock.tags, dayBase.tags, sunBlock.tags, czBlock.tags]);
 
-    // Pick top overlap theme for code + inspiration (fallback if none)
     const topTheme = overlaps[0]?.t || pick(rng, ["structure","truth","strategy","care","freedom","results","intuition","independence"]);
 
-    // Build "unique" angle so it doesn't repeat: choose one tag from each lens that is NOT the top overlap if possible
     function uniqueTag(list){
       const filtered = list.filter(t=>t !== topTheme);
       return filtered.length ? pick(rng, filtered) : pick(rng, list);
@@ -801,54 +813,38 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
     const uSUN = uniqueTag(sunBlock.tags);
     const uCZ = uniqueTag(czBlock.tags);
 
-    // Assemble short, plain sentences with variation
-    const lpLines = lpBlock.text;
-    const bnLines = bnBlock.text;
-    const sunLines = sunBlock.text;
-    const czLines = czBlock.text;
+    // Day lens text is intentionally distinct: "daily style"
     const dayLines = (dayRaw === dayReduced)
       ? [
-          "This is your day-to-day style. It’s the part people feel quickly.",
+          "This is your day-to-day style. It’s what people notice early.",
           "It shows up in habits, pace, and what you tolerate."
         ]
       : [
-          "This is your day-to-day style. It’s the part people feel quickly.",
-          "It starts strong, then settles into a simpler core over time."
+          "This is your day-to-day style. It’s what people notice early.",
+          "It can start intense, then settle into a simpler core as you grow."
         ];
 
     const codeA = [
-      "When things get real, you get clearer.",
-      "You do not need drama to be powerful.",
-      "You are steady when others scatter."
+      "When pressure shows up, you usually get clearer, not louder.",
+      "You do best when life is real and the goal is clear.",
+      "You are steady when other people scatter."
     ];
     const codeB = [
-      "You’re at your best with a clear goal and a clean plan.",
-      "You prefer honest progress over loud promises.",
-      "You don’t want perfect. You want solid."
+      "You prefer honest progress over talk.",
+      "You don’t chase perfection. You build what holds up.",
+      "You do not waste energy on things that do not matter."
     ];
 
     const codeThemeLines = CODE_LINES[topTheme] || CODE_LINES.structure;
-    const codeLine1 = pick(rng, codeA);
-    const codeLine2 = pick(rng, codeB);
-    const codeLine3 = pick(rng, codeThemeLines);
 
-    // Overlap sentence and unique sentence (to avoid repeating the same message)
     const overlapSentence = overlaps.length
       ? `The strongest repeat is ${title(topTheme)}. That’s the thread you return to when life gets loud.`
       : `Your readings don’t pile onto one theme. That usually means you adapt well and change gears when needed.`;
 
     const uniqueSentence =
-      `Your numbers lean into ${title(uLP)} and ${title(uBN)}. Your sign adds ${title(uSUN)}. Your zodiac adds ${title(uCZ)}. That mix keeps you from being “one-note.”`;
+      `Your numbers lean into ${title(uLP)} and ${title(uBN)}. Your sign adds ${title(uSUN)}. Your zodiac adds ${title(uCZ)}. That mix keeps you from being one-note.`;
 
-    // Inspiration after comparison
     const inspPool = INSPIRATION[topTheme] || INSPIRATION.structure;
-    const inspire1 = pick(rng, inspPool);
-    const inspire2 = pick(rng, [
-      "Pick the next right step and take it today. Small wins restore confidence fast.",
-      "Do one thing that proves to you that you are still in control of your direction.",
-      "You don’t need a new life. You need one clean decision and follow-through.",
-      "Keep it simple. Keep it honest. Keep moving."
-    ]);
 
     return {
       seed,
@@ -859,27 +855,35 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
 
       overlaps,
 
-      lpLine1: pick(rng, lpLines),
-      lpLine2: pick(rng, lpLines.filter(x=>x!==lpLines[0])),
+      lpLine1: pickUnique(rng, lpBlock.text, used),
+      lpLine2: pickUnique(rng, lpBlock.text, used),
 
-      bnLine1: pick(rng, bnLines),
-      bnLine2: pick(rng, bnLines.filter(x=>x!==bnLines[0])),
+      bnLine1: pickUnique(rng, bnBlock.text, used),
+      bnLine2: pickUnique(rng, bnBlock.text, used),
 
-      dayLine1: pick(rng, dayLines),
-      dayLine2: pick(rng, dayLines.filter(x=>x!==dayLines[0])),
+      dayLine1: pickUnique(rng, dayLines, used),
+      dayLine2: pickUnique(rng, dayLines, used),
 
-      sunLine1: pick(rng, sunLines),
-      sunLine2: pick(rng, sunLines.filter(x=>x!==sunLines[0])),
+      sunLine1: pickUnique(rng, sunBlock.text, used),
+      sunLine2: pickUnique(rng, sunBlock.text, used),
 
-      czLine1: pick(rng, czLines),
-      czLine2: pick(rng, czLines.filter(x=>x!==czLines[0])),
+      czLine1: pickUnique(rng, czBlock.text, used),
+      czLine2: pickUnique(rng, czBlock.text, used),
 
-      codeLine1, codeLine2, codeLine3,
+      codeLine1: pickUnique(rng, codeA, used),
+      codeLine2: pickUnique(rng, codeB, used),
+      codeLine3: pickUnique(rng, codeThemeLines, used),
 
       overlapSentence,
       uniqueSentence,
 
-      inspire1, inspire2
+      inspire1: pickUnique(rng, inspPool, used),
+      inspire2: pickUnique(rng, [
+        "Pick the next right step and take it today. Small wins restore confidence fast.",
+        "Do one thing today that proves you are still in control of your direction.",
+        "You don’t need a new life. You need one clean decision and follow-through.",
+        "Keep it simple. Keep it honest. Keep moving."
+      ], used)
     };
   }
 
@@ -909,7 +913,7 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
     }
 
     const data = buildData(m, d, y);
-    el.meta.textContent = `Birthday: ${data.dateStr} · Deterministic Seed: ${String(data.seed)}`;
+    el.meta.textContent = `Birthday: ${data.dateStr} · Deterministic Seed: ${y}${pad2(m+1)}${pad2(d)}`;
 
     renderReport(data);
 
@@ -935,9 +939,9 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
 </html>
 <!--
 Birthday Code
-Version: v1.1A3
+Version: v1.1A4
 URL: https://keythjyles.github.io/Vitals-Tracker-v1.0/BC/EOF Notes:
 
-Inspirational section is shown AFTER the “Compared Themes” section.
+Buttons are side-by-side on all screen sizes and use the exact labels requested.
 
-Report avoids repetition by giving each lens a distinct focus and by summarizing unique contributions. -->
+Report text uses deterministic unique selection to prevent exact repeated sentences. -->
