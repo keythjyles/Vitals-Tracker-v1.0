@@ -1,16 +1,14 @@
 <!--
 Angel Numbers Tracker — BOF Version Detail Notes
-App Version: v1.2A4
-Base: v1.2A3
+App Version: v1.2A5
+Base: v1.2A4
 Changes (requested):
-- Remove redundant "88 / Pattern / Main theme" strip from Home (post-submit).
-- Make angel number larger on card.
-- Angel Card header must read: "Angel Card Number: XXX"
-- Home text: "Swipe left to view Calendar."
-- Calendar text: "Swipe right for Home."
-- New Sighting modal: do NOT auto-focus (no keyboard pop).
-- "Added" popup: better formatting + include notes; number prominent; notes input bigger font.
-- Reduce Home label/title size to fit (as in screenshot) while still never wrapping.
+- Match UI to screenshot: larger on-card angel number + tighter visual hierarchy.
+- Keep Home/Calendar swipe hint text exactly as specified.
+- Ensure "Angel Card Number: XXX" header line is correct.
+- Keep New Sighting modal from auto-focusing (no keyboard pop).
+- Maintain improved "Added" popup formatting (number prominent + notes included).
+- Home title sizing tuned to fit like screenshot while still never wrapping.
 -->
 <!doctype html>
 <html lang="en">
@@ -272,17 +270,17 @@ Changes (requested):
     /* BIG number on the visible card */
     .meaningTop{
       display:flex;
-      align-items:center;
+      align-items:flex-end;
       justify-content:space-between;
       gap:10px;
       margin-bottom: 8px;
     }
     .numBig{
-      font-size:42px;           /* bigger */
+      font-size:64px;           /* bigger (match screenshot feel) */
       font-weight:950;
       letter-spacing:.4px;
       white-space:nowrap;
-      line-height: 1;
+      line-height: .92;
     }
     .patternPill{
       font-size:13px;
@@ -293,6 +291,7 @@ Changes (requested):
       border-radius: 999px;
       font-weight:750;
       white-space:nowrap;
+      margin-bottom: 6px;
     }
     .meaningText{
       color: rgba(235,245,255,.80);
@@ -378,7 +377,7 @@ Changes (requested):
       backdrop-filter: blur(10px);
     }
 
-    /* Title: smaller base, JS fits down if needed, never wraps */
+    /* Title: tuned smaller like screenshot; JS fits down if needed, never wraps */
     .homeTitle{
       margin: 0 2px 10px;
       font-weight: 950;
@@ -388,7 +387,7 @@ Changes (requested):
       white-space: nowrap;
       overflow: hidden;
       text-overflow: clip;
-      font-size: 40px; /* reduced to fit like screenshot; JS will fit down if needed */
+      font-size: 38px; /* tuned */
     }
 
     .homeTopRow{
@@ -960,7 +959,7 @@ Save creates a .txt file on your device.
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.2A4";
+  const APP_VERSION = "v1.2A5";
   const STORAGE_KEY = "angel_numbers_records_v2_2025_12_29"; // unchanged from v1.2A3 (already unique)
 
   const DAY_MS = 24*60*60*1000;
@@ -1553,8 +1552,6 @@ Save creates a .txt file on your device.
     $("homeNumBig").textContent = n;
     $("homePatternPill").textContent = `Pattern: ${card.pattern || "—"}`;
     $("homeMeaningText").textContent = card.headline || "—";
-
-    // Remove redundant "strip" content by placing only the Angel Card text in the scroll box
     $("homeMeta").textContent = card.cardText || "—";
 
     lastIdentify = { number: n, pattern: card.pattern || "—", cardText: card.cardText || "—" };
@@ -2298,8 +2295,7 @@ self.addEventListener('fetch', (e)=>{ });`;
     const parent = title.parentElement;
     if(!parent) return;
 
-    // Max starts slightly smaller (to match screenshot), still shrinks if needed.
-    let size = 40;
+    let size = 38;
     const min = 18;
 
     title.style.fontSize = size + "px";
@@ -2351,15 +2347,10 @@ self.addEventListener('fetch', (e)=>{ });`;
 
 <!--
 EOF Version Detail Notes
-App Version: v1.2A4
-Base: v1.2A3
+App Version: v1.2A5
+Base: v1.2A4
 Changes:
-- Removed redundant strip intent: main summary strip eliminated as separate section (only Angel Card text remains below).
-- Larger number on card.
-- Angel Card header now: "Angel Card Number: XXX"
-- Home instruction: "Swipe left to view Calendar."
-- Calendar instruction: "Swipe right for Home."
-- New Sighting modal does not auto-focus (keyboard stays closed).
-- Added popup improved: number prominent + includes notes.
-- Home title base font reduced and auto-fit preserves single line.
+- Increased on-card number size to match screenshot emphasis.
+- Home title tuned smaller; auto-fit still single-line (no wrap).
+- All prior v1.2A4 constraints preserved (swipe hints, no autofocus, Added modal formatting, Angel Card header line).
 -->
