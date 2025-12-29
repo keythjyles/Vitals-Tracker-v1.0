@@ -3,9 +3,11 @@ Angel Numbers Tracker — BOF Version Detail Notes
 App Version: v1.2A7
 Base: v1.2A6
 Changes (requested):
-- Home Angel Card: add "Angel Card Number:" header at top of the Angel Card panel, then BIG number below it, then continue the report.
-- Home title clipping: reduce title font size + adjust line-height; ensure any title-fit logic uses the new baseline.
-- Export: Home Export now exports the CURRENT identified number (not all saved entries). If no number is identified, prompt user to Submit first.
+- Home: DELETE the title (no more clipping); shift content up.
+- Home: Add "Angel Card Number" header inside the Angel Card panel, above the BIG number.
+- Edit/View (Angel Card) modal: add an Export button.
+- Edit/View (Angel Card) modal: remove the other data above the Angel Card (move entry details BELOW the Angel Card behind a toggle).
+- Home Export: export the CURRENT identified number/card (not “all entries”).
 - Advance version and update BOF/EOF notes every edit.
 -->
 <!doctype html>
@@ -232,7 +234,6 @@ Changes (requested):
       font-size:18px;
       outline:none;
       width:100%;
-      font-family: var(--font);
     }
     .field::placeholder{ color: rgba(235,245,255,.35); }
     .field:focus{
@@ -327,38 +328,35 @@ Changes (requested):
       padding: 10px;
     }
 
-    .angelCardHeader{
-      display:flex;
-      align-items:center;
-      font-weight:900;
-      background: rgba(0,0,0,.10);
+    .angelHeaderLine{
       border: 1px solid rgba(235,245,255,.12);
+      background: rgba(0,0,0,.08);
       border-radius: 14px;
-      height:auto;
       padding: 10px 12px;
+      font-weight: 900;
+      letter-spacing:.2px;
       color: rgba(235,245,255,.84);
-      font-size: 15px;
-      letter-spacing: .2px;
-      margin-bottom: 10px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.03);
     }
 
+    /* BIG number lives INSIDE the angel panel, below the header line */
     .angelBigNum{
       font-size:72px;
       font-weight:950;
       letter-spacing:.6px;
-      line-height: .98;
+      line-height: .92;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      padding: 6px 8px 8px;
+      padding: 10px 10px 10px;
       border-radius: 16px;
       border: 1px solid rgba(235,245,255,.10);
       background: rgba(0,0,0,.10);
       color: rgba(235,245,255,.92);
       box-shadow: inset 0 0 0 1px rgba(255,255,255,.03);
+      margin-top: 10px;
       margin-bottom: 10px;
       text-align:left;
-      font-family: var(--font);
     }
 
     .angelCardFrame .metaScroll{
@@ -403,25 +401,12 @@ Changes (requested):
       backdrop-filter: blur(10px);
     }
 
-    .homeTitle{
-      margin: 0 2px 10px;
-      font-weight: 950;
-      letter-spacing: .2px;
-      color: rgba(235,245,255,.92);
-      line-height: 1.12;         /* increased to prevent glyph clipping */
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: clip;
-      font-size: 32px;           /* reduced baseline */
-      padding-bottom: 1px;       /* prevent bottom cut in some renderers */
-      font-family: var(--font);  /* explicit */
-    }
-
     .homeTopRow{
       display:flex;
       gap:10px;
       align-items:center;
       margin-bottom: 8px;
+      margin-top: 2px; /* shift up since title is removed */
     }
     .homeTopRow .field{
       flex: 1;
@@ -502,7 +487,6 @@ Changes (requested):
       font-size: clamp(22px, 6.5vw, 34px);
       line-height: 1.05;
       margin: 4px 2px 10px;
-      font-family: var(--font);
     }
     .modalSub{
       color: rgba(235,245,255,.72);
@@ -510,7 +494,6 @@ Changes (requested):
       margin: 0 2px 12px;
       white-space: pre-wrap;
       line-height: 1.28;
-      font-family: var(--font);
     }
     .modalBtns{
       display:flex;
@@ -545,7 +528,6 @@ Changes (requested):
       user-select:none;
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
-      font-family: var(--font);
     }
 
     /* Added popup formatting */
@@ -555,13 +537,11 @@ Changes (requested):
       letter-spacing: .5px;
       margin: 6px 2px 6px;
       color: rgba(235,245,255,.92);
-      font-family: var(--font);
     }
     .addedMeta{
       color: rgba(235,245,255,.70);
       font-size: 14px;
       margin: 0 2px 10px;
-      font-family: var(--font);
     }
     .addedNotesBox{
       border:1px solid rgba(235,245,255,.12);
@@ -573,7 +553,6 @@ Changes (requested):
       line-height: 1.25;
       white-space: pre-wrap;
       margin: 10px 0 4px;
-      font-family: var(--font);
     }
     .addedNotesLabel{
       margin: 0 2px 6px;
@@ -581,7 +560,6 @@ Changes (requested):
       font-size: 13px;
       font-weight: 850;
       letter-spacing: .2px;
-      font-family: var(--font);
     }
 
     .touchLock{
@@ -626,7 +604,6 @@ Changes (requested):
       letter-spacing:.2px;
       padding: 2px 0 4px;
       user-select:none;
-      font-family: var(--font);
     }
 
     .calCell{
@@ -642,14 +619,12 @@ Changes (requested):
       user-select:none;
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
-      font-family: var(--font);
     }
     .calCell .dnum{
       font-weight: 900;
       font-size: 14px;
       color: rgba(235,245,255,.76);
       line-height: 1;
-      font-family: var(--font);
     }
     .calCell.hasData{
       border-color: rgba(90,150,255,.45);
@@ -662,7 +637,6 @@ Changes (requested):
       margin-top:10px;
       font-size: 13px;
       color: rgba(235,245,255,.44);
-      font-family: var(--font);
     }
 
     .dayLogoRow{
@@ -685,7 +659,6 @@ Changes (requested):
       background: rgba(255,255,255,.02);
       border-radius: 18px;
       overflow:hidden;
-      font-family: var(--font);
     }
     .dayItem{
       display:flex;
@@ -698,7 +671,6 @@ Changes (requested):
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
       cursor:pointer;
-      font-family: var(--font);
     }
     .dayItem:first-child{ border-top:none; }
     .dayItem:active{ transform: translateY(1px); }
@@ -714,14 +686,12 @@ Changes (requested):
       letter-spacing:.2px;
       color: rgba(235,245,255,.62);
       white-space:nowrap;
-      font-family: var(--font);
     }
     .dayNum{
       font-size: 16px;
       font-weight: 950;
       color: rgba(235,245,255,.90);
       white-space:nowrap;
-      font-family: var(--font);
     }
     .dayNotes{
       margin-left:auto;
@@ -731,7 +701,6 @@ Changes (requested):
       overflow:hidden;
       text-overflow:ellipsis;
       max-width: 45%;
-      font-family: var(--font);
     }
     .chev{
       font-size: 16px;
@@ -739,7 +708,29 @@ Changes (requested):
       color: rgba(235,245,255,.55);
       margin-left: 10px;
       flex:0 0 auto;
-      font-family: var(--font);
+    }
+
+    /* Edit details toggle (below angel card) */
+    .detailsToggleRow{
+      display:flex;
+      justify-content:flex-start;
+      margin-top: 10px;
+    }
+    .detailsToggleRow .btn{
+      height: 46px;
+      font-size: 16px;
+      font-weight: 850;
+      padding: 0 16px;
+      min-width: 0;
+      flex: 0 0 auto;
+      border-radius: 18px;
+    }
+    .detailsBox{
+      margin-top: 10px;
+      border: 1px solid rgba(235,245,255,.10);
+      background: rgba(255,255,255,.02);
+      border-radius: 18px;
+      padding: 10px;
     }
   </style>
 </head>
@@ -798,7 +789,7 @@ Changes (requested):
         <div id="home" class="card">
           <div id="homeScroll">
             <div class="homeShell" id="homeShell">
-              <div class="homeTitle" id="homeTitle">Identify Angel Number</div>
+              <!-- TITLE REMOVED (per request) -->
 
               <div class="homeTopRow">
                 <input id="homeIdNum" class="field" inputmode="numeric"
@@ -821,7 +812,7 @@ Changes (requested):
                   <div id="homeMeaningText" class="meaningText">—</div>
 
                   <div class="angelCardFrame" id="homeAngelFrame">
-                    <div id="homeAngelHeader" class="angelCardHeader">Angel Card Number: —</div>
+                    <div id="homeAngelHeader" class="angelHeaderLine">Angel Card Number: —</div>
                     <div id="homeAngelBigNum" class="angelBigNum">—</div>
                     <div id="homeMeta" class="metaScroll">—</div>
                   </div>
@@ -979,28 +970,37 @@ Save creates a .txt file on your device.
   <div id="editModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="editTitle">
     <div class="modalCard">
       <div class="modalTitle" id="editTitle">View &amp; Update</div>
-      <div class="modalSub" id="editSub">This is the Angel Card. Everything below is saved with the entry.</div>
+      <div class="modalSub" id="editSub">Angel Card first. Entry details are below.</div>
 
-      <div class="label" style="margin-top:6px;">Date &amp; time</div>
-      <input id="editDT" class="field" type="datetime-local" />
-
-      <div class="label">Number</div>
-      <input id="editNum" class="field" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="e.g., 1111" />
-
-      <div class="label">Notes (saved with entry)</div>
-      <textarea id="editNotes" class="field" style="font-size:18px;" placeholder="Notes..."></textarea>
-
-      <div class="label">Pattern</div>
-      <div id="editPattern" class="field" style="display:flex; align-items:center; font-weight:900; color: rgba(235,245,255,.84);">—</div>
-
-      <div class="label">Angel Card</div>
+      <!-- Angel Card FIRST (no other data above it) -->
       <div class="angelCardFrame">
-        <div id="editAngelHeader" class="field" style="display:flex; align-items:center; font-weight:900; background: rgba(0,0,0,.10); border: 1px solid rgba(235,245,255,.12); border-radius: 14px; height:auto; padding: 10px 12px;">Angel Card Number: —</div>
-        <div id="editAngelCard" class="metaScroll" style="max-height: 260px; margin-top:10px;">—</div>
+        <div id="editAngelHeader" class="angelHeaderLine">Angel Card Number: —</div>
+        <div id="editAngelBig" class="angelBigNum">—</div>
+        <div id="editAngelCard" class="metaScroll" style="max-height: 260px; margin-top:0;">—</div>
+      </div>
+
+      <!-- Details toggle -->
+      <div class="detailsToggleRow">
+        <button id="btnToggleDetails" class="btn">Show Details</button>
+      </div>
+
+      <div id="editDetailsBox" class="detailsBox hidden">
+        <div class="label" style="margin-top:2px;">Date &amp; time</div>
+        <input id="editDT" class="field" type="datetime-local" />
+
+        <div class="label">Number</div>
+        <input id="editNum" class="field" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="e.g., 1111" />
+
+        <div class="label">Notes (saved with entry)</div>
+        <textarea id="editNotes" class="field" style="font-size:18px;" placeholder="Notes..."></textarea>
+
+        <div class="label">Pattern</div>
+        <div id="editPattern" class="field" style="display:flex; align-items:center; font-weight:900; color: rgba(235,245,255,.84);">—</div>
       </div>
 
       <div class="modalBtns">
         <button id="btnEditSave" class="btn primary">Save</button>
+        <button id="btnEditExport" class="btn">Export</button>
         <button id="btnEditDelete" class="btn danger">Delete</button>
         <button id="btnEditClose" class="btn">Close</button>
       </div>
@@ -1211,7 +1211,7 @@ Save creates a .txt file on your device.
     const da = pad(d.getDate());
     const hh = pad(d.getHours());
     const mi = pad(d.getMinutes());
-    return `${y}-${m}-${da}T${hh}:${mi}`;
+    return `${y}-${m}-${da}T${hh}:${mi}`; // no seconds
   }
 
   function fromDTLocalValue(v){
@@ -1332,6 +1332,7 @@ Save creates a .txt file on your device.
     return items.map(x => `• ${x}`).join("\n");
   }
 
+  // IMPORTANT: cardText does NOT include "Angel Card Number" / "Pattern" header lines
   function buildAngelCard(n){
     if(!n){
       return { pattern: "—", headline: "—", cardText: "—" };
@@ -1595,7 +1596,6 @@ Save creates a .txt file on your device.
     setHomeRevealed(true);
     renderHomeCardFromNumber(n);
     try{ document.activeElement?.blur(); }catch{}
-    fitHomeTitle();
   }
 
   $("btnHomeSubmit").addEventListener("click", (e)=>{ e.preventDefault(); submitHome(); });
@@ -1859,6 +1859,14 @@ Save creates a .txt file on your device.
 
   let editId = null;
 
+  function setDetailsOpen(on){
+    const box = $("editDetailsBox");
+    const btn = $("btnToggleDetails");
+    box.classList.toggle("hidden", !on);
+    btn.textContent = on ? "Hide Details" : "Show Details";
+    btn.dataset.open = on ? "1" : "0";
+  }
+
   function openEditModal(id){
     const recs = loadRecords();
     const r = recs.find(x => x.id === id);
@@ -1877,7 +1885,10 @@ Save creates a .txt file on your device.
 
     $("editPattern").textContent = card.pattern || "—";
     $("editAngelHeader").textContent = `Angel Card Number: ${n || "—"}`;
+    $("editAngelBig").textContent = n || "—";
     $("editAngelCard").textContent = card.cardText || "—";
+
+    setDetailsOpen(false);
 
     $("editModal").classList.remove("hidden");
     lockTouches(80);
@@ -1896,10 +1907,17 @@ Save creates a .txt file on your device.
     const card = buildAngelCard(n);
     $("editPattern").textContent = card.pattern || "—";
     $("editAngelHeader").textContent = `Angel Card Number: ${n || "—"}`;
+    $("editAngelBig").textContent = n || "—";
     $("editAngelCard").textContent = card.cardText || "—";
   }
 
   $("editNum").addEventListener("input", refreshEditDerived);
+
+  $("btnToggleDetails").addEventListener("click", (e)=>{
+    e.preventDefault();
+    const on = $("btnToggleDetails").dataset.open === "1";
+    setDetailsOpen(!on);
+  });
 
   $("btnEditClose").addEventListener("click", (e)=>{ e.preventDefault(); closeEditModal(); });
   $("editModal").addEventListener("click", (e)=>{ if(e.target === $("editModal")) closeEditModal(); });
@@ -1959,6 +1977,30 @@ Save creates a .txt file on your device.
     closeEditModal();
     renderCalendar();
     reopenDayListForTs(ts);
+  });
+
+  // Export button inside View/Edit modal: export THIS entry
+  $("btnEditExport").addEventListener("click", (e)=>{
+    e.preventDefault();
+    if(!editId){
+      openInfo("Export", "No entry selected.", {mode:"info"});
+      return;
+    }
+    const recs = loadRecords();
+    const r = recs.find(x => x.id === editId);
+    if(!r){
+      openInfo("Export", "That entry could not be found.", {mode:"info"});
+      return;
+    }
+    exportReport(
+      [r],
+      {
+        title: "Single Entry Export",
+        rangeLabel: fmtDateTime(r.ts),
+        notes: "This export contains the single entry currently open in the Angel Card view."
+      },
+      "angel_numbers_entry"
+    );
   });
 
   const deck = $("deck");
@@ -2271,25 +2313,25 @@ self.addEventListener('fetch', (e)=>{ });`;
   function exportCurrentIdentify(){
     const n = lastIdentify.number || normalizeNumberInput($("homeIdNum").value);
     if(!n){
-      openInfo("Nothing to export", "Enter a number and tap Submit first. Then Export will export the current number’s Angel Card.", {mode:"info"});
+      openInfo("Export", "Enter a number, then tap Submit first.", {mode:"info"});
       return;
     }
     const card = buildAngelCard(n);
-    const pseudo = [{
-      id: "current",
+    const pseudo = {
+      id: makeId(Date.now()),
       ts: Date.now(),
       number: n,
       meaning: card.cardText || "—",
       notes: "None"
-    }];
+    };
     exportReport(
-      pseudo,
+      [pseudo],
       {
         title: "Current Identify Export",
-        rangeLabel: `Current identified number: ${n}`,
-        notes: "This export contains the Angel Card currently shown on the Home screen (not necessarily saved to the calendar)."
+        rangeLabel: `Current identify: ${n} (not saved unless you Add to Calendar)`,
+        notes: "This export contains the CURRENT identified number and its Angel Card from the Home screen."
       },
-      `angel_number_${n}`
+      "angel_numbers_current"
     );
   }
 
@@ -2300,7 +2342,10 @@ self.addEventListener('fetch', (e)=>{ });`;
     $("btnBackFromCalendar").addEventListener("click", () => snapToIndex(0, true));
 
     const btnExport = $("btnHomeExport");
-    if(btnExport) btnExport.addEventListener("click", () => exportCurrentIdentify());
+    if(btnExport) btnExport.addEventListener("click", (e) => {
+      e.preventDefault();
+      exportCurrentIdentify();
+    });
 
     const btnAdd = $("btnAddToCalendar");
     if(btnAdd) btnAdd.addEventListener("click", () => openAddCalModal());
@@ -2321,30 +2366,6 @@ self.addEventListener('fetch', (e)=>{ });`;
     });
   }
 
-  function fitHomeTitle(){
-    const title = $("homeTitle");
-    if(!title) return;
-
-    const parent = title.parentElement;
-    if(!parent) return;
-
-    const maxWidth = parent.clientWidth - 6;
-    if(maxWidth <= 0) return;
-
-    let size = 32;
-    const min = 16;
-
-    title.style.fontSize = size + "px";
-    title.style.letterSpacing = ".2px";
-    title.style.lineHeight = "1.12";
-    title.style.whiteSpace = "nowrap";
-
-    while(size > min && title.scrollWidth > maxWidth){
-      size -= 1;
-      title.style.fontSize = size + "px";
-    }
-  }
-
   injectManifest();
   registerSW();
 
@@ -2360,10 +2381,6 @@ self.addEventListener('fetch', (e)=>{ });`;
   renderCalendar();
 
   updateInstallButton();
-  fitHomeTitle();
-  setTimeout(fitHomeTitle, 0);
-  setTimeout(fitHomeTitle, 120);
-  setTimeout(fitHomeTitle, 300);
 
   try{ document.activeElement?.blur(); }catch{}
   setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 0);
@@ -2374,7 +2391,6 @@ self.addEventListener('fetch', (e)=>{ });`;
   window.addEventListener("resize", () => {
     setDeckX(deckTargetXForIndex(deckIndex), false);
     if(deckIndex === 1) renderCalendar();
-    fitHomeTitle();
   });
 
 })();
@@ -2387,7 +2403,10 @@ EOF Version Detail Notes
 App Version: v1.2A7
 Base: v1.2A6
 Changes:
-- Home Angel Card now shows "Angel Card Number: {number}" header at top, then BIG number, then the report.
-- Home title clipping fix: reduced baseline font-size and increased line-height; fit logic aligned to baseline.
-- Home Export now exports the CURRENT identified number’s Angel Card (not all saved entries). Prompts user if no number identified.
+- Home: deleted the title entirely (no more clipping); content shifts up.
+- Home: Angel Card panel now includes header line "Angel Card Number: X" above the BIG number.
+- View/Edit (Angel Card) modal: Angel Card is shown first with no other data above it.
+- View/Edit modal: entry details moved below the Angel Card behind a Show/Hide Details toggle.
+- View/Edit modal: added Export button to export the currently open entry.
+- Home Export now exports the CURRENT identified number/card (not all entries).
 -->
