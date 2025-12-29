@@ -2,14 +2,14 @@
 
 <!--
 Birthday Code
-Version: v1.1A4
+Version: v1.1A5
 URL: https://keythjyles.github.io/Vitals-Tracker-v1.0/BC/
 
 Version Notes:
-- Buttons: renamed to “Generate Report” and “Export”; forced side-by-side layout (all screen sizes).
-- Reduced repetition: added deterministic unique-line selection to prevent repeating the same sentence in the report.
-- No prompts, no mantra, no sources in the report (remains removed).
-- Deterministic output preserved.
+- Numerology expanded: Month Number + Day Number + Month+Day (Attitude) + Full Date (Life Path) + Year Number + Full Date + Year commentary.
+- Added Install button on the same button row (Generate / Export / Install).
+- Deterministic output preserved; anti-repetition selection retained.
+- No prompts, no mantra, no sources in the report.
 --><html lang="en">
 <head>
 <meta charset="utf-8">
@@ -85,7 +85,7 @@ Version Notes:
 
 /* Buttons: always side-by-side */ .btnRow{ display:flex; gap:10px; margin-top:12px; } .btnRow .btn{flex:1; min-width:0}
 
-.btn{ background:linear-gradient(135deg,#6fb3ff,#4f7cff); color:#04122b; border:none;border-radius:16px; padding:14px 16px; font-size:16px;font-weight:900; cursor:pointer; box-shadow: var(--shadow); user-select:none; } .btn:active{transform: translateY(1px)} .btn.secondary{ background:transparent; color:rgba(231,236,243,.92); border:1px solid var(--border); box-shadow:none; } .btn[disabled]{ opacity:.45; cursor:not-allowed; transform:none !important; }
+.btn{ background:linear-gradient(135deg,#6fb3ff,#4f7cff); color:#04122b; border:none;border-radius:16px; padding:14px 12px; font-size:16px;font-weight:900; cursor:pointer; box-shadow: var(--shadow); user-select:none; } .btn:active{transform: translateY(1px)} .btn.secondary{ background:transparent; color:rgba(231,236,243,.92); border:1px solid var(--border); box-shadow:none; } .btn[disabled]{ opacity:.45; cursor:not-allowed; transform:none !important; }
 
 .report{ margin-top:14px; background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,0)); border:1px solid var(--border); border-radius:18px; overflow:hidden; box-shadow: var(--shadow); } .reportTop{ padding:14px 16px 12px; border-bottom:1px solid var(--border); background: radial-gradient(720px 220px at 22% 0%, rgba(111,179,255,.18), transparent 60%), radial-gradient(720px 220px at 82% 0%, rgba(139,92,246,.16), transparent 60%), linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,0)); } .reportTop h2{margin:0;font-size:18px;letter-spacing:.2px} .meta{color:var(--muted);font-size:13px;margin-top:6px} .reportBody{ padding:14px 16px; max-height: 66vh; overflow:auto; }
 
@@ -105,7 +105,7 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
         <h1>Birthday Code</h1>
         <div class="sub">Intriguing, grounded interpretations</div>
       </div>
-      <div class="pill">v1.1A4</div>
+      <div class="pill">v1.1A5</div>
     </div>
   </header>  <div class="panel">
     <div class="row">
@@ -125,6 +125,7 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
     <div class="btnRow">
       <button class="btn" id="gen" type="button">Generate Report</button>
       <button class="btn secondary" id="export" type="button" disabled>Export</button>
+      <button class="btn secondary" id="installBtn" type="button" disabled>Install</button>
     </div>
   </div>  <div class="report" id="report">
     <div class="reportTop">
@@ -133,7 +134,7 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
     </div>
     <div class="reportBody" id="body"></div>
   </div>  <footer>
-    v1.1A4 · Developed by Keyth Jyles
+    v1.1A5 · Developed by Keyth Jyles · https://keythjyles.github.io/Vitals-Tracker-v1.0/BC/
   </footer>
 </div><div class="modalBack" id="modalBack" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="modal">
@@ -152,10 +153,102 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
 
   const APP = {
     name: "Birthday Code",
-    version: "v1.1A4",
+    version: "v1.1A5",
     url: "https://keythjyles.github.io/Vitals-Tracker-v1.0/BC/",
     cacheText: ""
   };
+
+  // --- Minimal manifest + SW for installability (single-file hosting) ---
+  // Note: GitHub Pages requires a service worker file at a path the browser can fetch.
+  // We generate SW source and register it via a Blob URL. Some browsers may not persist Blob SW across reloads.
+  // If install prompt does not appear, you can still "Add to Home Screen" from browser menu.
+  const manifestObj = {
+    name: "Birthday Code",
+    short_name: "Birthday Code",
+    start_url: APP.url,
+    display: "standalone",
+    background_color: "#0b1220",
+    theme_color: "#0b1220",
+    icons: [
+      {
+        src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='192' height='192' viewBox='0 0 192 192'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237cc3ff'/%3E%3Cstop offset='1' stop-color='%234f7cff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='192' height='192' rx='40' fill='url(%23g)'/%3E%3Ctext x='96' y='114' text-anchor='middle' font-family='Arial' font-size='72' font-weight='900' fill='%2306122b'%3EBC%3C/text%3E%3C/svg%3E",
+        sizes: "192x192",
+        type: "image/svg+xml"
+      },
+      {
+        src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='512' height='512' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237cc3ff'/%3E%3Cstop offset='1' stop-color='%234f7cff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='120' fill='url(%23g)'/%3E%3Ctext x='256' y='314' text-anchor='middle' font-family='Arial' font-size='190' font-weight='900' fill='%2306122b'%3EBC%3C/text%3E%3C/svg%3E",
+        sizes: "512x512",
+        type: "image/svg+xml"
+      }
+    ]
+  };
+
+  function attachManifest(){
+    try{
+      const json = JSON.stringify(manifestObj);
+      const blob = new Blob([json], {type:"application/manifest+json"});
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("link");
+      link.rel = "manifest";
+      link.href = url;
+      document.head.appendChild(link);
+    }catch(e){}
+  }
+
+  async function registerServiceWorker(){
+    // Best-effort. If it fails, app still works offline only as a normal page.
+    try{
+      if(!("serviceWorker" in navigator)) return;
+      const swCode =
+`const CACHE='bc-${APP.version}';
+self.addEventListener('install', e=>{
+  e.waitUntil((async()=>{
+    const c=await caches.open(CACHE);
+    try{ await c.addAll(['./']); }catch(_){}
+    self.skipWaiting();
+  })());
+});
+self.addEventListener('activate', e=>{
+  e.waitUntil((async()=>{
+    const keys=await caches.keys();
+    await Promise.all(keys.map(k=>k===CACHE?null:caches.delete(k)));
+    self.clients.claim();
+  })());
+});
+self.addEventListener('fetch', e=>{
+  e.respondWith((async()=>{
+    const req=e.request;
+    if(req.method!=='GET') return fetch(req);
+    const cached=await caches.match(req);
+    if(cached) return cached;
+    try{
+      const net=await fetch(req);
+      const c=await caches.open(CACHE);
+      c.put(req, net.clone());
+      return net;
+    }catch(_){
+      const fallback=await caches.match('./');
+      return fallback || new Response('Offline', {status:200, headers:{'Content-Type':'text/plain'}});
+    }
+  })());
+});`;
+      const blob = new Blob([swCode], {type:"text/javascript"});
+      const swUrl = URL.createObjectURL(blob);
+      await navigator.serviceWorker.register(swUrl, {scope:"./"});
+    }catch(e){}
+  }
+
+  // Install prompt handling
+  let deferredPrompt = null;
+  const installBtn = document.getElementById("installBtn");
+  window.addEventListener("beforeinstallprompt", (e)=>{
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.disabled = false;
+  });
+
+  attachManifest();
+  registerServiceWorker();
 
   const months = [
     {n:"January",d:31},{n:"February",d:28},{n:"March",d:31},{n:"April",d:30},
@@ -169,6 +262,7 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
     year: document.getElementById('year'),
     gen: document.getElementById('gen'),
     exportBtn: document.getElementById('export'),
+    installBtn,
     meta: document.getElementById('meta'),
     body: document.getElementById('body'),
     modalBack: document.getElementById('modalBack'),
@@ -186,6 +280,17 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
   el.modalClose.addEventListener("click", hideModal);
   el.modalBack.addEventListener("click", (e)=>{ if(e.target===el.modalBack) hideModal(); });
   document.addEventListener("keydown", (e)=>{ if(e.key==="Escape") hideModal(); });
+
+  el.installBtn.addEventListener("click", async ()=>{
+    if(!deferredPrompt){
+      showModal("Install", "If you don’t see an install prompt, use your browser menu and choose “Add to Home Screen”.");
+      return;
+    }
+    deferredPrompt.prompt();
+    try{ await deferredPrompt.userChoice; }catch(e){}
+    deferredPrompt = null;
+    el.installBtn.disabled = true;
+  });
 
   function isLeap(y){ return (y%4===0 && y%100!==0) || (y%400===0); }
   function pad2(n){ return String(n).padStart(2,"0"); }
@@ -243,7 +348,7 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
   function pickUnique(rng, arr, used){
     if(!arr || !arr.length) return "";
     let tries = 0;
-    while(tries < 10){
+    while(tries < 12){
       const s = pick(rng, arr);
       if(!used.has(s)){
         used.add(s);
@@ -251,7 +356,6 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
       }
       tries++;
     }
-    // Fallback: first unused, else first
     for(const s of arr){
       if(!used.has(s)){
         used.add(s);
@@ -272,9 +376,13 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
     }
     return x;
   }
+  function sumDigitsString(s){
+    return String(s).split("").reduce((a,b)=>a + (b>="0"&&b<="9" ? Number(b) : 0), 0);
+  }
+
   function lifePath(y,m,d){
     const s = String(y) + pad2(m+1) + pad2(d);
-    const sum = s.split("").reduce((a,b)=>a + Number(b), 0);
+    const sum = sumDigitsString(s);
     return reduceNumber(sum);
   }
 
@@ -314,136 +422,160 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
     return z[idx];
   }
 
-  // Trait tags used only for overlap logic
-  const TRAITS = {
-    lp: {
-      1:{tags:["independence","initiative","leadership"], text:[
-        "You do better when you can steer. You are not built to be micromanaged.",
-        "You like starting things. You dislike waiting for permission.",
-        "When you believe in something, you move first and explain later."
-      ]},
-      2:{tags:["harmony","intuition","partnership"], text:[
-        "You read people well. You notice tone and tension fast.",
-        "You’re good at smoothing rough edges without making a scene.",
-        "You often carry the role of peacekeeper, even when you didn’t ask for it."
-      ]},
-      3:{tags:["expression","creativity","optimism"], text:[
+  // Meaning copy by number
+  const NUM_MEAN = {
+    1:{
+      vibe:["independence","initiative","self-direction"],
+      lines:[
+        "You do best when you can choose the next step. You dislike being boxed in.",
+        "When you commit, you move quickly. You prefer action over debate."
+      ],
+      watch:[
+        "Watch the urge to do everything alone. Independence still needs support.",
+        "When frustrated, slow down before you burn bridges you’ll want later."
+      ]
+    },
+    2:{
+      vibe:["intuition","harmony","partnership"],
+      lines:[
+        "You read people fast. You notice tone, tension, and what’s unsaid.",
+        "You’re built for collaboration—when the people are right."
+      ],
+      watch:[
+        "Don’t carry everyone’s emotions as if they’re yours.",
+        "Avoid delaying decisions just to keep the peace."
+      ]
+    },
+    3:{
+      vibe:["expression","creativity","optimism"],
+      lines:[
         "You process life by talking, writing, or creating something from it.",
-        "You can lift a room. Your energy changes the mood.",
-        "When you’re at your best, you’re playful, sharp, and honest."
-      ]},
-      4:{tags:["structure","discipline","reliability"], text:[
-        "You do not trust chaos. You trust work.",
-        "You build your life in steps. You care about what holds up over time.",
+        "You can lift the mood in a room, even without trying."
+      ],
+      watch:[
+        "Don’t use humor to dodge what needs to be felt.",
+        "Consistency matters more than inspiration."
+      ]
+    },
+    4:{
+      vibe:["structure","discipline","reliability"],
+      lines:[
+        "You feel calmer when there is a plan. You trust what holds up over time.",
         "People count on you because you follow through."
-      ]},
-      5:{tags:["freedom","adaptability","change"], text:[
+      ],
+      watch:[
+        "Don’t turn high standards into self-punishment.",
+        "Make space for rest so discipline doesn’t become rigidity."
+      ]
+    },
+    5:{
+      vibe:["freedom","adaptability","change"],
+      lines:[
         "You need movement. Stagnation drains you.",
-        "You learn by trying, not by planning forever.",
-        "You can reset fast after change. You’re harder to trap than people think."
-      ]},
-      6:{tags:["care","responsibility","service"], text:[
-        "You take care of people. Sometimes too much.",
-        "You want things to feel safe, stable, and right at home.",
-        "You can be the strongest person in the room without raising your voice."
-      ]},
-      7:{tags:["analysis","truth","discernment"], text:[
-        "You think deeply. You do not enjoy shallow talk.",
-        "You’re good at spotting what doesn’t add up.",
-        "You need solitude to feel clear. It’s not isolation. It’s maintenance."
-      ]},
-      8:{tags:["results","strategy","ambition"], text:[
-        "You respect competence. You don’t respect excuses.",
-        "You think in outcomes. You want something you can point to.",
-        "You can carry responsibility, but you need control over the plan."
-      ]},
-      9:{tags:["compassion","wisdom","closure"], text:[
-        "You see the bigger picture. You notice what people are going through.",
-        "You can end a chapter cleanly when others keep reopening it.",
-        "You’re at your best when you’re doing something that matters beyond yourself."
-      ]},
-      11:{tags:["intuition","inspiration","sensitivity"], text:[
-        "You feel the signal early. You notice meaning in small details.",
-        "You can inspire people, but you also absorb their noise if you’re not careful.",
-        "When you trust your instincts, you’re hard to mislead."
-      ]},
-      22:{tags:["structure","impact","mastery"], text:[
-        "You can take a big idea and make it real.",
-        "You don’t just dream. You design.",
-        "You’re built for long projects. You don’t quit when the middle gets ugly."
-      ]},
-      33:{tags:["care","teaching","healing"], text:[
-        "You naturally guide people. People feel safe around you.",
-        "You give more than you take. That’s a strength and a risk.",
+        "You learn by trying, not by over-planning."
+      ],
+      watch:[
+        "Avoid scattering your energy across too many starts.",
+        "Choose one direction long enough to see results."
+      ]
+    },
+    6:{
+      vibe:["care","responsibility","service"],
+      lines:[
+        "You protect people you love. Your loyalty shows in actions.",
+        "You want life to feel safe, stable, and right at home."
+      ],
+      watch:[
+        "Don’t over-function for others and call it love.",
+        "Boundaries keep your care sustainable."
+      ]
+    },
+    7:{
+      vibe:["analysis","truth","discernment"],
+      lines:[
+        "You think deeply. Shallow talk doesn’t satisfy you.",
+        "You spot patterns and contradictions quickly."
+      ],
+      watch:[
+        "Don’t isolate when you need recovery—communicate instead.",
+        "Overthinking can steal the moment."
+      ]
+    },
+    8:{
+      vibe:["results","strategy","ambition"],
+      lines:[
+        "You respect competence. You want progress you can measure.",
+        "You’re built to carry responsibility—if you control the plan."
+      ],
+      watch:[
+        "Don’t confuse worth with productivity.",
+        "Power grows when you pair it with patience."
+      ]
+    },
+    9:{
+      vibe:["compassion","wisdom","closure"],
+      lines:[
+        "You see the bigger picture and what people are going through.",
+        "You can end a chapter cleanly when others keep reopening it."
+      ],
+      watch:[
+        "Don’t rescue people who refuse to help themselves.",
+        "Let endings be endings."
+      ]
+    },
+    11:{
+      vibe:["intuition","inspiration","sensitivity"],
+      lines:[
+        "You notice meaning in small details. You feel the signal early.",
+        "You can inspire people, but you also absorb noise if you’re not careful."
+      ],
+      watch:[
+        "Protect your nervous system. Quiet time is not optional.",
+        "Don’t confuse anxiety with intuition."
+      ]
+    },
+    22:{
+      vibe:["mastery","structure","impact"],
+      lines:[
+        "You can take a big idea and make it real. You don’t just dream—you design.",
+        "You’re built for long projects. You keep going when the middle gets ugly."
+      ],
+      watch:[
+        "Avoid carrying everything alone. Delegate where you can.",
+        "Don’t stall waiting for perfect conditions."
+      ]
+    },
+    33:{
+      vibe:["care","teaching","healing"],
+      lines:[
+        "People feel safe around you. You naturally guide and steady others.",
         "Your presence can calm chaos—when you keep boundaries."
-      ]}
-    },
-    bn: {
-      1:{tags:["independence","initiative"], text:[
-        "You act fast when you see the point.",
-        "You prefer clear choices over endless options."
-      ]},
-      2:{tags:["harmony","partnership"], text:[
-        "You work best with the right person beside you.",
-        "You notice what others need without being told."
-      ]},
-      3:{tags:["expression","humor"], text:[
-        "You lighten the mood when things get heavy.",
-        "You’re persuasive without trying too hard."
-      ]},
-      4:{tags:["structure","reliability"], text:[
-        "You like plans that make sense.",
-        "You trust effort. You distrust shortcuts."
-      ]},
-      5:{tags:["freedom","change"], text:[
-        "You need room to move.",
-        "You adjust quickly when life shifts."
-      ]},
-      6:{tags:["care","responsibility"], text:[
-        "You feel responsible for the outcome.",
-        "You’re protective of people you love."
-      ]},
-      7:{tags:["analysis","truth"], text:[
-        "You see patterns others miss.",
-        "You don’t believe words until actions match."
-      ]},
-      8:{tags:["results","strategy"], text:[
-        "You want progress you can measure.",
-        "You’re good at making hard calls."
-      ]},
-      9:{tags:["compassion","closure"], text:[
-        "You’re empathetic, but you also know when it’s time to move on.",
-        "You carry lessons forward instead of carrying resentment."
-      ]},
-      11:{tags:["intuition","inspiration"], text:[
-        "You pick up signals fast.",
-        "You can spark hope in people when they are stuck."
-      ]},
-      22:{tags:["structure","impact"], text:[
-        "You’re practical about big goals.",
-        "You build toward something real."
-      ]},
-      33:{tags:["care","healing"], text:[
-        "You give comfort and direction.",
-        "People feel better after talking to you."
-      ]}
-    },
+      ],
+      watch:[
+        "Don’t give so much that you disappear.",
+        "Your job is to help, not to carry."
+      ]
+    }
+  };
+
+  // Trait tags used for overlap logic
+  const TRAITS = {
     sun: {
       Aries:{tags:["initiative","directness"], text:[
-        "You’re direct. You’d rather deal with the truth than dance around it.",
-        "You don’t like hesitation. If it needs doing, you’d rather start."
+        "You’re direct. If it needs doing, you’d rather start than wait.",
+        "You don’t like hesitation. You prefer clean decisions."
       ]},
       Taurus:{tags:["reliability","steadiness"], text:[
-        "You’re steady. You don’t change your mind every five minutes.",
-        "You value comfort, quality, and loyalty."
+        "You’re steady. You value loyalty, comfort, and quality.",
+        "You don’t change your mind just to please people."
       ]},
       Gemini:{tags:["adaptability","expression"], text:[
-        "You connect ideas fast. You notice links other people miss.",
-        "You do better with variety than with monotony."
+        "You connect ideas fast. You do better with variety than monotony.",
+        "You notice links other people miss."
       ]},
       Cancer:{tags:["care","intuition"], text:[
         "You care deeply, even if you keep it private.",
-        "You remember what people said. You remember how it felt."
+        "You remember how things felt. That becomes your compass."
       ]},
       Leo:{tags:["confidence","expression"], text:[
         "You have presence. People notice when you decide to show up.",
@@ -451,31 +583,31 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
       ]},
       Virgo:{tags:["analysis","reliability"], text:[
         "You notice details. You can’t unsee what’s off.",
-        "You fix problems quietly and feel annoyed when nobody notices."
+        "You fix problems quietly and expect standards to matter."
       ]},
       Libra:{tags:["harmony","fairness"], text:[
         "You care about fairness. You can’t relax when things feel lopsided.",
-        "You try to keep peace without losing the truth."
+        "You keep peace without losing the truth."
       ]},
       Scorpio:{tags:["truth","focus"], text:[
-        "You’re intense in a controlled way.",
-        "You do not trust easily. When you do, you’re loyal."
+        "You’re intense in a controlled way. You don’t trust easily.",
+        "When you commit, you’re loyal and focused."
       ]},
       Sagittarius:{tags:["freedom","directness"], text:[
         "You value freedom. You don’t like being boxed in.",
         "You’d rather be honest than popular."
       ]},
       Capricorn:{tags:["discipline","results"], text:[
-        "You’re built for the long game.",
-        "You respect effort. You respect competence."
+        "You’re built for the long game. You respect effort and competence.",
+        "You prefer progress that holds up under pressure."
       ]},
       Aquarius:{tags:["independence","innovation"], text:[
         "You think differently. You see angles others miss.",
         "You want space to be yourself without being questioned."
       ]},
       Pisces:{tags:["intuition","compassion"], text:[
-        "You’re sensitive in a strong way.",
-        "You feel people. You also need recovery time."
+        "You’re sensitive in a strong way. You feel people.",
+        "You need recovery time to stay clear."
       ]}
     },
     cz: {
@@ -662,18 +794,28 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
     }).join("") + `</div>`;
   }
 
+  function meaningFor(n){
+    return NUM_MEAN[n] || NUM_MEAN[4];
+  }
+
   function renderReport(data){
     const numGrid = kvGrid([
-      {k:"Life Path", v:`${data.lp}`},
-      {k:"Birthday Number", v:`${data.bn}`},
-      {k:"Birthday Date (day)", v:`${data.dayRaw} → ${data.dayReduced}`}
+      {k:"Month Number", v:`${data.monthNum}`},
+      {k:"Day Number", v:`${data.dayNum}`},
+      {k:"Month + Day (Attitude)", v:`${data.mdSum} → ${data.attitude}`},
+      {k:"Year Number", v:`${data.yearSum} → ${data.yearNum}`},
+      {k:"Full Date (Life Path)", v:`${data.fullSum} → ${data.lifePath}`},
+      {k:"Full Date + Year", v:`${data.fullSum}+${data.yearNum} = ${data.fullPlusYear} → ${data.fullPlusYearReduced}`}
     ]);
 
     const numerologyText = `
       ${numGrid}
-      <p class="p"><strong>Life Path:</strong> ${data.lpLine1} ${data.lpLine2}</p>
-      <p class="p"><strong>Birthday Number:</strong> ${data.bnLine1} ${data.bnLine2}</p>
-      <p class="p"><strong>Birthday Date:</strong> ${data.dayLine1} ${data.dayLine2}</p>
+      <p class="p"><strong>Month:</strong> ${data.monthLine1} ${data.monthLine2}</p>
+      <p class="p"><strong>Day:</strong> ${data.dayLine1} ${data.dayLine2}</p>
+      <p class="p"><strong>Month + Day:</strong> ${data.attLine1} ${data.attLine2}</p>
+      <p class="p"><strong>Year:</strong> ${data.yearLine1} ${data.yearLine2}</p>
+      <p class="p"><strong>Full Date:</strong> ${data.lpLine1} ${data.lpLine2}</p>
+      <p class="p"><strong>Full Date + Year:</strong> ${data.fpyLine1} ${data.fpyLine2}</p>
     `;
 
     const codeText = `
@@ -729,12 +871,18 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
     lines.push("");
 
     lines.push("NUMEROLOGY");
-    lines.push(`Life Path: ${data.lp}`);
-    lines.push(`Birthday Number: ${data.bn}`);
-    lines.push(`Birthday Date (day): ${data.dayRaw} -> ${data.dayReduced}`);
-    lines.push(`Life Path: ${data.lpLine1} ${data.lpLine2}`);
-    lines.push(`Birthday Number: ${data.bnLine1} ${data.bnLine2}`);
-    lines.push(`Birthday Date: ${data.dayLine1} ${data.dayLine2}`);
+    lines.push(`Month Number: ${data.monthNum}`);
+    lines.push(`Day Number: ${data.dayNum}`);
+    lines.push(`Month + Day (Attitude): ${data.mdSum} -> ${data.attitude}`);
+    lines.push(`Year Number: ${data.yearSum} -> ${data.yearNum}`);
+    lines.push(`Full Date (Life Path): ${data.fullSum} -> ${data.lifePath}`);
+    lines.push(`Full Date + Year: ${data.fullSum}+${data.yearNum}=${data.fullPlusYear} -> ${data.fullPlusYearReduced}`);
+    lines.push(`Month: ${data.monthLine1} ${data.monthLine2}`);
+    lines.push(`Day: ${data.dayLine1} ${data.dayLine2}`);
+    lines.push(`Month+Day: ${data.attLine1} ${data.attLine2}`);
+    lines.push(`Year: ${data.yearLine1} ${data.yearLine2}`);
+    lines.push(`Full Date: ${data.lpLine1} ${data.lpLine2}`);
+    lines.push(`Full Date+Year: ${data.fpyLine1} ${data.fpyLine2}`);
     lines.push("");
 
     lines.push("BIRTHDAY CODE");
@@ -783,24 +931,42 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
   function buildData(m, d, y){
     const seed = (y * 10000) + ((m+1) * 100) + d;
     const rng = makeRng(seed);
-    const used = new Set(); // prevents repeating exact sentences
+    const used = new Set();
 
-    const lp = lifePath(y,m,d);
-    const bn = reduceNumber(d);
-    const dayRaw = d;
-    const dayReduced = reduceNumber(d);
+    const monthNum = reduceNumber(m+1);
+    const dayNum = reduceNumber(d);
+
+    const mdRaw = (m+1) + d;
+    const mdSum = mdRaw;
+    const attitude = reduceNumber(mdRaw);
+
+    const yearSum = sumDigitsString(String(y));
+    const yearNum = reduceNumber(yearSum);
+
+    const fullRawSum = sumDigitsString(String(y) + pad2(m+1) + pad2(d));
+    const fullSum = fullRawSum;
+    const lifePath = reduceNumber(fullRawSum);
+
+    const fullPlusYear = fullSum + yearNum;
+    const fullPlusYearReduced = reduceNumber(fullPlusYear);
 
     const sun = sunSign(m,d);
     const cz = chineseZodiac(y);
 
-    const lpBlock = TRAITS.lp[lp] || TRAITS.lp[4];
-    const bnBlock = TRAITS.bn[bn] || TRAITS.bn[4];
+    const mMean = meaningFor(monthNum);
+    const dMean = meaningFor(dayNum);
+    const attMean = meaningFor(attitude);
+    const yMean = meaningFor(yearNum);
+    const lpMean = meaningFor(lifePath);
+    const fpyMean = meaningFor(fullPlusYearReduced);
+
     const sunBlock = TRAITS.sun[sun] || TRAITS.sun.Capricorn;
-    const czBlock = TRAITS.cz[cz] || TRAITS.cz.Ox;
+    const czBlock  = TRAITS.cz[cz]  || TRAITS.cz.Ox;
 
-    const dayBase = TRAITS.bn[dayReduced] || TRAITS.bn[4];
-
-    const overlaps = computeOverlaps([lpBlock.tags, bnBlock.tags, dayBase.tags, sunBlock.tags, czBlock.tags]);
+    const overlaps = computeOverlaps([
+      mMean.vibe, dMean.vibe, attMean.vibe, yMean.vibe, lpMean.vibe,
+      sunBlock.tags, czBlock.tags
+    ]);
 
     const topTheme = overlaps[0]?.t || pick(rng, ["structure","truth","strategy","care","freedom","results","intuition","independence"]);
 
@@ -808,61 +974,85 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
       const filtered = list.filter(t=>t !== topTheme);
       return filtered.length ? pick(rng, filtered) : pick(rng, list);
     }
-    const uLP = uniqueTag(lpBlock.tags);
-    const uBN = uniqueTag(bnBlock.tags);
+
+    const uM = uniqueTag(mMean.vibe);
+    const uD = uniqueTag(dMean.vibe);
+    const uATT = uniqueTag(attMean.vibe);
     const uSUN = uniqueTag(sunBlock.tags);
     const uCZ = uniqueTag(czBlock.tags);
-
-    // Day lens text is intentionally distinct: "daily style"
-    const dayLines = (dayRaw === dayReduced)
-      ? [
-          "This is your day-to-day style. It’s what people notice early.",
-          "It shows up in habits, pace, and what you tolerate."
-        ]
-      : [
-          "This is your day-to-day style. It’s what people notice early.",
-          "It can start intense, then settle into a simpler core as you grow."
-        ];
-
-    const codeA = [
-      "When pressure shows up, you usually get clearer, not louder.",
-      "You do best when life is real and the goal is clear.",
-      "You are steady when other people scatter."
-    ];
-    const codeB = [
-      "You prefer honest progress over talk.",
-      "You don’t chase perfection. You build what holds up.",
-      "You do not waste energy on things that do not matter."
-    ];
 
     const codeThemeLines = CODE_LINES[topTheme] || CODE_LINES.structure;
 
     const overlapSentence = overlaps.length
-      ? `The strongest repeat is ${title(topTheme)}. That’s the thread you return to when life gets loud.`
-      : `Your readings don’t pile onto one theme. That usually means you adapt well and change gears when needed.`;
+      ? `The strongest repeat is ${title(topTheme)}. That’s the “always” part of you—the part that shows up under stress and under success.`
+      : `Your readings don’t pile onto one theme. That usually means you’re flexible and you adjust to the room.`;
 
     const uniqueSentence =
-      `Your numbers lean into ${title(uLP)} and ${title(uBN)}. Your sign adds ${title(uSUN)}. Your zodiac adds ${title(uCZ)}. That mix keeps you from being one-note.`;
+      `Your Month leans into ${title(uM)}. Your Day leans into ${title(uD)}. Your Month+Day adds ${title(uATT)}. Your sign adds ${title(uSUN)}. Your zodiac adds ${title(uCZ)}.`;
 
     const inspPool = INSPIRATION[topTheme] || INSPIRATION.structure;
+
+    const codeA = [
+      "You’re not random. Your patterns have a shape—and people can feel it.",
+      "When pressure shows up, you usually get clearer, not louder.",
+      "You don’t just react. You recalibrate."
+    ];
+    const codeB = [
+      "You do best when the goal is real and the next step is yours to choose.",
+      "You don’t want hype. You want something true that holds up.",
+      "You’re built for progress, not performance."
+    ];
+
+    // Month/Day/Attitude/Year/LP/FPY narratives
+    const monthLead = [
+      "Your Month number reads like your baseline tone—how you naturally enter life.",
+      "Your Month number is your default energy—what you return to when you’re relaxed."
+    ];
+    const dayLead = [
+      "Your Day number is how you operate up close—your style in real conversations and real problems.",
+      "Your Day number is your daily wiring—how you react when something lands in your lap."
+    ];
+    const attLead = [
+      "Month + Day shows your outward vibe—what people tend to notice first.",
+      "Month + Day is your social signature—how you come across before people know your whole story."
+    ];
+    const yearLead = [
+      "Your Year number adds a generational flavor—what you learned early, and what you resist.",
+      "Your Year number describes the background pressure you grew up with—and the strength it built."
+    ];
+    const lpLead = [
+      "Your Life Path is the long arc—what keeps calling you back, even after detours.",
+      "Your Life Path is the “big story” theme—what your life keeps training you to master."
+    ];
+    const fpyLead = [
+      "Full Date + Year is your integrated meaning—how your inner wiring and your time period blend together.",
+      "Full Date + Year is the combined lens—who you are, plus the era that shaped you."
+    ];
 
     return {
       seed,
       dateStr: `${months[m].n} ${d}, ${y}`,
 
-      lp, bn, dayRaw, dayReduced,
-      sun, cz,
+      monthNum, dayNum, mdSum, attitude, yearSum, yearNum, fullSum, lifePath, fullPlusYear, fullPlusYearReduced,
+      sun, cz, overlaps,
 
-      overlaps,
+      monthLine1: pickUnique(rng, monthLead, used),
+      monthLine2: pickUnique(rng, mMean.lines.concat(mMean.watch), used),
 
-      lpLine1: pickUnique(rng, lpBlock.text, used),
-      lpLine2: pickUnique(rng, lpBlock.text, used),
+      dayLine1: pickUnique(rng, dayLead, used),
+      dayLine2: pickUnique(rng, dMean.lines.concat(dMean.watch), used),
 
-      bnLine1: pickUnique(rng, bnBlock.text, used),
-      bnLine2: pickUnique(rng, bnBlock.text, used),
+      attLine1: pickUnique(rng, attLead, used),
+      attLine2: pickUnique(rng, attMean.lines.concat(attMean.watch), used),
 
-      dayLine1: pickUnique(rng, dayLines, used),
-      dayLine2: pickUnique(rng, dayLines, used),
+      yearLine1: pickUnique(rng, yearLead, used),
+      yearLine2: pickUnique(rng, yMean.lines.concat(yMean.watch), used),
+
+      lpLine1: pickUnique(rng, lpLead, used),
+      lpLine2: pickUnique(rng, lpMean.lines.concat(lpMean.watch), used),
+
+      fpyLine1: pickUnique(rng, fpyLead, used),
+      fpyLine2: pickUnique(rng, fpyMean.lines.concat(fpyMean.watch), used),
 
       sunLine1: pickUnique(rng, sunBlock.text, used),
       sunLine2: pickUnique(rng, sunBlock.text, used),
@@ -879,10 +1069,9 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
 
       inspire1: pickUnique(rng, inspPool, used),
       inspire2: pickUnique(rng, [
-        "Pick the next right step and take it today. Small wins restore confidence fast.",
-        "Do one thing today that proves you are still in control of your direction.",
-        "You don’t need a new life. You need one clean decision and follow-through.",
-        "Keep it simple. Keep it honest. Keep moving."
+        "People crave meaning because it calms the mind. Use this report as a mirror, not a rule.",
+        "The point is not to “believe” it. The point is to notice what hits and why.",
+        "Pick the one sentence that felt true. Build a small action from it today."
       ], used)
     };
   }
@@ -939,9 +1128,9 @@ footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-ali
 </html>
 <!--
 Birthday Code
-Version: v1.1A4
+Version: v1.1A5
 URL: https://keythjyles.github.io/Vitals-Tracker-v1.0/BC/EOF Notes:
 
-Buttons are side-by-side on all screen sizes and use the exact labels requested.
+Numerology now includes Month, Day, Month+Day (Attitude), Year, Full Date (Life Path), and Full Date+Year interpretation.
 
-Report text uses deterministic unique selection to prevent exact repeated sentences. -->
+Install button added; enabled when the browser provides an install prompt. -->
