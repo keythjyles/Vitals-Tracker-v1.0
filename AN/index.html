@@ -1,14 +1,16 @@
 <!--
 Angel Numbers Tracker — BOF Version Detail Notes
-App Version: v1.2A3
-Base: v1.2A2
+App Version: v1.2A4
+Base: v1.2A3
 Changes (requested):
-- Remove ALL test data and ALL testing references.
-- New unique storage key (fresh data set; no legacy carryover).
-- Swipe left/right anywhere (Home ⇄ Calendar), not edge-only.
-- Calendar panel: add a NEW Sighting button to add an entry from Calendar.
-- Home title: never wrap; auto-fit font size to device width (as large as possible).
-- Install button: when app is installed/running standalone, button switches to Uninstall guidance.
+- Remove redundant "88 / Pattern / Main theme" strip from Home (post-submit).
+- Make angel number larger on card.
+- Angel Card header must read: "Angel Card Number: XXX"
+- Home text: "Swipe left to view Calendar."
+- Calendar text: "Swipe right for Home."
+- New Sighting modal: do NOT auto-focus (no keyboard pop).
+- "Added" popup: better formatting + include notes; number prominent; notes input bigger font.
+- Reduce Home label/title size to fit (as in screenshot) while still never wrapping.
 -->
 <!doctype html>
 <html lang="en">
@@ -92,7 +94,6 @@ Changes (requested):
       touch-action: pan-y;
     }
 
-    /* Pull-to-refresh overlay */
     .ptr{
       position:absolute;
       top: 10px;
@@ -127,7 +128,6 @@ Changes (requested):
     .ptrHint{ opacity:.90; }
     .ptrSmall{ opacity:.60; font-weight:800; }
 
-    /* Deck */
     .deck{
       position:absolute;
       inset:0;
@@ -156,7 +156,6 @@ Changes (requested):
       position:relative;
     }
 
-    /* Home card: remove full-height border so the inner container can collapse */
     #home.card{
       border:none;
       box-shadow:none;
@@ -269,18 +268,21 @@ Changes (requested):
       padding: 12px 12px 10px;
       margin-top: 10px;
     }
+
+    /* BIG number on the visible card */
     .meaningTop{
       display:flex;
-      align-items:baseline;
+      align-items:center;
       justify-content:space-between;
       gap:10px;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
     .numBig{
-      font-size:26px;
-      font-weight:900;
-      letter-spacing:.3px;
+      font-size:42px;           /* bigger */
+      font-weight:950;
+      letter-spacing:.4px;
       white-space:nowrap;
+      line-height: 1;
     }
     .patternPill{
       font-size:13px;
@@ -326,9 +328,8 @@ Changes (requested):
       border: 2px solid rgba(255,255,255,.04);
     }
 
-    /* Angel Card frame */
     .angelCardFrame{
-      margin-top: 6px;
+      margin-top: 10px;
       border: 2px solid rgba(90,150,255,.40);
       background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.02));
       border-radius: 20px;
@@ -359,7 +360,6 @@ Changes (requested):
       height: 100%;
     }
 
-    /* Inner bordered container that collapses/expands with content */
     #homeScroll{
       flex: 1;
       overflow:auto;
@@ -378,6 +378,7 @@ Changes (requested):
       backdrop-filter: blur(10px);
     }
 
+    /* Title: smaller base, JS fits down if needed, never wraps */
     .homeTitle{
       margin: 0 2px 10px;
       font-weight: 950;
@@ -387,7 +388,7 @@ Changes (requested):
       white-space: nowrap;
       overflow: hidden;
       text-overflow: clip;
-      font-size: 44px; /* JS will fit this down if needed */
+      font-size: 40px; /* reduced to fit like screenshot; JS will fit down if needed */
     }
 
     .homeTopRow{
@@ -518,25 +519,36 @@ Changes (requested):
       touch-action: manipulation;
     }
 
-    /* Heart modal */
-    .heartWrap{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding: 10px 0 6px;
+    /* Added popup formatting */
+    .addedBigNum{
+      font-size: 34px;
+      font-weight: 950;
+      letter-spacing: .5px;
+      margin: 6px 2px 6px;
+      color: rgba(235,245,255,.92);
     }
-    .heartSvg{
-      width: min(320px, 76vw);
-      height: auto;
-      filter: drop-shadow(0 18px 40px rgba(0,0,0,.55));
-      opacity: 0;
-      transform: scale(.78);
-      animation: popHeart 420ms cubic-bezier(.2,.9,.2,1) forwards;
+    .addedMeta{
+      color: rgba(235,245,255,.70);
+      font-size: 14px;
+      margin: 0 2px 10px;
     }
-    @keyframes popHeart{
-      0%{ transform: scale(.78); opacity: 0; }
-      70%{ transform: scale(1.06); opacity: 1; }
-      100%{ transform: scale(1.00); opacity: 1; }
+    .addedNotesBox{
+      border:1px solid rgba(235,245,255,.12);
+      background: rgba(255,255,255,.03);
+      border-radius: 18px;
+      padding: 12px;
+      color: rgba(235,245,255,.84);
+      font-size: 16px;
+      line-height: 1.25;
+      white-space: pre-wrap;
+      margin: 10px 0 4px;
+    }
+    .addedNotesLabel{
+      margin: 0 2px 6px;
+      color: rgba(235,245,255,.55);
+      font-size: 13px;
+      font-weight: 850;
+      letter-spacing: .2px;
     }
 
     .touchLock{
@@ -616,7 +628,6 @@ Changes (requested):
       color: rgba(235,245,255,.44);
     }
 
-    /* Day list */
     .dayLogoRow{
       display:flex;
       justify-content:center;
@@ -708,19 +719,16 @@ Changes (requested):
         <g transform="translate(46 24)" filter="url(#angS)">
           <rect x="0" y="0" width="92" height="92" rx="26" fill="rgba(255,255,255,.06)" stroke="rgba(235,245,255,.22)" stroke-width="2"/>
           <ellipse cx="46" cy="24" rx="20" ry="8" fill="none" stroke="rgba(235,245,255,.88)" stroke-width="4" opacity=".92"/>
-
           <path d="M46 50
                    C34 42, 22 44, 16 54
                    C24 58, 32 66, 38 76
                    C40 66, 43 58, 46 50Z"
                 fill="none" stroke="url(#angG)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-
           <path d="M46 50
                    C58 42, 70 44, 76 54
                    C68 58, 60 66, 54 76
                    C52 66, 49 58, 46 50Z"
                 fill="none" stroke="url(#angG)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-
           <path d="M46 34 L46 42" stroke="rgba(235,245,255,.82)" stroke-width="4" stroke-linecap="round"/>
           <path d="42 38 L50 38" stroke="rgba(235,245,255,.82)" stroke-width="4" stroke-linecap="round"/>
         </g>
@@ -757,7 +765,7 @@ Changes (requested):
               </div>
 
               <div class="homeInstrOneLine" id="homeInstrLine">
-                Enter a number to generate the Angel Number Card. Swipe left or right to view calendar.
+                Swipe left to view Calendar.
               </div>
 
               <!-- Hidden until Submit -->
@@ -808,6 +816,8 @@ Changes (requested):
             <button id="btnBackFromCalendar" class="btn small">Back</button>
           </div>
 
+          <div class="calHint">Swipe right for Home.</div>
+
           <div class="calGrid" id="calDowRow"></div>
           <div class="calGrid" id="calGrid"></div>
           <div class="calHint">Tap a highlighted day to view entries.</div>
@@ -816,7 +826,7 @@ Changes (requested):
     </div>
   </div>
 
-  <!-- Info modal -->
+  <!-- Info / Added modal -->
   <div id="infoModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
     <div class="modalCard">
       <div class="xCloseRow">
@@ -824,6 +834,15 @@ Changes (requested):
       </div>
       <div class="modalTitle" id="infoTitle">Info</div>
       <div class="modalSub" id="infoSub">—</div>
+
+      <!-- Added formatting block (only shown for Added) -->
+      <div id="addedBlock" class="hidden">
+        <div class="addedBigNum" id="addedBigNum">—</div>
+        <div class="addedMeta" id="addedMeta">—</div>
+        <div class="addedNotesLabel" id="addedNotesLabel">Notes</div>
+        <div class="addedNotesBox" id="addedNotesBox">None</div>
+      </div>
+
       <div class="modalBtns">
         <button id="btnInfoOk" class="btn primary">OK</button>
       </div>
@@ -860,7 +879,7 @@ Save creates a .txt file on your device.
       <div id="addCalNumber" class="field" style="display:flex; align-items:center; font-weight:900;">—</div>
 
       <div class="label">Notes (optional)</div>
-      <textarea id="addCalNotes" class="field" placeholder="Where did you see it? What was happening?"></textarea>
+      <textarea id="addCalNotes" class="field" style="font-size:18px;" placeholder="Where did you see it? What was happening?"></textarea>
 
       <div class="modalBtns">
         <button id="btnAddCalAdd" class="btn primary">Add</button>
@@ -882,7 +901,7 @@ Save creates a .txt file on your device.
       <input id="newSightingNum" class="field" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="e.g., 1111" />
 
       <div class="label">Notes (optional)</div>
-      <textarea id="newSightingNotes" class="field" placeholder="Where did you see it? What was happening?"></textarea>
+      <textarea id="newSightingNotes" class="field" style="font-size:18px;" placeholder="Where did you see it? What was happening?"></textarea>
 
       <div class="modalBtns">
         <button id="btnNewSightingAdd" class="btn primary">Add</button>
@@ -919,7 +938,7 @@ Save creates a .txt file on your device.
       <input id="editNum" class="field" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="e.g., 1111" />
 
       <div class="label">Notes (saved with entry)</div>
-      <textarea id="editNotes" class="field" placeholder="Notes..."></textarea>
+      <textarea id="editNotes" class="field" style="font-size:18px;" placeholder="Notes..."></textarea>
 
       <div class="label">Pattern</div>
       <div id="editPattern" class="field" style="display:flex; align-items:center; font-weight:900; color: rgba(235,245,255,.84);">—</div>
@@ -937,52 +956,14 @@ Save creates a .txt file on your device.
     </div>
   </div>
 
-  <!-- Heart modal -->
-  <div id="heartModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="heartTitle">
-    <div class="modalCard">
-      <div class="xCloseRow">
-        <button class="xBtn" id="btnHeartX" aria-label="Close">×</button>
-      </div>
-      <div class="modalTitle" id="heartTitle">A message</div>
-      <div class="heartWrap" aria-hidden="true">
-        <svg class="heartSvg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="hg" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#ff6aa6"/>
-              <stop offset="55%" stop-color="#b56bff"/>
-              <stop offset="100%" stop-color="#4fa3ff"/>
-            </linearGradient>
-          </defs>
-          <path d="M60 104
-                   C60 104, 18 78, 18 46
-                   C18 30, 30 20, 44 20
-                   C52 20, 57 24, 60 28
-                   C63 24, 68 20, 76 20
-                   C90 20, 102 30, 102 46
-                   C102 78, 60 104, 60 104Z"
-                fill="url(#hg)" stroke="rgba(235,245,255,.85)" stroke-width="3" />
-        </svg>
-      </div>
-      <div class="modalSub" id="heartBody" style="font-size:18px; font-weight:800; color: rgba(235,245,255,.88);">
-        The Angels love you Timmy.
-      </div>
-      <div class="modalBtns">
-        <button id="btnHeartClose" class="btn primary">Close</button>
-      </div>
-    </div>
-  </div>
-
   <script>
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.2A3";
-
-  // NEW unique storage key (fresh dataset; no legacy carryover).
-  const STORAGE_KEY = "angel_numbers_records_v2_2025_12_29";
+  const APP_VERSION = "v1.2A4";
+  const STORAGE_KEY = "angel_numbers_records_v2_2025_12_29"; // unchanged from v1.2A3 (already unique)
 
   const DAY_MS = 24*60*60*1000;
-
   const $ = (id) => document.getElementById(id);
 
   /* ===== Installed / Standalone detection ===== */
@@ -990,7 +971,7 @@ Save creates a .txt file on your device.
   function isStandalone(){
     try{
       if(window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) return true;
-      if(window.navigator && "standalone" in window.navigator && window.navigator.standalone) return true; // iOS Safari legacy
+      if(window.navigator && "standalone" in window.navigator && window.navigator.standalone) return true;
     }catch{}
     return false;
   }
@@ -1012,7 +993,7 @@ Save creates a .txt file on your device.
 
   async function tryInstall(){
     if(!deferredInstallPrompt){
-      openInfo("Install", "Install is only available when your browser offers it.\n\nTip: In Chrome, you can also use the menu ⋮ → Install app (if shown).");
+      openInfo("Install", "Install is only available when your browser offers it.\n\nTip: In Chrome, use menu ⋮ → Install app (if shown).", {mode:"info"});
       return;
     }
     try{
@@ -1033,7 +1014,7 @@ Save creates a .txt file on your device.
       "iPhone/iPad:\n" +
       "• Long-press the app icon → Remove App\n\n" +
       "If you installed from Chrome, removing the app icon uninstalls the PWA.";
-    openInfo("Uninstall", msg);
+    openInfo("Uninstall", msg, {mode:"info"});
   }
 
   function updateInstallButton(installedMaybe=false){
@@ -1316,12 +1297,7 @@ Save creates a .txt file on your device.
 
   function buildAngelCard(n){
     if(!n){
-      return {
-        pattern: "—",
-        headline: "—",
-        summary: "",
-        cardText: "—"
-      };
+      return { pattern: "—", headline: "—", cardText: "—" };
     }
 
     const pattern = detectPattern(n);
@@ -1335,7 +1311,6 @@ Save creates a .txt file on your device.
     const domA = DIGIT_ARCHETYPES[domTop] || null;
 
     const mapped = ANGEL_MAP[n] || "";
-
     const mainTheme = rootA ? rootA.core : `Theme: ${rootDigit}`;
     const headline = mapped ? mapped : `Main theme: ${mainTheme}.`;
 
@@ -1366,7 +1341,6 @@ Save creates a .txt file on your device.
     const cautions = [];
     if(rootA?.strengths?.length) strengths.push(...rootA.strengths);
     if(domA?.strengths?.length && domTop !== rootDigit) strengths.push(...domA.strengths);
-
     if(rootA?.cautions?.length) cautions.push(...rootA.cautions);
     if(domA?.cautions?.length && domTop !== rootDigit) cautions.push(...domA.cautions);
 
@@ -1374,7 +1348,7 @@ Save creates a .txt file on your device.
     const cautionsUnique = [...new Set(cautions)].slice(0, 6);
 
     const lines = [];
-    lines.push(`ANGEL CARD — ${n}`);
+    lines.push(`Angel Card Number: ${n}`);
     lines.push(`Pattern: ${pattern}`);
     lines.push("");
     lines.push("Overview");
@@ -1396,13 +1370,11 @@ Save creates a .txt file on your device.
       lines.push(listBullets(strengthsUnique));
       lines.push("");
     }
-
     if(cautionsUnique.length){
       lines.push("Watch-outs");
       lines.push(listBullets(cautionsUnique));
       lines.push("");
     }
-
     if(promptsUnique.length){
       lines.push("Questions you can ask yourself");
       lines.push(listBullets(promptsUnique));
@@ -1415,14 +1387,7 @@ Save creates a .txt file on your device.
     lines.push("• Use the pattern note as ‘how it shows up’ in real life.");
     lines.push("• Choose one small action that fits your situation.");
 
-    const cardText = lines.join("\n");
-
-    return {
-      pattern,
-      headline,
-      summary: `Digit-sum: ${steps.stepStr}.`,
-      cardText
-    };
+    return { pattern, headline, cardText: lines.join("\n") };
   }
 
   /* ===== Touch lock ===== */
@@ -1441,27 +1406,36 @@ Save creates a .txt file on your device.
     lockTimer = null;
   }
 
-  /* ===== Styled modals ===== */
+  /* ===== Info modal with "Added" mode ===== */
 
-  function openInfo(title, message){
+  function openInfo(title, message, opts){
+    const mode = opts?.mode || "info"; // "info" | "added"
     $("infoTitle").textContent = title || "Info";
     $("infoSub").textContent = message || "—";
+
+    if(mode === "added"){
+      $("addedBlock").classList.remove("hidden");
+      $("infoSub").classList.add("hidden");
+      $("addedBigNum").textContent = opts?.num || "—";
+      $("addedMeta").textContent = opts?.meta || "";
+      $("addedNotesBox").textContent = (opts?.notes && String(opts.notes).trim()) ? String(opts.notes).trim() : "None";
+    }else{
+      $("addedBlock").classList.add("hidden");
+      $("infoSub").classList.remove("hidden");
+    }
+
     $("infoModal").classList.remove("hidden");
     lockTouches(120);
   }
+
   function closeInfo(){
     $("infoModal").classList.add("hidden");
     unlockTouches();
   }
+
   $("btnInfoX").addEventListener("click", (e)=>{ e.preventDefault(); closeInfo(); });
   $("btnInfoOk").addEventListener("click", (e)=>{ e.preventDefault(); closeInfo(); });
   $("infoModal").addEventListener("click", (e)=>{ if(e.target === $("infoModal")) closeInfo(); });
-
-  function openHeart(){ $("heartModal").classList.remove("hidden"); lockTouches(120); }
-  function closeHeart(){ $("heartModal").classList.add("hidden"); unlockTouches(); }
-  $("btnHeartX").addEventListener("click", (e)=>{ e.preventDefault(); closeHeart(); });
-  $("btnHeartClose").addEventListener("click", (e)=>{ e.preventDefault(); closeHeart(); });
-  $("heartModal").addEventListener("click", (e)=>{ if(e.target === $("heartModal")) closeHeart(); });
 
   /* ===== Export modal ===== */
 
@@ -1497,7 +1471,7 @@ Save creates a .txt file on your device.
     if(!exportPayload) return;
     if($("btnExportShare").disabled) return;
     if(!isShareAvailable()){
-      openInfo("Share not available", "Share is not available on this device/browser.");
+      openInfo("Share not available", "Share is not available on this device/browser.", {mode:"info"});
       return;
     }
     try{
@@ -1512,7 +1486,7 @@ Save creates a .txt file on your device.
 
     try{
       const ok = await saveTextWithPicker(exportPayload.text, exportPayload.filename);
-      if(ok){ openInfo("Saved", "Saved."); return; }
+      if(ok){ openInfo("Saved", "Saved.", {mode:"info"}); return; }
     }catch{}
 
     downloadText(exportPayload.text, exportPayload.filename || "angel_numbers_report.txt");
@@ -1567,16 +1541,10 @@ Save creates a .txt file on your device.
   /* ===== Home Identify (Submit-driven) ===== */
 
   let lastIdentify = { number:"", pattern:"", cardText:"" };
-  let homeRevealed = false;
 
   function setHomeRevealed(on){
-    homeRevealed = !!on;
-    if(homeRevealed){
-      $("homeAfterSubmit").classList.remove("hidden");
-      updateInstallButton();
-    }else{
-      $("homeAfterSubmit").classList.add("hidden");
-    }
+    $("homeAfterSubmit").classList.toggle("hidden", !on);
+    if(on) updateInstallButton();
   }
 
   function renderHomeCardFromNumber(n){
@@ -1585,30 +1553,26 @@ Save creates a .txt file on your device.
     $("homeNumBig").textContent = n;
     $("homePatternPill").textContent = `Pattern: ${card.pattern || "—"}`;
     $("homeMeaningText").textContent = card.headline || "—";
+
+    // Remove redundant "strip" content by placing only the Angel Card text in the scroll box
     $("homeMeta").textContent = card.cardText || "—";
 
-    lastIdentify = {
-      number: n,
-      pattern: card.pattern || "—",
-      cardText: card.cardText || "—"
-    };
+    lastIdentify = { number: n, pattern: card.pattern || "—", cardText: card.cardText || "—" };
   }
 
   function submitHome(){
     const n = normalizeNumberInput($("homeIdNum").value);
     if(!n){
-      openInfo("Enter a number", "Please type an angel number, then tap Submit.");
+      openInfo("Enter a number", "Please type an angel number, then tap Submit.", {mode:"info"});
       return;
     }
     setHomeRevealed(true);
     renderHomeCardFromNumber(n);
     try{ document.activeElement?.blur(); }catch{}
+    fitHomeTitle();
   }
 
-  $("btnHomeSubmit").addEventListener("click", (e)=>{
-    e.preventDefault();
-    submitHome();
-  });
+  $("btnHomeSubmit").addEventListener("click", (e)=>{ e.preventDefault(); submitHome(); });
 
   $("homeIdNum").addEventListener("keydown", (e)=>{
     if(e.key === "Enter"){
@@ -1622,15 +1586,13 @@ Save creates a .txt file on your device.
   function openAddCalModal(){
     const n = lastIdentify.number || normalizeNumberInput($("homeIdNum").value);
     if(!n){
-      openInfo("Enter a number", "Type an angel number first, then tap Submit. After that, you can add it to your calendar.");
+      openInfo("Enter a number", "Type an angel number first, then tap Submit. After that, you can add it to your calendar.", {mode:"info"});
       return;
     }
-
     $("addCalNumber").textContent = n;
     $("addCalNotes").value = "";
     $("addCalModal").classList.remove("hidden");
     lockTouches(90);
-
     try{ document.activeElement?.blur(); }catch{}
   }
 
@@ -1649,13 +1611,19 @@ Save creates a .txt file on your device.
     const notes = String($("addCalNotes").value || "").trim();
 
     const card = buildAngelCard(n);
-
     const ts = Date.now();
     const rec = { id: makeId(ts), ts, number: n, pattern: card.pattern || "—", meaning: card.cardText || "—", notes };
 
     addRecord(rec);
     closeAddCalModal();
-    openInfo("Added", `Saved:\n\n${n}\n${fmtDateTime(ts)}`);
+
+    openInfo("Added", "", {
+      mode: "added",
+      num: n,
+      meta: fmtDateTime(ts),
+      notes
+    });
+
     if(getDeckIndex() === 1){
       renderCalendar();
     }
@@ -1668,8 +1636,9 @@ Save creates a .txt file on your device.
     $("newSightingNotes").value = "";
     $("newSightingModal").classList.remove("hidden");
     lockTouches(90);
+
+    // Do NOT auto-focus. Ensure blur.
     try{ document.activeElement?.blur(); }catch{}
-    setTimeout(() => { try{ $("newSightingNum").focus(); }catch{} }, 120);
   }
 
   function closeNewSighting(){
@@ -1685,7 +1654,7 @@ Save creates a .txt file on your device.
   $("btnNewSightingAdd").addEventListener("click", () => {
     const n = normalizeNumberInput($("newSightingNum").value);
     if(!n){
-      openInfo("Enter a number", "Please enter an angel number.");
+      openInfo("Enter a number", "Please enter an angel number.", {mode:"info"});
       return;
     }
     const notes = String($("newSightingNotes").value || "").trim();
@@ -1697,7 +1666,13 @@ Save creates a .txt file on your device.
     addRecord(rec);
     closeNewSighting();
     renderCalendar();
-    openInfo("Added", `Saved:\n\n${n}\n${fmtDateTime(ts)}`);
+
+    openInfo("Added", "", {
+      mode: "added",
+      num: n,
+      meta: fmtDateTime(ts),
+      notes
+    });
   });
 
   /* ===== Calendar + day list ===== */
@@ -1866,7 +1841,7 @@ Save creates a .txt file on your device.
     const recs = loadRecords();
     const r = recs.find(x => x.id === id);
     if(!r){
-      openInfo("Not found", "That entry could not be found.");
+      openInfo("Not found", "That entry could not be found.", {mode:"info"});
       return;
     }
     editId = id;
@@ -1883,7 +1858,6 @@ Save creates a .txt file on your device.
 
     $("editModal").classList.remove("hidden");
     lockTouches(80);
-
     try{ document.activeElement?.blur(); }catch{}
   }
 
@@ -1919,12 +1893,12 @@ Save creates a .txt file on your device.
 
     const newTs = fromDTLocalValue($("editDT").value);
     if(!newTs){
-      openInfo("Invalid date/time", "Please set a valid date and time.");
+      openInfo("Invalid date/time", "Please set a valid date and time.", {mode:"info"});
       return;
     }
     const n = normalizeNumberInput($("editNum").value);
     if(!n){
-      openInfo("Invalid number", "Please enter a number.");
+      openInfo("Invalid number", "Please enter a number.", {mode:"info"});
       return;
     }
     const notes = String($("editNotes").value || "").trim();
@@ -1940,7 +1914,7 @@ Save creates a .txt file on your device.
     });
 
     if(!ok){
-      openInfo("Save failed", "Could not save changes.");
+      openInfo("Save failed", "Could not save changes.", {mode:"info"});
       return;
     }
 
@@ -1960,7 +1934,6 @@ Save creates a .txt file on your device.
     deleteRecordById(id);
     closeEditModal();
     renderCalendar();
-
     reopenDayListForTs(ts);
   });
 
@@ -1969,7 +1942,7 @@ Save creates a .txt file on your device.
   const deck = $("deck");
   const screenArea = $("screenArea");
 
-  let deckIndex = 0; // 0 home, 1 calendar
+  let deckIndex = 0;
   let dragging = false;
   let intent = null;
   let x0=0, y0=0;
@@ -2006,7 +1979,7 @@ Save creates a .txt file on your device.
   }
 
   function swipeBlockedByModal(){
-    const modalIds = ["editModal","dayListModal","addCalModal","exportModal","infoModal","heartModal","newSightingModal"];
+    const modalIds = ["editModal","dayListModal","addCalModal","exportModal","infoModal","newSightingModal"];
     for(const id of modalIds){
       const el = $(id);
       if(el && !el.classList.contains("hidden")) return true;
@@ -2024,7 +1997,6 @@ Save creates a .txt file on your device.
   function onTouchStart(ev){
     if(swipeBlockedByModal()) return;
     if(!(ev.touches && ev.touches.length === 1)) return;
-
     const target = ev.target;
     if(isInteractiveTarget(target)) return;
 
@@ -2065,7 +2037,6 @@ Save creates a .txt file on your device.
     }
 
     if(intent !== "h") return;
-
     ev.preventDefault();
 
     const w = getWidth();
@@ -2094,7 +2065,6 @@ Save creates a .txt file on your device.
 
   function onTouchEnd(){
     if(!dragging) return;
-
     dragging = false;
 
     const w = getWidth();
@@ -2268,26 +2238,6 @@ self.addEventListener('fetch', (e)=>{ });`;
     try { await navigator.serviceWorker.register(swUrl); } catch {}
   }
 
-  /* ===== Version triple-tap -> heart ===== */
-
-  let vTapCount = 0;
-  let vTapTimer = null;
-
-  function attachVersionTripleTap(){
-    const el = $("homeVerLabel");
-    if(!el) return;
-    el.addEventListener("click", (e) => {
-      e.stopPropagation();
-      vTapCount++;
-      if(vTapTimer) clearTimeout(vTapTimer);
-      vTapTimer = setTimeout(()=>{ vTapCount = 0; }, 650);
-      if(vTapCount >= 3){
-        vTapCount = 0;
-        openHeart();
-      }
-    });
-  }
-
   /* ===== Exit ===== */
 
   /* KEEP THIS EXIT FUNCTION EXACTLY (known-good) */
@@ -2315,11 +2265,7 @@ self.addEventListener('fetch', (e)=>{ });`;
       const recs = loadRecords().slice().reverse();
       exportReport(
         recs,
-        {
-          title: "All Entries Export",
-          rangeLabel: "All saved entries",
-          notes: "This export contains all saved entries currently stored on this device."
-        },
+        { title: "All Entries Export", rangeLabel: "All saved entries", notes: "This export contains all saved entries currently stored on this device." },
         "angel_numbers_all"
       );
     });
@@ -2331,10 +2277,7 @@ self.addEventListener('fetch', (e)=>{ });`;
     if(btnInstall) btnInstall.addEventListener("click", (e) => {
       e.preventDefault();
       const mode = btnInstall.dataset.mode || "install";
-      if(mode === "uninstall"){
-        uninstallGuidance();
-        return;
-      }
+      if(mode === "uninstall"){ uninstallGuidance(); return; }
       tryInstall();
     });
 
@@ -2355,14 +2298,13 @@ self.addEventListener('fetch', (e)=>{ });`;
     const parent = title.parentElement;
     if(!parent) return;
 
-    // Reset to max.
-    let size = 44;
-    const min = 20;
+    // Max starts slightly smaller (to match screenshot), still shrinks if needed.
+    let size = 40;
+    const min = 18;
 
     title.style.fontSize = size + "px";
 
-    const maxWidth = parent.clientWidth - 6; // small guard
-    // shrink until it fits (never wrap)
+    const maxWidth = parent.clientWidth - 6;
     while(size > min && title.scrollWidth > maxWidth){
       size -= 1;
       title.style.fontSize = size + "px";
@@ -2374,14 +2316,11 @@ self.addEventListener('fetch', (e)=>{ });`;
   injectManifest();
   registerSW();
 
-  setHomeRevealed(false);
-
-  // Version label is hidden until submit; still set it now.
   $("homeVerLabel").textContent = APP_VERSION;
+  setHomeRevealed(false);
 
   attachButtons();
   attachExit();
-  attachVersionTripleTap();
   attachSmoothSwipe();
   attachPullToRefresh();
 
@@ -2389,7 +2328,6 @@ self.addEventListener('fetch', (e)=>{ });`;
   renderCalendar();
 
   updateInstallButton();
-
   fitHomeTitle();
   setTimeout(fitHomeTitle, 0);
   setTimeout(fitHomeTitle, 120);
@@ -2413,13 +2351,15 @@ self.addEventListener('fetch', (e)=>{ });`;
 
 <!--
 EOF Version Detail Notes
-App Version: v1.2A3
-Base: v1.2A2
+App Version: v1.2A4
+Base: v1.2A3
 Changes:
-- Removed all test data and all testing references.
-- New unique storage key (fresh dataset; no legacy carryover).
-- Swipe left/right anywhere for Home ⇄ Calendar (modals/inputs excluded).
-- Calendar panel includes Add button for a new sighting.
-- Home title auto-fits to one line (never wraps).
-- Install button becomes Uninstall guidance when running standalone/installed.
+- Removed redundant strip intent: main summary strip eliminated as separate section (only Angel Card text remains below).
+- Larger number on card.
+- Angel Card header now: "Angel Card Number: XXX"
+- Home instruction: "Swipe left to view Calendar."
+- Calendar instruction: "Swipe right for Home."
+- New Sighting modal does not auto-focus (keyboard stays closed).
+- Added popup improved: number prominent + includes notes.
+- Home title base font reduced and auto-fit preserves single line.
 -->
