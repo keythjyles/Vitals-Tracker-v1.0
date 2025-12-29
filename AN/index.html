@@ -1,11 +1,12 @@
-<!-- Angel Numbers Tracker v1.1B3 -->
+<!-- Angel Numbers Tracker v1.1B4 -->
 <!--
 Version Detail Notes
-App Version: v1.1B3
-Base: v1.1B2
+App Version: v1.1B4
+Base: v1.1B3
 
 Changes (requested):
-- Angel Card area in View & Update now has a clear “card” border (matches app theme).
+- Identify Home screen Angel Card now uses the SAME bordered "card frame" style as the View & Update Angel Card.
+- Fix: After saving (or deleting) from Day List → View & Update, the Day List should reopen for the CORRECT day/date and show the correct entries (recompute day key from the updated timestamp).
 -->
 <!doctype html>
 <html lang="en">
@@ -316,7 +317,7 @@ Changes (requested):
       border: 2px solid rgba(255,255,255,.04);
     }
 
-    /* NEW: Angel Card "card" frame (for View & Update modal) */
+    /* Angel Card "card" frame (used in View & Update + Identify Home) */
     .angelCardFrame{
       margin-top: 6px;
       border: 2px solid rgba(90,150,255,.40);
@@ -728,8 +729,11 @@ Changes (requested):
                 Enter a number above to view its Angel Card.
               </div>
 
-              <div id="homeMeta" class="metaScroll">
+              <!-- CHANGED: home Angel Card now wrapped in the same angelCardFrame as View & Update -->
+              <div class="angelCardFrame" id="homeAngelFrame">
+                <div id="homeMeta" class="metaScroll">
 Enter a number to see a thorough Angel Card (summary, digit-sum lens, characteristics, prompts).
+                </div>
               </div>
 
               <div class="disclaimer">
@@ -913,7 +917,7 @@ Save creates a .txt file on your device.
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.1B3";
+  const APP_VERSION = "v1.1B4";
   const STORAGE_KEY = "angel_numbers_records_v1";
   const DAY_MS = 24*60*60*1000;
 
@@ -1621,9 +1625,11 @@ Save creates a .txt file on your device.
   }
 
   let currentDayKey = null;
+
   function openDayList(dayKey, recs){
     ensureDayLogo();
     currentDayKey = dayKey;
+
     const currentDayRecs = (recs || []).slice().sort((a,b)=> a.ts - b.ts);
 
     $("dayListTitle").textContent = fmtDayTitle(dayKey);
@@ -1780,6 +1786,14 @@ Save creates a .txt file on your device.
   $("btnEditClose").addEventListener("click", (e)=>{ e.preventDefault(); closeEditModal(); });
   $("editModal").addEventListener("click", (e)=>{ if(e.target === $("editModal")) closeEditModal(); });
 
+  function reopenDayListForTs(ts){
+    const newDayKey = startOfDay(ts);
+    currentDayKey = newDayKey;
+    const dayMap = buildDayIndexMap(loadRecords());
+    const updated = dayMap.get(newDayKey) || [];
+    openDayList(newDayKey, updated);
+  }
+
   $("btnEditSave").addEventListener("click", ()=>{
     if(!editId) return;
 
@@ -1813,25 +1827,24 @@ Save creates a .txt file on your device.
     closeEditModal();
     renderCalendar();
 
-    if(currentDayKey !== null){
-      const dayMap = buildDayIndexMap(loadRecords());
-      const updated = dayMap.get(currentDayKey) || [];
-      openDayList(currentDayKey, updated);
-    }
+    /* FIX: reopen day list for the UPDATED timestamp day (not the old day) */
+    reopenDayListForTs(newTs);
   });
 
   $("btnEditDelete").addEventListener("click", ()=>{
     if(!editId) return;
+
+    // capture the day before deletion so we can reopen that same day list correctly
+    const recs = loadRecords();
+    const r = recs.find(x => x.id === editId);
+    const ts = r ? r.ts : (currentDayKey ?? Date.now());
+
     const id = editId;
     deleteRecordById(id);
     closeEditModal();
     renderCalendar();
 
-    if(currentDayKey !== null){
-      const dayMap = buildDayIndexMap(loadRecords());
-      const updated = dayMap.get(currentDayKey) || [];
-      openDayList(currentDayKey, updated);
-    }
+    reopenDayListForTs(ts);
   });
 
   /* ===== Smooth panel swipe (edge only) ===== */
@@ -2285,8 +2298,9 @@ self.addEventListener('fetch', (e)=>{ });`;
 
 <!--
 EOF Version Detail Notes
-App Version: v1.1B3
-Base: v1.1B2
+App Version: v1.1B4
+Base: v1.1B3
 Changes:
-- Angel Card area in View & Update now has a clear card-style border/frame.
+- Identify Home Angel Card now uses the same bordered angelCardFrame style as View & Update.
+- Day List refresh after Save/Delete now reopens on the correct day (based on updated timestamp), preventing wrong-date/wrong-data display.
 -->
