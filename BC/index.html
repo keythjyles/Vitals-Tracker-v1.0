@@ -15,9 +15,6 @@ local Notes Packs (paraphrased book notes), local Saved Reports, and export.
   <title>Birthday Code</title>
 
   <style>
-    /* =========================
-       FULL STYLE BLOCK (PART 1)
-       ========================= */
     :root{
       --bg0:#071022;
       --bg1:#0b1324;
@@ -59,6 +56,7 @@ local Notes Packs (paraphrased book notes), local Saved Reports, and export.
       --edgeSwipe: 150px;
     }
 
+    /* Streamer mode boosts */
     body.streamer{
       --fz0: 20px;
       --fz1: 22px;
@@ -87,20 +85,861 @@ local Notes Packs (paraphrased book notes), local Saved Reports, and export.
       text-rendering: geometricPrecision;
     }
 
-    /* (ALL CSS FROM ORIGINAL CONTINUES UNCHANGED HERE) */
+    .app{
+      height: 100%;
+      display:flex;
+      flex-direction: column;
+      padding:
+        calc(env(safe-area-inset-top) + 10px)
+        calc(env(safe-area-inset-right) + 10px)
+        calc(env(safe-area-inset-bottom) + 10px)
+        calc(env(safe-area-inset-left) + 10px);
+      gap: 10px;
+    }
+
+    .header{
+      display:flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .brandCard{
+      border-radius: var(--r);
+      background: linear-gradient(180deg, rgba(15,26,48,.70), rgba(15,26,48,.52));
+      border: 1px solid var(--accent);
+      box-shadow: var(--shadow2);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      padding: var(--pad2);
+      display:flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brandLeft{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .logo{
+      width: 48px;
+      height: 48px;
+      flex: 0 0 auto;
+      filter: drop-shadow(0 10px 18px rgba(0,0,0,.35));
+    }
+
+    .brandText{
+      min-width:0;
+      display:flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .title{
+      font-size: var(--fz3);
+      font-weight: 800;
+      letter-spacing: .2px;
+      line-height: 1.05;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+    }
+    .subtitle{
+      font-size: var(--fz0);
+      color: var(--muted);
+      line-height: var(--lh);
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+    }
+
+    .headerRight{
+      display:flex;
+      gap: 10px;
+      flex: 0 0 auto;
+      align-items:center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .pillBtn{
+      height: var(--tap);
+      padding: 0 16px;
+      border-radius: var(--pill);
+      border: 1px solid var(--stroke2);
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+      color: var(--text);
+      font-size: var(--fz0);
+      font-weight: 700;
+      letter-spacing: .1px;
+      box-shadow: 0 10px 24px rgba(0,0,0,.26);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .pillBtn:active{ transform: translateY(1px); }
+    .pillBtn[disabled]{
+      opacity: .55;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .smallTag{
+      font-size: 14px;
+      font-weight: 800;
+      padding: 6px 10px;
+      border-radius: var(--pill);
+      border: 1px solid var(--stroke2);
+      color: var(--muted);
+      background: rgba(255,255,255,.05);
+      white-space: nowrap;
+    }
+
+    .deckWrap{
+      flex: 1 1 auto;
+      min-height: 0;
+      border-radius: var(--r);
+      border: 1px solid var(--accent);
+      box-shadow: var(--shadow);
+      background: linear-gradient(180deg, rgba(15,26,48,.64), rgba(15,26,48,.46));
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .deck{
+      height: 100%;
+      width: 200%;
+      display:flex;
+      transform: translateX(0%);
+      transition: transform 280ms cubic-bezier(.2,.9,.2,1);
+      will-change: transform;
+    }
+    .panel{
+      width: 50%;
+      height: 100%;
+      min-height: 0;
+      padding: 14px;
+      display:flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .panelHeaderRow{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 2px 2px 0 2px;
+    }
+
+    .panelTitle{
+      font-size: var(--fz2);
+      font-weight: 900;
+      letter-spacing: .2px;
+      line-height: 1.05;
+    }
+
+    .panelHint{
+      font-size: var(--fz0);
+      color: var(--muted);
+      line-height: var(--lh);
+      text-align:right;
+      white-space: nowrap;
+    }
+
+    .card{
+      border-radius: var(--r);
+      border: 1px solid var(--accent);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      box-shadow: var(--shadow2);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      padding: var(--pad2);
+    }
+
+    .row{
+      display:flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+    }
+
+    .seg{
+      display:flex;
+      gap: 0;
+      border-radius: var(--pill);
+      border: 1px solid var(--stroke2);
+      overflow:hidden;
+      width: 100%;
+      background: rgba(0,0,0,.10);
+    }
+    .seg button{
+      flex: 1 1 50%;
+      height: var(--tap);
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: var(--fz1);
+      font-weight: 900;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      padding: 0 10px;
+      white-space: nowrap;
+    }
+    .seg button.active{
+      background: linear-gradient(180deg, rgba(75,104,255,.35), rgba(43,78,122,.26));
+      color: var(--text);
+      box-shadow: inset 0 0 0 1px rgba(160,200,255,.25);
+    }
+
+    label{
+      display:block;
+      font-size: var(--fz0);
+      font-weight: 900;
+      color: var(--muted);
+      margin-bottom: 8px;
+      letter-spacing: .2px;
+    }
+
+    .field{
+      flex: 1 1 160px;
+      min-width: 140px;
+    }
+    .field.wide{ flex: 1 1 260px; min-width: 200px; }
+
+    select, input[type="text"], input[type="number"], textarea{
+      width: 100%;
+      height: var(--tap);
+      border-radius: 16px;
+      border: 1px solid var(--stroke2);
+      background: rgba(0,0,0,.14);
+      color: var(--text);
+      font-size: var(--fz1);
+      font-weight: 800;
+      padding: 0 14px;
+      outline: none;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
+    }
+    textarea{
+      height: auto;
+      min-height: 140px;
+      padding: 14px;
+      line-height: var(--lh);
+      resize: vertical;
+    }
+    input::placeholder, textarea::placeholder{ color: rgba(238,246,255,.40); }
+
+    .toggleRow{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 0 0 0;
+      flex-wrap: wrap;
+    }
+
+    .toggle{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      user-select:none;
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+      font-size: var(--fz1);
+      font-weight: 900;
+      color: var(--text);
+    }
+    .switch{
+      width: 64px;
+      height: 36px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke2);
+      background: rgba(0,0,0,.16);
+      position: relative;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.05);
+      flex: 0 0 auto;
+    }
+    .switch::after{
+      content:"";
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      background: rgba(238,246,255,.92);
+      position:absolute;
+      top: 50%;
+      left: 4px;
+      transform: translateY(-50%);
+      transition: left 160ms ease, background 160ms ease;
+      box-shadow: 0 10px 18px rgba(0,0,0,.35);
+    }
+    .toggle.on .switch{
+      background: rgba(75,104,255,.20);
+      border-color: rgba(75,104,255,.55);
+    }
+    .toggle.on .switch::after{
+      left: 30px;
+      background: rgba(160,200,255,.96);
+    }
+    .toggle small{
+      display:block;
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--muted2);
+      margin-top: 2px;
+      line-height: 1.1;
+    }
+
+    .primaryBtn{
+      width: 100%;
+      height: calc(var(--tap) + 6px);
+      border-radius: 18px;
+      border: 1px solid rgba(160,200,255,.35);
+      background: linear-gradient(180deg, rgba(75,104,255,.42), rgba(43,78,122,.34));
+      color: var(--text);
+      font-size: var(--fz2);
+      font-weight: 950;
+      letter-spacing: .2px;
+      box-shadow: 0 18px 40px rgba(0,0,0,.38);
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .primaryBtn:active{ transform: translateY(1px); }
+
+    .dangerBtn{
+      border: 1px solid rgba(255,110,120,.55) !important;
+      background: linear-gradient(180deg, rgba(255,110,120,.28), rgba(255,110,120,.16)) !important;
+    }
+
+    .grid2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 780px){
+      .grid2{ grid-template-columns: 1fr; }
+      .panelHint{ display:none; }
+      .title{ white-space: normal; }
+      .headerRight{ justify-content: flex-start; }
+    }
+
+    .reportArea{
+      flex: 1 1 auto;
+      min-height: 0;
+      display:flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .reportCards{
+      display:flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .reportCard{
+      border-radius: var(--r);
+      border: 1px solid var(--accent);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      box-shadow: var(--shadow2);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      overflow:hidden;
+    }
+
+    .reportTop{
+      padding: var(--pad2);
+      border-bottom: 1px solid rgba(210,230,255,.10);
+      display:flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .reportTitle{
+      font-size: var(--fz3);
+      font-weight: 950;
+      letter-spacing: .2px;
+      line-height: 1.05;
+    }
+    .reportMeta{
+      font-size: var(--fz0);
+      color: var(--muted);
+      line-height: var(--lh);
+      font-weight: 850;
+    }
+    .reportBody{
+      padding: var(--pad2);
+      max-height: 46vh;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scroll-behavior: smooth;
+    }
+    body.streamer .reportBody{ max-height: 44vh; }
+
+    .reportBody h3{
+      margin: 18px 0 10px;
+      font-size: var(--fz2);
+      font-weight: 950;
+      letter-spacing: .2px;
+      line-height: 1.05;
+    }
+    .reportBody h4{
+      margin: 14px 0 8px;
+      font-size: var(--fz1);
+      font-weight: 950;
+      letter-spacing: .2px;
+      line-height: 1.05;
+      color: rgba(200,230,255,.92);
+    }
+    .reportBody p{
+      margin: 10px 0;
+      font-size: var(--fz1);
+      line-height: var(--lh);
+      color: rgba(238,246,255,.90);
+      font-weight: 750;
+    }
+    .reportBody ul{
+      margin: 10px 0 10px 18px;
+      padding: 0;
+    }
+    .reportBody li{
+      margin: 8px 0;
+      font-size: var(--fz1);
+      line-height: var(--lh);
+      color: rgba(238,246,255,.90);
+      font-weight: 800;
+    }
+    body.streamer .reportBody li{ margin: 10px 0; }
+
+    .disclaimerLine{
+      font-size: var(--fz0);
+      color: var(--muted2);
+      line-height: var(--lh);
+      font-weight: 800;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding: 7px 12px;
+      border-radius: var(--pill);
+      border: 1px solid var(--stroke2);
+      background: rgba(0,0,0,.12);
+      font-size: 14px;
+      font-weight: 950;
+      letter-spacing: .2px;
+      color: rgba(210,230,255,.90);
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .badge.single{ border-color: rgba(160,200,255,.40); }
+    .badge.compare{ border-color: rgba(75,104,255,.55); }
+
+    .list{
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      display:flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-bottom: 8px;
+    }
+
+    .listRow{
+      display:flex;
+      gap: 12px;
+      align-items:center;
+      justify-content: space-between;
+      border-radius: 18px;
+      border: 1px solid rgba(210,230,255,.14);
+      background: rgba(0,0,0,.10);
+      padding: 12px 14px;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .listRow:active{ transform: translateY(1px); }
+    .listLeft{
+      min-width: 0;
+      display:flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .listDate{
+      font-size: var(--fz2);
+      font-weight: 950;
+      letter-spacing: .2px;
+      line-height: 1.05;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+    }
+    .listSnippet{
+      font-size: var(--fz0);
+      color: var(--muted);
+      font-weight: 850;
+      line-height: 1.15;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      max-width: 70vw;
+    }
+    .chev{
+      font-size: 28px;
+      font-weight: 900;
+      color: rgba(200,230,255,.75);
+      flex: 0 0 auto;
+    }
+
+    .footerBar{
+      display:flex;
+      justify-content: space-between;
+      align-items:center;
+      gap: 10px;
+      padding: 8px 4px 0 4px;
+      color: var(--muted2);
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: .2px;
+      flex-wrap: wrap;
+    }
+
+    /* Edge swipe zones */
+    .edgeZone{
+      position:absolute;
+      top:0; bottom:0;
+      width: var(--edgeSwipe);
+      z-index: 6;
+      background: transparent;
+      touch-action: pan-y;
+    }
+    .edgeZone.left{ left:0; }
+    .edgeZone.right{ right:0; }
+
+    /* Modals */
+    .modalOverlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.52);
+      display:none;
+      align-items: center;
+      justify-content: center;
+      padding:
+        calc(env(safe-area-inset-top) + 12px)
+        calc(env(safe-area-inset-right) + 12px)
+        calc(env(safe-area-inset-bottom) + 12px)
+        calc(env(safe-area-inset-left) + 12px);
+      z-index: 100;
+    }
+    .modalOverlay.show{ display:flex; }
+    .modal{
+      width: min(980px, 100%);
+      max-height: min(92vh, 980px);
+      overflow:hidden;
+      border-radius: calc(var(--r) + 2px);
+      border: 1px solid var(--accent);
+      background: linear-gradient(180deg, rgba(15,26,48,.78), rgba(15,26,48,.58));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display:flex;
+      flex-direction: column;
+    }
+    .modalTop{
+      padding: var(--pad2);
+      border-bottom: 1px solid rgba(210,230,255,.10);
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .modalTitle{
+      font-size: var(--fz2);
+      font-weight: 950;
+      letter-spacing: .2px;
+      line-height: 1.05;
+    }
+    .modalBody{
+      padding: var(--pad2);
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      min-height: 0;
+    }
+    .modalActions{
+      padding: var(--pad2);
+      border-top: 1px solid rgba(210,230,255,.10);
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    .xBtn{
+      width: var(--tap);
+      height: var(--tap);
+      border-radius: 18px;
+      border: 1px solid var(--stroke2);
+      background: rgba(0,0,0,.14);
+      color: var(--text);
+      font-size: 26px;
+      font-weight: 900;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .xBtn:active{ transform: translateY(1px); }
+
+    .note{
+      font-size: var(--fz0);
+      color: var(--muted);
+      font-weight: 850;
+      line-height: var(--lh);
+    }
+
+    .hr{
+      height: 1px;
+      background: rgba(210,230,255,.12);
+      margin: 14px 0;
+    }
+
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 15px;
+      font-weight: 900;
+      color: rgba(220,240,255,.85);
+      background: rgba(0,0,0,.18);
+      border: 1px solid rgba(210,230,255,.14);
+      border-radius: 10px;
+      padding: 4px 8px;
+      display:inline-block;
+    }
   </style>
 </head>
-
 <body>
   <div class="app" id="appRoot">
-    <!-- =========================
-         FULL HEADER + DECK + UI
-         (UNCHANGED FROM ORIGINAL)
-         ========================= -->
+    <div class="header">
+      <div class="brandCard">
+        <div class="brandLeft">
+          <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#7aa7ff" stop-opacity="0.95"/>
+                <stop offset="1" stop-color="#4b68ff" stop-opacity="0.85"/>
+              </linearGradient>
+              <radialGradient id="g2" cx="50%" cy="40%" r="60%">
+                <stop offset="0" stop-color="#eaf5ff" stop-opacity="0.95"/>
+                <stop offset="1" stop-color="#9fd3ff" stop-opacity="0.25"/>
+              </radialGradient>
+            </defs>
+            <circle cx="32" cy="26" r="10" fill="url(#g2)" opacity="0.55"/>
+            <ellipse cx="32" cy="16" rx="16" ry="6" fill="none" stroke="url(#g1)" stroke-width="3" opacity="0.85"/>
+            <path d="M32 22l3.8 7.8 8.6 1.2-6.2 6 1.5 8.5-7.7-4.1-7.7 4.1 1.5-8.5-6.2-6 8.6-1.2z"
+                  fill="url(#g1)" opacity="0.92"/>
+            <path d="M12 40c7 6 13 8 20 8s13-2 20-8" fill="none" stroke="rgba(160,200,255,.55)" stroke-width="3" stroke-linecap="round"/>
+            <path d="M10 34c8 10 17 14 22 14s14-4 22-14" fill="none" stroke="rgba(75,104,255,.35)" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+          <div class="brandText">
+            <div class="title">Birthday Code</div>
+            <div class="subtitle">Livestream-ready birthdate meaning studio (offline)</div>
+          </div>
+        </div>
 
-    <!-- Entire HTML structure exactly as previously provided,
-         ending just before the JSON import merge logic -->
+        <div class="headerRight">
+          <button class="pillBtn" id="btnInstall" title="Install PWA">Install</button>
+          <button class="pillBtn" id="btnStreamer" title="Increase on-camera readability">Streamer Mode</button>
+          <button class="pillBtn" id="btnInfo" title="Info">Info</button>
+          <button class="pillBtn dangerBtn" id="btnExit" title="Exit">Exit</button>
+        </div>
+      </div>
+    </div>
 
+    <div class="deckWrap" id="deckWrap" aria-label="Two panel deck">
+      <div class="edgeZone left" id="edgeLeft" aria-hidden="true"></div>
+      <div class="edgeZone right" id="edgeRight" aria-hidden="true"></div>
+
+      <div class="deck" id="deck">
+        <!-- Panel 0: Home -->
+        <div class="panel" id="panelHome">
+          <div class="panelHeaderRow">
+            <div class="panelTitle">Generate / Compare</div>
+            <div class="panelHint">Edge-swipe to Saved</div>
+          </div>
+
+          <div class="card">
+            <div class="seg" role="tablist" aria-label="Mode selector">
+              <button id="modeSingle" class="active" type="button">Single Date</button>
+              <button id="modeCompare" type="button">Side-by-Side Compare</button>
+            </div>
+
+            <div class="toggleRow" style="margin-top:10px;">
+              <div class="toggle on" id="toggleMaster" role="switch" aria-checked="true" tabindex="0" title="Preserve master numbers 11/22/33 when reducing">
+                <div class="switch" aria-hidden="true"></div>
+                <div>
+                  Master Numbers
+                  <small>Preserve 11 / 22 / 33</small>
+                </div>
+              </div>
+
+              <div class="toggle" id="toggleLNY" role="switch" aria-checked="false" tabindex="0" title="Heuristic: shift Chinese zodiac year for Jan/early Feb births">
+                <div class="switch" aria-hidden="true"></div>
+                <div>
+                  Assume after Lunar New Year
+                  <small>Heuristic (Jan/early Feb)</small>
+                </div>
+              </div>
+            </div>
+
+            <div class="hr"></div>
+
+            <div id="inputsSingle">
+              <div class="row">
+                <div class="field">
+                  <label for="sMonth">Month</label>
+                  <select id="sMonth"></select>
+                </div>
+                <div class="field">
+                  <label for="sDay">Day</label>
+                  <select id="sDay"></select>
+                </div>
+                <div class="field">
+                  <label for="sYear">Year</label>
+                  <input id="sYear" type="number" inputmode="numeric" placeholder="e.g., 1997" />
+                </div>
+                <div class="field wide">
+                  <label for="sName">Name / Nickname (optional)</label>
+                  <input id="sName" type="text" placeholder="For livestream personalization" />
+                </div>
+              </div>
+              <div class="note" id="sWarn" style="margin-top:10px; display:none;"></div>
+            </div>
+
+            <div id="inputsCompare" style="display:none; margin-top: 10px;">
+              <div class="grid2">
+                <div class="card" style="padding: var(--pad2); border-color: rgba(75,104,255,.55);">
+                  <div style="display:flex; justify-content: space-between; align-items:center; gap:10px; margin-bottom:10px;">
+                    <div class="badge compare">A</div>
+                    <div class="disclaimerLine">Left person</div>
+                  </div>
+                  <div class="row">
+                    <div class="field">
+                      <label for="aMonth">Month</label>
+                      <select id="aMonth"></select>
+                    </div>
+                    <div class="field">
+                      <label for="aDay">Day</label>
+                      <select id="aDay"></select>
+                    </div>
+                    <div class="field">
+                      <label for="aYear">Year</label>
+                      <input id="aYear" type="number" inputmode="numeric" placeholder="e.g., 1997" />
+                    </div>
+                    <div class="field wide">
+                      <label for="aName">Name (optional)</label>
+                      <input id="aName" type="text" placeholder="A nickname" />
+                    </div>
+                  </div>
+                  <div class="note" id="aWarn" style="margin-top:10px; display:none;"></div>
+                </div>
+
+                <div class="card" style="padding: var(--pad2); border-color: rgba(160,200,255,.50);">
+                  <div style="display:flex; justify-content: space-between; align-items:center; gap:10px; margin-bottom:10px;">
+                    <div class="badge single">B</div>
+                    <div class="disclaimerLine">Right person</div>
+                  </div>
+                  <div class="row">
+                    <div class="field">
+                      <label for="bMonth">Month</label>
+                      <select id="bMonth"></select>
+                    </div>
+                    <div class="field">
+                      <label for="bDay">Day</label>
+                      <select id="bDay"></select>
+                    </div>
+                    <div class="field">
+                      <label for="bYear">Year</label>
+                      <input id="bYear" type="number" inputmode="numeric" placeholder="e.g., 1997" />
+                    </div>
+                    <div class="field wide">
+                      <label for="bName">Name (optional)</label>
+                      <input id="bName" type="text" placeholder="B nickname" />
+                    </div>
+                  </div>
+                  <div class="note" id="bWarn" style="margin-top:10px; display:none;"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="hr"></div>
+
+            <button class="primaryBtn" id="btnGenerate" type="button">Generate Report</button>
+
+            <div class="toggleRow" style="margin-top: 12px;">
+              <button class="pillBtn" id="btnSaveCurrent" type="button" title="Save the latest generated report" disabled>Save Report</button>
+              <button class="pillBtn" id="btnExportCurrent" type="button" title="Export the latest generated report" disabled>Export</button>
+              <button class="pillBtn" id="btnNotes" type="button" title="Manage Notes Packs (local)">Notes Packs</button>
+            </div>
+
+            <div style="margin-top: 10px;">
+              <div class="disclaimerLine">Entertainment / reflective tool. Not factual prediction. Not advice.</div>
+            </div>
+          </div>
+
+          <div class="reportArea">
+            <div class="reportCards" id="reportCards"></div>
+          </div>
+
+          <div class="footerBar">
+            <div>Birthday Code <span id="footerVer"></span></div>
+            <div class="smallTag" id="installStateTag">Not installed</div>
+          </div>
+        </div>
+
+        <!-- Panel 1: Saved -->
+        <div class="panel" id="panelSaved">
+          <div class="panelHeaderRow">
+            <div class="panelTitle">Saved Reports</div>
+            <div class="panelHint">Edge-swipe to Home</div>
+          </div>
+
+          <div class="card">
+            <div class="row">
+              <div class="field wide" style="flex: 1 1 420px;">
+                <label for="savedSearch">Search (date or name)</label>
+                <input id="savedSearch" type="text" placeholder="Try: 03-04, March, 1997, Alex…" />
+              </div>
+              <div class="field" style="min-width: 200px;">
+                <label for="savedFilter">Filter</label>
+                <select id="savedFilter">
+                  <option value="all">All</option>
+                  <option value="single">Single</option>
+                  <option value="compare">Compare</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="list" id="savedList"></div>
+
+          <div class="footerBar">
+            <div>Storage key: <span class="kbd">birthdate_meaning_reports_v1</span></div>
+            <div class="smallTag" id="savedCount">0 saved</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Modals -->
@@ -120,280 +959,1658 @@ local Notes Packs (paraphrased book notes), local Saved Reports, and export.
 
     const APP_VERSION = "v1.0";
     const STORAGE_KEY = "birthdate_meaning_reports_v1";
+    const NOTES_KEY = "birthday_code_notes_packs_v1";
 
-    /* =========================
-       ALL JS LOGIC (PART 1)
-       =========================
-       Includes:
-       - State
-       - Utilities
-       - Meaning Engine
-       - Notes Packs manager
-       - Notes Packs editor
-       - Import modal setup
-       BUT STOPS IMMEDIATELY
-       BEFORE JSON MERGE LOOP
-    */
+    // Runtime PWA (manifest + service worker) via Blob URLs
+    let deferredBIP = null;
+    let isInstalled = false;
 
-    // ... all code exactly as previously generated ...
+    const el = (id) => document.getElementById(id);
 
-    // === STOP POINT FOR PART 1 ===
-    // Next line in Part 2 begins with:
-    // const incoming = Array.isArray(parsed.notesPacks) ? parsed.notesPacks : [];
+    const deck = el("deck");
+    const deckWrap = el("deckWrap");
+    const edgeLeft = el("edgeLeft");
+    const edgeRight = el("edgeRight");
+
+    const modeSingleBtn = el("modeSingle");
+    const modeCompareBtn = el("modeCompare");
+    const inputsSingle = el("inputsSingle");
+    const inputsCompare = el("inputsCompare");
+
+    const reportCards = el("reportCards");
+
+    const toggleMaster = el("toggleMaster");
+    const toggleLNY = el("toggleLNY");
+
+    const btnGenerate = el("btnGenerate");
+    const btnSaveCurrent = el("btnSaveCurrent");
+    const btnExportCurrent = el("btnExportCurrent");
+    const btnNotes = el("btnNotes");
+
+    const btnInfo = el("btnInfo");
+    const btnStreamer = el("btnStreamer");
+    const btnInstall = el("btnInstall");
+    const btnExit = el("btnExit");
+
+    const footerVer = el("footerVer");
+    const installStateTag = el("installStateTag");
+
+    const savedList = el("savedList");
+    const savedSearch = el("savedSearch");
+    const savedFilter = el("savedFilter");
+    const savedCount = el("savedCount");
+
+    const modalOverlay = el("modalOverlay");
+    const modalTitle = el("modalTitle");
+    const modalBody = el("modalBody");
+    const modalActions = el("modalActions");
+    const modalX = el("modalX");
+
+    // Inputs (single)
+    const sMonth = el("sMonth");
+    const sDay = el("sDay");
+    const sYear = el("sYear");
+    const sName = el("sName");
+    const sWarn = el("sWarn");
+
+    // Inputs (compare)
+    const aMonth = el("aMonth");
+    const aDay = el("aDay");
+    const aYear = el("aYear");
+    const aName = el("aName");
+    const aWarn = el("aWarn");
+
+    const bMonth = el("bMonth");
+    const bDay = el("bDay");
+    const bYear = el("bYear");
+    const bName = el("bName");
+    const bWarn = el("bWarn");
+
+    // State
+    const state = {
+      panelIndex: 0,
+      mode: "single",
+      streamer: false,
+      preserveMasters: true,
+      assumeAfterLNY: false,
+      latestGenerated: null, // {id, type, contentHTML, contentText, ts, title, metaLine}
+      notesPacks: []
+    };
+
+    footerVer.textContent = APP_VERSION;
+
+    // ----------------------------
+    // Utilities
+    // ----------------------------
+    function pad2(n){ return String(n).padStart(2, "0"); }
+    function ymd(y,m,d){ return `${String(y).padStart(4,"0")}-${pad2(m)}-${pad2(d)}`; }
+    function mdKey(m,d){ return `${pad2(m)}-${pad2(d)}`; }
+
+    function clampInt(v, min, max){
+      const n = parseInt(v, 10);
+      if (Number.isNaN(n)) return null;
+      return Math.max(min, Math.min(max, n));
+    }
+
+    function daysInMonth(month, year){
+      const m = clampInt(month,1,12) ?? 1;
+      const y = clampInt(year, 1, 9999) ?? 2000;
+      return new Date(y, m, 0).getDate();
+    }
+
+    function monthName(m){
+      const names = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+      return names[(m-1)] || `Month ${m}`;
+    }
+
+    function formatDateTitle(m,d,y){
+      return `${monthName(m)} ${d}, ${y}`;
+    }
+
+    function nowTs(){ return Date.now(); }
+
+    function safeText(s){
+      return (s ?? "").toString().replace(/\s+/g, " ").trim();
+    }
+
+    function escapeHTML(s){
+      return (s ?? "").toString()
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;");
+    }
+    function escapeAttr(s){
+      return escapeHTML(s).replaceAll('"',"&quot;");
+    }
+
+    function fmtLocal(ts){
+      try{
+        const d = new Date(ts);
+        return d.toLocaleString();
+      }catch(_){
+        return String(ts);
+      }
+    }
+
+    function hashStr(str){
+      let h = 2166136261 >>> 0;
+      for (let i=0;i<str.length;i++){
+        h ^= str.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+      }
+      return h >>> 0;
+    }
+    function seededPick(arr, seed){
+      if (!arr.length) return "";
+      const idx = seed % arr.length;
+      return arr[idx];
+    }
+    function seededShuffle(arr, seed){
+      const a = arr.slice();
+      let s = seed >>> 0;
+      for (let i=a.length-1;i>0;i--){
+        s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+        const j = s % (i+1);
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function htmlToText(rootEl){
+      const walker = document.createTreeWalker(rootEl, NodeFilter.SHOW_TEXT, null);
+      let out = "";
+      let node;
+      while ((node = walker.nextNode())){
+        const t = node.nodeValue.replace(/\s+/g, " ").trim();
+        if (!t) continue;
+        out += t + "\n";
+      }
+      return out.replace(/\n{3,}/g,"\n\n").trim();
+    }
+
+    function downloadText(filename, text){
+      const blob = new Blob([text], { type:"text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+    }
+
+    async function copyToClipboard(text){
+      try{
+        await navigator.clipboard.writeText(text);
+        return true;
+      }catch(_){
+        return false;
+      }
+    }
+
+    function setButtonsEnabled(hasLatest){
+      btnSaveCurrent.disabled = !hasLatest;
+      btnExportCurrent.disabled = !hasLatest;
+    }
+
+    // ----------------------------
+    // Offline tables (meaning engine)
+    // ----------------------------
+    const SUN_SIGNS = [
+      { name:"Capricorn", start:[12,22], end:[1,19], element:"Earth", modality:"Cardinal", planet:"Saturn" },
+      { name:"Aquarius",  start:[1,20],  end:[2,18], element:"Air",   modality:"Fixed",   planet:"Uranus (modern), Saturn (traditional)" },
+      { name:"Pisces",    start:[2,19],  end:[3,20], element:"Water", modality:"Mutable", planet:"Neptune (modern), Jupiter (traditional)" },
+      { name:"Aries",     start:[3,21],  end:[4,19], element:"Fire",  modality:"Cardinal",planet:"Mars" },
+      { name:"Taurus",    start:[4,20],  end:[5,20], element:"Earth", modality:"Fixed",   planet:"Venus" },
+      { name:"Gemini",    start:[5,21],  end:[6,20], element:"Air",   modality:"Mutable", planet:"Mercury" },
+      { name:"Cancer",    start:[6,21],  end:[7,22], element:"Water", modality:"Cardinal",planet:"Moon" },
+      { name:"Leo",       start:[7,23],  end:[8,22], element:"Fire",  modality:"Fixed",   planet:"Sun" },
+      { name:"Virgo",     start:[8,23],  end:[9,22], element:"Earth", modality:"Mutable", planet:"Mercury" },
+      { name:"Libra",     start:[9,23],  end:[10,22],element:"Air",   modality:"Cardinal",planet:"Venus" },
+      { name:"Scorpio",   start:[10,23], end:[11,21],element:"Water", modality:"Fixed",   planet:"Pluto (modern), Mars (traditional)" },
+      { name:"Sagittarius",start:[11,22],end:[12,21],element:"Fire",  modality:"Mutable", planet:"Jupiter" }
+    ];
+
+    function getSunSign(month, day){
+      const m = clampInt(month,1,12);
+      const d = clampInt(day,1,31);
+      if (!m || !d) return null;
+      for (const s of SUN_SIGNS){
+        const [sm, sd] = s.start;
+        const [em, ed] = s.end;
+        if (sm <= em){
+          if ((m > sm || (m === sm && d >= sd)) && (m < em || (m === em && d <= ed))) return s;
+        } else {
+          if ((m > sm || (m === sm && d >= sd)) || (m < em || (m === em && d <= ed))) return s;
+        }
+      }
+      return null;
+    }
+
+    const CHINESE_ANIMALS = ["Rat","Ox","Tiger","Rabbit","Dragon","Snake","Horse","Goat","Monkey","Rooster","Dog","Pig"];
+    const CH_ANCHOR_YEAR = 2020; // Rat
+
+    function chineseZodiac(year, month, day, assumeAfterLNY){
+      const y = clampInt(year, 1, 9999);
+      const m = clampInt(month,1,12);
+      const d = clampInt(day,1,31);
+      if (!y) return null;
+
+      let effectiveYear = y;
+      const boundaryNote = (m && d && (m === 1 || m === 2))
+        ? "Note: If born in Jan/early Feb, the Lunar New Year boundary may change the zodiac sign in traditional systems."
+        : "Note: Traditional Chinese zodiac changes at Lunar New Year; exact boundary varies by year.";
+
+      let heuristicApplied = false;
+      if (assumeAfterLNY && m && d){
+        if (m === 1 || (m === 2 && d <= 10)){
+          effectiveYear = y - 1;
+          heuristicApplied = true;
+        }
+      }
+
+      const idx = ((effectiveYear - CH_ANCHOR_YEAR) % 12 + 12) % 12;
+      return { animal: CHINESE_ANIMALS[idx], effectiveYear, heuristicApplied, boundaryNote };
+    }
+
+    function sumDigits(nStr){
+      let s = 0;
+      for (const ch of nStr) if (ch >= "0" && ch <= "9") s += (ch.charCodeAt(0) - 48);
+      return s;
+    }
+
+    function reduceNumber(n, preserveMasters){
+      let steps = [];
+      let cur = Math.abs(parseInt(n,10));
+      if (Number.isNaN(cur)) return { value:null, steps:["(invalid)"] };
+
+      while (cur >= 10){
+        if (preserveMasters && (cur === 11 || cur === 22 || cur === 33)){
+          steps.push(`${cur} (master)`);
+          return { value: cur, steps };
+        }
+        const asStr = String(cur);
+        const s = sumDigits(asStr);
+        steps.push(`${asStr.split("").join(" + ")} = ${s}`);
+        cur = s;
+      }
+      steps.push(`${cur}`);
+      return { value: cur, steps };
+    }
+
+    function lifePath(month, day, year, preserveMasters){
+      const m = clampInt(month,1,12);
+      const d = clampInt(day,1,31);
+      const y = clampInt(year,1,9999);
+      if (!m || !d || !y) return null;
+
+      const rm = reduceNumber(m, preserveMasters);
+      const rd = reduceNumber(d, preserveMasters);
+      const ry = reduceNumber(y, preserveMasters);
+
+      let total = (rm.value ?? 0) + (rd.value ?? 0) + (ry.value ?? 0);
+      const rt = reduceNumber(total, preserveMasters);
+
+      return { value: rt.value, parts: { rm, rd, ry }, total, totalSteps: rt.steps };
+    }
+
+    function birthdayNumber(day, preserveMasters){
+      const d = clampInt(day,1,31);
+      if (!d) return null;
+      return reduceNumber(d, preserveMasters);
+    }
+
+    function personalYear(month, day, currentYear, preserveMasters){
+      const m = clampInt(month,1,12);
+      const d = clampInt(day,1,31);
+      const y = clampInt(currentYear, 1, 9999);
+      if (!m || !d || !y) return null;
+
+      const rm = reduceNumber(m, preserveMasters);
+      const rd = reduceNumber(d, preserveMasters);
+      const ry = reduceNumber(y, preserveMasters);
+      const total = (rm.value ?? 0) + (rd.value ?? 0) + (ry.value ?? 0);
+      const rt = reduceNumber(total, preserveMasters);
+      return { value: rt.value, parts:{ rm, rd, ry }, total, totalSteps: rt.steps };
+    }
+
+    const NUM_KEYWORDS = {
+      1: ["initiative","self-direction","lead energy","fresh starts","decisive action"],
+      2: ["partnership","harmony","empathy","timing","quiet power"],
+      3: ["expression","creativity","social spark","humor","storytelling"],
+      4: ["structure","reliability","craft","grounding","method"],
+      5: ["adaptation","freedom","curiosity","movement","experimentation"],
+      6: ["care","responsibility","beauty","healing","home base"],
+      7: ["analysis","inner truth","research","depth","spiritual curiosity"],
+      8: ["ambition","results","power dynamics","management","material mastery"],
+      9: ["closure","compassion","big-picture","legacy","release"],
+      11:["intuition","signal sensitivity","inspiration","pattern awareness","teaching"],
+      22:["builder","systems thinking","scale","execution","legacy projects"],
+      33:["service","uplift","heart leadership","mentor energy","healing presence"]
+    };
+
+    const SEASONAL_LORE = {
+      1: ["reset energy","clean slate","winter clarity","intentional beginnings","quiet momentum"],
+      2: ["connection season","soft strength","steady affection","winter-to-spring bridge","patience with purpose"],
+      3: ["spring ignition","new growth","risk tolerance","fresh identity","first bloom confidence"],
+      4: ["rooting season","systems and routines","spring discipline","building blocks","stable momentum"],
+      5: ["expansion month","movement and curiosity","social momentum","learning loops","new doors"],
+      6: ["warmth and belonging","home-field advantage","summer closeness","care in action","comfort-building"],
+      7: ["heat and courage","visible confidence","summer boldness","play + pride","spotlight moments"],
+      8: ["harvest focus","drive and output","late-summer intensity","results season","execution mode"],
+      9: ["transition wisdom","season shift","review + refine","closing loops","teaching moments"],
+      10:["craft and calibration","autumn structure","quality control","precision energy","skill upgrades"],
+      11:["depth season","meaning-making","quiet power","memory and legacy","honest reflection"],
+      12:["closure + celebration","winter ritual","year-end integration","tradition","future framing"]
+    };
+
+    const INTUITION_LENSES = [
+      "If this date walked into the room, it would feel like",
+      "The hidden assignment here is",
+      "The recurring life theme is",
+      "The emotional signature tends to be",
+      "The growth edge often shows up as",
+      "The superpower becomes obvious when",
+      "The shadow pattern tends to appear when",
+      "A strong mantra for this signature is"
+    ];
+
+    const MANTRAS = [
+      "Move slow. Hit clean.",
+      "Listen first. Then speak once.",
+      "Build the thing. Let it teach you.",
+      "Let truth be your tempo.",
+      "Your rhythm is your proof.",
+      "Choose the next right step.",
+      "Depth over noise."
+    ];
+
+    // ----------------------------
+    // Notes Packs (local, user-provided)
+    // ----------------------------
+    function loadNotesPacks(){
+      try{
+        const raw = localStorage.getItem(NOTES_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return [];
+        return parsed.map(p => ({
+          id: safeText(p.id) || ("p_" + Math.random().toString(36).slice(2)),
+          name: safeText(p.name) || "Notes Pack",
+          global: (p.global ?? "").toString(),
+          perDate: (p.perDate && typeof p.perDate === "object") ? p.perDate : {}
+        }));
+      }catch(_){
+        return [];
+      }
+    }
+    function saveNotesPacks(packs){
+      localStorage.setItem(NOTES_KEY, JSON.stringify(packs));
+    }
+    function getNotesForMD(packs, md){
+      const out = [];
+      for (const p of packs){
+        const per = (p.perDate && p.perDate[md]) ? safeText(p.perDate[md]) : "";
+        const glob = safeText(p.global);
+        if (per || glob) out.push({ packName: p.name, global: glob, perDate: per });
+      }
+      return out;
+    }
+
+    // ----------------------------
+    // Reports storage
+    // ----------------------------
+    function loadReports(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return [];
+        const arr = JSON.parse(raw);
+        if (!Array.isArray(arr)) return [];
+        return arr.filter(r => r && r.id && r.ts && r.type && r.contentHTML && r.contentText);
+      }catch(_){
+        return [];
+      }
+    }
+    function saveReports(list){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    }
+    function addReport(report){
+      const list = loadReports();
+      list.unshift(report);
+      saveReports(list);
+      return list;
+    }
+    function deleteReport(id){
+      const list = loadReports().filter(r => r.id !== id);
+      saveReports(list);
+      return list;
+    }
+
+    // ----------------------------
+    // UI: Populate month/day dropdowns
+    // ----------------------------
+    function fillMonths(sel){
+      sel.innerHTML = "";
+      for (let m=1;m<=12;m++){
+        const opt = document.createElement("option");
+        opt.value = String(m);
+        opt.textContent = `${m} — ${monthName(m)}`;
+        sel.appendChild(opt);
+      }
+    }
+    function fillDays(sel, month, year){
+      const m = clampInt(month,1,12) ?? 1;
+      const y = clampInt(year, 1, 9999) ?? 2000;
+      const max = daysInMonth(m, y);
+      const prev = clampInt(sel.value,1,31) ?? 1;
+      sel.innerHTML = "";
+      for (let d=1; d<=max; d++){
+        const opt = document.createElement("option");
+        opt.value = String(d);
+        opt.textContent = String(d);
+        sel.appendChild(opt);
+      }
+      sel.value = String(Math.min(prev, max));
+    }
+
+    fillMonths(sMonth); fillMonths(aMonth); fillMonths(bMonth);
+
+    const today = new Date();
+    sMonth.value = String(today.getMonth()+1);
+    aMonth.value = sMonth.value;
+    bMonth.value = sMonth.value;
+
+    sYear.value = "1997";
+    aYear.value = "1997";
+    bYear.value = "1997";
+
+    fillDays(sDay, sMonth.value, sYear.value);
+    fillDays(aDay, aMonth.value, aYear.value);
+    fillDays(bDay, bMonth.value, bYear.value);
+
+    sDay.value = "1"; aDay.value = "1"; bDay.value = "1";
+
+    function yearWarning(year){
+      const y = clampInt(year, 1, 9999);
+      if (!y) return "Enter a 4-digit year.";
+      if (y < 1800 || y > 2100) return "Year is outside 1800–2100. Allowed (with caution for historical calendar assumptions).";
+      return "";
+    }
+
+    function setWarn(elWarn, msg){
+      if (msg){
+        elWarn.style.display = "block";
+        elWarn.textContent = msg;
+        elWarn.style.color = "rgba(255,210,120,.95)";
+      } else {
+        elWarn.style.display = "none";
+        elWarn.textContent = "";
+      }
+    }
+
+    function onSingleMonthYearChange(){
+      fillDays(sDay, sMonth.value, sYear.value);
+      setWarn(sWarn, yearWarning(sYear.value));
+    }
+    function onCompareMonthYearChange(){
+      fillDays(aDay, aMonth.value, aYear.value);
+      fillDays(bDay, bMonth.value, bYear.value);
+      setWarn(aWarn, yearWarning(aYear.value));
+      setWarn(bWarn, yearWarning(bYear.value));
+    }
+
+    sMonth.addEventListener("change", onSingleMonthYearChange);
+    sYear.addEventListener("input", onSingleMonthYearChange);
+    aMonth.addEventListener("change", onCompareMonthYearChange);
+    aYear.addEventListener("input", onCompareMonthYearChange);
+    bMonth.addEventListener("change", onCompareMonthYearChange);
+    bYear.addEventListener("input", onCompareMonthYearChange);
+
+    // ----------------------------
+    // Mode handling
+    // ----------------------------
+    function clearGeneratedUI(){
+      reportCards.innerHTML = "";
+      state.latestGenerated = null;
+      setButtonsEnabled(false);
+    }
+
+    function setMode(mode){
+      state.mode = mode;
+      if (mode === "single"){
+        modeSingleBtn.classList.add("active");
+        modeCompareBtn.classList.remove("active");
+        inputsSingle.style.display = "block";
+        inputsCompare.style.display = "none";
+      } else {
+        modeCompareBtn.classList.add("active");
+        modeSingleBtn.classList.remove("active");
+        inputsSingle.style.display = "none";
+        inputsCompare.style.display = "block";
+      }
+      clearGeneratedUI();
+    }
+
+    modeSingleBtn.addEventListener("click", () => setMode("single"));
+    modeCompareBtn.addEventListener("click", () => setMode("compare"));
+
+    // Toggles
+    function setToggle(toggleEl, on){
+      toggleEl.classList.toggle("on", !!on);
+      toggleEl.setAttribute("aria-checked", on ? "true" : "false");
+    }
+    setToggle(toggleMaster, true);
+    setToggle(toggleLNY, false);
+
+    toggleMaster.addEventListener("click", () => {
+      state.preserveMasters = !state.preserveMasters;
+      setToggle(toggleMaster, state.preserveMasters);
+    });
+    toggleMaster.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " "){
+        e.preventDefault();
+        state.preserveMasters = !state.preserveMasters;
+        setToggle(toggleMaster, state.preserveMasters);
+      }
+    });
+
+    toggleLNY.addEventListener("click", () => {
+      state.assumeAfterLNY = !state.assumeAfterLNY;
+      setToggle(toggleLNY, state.assumeAfterLNY);
+    });
+    toggleLNY.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " "){
+        e.preventDefault();
+        state.assumeAfterLNY = !state.assumeAfterLNY;
+        setToggle(toggleLNY, state.assumeAfterLNY);
+      }
+    });
+
+    // Streamer mode
+    function setStreamer(on){
+      state.streamer = !!on;
+      document.body.classList.toggle("streamer", state.streamer);
+      btnStreamer.textContent = state.streamer ? "Streamer Mode: ON" : "Streamer Mode";
+    }
+    btnStreamer.addEventListener("click", () => setStreamer(!state.streamer));
+
+    // Exit button (frozen)
+    btnExit.addEventListener("click", () => {
+      window.close();
+      setTimeout(() => alert("If it didn’t close: use your phone’s Back/Home."), 200);
+    });
+
+    // ----------------------------
+    // Deck navigation (edge-swipe only)
+    // ----------------------------
+    function setPanel(index){
+      state.panelIndex = index;
+      deck.style.transform = `translateX(${index === 0 ? 0 : -50}%)`;
+      if (index === 1) renderSavedList();
+    }
+
+    function canSwipeNow(){
+      if (modalOverlay.classList.contains("show")) return false;
+      return true;
+    }
+
+    function attachEdgeSwipe(zoneEl, direction){
+      let startX = 0, startY = 0, tracking = false, moved = false;
+
+      zoneEl.addEventListener("touchstart", (e) => {
+        if (!canSwipeNow()) return;
+        if (!e.touches || e.touches.length !== 1) return;
+        tracking = true;
+        moved = false;
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+      }, { passive:true });
+
+      zoneEl.addEventListener("touchmove", (e) => {
+        if (!tracking) return;
+        const t = e.touches[0];
+        const dx = t.clientX - startX;
+        const dy = t.clientY - startY;
+        if (Math.abs(dx) > 18 && Math.abs(dx) > Math.abs(dy) * 1.2) moved = true;
+      }, { passive:true });
+
+      zoneEl.addEventListener("touchend", (e) => {
+        if (!tracking) return;
+        tracking = false;
+        if (!moved) return;
+        const ct = e.changedTouches && e.changedTouches[0];
+        if (!ct) return;
+        const dx = ct.clientX - startX;
+        const threshold = 70;
+
+        if (direction === "toSaved"){
+          if (dx < -threshold) setPanel(1);
+        } else {
+          if (dx > threshold) setPanel(0);
+        }
+      }, { passive:true });
+    }
+
+    attachEdgeSwipe(edgeRight, "toSaved");
+    attachEdgeSwipe(edgeLeft, "toHome");
+
+    // ----------------------------
+    // Modals
+    // ----------------------------
+    function openModal(title, bodyNodeOrHTML, actions){
+      modalTitle.textContent = title;
+      modalBody.innerHTML = "";
+      if (typeof bodyNodeOrHTML === "string") modalBody.innerHTML = bodyNodeOrHTML;
+      else if (bodyNodeOrHTML instanceof Node) modalBody.appendChild(bodyNodeOrHTML);
+
+      modalActions.innerHTML = "";
+      for (const a of (actions || [])){
+        const b = document.createElement("button");
+        b.className = "pillBtn" + (a.danger ? " dangerBtn" : "");
+        b.type = "button";
+        b.textContent = a.label;
+        if (a.disabled) b.disabled = true;
+        b.addEventListener("click", () => a.onClick && a.onClick());
+        modalActions.appendChild(b);
+      }
+      modalOverlay.classList.add("show");
+      modalOverlay.setAttribute("aria-hidden","false");
+    }
+    function closeModal(){
+      modalOverlay.classList.remove("show");
+      modalOverlay.setAttribute("aria-hidden","true");
+      modalTitle.textContent = "Modal";
+      modalBody.innerHTML = "";
+      modalActions.innerHTML = "";
+    }
+    modalX.addEventListener("click", closeModal);
+    modalOverlay.addEventListener("click", (e) => { if (e.target === modalOverlay) closeModal(); });
+
+    btnInfo.addEventListener("click", () => {
+      openModal(
+        "Info",
+        `
+          <div class="note">
+            <div style="font-size: var(--fz2); font-weight: 950; margin-bottom: 8px;">What this tool is</div>
+            <p>
+              Birthday Code produces offline, deterministic “meaning” reports using built-in tables for Western astrology, a simplified Chinese zodiac cycle,
+              and numerology calculations, plus an original synthesis layer and your own local Notes Packs.
+            </p>
+            <p class="disclaimerLine">Entertainment / reflective tool. Not factual prediction. Not advice.</p>
+            <div class="hr"></div>
+            <div style="font-size: var(--fz2); font-weight: 950; margin-bottom: 8px;">Two panels</div>
+            <ul>
+              <li><b>Generate / Compare</b> creates reports and exports.</li>
+              <li><b>Saved Reports</b> stores and reopens prior reports (local-only).</li>
+            </ul>
+            <div class="hr"></div>
+            <div style="font-size: var(--fz2); font-weight: 950; margin-bottom: 8px;">Switch panels</div>
+            <p>
+              Swipe from the screen edges only (about <span class="kbd">150px</span> from left/right edges). This avoids conflicts with scrolling and typing.
+            </p>
+            <div class="hr"></div>
+            <div style="font-size: var(--fz2); font-weight: 950; margin-bottom: 8px;">Notes Packs</div>
+            <p>
+              Notes Packs are your own paraphrased notes from books you own (local-only). You can add global notes and per-date notes keyed by
+              <span class="kbd">MM-DD</span> (example: <span class="kbd">03-04</span>). These appear in reports under “Book Notes (Local)”.
+            </p>
+          </div>
+        `,
+        [{ label:"OK", onClick: closeModal }]
+      );
+    });
+
+    // ----------------------------
+    // Notes Packs Manager Modal
+    // ----------------------------
+    function openNotesManager(){
+      state.notesPacks = loadNotesPacks();
+
+      const wrap = document.createElement("div");
+      wrap.innerHTML = `
+        <div class="note">
+          <div style="font-size: var(--fz2); font-weight: 950; margin-bottom: 8px;">Sources / Notes Packs (Local)</div>
+          <p>
+            Create your own paraphrased notes from books you own. Notes are stored on this device only.
+            Use <span class="kbd">MM-DD</span> keys for per-date notes (example: <span class="kbd">03-04</span>).
+          </p>
+        </div>
+        <div class="hr"></div>
+      `;
+
+      const topRow = document.createElement("div");
+      topRow.className = "row";
+
+      const btnNew = document.createElement("button");
+      btnNew.className = "pillBtn";
+      btnNew.type = "button";
+      btnNew.textContent = "New Pack";
+      btnNew.addEventListener("click", () => {
+        const p = {
+          id: "p_" + Math.random().toString(36).slice(2),
+          name: "Notes Pack",
+          global: "",
+          perDate: {}
+        };
+        state.notesPacks.unshift(p);
+        saveNotesPacks(state.notesPacks);
+        closeModal();
+        openNotesManager();
+        openPackEditor(p.id);
+      });
+
+      const btnExportPacks = document.createElement("button");
+      btnExportPacks.className = "pillBtn";
+      btnExportPacks.type = "button";
+      btnExportPacks.textContent = "Export Packs";
+      btnExportPacks.addEventListener("click", () => {
+        const payload = {
+          app: "Birthday Code",
+          appVersion: APP_VERSION,
+          exportedAt: new Date().toISOString(),
+          notesPacks: state.notesPacks
+        };
+        const txt = JSON.stringify(payload, null, 2);
+        downloadText(`birthday_code_notes_packs_${APP_VERSION}.json`, txt);
+      });
+
+      const btnImportPacks = document.createElement("button");
+      btnImportPacks.className = "pillBtn";
+      btnImportPacks.type = "button";
+      btnImportPacks.textContent = "Import Packs";
+      btnImportPacks.addEventListener("click", () => openPacksImportModal());
+
+      topRow.appendChild(btnNew);
+      topRow.appendChild(btnExportPacks);
+      topRow.appendChild(btnImportPacks);
+      wrap.appendChild(topRow);
+
+      const list = document.createElement("div");
+      list.style.display = "flex";
+      list.style.flexDirection = "column";
+      list.style.gap = "10px";
+      list.style.marginTop = "12px";
+      wrap.appendChild(list);
+
+      function render(){
+        list.innerHTML = "";
+        if (!state.notesPacks.length){
+          const empty = document.createElement("div");
+          empty.className = "card";
+          empty.innerHTML = `<div class="note">No Notes Packs yet. Create one to store your paraphrased book notes (local-only).</div>`;
+          list.appendChild(empty);
+        } else {
+          for (const p of state.notesPacks){
+            const card = document.createElement("div");
+            card.className = "card";
+            card.style.borderColor = "rgba(160,200,255,.30)";
+            const perCount = p.perDate ? Object.keys(p.perDate).filter(k => safeText(p.perDate[k])).length : 0;
+
+            card.innerHTML = `
+              <div style="display:flex; justify-content: space-between; align-items:center; gap: 10px; margin-bottom: 8px;">
+                <div style="font-size: var(--fz2); font-weight: 950; line-height: 1.05; overflow:hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70vw;">
+                  ${escapeHTML(p.name)}
+                </div>
+                <div class="badge">${perCount} date notes</div>
+              </div>
+              <div class="note" style="margin-bottom: 10px;">
+                Global notes: ${safeText(p.global) ? "Yes" : "No"} &nbsp;•&nbsp; Per-date notes: ${perCount}
+              </div>
+            `;
+
+            const row = document.createElement("div");
+            row.className = "row";
+
+            const btnEdit = document.createElement("button");
+            btnEdit.className = "pillBtn";
+            btnEdit.type = "button";
+            btnEdit.textContent = "Edit";
+            btnEdit.addEventListener("click", () => openPackEditor(p.id));
+
+            const btnDel = document.createElement("button");
+            btnDel.className = "pillBtn dangerBtn";
+            btnDel.type = "button";
+            btnDel.textContent = "Delete";
+            btnDel.addEventListener("click", () => {
+              openModal(
+                "Delete Pack",
+                `<div class="note">Delete <b>${escapeHTML(p.name)}</b>? This removes its notes from this device.</div>`,
+                [
+                  { label:"Cancel", onClick: closeModal },
+                  { label:"Delete", danger:true, onClick: () => {
+                      state.notesPacks = state.notesPacks.filter(x => x.id !== p.id);
+                      saveNotesPacks(state.notesPacks);
+                      closeModal();
+                      openNotesManager();
+                    }
+                  }
+                ]
+              );
+            });
+
+            row.appendChild(btnEdit);
+            row.appendChild(btnDel);
+            card.appendChild(row);
+            list.appendChild(card);
+          }
+        }
+      }
+
+      function openPackEditor(packId){
+        const pack = state.notesPacks.find(x => x.id === packId);
+        if (!pack) return;
+
+        const ed = document.createElement("div");
+        ed.innerHTML = `
+          <div class="note">
+            <div style="font-size: var(--fz2); font-weight: 950; margin-bottom: 8px;">Edit Pack</div>
+            <p>Pack name is shown in reports under “Book Notes (Local)”.</p>
+          </div>
+        `;
+
+        const fName = document.createElement("div");
+        fName.className = "field wide";
+        fName.innerHTML = `<label>Pack name</label><input type="text" value="${escapeAttr(pack.name)}" />`;
+        const iName = fName.querySelector("input");
+        ed.appendChild(fName);
+
+        const fGlobal = document.createElement("div");
+        fGlobal.style.marginTop = "12px";
+        fGlobal.innerHTML = `<label>Global notes (optional)</label><textarea placeholder="Global notes for this source pack">${escapeHTML(pack.global || "")}</textarea>`;
+        const tGlobal = fGlobal.querySelector("textarea");
+        ed.appendChild(fGlobal);
+
+        const fKey = document.createElement("div");
+        fKey.style.marginTop = "12px";
+        fKey.innerHTML = `
+          <div class="row">
+            <div class="field" style="min-width: 200px;">
+              <label>MM-DD key</label>
+              <input type="text" id="mdKeyInput" placeholder="03-04" />
+            </div>
+            <div class="field wide" style="flex:1 1 420px;">
+              <label>Status</label>
+              <input type="text" id="mdHint" value="Enter MM-DD (example 03-04) to edit per-date notes." readonly />
+            </div>
+          </div>
+        `;
+        const iKey = fKey.querySelector("#mdKeyInput");
+        const iHint = fKey.querySelector("#mdHint");
+        ed.appendChild(fKey);
+
+        const fPer = document.createElement("div");
+        fPer.style.marginTop = "12px";
+        fPer.innerHTML = `<label>Per-date notes for this MM-DD (optional)</label><textarea id="mdNotes" placeholder="Notes that apply to this date (MM-DD) only"></textarea>`;
+        const tPer = fPer.querySelector("#mdNotes");
+        ed.appendChild(fPer);
+
+        const helper = document.createElement("div");
+        helper.className = "note";
+        helper.style.marginTop = "10px";
+        helper.innerHTML = `
+          Tip: Put short source breadcrumbs at the top of your notes, e.g. “Source: Book of Birthdays (paraphrase)” or “Source: Astro handbook (paraphrase)”.
+        `;
+        ed.appendChild(helper);
+
+        function normalizeMD(raw){
+          const s = safeText(raw).replaceAll("/", "-");
+          const m = s.match(/^(\d{1,2})-(\d{1,2})$/);
+          if (!m) return null;
+          const mm = clampInt(m[1],1,12);
+          const dd = clampInt(m[2],1,31);
+          if (!mm || !dd) return null;
+          return `${pad2(mm)}-${pad2(dd)}`;
+        }
+
+        function loadPer(md){
+          const current = (pack.perDate && pack.perDate[md]) ? pack.perDate[md] : "";
+          tPer.value = current || "";
+          iHint.value = `Editing per-date notes for ${md}.`;
+        }
+
+        function savePack(){
+          pack.name = safeText(iName.value) || "Notes Pack";
+          pack.global = (tGlobal.value ?? "").toString();
+          pack.perDate = pack.perDate || {};
+          saveNotesPacks(state.notesPacks);
+        }
+
+        iName.addEventListener("input", savePack);
+        tGlobal.addEventListener("input", savePack);
+
+        iKey.addEventListener("input", () => {
+          const md = normalizeMD(iKey.value);
+          if (!md){
+            iHint.value = "Enter MM-DD (example 03-04) to edit per-date notes.";
+            tPer.value = "";
+            return;
+          }
+          iKey.value = md;
+          loadPer(md);
+        });
+
+        tPer.addEventListener("input", () => {
+          const md = normalizeMD(iKey.value);
+          if (!md) return;
+          pack.perDate = pack.perDate || {};
+          pack.perDate[md] = (tPer.value ?? "").toString();
+          savePack();
+        });
+
+        openModal(
+          "Notes Pack Editor",
+          ed,
+          [
+            { label:"Back", onClick: () => { closeModal(); openNotesManager(); } },
+            { label:"Done", onClick: () => { savePack(); closeModal(); openNotesManager(); } }
+          ]
+        );
+      }
+
+      function openPacksImportModal(){
+        const w = document.createElement("div");
+        w.innerHTML = `
+          <div class="note">
+            <div style="font-size: var(--fz2); font-weight: 950; margin-bottom: 8px;">Import Notes Packs</div>
+            <p>Paste JSON from a prior “Export Packs”. This merges packs into this device.</p>
+          </div>
+        `;
+
+        const taWrap = document.createElement("div");
+        taWrap.style.marginTop = "12px";
+        taWrap.innerHTML = `<label>Paste JSON</label><textarea id="impJson" placeholder='{"notesPacks":[...]}'></textarea>`;
+        const ta = taWrap.querySelector("#impJson");
+        w.appendChild(taWrap);
+
+        const msg = document.createElement("div");
+        msg.className = "note";
+        msg.style.marginTop = "10px";
+        msg.style.color = "rgba(255,210,120,.95)";
+        msg.textContent = "";
+        w.appendChild(msg);
+
+        openModal(
+          "Import Packs",
+          w,
+          [
+            { label:"Cancel", onClick: closeModal },
+            { label:"Import", onClick: () => {
+                try{
+                  const parsed = JSON.parse(ta.value || "{}");
+                  const incoming = Array.isArray(parsed.notesPacks) ? parsed.notesPacks : Array.isArray(parsed) ? parsed : [];
+                  let merged = 0;
+
+                  for (const ip of incoming){
+                    if (!ip || !safeText(ip.name)) continue;
+                    const name = safeText(ip.name);
+                    const existing = state.notesPacks.find(p => safeText(p.name) === name);
+                    const glob = (ip.global ?? "").toString();
+                    const perDate = (ip.perDate && typeof ip.perDate === "object") ? ip.perDate : {};
+
+                    if (existing){
+                      if (safeText(glob) && !safeText(existing.global)) existing.global = glob;
+                      existing.perDate = Object.assign({}, existing.perDate || {}, perDate);
+                    } else {
+                      state.notesPacks.push({
+                        id: safeText(ip.id) || ("p_" + Math.random().toString(36).slice(2)),
+                        name,
+                        global: glob,
+                        perDate
+                      });
+                    }
+                    merged++;
+                  }
+
+                  saveNotesPacks(state.notesPacks);
+                  msg.textContent = merged ? `Imported/merged ${merged} pack(s).` : "Nothing imported.";
+                  msg.style.color = merged ? "var(--ok)" : "rgba(255,210,120,.95)";
+                }catch(e){
+                  msg.textContent = "Invalid JSON. Paste the full export JSON.";
+                  msg.style.color = "rgba(255,110,120,.95)";
+                }
+              }
+            }
+          ]
+        );
+      }
+
+      render();
+
+      openModal(
+        "Notes Packs",
+        wrap,
+        [{ label:"Done", onClick: closeModal }]
+      );
+    }
+
+    btnNotes.addEventListener("click", openNotesManager);
+
+    // ----------------------------
+    // Report building
+    // ----------------------------
+    function reportId(){
+      return "r_" + nowTs() + "_" + Math.random().toString(36).slice(2,8);
+    }
+
+    function buildSingleProfile(month, day, year, name){
+      const m = clampInt(month,1,12);
+      const d = clampInt(day,1,31);
+      const y = clampInt(year,1,9999);
+      if (!m || !d || !y) return null;
+
+      const md = mdKey(m,d);
+      const sun = getSunSign(m,d);
+      const cz = chineseZodiac(y, m, d, state.assumeAfterLNY);
+      const lp = lifePath(m,d,y, state.preserveMasters);
+      const bn = birthdayNumber(d, state.preserveMasters);
+      const py = personalYear(m,d, (new Date()).getFullYear(), state.preserveMasters);
+
+      const seed = hashStr(`${y}-${md}-${safeText(name)}`);
+
+      const kwLP = (lp && lp.value && NUM_KEYWORDS[lp.value]) ? seededShuffle(NUM_KEYWORDS[lp.value], seed) : [];
+      const season = SEASONAL_LORE[m] ? seededShuffle(SEASONAL_LORE[m], seed ^ 0xABC) : [];
+      const prompts = seededShuffle(INTUITION_LENSES, seed ^ 0x1337).slice(0,4);
+      const mantra = seededPick(MANTRAS, seed ^ 0xBEEF);
+
+      const packs = loadNotesPacks();
+      const notes = getNotesForMD(packs, md);
+
+      return {
+        m,d,y,md,name: safeText(name),
+        title: formatDateTitle(m,d,y),
+        sun, cz, lp, bn, py,
+        kwLP, season, prompts, mantra,
+        notes
+      };
+    }
+
+    function buildSingleReportHTML(profile){
+      const nameLine = profile.name ? ` — ${escapeHTML(profile.name)}` : "";
+      const sun = profile.sun;
+      const cz = profile.cz;
+      const lpv = profile.lp?.value;
+      const bnv = profile.bn?.value;
+      const pyv = profile.py?.value;
+
+      const kw = (profile.kwLP || []).slice(0,4);
+      const season = (profile.season || []).slice(0,3);
+
+      const notesBlocks = (profile.notes || []).map(n => {
+        const parts = [];
+        if (safeText(n.global)) parts.push(`<p><b>${escapeHTML(n.packName)} — Global</b><br>${escapeHTML(n.global).replaceAll("\n","<br>")}</p>`);
+        if (safeText(n.perDate)) parts.push(`<p><b>${escapeHTML(n.packName)} — ${escapeHTML(profile.md)}</b><br>${escapeHTML(n.perDate).replaceAll("\n","<br>")}</p>`);
+        return parts.join("");
+      }).join("");
+
+      const notesHTML = notesBlocks
+        ? `<h3>Book Notes (Local)</h3><div class="note">${notesBlocks}</div>`
+        : `<h3>Book Notes (Local)</h3><p class="disclaimerLine">No local notes for ${escapeHTML(profile.md)} yet. Add via Notes Packs.</p>`;
+
+      const lpSteps = profile.lp ? `
+        <p class="disclaimerLine"><b>Life Path steps</b></p>
+        <ul>
+          <li>Month: ${escapeHTML(profile.lp.parts.rm.steps.join(" → "))}</li>
+          <li>Day: ${escapeHTML(profile.lp.parts.rd.steps.join(" → "))}</li>
+          <li>Year: ${escapeHTML(profile.lp.parts.ry.steps.join(" → "))}</li>
+          <li>Total (${escapeHTML(String(profile.lp.total))}): ${escapeHTML(profile.lp.totalSteps.join(" → "))}</li>
+        </ul>
+      ` : "";
+
+      const pySteps = profile.py ? `
+        <p class="disclaimerLine"><b>Personal Year steps</b></p>
+        <ul>
+          <li>Month: ${escapeHTML(profile.py.parts.rm.steps.join(" → "))}</li>
+          <li>Day: ${escapeHTML(profile.py.parts.rd.steps.join(" → "))}</li>
+          <li>Year: ${escapeHTML(profile.py.parts.ry.steps.join(" → "))}</li>
+          <li>Total (${escapeHTML(String(profile.py.total))}): ${escapeHTML(profile.py.totalSteps.join(" → "))}</li>
+        </ul>
+      ` : "";
+
+      const badge = `<span class="badge single">Single</span>`;
+
+      const summaryBullets = [
+        sun ? `<li><b>${escapeHTML(sun.name)}</b> — ${escapeHTML(sun.element)} / ${escapeHTML(sun.modality)} (ruler: ${escapeHTML(sun.planet)})</li>` : "",
+        lpv ? `<li><b>Life Path ${escapeHTML(String(lpv))}</b> — ${escapeHTML((NUM_KEYWORDS[lpv] || []).slice(0,3).join(", "))}</li>` : "",
+        cz ? `<li><b>Chinese Zodiac:</b> ${escapeHTML(cz.animal)} <span class="disclaimerLine">(year ${escapeHTML(String(cz.effectiveYear))}${cz.heuristicApplied ? ", heuristic applied" : ""})</span></li>` : "",
+        bnv ? `<li><b>Birthday Number:</b> ${escapeHTML(String(bnv))}</li>` : "",
+        pyv ? `<li><b>Personal Year:</b> ${escapeHTML(String(pyv))}</li>` : ""
+      ].filter(Boolean).join("");
+
+      const promptsHTML = (profile.prompts || []).map(p => `<li>${escapeHTML(p)} <b>${escapeHTML(seededPick(["…a quiet intensity.","…a bright signal.","…a steady engine.","…a calm magnet.","…a disciplined spark."], hashStr(p+profile.md)))}</b></li>`).join("");
+
+      return `
+        <div class="reportCard">
+          <div class="reportTop">
+            <div class="reportTitle">${escapeHTML(profile.title)}${nameLine}</div>
+            <div class="reportMeta">${badge} • Generated: ${escapeHTML(fmtLocal(nowTs()))} • Notes key: <span class="kbd">${escapeHTML(profile.md)}</span></div>
+          </div>
+          <div class="reportBody">
+            <h3>Quick Highlights</h3>
+            <ul>${summaryBullets}</ul>
+
+            <h3>Signature Synthesis</h3>
+            <p>
+              This date reads like <b>${escapeHTML(season[0] || "seasonal momentum")}</b> mixed with a numerology emphasis on
+              <b>${escapeHTML(String(lpv ?? "—"))}</b>—a pattern that often expresses through
+              <b>${escapeHTML(kw[0] || "intentional growth")}</b>, <b>${escapeHTML(kw[1] || "clarity")}</b>, and <b>${escapeHTML(kw[2] || "follow-through")}</b>.
+            </p>
+            <p class="disclaimerLine"><b>Mantra:</b> ${escapeHTML(profile.mantra || "Depth over noise.")}</p>
+
+            <h3>Western Astrology</h3>
+            ${sun ? `
+              <ul>
+                <li><b>Sun sign:</b> ${escapeHTML(sun.name)}</li>
+                <li><b>Element:</b> ${escapeHTML(sun.element)}</li>
+                <li><b>Modality:</b> ${escapeHTML(sun.modality)}</li>
+                <li><b>Ruler:</b> ${escapeHTML(sun.planet)}</li>
+              </ul>
+            ` : `<p class="disclaimerLine">Invalid date for sun sign.</p>`}
+
+            <h3>Chinese Zodiac (Simplified)</h3>
+            ${cz ? `
+              <ul>
+                <li><b>Animal:</b> ${escapeHTML(cz.animal)}</li>
+                <li class="disclaimerLine">${escapeHTML(cz.boundaryNote)}</li>
+              </ul>
+            ` : `<p class="disclaimerLine">Enter a year to compute zodiac.</p>`}
+
+            <h3>Numerology</h3>
+            <ul>
+              <li><b>Life Path:</b> ${escapeHTML(String(lpv ?? "—"))}</li>
+              <li><b>Birthday Number:</b> ${escapeHTML(String(bnv ?? "—"))}</li>
+              <li><b>Personal Year (current year):</b> ${escapeHTML(String(pyv ?? "—"))}</li>
+            </ul>
+            ${lpSteps}
+            ${pySteps}
+
+            <h3>Intuition Prompts (Livestream Friendly)</h3>
+            <ul>${promptsHTML}</ul>
+
+            ${notesHTML}
+
+            <h3>Method Notes</h3>
+            <p class="disclaimerLine">
+              This is an entertainment / reflective synthesis tool. It uses static sign tables, a simplified zodiac cycle, and digit-reduction numerology with optional master-number preservation.
+              It does not provide factual prediction, diagnosis, or advice.
+            </p>
+          </div>
+        </div>
+      `.trim();
+    }
+
+    function buildCompareReportHTML(a, b){
+      const badge = `<span class="badge compare">Compare</span>`;
+      const t = `${a.title}${a.name ? " — "+a.name : ""} vs ${b.title}${b.name ? " — "+b.name : ""}`;
+
+      const aSun = a.sun?.name || "—";
+      const bSun = b.sun?.name || "—";
+      const aLP = a.lp?.value ?? "—";
+      const bLP = b.lp?.value ?? "—";
+      const aCZ = a.cz?.animal || "—";
+      const bCZ = b.cz?.animal || "—";
+
+      const common = [];
+      if (a.sun && b.sun && a.sun.element === b.sun.element) common.push(`Shared element: ${a.sun.element}`);
+      if (a.lp?.value && b.lp?.value && a.lp.value === b.lp.value) common.push(`Shared Life Path: ${a.lp.value}`);
+      if (a.cz?.animal && b.cz?.animal && a.cz.animal === b.cz.animal) common.push(`Shared zodiac: ${a.cz.animal}`);
+      const commonHTML = common.length ? `<ul>${common.map(x=>`<li>${escapeHTML(x)}</li>`).join("")}</ul>` : `<p class="disclaimerLine">No obvious “same label” matches. That can still be a strong complement.</p>`;
+
+      const contrast = [
+        `<li><b>Sun sign:</b> ${escapeHTML(aSun)} vs ${escapeHTML(bSun)}</li>`,
+        `<li><b>Life Path:</b> ${escapeHTML(String(aLP))} vs ${escapeHTML(String(bLP))}</li>`,
+        `<li><b>Chinese Zodiac:</b> ${escapeHTML(aCZ)} vs ${escapeHTML(bCZ)}</li>`
+      ].join("");
+
+      return `
+        <div class="reportCard">
+          <div class="reportTop">
+            <div class="reportTitle">${escapeHTML(t)}</div>
+            <div class="reportMeta">${badge} • Generated: ${escapeHTML(fmtLocal(nowTs()))}</div>
+          </div>
+          <div class="reportBody">
+            <h3>At a Glance</h3>
+            <ul>${contrast}</ul>
+
+            <h3>Shared Themes</h3>
+            ${commonHTML}
+
+            <h3>Complement Pattern</h3>
+            <p>
+              Think of A as bringing <b>${escapeHTML((NUM_KEYWORDS[a.lp?.value] || ["a particular rhythm"])[0])}</b> energy, while B brings
+              <b>${escapeHTML((NUM_KEYWORDS[b.lp?.value] || ["a different rhythm"])[0])}</b>. On a livestream, the best hook is to ask:
+              “Where do you two naturally agree, and where do you sharpen each other?”
+            </p>
+
+            <h3>Two Mini-Readings</h3>
+            ${buildSingleReportHTML(a)}
+            <div style="height:12px;"></div>
+            ${buildSingleReportHTML(b)}
+
+            <h3>Method Notes</h3>
+            <p class="disclaimerLine">
+              Compare mode is a structured synthesis of the two single reports. Entertainment / reflective tool only.
+            </p>
+          </div>
+        </div>
+      `.trim();
+    }
+
+    // ----------------------------
+    // Generate + Save + Export
+    // ----------------------------
+    function renderLatest(html){
+      reportCards.innerHTML = html;
+      setButtonsEnabled(true);
+      // ensure scroll starts at top
+      const rb = reportCards.querySelector(".reportBody");
+      if (rb) rb.scrollTop = 0;
+    }
+
+    function buildLatestTextFromHTML(html){
+      const tmp = document.createElement("div");
+      tmp.innerHTML = html;
+      return htmlToText(tmp);
+    }
+
+    function currentInputsSingle(){
+      const m = clampInt(sMonth.value,1,12);
+      const d = clampInt(sDay.value,1,31);
+      const y = clampInt(sYear.value,1,9999);
+      return { m,d,y, name: safeText(sName.value) };
+    }
+    function currentInputsCompare(){
+      const am = clampInt(aMonth.value,1,12);
+      const ad = clampInt(aDay.value,1,31);
+      const ay = clampInt(aYear.value,1,9999);
+      const bm = clampInt(bMonth.value,1,12);
+      const bd = clampInt(bDay.value,1,31);
+      const by = clampInt(bYear.value,1,9999);
+      return {
+        a: { m:am,d:ad,y:ay, name: safeText(aName.value) },
+        b: { m:bm,d:bd,y:by, name: safeText(bName.value) }
+      };
+    }
+
+    function validateDate(m,d,y){
+      if (!m || !d || !y) return "Enter month, day, and year.";
+      const max = daysInMonth(m,y);
+      if (d > max) return `Invalid day for that month/year (max ${max}).`;
+      return "";
+    }
+
+    btnGenerate.addEventListener("click", () => {
+      try{
+        state.notesPacks = loadNotesPacks();
+        const ts = nowTs();
+
+        if (state.mode === "single"){
+          const {m,d,y,name} = currentInputsSingle();
+          const warn = validateDate(m,d,y);
+          setWarn(sWarn, warn);
+          if (warn) return;
+
+          const profile = buildSingleProfile(m,d,y,name);
+          if (!profile) return;
+
+          const html = buildSingleReportHTML(profile);
+          const txt = buildLatestTextFromHTML(html);
+
+          state.latestGenerated = {
+            id: reportId(),
+            type: "single",
+            ts,
+            title: `${profile.title}${profile.name ? " — " + profile.name : ""}`,
+            metaLine: `Single • ${profile.md} • Generated ${fmtLocal(ts)}`,
+            contentHTML: html,
+            contentText: txt
+          };
+
+          renderLatest(html);
+        } else {
+          const {a,b} = currentInputsCompare();
+          const warnA = validateDate(a.m,a.d,a.y);
+          const warnB = validateDate(b.m,b.d,b.y);
+          setWarn(aWarn, warnA);
+          setWarn(bWarn, warnB);
+          if (warnA || warnB) return;
+
+          const pa = buildSingleProfile(a.m,a.d,a.y,a.name);
+          const pb = buildSingleProfile(b.m,b.d,b.y,b.name);
+          if (!pa || !pb) return;
+
+          const html = buildCompareReportHTML(pa, pb);
+          const txt = buildLatestTextFromHTML(html);
+
+          state.latestGenerated = {
+            id: reportId(),
+            type: "compare",
+            ts,
+            title: `${pa.title}${pa.name ? " — "+pa.name : ""} vs ${pb.title}${pb.name ? " — "+pb.name : ""}`,
+            metaLine: `Compare • Generated ${fmtLocal(ts)}`,
+            contentHTML: html,
+            contentText: txt
+          };
+
+          renderLatest(html);
+        }
+      }catch(e){
+        openModal("Error", `<div class="note" style="color: rgba(255,110,120,.95);">Generate failed: ${escapeHTML(String(e && e.message ? e.message : e))}</div>`, [{ label:"OK", onClick: closeModal }]);
+      }
+    });
+
+    btnSaveCurrent.addEventListener("click", () => {
+      if (!state.latestGenerated) return;
+      addReport(state.latestGenerated);
+      renderSavedList();
+      openModal("Saved", `<div class="note">Saved: <b>${escapeHTML(state.latestGenerated.title)}</b></div>`, [{ label:"OK", onClick: closeModal }]);
+    });
+
+    btnExportCurrent.addEventListener("click", async () => {
+      if (!state.latestGenerated) return;
+
+      const header = [
+        "Birthday Code — Export Report",
+        `App Version: ${APP_VERSION}`,
+        `Report Type: ${state.latestGenerated.type}`,
+        `Title: ${state.latestGenerated.title}`,
+        `Generated: ${fmtLocal(state.latestGenerated.ts)}`,
+        "How this report was created:",
+        "- Date meaning synthesis was generated locally on this device.",
+        "- No network calls, no accounts, no cloud sync.",
+        "- Includes: basic astrology table, simplified Chinese zodiac cycle, numerology digit-reduction, and any local Notes Packs.",
+        "Disclaimer: Entertainment / reflective tool. Not factual prediction. Not advice.",
+        "------------------------------"
+      ].join("\n");
+
+      const exportText = header + "\n" + (state.latestGenerated.contentText || "");
+      const filename = `birthday_code_report_${APP_VERSION}_${state.latestGenerated.type}_${state.latestGenerated.ts}.txt`;
+
+      openModal(
+        "Export",
+        `
+          <div class="note">
+            <div style="font-size: var(--fz2); font-weight: 950; margin-bottom: 8px;">Export Options</div>
+            <p>Choose Copy (clipboard) or Download (file).</p>
+          </div>
+        `,
+        [
+          { label:"Cancel", onClick: closeModal },
+          { label:"Copy", onClick: async () => {
+              const ok = await copyToClipboard(exportText);
+              closeModal();
+              openModal("Export", `<div class="note">${ok ? "Copied to clipboard." : "Copy failed. Use Download instead."}</div>`, [{ label:"OK", onClick: closeModal }]);
+            }
+          },
+          { label:"Download", onClick: () => {
+              downloadText(filename, exportText);
+              closeModal();
+            }
+          }
+        ]
+      );
+    });
+
+    // ----------------------------
+    // Saved panel rendering + actions
+    // ----------------------------
+    function matchSaved(r, q){
+      const hay = `${safeText(r.title)} ${safeText(r.metaLine)} ${safeText(r.type)}`.toLowerCase();
+      return hay.includes(q.toLowerCase());
+    }
+
+    function renderSavedList(){
+      const q = safeText(savedSearch.value);
+      const f = safeText(savedFilter.value || "all");
+      const all = loadReports();
+
+      const filtered = all.filter(r => {
+        if (f !== "all" && r.type !== f) return false;
+        if (q && !matchSaved(r, q)) return false;
+        return true;
+      });
+
+      savedList.innerHTML = "";
+
+      if (!filtered.length){
+        const empty = document.createElement("div");
+        empty.className = "card";
+        empty.innerHTML = `<div class="note">No saved reports match your filter.</div>`;
+        savedList.appendChild(empty);
+      } else {
+        for (const r of filtered){
+          const row = document.createElement("div");
+          row.className = "listRow";
+          row.innerHTML = `
+            <div class="listLeft">
+              <div class="listDate">${escapeHTML(r.title || "Report")}</div>
+              <div class="listSnippet">${escapeHTML(r.metaLine || "")}</div>
+            </div>
+            <div class="chev">›</div>
+          `;
+          row.addEventListener("click", () => openSavedViewer(r));
+          savedList.appendChild(row);
+        }
+      }
+
+      savedCount.textContent = `${all.length} saved`;
+    }
+
+    savedSearch.addEventListener("input", renderSavedList);
+    savedFilter.addEventListener("change", renderSavedList);
+
+    function openSavedViewer(r){
+      const body = document.createElement("div");
+      body.innerHTML = `
+        <div class="note">
+          <div style="font-size: var(--fz2); font-weight: 950; margin-bottom: 6px;">${escapeHTML(r.title || "Saved Report")}</div>
+          <div class="disclaimerLine">${escapeHTML(r.metaLine || "")}</div>
+        </div>
+        <div class="hr"></div>
+      `;
+
+      const wrap = document.createElement("div");
+      wrap.className = "reportCard";
+      wrap.style.marginTop = "10px";
+      wrap.innerHTML = r.contentHTML || `<div class="note">Missing content.</div>`;
+      body.appendChild(wrap);
+
+      const exportHeader = [
+        "Birthday Code — Export Report",
+        `App Version: ${APP_VERSION}`,
+        `Report Type: ${r.type}`,
+        `Title: ${r.title}`,
+        `Generated: ${fmtLocal(r.ts)}`,
+        "How this report was created:",
+        "- Date meaning synthesis was generated locally on this device.",
+        "- No network calls, no accounts, no cloud sync.",
+        "- Includes: basic astrology table, simplified Chinese zodiac cycle, numerology digit-reduction, and any local Notes Packs.",
+        "Disclaimer: Entertainment / reflective tool. Not factual prediction. Not advice.",
+        "------------------------------"
+      ].join("\n");
+      const exportText = exportHeader + "\n" + (r.contentText || "");
+
+      openModal(
+        "Saved Report",
+        body,
+        [
+          { label:"Close", onClick: closeModal },
+          { label:"Copy", onClick: async () => {
+              const ok = await copyToClipboard(exportText);
+              closeModal();
+              openModal("Export", `<div class="note">${ok ? "Copied to clipboard." : "Copy failed."}</div>`, [{ label:"OK", onClick: closeModal }]);
+            }
+          },
+          { label:"Download", onClick: () => {
+              const filename = `birthday_code_saved_${APP_VERSION}_${r.type}_${r.ts}.txt`;
+              downloadText(filename, exportText);
+              closeModal();
+            }
+          },
+          { label:"Delete", danger:true, onClick: () => {
+              openModal(
+                "Delete Saved Report",
+                `<div class="note">Delete <b>${escapeHTML(r.title)}</b>?</div>`,
+                [
+                  { label:"Cancel", onClick: closeModal },
+                  { label:"Delete", danger:true, onClick: () => {
+                      deleteReport(r.id);
+                      closeModal();
+                      renderSavedList();
+                    }
+                  }
+                ]
+              );
+            }
+          }
+        ]
+      );
+    }
+
+    // ----------------------------
+    // Install handling (PWA)
+    // ----------------------------
+    function updateInstallTag(){
+      installStateTag.textContent = isInstalled ? "Installed" : "Not installed";
+    }
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredBIP = e;
+      btnInstall.disabled = false;
+    });
+
+    window.addEventListener("appinstalled", () => {
+      isInstalled = true;
+      deferredBIP = null;
+      updateInstallTag();
+    });
+
+    btnInstall.addEventListener("click", async () => {
+      if (!deferredBIP){
+        openModal(
+          "Install",
+          `<div class="note">If Install doesn’t appear: open browser menu → “Add to Home screen”.</div>`,
+          [{ label:"OK", onClick: closeModal }]
+        );
+        return;
+      }
+      deferredBIP.prompt();
+      await deferredBIP.userChoice;
+      deferredBIP = null;
+    });
+
+    // Create manifest + service worker via Blob URLs (single-file PWA)
+    (function setupRuntimePWA(){
+      try{
+        const svgIcon = `
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7aa7ff" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#4b68ff" stop-opacity="0.85"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#0b1324"/>
+  <ellipse cx="32" cy="18" rx="18" ry="6" fill="none" stroke="url(#g1)" stroke-width="3" opacity="0.9"/>
+  <path d="M32 22l3.8 7.8 8.6 1.2-6.2 6 1.5 8.5-7.7-4.1-7.7 4.1 1.5-8.5-6.2-6 8.6-1.2z" fill="url(#g1)" opacity="0.95"/>
+  <path d="M10 36c8 10 17 14 22 14s14-4 22-14" fill="none" stroke="rgba(160,200,255,.55)" stroke-width="3" stroke-linecap="round"/>
+</svg>`.trim();
+
+        const iconBlob = new Blob([svgIcon], { type:"image/svg+xml" });
+        const iconURL = URL.createObjectURL(iconBlob);
+
+        const manifest = {
+          name: "Birthday Code",
+          short_name: "Birthday Code",
+          start_url: ".",
+          display: "standalone",
+          background_color: "#0b1324",
+          theme_color: "#0b1324",
+          description: "Offline-first livestream-readable birthdate meaning studio (single + compare, notes, saved reports).",
+          icons: [
+            { src: iconURL, sizes: "any", type: "image/svg+xml", purpose: "any maskable" }
+          ]
+        };
+
+        const mblob = new Blob([JSON.stringify(manifest)], { type:"application/manifest+json" });
+        const murl = URL.createObjectURL(mblob);
+        const manifestLink = document.getElementById("manifestLink") || (() => {
+          const l = document.createElement("link");
+          l.rel = "manifest";
+          document.head.appendChild(l);
+          return l;
+        })();
+        manifestLink.href = murl;
+
+        if ("serviceWorker" in navigator){
+          const swCode = `
+            const CACHE = "birthday-code-cache-${APP_VERSION}";
+            self.addEventListener("install", (e) => {
+              e.waitUntil((async () => {
+                self.skipWaiting();
+                const cache = await caches.open(CACHE);
+                try{
+                  await cache.addAll(["./", "./index.html"]);
+                }catch(_){}
+              })());
+            });
+            self.addEventListener("activate", (e) => {
+              e.waitUntil((async () => {
+                const keys = await caches.keys();
+                await Promise.all(keys.map(k => (k !== CACHE ? caches.delete(k) : Promise.resolve())));
+                self.clients.claim();
+              })());
+            });
+            self.addEventListener("fetch", (e) => {
+              const req = e.request;
+              if (req.method !== "GET") return;
+              e.respondWith((async () => {
+                const cache = await caches.open(CACHE);
+                const cached = await cache.match(req, { ignoreSearch: true });
+                if (cached) return cached;
+                try{
+                  const net = await fetch(req);
+                  if (net && net.ok){
+                    cache.put(req, net.clone()).catch(_=>{});
+                  }
+                  return net;
+                }catch(_){
+                  return cached || new Response("Offline", { status: 503, headers: { "Content-Type":"text/plain" } });
+                }
+              })());
+            });
+          `;
+          const swBlob = new Blob([swCode], { type:"text/javascript" });
+          const swURL = URL.createObjectURL(swBlob);
+          navigator.serviceWorker.register(swURL).catch(_ => {});
+        }
+      }catch(_){}
+    })();
+
+    // crude installed detection
+    (function detectInstalled(){
+      try{
+        isInstalled = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+      }catch(_){
+        isInstalled = false;
+      }
+      updateInstallTag();
+    })();
+
+    // ----------------------------
+    // Initialize saved list
+    // ----------------------------
+    renderSavedList();
+
+    // ----------------------------
+    // Default button states
+    // ----------------------------
+    setButtonsEnabled(false);
 
   </script>
 </body>
 </html>
-
-
-<!-- =========================
-     PART 2 — CONTINUATION
-     Starts EXACTLY at the stop point you specified
-     ========================= -->
-
-<script>
-/* =========================================================
-   CONTINUE: Notes Pack Import — JSON MERGE LOOP
-   ========================================================= */
-
-const incoming = Array.isArray(parsed.notesPacks) ? parsed.notesPacks : [];
-let merged = 0;
-
-incoming.forEach(ip=>{
-  if(!ip || !ip.name) return;
-  const existing = state.notesPacks.find(p=>p.name===ip.name);
-  if(existing){
-    existing.global = ip.global || existing.global;
-    existing.perDate = Object.assign({}, existing.perDate||{}, ip.perDate||{});
-  }else{
-    state.notesPacks.push({
-      id: ip.id || ("p_"+Math.random().toString(36).slice(2)),
-      name: ip.name,
-      global: ip.global||"",
-      perDate: ip.perDate||{}
-    });
-  }
-  merged++;
-});
-
-saveNotesPacks(state.notesPacks);
-msg.textContent = merged
-  ? `Imported ${merged} notes pack(s).`
-  : "Nothing imported.";
-msg.style.color = merged ? "var(--ok)" : "var(--warn)";
-
-/* =========================================================
-   MEANING ENGINE (DETERMINISTIC, OFFLINE)
-   ========================================================= */
-
-function sunSign(month, day){
-  const z=[
-    ["Capricorn",1,19,"Earth","Cardinal","Saturn"],
-    ["Aquarius",2,18,"Air","Fixed","Uranus"],
-    ["Pisces",3,20,"Water","Mutable","Neptune"],
-    ["Aries",4,19,"Fire","Cardinal","Mars"],
-    ["Taurus",5,20,"Earth","Fixed","Venus"],
-    ["Gemini",6,20,"Air","Mutable","Mercury"],
-    ["Cancer",7,22,"Water","Cardinal","Moon"],
-    ["Leo",8,22,"Fire","Fixed","Sun"],
-    ["Virgo",9,22,"Earth","Mutable","Mercury"],
-    ["Libra",10,22,"Air","Cardinal","Venus"],
-    ["Scorpio",11,21,"Water","Fixed","Pluto"],
-    ["Sagittarius",12,21,"Fire","Mutable","Jupiter"],
-    ["Capricorn",12,31,"Earth","Cardinal","Saturn"]
-  ];
-  for(let i=0;i<z.length;i++){
-    if(month===z[i][1] && day<=z[i][2]) return z[i];
-  }
-  return z[z.length-1];
-}
-
-function chineseZodiac(year){
-  const animals=["Rat","Ox","Tiger","Rabbit","Dragon","Snake","Horse","Goat","Monkey","Rooster","Dog","Pig"];
-  return animals[(year-4)%12];
-}
-
-function reduceNum(n, keepMasters){
-  while(n>9 && !(keepMasters && (n===11||n===22||n===33))){
-    n = n.toString().split("").reduce((a,b)=>a+Number(b),0);
-  }
-  return n;
-}
-
-function numerology(y,m,d,opts){
-  const life = reduceNum(
-    y.toString().split("").reduce((a,b)=>a+Number(b),0)+m+d,
-    opts.keepMasters
-  );
-  const birth = reduceNum(d, opts.keepMasters);
-  const py = reduceNum(life + new Date().getFullYear(), false);
-  return {life,birth,py};
-}
-
-/* =========================================================
-   REPORT GENERATION
-   ========================================================= */
-
-function generateSingle(a){
-  const ss = sunSign(a.month,a.day);
-  const cz = chineseZodiac(a.year);
-  const nu = numerology(a.year,a.month,a.day,state.opts);
-
-  let txt = `
-${fmtDate(a)} ${a.name?("— "+a.name):""}
-
-Quick Highlights
-• ${ss[0]} (${ss[3]}, ${ss[4]})
-• Life Path ${nu.life}
-• Chinese Zodiac: ${cz}
-
-Western Astrology
-Sun Sign: ${ss[0]}
-Element: ${ss[3]}
-Modality: ${ss[4]}
-Ruler: ${ss[5]}
-
-Chinese Zodiac
-${cz}
-(Boundary note: Jan/Feb births may vary by Lunar New Year.)
-
-Numerology
-Life Path: ${nu.life}
-Birthday Number: ${nu.birth}
-Personal Year: ${nu.py}
-
-Day Archetype
-A blend of ${ss[0]} drive, ${ss[3]} grounding, and a numerological emphasis on ${nu.life}.
-This archetype favors intentional growth, pattern recognition, and expressive clarity.
-
-Intuitive Prompts
-• What theme keeps repeating this year?
-• Where does discipline unlock freedom?
-• What conversation are you avoiding?
-
-Streamer Questions
-1. Does this resonate?
-2. What patterns do you see?
-3. What would you change?
-
-Sources & Method Notes
-Astrology, numerology, and intuition are cultural and reflective systems.
-Not factual prediction or advice.
-`;
-  return txt.trim();
-}
-
-function generateCompare(a,b){
-  const ra = generateSingle(a);
-  const rb = generateSingle(b);
-
-  return `
-${fmtDate(a)} vs ${fmtDate(b)}
-
-Comparison Summary
-Shared Themes
-• Personal growth
-• Pattern awareness
-
-Key Differences
-• Expression style
-• Motivational triggers
-
-Conversation Hooks
-• Who leads and who refines?
-• Where do paths diverge?
-
---- PERSON A ---
-${ra}
-
---- PERSON B ---
-${rb}
-
-Sources & Method Notes
-See individual reports above.
-`.trim();
-}
-
-/* =========================================================
-   SAVED REPORTS
-   ========================================================= */
-
-function saveReport(obj){
-  const list = loadReports();
-  list.unshift(obj);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-  renderSaved();
-}
-
-function loadReports(){
-  try{ return JSON.parse(localStorage.getItem(STORAGE_KEY))||[]; }
-  catch{ return []; }
-}
-
-function renderSaved(){
-  const box = el("savedList");
-  if(!box) return;
-  box.innerHTML="";
-  loadReports().forEach(r=>{
-    const d=document.createElement("div");
-    d.className="row card";
-    d.textContent=r.title||"Report";
-    d.onclick=()=>viewReport(r);
-    box.appendChild(d);
-  });
-}
-
-/* =========================================================
-   EXPORT
-   ========================================================= */
-
-function exportText(txt){
-  const blob=new Blob([txt],{type:"text/plain"});
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
-  a.download="birthday_code_report.txt";
-  a.click();
-}
-
-/* =========================================================
-   PWA INSTALL (MANIFEST + SW VIA BLOB)
-   ========================================================= */
-
-(function(){
-  const manifest={
-    name:"Birthday Code",
-    short_name:"Birthday Code",
-    start_url:".",
-    display:"standalone",
-    background_color:"#0b1324",
-    theme_color:"#0b1324",
-    icons:[]
-  };
-  const mblob=new Blob([JSON.stringify(manifest)],{type:"application/json"});
-  const murl=URL.createObjectURL(mblob);
-  const link=document.createElement("link");
-  link.rel="manifest";
-  link.href=murl;
-  document.head.appendChild(link);
-
-  const swCode=`
-    self.addEventListener('install',e=>self.skipWaiting());
-    self.addEventListener('fetch',e=>{});
-  `;
-  const swBlob=new Blob([swCode],{type:"text/javascript"});
-  navigator.serviceWorker?.register(URL.createObjectURL(swBlob));
-})();
-
-/* =========================================================
-   EXIT (FROZEN)
-   ========================================================= */
-
-function exitApp(){
-  window.close();
-  setTimeout(()=>alert("If it didn’t close: use your phone’s Back/Home."),200);
-}
-
-</script>
 
 <!--
 =========================================
@@ -402,5 +2619,9 @@ Version: v1.0
 Single-file offline-first PWA
 No external libraries
 Local-only storage
+Panels: Generate/Compare + Saved Reports
+Notes Packs: local CRUD + import/export
+Export: clipboard or file
+Exit handler: window.close + alert fallback
 =========================================
 -->
