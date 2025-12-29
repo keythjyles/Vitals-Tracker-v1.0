@@ -1,15 +1,14 @@
 <!--
 Angel Numbers Tracker — BOF Version Detail Notes
-App Version: v1.2A2
-Base: v1.2A1
+App Version: v1.2A3
+Base: v1.2A2
 Changes (requested):
-- Disable test data seeding (live/real data only).
-- Home opening view shows ONLY: input + Submit + one-line instructions.
-- After Submit, the rest of Home becomes visible (Angel Card + actions).
-- The bordered Home container “collapses” to fit visible content before Submit, then expands after Submit.
-- Remove the extra separator line under the swipe note (duplicate info).
-- Combine instructions onto one line to save vertical space.
-- Add BOF version notes (this block) to mirror EOF notes.
+- Remove ALL test data and ALL testing references.
+- New unique storage key (fresh data set; no legacy carryover).
+- Swipe left/right anywhere (Home ⇄ Calendar), not edge-only.
+- Calendar panel: add a NEW Sighting button to add an entry from Calendar.
+- Home title: never wrap; auto-fit font size to device width (as large as possible).
+- Install button: when app is installed/running standalone, button switches to Uninstall guidance.
 -->
 <!doctype html>
 <html lang="en">
@@ -157,7 +156,7 @@ Changes (requested):
       position:relative;
     }
 
-    /* Home card: remove full-height border so the inner container can "collapse" */
+    /* Home card: remove full-height border so the inner container can collapse */
     #home.card{
       border:none;
       box-shadow:none;
@@ -184,6 +183,7 @@ Changes (requested):
       -webkit-tap-highlight-color: transparent;
       font-size:18px;
       touch-action: manipulation;
+      white-space:nowrap;
     }
     .btn:active{ transform: translateY(1px); }
 
@@ -326,7 +326,7 @@ Changes (requested):
       border: 2px solid rgba(255,255,255,.04);
     }
 
-    /* Angel Card "card" frame */
+    /* Angel Card frame */
     .angelCardFrame{
       margin-top: 6px;
       border: 2px solid rgba(90,150,255,.40);
@@ -383,8 +383,11 @@ Changes (requested):
       font-weight: 950;
       letter-spacing: .2px;
       color: rgba(235,245,255,.92);
-      font-size: clamp(26px, 7.6vw, 44px);
       line-height: 1.02;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: clip;
+      font-size: 44px; /* JS will fit this down if needed */
     }
 
     .homeTopRow{
@@ -555,9 +558,10 @@ Changes (requested):
 
     .calBar{
       display:flex;
-      gap:12px;
+      gap:10px;
       align-items:center;
       margin-top: 10px;
+      flex-wrap:nowrap;
     }
     .calBar .field{ height:52px; border-radius: 18px; }
     .calBar .btn.small{ height:52px; border-radius: 18px; }
@@ -743,7 +747,7 @@ Changes (requested):
         <div id="home" class="card">
           <div id="homeScroll">
             <div class="homeShell" id="homeShell">
-              <div class="homeTitle">Identify Angel Number</div>
+              <div class="homeTitle" id="homeTitle">Identify Angel Number</div>
 
               <div class="homeTopRow">
                 <input id="homeIdNum" class="field" inputmode="numeric"
@@ -800,6 +804,7 @@ Changes (requested):
         <div id="calendar" class="card">
           <div class="calBar">
             <input id="calMonth" class="field" type="month" />
+            <button id="btnCalAddNew" class="btn small primary">Add</button>
             <button id="btnBackFromCalendar" class="btn small">Back</button>
           </div>
 
@@ -842,7 +847,7 @@ Save creates a .txt file on your device.
     </div>
   </div>
 
-  <!-- Add-to-Calendar modal -->
+  <!-- Add-to-Calendar modal (from Home) -->
   <div id="addCalModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="addCalTitle">
     <div class="modalCard">
       <div class="xCloseRow">
@@ -860,6 +865,28 @@ Save creates a .txt file on your device.
       <div class="modalBtns">
         <button id="btnAddCalAdd" class="btn primary">Add</button>
         <button id="btnAddCalCancel" class="btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW Sighting modal (from Calendar) -->
+  <div id="newSightingModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="newSightingTitle">
+    <div class="modalCard">
+      <div class="xCloseRow">
+        <button class="xBtn" id="btnNewSightingX" aria-label="Close">×</button>
+      </div>
+      <div class="modalTitle" id="newSightingTitle">New Sighting</div>
+      <div class="modalSub" id="newSightingSub">Add a new angel number sighting to your calendar.</div>
+
+      <div class="label" style="margin-top:6px;">Number</div>
+      <input id="newSightingNum" class="field" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="e.g., 1111" />
+
+      <div class="label">Notes (optional)</div>
+      <textarea id="newSightingNotes" class="field" placeholder="Where did you see it? What was happening?"></textarea>
+
+      <div class="modalBtns">
+        <button id="btnNewSightingAdd" class="btn primary">Add</button>
+        <button id="btnNewSightingCancel" class="btn">Cancel</button>
       </div>
     </div>
   </div>
@@ -949,15 +976,26 @@ Save creates a .txt file on your device.
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.2A2";
-  const STORAGE_KEY = "angel_numbers_records_v1";
-  const DAY_MS = 24*60*60*1000;
+  const APP_VERSION = "v1.2A3";
 
-  const TEST_DATA_ENABLED = false;
+  // NEW unique storage key (fresh dataset; no legacy carryover).
+  const STORAGE_KEY = "angel_numbers_records_v2_2025_12_29";
+
+  const DAY_MS = 24*60*60*1000;
 
   const $ = (id) => document.getElementById(id);
 
-  /* ===== PWA Install ===== */
+  /* ===== Installed / Standalone detection ===== */
+
+  function isStandalone(){
+    try{
+      if(window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) return true;
+      if(window.navigator && "standalone" in window.navigator && window.navigator.standalone) return true; // iOS Safari legacy
+    }catch{}
+    return false;
+  }
+
+  /* ===== PWA Install / Uninstall Guidance ===== */
 
   let deferredInstallPrompt = null;
 
@@ -985,16 +1023,33 @@ Save creates a .txt file on your device.
     updateInstallButton();
   }
 
+  function uninstallGuidance(){
+    const msg =
+      "To uninstall the app:\n\n" +
+      "Android:\n" +
+      "• Long-press the app icon → Uninstall\n" +
+      "or\n" +
+      "• Settings → Apps → Angel Numbers Tracker → Uninstall\n\n" +
+      "iPhone/iPad:\n" +
+      "• Long-press the app icon → Remove App\n\n" +
+      "If you installed from Chrome, removing the app icon uninstalls the PWA.";
+    openInfo("Uninstall", msg);
+  }
+
   function updateInstallButton(installedMaybe=false){
     const btn = $("btnInstall");
     if(!btn) return;
 
-    if(installedMaybe){
-      btn.disabled = true;
-      btn.textContent = "Installed";
+    const standaloneNow = installedMaybe || isStandalone();
+
+    if(standaloneNow){
+      btn.disabled = false;
+      btn.textContent = "Uninstall";
+      btn.dataset.mode = "uninstall";
       return;
     }
 
+    btn.dataset.mode = "install";
     if(deferredInstallPrompt){
       btn.disabled = false;
       btn.textContent = "Install";
@@ -1004,7 +1059,7 @@ Save creates a .txt file on your device.
     }
   }
 
-  /* ===== Numerology Lenses (plain-language) ===== */
+  /* ===== Numerology Lenses ===== */
 
   const DIGIT_ARCHETYPES = {
     "0": { core: "Fresh start • reset • open possibilities", strengths: ["starting over","clearing clutter","seeing the big picture"], cautions: ["don’t drift","pick one next step"], prompts: ["What needs a reset?","What would a clean start look like?","What is the simplest next step?"] },
@@ -1518,6 +1573,7 @@ Save creates a .txt file on your device.
     homeRevealed = !!on;
     if(homeRevealed){
       $("homeAfterSubmit").classList.remove("hidden");
+      updateInstallButton();
     }else{
       $("homeAfterSubmit").classList.add("hidden");
     }
@@ -1561,7 +1617,7 @@ Save creates a .txt file on your device.
     }
   });
 
-  /* ===== Add-to-Calendar modal ===== */
+  /* ===== Add-to-Calendar modal (from Home) ===== */
 
   function openAddCalModal(){
     const n = lastIdentify.number || normalizeNumberInput($("homeIdNum").value);
@@ -1603,6 +1659,45 @@ Save creates a .txt file on your device.
     if(getDeckIndex() === 1){
       renderCalendar();
     }
+  });
+
+  /* ===== New Sighting modal (from Calendar) ===== */
+
+  function openNewSighting(){
+    $("newSightingNum").value = "";
+    $("newSightingNotes").value = "";
+    $("newSightingModal").classList.remove("hidden");
+    lockTouches(90);
+    try{ document.activeElement?.blur(); }catch{}
+    setTimeout(() => { try{ $("newSightingNum").focus(); }catch{} }, 120);
+  }
+
+  function closeNewSighting(){
+    $("newSightingModal").classList.add("hidden");
+    unlockTouches();
+    try{ document.activeElement?.blur(); }catch{}
+  }
+
+  $("btnNewSightingX").addEventListener("click", (e)=>{ e.preventDefault(); closeNewSighting(); });
+  $("btnNewSightingCancel").addEventListener("click", (e)=>{ e.preventDefault(); closeNewSighting(); });
+  $("newSightingModal").addEventListener("click", (e)=>{ if(e.target === $("newSightingModal")) closeNewSighting(); });
+
+  $("btnNewSightingAdd").addEventListener("click", () => {
+    const n = normalizeNumberInput($("newSightingNum").value);
+    if(!n){
+      openInfo("Enter a number", "Please enter an angel number.");
+      return;
+    }
+    const notes = String($("newSightingNotes").value || "").trim();
+
+    const card = buildAngelCard(n);
+    const ts = Date.now();
+    const rec = { id: makeId(ts), ts, number: n, pattern: card.pattern || "—", meaning: card.cardText || "—", notes };
+
+    addRecord(rec);
+    closeNewSighting();
+    renderCalendar();
+    openInfo("Added", `Saved:\n\n${n}\n${fmtDateTime(ts)}`);
   });
 
   /* ===== Calendar + day list ===== */
@@ -1869,9 +1964,8 @@ Save creates a .txt file on your device.
     reopenDayListForTs(ts);
   });
 
-  /* ===== Smooth panel swipe (edge only) ===== */
+  /* ===== Smooth panel swipe (anywhere) ===== */
 
-  const EDGE = 150;
   const deck = $("deck");
   const screenArea = $("screenArea");
 
@@ -1882,7 +1976,6 @@ Save creates a .txt file on your device.
   let baseX=0;
   let lastX=0, lastT=0;
   let vx=0;
-  let blockSwipe = false;
 
   function getWidth(){
     return screenArea.clientWidth || window.innerWidth;
@@ -1912,23 +2005,28 @@ Save creates a .txt file on your device.
     }
   }
 
-  function shouldStartEdgeSwipe(ev){
-    if(blockSwipe) return false;
-    if(!(ev.touches && ev.touches.length === 1)) return false;
+  function swipeBlockedByModal(){
+    const modalIds = ["editModal","dayListModal","addCalModal","exportModal","infoModal","heartModal","newSightingModal"];
+    for(const id of modalIds){
+      const el = $(id);
+      if(el && !el.classList.contains("hidden")) return true;
+    }
+    return false;
+  }
 
-    const target = ev.target;
-    if(target && target.closest && target.closest("input, textarea, select")) return false;
-    if(target && target.closest && target.closest(".modalCard, .modal")) return false;
-
-    const x = ev.touches[0].clientX;
-    const w = getWidth();
-    const nearLeft = x <= EDGE;
-    const nearRight = x >= (w - EDGE);
-    return nearLeft || nearRight;
+  function isInteractiveTarget(target){
+    if(!target || !target.closest) return false;
+    if(target.closest("input, textarea, select, button")) return true;
+    if(target.closest(".modalCard, .modal")) return true;
+    return false;
   }
 
   function onTouchStart(ev){
-    if(!shouldStartEdgeSwipe(ev)) return;
+    if(swipeBlockedByModal()) return;
+    if(!(ev.touches && ev.touches.length === 1)) return;
+
+    const target = ev.target;
+    if(isInteractiveTarget(target)) return;
 
     dragging = true;
     intent = null;
@@ -2022,7 +2120,7 @@ Save creates a .txt file on your device.
     snapToIndex(target, true);
   }
 
-  function attachSmoothEdgeSwipe(){
+  function attachSmoothSwipe(){
     screenArea.addEventListener("touchstart", onTouchStart, {passive:true});
     screenArea.addEventListener("touchmove", onTouchMove, {passive:false});
     screenArea.addEventListener("touchend", onTouchEnd, {passive:true});
@@ -2051,13 +2149,7 @@ Save creates a .txt file on your device.
   }
 
   function canPtrStart(target){
-    if($("editModal") && !$("editModal").classList.contains("hidden")) return false;
-    if($("dayListModal") && !$("dayListModal").classList.contains("hidden")) return false;
-    if($("addCalModal") && !$("addCalModal").classList.contains("hidden")) return false;
-    if($("exportModal") && !$("exportModal").classList.contains("hidden")) return false;
-    if($("infoModal") && !$("infoModal").classList.contains("hidden")) return false;
-    if($("heartModal") && !$("heartModal").classList.contains("hidden")) return false;
-
+    if(swipeBlockedByModal()) return false;
     if(target && target.closest && target.closest("input, textarea, select, button")) return false;
     const sc = currentScrollEl();
     if(!sc) return false;
@@ -2176,13 +2268,6 @@ self.addEventListener('fetch', (e)=>{ });`;
     try { await navigator.serviceWorker.register(swUrl); } catch {}
   }
 
-  /* ===== Test data seeding (disabled) ===== */
-
-  function seedTestDataIfEmpty(){
-    if(!TEST_DATA_ENABLED) return;
-    // Intentionally disabled in v1.2A2
-  }
-
   /* ===== Version triple-tap -> heart ===== */
 
   let vTapCount = 0;
@@ -2245,17 +2330,49 @@ self.addEventListener('fetch', (e)=>{ });`;
     const btnInstall = $("btnInstall");
     if(btnInstall) btnInstall.addEventListener("click", (e) => {
       e.preventDefault();
+      const mode = btnInstall.dataset.mode || "install";
+      if(mode === "uninstall"){
+        uninstallGuidance();
+        return;
+      }
       tryInstall();
     });
 
     $("calMonth").addEventListener("change", renderCalendar);
+
+    $("btnCalAddNew").addEventListener("click", (e) => {
+      e.preventDefault();
+      openNewSighting();
+    });
+  }
+
+  /* ===== Home title auto-fit (never wrap) ===== */
+
+  function fitHomeTitle(){
+    const title = $("homeTitle");
+    if(!title) return;
+
+    const parent = title.parentElement;
+    if(!parent) return;
+
+    // Reset to max.
+    let size = 44;
+    const min = 20;
+
+    title.style.fontSize = size + "px";
+
+    const maxWidth = parent.clientWidth - 6; // small guard
+    // shrink until it fits (never wrap)
+    while(size > min && title.scrollWidth > maxWidth){
+      size -= 1;
+      title.style.fontSize = size + "px";
+    }
   }
 
   /* ===== Init ===== */
 
   injectManifest();
   registerSW();
-  seedTestDataIfEmpty();
 
   setHomeRevealed(false);
 
@@ -2265,13 +2382,17 @@ self.addEventListener('fetch', (e)=>{ });`;
   attachButtons();
   attachExit();
   attachVersionTripleTap();
-  attachSmoothEdgeSwipe();
+  attachSmoothSwipe();
   attachPullToRefresh();
 
   initMonthDefaultIfNeeded();
   renderCalendar();
 
   updateInstallButton();
+
+  fitHomeTitle();
+  setTimeout(fitHomeTitle, 0);
+  setTimeout(fitHomeTitle, 120);
 
   try{ document.activeElement?.blur(); }catch{}
   setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 0);
@@ -2282,6 +2403,7 @@ self.addEventListener('fetch', (e)=>{ });`;
   window.addEventListener("resize", () => {
     setDeckX(deckTargetXForIndex(deckIndex), false);
     if(deckIndex === 1) renderCalendar();
+    fitHomeTitle();
   });
 
 })();
@@ -2291,12 +2413,13 @@ self.addEventListener('fetch', (e)=>{ });`;
 
 <!--
 EOF Version Detail Notes
-App Version: v1.2A2
-Base: v1.2A1
+App Version: v1.2A3
+Base: v1.2A2
 Changes:
-- Disabled test data seeding (live use only).
-- Home shows only input + Submit + one-line instruction until Submit is pressed.
-- After Submit, the Angel Card and actions appear and the bordered container expands to fit.
-- Removed the extra duplicate separator/line beneath the swipe note (instruction is now one line).
-- Added BOF version notes block to mirror EOF.
+- Removed all test data and all testing references.
+- New unique storage key (fresh dataset; no legacy carryover).
+- Swipe left/right anywhere for Home ⇄ Calendar (modals/inputs excluded).
+- Calendar panel includes Add button for a new sighting.
+- Home title auto-fits to one line (never wraps).
+- Install button becomes Uninstall guidance when running standalone/installed.
 -->
