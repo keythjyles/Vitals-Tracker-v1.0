@@ -1,0 +1,2336 @@
+<!-- Angel Numbers Tracker v1.2A1 -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1324" />
+  <title>Angel Numbers Tracker</title>
+  <link rel="manifest" id="manifestLink" href="#" />
+  <style>
+    :root{
+      --bg0:#08101f;
+      --bg1:#0b1324;
+      --panel:#0c1528cc;
+      --stroke:rgba(235,245,255,.16);
+      --stroke2:rgba(235,245,255,.22);
+      --strokeBold:rgba(180,210,255,.42);
+      --text:rgba(235,245,255,.86);
+      --muted:rgba(235,245,255,.58);
+      --muted2:rgba(235,245,255,.42);
+
+      --accentBorder: rgba(43,78,122,.85);
+      --accentGlow: rgba(43,78,122,.18);
+      --themeLine: rgba(43,78,122,.55);
+      --themeLineSoft: rgba(43,78,122,.28);
+
+      --shadow:0 14px 40px rgba(0,0,0,.38);
+      --radius:26px;
+      --btnH:56px;
+      --pad:18px;
+      --font: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+
+    body{
+      margin:0;
+      font-family:var(--font);
+      color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 30% 0%, rgba(47,120,255,.22), transparent 55%),
+        radial-gradient(900px 600px at 80% 20%, rgba(155,120,255,.10), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+      display:flex;
+      justify-content:center;
+      padding: max(14px, env(safe-area-inset-top)) 12px max(14px, env(safe-area-inset-bottom));
+      overflow:hidden;
+    }
+
+    .app{
+      width:min(520px, 100%);
+      height: 100%;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      overflow:hidden;
+    }
+
+    .logoTitle{
+      margin:4px 6px 0;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      text-shadow: 0 10px 22px rgba(0,0,0,.35);
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .logoTitle svg{
+      width:min(520px, 100%);
+      height:auto;
+      display:block;
+    }
+
+    .screenArea{
+      position:relative;
+      flex:1;
+      overflow:hidden;
+      border-radius: var(--radius);
+      touch-action: pan-y;
+    }
+
+    /* Pull-to-refresh overlay */
+    .ptr{
+      position:absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 50;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(235,245,255,.16);
+      background: rgba(12,21,40,.86);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 14px 34px rgba(0,0,0,.36);
+      color: rgba(235,245,255,.84);
+      font-weight: 850;
+      font-size: 13px;
+      letter-spacing: .2px;
+      display:none;
+      align-items:center;
+      gap:10px;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: none;
+    }
+    .ptr.show{ display:flex; }
+    .ptrDot{
+      width:10px; height:10px;
+      border-radius: 50%;
+      background: rgba(47,120,255,.88);
+      box-shadow: 0 0 0 4px rgba(47,120,255,.18);
+      opacity:.95;
+    }
+    .ptrHint{ opacity:.90; }
+    .ptrSmall{ opacity:.60; font-weight:800; }
+
+    /* Deck */
+    .deck{
+      position:absolute;
+      inset:0;
+      display:flex;
+      width:200%;
+      height:100%;
+      transform: translate3d(0,0,0);
+      will-change: transform;
+    }
+    .deck.anim{
+      transition: transform 260ms cubic-bezier(.2,.9,.2,1);
+    }
+
+    .card{
+      flex: 0 0 50%;
+      width: 50%;
+      height: 100%;
+
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:3px solid var(--accentBorder);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: var(--pad);
+      backdrop-filter: blur(10px);
+
+      overflow:hidden;
+      touch-action: pan-y;
+      position:relative;
+    }
+
+    .hidden{ display:none !important; }
+
+    .btn{
+      height:var(--btnH);
+      border-radius: 999px;
+      border:1px solid var(--stroke2);
+      background: rgba(255,255,255,.03);
+      color:rgba(235,245,255,.78);
+      font-weight:650;
+      letter-spacing:.2px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 18px;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      font-size:18px;
+      touch-action: manipulation;
+    }
+    .btn:active{ transform: translateY(1px); }
+
+    .btn.primary{
+      background: linear-gradient(180deg, rgba(47,120,255,.92), rgba(47,120,255,.72));
+      border-color: rgba(120,170,255,.55);
+      color: rgba(235,245,255,.90);
+    }
+
+    .btn.danger{
+      background: linear-gradient(180deg, rgba(255,80,80,.18), rgba(255,80,80,.10));
+      border-color: rgba(255,120,120,.42);
+      color: rgba(255,225,225,.92);
+      box-shadow: 0 10px 26px rgba(0,0,0,.22);
+    }
+
+    .btn.small{
+      height:44px;
+      font-size:16px;
+      padding:0 14px;
+      font-weight:650;
+      white-space:nowrap;
+    }
+
+    .btn:disabled{
+      opacity:.55;
+      filter:saturate(.85);
+      transform:none !important;
+      pointer-events:none;
+    }
+
+    .label{
+      font-size:15px;
+      color:var(--muted);
+      font-weight:650;
+      margin: 10px 4px 6px;
+    }
+    .subtle{
+      font-size:14px;
+      color:var(--muted2);
+      margin: 6px 4px 0;
+    }
+
+    .field{
+      border:2px solid var(--strokeBold);
+      background: rgba(255,255,255,.06);
+      color: rgba(235,245,255,.86);
+      border-radius: 18px;
+      height:54px;
+      padding: 0 14px;
+      font-size:18px;
+      outline:none;
+      width:100%;
+    }
+    .field::placeholder{ color: rgba(235,245,255,.35); }
+    .field:focus{
+      border-color: rgba(90,150,255,.78);
+      box-shadow: 0 0 0 4px rgba(47,120,255,.16);
+    }
+    textarea.field{
+      height:96px;
+      padding: 12px 14px;
+      resize:none;
+      line-height:1.25;
+    }
+
+    .footerTiny{
+      margin-top:8px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      font-size: 12px;
+      color: rgba(235,245,255,.38);
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    .meaningCard{
+      border:1px solid var(--themeLine);
+      background: rgba(255,255,255,.03);
+      border-radius: 22px;
+      padding: 12px 12px 10px;
+      margin-top: 10px;
+    }
+    .meaningTop{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom: 6px;
+    }
+    .numBig{
+      font-size:26px;
+      font-weight:900;
+      letter-spacing:.3px;
+      white-space:nowrap;
+    }
+    .patternPill{
+      font-size:13px;
+      color: rgba(235,245,255,.70);
+      border: 1px solid var(--themeLineSoft);
+      background: rgba(255,255,255,.03);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight:750;
+      white-space:nowrap;
+    }
+    .meaningText{
+      color: rgba(235,245,255,.82);
+      font-size:15px;
+      line-height:1.22;
+      white-space: pre-wrap;
+    }
+
+    .metaScroll{
+      margin-top:10px;
+      border:1px solid rgba(235,245,255,.10);
+      background: rgba(255,255,255,.02);
+      border-radius: 16px;
+      padding: 10px 10px;
+      max-height: 230px;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      white-space: pre-wrap;
+      line-height: 1.28;
+      color: rgba(235,245,255,.82);
+      font-size:14px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(235,245,255,.28) rgba(255,255,255,.06);
+    }
+    .metaScroll::-webkit-scrollbar{ width: 8px; }
+    .metaScroll::-webkit-scrollbar-track{
+      background: rgba(255,255,255,.05);
+      border-radius: 999px;
+    }
+    .metaScroll::-webkit-scrollbar-thumb{
+      background: rgba(235,245,255,.22);
+      border-radius: 999px;
+      border: 2px solid rgba(255,255,255,.04);
+    }
+
+    /* Angel Card "card" frame (used in View & Update + Identify Home) */
+    .angelCardFrame{
+      margin-top: 6px;
+      border: 2px solid rgba(90,150,255,.40);
+      background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.02));
+      border-radius: 20px;
+      box-shadow: 0 14px 34px rgba(0,0,0,.26);
+      padding: 10px;
+    }
+    .angelCardFrame .metaScroll{
+      margin-top: 0;
+      border: 1px solid rgba(235,245,255,.10);
+      background: rgba(0,0,0,.10);
+      border-radius: 16px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.03);
+    }
+
+    .disclaimer{
+      margin-top:8px;
+      color: rgba(235,245,255,.44);
+      font-size:12px;
+      line-height:1.25;
+    }
+
+    /* HOME layout */
+    #home{
+      display:flex;
+      flex-direction:column;
+      gap:0;
+      padding-bottom:0;
+    }
+    #homeScroll{
+      flex: 1;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 10px;
+      touch-action: pan-y;
+      overscroll-behavior: contain;
+    }
+    #homeFooter{
+      flex: 0 0 auto;
+      padding-top: 10px;
+      padding-bottom: calc(8px + env(safe-area-inset-bottom));
+      background: linear-gradient(180deg, rgba(11,19,36,0), rgba(11,19,36,.72) 32%, rgba(11,19,36,.94));
+      border-top: 1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(10px);
+    }
+
+    .homeActions{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin:0;
+    }
+    .homeActions .btn{
+      height: 52px;
+      font-size: 18px;
+      font-weight: 820;
+      letter-spacing: .2px;
+    }
+    .homeActions .btn.wide{
+      grid-column: 1 / -1;
+    }
+    .homeActions .btn.tight{
+      height: 48px;
+      font-size: 16px;
+      font-weight: 820;
+    }
+    .homeActions .btn.exitSmall{
+      background: linear-gradient(180deg, rgba(255,80,80,.18), rgba(255,80,80,.10));
+      border-color: rgba(255,120,120,.42);
+      color: rgba(255,225,225,.92);
+      box-shadow: 0 10px 26px rgba(0,0,0,.22);
+    }
+
+    .homeTitle{
+      margin: 0 2px 10px;
+      font-weight: 950;
+      letter-spacing: .2px;
+      color: rgba(235,245,255,.92);
+      font-size: clamp(26px, 7.6vw, 44px);
+      line-height: 1.02;
+    }
+
+    .homeTopRow{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      margin-bottom: 8px;
+    }
+
+    /* Modal */
+    .modal{
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: max(16px, env(safe-area-inset-top)) 14px max(16px, env(safe-area-inset-bottom));
+      background: rgba(0,0,0,.56);
+      z-index: 9998;
+      touch-action: none;
+    }
+    .modalCard{
+      width:min(520px, 100%);
+      border-radius: 26px;
+      border: 3px solid var(--accentBorder);
+      background: linear-gradient(180deg, rgba(12,21,40,.96), rgba(8,16,31,.96));
+      box-shadow: 0 18px 60px rgba(0,0,0,.55);
+      padding: 16px;
+      backdrop-filter: blur(10px);
+      max-height: calc(100vh - 60px);
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .modalTitle{
+      font-weight: 900;
+      letter-spacing: .2px;
+      color: rgba(235,245,255,.92);
+      font-size: clamp(22px, 6.5vw, 34px);
+      line-height: 1.05;
+      margin: 4px 2px 10px;
+    }
+    .modalSub{
+      color: rgba(235,245,255,.72);
+      font-size: 15px;
+      margin: 0 2px 12px;
+      white-space: pre-wrap;
+      line-height: 1.28;
+    }
+    .modalBtns{
+      display:flex;
+      gap:12px;
+      margin-top: 10px;
+      flex-wrap:wrap;
+    }
+    .modalBtns .btn{
+      flex:1;
+      height: 54px;
+      font-size: 18px;
+      font-weight: 800;
+      min-width: 140px;
+    }
+
+    .xCloseRow{
+      display:flex;
+      justify-content:flex-end;
+      margin: -6px -6px 6px;
+    }
+    .xBtn{
+      width:44px; height:44px;
+      border-radius: 14px;
+      border:1px solid var(--stroke2);
+      background: rgba(255,255,255,.03);
+      color: rgba(235,245,255,.82);
+      font-weight: 900;
+      font-size: 18px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    /* Heart modal */
+    .heartWrap{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 10px 0 6px;
+    }
+    .heartSvg{
+      width: min(320px, 76vw);
+      height: auto;
+      filter: drop-shadow(0 18px 40px rgba(0,0,0,.55));
+      opacity: 0;
+      transform: scale(.78);
+      animation: popHeart 420ms cubic-bezier(.2,.9,.2,1) forwards;
+    }
+    @keyframes popHeart{
+      0%{ transform: scale(.78); opacity: 0; }
+      70%{ transform: scale(1.06); opacity: 1; }
+      100%{ transform: scale(1.00); opacity: 1; }
+    }
+
+    .touchLock{
+      position:fixed;
+      inset:0;
+      z-index: 9997;
+      background: transparent;
+      pointer-events:none;
+    }
+    .touchLock.on{ pointer-events:auto; }
+
+    /* Calendar */
+    #calendar{
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+      overscroll-behavior: contain;
+    }
+
+    .calBar{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      margin-top: 10px;
+    }
+    .calBar .field{ height:52px; border-radius: 18px; }
+    .calBar .btn.small{ height:52px; border-radius: 18px; }
+
+    .calGrid{
+      margin-top: 12px;
+      display:grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      width:100%;
+    }
+    .calDow{
+      text-align:center;
+      font-size: 12px;
+      color: rgba(235,245,255,.54);
+      font-weight: 800;
+      letter-spacing:.2px;
+      padding: 2px 0 4px;
+      user-select:none;
+    }
+
+    .calCell{
+      border:1px solid rgba(235,245,255,.10);
+      background: rgba(255,255,255,.02);
+      border-radius: 16px;
+      min-height: 56px;
+      padding: 8px 8px 6px;
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-start;
+      gap:6px;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .calCell .dnum{
+      font-weight: 900;
+      font-size: 14px;
+      color: rgba(235,245,255,.76);
+      line-height: 1;
+    }
+    .calCell.hasData{
+      border-color: rgba(90,150,255,.45);
+      background: rgba(43,78,122,.22);
+      box-shadow: 0 12px 24px rgba(0,0,0,.18);
+    }
+    .calCell.outMonth{ opacity:.42; }
+
+    .calHint{
+      margin-top:10px;
+      font-size: 13px;
+      color: rgba(235,245,255,.44);
+    }
+
+    /* Day list */
+    .dayLogoRow{
+      display:flex;
+      justify-content:center;
+      margin: 2px 0 6px;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .dayLogoRow svg{
+      width: 92%;
+      height: auto;
+      max-width: 420px;
+      opacity: .96;
+      filter: drop-shadow(0 10px 22px rgba(0,0,0,.35));
+    }
+    .dayList{
+      border:1px solid rgba(235,245,255,.10);
+      background: rgba(255,255,255,.02);
+      border-radius: 18px;
+      overflow:hidden;
+    }
+    .dayItem{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding: 10px 12px;
+      border-top:1px solid rgba(235,245,255,.08);
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      cursor:pointer;
+    }
+    .dayItem:first-child{ border-top:none; }
+    .dayItem:active{ transform: translateY(1px); }
+    .dayLeft{
+      display:flex;
+      align-items:baseline;
+      gap:10px;
+      min-width:0;
+    }
+    .dayTime{
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing:.2px;
+      color: rgba(235,245,255,.62);
+      white-space:nowrap;
+    }
+    .dayNum{
+      font-size: 16px;
+      font-weight: 950;
+      color: rgba(235,245,255,.90);
+      white-space:nowrap;
+    }
+    .dayNotes{
+      margin-left:auto;
+      font-size: 12px;
+      color: rgba(235,245,255,.48);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 45%;
+    }
+    .chev{
+      font-size: 16px;
+      font-weight: 900;
+      color: rgba(235,245,255,.55);
+      margin-left: 10px;
+      flex:0 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="touchLock" id="touchLock"></div>
+
+  <div class="app" id="appRoot">
+    <div class="logoTitle" aria-label="Angel Numbers Tracker">
+      <svg viewBox="0 0 900 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Angel Numbers Tracker">
+        <defs>
+          <linearGradient id="angG" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#8a6bff"/>
+            <stop offset="55%" stop-color="#4fa3ff"/>
+            <stop offset="100%" stop-color="#2f78ff"/>
+          </linearGradient>
+          <filter id="angS" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="rgba(0,0,0,.35)"/>
+          </filter>
+        </defs>
+        <g transform="translate(46 24)" filter="url(#angS)">
+          <rect x="0" y="0" width="92" height="92" rx="26" fill="rgba(255,255,255,.06)" stroke="rgba(235,245,255,.22)" stroke-width="2"/>
+          <ellipse cx="46" cy="24" rx="20" ry="8" fill="none" stroke="rgba(235,245,255,.88)" stroke-width="4" opacity=".92"/>
+
+          <path d="M46 50
+                   C34 42, 22 44, 16 54
+                   C24 58, 32 66, 38 76
+                   C40 66, 43 58, 46 50Z"
+                fill="none" stroke="url(#angG)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+
+          <path d="M46 50
+                   C58 42, 70 44, 76 54
+                   C68 58, 60 66, 54 76
+                   C52 66, 49 58, 46 50Z"
+                fill="none" stroke="url(#angG)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+
+          <path d="M46 34 L46 42" stroke="rgba(235,245,255,.82)" stroke-width="4" stroke-linecap="round"/>
+          <path d="42 38 L50 38" stroke="rgba(235,245,255,.82)" stroke-width="4" stroke-linecap="round"/>
+        </g>
+
+        <text x="160" y="92"
+              font-family="system-ui,Segoe UI,Roboto,Helvetica,Arial"
+              font-size="66"
+              font-weight="860"
+              fill="url(#angG)"
+              letter-spacing=".6"
+              filter="url(#angS)">Angel Numbers Tracker</text>
+      </svg>
+    </div>
+
+    <div class="screenArea" id="screenArea">
+      <div class="ptr" id="ptr">
+        <div class="ptrDot"></div>
+        <div class="ptrHint" id="ptrHint">Pull to refresh</div>
+        <div class="ptrSmall" id="ptrSmall"></div>
+      </div>
+
+      <div class="deck" id="deck">
+        <!-- HOME -->
+        <div id="home" class="card">
+          <div id="homeScroll">
+            <div class="homeTitle">Identify Angel Number</div>
+
+            <!-- CHANGED: Only input + Submit visible at first -->
+            <div class="homeTopRow">
+              <input id="homeIdNum" class="field" inputmode="numeric"
+                     autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                     placeholder="Enter a number (example: 1111)" />
+              <button id="btnSubmit" class="btn primary" style="height:54px; padding:0 16px; font-weight:900;">Submit</button>
+            </div>
+
+            <div class="subtle" id="homeInstructions">
+              Enter a number to generate the Angel Number Card.
+            </div>
+            <div class="subtle" id="homeSwipeHint">
+              Swipe left or right to view calendar.
+            </div>
+
+            <!-- Hidden until Submit -->
+            <div id="homeGenerated" class="hidden">
+              <div class="meaningCard" id="homeMeaningCard">
+                <div class="meaningTop">
+                  <div id="homeNumBig" class="numBig">—</div>
+                  <div id="homePatternPill" class="patternPill">Pattern: —</div>
+                </div>
+
+                <div id="homeMeaningText" class="meaningText">—</div>
+
+                <div class="angelCardFrame" id="homeAngelFrame">
+                  <div id="homeMeta" class="metaScroll"></div>
+                </div>
+
+                <div class="disclaimer">
+                  Cultural note: these meanings come from numerology and “angel number” traditions and vary by source.
+                  Use them as reflection prompts, not facts or predictions.
+                </div>
+              </div>
+
+              <div class="subtle">Inspired by a real Angel.</div>
+              <div class="subtle">Local-only. No accounts. No cloud.</div>
+            </div>
+          </div>
+
+          <div id="homeFooter" class="hidden">
+            <div class="homeActions">
+              <button id="btnAddToCalendar" class="btn primary wide">Add to Calendar</button>
+              <button id="btnViewCalendar" class="btn">View Calendar</button>
+              <button id="btnInstall" class="btn">Install</button>
+
+              <button id="btnHomeExport" class="btn tight">Export</button>
+              <button id="btnExitHome" class="btn tight exitSmall">Exit</button>
+            </div>
+
+            <div class="footerTiny">
+              <div id="homeVerLabel" aria-label="Version label">v—</div>
+              <div>developed by Keyth Jyles</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CALENDAR -->
+        <div id="calendar" class="card">
+          <div class="calBar">
+            <input id="calMonth" class="field" type="month" />
+            <button id="btnBackFromCalendar" class="btn small">Back</button>
+          </div>
+
+          <div class="calGrid" id="calDowRow"></div>
+          <div class="calGrid" id="calGrid"></div>
+          <div class="calHint">Tap a highlighted day to view entries.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info modal -->
+  <div id="infoModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+    <div class="modalCard">
+      <div class="xCloseRow">
+        <button class="xBtn" id="btnInfoX" aria-label="Close">×</button>
+      </div>
+      <div class="modalTitle" id="infoTitle">Info</div>
+      <div class="modalSub" id="infoSub">—</div>
+      <div class="modalBtns">
+        <button id="btnInfoOk" class="btn primary">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export modal -->
+  <div id="exportModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle">
+    <div class="modalCard">
+      <div class="modalTitle" id="exportModalTitle">Export ready</div>
+      <div class="modalSub" id="exportModalSub">
+Export report was copied to your clipboard. You can paste it into any messaging app, email, Notes, or any app that accepts text.
+Share sends the report to another app.
+Save creates a .txt file on your device.
+      </div>
+      <div class="modalBtns" style="flex-wrap:nowrap;">
+        <button id="btnExportClose" class="btn" style="min-width:0; flex:1 1 0; font-size:16px; height:52px;">Close</button>
+        <button id="btnExportShare" class="btn" style="min-width:0; flex:1 1 0; font-size:16px; height:52px;">Share</button>
+        <button id="btnExportSave" class="btn primary" style="min-width:0; flex:1 1 0; font-size:16px; height:52px;">Save .txt</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add-to-Calendar modal -->
+  <div id="addCalModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="addCalTitle">
+    <div class="modalCard">
+      <div class="xCloseRow">
+        <button class="xBtn" id="btnAddCalX" aria-label="Close">×</button>
+      </div>
+
+      <div class="modalTitle" id="addCalTitle">Add to Calendar</div>
+      <div class="modalSub" id="addCalSub">This saves an entry on this device.</div>
+
+      <div class="label" style="margin-top:6px;">Number</div>
+      <div id="addCalNumber" class="field" style="display:flex; align-items:center; font-weight:900;">—</div>
+
+      <div class="label">Notes (optional)</div>
+      <textarea id="addCalNotes" class="field" placeholder="Where did you see it? What was happening?"></textarea>
+
+      <div class="modalBtns">
+        <button id="btnAddCalAdd" class="btn primary">Add</button>
+        <button id="btnAddCalCancel" class="btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Day list modal (NO X) -->
+  <div id="dayListModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="dayListTitle">
+    <div class="modalCard">
+      <div class="dayLogoRow" aria-hidden="true" id="dayLogoRow"></div>
+
+      <div class="modalTitle" id="dayListTitle">Day</div>
+      <div class="modalSub" id="dayListSub">Tap a number to view details.</div>
+
+      <div class="dayList" id="dayList"></div>
+
+      <div class="modalBtns">
+        <button id="btnDayListClose" class="btn primary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- View & Update (Angel Card) modal -->
+  <div id="editModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+    <div class="modalCard">
+      <div class="modalTitle" id="editTitle">View &amp; Update</div>
+      <div class="modalSub" id="editSub">Edit the entry, then Save.</div>
+
+      <div class="label" style="margin-top:6px;">Date &amp; time</div>
+      <input id="editDT" class="field" type="datetime-local" />
+
+      <div class="label">Number</div>
+      <input id="editNum" class="field" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Example: 1111" />
+
+      <div class="label">Notes</div>
+      <textarea id="editNotes" class="field" placeholder="Notes..."></textarea>
+
+      <div class="label">Pattern</div>
+      <div id="editPattern" class="field" style="display:flex; align-items:center; font-weight:900; color: rgba(235,245,255,.84);">—</div>
+
+      <div class="label">Angel Card</div>
+      <div class="angelCardFrame">
+        <div id="editAngelCard" class="metaScroll" style="max-height: 260px;">—</div>
+      </div>
+
+      <div class="modalBtns">
+        <button id="btnEditSave" class="btn primary">Save</button>
+        <button id="btnEditDelete" class="btn danger">Delete</button>
+        <button id="btnEditClose" class="btn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Heart modal -->
+  <div id="heartModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="heartTitle">
+    <div class="modalCard">
+      <div class="xCloseRow">
+        <button class="xBtn" id="btnHeartX" aria-label="Close">×</button>
+      </div>
+      <div class="modalTitle" id="heartTitle">A message</div>
+      <div class="heartWrap" aria-hidden="true">
+        <svg class="heartSvg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="hg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#ff6aa6"/>
+              <stop offset="55%" stop-color="#b56bff"/>
+              <stop offset="100%" stop-color="#4fa3ff"/>
+            </linearGradient>
+          </defs>
+          <path d="M60 104
+                   C60 104, 18 78, 18 46
+                   C18 30, 30 20, 44 20
+                   C52 20, 57 24, 60 28
+                   C63 24, 68 20, 76 20
+                   C90 20, 102 30, 102 46
+                   C102 78, 60 104, 60 104Z"
+                fill="url(#hg)" stroke="rgba(235,245,255,.85)" stroke-width="3" />
+        </svg>
+      </div>
+      <div class="modalSub" id="heartBody" style="font-size:18px; font-weight:800; color: rgba(235,245,255,.88);">
+        The Angels love you Timmy.
+      </div>
+      <div class="modalBtns">
+        <button id="btnHeartClose" class="btn primary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+(() => {
+  "use strict";
+
+  const APP_VERSION = "v1.2A1";
+  const STORAGE_KEY = "angel_numbers_records_v1";
+  const DAY_MS = 24*60*60*1000;
+
+  // TEST DATA IS OFF (live use)
+  const TEST_DATA_ENABLED = false;
+
+  const $ = (id) => document.getElementById(id);
+
+  /* ===== PWA Install ===== */
+
+  let deferredInstallPrompt = null;
+
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    updateInstallButton();
+  });
+
+  window.addEventListener("appinstalled", () => {
+    deferredInstallPrompt = null;
+    updateInstallButton(true);
+  });
+
+  async function tryInstall(){
+    if(!deferredInstallPrompt){
+      openInfo("Install", "Install is only available when your browser offers it.\n\nTip: In Chrome, you can also use the menu ⋮ → Install app (if shown).");
+      return;
+    }
+    try{
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+    }catch{}
+    deferredInstallPrompt = null;
+    updateInstallButton();
+  }
+
+  function updateInstallButton(installedMaybe=false){
+    const btn = $("btnInstall");
+    if(!btn) return;
+
+    if(installedMaybe){
+      btn.disabled = true;
+      btn.textContent = "Installed";
+      return;
+    }
+
+    if(deferredInstallPrompt){
+      btn.disabled = false;
+      btn.textContent = "Install";
+    }else{
+      btn.disabled = true;
+      btn.textContent = "Install";
+    }
+  }
+
+  /* ===== Simple, everyday-language meanings ===== */
+
+  const DIGIT_ARCHETYPES = {
+    "0": {
+      core: "Reset and fresh start",
+      strengths: ["clearing space", "starting over", "seeing the bigger picture"],
+      cautions: ["don’t drift—pick one next step", "avoid staying vague"],
+      prompts: ["What needs a reset?", "What can you simplify today?", "What is the next small step?"]
+    },
+    "1": {
+      core: "New beginning and focus",
+      strengths: ["clear direction", "confidence", "taking initiative"],
+      cautions: ["don’t rush", "don’t force outcomes"],
+      prompts: ["What do you want to begin?", "Where should your attention go?", "What is one decision you can make today?"]
+    },
+    "2": {
+      core: "Balance and partnership",
+      strengths: ["patience", "cooperation", "steady progress"],
+      cautions: ["don’t delay forever", "don’t ignore your own needs"],
+      prompts: ["What needs balancing?", "Who do you need to talk with?", "Where can you be a little more patient?"]
+    },
+    "3": {
+      core: "Expression and creativity",
+      strengths: ["communication", "optimism", "creative ideas"],
+      cautions: ["don’t scatter your energy", "don’t overcommit"],
+      prompts: ["What needs to be said?", "What do you want to create?", "What is one thing you can finish?"]
+    },
+    "4": {
+      core: "Stability and structure",
+      strengths: ["planning", "building foundations", "reliability"],
+      cautions: ["don’t get rigid", "don’t over-control"],
+      prompts: ["What foundation are you building?", "What routine helps you?", "What needs strengthening?"]
+    },
+    "5": {
+      core: "Change and flexibility",
+      strengths: ["adaptability", "learning fast", "momentum"],
+      cautions: ["don’t create chaos", "don’t act on impulse"],
+      prompts: ["What is changing?", "What can you let go of?", "What new option is opening up?"]
+    },
+    "6": {
+      core: "Care and responsibility",
+      strengths: ["supporting others", "repairing what matters", "home and wellbeing"],
+      cautions: ["don’t carry everything alone", "don’t decide from guilt"],
+      prompts: ["What needs care right now?", "What boundary protects you?", "What is your real priority today?"]
+    },
+    "7": {
+      core: "Inner wisdom and reflection",
+      strengths: ["insight", "learning", "good judgment"],
+      cautions: ["don’t isolate too much", "don’t overthink forever"],
+      prompts: ["What do you already know inside?", "What needs research?", "What truth needs quiet time?"]
+    },
+    "8": {
+      core: "Strength and practical results",
+      strengths: ["execution", "leadership", "building security"],
+      cautions: ["don’t push too hard", "don’t measure your worth by results"],
+      prompts: ["What are you building?", "Where do you need to be firm?", "What practical step moves this forward?"]
+    },
+    "9": {
+      core: "Completion and letting go",
+      strengths: ["closure", "compassion", "big-picture learning"],
+      cautions: ["don’t cling to the past", "don’t over-sacrifice"],
+      prompts: ["What needs closure?", "What lesson is complete?", "What can you release with peace?"]
+    }
+  };
+
+  // A small set of common “known” meanings; everything else is generated from pattern + digit-sum.
+  const ANGEL_MAP = {
+    "000": "A reset moment. Clear your mind, simplify, and begin again.",
+    "111": "Focus your thoughts and intentions. Aim at what you want to build.",
+    "222": "Balance and patience. Cooperation helps; let things settle.",
+    "333": "Express yourself. Speak up, create, and keep moving.",
+    "444": "Build the foundation. Stay steady, practical, and consistent.",
+    "555": "Change is in motion. Stay flexible and choose the next step.",
+    "666": "Re-center. Check priorities and take care of yourself.",
+    "777": "Trust your inner sense. Learn, reflect, and move with wisdom.",
+    "888": "Practical momentum. Strong follow-through and responsibility.",
+    "999": "A chapter is closing. Finish what matters and make room for new.",
+    "1010": "A new cycle is starting. Keep your attention clear and focused.",
+    "1111": "Heightened awareness. Notice your thoughts and align your choices.",
+    "1212": "Realignment and growth. Small steady steps add up.",
+    "1234": "Step-by-step progress. Keep it simple and move in order."
+  };
+
+  /* ===== Storage ===== */
+
+  function loadRecords(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return [];
+      const arr = JSON.parse(raw);
+      if(!Array.isArray(arr)) return [];
+      return arr
+        .filter(r => r && typeof r.ts === "number")
+        .map(r => ({
+          id: (r.id ?? "").toString() || makeId(r.ts),
+          ts: r.ts,
+          number: (r.number ?? "").toString(),
+          pattern: (r.pattern ?? "").toString(),
+          meaning: (r.meaning ?? "").toString(),
+          notes: (r.notes ?? "").toString()
+        }))
+        .sort((a,b)=> b.ts - a.ts);
+    }catch{
+      return [];
+    }
+  }
+
+  function saveRecords(recs){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(recs));
+  }
+
+  function addRecord(rec){
+    const recs = loadRecords();
+    recs.unshift(rec);
+    saveRecords(recs);
+  }
+
+  function updateRecordById(id, patch){
+    const recs = loadRecords();
+    const idx = recs.findIndex(r => r.id === id);
+    if(idx < 0) return false;
+    recs[idx] = { ...recs[idx], ...patch };
+    recs.sort((a,b)=> b.ts - a.ts);
+    saveRecords(recs);
+    return true;
+  }
+
+  function deleteRecordById(id){
+    const recs = loadRecords().filter(r => r.id !== id);
+    saveRecords(recs);
+  }
+
+  /* ===== Utilities ===== */
+
+  function fmtDateTime(ts){
+    const d = new Date(ts);
+    const parts = new Intl.DateTimeFormat(undefined, {
+      year:"numeric", month:"2-digit", day:"2-digit",
+      hour:"2-digit", minute:"2-digit", second:"2-digit"
+    }).formatToParts(d);
+    const map = Object.fromEntries(parts.map(p=>[p.type,p.value]));
+    const mm = map.month, dd = map.day, yy = map.year;
+    const hh = map.hour, mi = map.minute, ss = map.second;
+    const dp = map.dayPeriod ? ` ${map.dayPeriod}` : "";
+    return `${mm}/${dd}/${yy}, ${hh}:${mi}:${ss}${dp}`;
+  }
+
+  function fmtDayTitle(ts){
+    const d = new Date(ts);
+    return new Intl.DateTimeFormat(undefined, { weekday:"long", year:"numeric", month:"long", day:"numeric" }).format(d);
+  }
+
+  function fmtTimeShort(ts){
+    const d = new Date(ts);
+    return new Intl.DateTimeFormat(undefined, { hour:"2-digit", minute:"2-digit" }).format(d);
+  }
+
+  function startOfDay(ts){
+    const d = new Date(ts);
+    d.setHours(0,0,0,0);
+    return d.getTime();
+  }
+
+  function normalizeNumberInput(raw){
+    const s = String(raw ?? "").trim();
+    return s.replace(/[^\d]/g, "");
+  }
+
+  function makeId(seedTs){
+    const r = Math.random().toString(16).slice(2);
+    return `an_${seedTs}_${r}`;
+  }
+
+  function toDTLocalValue(ts){
+    const d = new Date(ts);
+    const pad = (n)=>String(n).padStart(2,"0");
+    const y = d.getFullYear();
+    const m = pad(d.getMonth()+1);
+    const da = pad(d.getDate());
+    const hh = pad(d.getHours());
+    const mi = pad(d.getMinutes());
+    return `${y}-${m}-${da}T${hh}:${mi}`;
+  }
+
+  function fromDTLocalValue(v){
+    const s = String(v || "").trim();
+    if(!s) return null;
+    const d = new Date(s);
+    const t = d.getTime();
+    return Number.isFinite(t) ? t : null;
+  }
+
+  async function copyToClipboard(text){
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+    return false;
+  }
+
+  function downloadText(text, filename){
+    const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  async function saveTextWithPicker(text, suggestedName){
+    const canPick = typeof window.showSaveFilePicker === "function";
+    if(!canPick) return false;
+
+    const opts = {
+      suggestedName: suggestedName || "angel_numbers_report.txt",
+      types: [{ description: "Text", accept: {"text/plain": [".txt"]} }]
+    };
+
+    const handle = await window.showSaveFilePicker(opts);
+    const writable = await handle.createWritable();
+    await writable.write(new Blob([text], {type:"text/plain;charset=utf-8"}));
+    await writable.close();
+    return true;
+  }
+
+  function isShareAvailable(){
+    return !!(navigator.share && typeof navigator.share === "function");
+  }
+
+  function escapeHtml(s){
+    return String(s ?? "")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+  }
+
+  function listBullets(items){
+    return items.map(x => `• ${x}`).join("\n");
+  }
+
+  /* ===== Pattern detection ===== */
+
+  function isAllSame(s){ return !!(s && s.length >= 2 && s.split("").every(ch => ch === s[0])); }
+  function isPalindrome(s){ if(!s || s.length < 3) return false; return s === s.split("").reverse().join(""); }
+  function isRepeatedHalf(s){ if(!s || s.length < 4 || s.length % 2) return false; const h=s.slice(0,s.length/2); return h+h===s; }
+  function isAscendingSeq(s){
+    if(!s || s.length < 3) return false;
+    for(let i=1;i<s.length;i++){
+      const a=s.charCodeAt(i-1)-48, b=s.charCodeAt(i)-48;
+      if(b !== a+1) return false;
+    }
+    return true;
+  }
+  function isDescendingSeq(s){
+    if(!s || s.length < 3) return false;
+    for(let i=1;i<s.length;i++){
+      const a=s.charCodeAt(i-1)-48, b=s.charCodeAt(i)-48;
+      if(b !== a-1) return false;
+    }
+    return true;
+  }
+
+  function detectPattern(s){
+    if(!s) return "—";
+    if(isAllSame(s)) return `Repeating ${s[0]}s`;
+    if(isAscendingSeq(s)) return "Sequential (up)";
+    if(isDescendingSeq(s)) return "Sequential (down)";
+    if(isRepeatedHalf(s)) return "Double pattern";
+    if(isPalindrome(s)) return "Mirror (palindrome)";
+    if(s.length === 3 && s[0] === s[2] && s[0] !== s[1]) return "Sandwich pattern";
+    return "Mixed pattern";
+  }
+
+  /* ===== Digit-sum lens ===== */
+
+  function digitSumSteps(n){
+    const digits = n.split("").map(ch => ch.charCodeAt(0)-48).filter(x => x>=0 && x<=9);
+    const sum = digits.reduce((a,b)=>a+b,0);
+
+    let root = 0;
+    if(digits.length && digits.every(x=>x===0)){
+      root = 0;
+    }else if(sum > 0){
+      root = ((sum - 1) % 9) + 1;
+    }else{
+      root = 0;
+    }
+
+    const stepStr = `${digits.join(" + ")} = ${sum} → ${root}`;
+    return { digits, sum, root, stepStr };
+  }
+
+  function dominantDigits(n){
+    const counts = {};
+    for(const ch of n){
+      counts[ch] = (counts[ch]||0) + 1;
+    }
+    const entries = Object.entries(counts).sort((a,b)=> b[1]-a[1] || (a[0] > b[0] ? 1 : -1));
+    return entries.map(([d,c]) => ({ d, c }));
+  }
+
+  function buildAngelCardPlain(n){
+    if(!n){
+      return {
+        pattern: "—",
+        headline: "",
+        cardText: ""
+      };
+    }
+
+    const pattern = detectPattern(n);
+    const steps = digitSumSteps(n);
+    const rootDigit = String(steps.root);
+    const rootA = DIGIT_ARCHETYPES[rootDigit] || null;
+
+    const dom = dominantDigits(n);
+    const domTop = dom[0]?.d ?? rootDigit;
+    const domA = DIGIT_ARCHETYPES[domTop] || null;
+
+    const mapped = ANGEL_MAP[n] || "";
+
+    // Plain-language pattern lens
+    let patternLens = "";
+    if(pattern === "Sequential (up)") patternLens = "Pattern lens: step-by-step progress. Keep it simple and move forward one step at a time.";
+    else if(pattern === "Sequential (down)") patternLens = "Pattern lens: simplifying. You may be letting go or reducing stress and complexity.";
+    else if(pattern === "Double pattern"){
+      const half = n.slice(0, n.length/2);
+      patternLens = `Pattern lens: a repeated message. "${half}" shows up twice, so the theme is being emphasized.`;
+    } else if(pattern === "Mirror (palindrome)") {
+      patternLens = "Pattern lens: reflection. Notice what is being mirrored back to you in your choices and mood.";
+    } else if(/^Repeating/.test(pattern)) {
+      patternLens = "Pattern lens: extra emphasis. Repeating digits tend to ‘turn up the volume’ on that digit’s theme.";
+    } else if(pattern === "Sandwich pattern") {
+      patternLens = "Pattern lens: a theme on the outside with a different focus in the middle. Notice what is ‘held’ by the repeating edges.";
+    } else {
+      patternLens = "Pattern lens: mixed. Use the digit-sum theme and your real-life context to connect meaning.";
+    }
+
+    // Headline: known mapping or generated
+    const headline = mapped
+      ? mapped
+      : (rootA ? `Main theme: ${rootA.core}.` : "A reflective prompt. Meaning depends on your situation.");
+
+    const domDesc = dom.map(x => `${x.d}×${x.c}`).join("  |  ");
+
+    const strengths = [];
+    const cautions = [];
+    const prompts = [];
+
+    if(rootA?.strengths?.length) strengths.push(...rootA.strengths);
+    if(rootA?.cautions?.length) cautions.push(...rootA.cautions);
+    if(rootA?.prompts?.length) prompts.push(...rootA.prompts);
+
+    if(domA && domTop !== rootDigit){
+      if(domA.strengths?.length) strengths.push(...domA.strengths);
+      if(domA.cautions?.length) cautions.push(...domA.cautions);
+      if(domA.prompts?.length) prompts.push(...domA.prompts);
+    }
+
+    const strengthsUnique = [...new Set(strengths)].slice(0, 6);
+    const cautionsUnique = [...new Set(cautions)].slice(0, 6);
+    const promptsUnique = [...new Set(prompts)].slice(0, 6);
+
+    const whatNow = [
+      "Pause for 10 seconds and notice what you were thinking about when you saw the number.",
+      "Pick one small action that matches the main theme (not a big life overhaul).",
+      "If the number keeps repeating, treat it like a reminder—not a warning."
+    ];
+
+    const lines = [];
+    lines.push(`ANGEL CARD — ${n}`);
+    lines.push(`Pattern: ${pattern}`);
+    lines.push("");
+
+    lines.push("Overview");
+    lines.push(headline);
+    lines.push("");
+
+    lines.push("Pattern lens");
+    lines.push(patternLens);
+    lines.push("");
+
+    lines.push("Digit-sum lens");
+    lines.push(`Digit math: ${steps.stepStr}`);
+    if(rootA) lines.push(`Main theme: ${rootA.core}`);
+    lines.push("");
+
+    lines.push("Digit emphasis");
+    lines.push(`What stands out: ${domDesc}`);
+    if(domA && domTop !== rootDigit) lines.push(`Extra emphasis: ${domA.core}`);
+    lines.push("");
+
+    lines.push("What it may be nudging you toward");
+    lines.push(listBullets(whatNow));
+    lines.push("");
+
+    if(promptsUnique.length){
+      lines.push("Practical prompts");
+      lines.push(listBullets(promptsUnique));
+      lines.push("");
+    }
+
+    if(strengthsUnique.length){
+      lines.push("Helpful traits to lean on");
+      lines.push(listBullets(strengthsUnique));
+      lines.push("");
+    }
+
+    if(cautionsUnique.length){
+      lines.push("Things to watch for");
+      lines.push(listBullets(cautionsUnique));
+      lines.push("");
+    }
+
+    lines.push("Quick method");
+    lines.push("• Read the overview in plain language.");
+    lines.push("• Use the digit-sum as the main theme.");
+    lines.push("• Use the pattern as the ‘tone’ of the message.");
+    lines.push("• Apply it to what you were doing or thinking right then.");
+
+    return {
+      pattern,
+      headline,
+      cardText: lines.join("\n")
+    };
+  }
+
+  /* ===== Touch lock ===== */
+
+  let lockTimer = null;
+  function lockTouches(ms=140){
+    const el = $("touchLock");
+    el.classList.add("on");
+    if(lockTimer) clearTimeout(lockTimer);
+    lockTimer = setTimeout(() => el.classList.remove("on"), ms);
+  }
+  function unlockTouches(){
+    const el = $("touchLock");
+    el.classList.remove("on");
+    if(lockTimer) clearTimeout(lockTimer);
+    lockTimer = null;
+  }
+
+  /* ===== Styled modals ===== */
+
+  function openInfo(title, message){
+    $("infoTitle").textContent = title || "Info";
+    $("infoSub").textContent = message || "—";
+    $("infoModal").classList.remove("hidden");
+    lockTouches(120);
+  }
+  function closeInfo(){
+    $("infoModal").classList.add("hidden");
+    unlockTouches();
+  }
+  $("btnInfoX").addEventListener("click", (e)=>{ e.preventDefault(); closeInfo(); });
+  $("btnInfoOk").addEventListener("click", (e)=>{ e.preventDefault(); closeInfo(); });
+  $("infoModal").addEventListener("click", (e)=>{ if(e.target === $("infoModal")) closeInfo(); });
+
+  function openHeart(){ $("heartModal").classList.remove("hidden"); lockTouches(120); }
+  function closeHeart(){ $("heartModal").classList.add("hidden"); unlockTouches(); }
+  $("btnHeartX").addEventListener("click", (e)=>{ e.preventDefault(); closeHeart(); });
+  $("btnHeartClose").addEventListener("click", (e)=>{ e.preventDefault(); closeHeart(); });
+  $("heartModal").addEventListener("click", (e)=>{ if(e.target === $("heartModal")) closeHeart(); });
+
+  /* ===== Export modal ===== */
+
+  let exportPayload = null;
+
+  function openExportModal(payload){
+    exportPayload = payload;
+    $("exportModal").classList.remove("hidden");
+    lockTouches(120);
+
+    $("btnExportClose").disabled = true;
+    $("btnExportShare").disabled = true;
+    $("btnExportSave").disabled  = true;
+
+    setTimeout(() => {
+      $("btnExportClose").disabled = false;
+      $("btnExportShare").disabled = !isShareAvailable();
+      $("btnExportSave").disabled  = false;
+    }, 200);
+  }
+
+  function closeExportModal(){
+    exportPayload = null;
+    $("exportModal").classList.add("hidden");
+    unlockTouches();
+  }
+
+  $("btnExportClose").addEventListener("click", (e)=>{ e.preventDefault(); closeExportModal(); });
+  $("exportModal").addEventListener("click", (e)=>{ if(e.target === $("exportModal")) closeExportModal(); });
+
+  $("btnExportShare").addEventListener("click", async (e)=>{
+    e.preventDefault();
+    if(!exportPayload) return;
+    if($("btnExportShare").disabled) return;
+    if(!isShareAvailable()){
+      openInfo("Share not available", "Share is not available on this device/browser.");
+      return;
+    }
+    try{
+      await navigator.share({ title: "Angel Numbers Tracker Export", text: exportPayload.text });
+    }catch{}
+  });
+
+  $("btnExportSave").addEventListener("click", async (e)=>{
+    e.preventDefault();
+    if(!exportPayload) return;
+    if($("btnExportSave").disabled) return;
+
+    try{
+      const ok = await saveTextWithPicker(exportPayload.text, exportPayload.filename);
+      if(ok){ openInfo("Saved", "Saved."); return; }
+    }catch{}
+
+    downloadText(exportPayload.text, exportPayload.filename || "angel_numbers_report.txt");
+  });
+
+  function buildReportHeader({title, rangeLabel, notes}){
+    const now = fmtDateTime(Date.now());
+    const lines = [
+      "Angel Numbers Tracker — Export Report",
+      `App Version: ${APP_VERSION}`,
+      `Report: ${title}`,
+      `Generated: ${now}`,
+      rangeLabel ? `Range: ${rangeLabel}` : "",
+      "",
+      "How this data was captured:",
+      "- Sightings are entered manually into Angel Numbers Tracker on this device.",
+      "- Data is stored locally on the phone (no cloud sync, no account).",
+      "- Each record may include the number, the Angel Card, and optional notes.",
+      "",
+      notes ? notes : "",
+      "",
+      "------------------------------",
+      ""
+    ].filter(Boolean);
+    return lines.join("\n");
+  }
+
+  function exportReport(recs, headerInfo, filenameBase){
+    const header = buildReportHeader(headerInfo);
+
+    const lines = recs.map(r => {
+      const dt = fmtDateTime(r.ts);
+      const num = `Number: ${r.number || "—"}`;
+      const notes = (r.notes && r.notes.trim()) ? r.notes.trim() : "None";
+      const card = (r.meaning && r.meaning.trim()) ? r.meaning.trim() : "None";
+      return `${dt}\n${num}\nNotes: ${notes}\n\n${card}\n`;
+    });
+
+    const out = header + lines.join("\n");
+    const ts = new Date();
+    const y = ts.getFullYear();
+    const m = String(ts.getMonth()+1).padStart(2,"0");
+    const d = String(ts.getDate()).padStart(2,"0");
+    const filename = `${filenameBase || "angel_numbers_report"}_${y}-${m}-${d}.txt`;
+
+    (async () => {
+      try{ await copyToClipboard(out); }catch{}
+      openExportModal({ text: out, filename });
+    })();
+  }
+
+  /* ===== Home Identify (Submit -> reveal) ===== */
+
+  let lastIdentify = { number:"", pattern:"", cardText:"", headline:"" };
+  let revealed = false;
+
+  function resetHomeOutput(){
+    $("homeGenerated").classList.add("hidden");
+    $("homeFooter").classList.add("hidden");
+    revealed = false;
+  }
+
+  function setHomeOutput(n){
+    const card = buildAngelCardPlain(n);
+
+    $("homeNumBig").textContent = n;
+    $("homePatternPill").textContent = `Pattern: ${card.pattern || "—"}`;
+    $("homeMeaningText").textContent = card.headline || "—";
+    $("homeMeta").textContent = card.cardText || "—";
+
+    lastIdentify = {
+      number: n,
+      pattern: card.pattern || "—",
+      cardText: card.cardText || "—",
+      headline: card.headline || "—"
+    };
+  }
+
+  function revealHome(){
+    if(revealed) return;
+    $("homeGenerated").classList.remove("hidden");
+    $("homeFooter").classList.remove("hidden");
+    revealed = true;
+  }
+
+  function handleSubmit(){
+    const n = normalizeNumberInput($("homeIdNum").value);
+    if(!n){
+      openInfo("Please enter a number", "Type an angel number, then press Submit.");
+      return;
+    }
+    setHomeOutput(n);
+    revealHome();
+    try{ $("homeIdNum").blur(); }catch{}
+  }
+
+  $("btnSubmit").addEventListener("click", (e)=>{ e.preventDefault(); handleSubmit(); });
+
+  $("homeIdNum").addEventListener("keydown", (e)=>{
+    if(e.key === "Enter"){
+      e.preventDefault();
+      handleSubmit();
+    }
+  });
+
+  // If user edits number after reveal, keep it simple: require Submit again to refresh.
+  $("homeIdNum").addEventListener("input", ()=>{
+    if(revealed){
+      // no live update; user presses Submit to refresh
+    }
+  });
+
+  /* ===== Add-to-Calendar modal ===== */
+
+  function openAddCalModal(){
+    const n = lastIdentify.number || normalizeNumberInput($("homeIdNum").value);
+    if(!n){
+      openInfo("Enter a number", "Type an angel number first, then press Submit.");
+      return;
+    }
+
+    $("addCalNumber").textContent = n;
+    $("addCalNotes").value = "";
+    $("addCalModal").classList.remove("hidden");
+    lockTouches(90);
+
+    try{ document.activeElement?.blur(); }catch{}
+  }
+
+  function closeAddCalModal(){
+    $("addCalModal").classList.add("hidden");
+    unlockTouches();
+    try{ document.activeElement?.blur(); }catch{}
+  }
+
+  $("btnAddCalX").addEventListener("click", (e)=>{ e.preventDefault(); closeAddCalModal(); });
+  $("btnAddCalCancel").addEventListener("click", (e)=>{ e.preventDefault(); closeAddCalModal(); });
+  $("addCalModal").addEventListener("click", (e)=>{ if(e.target === $("addCalModal")) closeAddCalModal(); });
+
+  $("btnAddCalAdd").addEventListener("click", () => {
+    const n = String($("addCalNumber").textContent || "").trim();
+    const notes = String($("addCalNotes").value || "").trim();
+
+    const card = buildAngelCardPlain(n);
+
+    const ts = Date.now();
+    const rec = { id: makeId(ts), ts, number: n, pattern: card.pattern || "—", meaning: card.cardText || "—", notes };
+
+    addRecord(rec);
+    closeAddCalModal();
+    openInfo("Added", `Saved:\n\n${n}\n${fmtDateTime(ts)}`);
+    if(getDeckIndex() === 1){
+      renderCalendar();
+    }
+  });
+
+  /* ===== Calendar + day list ===== */
+
+  const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+  function initMonthDefaultIfNeeded(){
+    if($("calMonth").value) return;
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth()+1).padStart(2,"0");
+    $("calMonth").value = `${y}-${m}`;
+  }
+
+  function monthValueToYMD(value){
+    const m = /^(\d{4})-(\d{2})$/.exec(String(value || ""));
+    if(!m) return null;
+    const y = Number(m[1]);
+    const mo = Number(m[2]);
+    if(!y || !mo) return null;
+    return { y, mo };
+  }
+
+  function buildDayIndexMap(recs){
+    const map = new Map();
+    for(const r of recs){
+      const k = startOfDay(r.ts);
+      const arr = map.get(k) || [];
+      arr.push(r);
+      map.set(k, arr);
+    }
+    for(const [k, arr] of map.entries()){
+      arr.sort((a,b)=> a.ts - b.ts);
+      map.set(k, arr);
+    }
+    return map;
+  }
+
+  function ensureDayLogo(){
+    const wrap = $("dayLogoRow");
+    if(wrap.childNodes.length) return;
+    const svg = document.querySelector(".logoTitle svg");
+    if(!svg) return;
+    wrap.appendChild(svg.cloneNode(true));
+  }
+
+  let currentDayKey = null;
+
+  function openDayList(dayKey, recs){
+    ensureDayLogo();
+    currentDayKey = dayKey;
+
+    const currentDayRecs = (recs || []).slice().sort((a,b)=> a.ts - b.ts);
+
+    $("dayListTitle").textContent = fmtDayTitle(dayKey);
+    $("dayListSub").textContent = "Tap a number to view details.";
+
+    const list = $("dayList");
+    list.innerHTML = "";
+
+    if(currentDayRecs.length === 0){
+      const empty = document.createElement("div");
+      empty.className = "dayItem";
+      empty.style.cursor = "default";
+      empty.innerHTML = `<div class="dayLeft"><div class="dayTime">—</div><div class="dayNum">No entries</div></div>`;
+      list.appendChild(empty);
+    }else{
+      for(const r of currentDayRecs){
+        const item = document.createElement("div");
+        item.className = "dayItem";
+        const note = (r.notes || "").trim().replace(/\s+/g," ");
+        const noteShort = note ? note : "";
+        item.innerHTML =
+          `<div class="dayLeft">
+             <div class="dayTime">${escapeHtml(fmtTimeShort(r.ts))}</div>
+             <div class="dayNum">${escapeHtml(r.number || "—")}</div>
+           </div>
+           <div class="dayNotes">${escapeHtml(noteShort)}</div>
+           <div class="chev">›</div>`;
+
+        const open = (e) => {
+          try{ e.preventDefault(); }catch{}
+          try{ e.stopPropagation(); }catch{}
+          closeDayListImmediate();
+          requestAnimationFrame(() => {
+            openEditModal(r.id);
+          });
+        };
+        item.addEventListener("click", open, {passive:false});
+        item.addEventListener("pointerup", open, {passive:false});
+
+        list.appendChild(item);
+      }
+    }
+
+    $("dayListModal").classList.remove("hidden");
+    lockTouches(60);
+  }
+
+  function closeDayListImmediate(){
+    $("dayListModal").classList.add("hidden");
+    unlockTouches();
+  }
+
+  $("btnDayListClose").addEventListener("click", (e)=>{ e.preventDefault(); closeDayListImmediate(); });
+  $("dayListModal").addEventListener("click", (e)=>{ if(e.target === $("dayListModal")) closeDayListImmediate(); });
+
+  function renderCalendar(){
+    const mv = monthValueToYMD($("calMonth").value);
+    if(!mv) return;
+
+    const {y, mo} = mv;
+    const first = new Date(y, mo-1, 1);
+    const firstDow = first.getDay();
+    const totalCells = 42;
+
+    const gridStart = new Date(y, mo-1, 1 - firstDow);
+    gridStart.setHours(0,0,0,0);
+
+    const all = loadRecords();
+    const dayMap = buildDayIndexMap(all);
+
+    const dowRow = $("calDowRow");
+    dowRow.innerHTML = "";
+    for(const d of DOW){
+      const el = document.createElement("div");
+      el.className = "calDow";
+      el.textContent = d;
+      dowRow.appendChild(el);
+    }
+
+    const grid = $("calGrid");
+    grid.innerHTML = "";
+
+    for(let i=0;i<totalCells;i++){
+      const d = new Date(gridStart.getTime() + i*DAY_MS);
+      const dayStart = d.getTime();
+      const inMonth = (d.getMonth() === (mo-1));
+
+      const cell = document.createElement("div");
+      cell.className = "calCell" + (inMonth ? "" : " outMonth");
+
+      const dn = document.createElement("div");
+      dn.className = "dnum";
+      dn.textContent = String(d.getDate());
+      cell.appendChild(dn);
+
+      const recs = dayMap.get(dayStart) || [];
+      if(recs.length > 0){
+        cell.classList.add("hasData");
+        cell.addEventListener("click", (e)=>{
+          e.preventDefault();
+          openDayList(dayStart, recs);
+        }, {passive:false});
+      }
+
+      grid.appendChild(cell);
+    }
+  }
+
+  /* ===== View & Update modal ===== */
+
+  let editId = null;
+
+  function openEditModal(id){
+    const recs = loadRecords();
+    const r = recs.find(x => x.id === id);
+    if(!r){
+      openInfo("Not found", "That entry could not be found.");
+      return;
+    }
+    editId = id;
+
+    $("editDT").value = toDTLocalValue(r.ts);
+    $("editNum").value = r.number || "";
+    $("editNotes").value = r.notes || "";
+
+    const n = normalizeNumberInput(r.number || "");
+    const card = buildAngelCardPlain(n);
+
+    $("editPattern").textContent = card.pattern || "—";
+    $("editAngelCard").textContent = card.cardText || "—";
+
+    $("editModal").classList.remove("hidden");
+    lockTouches(80);
+
+    try{ document.activeElement?.blur(); }catch{}
+  }
+
+  function closeEditModal(){
+    editId = null;
+    $("editModal").classList.add("hidden");
+    unlockTouches();
+    try{ document.activeElement?.blur(); }catch{}
+  }
+
+  function refreshEditDerived(){
+    const n = normalizeNumberInput($("editNum").value);
+    const card = buildAngelCardPlain(n);
+    $("editPattern").textContent = card.pattern || "—";
+    $("editAngelCard").textContent = card.cardText || "—";
+  }
+
+  $("editNum").addEventListener("input", refreshEditDerived);
+
+  $("btnEditClose").addEventListener("click", (e)=>{ e.preventDefault(); closeEditModal(); });
+  $("editModal").addEventListener("click", (e)=>{ if(e.target === $("editModal")) closeEditModal(); });
+
+  function reopenDayListForTs(ts){
+    const newDayKey = startOfDay(ts);
+    currentDayKey = newDayKey;
+    const dayMap = buildDayIndexMap(loadRecords());
+    const updated = dayMap.get(newDayKey) || [];
+    openDayList(newDayKey, updated);
+  }
+
+  $("btnEditSave").addEventListener("click", ()=>{
+    if(!editId) return;
+
+    const newTs = fromDTLocalValue($("editDT").value);
+    if(!newTs){
+      openInfo("Invalid date/time", "Please set a valid date and time.");
+      return;
+    }
+    const n = normalizeNumberInput($("editNum").value);
+    if(!n){
+      openInfo("Invalid number", "Please enter a number.");
+      return;
+    }
+    const notes = String($("editNotes").value || "").trim();
+
+    const card = buildAngelCardPlain(n);
+
+    const ok = updateRecordById(editId, {
+      ts: newTs,
+      number: n,
+      pattern: card.pattern || "—",
+      meaning: card.cardText || "—",
+      notes
+    });
+
+    if(!ok){
+      openInfo("Save failed", "Could not save changes.");
+      return;
+    }
+
+    closeEditModal();
+    renderCalendar();
+
+    // FIX preserved: reopen day list for UPDATED day
+    reopenDayListForTs(newTs);
+  });
+
+  $("btnEditDelete").addEventListener("click", ()=>{
+    if(!editId) return;
+
+    const recs = loadRecords();
+    const r = recs.find(x => x.id === editId);
+    const ts = r ? r.ts : (currentDayKey ?? Date.now());
+
+    const id = editId;
+    deleteRecordById(id);
+    closeEditModal();
+    renderCalendar();
+
+    reopenDayListForTs(ts);
+  });
+
+  /* ===== Smooth panel swipe (edge only) ===== */
+
+  const EDGE = 150;
+  const deck = $("deck");
+  const screenArea = $("screenArea");
+
+  let deckIndex = 0; // 0 home, 1 calendar
+  let dragging = false;
+  let intent = null;
+  let x0=0, y0=0;
+  let baseX=0;
+  let lastX=0, lastT=0;
+  let vx=0;
+  let blockSwipe = false;
+
+  function getWidth(){
+    return screenArea.clientWidth || window.innerWidth;
+  }
+
+  function setDeckX(px, animate=false){
+    if(animate) deck.classList.add("anim");
+    else deck.classList.remove("anim");
+    deck.style.transform = `translate3d(${px}px,0,0)`;
+  }
+
+  function deckTargetXForIndex(idx){
+    const w = getWidth();
+    return -idx * w;
+  }
+
+  function getDeckIndex(){ return deckIndex; }
+
+  function snapToIndex(idx, animate=true){
+    idx = Math.max(0, Math.min(1, idx));
+    deckIndex = idx;
+    setDeckX(deckTargetXForIndex(deckIndex), animate);
+    try{ document.activeElement?.blur(); }catch{}
+    if(deckIndex === 1){
+      initMonthDefaultIfNeeded();
+      renderCalendar();
+    }
+  }
+
+  function shouldStartEdgeSwipe(ev){
+    if(blockSwipe) return false;
+    if(!(ev.touches && ev.touches.length === 1)) return false;
+
+    const target = ev.target;
+    if(target && target.closest && target.closest("input, textarea, select")) return false;
+    if(target && target.closest && target.closest(".modalCard, .modal")) return false;
+
+    const x = ev.touches[0].clientX;
+    const w = getWidth();
+    const nearLeft = x <= EDGE;
+    const nearRight = x >= (w - EDGE);
+    return nearLeft || nearRight;
+  }
+
+  function onTouchStart(ev){
+    if(!shouldStartEdgeSwipe(ev)) return;
+
+    dragging = true;
+    intent = null;
+    x0 = ev.touches[0].clientX;
+    y0 = ev.touches[0].clientY;
+
+    baseX = deckTargetXForIndex(deckIndex);
+    setDeckX(baseX, false);
+
+    lastX = x0;
+    lastT = performance.now();
+    vx = 0;
+  }
+
+  function onTouchMove(ev){
+    if(!dragging) return;
+    if(!(ev.touches && ev.touches.length === 1)) return;
+
+    const x = ev.touches[0].clientX;
+    const y = ev.touches[0].clientY;
+    const dx = x - x0;
+    const dy = y - y0;
+
+    if(!intent){
+      const ax = Math.abs(dx);
+      const ay = Math.abs(dy);
+      if(ax > 14 && ax > ay + 10){
+        intent = "h";
+      }else if(ay > 14 && ay > ax + 8){
+        dragging = false;
+        intent = null;
+        return;
+      }else{
+        return;
+      }
+    }
+
+    if(intent !== "h") return;
+
+    ev.preventDefault();
+
+    const w = getWidth();
+    let nextX = baseX + dx;
+
+    const minX = -w;
+    const maxX = 0;
+
+    if(nextX > maxX){
+      const over = nextX - maxX;
+      nextX = maxX + over * 0.22;
+    }else if(nextX < minX){
+      const over = nextX - minX;
+      nextX = minX + over * 0.22;
+    }
+
+    const now = performance.now();
+    const dt = Math.max(1, now - lastT);
+    const instV = (x - lastX) / dt;
+    vx = vx * 0.75 + instV * 0.25;
+    lastX = x;
+    lastT = now;
+
+    setDeckX(nextX, false);
+  }
+
+  function onTouchEnd(){
+    if(!dragging) return;
+
+    dragging = false;
+
+    const w = getWidth();
+    const matrix = deck.style.transform || "";
+    const m = /translate3d\(([-\d.]+)px/.exec(matrix);
+    const curX = m ? Number(m[1]) : deckTargetXForIndex(deckIndex);
+
+    const progress = (-curX) / w;
+    const deltaToHome = Math.abs(progress - 0);
+    const deltaToCal  = Math.abs(progress - 1);
+
+    const fling = vx;
+    const FLING_V = 0.65;
+
+    let target = deckIndex;
+    if(Math.abs(fling) > FLING_V){
+      if(fling < 0) target = 1;
+      else target = 0;
+    }else{
+      target = (deltaToHome <= deltaToCal) ? 0 : 1;
+    }
+
+    snapToIndex(target, true);
+  }
+
+  function attachSmoothEdgeSwipe(){
+    screenArea.addEventListener("touchstart", onTouchStart, {passive:true});
+    screenArea.addEventListener("touchmove", onTouchMove, {passive:false});
+    screenArea.addEventListener("touchend", onTouchEnd, {passive:true});
+    screenArea.addEventListener("touchcancel", onTouchEnd, {passive:true});
+  }
+
+  /* ===== Pull-to-refresh (custom) ===== */
+
+  const PTR_THRESHOLD = 225;
+  const PTR_MAX = Math.max(260, PTR_THRESHOLD + 35);
+
+  let ptrActive = false;
+  let ptrStartY = 0;
+  let ptrTriggered = false;
+
+  function ptrSet(show, hint, small){
+    const el = $("ptr");
+    if(show) el.classList.add("show");
+    else el.classList.remove("show");
+    $("ptrHint").textContent = hint || "Pull to refresh";
+    $("ptrSmall").textContent = small || "";
+  }
+
+  function currentScrollEl(){
+    return (getDeckIndex() === 0) ? $("homeScroll") : $("calendar");
+  }
+
+  function canPtrStart(target){
+    if($("editModal") && !$("editModal").classList.contains("hidden")) return false;
+    if($("dayListModal") && !$("dayListModal").classList.contains("hidden")) return false;
+    if($("addCalModal") && !$("addCalModal").classList.contains("hidden")) return false;
+    if($("exportModal") && !$("exportModal").classList.contains("hidden")) return false;
+    if($("infoModal") && !$("infoModal").classList.contains("hidden")) return false;
+    if($("heartModal") && !$("heartModal").classList.contains("hidden")) return false;
+
+    if(target && target.closest && target.closest("input, textarea, select, button")) return false;
+    const sc = currentScrollEl();
+    if(!sc) return false;
+    return sc.scrollTop <= 0;
+  }
+
+  function attachPullToRefresh(){
+    screenArea.addEventListener("touchstart", (e)=>{
+      if(!(e.touches && e.touches.length === 1)) return;
+      const target = e.target;
+      if(!canPtrStart(target)) return;
+
+      ptrActive = true;
+      ptrTriggered = false;
+      ptrStartY = e.touches[0].clientY;
+      ptrSet(true, "Pull to refresh", "");
+    }, {passive:true});
+
+    screenArea.addEventListener("touchmove", (e)=>{
+      if(!ptrActive) return;
+      if(!(e.touches && e.touches.length === 1)) return;
+
+      const y = e.touches[0].clientY;
+      const dy = y - ptrStartY;
+      if(dy <= 0){
+        ptrSet(false);
+        return;
+      }
+
+      e.preventDefault();
+
+      const pull = Math.min(PTR_MAX, dy);
+      const pct = Math.max(0, Math.min(100, Math.round((pull / PTR_THRESHOLD) * 100)));
+
+      if(pull >= PTR_THRESHOLD){
+        ptrSet(true, "Release to refresh", `${pct}%`);
+        ptrTriggered = true;
+      }else{
+        ptrSet(true, "Pull to refresh", `${pct}%`);
+        ptrTriggered = false;
+      }
+    }, {passive:false});
+
+    screenArea.addEventListener("touchend", ()=>{
+      if(!ptrActive) return;
+      ptrActive = false;
+
+      if(ptrTriggered){
+        ptrSet(true, "Refreshing…", "");
+        setTimeout(() => {
+          try{ location.reload(); }catch{}
+        }, 180);
+      }else{
+        ptrSet(false);
+      }
+    }, {passive:true});
+
+    screenArea.addEventListener("touchcancel", ()=>{
+      if(!ptrActive) return;
+      ptrActive = false;
+      ptrSet(false);
+    }, {passive:true});
+  }
+
+  /* ===== Manifest + SW ===== */
+
+  function injectManifest(){
+    const svg =
+`<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8a6bff"/>
+      <stop offset="55%" stop-color="#2f78ff"/>
+      <stop offset="100%" stop-color="#0b1324"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="110" fill="url(#g)"/>
+  <ellipse cx="256" cy="150" rx="110" ry="44" fill="none" stroke="rgba(235,245,255,.92)" stroke-width="26"/>
+  <path d="M256 240
+           C196 210, 140 220, 112 270
+           C154 294, 190 330, 214 380
+           C226 330, 240 285, 256 240Z"
+        fill="none" stroke="rgba(235,245,255,.92)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M256 240
+           C316 210, 372 220, 400 270
+           C358 294, 322 330, 298 380
+           C286 330, 272 285, 256 240Z"
+        fill="none" stroke="rgba(235,245,255,.92)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+    const encoded = encodeURIComponent(svg).replace(/'/g,"%27").replace(/"/g,"%22");
+    const icon = `data:image/svg+xml;charset=utf-8,${encoded}`;
+
+    const manifest = {
+      name: "Angel Numbers Tracker",
+      short_name: "AngelNums",
+      start_url: ".",
+      display: "standalone",
+      background_color: "#0b1324",
+      theme_color: "#0b1324",
+      icons: [{ src: icon, sizes: "512x512", type: "image/svg+xml", purpose: "any" }]
+    };
+
+    const blob = new Blob([JSON.stringify(manifest)], {type:"application/manifest+json"});
+    const url = URL.createObjectURL(blob);
+    $("manifestLink").setAttribute("href", url);
+  }
+
+  async function registerSW(){
+    if(!("serviceWorker" in navigator)) return;
+    const swCode =
+`self.addEventListener('install', (e)=>{ self.skipWaiting(); });
+self.addEventListener('activate', (e)=>{ e.waitUntil(self.clients.claim()); });
+self.addEventListener('fetch', (e)=>{ });`;
+    const blob = new Blob([swCode], {type:"text/javascript"});
+    const swUrl = URL.createObjectURL(blob);
+    try { await navigator.serviceWorker.register(swUrl); } catch {}
+  }
+
+  /* ===== Test data seeding (OFF) ===== */
+
+  function seedTestDataIfEmpty(){
+    if(!TEST_DATA_ENABLED) return;
+    const existing = loadRecords();
+    if(existing.length > 0) return;
+    // Intentionally no seeding when disabled.
+  }
+
+  /* ===== Version triple-tap -> heart ===== */
+
+  let vTapCount = 0;
+  let vTapTimer = null;
+
+  function attachVersionTripleTap(){
+    $("homeVerLabel").addEventListener("click", (e) => {
+      e.stopPropagation();
+      vTapCount++;
+      if(vTapTimer) clearTimeout(vTapTimer);
+      vTapTimer = setTimeout(()=>{ vTapCount = 0; }, 650);
+      if(vTapCount >= 3){
+        vTapCount = 0;
+        openHeart();
+      }
+    });
+  }
+
+  /* ===== Exit ===== */
+
+  /* KEEP THIS EXIT FUNCTION EXACTLY (known-good) */
+  $("btnExitHome").addEventListener("click", () => {
+    window.close();
+    setTimeout(() => {
+      alert("If it didn’t close: use your phone’s Back/Home.");
+    }, 200);
+  });
+
+  /* ===== Buttons ===== */
+
+  $("btnViewCalendar").addEventListener("click", () => snapToIndex(1, true));
+  $("btnBackFromCalendar").addEventListener("click", () => snapToIndex(0, true));
+
+  $("btnHomeExport").addEventListener("click", () => {
+    const recs = loadRecords().slice().reverse();
+    exportReport(
+      recs,
+      {
+        title: "All Entries Export",
+        rangeLabel: "All saved entries",
+        notes: "This export contains all saved entries currently stored on this device."
+      },
+      "angel_numbers_all"
+    );
+  });
+
+  $("btnAddToCalendar").addEventListener("click", () => {
+    if(!revealed){
+      openInfo("Submit first", "Press Submit to generate the Angel Number Card first.");
+      return;
+    }
+    openAddCalModal();
+  });
+
+  $("btnInstall").addEventListener("click", (e) => {
+    e.preventDefault();
+    tryInstall();
+  });
+
+  $("calMonth").addEventListener("change", renderCalendar);
+
+  /* ===== Init ===== */
+
+  injectManifest();
+  registerSW();
+  seedTestDataIfEmpty();
+
+  $("homeVerLabel").textContent = APP_VERSION;
+
+  attachVersionTripleTap();
+  attachSmoothEdgeSwipe();
+  attachPullToRefresh();
+
+  initMonthDefaultIfNeeded();
+  renderCalendar();
+
+  updateInstallButton();
+
+  try{ document.activeElement?.blur(); }catch{}
+  setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 0);
+  setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 80);
+
+  resetHomeOutput();
+  snapToIndex(0, false);
+
+  window.addEventListener("resize", () => {
+    setDeckX(deckTargetXForIndex(deckIndex), false);
+    if(deckIndex === 1) renderCalendar();
+  });
+
+})();
+  </script>
+</body>
+</html>
+
+<!--
+EOF Version Detail Notes
+App Version: v1.2A1
+Base: v1.2A0
+Changes:
+- Test data turned OFF (live use; no seeding).
+- Home panel updated: only input + Submit + simple instructions visible on load.
+- Angel Card + footer actions are hidden until Submit is pressed, then revealed.
+- Wording simplified to everyday language throughout the Angel Card output.
+- Swipe hint added under the “enter a number” instruction line.
+- Preserved fix: after Save/Delete in View & Update, Day List reopens for the correct day computed from updated timestamp.
+-->
