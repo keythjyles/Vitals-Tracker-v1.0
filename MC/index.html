@@ -1,10 +1,20 @@
+<!--
+Master Code — BOF Version Detail Notes
+App Version: v1.1A3
+Base: v1.1A2
+Changes (requested):
+- Each swipe panel now embeds and runs its associated app INSIDE the panel (iframe).
+- Removed “Open …” buttons from app panels (the app itself is the panel).
+- Added edge-swipe gutters over embedded apps so left/right panel swipes still work.
+- Help feature remains removed.
+-->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1324" />
-  <title>Master Code v1.1A2</title>
+  <title>Master Code v1.1A3</title>
 
   <style>
     :root{
@@ -61,7 +71,6 @@
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
     }
-
     .logoTitle svg{
       width:min(520px, 100%);
       height:auto;
@@ -92,7 +101,7 @@
       top: 10px;
       left: 50%;
       transform: translateX(-50%);
-      z-index: 50;
+      z-index: 60;
       padding: 8px 12px;
       border-radius: 999px;
       border: 1px solid rgba(235,245,255,.16);
@@ -142,7 +151,6 @@
       padding: 0;
       backdrop-filter: blur(10px);
       overflow:hidden;
-      touch-action: pan-y;
       position:relative;
     }
 
@@ -245,6 +253,67 @@
       -webkit-tap-highlight-color: transparent;
       padding-bottom: max(6px, env(safe-area-inset-bottom));
     }
+
+    /* Embedded app panel */
+    .embedWrap{
+      height:100%;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .embedTop{
+      flex: 0 0 auto;
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid rgba(235,245,255,.10);
+      background: linear-gradient(180deg, rgba(12,21,40,.70), rgba(12,21,40,.22));
+      backdrop-filter: blur(10px);
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .embedTitle{
+      margin:0;
+      font-weight: 950;
+      letter-spacing: .2px;
+      font-size: 22px;
+      color: rgba(235,245,255,.92);
+      line-height: 1.05;
+    }
+    .embedSub{
+      margin: 6px 0 0;
+      font-size: 12px;
+      color: rgba(235,245,255,.44);
+      line-height: 1.25;
+    }
+
+    .embedBody{
+      position:relative;
+      flex: 1 1 auto;
+      min-height: 0;
+      background: rgba(0,0,0,.10);
+    }
+
+    .embedFrame{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      border:0;
+      background: transparent;
+    }
+
+    /* Edge swipe gutters (capture left/right swipes even when iframe is present) */
+    .edge{
+      position:absolute;
+      top:0;
+      bottom:0;
+      width: 22px;
+      z-index: 80;
+      background: transparent;
+      touch-action: none; /* allow us to capture horizontal gestures */
+    }
+    .edge.left{ left:0; }
+    .edge.right{ right:0; }
 
     .modal{
       position:fixed;
@@ -386,7 +455,7 @@
               <button class="btn tight" id="btnInstall">Install</button>
             </div>
 
-            <div class="hintLine">Swipe left to preview each app panel in order.</div>
+            <div class="hintLine">Swipe left to view each embedded app panel in order.</div>
 
             <div class="footerTiny">
               <div id="footerVer">v—</div>
@@ -395,87 +464,87 @@
           </div>
         </div>
 
-        <!-- Panel 1: Vitals -->
+        <!-- Panel 1: Vitals (embedded) -->
         <div class="card" id="panelVitals">
-          <div class="cardScroll">
-            <div class="h1">Vitals Tracker</div>
-            <div class="sub">Opens the Vitals Tracker app (root index).</div>
-            <div class="stack">
-              <button class="btn primary" id="btnOpenVitals">Open Vitals Tracker</button>
-              <button class="btn" id="btnBack1">Back to Launch Pad</button>
+          <div class="embedWrap">
+            <div class="embedTop">
+              <div class="embedTitle">Vitals Tracker</div>
+              <div class="embedSub">Embedded view. Swipe on the left/right edge to switch panels.</div>
             </div>
-            <div class="hintLine">Swipe right to return. Swipe left to continue.</div>
-            <div class="footerTiny">
-              <div>v1.1A2</div>
-              <div>Master Code</div>
+            <div class="embedBody">
+              <iframe class="embedFrame" id="frameVitals" title="Vitals Tracker"
+                loading="lazy"
+                allow="clipboard-read; clipboard-write"></iframe>
+              <div class="edge left" data-edge="1"></div>
+              <div class="edge right" data-edge="1"></div>
             </div>
           </div>
         </div>
 
-        <!-- Panel 2: Angel -->
+        <!-- Panel 2: Angel (embedded) -->
         <div class="card" id="panelAngel">
-          <div class="cardScroll">
-            <div class="h1">Angel Code</div>
-            <div class="sub">Opens the AN directory app.</div>
-            <div class="stack">
-              <button class="btn primary" id="btnOpenAngel">Open Angel Code (AN)</button>
-              <button class="btn" id="btnBack2">Back to Launch Pad</button>
+          <div class="embedWrap">
+            <div class="embedTop">
+              <div class="embedTitle">Angel Code (AN)</div>
+              <div class="embedSub">Embedded view. Swipe on the left/right edge to switch panels.</div>
             </div>
-            <div class="hintLine">Swipe right/left to switch panels.</div>
-            <div class="footerTiny">
-              <div>v1.1A2</div>
-              <div>Master Code</div>
+            <div class="embedBody">
+              <iframe class="embedFrame" id="frameAngel" title="Angel Code"
+                loading="lazy"
+                allow="clipboard-read; clipboard-write"></iframe>
+              <div class="edge left" data-edge="1"></div>
+              <div class="edge right" data-edge="1"></div>
             </div>
           </div>
         </div>
 
-        <!-- Panel 3: Birthday -->
+        <!-- Panel 3: Birthday (embedded) -->
         <div class="card" id="panelBirthday">
-          <div class="cardScroll">
-            <div class="h1">Birthday Code</div>
-            <div class="sub">Opens the BC directory app.</div>
-            <div class="stack">
-              <button class="btn primary" id="btnOpenBirthday">Open Birthday Code (BC)</button>
-              <button class="btn" id="btnBack3">Back to Launch Pad</button>
+          <div class="embedWrap">
+            <div class="embedTop">
+              <div class="embedTitle">Birthday Code (BC)</div>
+              <div class="embedSub">Embedded view. Swipe on the left/right edge to switch panels.</div>
             </div>
-            <div class="hintLine">Swipe right/left to switch panels.</div>
-            <div class="footerTiny">
-              <div>v1.1A2</div>
-              <div>Master Code</div>
+            <div class="embedBody">
+              <iframe class="embedFrame" id="frameBirthday" title="Birthday Code"
+                loading="lazy"
+                allow="clipboard-read; clipboard-write"></iframe>
+              <div class="edge left" data-edge="1"></div>
+              <div class="edge right" data-edge="1"></div>
             </div>
           </div>
         </div>
 
-        <!-- Panel 4: Glucose -->
+        <!-- Panel 4: Glucose (embedded) -->
         <div class="card" id="panelGlucose">
-          <div class="cardScroll">
-            <div class="h1">Glucose Tracker</div>
-            <div class="sub">Opens the DB directory app.</div>
-            <div class="stack">
-              <button class="btn primary" id="btnOpenGlucose">Open Glucose Tracker (DB)</button>
-              <button class="btn" id="btnBack4">Back to Launch Pad</button>
+          <div class="embedWrap">
+            <div class="embedTop">
+              <div class="embedTitle">Glucose Tracker (DB)</div>
+              <div class="embedSub">Embedded view. Swipe on the left/right edge to switch panels.</div>
             </div>
-            <div class="hintLine">Swipe right/left to switch panels.</div>
-            <div class="footerTiny">
-              <div>v1.1A2</div>
-              <div>Master Code</div>
+            <div class="embedBody">
+              <iframe class="embedFrame" id="frameGlucose" title="Glucose Tracker"
+                loading="lazy"
+                allow="clipboard-read; clipboard-write"></iframe>
+              <div class="edge left" data-edge="1"></div>
+              <div class="edge right" data-edge="1"></div>
             </div>
           </div>
         </div>
 
-        <!-- Panel 5: Compatibility -->
+        <!-- Panel 5: Compatibility (embedded) -->
         <div class="card" id="panelCompat">
-          <div class="cardScroll">
-            <div class="h1">Compatibility Code</div>
-            <div class="sub">Opens the CC directory app (when created).</div>
-            <div class="stack">
-              <button class="btn primary" id="btnOpenCompat">Open Compatibility Code (CC)</button>
-              <button class="btn" id="btnBack5">Back to Launch Pad</button>
+          <div class="embedWrap">
+            <div class="embedTop">
+              <div class="embedTitle">Compatibility Code (CC)</div>
+              <div class="embedSub">Embedded view. Swipe on the left/right edge to switch panels.</div>
             </div>
-            <div class="hintLine">Swipe right to return. End of panel list.</div>
-            <div class="footerTiny">
-              <div>v1.1A2</div>
-              <div>Master Code</div>
+            <div class="embedBody">
+              <iframe class="embedFrame" id="frameCompat" title="Compatibility Code"
+                loading="lazy"
+                allow="clipboard-read; clipboard-write"></iframe>
+              <div class="edge left" data-edge="1"></div>
+              <div class="edge right" data-edge="1"></div>
             </div>
           </div>
         </div>
@@ -501,8 +570,7 @@
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.1A2";
-
+  const APP_VERSION = "v1.1A3";
   const $ = (id) => document.getElementById(id);
 
   function openInfo(title, msg){
@@ -511,9 +579,7 @@
     $("infoModal").classList.remove("hidden");
     try{ document.activeElement?.blur(); }catch{}
   }
-  function closeInfo(){
-    $("infoModal").classList.add("hidden");
-  }
+  function closeInfo(){ $("infoModal").classList.add("hidden"); }
   $("btnInfoX").addEventListener("click", (e)=>{ e.preventDefault(); closeInfo(); });
   $("btnInfoOk").addEventListener("click", (e)=>{ e.preventDefault(); closeInfo(); });
   $("infoModal").addEventListener("click", (e)=>{ if(e.target === $("infoModal")) closeInfo(); });
@@ -581,39 +647,48 @@
     btn.disabled = !deferredInstallPrompt;
   }
 
-  function launch(url){
-    try{
-      const u = String(url || "").trim();
-      if(!u) return;
-      window.location.href = u;
-    }catch{
-      openInfo("Open failed", "Could not open that app from this browser.");
-    }
+  // ---- URL resolution (robust for subfolder hosting) ----
+  // Use URL(relative, location.href).href so the paths resolve correctly no matter where Master Code is hosted.
+  function abs(rel){
+    try{ return new URL(rel, location.href).href; }catch{ return rel; }
   }
 
-  function relToRootIndex(){
-    return "../index.html";
-  }
-
+  // IMPORTANT:
+  // Adjust these paths ONLY if your repo structure differs.
+  // These are the same paths you were already using for navigation.
   const URLS = {
-    vitals: relToRootIndex(),
-    angel: "../AN/",
-    birthday: "../BC/",
-    glucose: "../DB/",
-    compat: "../CC/"
+    vitals: abs("../index.html"),
+    angel: abs("../AN/"),
+    birthday: abs("../BC/"),
+    glucose: abs("../DB/"),
+    compat: abs("../CC/")
   };
 
-  $("btnVitals").addEventListener("click", ()=> launch(URLS.vitals));
-  $("btnAngel").addEventListener("click", ()=> launch(URLS.angel));
-  $("btnBirthday").addEventListener("click", ()=> launch(URLS.birthday));
-  $("btnGlucose").addEventListener("click", ()=> launch(URLS.glucose));
-  $("btnCompat").addEventListener("click", ()=> launch(URLS.compat));
+  // Embed apps into panels (index runs inside the panel)
+  function setFrameSrc(id, src){
+    const f = $(id);
+    if(!f) return;
+    try{
+      if(f.getAttribute("src")) return; // do not reload once set
+      f.setAttribute("src", src);
+    }catch{}
+  }
 
-  $("btnOpenVitals").addEventListener("click", ()=> launch(URLS.vitals));
-  $("btnOpenAngel").addEventListener("click", ()=> launch(URLS.angel));
-  $("btnOpenBirthday").addEventListener("click", ()=> launch(URLS.birthday));
-  $("btnOpenGlucose").addEventListener("click", ()=> launch(URLS.glucose));
-  $("btnOpenCompat").addEventListener("click", ()=> launch(URLS.compat));
+  // Load launch pad buttons -> snap to panel and ensure iframe is loaded
+  function gotoPanel(idx){
+    snapToIndex(idx, true);
+    if(idx === 1) setFrameSrc("frameVitals", URLS.vitals);
+    if(idx === 2) setFrameSrc("frameAngel", URLS.angel);
+    if(idx === 3) setFrameSrc("frameBirthday", URLS.birthday);
+    if(idx === 4) setFrameSrc("frameGlucose", URLS.glucose);
+    if(idx === 5) setFrameSrc("frameCompat", URLS.compat);
+  }
+
+  $("btnVitals").addEventListener("click", ()=> gotoPanel(1));
+  $("btnAngel").addEventListener("click", ()=> gotoPanel(2));
+  $("btnBirthday").addEventListener("click", ()=> gotoPanel(3));
+  $("btnGlucose").addEventListener("click", ()=> gotoPanel(4));
+  $("btnCompat").addEventListener("click", ()=> gotoPanel(5));
 
   function injectManifest(){
     const svg =
@@ -667,6 +742,7 @@ self.addEventListener('fetch', (e)=>{ });`;
     try { await navigator.serviceWorker.register(swUrl); } catch {}
   }
 
+  // ---- Deck swipe (horizontal) ----
   const deck = $("deck");
   const screenArea = $("screenArea");
 
@@ -692,6 +768,14 @@ self.addEventListener('fetch', (e)=>{ });`;
     idx = Math.max(0, Math.min(panelCount-1, idx));
     deckIndex = idx;
     setDeckX(deckTargetXForIndex(deckIndex), animate);
+
+    // lazy-load embedded apps the first time we land on their panel
+    if(deckIndex === 1) setFrameSrc("frameVitals", URLS.vitals);
+    if(deckIndex === 2) setFrameSrc("frameAngel", URLS.angel);
+    if(deckIndex === 3) setFrameSrc("frameBirthday", URLS.birthday);
+    if(deckIndex === 4) setFrameSrc("frameGlucose", URLS.glucose);
+    if(deckIndex === 5) setFrameSrc("frameCompat", URLS.compat);
+
     try{ document.activeElement?.blur(); }catch{}
   }
 
@@ -699,10 +783,18 @@ self.addEventListener('fetch', (e)=>{ });`;
     return !$("infoModal").classList.contains("hidden");
   }
 
-  function isInteractiveTarget(target){
-    if(!target || !target.closest) return false;
-    if(target.closest("button, a, input, textarea, select")) return true;
-    if(target.closest(".modalCard, .modal")) return true;
+  // Only start horizontal swipe if touch begins on:
+  // - Launch Pad area (non-button)
+  // - OR on the edge gutters over embedded panels
+  function isSwipeStartAllowed(target){
+    if(!target) return false;
+    if(target.closest && target.closest(".edge")) return true;
+    // Launch pad: allow swipe unless starting on a button/input
+    if(deckIndex === 0){
+      if(target.closest && target.closest("button, input, textarea, select, a")) return false;
+      return true;
+    }
+    // Embedded panels: require edge gutters (iframe otherwise captures)
     return false;
   }
 
@@ -713,7 +805,7 @@ self.addEventListener('fetch', (e)=>{ });`;
     if(swipeBlockedByModal()) return;
     if(!(ev.touches && ev.touches.length === 1)) return;
     const target = ev.target;
-    if(isInteractiveTarget(target)) return;
+    if(!isSwipeStartAllowed(target)) return;
 
     dragging = true;
     intent = null;
@@ -808,17 +900,7 @@ self.addEventListener('fetch', (e)=>{ });`;
   screenArea.addEventListener("touchend", onTouchEnd, {passive:true});
   screenArea.addEventListener("touchcancel", onTouchEnd, {passive:true});
 
-  function bindBack(btnId){
-    const b = $(btnId);
-    if(!b) return;
-    b.addEventListener("click", (e)=>{ e.preventDefault(); snapToIndex(0, true); });
-  }
-  bindBack("btnBack1");
-  bindBack("btnBack2");
-  bindBack("btnBack3");
-  bindBack("btnBack4");
-  bindBack("btnBack5");
-
+  // ---- Pull-to-refresh (Launch Pad only, and only when at top) ----
   const PTR_THRESHOLD = 225;
   const PTR_MAX = Math.max(260, PTR_THRESHOLD + 35);
 
@@ -832,16 +914,11 @@ self.addEventListener('fetch', (e)=>{ });`;
     $("ptrSmall").textContent = small || "";
   }
 
-  function currentScrollEl(){
-    if(deckIndex === 0) return $("launchScroll");
-    const panels = deck.querySelectorAll(".cardScroll");
-    return panels[deckIndex] || $("launchScroll");
-  }
-
   function canPtrStart(target){
     if(swipeBlockedByModal()) return false;
-    if(target && target.closest && target.closest("button, input, textarea, select")) return false;
-    const sc = currentScrollEl();
+    if(deckIndex !== 0) return false; // refresh only on Launch Pad
+    if(target && target.closest && target.closest("button, input, textarea, select, a")) return false;
+    const sc = $("launchScroll");
     if(!sc) return false;
     return sc.scrollTop <= 0;
   }
@@ -867,6 +944,7 @@ self.addEventListener('fetch', (e)=>{ });`;
     const dy = y - ptrStartY;
     const dx = x - ptrStartX;
 
+    // cancel if user begins a horizontal swipe
     if(Math.abs(dx) > 14 && Math.abs(dx) > Math.abs(dy) + 10){
       ptrActive = false;
       ptrTriggered = false;
@@ -916,6 +994,7 @@ self.addEventListener('fetch', (e)=>{ });`;
     ptrSet(false);
   }, {passive:true});
 
+  // Install / Uninstall
   $("btnInstall").addEventListener("click", (e)=>{
     e.preventDefault();
     const mode = $("btnInstall").dataset.mode || "install";
@@ -923,12 +1002,12 @@ self.addEventListener('fetch', (e)=>{ });`;
     tryInstall();
   });
 
+  // Init
   injectManifest();
   registerSW();
 
   $("logoVer").textContent = APP_VERSION;
   $("footerVer").textContent = APP_VERSION;
-
   updateInstallButton();
   snapToIndex(0, false);
 
@@ -939,6 +1018,12 @@ self.addEventListener('fetch', (e)=>{ });`;
 })();
   </script>
 
-  <footer style="display:none">Master Code v1.1A2</footer>
+  <!--
+  Master Code — EOF Version Detail Notes
+  App Version: v1.1A3
+  Notes:
+  - Embedded apps run inside their swipe panels via iframe.
+  - Edge gutters capture left/right swipes so panels remain navigable on mobile.
+  -->
 </body>
 </html>
