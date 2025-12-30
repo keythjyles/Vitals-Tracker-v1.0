@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1324" />
-  <title>Master Code</title>
-  <link rel="manifest" id="manifestLink" href="#" />
+  <title>Master Code v1.1A2</title>
+
   <style>
     :root{
       --bg0:#08101f;
@@ -61,6 +61,7 @@
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
     }
+
     .logoTitle svg{
       width:min(520px, 100%);
       height:auto;
@@ -71,9 +72,9 @@
       margin: -4px 0 2px;
       text-align:center;
       font-size: 12px;
-      font-weight: 900;
+      font-weight: 850;
       letter-spacing: .2px;
-      color: rgba(235,245,255,.40);
+      color: rgba(235,245,255,.38);
       user-select:none;
       -webkit-tap-highlight-color: transparent;
     }
@@ -99,7 +100,7 @@
       backdrop-filter: blur(10px);
       box-shadow: 0 14px 34px rgba(0,0,0,.36);
       color: rgba(235,245,255,.84);
-      font-weight: 900;
+      font-weight: 850;
       font-size: 13px;
       letter-spacing: .2px;
       display:none;
@@ -118,7 +119,7 @@
       opacity:.95;
     }
     .ptrHint{ opacity:.90; }
-    .ptrSmall{ opacity:.60; font-weight:850; }
+    .ptrSmall{ opacity:.60; font-weight:800; }
 
     .deck{
       position:absolute;
@@ -128,40 +129,64 @@
       transform: translate3d(0,0,0);
       will-change: transform;
     }
-    .deck.anim{
-      transition: transform 260ms cubic-bezier(.2,.9,.2,1);
-    }
+    .deck.anim{ transition: transform 260ms cubic-bezier(.2,.9,.2,1); }
 
     .card{
+      flex: 0 0 100%;
+      width: 100%;
       height: 100%;
       background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
       border:3px solid var(--accentBorder);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      padding: var(--pad);
+      padding: 0;
       backdrop-filter: blur(10px);
       overflow:hidden;
       touch-action: pan-y;
       position:relative;
     }
 
-    #home.card{
-      border:none;
-      box-shadow:none;
-      background: transparent;
-      backdrop-filter: none;
-      padding: 0;
+    .cardScroll{
+      height:100%;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      padding: var(--pad);
+      overscroll-behavior: contain;
+      touch-action: pan-y;
     }
 
-    .hidden{ display:none !important; }
+    .h1{
+      font-weight: 950;
+      letter-spacing: .2px;
+      color: rgba(235,245,255,.92);
+      font-size: clamp(28px, 8.0vw, 44px);
+      line-height: 1.02;
+      margin: 6px 2px 10px;
+    }
+
+    .sub{
+      color: rgba(235,245,255,.70);
+      font-size: 15px;
+      line-height: 1.28;
+      margin: 0 2px 14px;
+    }
+
+    .sectionLabel{
+      font-size:15px;
+      color:var(--muted);
+      font-weight:800;
+      margin: 12px 4px 10px;
+      letter-spacing:.2px;
+    }
 
     .btn{
       height:var(--btnH);
+      width:100%;
       border-radius: 999px;
       border:1px solid var(--stroke2);
       background: rgba(255,255,255,.03);
       color:rgba(235,245,255,.78);
-      font-weight:700;
+      font-weight:850;
       letter-spacing:.2px;
       display:flex;
       align-items:center;
@@ -169,23 +194,25 @@
       padding:0 18px;
       user-select:none;
       -webkit-tap-highlight-color: transparent;
-      font-size:18px;
+      font-size:20px;
       touch-action: manipulation;
       white-space:nowrap;
+      max-width: 100%;
     }
     .btn:active{ transform: translateY(1px); }
+
     .btn.primary{
       background: linear-gradient(180deg, rgba(47,120,255,.92), rgba(47,120,255,.72));
       border-color: rgba(120,170,255,.55);
       color: rgba(235,245,255,.90);
-      font-weight: 900;
     }
+
     .btn.tight{
-      height: 48px;
-      font-size: 16px;
+      height: 52px;
+      font-size: 18px;
       font-weight: 900;
-      letter-spacing: .2px;
     }
+
     .btn:disabled{
       opacity:.55;
       filter:saturate(.85);
@@ -193,97 +220,31 @@
       pointer-events:none;
     }
 
-    .label{
-      font-size:15px;
-      color:var(--muted);
-      font-weight:750;
-      margin: 10px 4px 6px;
-    }
-    .subtle{
-      font-size:14px;
-      color:var(--muted2);
-      margin: 6px 4px 0;
-      line-height:1.25;
+    .stack{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      width:100%;
     }
 
-    .homeScroll{
-      height:100%;
-      overflow:auto;
-      -webkit-overflow-scrolling: touch;
-      padding: 0 0 10px;
-      touch-action: pan-y;
-      overscroll-behavior: contain;
-    }
-
-    .homeShell{
-      margin: 10px 12px 0;
-      border-radius: var(--radius);
-      border:3px solid var(--accentBorder);
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      box-shadow: var(--shadow);
-      padding: var(--pad);
-      backdrop-filter: blur(10px);
-    }
-
-    .homeTitle{
-      font-size: 26px;
-      font-weight: 950;
-      letter-spacing: .2px;
-      margin: 2px 2px 6px;
-      color: rgba(235,245,255,.92);
-    }
-    .homeHint{
-      margin: 0 2px 10px;
-      color: rgba(235,245,255,.54);
-      font-size: 14px;
+    .hintLine{
+      margin-top: 12px;
+      font-size: 13px;
+      color: rgba(235,245,255,.44);
       line-height: 1.25;
     }
 
-    .appGrid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
-      margin: 12px 0 0;
-    }
-    .appGrid .btn{ width:100%; }
-    .appGrid .btn.wide{ grid-column: 1 / -1; }
-
-    .actionRow{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
-      margin-top: 12px;
-    }
-
     .footerTiny{
-      margin-top:10px;
+      margin-top: 14px;
       display:flex;
       justify-content:space-between;
       gap:10px;
       font-size: 12px;
-      color: rgba(235,245,255,.40);
+      color: rgba(235,245,255,.38);
       user-select:none;
       -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
+      padding-bottom: max(6px, env(safe-area-inset-bottom));
     }
-
-    .infoCard{
-      border:1px solid rgba(235,245,255,.12);
-      background: rgba(0,0,0,.10);
-      border-radius: 18px;
-      padding: 12px;
-      color: rgba(235,245,255,.84);
-      line-height: 1.3;
-    }
-
-    .touchLock{
-      position:fixed;
-      inset:0;
-      z-index: 9997;
-      background: transparent;
-      pointer-events:none;
-    }
-    .touchLock.on{ pointer-events:auto; }
 
     .modal{
       position:fixed;
@@ -297,7 +258,6 @@
       touch-action: none;
     }
     .modal.hidden{ display:none; }
-
     .modalCard{
       width:min(520px, 100%);
       border-radius: 26px;
@@ -319,7 +279,7 @@
       margin: 4px 2px 10px;
     }
     .modalSub{
-      color: rgba(235,245,255,.78);
+      color: rgba(235,245,255,.76);
       font-size: 15px;
       margin: 0 2px 12px;
       white-space: pre-wrap;
@@ -338,7 +298,6 @@
       font-weight: 900;
       min-width: 140px;
     }
-
     .xCloseRow{
       display:flex;
       justify-content:flex-end;
@@ -350,7 +309,7 @@
       border:1px solid var(--stroke2);
       background: rgba(255,255,255,.03);
       color: rgba(235,245,255,.82);
-      font-weight: 950;
+      font-weight: 900;
       font-size: 18px;
       display:flex;
       align-items:center;
@@ -361,9 +320,8 @@
     }
   </style>
 </head>
-<body>
-  <div class="touchLock" id="touchLock"></div>
 
+<body>
   <div class="app" id="appRoot">
     <div class="logoTitle" aria-label="Master Code">
       <svg viewBox="0 0 900 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Master Code">
@@ -377,20 +335,20 @@
             <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="rgba(0,0,0,.35)"/>
           </filter>
         </defs>
+
         <g transform="translate(46 24)" filter="url(#mcS)">
           <rect x="0" y="0" width="92" height="92" rx="26" fill="rgba(255,255,255,.06)" stroke="rgba(235,245,255,.22)" stroke-width="2"/>
-          <path d="M22 60 C30 46, 42 40, 56 40 C70 40, 82 46, 90 60"
-                transform="translate(-2 0)"
-                fill="none" stroke="url(#mcG)" stroke-width="6" stroke-linecap="round"/>
-          <path d="M26 70 L66 70" fill="none" stroke="rgba(235,245,255,.86)" stroke-width="6" stroke-linecap="round"/>
-          <path d="M34 52 L34 88" fill="none" stroke="rgba(235,245,255,.70)" stroke-width="5" stroke-linecap="round"/>
-          <path d="M46 46 L46 92" fill="none" stroke="rgba(235,245,255,.84)" stroke-width="5" stroke-linecap="round"/>
-          <path d="M58 52 L58 88" fill="none" stroke="rgba(235,245,255,.70)" stroke-width="5" stroke-linecap="round"/>
+          <path d="M30 62 h32" stroke="url(#mcG)" stroke-width="8" stroke-linecap="round"/>
+          <path d="M30 46 h32" stroke="url(#mcG)" stroke-width="8" stroke-linecap="round" opacity=".9"/>
+          <path d="M30 30 h32" stroke="url(#mcG)" stroke-width="8" stroke-linecap="round" opacity=".8"/>
+          <path d="M38 26 v44" stroke="rgba(235,245,255,.78)" stroke-width="6" stroke-linecap="round" opacity=".55"/>
+          <path d="M54 26 v44" stroke="rgba(235,245,255,.78)" stroke-width="6" stroke-linecap="round" opacity=".55"/>
         </g>
+
         <text x="160" y="92"
           font-family="system-ui,Segoe UI,Roboto,Helvetica,Arial"
           font-size="66"
-          font-weight="900"
+          font-weight="860"
           fill="url(#mcG)"
           letter-spacing=".6"
           filter="url(#mcS)">Master Code</text>
@@ -407,96 +365,121 @@
       </div>
 
       <div class="deck" id="deck">
-        <div id="home" class="card">
-          <div class="homeScroll" id="homeScroll">
-            <div class="homeShell">
-              <div class="homeTitle">Launch Pad</div>
-              <div class="homeHint">
-                Tap an app to open it. Swipe left/right to switch panels. Pull down to refresh.
-              </div>
 
-              <div class="label">Apps</div>
-              <div class="appGrid">
-                <button class="btn primary wide" id="btnVitals">Vitals Tracker</button>
-                <button class="btn" id="btnAngel">Angel Code (AN)</button>
-                <button class="btn" id="btnBirthday">Birthday Code (BC)</button>
-                <button class="btn" id="btnGlucose">Glucose Tracker (DB)</button>
-                <button class="btn primary wide" id="btnCompat">Compatibility Code (CC)</button>
-              </div>
+        <!-- Panel 0: Launch Pad -->
+        <div class="card" id="panelLaunch">
+          <div class="cardScroll" id="launchScroll">
+            <div class="h1">Launch Pad</div>
+            <div class="sub">Tap an app to open it. Swipe left/right to switch panels. Pull down to refresh.</div>
 
-              <div class="label">Actions</div>
-              <div class="actionRow">
-                <button class="btn" id="btnInstall">Install</button>
-                <button class="btn tight" id="btnHelp">Help</button>
-              </div>
+            <div class="sectionLabel">Apps</div>
+            <div class="stack">
+              <button class="btn primary" id="btnVitals">Vitals Tracker</button>
+              <button class="btn" id="btnAngel">Angel Code (AN)</button>
+              <button class="btn" id="btnBirthday">Birthday Code (BC)</button>
+              <button class="btn" id="btnGlucose">Glucose Tracker (DB)</button>
+              <button class="btn primary" id="btnCompat">Compatibility Code (CC)</button>
+            </div>
 
-              <div class="footerTiny">
-                <div id="homeVerLabel">v—</div>
-                <div>developed by Keyth Jyles</div>
-              </div>
+            <div class="sectionLabel" style="margin-top:16px;">Actions</div>
+            <div class="stack">
+              <button class="btn tight" id="btnInstall">Install</button>
+            </div>
+
+            <div class="hintLine">Swipe left to preview each app panel in order.</div>
+
+            <div class="footerTiny">
+              <div id="footerVer">v—</div>
+              <div>developed by Keyth Jyles</div>
             </div>
           </div>
         </div>
 
-        <div id="panelInfo" class="card">
-          <div class="label" style="margin-top:0;">How this works</div>
-          <div class="infoCard">
-            <div style="font-weight:950; margin-bottom:8px;">Master Code is a local launcher.</div>
-            <div style="margin-bottom:10px;">
-              It does not store your data. Each app (Vitals / Angel / Birthday / Glucose / Compatibility) keeps its own local storage inside its own folder.
+        <!-- Panel 1: Vitals -->
+        <div class="card" id="panelVitals">
+          <div class="cardScroll">
+            <div class="h1">Vitals Tracker</div>
+            <div class="sub">Opens the Vitals Tracker app (root index).</div>
+            <div class="stack">
+              <button class="btn primary" id="btnOpenVitals">Open Vitals Tracker</button>
+              <button class="btn" id="btnBack1">Back to Launch Pad</button>
             </div>
-            <div style="margin-bottom:10px;">
-              If a button opens the wrong place, your folder path is the only thing to adjust:
-              <div style="margin-top:8px; opacity:.92; white-space:pre-wrap;">
-• Vitals: ../index.html
-• Angel Code: ../AN/
-• Birthday Code: ../BC/
-• Glucose: ../DB/
-• Compatibility: ../CC/
-              </div>
+            <div class="hintLine">Swipe right to return. Swipe left to continue.</div>
+            <div class="footerTiny">
+              <div>v1.1A2</div>
+              <div>Master Code</div>
             </div>
-            <div class="subtle">Swipe right to return to Home. Swipe left for Quick Links.</div>
-          </div>
-
-          <div class="label">Navigation</div>
-          <div class="infoCard">
-            <div style="white-space:pre-wrap; opacity:.92;">
-• Vertical scroll: inside a panel
-• Horizontal swipe: switch panels
-• Pull down at top: refresh
-            </div>
-          </div>
-
-          <div class="footerTiny">
-            <div id="infoVerLabel">v—</div>
-            <div>Master Code</div>
           </div>
         </div>
 
-        <div id="panelLinks" class="card">
-          <div class="label" style="margin-top:0;">Quick Links</div>
-          <div class="infoCard" style="margin-bottom:12px;">
-            <div style="font-weight:950; margin-bottom:8px;">Open a specific app:</div>
-            <div class="appGrid" style="margin:0;">
-              <button class="btn primary wide" id="btnVitals2">Vitals Tracker</button>
-              <button class="btn" id="btnAngel2">Angel Code</button>
-              <button class="btn" id="btnBirthday2">Birthday Code</button>
-              <button class="btn" id="btnGlucose2">Glucose Tracker</button>
-              <button class="btn primary wide" id="btnCompat2">Compatibility Code</button>
+        <!-- Panel 2: Angel -->
+        <div class="card" id="panelAngel">
+          <div class="cardScroll">
+            <div class="h1">Angel Code</div>
+            <div class="sub">Opens the AN directory app.</div>
+            <div class="stack">
+              <button class="btn primary" id="btnOpenAngel">Open Angel Code (AN)</button>
+              <button class="btn" id="btnBack2">Back to Launch Pad</button>
+            </div>
+            <div class="hintLine">Swipe right/left to switch panels.</div>
+            <div class="footerTiny">
+              <div>v1.1A2</div>
+              <div>Master Code</div>
             </div>
           </div>
+        </div>
 
-          <div class="label">Install status</div>
-          <div class="infoCard">
-            <div id="installStatus" style="white-space:pre-wrap; opacity:.92;">—</div>
-            <div class="subtle">Install visibility depends on what Chrome offers on your device.</div>
-          </div>
-
-          <div class="footerTiny">
-            <div id="linksVerLabel">v—</div>
-            <div>developed by Keyth Jyles</div>
+        <!-- Panel 3: Birthday -->
+        <div class="card" id="panelBirthday">
+          <div class="cardScroll">
+            <div class="h1">Birthday Code</div>
+            <div class="sub">Opens the BC directory app.</div>
+            <div class="stack">
+              <button class="btn primary" id="btnOpenBirthday">Open Birthday Code (BC)</button>
+              <button class="btn" id="btnBack3">Back to Launch Pad</button>
+            </div>
+            <div class="hintLine">Swipe right/left to switch panels.</div>
+            <div class="footerTiny">
+              <div>v1.1A2</div>
+              <div>Master Code</div>
+            </div>
           </div>
         </div>
+
+        <!-- Panel 4: Glucose -->
+        <div class="card" id="panelGlucose">
+          <div class="cardScroll">
+            <div class="h1">Glucose Tracker</div>
+            <div class="sub">Opens the DB directory app.</div>
+            <div class="stack">
+              <button class="btn primary" id="btnOpenGlucose">Open Glucose Tracker (DB)</button>
+              <button class="btn" id="btnBack4">Back to Launch Pad</button>
+            </div>
+            <div class="hintLine">Swipe right/left to switch panels.</div>
+            <div class="footerTiny">
+              <div>v1.1A2</div>
+              <div>Master Code</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel 5: Compatibility -->
+        <div class="card" id="panelCompat">
+          <div class="cardScroll">
+            <div class="h1">Compatibility Code</div>
+            <div class="sub">Opens the CC directory app (when created).</div>
+            <div class="stack">
+              <button class="btn primary" id="btnOpenCompat">Open Compatibility Code (CC)</button>
+              <button class="btn" id="btnBack5">Back to Launch Pad</button>
+            </div>
+            <div class="hintLine">Swipe right to return. End of panel list.</div>
+            <div class="footerTiny">
+              <div>v1.1A2</div>
+              <div>Master Code</div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -506,7 +489,7 @@
       <div class="xCloseRow">
         <button class="xBtn" id="btnInfoX" aria-label="Close">×</button>
       </div>
-      <div class="modalTitle" id="infoTitle">Help</div>
+      <div class="modalTitle" id="infoTitle">Info</div>
       <div class="modalSub" id="infoSub">—</div>
       <div class="modalBtns">
         <button id="btnInfoOk" class="btn primary">OK</button>
@@ -518,24 +501,22 @@
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.1A1";
+  const APP_VERSION = "v1.1A2";
 
   const $ = (id) => document.getElementById(id);
 
-  const PANEL_IDS = ["home","panelInfo","panelLinks"];
-  const panelCount = PANEL_IDS.length;
-
-  function setDeckLayout(){
-    const deck = $("deck");
-    if(!deck) return;
-    deck.style.width = (panelCount * 100) + "%";
-    for(const id of PANEL_IDS){
-      const el = $(id);
-      if(!el) continue;
-      el.style.flex = `0 0 ${100 / panelCount}%`;
-      el.style.width = `${100 / panelCount}%`;
-    }
+  function openInfo(title, msg){
+    $("infoTitle").textContent = title || "Info";
+    $("infoSub").textContent = msg || "—";
+    $("infoModal").classList.remove("hidden");
+    try{ document.activeElement?.blur(); }catch{}
   }
+  function closeInfo(){
+    $("infoModal").classList.add("hidden");
+  }
+  $("btnInfoX").addEventListener("click", (e)=>{ e.preventDefault(); closeInfo(); });
+  $("btnInfoOk").addEventListener("click", (e)=>{ e.preventDefault(); closeInfo(); });
+  $("infoModal").addEventListener("click", (e)=>{ if(e.target === $("infoModal")) closeInfo(); });
 
   function isStandalone(){
     try{
@@ -551,13 +532,11 @@
     e.preventDefault();
     deferredInstallPrompt = e;
     updateInstallButton();
-    renderInstallStatus();
   });
 
   window.addEventListener("appinstalled", () => {
     deferredInstallPrompt = null;
     updateInstallButton(true);
-    renderInstallStatus();
   });
 
   async function tryInstall(){
@@ -571,7 +550,6 @@
     }catch{}
     deferredInstallPrompt = null;
     updateInstallButton();
-    renderInstallStatus();
   }
 
   function uninstallGuidance(){
@@ -592,138 +570,122 @@
     if(!btn) return;
 
     const standaloneNow = installedMaybe || isStandalone();
-
     if(standaloneNow){
       btn.dataset.mode = "uninstall";
       btn.disabled = false;
       btn.textContent = "Uninstall";
       return;
     }
-
     btn.dataset.mode = "install";
     btn.textContent = "Install";
     btn.disabled = !deferredInstallPrompt;
   }
 
-  function renderInstallStatus(){
-    const el = $("installStatus");
-    if(!el) return;
-
-    const standaloneNow = isStandalone();
-    const offered = !!deferredInstallPrompt;
-
-    let s = "";
-    s += `App Version: ${APP_VERSION}\n`;
-    s += `Installed (standalone): ${standaloneNow ? "Yes" : "No"}\n`;
-    s += `Install prompt available: ${offered ? "Yes" : "No"}\n\n`;
-    s += "If Install prompt is No:\n";
-    s += "• Use Chrome menu ⋮ and look for Install app.\n";
-    s += "• Or Add to Home screen (if offered).\n";
-    s += "• Some devices/browsers do not offer PWA install for all pages.\n";
-    el.textContent = s;
+  function launch(url){
+    try{
+      const u = String(url || "").trim();
+      if(!u) return;
+      window.location.href = u;
+    }catch{
+      openInfo("Open failed", "Could not open that app from this browser.");
+    }
   }
 
-  function openInfo(title, message){
-    $("infoTitle").textContent = title || "Info";
-    $("infoSub").textContent = message || "—";
-    $("infoModal").classList.remove("hidden");
-    lockTouches(120);
-  }
-  function closeInfo(){
-    $("infoModal").classList.add("hidden");
-    unlockTouches();
+  function relToRootIndex(){
+    return "../index.html";
   }
 
-  $("btnInfoX").addEventListener("click", (e)=>{ e.preventDefault(); closeInfo(); });
-  $("btnInfoOk").addEventListener("click", (e)=>{ e.preventDefault(); closeInfo(); });
-  $("infoModal").addEventListener("click", (e)=>{ if(e.target === $("infoModal")) closeInfo(); });
+  const URLS = {
+    vitals: relToRootIndex(),
+    angel: "../AN/",
+    birthday: "../BC/",
+    glucose: "../DB/",
+    compat: "../CC/"
+  };
 
-  let lockTimer = null;
-  function lockTouches(ms=140){
-    const el = $("touchLock");
-    el.classList.add("on");
-    if(lockTimer) clearTimeout(lockTimer);
-    lockTimer = setTimeout(() => el.classList.remove("on"), ms);
+  $("btnVitals").addEventListener("click", ()=> launch(URLS.vitals));
+  $("btnAngel").addEventListener("click", ()=> launch(URLS.angel));
+  $("btnBirthday").addEventListener("click", ()=> launch(URLS.birthday));
+  $("btnGlucose").addEventListener("click", ()=> launch(URLS.glucose));
+  $("btnCompat").addEventListener("click", ()=> launch(URLS.compat));
+
+  $("btnOpenVitals").addEventListener("click", ()=> launch(URLS.vitals));
+  $("btnOpenAngel").addEventListener("click", ()=> launch(URLS.angel));
+  $("btnOpenBirthday").addEventListener("click", ()=> launch(URLS.birthday));
+  $("btnOpenGlucose").addEventListener("click", ()=> launch(URLS.glucose));
+  $("btnOpenCompat").addEventListener("click", ()=> launch(URLS.compat));
+
+  function injectManifest(){
+    const svg =
+`<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8a6bff"/>
+      <stop offset="55%" stop-color="#2f78ff"/>
+      <stop offset="100%" stop-color="#0b1324"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="110" fill="url(#g)"/>
+  <path d="M168 304 h176" stroke="rgba(235,245,255,.92)" stroke-width="28" stroke-linecap="round"/>
+  <path d="M168 240 h176" stroke="rgba(235,245,255,.82)" stroke-width="24" stroke-linecap="round"/>
+  <path d="M168 176 h176" stroke="rgba(235,245,255,.72)" stroke-width="20" stroke-linecap="round"/>
+</svg>`;
+    const encoded = encodeURIComponent(svg).replace(/'/g,"%27").replace(/"/g,"%22");
+    const icon = `data:image/svg+xml;charset=utf-8,${encoded}`;
+
+    const manifest = {
+      name: "Master Code",
+      short_name: "MasterCode",
+      start_url: ".",
+      display: "standalone",
+      background_color: "#0b1324",
+      theme_color: "#0b1324",
+      icons: [{ src: icon, sizes: "512x512", type: "image/svg+xml", purpose: "any" }]
+    };
+
+    const blob = new Blob([JSON.stringify(manifest)], {type:"application/manifest+json"});
+    const url = URL.createObjectURL(blob);
+
+    let link = document.getElementById("manifestLink");
+    if(!link){
+      link = document.createElement("link");
+      link.rel = "manifest";
+      link.id = "manifestLink";
+      document.head.appendChild(link);
+    }
+    link.setAttribute("href", url);
   }
-  function unlockTouches(){
-    const el = $("touchLock");
-    el.classList.remove("on");
-    if(lockTimer) clearTimeout(lockTimer);
-    lockTimer = null;
-  }
 
-  function navigateTo(path){
-    try{ location.href = path; }catch{}
-  }
-
-  function wireLaunchButtons(){
-    const toVitals = () => navigateTo("../index.html");
-    const toAN     = () => navigateTo("../AN/");
-    const toBC     = () => navigateTo("../BC/");
-    const toDB     = () => navigateTo("../DB/");
-    const toCC     = () => navigateTo("../CC/");
-
-    $("btnVitals").addEventListener("click", toVitals);
-    $("btnAngel").addEventListener("click", toAN);
-    $("btnBirthday").addEventListener("click", toBC);
-    $("btnGlucose").addEventListener("click", toDB);
-    $("btnCompat").addEventListener("click", toCC);
-
-    $("btnVitals2").addEventListener("click", toVitals);
-    $("btnAngel2").addEventListener("click", toAN);
-    $("btnBirthday2").addEventListener("click", toBC);
-    $("btnGlucose2").addEventListener("click", toDB);
-    $("btnCompat2").addEventListener("click", toCC);
-
-    $("btnHelp").addEventListener("click", (e)=>{
-      e.preventDefault();
-      openInfo(
-        "Help",
-        "Master Code is a launcher.\n\n" +
-        "If an app does not open:\n" +
-        "• Confirm your folder names: AN, BC, DB, CC, MC\n" +
-        "• Confirm the buttons point to:\n" +
-        "  Vitals: ../index.html\n" +
-        "  AN: ../AN/\n" +
-        "  BC: ../BC/\n" +
-        "  DB: ../DB/\n" +
-        "  CC: ../CC/\n\n" +
-        "Swipe panels left/right. Pull down at top to refresh."
-      );
-    });
-
-    $("btnInstall").addEventListener("click", (e)=>{
-      e.preventDefault();
-      const mode = $("btnInstall").dataset.mode || "install";
-      if(mode === "uninstall"){ uninstallGuidance(); return; }
-      tryInstall();
-    });
+  async function registerSW(){
+    if(!("serviceWorker" in navigator)) return;
+    const swCode =
+`self.addEventListener('install', (e)=>{ self.skipWaiting(); });
+self.addEventListener('activate', (e)=>{ e.waitUntil(self.clients.claim()); });
+self.addEventListener('fetch', (e)=>{ });`;
+    const blob = new Blob([swCode], {type:"text/javascript"});
+    const swUrl = URL.createObjectURL(blob);
+    try { await navigator.serviceWorker.register(swUrl); } catch {}
   }
 
   const deck = $("deck");
   const screenArea = $("screenArea");
 
+  const panelCount = 6;
   let deckIndex = 0;
-  let dragging = false;
-  let intent = null;
-  let x0=0, y0=0;
-  let baseX=0;
-  let lastX=0, lastT=0;
-  let vx=0;
 
   function getWidth(){
     return screenArea.clientWidth || window.innerWidth;
-  }
-
-  function deckTargetXForIndex(idx){
-    const w = getWidth();
-    return -idx * w;
   }
 
   function setDeckX(px, animate=false){
     if(animate) deck.classList.add("anim");
     else deck.classList.remove("anim");
     deck.style.transform = `translate3d(${px}px,0,0)`;
+  }
+
+  function deckTargetXForIndex(idx){
+    const w = getWidth();
+    return -idx * w;
   }
 
   function snapToIndex(idx, animate=true){
@@ -734,16 +696,18 @@
   }
 
   function swipeBlockedByModal(){
-    const el = $("infoModal");
-    return el && !el.classList.contains("hidden");
+    return !$("infoModal").classList.contains("hidden");
   }
 
   function isInteractiveTarget(target){
     if(!target || !target.closest) return false;
-    if(target.closest("input, textarea, select, button")) return true;
+    if(target.closest("button, a, input, textarea, select")) return true;
     if(target.closest(".modalCard, .modal")) return true;
     return false;
   }
+
+  let dragging=false, intent=null;
+  let x0=0, y0=0, baseX=0, lastX=0, lastT=0, vx=0;
 
   function onTouchStart(ev){
     if(swipeBlockedByModal()) return;
@@ -753,6 +717,7 @@
 
     dragging = true;
     intent = null;
+
     x0 = ev.touches[0].clientX;
     y0 = ev.touches[0].clientY;
 
@@ -793,7 +758,7 @@
     const w = getWidth();
     let nextX = baseX + dx;
 
-    const minX = -w * (panelCount - 1);
+    const minX = -(panelCount-1)*w;
     const maxX = 0;
 
     if(nextX > maxX){
@@ -824,36 +789,40 @@
     const curX = m ? Number(m[1]) : deckTargetXForIndex(deckIndex);
 
     const progress = (-curX) / w;
+    const nearest = Math.round(progress);
 
     const fling = vx;
     const FLING_V = 0.65;
 
-    let target = deckIndex;
+    let target = nearest;
     if(Math.abs(fling) > FLING_V){
-      if(fling < 0) target = Math.min(panelCount-1, deckIndex + 1);
-      else target = Math.max(0, deckIndex - 1);
-    }else{
-      target = Math.round(progress);
-      target = Math.max(0, Math.min(panelCount-1, target));
+      if(fling < 0) target = Math.ceil(progress);
+      else target = Math.floor(progress);
     }
 
     snapToIndex(target, true);
   }
 
-  function attachSmoothSwipe(){
-    screenArea.addEventListener("touchstart", onTouchStart, {passive:true});
-    screenArea.addEventListener("touchmove", onTouchMove, {passive:false});
-    screenArea.addEventListener("touchend", onTouchEnd, {passive:true});
-    screenArea.addEventListener("touchcancel", onTouchEnd, {passive:true});
+  screenArea.addEventListener("touchstart", onTouchStart, {passive:true});
+  screenArea.addEventListener("touchmove", onTouchMove, {passive:false});
+  screenArea.addEventListener("touchend", onTouchEnd, {passive:true});
+  screenArea.addEventListener("touchcancel", onTouchEnd, {passive:true});
+
+  function bindBack(btnId){
+    const b = $(btnId);
+    if(!b) return;
+    b.addEventListener("click", (e)=>{ e.preventDefault(); snapToIndex(0, true); });
   }
+  bindBack("btnBack1");
+  bindBack("btnBack2");
+  bindBack("btnBack3");
+  bindBack("btnBack4");
+  bindBack("btnBack5");
 
   const PTR_THRESHOLD = 225;
   const PTR_MAX = Math.max(260, PTR_THRESHOLD + 35);
 
-  let ptrActive = false;
-  let ptrTriggered = false;
-  let ptrStartY = 0;
-  let ptrStartX = 0;
+  let ptrActive=false, ptrTriggered=false, ptrStartY=0, ptrStartX=0;
 
   function ptrSet(show, hint, small){
     const el = $("ptr");
@@ -864,167 +833,112 @@
   }
 
   function currentScrollEl(){
-    if(deckIndex === 0) return $("homeScroll");
-    return $(PANEL_IDS[deckIndex]);
+    if(deckIndex === 0) return $("launchScroll");
+    const panels = deck.querySelectorAll(".cardScroll");
+    return panels[deckIndex] || $("launchScroll");
   }
 
   function canPtrStart(target){
     if(swipeBlockedByModal()) return false;
-    if(target && target.closest && target.closest("input, textarea, select, button")) return false;
-
+    if(target && target.closest && target.closest("button, input, textarea, select")) return false;
     const sc = currentScrollEl();
     if(!sc) return false;
-
-    if(sc === $("homeScroll")) return sc.scrollTop <= 0;
-
     return sc.scrollTop <= 0;
   }
 
-  function attachPullToRefresh(){
-    screenArea.addEventListener("touchstart", (e)=>{
-      if(!(e.touches && e.touches.length === 1)) return;
-      const target = e.target;
-      if(!canPtrStart(target)) return;
+  screenArea.addEventListener("touchstart", (e)=>{
+    if(!(e.touches && e.touches.length === 1)) return;
+    const target = e.target;
+    if(!canPtrStart(target)) return;
 
-      ptrActive = true;
-      ptrTriggered = false;
-      ptrStartY = e.touches[0].clientY;
-      ptrStartX = e.touches[0].clientX;
-      ptrSet(true, "Pull to refresh", "");
-    }, {passive:true});
+    ptrActive = true;
+    ptrTriggered = false;
+    ptrStartY = e.touches[0].clientY;
+    ptrStartX = e.touches[0].clientX;
+    ptrSet(true, "Pull to refresh", "");
+  }, {passive:true});
 
-    screenArea.addEventListener("touchmove", (e)=>{
-      if(!ptrActive) return;
-      if(!(e.touches && e.touches.length === 1)) return;
+  screenArea.addEventListener("touchmove", (e)=>{
+    if(!ptrActive) return;
+    if(!(e.touches && e.touches.length === 1)) return;
 
-      const x = e.touches[0].clientX;
-      const y = e.touches[0].clientY;
-      const dy = y - ptrStartY;
-      const dx = x - ptrStartX;
+    const x = e.touches[0].clientX;
+    const y = e.touches[0].clientY;
+    const dy = y - ptrStartY;
+    const dx = x - ptrStartX;
 
-      if(Math.abs(dx) > 14 && Math.abs(dx) > Math.abs(dy) + 10){
-        ptrActive = false;
-        ptrTriggered = false;
-        ptrSet(false);
-        return;
-      }
-
-      if(dy <= 0){
-        ptrSet(false);
-        ptrTriggered = false;
-        return;
-      }
-
-      e.preventDefault();
-
-      const pull = Math.min(PTR_MAX, dy);
-      const pct = Math.max(0, Math.min(100, Math.round((pull / PTR_THRESHOLD) * 100)));
-
-      if(pull >= PTR_THRESHOLD){
-        ptrSet(true, "Release to refresh", `${pct}%`);
-        ptrTriggered = true;
-      }else{
-        ptrSet(true, "Pull to refresh", `${pct}%`);
-        ptrTriggered = false;
-      }
-    }, {passive:false});
-
-    screenArea.addEventListener("touchend", ()=>{
-      if(!ptrActive) return;
-      ptrActive = false;
-
-      if(ptrTriggered){
-        ptrSet(true, "Refreshing…", "");
-        setTimeout(() => {
-          try{ location.reload(); }catch{}
-        }, 180);
-      }else{
-        ptrSet(false);
-      }
-      ptrTriggered = false;
-    }, {passive:true});
-
-    screenArea.addEventListener("touchcancel", ()=>{
-      if(!ptrActive) return;
+    if(Math.abs(dx) > 14 && Math.abs(dx) > Math.abs(dy) + 10){
       ptrActive = false;
       ptrTriggered = false;
       ptrSet(false);
-    }, {passive:true});
-  }
+      return;
+    }
 
-  function injectManifest(){
-    const svg =
-`<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#8a6bff"/>
-      <stop offset="55%" stop-color="#2f78ff"/>
-      <stop offset="100%" stop-color="#0b1324"/>
-    </linearGradient>
-  </defs>
-  <rect width="512" height="512" rx="110" fill="url(#g)"/>
-  <path d="M120 312 C170 225, 250 190, 320 190 C390 190, 450 225, 470 312" fill="none" stroke="rgba(235,245,255,.92)" stroke-width="26" stroke-linecap="round"/>
-  <path d="M160 350 L352 350" fill="none" stroke="rgba(235,245,255,.86)" stroke-width="26" stroke-linecap="round"/>
-</svg>`;
-    const encoded = encodeURIComponent(svg).replace(/'/g,"%27").replace(/"/g,"%22");
-    const icon = `data:image/svg+xml;charset=utf-8,${encoded}`;
+    if(dy <= 0){
+      ptrSet(false);
+      ptrTriggered = false;
+      return;
+    }
 
-    const manifest = {
-      name: "Master Code",
-      short_name: "MasterCode",
-      start_url: ".",
-      display: "standalone",
-      background_color: "#0b1324",
-      theme_color: "#0b1324",
-      icons: [{ src: icon, sizes: "512x512", type: "image/svg+xml", purpose: "any" }]
-    };
+    e.preventDefault();
 
-    const blob = new Blob([JSON.stringify(manifest)], {type:"application/manifest+json"});
-    const url = URL.createObjectURL(blob);
-    $("manifestLink").setAttribute("href", url);
-  }
+    const pull = Math.min(PTR_MAX, dy);
+    const pct = Math.max(0, Math.min(100, Math.round((pull / PTR_THRESHOLD) * 100)));
 
-  async function registerSW(){
-    if(!("serviceWorker" in navigator)) return;
-    const swCode =
-`self.addEventListener('install', (e)=>{ self.skipWaiting(); });
-self.addEventListener('activate', (e)=>{ e.waitUntil(self.clients.claim()); });
-self.addEventListener('fetch', (e)=>{ });`;
-    const blob = new Blob([swCode], {type:"text/javascript"});
-    const swUrl = URL.createObjectURL(blob);
-    try { await navigator.serviceWorker.register(swUrl); } catch {}
-  }
+    if(pull >= PTR_THRESHOLD){
+      ptrSet(true, "Release to refresh", `${pct}%`);
+      ptrTriggered = true;
+    }else{
+      ptrSet(true, "Pull to refresh", `${pct}%`);
+      ptrTriggered = false;
+    }
+  }, {passive:false});
 
-  function applyVersionLabels(){
-    $("logoVer").textContent = APP_VERSION;
-    $("homeVerLabel").textContent = APP_VERSION;
-    $("infoVerLabel").textContent = APP_VERSION;
-    $("linksVerLabel").textContent = APP_VERSION;
-  }
+  screenArea.addEventListener("touchend", ()=>{
+    if(!ptrActive) return;
+    ptrActive = false;
+
+    if(ptrTriggered){
+      ptrSet(true, "Refreshing…", "");
+      setTimeout(() => {
+        try{ location.reload(); }catch{}
+      }, 180);
+    }else{
+      ptrSet(false);
+    }
+    ptrTriggered = false;
+  }, {passive:true});
+
+  screenArea.addEventListener("touchcancel", ()=>{
+    if(!ptrActive) return;
+    ptrActive = false;
+    ptrTriggered = false;
+    ptrSet(false);
+  }, {passive:true});
+
+  $("btnInstall").addEventListener("click", (e)=>{
+    e.preventDefault();
+    const mode = $("btnInstall").dataset.mode || "install";
+    if(mode === "uninstall"){ uninstallGuidance(); return; }
+    tryInstall();
+  });
 
   injectManifest();
   registerSW();
 
-  setDeckLayout();
-  applyVersionLabels();
-
-  wireLaunchButtons();
-  attachSmoothSwipe();
-  attachPullToRefresh();
+  $("logoVer").textContent = APP_VERSION;
+  $("footerVer").textContent = APP_VERSION;
 
   updateInstallButton();
-  renderInstallStatus();
-
   snapToIndex(0, false);
 
   window.addEventListener("resize", () => {
-    setDeckLayout();
     setDeckX(deckTargetXForIndex(deckIndex), false);
   });
 
 })();
   </script>
 
-  <div style="display:none" aria-hidden="true">Master Code v1.1A1</div>
+  <footer style="display:none">Master Code v1.1A2</footer>
 </body>
 </html>
