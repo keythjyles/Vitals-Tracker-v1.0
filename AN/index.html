@@ -1,13 +1,13 @@
 <!--
 Angel Code — BOF Version Detail Notes
-App Version: v1.2A13
-Base: v1.2A12
+App Version: v1.2A12
+Base: v1.2A11
 Changes (requested):
-- Home panel Install/Uninstall button spans full panel width.
-- Remove the “Shows only when install is available…” instruction line (kept “Swipe left to view Calendar.”).
-- Home panel Uninstall now closes the tab/window after OK (same close behavior style as big install flow).
-- Big Install button hides whenever an Export report is displayed; returns only after refresh and only if not installed + install is available.
-- Version advanced and BOF/EOF notes updated.
+- Home panel Install/Uninstall button now spans full panel width (same column behavior as wide buttons).
+- Remove the “Shows only when install is available…” instruction line under the big install button.
+- Keep the “Swipe left to view Calendar.” line.
+- If installed, the Home panel Uninstall button now closes the tab/window after showing uninstall guidance (same close behavior style as big install flow).
+- Advance version and update BOF/EOF notes.
 -->
 <!doctype html>
 <html lang="en">
@@ -887,7 +887,7 @@ Changes (requested):
     </div>
   </div>
 
-  <!-- Info modal -->
+  <!-- Info / Added modal -->
   <div id="infoModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
     <div class="modalCard">
       <div class="xCloseRow">
@@ -1038,8 +1038,9 @@ Changes (requested):
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.2A13";
+  const APP_VERSION = "v1.2A12";
   const STORAGE_KEY = "angel_numbers_records_v2_2025_12_29"; // keep existing data
+
   const DAY_MS = 24*60*60*1000;
   const $ = (id) => document.getElementById(id);
 
@@ -1090,6 +1091,7 @@ Changes (requested):
   }
 
   function openUninstallAndClose(){
+    // Show uninstall guidance, then close the window/tab on OK.
     const msg =
       "To uninstall the app:\n\n" +
       "Android:\n" +
@@ -1108,7 +1110,7 @@ Changes (requested):
 
     const standaloneNow = installedMaybe || isStandalone();
 
-    // Installed: show Uninstall.
+    // If installed: show the button as Uninstall.
     if(standaloneNow){
       btn.classList.remove("hidden");
       btn.disabled = false;
@@ -1117,7 +1119,7 @@ Changes (requested):
       return;
     }
 
-    // Not installed: show ONLY if install prompt is available.
+    // Not installed: show only if install prompt is available; otherwise hide.
     btn.dataset.mode = "install";
     if(deferredInstallPrompt){
       btn.classList.remove("hidden");
@@ -1138,25 +1140,33 @@ Changes (requested):
 
   function updateBigInstallVisibility(){
     const wrap = $("bigInstallWrap");
-    if(!wrap) return;
+    const btn = $("btnBigInstall");
+    if(!wrap || !btn) return;
 
-    // Big install ONLY on Entry screen (before Submit reveal).
-    if(homeAfterSubmitIsVisible()){ wrap.classList.add("hidden"); return; }
+    // Big install is ONLY for Entry screen: before Submit reveal.
+    if(homeAfterSubmitIsVisible()){
+      wrap.classList.add("hidden");
+      return;
+    }
 
-    // If installed, never show.
-    if(isStandalone()){ wrap.classList.add("hidden"); return; }
+    // If installed, never show big install.
+    if(isStandalone()){
+      wrap.classList.add("hidden");
+      return;
+    }
 
     // If a report has been displayed, suppress until refresh.
-    if(bigInstallSuppressed){ wrap.classList.add("hidden"); return; }
+    if(bigInstallSuppressed){
+      wrap.classList.add("hidden");
+      return;
+    }
 
     // Only show if install is available.
-    if(deferredInstallPrompt){ wrap.classList.remove("hidden"); }
-    else{ wrap.classList.add("hidden"); }
-  }
-
-  function suppressBigInstallUntilRefresh(){
-    bigInstallSuppressed = true;
-    updateBigInstallVisibility();
+    if(deferredInstallPrompt){
+      wrap.classList.remove("hidden");
+    }else{
+      wrap.classList.add("hidden");
+    }
   }
 
   async function copyToClipboard(text){
@@ -1197,6 +1207,15 @@ Changes (requested):
 
   function isShareAvailable(){
     return !!(navigator.share && typeof navigator.share === "function");
+  }
+
+  function escapeHtml(s){
+    return String(s ?? "")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
   }
 
   function loadRecords(){
@@ -1248,10 +1267,15 @@ Changes (requested):
 
   function fmtDateTime(ts){
     const d = new Date(ts);
-    return new Intl.DateTimeFormat(undefined, {
+    const parts = new Intl.DateTimeFormat(undefined, {
       year:"numeric", month:"2-digit", day:"2-digit",
       hour:"2-digit", minute:"2-digit", second:"2-digit"
-    }).format(d);
+    }).formatToParts(d);
+    const map = Object.fromEntries(parts.map(p=>[p.type,p.value]));
+    const mm = map.month, dd = map.day, yy = map.year;
+    const hh = map.hour, mi = map.minute, ss = map.second;
+    const dp = map.dayPeriod ? ` ${map.dayPeriod}` : "";
+    return `${mm}/${dd}/${yy}, ${hh}:${mi}:${ss}${dp}`;
   }
 
   function fmtDayTitle(ts){
@@ -1475,794 +1499,1014 @@ Changes (requested):
 
     lines.push("Quick way to use this");
     lines.push("• Think back to what you were doing or thinking when you saw the number.");
-    lines.push("• Read the main theme as a gentle prompt.");
-    lines.push("• Take one small step that matches the theme.");
+    lines.push("• Read the main theme as the ‘headline’.");
+    lines.push("• Use the pattern note as ‘how it shows up’ in real life.");
+    lines.push("• Choose one small action that fits your situation.");
 
     return { pattern, headline, cardText: lines.join("\n") };
   }
 
-  // -------------------------
-  // UI state
-  // -------------------------
-  const state = {
-    activePanel: 0, // 0 home, 1 calendar
-    selectedId: null,
-    lastCardNumber: "",
-    lastCard: null
-  };
-
-  function setVersionLabels(){
-    $("tinyVer").textContent = APP_VERSION;
-    $("homeVerLabel").textContent = APP_VERSION;
+  let lockTimer = null;
+  function lockTouches(ms=140){
+    const el = $("touchLock");
+    el.classList.add("on");
+    if(lockTimer) clearTimeout(lockTimer);
+    lockTimer = setTimeout(() => el.classList.remove("on"), ms);
+  }
+  function unlockTouches(){
+    const el = $("touchLock");
+    el.classList.remove("on");
+    if(lockTimer) clearTimeout(lockTimer);
+    lockTimer = null;
   }
 
-  // -------------------------
-  // Modal helpers
-  // -------------------------
-  function show(el){ el.classList.remove("hidden"); }
-  function hide(el){ el.classList.add("hidden"); }
+  let pendingCloseOnInfoOk = false;
 
-  function openInfo(title, msg, opts={}){
+  function openInfo(title, message, opts){
+    const mode = opts?.mode || "info";
+    pendingCloseOnInfoOk = !!opts?.closeOnOk;
+
     $("infoTitle").textContent = title || "Info";
-    $("infoSub").textContent = msg || "";
-    hide($("addedBlock"));
-    show($("infoModal"));
-    lockTouch(true);
+    $("infoSub").textContent = message || "—";
 
-    const closeOnOk = !!opts.closeOnOk;
+    if(mode === "added"){
+      $("addedBlock").classList.remove("hidden");
+      $("infoSub").classList.add("hidden");
+      $("addedBigNum").textContent = opts?.num || "—";
+      $("addedMeta").textContent = opts?.meta || "";
+      $("addedNotesBox").textContent = (opts?.notes && String(opts.notes).trim()) ? String(opts.notes).trim() : "None";
+    }else{
+      $("addedBlock").classList.add("hidden");
+      $("infoSub").classList.remove("hidden");
+    }
 
-    const ok = $("btnInfoOk");
-    const x = $("btnInfoX");
-
-    const handler = () => {
-      closeInfo();
-      if(closeOnOk) closeAttempt();
-    };
-
-    ok.onclick = handler;
-    x.onclick = handler;
+    $("infoModal").classList.remove("hidden");
+    lockTouches(120);
   }
 
   function closeInfo(){
-    hide($("infoModal"));
-    lockTouch(false);
-  }
-
-  function lockTouch(on){
-    const tl = $("touchLock");
-    if(on) tl.classList.add("on");
-    else tl.classList.remove("on");
-  }
-
-  // -------------------------
-  // Export modal
-  // -------------------------
-  let currentExportText = "";
-
-  function openExport(text){
-    currentExportText = text || "";
-    $("exportReportBox").textContent = currentExportText || "—";
-    show($("exportModal"));
-    lockTouch(true);
-
-    // Once a report is displayed, suppress big install until refresh.
-    suppressBigInstallUntilRefresh();
-  }
-
-  function closeExport(){
-    hide($("exportModal"));
-    lockTouch(false);
-  }
-
-  function buildReportAllRecords(title, recs){
-    const now = new Date();
-    const header =
-`Angel Code — Export Report
-App Version: ${APP_VERSION}
-Report: ${title}
-Generated: ${new Intl.DateTimeFormat(undefined, {year:"numeric",month:"2-digit",day:"2-digit"}).format(now)} ${new Intl.DateTimeFormat(undefined, {hour:"2-digit",minute:"2-digit",second:"2-digit"}).format(now)}
-Storage: Local-only (this device)
-
-How this data was captured:
-- Sightings are entered manually in Angel Code on this device.
-- Data is stored locally on the phone (no cloud sync, no account).
-- Each record may include the number, pattern, an angel-card style interpretation, and optional notes.
-
-------------------------------`;
-
-    if(!recs.length){
-      return header + "\n(No records found.)\n";
+    $("infoModal").classList.add("hidden");
+    unlockTouches();
+    const shouldClose = pendingCloseOnInfoOk;
+    pendingCloseOnInfoOk = false;
+    if(shouldClose){
+      closeAttempt();
     }
+  }
 
-    const lines = [header];
-    for(const r of recs.slice().sort((a,b)=>b.ts-a.ts)){
-      lines.push(`${fmtDateTime(r.ts)}`);
-      lines.push(`Number: ${r.number || "—"}`);
-      lines.push(`Pattern: ${r.pattern || "—"}`);
-      lines.push(`Meaning: ${(r.meaning || "").trim() || "—"}`);
-      lines.push(`Notes: ${(r.notes || "").trim() || "—"}`);
-      lines.push("");
+  $("btnInfoX").addEventListener("click", (e)=>{ e.preventDefault(); closeInfo(); });
+  $("btnInfoOk").addEventListener("click", (e)=>{ e.preventDefault(); closeInfo(); });
+  $("infoModal").addEventListener("click", (e)=>{ if(e.target === $("infoModal")) closeInfo(); });
+
+  let exportPayload = null;
+
+  function openExportModal(payload){
+    exportPayload = payload;
+
+    bigInstallSuppressed = true;
+    updateBigInstallVisibility();
+
+    $("exportModalTitle").textContent = payload?.title || "Export";
+    $("exportModalSub").textContent = payload?.subtitle || "Your report is shown below.";
+    $("exportReportBox").textContent = payload?.text || "—";
+
+    $("exportHintLeft").textContent = payload?.hintLeft || "Local-only report.";
+    $("exportHintRight").textContent = payload?.hintRight || "Copy / Share / Save";
+
+    $("exportModal").classList.remove("hidden");
+    lockTouches(120);
+
+    $("btnExportOk").disabled   = false;
+    $("btnExportCopy").disabled = false;
+    $("btnExportShare").disabled = !isShareAvailable();
+    $("btnExportSave").disabled  = false;
+  }
+
+  function closeExportModal(){
+    exportPayload = null;
+    $("exportModal").classList.add("hidden");
+    unlockTouches();
+  }
+
+  $("btnExportOk").addEventListener("click", (e)=>{ e.preventDefault(); closeExportModal(); });
+  $("exportModal").addEventListener("click", (e)=>{ if(e.target === $("exportModal")) closeExportModal(); });
+
+  $("btnExportCopy").addEventListener("click", async (e)=>{
+    e.preventDefault();
+    if(!exportPayload?.text) return;
+    try{
+      await copyToClipboard(exportPayload.text);
+      openInfo("Copied", "Copied to clipboard.", {mode:"info"});
+    }catch{
+      openInfo("Copy failed", "Could not copy on this device/browser.", {mode:"info"});
     }
+  });
+
+  $("btnExportShare").addEventListener("click", async (e)=>{
+    e.preventDefault();
+    if(!exportPayload) return;
+    if($("btnExportShare").disabled) return;
+    if(!isShareAvailable()){
+      openInfo("Share not available", "Share is not available on this device/browser.", {mode:"info"});
+      return;
+    }
+    try{
+      await navigator.share({ title: exportPayload.shareTitle || "Angel Code Export", text: exportPayload.text });
+    }catch{}
+  });
+
+  $("btnExportSave").addEventListener("click", async (e)=>{
+    e.preventDefault();
+    if(!exportPayload) return;
+    if($("btnExportSave").disabled) return;
+
+    try{
+      const ok = await saveTextWithPicker(exportPayload.text, exportPayload.filename);
+      if(ok){ openInfo("Saved", "Saved.", {mode:"info"}); return; }
+    }catch{}
+
+    downloadText(exportPayload.text, exportPayload.filename || "angel_code_report.txt");
+  });
+
+  function buildReportHeader({reportLabel, title, rangeLabel}){
+    const now = fmtDateTime(Date.now());
+    const lines = [
+      "Angel Code — Export Report",
+      `App Version: ${APP_VERSION}`,
+      reportLabel ? reportLabel : "",
+      title ? `Report: ${title}` : "",
+      `Generated: ${now}`,
+      rangeLabel ? `Range: ${rangeLabel}` : "",
+      "",
+      "------------------------------",
+      ""
+    ].filter(Boolean);
     return lines.join("\n");
   }
 
-  // -------------------------
-  // Navigation (swipe deck)
-  // -------------------------
-  const deck = $("deck");
-  const screenArea = $("screenArea");
-  let drag = {active:false, startX:0, startY:0, baseX:0, lastX:0, lastT:0, moved:false};
-
-  function setPanel(idx, animate=true){
-    state.activePanel = Math.max(0, Math.min(1, idx));
-    if(animate) deck.classList.add("anim");
-    else deck.classList.remove("anim");
-    const tx = state.activePanel === 0 ? 0 : -50;
-    deck.style.transform = `translate3d(${tx}%,0,0)`;
-    if(animate) setTimeout(()=>deck.classList.remove("anim"), 300);
+  function buildReportFooter(){
+    const lines = [
+      "",
+      "------------------------------",
+      "This is a unique report generated by Angel Code on your device. It captures the exact Angel Card text shown at export time, along with your notes and timestamps, so you can paste/share/save a consistent record. Meanings vary across traditions; use as reflection prompts, not predictions."
+    ];
+    return lines.join("\n");
   }
 
-  function onPointerDown(e){
-    if($("infoModal").classList.contains("hidden") === false) return;
-    if($("exportModal").classList.contains("hidden") === false) return;
-    if($("addCalModal").classList.contains("hidden") === false) return;
-    if($("newSightingModal").classList.contains("hidden") === false) return;
-    if($("dayListModal").classList.contains("hidden") === false) return;
-    if($("editModal").classList.contains("hidden") === false) return;
+  function exportReport(recs, headerInfo, filenameBase, modalMeta){
+    const header = buildReportHeader(headerInfo);
 
-    drag.active = true;
-    drag.moved = false;
-    drag.startX = e.clientX;
-    drag.startY = e.clientY;
-    drag.baseX = state.activePanel === 0 ? 0 : -50;
-    drag.lastX = e.clientX;
-    drag.lastT = performance.now();
-    deck.classList.remove("anim");
-  }
-
-  function onPointerMove(e){
-    if(!drag.active) return;
-    const dx = e.clientX - drag.startX;
-    const dy = e.clientY - drag.startY;
-
-    // Only engage horizontal swipe if mostly horizontal
-    if(!drag.moved){
-      if(Math.abs(dx) < 8) return;
-      if(Math.abs(dy) > Math.abs(dx) * 1.2){
-        drag.active = false;
-        return;
-      }
-      drag.moved = true;
-    }
-
-    e.preventDefault();
-    const pct = (dx / screenArea.clientWidth) * 100;
-    let tx = drag.baseX + pct;
-    tx = Math.max(-50, Math.min(0, tx));
-    deck.style.transform = `translate3d(${tx}%,0,0)`;
-    drag.lastX = e.clientX;
-    drag.lastT = performance.now();
-  }
-
-  function onPointerUp(e){
-    if(!drag.active) return;
-    drag.active = false;
-    if(!drag.moved) return;
-
-    const dx = e.clientX - drag.startX;
-    const pct = (dx / screenArea.clientWidth) * 100;
-    const currentTx = (state.activePanel === 0 ? 0 : -50) + pct;
-
-    // Snap threshold
-    if(state.activePanel === 0){
-      if(currentTx < -18) setPanel(1, true);
-      else setPanel(0, true);
-    }else{
-      if(currentTx > -32) setPanel(0, true);
-      else setPanel(1, true);
-    }
-  }
-
-  screenArea.addEventListener("pointerdown", onPointerDown, {passive:false});
-  screenArea.addEventListener("pointermove", onPointerMove, {passive:false});
-  screenArea.addEventListener("pointerup", onPointerUp, {passive:true});
-  screenArea.addEventListener("pointercancel", onPointerUp, {passive:true});
-
-  // -------------------------
-  // Pull-to-refresh (simple)
-  // -------------------------
-  const ptr = $("ptr");
-  const ptrSmall = $("ptrSmall");
-  const homeScroll = $("homeScroll");
-  const calendarScroll = $("calendar");
-
-  function setupPTR(scroller){
-    let startY = 0;
-    let pulling = false;
-    let armed = false;
-
-    scroller.addEventListener("touchstart", (e) => {
-      if(scroller.scrollTop > 0) return;
-      if(state.activePanel !== (scroller === homeScroll ? 0 : 1)) return;
-      startY = e.touches[0].clientY;
-      pulling = true;
-      armed = false;
-      ptrSmall.textContent = "";
-    }, {passive:true});
-
-    scroller.addEventListener("touchmove", (e) => {
-      if(!pulling) return;
-      if(scroller.scrollTop > 0){ pulling = false; hide(ptr); return; }
-      const y = e.touches[0].clientY;
-      const dy = y - startY;
-      if(dy < 0){ hide(ptr); return; }
-      if(dy > 8){
-        show(ptr);
-        const amt = Math.min(60, dy);
-        ptr.style.transform = `translateX(-50%) translateY(${amt/4}px)`;
-        armed = dy > 80;
-        ptrSmall.textContent = armed ? "Release" : "";
-      }
-    }, {passive:true});
-
-    scroller.addEventListener("touchend", () => {
-      if(!pulling) return;
-      pulling = false;
-      ptr.style.transform = `translateX(-50%)`;
-      hide(ptr);
-      if(armed){
-        location.reload();
-      }
-    }, {passive:true});
-  }
-
-  setupPTR(homeScroll);
-  setupPTR(calendarScroll);
-
-  // -------------------------
-  // Home: submit + card render
-  // -------------------------
-  function revealAfterSubmit(){
-    show($("homeAfterSubmit"));
-    updateBigInstallVisibility(); // should hide big install now (entry-only)
-  }
-
-  function renderCardToHome(numberStr){
-    const n = normalizeNumberInput(numberStr);
-    if(!n){
-      openInfo("Number required", "Enter a number first.", {mode:"info"});
-      return;
-    }
-
-    const card = buildAngelCard(n);
-    state.lastCardNumber = n;
-    state.lastCard = card;
-
-    $("homeAngelHeader").textContent = `Angel Card Number: ${n}`;
-    $("homeAngelBigNum").textContent = n;
-    $("homeMeta").textContent = card.cardText;
-    revealAfterSubmit();
-
-    // ensure install button state updated after submit (installed/uninstalled/availability)
-    updateInstallButton();
-  }
-
-  // -------------------------
-  // Calendar rendering
-  // -------------------------
-  const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-
-  function ensureDowRow(){
-    const row = $("calDowRow");
-    if(row.childElementCount) return;
-    for(const d of DOW){
-      const div = document.createElement("div");
-      div.className = "calDow";
-      div.textContent = d;
-      row.appendChild(div);
-    }
-  }
-
-  function ymd(d){
-    const y = d.getFullYear();
-    const m = String(d.getMonth()+1).padStart(2,"0");
-    const da = String(d.getDate()).padStart(2,"0");
-    return `${y}-${m}-${da}`;
-  }
-
-  function getMonthMeta(yyyy_mm){
-    const [yS, mS] = yyyy_mm.split("-");
-    const y = Number(yS);
-    const m = Number(mS) - 1;
-    const first = new Date(y, m, 1);
-    const startDow = first.getDay();
-    const gridStart = new Date(y, m, 1 - startDow);
-    const days = [];
-    for(let i=0;i<42;i++){
-      const d = new Date(gridStart.getFullYear(), gridStart.getMonth(), gridStart.getDate()+i);
-      days.push(d);
-    }
-    return {y, m, first, gridStart, days};
-  }
-
-  function dayHasDataMap(){
-    const recs = loadRecords();
-    const map = new Map();
-    for(const r of recs){
-      const k = ymd(new Date(startOfDay(r.ts)));
-      map.set(k, (map.get(k)||0) + 1);
-    }
-    return map;
-  }
-
-  function renderCalendar(){
-    ensureDowRow();
-    const monthVal = $("calMonth").value;
-    if(!monthVal) return;
-
-    const grid = $("calGrid");
-    grid.innerHTML = "";
-
-    const {y, m, days} = getMonthMeta(monthVal);
-    const map = dayHasDataMap();
-
-    for(const d of days){
-      const cell = document.createElement("div");
-      cell.className = "calCell";
-
-      const inMonth = d.getMonth() === m;
-      if(!inMonth) cell.classList.add("outMonth");
-
-      const key = ymd(d);
-      const cnt = map.get(key) || 0;
-      if(cnt > 0) cell.classList.add("hasData");
-
-      const dn = document.createElement("div");
-      dn.className = "dnum";
-      dn.textContent = String(d.getDate());
-      cell.appendChild(dn);
-
-      if(cnt > 0){
-        const small = document.createElement("div");
-        small.style.fontSize = "11px";
-        small.style.color = "rgba(235,245,255,.62)";
-        small.style.fontWeight = "850";
-        small.textContent = `${cnt} saved`;
-        cell.appendChild(small);
-      }
-
-      cell.addEventListener("click", () => {
-        if(cnt <= 0) return;
-        openDayList(d.getTime());
-      });
-
-      grid.appendChild(cell);
-    }
-  }
-
-  // -------------------------
-  // Day list modal
-  // -------------------------
-  let currentDayTs = null;
-
-  function getRecordsForDay(dayTs){
-    const s = startOfDay(dayTs);
-    const e = s + DAY_MS;
-    return loadRecords().filter(r => r.ts >= s && r.ts < e).sort((a,b)=>b.ts-a.ts);
-  }
-
-  function openDayList(dayTs){
-    currentDayTs = dayTs;
-    $("dayListTitle").textContent = fmtDayTitle(dayTs);
-    $("dayListSub").textContent = "Tap a number to view details.";
-    $("dayLogoRow").innerHTML = $("logoTitle")?.innerHTML ? "" : "";
-
-    const list = $("dayList");
-    list.innerHTML = "";
-
-    const recs = getRecordsForDay(dayTs);
-    for(const r of recs){
-      const item = document.createElement("div");
-      item.className = "dayItem";
-
-      const left = document.createElement("div");
-      left.className = "dayLeft";
-
-      const time = document.createElement("div");
-      time.className = "dayTime";
-      time.textContent = fmtTimeShort(r.ts);
-
-      const num = document.createElement("div");
-      num.className = "dayNum";
-      num.textContent = r.number || "—";
-
-      left.appendChild(time);
-      left.appendChild(num);
-
-      const notes = document.createElement("div");
-      notes.className = "dayNotes";
-      notes.textContent = (r.notes || "").trim() ? r.notes.trim() : "";
-
-      const chev = document.createElement("div");
-      chev.className = "chev";
-      chev.textContent = "›";
-
-      item.appendChild(left);
-      item.appendChild(notes);
-      item.appendChild(chev);
-
-      item.addEventListener("click", () => {
-        hide($("dayListModal"));
-        lockTouch(false);
-        openEditModal(r.id);
-      });
-
-      list.appendChild(item);
-    }
-
-    show($("dayListModal"));
-    lockTouch(true);
-  }
-
-  function closeDayList(){
-    hide($("dayListModal"));
-    lockTouch(false);
-  }
-
-  // -------------------------
-  // Edit modal
-  // -------------------------
-  let editId = null;
-  let detailsVisible = false;
-
-  function getRecordById(id){
-    return loadRecords().find(r => r.id === id) || null;
-  }
-
-  function openEditModal(id){
-    const r = getRecordById(id);
-    if(!r){
-      openInfo("Not found", "That entry could not be found.", {mode:"info"});
-      return;
-    }
-    editId = id;
-    detailsVisible = false;
-    $("editDetailsBox").classList.add("hidden");
-    $("btnToggleDetails").textContent = "View/Edit Details";
-
-    $("editDT").value = toDTLocalValue(r.ts);
-    $("editNum").value = r.number || "";
-    $("editNotes").value = r.notes || "";
-
-    const card = buildAngelCard(normalizeNumberInput(r.number));
-    $("editAngelHeader").textContent = `Angel Card Number: ${normalizeNumberInput(r.number) || "—"}`;
-    $("editAngelBig").textContent = normalizeNumberInput(r.number) || "—";
-    $("editAngelCard").textContent = card.cardText || "—";
-    $("editPattern").textContent = r.pattern || card.pattern || "—";
-
-    show($("editModal"));
-    lockTouch(true);
-  }
-
-  function closeEditModal(){
-    hide($("editModal"));
-    lockTouch(false);
-    editId = null;
-  }
-
-  function toggleEditDetails(){
-    detailsVisible = !detailsVisible;
-    if(detailsVisible){
-      $("editDetailsBox").classList.remove("hidden");
-      $("btnToggleDetails").textContent = "Hide Details";
-    }else{
-      $("editDetailsBox").classList.add("hidden");
-      $("btnToggleDetails").textContent = "View/Edit Details";
-    }
-  }
-
-  function saveEdit(){
-    if(!editId) return;
-    const ts = fromDTLocalValue($("editDT").value);
-    const num = normalizeNumberInput($("editNum").value);
-    const notes = String($("editNotes").value || "").trim();
-
-    if(!ts || !num){
-      openInfo("Missing fields", "Date/time and Number are required.", {mode:"info"});
-      return;
-    }
-
-    const card = buildAngelCard(num);
-    const pattern = card.pattern || detectPattern(num);
-    const meaning = card.headline || card.cardText || "";
-
-    const ok = updateRecordById(editId, {
-      ts,
-      number: num,
-      notes,
-      pattern,
-      meaning: meaning
+    const lines = recs.map(r => {
+      const dt = fmtDateTime(r.ts);
+      const num = `Number: ${r.number || "—"}`;
+      const notes = (r.notes && r.notes.trim()) ? r.notes.trim() : "None";
+      const card = (r.meaning && r.meaning.trim()) ? r.meaning.trim() : "None";
+      return `Sighting:\n${dt}\n${num}\nNotes: ${notes}\n\nANGEL CARD — ${r.number || "—"}\n${card}\n`;
     });
 
-    if(!ok){
-      openInfo("Error", "Could not save changes.", {mode:"info"});
-      return;
-    }
+    const out = header + lines.join("\n") + buildReportFooter();
 
-    renderCalendar();
-    openInfo("Saved", "Entry updated.", {mode:"info"});
-    closeEditModal();
+    const ts = new Date();
+    const y = ts.getFullYear();
+    const m = String(ts.getMonth()+1).padStart(2,"0");
+    const d = String(ts.getDate()).padStart(2,"0");
+    const filename = `${filenameBase || "angel_code_report"}_${y}-${m}-${d}.txt`;
+
+    (async () => {
+      try{ await copyToClipboard(out); }catch{}
+      openExportModal({
+        title: modalMeta?.modalTitle || "Export",
+        subtitle: modalMeta?.modalSub || "Your report is shown below.",
+        text: out,
+        filename,
+        shareTitle: modalMeta?.shareTitle || "Angel Code Export",
+        hintLeft: "Report is local-only.",
+        hintRight: "Copy / Share / Save"
+      });
+    })();
   }
 
-  function deleteEdit(){
-    if(!editId) return;
-    const id = editId;
-    openInfo("Delete entry", "Tap OK to delete this entry.", {mode:"info"});
-    const okBtn = $("btnInfoOk");
-    const xBtn = $("btnInfoX");
-    const originalOk = okBtn.onclick;
-    const originalX = xBtn.onclick;
+  let lastIdentify = { number:"", pattern:"", cardText:"" };
 
-    okBtn.onclick = () => {
-      closeInfo();
-      deleteRecordById(id);
-      renderCalendar();
-      closeEditModal();
-      openInfo("Deleted", "Entry removed.", {mode:"info"});
-      // restore handlers
-      okBtn.onclick = originalOk;
-      xBtn.onclick = originalX;
-    };
-    xBtn.onclick = () => {
-      closeInfo();
-      okBtn.onclick = originalOk;
-      xBtn.onclick = originalX;
-    };
+  function setHomeRevealed(on){
+    $("homeAfterSubmit").classList.toggle("hidden", !on);
+    if(on) updateInstallButton();
+    updateBigInstallVisibility();
   }
 
-  function exportSingleRecord(id){
-    const r = getRecordById(id);
-    if(!r){
-      openInfo("Not found", "That entry could not be found.", {mode:"info"});
-      return;
-    }
-    const text = buildReportAllRecords("Single Entry Export", [r]);
-    openExport(text);
+  function renderHomeCardFromNumber(n){
+    const card = buildAngelCard(n);
+
+    $("homeAngelHeader").textContent = `Angel Card Number: ${n || "—"}`;
+    $("homeAngelBigNum").textContent = n || "—";
+    $("homeMeta").textContent = card.cardText || "—";
+
+    lastIdentify = { number: n, pattern: card.pattern || "—", cardText: card.cardText || "—" };
   }
 
-  // -------------------------
-  // Add modals
-  // -------------------------
-  function openAddFromHome(){
-    const n = normalizeNumberInput(state.lastCardNumber || $("homeIdNum").value);
+  function submitHome(){
+    const n = normalizeNumberInput($("homeIdNum").value);
     if(!n){
-      openInfo("Number required", "Submit a number first.", {mode:"info"});
+      openInfo("Enter a number", "Please type an angel number, then tap Submit.", {mode:"info"});
+      return;
+    }
+    setHomeRevealed(true);
+    renderHomeCardFromNumber(n);
+    try{ document.activeElement?.blur(); }catch{}
+  }
+
+  $("btnHomeSubmit").addEventListener("click", (e)=>{ e.preventDefault(); submitHome(); });
+
+  $("homeIdNum").addEventListener("keydown", (e)=>{
+    if(e.key === "Enter"){
+      e.preventDefault();
+      submitHome();
+    }
+  });
+
+  async function handleBigInstall(){
+    if(!deferredInstallPrompt){
+      openInfo("Install", "Install is not available yet in this browser session.\n\nTip: In Chrome, use menu ⋮ → Install app (if shown).", {mode:"info"});
+      return;
+    }
+
+    openInfo(
+      "Installing…",
+      "Please wait a moment while installing.\n\nAfter install, close this tab and launch Angel Code from your Home Screen for the best experience.\n\nTap OK to close this tab.",
+      {mode:"info", closeOnOk:true}
+    );
+
+    try{ await tryInstall(); }catch{}
+    updateInstallButton();
+    updateBigInstallVisibility();
+  }
+
+  $("btnBigInstall").addEventListener("click", (e)=>{
+    e.preventDefault();
+    handleBigInstall();
+  });
+
+  function openAddCalModal(){
+    const n = lastIdentify.number || normalizeNumberInput($("homeIdNum").value);
+    if(!n){
+      openInfo("Enter a number", "Type an angel number first, then tap Submit. After that, you can add it to your calendar.", {mode:"info"});
       return;
     }
     $("addCalNumber").textContent = n;
     $("addCalNotes").value = "";
     $("addCalDT").value = toDTLocalValue(Date.now());
-    show($("addCalModal"));
-    lockTouch(true);
+    $("addCalModal").classList.remove("hidden");
+    lockTouches(90);
+    try{ document.activeElement?.blur(); }catch{}
   }
 
-  function closeAddFromHome(){
-    hide($("addCalModal"));
-    lockTouch(false);
+  function closeAddCalModal(){
+    $("addCalModal").classList.add("hidden");
+    unlockTouches();
+    try{ document.activeElement?.blur(); }catch{}
   }
 
-  function addFromHome(){
-    const ts = fromDTLocalValue($("addCalDT").value);
-    const num = normalizeNumberInput($("addCalNumber").textContent);
+  $("btnAddCalX").addEventListener("click", (e)=>{ e.preventDefault(); closeAddCalModal(); });
+  $("btnAddCalCancel").addEventListener("click", (e)=>{ e.preventDefault(); closeAddCalModal(); });
+  $("addCalModal").addEventListener("click", (e)=>{ if(e.target === $("addCalModal")) closeAddCalModal(); });
+
+  $("btnAddCalAdd").addEventListener("click", () => {
+    const n = String($("addCalNumber").textContent || "").trim();
     const notes = String($("addCalNotes").value || "").trim();
-    if(!ts || !num){
-      openInfo("Missing fields", "Date/time and Number are required.", {mode:"info"});
-      return;
-    }
-    const card = buildAngelCard(num);
-    const rec = {
-      id: makeId(ts),
-      ts,
-      number: num,
-      pattern: card.pattern || detectPattern(num),
-      meaning: card.headline || "",
-      notes
-    };
+
+    const pickedTs = fromDTLocalValue($("addCalDT").value);
+    const ts = pickedTs ?? Date.now();
+
+    const card = buildAngelCard(n);
+    const rec = { id: makeId(ts), ts, number: n, pattern: card.pattern || "—", meaning: card.cardText || "—", notes };
+
     addRecord(rec);
-    renderCalendar();
-    closeAddFromHome();
-    openInfo("Saved", `Added to Calendar:\n\n${num}\n${fmtDateTime(ts)}`, {mode:"info"});
-  }
+    closeAddCalModal();
+
+    openInfo("Added", "", {
+      mode: "added",
+      num: n,
+      meta: fmtDateTime(ts),
+      notes
+    });
+
+    if(getDeckIndex() === 1){
+      renderCalendar();
+    }
+  });
 
   function openNewSighting(){
-    $("newSightingDT").value = toDTLocalValue(Date.now());
     $("newSightingNum").value = "";
     $("newSightingNotes").value = "";
-    show($("newSightingModal"));
-    lockTouch(true);
+    $("newSightingDT").value = toDTLocalValue(Date.now());
+    $("newSightingModal").classList.remove("hidden");
+    lockTouches(90);
+    try{ document.activeElement?.blur(); }catch{}
   }
 
   function closeNewSighting(){
-    hide($("newSightingModal"));
-    lockTouch(false);
+    $("newSightingModal").classList.add("hidden");
+    unlockTouches();
+    try{ document.activeElement?.blur(); }catch{}
   }
 
-  function addNewSighting(){
-    const ts = fromDTLocalValue($("newSightingDT").value);
-    const num = normalizeNumberInput($("newSightingNum").value);
+  $("btnNewSightingX").addEventListener("click", (e)=>{ e.preventDefault(); closeNewSighting(); });
+  $("btnNewSightingCancel").addEventListener("click", (e)=>{ e.preventDefault(); closeNewSighting(); });
+  $("newSightingModal").addEventListener("click", (e)=>{ if(e.target === $("newSightingModal")) closeNewSighting(); });
+
+  $("btnNewSightingAdd").addEventListener("click", () => {
+    const n = normalizeNumberInput($("newSightingNum").value);
+    if(!n){
+      openInfo("Enter a number", "Please enter an angel number.", {mode:"info"});
+      return;
+    }
     const notes = String($("newSightingNotes").value || "").trim();
-    if(!ts || !num){
-      openInfo("Missing fields", "Date/time and Number are required.", {mode:"info"});
-      return;
-    }
-    const card = buildAngelCard(num);
-    const rec = {
-      id: makeId(ts),
-      ts,
-      number: num,
-      pattern: card.pattern || detectPattern(num),
-      meaning: card.headline || "",
-      notes
-    };
+
+    const pickedTs = fromDTLocalValue($("newSightingDT").value);
+    const ts = pickedTs ?? Date.now();
+
+    const card = buildAngelCard(n);
+    const rec = { id: makeId(ts), ts, number: n, pattern: card.pattern || "—", meaning: card.cardText || "—", notes };
+
     addRecord(rec);
-    renderCalendar();
     closeNewSighting();
-    openInfo("Saved", `Added:\n\n${num}\n${fmtDateTime(ts)}`, {mode:"info"});
-  }
+    renderCalendar();
 
-  // -------------------------
-  // Home export (all)
-  // -------------------------
-  function exportAll(){
-    const recs = loadRecords();
-    const text = buildReportAllRecords("Calendar Export (All Entries)", recs);
-    openExport(text);
-  }
+    openInfo("Added", "", {
+      mode: "added",
+      num: n,
+      meta: fmtDateTime(ts),
+      notes
+    });
+  });
 
-  // -------------------------
-  // Install buttons behavior
-  // -------------------------
-  function handleSmallInstallClick(){
-    const btn = $("btnInstall");
-    if(!btn) return;
+  const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
-    if(btn.dataset.mode === "uninstall"){
-      openUninstallAndClose();
-      return;
-    }
-    tryInstall();
-  }
-
-  function handleBigInstallClick(){
-    if(isStandalone()){
-      // Should not be visible, but keep safe.
-      openUninstallAndClose();
-      return;
-    }
-    tryInstall();
-  }
-
-  // -------------------------
-  // Exit behavior
-  // -------------------------
-  function doExit(){
-    closeAttempt();
-  }
-
-  // -------------------------
-  // Init
-  // -------------------------
-  function initCalendarMonth(){
-    const d = new Date();
-    const y = d.getFullYear();
-    const m = String(d.getMonth()+1).padStart(2,"0");
+  function initMonthDefaultIfNeeded(){
+    if($("calMonth").value) return;
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth()+1).padStart(2,"0");
     $("calMonth").value = `${y}-${m}`;
   }
 
-  function wire(){
-    setVersionLabels();
-
-    // Initial install states
-    updateInstallButton();
-    updateBigInstallVisibility();
-
-    // Home submit
-    $("btnHomeSubmit").addEventListener("click", () => {
-      renderCardToHome($("homeIdNum").value);
-    });
-
-    $("homeIdNum").addEventListener("keydown", (e) => {
-      if(e.key === "Enter"){
-        e.preventDefault();
-        renderCardToHome($("homeIdNum").value);
-      }
-    });
-
-    // Big install
-    $("btnBigInstall").addEventListener("click", handleBigInstallClick);
-
-    // Home actions
-    $("btnAddToCalendar").addEventListener("click", openAddFromHome);
-    $("btnViewCalendar").addEventListener("click", () => { setPanel(1, true); });
-    $("btnInstall").addEventListener("click", handleSmallInstallClick);
-    $("btnHomeExport").addEventListener("click", exportAll);
-    $("btnExitHome").addEventListener("click", doExit);
-
-    // Export modal buttons
-    $("btnExportOk").addEventListener("click", closeExport);
-    $("btnExportCopy").addEventListener("click", async () => {
-      const ok = await copyToClipboard(currentExportText || "");
-      openInfo(ok ? "Copied" : "Copy not available", ok ? "Report copied to clipboard." : "Your browser did not allow clipboard copy.", {mode:"info"});
-    });
-    $("btnExportShare").addEventListener("click", async () => {
-      if(!isShareAvailable()){
-        openInfo("Share not available", "Your browser does not support Share on this device.", {mode:"info"});
-        return;
-      }
-      try{
-        await navigator.share({ title: "Angel Code Report", text: currentExportText || "" });
-      }catch{}
-    });
-    $("btnExportSave").addEventListener("click", async () => {
-      const name = `angel_code_report_${APP_VERSION.replace(/\./g,"_")}.txt`;
-      try{
-        const ok = await saveTextWithPicker(currentExportText || "", name);
-        if(!ok) downloadText(currentExportText || "", name);
-      }catch{
-        downloadText(currentExportText || "", name);
-      }
-    });
-
-    // Add-from-home modal
-    $("btnAddCalX").addEventListener("click", closeAddFromHome);
-    $("btnAddCalCancel").addEventListener("click", closeAddFromHome);
-    $("btnAddCalAdd").addEventListener("click", addFromHome);
-
-    // Calendar
-    initCalendarMonth();
-    ensureDowRow();
-    renderCalendar();
-
-    $("calMonth").addEventListener("change", renderCalendar);
-    $("btnCalAddNew").addEventListener("click", openNewSighting);
-    $("btnBackFromCalendar").addEventListener("click", () => { setPanel(0, true); });
-
-    // New sighting modal
-    $("btnNewSightingX").addEventListener("click", closeNewSighting);
-    $("btnNewSightingCancel").addEventListener("click", closeNewSighting);
-    $("btnNewSightingAdd").addEventListener("click", addNewSighting);
-
-    // Day list modal
-    $("btnDayListClose").addEventListener("click", closeDayList);
-
-    // Edit modal
-    $("btnEditClose").addEventListener("click", closeEditModal);
-    $("btnToggleDetails").addEventListener("click", toggleEditDetails);
-    $("btnEditSave").addEventListener("click", saveEdit);
-    $("btnEditDelete").addEventListener("click", deleteEdit);
-    $("btnEditExport").addEventListener("click", () => exportSingleRecord(editId));
-
-    // Info modal default close
-    $("btnInfoOk").addEventListener("click", closeInfo);
-    $("btnInfoX").addEventListener("click", closeInfo);
-
-    // Initial panel
-    setPanel(0, false);
+  function monthValueToYMD(value){
+    const m = /^(\d{4})-(\d{2})$/.exec(String(value || ""));
+    if(!m) return null;
+    const y = Number(m[1]);
+    const mo = Number(m[2]);
+    if(!y || !mo) return null;
+    return { y, mo };
   }
 
-  wire();
+  function buildDayIndexMap(recs){
+    const map = new Map();
+    for(const r of recs){
+      const k = startOfDay(r.ts);
+      const arr = map.get(k) || [];
+      arr.push(r);
+      map.set(k, arr);
+    }
+    for(const [k, arr] of map.entries()){
+      arr.sort((a,b)=> a.ts - b.ts);
+      map.set(k, arr);
+    }
+    return map;
+  }
+
+  function ensureDayLogo(){
+    const wrap = $("dayLogoRow");
+    if(wrap.childNodes.length) return;
+    const svg = document.querySelector(".logoTitle svg");
+    if(!svg) return;
+    wrap.appendChild(svg.cloneNode(true));
+  }
+
+  let currentDayKey = null;
+
+  function openDayList(dayKey, recs){
+    ensureDayLogo();
+    currentDayKey = dayKey;
+
+    const currentDayRecs = (recs || []).slice().sort((a,b)=> a.ts - b.ts);
+
+    $("dayListTitle").textContent = fmtDayTitle(dayKey);
+    $("dayListSub").textContent = "Tap a number to view the Angel Card.";
+
+    const list = $("dayList");
+    list.innerHTML = "";
+
+    if(currentDayRecs.length === 0){
+      const empty = document.createElement("div");
+      empty.className = "dayItem";
+      empty.style.cursor = "default";
+      empty.innerHTML = `<div class="dayLeft"><div class="dayTime">—</div><div class="dayNum">No entries</div></div>`;
+      list.appendChild(empty);
+    }else{
+      for(const r of currentDayRecs){
+        const item = document.createElement("div");
+        item.className = "dayItem";
+        const note = (r.notes || "").trim().replace(/\s+/g," ");
+        const noteShort = note ? note : "";
+        item.innerHTML =
+          `<div class="dayLeft">
+             <div class="dayTime">${escapeHtml(fmtTimeShort(r.ts))}</div>
+             <div class="dayNum">${escapeHtml(r.number || "—")}</div>
+           </div>
+           <div class="dayNotes">${escapeHtml(noteShort)}</div>
+           <div class="chev">›</div>`;
+
+        const open = (e) => {
+          try{ e.preventDefault(); }catch{}
+          try{ e.stopPropagation(); }catch{}
+          closeDayListImmediate();
+          requestAnimationFrame(() => {
+            openEditModal(r.id);
+          });
+        };
+        item.addEventListener("click", open, {passive:false});
+        item.addEventListener("pointerup", open, {passive:false});
+
+        list.appendChild(item);
+      }
+    }
+
+    $("dayListModal").classList.remove("hidden");
+    lockTouches(60);
+  }
+
+  function closeDayListImmediate(){
+    $("dayListModal").classList.add("hidden");
+    unlockTouches();
+  }
+
+  $("btnDayListClose").addEventListener("click", (e)=>{ e.preventDefault(); closeDayListImmediate(); });
+  $("dayListModal").addEventListener("click", (e)=>{ if(e.target === $("dayListModal")) closeDayListImmediate(); });
+
+  let editId = null;
+
+  function setDetailsOpen(on){
+    const box = $("editDetailsBox");
+    const btn = $("btnToggleDetails");
+    box.classList.toggle("hidden", !on);
+    btn.textContent = on ? "Hide Details" : "View/Edit Details";
+    btn.dataset.open = on ? "1" : "0";
+  }
+
+  function openEditModal(id){
+    const recs = loadRecords();
+    const r = recs.find(x => x.id === id);
+    if(!r){
+      openInfo("Not found", "That entry could not be found.", {mode:"info"});
+      return;
+    }
+    editId = id;
+
+    $("editDT").value = toDTLocalValue(r.ts);
+    $("editNum").value = r.number || "";
+    $("editNotes").value = r.notes || "";
+
+    const n = normalizeNumberInput(r.number || "");
+    const card = buildAngelCard(n);
+
+    $("editPattern").textContent = card.pattern || "—";
+    $("editAngelHeader").textContent = `Angel Card Number: ${n || "—"}`;
+    $("editAngelBig").textContent = n || "—";
+    $("editAngelCard").textContent = card.cardText || "—";
+
+    setDetailsOpen(false);
+
+    $("editModal").classList.remove("hidden");
+    lockTouches(80);
+    try{ document.activeElement?.blur(); }catch{}
+  }
+
+  function closeEditModal(){
+    editId = null;
+    $("editModal").classList.add("hidden");
+    unlockTouches();
+    try{ document.activeElement?.blur(); }catch{}
+  }
+
+  function refreshEditDerived(){
+    const n = normalizeNumberInput($("editNum").value);
+    const card = buildAngelCard(n);
+    $("editPattern").textContent = card.pattern || "—";
+    $("editAngelHeader").textContent = `Angel Card Number: ${n || "—"}`;
+    $("editAngelBig").textContent = n || "—";
+    $("editAngelCard").textContent = card.cardText || "—";
+  }
+
+  $("editNum").addEventListener("input", refreshEditDerived);
+
+  $("btnToggleDetails").addEventListener("click", (e)=>{
+    e.preventDefault();
+    const on = $("btnToggleDetails").dataset.open === "1";
+    setDetailsOpen(!on);
+  });
+
+  $("btnEditClose").addEventListener("click", (e)=>{ e.preventDefault(); closeEditModal(); });
+  $("editModal").addEventListener("click", (e)=>{ if(e.target === $("editModal")) closeEditModal(); });
+
+  function reopenDayListForTs(ts){
+    const newDayKey = startOfDay(ts);
+    currentDayKey = newDayKey;
+    const dayMap = buildDayIndexMap(loadRecords());
+    const updated = dayMap.get(newDayKey) || [];
+    openDayList(newDayKey, updated);
+  }
+
+  $("btnEditSave").addEventListener("click", ()=>{
+    if(!editId) return;
+
+    const newTs = fromDTLocalValue($("editDT").value);
+    if(!newTs){
+      openInfo("Invalid date/time", "Please set a valid date and time.", {mode:"info"});
+      return;
+    }
+    const n = normalizeNumberInput($("editNum").value);
+    if(!n){
+      openInfo("Invalid number", "Please enter a number.", {mode:"info"});
+      return;
+    }
+    const notes = String($("editNotes").value || "").trim();
+
+    const card = buildAngelCard(n);
+
+    const ok = updateRecordById(editId, {
+      ts: newTs,
+      number: n,
+      pattern: card.pattern || "—",
+      meaning: card.cardText || "—",
+      notes
+    });
+
+    if(!ok){
+      openInfo("Save failed", "Could not save changes.", {mode:"info"});
+      return;
+    }
+
+    closeEditModal();
+    renderCalendar();
+    reopenDayListForTs(newTs);
+  });
+
+  $("btnEditDelete").addEventListener("click", ()=>{
+    if(!editId) return;
+
+    const recs = loadRecords();
+    const r = recs.find(x => x.id === editId);
+    const ts = r ? r.ts : (currentDayKey ?? Date.now());
+
+    const id = editId;
+    deleteRecordById(id);
+    closeEditModal();
+    renderCalendar();
+    reopenDayListForTs(ts);
+  });
+
+  $("btnEditExport").addEventListener("click", (e)=>{
+    e.preventDefault();
+    if(!editId){
+      openInfo("Export", "No entry selected.", {mode:"info"});
+      return;
+    }
+    const recs = loadRecords();
+    const r = recs.find(x => x.id === editId);
+    if(!r){
+      openInfo("Export", "That entry could not be found.", {mode:"info"});
+      return;
+    }
+    exportReport(
+      [r],
+      {
+        reportLabel: "Angel Code Sighting",
+        title: "Single Entry Export",
+        rangeLabel: fmtDateTime(r.ts)
+      },
+      "angel_code_sighting",
+      {
+        modalTitle: "Angel Code Sighting",
+        modalSub: "Single entry export.",
+        shareTitle: "Angel Code Sighting"
+      }
+    );
+  });
+
+  const deck = $("deck");
+  const screenArea = $("screenArea");
+
+  let deckIndex = 0;
+  let dragging = false;
+  let intent = null;
+  let x0=0, y0=0;
+  let baseX=0;
+  let lastX=0, lastT=0;
+  let vx=0;
+
+  function getWidth(){
+    return screenArea.clientWidth || window.innerWidth;
+  }
+
+  function setDeckX(px, animate=false){
+    if(animate) deck.classList.add("anim");
+    else deck.classList.remove("anim");
+    deck.style.transform = `translate3d(${px}px,0,0)`;
+  }
+
+  function deckTargetXForIndex(idx){
+    const w = getWidth();
+    return -idx * w;
+  }
+
+  function getDeckIndex(){ return deckIndex; }
+
+  function snapToIndex(idx, animate=true){
+    idx = Math.max(0, Math.min(1, idx));
+    deckIndex = idx;
+    setDeckX(deckTargetXForIndex(deckIndex), animate);
+    try{ document.activeElement?.blur(); }catch{}
+    if(deckIndex === 1){
+      initMonthDefaultIfNeeded();
+      renderCalendar();
+    }
+  }
+
+  function swipeBlockedByModal(){
+    const modalIds = ["editModal","dayListModal","addCalModal","exportModal","infoModal","newSightingModal"];
+    for(const id of modalIds){
+      const el = $(id);
+      if(el && !el.classList.contains("hidden")) return true;
+    }
+    return false;
+  }
+
+  function isInteractiveTarget(target){
+    if(!target || !target.closest) return false;
+    if(target.closest("input, textarea, select, button")) return true;
+    if(target.closest(".modalCard, .modal")) return true;
+    return false;
+  }
+
+  function onTouchStart(ev){
+    if(swipeBlockedByModal()) return;
+    if(!(ev.touches && ev.touches.length === 1)) return;
+    const target = ev.target;
+    if(isInteractiveTarget(target)) return;
+
+    dragging = true;
+    intent = null;
+    x0 = ev.touches[0].clientX;
+    y0 = ev.touches[0].clientY;
+
+    baseX = deckTargetXForIndex(deckIndex);
+    setDeckX(baseX, false);
+
+    lastX = x0;
+    lastT = performance.now();
+    vx = 0;
+  }
+
+  function onTouchMove(ev){
+    if(!dragging) return;
+    if(!(ev.touches && ev.touches.length === 1)) return;
+
+    const x = ev.touches[0].clientX;
+    const y = ev.touches[0].clientY;
+    const dx = x - x0;
+    const dy = y - y0;
+
+    if(!intent){
+      const ax = Math.abs(dx);
+      const ay = Math.abs(dy);
+      if(ax > 14 && ax > ay + 10){
+        intent = "h";
+      }else if(ay > 14 && ay > ax + 8){
+        dragging = false;
+        intent = null;
+        return;
+      }else{
+        return;
+      }
+    }
+
+    if(intent !== "h") return;
+    ev.preventDefault();
+
+    const w = getWidth();
+    let nextX = baseX + dx;
+
+    const minX = -w;
+    const maxX = 0;
+
+    if(nextX > maxX){
+      const over = nextX - maxX;
+      nextX = maxX + over * 0.22;
+    }else if(nextX < minX){
+      const over = nextX - minX;
+      nextX = minX + over * 0.22;
+    }
+
+    const now = performance.now();
+    const dt = Math.max(1, now - lastT);
+    const instV = (x - lastX) / dt;
+    vx = vx * 0.75 + instV * 0.25;
+    lastX = x;
+    lastT = now;
+
+    setDeckX(nextX, false);
+  }
+
+  function onTouchEnd(){
+    if(!dragging) return;
+    dragging = false;
+
+    const w = getWidth();
+    const matrix = deck.style.transform || "";
+    const m = /translate3d\(([-\d.]+)px/.exec(matrix);
+    const curX = m ? Number(m[1]) : deckTargetXForIndex(deckIndex);
+
+    const progress = (-curX) / w;
+    const deltaToHome = Math.abs(progress - 0);
+    const deltaToCal  = Math.abs(progress - 1);
+
+    const fling = vx;
+    const FLING_V = 0.65;
+
+    let target = deckIndex;
+    if(Math.abs(fling) > FLING_V){
+      if(fling < 0) target = 1;
+      else target = 0;
+    }else{
+      target = (deltaToHome <= deltaToCal) ? 0 : 1;
+    }
+
+    snapToIndex(target, true);
+  }
+
+  function attachSmoothSwipe(){
+    screenArea.addEventListener("touchstart", onTouchStart, {passive:true});
+    screenArea.addEventListener("touchmove", onTouchMove, {passive:false});
+    screenArea.addEventListener("touchend", onTouchEnd, {passive:true});
+    screenArea.addEventListener("touchcancel", onTouchEnd, {passive:true});
+  }
+
+  const PTR_THRESHOLD = 225;
+  const PTR_MAX = Math.max(260, PTR_THRESHOLD + 35);
+
+  let ptrActive = false;
+  let ptrStartY = 0;
+  let ptrTriggered = false;
+
+  function ptrSet(show, hint, small){
+    const el = $("ptr");
+    if(show) el.classList.add("show");
+    else el.classList.remove("show");
+    $("ptrHint").textContent = hint || "Pull to refresh";
+    $("ptrSmall").textContent = small || "";
+  }
+
+  function currentScrollEl(){
+    return (getDeckIndex() === 0) ? $("homeScroll") : $("calendar");
+  }
+
+  function canPtrStart(target){
+    if(swipeBlockedByModal()) return false;
+    if(target && target.closest && target.closest("input, textarea, select, button")) return false;
+    const sc = currentScrollEl();
+    if(!sc) return false;
+    return sc.scrollTop <= 0;
+  }
+
+  function attachPullToRefresh(){
+    screenArea.addEventListener("touchstart", (e)=>{
+      if(!(e.touches && e.touches.length === 1)) return;
+      const target = e.target;
+      if(!canPtrStart(target)) return;
+
+      ptrActive = true;
+      ptrTriggered = false;
+      ptrStartY = e.touches[0].clientY;
+      ptrSet(true, "Pull to refresh", "");
+    }, {passive:true});
+
+    screenArea.addEventListener("touchmove", (e)=>{
+      if(!ptrActive) return;
+      if(!(e.touches && e.touches.length === 1)) return;
+
+      const y = e.touches[0].clientY;
+      const dy = y - ptrStartY;
+      if(dy <= 0){
+        ptrSet(false);
+        return;
+      }
+
+      e.preventDefault();
+
+      const pull = Math.min(PTR_MAX, dy);
+      const pct = Math.max(0, Math.min(100, Math.round((pull / PTR_THRESHOLD) * 100)));
+
+      if(pull >= PTR_THRESHOLD){
+        ptrSet(true, "Release to refresh", `${pct}%`);
+        ptrTriggered = true;
+      }else{
+        ptrSet(true, "Pull to refresh", `${pct}%`);
+        ptrTriggered = false;
+      }
+    }, {passive:false});
+
+    screenArea.addEventListener("touchend", ()=>{
+      if(!ptrActive) return;
+      ptrActive = false;
+
+      if(ptrTriggered){
+        ptrSet(true, "Refreshing…", "");
+        setTimeout(() => {
+          try{ location.reload(); }catch{}
+        }, 180);
+      }else{
+        ptrSet(false);
+      }
+    }, {passive:true});
+
+    screenArea.addEventListener("touchcancel", ()=>{
+      if(!ptrActive) return;
+      ptrActive = false;
+      ptrSet(false);
+    }, {passive:true});
+  }
+
+  function injectManifest(){
+    const svg =
+`<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8a6bff"/>
+      <stop offset="55%" stop-color="#2f78ff"/>
+      <stop offset="100%" stop-color="#0b1324"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="110" fill="url(#g)"/>
+  <ellipse cx="256" cy="150" rx="110" ry="44" fill="none" stroke="rgba(235,245,255,.92)" stroke-width="26"/>
+  <path d="M256 240
+           C196 210, 140 220, 112 270
+           C154 294, 190 330, 214 380
+           C226 330, 240 285, 256 240Z"
+        fill="none" stroke="rgba(235,245,255,.92)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M256 240
+           C316 210, 372 220, 400 270
+           C358 294, 322 330, 298 380
+           C286 330, 272 285, 256 240Z"
+        fill="none" stroke="rgba(235,245,255,.92)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+    const encoded = encodeURIComponent(svg).replace(/'/g,"%27").replace(/"/g,"%22");
+    const icon = `data:image/svg+xml;charset=utf-8,${encoded}`;
+
+    const manifest = {
+      name: "Angel Code",
+      short_name: "AngelCode",
+      start_url: ".",
+      display: "standalone",
+      background_color: "#0b1324",
+      theme_color: "#0b1324",
+      icons: [{ src: icon, sizes: "512x512", type: "image/svg+xml", purpose: "any" }]
+    };
+
+    const blob = new Blob([JSON.stringify(manifest)], {type:"application/manifest+json"});
+    const url = URL.createObjectURL(blob);
+    $("manifestLink").setAttribute("href", url);
+  }
+
+  async function registerSW(){
+    if(!("serviceWorker" in navigator)) return;
+    const swCode =
+`self.addEventListener('install', (e)=>{ self.skipWaiting(); });
+self.addEventListener('activate', (e)=>{ e.waitUntil(self.clients.claim()); });
+self.addEventListener('fetch', (e)=>{ });`;
+    const blob = new Blob([swCode], {type:"text/javascript"});
+    const swUrl = URL.createObjectURL(blob);
+    try { await navigator.serviceWorker.register(swUrl); } catch {}
+  }
+
+  /* KEEP THIS EXIT FUNCTION EXACTLY (known-good) */
+  function attachExit(){
+    const btn = $("btnExitHome");
+    if(!btn) return;
+    btn.addEventListener("click", () => {
+      window.close();
+      setTimeout(() => {
+        alert("If it didn’t close: use your phone’s Back/Home.");
+      }, 200);
+    });
+  }
+
+  function exportCurrentIdentify(){
+    const n = lastIdentify.number || normalizeNumberInput($("homeIdNum").value);
+    if(!n){
+      openInfo("Export", "Enter a number, then tap Submit first.", {mode:"info"});
+      return;
+    }
+    const card = buildAngelCard(n);
+    const pseudo = {
+      id: makeId(Date.now()),
+      ts: Date.now(),
+      number: n,
+      meaning: card.cardText || "—",
+      notes: "None"
+    };
+    exportReport(
+      [pseudo],
+      {
+        reportLabel: "Angel Code Identify",
+        title: "Angel Card (Identify)",
+        rangeLabel: `Current identify: ${n} (not saved unless you Add to Calendar)`
+      },
+      "angel_code_identify",
+      {
+        modalTitle: "Angel Card (Identify)",
+        modalSub: "Home screen identify export.",
+        shareTitle: "Angel Code Identify"
+      }
+    );
+  }
+
+  function attachButtons(){
+    const btnView = $("btnViewCalendar");
+    if(btnView) btnView.addEventListener("click", () => snapToIndex(1, true));
+
+    $("btnBackFromCalendar").addEventListener("click", () => snapToIndex(0, true));
+
+    const btnExport = $("btnHomeExport");
+    if(btnExport) btnExport.addEventListener("click", (e) => {
+      e.preventDefault();
+      exportCurrentIdentify();
+    });
+
+    const btnAdd = $("btnAddToCalendar");
+    if(btnAdd) btnAdd.addEventListener("click", () => openAddCalModal());
+
+    const btnInstall = $("btnInstall");
+    if(btnInstall) btnInstall.addEventListener("click", async (e) => {
+      e.preventDefault();
+      const mode = btnInstall.dataset.mode || "install";
+      if(mode === "uninstall"){
+        openUninstallAndClose();
+        return;
+      }
+      await tryInstall();
+      updateInstallButton();
+      updateBigInstallVisibility();
+    });
+
+    $("calMonth").addEventListener("change", renderCalendar);
+
+    $("btnCalAddNew").addEventListener("click", (e) => {
+      e.preventDefault();
+      openNewSighting();
+    });
+  }
+
+  injectManifest();
+  registerSW();
+
+  $("homeVerLabel").textContent = APP_VERSION;
+  $("tinyVer").textContent = APP_VERSION;
+
+  setHomeRevealed(false);
+
+  attachButtons();
+  attachExit();
+  attachSmoothSwipe();
+  attachPullToRefresh();
+
+  initMonthDefaultIfNeeded();
+  renderCalendar();
+
+  updateInstallButton();
+  updateBigInstallVisibility();
+
+  try{ document.activeElement?.blur(); }catch{}
+  setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 0);
+  setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 80);
+
+  snapToIndex(0, false);
+
+  window.addEventListener("resize", () => {
+    setDeckX(deckTargetXForIndex(deckIndex), false);
+    if(deckIndex === 1) renderCalendar();
+  });
+
 })();
   </script>
+</body>
+</html>
 
 <!--
-Angel Code — EOF Version Detail Notes
-App Version: v1.2A13
-Base: v1.2A12
-Changes (requested):
-- Home panel Install/Uninstall button spans full panel width.
-- Removed the “Shows only when install is available…” instruction line (kept “Swipe left to view Calendar.”).
-- Home panel Uninstall now closes the tab/window after OK (same close behavior style as big install flow).
-- Big Install button hides whenever an Export report is displayed; returns only after refresh and only if not installed + install is available.
+EOF Version Detail Notes
+App Version: v1.2A12
+Base: v1.2A11
+Changes:
+- Home panel Install/Uninstall button spans full width of the panel grid.
+- Removed “Shows only when install is available…” line under the big install button; kept the swipe hint line.
+- Uninstall action now shows guidance and then closes the tab/window on OK (same close behavior style).
 -->
-</body>
-  </html>
