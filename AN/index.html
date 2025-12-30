@@ -1,10 +1,10 @@
 <!--
 Angel Code — BOF Version Detail Notes
-App Version: v1.2A18
-Base: v1.2A16
+App Version: v1.2A19
+Base: v1.2A18
 Changes (requested):
-- Version bump only (A18).
-- No functional changes.
+- FIX: Easter Egg trigger now listens to the ACTUAL user number inputs (Home: #homeIdNum, Calendar: #newSightingNum, Edit: #editNum) and also fires on Home Submit when value matches.
+- FIX: Overlay initialization strengthened; fireworks canvas now reliably sizes after the overlay is visible.
 -->
 <!doctype html>
 
@@ -1010,7 +1010,7 @@ Changes (requested):
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.2A18";
+  const APP_VERSION = "v1.2A19";
   const STORAGE_KEY = "angel_numbers_records_v2_2025_12_29"; // keep existing data
 
   const DAY_MS = 24*60*60*1000;
@@ -1631,6 +1631,12 @@ Changes (requested):
       openInfo("Enter a number", "Please type an angel number, then tap Submit.", {mode:"info"});
       return;
     }
+
+    // Easter Egg trigger on Submit (also wired via input listeners at EOF)
+    if(typeof window.__AC_EGG_TRY === "function"){
+      try{ window.__AC_EGG_TRY(n); }catch{}
+    }
+
     setHomeActionsVisibility(true);
     renderHomeCardFromNumber(n);
     try{ document.activeElement?.blur(); }catch{}
@@ -2460,10 +2466,9 @@ self.addEventListener('fetch', (e)=>{ });`;
 
 <!-- ===========================
      ANGEL CODE — EASTER EGG (EOF)
-     Trigger: search for 333333333
+     Trigger: type 333333333 in the number field (Home, Add, or Edit)
      =========================== -->
 <style>
-  /* Overlay */
   #eggOverlay{
     position:fixed; inset:0;
     display:none;
@@ -2476,7 +2481,6 @@ self.addEventListener('fetch', (e)=>{ });`;
   }
   #eggOverlay.show{ display:flex; }
 
-  /* Card */
   #eggCard{
     position:relative;
     width:min(720px, 94vw);
@@ -2490,7 +2494,6 @@ self.addEventListener('fetch', (e)=>{ });`;
     overflow:hidden;
   }
 
-  /* Fireworks layer */
   #eggFx{
     position:absolute; inset:0;
     width:100%; height:100%;
@@ -2498,7 +2501,6 @@ self.addEventListener('fetch', (e)=>{ });`;
     opacity:.95;
   }
 
-  /* Content layer */
   #eggInner{
     position:relative;
     padding:24px 22px 20px;
@@ -2520,7 +2522,6 @@ self.addEventListener('fetch', (e)=>{ });`;
     margin: 0 0 14px;
   }
 
-  /* Heart */
   #eggHeartWrap{
     display:flex;
     align-items:center;
@@ -2541,7 +2542,6 @@ self.addEventListener('fetch', (e)=>{ });`;
     100%{ transform: scale(1); }
   }
 
-  /* Footer row */
   #eggRow{
     display:flex;
     gap:10px;
@@ -2562,7 +2562,6 @@ self.addEventListener('fetch', (e)=>{ });`;
   }
   #eggCloseBtn:active{ transform: translateY(1px); }
 
-  /* Small safety hint */
   #eggHint{
     font-size: 12px;
     color: rgba(235,245,255,.52);
@@ -2606,22 +2605,6 @@ self.addEventListener('fetch', (e)=>{ });`;
 
   const TRIGGER = '333333333';
 
-  function findSearchInput(){
-    const candidates = [
-      '#searchInput',
-      'input[type="search"]',
-      'input[placeholder*="Search" i]',
-      'input[name="search" i]',
-      '.search input',
-      '.toolbar input'
-    ];
-    for (const sel of candidates){
-      const el = document.querySelector(sel);
-      if (el && el.tagName === 'INPUT') return el;
-    }
-    return null;
-  }
-
   const overlay = document.getElementById('eggOverlay');
   const closeBtn = document.getElementById('eggCloseBtn');
   const canvas = document.getElementById('eggFx');
@@ -2635,7 +2618,7 @@ self.addEventListener('fetch', (e)=>{ });`;
     isOpen = true;
     overlay.classList.add('show');
     overlay.setAttribute('aria-hidden','false');
-    startFireworks();
+    startFireworksSafe();
   }
 
   function closeEgg(){
@@ -2646,6 +2629,18 @@ self.addEventListener('fetch', (e)=>{ });`;
     stopFireworks();
   }
 
+  function normalize(v){
+    return String(v || '').trim().replace(/[^\d]/g,'');
+  }
+
+  function tryTrigger(raw){
+    const v = normalize(raw);
+    if (v === TRIGGER) openEgg();
+  }
+
+  // Expose a safe hook for main app code (Home Submit)
+  window.__AC_EGG_TRY = tryTrigger;
+
   closeBtn.addEventListener('click', closeEgg);
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) closeEgg();
@@ -2655,15 +2650,47 @@ self.addEventListener('fetch', (e)=>{ });`;
     if (e.key === 'Escape') closeEgg();
   });
 
+  function bindToInput(id){
+    const el = document.getElementById(id);
+    if(!el) return;
+    const handler = () => tryTrigger(el.value);
+    el.addEventListener('input', handler, { passive:true });
+    el.addEventListener('change', handler, { passive:true });
+    el.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter'){
+        tryTrigger(el.value);
+      }
+    }, { passive:true });
+  }
+
+  // Bind to the actual number entry fields used in this app.
+  bindToInput('homeIdNum');        // Home entry
+  bindToInput('newSightingNum');   // Calendar add modal
+  bindToInput('editNum');          // Edit modal details
+
+  function startFireworksSafe(){
+    // Ensure layout has happened with overlay visible.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        startFireworks();
+      });
+    });
+  }
+
   function startFireworks(){
+    if (!isOpen) return;
+
     const ctx = canvas.getContext('2d', { alpha:true });
 
     function resize(){
       const r = card.getBoundingClientRect();
-      canvas.width = Math.max(1, Math.floor(r.width * devicePixelRatio));
-      canvas.height = Math.max(1, Math.floor(r.height * devicePixelRatio));
-      canvas.style.width = r.width + 'px';
-      canvas.style.height = r.height + 'px';
+      const w = Math.max(1, Math.floor(r.width));
+      const h = Math.max(1, Math.floor(r.height));
+
+      canvas.width = Math.max(1, Math.floor(w * devicePixelRatio));
+      canvas.height = Math.max(1, Math.floor(h * devicePixelRatio));
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
       ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
     }
     resize();
@@ -2673,8 +2700,8 @@ self.addEventListener('fetch', (e)=>{ });`;
     function rand(a,b){ return a + Math.random()*(b-a); }
 
     function spawnBurst(){
-      const w = canvas.clientWidth;
-      const h = canvas.clientHeight;
+      const w = canvas.clientWidth || card.clientWidth;
+      const h = canvas.clientHeight || card.clientHeight;
       const x = rand(w*0.15, w*0.85);
       const y = rand(h*0.10, h*0.55);
 
@@ -2771,38 +2798,6 @@ self.addEventListener('fetch', (e)=>{ });`;
     fx = null;
   }
 
-  function wire(){
-    const input = findSearchInput();
-    if (!input) return false;
-
-    const handler = () => {
-      const v = (input.value || '').trim();
-      if (v === TRIGGER) openEgg();
-    };
-
-    input.addEventListener('input', handler, { passive:true });
-    input.addEventListener('change', handler, { passive:true });
-
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter'){
-        const v = (input.value || '').trim();
-        if (v === TRIGGER) {
-          e.preventDefault();
-          openEgg();
-        }
-      }
-    });
-
-    return true;
-  }
-
-  if (!wire()){
-    let tries = 0;
-    const t = setInterval(() => {
-      tries++;
-      if (wire() || tries > 20) clearInterval(t);
-    }, 250);
-  }
 })();
 </script>
 <!-- ===========================
@@ -2813,9 +2808,9 @@ self.addEventListener('fetch', (e)=>{ });`;
 </html>
 <!--
 EOF Version Detail Notes
-App Version: v1.2A18
-Base: v1.2A16
+App Version: v1.2A19
+Base: v1.2A18
 Changes:
-- Version bump only (A18). No functional changes.
-- Easter Egg remains enabled (trigger: 333333333).
+- FIX: Easter Egg trigger now listens to #homeIdNum, #newSightingNum, #editNum and fires on Home Submit too.
+- FIX: Fireworks canvas now reliably sizes after overlay becomes visible.
 -->
