@@ -1,12 +1,12 @@
 <!--
 Angel Code — BOF Version Detail Notes
-App Version: v1.2A13
-Base: v1.2A10
+App Version: v1.2A14
+Base: v1.2A13
 Changes (requested):
-- Verified/kept Pull-to-Refresh behavior (top-of-scroll only; releases past threshold reload).
-- Install button layout: always sits to the RIGHT of View Calendar (same row) after Submit.
-- Install button visibility: on initial load, if NOT installed, Install is visible on the main screen; if installed, it stays hidden with the other post-Submit buttons.
-- Advanced version and updated BOF/EOF notes.
+- Install button is ALWAYS the same size as the Exit button (same height/font via .tight).
+- Install button stays in the SAME location on the entry screen before/after Submit (same grid slot: right of View Calendar, same row).
+- Entry screen behavior: before Submit, ONLY the Install button may be shown (when not installed); all other action buttons remain hidden until after Submit.
+- Pull-to-Refresh behavior re-verified and strengthened: cancels if user begins a horizontal swipe.
 -->
 <!doctype html>
 
@@ -201,6 +201,13 @@ Changes (requested):
       padding:0 14px;
       font-weight:650;
       white-space:nowrap;
+    }
+
+    .btn.tight{
+      height: 48px;
+      font-size: 16px;
+      font-weight: 820;
+      letter-spacing: .2px;
     }
 
     .btn:disabled{
@@ -401,40 +408,14 @@ Changes (requested):
       line-height: 1.25;
     }
 
-    /* Pre-submit install row (only shown when NOT installed) */
-    .preInstallRow{
-      margin-top: 12px;
-      display:flex;
-      justify-content:flex-end;
-      gap:10px;
-    }
-    .preInstallRow .btn{
-      height: 52px;
-      font-size: 18px;
-      font-weight: 820;
-      letter-spacing: .2px;
-      min-width: 160px;
-    }
-
     .homeActions{
       display:grid;
       grid-template-columns: 1fr 1fr;
       gap:10px;
       margin: 12px 0 0;
     }
-    .homeActions .btn{
-      height: 52px;
-      font-size: 18px;
-      font-weight: 820;
-      letter-spacing: .2px;
-    }
     .homeActions .btn.wide{
       grid-column: 1 / -1;
-    }
-    .homeActions .btn.tight{
-      height: 48px;
-      font-size: 16px;
-      font-weight: 820;
     }
     .homeActions .btn.exitSmall{
       background: linear-gradient(180deg, rgba(255,80,80,.18), rgba(255,80,80,.10));
@@ -811,11 +792,7 @@ Changes (requested):
                 Swipe left to view Calendar.
               </div>
 
-              <!-- Pre-submit Install (visible on load when NOT installed) -->
-              <div id="preInstallRow" class="preInstallRow hidden">
-                <div id="preInstallHolder"></div>
-              </div>
-
+              <!-- Reveal block (meaning + subtles) -->
               <div id="homeAfterSubmit" class="hidden">
                 <div class="meaningCard" id="homeMeaningCard">
                   <div class="angelCardFrame" id="homeAngelFrame">
@@ -832,22 +809,22 @@ Changes (requested):
 
                 <div class="subtle">Inspired by a real Angel.</div>
                 <div class="subtle">Local-only. No accounts. No cloud.</div>
+              </div>
 
-                <div class="homeActions">
-                  <button id="btnAddToCalendar" class="btn primary wide">Add to Calendar</button>
+              <!-- Actions grid: Install ALWAYS lives here (same location before/after Submit) -->
+              <div class="homeActions">
+                <button id="btnAddToCalendar" class="btn primary wide">Add to Calendar</button>
 
-                  <!-- View + Install row (Install must be to the RIGHT of View Calendar) -->
-                  <button id="btnViewCalendar" class="btn">View Calendar</button>
-                  <div id="postInstallHolder"></div>
+                <button id="btnViewCalendar" class="btn">View Calendar</button>
+                <button id="btnInstall" class="btn tight">Install</button>
 
-                  <button id="btnHomeExport" class="btn tight">Export</button>
-                  <button id="btnExitHome" class="btn tight exitSmall">Exit</button>
-                </div>
+                <button id="btnHomeExport" class="btn tight">Export</button>
+                <button id="btnExitHome" class="btn tight exitSmall">Exit</button>
+              </div>
 
-                <div class="footerTiny">
-                  <div id="homeVerLabel" aria-label="Version label">v—</div>
-                  <div>developed by Keyth Jyles</div>
-                </div>
+              <div class="footerTiny">
+                <div id="homeVerLabel" aria-label="Version label">v—</div>
+                <div>developed by Keyth Jyles</div>
               </div>
             </div>
           </div>
@@ -1022,7 +999,7 @@ Changes (requested):
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.2A13";
+  const APP_VERSION = "v1.2A14";
   const STORAGE_KEY = "angel_numbers_records_v2_2025_12_29"; // keep existing data
 
   const DAY_MS = 24*60*60*1000;
@@ -1075,44 +1052,47 @@ Changes (requested):
     openInfo("Uninstall", msg, {mode:"info"});
   }
 
-  function ensureInstallButtonExists(){
-    let btn = $("btnInstall");
-    if(btn) return btn;
+  // Action buttons visibility controller:
+  function setHomeActionsVisibility(afterSubmit){
+    const showAfter = !!afterSubmit;
 
-    btn = document.createElement("button");
-    btn.id = "btnInstall";
-    btn.className = "btn";
-    btn.type = "button";
-    btn.textContent = "Install";
-    return btn;
+    const btnAdd = $("btnAddToCalendar");
+    const btnView = $("btnViewCalendar");
+    const btnExport = $("btnHomeExport");
+    const btnExit = $("btnExitHome");
+
+    // Install button stays in place always, but visibility depends:
+    // - Before Submit: visible only if NOT installed (standalone false); hidden if installed
+    // - After Submit: visible always; if installed, becomes "Uninstall"
+    if(btnAdd) btnAdd.classList.toggle("hidden", !showAfter);
+    if(btnView) btnView.classList.toggle("hidden", !showAfter);
+    if(btnExport) btnExport.classList.toggle("hidden", !showAfter);
+    if(btnExit) btnExit.classList.toggle("hidden", !showAfter);
+
+    // Meaning block
+    $("homeAfterSubmit").classList.toggle("hidden", !showAfter);
+
+    updateInstallButton(undefined, showAfter);
   }
 
-  function placeInstallButton(where){
-    const btn = ensureInstallButtonExists();
-    const preRow = $("preInstallRow");
-    const pre = $("preInstallHolder");
-    const post = $("postInstallHolder");
-    if(!btn || !preRow || !pre || !post) return;
+  function updateInstallButton(installedMaybe=false, afterSubmitOverride=null){
+    const btn = $("btnInstall");
+    if(!btn) return;
 
-    if(where === "pre"){
-      preRow.classList.remove("hidden");
-      pre.appendChild(btn);
-    }else{
-      preRow.classList.add("hidden");
-      post.appendChild(btn);
-    }
-  }
-
-  function updateInstallButton(installedMaybe=false){
-    const btn = ensureInstallButtonExists();
     const standaloneNow = installedMaybe || isStandalone();
+    const afterSubmit = (afterSubmitOverride === null)
+      ? !$("homeAfterSubmit").classList.contains("hidden")
+      : !!afterSubmitOverride;
 
     if(standaloneNow){
-      // Requirement: if installed, keep it hidden with the other buttons (no install UI on load)
-      try{
-        $("preInstallRow")?.classList.add("hidden");
+      // Before submit: hidden with other buttons
+      if(!afterSubmit){
         btn.classList.add("hidden");
-      }catch{}
+        return;
+      }
+
+      // After submit: show "Uninstall"
+      btn.classList.remove("hidden");
       btn.dataset.mode = "uninstall";
       btn.disabled = false;
       btn.textContent = "Uninstall";
@@ -1120,20 +1100,12 @@ Changes (requested):
     }
 
     // Not installed
-    btn.classList.remove("hidden");
     btn.dataset.mode = "install";
     btn.textContent = "Install";
+    btn.disabled = !deferredInstallPrompt; // visible regardless; disabled if browser hasn't offered prompt
 
-    // Visibility on initial load: show on main screen (pre-submit)
-    // After Submit: it will be moved to the right of View Calendar.
-    if($("homeAfterSubmit")?.classList.contains("hidden")){
-      placeInstallButton("pre");
-    }else{
-      placeInstallButton("post");
-    }
-
-    // Enable only if prompt exists; visible regardless (per requirement)
-    btn.disabled = !deferredInstallPrompt;
+    // Before submit: visible (only button), After submit: visible in same slot
+    btn.classList.remove("hidden");
   }
 
   async function copyToClipboard(text){
@@ -1643,25 +1615,11 @@ Changes (requested):
 
   let lastIdentify = { number:"", pattern:"", cardText:"" };
 
-  function setHomeRevealed(on){
-    $("homeAfterSubmit").classList.toggle("hidden", !on);
-
-    // Move Install button depending on state
-    if(isStandalone()){
-      updateInstallButton(true);
-    }else{
-      placeInstallButton(on ? "post" : "pre");
-      updateInstallButton();
-    }
-  }
-
   function renderHomeCardFromNumber(n){
     const card = buildAngelCard(n);
-
     $("homeAngelHeader").textContent = `Angel Card Number: ${n || "—"}`;
     $("homeAngelBigNum").textContent = n || "—";
     $("homeMeta").textContent = card.cardText || "—";
-
     lastIdentify = { number: n, pattern: card.pattern || "—", cardText: card.cardText || "—" };
   }
 
@@ -1671,13 +1629,12 @@ Changes (requested):
       openInfo("Enter a number", "Please type an angel number, then tap Submit.", {mode:"info"});
       return;
     }
-    setHomeRevealed(true);
+    setHomeActionsVisibility(true);
     renderHomeCardFromNumber(n);
     try{ document.activeElement?.blur(); }catch{}
   }
 
   $("btnHomeSubmit").addEventListener("click", (e)=>{ e.preventDefault(); submitHome(); });
-
   $("homeIdNum").addEventListener("keydown", (e)=>{
     if(e.key === "Enter"){
       e.preventDefault();
@@ -2247,8 +2204,9 @@ Changes (requested):
   const PTR_MAX = Math.max(260, PTR_THRESHOLD + 35);
 
   let ptrActive = false;
-  let ptrStartY = 0;
   let ptrTriggered = false;
+  let ptrStartY = 0;
+  let ptrStartX = 0;
 
   function ptrSet(show, hint, small){
     const el = $("ptr");
@@ -2279,6 +2237,7 @@ Changes (requested):
       ptrActive = true;
       ptrTriggered = false;
       ptrStartY = e.touches[0].clientY;
+      ptrStartX = e.touches[0].clientX;
       ptrSet(true, "Pull to refresh", "");
     }, {passive:true});
 
@@ -2286,8 +2245,18 @@ Changes (requested):
       if(!ptrActive) return;
       if(!(e.touches && e.touches.length === 1)) return;
 
+      const x = e.touches[0].clientX;
       const y = e.touches[0].clientY;
       const dy = y - ptrStartY;
+      const dx = x - ptrStartX;
+
+      // If user starts a horizontal swipe, cancel PTR (prevents interference).
+      if(Math.abs(dx) > 14 && Math.abs(dx) > Math.abs(dy) + 10){
+        ptrActive = false;
+        ptrTriggered = false;
+        ptrSet(false);
+        return;
+      }
 
       if(dy <= 0){
         ptrSet(false);
@@ -2427,25 +2396,19 @@ self.addEventListener('fetch', (e)=>{ });`;
   }
 
   function attachButtons(){
-    const btnView = $("btnViewCalendar");
-    if(btnView) btnView.addEventListener("click", () => snapToIndex(1, true));
-
+    $("btnViewCalendar").addEventListener("click", () => snapToIndex(1, true));
     $("btnBackFromCalendar").addEventListener("click", () => snapToIndex(0, true));
 
-    const btnExport = $("btnHomeExport");
-    if(btnExport) btnExport.addEventListener("click", (e) => {
+    $("btnHomeExport").addEventListener("click", (e) => {
       e.preventDefault();
       exportCurrentIdentify();
     });
 
-    const btnAdd = $("btnAddToCalendar");
-    if(btnAdd) btnAdd.addEventListener("click", () => openAddCalModal());
+    $("btnAddToCalendar").addEventListener("click", () => openAddCalModal());
 
-    // Install button (created/placed dynamically)
-    const btnInstall = ensureInstallButtonExists();
-    btnInstall.addEventListener("click", (e) => {
+    $("btnInstall").addEventListener("click", (e) => {
       e.preventDefault();
-      const mode = btnInstall.dataset.mode || "install";
+      const mode = $("btnInstall").dataset.mode || "install";
       if(mode === "uninstall"){ uninstallGuidance(); return; }
       tryInstall();
     });
@@ -2463,9 +2426,6 @@ self.addEventListener('fetch', (e)=>{ });`;
 
   $("homeVerLabel").textContent = APP_VERSION;
 
-  // Initial: NOT revealed. If not installed, show Install on main screen.
-  setHomeRevealed(false);
-
   attachButtons();
   attachExit();
   attachSmoothSwipe();
@@ -2474,6 +2434,8 @@ self.addEventListener('fetch', (e)=>{ });`;
   initMonthDefaultIfNeeded();
   renderCalendar();
 
+  // Initial state: before Submit, only Install should be visible (when not installed)
+  setHomeActionsVisibility(false);
   updateInstallButton();
 
   try{ document.activeElement?.blur(); }catch{}
@@ -2493,11 +2455,10 @@ self.addEventListener('fetch', (e)=>{ });`;
 </html>
 <!--
 EOF Version Detail Notes
-App Version: v1.2A13
-Base: v1.2A10
+App Version: v1.2A14
+Base: v1.2A13
 Changes:
-- Verified/kept Pull-to-Refresh behavior (top-of-scroll only; release past threshold reloads).
-- Install button now sits to the RIGHT of View Calendar after Submit.
-- Install button is visible on initial load only when NOT installed; if installed, it remains hidden with the post-Submit button set.
-- Version advanced and notes updated.
+- Install button same size as Exit (.tight) and remains in the SAME grid location before/after Submit (right of View Calendar).
+- Before Submit: only Install may show (when not installed); other action buttons remain hidden.
+- Pull-to-refresh now cancels cleanly if the gesture becomes a horizontal swipe.
 -->
