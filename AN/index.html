@@ -1,10 +1,10 @@
 <!--
 Angel Code — BOF Version Detail Notes
-App Version: v1.2A16
-Base: v1.2A14
+App Version: v1.2A18
+Base: v1.2A16
 Changes (requested):
-- Add small version number under the logo.
-- Install button resized to match View Calendar button height and fill its grid slot.
+- Version bump only (A18).
+- No functional changes.
 -->
 <!doctype html>
 
@@ -1010,7 +1010,7 @@ Changes (requested):
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.2A16";
+  const APP_VERSION = "v1.2A18";
   const STORAGE_KEY = "angel_numbers_records_v2_2025_12_29"; // keep existing data
 
   const DAY_MS = 24*60*60*1000;
@@ -2420,6 +2420,11 @@ self.addEventListener('fetch', (e)=>{ });`;
       e.preventDefault();
       openNewSighting();
     });
+
+    $("btnBackFromCalendar").addEventListener("click", (e)=>{
+      e.preventDefault();
+      snapToIndex(0, true);
+    });
   }
 
   injectManifest();
@@ -2572,7 +2577,6 @@ self.addEventListener('fetch', (e)=>{ });`;
       <div id="eggTitle">The Angels love you Timmy!</div>
 
       <div id="eggHeartWrap" aria-hidden="true">
-        <!-- Sharp, scalable SVG heart -->
         <svg id="eggHeart" viewBox="0 0 64 64">
           <defs>
             <linearGradient id="eggHeartG" x1="0" y1="0" x2="1" y2="1">
@@ -2602,7 +2606,6 @@ self.addEventListener('fetch', (e)=>{ });`;
 
   const TRIGGER = '333333333';
 
-  // Try common selectors used across your apps; first one found wins.
   function findSearchInput(){
     const candidates = [
       '#searchInput',
@@ -2643,7 +2646,6 @@ self.addEventListener('fetch', (e)=>{ });`;
     stopFireworks();
   }
 
-  // Close handlers
   closeBtn.addEventListener('click', closeEgg);
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) closeEgg();
@@ -2653,7 +2655,6 @@ self.addEventListener('fetch', (e)=>{ });`;
     if (e.key === 'Escape') closeEgg();
   });
 
-  // Fireworks (canvas)
   function startFireworks(){
     const ctx = canvas.getContext('2d', { alpha:true });
 
@@ -2668,7 +2669,6 @@ self.addEventListener('fetch', (e)=>{ });`;
     resize();
 
     const particles = [];
-    const bursts = [];
 
     function rand(a,b){ return a + Math.random()*(b-a); }
 
@@ -2680,7 +2680,6 @@ self.addEventListener('fetch', (e)=>{ });`;
 
       const count = Math.floor(rand(36, 62));
       const hue = rand(0, 360);
-      bursts.push({ x, y, t:0, hue });
 
       for (let i=0;i<count;i++){
         const ang = rand(0, Math.PI*2);
@@ -2693,8 +2692,7 @@ self.addEventListener('fetch', (e)=>{ });`;
           life: Math.floor(rand(42, 78)),
           age: 0,
           hue: hue + rand(-18, 18),
-          size: rand(1.2, 2.2),
-          tw: rand(0.55, 1.0)
+          size: rand(1.2, 2.2)
         });
       }
     }
@@ -2709,18 +2707,15 @@ self.addEventListener('fetch', (e)=>{ });`;
       last = now;
       burstTimer += dt;
 
-      // Spawn cadence
       if (burstTimer > 420){
         burstTimer = 0;
         spawnBurst();
         if (Math.random() < 0.30) setTimeout(() => isOpen && spawnBurst(), 160);
       }
 
-      // Clear with slight trail
       ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight);
       ctx.globalCompositeOperation = 'lighter';
 
-      // Draw particles
       for (let i=particles.length-1;i>=0;i--){
         const p = particles[i];
         p.age += 1;
@@ -2738,7 +2733,6 @@ self.addEventListener('fetch', (e)=>{ });`;
         const a = Math.max(0, Math.min(1, k)) * 0.9;
         const r = p.size + (1-k)*0.8;
 
-        // Bright core + soft glow
         ctx.beginPath();
         ctx.fillStyle = `hsla(${p.hue}, 95%, 62%, ${a})`;
         ctx.arc(p.x, p.y, r, 0, Math.PI*2);
@@ -2777,12 +2771,10 @@ self.addEventListener('fetch', (e)=>{ });`;
     fx = null;
   }
 
-  // Trigger wiring
   function wire(){
     const input = findSearchInput();
     if (!input) return false;
 
-    // React to typing, paste, programmatic updates
     const handler = () => {
       const v = (input.value || '').trim();
       if (v === TRIGGER) openEgg();
@@ -2791,7 +2783,6 @@ self.addEventListener('fetch', (e)=>{ });`;
     input.addEventListener('input', handler, { passive:true });
     input.addEventListener('change', handler, { passive:true });
 
-    // Optional: if user hits Enter
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter'){
         const v = (input.value || '').trim();
@@ -2805,7 +2796,6 @@ self.addEventListener('fetch', (e)=>{ });`;
     return true;
   }
 
-  // Attempt immediately, then retry a few times in case UI mounts late.
   if (!wire()){
     let tries = 0;
     const t = setInterval(() => {
@@ -2818,15 +2808,14 @@ self.addEventListener('fetch', (e)=>{ });`;
 <!-- ===========================
      END EASTER EGG (EOF)
      =========================== -->
-  
+
 </body>
 </html>
 <!--
 EOF Version Detail Notes
-App Version: v1.2A16
-Base: v1.2A14
+App Version: v1.2A18
+Base: v1.2A16
 Changes:
-- Small version label under the logo (matches APP_VERSION).
-- Install button resized to match View Calendar button height and fill its grid slot.
-- Easter Egg implemented for version A17
+- Version bump only (A18). No functional changes.
+- Easter Egg remains enabled (trigger: 333333333).
 -->
