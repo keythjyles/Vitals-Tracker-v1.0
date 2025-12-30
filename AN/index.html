@@ -1,11 +1,10 @@
 <!--
 Angel Code — BOF Version Detail Notes
-App Version: v1.2A9
-Base: v1.2A8
+App Version: v1.2A10
+Base: v1.2A9
 Changes (requested):
-- Export report format now matches the “Angel Code Sighting” pattern exactly (header → Sighting → Angel Card → footer).
-- Export buttons now open a readable, bordered report viewer card (with OK/Back + Copy/Share/Save).
-- View & Update: reduce Angel Card height so action buttons fit without scrolling; rename details toggle to “View/Edit Details”.
+- Footer: use Footer draft A, minus the line about being created locally / no cloud / no account.
+- Export titles: use the suggested titles; home export "Angel Card (Identify)", entry export "Angel Code Sighting"; remove the word "photo" from image export title (when/if used).
 - Advance version and update BOF/EOF notes.
 -->
 <!doctype html>
@@ -703,47 +702,29 @@ Changes (requested):
       padding: 10px;
     }
 
-    /* Report viewer */
+    /* Export report card */
     .reportBox{
       border: 2px solid rgba(90,150,255,.40);
       background: rgba(0,0,0,.10);
       border-radius: 18px;
       padding: 12px;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.03);
-      max-height: 52vh;
-      overflow:auto;
-      -webkit-overflow-scrolling: touch;
       white-space: pre-wrap;
       line-height: 1.35;
+      color: rgba(235,245,255,.88);
       font-size: 14px;
-      color: rgba(235,245,255,.86);
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      max-height: 46vh;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      box-shadow: 0 14px 34px rgba(0,0,0,.22);
     }
-    .reportHint{
+    .reportHintRow{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
       margin-top: 10px;
       color: rgba(235,245,255,.52);
-      font-size: 13px;
-      line-height: 1.25;
-    }
-    .modalBtns.tightRow{
-      flex-wrap:nowrap;
-    }
-    .modalBtns.tightRow .btn{
-      min-width: 0;
-      flex: 1 1 0;
-      font-size: 16px;
-      height: 52px;
-    }
-
-    /* Make View & Update fit on-screen */
-    #editModal .angelBigNum{
-      font-size: 64px;
-      padding: 8px 10px 8px;
-      margin-top: 10px;
-      margin-bottom: 10px;
-    }
-    #editAngelCard{
-      max-height: 190px !important;
+      font-size: 12px;
+      user-select:none;
     }
   </style>
 </head>
@@ -887,17 +868,23 @@ Changes (requested):
     </div>
   </div>
 
-  <!-- Report viewer modal (Export) -->
-  <div id="reportModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="reportTitle">
+  <!-- Export (Readable Report) modal -->
+  <div id="exportModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle">
     <div class="modalCard">
-      <div class="modalTitle" id="reportTitle">Angel Code Sighting</div>
-      <div class="reportBox" id="reportBox">—</div>
-      <div class="reportHint" id="reportHint">Tip: the report is also copied to your clipboard so you can paste it anywhere.</div>
-      <div class="modalBtns tightRow">
-        <button id="btnReportOk" class="btn primary">OK</button>
-        <button id="btnReportCopy" class="btn">Copy</button>
-        <button id="btnReportShare" class="btn">Share</button>
-        <button id="btnReportSave" class="btn">Save .txt</button>
+      <div class="modalTitle" id="exportModalTitle">Export</div>
+      <div class="modalSub" id="exportModalSub">Your report is shown below.</div>
+
+      <div id="exportReportBox" class="reportBox">—</div>
+      <div class="reportHintRow">
+        <div id="exportHintLeft">Local-only report.</div>
+        <div id="exportHintRight">Copy / Share / Save</div>
+      </div>
+
+      <div class="modalBtns" style="margin-top:12px;">
+        <button id="btnExportOk" class="btn primary">OK</button>
+        <button id="btnExportCopy" class="btn">Copy</button>
+        <button id="btnExportShare" class="btn">Share</button>
+        <button id="btnExportSave" class="btn">Save .txt</button>
       </div>
     </div>
   </div>
@@ -976,7 +963,8 @@ Changes (requested):
       <div class="angelCardFrame">
         <div id="editAngelHeader" class="angelHeaderLine">Angel Card Number: —</div>
         <div id="editAngelBig" class="angelBigNum">—</div>
-        <div id="editAngelCard" class="metaScroll" style="margin-top:0;">—</div>
+        <!-- reduced height so buttons fit (requested) -->
+        <div id="editAngelCard" class="metaScroll" style="max-height: 185px; margin-top:0;">—</div>
       </div>
 
       <div class="detailsToggleRow">
@@ -1010,7 +998,7 @@ Changes (requested):
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.2A9";
+  const APP_VERSION = "v1.2A10";
   const STORAGE_KEY = "angel_numbers_records_v2_2025_12_29"; // keep existing data
 
   const DAY_MS = 24*60*60*1000;
@@ -1111,7 +1099,7 @@ Changes (requested):
     if(!canPick) return false;
 
     const opts = {
-      suggestedName: suggestedName || "angel_code_sighting.txt",
+      suggestedName: suggestedName || "angel_code_report.txt",
       types: [{ description: "Text", accept: {"text/plain": [".txt"]} }]
     };
 
@@ -1466,106 +1454,138 @@ Changes (requested):
   $("btnInfoOk").addEventListener("click", (e)=>{ e.preventDefault(); closeInfo(); });
   $("infoModal").addEventListener("click", (e)=>{ if(e.target === $("infoModal")) closeInfo(); });
 
-  // Report viewer (export)
-  let reportPayload = null;
+  let exportPayload = null;
 
-  function openReportViewer(payload){
-    reportPayload = payload;
-    $("reportTitle").textContent = payload?.title || "Angel Code Sighting";
-    $("reportBox").textContent = payload?.text || "—";
-    $("btnReportShare").disabled = !isShareAvailable();
-    $("reportModal").classList.remove("hidden");
+  function openExportModal(payload){
+    exportPayload = payload;
+
+    $("exportModalTitle").textContent = payload?.title || "Export";
+    $("exportModalSub").textContent = payload?.subtitle || "Your report is shown below.";
+    $("exportReportBox").textContent = payload?.text || "—";
+
+    $("exportHintLeft").textContent = payload?.hintLeft || "Local-only report.";
+    $("exportHintRight").textContent = payload?.hintRight || "Copy / Share / Save";
+
+    $("exportModal").classList.remove("hidden");
     lockTouches(120);
-    try{ document.activeElement?.blur(); }catch{}
+
+    $("btnExportOk").disabled   = false;
+    $("btnExportCopy").disabled = false;
+    $("btnExportShare").disabled = !isShareAvailable();
+    $("btnExportSave").disabled  = false;
   }
 
-  function closeReportViewer(){
-    reportPayload = null;
-    $("reportModal").classList.add("hidden");
+  function closeExportModal(){
+    exportPayload = null;
+    $("exportModal").classList.add("hidden");
     unlockTouches();
   }
 
-  $("btnReportOk").addEventListener("click", (e)=>{ e.preventDefault(); closeReportViewer(); });
-  $("reportModal").addEventListener("click", (e)=>{ if(e.target === $("reportModal")) closeReportViewer(); });
+  $("btnExportOk").addEventListener("click", (e)=>{ e.preventDefault(); closeExportModal(); });
+  $("exportModal").addEventListener("click", (e)=>{ if(e.target === $("exportModal")) closeExportModal(); });
 
-  $("btnReportCopy").addEventListener("click", async (e)=>{
+  $("btnExportCopy").addEventListener("click", async (e)=>{
     e.preventDefault();
-    if(!reportPayload?.text) return;
-    try{ await copyToClipboard(reportPayload.text); }catch{}
+    if(!exportPayload?.text) return;
+    try{
+      await copyToClipboard(exportPayload.text);
+      openInfo("Copied", "Copied to clipboard.", {mode:"info"});
+    }catch{
+      openInfo("Copy failed", "Could not copy on this device/browser.", {mode:"info"});
+    }
   });
 
-  $("btnReportShare").addEventListener("click", async (e)=>{
+  $("btnExportShare").addEventListener("click", async (e)=>{
     e.preventDefault();
-    if(!reportPayload?.text) return;
-    if(!isShareAvailable()) return;
+    if(!exportPayload) return;
+    if($("btnExportShare").disabled) return;
+    if(!isShareAvailable()){
+      openInfo("Share not available", "Share is not available on this device/browser.", {mode:"info"});
+      return;
+    }
     try{
-      await navigator.share({ title: "Angel Code Sighting", text: reportPayload.text });
+      await navigator.share({ title: exportPayload.shareTitle || "Angel Code Export", text: exportPayload.text });
     }catch{}
   });
 
-  $("btnReportSave").addEventListener("click", async (e)=>{
+  $("btnExportSave").addEventListener("click", async (e)=>{
     e.preventDefault();
-    if(!reportPayload?.text) return;
-    const filename = reportPayload.filename || "angel_code_sighting.txt";
+    if(!exportPayload) return;
+    if($("btnExportSave").disabled) return;
+
     try{
-      const ok = await saveTextWithPicker(reportPayload.text, filename);
-      if(ok) return;
+      const ok = await saveTextWithPicker(exportPayload.text, exportPayload.filename);
+      if(ok){ openInfo("Saved", "Saved.", {mode:"info"}); return; }
     }catch{}
-    downloadText(reportPayload.text, filename);
+
+    downloadText(exportPayload.text, exportPayload.filename || "angel_code_report.txt");
   });
 
-  function buildSightingReport(rec, opts){
-    const created = fmtDateTime(Date.now());
-
-    const tsLine = fmtDateTime(rec.ts);
-    const number = (rec.number || "—").trim();
-    const notes = (rec.notes && String(rec.notes).trim()) ? String(rec.notes).trim() : "None";
-
-    const card = buildAngelCard(normalizeNumberInput(number));
-    const pattern = card.pattern || (rec.pattern || "—");
-
-    const footer =
-      "------------------------------\n" +
-      "This is a unique, time-stamped report generated by Angel Code on this device.\n" +
-      "It exists so you can paste or share a single clean “snapshot” of the sighting and its Angel Card.\n" +
-      "No cloud, no account, no syncing—this report is created from local-only data.\n" +
-      "Meanings are tradition-based prompts for reflection and can vary.";
-
-    const lines = [];
-    lines.push("Angel Code — Export Report");
-    lines.push(`App Version: ${APP_VERSION}`);
-    lines.push(`Generated: ${created}`);
-    lines.push("");
-    lines.push("Angel Code Sighting");
-    lines.push("");
-    lines.push("Sighting:");
-    lines.push(tsLine);
-    lines.push(`Number: ${number}`);
-    lines.push(`Notes: ${notes}`);
-    lines.push("");
-    lines.push(`ANGEL CARD — ${number}`);
-    lines.push(`Pattern: ${pattern}`);
-    lines.push("");
-    lines.push(card.cardText || "—");
-    lines.push("");
-    lines.push("");
-    lines.push(footer);
-
+  function buildReportHeader({reportLabel, title, rangeLabel, notes}){
+    const now = fmtDateTime(Date.now());
+    const lines = [
+      "Angel Code — Export Report",
+      `App Version: ${APP_VERSION}`,
+      reportLabel ? reportLabel : "",
+      title ? `Report: ${title}` : "",
+      `Generated: ${now}`,
+      rangeLabel ? `Range: ${rangeLabel}` : "",
+      "",
+      "How this data was captured:",
+      "- Sightings are entered manually into Angel Code on this device.",
+      "- Data is stored locally on the phone (no cloud sync, no account).",
+      "- Each record includes date/time, number, Angel Card text, and optional notes.",
+      "",
+      notes ? notes : "",
+      "",
+      "------------------------------",
+      ""
+    ].filter(Boolean);
     return lines.join("\n");
   }
 
-  function reportFilename(){
+  function buildReportFooter(){
+    const lines = [
+      "",
+      "------------------------------",
+      "Footer",
+      "This Angel Card is a distilled reflection drawn from long-standing numerology and spiritual traditions—threads of symbolism carried across cultures and generations.",
+      "It is offered as a lens for contemplation, not as certainty or prediction."
+    ];
+    return lines.join("\n");
+  }
+
+  function exportReport(recs, headerInfo, filenameBase, modalMeta){
+    const header = buildReportHeader(headerInfo);
+
+    const lines = recs.map(r => {
+      const dt = fmtDateTime(r.ts);
+      const num = `Number: ${r.number || "—"}`;
+      const notes = (r.notes && r.notes.trim()) ? r.notes.trim() : "None";
+      const card = (r.meaning && r.meaning.trim()) ? r.meaning.trim() : "None";
+      return `Sighting:\n${dt}\n${num}\nNotes: ${notes}\n\nANGEL CARD — ${r.number || "—"}\n${card}\n`;
+    });
+
+    const out = header + lines.join("\n") + buildReportFooter();
+
     const ts = new Date();
     const y = ts.getFullYear();
     const m = String(ts.getMonth()+1).padStart(2,"0");
     const d = String(ts.getDate()).padStart(2,"0");
-    return `angel_code_sighting_${y}-${m}-${d}.txt`;
-  }
+    const filename = `${filenameBase || "angel_code_report"}_${y}-${m}-${d}.txt`;
 
-  async function showSightingReport(rec){
-    const text = buildSightingReport(rec, {});
-    try{ await copyToClipboard(text); }catch{}
-    openReportViewer({ title: "Angel Code Sighting", text, filename: reportFilename() });
+    (async () => {
+      try{ await copyToClipboard(out); }catch{}
+      openExportModal({
+        title: modalMeta?.modalTitle || "Export",
+        subtitle: modalMeta?.modalSub || "Your report is shown below.",
+        text: out,
+        filename,
+        shareTitle: modalMeta?.shareTitle || "Angel Code Export",
+        hintLeft: "Report is local-only.",
+        hintRight: "Copy / Share / Save"
+      });
+    })();
   }
 
   let lastIdentify = { number:"", pattern:"", cardText:"" };
@@ -1577,9 +1597,11 @@ Changes (requested):
 
   function renderHomeCardFromNumber(n){
     const card = buildAngelCard(n);
+
     $("homeAngelHeader").textContent = `Angel Card Number: ${n || "—"}`;
     $("homeAngelBigNum").textContent = n || "—";
     $("homeMeta").textContent = card.cardText || "—";
+
     lastIdentify = { number: n, pattern: card.pattern || "—", cardText: card.cardText || "—" };
   }
 
@@ -1975,7 +1997,7 @@ Changes (requested):
     reopenDayListForTs(ts);
   });
 
-  $("btnEditExport").addEventListener("click", async (e)=>{
+  $("btnEditExport").addEventListener("click", (e)=>{
     e.preventDefault();
     if(!editId){
       openInfo("Export", "No entry selected.", {mode:"info"});
@@ -1987,7 +2009,21 @@ Changes (requested):
       openInfo("Export", "That entry could not be found.", {mode:"info"});
       return;
     }
-    await showSightingReport(r);
+    exportReport(
+      [r],
+      {
+        reportLabel: "Angel Code Sighting",
+        title: "Angel Code Sighting",
+        rangeLabel: fmtDateTime(r.ts),
+        notes: "This export contains the single entry currently open in the Angel Card view."
+      },
+      "angel_code_sighting",
+      {
+        modalTitle: "Angel Code Sighting",
+        modalSub: "Single entry export.",
+        shareTitle: "Angel Code Sighting"
+      }
+    );
   });
 
   const deck = $("deck");
@@ -2030,7 +2066,7 @@ Changes (requested):
   }
 
   function swipeBlockedByModal(){
-    const modalIds = ["editModal","dayListModal","addCalModal","reportModal","infoModal","newSightingModal"];
+    const modalIds = ["editModal","dayListModal","addCalModal","exportModal","infoModal","newSightingModal"];
     for(const id of modalIds){
       const el = $(id);
       if(el && !el.classList.contains("hidden")) return true;
@@ -2297,7 +2333,7 @@ self.addEventListener('fetch', (e)=>{ });`;
     });
   }
 
-  async function exportCurrentIdentify(){
+  function exportCurrentIdentify(){
     const n = lastIdentify.number || normalizeNumberInput($("homeIdNum").value);
     if(!n){
       openInfo("Export", "Enter a number, then tap Submit first.", {mode:"info"});
@@ -2308,11 +2344,24 @@ self.addEventListener('fetch', (e)=>{ });`;
       id: makeId(Date.now()),
       ts: Date.now(),
       number: n,
-      pattern: card.pattern || "—",
       meaning: card.cardText || "—",
       notes: "None"
     };
-    await showSightingReport(pseudo);
+    exportReport(
+      [pseudo],
+      {
+        reportLabel: "Angel Card (Identify)",
+        title: "Angel Card (Identify)",
+        rangeLabel: `Current identify: ${n} (not saved unless you Add to Calendar)`,
+        notes: "This export contains the CURRENT identified number and its Angel Card from the Home screen."
+      },
+      "angel_card_identify",
+      {
+        modalTitle: "Angel Card (Identify)",
+        modalSub: "Home screen identify export.",
+        shareTitle: "Angel Card (Identify)"
+      }
+    );
   }
 
   function attachButtons(){
@@ -2380,10 +2429,11 @@ self.addEventListener('fetch', (e)=>{ });`;
 
 <!--
 EOF Version Detail Notes
-App Version: v1.2A9
-Base: v1.2A8
+App Version: v1.2A10
+Base: v1.2A9
 Changes:
-- Export report now matches the “Angel Code Sighting” pattern and includes a unique-report footer explaining why it exists.
-- Export opens a themed, bordered report viewer with OK/Back, Copy, Share, Save.
-- View & Update Angel Card area height reduced so buttons fit on-screen; details toggle renamed “View/Edit Details”.
+- Export footer updated to Footer draft A, with the "created locally / no cloud / no account" line removed.
+- Export title for Home identify set to "Angel Card (Identify)".
+- Entry export remains titled "Angel Code Sighting".
+- Version advanced and notes updated.
 -->
