@@ -3,9 +3,11 @@ Angel Code — BOF Version Detail Notes
 App Version: v1.2A11
 Base: v1.2A10
 Changes (requested):
-- Added a huge “Install” button under the main entry pill box on Home (stands out).
-- Install flow: tap Install → message prompts user to wait; OK triggers install prompt (if available) then attempts to close the tab/window (with fallback alert if blocked).
-- Show app version in very small font under the logo.
+- Add: Large “Install” button shown ONLY on the Entry screen (Home, before Submit), ONLY when NOT installed, and ONLY when install is available.
+- Rule: If installed, the big Install button is hidden; the existing Install button on the main panel shows “Uninstall”.
+- Rule: If install is not available yet, the main-panel Install button is hidden (not disabled).
+- Rule: If an Export report is displayed, the big Install button is suppressed and will only re-appear after refresh (and only if not installed).
+- Add: Very small version label shown under the logo.
 - Advance version and update BOF/EOF notes.
 -->
 <!doctype html>
@@ -82,13 +84,12 @@ Changes (requested):
       height:auto;
       display:block;
     }
-    .topVerTiny{
-      margin-top:2px;
-      font-size:10px;
-      letter-spacing:.6px;
-      color: rgba(235,245,255,.34);
-      font-weight: 850;
-      text-shadow:none;
+    .tinyVer{
+      margin-top: 2px;
+      font-size: 11px;
+      line-height: 1;
+      color: rgba(235,245,255,.36);
+      letter-spacing: .2px;
       user-select:none;
     }
 
@@ -404,28 +405,33 @@ Changes (requested):
       padding: 0 22px;
     }
 
-    .bigInstallWrap{
-      margin: 10px 0 0;
-    }
-    .btn.bigInstall{
-      width:100%;
-      height: 66px;
-      font-size: 22px;
-      font-weight: 950;
-      letter-spacing: .4px;
-      border-radius: 24px;
-      border: 2px solid rgba(120,170,255,.70);
-      box-shadow:
-        0 18px 42px rgba(0,0,0,.32),
-        0 0 0 6px rgba(47,120,255,.10);
-      background: linear-gradient(180deg, rgba(47,120,255,.98), rgba(47,120,255,.70));
-      color: rgba(235,245,255,.95);
-    }
-
     .homeInstrOneLine{
-      margin: 10px 2px 0;
+      margin: 0 2px 0;
       color: rgba(235,245,255,.52);
       font-size: 14px;
+      line-height: 1.25;
+    }
+
+    .bigInstallWrap{
+      margin-top: 12px;
+    }
+    .bigInstallBtn{
+      height: 64px;
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: .2px;
+      border-radius: 999px;
+      border: 2px solid rgba(120,170,255,.70);
+      background: linear-gradient(180deg, rgba(47,120,255,.98), rgba(47,120,255,.70));
+      box-shadow:
+        0 18px 42px rgba(0,0,0,.36),
+        0 0 0 6px rgba(47,120,255,.14);
+      color: rgba(235,245,255,.94);
+    }
+    .bigInstallNote{
+      margin: 8px 4px 0;
+      font-size: 12px;
+      color: rgba(235,245,255,.44);
       line-height: 1.25;
     }
 
@@ -801,7 +807,7 @@ Changes (requested):
               letter-spacing=".6"
               filter="url(#angS)">Angel Code</text>
       </svg>
-      <div class="topVerTiny" id="topVerTiny">v—</div>
+      <div class="tinyVer" id="tinyVer">v—</div>
     </div>
 
     <div class="screenArea" id="screenArea">
@@ -823,8 +829,9 @@ Changes (requested):
                 <button id="btnHomeSubmit" class="btn primary">Submit</button>
               </div>
 
-              <div class="bigInstallWrap">
-                <button id="btnBigInstall" class="btn bigInstall">Install Angel Code</button>
+              <div id="bigInstallWrap" class="bigInstallWrap hidden">
+                <button id="btnBigInstall" class="btn bigInstallBtn">Install Angel Code</button>
+                <div class="bigInstallNote">Shows only when install is available and the app is not installed.</div>
               </div>
 
               <div class="homeInstrOneLine" id="homeInstrLine">
@@ -1049,16 +1056,19 @@ Changes (requested):
   }
 
   let deferredInstallPrompt = null;
+  let bigInstallSuppressed = false; // if an Export report is displayed, suppress big install until refresh
 
   window.addEventListener("beforeinstallprompt", (e) => {
     e.preventDefault();
     deferredInstallPrompt = e;
     updateInstallButton();
+    updateBigInstallVisibility();
   });
 
   window.addEventListener("appinstalled", () => {
     deferredInstallPrompt = null;
     updateInstallButton(true);
+    updateBigInstallVisibility();
   });
 
   async function tryInstall(){
@@ -1072,6 +1082,7 @@ Changes (requested):
     }catch{}
     deferredInstallPrompt = null;
     updateInstallButton();
+    updateBigInstallVisibility();
     return true;
   }
 
@@ -1094,20 +1105,62 @@ Changes (requested):
 
     const standaloneNow = installedMaybe || isStandalone();
 
+    // If installed: show the button as Uninstall.
     if(standaloneNow){
+      btn.classList.remove("hidden");
       btn.disabled = false;
       btn.textContent = "Uninstall";
       btn.dataset.mode = "uninstall";
       return;
     }
 
+    // Not installed: show only if install prompt is available; otherwise hide.
     btn.dataset.mode = "install";
     if(deferredInstallPrompt){
+      btn.classList.remove("hidden");
       btn.disabled = false;
       btn.textContent = "Install";
     }else{
+      btn.classList.add("hidden");
       btn.disabled = true;
       btn.textContent = "Install";
+    }
+  }
+
+  function homeAfterSubmitIsVisible(){
+    const el = $("homeAfterSubmit");
+    if(!el) return false;
+    return !el.classList.contains("hidden");
+  }
+
+  function updateBigInstallVisibility(){
+    const wrap = $("bigInstallWrap");
+    const btn = $("btnBigInstall");
+    if(!wrap || !btn) return;
+
+    // Big install is ONLY for Entry screen: before Submit reveal.
+    if(homeAfterSubmitIsVisible()){
+      wrap.classList.add("hidden");
+      return;
+    }
+
+    // If installed, never show big install.
+    if(isStandalone()){
+      wrap.classList.add("hidden");
+      return;
+    }
+
+    // If a report has been displayed, suppress until refresh.
+    if(bigInstallSuppressed){
+      wrap.classList.add("hidden");
+      return;
+    }
+
+    // Only show if install is available.
+    if(deferredInstallPrompt){
+      wrap.classList.remove("hidden");
+    }else{
+      wrap.classList.add("hidden");
     }
   }
 
@@ -1462,14 +1515,21 @@ Changes (requested):
     lockTimer = null;
   }
 
-  let infoOkHandler = null;
+  let pendingCloseOnInfoOk = false;
+
+  function closeAttempt(){
+    window.close();
+    setTimeout(() => {
+      alert("If it didn’t close: use your phone’s Back/Home.");
+    }, 220);
+  }
 
   function openInfo(title, message, opts){
     const mode = opts?.mode || "info";
+    pendingCloseOnInfoOk = !!opts?.closeOnOk;
+
     $("infoTitle").textContent = title || "Info";
     $("infoSub").textContent = message || "—";
-
-    infoOkHandler = (typeof opts?.onOk === "function") ? opts.onOk : null;
 
     if(mode === "added"){
       $("addedBlock").classList.remove("hidden");
@@ -1487,28 +1547,27 @@ Changes (requested):
   }
 
   function closeInfo(){
-    infoOkHandler = null;
     $("infoModal").classList.add("hidden");
     unlockTouches();
+    const shouldClose = pendingCloseOnInfoOk;
+    pendingCloseOnInfoOk = false;
+    if(shouldClose){
+      closeAttempt();
+    }
   }
 
   $("btnInfoX").addEventListener("click", (e)=>{ e.preventDefault(); closeInfo(); });
-
-  $("btnInfoOk").addEventListener("click", async (e)=>{
-    e.preventDefault();
-    const h = infoOkHandler;
-    closeInfo();
-    if(h){
-      try{ await h(); }catch{}
-    }
-  });
-
+  $("btnInfoOk").addEventListener("click", (e)=>{ e.preventDefault(); closeInfo(); });
   $("infoModal").addEventListener("click", (e)=>{ if(e.target === $("infoModal")) closeInfo(); });
 
   let exportPayload = null;
 
   function openExportModal(payload){
     exportPayload = payload;
+
+    // If a report is displayed, suppress big install until refresh.
+    bigInstallSuppressed = true;
+    updateBigInstallVisibility();
 
     $("exportModalTitle").textContent = payload?.title || "Export";
     $("exportModalSub").textContent = payload?.subtitle || "Your report is shown below.";
@@ -1530,6 +1589,7 @@ Changes (requested):
     exportPayload = null;
     $("exportModal").classList.add("hidden");
     unlockTouches();
+    // Per requirement: big install stays hidden until refresh (do not re-show here).
   }
 
   $("btnExportOk").addEventListener("click", (e)=>{ e.preventDefault(); closeExportModal(); });
@@ -1635,6 +1695,7 @@ Changes (requested):
   function setHomeRevealed(on){
     $("homeAfterSubmit").classList.toggle("hidden", !on);
     if(on) updateInstallButton();
+    updateBigInstallVisibility();
   }
 
   function renderHomeCardFromNumber(n){
@@ -1665,6 +1726,29 @@ Changes (requested):
       e.preventDefault();
       submitHome();
     }
+  });
+
+  async function handleBigInstall(){
+    if(!deferredInstallPrompt){
+      openInfo("Install", "Install is not available yet in this browser session.\n\nTip: In Chrome, use menu ⋮ → Install app (if shown).", {mode:"info"});
+      return;
+    }
+
+    openInfo(
+      "Installing…",
+      "Please wait a moment while installing.\n\nAfter install, close this tab and launch Angel Code from your Home Screen for the best experience.\n\nTap OK to close this tab.",
+      {mode:"info", closeOnOk:true}
+    );
+
+    // Start install in background immediately.
+    try{ await tryInstall(); }catch{}
+    updateInstallButton();
+    updateBigInstallVisibility();
+  }
+
+  $("btnBigInstall").addEventListener("click", (e)=>{
+    e.preventDefault();
+    handleBigInstall();
   });
 
   function openAddCalModal(){
@@ -2404,23 +2488,6 @@ self.addEventListener('fetch', (e)=>{ });`;
     );
   }
 
-  async function installFlowAndClose(){
-    const msg =
-      "Please wait a moment while installing.\n\n" +
-      "After installing, please close this window and launch from the installed app for a better experience.\n\n" +
-      "Otherwise you may continue to use the web version.";
-    openInfo("Install", msg, {
-      mode:"info",
-      onOk: async () => {
-        try{ await tryInstall(); }catch{}
-        window.close();
-        setTimeout(() => {
-          alert("If it didn’t close: use your phone’s Back/Home.");
-        }, 200);
-      }
-    });
-  }
-
   function attachButtons(){
     const btnView = $("btnViewCalendar");
     if(btnView) btnView.addEventListener("click", () => snapToIndex(1, true));
@@ -2437,17 +2504,13 @@ self.addEventListener('fetch', (e)=>{ });`;
     if(btnAdd) btnAdd.addEventListener("click", () => openAddCalModal());
 
     const btnInstall = $("btnInstall");
-    if(btnInstall) btnInstall.addEventListener("click", (e) => {
+    if(btnInstall) btnInstall.addEventListener("click", async (e) => {
       e.preventDefault();
       const mode = btnInstall.dataset.mode || "install";
       if(mode === "uninstall"){ uninstallGuidance(); return; }
-      tryInstall();
-    });
-
-    const big = $("btnBigInstall");
-    if(big) big.addEventListener("click", (e) => {
-      e.preventDefault();
-      installFlowAndClose();
+      await tryInstall();
+      updateInstallButton();
+      updateBigInstallVisibility();
     });
 
     $("calMonth").addEventListener("change", renderCalendar);
@@ -2462,7 +2525,7 @@ self.addEventListener('fetch', (e)=>{ });`;
   registerSW();
 
   $("homeVerLabel").textContent = APP_VERSION;
-  $("topVerTiny").textContent = APP_VERSION;
+  $("tinyVer").textContent = APP_VERSION;
 
   setHomeRevealed(false);
 
@@ -2475,6 +2538,7 @@ self.addEventListener('fetch', (e)=>{ });`;
   renderCalendar();
 
   updateInstallButton();
+  updateBigInstallVisibility();
 
   try{ document.activeElement?.blur(); }catch{}
   setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 0);
@@ -2497,7 +2561,8 @@ EOF Version Detail Notes
 App Version: v1.2A11
 Base: v1.2A10
 Changes:
-- Added a prominent Home “Install Angel Code” button under the entry row.
-- Install flow now shows a wait/close guidance message; OK triggers install prompt (if available) then attempts to close the tab/window (with fallback alert if blocked).
-- Version number now appears in very small text under the logo.
+- Added large Entry-screen Install button (shown only when install is available and app is not installed).
+- Big Install button auto-hides when installed, after Submit reveal, and after any Export report is displayed (until refresh).
+- Main-panel Install button is hidden when install is unavailable; shows Uninstall when installed.
+- Added tiny version label under the logo.
 -->
