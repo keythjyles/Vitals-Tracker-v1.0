@@ -1,11 +1,10 @@
 <!--
 Angel Code — BOF Version Detail Notes
-App Version: v1.2A15
+App Version: v1.2A16
 Base: v1.2A14
 Changes (requested):
-- Home (pre-submit) Install button now fills the available width of the actions grid (full row), and matches the View Calendar button height.
-- Add a tiny version number under the logo (always visible).
-- No other behavior changes.
+- Add small version number under the logo.
+- Install button resized to match View Calendar button height and fill its grid slot.
 -->
 <!doctype html>
 
@@ -68,7 +67,6 @@ Changes (requested):
     .logoTitle{
       margin:4px 6px 0;
       display:flex;
-      flex-direction:column;
       justify-content:center;
       align-items:center;
       text-shadow: 0 10px 22px rgba(0,0,0,.35);
@@ -81,14 +79,16 @@ Changes (requested):
       height:auto;
       display:block;
     }
-    .logoVerTiny{
-      margin-top: 2px;
-      font-size: 11px;
+
+    .logoVer{
+      margin: -4px 0 2px;
+      text-align:center;
+      font-size: 12px;
       font-weight: 850;
       letter-spacing: .2px;
       color: rgba(235,245,255,.38);
-      text-shadow: 0 10px 22px rgba(0,0,0,.35);
       user-select:none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .screenArea{
@@ -212,7 +212,6 @@ Changes (requested):
       white-space:nowrap;
     }
 
-    /* Used by Install/Export/Exit row to keep identical sizing */
     .btn.tight{
       height: 48px;
       font-size: 16px;
@@ -424,6 +423,7 @@ Changes (requested):
       gap:10px;
       margin: 12px 0 0;
     }
+    .homeActions .btn{ width:100%; }
     .homeActions .btn.wide{
       grid-column: 1 / -1;
     }
@@ -432,16 +432,6 @@ Changes (requested):
       border-color: rgba(255,120,120,.42);
       color: rgba(255,225,225,.92);
       box-shadow: 0 10px 26px rgba(0,0,0,.22);
-    }
-
-    /* NEW: pre-submit install fills the row */
-    .homeActions.preSubmit #btnInstall{
-      grid-column: 1 / -1;
-      width: 100%;
-      height: var(--btnH);          /* same height as View Calendar (normal .btn) */
-      font-size: 18px;             /* match normal button */
-      font-weight: 650;            /* match normal button */
-      letter-spacing: .2px;
     }
 
     /* Modal */
@@ -744,6 +734,7 @@ Changes (requested):
       user-select:none;
     }
 
+    /* Ensure Export modal always appears above other modals */
     #exportModal{ z-index: 10020; }
   </style>
 </head>
@@ -786,8 +777,8 @@ Changes (requested):
           letter-spacing=".6"
           filter="url(#angS)">Angel Code</text>
       </svg>
-      <div class="logoVerTiny" id="logoVerTiny">v—</div>
     </div>
+    <div class="logoVer" id="logoVer">v—</div>
 
     <div class="screenArea" id="screenArea">
       <div class="ptr" id="ptr">
@@ -832,11 +823,11 @@ Changes (requested):
               </div>
 
               <!-- Actions grid: Install ALWAYS lives here (same location before/after Submit) -->
-              <div class="homeActions preSubmit" id="homeActions">
+              <div class="homeActions">
                 <button id="btnAddToCalendar" class="btn primary wide">Add to Calendar</button>
 
                 <button id="btnViewCalendar" class="btn">View Calendar</button>
-                <button id="btnInstall" class="btn tight">Install</button>
+                <button id="btnInstall" class="btn">Install</button>
 
                 <button id="btnHomeExport" class="btn tight">Export</button>
                 <button id="btnExitHome" class="btn tight exitSmall">Exit</button>
@@ -1019,7 +1010,7 @@ Changes (requested):
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.2A15";
+  const APP_VERSION = "v1.2A16";
   const STORAGE_KEY = "angel_numbers_records_v2_2025_12_29"; // keep existing data
 
   const DAY_MS = 24*60*60*1000;
@@ -1080,17 +1071,12 @@ Changes (requested):
     const btnView = $("btnViewCalendar");
     const btnExport = $("btnHomeExport");
     const btnExit = $("btnExitHome");
-    const actions = $("homeActions");
-
-    // Before submit, we want the install to be full-width (preSubmit mode)
-    actions.classList.toggle("preSubmit", !showAfter);
 
     if(btnAdd) btnAdd.classList.toggle("hidden", !showAfter);
     if(btnView) btnView.classList.toggle("hidden", !showAfter);
     if(btnExport) btnExport.classList.toggle("hidden", !showAfter);
     if(btnExit) btnExit.classList.toggle("hidden", !showAfter);
 
-    // Meaning block
     $("homeAfterSubmit").classList.toggle("hidden", !showAfter);
 
     updateInstallButton(undefined, showAfter);
@@ -1114,8 +1100,6 @@ Changes (requested):
       btn.dataset.mode = "uninstall";
       btn.disabled = false;
       btn.textContent = "Uninstall";
-      // After-submit uses tight sizing (same as Exit)
-      btn.classList.add("tight");
       return;
     }
 
@@ -1124,13 +1108,6 @@ Changes (requested):
     btn.disabled = !deferredInstallPrompt;
 
     btn.classList.remove("hidden");
-
-    // Before-submit: remove tight so it matches View Calendar button height
-    if(!afterSubmit){
-      btn.classList.remove("tight");
-    }else{
-      btn.classList.add("tight");
-    }
   }
 
   async function copyToClipboard(text){
@@ -2389,8 +2366,6 @@ self.addEventListener('fetch', (e)=>{ });`;
     });
   }
 
-  let lastIdentify = { number:"", pattern:"", cardText:"" };
-
   function exportCurrentIdentify(){
     const n = lastIdentify.number || normalizeNumberInput($("homeIdNum").value);
     if(!n){
@@ -2421,47 +2396,14 @@ self.addEventListener('fetch', (e)=>{ });`;
     );
   }
 
-  function renderHomeCardFromNumber(n){
-    const card = buildAngelCard(n);
-    $("homeAngelHeader").textContent = `Angel Card Number: ${n || "—"}`;
-    $("homeAngelBigNum").textContent = n || "—";
-    $("homeMeta").textContent = card.cardText || "—";
-    lastIdentify = { number: n, pattern: card.pattern || "—", cardText: card.cardText || "—" };
-  }
-
-  function submitHome(){
-    const n = normalizeNumberInput($("homeIdNum").value);
-    if(!n){
-      openInfo("Enter a number", "Please type an angel number, then tap Submit.", {mode:"info"});
-      return;
-    }
-    setHomeActionsVisibility(true);
-    renderHomeCardFromNumber(n);
-    try{ document.activeElement?.blur(); }catch{}
-  }
-
-  function openAddCalModal(){
-    const n = lastIdentify.number || normalizeNumberInput($("homeIdNum").value);
-    if(!n){
-      openInfo("Enter a number", "Type an angel number first, then tap Submit. After that, you can add it to your calendar.", {mode:"info"});
-      return;
-    }
-    $("addCalNumber").textContent = n;
-    $("addCalNotes").value = "";
-    $("addCalDT").value = toDTLocalValue(Date.now());
-    $("addCalModal").classList.remove("hidden");
-    lockTouches(90);
-    try{ document.activeElement?.blur(); }catch{}
-  }
-
   function attachButtons(){
-    $("btnHomeSubmit").addEventListener("click", (e)=>{ e.preventDefault(); submitHome(); });
-    $("homeIdNum").addEventListener("keydown", (e)=>{ if(e.key === "Enter"){ e.preventDefault(); submitHome(); } });
-
     $("btnViewCalendar").addEventListener("click", () => snapToIndex(1, true));
     $("btnBackFromCalendar").addEventListener("click", () => snapToIndex(0, true));
 
-    $("btnHomeExport").addEventListener("click", (e)=>{ e.preventDefault(); exportCurrentIdentify(); });
+    $("btnHomeExport").addEventListener("click", (e) => {
+      e.preventDefault();
+      exportCurrentIdentify();
+    });
 
     $("btnAddToCalendar").addEventListener("click", () => openAddCalModal());
 
@@ -2473,20 +2415,18 @@ self.addEventListener('fetch', (e)=>{ });`;
     });
 
     $("calMonth").addEventListener("change", renderCalendar);
-    $("btnCalAddNew").addEventListener("click", (e)=>{ e.preventDefault(); openNewSighting(); });
+
+    $("btnCalAddNew").addEventListener("click", (e) => {
+      e.preventDefault();
+      openNewSighting();
+    });
   }
-
-  // --- Remaining functions unchanged (calendar/edit/modals/etc.) ---
-  // To keep this edit strictly scoped, we do not alter those sections.
-
-  // (Reusing existing code paths already declared above in this file.)
-  // NOTE: The calendar/edit modal functions are present earlier in the file.
 
   injectManifest();
   registerSW();
 
   $("homeVerLabel").textContent = APP_VERSION;
-  $("logoVerTiny").textContent = APP_VERSION;
+  $("logoVer").textContent = APP_VERSION;
 
   attachButtons();
   attachExit();
@@ -2516,9 +2456,9 @@ self.addEventListener('fetch', (e)=>{ });`;
 </html>
 <!--
 EOF Version Detail Notes
-App Version: v1.2A15
+App Version: v1.2A16
 Base: v1.2A14
 Changes:
-- Pre-submit: Install button is full-width and matches View Calendar button height.
-- Tiny version string added under the logo (always visible).
+- Small version label under the logo (matches APP_VERSION).
+- Install button resized to match View Calendar button height and fill its grid slot.
 -->
