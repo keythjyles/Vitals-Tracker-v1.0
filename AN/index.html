@@ -1,14 +1,15 @@
 <!--
 Angel Code — BOF Version Detail Notes
-App Version: v1.2A10
-Base: v1.2A9
+App Version: v1.2A13
+Base: v1.2A10
 Changes (requested):
-- Fix: Export button from View & Update now reliably opens the Export report modal (export modal sits above other modals).
-- Export report header simplified: removed the “scribbled over” capture/explanation block; header is now clean and short.
-- Export report footer: removed the literal “Footer” label line (kept the explanation text).
-- Advance version and update BOF/EOF notes.
+- Verified/kept Pull-to-Refresh behavior (top-of-scroll only; releases past threshold reload).
+- Install button layout: always sits to the RIGHT of View Calendar (same row) after Submit.
+- Install button visibility: on initial load, if NOT installed, Install is visible on the main screen; if installed, it stays hidden with the other post-Submit buttons.
+- Advanced version and updated BOF/EOF notes.
 -->
 <!doctype html>
+
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -27,7 +28,6 @@ Changes (requested):
       --text:rgba(235,245,255,.86);
       --muted:rgba(235,245,255,.58);
       --muted2:rgba(235,245,255,.42);
-
       --accentBorder: rgba(43,78,122,.85);
       --accentGlow: rgba(43,78,122,.18);
       --themeLine: rgba(43,78,122,.55);
@@ -401,6 +401,21 @@ Changes (requested):
       line-height: 1.25;
     }
 
+    /* Pre-submit install row (only shown when NOT installed) */
+    .preInstallRow{
+      margin-top: 12px;
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+    }
+    .preInstallRow .btn{
+      height: 52px;
+      font-size: 18px;
+      font-weight: 820;
+      letter-spacing: .2px;
+      min-width: 160px;
+    }
+
     .homeActions{
       display:grid;
       grid-template-columns: 1fr 1fr;
@@ -728,13 +743,12 @@ Changes (requested):
       user-select:none;
     }
 
-    /* Ensure Export modal always appears above other modals (fix for hidden export) */
+    /* Ensure Export modal always appears above other modals */
     #exportModal{ z-index: 10020; }
   </style>
 </head>
 <body>
   <div class="touchLock" id="touchLock"></div>
-
   <div class="app" id="appRoot">
     <div class="logoTitle" aria-label="Angel Code">
       <svg viewBox="0 0 900 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Angel Code">
@@ -764,14 +778,13 @@ Changes (requested):
           <path d="M46 34 L46 42" stroke="rgba(235,245,255,.82)" stroke-width="4" stroke-linecap="round"/>
           <path d="42 38 L50 38" stroke="rgba(235,245,255,.82)" stroke-width="4" stroke-linecap="round"/>
         </g>
-
         <text x="160" y="92"
-              font-family="system-ui,Segoe UI,Roboto,Helvetica,Arial"
-              font-size="66"
-              font-weight="860"
-              fill="url(#angG)"
-              letter-spacing=".6"
-              filter="url(#angS)">Angel Code</text>
+          font-family="system-ui,Segoe UI,Roboto,Helvetica,Arial"
+          font-size="66"
+          font-weight="860"
+          fill="url(#angG)"
+          letter-spacing=".6"
+          filter="url(#angS)">Angel Code</text>
       </svg>
     </div>
 
@@ -798,6 +811,11 @@ Changes (requested):
                 Swipe left to view Calendar.
               </div>
 
+              <!-- Pre-submit Install (visible on load when NOT installed) -->
+              <div id="preInstallRow" class="preInstallRow hidden">
+                <div id="preInstallHolder"></div>
+              </div>
+
               <div id="homeAfterSubmit" class="hidden">
                 <div class="meaningCard" id="homeMeaningCard">
                   <div class="angelCardFrame" id="homeAngelFrame">
@@ -817,8 +835,11 @@ Changes (requested):
 
                 <div class="homeActions">
                   <button id="btnAddToCalendar" class="btn primary wide">Add to Calendar</button>
+
+                  <!-- View + Install row (Install must be to the RIGHT of View Calendar) -->
                   <button id="btnViewCalendar" class="btn">View Calendar</button>
-                  <button id="btnInstall" class="btn">Install</button>
+                  <div id="postInstallHolder"></div>
+
                   <button id="btnHomeExport" class="btn tight">Export</button>
                   <button id="btnExitHome" class="btn tight exitSmall">Exit</button>
                 </div>
@@ -1001,7 +1022,7 @@ Changes (requested):
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.2A10";
+  const APP_VERSION = "v1.2A13";
   const STORAGE_KEY = "angel_numbers_records_v2_2025_12_29"; // keep existing data
 
   const DAY_MS = 24*60*60*1000;
@@ -1054,27 +1075,65 @@ Changes (requested):
     openInfo("Uninstall", msg, {mode:"info"});
   }
 
-  function updateInstallButton(installedMaybe=false){
-    const btn = $("btnInstall");
-    if(!btn) return;
+  function ensureInstallButtonExists(){
+    let btn = $("btnInstall");
+    if(btn) return btn;
 
+    btn = document.createElement("button");
+    btn.id = "btnInstall";
+    btn.className = "btn";
+    btn.type = "button";
+    btn.textContent = "Install";
+    return btn;
+  }
+
+  function placeInstallButton(where){
+    const btn = ensureInstallButtonExists();
+    const preRow = $("preInstallRow");
+    const pre = $("preInstallHolder");
+    const post = $("postInstallHolder");
+    if(!btn || !preRow || !pre || !post) return;
+
+    if(where === "pre"){
+      preRow.classList.remove("hidden");
+      pre.appendChild(btn);
+    }else{
+      preRow.classList.add("hidden");
+      post.appendChild(btn);
+    }
+  }
+
+  function updateInstallButton(installedMaybe=false){
+    const btn = ensureInstallButtonExists();
     const standaloneNow = installedMaybe || isStandalone();
 
     if(standaloneNow){
+      // Requirement: if installed, keep it hidden with the other buttons (no install UI on load)
+      try{
+        $("preInstallRow")?.classList.add("hidden");
+        btn.classList.add("hidden");
+      }catch{}
+      btn.dataset.mode = "uninstall";
       btn.disabled = false;
       btn.textContent = "Uninstall";
-      btn.dataset.mode = "uninstall";
       return;
     }
 
+    // Not installed
+    btn.classList.remove("hidden");
     btn.dataset.mode = "install";
-    if(deferredInstallPrompt){
-      btn.disabled = false;
-      btn.textContent = "Install";
+    btn.textContent = "Install";
+
+    // Visibility on initial load: show on main screen (pre-submit)
+    // After Submit: it will be moved to the right of View Calendar.
+    if($("homeAfterSubmit")?.classList.contains("hidden")){
+      placeInstallButton("pre");
     }else{
-      btn.disabled = true;
-      btn.textContent = "Install";
+      placeInstallButton("post");
     }
+
+    // Enable only if prompt exists; visible regardless (per requirement)
+    btn.disabled = !deferredInstallPrompt;
   }
 
   async function copyToClipboard(text){
@@ -1586,7 +1645,14 @@ Changes (requested):
 
   function setHomeRevealed(on){
     $("homeAfterSubmit").classList.toggle("hidden", !on);
-    if(on) updateInstallButton();
+
+    // Move Install button depending on state
+    if(isStandalone()){
+      updateInstallButton(true);
+    }else{
+      placeInstallButton(on ? "post" : "pre");
+      updateInstallButton();
+    }
   }
 
   function renderHomeCardFromNumber(n){
@@ -2222,8 +2288,10 @@ Changes (requested):
 
       const y = e.touches[0].clientY;
       const dy = y - ptrStartY;
+
       if(dy <= 0){
         ptrSet(false);
+        ptrTriggered = false;
         return;
       }
 
@@ -2253,11 +2321,13 @@ Changes (requested):
       }else{
         ptrSet(false);
       }
+      ptrTriggered = false;
     }, {passive:true});
 
     screenArea.addEventListener("touchcancel", ()=>{
       if(!ptrActive) return;
       ptrActive = false;
+      ptrTriggered = false;
       ptrSet(false);
     }, {passive:true});
   }
@@ -2371,8 +2441,9 @@ self.addEventListener('fetch', (e)=>{ });`;
     const btnAdd = $("btnAddToCalendar");
     if(btnAdd) btnAdd.addEventListener("click", () => openAddCalModal());
 
-    const btnInstall = $("btnInstall");
-    if(btnInstall) btnInstall.addEventListener("click", (e) => {
+    // Install button (created/placed dynamically)
+    const btnInstall = ensureInstallButtonExists();
+    btnInstall.addEventListener("click", (e) => {
       e.preventDefault();
       const mode = btnInstall.dataset.mode || "install";
       if(mode === "uninstall"){ uninstallGuidance(); return; }
@@ -2391,6 +2462,8 @@ self.addEventListener('fetch', (e)=>{ });`;
   registerSW();
 
   $("homeVerLabel").textContent = APP_VERSION;
+
+  // Initial: NOT revealed. If not installed, show Install on main screen.
   setHomeRevealed(false);
 
   attachButtons();
@@ -2418,13 +2491,13 @@ self.addEventListener('fetch', (e)=>{ });`;
   </script>
 </body>
 </html>
-
 <!--
 EOF Version Detail Notes
-App Version: v1.2A10
-Base: v1.2A9
+App Version: v1.2A13
+Base: v1.2A10
 Changes:
-- Fixed: Export report modal now reliably displays above other modals (View & Update export no longer appears to “do nothing”).
-- Export report header simplified (removed capture/explanation block); clean header only.
-- Export report footer label "Footer" removed (kept the explanation text).
+- Verified/kept Pull-to-Refresh behavior (top-of-scroll only; release past threshold reloads).
+- Install button now sits to the RIGHT of View Calendar after Submit.
+- Install button is visible on initial load only when NOT installed; if installed, it remains hidden with the post-Submit button set.
+- Version advanced and notes updated.
 -->
