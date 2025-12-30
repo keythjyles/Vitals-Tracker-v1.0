@@ -1,9 +1,11 @@
 <!--
 Angel Code — BOF Version Detail Notes
-App Version: v1.2A20
-Base: v1.2A19
+App Version: v1.2A21
+Base: v1.2A20
 Changes (requested):
-- FIX: Easter Egg launch now forces keyboard to close (blurs active input) when overlay opens.
+- FIX: Easter Egg (333333333) no longer triggers while typing; it ONLY triggers on Home Submit.
+- ADD: Dedicated Angel Card for 333333333 (always available, independent of Easter Egg) using drafted language.
+- ADD: 333333333 Angel Card has a unique gold glowing border (Home + Edit views).
 -->
 <!doctype html>
 
@@ -29,6 +31,10 @@ Changes (requested):
       --accentGlow: rgba(43,78,122,.18);
       --themeLine: rgba(43,78,122,.55);
       --themeLineSoft: rgba(43,78,122,.28);
+
+      /* Special gold glow for 333333333 */
+      --goldBorder: rgba(255,214,106,.88);
+      --goldGlow: rgba(255,214,106,.22);
 
       --shadow:0 14px 40px rgba(0,0,0,.38);
       --radius:26px;
@@ -359,6 +365,16 @@ Changes (requested):
       color: rgba(235,245,255,.44);
       font-size:12px;
       line-height:1.25;
+    }
+
+    /* Special gold glow class (ONLY for 333333333 card) */
+    .goldGlow{
+      border-color: var(--goldBorder) !important;
+      box-shadow:
+        0 16px 46px rgba(0,0,0,.34),
+        0 0 0 1px rgba(255,214,106,.14),
+        0 0 22px var(--goldGlow),
+        0 0 46px rgba(255,214,106,.14) !important;
     }
 
     /* HOME layout */
@@ -778,7 +794,6 @@ Changes (requested):
       </svg>
     </div>
     <div class="logoVer" id="logoVer">v—</div>
-
     <div class="screenArea" id="screenArea">
       <div class="ptr" id="ptr">
         <div class="ptrDot"></div>
@@ -856,6 +871,7 @@ Changes (requested):
         </div>
       </div>
     </div>
+
   </div>
 
   <!-- Info / Added modal -->
@@ -972,7 +988,7 @@ Changes (requested):
       <div class="modalTitle" id="editTitle">View &amp; Update</div>
       <div class="modalSub" id="editSub">Angel Card first. Entry details are below.</div>
 
-      <div class="angelCardFrame">
+      <div class="angelCardFrame" id="editAngelFrame">
         <div id="editAngelHeader" class="angelHeaderLine">Angel Card Number: —</div>
         <div id="editAngelBig" class="angelBigNum">—</div>
         <div id="editAngelCard" class="metaScroll" style="max-height: 185px; margin-top:0;">—</div>
@@ -1009,11 +1025,59 @@ Changes (requested):
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.2A20";
+  const APP_VERSION = "v1.2A21";
   const STORAGE_KEY = "angel_numbers_records_v2_2025_12_29"; // keep existing data
 
   const DAY_MS = 24*60*60*1000;
   const $ = (id) => document.getElementById(id);
+
+  const SPECIAL_333 = "333333333";
+  const SPECIAL_333_TEXT =
+`333 · 333 · 333
+Three times three times three says this plainly:
+Your life is not random.
+Your survival was not accidental.
+Your sensitivity is not a flaw.
+This number speaks to a person whose awareness does not arrive through effort.
+It arrives uninvited.
+It settles deep in the body before the mind has words for it.
+There are people who notice things,
+and there are people who know—
+not where, not how, but that.
+This card marks the latter.
+It describes a mind that has been shaped by intensity,
+by sudden change,
+by moments where everything familiar vanished
+and only presence remained.
+From that kind of life comes a rare ability:
+the capacity to feel truth before it announces itself.
+This is not imagination.
+It is not anxiety.
+It is a form of intuition that moves through the nervous system first—
+a quiet warning,
+a heaviness,
+a certainty without explanation.
+People with this frequency do not chase meaning.
+Meaning finds them.
+They are drawn to belief systems, symbols, patterns, and the unseen structure beneath reality—not to escape life, but to make sense of it.
+They carry a servant’s posture, not because they are small, but because they understand what matters.
+They adapt.
+They endure.
+They keep going without complaint.
+And through all of it, something in them remains intact.
+Bright.
+Sensitive.
+Unbroken.
+This number appears as reassurance:
+What you carry is real.
+What you feel is valid.
+And what you have lived through has tuned you—not weakened you.
+Some lights are loud.
+Others are steady enough to guide people through darkness.
+This is the latter.
+And the angels?
+They do not need to find you.
+They already recognize the frequency you move in.`;
 
   function isStandalone(){
     try{
@@ -1356,7 +1420,17 @@ Changes (requested):
 
   function buildAngelCard(n){
     if(!n){
-      return { pattern: "—", headline: "—", cardText: "—" };
+      return { pattern: "—", headline: "—", cardText: "—", isSpecialGold:false };
+    }
+
+    // Dedicated special card for 333333333 (always available)
+    if(n === SPECIAL_333){
+      return {
+        pattern: detectPattern(n),
+        headline: "333 · 333 · 333",
+        cardText: SPECIAL_333_TEXT,
+        isSpecialGold: true
+      };
     }
 
     const pattern = detectPattern(n);
@@ -1443,7 +1517,12 @@ Changes (requested):
     lines.push("• Use the pattern note as ‘how it shows up’ in real life.");
     lines.push("• Choose one small action that fits your situation.");
 
-    return { pattern, headline, cardText: lines.join("\n") };
+    return { pattern, headline, cardText: lines.join("\n"), isSpecialGold:false };
+  }
+
+  function applyGoldGlow(frameEl, on){
+    if(!frameEl) return;
+    frameEl.classList.toggle("goldGlow", !!on);
   }
 
   let lockTimer = null;
@@ -1618,9 +1697,13 @@ Changes (requested):
 
   function renderHomeCardFromNumber(n){
     const card = buildAngelCard(n);
+
     $("homeAngelHeader").textContent = `Angel Card Number: ${n || "—"}`;
     $("homeAngelBigNum").textContent = n || "—";
     $("homeMeta").textContent = card.cardText || "—";
+
+    applyGoldGlow($("homeAngelFrame"), !!card.isSpecialGold);
+
     lastIdentify = { number: n, pattern: card.pattern || "—", cardText: card.cardText || "—" };
   }
 
@@ -1631,7 +1714,7 @@ Changes (requested):
       return;
     }
 
-    // Easter Egg trigger on Submit (also wired via input listeners at EOF)
+    // Easter Egg trigger ONLY on Submit.
     if(typeof window.__AC_EGG_TRY === "function"){
       try{ window.__AC_EGG_TRY(n); }catch{}
     }
@@ -1930,6 +2013,8 @@ Changes (requested):
     $("editAngelBig").textContent = n || "—";
     $("editAngelCard").textContent = card.cardText || "—";
 
+    applyGoldGlow($("editAngelFrame"), !!card.isSpecialGold);
+
     setDetailsOpen(false);
 
     $("editModal").classList.remove("hidden");
@@ -1951,6 +2036,7 @@ Changes (requested):
     $("editAngelHeader").textContent = `Angel Card Number: ${n || "—"}`;
     $("editAngelBig").textContent = n || "—";
     $("editAngelCard").textContent = card.cardText || "—";
+    applyGoldGlow($("editAngelFrame"), !!card.isSpecialGold);
   }
 
   $("editNum").addEventListener("input", refreshEditDerived);
@@ -2463,142 +2549,142 @@ self.addEventListener('fetch', (e)=>{ });`;
 })();
   </script>
 
-<!-- ===========================
+  <!-- ===========================
      ANGEL CODE — EASTER EGG (EOF)
-     Trigger: type 333333333 in the number field (Home, Add, or Edit)
+     Trigger: ONLY via Home Submit when number equals 333333333
      =========================== -->
-<style>
-  #eggOverlay{
-    position:fixed; inset:0;
-    display:none;
-    align-items:center; justify-content:center;
-    padding:18px;
-    background:rgba(0,0,0,.72);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    z-index:999999;
-  }
-  #eggOverlay.show{ display:flex; }
+  <style>
+    #eggOverlay{
+      position:fixed; inset:0;
+      display:none;
+      align-items:center; justify-content:center;
+      padding:18px;
+      background:rgba(0,0,0,.72);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index:999999;
+    }
+    #eggOverlay.show{ display:flex; }
 
-  #eggCard{
-    position:relative;
-    width:min(720px, 94vw);
-    border-radius:26px;
-    border:1px solid rgba(180,210,255,.34);
-    background:
-      radial-gradient(1200px 600px at 20% 0%, rgba(120,180,255,.20), transparent 60%),
-      radial-gradient(900px 500px at 80% 10%, rgba(255,120,160,.16), transparent 55%),
-      rgba(8,16,31,.92);
-    box-shadow: 0 22px 80px rgba(0,0,0,.55);
-    overflow:hidden;
-  }
+    #eggCard{
+      position:relative;
+      width:min(720px, 94vw);
+      border-radius:26px;
+      border:1px solid rgba(180,210,255,.34);
+      background:
+        radial-gradient(1200px 600px at 20% 0%, rgba(120,180,255,.20), transparent 60%),
+        radial-gradient(900px 500px at 80% 10%, rgba(255,120,160,.16), transparent 55%),
+        rgba(8,16,31,.92);
+      box-shadow: 0 22px 80px rgba(0,0,0,.55);
+      overflow:hidden;
+    }
 
-  #eggFx{
-    position:absolute; inset:0;
-    width:100%; height:100%;
-    display:block;
-    opacity:.95;
-  }
+    #eggFx{
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      display:block;
+      opacity:.95;
+    }
 
-  #eggInner{
-    position:relative;
-    padding:24px 22px 20px;
-    text-align:center;
-  }
-  #eggTitle{
-    font-size: clamp(22px, 3.8vw, 34px);
-    line-height:1.15;
-    letter-spacing:.2px;
-    color: rgba(235,245,255,.92);
-    text-shadow: 0 2px 18px rgba(0,0,0,.55);
-    margin: 6px 0 14px;
-    font-weight: 800;
-  }
-  #eggSub{
-    font-size: clamp(15px, 2.8vw, 18px);
-    line-height:1.35;
-    color: rgba(235,245,255,.82);
-    margin: 0 0 14px;
-  }
+    #eggInner{
+      position:relative;
+      padding:24px 22px 20px;
+      text-align:center;
+    }
+    #eggTitle{
+      font-size: clamp(22px, 3.8vw, 34px);
+      line-height:1.15;
+      letter-spacing:.2px;
+      color: rgba(235,245,255,.92);
+      text-shadow: 0 2px 18px rgba(0,0,0,.55);
+      margin: 6px 0 14px;
+      font-weight: 800;
+    }
+    #eggSub{
+      font-size: clamp(15px, 2.8vw, 18px);
+      line-height:1.35;
+      color: rgba(235,245,255,.82);
+      margin: 0 0 14px;
+    }
 
-  #eggHeartWrap{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    margin: 10px 0 10px;
-  }
-  #eggHeart{
-    width: clamp(92px, 18vw, 160px);
-    height: clamp(92px, 18vw, 160px);
-    filter: drop-shadow(0 10px 24px rgba(255,0,0,.22));
-    transform-origin:50% 60%;
-    animation: eggPulse 1.15s ease-in-out infinite;
-  }
-  @keyframes eggPulse{
-    0%{ transform: scale(1); }
-    35%{ transform: scale(1.10); }
-    70%{ transform: scale(0.98); }
-    100%{ transform: scale(1); }
-  }
+    #eggHeartWrap{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin: 10px 0 10px;
+    }
+    #eggHeart{
+      width: clamp(92px, 18vw, 160px);
+      height: clamp(92px, 18vw, 160px);
+      filter: drop-shadow(0 10px 24px rgba(255,0,0,.22));
+      transform-origin:50% 60%;
+      animation: eggPulse 1.15s ease-in-out infinite;
+    }
+    @keyframes eggPulse{
+      0%{ transform: scale(1); }
+      35%{ transform: scale(1.10); }
+      70%{ transform: scale(0.98); }
+      100%{ transform: scale(1); }
+    }
 
-  #eggRow{
-    display:flex;
-    gap:10px;
-    justify-content:center;
-    margin-top: 14px;
-    flex-wrap: wrap;
-  }
-  #eggCloseBtn{
-    appearance:none;
-    border:1px solid rgba(235,245,255,.22);
-    background: rgba(12,21,40,.75);
-    color: rgba(235,245,255,.86);
-    padding: 10px 14px;
-    border-radius: 14px;
-    font-weight: 700;
-    cursor:pointer;
-    min-width: 140px;
-  }
-  #eggCloseBtn:active{ transform: translateY(1px); }
+    #eggRow{
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+    #eggCloseBtn{
+      appearance:none;
+      border:1px solid rgba(235,245,255,.22);
+      background: rgba(12,21,40,.75);
+      color: rgba(235,245,255,.86);
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-weight: 700;
+      cursor:pointer;
+      min-width: 140px;
+    }
+    #eggCloseBtn:active{ transform: translateY(1px); }
 
-  #eggHint{
-    font-size: 12px;
-    color: rgba(235,245,255,.52);
-    margin-top: 10px;
-  }
-</style>
+    #eggHint{
+      font-size: 12px;
+      color: rgba(235,245,255,.52);
+      margin-top: 10px;
+    }
+  </style>
 
-<div id="eggOverlay" aria-hidden="true" role="dialog" aria-label="Angel Code Easter Egg">
-  <div id="eggCard">
-    <canvas id="eggFx"></canvas>
-    <div id="eggInner">
-      <div id="eggTitle">The Angels love you Timmy!</div>
+  <div id="eggOverlay" aria-hidden="true" role="dialog" aria-label="Angel Code Easter Egg">
+    <div id="eggCard">
+      <canvas id="eggFx"></canvas>
+      <div id="eggInner">
+        <div id="eggTitle">The Angels love you Timmy!</div>
 
-      <div id="eggHeartWrap" aria-hidden="true">
-        <svg id="eggHeart" viewBox="0 0 64 64">
-          <defs>
-            <linearGradient id="eggHeartG" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#ff2a2a"/>
-              <stop offset="0.55" stop-color="#ff0033"/>
-              <stop offset="1" stop-color="#c4002a"/>
-            </linearGradient>
-          </defs>
-          <path fill="url(#eggHeartG)" d="M32 56s-20-12.7-27-26C0.5 20.6 6.4 10 17.2 10c6 0 10.2 3.2 14.8 8 4.6-4.8 8.8-8 14.8-8C57.6 10 63.5 20.6 59 30c-7 13.3-27 26-27 26z"/>
-        </svg>
+        <div id="eggHeartWrap" aria-hidden="true">
+          <svg id="eggHeart" viewBox="0 0 64 64">
+            <defs>
+              <linearGradient id="eggHeartG" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#ff2a2a"/>
+                <stop offset="0.55" stop-color="#ff0033"/>
+                <stop offset="1" stop-color="#c4002a"/>
+              </linearGradient>
+            </defs>
+            <path fill="url(#eggHeartG)" d="M32 56s-20-12.7-27-26C0.5 20.6 6.4 10 17.2 10c6 0 10.2 3.2 14.8 8 4.6-4.8 8.8-8 14.8-8C57.6 10 63.5 20.6 59 30c-7 13.3-27 26-27 26z"/>
+          </svg>
+        </div>
+
+        <div id="eggSub"><strong>You are the Angel Code!</strong></div>
+
+        <div id="eggRow">
+          <button id="eggCloseBtn" type="button">Close</button>
+        </div>
+
+        <div id="eggHint">Tip: Press ESC to close. Tap outside the card also closes.</div>
       </div>
-
-      <div id="eggSub"><strong>You are the Angel Code!</strong></div>
-
-      <div id="eggRow">
-        <button id="eggCloseBtn" type="button">Close</button>
-      </div>
-
-      <div id="eggHint">Tip: Press ESC to close. Tap outside the card also closes.</div>
     </div>
   </div>
-</div>
 
-<script>
+  <script>
 (() => {
   'use strict';
 
@@ -2659,24 +2745,6 @@ self.addEventListener('fetch', (e)=>{ });`;
     if (!isOpen) return;
     if (e.key === 'Escape') closeEgg();
   });
-
-  function bindToInput(id){
-    const el = document.getElementById(id);
-    if(!el) return;
-    const handler = () => tryTrigger(el.value);
-    el.addEventListener('input', handler, { passive:true });
-    el.addEventListener('change', handler, { passive:true });
-    el.addEventListener('keydown', (e) => {
-      if(e.key === 'Enter'){
-        tryTrigger(el.value);
-      }
-    }, { passive:true });
-  }
-
-  // Bind to the actual number entry fields used in this app.
-  bindToInput('homeIdNum');        // Home entry
-  bindToInput('newSightingNum');   // Calendar add modal
-  bindToInput('editNum');          // Edit modal details
 
   function startFireworksSafe(){
     // Ensure layout has happened with overlay visible.
@@ -2809,17 +2877,19 @@ self.addEventListener('fetch', (e)=>{ });`;
   }
 
 })();
-</script>
-<!-- ===========================
+  </script>
+
+  <!-- ===========================
      END EASTER EGG (EOF)
      =========================== -->
-
 </body>
 </html>
 <!--
 EOF Version Detail Notes
-App Version: v1.2A20
-Base: v1.2A19
+App Version: v1.2A21
+Base: v1.2A20
 Changes:
-- FIX: Easter Egg launch now forces keyboard to close (blurs active input) when overlay opens.
+- FIX: Easter Egg (333333333) no longer triggers while typing; it ONLY triggers on Home Submit.
+- ADD: Dedicated Angel Card for 333333333 using drafted language (always available).
+- ADD: 333333333 Angel Card has a unique gold glowing border (Home + Edit views).
 -->
