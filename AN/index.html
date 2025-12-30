@@ -1,10 +1,9 @@
 <!--
 Angel Code — BOF Version Detail Notes
-App Version: v1.2A19
-Base: v1.2A18
+App Version: v1.2A20
+Base: v1.2A19
 Changes (requested):
-- FIX: Easter Egg trigger now listens to the ACTUAL user number inputs (Home: #homeIdNum, Calendar: #newSightingNum, Edit: #editNum) and also fires on Home Submit when value matches.
-- FIX: Overlay initialization strengthened; fireworks canvas now reliably sizes after the overlay is visible.
+- FIX: Easter Egg launch now forces keyboard to close (blurs active input) when overlay opens.
 -->
 <!doctype html>
 
@@ -1010,7 +1009,7 @@ Changes (requested):
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.2A19";
+  const APP_VERSION = "v1.2A20";
   const STORAGE_KEY = "angel_numbers_records_v2_2025_12_29"; // keep existing data
 
   const DAY_MS = 24*60*60*1000;
@@ -2613,9 +2612,20 @@ self.addEventListener('fetch', (e)=>{ });`;
   let fx = null;
   let isOpen = false;
 
+  function blurActive(){
+    try{
+      const a = document.activeElement;
+      if(a && typeof a.blur === 'function') a.blur();
+    }catch{}
+  }
+
   function openEgg(){
     if (isOpen) return;
     isOpen = true;
+
+    // Close keyboard (blur active input) before showing overlay.
+    blurActive();
+
     overlay.classList.add('show');
     overlay.setAttribute('aria-hidden','false');
     startFireworksSafe();
@@ -2808,9 +2818,8 @@ self.addEventListener('fetch', (e)=>{ });`;
 </html>
 <!--
 EOF Version Detail Notes
-App Version: v1.2A19
-Base: v1.2A18
+App Version: v1.2A20
+Base: v1.2A19
 Changes:
-- FIX: Easter Egg trigger now listens to #homeIdNum, #newSightingNum, #editNum and fires on Home Submit too.
-- FIX: Fireworks canvas now reliably sizes after overlay becomes visible.
+- FIX: Easter Egg launch now forces keyboard to close (blurs active input) when overlay opens.
 -->
