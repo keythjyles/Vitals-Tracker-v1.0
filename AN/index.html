@@ -2452,6 +2452,373 @@ self.addEventListener('fetch', (e)=>{ });`;
 
 })();
   </script>
+
+<!-- ===========================
+     ANGEL CODE — EASTER EGG (EOF)
+     Trigger: search for 333333333
+     =========================== -->
+<style>
+  /* Overlay */
+  #eggOverlay{
+    position:fixed; inset:0;
+    display:none;
+    align-items:center; justify-content:center;
+    padding:18px;
+    background:rgba(0,0,0,.72);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index:999999;
+  }
+  #eggOverlay.show{ display:flex; }
+
+  /* Card */
+  #eggCard{
+    position:relative;
+    width:min(720px, 94vw);
+    border-radius:26px;
+    border:1px solid rgba(180,210,255,.34);
+    background:
+      radial-gradient(1200px 600px at 20% 0%, rgba(120,180,255,.20), transparent 60%),
+      radial-gradient(900px 500px at 80% 10%, rgba(255,120,160,.16), transparent 55%),
+      rgba(8,16,31,.92);
+    box-shadow: 0 22px 80px rgba(0,0,0,.55);
+    overflow:hidden;
+  }
+
+  /* Fireworks layer */
+  #eggFx{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    display:block;
+    opacity:.95;
+  }
+
+  /* Content layer */
+  #eggInner{
+    position:relative;
+    padding:24px 22px 20px;
+    text-align:center;
+  }
+  #eggTitle{
+    font-size: clamp(22px, 3.8vw, 34px);
+    line-height:1.15;
+    letter-spacing:.2px;
+    color: rgba(235,245,255,.92);
+    text-shadow: 0 2px 18px rgba(0,0,0,.55);
+    margin: 6px 0 14px;
+    font-weight: 800;
+  }
+  #eggSub{
+    font-size: clamp(15px, 2.8vw, 18px);
+    line-height:1.35;
+    color: rgba(235,245,255,.82);
+    margin: 0 0 14px;
+  }
+
+  /* Heart */
+  #eggHeartWrap{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin: 10px 0 10px;
+  }
+  #eggHeart{
+    width: clamp(92px, 18vw, 160px);
+    height: clamp(92px, 18vw, 160px);
+    filter: drop-shadow(0 10px 24px rgba(255,0,0,.22));
+    transform-origin:50% 60%;
+    animation: eggPulse 1.15s ease-in-out infinite;
+  }
+  @keyframes eggPulse{
+    0%{ transform: scale(1); }
+    35%{ transform: scale(1.10); }
+    70%{ transform: scale(0.98); }
+    100%{ transform: scale(1); }
+  }
+
+  /* Footer row */
+  #eggRow{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  #eggCloseBtn{
+    appearance:none;
+    border:1px solid rgba(235,245,255,.22);
+    background: rgba(12,21,40,.75);
+    color: rgba(235,245,255,.86);
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-weight: 700;
+    cursor:pointer;
+    min-width: 140px;
+  }
+  #eggCloseBtn:active{ transform: translateY(1px); }
+
+  /* Small safety hint */
+  #eggHint{
+    font-size: 12px;
+    color: rgba(235,245,255,.52);
+    margin-top: 10px;
+  }
+</style>
+
+<div id="eggOverlay" aria-hidden="true" role="dialog" aria-label="Angel Code Easter Egg">
+  <div id="eggCard">
+    <canvas id="eggFx"></canvas>
+    <div id="eggInner">
+      <div id="eggTitle">The Angels love you Timmy!</div>
+
+      <div id="eggHeartWrap" aria-hidden="true">
+        <!-- Sharp, scalable SVG heart -->
+        <svg id="eggHeart" viewBox="0 0 64 64">
+          <defs>
+            <linearGradient id="eggHeartG" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#ff2a2a"/>
+              <stop offset="0.55" stop-color="#ff0033"/>
+              <stop offset="1" stop-color="#c4002a"/>
+            </linearGradient>
+          </defs>
+          <path fill="url(#eggHeartG)" d="M32 56s-20-12.7-27-26C0.5 20.6 6.4 10 17.2 10c6 0 10.2 3.2 14.8 8 4.6-4.8 8.8-8 14.8-8C57.6 10 63.5 20.6 59 30c-7 13.3-27 26-27 26z"/>
+        </svg>
+      </div>
+
+      <div id="eggSub"><strong>You are the Angel Code!</strong></div>
+
+      <div id="eggRow">
+        <button id="eggCloseBtn" type="button">Close</button>
+      </div>
+
+      <div id="eggHint">Tip: Press ESC to close. Tap outside the card also closes.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  const TRIGGER = '333333333';
+
+  // Try common selectors used across your apps; first one found wins.
+  function findSearchInput(){
+    const candidates = [
+      '#searchInput',
+      'input[type="search"]',
+      'input[placeholder*="Search" i]',
+      'input[name="search" i]',
+      '.search input',
+      '.toolbar input'
+    ];
+    for (const sel of candidates){
+      const el = document.querySelector(sel);
+      if (el && el.tagName === 'INPUT') return el;
+    }
+    return null;
+  }
+
+  const overlay = document.getElementById('eggOverlay');
+  const closeBtn = document.getElementById('eggCloseBtn');
+  const canvas = document.getElementById('eggFx');
+  const card = document.getElementById('eggCard');
+
+  let fx = null;
+  let isOpen = false;
+
+  function openEgg(){
+    if (isOpen) return;
+    isOpen = true;
+    overlay.classList.add('show');
+    overlay.setAttribute('aria-hidden','false');
+    startFireworks();
+  }
+
+  function closeEgg(){
+    if (!isOpen) return;
+    isOpen = false;
+    overlay.classList.remove('show');
+    overlay.setAttribute('aria-hidden','true');
+    stopFireworks();
+  }
+
+  // Close handlers
+  closeBtn.addEventListener('click', closeEgg);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeEgg();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (!isOpen) return;
+    if (e.key === 'Escape') closeEgg();
+  });
+
+  // Fireworks (canvas)
+  function startFireworks(){
+    const ctx = canvas.getContext('2d', { alpha:true });
+
+    function resize(){
+      const r = card.getBoundingClientRect();
+      canvas.width = Math.max(1, Math.floor(r.width * devicePixelRatio));
+      canvas.height = Math.max(1, Math.floor(r.height * devicePixelRatio));
+      canvas.style.width = r.width + 'px';
+      canvas.style.height = r.height + 'px';
+      ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+    }
+    resize();
+
+    const particles = [];
+    const bursts = [];
+
+    function rand(a,b){ return a + Math.random()*(b-a); }
+
+    function spawnBurst(){
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      const x = rand(w*0.15, w*0.85);
+      const y = rand(h*0.10, h*0.55);
+
+      const count = Math.floor(rand(36, 62));
+      const hue = rand(0, 360);
+      bursts.push({ x, y, t:0, hue });
+
+      for (let i=0;i<count;i++){
+        const ang = rand(0, Math.PI*2);
+        const spd = rand(1.8, 4.8);
+        particles.push({
+          x, y,
+          vx: Math.cos(ang)*spd,
+          vy: Math.sin(ang)*spd,
+          g: rand(0.035, 0.075),
+          life: Math.floor(rand(42, 78)),
+          age: 0,
+          hue: hue + rand(-18, 18),
+          size: rand(1.2, 2.2),
+          tw: rand(0.55, 1.0)
+        });
+      }
+    }
+
+    let last = performance.now();
+    let burstTimer = 0;
+
+    function frame(now){
+      if (!isOpen) return;
+
+      const dt = Math.min(34, now - last);
+      last = now;
+      burstTimer += dt;
+
+      // Spawn cadence
+      if (burstTimer > 420){
+        burstTimer = 0;
+        spawnBurst();
+        if (Math.random() < 0.30) setTimeout(() => isOpen && spawnBurst(), 160);
+      }
+
+      // Clear with slight trail
+      ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight);
+      ctx.globalCompositeOperation = 'lighter';
+
+      // Draw particles
+      for (let i=particles.length-1;i>=0;i--){
+        const p = particles[i];
+        p.age += 1;
+
+        p.vy += p.g * (dt/16.7);
+        p.x += p.vx * (dt/16.7);
+        p.y += p.vy * (dt/16.7);
+
+        const k = 1 - (p.age / p.life);
+        if (k <= 0){
+          particles.splice(i,1);
+          continue;
+        }
+
+        const a = Math.max(0, Math.min(1, k)) * 0.9;
+        const r = p.size + (1-k)*0.8;
+
+        // Bright core + soft glow
+        ctx.beginPath();
+        ctx.fillStyle = `hsla(${p.hue}, 95%, 62%, ${a})`;
+        ctx.arc(p.x, p.y, r, 0, Math.PI*2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.fillStyle = `hsla(${p.hue}, 95%, 70%, ${a*0.25})`;
+        ctx.arc(p.x, p.y, r*3.2, 0, Math.PI*2);
+        ctx.fill();
+      }
+
+      ctx.globalCompositeOperation = 'source-over';
+
+      fx.raf = requestAnimationFrame(frame);
+    }
+
+    function onResize(){
+      if (!isOpen) return;
+      resize();
+    }
+
+    window.addEventListener('resize', onResize, { passive:true });
+
+    fx = {
+      raf: requestAnimationFrame(frame),
+      cleanup(){
+        window.removeEventListener('resize', onResize);
+        try { cancelAnimationFrame(this.raf); } catch(_){}
+        ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight);
+      }
+    };
+  }
+
+  function stopFireworks(){
+    if (fx && fx.cleanup) fx.cleanup();
+    fx = null;
+  }
+
+  // Trigger wiring
+  function wire(){
+    const input = findSearchInput();
+    if (!input) return false;
+
+    // React to typing, paste, programmatic updates
+    const handler = () => {
+      const v = (input.value || '').trim();
+      if (v === TRIGGER) openEgg();
+    };
+
+    input.addEventListener('input', handler, { passive:true });
+    input.addEventListener('change', handler, { passive:true });
+
+    // Optional: if user hits Enter
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter'){
+        const v = (input.value || '').trim();
+        if (v === TRIGGER) {
+          e.preventDefault();
+          openEgg();
+        }
+      }
+    });
+
+    return true;
+  }
+
+  // Attempt immediately, then retry a few times in case UI mounts late.
+  if (!wire()){
+    let tries = 0;
+    const t = setInterval(() => {
+      tries++;
+      if (wire() || tries > 20) clearInterval(t);
+    }, 250);
+  }
+})();
+</script>
+<!-- ===========================
+     END EASTER EGG (EOF)
+     =========================== -->
+  
 </body>
 </html>
 <!--
