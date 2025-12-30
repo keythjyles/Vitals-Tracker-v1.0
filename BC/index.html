@@ -1,0 +1,1136 @@
+<!doctype html>
+
+<!--
+Birthday Code
+Version: v1.1A5
+URL: https://keythjyles.github.io/Vitals-Tracker-v1.0/BC/
+
+Version Notes:
+- Numerology expanded: Month Number + Day Number + Month+Day (Attitude) + Full Date (Life Path) + Year Number + Full Date + Year commentary.
+- Added Install button on the same button row (Generate / Export / Install).
+- Deterministic output preserved; anti-repetition selection retained.
+- No prompts, no mantra, no sources in the report.
+--><html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1220">
+<title>Birthday Code</title>
+<style>
+  :root{
+    --bg:#0b1220;
+    --panel:#121a2e;
+    --card:#0f172a;
+    --accent:#6fb3ff;
+    --accent2:#8b5cf6;
+    --text:#e7ecf3;
+    --muted:#a9b2c7;
+    --border:rgba(255,255,255,.12);
+    --shadow: 0 16px 44px rgba(0,0,0,.45);
+    --r:16px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 20% -10%, rgba(111,179,255,.22) 0%, transparent 60%),
+      radial-gradient(1000px 520px at 90% 0%, rgba(139,92,246,.18) 0%, transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  }
+  .wrap{max-width:900px;margin:0 auto;padding:16px 14px 20px}
+  header{
+    background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,0));
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:16px;
+    display:flex;align-items:center;gap:12px;
+    box-shadow: var(--shadow);
+    overflow:hidden;
+    position:relative;
+  }
+  header:before{
+    content:"";
+    position:absolute;inset:-2px;
+    background:
+      radial-gradient(700px 180px at 18% 0%, rgba(111,179,255,.28), transparent 55%),
+      radial-gradient(700px 180px at 82% 0%, rgba(139,92,246,.26), transparent 55%);
+    filter: blur(12px);
+    opacity:.55;
+    pointer-events:none;
+  }
+  .brand{position:relative;z-index:1;display:flex;align-items:center;gap:12px;width:100%}
+  .logo{
+    width:40px;height:40px;border-radius:12px;
+    background:linear-gradient(135deg,#7cc3ff,#4f7cff);
+    display:grid;place-items:center;color:#06122b;font-weight:900;
+    box-shadow: 0 10px 28px rgba(0,0,0,.35);
+    border:1px solid rgba(255,255,255,.16);
+    flex:0 0 auto;
+  }
+  h1{font-size:22px;margin:0;letter-spacing:.2px}
+  .sub{color:var(--muted);font-size:13px;margin-top:2px}
+  .pill{
+    margin-left:auto;
+    position:relative;z-index:1;
+    font-size:12px;
+    color:var(--muted);
+    padding:7px 10px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    background:rgba(255,255,255,.03);
+    white-space:nowrap;
+  }.panel{ margin-top:14px; background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,0)); border:1px solid var(--border); border-radius:18px; padding:16px; box-shadow: var(--shadow); } .row{display:flex;gap:12px;flex-wrap:wrap} label{font-size:12px;color:var(--muted);display:block;margin:0 0 6px} select,input{ width:100%; background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:14px; padding:12px; font-size:16px; outline:none; } select:focus,input:focus{ border-color: rgba(111,179,255,.55); box-shadow: 0 0 0 4px rgba(111,179,255,.12); } .col{flex:1;min-width:150px}
+
+/* Buttons: always side-by-side */ .btnRow{ display:flex; gap:10px; margin-top:12px; } .btnRow .btn{flex:1; min-width:0}
+
+.btn{ background:linear-gradient(135deg,#6fb3ff,#4f7cff); color:#04122b; border:none;border-radius:16px; padding:14px 12px; font-size:16px;font-weight:900; cursor:pointer; box-shadow: var(--shadow); user-select:none; } .btn:active{transform: translateY(1px)} .btn.secondary{ background:transparent; color:rgba(231,236,243,.92); border:1px solid var(--border); box-shadow:none; } .btn[disabled]{ opacity:.45; cursor:not-allowed; transform:none !important; }
+
+.report{ margin-top:14px; background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,0)); border:1px solid var(--border); border-radius:18px; overflow:hidden; box-shadow: var(--shadow); } .reportTop{ padding:14px 16px 12px; border-bottom:1px solid var(--border); background: radial-gradient(720px 220px at 22% 0%, rgba(111,179,255,.18), transparent 60%), radial-gradient(720px 220px at 82% 0%, rgba(139,92,246,.16), transparent 60%), linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,0)); } .reportTop h2{margin:0;font-size:18px;letter-spacing:.2px} .meta{color:var(--muted);font-size:13px;margin-top:6px} .reportBody{ padding:14px 16px; max-height: 66vh; overflow:auto; }
+
+.section{ background:rgba(18,26,46,.88); border:1px solid var(--border); border-radius:16px; padding:14px; margin:0 0 12px; } .section:last-child{margin-bottom:0} .section h3{ margin:0 0 8px; font-size:16px; display:flex;align-items:center;gap:10px; } .dot{ width:10px;height:10px;border-radius:99px; background:rgba(111,179,255,.90); box-shadow: 0 0 0 4px rgba(111,179,255,.12); flex:0 0 auto; } .dot.purple{background:rgba(139,92,246,.88);box-shadow:0 0 0 4px rgba(139,92,246,.12)} .dot.green{background:rgba(110,255,198,.82);box-shadow:0 0 0 4px rgba(110,255,198,.10)} .dot.gold{background:rgba(255,214,126,.90);box-shadow:0 0 0 4px rgba(255,214,126,.11)} .dot.red{background:rgba(255,120,120,.88);box-shadow:0 0 0 4px rgba(255,120,120,.10)} .p{margin:6px 0;line-height:1.55;color:rgba(231,236,243,.92)} .muted{color:var(--muted)} .kvs{ display:grid; grid-template-columns: 1fr; gap:10px; margin-top:10px; } @media(min-width:720px){ .kvs{grid-template-columns: 1fr 1fr} } .kv{ background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.10); border-radius:14px; padding:10px 10px; } .kv .k{font-size:11px;color:var(--muted);letter-spacing:.2px} .kv .v{margin-top:6px;font-size:14px;line-height:1.4} .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px} .chip{ padding:7px 10px;border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.03); font-size:12px;color:rgba(231,236,243,.92); white-space:nowrap; }
+
+footer{ margin:16px 0 6px; color:rgba(169,178,199,.85); font-size:12px; text-align:center; }
+
+/* App-styled modal (no system popups) */ .modalBack{ position:fixed;inset:0; display:none; align-items:center; justify-content:center; padding:18px; background: rgba(0,0,0,.58); z-index:9999; } .modalBack.show{display:flex} .modal{ width:min(520px, 100%); border-radius:18px; border:1px solid rgba(255,255,255,.16); background: radial-gradient(720px 260px at 20% 0%, rgba(111,179,255,.14), transparent 60%), radial-gradient(720px 260px at 80% 0%, rgba(139,92,246,.14), transparent 60%), linear-gradient(180deg, rgba(14,20,40,.96), rgba(10,14,28,.96)); box-shadow: 0 18px 52px rgba(0,0,0,.60); overflow:hidden; } .modalHead{ padding:12px 14px; border-bottom:1px solid rgba(255,255,255,.12); display:flex;align-items:center;justify-content:space-between;gap:12px; } .modalTitle{margin:0;font-size:13px;font-weight:900;letter-spacing:.25px} .modalClose{ cursor:pointer; border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.03); color:rgba(231,236,243,.92); border-radius:12px; padding:8px 10px; font-weight:900; } .modalBody{padding:12px 14px 14px;font-size:13px;line-height:1.5;color:rgba(231,236,243,.92)} </style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo">BC</div>
+      <div>
+        <h1>Birthday Code</h1>
+        <div class="sub">Intriguing, grounded interpretations</div>
+      </div>
+      <div class="pill">v1.1A5</div>
+    </div>
+  </header>  <div class="panel">
+    <div class="row">
+      <div class="col">
+        <label for="month">Month</label>
+        <select id="month"></select>
+      </div>
+      <div class="col">
+        <label for="day">Day</label>
+        <select id="day"></select>
+      </div>
+      <div class="col">
+        <label for="year">Year</label>
+        <input id="year" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="e.g. 1984">
+      </div>
+    </div>
+    <div class="btnRow">
+      <button class="btn" id="gen" type="button">Generate Report</button>
+      <button class="btn secondary" id="export" type="button" disabled>Export</button>
+      <button class="btn secondary" id="installBtn" type="button" disabled>Install</button>
+    </div>
+  </div>  <div class="report" id="report">
+    <div class="reportTop">
+      <h2>Birthday Report</h2>
+      <div class="meta" id="meta">No report yet.</div>
+    </div>
+    <div class="reportBody" id="body"></div>
+  </div>  <footer>
+    v1.1A5 · Developed by Keyth Jyles · https://keythjyles.github.io/Vitals-Tracker-v1.0/BC/
+  </footer>
+</div><div class="modalBack" id="modalBack" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal">
+    <div class="modalHead">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="dot red" aria-hidden="true"></span>
+        <h3 class="modalTitle" id="modalTitle">Notice</h3>
+      </div>
+      <button class="modalClose" id="modalClose" type="button">Close</button>
+    </div>
+    <div class="modalBody" id="modalText"></div>
+  </div>
+</div><script>
+(function(){
+  "use strict";
+
+  const APP = {
+    name: "Birthday Code",
+    version: "v1.1A5",
+    url: "https://keythjyles.github.io/Vitals-Tracker-v1.0/BC/",
+    cacheText: ""
+  };
+
+  // --- Minimal manifest + SW for installability (single-file hosting) ---
+  // Note: GitHub Pages requires a service worker file at a path the browser can fetch.
+  // We generate SW source and register it via a Blob URL. Some browsers may not persist Blob SW across reloads.
+  // If install prompt does not appear, you can still "Add to Home Screen" from browser menu.
+  const manifestObj = {
+    name: "Birthday Code",
+    short_name: "Birthday Code",
+    start_url: APP.url,
+    display: "standalone",
+    background_color: "#0b1220",
+    theme_color: "#0b1220",
+    icons: [
+      {
+        src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='192' height='192' viewBox='0 0 192 192'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237cc3ff'/%3E%3Cstop offset='1' stop-color='%234f7cff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='192' height='192' rx='40' fill='url(%23g)'/%3E%3Ctext x='96' y='114' text-anchor='middle' font-family='Arial' font-size='72' font-weight='900' fill='%2306122b'%3EBC%3C/text%3E%3C/svg%3E",
+        sizes: "192x192",
+        type: "image/svg+xml"
+      },
+      {
+        src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='512' height='512' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237cc3ff'/%3E%3Cstop offset='1' stop-color='%234f7cff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='120' fill='url(%23g)'/%3E%3Ctext x='256' y='314' text-anchor='middle' font-family='Arial' font-size='190' font-weight='900' fill='%2306122b'%3EBC%3C/text%3E%3C/svg%3E",
+        sizes: "512x512",
+        type: "image/svg+xml"
+      }
+    ]
+  };
+
+  function attachManifest(){
+    try{
+      const json = JSON.stringify(manifestObj);
+      const blob = new Blob([json], {type:"application/manifest+json"});
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("link");
+      link.rel = "manifest";
+      link.href = url;
+      document.head.appendChild(link);
+    }catch(e){}
+  }
+
+  async function registerServiceWorker(){
+    // Best-effort. If it fails, app still works offline only as a normal page.
+    try{
+      if(!("serviceWorker" in navigator)) return;
+      const swCode =
+`const CACHE='bc-${APP.version}';
+self.addEventListener('install', e=>{
+  e.waitUntil((async()=>{
+    const c=await caches.open(CACHE);
+    try{ await c.addAll(['./']); }catch(_){}
+    self.skipWaiting();
+  })());
+});
+self.addEventListener('activate', e=>{
+  e.waitUntil((async()=>{
+    const keys=await caches.keys();
+    await Promise.all(keys.map(k=>k===CACHE?null:caches.delete(k)));
+    self.clients.claim();
+  })());
+});
+self.addEventListener('fetch', e=>{
+  e.respondWith((async()=>{
+    const req=e.request;
+    if(req.method!=='GET') return fetch(req);
+    const cached=await caches.match(req);
+    if(cached) return cached;
+    try{
+      const net=await fetch(req);
+      const c=await caches.open(CACHE);
+      c.put(req, net.clone());
+      return net;
+    }catch(_){
+      const fallback=await caches.match('./');
+      return fallback || new Response('Offline', {status:200, headers:{'Content-Type':'text/plain'}});
+    }
+  })());
+});`;
+      const blob = new Blob([swCode], {type:"text/javascript"});
+      const swUrl = URL.createObjectURL(blob);
+      await navigator.serviceWorker.register(swUrl, {scope:"./"});
+    }catch(e){}
+  }
+
+  // Install prompt handling
+  let deferredPrompt = null;
+  const installBtn = document.getElementById("installBtn");
+  window.addEventListener("beforeinstallprompt", (e)=>{
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.disabled = false;
+  });
+
+  attachManifest();
+  registerServiceWorker();
+
+  const months = [
+    {n:"January",d:31},{n:"February",d:28},{n:"March",d:31},{n:"April",d:30},
+    {n:"May",d:31},{n:"June",d:30},{n:"July",d:31},{n:"August",d:31},
+    {n:"September",d:30},{n:"October",d:31},{n:"November",d:30},{n:"December",d:31}
+  ];
+
+  const el = {
+    month: document.getElementById('month'),
+    day: document.getElementById('day'),
+    year: document.getElementById('year'),
+    gen: document.getElementById('gen'),
+    exportBtn: document.getElementById('export'),
+    installBtn,
+    meta: document.getElementById('meta'),
+    body: document.getElementById('body'),
+    modalBack: document.getElementById('modalBack'),
+    modalTitle: document.getElementById('modalTitle'),
+    modalText: document.getElementById('modalText'),
+    modalClose: document.getElementById('modalClose')
+  };
+
+  function showModal(title, text){
+    el.modalTitle.textContent = String(title || "Notice");
+    el.modalText.textContent = String(text || "");
+    el.modalBack.classList.add("show");
+  }
+  function hideModal(){ el.modalBack.classList.remove("show"); }
+  el.modalClose.addEventListener("click", hideModal);
+  el.modalBack.addEventListener("click", (e)=>{ if(e.target===el.modalBack) hideModal(); });
+  document.addEventListener("keydown", (e)=>{ if(e.key==="Escape") hideModal(); });
+
+  el.installBtn.addEventListener("click", async ()=>{
+    if(!deferredPrompt){
+      showModal("Install", "If you don’t see an install prompt, use your browser menu and choose “Add to Home Screen”.");
+      return;
+    }
+    deferredPrompt.prompt();
+    try{ await deferredPrompt.userChoice; }catch(e){}
+    deferredPrompt = null;
+    el.installBtn.disabled = true;
+  });
+
+  function isLeap(y){ return (y%4===0 && y%100!==0) || (y%400===0); }
+  function pad2(n){ return String(n).padStart(2,"0"); }
+
+  function sanitizeYear(){
+    const raw = String(el.year.value || "");
+    const digits = raw.replace(/[^\d]/g,"").slice(0,4);
+    if(digits !== raw) el.year.value = digits;
+    return digits;
+  }
+
+  function daysInMonth(mIndex, y){
+    if(mIndex===1) return isLeap(y) ? 29 : 28;
+    return months[mIndex].d;
+  }
+
+  function fillMonths(){
+    el.month.innerHTML = "";
+    months.forEach((m,i)=>{
+      const o=document.createElement('option');
+      o.value=i; o.textContent=m.n;
+      el.month.appendChild(o);
+    });
+  }
+
+  function fillDays(){
+    const m = Number(el.month.value || 0);
+    const yDigits = sanitizeYear();
+    const y = Number(yDigits || "2000");
+    const max = daysInMonth(m, y);
+    const current = Number(el.day.value || 1);
+
+    el.day.innerHTML = "";
+    for(let d=1; d<=max; d++){
+      const o=document.createElement('option');
+      o.value=d; o.textContent=d;
+      el.day.appendChild(o);
+    }
+    el.day.value = String(Math.min(current, max));
+  }
+
+  // Deterministic RNG for phrasing variation
+  function makeRng(seed){
+    let x = (seed >>> 0) || 1;
+    return function(){
+      x ^= (x << 13); x >>>= 0;
+      x ^= (x >>> 17); x >>>= 0;
+      x ^= (x << 5);  x >>>= 0;
+      return (x >>> 0) / 4294967296;
+    };
+  }
+  function pick(rng, arr){ return arr[Math.floor(rng()*arr.length)]; }
+
+  // Deterministic unique selection (prevents exact sentence repeats across the report)
+  function pickUnique(rng, arr, used){
+    if(!arr || !arr.length) return "";
+    let tries = 0;
+    while(tries < 12){
+      const s = pick(rng, arr);
+      if(!used.has(s)){
+        used.add(s);
+        return s;
+      }
+      tries++;
+    }
+    for(const s of arr){
+      if(!used.has(s)){
+        used.add(s);
+        return s;
+      }
+    }
+    used.add(arr[0]);
+    return arr[0];
+  }
+
+  // Numerology helpers
+  function reduceNumber(n){
+    let x = Math.abs(Number(n) || 0);
+    const masters = [11,22,33];
+    const digitSum = (v)=> String(v).split("").reduce((a,b)=>a + (b>="0" && b<="9" ? Number(b) : 0), 0);
+    while(x>9 && !masters.includes(x)){
+      x = digitSum(x);
+    }
+    return x;
+  }
+  function sumDigitsString(s){
+    return String(s).split("").reduce((a,b)=>a + (b>="0"&&b<="9" ? Number(b) : 0), 0);
+  }
+
+  function lifePath(y,m,d){
+    const s = String(y) + pad2(m+1) + pad2(d);
+    const sum = sumDigitsString(s);
+    return reduceNumber(sum);
+  }
+
+  // Western Sun sign (tropical, by month/day)
+  function sunSign(m,d){
+    const ranges = [
+      ["Capricorn",[12,22],[1,19]],
+      ["Aquarius",[1,20],[2,18]],
+      ["Pisces",[2,19],[3,20]],
+      ["Aries",[3,21],[4,19]],
+      ["Taurus",[4,20],[5,20]],
+      ["Gemini",[5,21],[6,20]],
+      ["Cancer",[6,21],[7,22]],
+      ["Leo",[7,23],[8,22]],
+      ["Virgo",[8,23],[9,22]],
+      ["Libra",[9,23],[10,22]],
+      ["Scorpio",[10,23],[11,21]],
+      ["Sagittarius",[11,22],[12,21]]
+    ];
+    const mm = m+1;
+    for(const r of ranges){
+      const sm=r[1][0], sd=r[1][1], em=r[2][0], ed=r[2][1];
+      if(sm<=em){
+        if((mm>sm || (mm===sm && d>=sd)) && (mm<em || (mm===em && d<=ed))) return r[0];
+      }else{
+        if((mm>sm || (mm===sm && d>=sd)) || (mm<em || (mm===em && d<=ed))) return r[0];
+      }
+    }
+    return "Unknown";
+  }
+
+  // Chinese Zodiac (12-year cycle). Note: Lunar New Year boundary can shift for Jan/Feb births.
+  function chineseZodiac(y){
+    const z=["Rat","Ox","Tiger","Rabbit","Dragon","Snake","Horse","Goat","Monkey","Rooster","Dog","Pig"];
+    const base = 2008; // Rat
+    const idx = ((y - base) % 12 + 12) % 12;
+    return z[idx];
+  }
+
+  // Meaning copy by number
+  const NUM_MEAN = {
+    1:{
+      vibe:["independence","initiative","self-direction"],
+      lines:[
+        "You do best when you can choose the next step. You dislike being boxed in.",
+        "When you commit, you move quickly. You prefer action over debate."
+      ],
+      watch:[
+        "Watch the urge to do everything alone. Independence still needs support.",
+        "When frustrated, slow down before you burn bridges you’ll want later."
+      ]
+    },
+    2:{
+      vibe:["intuition","harmony","partnership"],
+      lines:[
+        "You read people fast. You notice tone, tension, and what’s unsaid.",
+        "You’re built for collaboration—when the people are right."
+      ],
+      watch:[
+        "Don’t carry everyone’s emotions as if they’re yours.",
+        "Avoid delaying decisions just to keep the peace."
+      ]
+    },
+    3:{
+      vibe:["expression","creativity","optimism"],
+      lines:[
+        "You process life by talking, writing, or creating something from it.",
+        "You can lift the mood in a room, even without trying."
+      ],
+      watch:[
+        "Don’t use humor to dodge what needs to be felt.",
+        "Consistency matters more than inspiration."
+      ]
+    },
+    4:{
+      vibe:["structure","discipline","reliability"],
+      lines:[
+        "You feel calmer when there is a plan. You trust what holds up over time.",
+        "People count on you because you follow through."
+      ],
+      watch:[
+        "Don’t turn high standards into self-punishment.",
+        "Make space for rest so discipline doesn’t become rigidity."
+      ]
+    },
+    5:{
+      vibe:["freedom","adaptability","change"],
+      lines:[
+        "You need movement. Stagnation drains you.",
+        "You learn by trying, not by over-planning."
+      ],
+      watch:[
+        "Avoid scattering your energy across too many starts.",
+        "Choose one direction long enough to see results."
+      ]
+    },
+    6:{
+      vibe:["care","responsibility","service"],
+      lines:[
+        "You protect people you love. Your loyalty shows in actions.",
+        "You want life to feel safe, stable, and right at home."
+      ],
+      watch:[
+        "Don’t over-function for others and call it love.",
+        "Boundaries keep your care sustainable."
+      ]
+    },
+    7:{
+      vibe:["analysis","truth","discernment"],
+      lines:[
+        "You think deeply. Shallow talk doesn’t satisfy you.",
+        "You spot patterns and contradictions quickly."
+      ],
+      watch:[
+        "Don’t isolate when you need recovery—communicate instead.",
+        "Overthinking can steal the moment."
+      ]
+    },
+    8:{
+      vibe:["results","strategy","ambition"],
+      lines:[
+        "You respect competence. You want progress you can measure.",
+        "You’re built to carry responsibility—if you control the plan."
+      ],
+      watch:[
+        "Don’t confuse worth with productivity.",
+        "Power grows when you pair it with patience."
+      ]
+    },
+    9:{
+      vibe:["compassion","wisdom","closure"],
+      lines:[
+        "You see the bigger picture and what people are going through.",
+        "You can end a chapter cleanly when others keep reopening it."
+      ],
+      watch:[
+        "Don’t rescue people who refuse to help themselves.",
+        "Let endings be endings."
+      ]
+    },
+    11:{
+      vibe:["intuition","inspiration","sensitivity"],
+      lines:[
+        "You notice meaning in small details. You feel the signal early.",
+        "You can inspire people, but you also absorb noise if you’re not careful."
+      ],
+      watch:[
+        "Protect your nervous system. Quiet time is not optional.",
+        "Don’t confuse anxiety with intuition."
+      ]
+    },
+    22:{
+      vibe:["mastery","structure","impact"],
+      lines:[
+        "You can take a big idea and make it real. You don’t just dream—you design.",
+        "You’re built for long projects. You keep going when the middle gets ugly."
+      ],
+      watch:[
+        "Avoid carrying everything alone. Delegate where you can.",
+        "Don’t stall waiting for perfect conditions."
+      ]
+    },
+    33:{
+      vibe:["care","teaching","healing"],
+      lines:[
+        "People feel safe around you. You naturally guide and steady others.",
+        "Your presence can calm chaos—when you keep boundaries."
+      ],
+      watch:[
+        "Don’t give so much that you disappear.",
+        "Your job is to help, not to carry."
+      ]
+    }
+  };
+
+  // Trait tags used for overlap logic
+  const TRAITS = {
+    sun: {
+      Aries:{tags:["initiative","directness"], text:[
+        "You’re direct. If it needs doing, you’d rather start than wait.",
+        "You don’t like hesitation. You prefer clean decisions."
+      ]},
+      Taurus:{tags:["reliability","steadiness"], text:[
+        "You’re steady. You value loyalty, comfort, and quality.",
+        "You don’t change your mind just to please people."
+      ]},
+      Gemini:{tags:["adaptability","expression"], text:[
+        "You connect ideas fast. You do better with variety than monotony.",
+        "You notice links other people miss."
+      ]},
+      Cancer:{tags:["care","intuition"], text:[
+        "You care deeply, even if you keep it private.",
+        "You remember how things felt. That becomes your compass."
+      ]},
+      Leo:{tags:["confidence","expression"], text:[
+        "You have presence. People notice when you decide to show up.",
+        "You give warmth, but you want respect back."
+      ]},
+      Virgo:{tags:["analysis","reliability"], text:[
+        "You notice details. You can’t unsee what’s off.",
+        "You fix problems quietly and expect standards to matter."
+      ]},
+      Libra:{tags:["harmony","fairness"], text:[
+        "You care about fairness. You can’t relax when things feel lopsided.",
+        "You keep peace without losing the truth."
+      ]},
+      Scorpio:{tags:["truth","focus"], text:[
+        "You’re intense in a controlled way. You don’t trust easily.",
+        "When you commit, you’re loyal and focused."
+      ]},
+      Sagittarius:{tags:["freedom","directness"], text:[
+        "You value freedom. You don’t like being boxed in.",
+        "You’d rather be honest than popular."
+      ]},
+      Capricorn:{tags:["discipline","results"], text:[
+        "You’re built for the long game. You respect effort and competence.",
+        "You prefer progress that holds up under pressure."
+      ]},
+      Aquarius:{tags:["independence","innovation"], text:[
+        "You think differently. You see angles others miss.",
+        "You want space to be yourself without being questioned."
+      ]},
+      Pisces:{tags:["intuition","compassion"], text:[
+        "You’re sensitive in a strong way. You feel people.",
+        "You need recovery time to stay clear."
+      ]}
+    },
+    cz: {
+      Rat:{tags:["strategy","adaptability"], text:[
+        "You’re resourceful. You find a way around problems.",
+        "You notice opportunities before other people do."
+      ]},
+      Ox:{tags:["steadiness","discipline"], text:[
+        "You’re steady and stubborn in a good way.",
+        "You keep going when others give up."
+      ]},
+      Tiger:{tags:["courage","initiative"], text:[
+        "You move boldly when something matters.",
+        "You dislike being controlled."
+      ]},
+      Rabbit:{tags:["harmony","intuition"], text:[
+        "You’re tactful. You know what to say and when.",
+        "You avoid unnecessary conflict, but you remember everything."
+      ]},
+      Dragon:{tags:["confidence","impact"], text:[
+        "You have big energy when you commit.",
+        "You don’t aim small."
+      ]},
+      Snake:{tags:["truth","strategy"], text:[
+        "You read between the lines.",
+        "You’re patient, and you plan quietly."
+      ]},
+      Horse:{tags:["freedom","drive"], text:[
+        "You need movement and forward motion.",
+        "You get restless when life becomes too small."
+      ]},
+      Goat:{tags:["compassion","creativity"], text:[
+        "You’re gentle, but not weak.",
+        "You’re driven by meaning and feeling."
+      ]},
+      Monkey:{tags:["adaptability","strategy"], text:[
+        "You find clever solutions fast.",
+        "You can turn a problem into a game and still win."
+      ]},
+      Rooster:{tags:["directness","reliability"], text:[
+        "You speak plainly and prefer clear standards.",
+        "You notice what’s sloppy and want it fixed."
+      ]},
+      Dog:{tags:["loyalty","fairness"], text:[
+        "You protect your people.",
+        "You care about what’s right, not just what’s easy."
+      ]},
+      Pig:{tags:["compassion","steadiness"], text:[
+        "You’re warm and genuine.",
+        "You keep going. You don’t abandon people easily."
+      ]}
+    }
+  };
+
+  const CODE_LINES = {
+    independence: [
+      "You move best when you can choose your next step.",
+      "You don’t need applause. You need control over your direction."
+    ],
+    structure: [
+      "You calm down when there is a plan.",
+      "Your strength is consistency. You build momentum through repeatable effort."
+    ],
+    truth: [
+      "You want what’s real. You do not enjoy pretending.",
+      "You’d rather hear the hard truth than be fed something soft."
+    ],
+    care: [
+      "You naturally protect people. You notice what they don’t say.",
+      "Your loyalty shows up in actions, not speeches."
+    ],
+    freedom: [
+      "You need room to breathe and move.",
+      "When you feel trapped, your patience drops fast."
+    ],
+    strategy: [
+      "You think ahead. You watch patterns before you act.",
+      "You make better moves than people expect because you don’t rush."
+    ],
+    results: [
+      "You respect results that hold up under pressure.",
+      "You don’t like wasted motion. You like progress you can measure."
+    ],
+    intuition: [
+      "You pick up signals fast, even if you can’t explain it right away.",
+      "Your instincts are usually right. The trick is trusting them without spiraling."
+    ],
+    harmony: [
+      "You prefer calm. You don’t enjoy drama.",
+      "You can keep peace without losing your backbone."
+    ],
+    adaptability: [
+      "You adjust quickly when things change.",
+      "You can pivot without falling apart."
+    ],
+    discipline: [
+      "You are stronger when you keep a routine.",
+      "You do well with responsibility, but you need recovery time."
+    ],
+    confidence: [
+      "When you decide, you become hard to stop.",
+      "People feel your certainty even when you’re quiet."
+    ]
+  };
+
+  const INSPIRATION = {
+    independence: [
+      "Give yourself permission to choose the hard thing that frees you.",
+      "Stop shrinking your goals to fit other people’s comfort."
+    ],
+    structure: [
+      "Pick one thing. Make it simple. Do it daily. Let the results stack.",
+      "Small routines create big stability. That is your advantage."
+    ],
+    truth: [
+      "Say the real thing kindly, but say it.",
+      "Your life gets lighter when you stop carrying stories that aren’t true."
+    ],
+    care: [
+      "Keep your heart open, but protect your time and energy.",
+      "Your love is powerful. Aim it where it is returned."
+    ],
+    freedom: [
+      "Choose momentum over perfection.",
+      "If you feel stuck, change something small today and keep moving."
+    ],
+    strategy: [
+      "Trust your timing. Not everything requires speed.",
+      "Your best wins come from patient focus, not noise."
+    ],
+    results: [
+      "Measure your progress, not your mood.",
+      "Do the work that moves the needle. Ignore the rest."
+    ],
+    intuition: [
+      "Your instincts are information. Treat them with respect.",
+      "When you feel the signal, pause—then act on purpose."
+    ],
+    harmony: [
+      "You can be peaceful and still be firm.",
+      "Calm is a strength. Keep it, even when others can’t."
+    ],
+    adaptability: [
+      "Change is not a threat to you. It is a tool.",
+      "You can start again without losing who you are."
+    ],
+    discipline: [
+      "Your future is built by what you repeat.",
+      "Consistency beats intensity. Keep going."
+    ],
+    confidence: [
+      "Show up like you belong there. You usually do.",
+      "Stop waiting to feel ready. You get ready by moving."
+    ]
+  };
+
+  function computeOverlaps(tagLists){
+    const counts = new Map();
+    tagLists.forEach(list=>{
+      list.forEach(t=> counts.set(t, (counts.get(t)||0)+1));
+    });
+    const overlaps = [];
+    for(const [k,v] of counts.entries()){
+      if(v>=2) overlaps.push({t:k,c:v});
+    }
+    overlaps.sort((a,b)=>b.c-a.c || a.t.localeCompare(b.t));
+    return overlaps;
+  }
+
+  function title(t){ return t.charAt(0).toUpperCase() + t.slice(1); }
+
+  function chipsHTML(traits){
+    if(!traits.length) return "";
+    return `<div class="chips">${traits.map(x=>`<span class="chip">${title(x)}</span>`).join("")}</div>`;
+  }
+
+  function sec(dotClass, head, inner){
+    return `<div class="section"><h3><span class="dot ${dotClass}" aria-hidden="true"></span>${head}</h3>${inner}</div>`;
+  }
+
+  function kvGrid(items){
+    return `<div class="kvs">` + items.map(it=>{
+      return `<div class="kv"><div class="k">${it.k}</div><div class="v">${it.v}</div></div>`;
+    }).join("") + `</div>`;
+  }
+
+  function meaningFor(n){
+    return NUM_MEAN[n] || NUM_MEAN[4];
+  }
+
+  function renderReport(data){
+    const numGrid = kvGrid([
+      {k:"Month Number", v:`${data.monthNum}`},
+      {k:"Day Number", v:`${data.dayNum}`},
+      {k:"Month + Day (Attitude)", v:`${data.mdSum} → ${data.attitude}`},
+      {k:"Year Number", v:`${data.yearSum} → ${data.yearNum}`},
+      {k:"Full Date (Life Path)", v:`${data.fullSum} → ${data.lifePath}`},
+      {k:"Full Date + Year", v:`${data.fullSum}+${data.yearNum} = ${data.fullPlusYear} → ${data.fullPlusYearReduced}`}
+    ]);
+
+    const numerologyText = `
+      ${numGrid}
+      <p class="p"><strong>Month:</strong> ${data.monthLine1} ${data.monthLine2}</p>
+      <p class="p"><strong>Day:</strong> ${data.dayLine1} ${data.dayLine2}</p>
+      <p class="p"><strong>Month + Day:</strong> ${data.attLine1} ${data.attLine2}</p>
+      <p class="p"><strong>Year:</strong> ${data.yearLine1} ${data.yearLine2}</p>
+      <p class="p"><strong>Full Date:</strong> ${data.lpLine1} ${data.lpLine2}</p>
+      <p class="p"><strong>Full Date + Year:</strong> ${data.fpyLine1} ${data.fpyLine2}</p>
+    `;
+
+    const codeText = `
+      <p class="p">${data.codeLine1}</p>
+      <p class="p">${data.codeLine2}</p>
+      <p class="p"><strong>In plain terms:</strong> ${data.codeLine3}</p>
+    `;
+
+    const astroText = `
+      <p class="p"><strong>${data.sun}:</strong> ${data.sunLine1}</p>
+      <p class="p">${data.sunLine2}</p>
+    `;
+
+    const czText = `
+      <p class="p"><strong>${data.cz}:</strong> ${data.czLine1}</p>
+      <p class="p">${data.czLine2}</p>
+      <p class="p muted">Note: If born in Jan/Feb, Lunar New Year can shift the zodiac sign.</p>
+    `;
+
+    const overlapLead = data.overlaps.length
+      ? "When multiple readings repeat the same idea, that’s usually the part that feels most accurate."
+      : "No single theme dominates across all readings. That often means you’re versatile and situation-aware.";
+
+    const overlapText = `
+      <p class="p">${overlapLead}</p>
+      ${data.overlaps.length ? chipsHTML(data.overlaps.map(o=>o.t)) : ""}
+      <p class="p"><strong>What keeps showing up about you:</strong> ${data.overlapSentence}</p>
+      <p class="p"><strong>What is different:</strong> ${data.uniqueSentence}</p>
+    `;
+
+    const inspireText = `
+      <p class="p"><strong>Your next move:</strong> ${data.inspire1}</p>
+      <p class="p">${data.inspire2}</p>
+    `;
+
+    el.body.innerHTML =
+      sec("green","Numerology", numerologyText) +
+      sec("", "Birthday Code", codeText) +
+      sec("", "Western Astrology", astroText) +
+      sec("purple","Chinese Zodiac", czText) +
+      sec("gold","Compared Themes", overlapText) +
+      sec("green","Inspiration", inspireText);
+  }
+
+  function reportToText(data){
+    const lines = [];
+    lines.push(`${APP.name} — Birthday Report`);
+    lines.push(`Version: ${APP.version}`);
+    lines.push(`URL: ${APP.url}`);
+    lines.push(`Generated (local): ${new Date().toLocaleString()}`);
+    lines.push(`Birthday: ${data.dateStr}`);
+    lines.push(`Deterministic Seed: ${data.seed}`);
+    lines.push("");
+
+    lines.push("NUMEROLOGY");
+    lines.push(`Month Number: ${data.monthNum}`);
+    lines.push(`Day Number: ${data.dayNum}`);
+    lines.push(`Month + Day (Attitude): ${data.mdSum} -> ${data.attitude}`);
+    lines.push(`Year Number: ${data.yearSum} -> ${data.yearNum}`);
+    lines.push(`Full Date (Life Path): ${data.fullSum} -> ${data.lifePath}`);
+    lines.push(`Full Date + Year: ${data.fullSum}+${data.yearNum}=${data.fullPlusYear} -> ${data.fullPlusYearReduced}`);
+    lines.push(`Month: ${data.monthLine1} ${data.monthLine2}`);
+    lines.push(`Day: ${data.dayLine1} ${data.dayLine2}`);
+    lines.push(`Month+Day: ${data.attLine1} ${data.attLine2}`);
+    lines.push(`Year: ${data.yearLine1} ${data.yearLine2}`);
+    lines.push(`Full Date: ${data.lpLine1} ${data.lpLine2}`);
+    lines.push(`Full Date+Year: ${data.fpyLine1} ${data.fpyLine2}`);
+    lines.push("");
+
+    lines.push("BIRTHDAY CODE");
+    lines.push(data.codeLine1);
+    lines.push(data.codeLine2);
+    lines.push(`In plain terms: ${data.codeLine3}`);
+    lines.push("");
+
+    lines.push("WESTERN ASTROLOGY");
+    lines.push(`${data.sun}: ${data.sunLine1}`);
+    lines.push(data.sunLine2);
+    lines.push("");
+
+    lines.push("CHINESE ZODIAC");
+    lines.push(`${data.cz}: ${data.czLine1}`);
+    lines.push(data.czLine2);
+    lines.push("Note: Jan/Feb births may shift by Lunar New Year.");
+    lines.push("");
+
+    lines.push("COMPARED THEMES");
+    lines.push(data.overlaps.length ? "Repeated themes: " + data.overlaps.map(o=>title(o.t)).join(", ") : "No dominant repeats.");
+    lines.push(`What keeps showing up: ${data.overlapSentence}`);
+    lines.push(`What is different: ${data.uniqueSentence}`);
+    lines.push("");
+
+    lines.push("INSPIRATION");
+    lines.push(`Your next move: ${data.inspire1}`);
+    lines.push(data.inspire2);
+    lines.push("");
+    lines.push("— End of Report —");
+    return lines.join("\n");
+  }
+
+  function downloadText(filename, text){
+    const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=> URL.revokeObjectURL(url), 5000);
+  }
+
+  function buildData(m, d, y){
+    const seed = (y * 10000) + ((m+1) * 100) + d;
+    const rng = makeRng(seed);
+    const used = new Set();
+
+    const monthNum = reduceNumber(m+1);
+    const dayNum = reduceNumber(d);
+
+    const mdRaw = (m+1) + d;
+    const mdSum = mdRaw;
+    const attitude = reduceNumber(mdRaw);
+
+    const yearSum = sumDigitsString(String(y));
+    const yearNum = reduceNumber(yearSum);
+
+    const fullRawSum = sumDigitsString(String(y) + pad2(m+1) + pad2(d));
+    const fullSum = fullRawSum;
+    const lifePath = reduceNumber(fullRawSum);
+
+    const fullPlusYear = fullSum + yearNum;
+    const fullPlusYearReduced = reduceNumber(fullPlusYear);
+
+    const sun = sunSign(m,d);
+    const cz = chineseZodiac(y);
+
+    const mMean = meaningFor(monthNum);
+    const dMean = meaningFor(dayNum);
+    const attMean = meaningFor(attitude);
+    const yMean = meaningFor(yearNum);
+    const lpMean = meaningFor(lifePath);
+    const fpyMean = meaningFor(fullPlusYearReduced);
+
+    const sunBlock = TRAITS.sun[sun] || TRAITS.sun.Capricorn;
+    const czBlock  = TRAITS.cz[cz]  || TRAITS.cz.Ox;
+
+    const overlaps = computeOverlaps([
+      mMean.vibe, dMean.vibe, attMean.vibe, yMean.vibe, lpMean.vibe,
+      sunBlock.tags, czBlock.tags
+    ]);
+
+    const topTheme = overlaps[0]?.t || pick(rng, ["structure","truth","strategy","care","freedom","results","intuition","independence"]);
+
+    function uniqueTag(list){
+      const filtered = list.filter(t=>t !== topTheme);
+      return filtered.length ? pick(rng, filtered) : pick(rng, list);
+    }
+
+    const uM = uniqueTag(mMean.vibe);
+    const uD = uniqueTag(dMean.vibe);
+    const uATT = uniqueTag(attMean.vibe);
+    const uSUN = uniqueTag(sunBlock.tags);
+    const uCZ = uniqueTag(czBlock.tags);
+
+    const codeThemeLines = CODE_LINES[topTheme] || CODE_LINES.structure;
+
+    const overlapSentence = overlaps.length
+      ? `The strongest repeat is ${title(topTheme)}. That’s the “always” part of you—the part that shows up under stress and under success.`
+      : `Your readings don’t pile onto one theme. That usually means you’re flexible and you adjust to the room.`;
+
+    const uniqueSentence =
+      `Your Month leans into ${title(uM)}. Your Day leans into ${title(uD)}. Your Month+Day adds ${title(uATT)}. Your sign adds ${title(uSUN)}. Your zodiac adds ${title(uCZ)}.`;
+
+    const inspPool = INSPIRATION[topTheme] || INSPIRATION.structure;
+
+    const codeA = [
+      "You’re not random. Your patterns have a shape—and people can feel it.",
+      "When pressure shows up, you usually get clearer, not louder.",
+      "You don’t just react. You recalibrate."
+    ];
+    const codeB = [
+      "You do best when the goal is real and the next step is yours to choose.",
+      "You don’t want hype. You want something true that holds up.",
+      "You’re built for progress, not performance."
+    ];
+
+    // Month/Day/Attitude/Year/LP/FPY narratives
+    const monthLead = [
+      "Your Month number reads like your baseline tone—how you naturally enter life.",
+      "Your Month number is your default energy—what you return to when you’re relaxed."
+    ];
+    const dayLead = [
+      "Your Day number is how you operate up close—your style in real conversations and real problems.",
+      "Your Day number is your daily wiring—how you react when something lands in your lap."
+    ];
+    const attLead = [
+      "Month + Day shows your outward vibe—what people tend to notice first.",
+      "Month + Day is your social signature—how you come across before people know your whole story."
+    ];
+    const yearLead = [
+      "Your Year number adds a generational flavor—what you learned early, and what you resist.",
+      "Your Year number describes the background pressure you grew up with—and the strength it built."
+    ];
+    const lpLead = [
+      "Your Life Path is the long arc—what keeps calling you back, even after detours.",
+      "Your Life Path is the “big story” theme—what your life keeps training you to master."
+    ];
+    const fpyLead = [
+      "Full Date + Year is your integrated meaning—how your inner wiring and your time period blend together.",
+      "Full Date + Year is the combined lens—who you are, plus the era that shaped you."
+    ];
+
+    return {
+      seed,
+      dateStr: `${months[m].n} ${d}, ${y}`,
+
+      monthNum, dayNum, mdSum, attitude, yearSum, yearNum, fullSum, lifePath, fullPlusYear, fullPlusYearReduced,
+      sun, cz, overlaps,
+
+      monthLine1: pickUnique(rng, monthLead, used),
+      monthLine2: pickUnique(rng, mMean.lines.concat(mMean.watch), used),
+
+      dayLine1: pickUnique(rng, dayLead, used),
+      dayLine2: pickUnique(rng, dMean.lines.concat(dMean.watch), used),
+
+      attLine1: pickUnique(rng, attLead, used),
+      attLine2: pickUnique(rng, attMean.lines.concat(attMean.watch), used),
+
+      yearLine1: pickUnique(rng, yearLead, used),
+      yearLine2: pickUnique(rng, yMean.lines.concat(yMean.watch), used),
+
+      lpLine1: pickUnique(rng, lpLead, used),
+      lpLine2: pickUnique(rng, lpMean.lines.concat(lpMean.watch), used),
+
+      fpyLine1: pickUnique(rng, fpyLead, used),
+      fpyLine2: pickUnique(rng, fpyMean.lines.concat(fpyMean.watch), used),
+
+      sunLine1: pickUnique(rng, sunBlock.text, used),
+      sunLine2: pickUnique(rng, sunBlock.text, used),
+
+      czLine1: pickUnique(rng, czBlock.text, used),
+      czLine2: pickUnique(rng, czBlock.text, used),
+
+      codeLine1: pickUnique(rng, codeA, used),
+      codeLine2: pickUnique(rng, codeB, used),
+      codeLine3: pickUnique(rng, codeThemeLines, used),
+
+      overlapSentence,
+      uniqueSentence,
+
+      inspire1: pickUnique(rng, inspPool, used),
+      inspire2: pickUnique(rng, [
+        "People crave meaning because it calms the mind. Use this report as a mirror, not a rule.",
+        "The point is not to “believe” it. The point is to notice what hits and why.",
+        "Pick the one sentence that felt true. Build a small action from it today."
+      ], used)
+    };
+  }
+
+  // Init UI
+  fillMonths();
+  el.month.value = "0";
+  el.year.value = "1984";
+  fillDays();
+
+  el.month.addEventListener("change", fillDays);
+  el.year.addEventListener("input", fillDays);
+
+  el.gen.addEventListener("click", ()=>{
+    const yDigits = sanitizeYear();
+    const y = Number(yDigits);
+    if(!yDigits || yDigits.length !== 4 || !Number.isFinite(y) || y < 1800 || y > 2200){
+      showModal("Invalid Year", "Enter a 4-digit year between 1800 and 2200.");
+      return;
+    }
+    const m = Number(el.month.value || 0);
+    const d = Number(el.day.value || 1);
+    const maxD = daysInMonth(m, y);
+    if(d < 1 || d > maxD){
+      showModal("Invalid Day", "That day does not exist for the selected month/year.");
+      fillDays();
+      return;
+    }
+
+    const data = buildData(m, d, y);
+    el.meta.textContent = `Birthday: ${data.dateStr} · Deterministic Seed: ${y}${pad2(m+1)}${pad2(d)}`;
+
+    renderReport(data);
+
+    APP.cacheText = reportToText(data);
+    el.exportBtn.disabled = false;
+  });
+
+  el.exportBtn.addEventListener("click", ()=>{
+    if(!APP.cacheText){
+      showModal("No Report Yet", "Generate a report first, then export it.");
+      return;
+    }
+    const yDigits = sanitizeYear();
+    const y = Number(yDigits);
+    const m = Number(el.month.value || 0) + 1;
+    const d = Number(el.day.value || 1);
+    const seed = `${y}${pad2(m)}${pad2(d)}`;
+    downloadText(`BirthdayCode_${seed}_${APP.version}.txt`, APP.cacheText);
+  });
+
+})();
+</script></body>
+</html>
+<!--
+Birthday Code
+Version: v1.1A5
+URL: https://keythjyles.github.io/Vitals-Tracker-v1.0/BC/EOF Notes:
+
+Numerology now includes Month, Day, Month+Day (Attitude), Year, Full Date (Life Path), and Full Date+Year interpretation.
+
+Install button added; enabled when the browser provides an install prompt. -->
