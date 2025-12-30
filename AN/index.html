@@ -1,832 +1,2503 @@
-return s;
+<!--
+Angel Code — BOF Version Detail Notes
+App Version: v1.2A11
+Base: v1.2A10
+Changes (requested):
+- Added a huge “Install” button under the main entry pill box on Home (stands out).
+- Install flow: tap Install → message prompts user to wait; OK triggers install prompt (if available) then attempts to close the tab/window (with fallback alert if blocked).
+- Show app version in very small font under the logo.
+- Advance version and update BOF/EOF notes.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1324" />
+  <title>Angel Code</title>
+  <link rel="manifest" id="manifestLink" href="#" />
+  <style>
+    :root{
+      --bg0:#08101f;
+      --bg1:#0b1324;
+      --panel:#0c1528cc;
+      --stroke:rgba(235,245,255,.16);
+      --stroke2:rgba(235,245,255,.22);
+      --strokeBold:rgba(180,210,255,.42);
+      --text:rgba(235,245,255,.86);
+      --muted:rgba(235,245,255,.58);
+      --muted2:rgba(235,245,255,.42);
+
+      --accentBorder: rgba(43,78,122,.85);
+      --accentGlow: rgba(43,78,122,.18);
+      --themeLine: rgba(43,78,122,.55);
+      --themeLineSoft: rgba(43,78,122,.28);
+
+      --shadow:0 14px 40px rgba(0,0,0,.38);
+      --radius:26px;
+      --btnH:56px;
+      --pad:18px;
+      --font: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+
+    body{
+      margin:0;
+      font-family:var(--font);
+      color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 30% 0%, rgba(47,120,255,.22), transparent 55%),
+        radial-gradient(900px 600px at 80% 20%, rgba(155,120,255,.10), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+      display:flex;
+      justify-content:center;
+      padding: max(14px, env(safe-area-inset-top)) 12px max(14px, env(safe-area-inset-bottom));
+      overflow:hidden;
+    }
+
+    .app{
+      width:min(520px, 100%);
+      height: 100%;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      overflow:hidden;
+    }
+
+    .logoTitle{
+      margin:4px 6px 0;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      text-shadow: 0 10px 22px rgba(0,0,0,.35);
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .logoTitle svg{
+      width:min(520px, 100%);
+      height:auto;
+      display:block;
+    }
+    .topVerTiny{
+      margin-top:2px;
+      font-size:10px;
+      letter-spacing:.6px;
+      color: rgba(235,245,255,.34);
+      font-weight: 850;
+      text-shadow:none;
+      user-select:none;
+    }
+
+    .screenArea{
+      position:relative;
+      flex:1;
+      overflow:hidden;
+      border-radius: var(--radius);
+      touch-action: pan-y;
+    }
+
+    .ptr{
+      position:absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 50;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(235,245,255,.16);
+      background: rgba(12,21,40,.86);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 14px 34px rgba(0,0,0,.36);
+      color: rgba(235,245,255,.84);
+      font-weight: 850;
+      font-size: 13px;
+      letter-spacing: .2px;
+      display:none;
+      align-items:center;
+      gap:10px;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: none;
+    }
+    .ptr.show{ display:flex; }
+    .ptrDot{
+      width:10px; height:10px;
+      border-radius: 50%;
+      background: rgba(47,120,255,.88);
+      box-shadow: 0 0 0 4px rgba(47,120,255,.18);
+      opacity:.95;
+    }
+    .ptrHint{ opacity:.90; }
+    .ptrSmall{ opacity:.60; font-weight:800; }
+
+    .deck{
+      position:absolute;
+      inset:0;
+      display:flex;
+      width:200%;
+      height:100%;
+      transform: translate3d(0,0,0);
+      will-change: transform;
+    }
+    .deck.anim{
+      transition: transform 260ms cubic-bezier(.2,.9,.2,1);
+    }
+
+    .card{
+      flex: 0 0 50%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:3px solid var(--accentBorder);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: var(--pad);
+      backdrop-filter: blur(10px);
+      overflow:hidden;
+      touch-action: pan-y;
+      position:relative;
+    }
+
+    #home.card{
+      border:none;
+      box-shadow:none;
+      background: transparent;
+      backdrop-filter: none;
+      padding: 0;
+    }
+
+    .hidden{ display:none !important; }
+
+    .btn{
+      height:var(--btnH);
+      border-radius: 999px;
+      border:1px solid var(--stroke2);
+      background: rgba(255,255,255,.03);
+      color:rgba(235,245,255,.78);
+      font-weight:650;
+      letter-spacing:.2px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 18px;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      font-size:18px;
+      touch-action: manipulation;
+      white-space:nowrap;
+    }
+    .btn:active{ transform: translateY(1px); }
+
+    .btn.primary{
+      background: linear-gradient(180deg, rgba(47,120,255,.92), rgba(47,120,255,.72));
+      border-color: rgba(120,170,255,.55);
+      color: rgba(235,245,255,.90);
+    }
+
+    .btn.danger{
+      background: linear-gradient(180deg, rgba(255,80,80,.18), rgba(255,80,80,.10));
+      border-color: rgba(255,120,120,.42);
+      color: rgba(255,225,225,.92);
+      box-shadow: 0 10px 26px rgba(0,0,0,.22);
+    }
+
+    .btn.small{
+      height:44px;
+      font-size:16px;
+      padding:0 14px;
+      font-weight:650;
+      white-space:nowrap;
+    }
+
+    .btn:disabled{
+      opacity:.55;
+      filter:saturate(.85);
+      transform:none !important;
+      pointer-events:none;
+    }
+
+    .label{
+      font-size:15px;
+      color:var(--muted);
+      font-weight:650;
+      margin: 10px 4px 6px;
+    }
+    .subtle{
+      font-size:14px;
+      color:var(--muted2);
+      margin: 6px 4px 0;
+    }
+
+    .field{
+      border:2px solid var(--strokeBold);
+      background: rgba(255,255,255,.06);
+      color: rgba(235,245,255,.86);
+      border-radius: 18px;
+      height:54px;
+      padding: 0 14px;
+      font-size:18px;
+      outline:none;
+      width:100%;
+    }
+    .field::placeholder{ color: rgba(235,245,255,.35); }
+    .field:focus{
+      border-color: rgba(90,150,255,.78);
+      box-shadow: 0 0 0 4px rgba(47,120,255,.16);
+    }
+    textarea.field{
+      height:96px;
+      padding: 12px 14px;
+      resize:none;
+      line-height:1.25;
+    }
+
+    .footerTiny{
+      margin-top:8px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      font-size: 12px;
+      color: rgba(235,245,255,.38);
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    .meaningCard{
+      border:1px solid var(--themeLine);
+      background: rgba(255,255,255,.03);
+      border-radius: 22px;
+      padding: 12px 12px 10px;
+      margin-top: 10px;
+    }
+
+    .metaScroll{
+      margin-top:10px;
+      border:1px solid rgba(235,245,255,.10);
+      background: rgba(255,255,255,.02);
+      border-radius: 16px;
+      padding: 10px 10px;
+      max-height: 230px;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      white-space: pre-wrap;
+      line-height: 1.28;
+      color: rgba(235,245,255,.82);
+      font-size:14px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(235,245,255,.28) rgba(255,255,255,.06);
+    }
+    .metaScroll::-webkit-scrollbar{ width: 8px; }
+    .metaScroll::-webkit-scrollbar-track{
+      background: rgba(255,255,255,.05);
+      border-radius: 999px;
+    }
+    .metaScroll::-webkit-scrollbar-thumb{
+      background: rgba(235,245,255,.22);
+      border-radius: 999px;
+      border: 2px solid rgba(255,255,255,.04);
+    }
+
+    .angelCardFrame{
+      margin-top: 0;
+      border: 2px solid rgba(90,150,255,.40);
+      background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.02));
+      border-radius: 20px;
+      box-shadow: 0 14px 34px rgba(0,0,0,.26);
+      padding: 10px;
+    }
+
+    .angelHeaderLine{
+      border: 1px solid rgba(235,245,255,.12);
+      background: rgba(0,0,0,.08);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-weight: 900;
+      letter-spacing:.2px;
+      color: rgba(235,245,255,.84);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.03);
+    }
+
+    .angelBigNum{
+      font-size:72px;
+      font-weight:950;
+      letter-spacing:.6px;
+      line-height: .92;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding: 10px 10px 10px;
+      border-radius: 16px;
+      border: 1px solid rgba(235,245,255,.10);
+      background: rgba(0,0,0,.10);
+      color: rgba(235,245,255,.92);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.03);
+      margin-top: 10px;
+      margin-bottom: 10px;
+      text-align:left;
+    }
+
+    .angelCardFrame .metaScroll{
+      margin-top: 0;
+      border: 1px solid rgba(235,245,255,.10);
+      background: rgba(0,0,0,.10);
+      border-radius: 16px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.03);
+    }
+
+    .disclaimer{
+      margin-top:8px;
+      color: rgba(235,245,255,.44);
+      font-size:12px;
+      line-height:1.25;
+    }
+
+    /* HOME layout */
+    #home{
+      display:flex;
+      flex-direction:column;
+      gap:0;
+      padding-bottom:0;
+      height: 100%;
+    }
+
+    #homeScroll{
+      flex: 1;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 0 0 10px;
+      touch-action: pan-y;
+      overscroll-behavior: contain;
+    }
+    .homeShell{
+      margin: 10px 12px 0;
+      border-radius: var(--radius);
+      border:3px solid var(--accentBorder);
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      box-shadow: var(--shadow);
+      padding: var(--pad);
+      backdrop-filter: blur(10px);
+    }
+
+    .homeTopRow{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      margin-bottom: 8px;
+      margin-top: 2px;
+    }
+    .homeTopRow .field{
+      flex: 1;
+      height: 56px;
+      border-radius: 22px;
+    }
+    .homeTopRow .btn{
+      height: 56px;
+      border-radius: 999px;
+      min-width: 126px;
+      font-weight: 850;
+      font-size: 20px;
+      padding: 0 22px;
+    }
+
+    .bigInstallWrap{
+      margin: 10px 0 0;
+    }
+    .btn.bigInstall{
+      width:100%;
+      height: 66px;
+      font-size: 22px;
+      font-weight: 950;
+      letter-spacing: .4px;
+      border-radius: 24px;
+      border: 2px solid rgba(120,170,255,.70);
+      box-shadow:
+        0 18px 42px rgba(0,0,0,.32),
+        0 0 0 6px rgba(47,120,255,.10);
+      background: linear-gradient(180deg, rgba(47,120,255,.98), rgba(47,120,255,.70));
+      color: rgba(235,245,255,.95);
+    }
+
+    .homeInstrOneLine{
+      margin: 10px 2px 0;
+      color: rgba(235,245,255,.52);
+      font-size: 14px;
+      line-height: 1.25;
+    }
+
+    .homeActions{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin: 12px 0 0;
+    }
+    .homeActions .btn{
+      height: 52px;
+      font-size: 18px;
+      font-weight: 820;
+      letter-spacing: .2px;
+    }
+    .homeActions .btn.wide{
+      grid-column: 1 / -1;
+    }
+    .homeActions .btn.tight{
+      height: 48px;
+      font-size: 16px;
+      font-weight: 820;
+    }
+    .homeActions .btn.exitSmall{
+      background: linear-gradient(180deg, rgba(255,80,80,.18), rgba(255,80,80,.10));
+      border-color: rgba(255,120,120,.42);
+      color: rgba(255,225,225,.92);
+      box-shadow: 0 10px 26px rgba(0,0,0,.22);
+    }
+
+    /* Modal */
+    .modal{
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: max(16px, env(safe-area-inset-top)) 14px max(16px, env(safe-area-inset-bottom));
+      background: rgba(0,0,0,.56);
+      z-index: 9998;
+      touch-action: none;
+    }
+    .modalCard{
+      width:min(520px, 100%);
+      border-radius: 26px;
+      border: 3px solid var(--accentBorder);
+      background: linear-gradient(180deg, rgba(12,21,40,.96), rgba(8,16,31,.96));
+      box-shadow: 0 18px 60px rgba(0,0,0,.55);
+      padding: 16px;
+      backdrop-filter: blur(10px);
+      max-height: calc(100vh - 60px);
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .modalTitle{
+      font-weight: 900;
+      letter-spacing: .2px;
+      color: rgba(235,245,255,.92);
+      font-size: clamp(22px, 6.5vw, 34px);
+      line-height: 1.05;
+      margin: 4px 2px 10px;
+    }
+    .modalSub{
+      color: rgba(235,245,255,.72);
+      font-size: 15px;
+      margin: 0 2px 12px;
+      white-space: pre-wrap;
+      line-height: 1.28;
+    }
+    .modalBtns{
+      display:flex;
+      gap:12px;
+      margin-top: 10px;
+      flex-wrap:wrap;
+    }
+    .modalBtns .btn{
+      flex:1;
+      height: 54px;
+      font-size: 18px;
+      font-weight: 800;
+      min-width: 140px;
+    }
+
+    .xCloseRow{
+      display:flex;
+      justify-content:flex-end;
+      margin: -6px -6px 6px;
+    }
+    .xBtn{
+      width:44px; height:44px;
+      border-radius: 14px;
+      border:1px solid var(--stroke2);
+      background: rgba(255,255,255,.03);
+      color: rgba(235,245,255,.82);
+      font-weight: 900;
+      font-size: 18px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    .addedBigNum{
+      font-size: 34px;
+      font-weight: 950;
+      letter-spacing: .5px;
+      margin: 6px 2px 6px;
+      color: rgba(235,245,255,.92);
+    }
+    .addedMeta{
+      color: rgba(235,245,255,.70);
+      font-size: 14px;
+      margin: 0 2px 10px;
+    }
+    .addedNotesBox{
+      border:1px solid rgba(235,245,255,.12);
+      background: rgba(255,255,255,.03);
+      border-radius: 18px;
+      padding: 12px;
+      color: rgba(235,245,255,.84);
+      font-size: 16px;
+      line-height: 1.25;
+      white-space: pre-wrap;
+      margin: 10px 0 4px;
+    }
+    .addedNotesLabel{
+      margin: 0 2px 6px;
+      color: rgba(235,245,255,.55);
+      font-size: 13px;
+      font-weight: 850;
+      letter-spacing: .2px;
+    }
+
+    .touchLock{
+      position:fixed;
+      inset:0;
+      z-index: 9997;
+      background: transparent;
+      pointer-events:none;
+    }
+    .touchLock.on{ pointer-events:auto; }
+
+    /* Calendar */
+    #calendar{
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+      overscroll-behavior: contain;
+    }
+
+    .calBar{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      margin-top: 10px;
+      flex-wrap:nowrap;
+    }
+    .calBar .field{ height:52px; border-radius: 18px; }
+    .calBar .btn.small{ height:52px; border-radius: 18px; }
+
+    .calGrid{
+      margin-top: 12px;
+      display:grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      width:100%;
+    }
+    .calDow{
+      text-align:center;
+      font-size: 12px;
+      color: rgba(235,245,255,.54);
+      font-weight: 800;
+      letter-spacing:.2px;
+      padding: 2px 0 4px;
+      user-select:none;
+    }
+
+    .calCell{
+      border:1px solid rgba(235,245,255,.10);
+      background: rgba(255,255,255,.02);
+      border-radius: 16px;
+      min-height: 56px;
+      padding: 8px 8px 6px;
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-start;
+      gap:6px;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .calCell .dnum{
+      font-weight: 900;
+      font-size: 14px;
+      color: rgba(235,245,255,.76);
+      line-height: 1;
+    }
+    .calCell.hasData{
+      border-color: rgba(90,150,255,.45);
+      background: rgba(43,78,122,.22);
+      box-shadow: 0 12px 24px rgba(0,0,0,.18);
+    }
+    .calCell.outMonth{ opacity:.42; }
+
+    .calHint{
+      margin-top:10px;
+      font-size: 13px;
+      color: rgba(235,245,255,.44);
+    }
+
+    .dayLogoRow{
+      display:flex;
+      justify-content:center;
+      margin: 2px 0 6px;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .dayLogoRow svg{
+      width: 92%;
+      height: auto;
+      max-width: 420px;
+      opacity: .96;
+      filter: drop-shadow(0 10px 22px rgba(0,0,0,.35));
+    }
+    .dayList{
+      border:1px solid rgba(235,245,255,.10);
+      background: rgba(255,255,255,.02);
+      border-radius: 18px;
+      overflow:hidden;
+    }
+    .dayItem{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding: 10px 12px;
+      border-top:1px solid rgba(235,245,255,.08);
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      cursor:pointer;
+    }
+    .dayItem:first-child{ border-top:none; }
+    .dayItem:active{ transform: translateY(1px); }
+    .dayLeft{
+      display:flex;
+      align-items:baseline;
+      gap:10px;
+      min-width:0;
+    }
+    .dayTime{
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing:.2px;
+      color: rgba(235,245,255,.62);
+      white-space:nowrap;
+    }
+    .dayNum{
+      font-size: 16px;
+      font-weight: 950;
+      color: rgba(235,245,255,.90);
+      white-space:nowrap;
+    }
+    .dayNotes{
+      margin-left:auto;
+      font-size: 12px;
+      color: rgba(235,245,255,.48);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 45%;
+    }
+    .chev{
+      font-size: 16px;
+      font-weight: 900;
+      color: rgba(235,245,255,.55);
+      margin-left: 10px;
+      flex:0 0 auto;
+    }
+
+    .detailsToggleRow{
+      display:flex;
+      justify-content:flex-start;
+      margin-top: 10px;
+    }
+    .detailsToggleRow .btn{
+      height: 46px;
+      font-size: 16px;
+      font-weight: 850;
+      padding: 0 16px;
+      min-width: 0;
+      flex: 0 0 auto;
+      border-radius: 18px;
+    }
+    .detailsBox{
+      margin-top: 10px;
+      border: 1px solid rgba(235,245,255,.10);
+      background: rgba(255,255,255,.02);
+      border-radius: 18px;
+      padding: 10px;
+    }
+
+    /* Export report card */
+    .reportBox{
+      border: 2px solid rgba(90,150,255,.40);
+      background: rgba(0,0,0,.10);
+      border-radius: 18px;
+      padding: 12px;
+      white-space: pre-wrap;
+      line-height: 1.35;
+      color: rgba(235,245,255,.88);
+      font-size: 14px;
+      max-height: 46vh;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      box-shadow: 0 14px 34px rgba(0,0,0,.22);
+    }
+    .reportHintRow{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      margin-top: 10px;
+      color: rgba(235,245,255,.52);
+      font-size: 12px;
+      user-select:none;
+    }
+
+    /* Ensure Export modal always appears above other modals */
+    #exportModal{ z-index: 10020; }
+  </style>
+</head>
+<body>
+  <div class="touchLock" id="touchLock"></div>
+
+  <div class="app" id="appRoot">
+    <div class="logoTitle" aria-label="Angel Code">
+      <svg viewBox="0 0 900 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Angel Code">
+        <defs>
+          <linearGradient id="angG" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#8a6bff"/>
+            <stop offset="55%" stop-color="#4fa3ff"/>
+            <stop offset="100%" stop-color="#2f78ff"/>
+          </linearGradient>
+          <filter id="angS" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="rgba(0,0,0,.35)"/>
+          </filter>
+        </defs>
+        <g transform="translate(46 24)" filter="url(#angS)">
+          <rect x="0" y="0" width="92" height="92" rx="26" fill="rgba(255,255,255,.06)" stroke="rgba(235,245,255,.22)" stroke-width="2"/>
+          <ellipse cx="46" cy="24" rx="20" ry="8" fill="none" stroke="rgba(235,245,255,.88)" stroke-width="4" opacity=".92"/>
+          <path d="M46 50
+                   C34 42, 22 44, 16 54
+                   C24 58, 32 66, 38 76
+                   C40 66, 43 58, 46 50Z"
+                fill="none" stroke="url(#angG)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M46 50
+                   C58 42, 70 44, 76 54
+                   C68 58, 60 66, 54 76
+                   C52 66, 49 58, 46 50Z"
+                fill="none" stroke="url(#angG)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M46 34 L46 42" stroke="rgba(235,245,255,.82)" stroke-width="4" stroke-linecap="round"/>
+          <path d="42 38 L50 38" stroke="rgba(235,245,255,.82)" stroke-width="4" stroke-linecap="round"/>
+        </g>
+
+        <text x="160" y="92"
+              font-family="system-ui,Segoe UI,Roboto,Helvetica,Arial"
+              font-size="66"
+              font-weight="860"
+              fill="url(#angG)"
+              letter-spacing=".6"
+              filter="url(#angS)">Angel Code</text>
+      </svg>
+      <div class="topVerTiny" id="topVerTiny">v—</div>
+    </div>
+
+    <div class="screenArea" id="screenArea">
+      <div class="ptr" id="ptr">
+        <div class="ptrDot"></div>
+        <div class="ptrHint" id="ptrHint">Pull to refresh</div>
+        <div class="ptrSmall" id="ptrSmall"></div>
+      </div>
+
+      <div class="deck" id="deck">
+        <!-- HOME -->
+        <div id="home" class="card">
+          <div id="homeScroll">
+            <div class="homeShell" id="homeShell">
+              <div class="homeTopRow">
+                <input id="homeIdNum" class="field" inputmode="numeric"
+                       autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                       placeholder="Enter a number (example: 1111, 1212, 1234)" />
+                <button id="btnHomeSubmit" class="btn primary">Submit</button>
+              </div>
+
+              <div class="bigInstallWrap">
+                <button id="btnBigInstall" class="btn bigInstall">Install Angel Code</button>
+              </div>
+
+              <div class="homeInstrOneLine" id="homeInstrLine">
+                Swipe left to view Calendar.
+              </div>
+
+              <div id="homeAfterSubmit" class="hidden">
+                <div class="meaningCard" id="homeMeaningCard">
+                  <div class="angelCardFrame" id="homeAngelFrame">
+                    <div id="homeAngelHeader" class="angelHeaderLine">Angel Card Number: —</div>
+                    <div id="homeAngelBigNum" class="angelBigNum">—</div>
+                    <div id="homeMeta" class="metaScroll">—</div>
+                  </div>
+
+                  <div class="disclaimer">
+                    Cultural note: these meanings come from numerology/“angel number” traditions and can vary.
+                    Use them as gentle prompts for reflection, not as facts or predictions.
+                  </div>
+                </div>
+
+                <div class="subtle">Inspired by a real Angel.</div>
+                <div class="subtle">Local-only. No accounts. No cloud.</div>
+
+                <div class="homeActions">
+                  <button id="btnAddToCalendar" class="btn primary wide">Add to Calendar</button>
+                  <button id="btnViewCalendar" class="btn">View Calendar</button>
+                  <button id="btnInstall" class="btn">Install</button>
+                  <button id="btnHomeExport" class="btn tight">Export</button>
+                  <button id="btnExitHome" class="btn tight exitSmall">Exit</button>
+                </div>
+
+                <div class="footerTiny">
+                  <div id="homeVerLabel" aria-label="Version label">v—</div>
+                  <div>developed by Keyth Jyles</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CALENDAR -->
+        <div id="calendar" class="card">
+          <div class="calBar">
+            <input id="calMonth" class="field" type="month" />
+            <button id="btnCalAddNew" class="btn small primary">Add</button>
+            <button id="btnBackFromCalendar" class="btn small">Back</button>
+          </div>
+
+          <div class="calHint">Swipe right for Home.</div>
+
+          <div class="calGrid" id="calDowRow"></div>
+          <div class="calGrid" id="calGrid"></div>
+          <div class="calHint">Tap a highlighted day to view entries.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info / Added modal -->
+  <div id="infoModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+    <div class="modalCard">
+      <div class="xCloseRow">
+        <button class="xBtn" id="btnInfoX" aria-label="Close">×</button>
+      </div>
+      <div class="modalTitle" id="infoTitle">Info</div>
+      <div class="modalSub" id="infoSub">—</div>
+
+      <div id="addedBlock" class="hidden">
+        <div class="addedBigNum" id="addedBigNum">—</div>
+        <div class="addedMeta" id="addedMeta">—</div>
+        <div class="addedNotesLabel" id="addedNotesLabel">Notes</div>
+        <div class="addedNotesBox" id="addedNotesBox">None</div>
+      </div>
+
+      <div class="modalBtns">
+        <button id="btnInfoOk" class="btn primary">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export (Readable Report) modal -->
+  <div id="exportModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle">
+    <div class="modalCard">
+      <div class="modalTitle" id="exportModalTitle">Export</div>
+      <div class="modalSub" id="exportModalSub">Your report is shown below.</div>
+
+      <div id="exportReportBox" class="reportBox">—</div>
+      <div class="reportHintRow">
+        <div id="exportHintLeft">Local-only report.</div>
+        <div id="exportHintRight">Copy / Share / Save</div>
+      </div>
+
+      <div class="modalBtns" style="margin-top:12px;">
+        <button id="btnExportOk" class="btn primary">OK</button>
+        <button id="btnExportCopy" class="btn">Copy</button>
+        <button id="btnExportShare" class="btn">Share</button>
+        <button id="btnExportSave" class="btn">Save .txt</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add-to-Calendar modal (from Home) -->
+  <div id="addCalModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="addCalTitle">
+    <div class="modalCard">
+      <div class="xCloseRow">
+        <button class="xBtn" id="btnAddCalX" aria-label="Close">×</button>
+      </div>
+      <div class="modalTitle" id="addCalTitle">Add to Calendar</div>
+      <div class="modalSub" id="addCalSub">This saves an entry to your calendar on this device.</div>
+
+      <div class="label" style="margin-top:6px;">Date &amp; time</div>
+      <input id="addCalDT" class="field" type="datetime-local" />
+
+      <div class="label">Number</div>
+      <div id="addCalNumber" class="field" style="display:flex; align-items:center; font-weight:900;">—</div>
+
+      <div class="label">Notes (optional)</div>
+      <textarea id="addCalNotes" class="field" style="font-size:18px;" placeholder="Where did you see it? What was happening?"></textarea>
+
+      <div class="modalBtns">
+        <button id="btnAddCalAdd" class="btn primary">Add</button>
+        <button id="btnAddCalCancel" class="btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW Sighting modal (from Calendar) -->
+  <div id="newSightingModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="newSightingTitle">
+    <div class="modalCard">
+      <div class="xCloseRow">
+        <button class="xBtn" id="btnNewSightingX" aria-label="Close">×</button>
+      </div>
+      <div class="modalTitle" id="newSightingTitle">New Sighting</div>
+      <div class="modalSub" id="newSightingSub">Add a new angel number sighting to your calendar.</div>
+
+      <div class="label" style="margin-top:6px;">Date &amp; time</div>
+      <input id="newSightingDT" class="field" type="datetime-local" />
+
+      <div class="label">Number</div>
+      <input id="newSightingNum" class="field" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="e.g., 1111" />
+
+      <div class="label">Notes (optional)</div>
+      <textarea id="newSightingNotes" class="field" style="font-size:18px;" placeholder="Where did you see it? What was happening?"></textarea>
+
+      <div class="modalBtns">
+        <button id="btnNewSightingAdd" class="btn primary">Add</button>
+        <button id="btnNewSightingCancel" class="btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Day list modal (NO X) -->
+  <div id="dayListModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="dayListTitle">
+    <div class="modalCard">
+      <div class="dayLogoRow" aria-hidden="true" id="dayLogoRow"></div>
+      <div class="modalTitle" id="dayListTitle">Day</div>
+      <div class="modalSub" id="dayListSub">Tap a number to view details.</div>
+
+      <div class="dayList" id="dayList"></div>
+
+      <div class="modalBtns">
+        <button id="btnDayListClose" class="btn primary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- View & Update (Angel Card) modal -->
+  <div id="editModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+    <div class="modalCard">
+      <div class="modalTitle" id="editTitle">View &amp; Update</div>
+      <div class="modalSub" id="editSub">Angel Card first. Entry details are below.</div>
+
+      <div class="angelCardFrame">
+        <div id="editAngelHeader" class="angelHeaderLine">Angel Card Number: —</div>
+        <div id="editAngelBig" class="angelBigNum">—</div>
+        <div id="editAngelCard" class="metaScroll" style="max-height: 185px; margin-top:0;">—</div>
+      </div>
+
+      <div class="detailsToggleRow">
+        <button id="btnToggleDetails" class="btn">View/Edit Details</button>
+      </div>
+
+      <div id="editDetailsBox" class="detailsBox hidden">
+        <div class="label" style="margin-top:2px;">Date &amp; time</div>
+        <input id="editDT" class="field" type="datetime-local" />
+
+        <div class="label">Number</div>
+        <input id="editNum" class="field" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="e.g., 1111" />
+
+        <div class="label">Notes (saved with entry)</div>
+        <textarea id="editNotes" class="field" style="font-size:18px;" placeholder="Notes..."></textarea>
+
+        <div class="label">Pattern</div>
+        <div id="editPattern" class="field" style="display:flex; align-items:center; font-weight:900; color: rgba(235,245,255,.84);">—</div>
+      </div>
+
+      <div class="modalBtns">
+        <button id="btnEditSave" class="btn primary">Save</button>
+        <button id="btnEditExport" class="btn">Export</button>
+        <button id="btnEditDelete" class="btn danger">Delete</button>
+        <button id="btnEditClose" class="btn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+(() => {
+  "use strict";
+
+  const APP_VERSION = "v1.2A11";
+  const STORAGE_KEY = "angel_numbers_records_v2_2025_12_29"; // keep existing data
+
+  const DAY_MS = 24*60*60*1000;
+  const $ = (id) => document.getElementById(id);
+
+  function isStandalone(){
+    try{
+      if(window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) return true;
+      if(window.navigator && "standalone" in window.navigator && window.navigator.standalone) return true;
+    }catch{}
+    return false;
+  }
+
+  let deferredInstallPrompt = null;
+
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    updateInstallButton();
+  });
+
+  window.addEventListener("appinstalled", () => {
+    deferredInstallPrompt = null;
+    updateInstallButton(true);
+  });
+
+  async function tryInstall(){
+    if(!deferredInstallPrompt){
+      openInfo("Install", "Install is only available when your browser offers it.\n\nTip: In Chrome, use menu ⋮ → Install app (if shown).", {mode:"info"});
+      return false;
+    }
+    try{
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+    }catch{}
+    deferredInstallPrompt = null;
+    updateInstallButton();
+    return true;
+  }
+
+  function uninstallGuidance(){
+    const msg =
+      "To uninstall the app:\n\n" +
+      "Android:\n" +
+      "• Long-press the app icon → Uninstall\n" +
+      "or\n" +
+      "• Settings → Apps → Angel Code → Uninstall\n\n" +
+      "iPhone/iPad:\n" +
+      "• Long-press the app icon → Remove App\n\n" +
+      "If you installed from Chrome, removing the app icon uninstalls the PWA.";
+    openInfo("Uninstall", msg, {mode:"info"});
+  }
+
+  function updateInstallButton(installedMaybe=false){
+    const btn = $("btnInstall");
+    if(!btn) return;
+
+    const standaloneNow = installedMaybe || isStandalone();
+
+    if(standaloneNow){
+      btn.disabled = false;
+      btn.textContent = "Uninstall";
+      btn.dataset.mode = "uninstall";
+      return;
+    }
+
+    btn.dataset.mode = "install";
+    if(deferredInstallPrompt){
+      btn.disabled = false;
+      btn.textContent = "Install";
+    }else{
+      btn.disabled = true;
+      btn.textContent = "Install";
+    }
+  }
+
+  async function copyToClipboard(text){
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+    return false;
+  }
+
+  function downloadText(text, filename){
+    const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  async function saveTextWithPicker(text, suggestedName){
+    const canPick = typeof window.showSaveFilePicker === "function";
+    if(!canPick) return false;
+
+    const opts = {
+      suggestedName: suggestedName || "angel_code_report.txt",
+      types: [{ description: "Text", accept: {"text/plain": [".txt"]} }]
+    };
+
+    const handle = await window.showSaveFilePicker(opts);
+    const writable = await handle.createWritable();
+    await writable.write(new Blob([text], {type:"text/plain;charset=utf-8"}));
+    await writable.close();
+    return true;
+  }
+
+  function isShareAvailable(){
+    return !!(navigator.share && typeof navigator.share === "function");
+  }
+
+  function escapeHtml(s){
+    return String(s ?? "")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+  }
+
+  function loadRecords(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return [];
+      const arr = JSON.parse(raw);
+      if(!Array.isArray(arr)) return [];
+      return arr
+        .filter(r => r && typeof r.ts === "number")
+        .map(r => ({
+          id: (r.id ?? "").toString() || makeId(r.ts),
+          ts: r.ts,
+          number: (r.number ?? "").toString(),
+          pattern: (r.pattern ?? "").toString(),
+          meaning: (r.meaning ?? "").toString(),
+          notes: (r.notes ?? "").toString()
+        }))
+        .sort((a,b)=> b.ts - a.ts);
+    }catch{
+      return [];
+    }
+  }
+
+  function saveRecords(recs){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(recs));
+  }
+
+  function addRecord(rec){
+    const recs = loadRecords();
+    recs.unshift(rec);
+    saveRecords(recs);
+  }
+
+  function updateRecordById(id, patch){
+    const recs = loadRecords();
+    const idx = recs.findIndex(r => r.id === id);
+    if(idx < 0) return false;
+    recs[idx] = { ...recs[idx], ...patch };
+    recs.sort((a,b)=> b.ts - a.ts);
+    saveRecords(recs);
+    return true;
+  }
+
+  function deleteRecordById(id){
+    const recs = loadRecords().filter(r => r.id !== id);
+    saveRecords(recs);
   }
 
   function fmtDateTime(ts){
     const d = new Date(ts);
-    const mo = String(d.getMonth()+1).padStart(2,"0");
-    const da = String(d.getDate()).padStart(2,"0");
-    const yr = d.getFullYear();
-    let hr = d.getHours();
-    const ampm = hr>=12 ? "PM":"AM";
-    hr = hr%12; if(hr===0) hr=12;
-    const mi = String(d.getMinutes()).padStart(2,"0");
-    const se = String(d.getSeconds()).padStart(2,"0");
-    return `${mo}/${da}/${yr}, ${String(hr).padStart(2,"0")}:${mi}:${se} ${ampm}`;
+    const parts = new Intl.DateTimeFormat(undefined, {
+      year:"numeric", month:"2-digit", day:"2-digit",
+      hour:"2-digit", minute:"2-digit", second:"2-digit"
+    }).formatToParts(d);
+    const map = Object.fromEntries(parts.map(p=>[p.type,p.value]));
+    const mm = map.month, dd = map.day, yy = map.year;
+    const hh = map.hour, mi = map.minute, ss = map.second;
+    const dp = map.dayPeriod ? ` ${map.dayPeriod}` : "";
+    return `${mm}/${dd}/${yy}, ${hh}:${mi}:${ss}${dp}`;
+  }
+
+  function fmtDayTitle(ts){
+    const d = new Date(ts);
+    return new Intl.DateTimeFormat(undefined, { weekday:"long", year:"numeric", month:"long", day:"numeric" }).format(d);
+  }
+
+  function fmtTimeShort(ts){
+    const d = new Date(ts);
+    return new Intl.DateTimeFormat(undefined, { hour:"2-digit", minute:"2-digit" }).format(d);
+  }
+
+  function startOfDay(ts){
+    const d = new Date(ts);
+    d.setHours(0,0,0,0);
+    return d.getTime();
+  }
+
+  function normalizeNumberInput(raw){
+    const s = String(raw ?? "").trim();
+    return s.replace(/[^\d]/g, "");
+  }
+
+  function makeId(seedTs){
+    const r = Math.random().toString(16).slice(2);
+    return `ac_${seedTs}_${r}`;
   }
 
   function toDTLocalValue(ts){
     const d = new Date(ts);
-    const pad = (n)=> String(n).padStart(2,"0");
-    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    const pad = (n)=>String(n).padStart(2,"0");
+    const y = d.getFullYear();
+    const m = pad(d.getMonth()+1);
+    const da = pad(d.getDate());
+    const hh = pad(d.getHours());
+    const mi = pad(d.getMinutes());
+    return `${y}-${m}-${da}T${hh}:${mi}`;
   }
 
   function fromDTLocalValue(v){
-    if(!v) return Date.now();
-    const d = new Date(v);
+    const s = String(v || "").trim();
+    if(!s) return null;
+    const d = new Date(s);
     const t = d.getTime();
-    return Number.isFinite(t) ? t : Date.now();
+    return Number.isFinite(t) ? t : null;
   }
 
-  function classifyPattern(numStr){
-    const s = (numStr || "").replace(/\D/g,"");
+  function isAllSame(s){ return !!(s && s.length >= 2 && s.split("").every(ch => ch === s[0])); }
+  function isPalindrome(s){ if(!s || s.length < 3) return false; return s === s.split("").reverse().join(""); }
+  function isRepeatedHalf(s){ if(!s || s.length < 4 || s.length % 2) return false; const h=s.slice(0,s.length/2); return h+h===s; }
+  function isAscendingSeq(s){
+    if(!s || s.length < 3) return false;
+    for(let i=1;i<s.length;i++){
+      const a=s.charCodeAt(i-1)-48, b=s.charCodeAt(i)-48;
+      if(b !== a+1) return false;
+    }
+    return true;
+  }
+  function isDescendingSeq(s){
+    if(!s || s.length < 3) return false;
+    for(let i=1;i<s.length;i++){
+      const a=s.charCodeAt(i-1)-48, b=s.charCodeAt(i)-48;
+      if(b !== a-1) return false;
+    }
+    return true;
+  }
+
+  function detectPattern(s){
     if(!s) return "—";
-
-    const allSame = s.split("").every(ch => ch === s[0]);
-    if(allSame) return `Repeating ${s[0]}s`;
-
-    const isMirror = s.length>=4 && s === s.split("").reverse().join("");
-    if(isMirror) return "Mirror / Palindrome";
-
-    const pairs = s.length%2===0 && (() => {
-      const half = s.length/2;
-      return s.slice(0,half) === s.slice(half);
-    })();
-    if(pairs) return "Double pattern";
-
-    // Simple sequences
-    const asc = "01234567890123456789";
-    const desc = "98765432109876543210";
-    if(asc.includes(s)) return "Ascending sequence";
-    if(desc.includes(s)) return "Descending sequence";
-
-    // Alternating digits (e.g., 1212, 3434)
-    const alt = s.length>=4 && s.split("").every((ch,i)=> ch === s[i%2]);
-    if(alt) return "Alternating pattern";
-
+    if(isAllSame(s)) return `Repeating ${s[0]}s`;
+    if(isAscendingSeq(s)) return "Counting up (in order)";
+    if(isDescendingSeq(s)) return "Counting down (in order)";
+    if(isRepeatedHalf(s)) return "Repeat pattern (double)";
+    if(isPalindrome(s)) return "Mirror pattern";
+    if(s.length === 3 && s[0] === s[2] && s[0] !== s[1]) return "Sandwich pattern";
     return "Mixed pattern";
   }
 
-  function digitSum(numStr){
-    const s = (numStr || "").replace(/\D/g,"");
-    let sum = 0;
-    for(const ch of s) sum += (ch.charCodeAt(0)-48);
-    return sum;
-  }
+  const DIGIT_ARCHETYPES = {
+    "0": { core: "Fresh start • reset • open possibilities", strengths: ["starting over","clearing clutter","seeing the big picture"], cautions: ["don’t drift","pick one next step"], prompts: ["What needs a reset?","What would a clean start look like?","What is the simplest next step?"] },
+    "1": { core: "New beginnings • focus • personal strength", strengths: ["clarity","confidence","taking the lead"], cautions: ["don’t rush","don’t let pride decide"], prompts: ["What do you want to begin?","What deserves your focus today?","What one thing matters most?"] },
+    "2": { core: "Balance • teamwork • patience", strengths: ["calm","cooperation","listening"], cautions: ["don’t get stuck","don’t over-please"], prompts: ["Where do you need balance?","Who can you work with?","What conversation needs clarity?"] },
+    "3": { core: "Expression • creativity • encouragement", strengths: ["communication","optimism","creative momentum"], cautions: ["don’t scatter your energy","don’t overcommit"], prompts: ["What needs to be said?","What can you create today?","Where can you bring more joy?"] },
+    "4": { core: "Stability • structure • discipline", strengths: ["planning","reliability","building foundations"], cautions: ["don’t be too rigid","avoid over-control"], prompts: ["What routine would help?","What needs strengthening?","What are you building long-term?"] },
+    "5": { core: "Change • flexibility • learning by doing", strengths: ["adaptability","growth","forward motion"], cautions: ["avoid chaos","don’t act on impulse"], prompts: ["What is changing?","What can you let go of?","What new option is opening?"] },
+    "6": { core: "Care • home • responsibility", strengths: ["supporting others","healing","protecting what matters"], cautions: ["avoid carrying everything","avoid guilt decisions"], prompts: ["What needs care right now?","What boundary would help?","What truly matters today?"] },
+    "7": { core: "Inner wisdom • insight • reflection", strengths: ["discernment","depth","learning"], cautions: ["don’t isolate too much","avoid overthinking"], prompts: ["What do you know inside?","What needs research?","What truth needs quiet time?"] },
+    "8": { core: "Practical success • power • money/work lessons", strengths: ["execution","leadership","results"], cautions: ["avoid control battles","don’t tie worth to outcomes"], prompts: ["What are you responsible for?","Where do you need strength?","What practical move helps most?"] },
+    "9": { core: "Completion • forgiveness • letting go", strengths: ["closure","compassion","wisdom from endings"], cautions: ["don’t cling to the past","avoid self-sacrifice"], prompts: ["What needs closure?","What lesson is complete?","What can you release with peace?"] }
+  };
 
-  function reduceToSingle(n){
-    let x = Math.abs(Number(n)||0);
-    while(x>9){
-      let s=0;
-      for(const ch of String(x)) s += (ch.charCodeAt(0)-48);
-      x = s;
-    }
-    return x;
-  }
+  const ANGEL_MAP = {
+    "000":"Reset and begin again. A clean-slate moment—breathe, clear your head, and choose a new direction.",
+    "111":"Focus your thoughts. What you keep thinking about is what you feed—aim your attention on what you want to build.",
+    "222":"Balance and patience. Let things settle; work with others and keep the peace where you can.",
+    "333":"Speak up and create. Express yourself; your voice and ideas matter right now.",
+    "444":"Build your foundation. Stay steady, stay disciplined—this is about structure and stability.",
+    "555":"Change is moving. Adjust, stay flexible, and step forward instead of freezing.",
+    "666":"Re-center your priorities. Come back to health, home, and what truly matters.",
+    "777":"Trust your inner guidance. Slow down and listen; learn, reflect, and follow what feels true.",
+    "888":"Strong momentum. Practical progress—take smart action and manage your resources well.",
+    "999":"A chapter is closing. Wrap things up, forgive, and make room for what’s next.",
+    "1010":"A fresh cycle with direction. Start clean and stay intentional.",
+    "1111":"Heightened awareness. Notice what you’re thinking and choosing—align with your best path.",
+    "1212":"Realignment and growth. Keep going; small steady steps add up.",
+    "1234":"Step-by-step progress. Keep it simple; do the next right thing."
+  };
 
-  function buildAngelCard(numStr){
-    const raw = (numStr || "").trim();
-    const s = raw.replace(/\D/g,"");
-    if(!s){
-      return {
-        number: raw,
-        main: "—",
-        patternNote: "—",
-        meta: "Enter a number to generate an Angel Card."
-      };
-    }
+  function digitSumSteps(n){
+    const digits = n.split("").map(ch => ch.charCodeAt(0)-48).filter(x => x>=0 && x<=9);
+    const sum = digits.reduce((a,b)=>a+b,0);
 
-    const pattern = classifyPattern(s);
-    const ds = digitSum(s);
-    const root = reduceToSingle(ds);
-
-    // Base meanings by root digit (simple, stable, neutral)
-    const rootThemes = {
-      0: "Reset and openness. Start fresh. Let the next step reveal itself.",
-      1: "Initiation and self-leadership. Choose a direction; take the first step.",
-      2: "Balance and patience. Cooperate; keep the peace where you can.",
-      3: "Expression and growth. Communicate; create; let encouragement in.",
-      4: "Stability and structure. Build the foundation; handle the practical.",
-      5: "Change and flexibility. Adapt; release what is stale; stay mobile.",
-      6: "Care and responsibility. Support home/health; restore harmony.",
-      7: "Insight and inner truth. Learn; reflect; trust your quiet knowing.",
-      8: "Strength and momentum. Act with discipline; respect boundaries.",
-      9: "Completion and compassion. Close a chapter; forgive; serve wisely."
-    };
-
-    const main = `Main theme: ${rootThemes[root] || rootThemes[2]}`;
-
-    let patternNote = "";
-    if(/^(\d)\1+$/.test(s)){
-      const d = s[0];
-      patternNote = `Pattern note: repeating digits turn up the volume on the main theme (${d}).`;
-    }else if(pattern === "Double pattern"){
-      patternNote = "Pattern note: double patterns suggest reinforcement—two signals echoing the same idea.";
-    }else if(pattern === "Alternating pattern"){
-      patternNote = "Pattern note: alternating digits often points to a back-and-forth choice or a rhythm to stabilize.";
-    }else if(pattern === "Ascending sequence"){
-      patternNote = "Pattern note: ascending sequences often point to progression—keep moving one step at a time.";
-    }else if(pattern === "Descending sequence"){
-      patternNote = "Pattern note: descending sequences often suggest simplifying—reduce pressure and return to basics.";
-    }else if(pattern === "Mirror / Palindrome"){
-      patternNote = "Pattern note: mirror patterns often reflect self-awareness—notice what you are projecting and receiving.";
+    let root = 0;
+    if(digits.length && digits.every(x=>x===0)){
+      root = 0;
+    }else if(sum > 0){
+      root = ((sum - 1) % 9) + 1;
     }else{
-      patternNote = "Pattern note: mixed patterns often highlight the main theme in a less linear, more situational way.";
+      root = 0;
     }
 
-    const meta =
-      `Overview\n` +
-      `${main}\n\n` +
-      `Why this pattern matters\n` +
-      `${patternNote}\n\n` +
-      `Simple number lens (digit-sum)\n` +
-      `Digits sum: ${ds}\n` +
-      `Reduced: ${root} (interpretation anchor)\n\n` +
-      `One small action\n` +
-      `Pick a single action that fits the theme, and do it within 24 hours.`;
-
-    return { number: s, main, patternNote, meta, pattern, ds, root };
+    const stepStr = `${digits.join(" + ")} = ${sum} → ${root}`;
+    return { digits, sum, root, stepStr };
   }
 
-  function openInfo(title, text, opts={}){
-    $("infoTitle").textContent = title || "Info";
-    $("infoSub").textContent = text || "";
-    $("addedBlock").classList.add("hidden");
+  function dominantDigits(n){
+    const counts = {};
+    for(const ch of n){
+      counts[ch] = (counts[ch]||0) + 1;
+    }
+    const entries = Object.entries(counts).sort((a,b)=> b[1]-a[1] || (a[0] > b[0] ? 1 : -1));
+    return entries.map(([d,c]) => ({ d, c }));
+  }
 
-    const ok = $("btnInfoOk");
-    ok.textContent = opts.okText || "OK";
-    ok.dataset.mode = opts.mode || "info";
+  function listBullets(items){
+    return items.map(x => `• ${x}`).join("\n");
+  }
+
+  function buildAngelCard(n){
+    if(!n){
+      return { pattern: "—", headline: "—", cardText: "—" };
+    }
+
+    const pattern = detectPattern(n);
+    const steps = digitSumSteps(n);
+    const rootDigit = String(steps.root);
+
+    const dom = dominantDigits(n);
+    const domTop = dom[0]?.d ?? rootDigit;
+
+    const rootA = DIGIT_ARCHETYPES[rootDigit] || null;
+    const domA = DIGIT_ARCHETYPES[domTop] || null;
+
+    const mapped = ANGEL_MAP[n] || "";
+    const mainTheme = rootA ? rootA.core : `Theme: ${rootDigit}`;
+    const headline = mapped ? mapped : `Main theme: ${mainTheme}.`;
+
+    let patternLens = "";
+    if(pattern === "Counting up (in order)") patternLens = "Pattern note: it looks like a step-by-step climb. Keep it simple and keep moving.";
+    else if(pattern === "Counting down (in order)") patternLens = "Pattern note: it looks like simplifying. Let go of extra weight and return to basics.";
+    else if(pattern === "Repeat pattern (double)"){
+      const half = n.slice(0, n.length/2);
+      patternLens = `Pattern note: "${half}" repeats. When something repeats, it’s asking for extra attention.`;
+    } else if(pattern === "Mirror pattern") {
+      patternLens = "Pattern note: it mirrors itself. Consider what life is reflecting back to you right now.";
+    } else if(/^Repeating/.test(pattern)) {
+      patternLens = "Pattern note: repeating digits turn up the volume on the main theme.";
+    } else if(pattern === "Sandwich pattern") {
+      patternLens = "Pattern note: the outer digits ‘frame’ the middle digit. Notice what the middle might represent in your situation.";
+    } else {
+      patternLens = "Pattern note: a mix. Use the main theme plus what was happening when you noticed the number.";
+    }
+
+    const domDesc = dom.map(x => `${x.d}×${x.c}`).join("  |  ");
+
+    const prompts = [];
+    if(rootA?.prompts?.length) prompts.push(...rootA.prompts);
+    if(domA?.prompts?.length && domTop !== rootDigit) prompts.push(...domA.prompts);
+    const promptsUnique = [...new Set(prompts)].slice(0, 6);
+
+    const strengths = [];
+    const cautions = [];
+    if(rootA?.strengths?.length) strengths.push(...rootA.strengths);
+    if(domA?.strengths?.length && domTop !== rootDigit) strengths.push(...domA.strengths);
+    if(rootA?.cautions?.length) cautions.push(...rootA.cautions);
+    if(domA?.cautions?.length && domTop !== rootDigit) cautions.push(...domA.cautions);
+
+    const strengthsUnique = [...new Set(strengths)].slice(0, 6);
+    const cautionsUnique = [...new Set(cautions)].slice(0, 6);
+
+    const lines = [];
+    lines.push("Overview");
+    lines.push(`Main theme: ${mapped ? mapped : mainTheme}.`);
+    lines.push("");
+    lines.push("Why this pattern matters");
+    lines.push(patternLens);
+    lines.push("");
+    lines.push("Simple number lens (digit-sum)");
+    lines.push(`Add the digits: ${steps.stepStr}`);
+    lines.push(`Main theme digit: ${mainTheme}`);
+    lines.push("");
+    lines.push("Digit emphasis");
+    lines.push(`What shows up most: ${domDesc}`);
+    lines.push("");
+
+    if(strengthsUnique.length){
+      lines.push("Helpful qualities");
+      lines.push(listBullets(strengthsUnique));
+      lines.push("");
+    }
+    if(cautionsUnique.length){
+      lines.push("Watch-outs");
+      lines.push(listBullets(cautionsUnique));
+      lines.push("");
+    }
+    if(promptsUnique.length){
+      lines.push("Questions you can ask yourself");
+      lines.push(listBullets(promptsUnique));
+      lines.push("");
+    }
+
+    lines.push("Quick way to use this");
+    lines.push("• Think back to what you were doing or thinking when you saw the number.");
+    lines.push("• Read the main theme as the ‘headline’.");
+    lines.push("• Use the pattern note as ‘how it shows up’ in real life.");
+    lines.push("• Choose one small action that fits your situation.");
+
+    return { pattern, headline, cardText: lines.join("\n") };
+  }
+
+  let lockTimer = null;
+  function lockTouches(ms=140){
+    const el = $("touchLock");
+    el.classList.add("on");
+    if(lockTimer) clearTimeout(lockTimer);
+    lockTimer = setTimeout(() => el.classList.remove("on"), ms);
+  }
+  function unlockTouches(){
+    const el = $("touchLock");
+    el.classList.remove("on");
+    if(lockTimer) clearTimeout(lockTimer);
+    lockTimer = null;
+  }
+
+  let infoOkHandler = null;
+
+  function openInfo(title, message, opts){
+    const mode = opts?.mode || "info";
+    $("infoTitle").textContent = title || "Info";
+    $("infoSub").textContent = message || "—";
+
+    infoOkHandler = (typeof opts?.onOk === "function") ? opts.onOk : null;
+
+    if(mode === "added"){
+      $("addedBlock").classList.remove("hidden");
+      $("infoSub").classList.add("hidden");
+      $("addedBigNum").textContent = opts?.num || "—";
+      $("addedMeta").textContent = opts?.meta || "";
+      $("addedNotesBox").textContent = (opts?.notes && String(opts.notes).trim()) ? String(opts.notes).trim() : "None";
+    }else{
+      $("addedBlock").classList.add("hidden");
+      $("infoSub").classList.remove("hidden");
+    }
 
     $("infoModal").classList.remove("hidden");
-    lockTouch(true);
+    lockTouches(120);
   }
 
   function closeInfo(){
+    infoOkHandler = null;
     $("infoModal").classList.add("hidden");
-    lockTouch(false);
+    unlockTouches();
   }
 
-  // Export modal helpers
-  function openExport(reportText){
-    $("exportReportBox").textContent = reportText || "";
+  $("btnInfoX").addEventListener("click", (e)=>{ e.preventDefault(); closeInfo(); });
+
+  $("btnInfoOk").addEventListener("click", async (e)=>{
+    e.preventDefault();
+    const h = infoOkHandler;
+    closeInfo();
+    if(h){
+      try{ await h(); }catch{}
+    }
+  });
+
+  $("infoModal").addEventListener("click", (e)=>{ if(e.target === $("infoModal")) closeInfo(); });
+
+  let exportPayload = null;
+
+  function openExportModal(payload){
+    exportPayload = payload;
+
+    $("exportModalTitle").textContent = payload?.title || "Export";
+    $("exportModalSub").textContent = payload?.subtitle || "Your report is shown below.";
+    $("exportReportBox").textContent = payload?.text || "—";
+
+    $("exportHintLeft").textContent = payload?.hintLeft || "Local-only report.";
+    $("exportHintRight").textContent = payload?.hintRight || "Copy / Share / Save";
+
     $("exportModal").classList.remove("hidden");
-    lockTouch(true);
+    lockTouches(120);
+
+    $("btnExportOk").disabled   = false;
+    $("btnExportCopy").disabled = false;
+    $("btnExportShare").disabled = !isShareAvailable();
+    $("btnExportSave").disabled  = false;
   }
-  function closeExport(){
+
+  function closeExportModal(){
+    exportPayload = null;
     $("exportModal").classList.add("hidden");
-    lockTouch(false);
+    unlockTouches();
   }
 
-  // Touch lock
-  function lockTouch(on){
-    const el = $("touchLock");
-    if(!el) return;
-    el.classList.toggle("on", !!on);
+  $("btnExportOk").addEventListener("click", (e)=>{ e.preventDefault(); closeExportModal(); });
+  $("exportModal").addEventListener("click", (e)=>{ if(e.target === $("exportModal")) closeExportModal(); });
+
+  $("btnExportCopy").addEventListener("click", async (e)=>{
+    e.preventDefault();
+    if(!exportPayload?.text) return;
+    try{
+      await copyToClipboard(exportPayload.text);
+      openInfo("Copied", "Copied to clipboard.", {mode:"info"});
+    }catch{
+      openInfo("Copy failed", "Could not copy on this device/browser.", {mode:"info"});
+    }
+  });
+
+  $("btnExportShare").addEventListener("click", async (e)=>{
+    e.preventDefault();
+    if(!exportPayload) return;
+    if($("btnExportShare").disabled) return;
+    if(!isShareAvailable()){
+      openInfo("Share not available", "Share is not available on this device/browser.", {mode:"info"});
+      return;
+    }
+    try{
+      await navigator.share({ title: exportPayload.shareTitle || "Angel Code Export", text: exportPayload.text });
+    }catch{}
+  });
+
+  $("btnExportSave").addEventListener("click", async (e)=>{
+    e.preventDefault();
+    if(!exportPayload) return;
+    if($("btnExportSave").disabled) return;
+
+    try{
+      const ok = await saveTextWithPicker(exportPayload.text, exportPayload.filename);
+      if(ok){ openInfo("Saved", "Saved.", {mode:"info"}); return; }
+    }catch{}
+
+    downloadText(exportPayload.text, exportPayload.filename || "angel_code_report.txt");
+  });
+
+  function buildReportHeader({reportLabel, title, rangeLabel}){
+    const now = fmtDateTime(Date.now());
+    const lines = [
+      "Angel Code — Export Report",
+      `App Version: ${APP_VERSION}`,
+      reportLabel ? reportLabel : "",
+      title ? `Report: ${title}` : "",
+      `Generated: ${now}`,
+      rangeLabel ? `Range: ${rangeLabel}` : "",
+      "",
+      "------------------------------",
+      ""
+    ].filter(Boolean);
+    return lines.join("\n");
   }
 
-  // Deck swipe
+  function buildReportFooter(){
+    const lines = [
+      "",
+      "------------------------------",
+      "This is a unique report generated by Angel Code on your device. It captures the exact Angel Card text shown at export time, along with your notes and timestamps, so you can paste/share/save a consistent record. Meanings vary across traditions; use as reflection prompts, not predictions."
+    ];
+    return lines.join("\n");
+  }
+
+  function exportReport(recs, headerInfo, filenameBase, modalMeta){
+    const header = buildReportHeader(headerInfo);
+
+    const lines = recs.map(r => {
+      const dt = fmtDateTime(r.ts);
+      const num = `Number: ${r.number || "—"}`;
+      const notes = (r.notes && r.notes.trim()) ? r.notes.trim() : "None";
+      const card = (r.meaning && r.meaning.trim()) ? r.meaning.trim() : "None";
+      return `Sighting:\n${dt}\n${num}\nNotes: ${notes}\n\nANGEL CARD — ${r.number || "—"}\n${card}\n`;
+    });
+
+    const out = header + lines.join("\n") + buildReportFooter();
+
+    const ts = new Date();
+    const y = ts.getFullYear();
+    const m = String(ts.getMonth()+1).padStart(2,"0");
+    const d = String(ts.getDate()).padStart(2,"0");
+    const filename = `${filenameBase || "angel_code_report"}_${y}-${m}-${d}.txt`;
+
+    (async () => {
+      try{ await copyToClipboard(out); }catch{}
+      openExportModal({
+        title: modalMeta?.modalTitle || "Export",
+        subtitle: modalMeta?.modalSub || "Your report is shown below.",
+        text: out,
+        filename,
+        shareTitle: modalMeta?.shareTitle || "Angel Code Export",
+        hintLeft: "Report is local-only.",
+        hintRight: "Copy / Share / Save"
+      });
+    })();
+  }
+
+  let lastIdentify = { number:"", pattern:"", cardText:"" };
+
+  function setHomeRevealed(on){
+    $("homeAfterSubmit").classList.toggle("hidden", !on);
+    if(on) updateInstallButton();
+  }
+
+  function renderHomeCardFromNumber(n){
+    const card = buildAngelCard(n);
+
+    $("homeAngelHeader").textContent = `Angel Card Number: ${n || "—"}`;
+    $("homeAngelBigNum").textContent = n || "—";
+    $("homeMeta").textContent = card.cardText || "—";
+
+    lastIdentify = { number: n, pattern: card.pattern || "—", cardText: card.cardText || "—" };
+  }
+
+  function submitHome(){
+    const n = normalizeNumberInput($("homeIdNum").value);
+    if(!n){
+      openInfo("Enter a number", "Please type an angel number, then tap Submit.", {mode:"info"});
+      return;
+    }
+    setHomeRevealed(true);
+    renderHomeCardFromNumber(n);
+    try{ document.activeElement?.blur(); }catch{}
+  }
+
+  $("btnHomeSubmit").addEventListener("click", (e)=>{ e.preventDefault(); submitHome(); });
+
+  $("homeIdNum").addEventListener("keydown", (e)=>{
+    if(e.key === "Enter"){
+      e.preventDefault();
+      submitHome();
+    }
+  });
+
+  function openAddCalModal(){
+    const n = lastIdentify.number || normalizeNumberInput($("homeIdNum").value);
+    if(!n){
+      openInfo("Enter a number", "Type an angel number first, then tap Submit. After that, you can add it to your calendar.", {mode:"info"});
+      return;
+    }
+    $("addCalNumber").textContent = n;
+    $("addCalNotes").value = "";
+    $("addCalDT").value = toDTLocalValue(Date.now());
+    $("addCalModal").classList.remove("hidden");
+    lockTouches(90);
+    try{ document.activeElement?.blur(); }catch{}
+  }
+
+  function closeAddCalModal(){
+    $("addCalModal").classList.add("hidden");
+    unlockTouches();
+    try{ document.activeElement?.blur(); }catch{}
+  }
+
+  $("btnAddCalX").addEventListener("click", (e)=>{ e.preventDefault(); closeAddCalModal(); });
+  $("btnAddCalCancel").addEventListener("click", (e)=>{ e.preventDefault(); closeAddCalModal(); });
+  $("addCalModal").addEventListener("click", (e)=>{ if(e.target === $("addCalModal")) closeAddCalModal(); });
+
+  $("btnAddCalAdd").addEventListener("click", () => {
+    const n = String($("addCalNumber").textContent || "").trim();
+    const notes = String($("addCalNotes").value || "").trim();
+
+    const pickedTs = fromDTLocalValue($("addCalDT").value);
+    const ts = pickedTs ?? Date.now();
+
+    const card = buildAngelCard(n);
+    const rec = { id: makeId(ts), ts, number: n, pattern: card.pattern || "—", meaning: card.cardText || "—", notes };
+
+    addRecord(rec);
+    closeAddCalModal();
+
+    openInfo("Added", "", {
+      mode: "added",
+      num: n,
+      meta: fmtDateTime(ts),
+      notes
+    });
+
+    if(getDeckIndex() === 1){
+      renderCalendar();
+    }
+  });
+
+  function openNewSighting(){
+    $("newSightingNum").value = "";
+    $("newSightingNotes").value = "";
+    $("newSightingDT").value = toDTLocalValue(Date.now());
+    $("newSightingModal").classList.remove("hidden");
+    lockTouches(90);
+    try{ document.activeElement?.blur(); }catch{}
+  }
+
+  function closeNewSighting(){
+    $("newSightingModal").classList.add("hidden");
+    unlockTouches();
+    try{ document.activeElement?.blur(); }catch{}
+  }
+
+  $("btnNewSightingX").addEventListener("click", (e)=>{ e.preventDefault(); closeNewSighting(); });
+  $("btnNewSightingCancel").addEventListener("click", (e)=>{ e.preventDefault(); closeNewSighting(); });
+  $("newSightingModal").addEventListener("click", (e)=>{ if(e.target === $("newSightingModal")) closeNewSighting(); });
+
+  $("btnNewSightingAdd").addEventListener("click", () => {
+    const n = normalizeNumberInput($("newSightingNum").value);
+    if(!n){
+      openInfo("Enter a number", "Please enter an angel number.", {mode:"info"});
+      return;
+    }
+    const notes = String($("newSightingNotes").value || "").trim();
+
+    const pickedTs = fromDTLocalValue($("newSightingDT").value);
+    const ts = pickedTs ?? Date.now();
+
+    const card = buildAngelCard(n);
+    const rec = { id: makeId(ts), ts, number: n, pattern: card.pattern || "—", meaning: card.cardText || "—", notes };
+
+    addRecord(rec);
+    closeNewSighting();
+    renderCalendar();
+
+    openInfo("Added", "", {
+      mode: "added",
+      num: n,
+      meta: fmtDateTime(ts),
+      notes
+    });
+  });
+
+  const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+  function initMonthDefaultIfNeeded(){
+    if($("calMonth").value) return;
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth()+1).padStart(2,"0");
+    $("calMonth").value = `${y}-${m}`;
+  }
+
+  function monthValueToYMD(value){
+    const m = /^(\d{4})-(\d{2})$/.exec(String(value || ""));
+    if(!m) return null;
+    const y = Number(m[1]);
+    const mo = Number(m[2]);
+    if(!y || !mo) return null;
+    return { y, mo };
+  }
+
+  function buildDayIndexMap(recs){
+    const map = new Map();
+    for(const r of recs){
+      const k = startOfDay(r.ts);
+      const arr = map.get(k) || [];
+      arr.push(r);
+      map.set(k, arr);
+    }
+    for(const [k, arr] of map.entries()){
+      arr.sort((a,b)=> a.ts - b.ts);
+      map.set(k, arr);
+    }
+    return map;
+  }
+
+  function ensureDayLogo(){
+    const wrap = $("dayLogoRow");
+    if(wrap.childNodes.length) return;
+    const svg = document.querySelector(".logoTitle svg");
+    if(!svg) return;
+    wrap.appendChild(svg.cloneNode(true));
+  }
+
+  let currentDayKey = null;
+
+  function openDayList(dayKey, recs){
+    ensureDayLogo();
+    currentDayKey = dayKey;
+
+    const currentDayRecs = (recs || []).slice().sort((a,b)=> a.ts - b.ts);
+
+    $("dayListTitle").textContent = fmtDayTitle(dayKey);
+    $("dayListSub").textContent = "Tap a number to view the Angel Card.";
+
+    const list = $("dayList");
+    list.innerHTML = "";
+
+    if(currentDayRecs.length === 0){
+      const empty = document.createElement("div");
+      empty.className = "dayItem";
+      empty.style.cursor = "default";
+      empty.innerHTML = `<div class="dayLeft"><div class="dayTime">—</div><div class="dayNum">No entries</div></div>`;
+      list.appendChild(empty);
+    }else{
+      for(const r of currentDayRecs){
+        const item = document.createElement("div");
+        item.className = "dayItem";
+        const note = (r.notes || "").trim().replace(/\s+/g," ");
+        const noteShort = note ? note : "";
+        item.innerHTML =
+          `<div class="dayLeft">
+             <div class="dayTime">${escapeHtml(fmtTimeShort(r.ts))}</div>
+             <div class="dayNum">${escapeHtml(r.number || "—")}</div>
+           </div>
+           <div class="dayNotes">${escapeHtml(noteShort)}</div>
+           <div class="chev">›</div>`;
+
+        const open = (e) => {
+          try{ e.preventDefault(); }catch{}
+          try{ e.stopPropagation(); }catch{}
+          closeDayListImmediate();
+          requestAnimationFrame(() => {
+            openEditModal(r.id);
+          });
+        };
+        item.addEventListener("click", open, {passive:false});
+        item.addEventListener("pointerup", open, {passive:false});
+
+        list.appendChild(item);
+      }
+    }
+
+    $("dayListModal").classList.remove("hidden");
+    lockTouches(60);
+  }
+
+  function closeDayListImmediate(){
+    $("dayListModal").classList.add("hidden");
+    unlockTouches();
+  }
+
+  $("btnDayListClose").addEventListener("click", (e)=>{ e.preventDefault(); closeDayListImmediate(); });
+  $("dayListModal").addEventListener("click", (e)=>{ if(e.target === $("dayListModal")) closeDayListImmediate(); });
+
+  function renderCalendar(){
+    const mv = monthValueToYMD($("calMonth").value);
+    if(!mv) return;
+
+    const {y, mo} = mv;
+    const first = new Date(y, mo-1, 1);
+    const firstDow = first.getDay();
+    const totalCells = 42;
+
+    const gridStart = new Date(y, mo-1, 1 - firstDow);
+    gridStart.setHours(0,0,0,0);
+
+    const all = loadRecords();
+    const dayMap = buildDayIndexMap(all);
+
+    const dowRow = $("calDowRow");
+    dowRow.innerHTML = "";
+    for(const d of DOW){
+      const el = document.createElement("div");
+      el.className = "calDow";
+      el.textContent = d;
+      dowRow.appendChild(el);
+    }
+
+    const grid = $("calGrid");
+    grid.innerHTML = "";
+
+    for(let i=0;i<totalCells;i++){
+      const d = new Date(gridStart.getTime() + i*DAY_MS);
+      const dayStart = d.getTime();
+      const inMonth = (d.getMonth() === (mo-1));
+
+      const cell = document.createElement("div");
+      cell.className = "calCell" + (inMonth ? "" : " outMonth");
+
+      const dn = document.createElement("div");
+      dn.className = "dnum";
+      dn.textContent = String(d.getDate());
+      cell.appendChild(dn);
+
+      const recs = dayMap.get(dayStart) || [];
+      if(recs.length > 0){
+        cell.classList.add("hasData");
+        cell.addEventListener("click", (e)=>{
+          e.preventDefault();
+          openDayList(dayStart, recs);
+        }, {passive:false});
+      }
+
+      grid.appendChild(cell);
+    }
+  }
+
+  let editId = null;
+
+  function setDetailsOpen(on){
+    const box = $("editDetailsBox");
+    const btn = $("btnToggleDetails");
+    box.classList.toggle("hidden", !on);
+    btn.textContent = on ? "Hide Details" : "View/Edit Details";
+    btn.dataset.open = on ? "1" : "0";
+  }
+
+  function openEditModal(id){
+    const recs = loadRecords();
+    const r = recs.find(x => x.id === id);
+    if(!r){
+      openInfo("Not found", "That entry could not be found.", {mode:"info"});
+      return;
+    }
+    editId = id;
+
+    $("editDT").value = toDTLocalValue(r.ts);
+    $("editNum").value = r.number || "";
+    $("editNotes").value = r.notes || "";
+
+    const n = normalizeNumberInput(r.number || "");
+    const card = buildAngelCard(n);
+
+    $("editPattern").textContent = card.pattern || "—";
+    $("editAngelHeader").textContent = `Angel Card Number: ${n || "—"}`;
+    $("editAngelBig").textContent = n || "—";
+    $("editAngelCard").textContent = card.cardText || "—";
+
+    setDetailsOpen(false);
+
+    $("editModal").classList.remove("hidden");
+    lockTouches(80);
+    try{ document.activeElement?.blur(); }catch{}
+  }
+
+  function closeEditModal(){
+    editId = null;
+    $("editModal").classList.add("hidden");
+    unlockTouches();
+    try{ document.activeElement?.blur(); }catch{}
+  }
+
+  function refreshEditDerived(){
+    const n = normalizeNumberInput($("editNum").value);
+    const card = buildAngelCard(n);
+    $("editPattern").textContent = card.pattern || "—";
+    $("editAngelHeader").textContent = `Angel Card Number: ${n || "—"}`;
+    $("editAngelBig").textContent = n || "—";
+    $("editAngelCard").textContent = card.cardText || "—";
+  }
+
+  $("editNum").addEventListener("input", refreshEditDerived);
+
+  $("btnToggleDetails").addEventListener("click", (e)=>{
+    e.preventDefault();
+    const on = $("btnToggleDetails").dataset.open === "1";
+    setDetailsOpen(!on);
+  });
+
+  $("btnEditClose").addEventListener("click", (e)=>{ e.preventDefault(); closeEditModal(); });
+  $("editModal").addEventListener("click", (e)=>{ if(e.target === $("editModal")) closeEditModal(); });
+
+  function reopenDayListForTs(ts){
+    const newDayKey = startOfDay(ts);
+    currentDayKey = newDayKey;
+    const dayMap = buildDayIndexMap(loadRecords());
+    const updated = dayMap.get(newDayKey) || [];
+    openDayList(newDayKey, updated);
+  }
+
+  $("btnEditSave").addEventListener("click", ()=>{
+    if(!editId) return;
+
+    const newTs = fromDTLocalValue($("editDT").value);
+    if(!newTs){
+      openInfo("Invalid date/time", "Please set a valid date and time.", {mode:"info"});
+      return;
+    }
+    const n = normalizeNumberInput($("editNum").value);
+    if(!n){
+      openInfo("Invalid number", "Please enter a number.", {mode:"info"});
+      return;
+    }
+    const notes = String($("editNotes").value || "").trim();
+
+    const card = buildAngelCard(n);
+
+    const ok = updateRecordById(editId, {
+      ts: newTs,
+      number: n,
+      pattern: card.pattern || "—",
+      meaning: card.cardText || "—",
+      notes
+    });
+
+    if(!ok){
+      openInfo("Save failed", "Could not save changes.", {mode:"info"});
+      return;
+    }
+
+    closeEditModal();
+    renderCalendar();
+    reopenDayListForTs(newTs);
+  });
+
+  $("btnEditDelete").addEventListener("click", ()=>{
+    if(!editId) return;
+
+    const recs = loadRecords();
+    const r = recs.find(x => x.id === editId);
+    const ts = r ? r.ts : (currentDayKey ?? Date.now());
+
+    const id = editId;
+    deleteRecordById(id);
+    closeEditModal();
+    renderCalendar();
+    reopenDayListForTs(ts);
+  });
+
+  $("btnEditExport").addEventListener("click", (e)=>{
+    e.preventDefault();
+    if(!editId){
+      openInfo("Export", "No entry selected.", {mode:"info"});
+      return;
+    }
+    const recs = loadRecords();
+    const r = recs.find(x => x.id === editId);
+    if(!r){
+      openInfo("Export", "That entry could not be found.", {mode:"info"});
+      return;
+    }
+    exportReport(
+      [r],
+      {
+        reportLabel: "Angel Code Sighting",
+        title: "Single Entry Export",
+        rangeLabel: fmtDateTime(r.ts)
+      },
+      "angel_code_sighting",
+      {
+        modalTitle: "Angel Code Sighting",
+        modalSub: "Single entry export.",
+        shareTitle: "Angel Code Sighting"
+      }
+    );
+  });
+
   const deck = $("deck");
-  let deckX = 0; // 0 = home, -50% = calendar
-  let drag = null;
+  const screenArea = $("screenArea");
 
-  function setDeck(pos, animate=true){
-    deckX = pos;
-    deck.classList.toggle("anim", !!animate);
-    deck.style.transform = `translate3d(${deckX}%,0,0)`;
+  let deckIndex = 0;
+  let dragging = false;
+  let intent = null;
+  let x0=0, y0=0;
+  let baseX=0;
+  let lastX=0, lastT=0;
+  let vx=0;
+
+  function getWidth(){
+    return screenArea.clientWidth || window.innerWidth;
   }
 
-  function clamp(v,min,max){ return Math.max(min, Math.min(max,v)); }
-
-  function onDeckStart(e){
-    if(e.touches && e.touches.length>1) return;
-    if($("infoModal") && !$("infoModal").classList.contains("hidden")) return;
-    if($("exportModal") && !$("exportModal").classList.contains("hidden")) return;
-    if($("addCalModal") && !$("addCalModal").classList.contains("hidden")) return;
-    if($("newSightingModal") && !$("newSightingModal").classList.contains("hidden")) return;
-    if($("dayListModal") && !$("dayListModal").classList.contains("hidden")) return;
-    if($("editModal") && !$("editModal").classList.contains("hidden")) return;
-
-    const x = e.touches ? e.touches[0].clientX : e.clientX;
-    const y = e.touches ? e.touches[0].clientY : e.clientY;
-    drag = { x0:x, y0:y, dx:0, dy:0, started:false };
+  function setDeckX(px, animate=false){
+    if(animate) deck.classList.add("anim");
+    else deck.classList.remove("anim");
+    deck.style.transform = `translate3d(${px}px,0,0)`;
   }
 
-  function onDeckMove(e){
-    if(!drag) return;
-    const x = e.touches ? e.touches[0].clientX : e.clientX;
-    const y = e.touches ? e.touches[0].clientY : e.clientY;
-    drag.dx = x - drag.x0;
-    drag.dy = y - drag.y0;
+  function deckTargetXForIndex(idx){
+    const w = getWidth();
+    return -idx * w;
+  }
 
-    if(!drag.started){
-      if(Math.abs(drag.dx) > 10 && Math.abs(drag.dx) > Math.abs(drag.dy)){
-        drag.started = true;
-        deck.classList.remove("anim");
+  function getDeckIndex(){ return deckIndex; }
+
+  function snapToIndex(idx, animate=true){
+    idx = Math.max(0, Math.min(1, idx));
+    deckIndex = idx;
+    setDeckX(deckTargetXForIndex(deckIndex), animate);
+    try{ document.activeElement?.blur(); }catch{}
+    if(deckIndex === 1){
+      initMonthDefaultIfNeeded();
+      renderCalendar();
+    }
+  }
+
+  function swipeBlockedByModal(){
+    const modalIds = ["editModal","dayListModal","addCalModal","exportModal","infoModal","newSightingModal"];
+    for(const id of modalIds){
+      const el = $(id);
+      if(el && !el.classList.contains("hidden")) return true;
+    }
+    return false;
+  }
+
+  function isInteractiveTarget(target){
+    if(!target || !target.closest) return false;
+    if(target.closest("input, textarea, select, button")) return true;
+    if(target.closest(".modalCard, .modal")) return true;
+    return false;
+  }
+
+  function onTouchStart(ev){
+    if(swipeBlockedByModal()) return;
+    if(!(ev.touches && ev.touches.length === 1)) return;
+    const target = ev.target;
+    if(isInteractiveTarget(target)) return;
+
+    dragging = true;
+    intent = null;
+    x0 = ev.touches[0].clientX;
+    y0 = ev.touches[0].clientY;
+
+    baseX = deckTargetXForIndex(deckIndex);
+    setDeckX(baseX, false);
+
+    lastX = x0;
+    lastT = performance.now();
+    vx = 0;
+  }
+
+  function onTouchMove(ev){
+    if(!dragging) return;
+    if(!(ev.touches && ev.touches.length === 1)) return;
+
+    const x = ev.touches[0].clientX;
+    const y = ev.touches[0].clientY;
+    const dx = x - x0;
+    const dy = y - y0;
+
+    if(!intent){
+      const ax = Math.abs(dx);
+      const ay = Math.abs(dy);
+      if(ax > 14 && ax > ay + 10){
+        intent = "h";
+      }else if(ay > 14 && ay > ax + 8){
+        dragging = false;
+        intent = null;
+        return;
       }else{
         return;
       }
     }
 
-    e.preventDefault();
-    const w = $("screenArea").clientWidth || 360;
-    const deltaPct = (drag.dx / w) * 100;
-    const next = clamp(deckX + deltaPct, -50, 0);
-    deck.style.transform = `translate3d(${next}%,0,0)`;
-  }
+    if(intent !== "h") return;
+    ev.preventDefault();
 
-  function onDeckEnd(){
-    if(!drag) return;
-    if(!drag.started){
-      drag = null;
-      return;
+    const w = getWidth();
+    let nextX = baseX + dx;
+
+    const minX = -w;
+    const maxX = 0;
+
+    if(nextX > maxX){
+      const over = nextX - maxX;
+      nextX = maxX + over * 0.22;
+    }else if(nextX < minX){
+      const over = nextX - minX;
+      nextX = minX + over * 0.22;
     }
-    const w = $("screenArea").clientWidth || 360;
-    const pct = (drag.dx / w) * 100;
-    const target = (deckX === 0)
-      ? (pct < -15 ? -50 : 0)
-      : (pct > 15 ? 0 : -50);
 
-    setDeck(target, true);
-    drag = null;
+    const now = performance.now();
+    const dt = Math.max(1, now - lastT);
+    const instV = (x - lastX) / dt;
+    vx = vx * 0.75 + instV * 0.25;
+    lastX = x;
+    lastT = now;
+
+    setDeckX(nextX, false);
   }
 
-  $("screenArea").addEventListener("touchstart", onDeckStart, {passive:true});
-  $("screenArea").addEventListener("touchmove", onDeckMove, {passive:false});
-  $("screenArea").addEventListener("touchend", onDeckEnd, {passive:true});
-  $("screenArea").addEventListener("touchcancel", onDeckEnd, {passive:true});
+  function onTouchEnd(){
+    if(!dragging) return;
+    dragging = false;
 
-  // Pull-to-refresh (home + calendar) lightweight
-  const ptr = $("ptr");
-  const ptrHint = $("ptrHint");
-  const ptrSmall = $("ptrSmall");
-  let ptrState = { pulling:false, startY:0, dist:0, target:null };
+    const w = getWidth();
+    const matrix = deck.style.transform || "";
+    const m = /translate3d\(([-\d.]+)px/.exec(matrix);
+    const curX = m ? Number(m[1]) : deckTargetXForIndex(deckIndex);
 
-  function ptrAttach(scrollEl, label){
-    scrollEl.addEventListener("touchstart",(e)=>{
-      if(e.touches.length>1) return;
-      if(scrollEl.scrollTop>0) return;
-      ptrState = { pulling:true, startY:e.touches[0].clientY, dist:0, target:scrollEl };
-      ptrHint.textContent = "Pull to refresh";
-      ptrSmall.textContent = label || "";
-      ptr.classList.add("show");
+    const progress = (-curX) / w;
+    const deltaToHome = Math.abs(progress - 0);
+    const deltaToCal  = Math.abs(progress - 1);
+
+    const fling = vx;
+    const FLING_V = 0.65;
+
+    let target = deckIndex;
+    if(Math.abs(fling) > FLING_V){
+      if(fling < 0) target = 1;
+      else target = 0;
+    }else{
+      target = (deltaToHome <= deltaToCal) ? 0 : 1;
+    }
+
+    snapToIndex(target, true);
+  }
+
+  function attachSmoothSwipe(){
+    screenArea.addEventListener("touchstart", onTouchStart, {passive:true});
+    screenArea.addEventListener("touchmove", onTouchMove, {passive:false});
+    screenArea.addEventListener("touchend", onTouchEnd, {passive:true});
+    screenArea.addEventListener("touchcancel", onTouchEnd, {passive:true});
+  }
+
+  const PTR_THRESHOLD = 225;
+  const PTR_MAX = Math.max(260, PTR_THRESHOLD + 35);
+
+  let ptrActive = false;
+  let ptrStartY = 0;
+  let ptrTriggered = false;
+
+  function ptrSet(show, hint, small){
+    const el = $("ptr");
+    if(show) el.classList.add("show");
+    else el.classList.remove("show");
+    $("ptrHint").textContent = hint || "Pull to refresh";
+    $("ptrSmall").textContent = small || "";
+  }
+
+  function currentScrollEl(){
+    return (getDeckIndex() === 0) ? $("homeScroll") : $("calendar");
+  }
+
+  function canPtrStart(target){
+    if(swipeBlockedByModal()) return false;
+    if(target && target.closest && target.closest("input, textarea, select, button")) return false;
+    const sc = currentScrollEl();
+    if(!sc) return false;
+    return sc.scrollTop <= 0;
+  }
+
+  function attachPullToRefresh(){
+    screenArea.addEventListener("touchstart", (e)=>{
+      if(!(e.touches && e.touches.length === 1)) return;
+      const target = e.target;
+      if(!canPtrStart(target)) return;
+
+      ptrActive = true;
+      ptrTriggered = false;
+      ptrStartY = e.touches[0].clientY;
+      ptrSet(true, "Pull to refresh", "");
     }, {passive:true});
 
-    scrollEl.addEventListener("touchmove",(e)=>{
-      if(!ptrState.pulling) return;
+    screenArea.addEventListener("touchmove", (e)=>{
+      if(!ptrActive) return;
+      if(!(e.touches && e.touches.length === 1)) return;
+
       const y = e.touches[0].clientY;
-      const d = Math.max(0, y - ptrState.startY);
-      ptrState.dist = d;
-      if(d > 78){
-        ptrHint.textContent = "Release to refresh";
-      }else{
-        ptrHint.textContent = "Pull to refresh";
+      const dy = y - ptrStartY;
+      if(dy <= 0){
+        ptrSet(false);
+        return;
       }
-    }, {passive:true});
 
-    scrollEl.addEventListener("touchend",()=>{
-      if(!ptrState.pulling) return;
-      const doRefresh = ptrState.dist > 78;
-      ptrState.pulling = false;
-      ptr.classList.remove("show");
-      if(doRefresh){
-        // refresh calendar + home view content
-        refreshAll();
-        openInfo("Refreshed", "Updated the calendar and current view.", {mode:"info"});
-      }
-    }, {passive:true});
-  }
-
-  ptrAttach($("homeScroll"), "Home");
-  ptrAttach($("calendar"), "Calendar");
-
-  // Data
-  let records = loadRecords();
-  let currentCard = null;      // current Angel Card data
-  let currentSelectedId = null; // selected record in edit modal
-  let detailsShown = false;
-
-  function refreshAll(){
-    records = loadRecords();
-    renderCalendar();
-    updateFooterVersion();
-    updateInstallButtons();
-  }
-
-  function updateFooterVersion(){
-    const hv = $("homeVerLabel");
-    if(hv) hv.textContent = APP_VERSION;
-  }
-
-  // HOME submit
-  function doHomeSubmit(){
-    const val = ($("homeIdNum").value || "").trim();
-    const card = buildAngelCard(val);
-    currentCard = card;
-
-    $("homeAfterSubmit").classList.remove("hidden");
-    $("homeAngelHeader").textContent = `Angel Card Number: ${card.number || "—"}`;
-    $("homeAngelBigNum").textContent = card.number || "—";
-    $("homeMeta").textContent = card.meta || "—";
-
-    // update add-to-calendar modal defaults
-    const now = Date.now();
-    $("addCalDT").value = toDTLocalValue(now);
-    $("addCalNumber").textContent = card.number || "—";
-    $("addCalNotes").value = "";
-
-    // set footer
-    updateFooterVersion();
-
-    // update install buttons availability/label
-    updateInstallButtons();
-  }
-
-  $("btnHomeSubmit").addEventListener("click", doHomeSubmit);
-  $("homeIdNum").addEventListener("keydown", (e)=>{
-    if(e.key === "Enter"){
       e.preventDefault();
-      doHomeSubmit();
-    }
-  });
 
-  // HOME actions
-  $("btnViewCalendar").addEventListener("click", ()=> setDeck(-50,true));
+      const pull = Math.min(PTR_MAX, dy);
+      const pct = Math.max(0, Math.min(100, Math.round((pull / PTR_THRESHOLD) * 100)));
 
-  $("btnAddToCalendar").addEventListener("click", ()=>{
-    if(!currentCard || !currentCard.number || currentCard.number === "—"){
-      openInfo("No number", "Enter a number first.", {mode:"info"});
-      return;
-    }
-    $("addCalModal").classList.remove("hidden");
-    lockTouch(true);
-  });
-
-  // Install buttons (small + big)
-  function handleInstallClick(btn){
-    const mode = btn.dataset.mode || "install";
-    if(mode === "uninstall"){
-      uninstallGuidance();
-      return;
-    }
-    tryInstallFlow();
-  }
-
-  $("btnInstall").addEventListener("click", (e)=> handleInstallClick(e.currentTarget));
-  $("btnInstallBig").addEventListener("click", (e)=> handleInstallClick(e.currentTarget));
-
-  $("btnExitHome").addEventListener("click", ()=>{
-    // Known limitation: many browsers block window.close() unless opened by script.
-    try{ window.close(); }catch{}
-    setTimeout(()=>{
-      openInfo("Exit", "If this did not close, use your back button or close the tab.", {mode:"info"});
-    }, 260);
-  });
-
-  // HOME Export (Identify export)
-  $("btnHomeExport").addEventListener("click", ()=>{
-    if(!currentCard || !currentCard.number || currentCard.number === "—"){
-      openInfo("Export", "Enter a number first, then Export.", {mode:"info"});
-      return;
-    }
-    const report = buildIdentifyReport(currentCard.number);
-    openExport(report);
-  });
-
-  // Calendar: back
-  $("btnBackFromCalendar").addEventListener("click", ()=> setDeck(0,true));
-
-  // Calendar month input
-  function setMonthToNow(){
-    const d = new Date();
-    const m = String(d.getMonth()+1).padStart(2,"0");
-    $("calMonth").value = `${d.getFullYear()}-${m}`;
-  }
-
-  // Calendar DOW headers
-  function buildDowRow(){
-    const names = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-    const row = $("calDowRow");
-    row.innerHTML = "";
-    for(const n of names){
-      const div = document.createElement("div");
-      div.className = "calDow";
-      div.textContent = n;
-      row.appendChild(div);
-    }
-  }
-
-  function getMonthDays(yyyyMM){
-    const [y,m] = yyyyMM.split("-").map(x=>parseInt(x,10));
-    const first = new Date(y, m-1, 1);
-    const startDow = first.getDay();
-    const start = new Date(y, m-1, 1 - startDow);
-    const cells = [];
-    for(let i=0;i<42;i++){
-      const d = new Date(start.getTime() + i*DAY_MS);
-      const inMonth = (d.getMonth() === (m-1));
-      cells.push({ date:d, inMonth });
-    }
-    return cells;
-  }
-
-  function ymd(d){
-    const pad=(n)=>String(n).padStart(2,"0");
-    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-  }
-
-  function renderCalendar(){
-    buildDowRow();
-    const grid = $("calGrid");
-    grid.innerHTML = "";
-    const yyyyMM = $("calMonth").value || (()=>{ setMonthToNow(); return $("calMonth").value; })();
-
-    // Build a quick index: ymd -> count
-    const idx = new Map();
-    for(const r of records){
-      const d = new Date(r.ts);
-      const key = ymd(d);
-      idx.set(key, (idx.get(key)||0)+1);
-    }
-
-    const cells = getMonthDays(yyyyMM);
-    for(const c of cells){
-      const key = ymd(c.date);
-      const count = idx.get(key)||0;
-
-      const cell = document.createElement("div");
-      cell.className = "calCell" + (count? " hasData":"") + (c.inMonth? "":" outMonth");
-      cell.dataset.ymd = key;
-      cell.innerHTML = `<div class="dnum">${c.date.getDate()}</div>` +
-                       (count ? `<div style="font-size:12px;color:rgba(235,245,255,.70);font-weight:900;">${count} entry${count>1?"ies":"y"}</div>` : "");
-      cell.addEventListener("click", ()=>{
-        if(count){
-          openDayList(key);
-        }
-      });
-      grid.appendChild(cell);
-    }
-  }
-
-  $("calMonth").addEventListener("change", renderCalendar);
-
-  // Day list modal
-  function openDayList(ymdKey){
-    const items = records
-      .filter(r => ymd(new Date(r.ts)) === ymdKey)
-      .sort((a,b)=> a.ts - b.ts);
-
-    $("dayListTitle").textContent = ymdKey;
-    $("dayListSub").textContent = "Tap a number to view details.";
-
-    $("dayLogoRow").innerHTML = $("dayLogoRow").innerHTML || document.querySelector(".logoTitle svg").outerHTML;
-
-    const list = $("dayList");
-    list.innerHTML = "";
-    for(const r of items){
-      const row = document.createElement("div");
-      row.className = "dayItem";
-      const d = new Date(r.ts);
-      let hr = d.getHours();
-      const ampm = hr>=12 ? "PM":"AM";
-      hr = hr%12; if(hr===0) hr=12;
-      const mi = String(d.getMinutes()).padStart(2,"0");
-      const time = `${String(hr).padStart(2,"0")}:${mi} ${ampm}`;
-      row.innerHTML =
-        `<div class="dayLeft">
-           <div class="dayTime">${time}</div>
-           <div class="dayNum">${escapeHtml(r.number)}</div>
-         </div>
-         <div class="dayNotes">${escapeHtml(r.notes || "")}</div>
-         <div class="chev">›</div>`;
-      row.addEventListener("click", ()=>{
-        $("dayListModal").classList.add("hidden");
-        openEdit(r.id);
-      });
-      list.appendChild(row);
-    }
-
-    $("dayListModal").classList.remove("hidden");
-    lockTouch(true);
-  }
-
-  $("btnDayListClose").addEventListener("click", ()=>{
-    $("dayListModal").classList.add("hidden");
-    lockTouch(false);
-  });
-
-  // Calendar add new
-  $("btnCalAddNew").addEventListener("click", ()=>{
-    const now = Date.now();
-    $("newSightingDT").value = toDTLocalValue(now);
-    $("newSightingNum").value = "";
-    $("newSightingNotes").value = "";
-    $("newSightingModal").classList.remove("hidden");
-    lockTouch(true);
-  });
-  $("btnNewSightingX").addEventListener("click", ()=>{
-    $("newSightingModal").classList.add("hidden");
-    lockTouch(false);
-  });
-  $("btnNewSightingCancel").addEventListener("click", ()=>{
-    $("newSightingModal").classList.add("hidden");
-    lockTouch(false);
-  });
-
-  $("btnNewSightingAdd").addEventListener("click", ()=>{
-    const ts = fromDTLocalValue($("newSightingDT").value);
-    const num = ($("newSightingNum").value || "").trim();
-    const card = buildAngelCard(num);
-    const rec = {
-      id: makeId(ts),
-      ts,
-      number: card.number || num,
-      pattern: card.pattern || classifyPattern(card.number || num),
-      meaning: card.meta || "",
-      notes: ($("newSightingNotes").value || "").trim()
-    };
-    addRecord(rec);
-    $("newSightingModal").classList.add("hidden");
-    lockTouch(false);
-    renderCalendar();
-    openInfo("Added", "Saved to Calendar.", {mode:"info"});
-  });
-
-  // Add-to-calendar modal from Home
-  $("btnAddCalX").addEventListener("click", ()=>{
-    $("addCalModal").classList.add("hidden");
-    lockTouch(false);
-  });
-  $("btnAddCalCancel").addEventListener("click", ()=>{
-    $("addCalModal").classList.add("hidden");
-    lockTouch(false);
-  });
-
-  $("btnAddCalAdd").addEventListener("click", ()=>{
-    if(!currentCard || !currentCard.number || currentCard.number === "—"){
-      openInfo("No number", "Enter a number first.", {mode:"info"});
-      return;
-    }
-    const ts = fromDTLocalValue($("addCalDT").value);
-    const notes = ($("addCalNotes").value || "").trim();
-    const rec = {
-      id: makeId(ts),
-      ts,
-      number: currentCard.number,
-      pattern: currentCard.pattern || classifyPattern(currentCard.number),
-      meaning: currentCard.meta || "",
-      notes
-    };
-    addRecord(rec);
-    $("addCalModal").classList.add("hidden");
-    lockTouch(false);
-    renderCalendar();
-    openInfo("Added", "Saved to Calendar.", {mode:"info"});
-  });
-
-  // Edit modal
-  function openEdit(id){
-    const rec = records.find(r=>r.id===id);
-    if(!rec){
-      openInfo("Not found", "That entry could not be found.", {mode:"info"});
-      return;
-    }
-
-    currentSelectedId = rec.id;
-    detailsShown = false;
-    $("editDetailsBox").classList.add("hidden");
-    $("btnToggleDetails").textContent = "View/Edit Details";
-
-    const card = buildAngelCard(rec.number);
-    $("editAngelHeader").textContent = `Angel Card Number: ${card.number || rec.number || "—"}`;
-    $("editAngelBig").textContent = card.number || rec.number || "—";
-    $("editAngelCard").textContent = card.meta || rec.meaning || "—";
-
-    $("editDT").value = toDTLocalValue(rec.ts);
-    $("editNum").value = rec.number || "";
-    $("editNotes").value = rec.notes || "";
-    $("editPattern").textContent = rec.pattern || card.pattern || "—";
-
-    $("editModal").classList.remove("hidden");
-    lockTouch(true);
-  }
-
-  $("btnToggleDetails").addEventListener("click", ()=>{
-    detailsShown = !detailsShown;
-    $("editDetailsBox").classList.toggle("hidden", !detailsShown);
-    $("btnToggleDetails").textContent = detailsShown ? "Hide Details" : "View/Edit Details";
-  });
-
-  $("btnEditClose").addEventListener("click", ()=>{
-    $("editModal").classList.add("hidden");
-    lockTouch(false);
-  });
-
-  $("btnEditSave").addEventListener("click", ()=>{
-    if(!currentSelectedId) return;
-    const idx = records.findIndex(r=>r.id===currentSelectedId);
-    if(idx<0) return;
-
-    const ts = fromDTLocalValue($("editDT").value);
-    const numRaw = ($("editNum").value || "").trim();
-    const card = buildAngelCard(numRaw);
-    const notes = ($("editNotes").value || "").trim();
-    const updated = {
-      ...records[idx],
-      ts,
-      number: card.number || numRaw,
-      pattern: classifyPattern(card.number || numRaw),
-      meaning: card.meta || "",
-      notes
-    };
-
-    records[idx] = updated;
-    records.sort((a,b)=> b.ts - a.ts);
-    saveRecords(records);
-
-    // refresh edit top card
-    const c2 = buildAngelCard(updated.number);
-    $("editAngelHeader").textContent = `Angel Card Number: ${c2.number || updated.number || "—"}`;
-    $("editAngelBig").textContent = c2.number || updated.number || "—";
-    $("editAngelCard").textContent = c2.meta || updated.meaning || "—";
-    $("editPattern").textContent = updated.pattern || "—";
-
-    renderCalendar();
-    openInfo("Saved", "Entry updated.", {mode:"info"});
-  });
-
-  $("btnEditDelete").addEventListener("click", ()=>{
-    if(!currentSelectedId) return;
-    const idx = records.findIndex(r=>r.id===currentSelectedId);
-    if(idx<0) return;
-
-    const rec = records[idx];
-    const msg = `Delete this entry?\n\n${fmtDateTime(rec.ts)}\nNumber: ${rec.number}\nNotes: ${rec.notes || "None"}`;
-    openInfo("Confirm delete", msg, {mode:"confirmDelete", okText:"Delete"});
-  });
-
-  $("btnEditExport").addEventListener("click", ()=>{
-    if(!currentSelectedId) return;
-    const rec = records.find(r=>r.id===currentSelectedId);
-    if(!rec){
-      openInfo("Export", "Entry not found.", {mode:"info"});
-      return;
-    }
-    const report = buildEntryReport(rec);
-    openExport(report);
-  });
-
-  // Info modal buttons
-  $("btnInfoX").addEventListener("click", closeInfo);
-
-  $("btnInfoOk").addEventListener("click", ()=>{
-    const mode = $("btnInfoOk").dataset.mode || "info";
-    if(mode === "confirmDelete"){
-      // perform delete
-      if(currentSelectedId){
-        records = records.filter(r=>r.id!==currentSelectedId);
-        saveRecords(records);
-        currentSelectedId = null;
-        renderCalendar();
-        $("editModal").classList.add("hidden");
-      }
-      closeInfo();
-      openInfo("Deleted", "Entry deleted.", {mode:"info"});
-      return;
-    }
-
-    if(mode === "installDone"){
-      closeInfo();
-      // Attempt to close the tab/window.
-      // Note: most browsers will block this unless the tab was opened by script.
-      try{ window.close(); }catch{}
-      setTimeout(()=>{
-        if(!document.hidden){
-          openInfo("Close this tab", "If this didn’t close automatically, close the tab or use your back button.\n\nThen launch the installed app icon for the best experience.", {mode:"info"});
-        }
-      }, 260);
-      return;
-    }
-
-    closeInfo();
-  });
-
-  // Export modal buttons
-  $("btnExportOk").addEventListener("click", closeExport);
-
-  $("btnExportCopy").addEventListener("click", async ()=>{
-    const text = $("exportReportBox").textContent || "";
-    try{
-      const ok = await copyToClipboard(text);
-      if(ok){
-        openInfo("Copied", "Report copied to clipboard.", {mode:"info"});
+      if(pull >= PTR_THRESHOLD){
+        ptrSet(true, "Release to refresh", `${pct}%`);
+        ptrTriggered = true;
       }else{
-        openInfo("Copy", "Copy is not available on this browser.", {mode:"info"});
+        ptrSet(true, "Pull to refresh", `${pct}%`);
+        ptrTriggered = false;
       }
-    }catch{
-      openInfo("Copy failed", "Could not copy to clipboard.", {mode:"info"});
-    }
-  });
+    }, {passive:false});
 
-  $("btnExportShare").addEventListener("click", async ()=>{
-    const text = $("exportReportBox").textContent || "";
-    if(!isShareAvailable()){
-      openInfo("Share", "Share is not available on this browser.", {mode:"info"});
+    screenArea.addEventListener("touchend", ()=>{
+      if(!ptrActive) return;
+      ptrActive = false;
+
+      if(ptrTriggered){
+        ptrSet(true, "Refreshing…", "");
+        setTimeout(() => {
+          try{ location.reload(); }catch{}
+        }, 180);
+      }else{
+        ptrSet(false);
+      }
+    }, {passive:true});
+
+    screenArea.addEventListener("touchcancel", ()=>{
+      if(!ptrActive) return;
+      ptrActive = false;
+      ptrSet(false);
+    }, {passive:true});
+  }
+
+  function injectManifest(){
+    const svg =
+`<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8a6bff"/>
+      <stop offset="55%" stop-color="#2f78ff"/>
+      <stop offset="100%" stop-color="#0b1324"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="110" fill="url(#g)"/>
+  <ellipse cx="256" cy="150" rx="110" ry="44" fill="none" stroke="rgba(235,245,255,.92)" stroke-width="26"/>
+  <path d="M256 240
+           C196 210, 140 220, 112 270
+           C154 294, 190 330, 214 380
+           C226 330, 240 285, 256 240Z"
+        fill="none" stroke="rgba(235,245,255,.92)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M256 240
+           C316 210, 372 220, 400 270
+           C358 294, 322 330, 298 380
+           C286 330, 272 285, 256 240Z"
+        fill="none" stroke="rgba(235,245,255,.92)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+    const encoded = encodeURIComponent(svg).replace(/'/g,"%27").replace(/"/g,"%22");
+    const icon = `data:image/svg+xml;charset=utf-8,${encoded}`;
+
+    const manifest = {
+      name: "Angel Code",
+      short_name: "AngelCode",
+      start_url: ".",
+      display: "standalone",
+      background_color: "#0b1324",
+      theme_color: "#0b1324",
+      icons: [{ src: icon, sizes: "512x512", type: "image/svg+xml", purpose: "any" }]
+    };
+
+    const blob = new Blob([JSON.stringify(manifest)], {type:"application/manifest+json"});
+    const url = URL.createObjectURL(blob);
+    $("manifestLink").setAttribute("href", url);
+  }
+
+  async function registerSW(){
+    if(!("serviceWorker" in navigator)) return;
+    const swCode =
+`self.addEventListener('install', (e)=>{ self.skipWaiting(); });
+self.addEventListener('activate', (e)=>{ e.waitUntil(self.clients.claim()); });
+self.addEventListener('fetch', (e)=>{ });`;
+    const blob = new Blob([swCode], {type:"text/javascript"});
+    const swUrl = URL.createObjectURL(blob);
+    try { await navigator.serviceWorker.register(swUrl); } catch {}
+  }
+
+  /* KEEP THIS EXIT FUNCTION EXACTLY (known-good) */
+  function attachExit(){
+    const btn = $("btnExitHome");
+    if(!btn) return;
+    btn.addEventListener("click", () => {
+      window.close();
+      setTimeout(() => {
+        alert("If it didn’t close: use your phone’s Back/Home.");
+      }, 200);
+    });
+  }
+
+  function exportCurrentIdentify(){
+    const n = lastIdentify.number || normalizeNumberInput($("homeIdNum").value);
+    if(!n){
+      openInfo("Export", "Enter a number, then tap Submit first.", {mode:"info"});
       return;
     }
-    try{
-      await navigator.share({ title:"Angel Code Report", text });
-    }catch{
-      // user cancelled or failed
-    }
-  });
-
-  $("btnExportSave").addEventListener("click", async ()=>{
-    const text = $("exportReportBox").textContent || "";
-    const name = `angel_code_report_${new Date().toISOString().slice(0,10)}.txt`;
-    try{
-      const usedPicker = await saveTextWithPicker(text, name);
-      if(!usedPicker){
-        downloadText(text, name);
+    const card = buildAngelCard(n);
+    const pseudo = {
+      id: makeId(Date.now()),
+      ts: Date.now(),
+      number: n,
+      meaning: card.cardText || "—",
+      notes: "None"
+    };
+    exportReport(
+      [pseudo],
+      {
+        reportLabel: "Angel Code Identify",
+        title: "Angel Card (Identify)",
+        rangeLabel: `Current identify: ${n} (not saved unless you Add to Calendar)`
+      },
+      "angel_code_identify",
+      {
+        modalTitle: "Angel Card (Identify)",
+        modalSub: "Home screen identify export.",
+        shareTitle: "Angel Code Identify"
       }
-      openInfo("Saved", "Report saved.", {mode:"info"});
-    }catch{
-      // fallback
-      try{
-        downloadText(text, name);
-        openInfo("Saved", "Report saved.", {mode:"info"});
-      }catch{
-        openInfo("Save failed", "Could not save report.", {mode:"info"});
+    );
+  }
+
+  async function installFlowAndClose(){
+    const msg =
+      "Please wait a moment while installing.\n\n" +
+      "After installing, please close this window and launch from the installed app for a better experience.\n\n" +
+      "Otherwise you may continue to use the web version.";
+    openInfo("Install", msg, {
+      mode:"info",
+      onOk: async () => {
+        try{ await tryInstall(); }catch{}
+        window.close();
+        setTimeout(() => {
+          alert("If it didn’t close: use your phone’s Back/Home.");
+        }, 200);
       }
-    }
+    });
+  }
+
+  function attachButtons(){
+    const btnView = $("btnViewCalendar");
+    if(btnView) btnView.addEventListener("click", () => snapToIndex(1, true));
+
+    $("btnBackFromCalendar").addEventListener("click", () => snapToIndex(0, true));
+
+    const btnExport = $("btnHomeExport");
+    if(btnExport) btnExport.addEventListener("click", (e) => {
+      e.preventDefault();
+      exportCurrentIdentify();
+    });
+
+    const btnAdd = $("btnAddToCalendar");
+    if(btnAdd) btnAdd.addEventListener("click", () => openAddCalModal());
+
+    const btnInstall = $("btnInstall");
+    if(btnInstall) btnInstall.addEventListener("click", (e) => {
+      e.preventDefault();
+      const mode = btnInstall.dataset.mode || "install";
+      if(mode === "uninstall"){ uninstallGuidance(); return; }
+      tryInstall();
+    });
+
+    const big = $("btnBigInstall");
+    if(big) big.addEventListener("click", (e) => {
+      e.preventDefault();
+      installFlowAndClose();
+    });
+
+    $("calMonth").addEventListener("change", renderCalendar);
+
+    $("btnCalAddNew").addEventListener("click", (e) => {
+      e.preventDefault();
+      openNewSighting();
+    });
+  }
+
+  injectManifest();
+  registerSW();
+
+  $("homeVerLabel").textContent = APP_VERSION;
+  $("topVerTiny").textContent = APP_VERSION;
+
+  setHomeRevealed(false);
+
+  attachButtons();
+  attachExit();
+  attachSmoothSwipe();
+  attachPullToRefresh();
+
+  initMonthDefaultIfNeeded();
+  renderCalendar();
+
+  updateInstallButton();
+
+  try{ document.activeElement?.blur(); }catch{}
+  setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 0);
+  setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 80);
+
+  snapToIndex(0, false);
+
+  window.addEventListener("resize", () => {
+    setDeckX(deckTargetXForIndex(deckIndex), false);
+    if(deckIndex === 1) renderCalendar();
   });
-
-  // Reports
-  function buildIdentifyReport(number){
-    const now = new Date();
-    const gen = fmtDateTime(now.getTime());
-    const card = buildAngelCard(number);
-    const lines = [];
-    lines.push(`Angel Code — Report`);
-    lines.push(`App Version: ${APP_VERSION}`);
-    lines.push(`Report: Angel Card (Identify)`);
-    lines.push(`Generated: ${gen}`);
-    lines.push(`Range: Current identify number (Home screen)`);
-    lines.push(`How this data was captured:`);
-    lines.push(`- This Angel Card was generated from a number entered manually on this device.`);
-    lines.push(`- Data is local-only (no cloud sync, no account).`);
-    lines.push(`- The report contains the current number and its Angel Card text from the Home screen.`);
-    lines.push(`------------------------------`);
-    lines.push(`Number: ${card.number || number}`);
-    lines.push(`Pattern: ${card.pattern || classifyPattern(card.number || number)}`);
-    lines.push(``);
-    lines.push(`${card.meta || ""}`);
-    return lines.join("\n");
-  }
-
-  function buildEntryReport(rec){
-    const now = new Date();
-    const gen = fmtDateTime(now.getTime());
-    const when = fmtDateTime(rec.ts);
-    const card = buildAngelCard(rec.number);
-
-    const lines = [];
-    lines.push(`Angel Code — Report`);
-    lines.push(`App Version: ${APP_VERSION}`);
-    lines.push(`Report: View & Update Export`);
-    lines.push(`Generated: ${gen}`);
-    lines.push(`Entry: ${when}`);
-    lines.push(`How this data was captured:`);
-    lines.push(`- Sightings are entered manually into Angel Code on this device.`);
-    lines.push(`- Data is stored locally on the phone (no cloud sync, no account).`);
-    lines.push(`- Each record includes date/time, number, pattern, Angel Card text, and optional notes.`);
-    lines.push(`This export contains the selected entry and its Angel Card as shown in View & Update.`);
-    lines.push(`------------------------------`);
-    lines.push(`Date/Time: ${when}`);
-    lines.push(`Number: ${rec.number}`);
-    lines.push(`Pattern: ${rec.pattern || card.pattern || "—"}`);
-    lines.push(`Notes: ${rec.notes ? rec.notes : "None"}`);
-    lines.push(``);
-    lines.push(`${card.meta || rec.meaning || ""}`);
-    return lines.join("\n");
-  }
-
-  // Initial render & setup
-  function init(){
-    setMonthToNow();
-    renderCalendar();
-    updateFooterVersion();
-
-    // Home post-submit section stays hidden until user submits
-    // but footer needs version once shown; handled in doHomeSubmit
-
-    updateInstallButtons();
-    // also wire small install button presence (it’s under after-submit)
-    // This will be updated when after-submit becomes visible.
-  }
-
-  init();
 
 })();
   </script>
+</body>
+</html>
 
 <!--
-Angel Code — EOF Version Detail Notes
+EOF Version Detail Notes
 App Version: v1.2A11
 Base: v1.2A10
-Changes (requested):
-- Add a large, high-visibility Install button on the Home/Entry screen under the main pill row.
-- On tap, show an “Installing…” message immediately.
-- After install (accepted), show a completion message with OK that attempts to close the current tab/window.
-- Big Install button uses same install availability logic as the small Install button.
+Changes:
+- Added a prominent Home “Install Angel Code” button under the entry row.
+- Install flow now shows a wait/close guidance message; OK triggers install prompt (if available) then attempts to close the tab/window (with fallback alert if blocked).
+- Version number now appears in very small text under the logo.
 -->
-</body>
-    </html>
