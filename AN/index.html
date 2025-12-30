@@ -1,12 +1,11 @@
 <!--
 Angel Code — BOF Version Detail Notes
-App Version: v1.2A12
-Base: v1.2A11
+App Version: v1.2A10
+Base: v1.2A9
 Changes (requested):
-- Home panel Install/Uninstall button now spans full panel width (same column behavior as wide buttons).
-- Remove the “Shows only when install is available…” instruction line under the big install button.
-- Keep the “Swipe left to view Calendar.” line.
-- If installed, the Home panel Uninstall button now closes the tab/window after showing uninstall guidance (same close behavior style as big install flow).
+- Fix: Export button from View & Update now reliably opens the Export report modal (export modal sits above other modals).
+- Export report header simplified: removed the “scribbled over” capture/explanation block; header is now clean and short.
+- Export report footer: removed the literal “Footer” label line (kept the explanation text).
 - Advance version and update BOF/EOF notes.
 -->
 <!doctype html>
@@ -70,7 +69,6 @@ Changes (requested):
     .logoTitle{
       margin:4px 6px 0;
       display:flex;
-      flex-direction:column;
       justify-content:center;
       align-items:center;
       text-shadow: 0 10px 22px rgba(0,0,0,.35);
@@ -82,14 +80,6 @@ Changes (requested):
       width:min(520px, 100%);
       height:auto;
       display:block;
-    }
-    .tinyVer{
-      margin-top: 2px;
-      font-size: 11px;
-      line-height: 1;
-      color: rgba(235,245,255,.36);
-      letter-spacing: .2px;
-      user-select:none;
     }
 
     .screenArea{
@@ -411,24 +401,6 @@ Changes (requested):
       line-height: 1.25;
     }
 
-    .bigInstallWrap{
-      margin-top: 12px;
-    }
-    .bigInstallBtn{
-      width: 100%;
-      height: 64px;
-      font-size: 22px;
-      font-weight: 900;
-      letter-spacing: .2px;
-      border-radius: 999px;
-      border: 2px solid rgba(120,170,255,.70);
-      background: linear-gradient(180deg, rgba(47,120,255,.98), rgba(47,120,255,.70));
-      box-shadow:
-        0 18px 42px rgba(0,0,0,.36),
-        0 0 0 6px rgba(47,120,255,.14);
-      color: rgba(235,245,255,.94);
-    }
-
     .homeActions{
       display:grid;
       grid-template-columns: 1fr 1fr;
@@ -454,11 +426,6 @@ Changes (requested):
       border-color: rgba(255,120,120,.42);
       color: rgba(255,225,225,.92);
       box-shadow: 0 10px 26px rgba(0,0,0,.22);
-    }
-
-    /* Make install/uninstall span full panel width */
-    #btnInstall{
-      grid-column: 1 / -1;
     }
 
     /* Modal */
@@ -761,6 +728,7 @@ Changes (requested):
       user-select:none;
     }
 
+    /* Ensure Export modal always appears above other modals (fix for hidden export) */
     #exportModal{ z-index: 10020; }
   </style>
 </head>
@@ -805,7 +773,6 @@ Changes (requested):
               letter-spacing=".6"
               filter="url(#angS)">Angel Code</text>
       </svg>
-      <div class="tinyVer" id="tinyVer">v—</div>
     </div>
 
     <div class="screenArea" id="screenArea">
@@ -825,10 +792,6 @@ Changes (requested):
                        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
                        placeholder="Enter a number (example: 1111, 1212, 1234)" />
                 <button id="btnHomeSubmit" class="btn primary">Submit</button>
-              </div>
-
-              <div id="bigInstallWrap" class="bigInstallWrap hidden">
-                <button id="btnBigInstall" class="btn bigInstallBtn">Install Angel Code</button>
               </div>
 
               <div class="homeInstrOneLine" id="homeInstrLine">
@@ -1038,7 +1001,7 @@ Changes (requested):
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.2A12";
+  const APP_VERSION = "v1.2A10";
   const STORAGE_KEY = "angel_numbers_records_v2_2025_12_29"; // keep existing data
 
   const DAY_MS = 24*60*60*1000;
@@ -1053,25 +1016,22 @@ Changes (requested):
   }
 
   let deferredInstallPrompt = null;
-  let bigInstallSuppressed = false; // if an Export report is displayed, suppress big install until refresh
 
   window.addEventListener("beforeinstallprompt", (e) => {
     e.preventDefault();
     deferredInstallPrompt = e;
     updateInstallButton();
-    updateBigInstallVisibility();
   });
 
   window.addEventListener("appinstalled", () => {
     deferredInstallPrompt = null;
     updateInstallButton(true);
-    updateBigInstallVisibility();
   });
 
   async function tryInstall(){
     if(!deferredInstallPrompt){
       openInfo("Install", "Install is only available when your browser offers it.\n\nTip: In Chrome, use menu ⋮ → Install app (if shown).", {mode:"info"});
-      return false;
+      return;
     }
     try{
       deferredInstallPrompt.prompt();
@@ -1079,19 +1039,9 @@ Changes (requested):
     }catch{}
     deferredInstallPrompt = null;
     updateInstallButton();
-    updateBigInstallVisibility();
-    return true;
   }
 
-  function closeAttempt(){
-    window.close();
-    setTimeout(() => {
-      alert("If it didn’t close: use your phone’s Back/Home.");
-    }, 220);
-  }
-
-  function openUninstallAndClose(){
-    // Show uninstall guidance, then close the window/tab on OK.
+  function uninstallGuidance(){
     const msg =
       "To uninstall the app:\n\n" +
       "Android:\n" +
@@ -1101,7 +1051,7 @@ Changes (requested):
       "iPhone/iPad:\n" +
       "• Long-press the app icon → Remove App\n\n" +
       "If you installed from Chrome, removing the app icon uninstalls the PWA.";
-    openInfo("Uninstall", msg, {mode:"info", closeOnOk:true});
+    openInfo("Uninstall", msg, {mode:"info"});
   }
 
   function updateInstallButton(installedMaybe=false){
@@ -1110,62 +1060,20 @@ Changes (requested):
 
     const standaloneNow = installedMaybe || isStandalone();
 
-    // If installed: show the button as Uninstall.
     if(standaloneNow){
-      btn.classList.remove("hidden");
       btn.disabled = false;
       btn.textContent = "Uninstall";
       btn.dataset.mode = "uninstall";
       return;
     }
 
-    // Not installed: show only if install prompt is available; otherwise hide.
     btn.dataset.mode = "install";
     if(deferredInstallPrompt){
-      btn.classList.remove("hidden");
       btn.disabled = false;
       btn.textContent = "Install";
     }else{
-      btn.classList.add("hidden");
       btn.disabled = true;
       btn.textContent = "Install";
-    }
-  }
-
-  function homeAfterSubmitIsVisible(){
-    const el = $("homeAfterSubmit");
-    if(!el) return false;
-    return !el.classList.contains("hidden");
-  }
-
-  function updateBigInstallVisibility(){
-    const wrap = $("bigInstallWrap");
-    const btn = $("btnBigInstall");
-    if(!wrap || !btn) return;
-
-    // Big install is ONLY for Entry screen: before Submit reveal.
-    if(homeAfterSubmitIsVisible()){
-      wrap.classList.add("hidden");
-      return;
-    }
-
-    // If installed, never show big install.
-    if(isStandalone()){
-      wrap.classList.add("hidden");
-      return;
-    }
-
-    // If a report has been displayed, suppress until refresh.
-    if(bigInstallSuppressed){
-      wrap.classList.add("hidden");
-      return;
-    }
-
-    // Only show if install is available.
-    if(deferredInstallPrompt){
-      wrap.classList.remove("hidden");
-    }else{
-      wrap.classList.add("hidden");
     }
   }
 
@@ -1520,12 +1428,8 @@ Changes (requested):
     lockTimer = null;
   }
 
-  let pendingCloseOnInfoOk = false;
-
   function openInfo(title, message, opts){
     const mode = opts?.mode || "info";
-    pendingCloseOnInfoOk = !!opts?.closeOnOk;
-
     $("infoTitle").textContent = title || "Info";
     $("infoSub").textContent = message || "—";
 
@@ -1547,11 +1451,6 @@ Changes (requested):
   function closeInfo(){
     $("infoModal").classList.add("hidden");
     unlockTouches();
-    const shouldClose = pendingCloseOnInfoOk;
-    pendingCloseOnInfoOk = false;
-    if(shouldClose){
-      closeAttempt();
-    }
   }
 
   $("btnInfoX").addEventListener("click", (e)=>{ e.preventDefault(); closeInfo(); });
@@ -1562,9 +1461,6 @@ Changes (requested):
 
   function openExportModal(payload){
     exportPayload = payload;
-
-    bigInstallSuppressed = true;
-    updateBigInstallVisibility();
 
     $("exportModalTitle").textContent = payload?.title || "Export";
     $("exportModalSub").textContent = payload?.subtitle || "Your report is shown below.";
@@ -1691,7 +1587,6 @@ Changes (requested):
   function setHomeRevealed(on){
     $("homeAfterSubmit").classList.toggle("hidden", !on);
     if(on) updateInstallButton();
-    updateBigInstallVisibility();
   }
 
   function renderHomeCardFromNumber(n){
@@ -1722,28 +1617,6 @@ Changes (requested):
       e.preventDefault();
       submitHome();
     }
-  });
-
-  async function handleBigInstall(){
-    if(!deferredInstallPrompt){
-      openInfo("Install", "Install is not available yet in this browser session.\n\nTip: In Chrome, use menu ⋮ → Install app (if shown).", {mode:"info"});
-      return;
-    }
-
-    openInfo(
-      "Installing…",
-      "Please wait a moment while installing.\n\nAfter install, close this tab and launch Angel Code from your Home Screen for the best experience.\n\nTap OK to close this tab.",
-      {mode:"info", closeOnOk:true}
-    );
-
-    try{ await tryInstall(); }catch{}
-    updateInstallButton();
-    updateBigInstallVisibility();
-  }
-
-  $("btnBigInstall").addEventListener("click", (e)=>{
-    e.preventDefault();
-    handleBigInstall();
   });
 
   function openAddCalModal(){
@@ -1942,6 +1815,59 @@ Changes (requested):
 
   $("btnDayListClose").addEventListener("click", (e)=>{ e.preventDefault(); closeDayListImmediate(); });
   $("dayListModal").addEventListener("click", (e)=>{ if(e.target === $("dayListModal")) closeDayListImmediate(); });
+
+  function renderCalendar(){
+    const mv = monthValueToYMD($("calMonth").value);
+    if(!mv) return;
+
+    const {y, mo} = mv;
+    const first = new Date(y, mo-1, 1);
+    const firstDow = first.getDay();
+    const totalCells = 42;
+
+    const gridStart = new Date(y, mo-1, 1 - firstDow);
+    gridStart.setHours(0,0,0,0);
+
+    const all = loadRecords();
+    const dayMap = buildDayIndexMap(all);
+
+    const dowRow = $("calDowRow");
+    dowRow.innerHTML = "";
+    for(const d of DOW){
+      const el = document.createElement("div");
+      el.className = "calDow";
+      el.textContent = d;
+      dowRow.appendChild(el);
+    }
+
+    const grid = $("calGrid");
+    grid.innerHTML = "";
+
+    for(let i=0;i<totalCells;i++){
+      const d = new Date(gridStart.getTime() + i*DAY_MS);
+      const dayStart = d.getTime();
+      const inMonth = (d.getMonth() === (mo-1));
+
+      const cell = document.createElement("div");
+      cell.className = "calCell" + (inMonth ? "" : " outMonth");
+
+      const dn = document.createElement("div");
+      dn.className = "dnum";
+      dn.textContent = String(d.getDate());
+      cell.appendChild(dn);
+
+      const recs = dayMap.get(dayStart) || [];
+      if(recs.length > 0){
+        cell.classList.add("hasData");
+        cell.addEventListener("click", (e)=>{
+          e.preventDefault();
+          openDayList(dayStart, recs);
+        }, {passive:false});
+      }
+
+      grid.appendChild(cell);
+    }
+  }
 
   let editId = null;
 
@@ -2446,16 +2372,11 @@ self.addEventListener('fetch', (e)=>{ });`;
     if(btnAdd) btnAdd.addEventListener("click", () => openAddCalModal());
 
     const btnInstall = $("btnInstall");
-    if(btnInstall) btnInstall.addEventListener("click", async (e) => {
+    if(btnInstall) btnInstall.addEventListener("click", (e) => {
       e.preventDefault();
       const mode = btnInstall.dataset.mode || "install";
-      if(mode === "uninstall"){
-        openUninstallAndClose();
-        return;
-      }
-      await tryInstall();
-      updateInstallButton();
-      updateBigInstallVisibility();
+      if(mode === "uninstall"){ uninstallGuidance(); return; }
+      tryInstall();
     });
 
     $("calMonth").addEventListener("change", renderCalendar);
@@ -2470,8 +2391,6 @@ self.addEventListener('fetch', (e)=>{ });`;
   registerSW();
 
   $("homeVerLabel").textContent = APP_VERSION;
-  $("tinyVer").textContent = APP_VERSION;
-
   setHomeRevealed(false);
 
   attachButtons();
@@ -2483,7 +2402,6 @@ self.addEventListener('fetch', (e)=>{ });`;
   renderCalendar();
 
   updateInstallButton();
-  updateBigInstallVisibility();
 
   try{ document.activeElement?.blur(); }catch{}
   setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 0);
@@ -2503,10 +2421,10 @@ self.addEventListener('fetch', (e)=>{ });`;
 
 <!--
 EOF Version Detail Notes
-App Version: v1.2A12
-Base: v1.2A11
+App Version: v1.2A10
+Base: v1.2A9
 Changes:
-- Home panel Install/Uninstall button spans full width of the panel grid.
-- Removed “Shows only when install is available…” line under the big install button; kept the swipe hint line.
-- Uninstall action now shows guidance and then closes the tab/window on OK (same close behavior style).
+- Fixed: Export report modal now reliably displays above other modals (View & Update export no longer appears to “do nothing”).
+- Export report header simplified (removed capture/explanation block); clean header only.
+- Export report footer label "Footer" removed (kept the explanation text).
 -->
