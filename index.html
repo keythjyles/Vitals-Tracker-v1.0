@@ -1,11 +1,11 @@
-<!-- Vitals Tracker v1.19B40 -->
+<!-- Vitals Tracker v1.19B41 -->
 <!--
 Version Detail Notes
-App Version: v1.19B40
-Base: v1.19B8
+App Version: v1.19B41
+Base: v1.19B40
 Changes (requested):
-- Enforce version jump to v1.19B40.
-- Home panel accent border now visually "floats" to just under the footer line (tightened bottom spacing inside Home panel).
+- Fix: Panels no longer stretch to the height of the tallest panel. The accent border now hugs content (no extra empty space inside) on Home and Charts (and all panels).
+- Advance version to v1.19B41.
 - No other behavior changes.
 -->
 <!doctype html>
@@ -186,7 +186,7 @@ Changes (requested):
       line-height:1.25;
     }
 
-    /* Tighten Home bottom so border sits just under footer (v1.19B40) */
+    /* Home bottom spacing (keep tight so footer is close to border) */
     #home.card{ padding-bottom: 10px; }
     #home .homeMain{ margin-bottom: 0; }
     #home .footerTiny{ margin-top: 8px; padding-bottom: 0; }
@@ -506,10 +506,12 @@ Changes (requested):
       width:100%;
       will-change: transform;
       transform: translate3d(0,0,0);
+      align-items:flex-start; /* v1.19B41: prevent cross-axis stretch */
     }
     .panel{
       flex: 0 0 100%;
       width:100%;
+      align-self:flex-start; /* v1.19B41: keep each card hugging content */
     }
 
     .ptrHint{
@@ -573,7 +575,7 @@ Changes (requested):
             <div class="ptrHint">Pull down on Home to refresh (release).</div>
 
             <div class="footerTiny">
-              <div>v1.19B40</div>
+              <div>v1.19B41</div>
               <div>developed by Keyth Jyles</div>
             </div>
           </div>
@@ -699,7 +701,7 @@ Optional:
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.19B40";
+  const APP_VERSION = "v1.19B41";
   const STORAGE_KEY = "vitals_tracker_records_v1";
   const SYMPTOMS = [
     "Sweaty","Dizzy","Panic","Brain fog","Chest tight","Headache",
@@ -2345,6 +2347,6 @@ self.addEventListener('fetch', (e)=>{ });`;
 </html>
 <!--
 Vitals Tracker — EOF Version Notes
-App Version: v1.19B40
-- Home bottom spacing tightened so the accent border sits just under the footer line.
+App Version: v1.19B41
+- Fix: Panels no longer stretch to the tallest panel; accent borders now hug content (Home/Charts/etc.).
 -->
