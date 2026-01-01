@@ -1,13 +1,11 @@
-<!-- Vitals Tracker v1.19B8 -->
+<!-- Vitals Tracker v1.19B40 -->
 <!--
 Version Detail Notes
-App Version: v1.19B8
-Base: v1.19B7
+App Version: v1.19B40
+Base: v1.19B8
 Changes (requested):
-- Add seamless left/right swipe carousel between panels (Home, Log, Charts). Panels track the finger during swipe and snap cleanly.
-- Add panel is EXCLUDED from rotation; it opens only via ADD buttons from any panel.
-- Preserve pull-down-to-refresh behavior on Home panel; cancels if horizontal swipe is detected.
-- Log list interaction: swipes are primary. Horizontal swipes suppress accidental entry selection/edit prompt.
+- Enforce version jump to v1.19B40.
+- Home panel accent border now visually "floats" to just under the footer line (tightened bottom spacing inside Home panel).
 - No other behavior changes.
 -->
 <!doctype html>
@@ -187,6 +185,11 @@ Changes (requested):
       resize:none;
       line-height:1.25;
     }
+
+    /* Tighten Home bottom so border sits just under footer (v1.19B40) */
+    #home.card{ padding-bottom: 10px; }
+    #home .homeMain{ margin-bottom: 0; }
+    #home .footerTiny{ margin-top: 8px; padding-bottom: 0; }
 
     .homeMain{
       display:flex;
@@ -493,7 +496,6 @@ Changes (requested):
       color: rgba(235,245,255,.90);
     }
 
-    /* v1.19B8 carousel */
     .viewport{
       overflow:hidden;
       width:100%;
@@ -510,7 +512,6 @@ Changes (requested):
       width:100%;
     }
 
-    /* Pull-to-refresh hint */
     .ptrHint{
       margin: 0 4px 10px;
       color: rgba(235,245,255,.40);
@@ -572,7 +573,7 @@ Changes (requested):
             <div class="ptrHint">Pull down on Home to refresh (release).</div>
 
             <div class="footerTiny">
-              <div>v1.19B8</div>
+              <div>v1.19B40</div>
               <div>developed by Keyth Jyles</div>
             </div>
           </div>
@@ -698,7 +699,7 @@ Optional:
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.19B8";
+  const APP_VERSION = "v1.19B40";
   const STORAGE_KEY = "vitals_tracker_records_v1";
   const SYMPTOMS = [
     "Sweaty","Dizzy","Panic","Brain fog","Chest tight","Headache",
@@ -799,10 +800,6 @@ Optional:
     return new Intl.DateTimeFormat(undefined, { month:"2-digit", day:"2-digit" }).format(new Date(ts));
   }
 
-  /* =========================
-     Carousel (Home/Log/Charts)
-     ========================= */
-
   const PANELS = ["home","log","charts"];
   const track = $("track");
   const viewport = $("viewport");
@@ -851,7 +848,7 @@ Optional:
 
   let swipe = {
     active:false,
-    axis:null,         // "x" | "y"
+    axis:null,
     startX:0,
     startY:0,
     startT:0,
@@ -928,12 +925,9 @@ Optional:
     }
 
     if(swipe.axis === "y"){
-      // Pull-to-refresh only on Home, only near top, only downward.
       if(currentPanelId() !== "home") return;
       if(window.scrollY > 0) return;
       if(dy < 0) return;
-
-      // Cancel PTR if horizontal emerges
       if(Math.abs(dx) > 18 && Math.abs(dx) > Math.abs(dy)){
         return;
       }
@@ -947,8 +941,6 @@ Optional:
     const dy = swipe.lastY - swipe.startY;
 
     const w = trackWidth();
-    const xNow = swipe.baseX + dx;
-
     const velocityX = (() => {
       const dt = Math.max(1, Date.now() - swipe.startT);
       return dx / dt;
@@ -981,7 +973,6 @@ Optional:
     }
 
     if(swipe.axis === "y"){
-      // Pull-to-refresh trigger on Home
       if(currentPanelId() === "home" && window.scrollY === 0){
         const PULL_THRESHOLD = 70;
         if(dy >= PULL_THRESHOLD && Math.abs(dx) < 24){
@@ -991,13 +982,11 @@ Optional:
       }
     }
 
-    // Snap back if no commit
     snapToIndex(activeIndex, true);
     swipe.active = false;
     swipe.axis = null;
   }
 
-  // Pointer events (supports touch + stylus)
   viewport.addEventListener("pointerdown", (ev) => {
     if(ev.pointerType === "mouse") return;
     if(!allowSwipeHere(ev.target)) return;
@@ -1023,15 +1012,10 @@ Optional:
     swipe.axis = null;
   });
 
-  // Keep track aligned on resize
   window.addEventListener("resize", () => {
     if(isAddOpen) return;
     snapToIndex(activeIndex, false);
   });
-
-  /* =========================
-     Custom edit prompt modal
-     ========================= */
 
   let pendingEditTs = null;
   let modalPrevFocus = null;
@@ -1099,10 +1083,6 @@ Optional:
       }
     }
   });
-
-  /* =========================
-     Export modal (clipboard/share/save)
-     ========================= */
 
   let exportPayload = null;
   let exportPrevFocus = null;
@@ -1232,10 +1212,6 @@ Optional:
     downloadText(exportPayload.text, exportPayload.filename || "vitals_report.txt");
   });
 
-  /* =========================
-     Symptoms UI
-     ========================= */
-
   const symGrid = $("symGrid");
   const symState = new Map();
 
@@ -1316,10 +1292,6 @@ Optional:
     $("notes").value = "";
     clearSymUI();
   }
-
-  /* =========================
-     Add/Edit
-     ========================= */
 
   let timeTimer = null;
   let editTs = null;
@@ -1403,10 +1375,6 @@ Optional:
       guard++;
     }
   }
-
-  /* =========================
-     Log filtering + render
-     ========================= */
 
   function recordMatches(rec, q){
     if(!q) return true;
@@ -1506,10 +1474,6 @@ Optional:
 
     try { document.activeElement && document.activeElement.blur(); } catch {}
   }
-
-  /* =========================
-     Log tap handling (swipe-first)
-     ========================= */
 
   const logTap = {
     activeEl:null,
@@ -1631,10 +1595,6 @@ Optional:
     }
   });
 
-  /* =========================
-     Export with report header
-     ========================= */
-
   function buildReportHeader({title, rangeLabel, notes}){
     const now = fmtDateTime(Date.now());
     const lines = [
@@ -1681,10 +1641,6 @@ Optional:
       openExportModal({ text: out, filename });
     })();
   }
-
-  /* =========================
-     Charts (unchanged)
-     ========================= */
 
   const chartView = {
     baseMin: 0,
@@ -2110,10 +2066,6 @@ Optional:
     canvas.addEventListener("touchcancel", endGestures, {passive:true});
   }
 
-  /* =========================
-     Clear Data + Install + Exit
-     ========================= */
-
   function clearAllData(){
     const ok = confirm(
       "Clear ALL saved vitals data?\n\n" +
@@ -2175,17 +2127,12 @@ Optional:
 
   $("btnClearAll").addEventListener("click", clearAllData);
 
-  /* KEEP THIS EXIT FUNCTION EXACTLY (known-good) */
   $("btnExitHome").addEventListener("click", () => {
     window.close();
     setTimeout(() => {
       alert("If it didn’t close: use your phone’s Back/Home.");
     }, 200);
   });
-
-  /* =========================
-     Buttons + Save/Delete
-     ========================= */
 
   $("btnGoAdd").addEventListener("click", () => enterAddNew(currentPanelId()));
   $("btnGoLog").addEventListener("click", () => showCarouselPanel("log"));
@@ -2263,19 +2210,9 @@ Optional:
     showCarouselPanel("log");
   });
 
-  /* =========================
-     SEARCH BEHAVIOR
-     - Search runs only on button click or Enter key.
-     ========================= */
+  function runSearch(){ renderLog(); }
 
-  function runSearch(){
-    renderLog();
-  }
-
-  $("btnRunSearch").addEventListener("click", (e) => {
-    e.preventDefault();
-    runSearch();
-  });
+  $("btnRunSearch").addEventListener("click", (e) => { e.preventDefault(); runSearch(); });
 
   $("search").addEventListener("keydown", (e) => {
     if(e.key === "Enter"){
@@ -2294,10 +2231,6 @@ Optional:
     applyWeekToBase(true);
     renderCharts();
   });
-
-  /* =========================
-     Export handlers
-     ========================= */
 
   $("btnExportLog").addEventListener("click", () => {
     const recs = filteredRecords({fromId:"fromDate", toId:"toDate", searchId:"search"});
@@ -2345,10 +2278,6 @@ Optional:
     );
   });
 
-  /* =========================
-     Manifest + SW
-     ========================= */
-
   function injectManifest(){
     const svg =
 `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
@@ -2393,10 +2322,6 @@ self.addEventListener('fetch', (e)=>{ });`;
     try { await navigator.serviceWorker.register(swUrl); } catch {}
   }
 
-  /* =========================
-     Init
-     ========================= */
-
   buildSymptoms();
   injectManifest();
   registerSW();
@@ -2420,8 +2345,6 @@ self.addEventListener('fetch', (e)=>{ });`;
 </html>
 <!--
 Vitals Tracker — EOF Version Notes
-App Version: v1.19B8
-- Carousel swipe: Home ↔ Log ↔ Charts. Add excluded.
-- Home pull-down refresh retained; cancels if horizontal swipe detected.
-- Log: swipe-first prevents accidental edit prompt during swipes.
+App Version: v1.19B40
+- Home bottom spacing tightened so the accent border sits just under the footer line.
 -->
