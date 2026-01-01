@@ -1,12 +1,13 @@
-<!-- Vitals Tracker v1.19B41 -->
+<!-- Vitals Tracker v1.19B42 -->
 <!--
 Version Detail Notes
-App Version: v1.19B41
-Base: v1.19B40
+App Version: v1.19B42
+Base: v1.19B41
 Changes (requested):
-- Fix: Panels no longer stretch to the height of the tallest panel. The accent border now hugs content (no extra empty space inside) on Home and Charts (and all panels).
-- Advance version to v1.19B41.
-- No other behavior changes.
+- Fix: Remove “double border” look by hiding the inner card border when accent frame is used.
+- Fix: Prevent accent border clipping/missing segment by drawing the accent border INSIDE the panel (no negative inset).
+- Slightly decrease panel size (minimal) by adding small horizontal padding inside the carousel viewport (no layout reflow).
+- No other layout/behavior changes.
 -->
 <!doctype html>
 <html lang="en">
@@ -82,15 +83,17 @@ Changes (requested):
       backdrop-filter: blur(10px);
     }
 
+    /* Accent frame should be the ONLY visible border (no “double border”) */
     .accentFrame{
       position:relative;
+      border-color: transparent; /* keep border box sizing the same without showing it */
     }
     .accentFrame::before{
       content:"";
       position:absolute;
-      inset:-3px;
+      inset:0; /* draw inside to prevent clipping */
       border:3px solid var(--accent);
-      border-radius: calc(var(--radius) + 3px);
+      border-radius: var(--radius);
       pointer-events:none;
       z-index:0;
     }
@@ -500,18 +503,19 @@ Changes (requested):
       overflow:hidden;
       width:100%;
       touch-action: pan-y;
+      padding: 0 6px; /* v1.19B42: minimal panel shrink */
     }
     .track{
       display:flex;
       width:100%;
       will-change: transform;
       transform: translate3d(0,0,0);
-      align-items:flex-start; /* v1.19B41: prevent cross-axis stretch */
+      align-items:flex-start;
     }
     .panel{
       flex: 0 0 100%;
       width:100%;
-      align-self:flex-start; /* v1.19B41: keep each card hugging content */
+      align-self:flex-start;
     }
 
     .ptrHint{
@@ -575,7 +579,7 @@ Changes (requested):
             <div class="ptrHint">Pull down on Home to refresh (release).</div>
 
             <div class="footerTiny">
-              <div>v1.19B41</div>
+              <div>v1.19B42</div>
               <div>developed by Keyth Jyles</div>
             </div>
           </div>
@@ -701,7 +705,7 @@ Optional:
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.19B41";
+  const APP_VERSION = "v1.19B42";
   const STORAGE_KEY = "vitals_tracker_records_v1";
   const SYMPTOMS = [
     "Sweaty","Dizzy","Panic","Brain fog","Chest tight","Headache",
@@ -812,7 +816,7 @@ Optional:
   function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
 
   function trackWidth(){
-    return viewport.getBoundingClientRect().width || 1;
+    return viewport.clientWidth || 1; /* v1.19B42: match padded content width */
   }
 
   function setTrackX(px, withTransition){
@@ -2347,6 +2351,8 @@ self.addEventListener('fetch', (e)=>{ });`;
 </html>
 <!--
 Vitals Tracker — EOF Version Notes
-App Version: v1.19B41
-- Fix: Panels no longer stretch to the tallest panel; accent borders now hug content (Home/Charts/etc.).
+App Version: v1.19B42
+- Fix: Accent border drawn inside; no clipping/missing segment.
+- Fix: Removed double-border look on panels.
+- Minimal panel shrink via carousel viewport padding.
 -->
