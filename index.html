@@ -1,12 +1,12 @@
-<!-- Vitals Tracker v1.19B7 -->
+<!-- Vitals Tracker v1.19B8 -->
 <!--
 Version Detail Notes
-App Version: v1.19B7
-Base: v1.19B6 (derived from v1.19B5)
+App Version: v1.19B8
+Base: v1.19B7
 Changes (requested):
-- Remove the screen border (body::before).
-- Home / Add / Log / Charts panels all use the same accent border (matching prior screen border).
-- Modals (edit/export) use the same accent border style.
+- Add seamless left/right swipe carousel between panels (Home/Add/Log/Charts).
+- Panels follow finger during swipe; snap to nearest panel on release.
+- Maintain Pull-to-Refresh on Home panel; cancel pull-to-refresh when a horizontal swipe is detected.
 - No other behavior changes.
 -->
 <!doctype html>
@@ -52,6 +52,7 @@ Changes (requested):
       display:flex;
       justify-content:center;
       padding: max(14px, env(safe-area-inset-top)) 12px max(14px, env(safe-area-inset-bottom));
+      overscroll-behavior-y: contain;
     }
 
     .app{
@@ -59,6 +60,7 @@ Changes (requested):
       display:flex;
       flex-direction:column;
       gap:14px;
+      position:relative;
     }
 
     .logoTitle{
@@ -67,6 +69,7 @@ Changes (requested):
       justify-content:center;
       align-items:center;
       text-shadow: 0 10px 22px rgba(0,0,0,.35);
+      flex:0 0 auto;
     }
     .logoTitle svg{
       width:min(520px, 100%);
@@ -83,7 +86,7 @@ Changes (requested):
       backdrop-filter: blur(10px);
     }
 
-    /* v1.19B7: unified accent border for all panels */
+    /* v1.19B7+: unified accent border for all panels */
     .accentFrame{
       position:relative;
     }
@@ -389,10 +392,10 @@ Changes (requested):
     }
     .searchRow .btn.small{
       flex: 0 0 auto;
-      height:54px;         /* match field height */
+      height:54px;
       font-size:16px;
       padding: 0 16px;
-      border-radius: 18px; /* matches input curvature better for side-by-side */
+      border-radius: 18px;
     }
 
     canvas{
@@ -445,7 +448,7 @@ Changes (requested):
     .modalCard{
       width:min(520px, 100%);
       border-radius: 26px;
-      border: 3px solid var(--accent); /* v1.19B7: match panel accent border thickness */
+      border: 3px solid var(--accent);
       background: linear-gradient(180deg, rgba(12,21,40,.96), rgba(8,16,31,.96));
       box-shadow: 0 18px 60px rgba(0,0,0,.55);
       padding: 18px;
@@ -493,6 +496,51 @@ Changes (requested):
     #exportModal .btn.primary{
       color: rgba(235,245,255,.90);
     }
+
+    /* Carousel (v1.19B8) */
+    .carouselViewport{
+      width:100%;
+      overflow:hidden;
+      position:relative;
+      touch-action: pan-y;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .carouselTrack{
+      display:flex;
+      width:100%;
+      transform: translate3d(0,0,0);
+      will-change: transform;
+    }
+    .panelWrap{
+      flex: 0 0 100%;
+      width:100%;
+      padding-bottom: 2px;
+    }
+
+    /* Pull-to-refresh hint (Home only) */
+    .ptrHint{
+      position:absolute;
+      top:-34px;
+      left:0;
+      right:0;
+      height:34px;
+      display:flex;
+      align-items:flex-end;
+      justify-content:center;
+      pointer-events:none;
+      color: rgba(235,245,255,.56);
+      font-size: 12px;
+      letter-spacing: .2px;
+      text-shadow: 0 10px 22px rgba(0,0,0,.35);
+      z-index: 5;
+    }
+    .ptrHint > div{
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(235,245,255,.14);
+      background: rgba(0,0,0,.18);
+      backdrop-filter: blur(10px);
+    }
   </style>
 </head>
 
@@ -526,106 +574,122 @@ Changes (requested):
       </svg>
     </div>
 
-    <div id="home" class="card accentFrame">
-      <div class="homeMain">
-        <button id="btnGoAdd" class="btn primary">ADD Reading</button>
-        <button id="btnGoLog" class="btn">Log</button>
-        <button id="btnGoCharts" class="btn">Charts</button>
+    <div id="carouselViewport" class="carouselViewport" aria-label="Panels">
+      <div id="ptrHint" class="ptrHint" aria-hidden="true"><div>Pull to refresh</div></div>
 
-        <div class="homeFooterRow">
-          <button id="btnInstall" class="btn small">Install</button>
-          <button id="btnClearAll" class="btn small">Clear Data</button>
-          <div class="grow"></div>
-          <button id="btnExitHome" class="btn small danger">Exit</button>
+      <div id="carouselTrack" class="carouselTrack">
+
+        <div class="panelWrap">
+          <div id="home" class="card accentFrame">
+            <div class="homeMain">
+              <button id="btnGoAdd" class="btn primary">ADD Reading</button>
+              <button id="btnGoLog" class="btn">Log</button>
+              <button id="btnGoCharts" class="btn">Charts</button>
+
+              <div class="homeFooterRow">
+                <button id="btnInstall" class="btn small">Install</button>
+                <button id="btnClearAll" class="btn small">Clear Data</button>
+                <div class="grow"></div>
+                <button id="btnExitHome" class="btn small danger">Exit</button>
+              </div>
+
+              <div class="subtle">Data stays on your phone (local only).</div>
+
+              <div class="footerTiny">
+                <div>v1.19B8</div>
+                <div>developed by Keyth Jyles</div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="subtle">Data stays on your phone (local only).</div>
+        <div class="panelWrap">
+          <div id="add" class="card accentFrame">
+            <div id="editPill" class="editPill hidden">Editing entry</div>
 
-        <div class="footerTiny">
-          <div>v1.19B7</div>
-          <div>developed by Keyth Jyles</div>
+            <div id="timeLine" class="timeLine">--:--:-- --, --/--/----</div>
+
+            <div class="triple">
+              <div>
+                <div class="miniLabel">Systolic</div>
+                <input id="sys" class="field" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 132" />
+              </div>
+              <div>
+                <div class="miniLabel">Diastolic</div>
+                <input id="dia" class="field" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 91" />
+              </div>
+              <div>
+                <div class="miniLabel">Heart Rate</div>
+                <input id="hr" class="field" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 72" />
+              </div>
+            </div>
+
+            <div class="noteLabel">Notes <em>(optional)</em></div>
+            <textarea id="notes" class="field" placeholder="optional"></textarea>
+
+            <div class="label">Symptoms</div>
+            <div id="symGrid" class="symGrid"></div>
+
+            <div class="panelButtons">
+              <button id="btnSave" class="btn primary grow">Save</button>
+              <button id="btnDelete" class="btn grow hidden">Delete</button>
+              <button id="btnBackFromAdd" class="btn grow">Back</button>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
 
-    <div id="add" class="card accentFrame hidden">
-      <div id="editPill" class="editPill hidden">Editing entry</div>
+        <div class="panelWrap">
+          <div id="log" class="card accentFrame">
+            <div class="row center">
+              <button id="btnExportLog" class="btn small">Export</button>
+              <button id="btnAddFromLog" class="btn small">ADD</button>
+              <div class="grow"></div>
+              <button id="btnBackFromLog" class="btn small">Back</button>
+            </div>
 
-      <div id="timeLine" class="timeLine">--:--:-- --, --/--/----</div>
+            <div class="label">Search</div>
+            <div class="searchRow">
+              <input id="search" class="field" placeholder="Type a word: sweaty, dizzy, headache..." />
+              <button id="btnRunSearch" class="btn small">Search</button>
+            </div>
 
-      <div class="triple">
-        <div>
-          <div class="miniLabel">Systolic</div>
-          <input id="sys" class="field" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 132" />
+            <div class="filters">
+              <div class="dateField">
+                <div class="miniLabel">From</div>
+                <input id="fromDate" class="field" type="date" />
+              </div>
+              <div class="dateField">
+                <div class="miniLabel">To</div>
+                <input id="toDate" class="field" type="date" />
+              </div>
+            </div>
+
+            <div id="logList"></div>
+          </div>
         </div>
-        <div>
-          <div class="miniLabel">Diastolic</div>
-          <input id="dia" class="field" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 91" />
+
+        <div class="panelWrap">
+          <div id="charts" class="card accentFrame">
+            <div class="row center">
+              <button id="btnExportCharts" class="btn small">Export</button>
+              <div class="grow"></div>
+              <button id="btnBackFromCharts" class="btn small">Back</button>
+            </div>
+
+            <div class="subtle">Weekly view (7 days). Pinch to zoom; drag to pan.</div>
+
+            <div class="filters">
+              <div class="dateField" style="grid-column:1 / span 2;">
+                <div class="miniLabel">Week</div>
+                <input id="chartWeek" class="field" type="week" />
+              </div>
+            </div>
+
+            <canvas id="chart" width="900" height="520"></canvas>
+          </div>
         </div>
-        <div>
-          <div class="miniLabel">Heart Rate</div>
-          <input id="hr" class="field" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 72" />
-        </div>
+
       </div>
-
-      <div class="noteLabel">Notes <em>(optional)</em></div>
-      <textarea id="notes" class="field" placeholder="optional"></textarea>
-
-      <div class="label">Symptoms</div>
-      <div id="symGrid" class="symGrid"></div>
-
-      <div class="panelButtons">
-        <button id="btnSave" class="btn primary grow">Save</button>
-        <button id="btnDelete" class="btn grow hidden">Delete</button>
-        <button id="btnBackFromAdd" class="btn grow">Back</button>
-      </div>
-    </div>
-
-    <div id="log" class="card accentFrame hidden">
-      <div class="row center">
-        <button id="btnExportLog" class="btn small">Export</button>
-        <button id="btnAddFromLog" class="btn small">ADD</button>
-        <div class="grow"></div>
-        <button id="btnBackFromLog" class="btn small">Back</button>
-      </div>
-
-      <div class="label">Search</div>
-      <div class="searchRow">
-        <input id="search" class="field" placeholder="Type a word: sweaty, dizzy, headache..." />
-        <button id="btnRunSearch" class="btn small">Search</button>
-      </div>
-
-      <div class="filters">
-        <div class="dateField">
-          <div class="miniLabel">From</div>
-          <input id="fromDate" class="field" type="date" />
-        </div>
-        <div class="dateField">
-          <div class="miniLabel">To</div>
-          <input id="toDate" class="field" type="date" />
-        </div>
-      </div>
-
-      <div id="logList"></div>
-    </div>
-
-    <div id="charts" class="card accentFrame hidden">
-      <div class="row center">
-        <button id="btnExportCharts" class="btn small">Export</button>
-        <div class="grow"></div>
-        <button id="btnBackFromCharts" class="btn small">Back</button>
-      </div>
-
-      <div class="subtle">Weekly view (7 days). Pinch to zoom; drag to pan.</div>
-
-      <div class="filters">
-        <div class="dateField" style="grid-column:1 / span 2;">
-          <div class="miniLabel">Week</div>
-          <input id="chartWeek" class="field" type="week" />
-        </div>
-      </div>
-
-      <canvas id="chart" width="900" height="520"></canvas>
     </div>
 
   </div>
@@ -665,7 +729,7 @@ Optional:
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.19B7";
+  const APP_VERSION = "v1.19B8";
   const STORAGE_KEY = "vitals_tracker_records_v1";
   const SYMPTOMS = [
     "Sweaty","Dizzy","Panic","Brain fog","Chest tight","Headache",
@@ -706,36 +770,6 @@ Optional:
   }
 
   const $ = (id) => document.getElementById(id);
-  const screens = ["home","add","log","charts"];
-
-  function focusTopOfPanel(screen){
-    window.scrollTo({top:0, left:0, behavior:"auto"});
-
-    if(screen === "add"){
-      if(editTs == null){
-        setTimeout(() => { try{ $("sys").focus({preventScroll:true}); }catch{} }, 0);
-      }else{
-        setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 0);
-      }
-    }
-  }
-
-  function show(screen){
-    for(const s of screens){
-      $(s).classList.toggle("hidden", s !== screen);
-    }
-    if(screen === "log"){ renderLog(); }
-    if(screen === "charts"){
-      initWeekDefaultIfNeeded();
-      applyWeekToBase(true);
-      renderCharts();
-    }
-    if(screen === "add"){
-      tickTime();
-      adjustTimeFont();
-    }
-    focusTopOfPanel(screen);
-  }
 
   function fmtDateTime(ts){
     const d = new Date(ts);
@@ -794,6 +828,249 @@ Optional:
   }
   function mmddFromTs(ts){
     return new Intl.DateTimeFormat(undefined, { month:"2-digit", day:"2-digit" }).format(new Date(ts));
+  }
+
+  /* =========================
+     Carousel + navigation
+     ========================= */
+
+  const PANELS = ["home","add","log","charts"];
+  let activeIndex = 0;
+
+  function panelIndexByName(name){
+    const i = PANELS.indexOf(name);
+    return i >= 0 ? i : 0;
+  }
+
+  function getViewportWidth(){
+    const vp = $("carouselViewport");
+    return Math.max(1, vp ? vp.clientWidth : window.innerWidth);
+  }
+
+  function setTrackTransform(px, animate){
+    const track = $("carouselTrack");
+    if(!track) return;
+    track.style.transition = animate ? "transform 240ms cubic-bezier(.22,.8,.2,1)" : "none";
+    track.style.transform = `translate3d(${px}px,0,0)`;
+  }
+
+  function onPanelEnter(name){
+    if(name === "log"){ renderLog(); }
+    if(name === "charts"){
+      initWeekDefaultIfNeeded();
+      applyWeekToBase(true);
+      renderCharts();
+    }
+    if(name === "add"){
+      tickTime();
+      adjustTimeFont();
+    }
+    window.scrollTo({top:0, left:0, behavior:"auto"});
+  }
+
+  function goToPanel(name, animate=true){
+    const next = panelIndexByName(name);
+    activeIndex = next;
+    const W = getViewportWidth();
+    setTrackTransform(-activeIndex * W, animate);
+    onPanelEnter(PANELS[activeIndex]);
+    refreshPTRHint();
+  }
+
+  /* =========================
+     Pull-to-refresh (Home only)
+     ========================= */
+
+  const ptr = {
+    tracking:false,
+    startX:0,
+    startY:0,
+    dy:0,
+    mode:null,  // null | "h" | "v"
+    cancelled:false
+  };
+
+  function refreshPTRHint(){
+    const hint = $("ptrHint");
+    if(!hint) return;
+    hint.style.display = (activeIndex === 0) ? "flex" : "none";
+  }
+
+  function canPTRStart(){
+    if(activeIndex !== 0) return false;
+    if(window.scrollY > 0) return false;
+    if(!$("editModal").classList.contains("hidden")) return false;
+    if(!$("exportModal").classList.contains("hidden")) return false;
+    return true;
+  }
+
+  function doPTRRefresh(){
+    try{ location.reload(); }catch{}
+  }
+
+  /* =========================
+     Unified touch gesture manager
+     - decide between horizontal carousel swipe vs vertical scroll/pull
+     ========================= */
+
+  const swipe = {
+    tracking:false,
+    startX:0,
+    startY:0,
+    dx:0,
+    dy:0,
+    startOffsetPx:0,
+    mode:null, // null | "h" | "v"
+    pointerId:null
+  };
+
+  function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
+
+  function attachCarouselGestures(){
+    const vp = $("carouselViewport");
+    if(!vp) return;
+
+    function isInteractiveTarget(t){
+      if(!t) return false;
+      const tag = (t.tagName || "").toLowerCase();
+      if(tag === "input" || tag === "textarea" || tag === "select" || tag === "button" || tag === "label") return true;
+      if(t.isContentEditable) return true;
+      return false;
+    }
+
+    function begin(ev){
+      if(ev.touches && ev.touches.length !== 1) return;
+      const x = ev.touches ? ev.touches[0].clientX : ev.clientX;
+      const y = ev.touches ? ev.touches[0].clientY : ev.clientY;
+
+      swipe.tracking = true;
+      swipe.startX = x;
+      swipe.startY = y;
+      swipe.dx = 0;
+      swipe.dy = 0;
+      swipe.mode = null;
+      swipe.startOffsetPx = -activeIndex * getViewportWidth();
+      swipe.pointerId = ev.pointerId ?? null;
+
+      ptr.tracking = false;
+      ptr.mode = null;
+      ptr.cancelled = false;
+      ptr.dy = 0;
+
+      if(canPTRStart()){
+        ptr.tracking = true;
+        ptr.startX = x;
+        ptr.startY = y;
+      }
+    }
+
+    function move(ev){
+      if(!swipe.tracking) return;
+      if(ev.touches && ev.touches.length !== 1) return;
+
+      const x = ev.touches ? ev.touches[0].clientX : ev.clientX;
+      const y = ev.touches ? ev.touches[0].clientY : ev.clientY;
+
+      swipe.dx = x - swipe.startX;
+      swipe.dy = y - swipe.startY;
+
+      const ax = Math.abs(swipe.dx);
+      const ay = Math.abs(swipe.dy);
+
+      if(swipe.mode == null){
+        if(ax > ay + 8){
+          swipe.mode = "h";
+          if(ptr.tracking){ ptr.cancelled = true; ptr.mode = "h"; }
+        }else if(ay > ax + 8){
+          swipe.mode = "v";
+          if(ptr.tracking){ ptr.mode = "v"; }
+        }else{
+          return;
+        }
+      }
+
+      if(swipe.mode === "h"){
+        if(isInteractiveTarget(ev.target)) return;
+
+        const W = getViewportWidth();
+        const maxIndex = PANELS.length - 1;
+
+        let offset = swipe.startOffsetPx + swipe.dx;
+
+        const leftLimit = 0;
+        const rightLimit = -maxIndex * W;
+
+        if(offset > leftLimit){
+          offset = leftLimit + (offset - leftLimit) * 0.28;
+        }
+        if(offset < rightLimit){
+          offset = rightLimit + (offset - rightLimit) * 0.28;
+        }
+
+        setTrackTransform(offset, false);
+
+        try{ ev.preventDefault(); }catch{}
+        return;
+      }
+
+      if(swipe.mode === "v" && ptr.tracking && !ptr.cancelled){
+        const dy = swipe.dy;
+        if(dy > 0 && window.scrollY <= 0){
+          ptr.dy = dy;
+          try{ ev.preventDefault(); }catch{}
+        }
+      }
+    }
+
+    function end(){
+      if(!swipe.tracking) return;
+
+      const mode = swipe.mode;
+      const dx = swipe.dx;
+      const dy = swipe.dy;
+
+      swipe.tracking = false;
+      swipe.mode = null;
+
+      if(mode === "h"){
+        const W = getViewportWidth();
+        let nextIndex = activeIndex;
+
+        const v = dx;
+        const absV = Math.abs(v);
+
+        if(absV > Math.max(38, W * 0.18)){
+          if(v < 0) nextIndex = Math.min(PANELS.length - 1, activeIndex + 1);
+          if(v > 0) nextIndex = Math.max(0, activeIndex - 1);
+        }else{
+          nextIndex = Math.round((- (swipe.startOffsetPx + dx)) / W);
+          nextIndex = clamp(nextIndex, 0, PANELS.length - 1);
+        }
+
+        activeIndex = nextIndex;
+        setTrackTransform(-activeIndex * W, true);
+        onPanelEnter(PANELS[activeIndex]);
+        refreshPTRHint();
+        return;
+      }
+
+      if(mode === "v" && ptr.tracking && !ptr.cancelled){
+        const pull = ptr.dy;
+        ptr.tracking = false;
+        ptr.dy = 0;
+        if(activeIndex === 0 && pull >= 86 && window.scrollY <= 0){
+          doPTRRefresh();
+        }
+      }else{
+        ptr.tracking = false;
+        ptr.dy = 0;
+      }
+    }
+
+    vp.addEventListener("touchstart", begin, {passive:true});
+    vp.addEventListener("touchmove", move, {passive:false});
+    vp.addEventListener("touchend", end, {passive:true});
+    vp.addEventListener("touchcancel", end, {passive:true});
   }
 
   /* =========================
@@ -1051,10 +1328,6 @@ Optional:
     }
   }
 
-  function selectedSymptoms(){
-    return SYMPTOMS.filter(s => symState.get(s));
-  }
-
   function clearSymUI(){
     for(const k of SYMPTOMS) symState.set(k,false);
     for(const el of symGrid.querySelectorAll(".symItem")){
@@ -1084,6 +1357,10 @@ Optional:
     clearSymUI();
   }
 
+  function selectedSymptoms(){
+    return SYMPTOMS.filter(s => symState.get(s));
+  }
+
   /* =========================
      Add/Edit
      ========================= */
@@ -1098,7 +1375,7 @@ Optional:
     $("editPill").classList.add("hidden");
     $("btnDelete").classList.add("hidden");
     clearAddForm();
-    show("add");
+    goToPanel("add", true);
   }
 
   function enterAddEdit(ts){
@@ -1120,7 +1397,7 @@ Optional:
     $("notes").value = (r.notes ?? "").toString();
     setSymSelected(r.symptoms || []);
 
-    show("add");
+    goToPanel("add", true);
   }
 
   function tickTime(){
@@ -1285,7 +1562,7 @@ Optional:
   }
 
   $("logList").addEventListener("pointerdown", (ev) => {
-    if($("log").classList.contains("hidden")) return;
+    if(activeIndex !== panelIndexByName("log")) return;
     if(ev.button != null && ev.button !== 0) return;
 
     const entry = findEntryEl(ev.target);
@@ -1414,8 +1691,6 @@ Optional:
     pinch: null,
     pan: null
   };
-
-  function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
 
   function clampViewToBase(){
     const baseMin = chartView.baseMin, baseMax = chartView.baseMax;
@@ -1749,7 +2024,7 @@ Optional:
     }
 
     canvas.addEventListener("touchstart", (e) => {
-      if($("charts").classList.contains("hidden")) return;
+      if(activeIndex !== panelIndexByName("charts")) return;
 
       if(e.touches.length === 2){
         e.preventDefault();
@@ -1783,7 +2058,7 @@ Optional:
     }, {passive:false});
 
     canvas.addEventListener("touchmove", (e) => {
-      if($("charts").classList.contains("hidden")) return;
+      if(activeIndex !== panelIndexByName("charts")) return;
 
       if(chartView.pinch && e.touches.length === 2){
         e.preventDefault();
@@ -1849,7 +2124,7 @@ Optional:
     $("search").value = "";
 
     alert("All data cleared.");
-    show("home");
+    goToPanel("home", true);
   }
 
   let deferredPrompt = null;
@@ -1908,12 +2183,12 @@ Optional:
      ========================= */
 
   $("btnGoAdd").addEventListener("click", () => enterAddNew("home"));
-  $("btnGoLog").addEventListener("click", () => { editTs=null; show("log"); });
-  $("btnGoCharts").addEventListener("click", () => { editTs=null; show("charts"); });
+  $("btnGoLog").addEventListener("click", () => { editTs=null; goToPanel("log", true); });
+  $("btnGoCharts").addEventListener("click", () => { editTs=null; goToPanel("charts", true); });
 
-  $("btnBackFromAdd").addEventListener("click", () => { editTs=null; show(returnScreen || "home"); });
-  $("btnBackFromLog").addEventListener("click", () => show("home"));
-  $("btnBackFromCharts").addEventListener("click", () => show("home"));
+  $("btnBackFromAdd").addEventListener("click", () => { editTs=null; goToPanel(returnScreen || "home", true); });
+  $("btnBackFromLog").addEventListener("click", () => goToPanel("home", true));
+  $("btnBackFromCharts").addEventListener("click", () => goToPanel("home", true));
 
   $("btnAddFromLog").addEventListener("click", () => enterAddNew("log"));
 
@@ -1962,7 +2237,7 @@ Optional:
     $("search").value = "";
 
     editTs = null;
-    show("log");
+    goToPanel("log", true);
   });
 
   $("btnDelete").addEventListener("click", () => {
@@ -1974,11 +2249,11 @@ Optional:
     saveRecords(recs);
 
     editTs = null;
-    show("log");
+    goToPanel("log", true);
   });
 
   /* =========================
-     SEARCH BEHAVIOR (v1.19B4)
+     SEARCH BEHAVIOR (stable)
      - DO NOT auto-search on input.
      - Search runs only on button click or Enter key.
      ========================= */
@@ -2009,64 +2284,6 @@ Optional:
   $("chartWeek").addEventListener("change", () => {
     applyWeekToBase(true);
     renderCharts();
-  });
-
-  /* =========================
-     Symptoms helpers
-     ========================= */
-
-  function selectedSymptoms(){
-    return SYMPTOMS.filter(s => symState.get(s));
-  }
-
-  /* =========================
-     Export handlers
-     ========================= */
-
-  $("btnExportLog").addEventListener("click", () => {
-    const recs = filteredRecords({fromId:"fromDate", toId:"toDate", searchId:"search"});
-    const rangeLabel = (() => {
-      const f = $("fromDate").value;
-      const t = $("toDate").value;
-      if(f && t) return `${f} to ${t}`;
-      if(f) return `From ${f}`;
-      if(t) return `Up to ${t}`;
-      return "All log entries (filtered by search/date if set)";
-    })();
-
-    exportReport(
-      recs,
-      {
-        title: "Log Export",
-        rangeLabel,
-        notes: "This report reflects the Log screen filters (Search + optional From/To dates)."
-      },
-      "vitals_log_report"
-    );
-  });
-
-  $("btnExportCharts").addEventListener("click", () => {
-    const all = loadRecords().slice().reverse();
-    const a = chartView.viewMin, b = chartView.viewMax;
-    const recs = all.filter(r => r.ts >= a && r.ts <= b);
-
-    const weekVal = $("chartWeek").value || "";
-    const baseRange = `${fmtDateTime(chartView.baseMin)} to ${fmtDateTime(chartView.baseMax)}`;
-    const viewRange = `${fmtDateTime(chartView.viewMin)} to ${fmtDateTime(chartView.viewMax)}`;
-
-    exportReport(
-      recs,
-      {
-        title: "Charts Export (Weekly View)",
-        rangeLabel: `Selected week: ${weekVal} | Base week: ${baseRange} | Exported view: ${viewRange}`,
-        notes:
-          "What you are looking at:\n" +
-          "- The Charts screen shows exactly 7 days at a time (weekly view).\n" +
-          "- You can pinch to zoom in, then drag left/right to pan within that 7-day week.\n" +
-          "- This export contains the entries that fall within the CURRENT visible chart view (after zoom/pan)."
-      },
-      "vitals_charts_report"
-    );
   });
 
   /* =========================
@@ -2126,18 +2343,30 @@ self.addEventListener('fetch', (e)=>{ });`;
   registerSW();
   refreshInstallButton();
   attachChartGestures();
+  attachCarouselGestures();
 
   $("fromDate").value = "";
   $("toDate").value = "";
 
-  show("home");
+  refreshPTRHint();
+  goToPanel("home", false);
 
   window.addEventListener("resize", () => {
-    if(!$("add").classList.contains("hidden")) adjustTimeFont();
-    if(!$("charts").classList.contains("hidden")) renderCharts();
+    const W = getViewportWidth();
+    setTrackTransform(-activeIndex * W, false);
+    if(activeIndex === panelIndexByName("add")) adjustTimeFont();
+    if(activeIndex === panelIndexByName("charts")) renderCharts();
   });
 
 })();
 </script>
 </body>
-  </html>
+</html>
+<!--
+Version Detail Notes (EOF)
+App Version: v1.19B8
+Base: v1.19B7
+Changes:
+- Seamless left/right swipe carousel between panels.
+- Home pull-to-refresh preserved; cancelled when horizontal swipe is detected.
+-->
