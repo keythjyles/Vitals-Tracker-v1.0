@@ -1,12 +1,11 @@
-<!-- Vitals Tracker v1.19B42 -->
+<!-- Vitals Tracker v1.19B43 -->
 <!--
 Version Detail Notes
-App Version: v1.19B42
-Base: v1.19B41
+App Version: v1.19B43
+Base: v1.19B42
 Changes (requested):
-- Fix: Remove “double border” look by hiding the inner card border when accent frame is used.
-- Fix: Prevent accent border clipping/missing segment by drawing the accent border INSIDE the panel (no negative inset).
-- Slightly decrease panel size (minimal) by adding small horizontal padding inside the carousel viewport (no layout reflow).
+- Fix: eliminate “bleed” between panels after minimal shrink by adding a track gap equal to viewport padding.
+- Keep panel visuals/size the same (still slightly smaller), but prevent adjacent panel edge from showing.
 - No other layout/behavior changes.
 -->
 <!doctype html>
@@ -36,6 +35,9 @@ Changes (requested):
       --btnH:56px;
       --pad:18px;
       --font: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+
+      /* v1.19B43: keep minimal shrink, and use same value for panel spacing fix */
+      --vpPadX:6px;
     }
 
     *{ box-sizing:border-box; }
@@ -83,15 +85,14 @@ Changes (requested):
       backdrop-filter: blur(10px);
     }
 
-    /* Accent frame should be the ONLY visible border (no “double border”) */
     .accentFrame{
       position:relative;
-      border-color: transparent; /* keep border box sizing the same without showing it */
+      border-color: transparent;
     }
     .accentFrame::before{
       content:"";
       position:absolute;
-      inset:0; /* draw inside to prevent clipping */
+      inset:0;
       border:3px solid var(--accent);
       border-radius: var(--radius);
       pointer-events:none;
@@ -189,7 +190,6 @@ Changes (requested):
       line-height:1.25;
     }
 
-    /* Home bottom spacing (keep tight so footer is close to border) */
     #home.card{ padding-bottom: 10px; }
     #home .homeMain{ margin-bottom: 0; }
     #home .footerTiny{ margin-top: 8px; padding-bottom: 0; }
@@ -503,15 +503,19 @@ Changes (requested):
       overflow:hidden;
       width:100%;
       touch-action: pan-y;
-      padding: 0 6px; /* v1.19B42: minimal panel shrink */
+      padding: 0 var(--vpPadX);
     }
+
+    /* v1.19B43: add track spacing so shrunk panels don't reveal neighbors */
     .track{
       display:flex;
       width:100%;
       will-change: transform;
       transform: translate3d(0,0,0);
       align-items:flex-start;
+      gap: calc(var(--vpPadX) * 2);
     }
+
     .panel{
       flex: 0 0 100%;
       width:100%;
@@ -579,7 +583,7 @@ Changes (requested):
             <div class="ptrHint">Pull down on Home to refresh (release).</div>
 
             <div class="footerTiny">
-              <div>v1.19B42</div>
+              <div>v1.19B43</div>
               <div>developed by Keyth Jyles</div>
             </div>
           </div>
@@ -705,7 +709,7 @@ Optional:
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.19B42";
+  const APP_VERSION = "v1.19B43";
   const STORAGE_KEY = "vitals_tracker_records_v1";
   const SYMPTOMS = [
     "Sweaty","Dizzy","Panic","Brain fog","Chest tight","Headache",
@@ -815,8 +819,22 @@ Optional:
 
   function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
 
+  /* v1.19B43: width = visible inner viewport (excludes padding) */
   function trackWidth(){
-    return viewport.clientWidth || 1; /* v1.19B42: match padded content width */
+    return viewport.clientWidth || 1;
+  }
+
+  function getGapPx(){
+    const cs = getComputedStyle(track);
+    const g = parseFloat(cs.columnGap || cs.gap || "0");
+    return Number.isFinite(g) ? g : 0;
+  }
+
+  /* v1.19B43: translation now accounts for track gap */
+  function xForIndex(idx){
+    const w = trackWidth();
+    const g = getGapPx();
+    return -(idx * (w + g));
   }
 
   function setTrackX(px, withTransition){
@@ -830,9 +848,7 @@ Optional:
 
   function snapToIndex(idx, withTransition=true){
     activeIndex = clamp(idx, 0, PANELS.length-1);
-    const w = trackWidth();
-    const x = -activeIndex * w;
-    setTrackX(x, withTransition);
+    setTrackX(xForIndex(activeIndex), withTransition);
   }
 
   function showCarouselPanel(id){
@@ -883,7 +899,7 @@ Optional:
     swipe.lastX = clientX;
     swipe.lastY = clientY;
     swipe.startT = Date.now();
-    swipe.baseX = -activeIndex * trackWidth();
+    swipe.baseX = xForIndex(activeIndex);
     swipe.wasHorizontal = false;
     swipe.wasVertical = false;
     track.style.transition = "none";
@@ -918,8 +934,9 @@ Optional:
       if(preventer) preventer();
 
       const w = trackWidth();
+      const g = getGapPx();
       const maxX = 0;
-      const minX = -(PANELS.length-1) * w;
+      const minX = -((PANELS.length-1) * (w + g));
 
       let x = swipe.baseX + dx;
 
@@ -1022,6 +1039,10 @@ Optional:
     if(isAddOpen) return;
     snapToIndex(activeIndex, false);
   });
+
+  /* -----------------------
+     Everything below unchanged
+     ----------------------- */
 
   let pendingEditTs = null;
   let modalPrevFocus = null;
@@ -2351,8 +2372,7 @@ self.addEventListener('fetch', (e)=>{ });`;
 </html>
 <!--
 Vitals Tracker — EOF Version Notes
-App Version: v1.19B42
-- Fix: Accent border drawn inside; no clipping/missing segment.
-- Fix: Removed double-border look on panels.
-- Minimal panel shrink via carousel viewport padding.
+App Version: v1.19B43
+- Fix: Track gap added + swipe math updated to eliminate panel bleed.
+- Kept minimal panel shrink and all other layout/behavior unchanged.
 -->
