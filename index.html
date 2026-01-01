@@ -1,12 +1,13 @@
-<!-- Vitals Tracker v1.19B43 -->
+<!-- Vitals Tracker v1.19B44 -->
 <!--
 Version Detail Notes
-App Version: v1.19B43
-Base: v1.19B42
+App Version: v1.19B44
+Base: v1.19B43
 Changes (requested):
-- Fix: eliminate “bleed” between panels after minimal shrink by adding a track gap equal to viewport padding.
-- Keep panel visuals/size the same (still slightly smaller), but prevent adjacent panel edge from showing.
-- No other layout/behavior changes.
+- Fix: Home panel was effectively “fixed” because it had extra internal padding rules; Log/Charts were not.
+- Solution: Make the carousel panels use a fixed outer frame + inner scrolling content so ALL panels render with the same border/frame behavior.
+- Remove the track GAP hack and revert swipe math back to simple 100% panel paging (no neighbor bleed).
+- No other behavior changes (swipe, pull-to-refresh, log edit flow, charts gestures, exit handler all preserved).
 -->
 <!doctype html>
 <html lang="en">
@@ -36,7 +37,7 @@ Changes (requested):
       --pad:18px;
       --font: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
 
-      /* v1.19B43: keep minimal shrink, and use same value for panel spacing fix */
+      /* keep the same minimal “shrink” */
       --vpPadX:6px;
     }
 
@@ -307,7 +308,6 @@ Changes (requested):
     #log .label{ margin: 8px 4px 6px; }
     #log .filters{ margin-top: 8px; gap: 10px; }
     #log .dateField{ gap: 6px; }
-    #log > .row.center{ margin-bottom: 4px; }
 
     .entry{
       border:1px solid var(--stroke);
@@ -499,6 +499,7 @@ Changes (requested):
       color: rgba(235,245,255,.90);
     }
 
+    /* Carousel viewport */
     .viewport{
       overflow:hidden;
       width:100%;
@@ -506,20 +507,35 @@ Changes (requested):
       padding: 0 var(--vpPadX);
     }
 
-    /* v1.19B43: add track spacing so shrunk panels don't reveal neighbors */
+    /* Track: NO GAP. Paging returns to pure 100% widths */
     .track{
       display:flex;
       width:100%;
       will-change: transform;
       transform: translate3d(0,0,0);
       align-items:flex-start;
-      gap: calc(var(--vpPadX) * 2);
+      gap: 0;
     }
 
     .panel{
       flex: 0 0 100%;
       width:100%;
       align-self:flex-start;
+    }
+
+    /* v1.19B44: FIX ALL PANELS (Log/Charts) to behave like Home:
+       Use a fixed outer frame with inner scroll.
+       Home already “looked right” due to different content height; now all match. */
+    .panelFrame{
+      width:100%;
+      height: calc(100dvh - max(14px, env(safe-area-inset-top)) - max(14px, env(safe-area-inset-bottom)) - 12px); /* matches body vertical padding intent */
+      max-height: calc(100dvh - max(14px, env(safe-area-inset-top)) - max(14px, env(safe-area-inset-bottom)) - 12px);
+      overflow:hidden;
+    }
+    .panelInner{
+      height:100%;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     .ptrHint{
@@ -567,73 +583,85 @@ Changes (requested):
       <div class="track" id="track">
 
         <div id="home" class="panel card accentFrame">
-          <div class="homeMain">
-            <button id="btnGoAdd" class="btn primary">ADD Reading</button>
-            <button id="btnGoLog" class="btn">Log</button>
-            <button id="btnGoCharts" class="btn">Charts</button>
+          <div class="panelFrame">
+            <div class="panelInner">
+              <div class="homeMain">
+                <button id="btnGoAdd" class="btn primary">ADD Reading</button>
+                <button id="btnGoLog" class="btn">Log</button>
+                <button id="btnGoCharts" class="btn">Charts</button>
 
-            <div class="homeFooterRow">
-              <button id="btnInstall" class="btn small">Install</button>
-              <button id="btnClearAll" class="btn small">Clear Data</button>
-              <div class="grow"></div>
-              <button id="btnExitHome" class="btn small danger">Exit</button>
-            </div>
+                <div class="homeFooterRow">
+                  <button id="btnInstall" class="btn small">Install</button>
+                  <button id="btnClearAll" class="btn small">Clear Data</button>
+                  <div class="grow"></div>
+                  <button id="btnExitHome" class="btn small danger">Exit</button>
+                </div>
 
-            <div class="subtle">Data stays on your phone (local only).</div>
-            <div class="ptrHint">Pull down on Home to refresh (release).</div>
+                <div class="subtle">Data stays on your phone (local only).</div>
+                <div class="ptrHint">Pull down on Home to refresh (release).</div>
 
-            <div class="footerTiny">
-              <div>v1.19B43</div>
-              <div>developed by Keyth Jyles</div>
+                <div class="footerTiny">
+                  <div>v1.19B44</div>
+                  <div>developed by Keyth Jyles</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         <div id="log" class="panel card accentFrame">
-          <div class="row center">
-            <button id="btnExportLog" class="btn small">Export</button>
-            <button id="btnAddFromLog" class="btn small">ADD</button>
-            <div class="grow"></div>
-            <button id="btnBackFromLog" class="btn small">Back</button>
-          </div>
+          <div class="panelFrame">
+            <div class="panelInner">
+              <div class="row center">
+                <button id="btnExportLog" class="btn small">Export</button>
+                <button id="btnAddFromLog" class="btn small">ADD</button>
+                <div class="grow"></div>
+                <button id="btnBackFromLog" class="btn small">Back</button>
+              </div>
 
-          <div class="label">Search</div>
-          <div class="searchRow">
-            <input id="search" class="field" placeholder="Type a word: sweaty, dizzy, headache..." />
-            <button id="btnRunSearch" class="btn small">Search</button>
-          </div>
+              <div class="label">Search</div>
+              <div class="searchRow">
+                <input id="search" class="field" placeholder="Type a word: sweaty, dizzy, headache..." />
+                <button id="btnRunSearch" class="btn small">Search</button>
+              </div>
 
-          <div class="filters">
-            <div class="dateField">
-              <div class="miniLabel">From</div>
-              <input id="fromDate" class="field" type="date" />
+              <div class="filters">
+                <div class="dateField">
+                  <div class="miniLabel">From</div>
+                  <input id="fromDate" class="field" type="date" />
+                </div>
+                <div class="dateField">
+                  <div class="miniLabel">To</div>
+                  <input id="toDate" class="field" type="date" />
+                </div>
+              </div>
+
+              <div id="logList"></div>
             </div>
-            <div class="dateField">
-              <div class="miniLabel">To</div>
-              <input id="toDate" class="field" type="date" />
-            </div>
           </div>
-
-          <div id="logList"></div>
         </div>
 
         <div id="charts" class="panel card accentFrame">
-          <div class="row center">
-            <button id="btnExportCharts" class="btn small">Export</button>
-            <div class="grow"></div>
-            <button id="btnBackFromCharts" class="btn small">Back</button>
-          </div>
+          <div class="panelFrame">
+            <div class="panelInner">
+              <div class="row center">
+                <button id="btnExportCharts" class="btn small">Export</button>
+                <div class="grow"></div>
+                <button id="btnBackFromCharts" class="btn small">Back</button>
+              </div>
 
-          <div class="subtle">Weekly view (7 days). Pinch to zoom; drag to pan.</div>
+              <div class="subtle">Weekly view (7 days). Pinch to zoom; drag to pan.</div>
 
-          <div class="filters">
-            <div class="dateField" style="grid-column:1 / span 2;">
-              <div class="miniLabel">Week</div>
-              <input id="chartWeek" class="field" type="week" />
+              <div class="filters">
+                <div class="dateField" style="grid-column:1 / span 2;">
+                  <div class="miniLabel">Week</div>
+                  <input id="chartWeek" class="field" type="week" />
+                </div>
+              </div>
+
+              <canvas id="chart" width="900" height="520"></canvas>
             </div>
           </div>
-
-          <canvas id="chart" width="900" height="520"></canvas>
         </div>
 
       </div>
@@ -709,7 +737,7 @@ Optional:
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.19B43";
+  const APP_VERSION = "v1.19B44";
   const STORAGE_KEY = "vitals_tracker_records_v1";
   const SYMPTOMS = [
     "Sweaty","Dizzy","Panic","Brain fog","Chest tight","Headache",
@@ -819,22 +847,14 @@ Optional:
 
   function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
 
-  /* v1.19B43: width = visible inner viewport (excludes padding) */
+  /* v1.19B44: pure paging width = visible inner viewport (excludes padding) */
   function trackWidth(){
     return viewport.clientWidth || 1;
   }
 
-  function getGapPx(){
-    const cs = getComputedStyle(track);
-    const g = parseFloat(cs.columnGap || cs.gap || "0");
-    return Number.isFinite(g) ? g : 0;
-  }
-
-  /* v1.19B43: translation now accounts for track gap */
   function xForIndex(idx){
     const w = trackWidth();
-    const g = getGapPx();
-    return -(idx * (w + g));
+    return -(idx * w);
   }
 
   function setTrackX(px, withTransition){
@@ -934,9 +954,8 @@ Optional:
       if(preventer) preventer();
 
       const w = trackWidth();
-      const g = getGapPx();
       const maxX = 0;
-      const minX = -((PANELS.length-1) * (w + g));
+      const minX = -((PANELS.length-1) * w);
 
       let x = swipe.baseX + dx;
 
@@ -2372,7 +2391,8 @@ self.addEventListener('fetch', (e)=>{ });`;
 </html>
 <!--
 Vitals Tracker — EOF Version Notes
-App Version: v1.19B43
-- Fix: Track gap added + swipe math updated to eliminate panel bleed.
-- Kept minimal panel shrink and all other layout/behavior unchanged.
+App Version: v1.19B44
+- Fix: Log/Charts now wrapped in fixed frame + inner scroll, matching Home behavior and eliminating panel bleed without track gaps.
+- Track gap removed; paging restored to pure 100% widths (simple, stable).
+- No other behavior changes.
 -->
