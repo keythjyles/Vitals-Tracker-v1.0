@@ -4,12 +4,10 @@ Version Detail Notes
 App Version: v1.19B44
 Base: v1.19B43
 Changes (requested):
-- Add CSV Import (merge + dedupe) for records with columns:
-  date,time,systolic,diastolic,hr,symptoms,notes
-- Import via Home button + modal textarea; parse robustly (quoted commas supported).
-- Convert to existing record schema (ts/sys/dia/hr/notes/symptoms).
-- Merge with existing local records, de-dupe by ts, sort desc, save.
-- No other layout/behavior changes.
+- Fix: Home panel was effectively “fixed” because it had extra internal padding rules; Log/Charts were not.
+- Solution: Make the carousel panels use a fixed outer frame + inner scrolling content so ALL panels render with the same border/frame behavior.
+- Remove the track GAP hack and revert swipe math back to simple 100% panel paging (no neighbor bleed).
+- No other behavior changes (swipe, pull-to-refresh, log edit flow, charts gestures, exit handler all preserved).
 -->
 <!doctype html>
 <html lang="en">
@@ -39,7 +37,7 @@ Changes (requested):
       --pad:18px;
       --font: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
 
-      /* keep minimal shrink, and use same value for panel spacing fix */
+      /* keep the same minimal “shrink” */
       --vpPadX:6px;
     }
 
@@ -310,7 +308,6 @@ Changes (requested):
     #log .label{ margin: 8px 4px 6px; }
     #log .filters{ margin-top: 8px; gap: 10px; }
     #log .dateField{ gap: 6px; }
-    #log > .row.center{ margin-bottom: 4px; }
 
     .entry{
       border:1px solid var(--stroke);
@@ -502,18 +499,7 @@ Changes (requested):
       color: rgba(235,245,255,.90);
     }
 
-    /* Import modal tweaks */
-    #importModal .modalSub{ margin-bottom: 10px; }
-    #importText.field{
-      height: 240px;
-      border-radius: 18px;
-      font-size: 14px;
-      line-height: 1.25;
-      padding: 12px 14px;
-    }
-    #importModal .modalBtns{ flex-wrap: nowrap; }
-    #importModal .modalBtns .btn{ min-width: 0; flex: 1 1 0; height: 52px; font-size: 16px; }
-
+    /* Carousel viewport */
     .viewport{
       overflow:hidden;
       width:100%;
@@ -521,20 +507,35 @@ Changes (requested):
       padding: 0 var(--vpPadX);
     }
 
-    /* add track spacing so shrunk panels don't reveal neighbors */
+    /* Track: NO GAP. Paging returns to pure 100% widths */
     .track{
       display:flex;
       width:100%;
       will-change: transform;
       transform: translate3d(0,0,0);
       align-items:flex-start;
-      gap: calc(var(--vpPadX) * 2);
+      gap: 0;
     }
 
     .panel{
       flex: 0 0 100%;
       width:100%;
       align-self:flex-start;
+    }
+
+    /* v1.19B44: FIX ALL PANELS (Log/Charts) to behave like Home:
+       Use a fixed outer frame with inner scroll.
+       Home already “looked right” due to different content height; now all match. */
+    .panelFrame{
+      width:100%;
+      height: calc(100dvh - max(14px, env(safe-area-inset-top)) - max(14px, env(safe-area-inset-bottom)) - 12px); /* matches body vertical padding intent */
+      max-height: calc(100dvh - max(14px, env(safe-area-inset-top)) - max(14px, env(safe-area-inset-bottom)) - 12px);
+      overflow:hidden;
+    }
+    .panelInner{
+      height:100%;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     .ptrHint{
@@ -582,74 +583,85 @@ Changes (requested):
       <div class="track" id="track">
 
         <div id="home" class="panel card accentFrame">
-          <div class="homeMain">
-            <button id="btnGoAdd" class="btn primary">ADD Reading</button>
-            <button id="btnGoLog" class="btn">Log</button>
-            <button id="btnGoCharts" class="btn">Charts</button>
+          <div class="panelFrame">
+            <div class="panelInner">
+              <div class="homeMain">
+                <button id="btnGoAdd" class="btn primary">ADD Reading</button>
+                <button id="btnGoLog" class="btn">Log</button>
+                <button id="btnGoCharts" class="btn">Charts</button>
 
-            <div class="homeFooterRow">
-              <button id="btnInstall" class="btn small">Install</button>
-              <button id="btnImport" class="btn small">Import CSV</button>
-              <button id="btnClearAll" class="btn small">Clear Data</button>
-              <div class="grow"></div>
-              <button id="btnExitHome" class="btn small danger">Exit</button>
-            </div>
+                <div class="homeFooterRow">
+                  <button id="btnInstall" class="btn small">Install</button>
+                  <button id="btnClearAll" class="btn small">Clear Data</button>
+                  <div class="grow"></div>
+                  <button id="btnExitHome" class="btn small danger">Exit</button>
+                </div>
 
-            <div class="subtle">Data stays on your phone (local only).</div>
-            <div class="ptrHint">Pull down on Home to refresh (release).</div>
+                <div class="subtle">Data stays on your phone (local only).</div>
+                <div class="ptrHint">Pull down on Home to refresh (release).</div>
 
-            <div class="footerTiny">
-              <div>v1.19B44</div>
-              <div>developed by Keyth Jyles</div>
+                <div class="footerTiny">
+                  <div>v1.19B44</div>
+                  <div>developed by Keyth Jyles</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         <div id="log" class="panel card accentFrame">
-          <div class="row center">
-            <button id="btnExportLog" class="btn small">Export</button>
-            <button id="btnAddFromLog" class="btn small">ADD</button>
-            <div class="grow"></div>
-            <button id="btnBackFromLog" class="btn small">Back</button>
-          </div>
+          <div class="panelFrame">
+            <div class="panelInner">
+              <div class="row center">
+                <button id="btnExportLog" class="btn small">Export</button>
+                <button id="btnAddFromLog" class="btn small">ADD</button>
+                <div class="grow"></div>
+                <button id="btnBackFromLog" class="btn small">Back</button>
+              </div>
 
-          <div class="label">Search</div>
-          <div class="searchRow">
-            <input id="search" class="field" placeholder="Type a word: sweaty, dizzy, headache..." />
-            <button id="btnRunSearch" class="btn small">Search</button>
-          </div>
+              <div class="label">Search</div>
+              <div class="searchRow">
+                <input id="search" class="field" placeholder="Type a word: sweaty, dizzy, headache..." />
+                <button id="btnRunSearch" class="btn small">Search</button>
+              </div>
 
-          <div class="filters">
-            <div class="dateField">
-              <div class="miniLabel">From</div>
-              <input id="fromDate" class="field" type="date" />
+              <div class="filters">
+                <div class="dateField">
+                  <div class="miniLabel">From</div>
+                  <input id="fromDate" class="field" type="date" />
+                </div>
+                <div class="dateField">
+                  <div class="miniLabel">To</div>
+                  <input id="toDate" class="field" type="date" />
+                </div>
+              </div>
+
+              <div id="logList"></div>
             </div>
-            <div class="dateField">
-              <div class="miniLabel">To</div>
-              <input id="toDate" class="field" type="date" />
-            </div>
           </div>
-
-          <div id="logList"></div>
         </div>
 
         <div id="charts" class="panel card accentFrame">
-          <div class="row center">
-            <button id="btnExportCharts" class="btn small">Export</button>
-            <div class="grow"></div>
-            <button id="btnBackFromCharts" class="btn small">Back</button>
-          </div>
+          <div class="panelFrame">
+            <div class="panelInner">
+              <div class="row center">
+                <button id="btnExportCharts" class="btn small">Export</button>
+                <div class="grow"></div>
+                <button id="btnBackFromCharts" class="btn small">Back</button>
+              </div>
 
-          <div class="subtle">Weekly view (7 days). Pinch to zoom; drag to pan.</div>
+              <div class="subtle">Weekly view (7 days). Pinch to zoom; drag to pan.</div>
 
-          <div class="filters">
-            <div class="dateField" style="grid-column:1 / span 2;">
-              <div class="miniLabel">Week</div>
-              <input id="chartWeek" class="field" type="week" />
+              <div class="filters">
+                <div class="dateField" style="grid-column:1 / span 2;">
+                  <div class="miniLabel">Week</div>
+                  <input id="chartWeek" class="field" type="week" />
+                </div>
+              </div>
+
+              <canvas id="chart" width="900" height="520"></canvas>
             </div>
           </div>
-
-          <canvas id="chart" width="900" height="520"></canvas>
         </div>
 
       </div>
@@ -717,24 +729,6 @@ Optional:
         <button id="btnExportClose" class="btn">Close</button>
         <button id="btnExportShare" class="btn">Share</button>
         <button id="btnExportSave" class="btn primary">Save .txt</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="importModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="importModalTitle">
-    <div class="modalCard">
-      <div id="importModalTitle" class="modalTitle">Import CSV</div>
-      <div class="modalSub" id="importModalSub">
-Paste CSV with header:
-date,time,systolic,diastolic,hr,symptoms,notes
-
-Symptoms can be separated with semicolons. “None” is allowed.
-Import merges with existing data and de-dupes by timestamp.
-      </div>
-      <textarea id="importText" class="field" placeholder="Paste CSV here..."></textarea>
-      <div class="modalBtns">
-        <button id="btnImportCancel" class="btn">Cancel</button>
-        <button id="btnImportDo" class="btn primary">Import</button>
       </div>
     </div>
   </div>
@@ -853,20 +847,14 @@ Import merges with existing data and de-dupes by timestamp.
 
   function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
 
+  /* v1.19B44: pure paging width = visible inner viewport (excludes padding) */
   function trackWidth(){
     return viewport.clientWidth || 1;
   }
 
-  function getGapPx(){
-    const cs = getComputedStyle(track);
-    const g = parseFloat(cs.columnGap || cs.gap || "0");
-    return Number.isFinite(g) ? g : 0;
-  }
-
   function xForIndex(idx){
     const w = trackWidth();
-    const g = getGapPx();
-    return -(idx * (w + g));
+    return -(idx * w);
   }
 
   function setTrackX(px, withTransition){
@@ -919,7 +907,6 @@ Import merges with existing data and de-dupes by timestamp.
     if(isAddOpen) return false;
     if(!$("editModal").classList.contains("hidden")) return false;
     if(!$("exportModal").classList.contains("hidden")) return false;
-    if(!$("importModal").classList.contains("hidden")) return false;
     if(target && (target.closest?.("input, textarea, select, button"))) return false;
     return true;
   }
@@ -967,9 +954,8 @@ Import merges with existing data and de-dupes by timestamp.
       if(preventer) preventer();
 
       const w = trackWidth();
-      const g = getGapPx();
       const maxX = 0;
-      const minX = -((PANELS.length-1) * (w + g));
+      const minX = -((PANELS.length-1) * w);
 
       let x = swipe.baseX + dx;
 
@@ -1074,7 +1060,7 @@ Import merges with existing data and de-dupes by timestamp.
   });
 
   /* -----------------------
-     Everything below unchanged (except import feature additions)
+     Everything below unchanged
      ----------------------- */
 
   let pendingEditTs = null;
@@ -1271,299 +1257,6 @@ Import merges with existing data and de-dupes by timestamp.
 
     downloadText(exportPayload.text, exportPayload.filename || "vitals_report.txt");
   });
-
-  /* ---------- CSV Import (v1.19B44) ---------- */
-
-  let importPrevFocus = null;
-  let importOpenedAt = 0;
-  let enableImportTimer = null;
-
-  function openImportModal(prefillText){
-    importPrevFocus = document.activeElement || null;
-    importOpenedAt = Date.now();
-
-    const btnDo = $("btnImportDo");
-    btnDo.disabled = true;
-
-    $("importModal").classList.remove("hidden");
-    $("importText").value = (prefillText || "").toString();
-
-    if(enableImportTimer) clearTimeout(enableImportTimer);
-    enableImportTimer = setTimeout(() => { btnDo.disabled = false; }, 450);
-
-    setTimeout(() => {
-      try{ $("importText").focus({preventScroll:true}); }catch{}
-    }, 0);
-  }
-
-  function closeImportModal(){
-    $("importModal").classList.add("hidden");
-    try{ importPrevFocus?.focus?.({preventScroll:true}); }catch{}
-  }
-
-  $("btnImportCancel").addEventListener("click", (e) => { e.preventDefault(); closeImportModal(); });
-
-  $("importModal").addEventListener("click", (e) => {
-    const justOpened = (Date.now() - importOpenedAt) < 220;
-    if(justOpened){ e.preventDefault(); e.stopPropagation(); return; }
-    if(e.target === $("importModal")) closeImportModal();
-  });
-
-  document.addEventListener("keydown", (e) => {
-    const open = !$("importModal").classList.contains("hidden");
-    if(!open) return;
-    if(e.key === "Escape"){
-      e.preventDefault();
-      closeImportModal();
-    }
-  });
-
-  function parseCSVLine(line){
-    // RFC4180-ish: supports quoted fields with commas and double-quote escaping.
-    const out = [];
-    let cur = "";
-    let inQ = false;
-    for(let i=0;i<line.length;i++){
-      const ch = line[i];
-      if(inQ){
-        if(ch === '"'){
-          const next = line[i+1];
-          if(next === '"'){ cur += '"'; i++; }
-          else{ inQ = false; }
-        }else{
-          cur += ch;
-        }
-      }else{
-        if(ch === '"'){ inQ = true; }
-        else if(ch === ","){ out.push(cur); cur = ""; }
-        else{ cur += ch; }
-      }
-    }
-    out.push(cur);
-    return out.map(s => (s ?? "").toString().trim());
-  }
-
-  function splitCSVRows(text){
-    // preserve quoted newlines
-    const rows = [];
-    let cur = "";
-    let inQ = false;
-
-    for(let i=0;i<text.length;i++){
-      const ch = text[i];
-      if(ch === '"'){
-        // toggle quote unless escaped
-        const prev = text[i-1];
-        if(prev !== "\\"){ // (we don't emit backslashes anyway; safe toggle)
-          // handle doubled quotes in a naive way: if next is also quote, consume both and stay inQ
-          const next = text[i+1];
-          if(inQ && next === '"'){
-            cur += '""';
-            i++;
-            continue;
-          }
-          inQ = !inQ;
-        }
-        cur += ch;
-        continue;
-      }
-      if((ch === "\n" || ch === "\r") && !inQ){
-        if(cur.trim().length){
-          rows.push(cur.replace(/\r/g,""));
-        }
-        cur = "";
-        // swallow \r\n pair
-        if(ch === "\r" && text[i+1] === "\n") i++;
-      }else{
-        cur += ch;
-      }
-    }
-    if(cur.trim().length) rows.push(cur.replace(/\r/g,""));
-    return rows;
-  }
-
-  function intOrNull(v){
-    const t = String(v ?? "").trim();
-    if(!t) return null;
-    const n = Number(t);
-    if(!Number.isFinite(n)) return null;
-    return Math.round(n);
-  }
-
-  function parseDateTimeToTs(dateStr, timeStr){
-    // Expect date: YYYY-MM-DD, time: HH:MM (24h) optionally with seconds.
-    const ds = String(dateStr || "").trim();
-    const ts = String(timeStr || "").trim();
-    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ds);
-    if(!m) return null;
-    const y = Number(m[1]), mo = Number(m[2]), d = Number(m[3]);
-    if(!y || !mo || !d) return null;
-
-    let hh = 0, mm = 0, ss = 0;
-    const tm = /^(\d{1,2}):(\d{2})(?::(\d{2}))?$/.exec(ts);
-    if(tm){
-      hh = Number(tm[1]); mm = Number(tm[2]); ss = Number(tm[3] || 0);
-    }else{
-      // allow blank time
-      return null;
-    }
-    if(!Number.isFinite(hh) || !Number.isFinite(mm) || !Number.isFinite(ss)) return null;
-
-    const dt = new Date(y, mo-1, d, hh, mm, ss, 0);
-    const out = dt.getTime();
-    return Number.isFinite(out) ? out : null;
-  }
-
-  function parseSymptomsList(raw){
-    const s = (raw ?? "").toString().trim();
-    if(!s) return [];
-    if(/^none$/i.test(s)) return [];
-    // Incoming uses semicolons; tolerate commas too.
-    return s.split(/[;]+/g).map(x=>x.trim()).filter(Boolean);
-  }
-
-  function normalizeSymptoms(names){
-    // Keep only known labels when possible; also allow unknown passthrough (but trimmed).
-    const set = new Set(SYMPTOMS.map(x=>x.toLowerCase()));
-    const out = [];
-    for(const n of (names || [])){
-      const t = String(n || "").trim();
-      if(!t) continue;
-      const lower = t.toLowerCase();
-      const idx = SYMPTOMS.findIndex(x => x.toLowerCase() === lower);
-      if(idx >= 0){
-        out.push(SYMPTOMS[idx]);
-      }else{
-        // passthrough (future-proof)
-        out.push(t);
-      }
-    }
-    // de-dupe while preserving order
-    const seen = new Set();
-    return out.filter(x => { const k=x.toLowerCase(); if(seen.has(k)) return false; seen.add(k); return true; });
-  }
-
-  function importCSV(text){
-    const rows = splitCSVRows(String(text || ""));
-    if(!rows.length) return {ok:false, msg:"No CSV text found."};
-
-    // find header row
-    const headerIdx = rows.findIndex(r => /date\s*,\s*time\s*,\s*systolic\s*,\s*diastolic\s*,\s*hr\s*,\s*symptoms\s*,\s*notes/i.test(r));
-    const start = headerIdx >= 0 ? headerIdx : 0;
-
-    const header = parseCSVLine(rows[start]);
-    const colMap = new Map(header.map((h,i)=>[String(h||"").toLowerCase(), i]));
-
-    const required = ["date","time","systolic","diastolic","hr","symptoms","notes"];
-    const missing = required.filter(k => !colMap.has(k));
-    if(missing.length){
-      return {ok:false, msg:`Missing required columns: ${missing.join(", ")}`};
-    }
-
-    const items = [];
-    const errors = [];
-
-    for(let i=start+1;i<rows.length;i++){
-      const line = rows[i];
-      if(!line || !line.trim()) continue;
-
-      const cols = parseCSVLine(line);
-
-      const get = (k) => cols[colMap.get(k)] ?? "";
-
-      const date = get("date");
-      const time = get("time");
-      const ts = parseDateTimeToTs(date, time);
-      if(ts == null){
-        errors.push(`Row ${i+1}: invalid date/time (${date} ${time})`);
-        continue;
-      }
-
-      const sys = intOrNull(get("systolic"));
-      const dia = intOrNull(get("diastolic"));
-      const hr  = intOrNull(get("hr"));
-
-      const notes = (get("notes") ?? "").toString();
-      const syms = normalizeSymptoms(parseSymptomsList(get("symptoms")));
-
-      // accept if at least one meaningful value
-      const hasAny = !(sys==null && dia==null && hr==null && !notes.trim() && syms.length===0);
-      if(!hasAny){
-        errors.push(`Row ${i+1}: empty record`);
-        continue;
-      }
-
-      items.push({ ts, sys, dia, hr, notes, symptoms: syms });
-    }
-
-    if(!items.length){
-      return {ok:false, msg: errors.length ? ("No rows imported.\n\n" + errors.slice(0,6).join("\n")) : "No rows imported."};
-    }
-
-    // merge + dedupe by ts
-    const existing = loadRecords();
-    const byTs = new Map(existing.map(r => [r.ts, r]));
-    let added = 0, replaced = 0;
-
-    for(const r of items){
-      if(byTs.has(r.ts)){
-        byTs.set(r.ts, r);
-        replaced++;
-      }else{
-        byTs.set(r.ts, r);
-        added++;
-      }
-    }
-
-    const merged = Array.from(byTs.values()).sort((a,b)=> b.ts - a.ts);
-    saveRecords(merged);
-
-    return {
-      ok:true,
-      added,
-      replaced,
-      total: merged.length,
-      errors
-    };
-  }
-
-  $("btnImport").addEventListener("click", () => {
-    if(isAddOpen) return;
-    if(!$("editModal").classList.contains("hidden")) return;
-    if(!$("exportModal").classList.contains("hidden")) return;
-    openImportModal("");
-  });
-
-  $("btnImportDo").addEventListener("click", (e) => {
-    e.preventDefault();
-    if($("btnImportDo").disabled) return;
-
-    const txt = $("importText").value || "";
-    const res = importCSV(txt);
-
-    if(!res.ok){
-      alert(res.msg || "Import failed.");
-      return;
-    }
-
-    closeImportModal();
-
-    // clear filters so user sees imported items
-    $("fromDate").value = "";
-    $("toDate").value = "";
-    $("search").value = "";
-
-    renderLog();
-    showCarouselPanel("log");
-
-    const errNote = (res.errors && res.errors.length)
-      ? `\n\nWarnings (first 5):\n- ${res.errors.slice(0,5).join("\n- ")}`
-      : "";
-
-    alert(`Import complete.\n\nAdded: ${res.added}\nUpdated (same timestamp): ${res.replaced}\nTotal records: ${res.total}${errNote}`);
-  });
-
-  /* ---------- End CSV Import ---------- */
 
   const symGrid = $("symGrid");
   const symState = new Map();
@@ -2501,6 +2194,14 @@ Import merges with existing data and de-dupes by timestamp.
     closeAddPanel();
   });
 
+  function intOrNull(v){
+    const t = String(v).trim();
+    if(!t) return null;
+    const n = Number(t);
+    if(!Number.isFinite(n)) return null;
+    return Math.round(n);
+  }
+
   function validateAnyInput(sys,dia,hr,notes,symptoms){
     return !(sys==null && dia==null && hr==null && !String(notes||"").trim() && (symptoms||[]).length===0);
   }
@@ -2691,6 +2392,7 @@ self.addEventListener('fetch', (e)=>{ });`;
 <!--
 Vitals Tracker — EOF Version Notes
 App Version: v1.19B44
-- Added CSV Import modal + merge/dedupe importer for date,time,sys,dia,hr,symptoms,notes CSV.
-- All other layout/behavior unchanged.
+- Fix: Log/Charts now wrapped in fixed frame + inner scroll, matching Home behavior and eliminating panel bleed without track gaps.
+- Track gap removed; paging restored to pure 100% widths (simple, stable).
+- No other behavior changes.
 -->
