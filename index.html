@@ -1,13 +1,21 @@
-<!-- Vitals Tracker v1.19B44 -->
+<!-- Vitals Tracker v1.19B45 -->
 <!--
 Version Detail Notes
-App Version: v1.19B44
-Base: v1.19B43
+App Version: v1.19B45
+Base: v1.19B44
 Changes (requested):
-- Fix: Home panel was effectively “fixed” because it had extra internal padding rules; Log/Charts were not.
-- Solution: Make the carousel panels use a fixed outer frame + inner scrolling content so ALL panels render with the same border/frame behavior.
-- Remove the track GAP hack and revert swipe math back to simple 100% panel paging (no neighbor bleed).
-- No other behavior changes (swipe, pull-to-refresh, log edit flow, charts gestures, exit handler all preserved).
+- UI/Layout: Collapse the panel border up from the bottom (Home/Charts panels) without changing layout/behavior.
+- Charts (Core v1 behavior):
+  - Default chart view shows the most recent 7 days (rolling).
+  - Zoom in to 1 day; zoom out to 14 days.
+  - Pan left/right across time.
+  - Y-axis labels remain dynamic based on visible data.
+- Chart Controls & Labels:
+  - Remove date selector box.
+  - Replace with a live label showing the currently visible date range (updates on default/zoom/pan).
+- Clinical Visual Cues:
+  - Add systolic-focused hypertension bands (hypotensive/normal/elevated/stage 1/stage 2).
+- No other behavior changes (swipe, pull-to-refresh, log edit flow, gestures, exit handler preserved).
 -->
 <!doctype html>
 <html lang="en">
@@ -102,6 +110,22 @@ Changes (requested):
     .accentFrame > *{
       position:relative;
       z-index:1;
+    }
+
+    /* v1.19B45: collapse the accent border up from the bottom on carousel panels only */
+    .panel.card.accentFrame::after{
+      content:"";
+      position:absolute;
+      left:0; right:0; bottom:0;
+      height:22px; /* visual mask height */
+      border-radius: 0 0 var(--radius) var(--radius);
+      pointer-events:none;
+      z-index:2; /* above border */
+      background: linear-gradient(180deg,
+        rgba(11,19,36,0) 0%,
+        rgba(11,19,36,.55) 45%,
+        rgba(11,19,36,.95) 100%
+      );
     }
 
     .hidden{ display:none !important; }
@@ -523,12 +547,10 @@ Changes (requested):
       align-self:flex-start;
     }
 
-    /* v1.19B44: FIX ALL PANELS (Log/Charts) to behave like Home:
-       Use a fixed outer frame with inner scroll.
-       Home already “looked right” due to different content height; now all match. */
+    /* Fixed outer frame + inner scroll (B44) */
     .panelFrame{
       width:100%;
-      height: calc(100dvh - max(14px, env(safe-area-inset-top)) - max(14px, env(safe-area-inset-bottom)) - 12px); /* matches body vertical padding intent */
+      height: calc(100dvh - max(14px, env(safe-area-inset-top)) - max(14px, env(safe-area-inset-bottom)) - 12px);
       max-height: calc(100dvh - max(14px, env(safe-area-inset-top)) - max(14px, env(safe-area-inset-bottom)) - 12px);
       overflow:hidden;
     }
@@ -545,6 +567,22 @@ Changes (requested):
       font-weight: 650;
       letter-spacing: .2px;
       user-select:none;
+    }
+
+    /* v1.19B45: live chart range label */
+    .rangeLine{
+      margin: 10px 4px 0;
+      color: rgba(235,245,255,.82);
+      font-weight: 800;
+      letter-spacing: .2px;
+      font-size: 15px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .rangeLine .mut{
+      color: rgba(235,245,255,.52);
+      font-weight: 750;
     }
   </style>
 </head>
@@ -601,7 +639,7 @@ Changes (requested):
                 <div class="ptrHint">Pull down on Home to refresh (release).</div>
 
                 <div class="footerTiny">
-                  <div>v1.19B44</div>
+                  <div>v1.19B45</div>
                   <div>developed by Keyth Jyles</div>
                 </div>
               </div>
@@ -650,14 +688,8 @@ Changes (requested):
                 <button id="btnBackFromCharts" class="btn small">Back</button>
               </div>
 
-              <div class="subtle">Weekly view (7 days). Pinch to zoom; drag to pan.</div>
-
-              <div class="filters">
-                <div class="dateField" style="grid-column:1 / span 2;">
-                  <div class="miniLabel">Week</div>
-                  <input id="chartWeek" class="field" type="week" />
-                </div>
-              </div>
+              <div class="subtle">Default: most recent 7 days. Pinch to zoom (1–14 days); drag to pan.</div>
+              <div id="chartRangeLabel" class="rangeLine">—</div>
 
               <canvas id="chart" width="900" height="520"></canvas>
             </div>
@@ -737,7 +769,7 @@ Optional:
 (() => {
   "use strict";
 
-  const APP_VERSION = "v1.19B44";
+  const APP_VERSION = "v1.19B45";
   const STORAGE_KEY = "vitals_tracker_records_v1";
   const SYMPTOMS = [
     "Sweaty","Dizzy","Panic","Brain fog","Chest tight","Headache",
@@ -803,6 +835,10 @@ Optional:
     return `${time}, ${date}`;
   }
 
+  function fmtShortDate(ts){
+    return new Intl.DateTimeFormat(undefined, { month:"short", day:"2-digit", year:"numeric" }).format(new Date(ts));
+  }
+
   function startOfDay(ts){
     const d = new Date(ts);
     d.setHours(0,0,0,0);
@@ -847,7 +883,7 @@ Optional:
 
   function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
 
-  /* v1.19B44: pure paging width = visible inner viewport (excludes padding) */
+  /* pure paging width = visible inner viewport (excludes padding) */
   function trackWidth(){
     return viewport.clientWidth || 1;
   }
@@ -877,8 +913,7 @@ Optional:
     snapToIndex(idx, true);
     if(id === "log"){ renderLog(); }
     if(id === "charts"){
-      initWeekDefaultIfNeeded();
-      applyWeekToBase(true);
+      initChartDefaultIfNeeded(true);
       renderCharts();
     }
     window.scrollTo({top:0, left:0, behavior:"auto"});
@@ -1004,8 +1039,7 @@ Optional:
       const id = currentPanelId();
       if(id === "log"){ renderLog(); }
       if(id === "charts"){
-        initWeekDefaultIfNeeded();
-        applyWeekToBase(true);
+        initChartDefaultIfNeeded(true);
         renderCharts();
       }
 
@@ -1060,7 +1094,7 @@ Optional:
   });
 
   /* -----------------------
-     Everything below unchanged
+     Everything below unchanged except charts per v1.19B45
      ----------------------- */
 
   let pendingEditTs = null;
@@ -1606,7 +1640,8 @@ Optional:
 
   $("logList").addEventListener("pointerup", (ev) => {
     if(!logTap.tracking) return;
-    if(logTap.pointerId != null && ev.pointerId !== logTap.pointerId) return;
+    if(logTap.pointerId
+    Id != null && ev.pointerId !== logTap.pointerId) return;
 
     const entry = logTap.activeEl;
     const ts = logTap.activeTs;
@@ -1693,10 +1728,11 @@ Optional:
     baseMax: 0,
     viewMin: 0,
     viewMax: 0,
-    minSpan: 48*60*60*1000,
-    maxSpan: 7*DAY_MS,
+    minSpan: 1*DAY_MS,        // v1.19B45: 1 day
+    maxSpan: 14*DAY_MS,       // v1.19B45: 14 days
     pinch: null,
-    pan: null
+    pan: null,
+    didInit: false
   };
 
   function clampViewToBase(){
@@ -1774,69 +1810,117 @@ Optional:
     return recs.filter(r => r.ts >= a && r.ts <= b);
   }
 
-  function getISOWeekInputValueFromDate(d){
-    const date = new Date(d.getTime());
-    date.setHours(0,0,0,0);
-    date.setDate(date.getDate() + 3 - ((date.getDay() + 6) % 7));
-    const weekYear = date.getFullYear();
-
-    const week1 = new Date(weekYear, 0, 4);
-    week1.setHours(0,0,0,0);
-    const week1Thursday = new Date(week1.getTime());
-    week1Thursday.setDate(week1Thursday.getDate() + 3 - ((week1Thursday.getDay() + 6) % 7));
-
-    const diffDays = Math.round((date - week1Thursday) / DAY_MS);
-    const weekNo = 1 + Math.floor(diffDays / 7);
-
-    return `${weekYear}-W${String(weekNo).padStart(2,"0")}`;
-  }
-
-  function weekInputToMondayStart(value){
-    const m = /^(\d{4})-W(\d{2})$/.exec(String(value || ""));
-    if(!m) return null;
-    const year = Number(m[1]);
-    const week = Number(m[2]);
-    if(!year || !week) return null;
-
-    const jan4 = new Date(year, 0, 4);
-    jan4.setHours(0,0,0,0);
-
-    const jan4Dow = (jan4.getDay() + 6) % 7;
-    const week1Mon = new Date(jan4.getTime() - jan4Dow*DAY_MS);
-
-    const targetMon = new Date(week1Mon.getTime() + (week-1)*7*DAY_MS);
-    targetMon.setHours(0,0,0,0);
-    return targetMon;
-  }
-
-  function initWeekDefaultIfNeeded(){
-    if(!$("chartWeek").value){
-      $("chartWeek").value = getISOWeekInputValueFromDate(new Date());
+  function dataBounds(){
+    const all = loadRecords();
+    const now = Date.now();
+    if(!all.length){
+      return { minTs: now - 30*DAY_MS, maxTs: now };
     }
+    const minTs = all.reduce((m,r)=> Math.min(m, r.ts), all[0].ts);
+    const maxTs = all.reduce((m,r)=> Math.max(m, r.ts), all[0].ts);
+    return { minTs, maxTs };
   }
 
-  function applyWeekToBase(resetView){
-    const mon = weekInputToMondayStart($("chartWeek").value);
-    if(!mon){
-      $("chartWeek").value = getISOWeekInputValueFromDate(new Date());
-      return applyWeekToBase(resetView);
-    }
-    const baseMin = mon.getTime();
-    const baseMax = baseMin + 7*DAY_MS - 1;
+  function initChartDefaultIfNeeded(force){
+    if(chartView.didInit && !force) return;
+
+    const { minTs, maxTs } = dataBounds();
+    const baseMin = Math.min(minTs, maxTs);
+    const baseMax = Math.max(minTs, maxTs);
 
     chartView.baseMin = baseMin;
     chartView.baseMax = baseMax;
 
-    if(resetView || !chartView.viewMin || !chartView.viewMax){
-      chartView.viewMin = baseMin;
-      chartView.viewMax = baseMax;
-    }else{
-      clampViewToBase();
+    const end = baseMax || Date.now();
+    const start = end - 7*DAY_MS;
+
+    chartView.viewMax = end;
+    chartView.viewMin = Math.max(baseMin, start);
+
+    chartView.didInit = true;
+    clampViewToBase();
+    updateChartRangeLabel();
+  }
+
+  function updateChartRangeLabel(){
+    const el = $("chartRangeLabel");
+    if(!el) return;
+
+    const a = chartView.viewMin;
+    const b = chartView.viewMax;
+
+    const spanDays = Math.max(1, (b - a) / DAY_MS);
+    const spanTxt = (spanDays < 1.05) ? "1 day" : `${Math.round(spanDays)} days`;
+
+    const left = fmtShortDate(a);
+    const right = fmtShortDate(b);
+    el.innerHTML = `${escapeHtml(left)} <span class="mut">→</span> ${escapeHtml(right)} <span class="mut">(${escapeHtml(spanTxt)})</span>`;
+  }
+
+  function renderHypertensionBands(ctx, yMin, yMax, pad, W, H){
+    // Systolic-focused bands (mmHg)
+    // Hypotensive: <90
+    // Normal: 90–119
+    // Elevated: 120–129
+    // Stage 1: 130–139
+    // Stage 2: >=140
+    const bands = [
+      { name:"Stage 2", lo:140, hi:1000, fill:"rgba(255,120,120,.10)", text:"rgba(255,210,210,.30)" },
+      { name:"Stage 1", lo:130, hi:139.999, fill:"rgba(255,200,120,.09)", text:"rgba(255,235,205,.28)" },
+      { name:"Elevated", lo:120, hi:129.999, fill:"rgba(255,240,160,.07)", text:"rgba(255,255,225,.26)" },
+      { name:"Normal", lo:90,  hi:119.999, fill:"rgba(120,220,180,.06)", text:"rgba(200,255,230,.22)" },
+      { name:"Low", lo:-1000, hi:89.999, fill:"rgba(120,170,255,.06)", text:"rgba(200,220,255,.22)" }
+    ];
+
+    const plotY0 = pad.t;
+    const plotY1 = H - pad.b;
+    const plotX0 = pad.l;
+    const plotX1 = W - pad.r;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(plotX0, plotY0, plotX1-plotX0, plotY1-plotY0);
+    ctx.clip();
+
+    for(const b of bands){
+      const topV = Math.min(b.hi, yMax);
+      const botV = Math.max(b.lo, yMin);
+      if(topV < yMin || botV > yMax) continue;
+      if(topV <= botV) continue;
+
+      const yTop = yTo(topV, yMin, yMax, pad, H);
+      const yBot = yTo(botV, yMin, yMax, pad, H);
+
+      const h = Math.max(0, yBot - yTop);
+      if(h <= 0) continue;
+
+      ctx.fillStyle = b.fill;
+      ctx.fillRect(plotX0, yTop, (plotX1-plotX0), h);
+
+      // unobtrusive label only if there is enough vertical space
+      if(h >= 22){
+        ctx.fillStyle = b.text;
+        ctx.font = "12px system-ui,Segoe UI,Roboto";
+        ctx.textAlign = "right";
+        ctx.fillText(b.name, plotX1 - 10, yTop + 16);
+      }
     }
+
+    ctx.restore();
   }
 
   function renderCharts(){
-    applyWeekToBase(false);
+    // Refresh base bounds from data (for panning across time) without resetting view unless needed.
+    const { minTs, maxTs } = dataBounds();
+    chartView.baseMin = Math.min(minTs, maxTs);
+    chartView.baseMax = Math.max(minTs, maxTs);
+
+    if(!chartView.viewMin || !chartView.viewMax){
+      initChartDefaultIfNeeded(true);
+    }else{
+      clampViewToBase();
+      updateChartRangeLabel();
+    }
 
     const canvas = $("chart");
     const ctx = canvas.getContext("2d");
@@ -1875,14 +1959,23 @@ Optional:
     const tMin = chartView.viewMin;
     const tMax = chartView.viewMax;
 
+    // Clip plot area for bands + day columns + lines
     ctx.save();
     ctx.beginPath();
     ctx.rect(plotX0, plotY0, plotX1-plotX0, plotY1-plotY0);
     ctx.clip();
 
-    const weekStart = startOfDay(chartView.baseMin);
-    for(let i=0;i<7;i++){
-      const bandStart = weekStart + i*DAY_MS;
+    // v1.19B45: hypertension bands first (subtle background cues)
+    renderHypertensionBands(ctx, yMin, yMax, pad, W, H);
+
+    // existing alternating day bands
+    const viewStartDay = startOfDay(tMin);
+    const viewEndDay = startOfDay(tMax) + DAY_MS;
+
+    // align bands to visible days (not fixed week)
+    const dayCount = Math.ceil((viewEndDay - viewStartDay) / DAY_MS);
+    for(let i=0;i<dayCount;i++){
+      const bandStart = viewStartDay + i*DAY_MS;
       const bandEnd = bandStart + DAY_MS;
 
       const a = Math.max(bandStart, tMin);
@@ -1900,8 +1993,10 @@ Optional:
         : "rgba(47,120,255,.26)";
       ctx.fillRect(x0, plotY0, (x1 - x0), (plotY1 - plotY0));
     }
+
     ctx.restore();
 
+    // Y grid + labels (dynamic based on visible data)
     ctx.font = "16px system-ui,Segoe UI,Roboto";
     ctx.fillStyle = "rgba(235,245,255,.60)";
     ctx.strokeStyle = "rgba(235,245,255,.10)";
@@ -1922,6 +2017,7 @@ Optional:
     const rangeMs = (tMax - tMin);
     const showTime = rangeMs <= (18 * 60 * 60 * 1000);
 
+    // Bottom day labels
     ctx.fillStyle = "rgba(235,245,255,.90)";
     ctx.font = "20px system-ui,Segoe UI,Roboto";
     ctx.textAlign = "center";
@@ -1930,10 +2026,11 @@ Optional:
     const yDow = H - 44;
     const yDate = H - 22;
 
-    const weekStartLabel = startOfDay(chartView.baseMin);
+    const startLabelDay = startOfDay(tMin);
+    const daysToLabel = Math.max(1, Math.ceil((startOfDay(tMax) + DAY_MS - startLabelDay) / DAY_MS));
 
-    for(let i=0;i<7;i++){
-      const dayStart = weekStartLabel + i*DAY_MS;
+    for(let i=0;i<daysToLabel;i++){
+      const dayStart = startLabelDay + i*DAY_MS;
       const dayCenter = dayStart + (DAY_MS/2);
       if(dayCenter < tMin || dayCenter > tMax) continue;
 
@@ -1976,6 +2073,7 @@ Optional:
 
     ctx.textAlign = "start";
 
+    // Series lines
     if(recs.length){
       drawSeriesTimedWithDayGaps(ctx, recs, r=>r.sys, tMin, tMax, yMin, yMax, pad, W, H, "rgba(79,140,255,.98)");
       drawSeriesTimedWithDayGaps(ctx, recs, r=>r.dia, tMin, tMax, yMin, yMax, pad, W, H, "rgba(216,224,240,.88)");
@@ -1986,6 +2084,7 @@ Optional:
       ctx.fillText("No readings in this view.", pad.l + 12, pad.t + 34);
     }
 
+    // Legend (unchanged)
     const lx = pad.l + 10;
     let ly = pad.t + 26;
 
@@ -2035,7 +2134,7 @@ Optional:
 
       if(e.touches.length === 2){
         e.preventDefault();
-        applyWeekToBase(false);
+        if(!chartView.didInit) initChartDefaultIfNeeded(true);
 
         const d = dist2(e.touches[0], e.touches[1]);
         const cx = pinchCenterX(e.touches[0], e.touches[1]);
@@ -2053,7 +2152,7 @@ Optional:
 
       if(e.touches.length === 1){
         e.preventDefault();
-        applyWeekToBase(false);
+        if(!chartView.didInit) initChartDefaultIfNeeded(true);
 
         chartView.pan = {
           x0: e.touches[0].clientX,
@@ -2084,6 +2183,7 @@ Optional:
         chartView.viewMin = vMin;
         chartView.viewMax = vMax;
         clampViewToBase();
+        updateChartRangeLabel();
         renderCharts();
         return;
       }
@@ -2100,6 +2200,7 @@ Optional:
         chartView.viewMin = chartView.pan.viewMin + dt;
         chartView.viewMax = chartView.pan.viewMax + dt;
         clampViewToBase();
+        updateChartRangeLabel();
         renderCharts();
       }
     }, {passive:false});
@@ -2273,11 +2374,6 @@ Optional:
     $(id).addEventListener("change", () => renderLog());
   });
 
-  $("chartWeek").addEventListener("change", () => {
-    applyWeekToBase(true);
-    renderCharts();
-  });
-
   $("btnExportLog").addEventListener("click", () => {
     const recs = filteredRecords({fromId:"fromDate", toId:"toDate", searchId:"search"});
     const rangeLabel = (() => {
@@ -2305,20 +2401,19 @@ Optional:
     const a = chartView.viewMin, b = chartView.viewMax;
     const recs = all.filter(r => r.ts >= a && r.ts <= b);
 
-    const weekVal = $("chartWeek").value || "";
     const baseRange = `${fmtDateTime(chartView.baseMin)} to ${fmtDateTime(chartView.baseMax)}`;
     const viewRange = `${fmtDateTime(chartView.viewMin)} to ${fmtDateTime(chartView.viewMax)}`;
 
     exportReport(
       recs,
       {
-        title: "Charts Export (Weekly View)",
-        rangeLabel: `Selected week: ${weekVal} | Base week: ${baseRange} | Exported view: ${viewRange}`,
+        title: "Charts Export (Pan/Zoom View)",
+        rangeLabel: `Data span: ${baseRange} | Exported view: ${viewRange}`,
         notes:
           "What you are looking at:\n" +
-          "- The Charts screen shows exactly 7 days at a time (weekly view).\n" +
-          "- You can pinch to zoom in, then drag left/right to pan within that 7-day week.\n" +
-          "- This export contains the entries that fall within the CURRENT visible chart view (after zoom/pan)."
+          "- The Charts screen defaults to the most recent 7 days.\n" +
+          "- Pinch to zoom (1–14 days), then drag left/right to pan across time.\n" +
+          "- This export contains the entries that fall within the CURRENT visible chart view (after pan/zoom)."
       },
       "vitals_charts_report"
     );
@@ -2391,8 +2486,10 @@ self.addEventListener('fetch', (e)=>{ });`;
 </html>
 <!--
 Vitals Tracker — EOF Version Notes
-App Version: v1.19B44
-- Fix: Log/Charts now wrapped in fixed frame + inner scroll, matching Home behavior and eliminating panel bleed without track gaps.
-- Track gap removed; paging restored to pure 100% widths (simple, stable).
+App Version: v1.19B45
+- Charts restored to rolling v1 behavior: default most recent 7 days; pinch zoom 1–14 days; pan across time.
+- Removed date selector; added live range label reflecting current visible chart window.
+- Added systolic-focused hypertension bands (subtle, informative) behind the plot.
+- Carousel panel accent border visually collapses up from bottom on carousel panels (Home/Log/Charts) without layout changes.
 - No other behavior changes.
 -->
