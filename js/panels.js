@@ -1,264 +1,156 @@
-/*
-Vitals Tracker (Modular) — js/panel.js
-App Version: v2.001
+/* ------------------------------------------------------------
+   Vitals Tracker — js/panels.js
+   App Version: v2.010
 
-Purpose:
-- Owns the carousel “panel paging” behavior:
-  - Swipe left/right between Home, Log, Charts.
-  - No neighbor bleed; simple 100% paging.
-  - Preserves the original “pull-to-refresh on Home only”.
-- Does NOT manage Add/Edit overlay panel (handled by ui.js).
-- Provides a small API so ui.js can:
-  - snap to specific panel
-  - get current panel id
-  - temporarily disable swipe while modals/overlays are open
+   Purpose:
+   - Home panel content manager (shell-level)
+   - Keeps Home clean: no embedded Log/Chart preview cards
+   - Provides simple "Go to Log" / "Go to Charts" navigation
 
-Latest Update (v2.001):
-- First modular implementation extracted from v1.19B44 logic.
-- Keeps the same axis-lock thresholds and commit behavior.
-*/
+   Latest update (v2.010):
+   - Removes legacy Home preview cards ("Log (read-only preview)" and
+     "Charts (placeholder)") so Charts no longer appears on Home.
+   - Injects two large navigation buttons on Home.
+   - Does not write/migrate data.
 
-import { clamp } from "./utils.js";
+   Safety:
+   - Read-only DOM edits only
+   - No storage writes
+   ------------------------------------------------------------ */
 
-const PANELS = ["home","log","charts"];
+(function () {
+  "use strict";
 
-let viewportEl = null;
-let trackEl = null;
+  const VT = (window.VT = window.VT || {});
+  VT.panels = VT.panels || {};
 
-let activeIndex = 0;
+  function qsa(sel, root) {
+    return Array.from((root || document).querySelectorAll(sel));
+  }
 
-// external guard flags (set by ui.js)
-let swipeEnabled = true;
-let overlayOpen = false;
-let modalOpen = false;
-
-let swipe = {
-  active:false,
-  axis:null,
-  startX:0,
-  startY:0,
-  startT:0,
-  baseX:0,
-  lastX:0,
-  lastY:0
-};
-
-let lastCarouselSwipeAt = 0;
-
-function trackWidth(){
-  return (viewportEl?.clientWidth || 1);
-}
-
-function xForIndex(idx){
-  return -(idx * trackWidth());
-}
-
-function setTrackX(px, withTransition){
-  if(!trackEl) return;
-  trackEl.style.transition = withTransition ? "transform 200ms ease" : "none";
-  trackEl.style.transform = `translate3d(${px}px,0,0)`;
-}
-
-function snapToIndex(idx, withTransition=true){
-  activeIndex = clamp(idx, 0, PANELS.length-1);
-  setTrackX(xForIndex(activeIndex), withTransition);
-}
-
-function currentPanelId(){
-  return PANELS[activeIndex] || "home";
-}
-
-function allowSwipeHere(target){
-  if(!swipeEnabled) return false;
-  if(overlayOpen) return false;
-  if(modalOpen) return false;
-
-  // block gesture if interacting with input controls
-  if(target && (target.closest?.("input, textarea, select, button"))) return false;
-  return true;
-}
-
-function beginSwipe(clientX, clientY){
-  swipe.active = true;
-  swipe.axis = null;
-  swipe.startX = clientX;
-  swipe.startY = clientY;
-  swipe.lastX = clientX;
-  swipe.lastY = clientY;
-  swipe.startT = Date.now();
-  swipe.baseX = xForIndex(activeIndex);
-  if(trackEl) trackEl.style.transition = "none";
-}
-
-function moveSwipe(clientX, clientY, preventer){
-  if(!swipe.active) return;
-
-  const dx = clientX - swipe.startX;
-  const dy = clientY - swipe.startY;
-  swipe.lastX = clientX;
-  swipe.lastY = clientY;
-
-  const AXIS_LOCK = 10;
-
-  if(!swipe.axis){
-    if(Math.abs(dx) >= AXIS_LOCK || Math.abs(dy) >= AXIS_LOCK){
-      swipe.axis = (Math.abs(dx) > Math.abs(dy)) ? "x" : "y";
-    }else{
-      return;
+  function findPanelByName(name) {
+    const n = String(name || "").toLowerCase();
+    const panels = qsa(".panel, [data-panel], [data-name]");
+    for (const p of panels) {
+      const dn =
+        (p.getAttribute("data-panel") ||
+          p.getAttribute("data-name") ||
+          p.id ||
+          "")
+          .toLowerCase();
+      if (dn.includes(n)) return p;
     }
+    return null;
   }
 
-  if(swipe.axis === "x"){
-    lastCarouselSwipeAt = Date.now();
-    if(preventer) preventer();
+  function clickNavTarget(targetName) {
+    const t = String(targetName || "").toLowerCase();
 
-    const w = trackWidth();
-    const maxX = 0;
-    const minX = -((PANELS.length-1) * w);
-
-    let x = swipe.baseX + dx;
-
-    // rubber-banding
-    if(x > maxX) x = maxX + (x - maxX) * 0.25;
-    if(x < minX) x = minX + (x - minX) * 0.25;
-
-    setTrackX(x, false);
-    return;
-  }
-
-  // pull-to-refresh (Home only)
-  if(swipe.axis === "y"){
-    if(currentPanelId() !== "home") return;
-    if(window.scrollY > 0) return;
-    if(dy < 0) return;
-  }
-}
-
-function endSwipe(preventer, onPanelChanged){
-  if(!swipe.active) return;
-
-  const dx = swipe.lastX - swipe.startX;
-  const dy = swipe.lastY - swipe.startY;
-
-  const w = trackWidth();
-  const dt = Math.max(1, Date.now() - swipe.startT);
-  const velocityX = dx / dt;
-
-  const SWIPE_COMMIT = w * 0.18;
-  const VELOCITY_COMMIT = 0.55;
-
-  if(swipe.axis === "x"){
-    if(preventer) preventer();
-
-    let idx = activeIndex;
-    if(dx <= -SWIPE_COMMIT || velocityX <= -VELOCITY_COMMIT) idx = activeIndex + 1;
-    if(dx >=  SWIPE_COMMIT || velocityX >=  VELOCITY_COMMIT) idx = activeIndex - 1;
-    idx = clamp(idx, 0, PANELS.length-1);
-
-    const changed = (idx !== activeIndex);
-    snapToIndex(idx, true);
-
-    swipe.active = false;
-    swipe.axis = null;
-
-    if(changed && typeof onPanelChanged === "function"){
-      onPanelChanged(currentPanelId());
+    // Preferred: any existing nav buttons (data-nav)
+    const btn = document.querySelector(`[data-nav="${t}"]`);
+    if (btn) {
+      btn.click();
+      return true;
     }
-    return;
+
+    // Fallback: dispatch a generic navigation event
+    document.dispatchEvent(new CustomEvent("vt:navigate", { detail: { to: t } }));
+    return false;
   }
 
-  if(swipe.axis === "y"){
-    if(currentPanelId() === "home" && window.scrollY === 0){
-      const PULL_THRESHOLD = 70;
-      if(dy >= PULL_THRESHOLD && Math.abs(dx) < 24){
-        if(preventer) preventer();
-        location.reload();
+  function removeHomePreviewCards(homePanel) {
+    if (!homePanel) return;
+
+    // Remove obvious legacy preview cards by text match
+    const candidates = qsa("div, section, article", homePanel);
+    for (const el of candidates) {
+      const txt = (el.textContent || "").trim();
+      if (!txt) continue;
+
+      // These are the specific legacy blocks you’re seeing.
+      const isLogPreview =
+        txt.includes("Log (read-only preview)") ||
+        txt.includes("Next: render actual entries here");
+      const isChartsPreview =
+        txt.includes("Charts (placeholder)") ||
+        txt.includes("Next: attach chart engine");
+
+      if (isLogPreview || isChartsPreview) {
+        // Remove the nearest "card-like" container if possible
+        const card = el.closest(".card, .box, .panelCard, .section") || el;
+        try { card.remove(); } catch (_) {}
       }
     }
   }
 
-  // snap back
-  snapToIndex(activeIndex, true);
-  swipe.active = false;
-  swipe.axis = null;
-}
+  function injectHomeNav(homePanel) {
+    if (!homePanel) return;
 
-export function initPanelCarousel({ viewportId="viewport", trackId="track", onPanelChanged } = {}){
-  viewportEl = document.getElementById(viewportId);
-  trackEl = document.getElementById(trackId);
+    // Find a reasonable insertion point: first large inner container, else panel itself
+    const host =
+      homePanel.querySelector(".panel-inner") ||
+      homePanel.querySelector(".content") ||
+      homePanel;
 
-  if(!viewportEl || !trackEl) throw new Error("panel.js: viewport/track not found");
+    // Remove any prior injected nav (idempotent)
+    const existing = host.querySelector("#vtHomeNav");
+    if (existing) existing.remove();
 
-  // pointer events for touch devices
-  viewportEl.addEventListener("pointerdown", (ev) => {
-    if(ev.pointerType === "mouse") return;
-    if(!allowSwipeHere(ev.target)) return;
-    beginSwipe(ev.clientX, ev.clientY);
-  });
+    const wrap = document.createElement("div");
+    wrap.id = "vtHomeNav";
+    wrap.style.marginTop = "14px";
 
-  viewportEl.addEventListener("pointermove", (ev) => {
-    if(!swipe.active) return;
-    if(ev.pointerType === "mouse") return;
-    moveSwipe(ev.clientX, ev.clientY, () => { try{ ev.preventDefault(); }catch{} });
-  }, { passive:false });
+    // Buttons styled to match your pill/glass theme without relying on CSS edits
+    function makeBtn(label, target) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = label;
+      b.setAttribute("aria-label", label);
 
-  viewportEl.addEventListener("pointerup", (ev) => {
-    if(!swipe.active) return;
-    if(ev.pointerType === "mouse") return;
-    endSwipe(() => { try{ ev.preventDefault(); }catch{} }, onPanelChanged);
-  }, { passive:false });
+      b.style.width = "100%";
+      b.style.padding = "16px 16px";
+      b.style.margin = "10px 0";
+      b.style.borderRadius = "999px";
+      b.style.border = "1px solid rgba(235,245,255,.22)";
+      b.style.background = "rgba(12,21,40,.45)";
+      b.style.color = "rgba(235,245,255,.90)";
+      b.style.fontSize = "18px";
+      b.style.fontWeight = "700";
+      b.style.letterSpacing = ".2px";
+      b.style.boxShadow = "0 8px 20px rgba(0,0,0,.25) inset";
 
-  viewportEl.addEventListener("pointercancel", () => {
-    if(!swipe.active) return;
-    snapToIndex(activeIndex, true);
-    swipe.active = false;
-    swipe.axis = null;
-  });
+      b.addEventListener("click", function () {
+        clickNavTarget(target);
+      });
 
-  window.addEventListener("resize", () => {
-    if(overlayOpen) return;
-    snapToIndex(activeIndex, false);
-  });
+      return b;
+    }
 
-  // initial position
-  snapToIndex(0, false);
-}
+    const logBtn = makeBtn("Open Log", "log");
+    const chartBtn = makeBtn("Open Charts", "charts");
 
-export function goToPanel(panelId, { transition=true } = {}){
-  const idx = Math.max(0, PANELS.indexOf(panelId));
-  snapToIndex(idx, transition);
-  window.scrollTo({ top:0, left:0, behavior:"auto" });
-}
+    wrap.appendChild(logBtn);
+    wrap.appendChild(chartBtn);
 
-export function getCurrentPanelId(){
-  return currentPanelId();
-}
+    // Insert near the top of Home content (after any header text)
+    host.insertBefore(wrap, host.firstChild);
+  }
 
-export function getLastCarouselSwipeAt(){
-  return lastCarouselSwipeAt;
-}
+  function refreshHome() {
+    const home = findPanelByName("home");
+    if (!home) return;
 
-export function setSwipeEnabled(on){
-  swipeEnabled = !!on;
-}
+    removeHomePreviewCards(home);
+    injectHomeNav(home);
+  }
 
-export function setOverlayOpen(on){
-  overlayOpen = !!on;
-}
+  // Public helper (optional use)
+  VT.panels.refreshHome = refreshHome;
 
-export function setModalOpen(on){
-  modalOpen = !!on;
-}
+  document.addEventListener("DOMContentLoaded", refreshHome);
 
-/*
-Vitals Tracker (Modular) — js/panel.js (EOF)
-App Version: v2.001
-Integration notes:
-- index.html must have:
-  - <div class="viewport" id="viewport"><div class="track" id="track"> ... panels ...</div></div>
-- ui.js should call:
-  - initPanelCarousel({ onPanelChanged })
-  - goToPanel("log"/"charts"/"home")
-  - setOverlayOpen(true/false) when Add/Edit is open
-  - setModalOpen(true/false) when modals are open
-*/
+  // Also refresh whenever Home is shown (works with your app.js dispatcher)
+  document.addEventListener("vt:panel:home", refreshHome);
+  document.addEventListener("vt:show:home", refreshHome);
+
+})();
