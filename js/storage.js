@@ -46,7 +46,6 @@ export function loadRecords(){
 }
 
 export function saveRecords(recs){
-  // expect newest-first ordering, but normalize just in case
   const safe = Array.isArray(recs) ? recs.slice() : [];
   safe
     .filter(r => r && typeof r.ts === "number")
@@ -63,7 +62,7 @@ export function upsertRecord(record){
   saveRecords(recs);
 }
 
-export function deleteRecordByTs(ts){
+export function deleteRecord(ts){
   const recs = loadRecords().filter(r => r.ts !== ts);
   saveRecords(recs);
 }
@@ -77,5 +76,5 @@ Vitals Tracker (Modular) — js/storage.js (EOF)
 App Version: v2.001
 Notes:
 - This module intentionally continues to use the v1 key so your current data remains intact.
-- If you later want a new v2 key, we will add a one-time “import/migrate” routine with a user-visible confirmation.
+- Next expected file: js/chart.js
 */
