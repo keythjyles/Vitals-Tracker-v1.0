@@ -1,6 +1,6 @@
 <!--
 Vitals Tracker — Functional Shell + Read-Only Data Detection
-App Version: v2.004
+App Version: v2.005
 
 Purpose:
 - Keep function-first UI stable (buttons, swipe, pull-to-refresh).
@@ -8,9 +8,11 @@ Purpose:
 - Display detected source + record count + newest timestamp on Home and Log.
 - No data writes, no migration, no destructive actions.
 
-Latest Update (v2.004):
-- Added <script src="js/storage.js"></script>.
-- Added boot-time read-only data probe and UI status rendering (no popups).
+Latest Update (v2.005):
+- Fixed GitHub Pages base-path loading by using explicit relative script src:
+    ./js/storage.js
+  (prevents accidental fetch from site root).
+- No other behavior changes.
 -->
 
 <!doctype html>
@@ -210,7 +212,7 @@ Latest Update (v2.004):
   <div class="app">
     <div class="hdr">
       <div class="title">Vitals Tracker</div>
-      <div class="boot" id="bootMark">BOOT OK v2.004</div>
+      <div class="boot" id="bootMark">BOOT OK v2.005</div>
     </div>
 
     <div class="viewport" id="viewport">
@@ -296,8 +298,8 @@ Latest Update (v2.004):
     </div>
   </div>
 
-  <!-- Read-only storage bridge -->
-  <script src="js/storage.js"></script>
+  <!-- Read-only storage bridge (GitHub Pages safe relative path) -->
+  <script src="./js/storage.js"></script>
 
   <script>
     (function(){
@@ -436,7 +438,7 @@ Latest Update (v2.004):
         setStatus("Detecting existing data (read-only)…");
 
         if (!window.VTStorage || typeof window.VTStorage.detectAndLoadReadOnly !== "function") {
-          setStatus("Storage bridge not loaded. Check: js/storage.js");
+          setStatus("Storage bridge not loaded. Check: ./js/storage.js");
           dataSource.textContent = "Not loaded";
           dataCount.textContent  = "—";
           dataNewest.textContent = "—";
@@ -492,8 +494,9 @@ Latest Update (v2.004):
 
 <!--
 EOF — index.html
-App Version: v2.004
+App Version: v2.005
+
 Notes:
-- This version displays read-only detection results from js/storage.js.
+- Fixed GitHub Pages relative-path loading for modular scripts.
 - Next file after confirmation: js/log.js (render last 50 entries, read-only).
 -->
