@@ -1,20 +1,16 @@
 <!--
-Vitals Tracker — Functional Shell (No External JS)
-App Version: v2.003
+Vitals Tracker — Functional Shell + Read-Only Data Detection
+App Version: v2.004
 
 Purpose:
-- Function-first, dependency-free shell that proves:
-  - Buttons work (no browser alerts/popups)
-  - Swipe works (left/right panels)
-  - Pull-to-refresh on Home works
-  - In-app “sheet” UI replaces generic popups
-- Does NOT read/write/clear localStorage data.
+- Keep function-first UI stable (buttons, swipe, pull-to-refresh).
+- Load js/storage.js and detect existing v1 data READ-ONLY.
+- Display detected source + record count + newest timestamp on Home and Log.
+- No data writes, no migration, no destructive actions.
 
-Latest Update (v2.003):
-- Removed all alert() calls.
-- Added in-app bottom sheet for actions (Add/Install/Clear/Exit/Export placeholders).
-- Home buttons now route panels + open sheet as appropriate.
-- Provides a visible status line for feedback without popups.
+Latest Update (v2.004):
+- Added <script src="js/storage.js"></script>.
+- Added boot-time read-only data probe and UI status rendering (no popups).
 -->
 
 <!doctype html>
@@ -137,7 +133,21 @@ Latest Update (v2.003):
       color: rgba(235,245,255,.62);
       min-height: 16px;
       user-select:none;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
     }
+
+    .kv{
+      display:grid;
+      grid-template-columns: 120px 1fr;
+      gap:6px 10px;
+      margin-top:8px;
+      font-size:13px;
+      color: rgba(235,245,255,.74);
+    }
+    .k{ color: rgba(235,245,255,.50); }
+    .v{ color: rgba(235,245,255,.82); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
     /* Bottom Sheet (no popups) */
     .sheetMask{
@@ -200,7 +210,7 @@ Latest Update (v2.003):
   <div class="app">
     <div class="hdr">
       <div class="title">Vitals Tracker</div>
-      <div class="boot" id="bootMark">BOOT OK v2.003</div>
+      <div class="boot" id="bootMark">BOOT OK v2.004</div>
     </div>
 
     <div class="viewport" id="viewport">
@@ -221,15 +231,17 @@ Latest Update (v2.003):
           </div>
 
           <div class="note">
-            Function-first shell. No data is read or written here.
+            Function-first shell. Data detection is read-only.
           </div>
-          <div class="ptr" id="ptrHint">Pull down on Home to refresh (release).</div>
-          <div class="statusLine" id="statusLine"></div>
+          <div class="ptr">Pull down on Home to refresh (release).</div>
+          <div class="statusLine" id="statusLine">Booting…</div>
 
           <div class="card">
-            <div style="font-weight:900;">Status</div>
-            <div style="margin-top:6px; color:rgba(235,245,255,.70); font-size:14px;">
-              Buttons and swipe are live. Next we reattach data + charts without risking your existing records.
+            <div style="font-weight:900;">Data Detected (Read-Only)</div>
+            <div class="kv">
+              <div class="k">Source</div><div class="v" id="dataSource">—</div>
+              <div class="k">Entries</div><div class="v" id="dataCount">—</div>
+              <div class="k">Newest</div><div class="v" id="dataNewest">—</div>
             </div>
           </div>
         </section>
@@ -242,9 +254,15 @@ Latest Update (v2.003):
           </div>
 
           <div class="card">
-            <div style="font-weight:900;">Log (placeholder)</div>
+            <div style="font-weight:900;">Log (read-only preview)</div>
             <div style="margin-top:6px; color:rgba(235,245,255,.70); font-size:14px;">
-              Next step: read-only load of your existing v1 records and render them here.
+              Next: render actual entries here. For now we show detected totals.
+            </div>
+
+            <div class="kv" style="margin-top:10px;">
+              <div class="k">Detected</div><div class="v" id="logDetected">—</div>
+              <div class="k">Entries</div><div class="v" id="logCount">—</div>
+              <div class="k">Newest</div><div class="v" id="logNewest">—</div>
             </div>
           </div>
         </section>
@@ -259,14 +277,14 @@ Latest Update (v2.003):
           <div class="card">
             <div style="font-weight:900;">Charts (placeholder)</div>
             <div style="margin-top:6px; color:rgba(235,245,255,.70); font-size:14px;">
-              Next step: attach chart engine with horizontal pan/zoom only + hypertension bands.
+              Next: attach chart engine with horizontal pan/zoom only + hypertension bands.
             </div>
           </div>
         </section>
 
       </div>
 
-      <!-- In-app sheet (no browser popups) -->
+      <!-- In-app sheet -->
       <div class="sheetMask" id="sheetMask"></div>
       <div class="sheet" id="sheet">
         <div class="sheetHead">
@@ -278,11 +296,22 @@ Latest Update (v2.003):
     </div>
   </div>
 
+  <!-- Read-only storage bridge -->
+  <script src="js/storage.js"></script>
+
   <script>
     (function(){
       const track = document.getElementById("track");
       const viewport = document.getElementById("viewport");
       const statusLine = document.getElementById("statusLine");
+
+      // Data UI
+      const dataSource = document.getElementById("dataSource");
+      const dataCount  = document.getElementById("dataCount");
+      const dataNewest = document.getElementById("dataNewest");
+      const logDetected = document.getElementById("logDetected");
+      const logCount    = document.getElementById("logCount");
+      const logNewest   = document.getElementById("logNewest");
 
       // Sheet
       const sheetMask = document.getElementById("sheetMask");
@@ -290,37 +319,31 @@ Latest Update (v2.003):
       const sheetBody  = document.getElementById("sheetBody");
       const sheetClose = document.getElementById("sheetClose");
 
-      function setStatus(msg){
-        statusLine.textContent = msg || "";
-      }
+      function setStatus(msg){ statusLine.textContent = msg || ""; }
 
       function openSheet(title, body){
         sheetTitle.textContent = title || "Action";
         sheetBody.textContent = body || "";
         viewport.classList.add("sheetOpen");
       }
-      function closeSheet(){
-        viewport.classList.remove("sheetOpen");
-      }
+      function closeSheet(){ viewport.classList.remove("sheetOpen"); }
       sheetMask.addEventListener("click", closeSheet);
       sheetClose.addEventListener("click", closeSheet);
 
       // Panels
-      let idx = 0; // 0=Home, 1=Log, 2=Charts
+      let idx = 0;
       function go(n){
         idx = Math.max(0, Math.min(2, n));
         track.style.transform = "translate3d(" + (-idx*100) + "%,0,0)";
         closeSheet();
-        setStatus("");
       }
 
-      // Button routing
+      // Buttons
       document.getElementById("btnLog").addEventListener("click", ()=>go(1));
       document.getElementById("btnCharts").addEventListener("click", ()=>go(2));
       document.getElementById("btnBackFromLog").addEventListener("click", ()=>go(0));
       document.getElementById("btnBackFromCharts").addEventListener("click", ()=>go(0));
 
-      // Non-destructive placeholders (no alerts)
       function placeholder(title, msg){
         openSheet(title, msg);
         setStatus(title);
@@ -328,47 +351,41 @@ Latest Update (v2.003):
 
       document.getElementById("btnAdd").addEventListener("click", ()=>{
         placeholder("ADD Reading",
-          "Add/Edit flow will be wired next.\n\n" +
-          "Safety: no existing records will be modified until you confirm the add/edit UI is correct."
+          "Add/Edit flow will be wired next.\n\nSafety: existing records remain untouched until you approve the add/edit UI."
         );
       });
 
       document.getElementById("btnAddFromLog").addEventListener("click", ()=>{
         placeholder("ADD Reading",
-          "Add/Edit flow will be wired next from the Log panel.\n\n" +
-          "Safety: we will load your existing v1 records read-only first."
+          "Add/Edit flow will be wired next from the Log panel.\n\nSafety: we will keep v1 storage intact."
         );
       });
 
       document.getElementById("btnInstall").addEventListener("click", ()=>{
         placeholder("Install",
-          "Install will be wired after we confirm modular JS is stable.\n\n" +
-          "For now you can use Chrome menu → Install app (if offered)."
+          "Install will be wired after modular stability is confirmed.\n\nFor now: Chrome menu → Install app (if offered)."
         );
       });
 
       document.getElementById("btnClear").addEventListener("click", ()=>{
         placeholder("Clear Data (Disabled)",
-          "Clear Data is intentionally disabled in the function-first shell.\n\n" +
-          "We will restore Clear Data only after your existing records are confirmed visible."
+          "Clear is disabled until your existing records are confirmed visible and exportable.\n\nNothing has been cleared."
         );
       });
 
       document.getElementById("btnExit").addEventListener("click", ()=>{
         placeholder("Exit (Pending)",
-          "Exit will be restored with your known-good v1 handler later.\n\n" +
-          "This placeholder prevents any accidental behavior changes."
+          "Exit will be restored using your known-good v1 handler later.\n\nThis placeholder avoids unexpected behavior."
         );
       });
 
       document.getElementById("btnExportCharts").addEventListener("click", ()=>{
         placeholder("Export Visible (Pending)",
-          "Export will be wired once the chart has a real visible-range window.\n\n" +
-          "Requirement: export only the currently visible date range."
+          "Export will be wired after the chart has a visible-range window.\n\nRequirement: export only currently visible date range."
         );
       });
 
-      // Swipe panels (basic)
+      // Swipe
       let startX=0, startY=0, tracking=false;
 
       viewport.addEventListener("touchstart", (e)=>{
@@ -399,7 +416,7 @@ Latest Update (v2.003):
         else go(idx-1);
       }, {passive:true});
 
-      // Pull-to-refresh on Home only (simple, safe)
+      // Pull-to-refresh on Home only
       let pullStartY = 0;
       viewport.addEventListener("touchstart", (e)=>{
         if(idx!==0) return;
@@ -411,14 +428,63 @@ Latest Update (v2.003):
         if(idx!==0) return;
         const endY = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientY : pullStartY;
         const dy = endY - pullStartY;
-        if(dy > 80){
-          location.reload();
-        }
+        if(dy > 80) location.reload();
       }, {passive:true});
 
-      // Start at Home
+      // Read-only data detection
+      async function probeData(){
+        setStatus("Detecting existing data (read-only)…");
+
+        if (!window.VTStorage || typeof window.VTStorage.detectAndLoadReadOnly !== "function") {
+          setStatus("Storage bridge not loaded. Check: js/storage.js");
+          dataSource.textContent = "Not loaded";
+          dataCount.textContent  = "—";
+          dataNewest.textContent = "—";
+          logDetected.textContent = "Not loaded";
+          logCount.textContent = "—";
+          logNewest.textContent = "—";
+          return;
+        }
+
+        try {
+          const res = await window.VTStorage.detectAndLoadReadOnly();
+          if (res.ok) {
+            const src = `${res.source} — ${res.sourceName}`;
+            dataSource.textContent = src;
+            dataCount.textContent  = String(res.meta.count);
+            dataNewest.textContent = res.meta.newestIso || "N/A";
+
+            logDetected.textContent = src;
+            logCount.textContent    = String(res.meta.count);
+            logNewest.textContent   = res.meta.newestIso || "N/A";
+
+            setStatus(`Data detected: ${res.meta.count} entries (${res.source}).`);
+          } else {
+            dataSource.textContent = "None detected";
+            dataCount.textContent  = "0";
+            dataNewest.textContent = "—";
+
+            logDetected.textContent = "None detected";
+            logCount.textContent    = "0";
+            logNewest.textContent   = "—";
+
+            setStatus("No legacy data detected (read-only).");
+          }
+        } catch (e) {
+          dataSource.textContent = "Error";
+          dataCount.textContent  = "—";
+          dataNewest.textContent = "—";
+          logDetected.textContent = "Error";
+          logCount.textContent    = "—";
+          logNewest.textContent   = "—";
+          setStatus("Data probe error (see console).");
+          console.error("VTStorage probe error:", e);
+        }
+      }
+
+      // Boot
       go(0);
-      setStatus("Ready.");
+      probeData();
     })();
   </script>
 </body>
@@ -426,8 +492,8 @@ Latest Update (v2.003):
 
 <!--
 EOF — index.html
-App Version: v2.003
+App Version: v2.004
 Notes:
-- No browser popups are used; all feedback is in-app via the bottom sheet.
-- Next file to wire real functionality safely: js/storage.js (read-only load + count display).
+- This version displays read-only detection results from js/storage.js.
+- Next file after confirmation: js/log.js (render last 50 entries, read-only).
 -->
