@@ -1,10 +1,37 @@
-<!-- Vitals Tracker — Function-First Shell -->
-<!-- App Version: v2.009 -->
+<!-- ===========================
+File: /index.html
+Vitals Tracker — Function-First Shell
+App Version: v2.013
+Base: v2.009 (user-provided working index)
+
+Purpose
+- Read-only shell that detects existing local data and renders:
+  - Home summary (source/entries/newest)
+  - Log preview (paged: 25 at a time; “Load next 25”)
+  - Charts (interactive time-window: 2–14 days; pan + horizontal pinch zoom on chart only)
+
+What changed in v2.013 (requested)
+1) Charts “calendar window”
+   - Default window shows the latest 14 days (ending at newest record).
+   - Chart is the only interactive surface:
+     * Pan left/right to move through time.
+     * Two-finger pinch zoom LEFT/RIGHT only (2–14 day window).
+     * No vertical zoom. Page itself is not pinch-zoomable.
+   - X-axis: hour ticks every 4 hours (Central Time / America-Chicago).
+
+2) Log paging
+   - Shows newest 25 initially.
+   - Bottom link/button loads the next 25 (append).
+
+Notes
+- This file does NOT write or delete any storage.
+- Keeps your existing IDs/structure so external modules can remain stable.
+=========================== -->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no" />
   <meta name="theme-color" content="#0b1324" />
   <title>Vitals Tracker</title>
 
@@ -38,6 +65,7 @@
         radial-gradient(900px 600px at 90% 10%, rgba(80,160,255,.12), transparent 55%),
         linear-gradient(180deg, var(--bg1), var(--bg0));
       overflow:hidden;
+      touch-action: manipulation; /* reduce browser gesture interference */
     }
 
     .app{
@@ -201,6 +229,7 @@
       padding:10px;
       background: rgba(0,0,0,.18);
       overflow:hidden;
+      touch-action: none; /* IMPORTANT: chart captures gestures; page doesn't */
     }
     canvas{display:block; width:100%; height:440px;}
 
@@ -220,6 +249,23 @@
       letter-spacing:.2px;
       text-align:center;
     }
+
+    /* Log paging button */
+    .loadMoreWrap{
+      margin-top:12px;
+      display:flex;
+      justify-content:center;
+    }
+    .linkBtn{
+      border:1px solid var(--stroke2);
+      border-radius:999px;
+      padding:10px 14px;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      color:var(--text);
+      font-weight:900;
+      letter-spacing:.2px;
+    }
+    .linkBtn:active{transform:translateY(1px)}
   </style>
 </head>
 
@@ -227,7 +273,7 @@
   <div class="app">
     <div class="topbar">
       <div class="title">Vitals Tracker</div>
-      <div class="boot" id="bootText">BOOT OK v2.009</div>
+      <div class="boot" id="bootText">BOOT OK v2.013</div>
     </div>
 
     <div class="shell">
@@ -281,6 +327,9 @@
           <div class="card" id="logCard">
             <div class="muted" id="logTopNote">Loading…</div>
             <ul class="list" id="logList" style="margin-top:12px;"></ul>
+            <div class="loadMoreWrap" id="logMoreWrap" style="display:none;">
+              <button class="linkBtn" id="btnLoadMore">Load next 25</button>
+            </div>
           </div>
         </section>
 
@@ -300,7 +349,7 @@
               <canvas id="chartCanvas" width="1200" height="520"></canvas>
             </div>
             <div class="hint small" id="chartsHint">
-              Time-spaced plot. Sys/Dia are drawn when present; HR drawn when present.
+              Time-window is adjustable (2–14 days). Pan left/right. Pinch horizontally only. Central Time axis.
             </div>
           </div>
         </section>
@@ -310,12 +359,13 @@
   </div>
 
   <!-- External modules -->
-  <script src="./js/storage.js?v=2.009"></script>
-  <script src="./js/gestures.js?v=2.009"></script>
+  <script src="./js/storage.js?v=2.013"></script>
+  <script src="./js/gestures.js?v=2.013"></script>
 
   <script>
     (function(){
-      const APP_VERSION = "v2.009";
+      const APP_VERSION = "v2.013";
+      const CT_TZ = "America/Chicago";
 
       // Panels
       const panelHome = document.getElementById("panelHome");
@@ -352,7 +402,6 @@
       let pullArmed = false;
 
       panelHome.addEventListener("touchstart", (e) => {
-        // Only arm if we're at top of the home card scroll
         const homeCard = document.getElementById("homeCard");
         if(homeCard.scrollTop !== 0) return;
         pullStartY = e.touches[0].clientY;
@@ -399,7 +448,7 @@
 
       // Service worker (cache-busted)
       if("serviceWorker" in navigator){
-        navigator.serviceWorker.register("./sw.js?v=2.009").catch(()=>{});
+        navigator.serviceWorker.register("./sw.js?v=2.013").catch(()=>{});
       }
 
       // Read-only storage detection + rendering
@@ -411,20 +460,69 @@
 
       const logTopNote = document.getElementById("logTopNote");
       const logList = document.getElementById("logList");
+      const logMoreWrap = document.getElementById("logMoreWrap");
+      const btnLoadMore = document.getElementById("btnLoadMore");
 
       const chartsTopNote = document.getElementById("chartsTopNote");
       const chartCanvas = document.getElementById("chartCanvas");
+      const canvasWrap = chartCanvas.closest(".canvasWrap");
       const ctx = chartCanvas.getContext("2d");
 
       let records = [];
       let summary = { source:"Not loaded", entries:0, newest:null };
 
-      function fmtDate(ts){
+      // Log paging state
+      let logSortedNewestFirst = [];
+      let logShown = 0;
+      const LOG_PAGE = 25;
+
+      // Chart window state (milliseconds)
+      const DAY_MS = 24*60*60*1000;
+      const MIN_DAYS = 2;
+      const MAX_DAYS = 14;
+
+      let dataMinT = 0;
+      let dataMaxT = 0;
+
+      // View window in ms
+      let viewEndT = 0;       // ms
+      let viewDays = MAX_DAYS;
+
+      // Touch/pointer state for chart gestures
+      let panning = false;
+      let panStartX = 0;
+      let panStartEndT = 0;
+
+      let pinchActive = false;
+      let pinchStartDist = 0;
+      let pinchStartDays = MAX_DAYS;
+      let pinchCenterX = 0;   // canvas px (CSS pixels)
+      let pinchCenterT = 0;   // ms (time under pinch center)
+
+      // Central Time formatters (concise)
+      const dtFull = new Intl.DateTimeFormat("en-US", {
+        timeZone: CT_TZ,
+        year:"numeric", month:"2-digit", day:"2-digit",
+        hour:"2-digit", minute:"2-digit", second:"2-digit",
+        hour12:false
+      });
+      const dtShort = new Intl.DateTimeFormat("en-US", {
+        timeZone: CT_TZ,
+        month:"2-digit", day:"2-digit",
+        hour:"2-digit", minute:"2-digit",
+        hour12:false
+      });
+      const dtDate = new Intl.DateTimeFormat("en-US", {
+        timeZone: CT_TZ,
+        month:"2-digit", day:"2-digit"
+      });
+
+      function fmtCT(ts){
         try{
           const d = new Date(ts);
           if(isNaN(d.getTime())) return String(ts || "");
-          return d.toISOString();
-        } catch(_){
+          return dtFull.format(d);
+        }catch(_){
           return String(ts || "");
         }
       }
@@ -435,12 +533,10 @@
       }
 
       function extractTs(r){
-        // Accept several shapes used across versions
         return r.ts || r.time || r.timestamp || r.date || r.createdAt || r.created_at || r.iso || null;
       }
 
       function extractBP(r){
-        // Accept several shapes
         const sys = safeNum(r.sys ?? r.systolic ?? (r.bp && (r.bp.sys ?? r.bp.systolic)));
         const dia = safeNum(r.dia ?? r.diastolic ?? (r.bp && (r.bp.dia ?? r.bp.diastolic)));
         return { sys, dia };
@@ -458,80 +554,164 @@
       function renderSummary(){
         sumSource.textContent = summary.source || "—";
         sumEntries.textContent = String(summary.entries ?? "—");
-        sumNewest.textContent = summary.newest ? fmtDate(summary.newest) : "—";
+        sumNewest.textContent = summary.newest ? fmtCT(summary.newest) : "—";
         detectedPill.textContent = summary.entries ? (summary.entries + " entries") : "—";
       }
 
-      function renderLog(){
-        logList.innerHTML = "";
-        if(!records.length){
-          logTopNote.textContent = "No records detected (read-only).";
-          return;
-        }
-        logTopNote.textContent = `Showing newest 25 of ${records.length} records (read-only).`;
-
-        const newestFirst = [...records].sort((a,b)=>{
+      function buildLogOrder(){
+        logSortedNewestFirst = [...records].sort((a,b)=>{
           const ta = new Date(extractTs(a) || 0).getTime();
           const tb = new Date(extractTs(b) || 0).getTime();
           return tb - ta;
-        }).slice(0,25);
+        });
+        logShown = 0;
+      }
 
-        for(const r of newestFirst){
-          const ts = extractTs(r);
+      function appendLogPage(){
+        if(!logSortedNewestFirst.length){
+          logTopNote.textContent = "No records detected (read-only).";
+          logMoreWrap.style.display = "none";
+          return;
+        }
+
+        const total = logSortedNewestFirst.length;
+        const next = Math.min(total, logShown + LOG_PAGE);
+        const slice = logSortedNewestFirst.slice(logShown, next);
+
+        if(logShown === 0){
+          logList.innerHTML = "";
+        }
+
+        for(const r of slice){
+          const tsRaw = extractTs(r);
+          const t = new Date(tsRaw || 0).getTime();
           const {sys,dia} = extractBP(r);
           const hr = extractHR(r);
           const notes = extractNotes(r);
 
-          const topLeft = (sys && dia) ? `${sys}/${ mentions(dia)}` : (sys || dia ? `${sys ?? "—"}/${dia ?? "—"}` : "—");
-          function mentions(x){ return x; }
+          const bpText = (sys != null || dia != null)
+            ? `${sys ?? "—"}/${dia ?? "—"}`
+            : "—";
 
-          const topRight = hr ? `HR ${hr}` : "—";
-          const iso = ts ? fmtDate(ts) : "—";
+          const hrText = (hr != null) ? `HR ${hr}` : "—";
+          const whenText = (Number.isFinite(t) && t > 0) ? fmtCT(t) : String(tsRaw || "—");
 
           const li = document.createElement("li");
           li.className = "row";
 
-          const t = document.createElement("div");
-          t.className = "rowTop";
-          t.innerHTML = `<div>${topLeft}</div><div class="pill">${topRight}</div>`;
+          const top = document.createElement("div");
+          top.className = "rowTop";
+          top.innerHTML = `<div>${bpText}</div><div class="pill">${hrText}</div>`;
 
-          const s = document.createElement("div");
-          s.className = "rowSub";
+          const sub = document.createElement("div");
+          sub.className = "rowSub";
           const noteTrim = notes && notes.trim() ? ` • ${notes.trim().slice(0,140)}` : "";
-          s.textContent = `${iso}${noteTrim}`;
+          sub.textContent = `${whenText}${noteTrim}`;
 
-          li.appendChild(t);
-          li.appendChild(s);
+          li.appendChild(top);
+          li.appendChild(sub);
           logList.appendChild(li);
         }
+
+        logShown = next;
+        logTopNote.textContent = `Showing newest ${logShown} of ${total} records (read-only).`;
+
+        if(logShown < total){
+          logMoreWrap.style.display = "flex";
+          btnLoadMore.textContent = `Load next ${Math.min(LOG_PAGE, total - logShown)}`;
+        }else{
+          logMoreWrap.style.display = "none";
+        }
       }
+
+      btnLoadMore.addEventListener("click", () => {
+        appendLogPage();
+      });
 
       function clearCanvas(){
         ctx.clearRect(0,0,chartCanvas.width, chartCanvas.height);
       }
 
+      function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+
+      function ensureViewBounds(){
+        if(!dataMinT || !dataMaxT || dataMaxT <= dataMinT){
+          viewEndT = 0;
+          viewDays = MAX_DAYS;
+          return;
+        }
+        viewDays = clamp(viewDays, MIN_DAYS, MAX_DAYS);
+
+        const windowMs = viewDays * DAY_MS;
+        const minEnd = dataMinT + windowMs;
+        const maxEnd = dataMaxT;
+
+        viewEndT = clamp(viewEndT || dataMaxT, minEnd, maxEnd);
+      }
+
+      function viewStartT(){
+        return viewEndT - (viewDays * DAY_MS);
+      }
+
+      function tToX(t, x0, pw){
+        const s = viewStartT();
+        const e = viewEndT;
+        const dt = Math.max(1, e - s);
+        return x0 + ((t - s) / dt) * pw;
+      }
+
+      function xToT(x, x0, pw){
+        const s = viewStartT();
+        const e = viewEndT;
+        const dt = Math.max(1, e - s);
+        const u = (x - x0) / Math.max(1, pw);
+        return s + clamp(u, 0, 1) * dt;
+      }
+
+      function computeVisiblePoints(){
+        const s = viewStartT();
+        const e = viewEndT;
+
+        const ptsSys = [];
+        const ptsDia = [];
+        const ptsHr  = [];
+
+        for(const r of records){
+          const tsRaw = extractTs(r);
+          const t = new Date(tsRaw || 0).getTime();
+          if(!Number.isFinite(t) || t <= 0) continue;
+          if(t < s || t > e) continue;
+
+          const {sys,dia} = extractBP(r);
+          const hr = extractHR(r);
+
+          if(sys != null) ptsSys.push({t, y: sys});
+          if(dia != null) ptsDia.push({t, y: dia});
+          if(hr != null)  ptsHr.push({t, y: hr});
+        }
+
+        ptsSys.sort((a,b)=>a.t-b.t);
+        ptsDia.sort((a,b)=>a.t-b.t);
+        ptsHr.sort((a,b)=>a.t-b.t);
+
+        return { ptsSys, ptsDia, ptsHr };
+      }
+
       function drawAxes(minY, maxY){
         const w = chartCanvas.width, h = chartCanvas.height;
         ctx.save();
-        ctx.globalAlpha = 1;
-
-        // background
-        ctx.fillStyle = "rgba(0,0,0,0)";
-        ctx.fillRect(0,0,w,h);
 
         // plot area
-        const padL = 70, padR = 18, padT = 18, padB = 46;
+        const padL = 70, padR = 18, padT = 18, padB = 70;
         const x0 = padL, y0 = padT, pw = w - padL - padR, ph = h - padT - padB;
 
-        // grid
+        // border
         ctx.strokeStyle = "rgba(235,245,255,.14)";
         ctx.lineWidth = 2;
-
         ctx.strokeRect(x0, y0, pw, ph);
 
-        // y ticks
+        // y grid + labels
         const ticks = 4;
-        ctx.lineWidth = 2;
         ctx.font = "24px system-ui, -apple-system, Segoe UI, Roboto, Arial";
         ctx.fillStyle = "rgba(235,245,255,.48)";
 
@@ -548,51 +728,81 @@
           ctx.fillText(String(val), 10, y + 8);
         }
 
+        // x ticks every 4 hours (Central Time display)
+        // We tick in milliseconds, aligned to 4-hour boundaries (UTC-based alignment is acceptable for visual ticks),
+        // then label in CT.
+        const start = viewStartT();
+        const end = viewEndT;
+
+        const FOUR_H = 4*60*60*1000;
+        let firstTick = Math.ceil(start / FOUR_H) * FOUR_H;
+
+        ctx.font = "20px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+        ctx.fillStyle = "rgba(235,245,255,.40)";
+        ctx.strokeStyle = "rgba(235,245,255,.08)";
+        ctx.lineWidth = 2;
+
+        for(let tt = firstTick; tt <= end; tt += FOUR_H){
+          const x = tToX(tt, x0, pw);
+          // tick mark
+          ctx.beginPath();
+          ctx.moveTo(x, y0+ph);
+          ctx.lineTo(x, y0+ph+10);
+          ctx.stroke();
+
+          // label every tick (4 hours)
+          const d = new Date(tt);
+          const label = dtShort.format(d); // MM/DD, HH:MM (24h) in CT
+          ctx.fillText(label, x - 42, y0+ph+34);
+
+          // faint vertical grid line
+          ctx.strokeStyle = "rgba(235,245,255,.06)";
+          ctx.beginPath();
+          ctx.moveTo(x, y0);
+          ctx.lineTo(x, y0+ph);
+          ctx.stroke();
+          ctx.strokeStyle = "rgba(235,245,255,.08)";
+        }
+
+        // window label
+        ctx.fillStyle = "rgba(235,245,255,.46)";
+        const winLabel = `${dtDate.format(new Date(start))} → ${dtDate.format(new Date(end))}  (${viewDays.toFixed(1)} days)`;
+        ctx.fillText(winLabel, x0, y0+ph+62);
+
         ctx.restore();
-        return { padL, padR, padT, padB, x0, y0, pw, ph };
+        return { x0, y0, pw, ph, padL, padR, padT, padB };
       }
 
-      function plotSeries(points, minY, maxY, color){
-        // We avoid hardcoding colors: derive from existing stroke alpha using current strokeStyle only.
-        // Use provided color string only if passed; otherwise default to a safe rgba.
-        const style = color || "rgba(130,190,255,.90)";
+      function plotSeries(points, minY, maxY, style){
         const w = chartCanvas.width, h = chartCanvas.height;
-        const padL = 70, padR = 18, padT = 18, padB = 46;
+        const padL = 70, padR = 18, padT = 18, padB = 70;
         const x0 = padL, y0 = padT, pw = w - padL - padR, ph = h - padT - padB;
 
         if(points.length < 2) return;
 
-        const tMin = points[0].t;
-        const tMax = points[points.length-1].t;
-        const dt = Math.max(1, tMax - tMin);
+        const yDen = Math.max(1, (maxY - minY));
 
-        const xy = (p) => {
-          const x = x0 + ((p.t - tMin) / dt) * pw;
-          const y = y0 + (1 - ((p.y - minY) / Math.max(1, (maxY - minY)))) * ph;
-          return {x,y};
-        };
+        const yToPix = (y) => y0 + (1 - ((y - minY) / yDen)) * ph;
 
         ctx.save();
         ctx.strokeStyle = style;
+        ctx.fillStyle = style;
         ctx.lineWidth = 5;
         ctx.lineJoin = "round";
         ctx.lineCap = "round";
 
         ctx.beginPath();
-        const a = xy(points[0]);
-        ctx.moveTo(a.x, a.y);
+        ctx.moveTo(tToX(points[0].t, x0, pw), yToPix(points[0].y));
         for(let i=1;i<points.length;i++){
-          const b = xy(points[i]);
-          ctx.lineTo(b.x, b.y);
+          ctx.lineTo(tToX(points[i].t, x0, pw), yToPix(points[i].y));
         }
         ctx.stroke();
 
-        // points
-        ctx.fillStyle = style;
         for(const p of points){
-          const c = xy(p);
+          const x = tToX(p.t, x0, pw);
+          const y = yToPix(p.y);
           ctx.beginPath();
-          ctx.arc(c.x, c.y, 7, 0, Math.PI*2);
+          ctx.arc(x, y, 7, 0, Math.PI*2);
           ctx.fill();
         }
 
@@ -601,60 +811,189 @@
 
       function renderCharts(){
         clearCanvas();
+
         if(!records.length){
           chartsTopNote.textContent = "No records detected (read-only).";
           return;
         }
 
-        // Prepare time-ordered points
-        const ptsSys = [];
-        const ptsDia = [];
-        const ptsHr  = [];
-
-        for(const r of records){
-          const tsRaw = extractTs(r);
-          const t = new Date(tsRaw || 0).getTime();
-          if(!Number.isFinite(t) || t <= 0) continue;
-
-          const {sys,dia} = extractBP(r);
-          const hr = extractHR(r);
-
-          if(sys != null) ptsSys.push({t, y: sys});
-          if(dia != null) ptsDia.push({t, y: dia});
-          if(hr != null)  ptsHr.push({t, y: hr});
+        if(!dataMinT || !dataMaxT){
+          chartsTopNote.textContent = "Records found, but timestamps could not be parsed.";
+          return;
         }
 
-        // Sort by time
-        ptsSys.sort((a,b)=>a.t-b.t);
-        ptsDia.sort((a,b)=>a.t-b.t);
-        ptsHr.sort((a,b)=>a.t-b.t);
+        ensureViewBounds();
+
+        const { ptsSys, ptsDia, ptsHr } = computeVisiblePoints();
 
         const allY = [...ptsSys, ...ptsDia, ...ptsHr].map(p=>p.y);
         if(!allY.length){
-          chartsTopNote.textContent = "Records found, but no numeric BP/HR fields detected.";
+          chartsTopNote.textContent = "No BP/HR points in the current view window.";
           return;
         }
 
         let minY = Math.min(...allY);
         let maxY = Math.max(...allY);
 
-        // Add padding
         const pad = Math.max(10, Math.round((maxY-minY) * 0.12));
         minY = Math.max(0, minY - pad);
         maxY = maxY + pad;
 
         drawAxes(minY, maxY);
 
-        // Plot series (sys, dia, hr). Keep distinct but consistent.
         plotSeries(ptsSys, minY, maxY, "rgba(130,190,255,.90)");
         plotSeries(ptsDia, minY, maxY, "rgba(130,190,255,.62)");
         plotSeries(ptsHr,  minY, maxY, "rgba(130,190,255,.40)");
 
-        chartsTopNote.textContent = `Plotting ${records.length} records (read-only).`;
+        const s = viewStartT();
+        const e = viewEndT;
+        chartsTopNote.textContent = `Showing ${viewDays.toFixed(1)} days (CT): ${dtShort.format(new Date(s))} → ${dtShort.format(new Date(e))} • ${records.length} records total (read-only).`;
       }
 
+      function setDefaultChartWindowToLatest14(){
+        if(!dataMaxT) return;
+        viewDays = MAX_DAYS;
+        viewEndT = dataMaxT;
+        ensureViewBounds();
+      }
+
+      // ===== Chart gesture handling (chart only) =====
+      function getCanvasClientRect(){
+        return chartCanvas.getBoundingClientRect();
+      }
+
+      function cssXFromTouch(touch){
+        const rect = getCanvasClientRect();
+        return touch.clientX - rect.left;
+      }
+
+      function dist2(a,b){
+        const dx = a.clientX - b.clientX;
+        const dy = a.clientY - b.clientY;
+        return Math.sqrt(dx*dx + dy*dy);
+      }
+
+      function beginPan(clientX){
+        panning = true;
+        panStartX = clientX;
+        panStartEndT = viewEndT;
+      }
+
+      function movePan(clientX){
+        if(!panning) return;
+        const rect = getCanvasClientRect();
+        const w = Math.max(1, rect.width);
+        const dx = clientX - panStartX;
+
+        // Convert pixels to time shift: dragging right should move window earlier (pan left in time)
+        const windowMs = viewDays * DAY_MS;
+        const dt = (dx / w) * windowMs;
+
+        viewEndT = panStartEndT - dt;
+        ensureViewBounds();
+        renderCharts();
+      }
+
+      function endPan(){
+        panning = false;
+      }
+
+      function beginPinch(t1, t2){
+        pinchActive = true;
+        pinchStartDist = dist2(t1, t2);
+        pinchStartDays = viewDays;
+
+        const rect = getCanvasClientRect();
+        pinchCenterX = ((t1.clientX + t2.clientX) / 2) - rect.left;
+
+        // lock the time under the pinch center so zoom feels anchored
+        const w = Math.max(1, rect.width);
+        // approximate plot-area mapping: use full canvas width for anchor
+        pinchCenterT = xToT((pinchCenterX / w) * (chartCanvas.width), 0, chartCanvas.width);
+      }
+
+      function movePinch(t1, t2){
+        if(!pinchActive) return;
+        const d = dist2(t1, t2);
+        const ratio = d / Math.max(1, pinchStartDist);
+
+        // Horizontal zoom only: larger distance => fewer days (zoom in)
+        // Clamp to [2,14]
+        let newDays = pinchStartDays / ratio;
+        newDays = clamp(newDays, MIN_DAYS, MAX_DAYS);
+
+        // Keep center time anchored
+        const oldDays = viewDays;
+        viewDays = newDays;
+
+        // Recompute end so that pinchCenterT stays at same relative x
+        // Use pinch center as fraction of window:
+        const rect = getCanvasClientRect();
+        const wCss = Math.max(1, rect.width);
+        const frac = clamp(pinchCenterX / wCss, 0, 1);
+
+        const winMs = viewDays * DAY_MS;
+        viewEndT = pinchCenterT + (1 - frac) * winMs;
+
+        // If days changed, clamp bounds
+        ensureViewBounds();
+        renderCharts();
+      }
+
+      function endPinch(){
+        pinchActive = false;
+      }
+
+      // Touch events
+      canvasWrap.addEventListener("touchstart", (e) => {
+        if(!records.length) return;
+        if(e.touches.length === 1){
+          // pan
+          beginPan(e.touches[0].clientX);
+        }else if(e.touches.length === 2){
+          // pinch
+          endPan();
+          beginPinch(e.touches[0], e.touches[1]);
+        }
+      }, {passive:false});
+
+      canvasWrap.addEventListener("touchmove", (e) => {
+        if(!records.length) return;
+
+        // Prevent the panel from scrolling while interacting with chart
+        e.preventDefault();
+
+        if(e.touches.length === 1 && !pinchActive){
+          movePan(e.touches[0].clientX);
+        }else if(e.touches.length === 2){
+          if(!pinchActive) beginPinch(e.touches[0], e.touches[1]);
+          movePinch(e.touches[0], e.touches[1]);
+        }
+      }, {passive:false});
+
+      canvasWrap.addEventListener("touchend", (e) => {
+        if(e.touches.length === 0){
+          endPan();
+          endPinch();
+        }else if(e.touches.length === 1){
+          // transition from pinch to pan
+          endPinch();
+          beginPan(e.touches[0].clientX);
+        }
+      }, {passive:true});
+
+      // Optional: mouse drag pan (desktop)
+      canvasWrap.addEventListener("mousedown", (e) => {
+        if(!records.length) return;
+        beginPan(e.clientX);
+      });
+      window.addEventListener("mousemove", (e) => {
+        if(!panning || pinchActive) return;
+        movePan(e.clientX);
+      });
+      window.addEventListener("mouseup", () => endPan());
+
       async function loadReadOnlyData(){
-        // The shell never writes. It only detects and reads.
         const bridge = window.StorageBridge || window.VTStorage || window.storageBridge || null;
 
         if(!bridge){
@@ -662,7 +1001,8 @@
           summary = { source:"Not loaded", entries:0, newest:null };
           records = [];
           renderSummary();
-          renderLog();
+          buildLogOrder();
+          appendLogPage();
           renderCharts();
           return;
         }
@@ -671,7 +1011,6 @@
 
         // Try common function names (defensive)
         let out = null;
-
         const tryCalls = [
           () => bridge.detect && bridge.detect(),
           () => bridge.detectLegacy && bridge.detectLegacy(),
@@ -683,7 +1022,7 @@
         for(const fn of tryCalls){
           try{
             const v = fn();
-            if(v && typeof v.then === "function") out = await v; else out = v;
+            out = (v && typeof v.then === "function") ? await v : v;
             if(out) break;
           }catch(_){}
         }
@@ -700,44 +1039,69 @@
         for(const fn of tryRecs){
           try{
             const v = fn();
-            if(v && typeof v.then === "function") recs = await v; else recs = v;
+            recs = (v && typeof v.then === "function") ? await v : v;
             if(Array.isArray(recs)) break;
           }catch(_){}
         }
 
-        // Fallback: if detect returned records
         if(!Array.isArray(recs) && out && Array.isArray(out.records)) recs = out.records;
         if(!Array.isArray(recs)) recs = [];
 
         records = recs;
 
+        // Data min/max time
+        const times = records.map(r => new Date(extractTs(r) || 0).getTime()).filter(t => Number.isFinite(t) && t > 0);
+        dataMinT = times.length ? Math.min(...times) : 0;
+        dataMaxT = times.length ? Math.max(...times) : 0;
+
         // Summary
-        let source = (out && (out.source || out.storage || out.kind)) || "localStorage";
-        let entries = (out && (out.entries ?? out.count)) ?? records.length;
+        const source = (out && (out.source || out.storage || out.kind)) || "localStorage";
+        const entries = (out && (out.entries ?? out.count)) ?? records.length;
 
         let newest = (out && (out.newest || out.latest || out.newestISO)) || null;
-        if(!newest && records.length){
-          const newestMs = Math.max(...records.map(r => new Date(extractTs(r) || 0).getTime()).filter(Number.isFinite));
-          if(Number.isFinite(newestMs) && newestMs > 0) newest = new Date(newestMs).toISOString();
-        }
+        if(!newest && dataMaxT) newest = dataMaxT;
 
         summary = { source, entries, newest };
         renderSummary();
-        renderLog();
+
+        // Log
+        buildLogOrder();
+        appendLogPage();
+
+        // Charts (default latest 14 days)
+        if(dataMaxT){
+          setDefaultChartWindowToLatest14();
+        }
         renderCharts();
       }
 
-      // Fix: prevent any stray placeholder injections from older shells
-      // (No "Charts (placeholder)" exists in this file.)
-
       document.addEventListener("DOMContentLoaded", () => {
-        loadReadOnlyData();
+        // Boot label
+        const boot = document.getElementById("bootText");
+        if(boot) boot.textContent = "BOOT OK " + APP_VERSION;
 
-        // If gestures.js exists and wants hook points, it can use these IDs without breaking anything.
-        // We do not depend on it for panel switching (buttons already work).
+        loadReadOnlyData();
       });
 
     })();
   </script>
 </body>
 </html>
+
+<!-- ===========================
+File: /index.html
+End of file — v2.013
+Element IDs intentionally preserved (stability contract)
+- Panels: #panelHome #panelLog #panelCharts
+- Home: #homeCard #bridgeStatus #sumSource #sumEntries #sumNewest #detectedPill
+- Log: #logCard #logTopNote #logList #btnLoadMore #logMoreWrap
+- Charts: #chartsCard #chartsTopNote #chartCanvas
+
+External files expected
+- /js/storage.js
+- /js/gestures.js
+- /sw.js
+
+If you do not see v2.013 immediately
+- This is almost always service-worker cache. Update /sw.js and bump its cache version too.
+=========================== -->
