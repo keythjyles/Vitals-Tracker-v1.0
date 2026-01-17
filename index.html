@@ -1,6 +1,6 @@
 <!-- File: index.html -->
 <!-- Vitals Tracker — Function-First Shell -->
-<!-- App Version: v2.013 -->
+<!-- App Version: v2.014 -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -196,15 +196,20 @@
       white-space:nowrap;
     }
 
+    /* CHART: make it wider/tighter like your example */
     .canvasWrap{
       border:1px solid var(--stroke2);
       border-radius: var(--r);
-      padding:10px;
+      padding:6px;                 /* reduced */
       background: rgba(0,0,0,.18);
       overflow:hidden;
-      touch-action:none; /* IMPORTANT: stop page scroll/zoom on chart */
+      touch-action:none;            /* IMPORTANT: stop page scroll/zoom on chart */
     }
-    canvas{display:block; width:100%; height:440px;}
+    canvas{
+      display:block;
+      width:100%;
+      height:300px;               /* compressed height */
+    }
 
     .hint{
       margin-top:10px;
@@ -245,7 +250,7 @@
   <div class="app">
     <div class="topbar">
       <div class="title">Vitals Tracker</div>
-      <div class="boot" id="bootText">BOOT OK v2.013</div>
+      <div class="boot" id="bootText">BOOT OK v2.014</div>
     </div>
 
     <div class="shell">
@@ -313,9 +318,10 @@
             </div>
           </div>
 
-          <div class="card" id="chartsCard">
+          <!-- tighter padding inside chart card -->
+          <div class="card" id="chartsCard" style="padding:12px;">
             <div class="muted" id="chartsTopNote">Loading…</div>
-            <div class="canvasWrap" id="canvasWrap" style="margin-top:12px;">
+            <div class="canvasWrap" id="canvasWrap" style="margin-top:10px;">
               <canvas id="chartCanvas"></canvas>
             </div>
             <div class="hint small" id="chartsHint">
@@ -330,12 +336,12 @@
   </div>
 
   <!-- External modules -->
-  <script src="./js/storage.js?v=2.013"></script>
-  <script src="./js/gestures.js?v=2.013"></script>
+  <script src="./js/storage.js?v=2.014"></script>
+  <script src="./js/gestures.js?v=2.014"></script>
 
   <script>
     (function(){
-      const APP_VERSION = "v2.013";
+      const APP_VERSION = "v2.014";
       const TZ = "America/Chicago"; // Central Time
       const MS_HOUR = 3600000;
       const MS_DAY  = 86400000;
@@ -352,6 +358,12 @@
         if(which === "home") panelHome.classList.add("active");
         if(which === "log") panelLog.classList.add("active");
         if(which === "charts") panelCharts.classList.add("active");
+
+        // ensure crisp redraw when entering charts
+        if(which === "charts"){
+          setupCanvas();
+          renderCharts();
+        }
       }
 
       // Buttons
@@ -421,7 +433,7 @@
 
       // Service worker (cache-busted)
       if("serviceWorker" in navigator){
-        navigator.serviceWorker.register("./sw.js?v=2.013").catch(()=>{});
+        navigator.serviceWorker.register("./sw.js?v=2.014").catch(()=>{});
       }
 
       // Read-only storage detection + rendering
@@ -444,8 +456,8 @@
       function setupCanvas(){
         const dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
         const rect = chartCanvas.getBoundingClientRect();
-        const cssW = Math.max(320, Math.floor(rect.width));
-        const cssH = Math.max(280, Math.floor(rect.height));
+        const cssW = Math.max(280, Math.floor(rect.width));
+        const cssH = Math.max(220, Math.floor(rect.height));
         chartCanvas.width  = Math.floor(cssW * dpr);
         chartCanvas.height = Math.floor(cssH * dpr);
         ctx = chartCanvas.getContext("2d", { alpha:true, desynchronized:true });
@@ -460,7 +472,7 @@
         hour:"2-digit", minute:"2-digit", second:"2-digit",
         hour12:false
       });
-      const fmtDayLabel = new Intl.DateTimeFormat("en-US", {
+      const fmtDayTwoLine = new Intl.DateTimeFormat("en-US", {
         timeZone: TZ,
         weekday:"short",
         month:"2-digit", day:"2-digit"
@@ -490,7 +502,6 @@
           const parts = fmtISO.formatToParts(new Date(ms));
           const map = {};
           for(const p of parts) map[p.type]=p.value;
-          // "YYYY-MM-DD HH:MM:SS CT"
           return `${map.year}-${map.month}-${map.day} ${map.hour}:${map.minute}:${map.second}`;
         }catch(_){
           return "—";
@@ -601,29 +612,24 @@
         windowDays: 7,
         minDays: 2,
         maxDays: 14,
-        centerMs: null,     // set after data load
+        centerMs: null,
         tMinData: null,
         tMaxData: null
       };
 
+      function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
+
       // Fixed Y axis (does not fluctuate)
-      // Covers Sys up to 200+, Dia, and HR.
       const Y_MIN_FIXED = 40;
       const Y_MAX_FIXED = 200;
 
-      // Systolic bands (tint background) — medically recognized categories you requested:
-      // Hypotension: < 90
-      // Optimal (includes normal/elevated to keep 4-band model): 90–129
-      // HTN Stage 1: 130–139
-      // HTN Stage 2: >= 140
+      // Systolic bands (tint background)
       const SYS_BANDS = [
-        { name:"HTN2",      y0:140, y1:200, fill:"rgba(255, 70, 70, .16)" },   // red tint
-        { name:"HTN1",      y0:130, y1:140, fill:"rgba(255, 210, 80, .14)" },  // yellow tint
-        { name:"Optimal",   y0: 90, y1:130, fill:"rgba(80, 160, 255, .12)" },  // blue tint
-        { name:"Hypotens.", y0: 40, y1: 90, fill:"rgba(170, 120, 255, .10)" }  // purple tint
+        { name:"HTN2",      y0:140, y1:200, fill:"rgba(255, 70, 70, .16)" },   // red
+        { name:"HTN1",      y0:130, y1:140, fill:"rgba(255, 210, 80, .14)" },  // yellow
+        { name:"Optimal",   y0: 90, y1:130, fill:"rgba(80, 160, 255, .12)" },  // blue
+        { name:"Hypotens.", y0: 40, y1: 90, fill:"rgba(170, 120, 255, .10)" }  // purple
       ];
-
-      function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
 
       function computeDataTimeBounds(){
         let tMin = Infinity, tMax = -Infinity;
@@ -646,8 +652,7 @@
         view.tMinData = tMin;
         view.tMaxData = tMax;
         if(tMin != null && tMax != null){
-          // center on latest by default (right edge), but keep within data
-          const wMs = view.windowDays * MS_DAY;
+          const wMs = view.windowDays * 86400000;
           view.centerMs = clamp(tMax - (wMs*0.35), tMin + wMs*0.5, tMax - wMs*0.5);
         }
       }
@@ -657,11 +662,10 @@
         if(view.centerMs == null || view.tMinData == null || view.tMaxData == null){
           return { t0:0, t1:0, ok:false };
         }
-        const wMs = view.windowDays * MS_DAY;
+        const wMs = view.windowDays * 86400000;
         let t0 = view.centerMs - wMs/2;
         let t1 = view.centerMs + wMs/2;
 
-        // clamp to data bounds
         if(t0 < view.tMinData){
           const shift = view.tMinData - t0;
           t0 += shift; t1 += shift;
@@ -670,10 +674,9 @@
           const shift = t1 - view.tMaxData;
           t0 -= shift; t1 -= shift;
         }
-        // if bounds are smaller than window
+
         t0 = Math.max(view.tMinData, t0);
         t1 = Math.min(view.tMaxData, t1);
-
         return { t0, t1, ok:true };
       }
 
@@ -687,11 +690,10 @@
         const rect = chartCanvas.getBoundingClientRect();
         const w = rect.width, h = rect.height;
 
-        // Plot area
-        const padL = 62, padR = 14, padT = 14, padB = 44;
+        // Reduce padding to widen plot, but keep y labels readable
+        const padL = 50, padR = 10, padT = 10, padB = 40;
         const x0 = padL, y0 = padT, pw = w - padL - padR, ph = h - padT - padB;
 
-        // outer frame
         ctx.strokeStyle = "rgba(235,245,255,.14)";
         ctx.lineWidth = 1;
         ctx.strokeRect(x0, y0, pw, ph);
@@ -705,7 +707,6 @@
         return y0 + (1 - t) * ph;
       }
 
-      // Build day boundaries within visible range by detecting CT day changes (with refinement)
       function computeDayBoundaries(t0, t1){
         const bounds = [];
         if(!Number.isFinite(t0) || !Number.isFinite(t1) || t1<=t0) return bounds;
@@ -717,7 +718,6 @@
           const tNext = t + MS_HOUR;
           const nextKey = ctDayKey(tNext);
           if(nextKey !== prevKey){
-            // boundary exists between t and tNext. refine by binary search.
             let lo = t, hi = tNext;
             for(let i=0;i<12;i++){
               const mid = Math.floor((lo+hi)/2);
@@ -729,22 +729,16 @@
           }
           t = tNext;
         }
-
         return bounds.sort((a,b)=>a-b);
       }
 
       function drawAlternatingDays(frame, t0, t1){
         const { x0, y0, pw, ph } = frame;
         const bounds = computeDayBoundaries(t0, t1);
-
-        // include endpoints
         const cuts = [t0, ...bounds, t1].filter((v,i,a)=> i===0 || v>a[i-1]);
 
-        // first segment index parity based on CT day key
-        const startKey = ctDayKey(t0);
-        // basic parity from day number
         const p = ctParts(t0);
-        let parity = (p.d % 2); // stable alternating
+        let parity = (p.d % 2);
 
         for(let i=0;i<cuts.length-1;i++){
           const a = cuts[i], b = cuts[i+1];
@@ -758,8 +752,7 @@
       }
 
       function drawSystolicBands(frame){
-        const { x0, y0, pw, ph } = frame;
-
+        const { x0, pw } = frame;
         for(const b of SYS_BANDS){
           const yTop = yToPx(b.y1, frame);
           const yBot = yToPx(b.y0, frame);
@@ -772,7 +765,6 @@
       function drawYGridAndLabels(frame){
         const { x0, y0, pw, ph } = frame;
 
-        // fixed ticks that don't fluctuate
         const ticks = [40, 60, 80, 100, 120, 140, 160, 180, 200]
           .filter(v => v>=Y_MIN_FIXED && v<=Y_MAX_FIXED);
 
@@ -789,64 +781,60 @@
           ctx.moveTo(x0, y);
           ctx.lineTo(x0+pw, y);
           ctx.stroke();
-
-          // label
-          ctx.fillText(String(val), 10, y);
+          ctx.fillText(String(val), 8, y);
         }
       }
 
       function chooseXTicks(t0, t1){
         const spanMs = t1 - t0;
-        const spanDays = spanMs / MS_DAY;
-
-        // return array of {t,label}
+        const spanDays = spanMs / 86400000;
         const out = [];
 
-        // <= 2.2 days: show every 4 hours
         if(spanDays <= 2.2){
           const step = 4 * MS_HOUR;
           let t = Math.ceil(t0/step)*step;
           while(t <= t1){
-            out.push({ t, label: fmtHourLabel.format(new Date(t)) });
+            out.push({ t, labelTop: fmtHourLabel.format(new Date(t)), labelBot: "" });
             t += step;
           }
           return out;
         }
 
-        // <= 4.5 days: show every 6 hours
         if(spanDays <= 4.5){
           const step = 6 * MS_HOUR;
           let t = Math.ceil(t0/step)*step;
           while(t <= t1){
-            out.push({ t, label: fmtHourLabel.format(new Date(t)) });
+            out.push({ t, labelTop: fmtHourLabel.format(new Date(t)), labelBot: "" });
             t += step;
           }
           return out;
         }
 
-        // <= 7.5 days: label each day (Mon 01/12)
-        if(spanDays <= 7.5){
-          // drop a tick near each CT midnight by using day boundaries
+        // 7-day style: two-line labels like your example
+        if(spanDays <= 7.8){
           const bounds = computeDayBoundaries(t0, t1);
           const cuts = [t0, ...bounds].filter(v=>v>=t0 && v<=t1);
           for(const t of cuts){
-            out.push({ t, label: fmtDayLabel.format(new Date(t)) });
+            const s = fmtDayTwoLine.format(new Date(t)); // "Mon, 01/12"
+            const parts = s.split(", ");
+            out.push({ t, labelTop: (parts[0] || s), labelBot: (parts[1] || "") });
           }
           return out;
         }
 
-        // > 7.5 up to 14: label every other day
+        // 14-day style: every other day
         const bounds = computeDayBoundaries(t0, t1);
         const cuts = [t0, ...bounds].filter(v=>v>=t0 && v<=t1);
         for(let i=0;i<cuts.length;i+=2){
-          out.push({ t: cuts[i], label: fmtDayLabel.format(new Date(cuts[i])) });
+          const s = fmtDayTwoLine.format(new Date(cuts[i]));
+          const parts = s.split(", ");
+          out.push({ t: cuts[i], labelTop: (parts[0] || s), labelBot: (parts[1] || "") });
         }
         return out;
       }
 
       function drawXLabels(frame, t0, t1){
         const { x0, y0, pw, ph } = frame;
-
         const ticks = chooseXTicks(t0, t1);
 
         ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
@@ -856,15 +844,18 @@
 
         for(const tick of ticks){
           const x = x0 + ((tick.t - t0) / (t1 - t0)) * pw;
-          // small tick mark
+
           ctx.strokeStyle = "rgba(235,245,255,.10)";
           ctx.lineWidth = 1;
           ctx.beginPath();
           ctx.moveTo(x, y0 + ph);
-          ctx.lineTo(x, y0 + ph + 6);
+          ctx.lineTo(x, y0 + ph + 5);
           ctx.stroke();
 
-          ctx.fillText(tick.label, x, y0 + ph + 10);
+          ctx.fillText(tick.labelTop || "", x, y0 + ph + 8);
+          if(tick.labelBot){
+            ctx.fillText(tick.labelBot, x, y0 + ph + 22);
+          }
         }
       }
 
@@ -896,7 +887,7 @@
 
       function plotLine(points, frame, t0, t1, stroke, alpha){
         if(points.length < 2) return;
-        const { x0, y0, pw, ph } = frame;
+        const { x0, pw } = frame;
 
         ctx.save();
         ctx.strokeStyle = stroke;
@@ -914,14 +905,14 @@
         }
         ctx.stroke();
 
-        // tiny points
+        // very small points (crisp)
         ctx.fillStyle = stroke;
-        ctx.globalAlpha = Math.min(1, alpha + 0.08);
+        ctx.globalAlpha = Math.min(1, alpha + 0.06);
         for(const p of points){
           const x = x0 + ((p.t - t0) / (t1 - t0)) * pw;
           const y = yToPx(p.y, frame);
           ctx.beginPath();
-          ctx.arc(x, y, 2.0, 0, Math.PI*2);
+          ctx.arc(x, y, 1.6, 0, Math.PI*2);
           ctx.fill();
         }
 
@@ -942,10 +933,9 @@
         ];
 
         let lx = x0 + 8;
-        let ly = y0 + 8;
+        let ly = y0 + 6;
         for(const it of items){
           ctx.fillStyle = "rgba(235,245,255,.72)";
-          // swatch line
           ctx.strokeStyle = it.stroke;
           ctx.globalAlpha = it.alpha;
           ctx.lineWidth = 2;
@@ -957,13 +947,11 @@
           ctx.fillText(it.label, lx+22, ly);
           ly += 18;
         }
-
         ctx.restore();
       }
 
       function renderCharts(){
         if(!ctx) return;
-
         clearCanvas();
 
         if(!records.length){
@@ -980,23 +968,13 @@
 
         const { t0, t1 } = range;
 
-        // Frame + backgrounds
         const frame = drawPlotFrame();
-
-        // alternating days (vertical)
         drawAlternatingDays(frame, t0, t1);
-
-        // systolic bands (horizontal)
         drawSystolicBands(frame);
-
-        // grids/labels
         drawYGridAndLabels(frame);
         drawXLabels(frame, t0, t1);
 
-        // series
         const series = buildSeriesVisible(t0, t1);
-
-        // crisp palette (not glowy)
         plotLine(series.sys, frame, t0, t1, "rgba(170,210,255,1)", 0.95);
         plotLine(series.dia, frame, t0, t1, "rgba(235,245,255,1)", 0.78);
         plotLine(series.hr,  frame, t0, t1, "rgba(150,255,210,1)", 0.72);
@@ -1013,7 +991,6 @@
         startCenter:0,
         startDays:7,
         pinchStartDist:0,
-        pinchMidX:0,
         pinchAnchorTime:0
       };
 
@@ -1025,7 +1002,7 @@
 
       function onChartTouchStart(e){
         if(!records.length) return;
-        setupCanvas(); // ensure sizes are current
+        setupCanvas();
         ensureViewCenter();
 
         if(e.touches.length === 1){
@@ -1037,13 +1014,13 @@
           const a = e.touches[0], b = e.touches[1];
           gesture.pinchStartDist = Math.max(1, touchDist(a,b));
           gesture.startDays = view.windowDays;
-          gesture.pinchMidX = (a.clientX + b.clientX) / 2;
 
-          // anchor time at pinch mid-point
+          // anchor time at pinch midpoint
           const { t0, t1, ok } = getVisibleRange();
           if(ok){
             const rect = canvasWrap.getBoundingClientRect();
-            const x = clamp(gesture.pinchMidX - rect.left, 0, rect.width);
+            const midX = (a.clientX + b.clientX) / 2;
+            const x = clamp(midX - rect.left, 0, rect.width);
             const frac = rect.width > 0 ? (x / rect.width) : 0.5;
             gesture.pinchAnchorTime = t0 + frac * (t1 - t0);
           } else {
@@ -1076,7 +1053,7 @@
           const a = e.touches[0], b = e.touches[1];
           const dist = Math.max(1, touchDist(a,b));
 
-          // scale days horizontally: bigger distance => zoom OUT (more days)
+          // bigger distance => zoom OUT (more days)
           const scale = dist / gesture.pinchStartDist;
           const newDays = clamp(gesture.startDays * scale, view.minDays, view.maxDays);
           view.windowDays = newDays;
@@ -1087,12 +1064,8 @@
           const x = clamp(midX - rect.left, 0, rect.width);
           const frac = rect.width > 0 ? (x / rect.width) : 0.5;
 
-          const wMs = view.windowDays * MS_DAY;
-          // visible range is center +/- w/2, so anchor time = center - w/2 + frac*w
-          // => center = anchor - (frac*w - w/2) = anchor - w*(frac-0.5)
+          const wMs = view.windowDays * 86400000;
           view.centerMs = gesture.pinchAnchorTime - wMs * (frac - 0.5);
-
-          // clamp center within bounds
           view.centerMs = clamp(view.centerMs, view.tMinData, view.tMaxData);
 
           renderCharts();
@@ -1105,7 +1078,6 @@
         if(e.touches.length === 0){
           gesture.mode = null;
         } else if(e.touches.length === 1){
-          // switch from pinch->pan seamlessly
           gesture.mode = "pan";
           gesture.startX = e.touches[0].clientX;
           gesture.startCenter = view.centerMs ?? gesture.startCenter;
@@ -1145,7 +1117,6 @@
         bridgeStatus.textContent = "Storage bridge loaded.";
 
         let out = null;
-
         const tryCalls = [
           () => bridge.detect && bridge.detect(),
           () => bridge.detectLegacy && bridge.detectLegacy(),
@@ -1217,4 +1188,4 @@
   </script>
 </body>
 </html>
-<!-- EOF File: index.html | App Version: v2.013 -->
+<!-- EOF File: index.html | App Version: v2.014 -->
