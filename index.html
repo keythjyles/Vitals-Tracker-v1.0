@@ -2,15 +2,17 @@
 Vitals Tracker (Modular) — index.html
 App Version: v2.001
 Purpose:
-- Main app shell for Vitals Tracker v2 (modular architecture).
-- Hosts the swipeable carousel panels (Home, Log, Charts) and the Add/Edit screen.
-- Loads CSS + JS modules that implement storage (non-destructive v1 import), UI, gestures, chart pan/zoom (horizontal only), and exports.
-Key Requirements Implemented/Enabled Here:
-- Carousel DOM structure for left/right swipe.
-- Fixed outer frame + inner scrolling content per panel (consistent border behavior).
-- Chart canvas is placed in a dedicated interaction container so chart gestures can consume touch/scroll (panel should not scroll while interacting with chart).
+- Primary shell for the modular Vitals Tracker PWA.
+- Renders the fixed framed UI + swipe carousel panels (Home/Log/Charts).
+- Loads js/app.js and shows a hard on-screen diagnostic if JS fails to start.
+
+Data Safety:
+- This file does NOT clear, migrate, or overwrite existing v1 localStorage data.
+- Storage keys and migrations (if any) must remain in js/storage.js.
+
 Latest Update (v2.001):
-- Initial modular shell with required IDs/classes for gestures, chart interaction, and chart-range export.
+- Diagnostic boot overlay added: if JS fails to load/execute, the user sees the exact reason.
+- UI shell aligned to the v1 layout (stacked Home buttons, familiar spacing).
 -->
 
 <!doctype html>
@@ -21,29 +23,238 @@ Latest Update (v2.001):
   <meta name="theme-color" content="#0b1324" />
   <title>Vitals Tracker</title>
 
-  <link rel="manifest" href="pwa/manifest.json" />
+  <link rel="manifest" href="manifest.webmanifest" />
 
-  <link rel="stylesheet" href="css/app.css" />
+  <style>
+    :root{
+      --bg0:#08101f;
+      --bg1:#0b1324;
+      --panel:#0c1528cc;
+      --stroke:rgba(235,245,255,.16);
+      --stroke2:rgba(235,245,255,.22);
+      --strokeBold:rgba(180,210,255,.42);
+      --text:rgba(235,245,255,.86);
+      --muted:rgba(235,245,255,.58);
+      --muted2:rgba(235,245,255,.42);
+      --accent:#2b4e7a;
+      --shadow:0 14px 40px rgba(0,0,0,.38);
+      --radius:26px;
+      --btnH:56px;
+      --pad:18px;
+      --font: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      --vpPadX:6px;
+    }
 
-  <noscript>
-    <style>
-      body{ background:#0b1324; color:#fff; font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; padding:20px; }
-      .ns{ max-width:520px; margin:0 auto; }
-    </style>
-  </noscript>
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+
+    body{
+      margin:0;
+      font-family:var(--font);
+      color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 30% 0%, rgba(47,120,255,.22), transparent 55%),
+        radial-gradient(900px 600px at 80% 20%, rgba(91,214,178,.10), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+      display:flex;
+      justify-content:center;
+      padding: max(14px, env(safe-area-inset-top)) 12px max(14px, env(safe-area-inset-bottom));
+    }
+
+    .app{
+      width:min(520px, 100%);
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    .logoTitle{
+      margin:10px 6px 0;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      text-shadow: 0 10px 22px rgba(0,0,0,.35);
+    }
+    .logoTitle svg{
+      width:min(520px, 100%);
+      height:auto;
+      display:block;
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid var(--stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: var(--pad);
+      backdrop-filter: blur(10px);
+    }
+
+    .accentFrame{ position:relative; border-color: transparent; }
+    .accentFrame::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      border:3px solid var(--accent);
+      border-radius: var(--radius);
+      pointer-events:none;
+      z-index:0;
+    }
+    .accentFrame > *{ position:relative; z-index:1; }
+
+    .btn{
+      height:var(--btnH);
+      border-radius: 999px;
+      border:1px solid var(--stroke2);
+      background: rgba(255,255,255,.03);
+      color:rgba(235,245,255,.78);
+      font-weight:650;
+      letter-spacing:.2px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 18px;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      font-size:18px;
+    }
+    .btn:active{ transform: translateY(1px); }
+
+    .btn.primary{
+      background: linear-gradient(180deg, rgba(47,120,255,.92), rgba(47,120,255,.72));
+      border-color: rgba(120,170,255,.55);
+      color: rgba(235,245,255,.90);
+    }
+    .btn.danger{
+      background: linear-gradient(180deg, rgba(255,80,80,.18), rgba(255,80,80,.10));
+      border-color: rgba(255,120,120,.42);
+      color: rgba(255,225,225,.92);
+      box-shadow: 0 10px 26px rgba(0,0,0,.22);
+    }
+    .btn.small{
+      height:44px;
+      font-size:16px;
+      padding:0 14px;
+      font-weight:650;
+      white-space:nowrap;
+    }
+
+    .homeMain{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      margin-top:8px;
+    }
+    .homeMain > .btn:not(.small){
+      font-size:26px;
+      font-weight:750;
+      letter-spacing:.3px;
+    }
+
+    .homeFooterRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-top:8px;
+      flex-wrap:nowrap;
+    }
+    .grow{ flex:1; }
+
+    .subtle{
+      font-size:14px;
+      color:var(--muted2);
+      margin: 6px 4px 0;
+    }
+    .ptrHint{
+      margin: 0 4px 10px;
+      color: rgba(235,245,255,.40);
+      font-size: 12px;
+      font-weight: 650;
+      letter-spacing: .2px;
+      user-select:none;
+    }
+    .footerTiny{
+      margin-top:10px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      font-size: 12px;
+      color: rgba(235,245,255,.38);
+    }
+
+    /* Carousel viewport */
+    .viewport{
+      overflow:hidden;
+      width:100%;
+      touch-action: pan-y;
+      padding: 0 var(--vpPadX);
+    }
+    .track{
+      display:flex;
+      width:100%;
+      will-change: transform;
+      transform: translate3d(0,0,0);
+      align-items:flex-start;
+      gap: 0;
+    }
+    .panel{
+      flex: 0 0 100%;
+      width:100%;
+      align-self:flex-start;
+    }
+
+    .panelFrame{
+      width:100%;
+      height: calc(100dvh - max(14px, env(safe-area-inset-top)) - max(14px, env(safe-area-inset-bottom)) - 12px);
+      max-height: calc(100dvh - max(14px, env(safe-area-inset-top)) - max(14px, env(safe-area-inset-bottom)) - 12px);
+      overflow:hidden;
+    }
+    .panelInner{
+      height:100%;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Hard-visible boot diagnostics */
+    #bootError{
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,.78);
+      z-index: 99999;
+      display:none;
+      padding: max(16px, env(safe-area-inset-top)) 14px max(16px, env(safe-area-inset-bottom));
+    }
+    #bootError .card{
+      border: 3px solid rgba(255,120,120,.55);
+      background: linear-gradient(180deg, rgba(12,21,40,.98), rgba(8,16,31,.98));
+    }
+    #bootError h1{
+      margin: 2px 2px 10px;
+      font-size: 22px;
+      letter-spacing:.2px;
+    }
+    #bootError pre{
+      margin: 0;
+      white-space: pre-wrap;
+      color: rgba(235,245,255,.84);
+      font-size: 13px;
+      line-height: 1.25;
+    }
+    #bootError .btnRow{
+      display:flex;
+      gap:10px;
+      margin-top:12px;
+      flex-wrap:wrap;
+    }
+    #bootError .btn{ height:50px; font-size:16px; font-weight:800; }
+  </style>
 </head>
 
 <body>
-  <noscript>
-    <div class="ns">
-      <h2>Vitals Tracker</h2>
-      <p>This app requires JavaScript to run.</p>
-    </div>
-  </noscript>
+  <div class="app">
 
-  <div class="app" id="appRoot" aria-label="Vitals Tracker App">
     <div class="logoTitle" aria-label="Vitals Tracker">
-      <!-- Inline SVG kept in index for identity consistency; styling remains in CSS -->
       <svg viewBox="0 0 900 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Vitals Tracker">
         <defs>
           <linearGradient id="vtg" x1="0" y1="0" x2="1" y2="0">
@@ -70,164 +281,139 @@ Latest Update (v2.001):
       </svg>
     </div>
 
-    <!-- Carousel viewport -->
-    <div class="viewport" id="viewport" aria-label="Panels viewport">
-      <div class="track" id="track" aria-label="Panels track">
+    <div class="viewport" id="viewport">
+      <div class="track" id="track">
 
-        <!-- HOME -->
-        <section id="home" class="panel card accentFrame" aria-label="Home panel">
+        <!-- Home -->
+        <div id="home" class="panel card accentFrame">
           <div class="panelFrame">
             <div class="panelInner">
               <div class="homeMain">
-                <button id="btnGoAdd" class="btn primary" type="button">ADD Reading</button>
-                <button id="btnGoLog" class="btn" type="button">Log</button>
-                <button id="btnGoCharts" class="btn" type="button">Charts</button>
+                <button id="btnGoAdd" class="btn primary">ADD Reading</button>
+                <button id="btnGoLog" class="btn">Log</button>
+                <button id="btnGoCharts" class="btn">Charts</button>
 
                 <div class="homeFooterRow">
-                  <button id="btnInstall" class="btn small" type="button">Install</button>
-                  <button id="btnClearAll" class="btn small" type="button">Clear Data</button>
+                  <button id="btnInstall" class="btn small">Install</button>
+                  <button id="btnClearAll" class="btn small">Clear Data</button>
                   <div class="grow"></div>
-                  <button id="btnExitHome" class="btn small danger" type="button">Exit</button>
+                  <button id="btnExitHome" class="btn small danger">Exit</button>
                 </div>
 
                 <div class="subtle">Data stays on your phone (local only).</div>
-                <div class="ptrHint" id="ptrHint">Pull down on Home to refresh (release).</div>
-
-                <div class="subtle" id="dataStatus" aria-live="polite"></div>
+                <div class="ptrHint">Pull down on Home to refresh (release).</div>
 
                 <div class="footerTiny">
-                  <div id="footerVersion">v2.001</div>
+                  <div id="verText">v2.001</div>
                   <div>developed by Keyth Jyles</div>
                 </div>
               </div>
             </div>
           </div>
-        </section>
+        </div>
 
-        <!-- LOG -->
-        <section id="log" class="panel card accentFrame" aria-label="Log panel">
+        <!-- Log -->
+        <div id="log" class="panel card accentFrame">
           <div class="panelFrame">
             <div class="panelInner" id="logInner">
-              <div class="row center">
-                <button id="btnExportLog" class="btn small" type="button">Export</button>
-                <button id="btnAddFromLog" class="btn small" type="button">ADD</button>
-                <div class="grow"></div>
-                <button id="btnBackFromLog" class="btn small" type="button">Back</button>
+              <div style="opacity:.7; margin-top:10px;">
+                Log panel will render via JS (js/ui.js).
               </div>
-
-              <div class="label">Search</div>
-              <div class="searchRow">
-                <input id="search" class="field" placeholder="Type a word: sweaty, dizzy, headache..." />
-                <button id="btnRunSearch" class="btn small" type="button">Search</button>
-              </div>
-
-              <div class="filters">
-                <div class="dateField">
-                  <div class="miniLabel">From</div>
-                  <input id="fromDate" class="field" type="date" />
-                </div>
-                <div class="dateField">
-                  <div class="miniLabel">To</div>
-                  <input id="toDate" class="field" type="date" />
-                </div>
-              </div>
-
-              <div id="logList" aria-label="Log entries"></div>
             </div>
           </div>
-        </section>
+        </div>
 
-        <!-- CHARTS -->
-        <section id="charts" class="panel card accentFrame" aria-label="Charts panel">
+        <!-- Charts -->
+        <div id="charts" class="panel card accentFrame">
           <div class="panelFrame">
             <div class="panelInner" id="chartsInner">
-              <div class="row center">
-                <button id="btnExportCharts" class="btn small" type="button">Export</button>
-                <div class="grow"></div>
-                <button id="btnBackFromCharts" class="btn small" type="button">Back</button>
-              </div>
-
-              <div class="subtle" id="chartHelp">
-                Pan/zoom horizontally on the chart. Export includes only the visible chart range.
-              </div>
-
-              <!-- Live chart-visible range label (no week selector in v2) -->
-              <div class="rangeLabel" id="chartRangeLabel" aria-live="polite">—</div>
-
-              <!-- Chart interaction container:
-                   - JS will prevent panel scroll while interacting with chart.
-                   - touch-action is controlled in CSS; JS will also add guards. -->
-              <div class="chartWrap" id="chartWrap">
-                <canvas id="chart" width="900" height="520" aria-label="Vitals chart"></canvas>
-              </div>
-
-              <div class="subtle" id="chartLegendHint">
-                Bands indicate systolic categories (hypotension → stage 2). Lines: SYS, DIA, HR.
+              <div style="opacity:.7; margin-top:10px;">
+                Charts panel will render via JS (js/chart.js).
               </div>
             </div>
           </div>
-        </section>
+        </div>
 
       </div>
     </div>
 
-    <!-- ADD / EDIT (separate from carousel; shown/hidden by JS) -->
-    <section id="add" class="card accentFrame hidden" aria-label="Add or edit reading">
-      <div id="editPill" class="editPill hidden">Editing entry</div>
-
-      <div id="timeLine" class="timeLine">--:--:-- --, --/--/----</div>
-
-      <div class="triple">
-        <div>
-          <div class="miniLabel">Systolic</div>
-          <input id="sys" class="field" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 132" />
-        </div>
-        <div>
-          <div class="miniLabel">Diastolic</div>
-          <input id="dia" class="field" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 91" />
-        </div>
-        <div>
-          <div class="miniLabel">Heart Rate</div>
-          <input id="hr" class="field" inputmode="numeric" pattern="[0-9]*" placeholder="e.g., 72" />
-        </div>
-      </div>
-
-      <div class="noteLabel">Notes <em>(optional)</em></div>
-      <textarea id="notes" class="field" placeholder="optional"></textarea>
-
-      <div class="label">Symptoms</div>
-      <div id="symGrid" class="symGrid" aria-label="Symptoms"></div>
-
-      <div class="panelButtons">
-        <button id="btnSave" class="btn primary grow" type="button">Save</button>
-        <button id="btnDelete" class="btn grow hidden" type="button">Delete</button>
-        <button id="btnBackFromAdd" class="btn grow" type="button">Back</button>
-      </div>
-    </section>
-
-    <!-- Inline (non-generic) confirmations/alerts area:
-         Used instead of generic modal popups. -->
-    <div id="inlineNotice" class="inlineNotice hidden" role="status" aria-live="polite"></div>
-
   </div>
 
-  <!-- Modules -->
-  <script src="js/version.js"></script>
-  <script src="js/store.js"></script>
-  <script src="js/state.js"></script>
-  <script src="js/gestures.js"></script>
-  <script src="js/charts.js"></script>
-  <script src="js/export.js"></script>
-  <script src="js/ui.js"></script>
-  <script src="js/app.js"></script>
+  <!-- Boot error overlay (only shown if JS fails) -->
+  <div id="bootError">
+    <div class="card">
+      <h1>Vitals Tracker failed to start</h1>
+      <pre id="bootErrorText">Unknown error.</pre>
+      <div class="btnRow">
+        <button class="btn" id="btnReload">Reload</button>
+        <button class="btn primary" id="btnShowPaths">Show expected file paths</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Minimal inline diagnostics (never touches data) -->
+  <script>
+    (function(){
+      const $ = (id)=>document.getElementById(id);
+      const overlay = $("bootError");
+      const out = $("bootErrorText");
+
+      function show(msg){
+        out.textContent = msg || "Unknown error.";
+        overlay.style.display = "block";
+      }
+
+      window.addEventListener("error", (e) => {
+        show("JS runtime error:\\n" + (e.message || e.error || "Unknown") + "\\n\\nSource: " + (e.filename||"") + ":" + (e.lineno||"") );
+      });
+
+      window.addEventListener("unhandledrejection", (e) => {
+        show("Unhandled Promise rejection:\\n" + (e.reason && (e.reason.stack || e.reason.message) ? (e.reason.stack || e.reason.message) : String(e.reason)));
+      });
+
+      $("btnReload").addEventListener("click", ()=>location.reload());
+
+      $("btnShowPaths").addEventListener("click", ()=>{
+        show(
+          "Expected modular files (case-sensitive):\\n" +
+          "- js/app.js\\n" +
+          "- js/state.js\\n" +
+          "- js/utils.js\\n" +
+          "- js/storage.js\\n" +
+          "- js/ui.js\\n" +
+          "- js/panels.js\\n" +
+          "- js/chart.js\\n" +
+          "- js/gestures.js\\n" +
+          "- js/reporting.js\\n" +
+          "- js/pwa.js\\n" +
+          "- css/app.css (optional if you moved CSS)\\n\\n" +
+          "If any are missing/renamed, buttons will do nothing."
+        );
+      });
+
+      // If app.js never runs, we will show a timeout with guidance
+      setTimeout(()=>{
+        if(!window.__VT_BOOTED__){
+          show(
+            "Boot timeout: js/app.js did not finish initializing.\\n\\n" +
+            "Most common causes:\\n" +
+            "1) js/app.js not found (wrong path or filename case)\\n" +
+            "2) js/app.js threw an error early\\n" +
+            "3) Service worker served an old cached file\\n\\n" +
+            "Action: Open view-source and confirm the script src is exactly: js/app.js"
+          );
+        }
+      }, 1200);
+    })();
+  </script>
+
+  <!-- Main app boot (this is what must load) -->
+  <script defer src="js/app.js?v=2.001"></script>
 </body>
 </html>
 
 <!--
-Vitals Tracker (Modular) — index.html (EOF)
-App Version: v2.001
-Notes:
-- This file intentionally contains only the app shell and required element IDs.
-- All behavior (storage/import safety, swipe + pull-to-refresh, chart pan/zoom, hypertension bands, and visible-range export) is implemented in the JS modules.
-- Next expected file: css/app.css
+EOF Notes (v2.001):
+- If buttons don’t work, it is almost certainly because js/app.js is missing/404 or crashing.
+- This file now displays an on-screen boot error instead of failing silently.
 -->
