@@ -2,35 +2,49 @@
 Vitals Tracker (Modular) — js/chart.js
 App Version: v2.001
 Purpose:
-- Renders the BP/HR time-series chart for the currently visible chart range.
-- Dynamic Y-axis labels based on visible data.
-- Hypertension (systolic-focused) horizontal bands (informative, not distracting).
-- Provides a live visible-range label (replaces any date selector UI).
-- Exports only the visible date range (handled by export module; this module provides the range + filtered records).
+- Render the Charts canvas with:
+  - Default view = most recent 7 days.
+  - Zoom: 1 day min, 14 days max.
+  - Pan horizontally only (gestures owned by chart).
+  - Dynamic Y-axis labels based on visible data (not fixed).
+  - Hypertension bands (systolic-focused): Hypotensive, Normal, Elevated, HTN Stage 1, HTN Stage 2.
+- Remove the week selector UI (handled in index UI); replace with a visible range label that updates
+  on default/zoom/pan.
+- Export on Charts exports ONLY visible date range of the chart (handled by export module but uses chartView).
 
 Latest Update (v2.001):
-- Added systolic hypertension bands (Hypotensive/Normal/Elevated/Stage 1/Stage 2/Crisis).
-- Added dynamic Y-axis scaling derived from records in current view.
-- Added visible range label formatter (auto-updates after zoom/pan/default).
+- Initial modular chart renderer created.
+- Implements dynamic y scaling, alternating day bands, and systolic hypertension bands (subtle but obvious).
+- Provides getVisibleRangeLabel() for UI label replacement.
 */
 
-import { state, DAY_MS, startOfDay } from "./state.js";
 import { loadRecords } from "./storage.js";
+import { chartView, DAY_MS, startOfDay, clampViewToBase, applyDefaultChartWindowIfNeeded } from "./state.js";
+import { dowShortFromTs, mmddFromTs, fmtDateTime, fmtShortDate, clamp } from "./utils.js";
 
-/* ---------- Helpers ---------- */
+/* ---------------- Hypertension bands (systolic-focused) ----------------
+   These are visual cues, not diagnosis. Cutoffs aligned with common clinical categories.
+   Systolic ranges (mmHg):
+   - Hypotensive: < 90
+   - Normal: 90–119
+   - Elevated: 120–129
+   - HTN Stage 1: 130–139
+   - HTN Stage 2: >= 140
+*/
+const SYSTOLIC_BANDS = [
+  { name:"Hypotensive", min:-Infinity, max: 89,  fill:"rgba(120,220,180,.10)" },
+  { name:"Normal",      min:  90,      max:119,  fill:"rgba(235,245,255,.08)" },
+  { name:"Elevated",    min: 120,      max:129,  fill:"rgba(255,210,120,.10)" },
+  { name:"HTN Stage 1", min: 130,      max:139,  fill:"rgba(255,160,120,.12)" },
+  { name:"HTN Stage 2", min: 140,      max:Infinity, fill:"rgba(255,90,90,.12)" }
+];
 
-function fmtDateShort(ts){
-  return new Intl.DateTimeFormat(undefined, { month:"short", day:"2-digit", year:"numeric" }).format(new Date(ts));
+function recordsInView(){
+  const all = loadRecords().slice().reverse(); // oldest -> newest for drawing continuity
+  const a = chartView.viewMin;
+  const b = chartView.viewMax;
+  return all.filter(r => r.ts >= a && r.ts <= b);
 }
-
-function fmtDateTimeShort(ts){
-  return new Intl.DateTimeFormat(undefined, {
-    month:"2-digit", day:"2-digit", year:"numeric",
-    hour:"2-digit", minute:"2-digit"
-  }).format(new Date(ts));
-}
-
-function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
 
 function xFromTs(ts, tMin, tMax, pad, W){
   const span = W - pad.l - pad.r;
@@ -45,79 +59,7 @@ function yTo(v, yMin, yMax, pad, H){
   return pad.t + span * (1 - t);
 }
 
-/* ---------- Public API ---------- */
-
-export function getVisibleRangeLabel(){
-  const a = state.chart.viewMin;
-  const b = state.chart.viewMax;
-
-  const aD = startOfDay(a);
-  const bD = startOfDay(b);
-
-  const sameDay = aD === bD;
-  if (sameDay){
-    return `${fmtDateShort(a)} (visible)`;
-  }
-  return `${fmtDateShort(a)} – ${fmtDateShort(b)} (visible)`;
-}
-
-export function getRecordsInVisibleRange(){
-  const all = loadRecords().slice().reverse(); // chronological
-  const a = state.chart.viewMin;
-  const b = state.chart.viewMax;
-  return all.filter(r => r.ts >= a && r.ts <= b);
-}
-
-/* ---------- Bands (systolic-focused) ---------- */
-/*
-Bands chosen to be clinically recognizable.
-These are systolic cutoffs (mmHg):
-- Hypotensive: < 90
-- Normal: 90–119
-- Elevated: 120–129
-- HTN Stage 1: 130–139
-- HTN Stage 2: 140–179
-- Crisis: >= 180
-*/
-const SYSTOLIC_BANDS = [
-  { name: "Hypotensive", min: -Infinity, max: 89,  fill: "rgba(120,220,180,.06)" },
-  { name: "Normal",      min: 90,        max: 119, fill: "rgba(235,245,255,.05)" },
-  { name: "Elevated",    min: 120,       max: 129, fill: "rgba(47,120,255,.07)" },
-  { name: "HTN Stage 1", min: 130,       max: 139, fill: "rgba(255,220,120,.07)" },
-  { name: "HTN Stage 2", min: 140,       max: 179, fill: "rgba(255,150,80,.08)" },
-  { name: "Crisis",      min: 180,       max: Infinity, fill: "rgba(255,80,80,.10)" }
-];
-
-function drawHypertensionBands(ctx, yMin, yMax, pad, W, H){
-  const plotX0 = pad.l;
-  const plotX1 = W - pad.r;
-  const plotY0 = pad.t;
-  const plotY1 = H - pad.b;
-
-  ctx.save();
-  ctx.beginPath();
-  ctx.rect(plotX0, plotY0, plotX1-plotX0, plotY1-plotY0);
-  ctx.clip();
-
-  for (const b of SYSTOLIC_BANDS){
-    const bandMin = Math.max(b.min, yMin);
-    const bandMax = Math.min(b.max, yMax);
-    if (bandMax < yMin || bandMin > yMax) continue;
-    if (bandMax <= bandMin) continue;
-
-    const y1 = yTo(bandMax, yMin, yMax, pad, H);
-    const y0 = yTo(bandMin, yMin, yMax, pad, H);
-
-    ctx.fillStyle = b.fill;
-    ctx.fillRect(plotX0, y1, plotX1-plotX0, (y0 - y1));
-  }
-
-  ctx.restore();
-}
-
-/* ---------- Series drawing (time-based, breaks across multi-day gaps) ---------- */
-
-function drawSeries(ctx, recs, pick, tMin, tMax, yMin, yMax, pad, W, H, color){
+function drawSeriesTimedWithDayGaps(ctx, recs, pick, tMin, tMax, yMin, yMax, pad, W, H, color){
   ctx.strokeStyle = color;
   ctx.lineWidth = 3;
   ctx.lineJoin = "round";
@@ -127,29 +69,27 @@ function drawSeries(ctx, recs, pick, tMin, tMax, yMin, yMax, pad, W, H, color){
   let prevTs = null;
 
   ctx.beginPath();
-  for (const r of recs){
+  for(const r of recs){
     const v = pick(r);
-    if (v == null){
+    if(v == null){
       started = false;
       prevTs = r.ts;
       continue;
     }
 
-    if (prevTs != null){
+    if(prevTs != null){
       const prevDay = startOfDay(prevTs);
       const curDay  = startOfDay(r.ts);
-      if (curDay - prevDay > DAY_MS){
-        started = false;
-      }
+      if(curDay - prevDay > DAY_MS) started = false; // gap breaks line
     }
 
     const x = xFromTs(r.ts, tMin, tMax, pad, W);
     const y = yTo(v, yMin, yMax, pad, H);
 
-    if (!started){
+    if(!started){
       ctx.moveTo(x,y);
       started = true;
-    } else {
+    }else{
       ctx.lineTo(x,y);
     }
 
@@ -158,13 +98,75 @@ function drawSeries(ctx, recs, pick, tMin, tMax, yMin, yMax, pad, W, H, color){
   ctx.stroke();
 }
 
-/* ---------- Main render ---------- */
+function computeDynamicY(recs){
+  // Use only visible data (sys/dia/hr). Dynamic ticks should reflect what reviewer sees.
+  const all = recs.flatMap(r => [r.sys, r.dia, r.hr]).filter(v => v != null);
+  if(all.length === 0) return { yMin:40, yMax:180 };
+
+  const minV = Math.min(...all);
+  const maxV = Math.max(...all);
+
+  const padV = Math.max(8, Math.round((maxV - minV) * 0.12));
+  let yMin = minV - padV;
+  let yMax = maxV + padV;
+
+  // Keep a sane floor/ceiling in case of sparse data.
+  yMin = Math.floor(yMin / 5) * 5;
+  yMax = Math.ceil(yMax / 5) * 5;
+
+  if(yMax - yMin < 20){
+    yMin -= 10;
+    yMax += 10;
+  }
+
+  return { yMin, yMax };
+}
+
+/* Visible range label for replacement of week selector */
+export function getVisibleRangeLabel(){
+  const a = new Date(chartView.viewMin);
+  const b = new Date(chartView.viewMax);
+  return `${fmtShortDate(a)} to ${fmtShortDate(b)}`;
+}
+
+/* Sets base bounds to allow pan across all data, while view clamps to that base.
+   Base is: from earliest record day start to latest record day end (or last 14 days fallback).
+*/
+export function updateChartBaseToData(){
+  const recs = loadRecords();
+  if(recs.length === 0){
+    const now = Date.now();
+    const end = now;
+    const start = now - 14*DAY_MS;
+    chartView.baseMin = startOfDay(start);
+    chartView.baseMax = startOfDay(end) + DAY_MS - 1;
+    return;
+  }
+  const newest = recs[0].ts;
+  const oldest = recs[recs.length-1].ts;
+  chartView.baseMin = startOfDay(oldest);
+  chartView.baseMax = startOfDay(newest) + DAY_MS - 1;
+}
+
+/* Default view: most recent 7 days (or less if dataset smaller) */
+export function setDefaultRecent7DaysView(){
+  updateChartBaseToData();
+  const end = chartView.baseMax;
+  const start = end - (7*DAY_MS) + 1;
+  chartView.viewMin = Math.max(chartView.baseMin, start);
+  chartView.viewMax = end;
+  clampViewToBase();
+}
 
 export function renderChart(canvasEl){
-  const ctx = canvasEl.getContext("2d");
-  const W = canvasEl.width, H = canvasEl.height;
+  // Ensure base/view exist and comply with your v2 rules.
+  updateChartBaseToData();
+  applyDefaultChartWindowIfNeeded(); // if view not set, sets recent 7 days
+  clampViewToBase();
 
-  ctx.clearRect(0,0,W,H);
+  const ctx = canvasEl.getContext("2d");
+  const W = canvasEl.width;
+  const H = canvasEl.height;
 
   const pad = { l:62, r:18, t:18, b:92 };
   const plotX0 = pad.l;
@@ -172,66 +174,98 @@ export function renderChart(canvasEl){
   const plotY0 = pad.t;
   const plotY1 = H - pad.b;
 
-  /* subtle canvas frame */
+  const tMin = chartView.viewMin;
+  const tMax = chartView.viewMax;
+
+  const recs = recordsInView();
+  const { yMin, yMax } = computeDynamicY(recs);
+
+  ctx.clearRect(0,0,W,H);
+
+  // Panel background + border
   ctx.lineWidth = 1;
   ctx.strokeStyle = "rgba(235,245,255,.12)";
   ctx.fillStyle = "rgba(255,255,255,.02)";
-  if (ctx.roundRect){
-    ctx.beginPath();
-    ctx.roundRect(0,0,W,H,22);
-    ctx.fill();
-    ctx.stroke();
-  } else {
-    ctx.fillRect(0,0,W,H);
-    ctx.strokeRect(0,0,W,H);
+  ctx.beginPath();
+  if(ctx.roundRect) ctx.roundRect(0,0,W,H,22);
+  else ctx.rect(0,0,W,H);
+  ctx.fill();
+  ctx.stroke();
+
+  // Clip plot region
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(plotX0, plotY0, plotX1-plotX0, plotY1-plotY0);
+  ctx.clip();
+
+  // Alternating day bands in visible window (immediately obvious, not distracting)
+  const firstDay = startOfDay(tMin);
+  const lastDay = startOfDay(tMax);
+  const dayCount = Math.floor((lastDay - firstDay) / DAY_MS) + 1;
+
+  for(let i=0;i<dayCount;i++){
+    const bandStart = firstDay + i*DAY_MS;
+    const bandEnd = bandStart + DAY_MS;
+
+    const a = Math.max(bandStart, tMin);
+    const b = Math.min(bandEnd,   tMax);
+    if(b <= a) continue;
+
+    let x0 = xFromTs(a, tMin, tMax, pad, W);
+    let x1 = xFromTs(b, tMin, tMax, pad, W);
+    x0 = Math.max(x0, plotX0);
+    x1 = Math.min(x1, plotX1);
+    if(x1 <= x0) continue;
+
+    ctx.fillStyle = (i % 2 === 0) ? "rgba(255,255,255,.12)" : "rgba(47,120,255,.22)";
+    ctx.fillRect(x0, plotY0, (x1-x0), (plotY1-plotY0));
   }
 
-  const tMin = state.chart.viewMin;
-  const tMax = state.chart.viewMax;
+  // Hypertension bands (systolic-focused) drawn as horizontal ranges across plot
+  // Keep subtle but clear: low-opacity fills.
+  for(const band of SYSTOLIC_BANDS){
+    const yA = band.max === Infinity ? yMin : band.max;
+    const yB = band.min === -Infinity ? yMin : band.min;
 
-  const recs = getRecordsInVisibleRange();
+    // Convert to y pixels; because yTo expects within yMin..yMax, clamp band edges.
+    const topVal = clamp(band.max === Infinity ? yMax : band.max, yMin, yMax);
+    const botVal = clamp(band.min === -Infinity ? yMin : band.min, yMin, yMax);
 
-  /* dynamic Y scale based on visible records */
-  let values = [];
-  if (recs.length){
-    for (const r of recs){
-      if (r.sys != null) values.push(r.sys);
-      if (r.dia != null) values.push(r.dia);
-      if (r.hr  != null) values.push(r.hr);
-    }
+    // If band lies outside visible y range, skip.
+    if(topVal < yMin && botVal < yMin) continue;
+    if(topVal > yMax && botVal > yMax) continue;
+
+    const yTop = yTo(topVal, yMin, yMax, pad, H);
+    const yBot = yTo(botVal, yMin, yMax, pad, H);
+
+    const y0 = Math.min(yTop, yBot);
+    const y1 = Math.max(yTop, yBot);
+
+    ctx.fillStyle = band.fill;
+    ctx.fillRect(plotX0, y0, (plotX1-plotX0), (y1-y0));
   }
 
-  let yMin = 40, yMax = 180;
-  if (values.length){
-    const minV = Math.min(...values);
-    const maxV = Math.max(...values);
-    const padV = Math.max(8, Math.round((maxV - minV) * 0.12));
-    yMin = minV - padV;
-    yMax = maxV + padV;
-  }
+  ctx.restore();
 
-  /* clip to plot and draw bands first (behind everything) */
-  drawHypertensionBands(ctx, yMin, yMax, pad, W, H);
-
-  /* horizontal grid + Y labels */
+  // Grid + Y-axis labels (dynamic)
   ctx.font = "16px system-ui,Segoe UI,Roboto";
   ctx.fillStyle = "rgba(235,245,255,.60)";
   ctx.strokeStyle = "rgba(235,245,255,.10)";
   ctx.lineWidth = 1;
 
   const ticks = 5;
-  for (let i=0;i<=ticks;i++){
+  for(let i=0;i<=ticks;i++){
     const y = pad.t + (H - pad.t - pad.b) * (i/ticks);
     ctx.beginPath();
     ctx.moveTo(pad.l, y);
     ctx.lineTo(W - pad.r, y);
     ctx.stroke();
 
-    const val = Math.round(yMax - (yMax - yMin) * (i/ticks));
+    const val = Math.round(yMax - (yMax-yMin)*(i/ticks));
     ctx.fillText(String(val), 16, y+6);
   }
 
-  /* day tick labels along bottom, based on visible span */
+  // X-axis day labels
   ctx.fillStyle = "rgba(235,245,255,.90)";
   ctx.font = "20px system-ui,Segoe UI,Roboto";
   ctx.textAlign = "center";
@@ -239,89 +273,66 @@ export function renderChart(canvasEl){
   const yDow = H - 44;
   const yDate = H - 22;
 
-  const spanMs = (tMax - tMin) || 1;
-  const daysVisible = Math.max(1, Math.ceil(spanMs / DAY_MS));
+  // Label days visible; use noon for center.
+  const labelFirst = startOfDay(tMin);
+  const labelLast  = startOfDay(tMax);
+  const labelDays  = Math.floor((labelLast - labelFirst)/DAY_MS) + 1;
 
-  /* label at most 7-ish points to avoid clutter */
-  const labelCount = clamp(daysVisible, 2, 7);
+  for(let i=0;i<labelDays;i++){
+    const dayStart = labelFirst + i*DAY_MS;
+    const dayCenter = dayStart + (DAY_MS/2);
+    if(dayCenter < tMin || dayCenter > tMax) continue;
 
-  for (let i=0;i<labelCount;i++){
-    const u = (labelCount === 1) ? 0.5 : i/(labelCount-1);
-    const ts = tMin + u * spanMs;
-    const dayStart = startOfDay(ts);
-    const x = xFromTs(ts, tMin, tMax, pad, W);
-
-    const dow = new Intl.DateTimeFormat(undefined, { weekday:"short" }).format(new Date(dayStart));
-    const md  = new Intl.DateTimeFormat(undefined, { month:"2-digit", day:"2-digit" }).format(new Date(dayStart));
-
-    ctx.fillStyle = "rgba(235,245,255,.90)";
-    ctx.font = "20px system-ui,Segoe UI,Roboto";
-    ctx.fillText(dow, x, yDow);
+    const x = xFromTs(dayCenter, tMin, tMax, pad, W);
+    ctx.fillText(dowShortFromTs(dayStart), x, yDow);
 
     ctx.fillStyle = "rgba(235,245,255,.70)";
     ctx.font = "16px system-ui,Segoe UI,Roboto";
-    ctx.fillText(md, x, yDate);
+    ctx.fillText(mmddFromTs(dayStart), x, yDate);
+
+    ctx.fillStyle = "rgba(235,245,255,.90)";
+    ctx.font = "20px system-ui,Segoe UI,Roboto";
   }
 
   ctx.textAlign = "start";
 
-  /* series */
-  if (recs.length){
-    drawSeries(ctx, recs, r=>r.sys, tMin, tMax, yMin, yMax, pad, W, H, "rgba(79,140,255,.98)");
-    drawSeries(ctx, recs, r=>r.dia, tMin, tMax, yMin, yMax, pad, W, H, "rgba(216,224,240,.88)");
-    drawSeries(ctx, recs, r=>r.hr , tMin, tMax, yMin, yMax, pad, W, H, "rgba(120,220,180,.92)");
-  } else {
+  // Series
+  if(recs.length){
+    drawSeriesTimedWithDayGaps(ctx, recs, r=>r.sys, tMin, tMax, yMin, yMax, pad, W, H, "rgba(79,140,255,.98)");
+    drawSeriesTimedWithDayGaps(ctx, recs, r=>r.dia, tMin, tMax, yMin, yMax, pad, W, H, "rgba(216,224,240,.88)");
+    drawSeriesTimedWithDayGaps(ctx, recs, r=>r.hr,  tMin, tMax, yMin, yMax, pad, W, H, "rgba(120,220,180,.92)");
+  }else{
     ctx.fillStyle = "rgba(235,245,255,.46)";
     ctx.font = "18px system-ui,Segoe UI,Roboto";
     ctx.fillText("No readings in this view.", pad.l + 12, pad.t + 34);
   }
 
-  /* legend */
+  // Legend
   const lx = pad.l + 10;
   let ly = pad.t + 26;
 
   ctx.font = "22px system-ui,Segoe UI,Roboto";
-  function legend(label, color){
+  ctx.fillStyle = "rgba(235,245,255,.88)";
+
+  function legend(text, color){
     ctx.fillStyle = color;
     ctx.fillRect(lx, ly-14, 26, 8);
     ctx.fillStyle = "rgba(235,245,255,.88)";
-    ctx.fillText(label.split("").join(" "), lx+38, ly-6);
+    const spaced = text.split("").join(" ");
+    ctx.fillText(spaced, lx+38, ly-6);
     ly += 32;
   }
   legend("Systolic", "rgba(79,140,255,.98)");
   legend("Diastolic", "rgba(216,224,240,.88)");
   legend("Heart Rate", "rgba(120,220,180,.92)");
-
-  /* subtle band key (small) – keep non-distracting */
-  ctx.fillStyle = "rgba(235,245,255,.46)";
-  ctx.font = "14px system-ui,Segoe UI,Roboto";
-  ctx.fillText("Systolic bands: hypo • normal • elevated • HTN1 • HTN2 • crisis", pad.l + 10, pad.t + 124);
-}
-
-/* ---------- Report helpers for export module ---------- */
-
-export function buildChartsExportContext(){
-  const a = state.chart.viewMin;
-  const b = state.chart.viewMax;
-
-  const rangeLabel = `${fmtDateTimeShort(a)} to ${fmtDateTimeShort(b)}`;
-
-  const reviewerNotes =
-    "Reviewer notes:\n" +
-    "- Readings are patient-entered at the time they were measured.\n" +
-    "- Chart export includes only the visible date/time range shown on-screen.\n" +
-    "- Clusters of readings may indicate symptomatic episodes; gaps often indicate stability or fewer checks.\n" +
-    "- Consider BP/HR trends alongside notes/symptoms for temporal correlation.";
-
-  return { rangeLabel, reviewerNotes };
 }
 
 /*
 Vitals Tracker (Modular) — js/chart.js (EOF)
 App Version: v2.001
 Notes:
-- Hypertension bands are systolic-focused and intentionally subtle.
-- Y-axis labels dynamically scale to visible data.
-- Visible range label comes from getVisibleRangeLabel().
-- Next expected file: js/export.js (clipboard/share/save + PDF export flow)
+- Hypertension bands are systolic-focused and rendered across the plot as low-opacity horizontal zones.
+- Y-axis labels are computed from visible data only (dynamic).
+- Default view + pan/zoom behavior depends on state.js + gestures.js.
+- Next expected file: js/export.js (exports only visible range; adds reviewer-focused capture method + significance; PDF export without generic popups)
 */
