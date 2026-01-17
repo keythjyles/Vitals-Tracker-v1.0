@@ -2,68 +2,53 @@
 Vitals Tracker (Modular) — js/app.js
 App Version: v2.001
 Purpose:
-- App bootstrap + carousel (panel swipe) + pull-to-refresh (Home only) preserving v1 feel.
-- Wires global hooks used by ui.js (nav, exit, install, clear data).
-- Ensures modular architecture does NOT overwrite existing data:
-  - Reads/writes the same STORAGE_KEY via storage.js.
-- Initializes modules in the correct order.
+- Main bootstrap + wiring:
+  - Preserve v1 storage key and existing data (no migration, no overwrite).
+  - Initialize UI, storage, symptoms grid, carousel swipe, add/edit flow, modals.
+  - Charts: default 7-day view, pan/zoom horizontal, visible-range export.
+  - Pull-to-refresh on Home (release).
+  - Exit handler preserved.
+- This module is the single entrypoint imported by index.html.
 
 Latest Update (v2.001):
-- Initial modular bootstrap.
-- Carousel paging is pure 100% widths (no gaps, no bleed).
-- Pull-to-refresh works on Home only (downward pull at top).
-- Exit handler preserved: window.close() + delayed alert fallback.
+- Initial modular wiring for v2.001 with chart range label (no week selector),
+  chart gestures captured by canvas, and visible-range charts export.
 */
 
-import { $, show, hide } from "./utils.js";
-import { setActivePanelId, getActivePanelId } from "./state.js";
-import { clearAllRecords } from "./storage.js";
-import { refreshInstallButton, handleInstallClick, isStandalone } from "./pwa.js";
-import { wireUiControls, onPanelShown } from "./ui.js";
-import { renderLog } from "./log.js";
-import { initChartsDefaultView, renderCharts } from "./charts.js";
+import { $, $$, clamp } from "./utils.js";
+import { APP_VERSION, state } from "./state.js";
+import { loadRecords, saveRecords, clearAllRecords } from "./storage.js";
+import {
+  buildSymptomsUI,
+  selectedSymptoms,
+  setSymptomsSelected,
+  clearSymptomsSelected
+} from "./symptoms.js";
+import {
+  openAddPanel,
+  closeAddPanel,
+  enterAddNew,
+  enterAddEdit,
+  wireInstallButton,
+  wireExitButton,
+  wireClearDataButton,
+  refreshInstallButton,
+  openEditPrompt,
+  wireEditModal,
+  wireExportModal
+} from "./ui.js";
+import { renderLog, wireLogEvents } from "./log.js";
+import { renderCharts, attachChartGestures, wireChartsExportButton, updateChartRangeLabel, chartView } from "./chart.js";
+import { injectManifest, registerSW } from "./pwa.js";
 
-const PANELS = ["home","log","charts"]; // carousel panels only
-const viewport = $("viewport");
+/* -----------------------------
+   Carousel swipe (Home/Log/Charts)
+   Requirements: keep behavior; no neighbor bleed; simple 100% paging.
+------------------------------ */
+const PANELS = ["home","log","charts"];
+
 const track = $("track");
-
-let activeIndex = 0;
-let lastCarouselSwipeAt = 0;
-let isAddOpen = false;
-
-function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
-
-function trackWidth(){
-  return viewport?.clientWidth || 1;
-}
-
-function xForIndex(idx){
-  return -(idx * trackWidth());
-}
-
-function setTrackX(px, withTransition){
-  if(!track) return;
-  track.style.transition = withTransition ? "transform 200ms ease" : "none";
-  track.style.transform = `translate3d(${px}px,0,0)`;
-}
-
-function snapToIndex(idx, withTransition=true){
-  activeIndex = clamp(idx, 0, PANELS.length - 1);
-  setTrackX(xForIndex(activeIndex), withTransition);
-
-  const id = PANELS[activeIndex] || "home";
-  setActivePanelId(id);
-  onPanelShown(id);
-}
-
-function showPanel(id){
-  if(isAddOpen) return;
-  const idx = Math.max(0, PANELS.indexOf(id));
-  snapToIndex(idx, true);
-  window.scrollTo({ top:0, left:0, behavior:"auto" });
-}
-
-/* --------------------------- Pull-to-refresh (Home) -------------------------- */
+const viewport = $("viewport");
 
 let swipe = {
   active:false,
@@ -76,14 +61,51 @@ let swipe = {
   lastY:0
 };
 
+let lastCarouselSwipeAt = 0;
+
+function trackWidth(){
+  return viewport.clientWidth || 1;
+}
+
+function xForIndex(idx){
+  return -(idx * trackWidth());
+}
+
+function setTrackX(px, withTransition){
+  track.style.transition = withTransition ? "transform 200ms ease" : "none";
+  track.style.transform = `translate3d(${px}px,0,0)`;
+}
+
+function snapToIndex(idx, withTransition=true){
+  state.activeIndex = clamp(idx, 0, PANELS.length-1);
+  setTrackX(xForIndex(state.activeIndex), withTransition);
+}
+
+function currentPanelId(){
+  return PANELS[state.activeIndex] || "home";
+}
+
+function showCarouselPanel(id){
+  if(state.isAddOpen) return;
+  const idx = Math.max(0, PANELS.indexOf(id));
+  snapToIndex(idx, true);
+
+  if(id === "log"){
+    renderLog();
+  }
+  if(id === "charts"){
+    // If first time, default is set in chart module; always re-render on entry
+    renderCharts();
+  }
+
+  window.scrollTo({top:0, left:0, behavior:"auto"});
+}
+
 function allowSwipeHere(target){
-  if(isAddOpen) return false;
-  // Block swiping if interacting with inputs/buttons etc.
-  if(target && (target.closest?.("input, textarea, select, button"))) return false;
-  // Block if export/print sheets are open
-  const exportOpen = $("exportSheet") && !$("exportSheet").classList.contains("hidden");
-  const printOpen  = $("printPanel") && !$("printPanel").classList.contains("hidden");
-  if(exportOpen || printOpen) return false;
+  if(state.isAddOpen) return false;
+  if(!$("editModal").classList.contains("hidden")) return false;
+  if(!$("exportModal").classList.contains("hidden")) return false;
+  if(target && target.closest?.("input, textarea, select, button")) return false;
   return true;
 }
 
@@ -95,21 +117,19 @@ function beginSwipe(x,y){
   swipe.lastX = x;
   swipe.lastY = y;
   swipe.startT = Date.now();
-  swipe.baseX = xForIndex(activeIndex);
-  setTrackX(swipe.baseX, false);
+  swipe.baseX = xForIndex(state.activeIndex);
+  track.style.transition = "none";
 }
 
-function moveSwipe(x,y, ev){
+function moveSwipe(x,y, preventDefault){
   if(!swipe.active) return;
 
   const dx = x - swipe.startX;
   const dy = y - swipe.startY;
-
   swipe.lastX = x;
   swipe.lastY = y;
 
   const AXIS_LOCK = 10;
-
   if(!swipe.axis){
     if(Math.abs(dx) >= AXIS_LOCK || Math.abs(dy) >= AXIS_LOCK){
       swipe.axis = (Math.abs(dx) > Math.abs(dy)) ? "x" : "y";
@@ -120,54 +140,59 @@ function moveSwipe(x,y, ev){
 
   if(swipe.axis === "x"){
     lastCarouselSwipeAt = Date.now();
-    try{ ev.preventDefault(); }catch{}
+    if(preventDefault) preventDefault();
 
     const w = trackWidth();
     const maxX = 0;
-    const minX = -((PANELS.length-1) * w);
+    const minX = -((PANELS.length-1)*w);
 
     let px = swipe.baseX + dx;
 
-    if(px > maxX) px = maxX + (px - maxX)*0.25;
-    if(px < minX) px = minX + (px - minX)*0.25;
+    // edge rubber-band
+    if(px > maxX) px = maxX + (px - maxX) * 0.25;
+    if(px < minX) px = minX + (px - minX) * 0.25;
 
     setTrackX(px, false);
     return;
   }
 
+  // Pull-to-refresh: Home only (release). Keep same behavior.
   if(swipe.axis === "y"){
-    // Pull-to-refresh only on Home, only when page is at top, only downward
-    const id = PANELS[activeIndex] || "home";
-    if(id !== "home") return;
+    if(currentPanelId() !== "home") return;
     if(window.scrollY > 0) return;
     if(dy < 0) return;
-    // Do not hijack if horizontal intent is obvious
-    if(Math.abs(dx) > 18 && Math.abs(dx) > Math.abs(dy)) return;
+    // do nothing until end; we just detect
   }
 }
 
-function endSwipe(ev){
+function endSwipe(preventDefault){
   if(!swipe.active) return;
 
   const dx = swipe.lastX - swipe.startX;
   const dy = swipe.lastY - swipe.startY;
 
   const w = trackWidth();
-  const dt = Math.max(1, Date.now() - swipe.startT);
-  const velocityX = dx / dt;
+  const velocityX = (() => {
+    const dt = Math.max(1, Date.now() - swipe.startT);
+    return dx / dt;
+  })();
 
   const SWIPE_COMMIT = w * 0.18;
   const VELOCITY_COMMIT = 0.55;
 
   if(swipe.axis === "x"){
-    try{ ev.preventDefault(); }catch{}
+    if(preventDefault) preventDefault();
 
-    let idx = activeIndex;
-    if(dx <= -SWIPE_COMMIT || velocityX <= -VELOCITY_COMMIT) idx = activeIndex + 1;
-    if(dx >=  SWIPE_COMMIT || velocityX >=  VELOCITY_COMMIT) idx = activeIndex - 1;
-
+    let idx = state.activeIndex;
+    if(dx <= -SWIPE_COMMIT || velocityX <= -VELOCITY_COMMIT) idx = state.activeIndex + 1;
+    if(dx >=  SWIPE_COMMIT || velocityX >=  VELOCITY_COMMIT) idx = state.activeIndex - 1;
     idx = clamp(idx, 0, PANELS.length-1);
+
     snapToIndex(idx, true);
+
+    const id = currentPanelId();
+    if(id === "log") renderLog();
+    if(id === "charts") renderCharts();
 
     swipe.active = false;
     swipe.axis = null;
@@ -175,65 +200,140 @@ function endSwipe(ev){
   }
 
   if(swipe.axis === "y"){
-    const id = PANELS[activeIndex] || "home";
-    if(id === "home" && window.scrollY === 0){
+    if(currentPanelId() === "home" && window.scrollY === 0){
       const PULL_THRESHOLD = 70;
       if(dy >= PULL_THRESHOLD && Math.abs(dx) < 24){
-        try{ ev.preventDefault(); }catch{}
+        if(preventDefault) preventDefault();
         location.reload();
       }
     }
   }
 
-  // Reset position
-  snapToIndex(activeIndex, true);
+  snapToIndex(state.activeIndex, true);
   swipe.active = false;
   swipe.axis = null;
 }
 
-/* ------------------------------- Exit handler -------------------------------- */
-
-function exitApp(){
-  window.close();
-  setTimeout(() => {
-    alert("If it didn’t close: use your phone’s Back/Home.");
-  }, 200);
+/* -----------------------------
+   Add/Edit Save/Delete (core flow preserved)
+------------------------------ */
+function intOrNull(v){
+  const t = String(v).trim();
+  if(!t) return null;
+  const n = Number(t);
+  if(!Number.isFinite(n)) return null;
+  return Math.round(n);
 }
 
-/* ------------------------------- Clear data ---------------------------------- */
-
-function clearDataFlow(){
-  const ok = confirm(
-    "Clear ALL saved vitals data?\n\n" +
-    "This deletes everything stored on this phone for Vitals Tracker.\n" +
-    "This cannot be undone."
-  );
-  if(!ok) return;
-
-  clearAllRecords();
-
-  // Reset UI filters quickly
-  const from = $("fromDate"); if(from) from.value = "";
-  const to   = $("toDate");   if(to) to.value = "";
-  const s    = $("search");   if(s) s.value = "";
-
-  alert("All data cleared.");
-  showPanel("home");
+function validateAnyInput(sys,dia,hr,notes,symptoms){
+  return !(sys==null && dia==null && hr==null && !String(notes||"").trim() && (symptoms||[]).length===0);
 }
 
-/* ----------------------------- Hooks for ui.js --------------------------------
-   ui.js calls window.__vtNav / __vtExit / __vtClearAll / __vtInstall
-------------------------------------------------------------------------------- */
+function wireAddPanelButtons(){
+  $("btnGoAdd").addEventListener("click", () => enterAddNew(currentPanelId()));
+  $("btnAddFromLog").addEventListener("click", () => enterAddNew("log"));
 
-function installFlow(){
-  handleInstallClick();
+  $("btnBackFromAdd").addEventListener("click", () => {
+    state.editTs = null;
+    closeAddPanel();
+    showCarouselPanel(state.returnPanel || "home");
+  });
+
+  $("btnSave").addEventListener("click", () => {
+    const sys = intOrNull($("sys").value);
+    const dia = intOrNull($("dia").value);
+    const hr  = intOrNull($("hr").value);
+    const notes = ($("notes").value || "").toString();
+    const symptoms = selectedSymptoms();
+
+    if(!validateAnyInput(sys,dia,hr,notes,symptoms)){
+      alert("Enter at least one value (BP, HR, notes, or symptom).");
+      return;
+    }
+
+    const recs = loadRecords();
+
+    if(state.editTs == null){
+      recs.unshift({ ts: Date.now(), sys, dia, hr, notes, symptoms });
+    }else{
+      const idx = recs.findIndex(r => r.ts === state.editTs);
+      if(idx >= 0){
+        recs[idx] = { ts: state.editTs, sys, dia, hr, notes, symptoms };
+      }else{
+        recs.unshift({ ts: Date.now(), sys, dia, hr, notes, symptoms });
+      }
+    }
+
+    recs.sort((a,b)=> b.ts - a.ts);
+    saveRecords(recs);
+
+    // reset log filters
+    $("fromDate").value = "";
+    $("toDate").value = "";
+    $("search").value = "";
+
+    state.editTs = null;
+    closeAddPanel();
+    showCarouselPanel("log");
+  });
+
+  $("btnDelete").addEventListener("click", () => {
+    if(state.editTs == null) return;
+    const ok = confirm("Delete this entry? This cannot be undone.");
+    if(!ok) return;
+
+    const recs = loadRecords().filter(r => r.ts !== state.editTs);
+    saveRecords(recs);
+
+    state.editTs = null;
+    closeAddPanel();
+    showCarouselPanel("log");
+  });
 }
 
-/* ------------------------------ Bootstrapping -------------------------------- */
+/* -----------------------------
+   Navigation buttons
+------------------------------ */
+function wireNavButtons(){
+  $("btnGoLog").addEventListener("click", () => showCarouselPanel("log"));
+  $("btnGoCharts").addEventListener("click", () => showCarouselPanel("charts"));
 
-function wireCarouselEvents(){
-  if(!viewport) return;
+  $("btnBackFromLog").addEventListener("click", () => showCarouselPanel("home"));
+  $("btnBackFromCharts").addEventListener("click", () => showCarouselPanel("home"));
+}
 
+/* -----------------------------
+   Bootstrap
+------------------------------ */
+export function initApp(){
+  // footer version
+  const footerV = $("footerVersion");
+  if(footerV) footerV.textContent = APP_VERSION;
+
+  // symptoms UI
+  buildSymptomsUI();
+
+  // modals
+  wireEditModal({
+    onConfirm: (ts) => enterAddEdit(ts, { lastCarouselSwipeAt })
+  });
+  wireExportModal();
+
+  // log
+  wireLogEvents({ lastCarouselSwipeAt });
+
+  // charts
+  attachChartGestures();
+  wireChartsExportButton();
+
+  // buttons
+  wireNavButtons();
+  wireAddPanelButtons();
+  wireInstallButton();
+  wireExitButton();
+  wireClearDataButton();
+
+  // carousel swipe
   viewport.addEventListener("pointerdown", (ev) => {
     if(ev.pointerType === "mouse") return;
     if(!allowSwipeHere(ev.target)) return;
@@ -243,62 +343,49 @@ function wireCarouselEvents(){
   viewport.addEventListener("pointermove", (ev) => {
     if(!swipe.active) return;
     if(ev.pointerType === "mouse") return;
-    moveSwipe(ev.clientX, ev.clientY, ev);
+    moveSwipe(ev.clientX, ev.clientY, () => { try{ ev.preventDefault(); }catch{} });
   }, { passive:false });
 
   viewport.addEventListener("pointerup", (ev) => {
     if(!swipe.active) return;
     if(ev.pointerType === "mouse") return;
-    endSwipe(ev);
+    endSwipe(() => { try{ ev.preventDefault(); }catch{} });
   }, { passive:false });
 
   viewport.addEventListener("pointercancel", () => {
     if(!swipe.active) return;
-    snapToIndex(activeIndex, true);
+    snapToIndex(state.activeIndex, true);
     swipe.active = false;
     swipe.axis = null;
   });
 
   window.addEventListener("resize", () => {
-    if(isAddOpen) return;
-    snapToIndex(activeIndex, false);
-    if(getActivePanelId() === "charts") renderCharts();
+    if(state.isAddOpen) return;
+    snapToIndex(state.activeIndex, false);
+    if(currentPanelId() === "charts") renderCharts();
   });
-}
 
-export function setAddOpenState(open){
-  isAddOpen = !!open;
-}
+  // PWA
+  injectManifest();
+  registerSW();
 
-function bootstrap(){
-  // hooks for ui.js
-  window.__vtNav = (id) => showPanel(id);
-  window.__vtExit = () => exitApp();
-  window.__vtClearAll = () => clearDataFlow();
-  window.__vtInstall = () => installFlow();
-
-  wireUiControls();
-  wireCarouselEvents();
-
+  // install label
   refreshInstallButton();
 
-  // Initial panel
+  // initial state
+  $("fromDate").value = "";
+  $("toDate").value = "";
   snapToIndex(0, false);
 
-  // Pre-render for fast startup
   renderLog();
-  initChartsDefaultView();
-  renderCharts();
+  // charts will render on first entry; but keep label correct if already visible by swipe
+  updateChartRangeLabel();
 }
-
-bootstrap();
 
 /*
 Vitals Tracker (Modular) — js/app.js (EOF)
 App Version: v2.001
 Notes:
-- Keeps the frozen Exit behavior (window.close + delayed alert).
-- Carousel is pure 100% paging; no track gap; no neighbor bleed.
-- Pull-to-refresh: Home only, downward pull at top.
-- Next expected file: js/pwa.js (manifest + SW injection; install/uninstall button behavior)
+- Uses same storage key as v1 to preserve existing data; no migration performed.
+- Next expected file: js/ui.js (panels, add/edit open/close, modals, install/exit/clear wiring, clipboard)
 */
