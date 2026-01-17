@@ -1,285 +1,329 @@
-/*
-Vitals Tracker (Modular) — js/log.js
-App Version: v2.001
-Purpose:
-- Log panel: search + date filters, render entries, press-highlight, and “Edit this reading?” modal.
-- Exports log report based on current filters (search + date range).
-- Does NOT change record schema; uses storage.js.
+/* ------------------------------------------------------------
+   Vitals Tracker — js/log.js
+   Mode: READ-ONLY (legacy/localStorage compatible)
+   Purpose: Render Log list + simple search/filter without writes
+   ------------------------------------------------------------ */
 
-Key Behaviors (match v1 intent):
-- Tap/press entry highlights; release confirms edit modal (with brief delay disabling Edit).
-- Horizontal swipe on a log entry cancels press (so carousel swipe wins).
-- Search and date inputs filter live.
-- Export uses current filters and is succinct but reviewer-friendly.
+(function () {
+  "use strict";
 
-Latest Update (v2.001):
-- Initial modular log module. Uses shared export modal (ui.js) and add.js for editing.
-*/
+  const NS = (window.VT = window.VT || {});
+  const LOG = (NS.log = NS.log || {});
 
-import { $, escapeHtml, fmtDateTime, clampEndOfDay, parseDateField } from "./utils.js";
-import { loadRecords } from "./storage.js";
-import { openAddEdit } from "./add.js";
-import { openEditPrompt } from "./ui.js";
-import { exportLogReport } from "./reports.js";
-
-let _lastCarouselSwipeAt = 0;
-
-export function setLastCarouselSwipeAt(ts){
-  _lastCarouselSwipeAt = ts || 0;
-}
-
-function recordMatches(rec, q){
-  if(!q) return true;
-  const s = q.toLowerCase().trim();
-  if(!s) return true;
-
-  const bp = `${rec.sys ?? ""}/${rec.dia ?? ""}`.toLowerCase();
-  const hr = `${rec.hr ?? ""}`.toLowerCase();
-  const notes = (rec.notes || "").toLowerCase();
-  const sym = (rec.symptoms || []).join(", ").toLowerCase();
-  const dt = fmtDateTime(rec.ts).toLowerCase();
-
-  return bp.includes(s) || hr.includes(s) || notes.includes(s) || sym.includes(s) || dt.includes(s);
-}
-
-export function getFilteredRecords(){
-  const recs = loadRecords();
-
-  const q = ($("search").value || "").trim();
-
-  const fromV = $("fromDate").value || "";
-  const toV   = $("toDate").value || "";
-
-  const fromTs = parseDateField(fromV);
-  const toMid  = parseDateField(toV);
-  const toTs   = toMid != null ? clampEndOfDay(toMid) : null;
-
-  return recs.filter(r => {
-    if(fromTs != null && r.ts < fromTs) return false;
-    if(toTs != null && r.ts > toTs) return false;
-    return recordMatches(r, q);
-  });
-}
-
-export function renderLog(){
-  const list = $("logList");
-  const recs = getFilteredRecords();
-
-  list.innerHTML = "";
-  if(recs.length === 0){
-    const empty = document.createElement("div");
-    empty.className = "subtle";
-    empty.style.marginTop = "10px";
-    empty.textContent = "No matching records.";
-    list.appendChild(empty);
-    return;
-  }
-
-  for(const r of recs){
-    const e = document.createElement("div");
-    e.className = "entry";
-    e.tabIndex = 0;
-    e.setAttribute("role","button");
-    e.setAttribute("aria-label","Open entry for editing");
-    e.dataset.ts = String(r.ts);
-
-    const top = document.createElement("div");
-    top.className = "entryTop";
-
-    const t = document.createElement("div");
-    t.className = "entryTime";
-    t.textContent = fmtDateTime(r.ts);
-
-    top.appendChild(t);
-    e.appendChild(top);
-
-    const line1 = document.createElement("div");
-    line1.className = "entryBPHR";
-
-    const bp = document.createElement("div");
-    bp.className = "bpBig";
-    bp.textContent = `BP ${r.sys ?? "—"}/${r.dia ?? "—"}`;
-
-    const hr = document.createElement("div");
-    hr.className = "hrBig";
-    hr.textContent = `HR ${r.hr ?? "—"}`;
-
-    line1.appendChild(bp);
-    line1.appendChild(hr);
-    e.appendChild(line1);
-
-    const sym = (r.symptoms && r.symptoms.length) ? r.symptoms.join(", ") : "None";
-    const notes = (r.notes && r.notes.trim()) ? r.notes.trim() : "None";
-
-    const l2 = document.createElement("div");
-    l2.className = "entryLine";
-    l2.innerHTML = `<b>Symptoms:</b> ${escapeHtml(sym)}`;
-    e.appendChild(l2);
-
-    const l3 = document.createElement("div");
-    l3.className = "entryLine";
-    l3.innerHTML = `<b>Notes:</b> ${escapeHtml(notes)}`;
-    e.appendChild(l3);
-
-    list.appendChild(e);
-  }
-
-  try{ document.activeElement?.blur?.(); }catch{}
-}
-
-/* Press-highlight + release-to-confirm edit (v1-style) */
-const logTap = {
-  activeEl:null,
-  activeTs:null,
-  pointerId:null,
-  tracking:false,
-  startX:0,
-  startY:0,
-  swiped:false
-};
-
-function findEntryEl(target){
-  if(!target) return null;
-  const el = target.closest ? target.closest(".entry") : null;
-  if(!el) return null;
-  if(el.closest && el.closest("#logList") !== $("logList")) return null;
-  return el;
-}
-
-function rectInside(el, clientX, clientY){
-  const SLOP_PX = 14;
-  const rect = el.getBoundingClientRect();
-  return (
-    clientX >= rect.left - SLOP_PX && clientX <= rect.right + SLOP_PX &&
-    clientY >= rect.top  - SLOP_PX && clientY <= rect.bottom + SLOP_PX
-  );
-}
-
-function clearLogPress(){
-  if(logTap.activeEl) logTap.activeEl.classList.remove("pressed");
-  logTap.activeEl = null;
-  logTap.activeTs = null;
-  logTap.pointerId = null;
-  logTap.tracking = false;
-  logTap.swiped = false;
-}
-
-export function attachLogInteractions(){
-  $("btnRunSearch").addEventListener("click", (e) => { e.preventDefault(); renderLog(); });
-
-  $("search").addEventListener("keydown", (e) => {
-    if(e.key === "Enter"){
-      e.preventDefault();
-      renderLog();
-      try{ e.target.blur(); }catch{}
+  // ---- Utilities ----
+  function el(tag, attrs = {}, children = []) {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (k === "class") n.className = v;
+      else if (k === "text") n.textContent = v;
+      else if (k === "html") n.innerHTML = v;
+      else if (k.startsWith("on") && typeof v === "function") n.addEventListener(k.slice(2), v);
+      else n.setAttribute(k, v);
     }
-  });
+    (children || []).forEach((c) => n.appendChild(typeof c === "string" ? document.createTextNode(c) : c));
+    return n;
+  }
 
-  ["fromDate","toDate"].forEach(id => {
-    $(id).addEventListener("input", () => renderLog());
-    $(id).addEventListener("change", () => renderLog());
-  });
+  function safeJSONParse(s) {
+    try { return JSON.parse(s); } catch { return null; }
+  }
 
-  $("btnExportLog").addEventListener("click", () => {
-    const recs = getFilteredRecords();
-    exportLogReport(recs, {
-      search: ($("search").value || "").trim(),
-      from: $("fromDate").value || "",
-      to: $("toDate").value || ""
+  function normalizeRecord(r) {
+    if (!r || typeof r !== "object") return null;
+
+    // Timestamp normalization
+    const ts =
+      r.ts || r.timestamp || r.time || r.datetime || r.dateTime || r.createdAt || r.created ||
+      r.iso || r.when || r.at || null;
+
+    let t = null;
+    if (typeof ts === "number") t = ts;
+    else if (typeof ts === "string") {
+      const d = Date.parse(ts);
+      if (!Number.isNaN(d)) t = d;
+    }
+
+    // BP normalization
+    const sys = num(
+      r.sys ?? r.systolic ?? r.sbp ?? r.SYS ?? r.Systolic ?? (r.bp && r.bp.sys) ?? (r.bp && r.bp.systolic)
+    );
+    const dia = num(
+      r.dia ?? r.diastolic ?? r.dbp ?? r.DIA ?? r.Diastolic ?? (r.bp && r.bp.dia) ?? (r.bp && r.bp.diastolic)
+    );
+
+    // HR normalization
+    const hr = num(r.hr ?? r.heartRate ?? r.pulse ?? r.HR ?? r.Pulse);
+
+    const symptoms = normalizeSymptoms(r.symptoms ?? r.symptom ?? r.sx ?? r.Symptoms);
+    const notes = (r.notes ?? r.note ?? r.comment ?? r.comments ?? "").toString();
+
+    // Keep original too
+    return {
+      _raw: r,
+      t,
+      sys,
+      dia,
+      hr,
+      symptoms,
+      notes
+    };
+  }
+
+  function normalizeSymptoms(s) {
+    if (!s) return [];
+    if (Array.isArray(s)) return s.map(String).filter(Boolean);
+    if (typeof s === "string") {
+      // allow comma/pipe/newline separated
+      return s.split(/[,|;\n]+/g).map((x) => x.trim()).filter(Boolean);
+    }
+    if (typeof s === "object") {
+      // allow map of {name:true}
+      return Object.keys(s).filter((k) => !!s[k]).map(String);
+    }
+    return [];
+  }
+
+  function num(v) {
+    if (v === 0) return 0;
+    if (v === null || v === undefined) return null;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function fmtDateTime(ms) {
+    if (!ms || !Number.isFinite(ms)) return "—";
+    const d = new Date(ms);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    let hh = d.getHours();
+    const ampm = hh >= 12 ? "PM" : "AM";
+    hh = hh % 12; if (hh === 0) hh = 12;
+    const mi = String(d.getMinutes()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd} ${String(hh).padStart(2, "0")}:${mi} ${ampm}`;
+  }
+
+  function getRootPanelContainer() {
+    // Try common containers used in your app shell
+    return (
+      document.querySelector("[data-panel='log']") ||
+      document.querySelector("#panel-log") ||
+      document.querySelector("#logPanel") ||
+      document.querySelector("#log-panel") ||
+      document.querySelector(".panel.is-log") ||
+      document.querySelector(".panel[data-name='Log']") ||
+      document.querySelector(".panel[data-name='log']") ||
+      document.querySelector(".panel[data-panel='log']") ||
+      // fallback: active/visible panel
+      document.querySelector(".panel.active") ||
+      document.querySelector(".panel.is-active") ||
+      document.querySelector(".panel")
+    );
+  }
+
+  // ---- Data access (READ ONLY) ----
+  async function readAllRecordsReadOnly() {
+    // Prefer storage bridge if present
+    const S = NS.storage;
+
+    try {
+      if (S && typeof S.readAll === "function") {
+        const raw = await S.readAll();
+        return Array.isArray(raw) ? raw : [];
+      }
+      if (S && typeof S.getAllReadOnly === "function") {
+        const raw = await S.getAllReadOnly();
+        return Array.isArray(raw) ? raw : [];
+      }
+      if (S && typeof S.getAll === "function") {
+        const raw = await S.getAll();
+        return Array.isArray(raw) ? raw : [];
+      }
+      if (S && typeof S.peekLegacy === "function") {
+        const raw = await S.peekLegacy();
+        return Array.isArray(raw) ? raw : [];
+      }
+    } catch (e) {
+      // fall through to localStorage direct
+    }
+
+    // Direct legacy localStorage fallback (your screenshot shows vitals_tracker_records*)
+    const keysToTry = [
+      "vitals_tracker_records",
+      "vitals_tracker_records_v1",
+      "vitals_tracker_records_v1_18",
+      "vitals_tracker_records_v1_19",
+      "vitals_tracker_records_v1_19B",
+      "vitals_tracker_records_v1_19B44"
+    ];
+
+    for (const k of keysToTry) {
+      const s = localStorage.getItem(k);
+      if (!s) continue;
+      const parsed = safeJSONParse(s);
+      if (Array.isArray(parsed)) return parsed;
+      if (parsed && Array.isArray(parsed.records)) return parsed.records;
+    }
+
+    return [];
+  }
+
+  // ---- Rendering ----
+  function buildUI(container) {
+    // Create a minimal, readable Log UI
+    const wrap = el("div", { class: "vt-log-ro", style: "padding:14px; max-width:900px;" });
+
+    const title = el("div", {
+      class: "vt-log-title",
+      style: "font-weight:700; font-size:18px; margin:4px 0 10px 0;"
+    }, ["Log (Read-Only)"]);
+
+    const controls = el("div", {
+      class: "vt-log-controls",
+      style: "display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:10px;"
     });
-  });
 
-  // Pointer flow for entries
-  $("logList").addEventListener("pointerdown", (ev) => {
-    if(ev.button != null && ev.button !== 0) return;
+    const q = el("input", {
+      type: "search",
+      placeholder: "Search notes/symptoms…",
+      style:
+        "flex:1 1 220px; min-width:220px; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.18); background:rgba(0,0,0,.18); color:inherit;"
+    });
 
-    const entry = findEntryEl(ev.target);
-    if(!entry) return;
+    const dateFrom = el("input", {
+      type: "date",
+      style:
+        "padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.18); background:rgba(0,0,0,.18); color:inherit;"
+    });
 
-    const ts = Number(entry.dataset.ts);
-    if(!Number.isFinite(ts)) return;
+    const dateTo = el("input", {
+      type: "date",
+      style:
+        "padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.18); background:rgba(0,0,0,.18); color:inherit;"
+    });
 
-    clearLogPress();
-    logTap.activeEl = entry;
-    logTap.activeTs = ts;
-    logTap.pointerId = ev.pointerId;
-    logTap.tracking = true;
-    logTap.startX = ev.clientX;
-    logTap.startY = ev.clientY;
-    logTap.swiped = false;
+    const meta = el("div", { style: "opacity:.75; font-size:13px; margin:6px 0 10px 0;" }, ["Loading…"]);
 
-    entry.classList.add("pressed");
-    try{ entry.setPointerCapture(ev.pointerId); }catch{}
-  });
+    const list = el("div", { class: "vt-log-list", style: "display:flex; flex-direction:column; gap:10px;" });
 
-  $("logList").addEventListener("pointermove", (ev) => {
-    if(!logTap.tracking) return;
-    if(logTap.pointerId != null && ev.pointerId !== logTap.pointerId) return;
-    if(!logTap.activeEl) return;
+    controls.appendChild(q);
+    controls.appendChild(dateFrom);
+    controls.appendChild(dateTo);
 
-    const dx = ev.clientX - logTap.startX;
-    const dy = ev.clientY - logTap.startY;
+    wrap.appendChild(title);
+    wrap.appendChild(controls);
+    wrap.appendChild(meta);
+    wrap.appendChild(list);
 
-    const SWIPE_T = 12;
+    // Mount: try to clear any placeholder content that blocks view
+    try { container.innerHTML = ""; } catch {}
+    container.appendChild(wrap);
 
-    if(Math.abs(dx) > SWIPE_T && Math.abs(dx) > Math.abs(dy)){
-      logTap.swiped = true;
-      clearLogPress();
-      return;
+    return { wrap, q, dateFrom, dateTo, meta, list };
+  }
+
+  function recordCard(r) {
+    const dt = fmtDateTime(r.t);
+    const bp = (r.sys != null && r.dia != null) ? `${r.sys}/${r.dia}` : "—";
+    const hr = (r.hr != null) ? `${r.hr}` : "—";
+    const sx = (r.symptoms && r.symptoms.length) ? r.symptoms.join(", ") : "—";
+    const notes = (r.notes || "").trim() || "—";
+
+    return el("div", {
+      class: "vt-log-card",
+      style:
+        "border:1px solid rgba(255,255,255,.14); border-radius:16px; padding:12px 12px; background:rgba(0,0,0,.14);"
+    }, [
+      el("div", { style: "display:flex; justify-content:space-between; gap:10px; align-items:center; margin-bottom:8px;" }, [
+        el("div", { style: "font-weight:700;" , text: dt }),
+        el("div", { style: "opacity:.85; font-weight:700;" , text: `BP ${bp}  •  HR ${hr}` })
+      ]),
+      el("div", { style: "opacity:.85; font-size:13px; margin-bottom:6px;" }, [
+        el("span", { style: "font-weight:700;" , text: "Symptoms: " }),
+        el("span", { text: sx })
+      ]),
+      el("div", { style: "opacity:.85; font-size:13px;" }, [
+        el("span", { style: "font-weight:700;" , text: "Notes: " }),
+        el("span", { text: notes })
+      ])
+    ]);
+  }
+
+  function applyFilters(rows, q, fromVal, toVal) {
+    const query = (q || "").trim().toLowerCase();
+    let fromMs = null, toMs = null;
+
+    if (fromVal) {
+      const d = Date.parse(fromVal + "T00:00:00");
+      if (!Number.isNaN(d)) fromMs = d;
+    }
+    if (toVal) {
+      const d = Date.parse(toVal + "T23:59:59");
+      if (!Number.isNaN(d)) toMs = d;
     }
 
-    if(!rectInside(logTap.activeEl, ev.clientX, ev.clientY)){
-      clearLogPress();
+    return rows.filter((r) => {
+      if (!r) return false;
+      if (fromMs != null && (r.t == null || r.t < fromMs)) return false;
+      if (toMs != null && (r.t == null || r.t > toMs)) return false;
+
+      if (!query) return true;
+
+      const hay = [
+        r.notes || "",
+        (r.symptoms || []).join(" "),
+        (r.sys != null && r.dia != null) ? `${r.sys}/${r.dia}` : "",
+        (r.hr != null) ? `${r.hr}` : ""
+      ].join(" ").toLowerCase();
+
+      return hay.includes(query);
+    });
+  }
+
+  async function render() {
+    const container = getRootPanelContainer();
+    if (!container) return;
+
+    const ui = buildUI(container);
+
+    let raw = await readAllRecordsReadOnly();
+    let norm = raw.map(normalizeRecord).filter(Boolean);
+    norm.sort((a, b) => (b.t || 0) - (a.t || 0));
+
+    function update() {
+      const filtered = applyFilters(norm, ui.q.value, ui.dateFrom.value, ui.dateTo.value);
+      ui.meta.textContent = `Showing ${filtered.length} of ${norm.length} entries (read-only).`;
+      ui.list.innerHTML = "";
+      if (!filtered.length) {
+        ui.list.appendChild(el("div", { style: "opacity:.75; padding:10px 2px;" }, ["No matching entries."]));
+        return;
+      }
+      const frag = document.createDocumentFragment();
+      for (const r of filtered) frag.appendChild(recordCard(r));
+      ui.list.appendChild(frag);
     }
-  });
 
-  $("logList").addEventListener("pointercancel", () => clearLogPress());
+    ui.q.addEventListener("input", update);
+    ui.dateFrom.addEventListener("change", update);
+    ui.dateTo.addEventListener("change", update);
 
-  $("logList").addEventListener("pointerup", (ev) => {
-    if(!logTap.tracking) return;
-    if(logTap.pointerId != null && ev.pointerId !== logTap.pointerId) return;
+    update();
+  }
 
-    const entry = logTap.activeEl;
-    const ts = logTap.activeTs;
+  // Public API expected by other modules
+  LOG.render = render;
+  LOG.init = render;
 
-    const dx = ev.clientX - logTap.startX;
-    const dy = ev.clientY - logTap.startY;
+  // Auto-render when log panel becomes active
+  function tryAuto() {
+    // If your panels system dispatches events, we listen.
+    // Fallback: if user navigates to Log, our code can be called by app.js too.
+    render();
+  }
 
-    const inside = entry ? rectInside(entry, ev.clientX, ev.clientY) : false;
-    const wasSwipe = logTap.swiped || (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy));
+  document.addEventListener("vt:show:log", tryAuto);
+  document.addEventListener("vt:panel:log", tryAuto);
 
-    clearLogPress();
-    if(wasSwipe) return;
-
-    if(inside && ts != null){
-      const justCarouselSwiped = (Date.now() - _lastCarouselSwipeAt) < 260;
-      if(justCarouselSwiped) return;
-
-      // Open the edit prompt modal; on confirm, openAddEdit(ts)
-      openEditPrompt(ts, () => openAddEdit(ts));
-    }
-  });
-
-  $("logList").addEventListener("keydown", (ev) => {
-    const entry = findEntryEl(ev.target);
-    if(!entry) return;
-    if(ev.key === "Enter" || ev.key === " "){
-      const ts = Number(entry.dataset.ts);
-      if(!Number.isFinite(ts)) return;
-      ev.preventDefault();
-
-      const justCarouselSwiped = (Date.now() - _lastCarouselSwipeAt) < 260;
-      if(justCarouselSwiped) return;
-
-      openEditPrompt(ts, () => openAddEdit(ts));
-    }
-  });
-}
-
-/*
-Vitals Tracker (Modular) — js/log.js (EOF)
-App Version: v2.001
-Notes:
-- Uses ui.js edit modal to preserve the “Confirm → Edit” pattern.
-- Next expected file: js/reports.js (succinct reviewer-facing exports + charts visible-range export)
-*/
+  // Safe no-op unless this file is loaded while Log is visible
+  // (If not visible, render() will still mount into the active panel fallback.)
+})();
