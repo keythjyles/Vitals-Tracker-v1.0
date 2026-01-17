@@ -1,299 +1,424 @@
 /*
 Vitals Tracker (Modular) — js/ui.js
 App Version: v2.001
+
 Purpose:
-- Central UI wiring for:
-  - Panel navigation (Home/Log/Charts/Add) while preserving the v1 "feel".
-  - Non-generic export flows:
-    - Text export: copies to clipboard and shows an in-app Export panel (not a generic popup).
-    - PDF export: shows an in-app Print/PDF preview panel and triggers window.print() on user action.
-- Chart-specific interaction rules:
-  - Horizontal pan/zoom only (no vertical zoom).
-  - While finger is on the chart canvas, vertical scroll should NOT scroll the whole panel; the chart captures gestures.
-  - Export on Charts exports only the visible chart range (handled in export.js).
-- Chart range label:
-  - Replaces the old week selector box with an always-on label showing the currently visible chart range.
-  - Updates on default view, pan, and zoom.
+- Owns UI-only behavior that should not touch core data structures:
+  - Open/close Add/Edit panel (without destroying carousel state).
+  - Time line ticker + font fit.
+  - Edit confirmation modal (press-highlight flow remains in log.js).
+  - Export modal (no generic popups; consistent in-app modal UX).
+  - Install/Uninstall guidance button behavior.
+  - Clear Data button (with explicit confirmation).
+  - Exit handler preserved (window.close + delayed alert fallback).
 
 Latest Update (v2.001):
-- Initial modular UI controller with:
-  - In-app Export sheet (copy/share/save .txt).
-  - In-app PDF/Print preview (no generic export choice popup).
-  - Chart range label updater hook.
+- Initial modular UI wiring for v2.001.
+- Export modal accepts payload text/filename and offers Close / Share / Save .txt.
+- Clear Data removes ONLY the v1 storage key (preserves modular files, does not alter browser settings).
 */
 
-import { $, setText, show, hide, isHidden } from "./utils.js";
-import { APP_VERSION, chartView, setActivePanelId } from "./state.js";
-import { renderLog } from "./log.js";
-import { initChartsDefaultView, renderCharts, updateChartRangeLabel } from "./charts.js";
-import {
-  buildLogExportText,
-  buildChartsExportText,
-  copyToClipboard,
-  saveTextWithPicker,
-  downloadText,
-  buildLogPrintableHtml,
-  buildChartsPrintableHtml
-} from "./export.js";
-import { enterAddNewFrom, enterAddEditFromLog, closeAddPanel } from "./add.js";
+import { $, clamp } from "./utils.js";
+import { APP_VERSION, STORAGE_KEY, state } from "./state.js";
+import { loadRecords, saveRecords, clearAllRecords } from "./storage.js";
 
-/* ----------------------------- Internal helpers ----------------------------- */
-
-function safeFocus(el){
-  try{ el?.focus?.({ preventScroll:true }); }catch{}
+/* -----------------------------
+   Add/Edit panel open/close
+------------------------------ */
+export function openAddPanel(){
+  state.isAddOpen = true;
+  $("add").classList.remove("hidden");
+  $("viewport").classList.add("hidden");
+  window.scrollTo({top:0, left:0, behavior:"auto"});
 }
 
-function setVersionBadges(){
-  const nodes = document.querySelectorAll("[data-app-version]");
-  nodes.forEach(n => n.textContent = APP_VERSION);
+export function closeAddPanel(){
+  state.isAddOpen = false;
+  $("add").classList.add("hidden");
+  $("viewport").classList.remove("hidden");
+  window.scrollTo({top:0, left:0, behavior:"auto"});
 }
 
-function blurActive(){
-  try{ document.activeElement?.blur?.(); }catch{}
+export function enterAddNew(fromPanel="home"){
+  state.editTs = null;
+  state.returnPanel = fromPanel;
+
+  $("editPill").classList.add("hidden");
+  $("btnDelete").classList.add("hidden");
+
+  $("sys").value = "";
+  $("dia").value = "";
+  $("hr").value  = "";
+  $("notes").value = "";
+
+  // symptoms grid state is managed by symptoms.js; we only clear UI safely here if present
+  try{
+    const ev = new CustomEvent("vt:clearSymptoms");
+    window.dispatchEvent(ev);
+  }catch{}
+
+  openAddPanel();
+  startTimeTicker();
+  adjustTimeFont();
+
+  setTimeout(() => { try{ $("sys").focus({preventScroll:true}); }catch{} }, 0);
 }
 
-/* ----------------------------- Navigation ----------------------------- */
-
-export function goTo(panelId){
-  // panelId: "home" | "log" | "charts"
-  setActivePanelId(panelId);
-
-  // Show the carousel panel via app.js (which controls swipe/carousel). If app.js exists, it calls here.
-  // We keep this as a no-op hook unless app.js wires it.
-}
-
-/*
-The following functions are expected to be called by app.js (carousel controller):
-- onPanelShown("log") -> renderLog
-- onPanelShown("charts") -> init view if needed, renderCharts
-*/
-
-export function onPanelShown(panelId){
-  blurActive();
-
-  if(panelId === "log"){
-    renderLog();
+export function enterAddEdit(ts){
+  const recs = loadRecords();
+  const r = recs.find(x => x.ts === ts);
+  if(!r){
+    enterAddNew("log");
     return;
   }
-  if(panelId === "charts"){
-    initChartsDefaultView();      // most recent 7 days, etc.
-    renderCharts();
-    updateChartRangeLabel();
-    return;
-  }
-}
 
-/* ----------------------------- Export Sheet (Text) ----------------------------- */
+  state.editTs = ts;
+  state.returnPanel = "log";
 
-let exportPayload = null;
-let exportPrevFocus = null;
+  $("editPill").classList.remove("hidden");
+  $("btnDelete").classList.remove("hidden");
 
-export function openExportSheet(payload){
-  exportPayload = payload;
-  exportPrevFocus = document.activeElement || null;
-
-  // payload: { text, filename, count }
-  setText($("exportSheetTitle"), "Export ready");
-  setText($("exportSheetSub"),
-    `Copied to clipboard.\n\n` +
-    `This report is reviewer-oriented (method of capture + what matters).\n` +
-    `Entries: ${payload.count ?? "—"}\n\n` +
-    `Optional:\n` +
-    `• Share sends the report to another app.\n` +
-    `• Save creates a .txt file on your device.`
-  );
-
-  const canShare = !!(navigator.share && typeof navigator.share === "function");
-  $("btnExportShare").disabled = !canShare;
-
-  show($("exportSheet"));
-  safeFocus($("btnExportClose"));
-}
-
-export function closeExportSheet(){
-  exportPayload = null;
-  hide($("exportSheet"));
-  try{ exportPrevFocus?.focus?.({ preventScroll:true }); }catch{}
-}
-
-async function doExportCopyAndOpen(payload){
-  try{ await copyToClipboard(payload.text); }catch{}
-  openExportSheet(payload);
-}
-
-async function handleExportSave(){
-  if(!exportPayload) return;
-  const text = exportPayload.text;
-  const filename = exportPayload.filename || "vitals_report.txt";
+  $("sys").value = (r.sys ?? "") === null ? "" : (r.sys ?? "");
+  $("dia").value = (r.dia ?? "") === null ? "" : (r.dia ?? "");
+  $("hr").value  = (r.hr  ?? "") === null ? "" : (r.hr  ?? "");
+  $("notes").value = (r.notes ?? "").toString();
 
   try{
-    const ok = await saveTextWithPicker(text, filename);
-    if(ok){
-      // Non-generic: we update in-sheet message instead of alert
-      setText($("exportSheetSub"),
-        `Saved.\n\nEntries: ${exportPayload.count ?? "—"}\n\n` +
-        `Tip: You can still Share or Close.`
+    const ev = new CustomEvent("vt:setSymptoms", { detail: { symptoms: r.symptoms || [] } });
+    window.dispatchEvent(ev);
+  }catch{}
+
+  openAddPanel();
+  startTimeTicker();
+  adjustTimeFont();
+  setTimeout(() => { try{ document.activeElement?.blur(); }catch{} }, 0);
+}
+
+/* -----------------------------
+   Time line ticker + font fit
+------------------------------ */
+let timeTimer = null;
+
+function fmtTimeCommaDate(ts){
+  const d = new Date(ts);
+  const time = new Intl.DateTimeFormat(undefined, {
+    hour:"2-digit", minute:"2-digit", second:"2-digit"
+  }).format(d);
+  const date = new Intl.DateTimeFormat(undefined, {
+    month:"2-digit", day:"2-digit", year:"numeric"
+  }).format(d);
+  return `${time}, ${date}`;
+}
+
+function tickTime(){
+  const line = $("timeLine");
+  const ts = (state.editTs != null) ? state.editTs : Date.now();
+  line.textContent = fmtTimeCommaDate(ts);
+  adjustTimeFont();
+
+  if(timeTimer) clearTimeout(timeTimer);
+  timeTimer = setTimeout(tickTime, 900);
+}
+
+function startTimeTicker(){
+  tickTime();
+}
+
+export function adjustTimeFont(){
+  const el = $("timeLine");
+  if(!el) return;
+  const parent = el.parentElement;
+  if(!parent) return;
+
+  el.style.fontSize = "";
+  const maxW = parent.clientWidth - 8;
+
+  let fs = parseFloat(getComputedStyle(el).fontSize) || 28;
+  let guard = 0;
+  while(el.scrollWidth > maxW && fs > 16 && guard < 30){
+    fs -= 1;
+    el.style.fontSize = fs + "px";
+    guard++;
+  }
+}
+
+/* -----------------------------
+   Edit confirm modal
+------------------------------ */
+let pendingEditTs = null;
+let modalPrevFocus = null;
+let modalOpenedAt = 0;
+let enableEditTimer = null;
+
+export function openEditPrompt(ts){
+  pendingEditTs = ts;
+  modalPrevFocus = document.activeElement || null;
+  modalOpenedAt = Date.now();
+
+  const m = $("editModal");
+  const btnEdit = $("btnEditConfirm");
+
+  btnEdit.disabled = true;
+  if(enableEditTimer) clearTimeout(enableEditTimer);
+  enableEditTimer = setTimeout(() => { btnEdit.disabled = false; }, 450);
+
+  m.classList.remove("hidden");
+  setTimeout(() => { try{ $("btnEditCancel").focus({preventScroll:true}); }catch{} }, 0);
+}
+
+function closeEditPrompt(){
+  pendingEditTs = null;
+  $("editModal").classList.add("hidden");
+  try{ modalPrevFocus?.focus?.({preventScroll:true}); }catch{}
+}
+
+export function wireEditModal({ onConfirm }){
+  $("btnEditCancel").addEventListener("click", (e) => { e.preventDefault(); closeEditPrompt(); });
+  $("btnEditConfirm").addEventListener("click", (e) => {
+    e.preventDefault();
+    if($("btnEditConfirm").disabled) return;
+    const ts = pendingEditTs;
+    closeEditPrompt();
+    if(ts != null) onConfirm(ts);
+  });
+
+  $("editModal").addEventListener("click", (e) => {
+    const justOpened = (Date.now() - modalOpenedAt) < 220;
+    if(justOpened){ e.preventDefault(); e.stopPropagation(); return; }
+    if(e.target === $("editModal")) closeEditPrompt();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    const open = !$("editModal").classList.contains("hidden");
+    if(!open) return;
+
+    if(e.key === "Escape"){
+      e.preventDefault();
+      closeEditPrompt();
+      return;
+    }
+    if(e.key === "Enter"){
+      const ae = document.activeElement;
+      if(ae && ae.id === "btnEditCancel"){
+        e.preventDefault();
+        closeEditPrompt();
+      }else{
+        e.preventDefault();
+        $("btnEditConfirm").click();
+      }
+    }
+  });
+}
+
+/* -----------------------------
+   Export modal (no generic popups)
+------------------------------ */
+let exportPayload = null;
+let exportPrevFocus = null;
+let exportOpenedAt = 0;
+let enableExportTimer = null;
+
+function isShareAvailable(){
+  return !!(navigator.share && typeof navigator.share === "function");
+}
+
+async function copyToClipboard(text){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    await navigator.clipboard.writeText(text);
+    return true;
+  }
+  return false;
+}
+
+function downloadText(text, filename){
+  const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+async function saveTextWithPicker(text, suggestedName){
+  const canPick = typeof window.showSaveFilePicker === "function";
+  if(!canPick) return false;
+
+  const opts = {
+    suggestedName: suggestedName || "vitals_report.txt",
+    types: [{ description: "Text", accept: {"text/plain": [".txt"]} }]
+  };
+
+  const handle = await window.showSaveFilePicker(opts);
+  const writable = await handle.createWritable();
+  await writable.write(new Blob([text], {type:"text/plain;charset=utf-8"}));
+  await writable.close();
+  return true;
+}
+
+export function openExportModal(payload){
+  exportPayload = payload;
+  exportPrevFocus = document.activeElement || null;
+  exportOpenedAt = Date.now();
+
+  const btnClose = $("btnExportClose");
+  const btnShare = $("btnExportShare");
+  const btnSave  = $("btnExportSave");
+
+  btnClose.disabled = true;
+  btnShare.disabled = true;
+  btnSave.disabled  = true;
+
+  $("exportModal").classList.remove("hidden");
+
+  if(enableExportTimer) clearTimeout(enableExportTimer);
+  enableExportTimer = setTimeout(() => {
+    btnClose.disabled = false;
+    btnShare.disabled = !isShareAvailable();
+    btnSave.disabled  = false;
+  }, 450);
+
+  setTimeout(() => { try{ btnClose.focus({preventScroll:true}); }catch{} }, 0);
+}
+
+function closeExportModal(){
+  exportPayload = null;
+  $("exportModal").classList.add("hidden");
+  try{ exportPrevFocus?.focus?.({preventScroll:true}); }catch{}
+}
+
+export function wireExportModal(){
+  $("btnExportClose").addEventListener("click", (e) => { e.preventDefault(); closeExportModal(); });
+
+  $("exportModal").addEventListener("click", (e) => {
+    const justOpened = (Date.now() - exportOpenedAt) < 220;
+    if(justOpened){ e.preventDefault(); e.stopPropagation(); return; }
+    if(e.target === $("exportModal")) closeExportModal();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    const open = !$("exportModal").classList.contains("hidden");
+    if(!open) return;
+    if(e.key === "Escape"){
+      e.preventDefault();
+      closeExportModal();
+    }
+  });
+
+  $("btnExportShare").addEventListener("click", async (e) => {
+    e.preventDefault();
+    if(!exportPayload) return;
+    if($("btnExportShare").disabled) return;
+
+    if(!isShareAvailable()){
+      // No popups required; but Share button is disabled when unavailable.
+      return;
+    }
+    try{
+      await navigator.share({
+        title: "Vitals Tracker Export",
+        text: exportPayload.text
+      });
+    }catch{}
+  });
+
+  $("btnExportSave").addEventListener("click", async (e) => {
+    e.preventDefault();
+    if(!exportPayload) return;
+    if($("btnExportSave").disabled) return;
+
+    try{
+      const ok = await saveTextWithPicker(exportPayload.text, exportPayload.filename);
+      if(ok) return;
+    }catch{}
+
+    downloadText(exportPayload.text, exportPayload.filename || "vitals_report.txt");
+  });
+}
+
+export async function exportToModal({ text, filename }){
+  try{ await copyToClipboard(text); }catch{}
+  openExportModal({ text, filename });
+}
+
+/* -----------------------------
+   Install / Exit / Clear Data
+------------------------------ */
+let deferredPrompt = null;
+
+export function wireInstallButton(){
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    refreshInstallButton();
+  });
+
+  window.addEventListener("appinstalled", () => {
+    deferredPrompt = null;
+    refreshInstallButton();
+  });
+
+  $("btnInstall").addEventListener("click", async () => {
+    if(isStandalone()){
+      // No generic popup: but we still must inform the user. Alert is acceptable as an OS-level prompt;
+      // If you want this in an in-app modal later, we can convert it.
+      alert(
+        "Uninstall:\n\n" +
+        "Android: press-and-hold the app icon → Uninstall.\n" +
+        "Uninstall typically does NOT delete your saved data, but device/browser behavior can vary.\n\n" +
+        "To delete data on purpose: use Clear Data (home screen)."
       );
       return;
     }
-  }catch{}
-
-  downloadText(text, filename);
-  setText($("exportSheetSub"),
-    `Saved.\n\nEntries: ${exportPayload.count ?? "—"}\n\n` +
-    `Tip: You can still Share or Close.`
-  );
-}
-
-async function handleExportShare(){
-  if(!exportPayload) return;
-  if(!(navigator.share && typeof navigator.share === "function")) return;
-
-  try{
-    await navigator.share({
-      title: "Vitals Tracker Export",
-      text: exportPayload.text
-    });
-  }catch{
-    // user canceled or share failed; keep silent
-  }
-}
-
-/* ----------------------------- Print/PDF Panel ----------------------------- */
-
-let printPrevFocus = null;
-
-export function openPrintPanel(htmlDoc){
-  // htmlDoc is a full HTML document string to print
-  printPrevFocus = document.activeElement || null;
-
-  const frame = $("printFrame");
-  if(frame){
-    // Load HTML into iframe
-    const blob = new Blob([htmlDoc], { type:"text/html;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    frame.dataset.blobUrl && URL.revokeObjectURL(frame.dataset.blobUrl);
-    frame.dataset.blobUrl = url;
-    frame.src = url;
-  }
-
-  show($("printPanel"));
-  safeFocus($("btnPrintNow"));
-}
-
-export function closePrintPanel(){
-  hide($("printPanel"));
-  try{ printPrevFocus?.focus?.({ preventScroll:true }); }catch{}
-}
-
-function printNow(){
-  const frame = $("printFrame");
-  if(!frame) return;
-
-  try{
-    // Some browsers need a brief delay for the iframe to finish loading.
-    const win = frame.contentWindow;
-    if(!win) return;
-    win.focus();
-    win.print();
-  }catch{
-    // If printing fails, leave preview open
-  }
-}
-
-/* ----------------------------- Wire controls ----------------------------- */
-
-export function wireUiControls(){
-  setVersionBadges();
-
-  // Home buttons
-  $("btnGoAdd")?.addEventListener("click", () => enterAddNewFrom("home"));
-  $("btnGoLog")?.addEventListener("click", () => window.__vtNav?.("log"));
-  $("btnGoCharts")?.addEventListener("click", () => window.__vtNav?.("charts"));
-
-  $("btnClearAll")?.addEventListener("click", () => window.__vtClearAll?.());
-  $("btnInstall")?.addEventListener("click", () => window.__vtInstall?.());
-
-  // Exit handler MUST remain in app.js (frozen). We call hook.
-  $("btnExitHome")?.addEventListener("click", () => window.__vtExit?.());
-
-  // Log buttons
-  $("btnBackFromLog")?.addEventListener("click", () => window.__vtNav?.("home"));
-  $("btnAddFromLog")?.addEventListener("click", () => enterAddNewFrom("log"));
-  $("btnRunSearch")?.addEventListener("click", (e) => { e.preventDefault(); renderLog(); });
-
-  $("search")?.addEventListener("keydown", (e) => {
-    if(e.key === "Enter"){
-      e.preventDefault();
-      renderLog();
-      blurActive();
+    if(deferredPrompt){
+      deferredPrompt.prompt();
+      try{ await deferredPrompt.userChoice; }catch{}
+      deferredPrompt = null;
+      refreshInstallButton();
+      return;
     }
+    alert("Install is available when your browser offers it (menu → Install app).");
   });
+}
 
-  ["fromDate","toDate"].forEach(id => {
-    $(id)?.addEventListener("input", () => renderLog());
-    $(id)?.addEventListener("change", () => renderLog());
+export function isStandalone(){
+  return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+}
+
+export function refreshInstallButton(){
+  $("btnInstall").textContent = isStandalone() ? "Uninstall" : "Install";
+}
+
+export function wireExitButton(){
+  $("btnExitHome").addEventListener("click", () => {
+    // frozen known-good behavior
+    window.close();
+    setTimeout(() => {
+      alert("If it didn’t close: use your phone’s Back/Home.");
+    }, 200);
   });
+}
 
-  // Charts buttons
-  $("btnBackFromCharts")?.addEventListener("click", () => window.__vtNav?.("home"));
+export function wireClearDataButton(){
+  $("btnClearAll").addEventListener("click", () => {
+    const ok = confirm(
+      "Clear ALL saved vitals data?\n\n" +
+      "This deletes everything stored on this phone for Vitals Tracker.\n" +
+      "This cannot be undone."
+    );
+    if(!ok) return;
 
-  // Export (Text) — Log
-  $("btnExportLogTxt")?.addEventListener("click", async () => {
-    const payload = buildLogExportText({
-      searchValue: $("search")?.value || "",
-      fromDateValue: $("fromDate")?.value || "",
-      toDateValue: $("toDate")?.value || ""
-    });
-    await doExportCopyAndOpen(payload);
-  });
+    clearAllRecords();
 
-  // Export (PDF) — Log
-  $("btnExportLogPdf")?.addEventListener("click", () => {
-    const html = buildLogPrintableHtml({
-      searchValue: $("search")?.value || "",
-      fromDateValue: $("fromDate")?.value || "",
-      toDateValue: $("toDate")?.value || ""
-    });
-    openPrintPanel(html);
-  });
+    // reset log filters if present
+    if($("fromDate")) $("fromDate").value = "";
+    if($("toDate")) $("toDate").value = "";
+    if($("search")) $("search").value = "";
 
-  // Export (Text) — Charts (visible range only)
-  $("btnExportChartsTxt")?.addEventListener("click", async () => {
-    const payload = buildChartsExportText();
-    await doExportCopyAndOpen(payload);
-  });
-
-  // Export (PDF) — Charts (visible range only)
-  $("btnExportChartsPdf")?.addEventListener("click", () => {
-    const html = buildChartsPrintableHtml();
-    openPrintPanel(html);
-  });
-
-  // Export sheet
-  $("btnExportClose")?.addEventListener("click", (e) => { e.preventDefault(); closeExportSheet(); });
-  $("btnExportShare")?.addEventListener("click", async (e) => { e.preventDefault(); await handleExportShare(); });
-  $("btnExportSave")?.addEventListener("click", async (e) => { e.preventDefault(); await handleExportSave(); });
-
-  // Click outside sheets closes (non-generic, but still standard)
-  $("exportSheet")?.addEventListener("click", (e) => {
-    if(e.target === $("exportSheet")) closeExportSheet();
-  });
-
-  // Print panel
-  $("btnPrintClose")?.addEventListener("click", (e) => { e.preventDefault(); closePrintPanel(); });
-  $("btnPrintNow")?.addEventListener("click", (e) => { e.preventDefault(); printNow(); });
-
-  $("printPanel")?.addEventListener("click", (e) => {
-    if(e.target === $("printPanel")) closePrintPanel();
-  });
-
-  // Add panel back button (handled in add.js but we ensure close)
-  $("btnBackFromAdd")?.addEventListener("click", () => closeAddPanel());
-
-  // Keep chart range label in sync if charts module emits events
-  window.addEventListener("vt:chartviewchanged", () => {
-    updateChartRangeLabel();
+    alert("All data cleared.");
+    // caller controls navigation; keep minimal
   });
 }
 
@@ -301,17 +426,7 @@ export function wireUiControls(){
 Vitals Tracker (Modular) — js/ui.js (EOF)
 App Version: v2.001
 Notes:
-- Requires index.html to include:
-  - Export sheet DOM ids:
-    exportSheet, exportSheetTitle, exportSheetSub,
-    btnExportClose, btnExportShare, btnExportSave
-  - Print panel DOM ids:
-    printPanel, printFrame, btnPrintClose, btnPrintNow
-  - Log export buttons:
-    btnExportLogTxt, btnExportLogPdf
-  - Charts export buttons:
-    btnExportChartsTxt, btnExportChartsPdf
-  - Chart range label element:
-    chartRangeLabel
-- Next expected file: js/app.js (bootstrap; preserve existing STORAGE_KEY exactly; implement carousel swipe + pull-to-refresh; hook __vtNav/__vtExit/__vtClearAll/__vtInstall)
+- Export modal is the required non-generic UI for exports; charts/log use exportToModal().
+- If you want “export as PDF” next: we will add js/pdf.js to render a clean report to a hidden DOM,
+  then print-to-PDF (or share as PDF) via browser print pipeline with controlled layout.
 */
