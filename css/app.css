@@ -1,16 +1,21 @@
 /*
 Vitals Tracker (Modular) — css/app.css
 App Version: v2.001
+
 Purpose:
-- Global styling for the modular Vitals Tracker v2 shell.
-- Preserves the exact v1 visual language: glass panels, accent frame border, button styles, typography, spacing.
-- Ensures the carousel panels render consistently: fixed outer frame + inner scrolling content.
-- Sets chart interaction defaults so chart gestures (horizontal pan/zoom) can consume touch/scroll without the parent panel scrolling.
+- Centralized styling to preserve the v1.19Bx look/feel:
+  - Glass panel, accent frame, typography, buttons
+  - Carousel viewport/track/panels
+  - Add/Edit form styling
+  - Log entry styling
+  - Charts canvas styling
+  - Custom in-panel “sheet” components for export (no generic popups)
+
 Latest Update (v2.001):
-- Initial v2 CSS extracted from v1.19B44 with minimal structural additions:
-  - .chartWrap container for gesture isolation
-  - .rangeLabel for visible date range label on Charts
-  - .inlineNotice for non-generic inline notices (no modal popups)
+- Initial modular stylesheet extracted from v1.19B44.
+- Preserves accent frame + card look.
+- Adds classes for custom sheets:
+  - .sheet, .sheetCard, .sheetTitle, .sheetSub, .sheetBtns
 */
 
 :root{
@@ -29,8 +34,6 @@ Latest Update (v2.001):
   --btnH:56px;
   --pad:18px;
   --font: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-
-  /* keep the same minimal “shrink” */
   --vpPadX:6px;
 }
 
@@ -184,45 +187,6 @@ textarea.field{
   line-height:1.25;
 }
 
-.homeMain{
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-  margin-top:8px;
-}
-.homeMain > .btn:not(.small){
-  font-size:26px;
-  font-weight:750;
-  letter-spacing:.3px;
-}
-
-.homeFooterRow{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  margin-top:8px;
-  flex-wrap:nowrap;
-}
-
-.footerTiny{
-  margin-top:10px;
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  font-size: 12px;
-  color: rgba(235,245,255,.38);
-}
-
-.ptrHint{
-  margin: 0 4px 10px;
-  color: rgba(235,245,255,.40);
-  font-size: 12px;
-  font-weight: 650;
-  letter-spacing: .2px;
-  user-select:none;
-}
-
 .timeLine{
   margin: 4px 4px 14px;
   color: rgba(235,245,255,.82);
@@ -303,6 +267,7 @@ textarea.field{
   flex-wrap:wrap;
 }
 
+/* Log entries */
 .filters{
   display:grid;
   grid-template-columns: 1fr 1fr;
@@ -342,43 +307,6 @@ input[type="date"].field, input[type="week"].field{
   border-radius: 18px;
 }
 
-/* Chart canvas base */
-canvas{
-  width:100%;
-  height:280px;
-  border-radius: 22px;
-  border:1px solid var(--stroke);
-  background: rgba(255,255,255,.02);
-  margin-top: 10px;
-  touch-action: none;
-}
-
-/* New: chart interaction wrapper
-   - Provides a consistent touch surface.
-   - JS will stop wheel/touch scroll propagation while user is above/interacting with the chart.
-*/
-.chartWrap{
-  margin-top: 10px;
-  border-radius: 22px;
-  overflow:hidden;
-  /* Keep it visually identical, but allow us to intercept events cleanly */
-}
-
-/* New: visible range label for Charts */
-.rangeLabel{
-  margin: 10px 4px 0;
-  padding: 10px 12px;
-  border-radius: 18px;
-  border: 1px solid var(--stroke2);
-  background: rgba(255,255,255,.03);
-  color: rgba(235,245,255,.72);
-  font-weight: 750;
-  letter-spacing: .2px;
-  font-size: 14px;
-  user-select:none;
-}
-
-/* Entries */
 .entry{
   border:1px solid var(--stroke);
   background: rgba(255,255,255,.03);
@@ -431,70 +359,48 @@ canvas{
 }
 .entryLine b{ color: rgba(235,245,255,.70); }
 
-/* Add/Edit Pill */
-.editPill{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding: 8px 12px;
-  border-radius: 999px;
-  border: 1px solid var(--stroke2);
-  background: rgba(255,255,255,.03);
-  color: rgba(235,245,255,.70);
-  font-weight:700;
-  letter-spacing:.2px;
-  margin: 0 4px 10px;
-  width: fit-content;
-}
-
-.noteLabel{
-  margin: 12px 4px 8px;
-  color:var(--muted);
-  font-weight:650;
-  font-size:16px;
-}
-.noteLabel em{
-  font-style:italic;
-  color: rgba(235,245,255,.42);
-  font-weight:600;
-}
-
-/* Inline notice (non-generic; no modal popups) */
-.inlineNotice{
+/* Chart canvas */
+canvas{
+  width:100%;
+  height:280px;
+  border-radius: 22px;
+  border:1px solid var(--stroke);
+  background: rgba(255,255,255,.02);
   margin-top: 10px;
-  padding: 12px 14px;
-  border-radius: 18px;
-  border: 1px solid rgba(120,170,255,.42);
-  background: rgba(47,120,255,.12);
-  color: rgba(235,245,255,.86);
-  font-weight: 700;
-  letter-spacing: .2px;
+  touch-action: none; /* critical: chart owns gestures */
 }
 
-/* Carousel viewport */
+.ptrHint{
+  margin: 0 4px 10px;
+  color: rgba(235,245,255,.40);
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: .2px;
+  user-select:none;
+}
+
+/* Carousel */
 .viewport{
   overflow:hidden;
   width:100%;
   touch-action: pan-y;
   padding: 0 var(--vpPadX);
 }
-
 .track{
   display:flex;
   width:100%;
   will-change: transform;
   transform: translate3d(0,0,0);
   align-items:flex-start;
-  gap: 0;
+  gap:0;
 }
-
 .panel{
   flex: 0 0 100%;
   width:100%;
   align-self:flex-start;
 }
 
-/* Fixed outer frame + inner scroll for panel content (consistent borders) */
+/* Fixed frame + inner scroll (matches v1.19B44 behavior) */
 .panelFrame{
   width:100%;
   height: calc(100dvh - max(14px, env(safe-area-inset-top)) - max(14px, env(safe-area-inset-bottom)) - 12px);
@@ -507,16 +413,57 @@ canvas{
   -webkit-overflow-scrolling: touch;
 }
 
-/* Small panel-specific tightening for parity */
-#log .label{ margin: 8px 4px 6px; }
-#log .filters{ margin-top: 8px; gap: 10px; }
-#log .dateField{ gap: 6px; }
+/* Custom sheet (export UI) — not a generic popup modal */
+.sheet{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: max(16px, env(safe-area-inset-top)) 14px max(16px, env(safe-area-inset-bottom));
+  background: rgba(0,0,0,.56);
+  z-index: 9998;
+}
+.sheetCard{
+  width:min(520px, 100%);
+  border-radius: 26px;
+  border: 3px solid var(--accent);
+  background: linear-gradient(180deg, rgba(12,21,40,.96), rgba(8,16,31,.96));
+  box-shadow: 0 18px 60px rgba(0,0,0,.55);
+  padding: 18px;
+  backdrop-filter: blur(10px);
+}
+.sheetTitle{
+  font-weight: 900;
+  letter-spacing: .2px;
+  color: rgba(235,245,255,.92);
+  font-size: clamp(22px, 6.5vw, 34px);
+  line-height: 1.05;
+  margin: 4px 2px 14px;
+}
+.sheetSub{
+  color: rgba(235,245,255,.56);
+  font-size: 14px;
+  margin: 0 2px 14px;
+  white-space: pre-wrap;
+}
+.sheetBtns{
+  display:flex;
+  gap:12px;
+  margin-top: 6px;
+  flex-wrap:wrap;
+}
+.sheetBtns .btn{
+  flex:1;
+  height: 54px;
+  font-size: 18px;
+  font-weight: 800;
+  min-width: 140px;
+}
 
 /*
 Vitals Tracker (Modular) — css/app.css (EOF)
 App Version: v2.001
 Notes:
-- Styling is intentionally kept very close to v1.19B44 to preserve look/feel.
-- Chart gesture/scroll isolation is supported via .chartWrap + canvas touch-action none; JS will further prevent panel scroll while interacting.
-- Next expected file: js/version.js
+- Next expected file: js/chart.js
 */
