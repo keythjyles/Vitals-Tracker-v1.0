@@ -1,0 +1,522 @@
+/*
+Vitals Tracker (Modular) — css/app.css
+App Version: v2.001
+Purpose:
+- Global styling for the modular Vitals Tracker v2 shell.
+- Preserves the exact v1 visual language: glass panels, accent frame border, button styles, typography, spacing.
+- Ensures the carousel panels render consistently: fixed outer frame + inner scrolling content.
+- Sets chart interaction defaults so chart gestures (horizontal pan/zoom) can consume touch/scroll without the parent panel scrolling.
+Latest Update (v2.001):
+- Initial v2 CSS extracted from v1.19B44 with minimal structural additions:
+  - .chartWrap container for gesture isolation
+  - .rangeLabel for visible date range label on Charts
+  - .inlineNotice for non-generic inline notices (no modal popups)
+*/
+
+:root{
+  --bg0:#08101f;
+  --bg1:#0b1324;
+  --panel:#0c1528cc;
+  --stroke:rgba(235,245,255,.16);
+  --stroke2:rgba(235,245,255,.22);
+  --strokeBold:rgba(180,210,255,.42);
+  --text:rgba(235,245,255,.86);
+  --muted:rgba(235,245,255,.58);
+  --muted2:rgba(235,245,255,.42);
+  --accent:#2b4e7a;
+  --shadow:0 14px 40px rgba(0,0,0,.38);
+  --radius:26px;
+  --btnH:56px;
+  --pad:18px;
+  --font: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+
+  /* keep the same minimal “shrink” */
+  --vpPadX:6px;
+}
+
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+
+body{
+  margin:0;
+  font-family:var(--font);
+  color:var(--text);
+  background:
+    radial-gradient(1200px 700px at 30% 0%, rgba(47,120,255,.22), transparent 55%),
+    radial-gradient(900px 600px at 80% 20%, rgba(91,214,178,.10), transparent 55%),
+    linear-gradient(180deg, var(--bg1), var(--bg0));
+  display:flex;
+  justify-content:center;
+  padding: max(14px, env(safe-area-inset-top)) 12px max(14px, env(safe-area-inset-bottom));
+}
+
+.app{
+  width:min(520px, 100%);
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.logoTitle{
+  margin:10px 6px 0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  text-shadow: 0 10px 22px rgba(0,0,0,.35);
+}
+.logoTitle svg{
+  width:min(520px, 100%);
+  height:auto;
+  display:block;
+}
+
+.card{
+  background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+  border:1px solid var(--stroke);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: var(--pad);
+  backdrop-filter: blur(10px);
+}
+
+.accentFrame{
+  position:relative;
+  border-color: transparent;
+}
+.accentFrame::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border:3px solid var(--accent);
+  border-radius: var(--radius);
+  pointer-events:none;
+  z-index:0;
+}
+.accentFrame > *{
+  position:relative;
+  z-index:1;
+}
+
+.hidden{ display:none !important; }
+
+.btn{
+  height:var(--btnH);
+  border-radius: 999px;
+  border:1px solid var(--stroke2);
+  background: rgba(255,255,255,.03);
+  color:rgba(235,245,255,.78);
+  font-weight:650;
+  letter-spacing:.2px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 18px;
+  user-select:none;
+  -webkit-tap-highlight-color: transparent;
+  font-size:18px;
+}
+.btn:active{ transform: translateY(1px); }
+
+.btn.primary{
+  background: linear-gradient(180deg, rgba(47,120,255,.92), rgba(47,120,255,.72));
+  border-color: rgba(120,170,255,.55);
+  color: rgba(235,245,255,.90);
+}
+
+.btn.danger{
+  background: linear-gradient(180deg, rgba(255,80,80,.18), rgba(255,80,80,.10));
+  border-color: rgba(255,120,120,.42);
+  color: rgba(255,225,225,.92);
+  box-shadow: 0 10px 26px rgba(0,0,0,.22);
+}
+
+.btn.small{
+  height:44px;
+  font-size:16px;
+  padding:0 14px;
+  font-weight:650;
+  white-space:nowrap;
+}
+
+.btn:disabled{
+  opacity:.55;
+  filter:saturate(.85);
+  transform:none !important;
+  pointer-events:none;
+}
+
+.row{ display:flex; gap:12px; }
+.row.center{ align-items:center; }
+.grow{ flex:1; }
+
+.label{
+  font-size:16px;
+  color:var(--muted);
+  font-weight:650;
+  margin: 12px 4px 8px;
+}
+.subtle{
+  font-size:14px;
+  color:var(--muted2);
+  margin: 6px 4px 0;
+}
+
+.field{
+  border:2px solid var(--strokeBold);
+  background: rgba(255,255,255,.06);
+  color: rgba(235,245,255,.86);
+  border-radius: 18px;
+  height:54px;
+  padding: 0 14px;
+  font-size:18px;
+  outline:none;
+  width:100%;
+}
+.field::placeholder{ color: rgba(235,245,255,.35); }
+.field:focus{
+  border-color: rgba(90,150,255,.78);
+  box-shadow: 0 0 0 4px rgba(47,120,255,.16);
+}
+textarea.field{
+  height:64px;
+  padding: 12px 14px;
+  resize:none;
+  line-height:1.25;
+}
+
+.homeMain{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  margin-top:8px;
+}
+.homeMain > .btn:not(.small){
+  font-size:26px;
+  font-weight:750;
+  letter-spacing:.3px;
+}
+
+.homeFooterRow{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-top:8px;
+  flex-wrap:nowrap;
+}
+
+.footerTiny{
+  margin-top:10px;
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  font-size: 12px;
+  color: rgba(235,245,255,.38);
+}
+
+.ptrHint{
+  margin: 0 4px 10px;
+  color: rgba(235,245,255,.40);
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: .2px;
+  user-select:none;
+}
+
+.timeLine{
+  margin: 4px 4px 14px;
+  color: rgba(235,245,255,.82);
+  font-weight:750;
+  letter-spacing:.3px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  line-height:1.05;
+  font-size: clamp(18px, 6.4vw, 44px);
+}
+
+.triple{
+  display:grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+.triple .miniLabel{
+  margin: 0 4px 8px;
+  color: var(--muted);
+  font-weight:650;
+  font-size:16px;
+}
+
+.symGrid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 14px;
+  padding: 2px 2px 0;
+  margin-top: 0;
+}
+.symItem{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding: 2px 6px;
+  border-radius: 14px;
+  transition: background .12s ease, border-color .12s ease;
+}
+.box{
+  width:30px;
+  height:30px;
+  border-radius: 8px;
+  border:2px solid rgba(235,245,255,.40);
+  background: rgba(255,255,255,.03);
+  display:grid;
+  place-items:center;
+  flex:0 0 auto;
+}
+.check{
+  width:14px;
+  height:8px;
+  border-left:3px solid transparent;
+  border-bottom:3px solid transparent;
+  transform: rotate(-45deg);
+  margin-top:-2px;
+}
+.symText{
+  font-size:16px;
+  font-weight:500;
+  color: rgba(235,245,255,.76);
+  line-height:1.1;
+}
+.symItem.selected{ background: rgba(47,120,255,.16); }
+.symItem.selected .box{
+  border-color: rgba(90,150,255,.90);
+  background: rgba(47,120,255,.18);
+}
+.symItem.selected .check{
+  border-left-color: rgba(235,245,255,.92);
+  border-bottom-color: rgba(235,245,255,.92);
+}
+
+.panelButtons{
+  display:flex;
+  gap:12px;
+  margin-top: 10px;
+  flex-wrap:wrap;
+}
+
+.filters{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top:10px;
+}
+.dateField{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.dateField .miniLabel{
+  margin: 0 4px;
+  color: var(--muted);
+  font-weight:650;
+  font-size:14px;
+}
+input[type="date"].field, input[type="week"].field{
+  font-size:16px;
+  padding-right: 10px;
+}
+
+.searchRow{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+.searchRow .field{
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.searchRow .btn.small{
+  flex: 0 0 auto;
+  height:54px;
+  font-size:16px;
+  padding: 0 16px;
+  border-radius: 18px;
+}
+
+/* Chart canvas base */
+canvas{
+  width:100%;
+  height:280px;
+  border-radius: 22px;
+  border:1px solid var(--stroke);
+  background: rgba(255,255,255,.02);
+  margin-top: 10px;
+  touch-action: none;
+}
+
+/* New: chart interaction wrapper
+   - Provides a consistent touch surface.
+   - JS will stop wheel/touch scroll propagation while user is above/interacting with the chart.
+*/
+.chartWrap{
+  margin-top: 10px;
+  border-radius: 22px;
+  overflow:hidden;
+  /* Keep it visually identical, but allow us to intercept events cleanly */
+}
+
+/* New: visible range label for Charts */
+.rangeLabel{
+  margin: 10px 4px 0;
+  padding: 10px 12px;
+  border-radius: 18px;
+  border: 1px solid var(--stroke2);
+  background: rgba(255,255,255,.03);
+  color: rgba(235,245,255,.72);
+  font-weight: 750;
+  letter-spacing: .2px;
+  font-size: 14px;
+  user-select:none;
+}
+
+/* Entries */
+.entry{
+  border:1px solid var(--stroke);
+  background: rgba(255,255,255,.03);
+  border-radius: 22px;
+  padding: 8px 10px 7px;
+  margin-top: 6px;
+  touch-action: pan-y;
+}
+.entry.pressed{
+  background: rgba(47,120,255,.14);
+  border-color: rgba(90,150,255,.55);
+}
+.entry:active{ transform: translateY(1px); }
+.entryTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:10px;
+  margin-bottom: 2px;
+}
+.entryTime{
+  font-size:13px;
+  color: rgba(235,245,255,.46);
+  white-space:nowrap;
+}
+.entryBPHR{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:baseline;
+}
+.bpBig{
+  font-size:20px;
+  font-weight:800;
+  letter-spacing:.1px;
+  white-space:nowrap;
+}
+.hrBig{
+  font-size:20px;
+  font-weight:800;
+  color: rgba(235,245,255,.72);
+  white-space:nowrap;
+  letter-spacing:.1px;
+}
+.entryLine{
+  margin-top: 3px;
+  color: rgba(235,245,255,.62);
+  font-size:15px;
+  line-height:1.12;
+}
+.entryLine b{ color: rgba(235,245,255,.70); }
+
+/* Add/Edit Pill */
+.editPill{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--stroke2);
+  background: rgba(255,255,255,.03);
+  color: rgba(235,245,255,.70);
+  font-weight:700;
+  letter-spacing:.2px;
+  margin: 0 4px 10px;
+  width: fit-content;
+}
+
+.noteLabel{
+  margin: 12px 4px 8px;
+  color:var(--muted);
+  font-weight:650;
+  font-size:16px;
+}
+.noteLabel em{
+  font-style:italic;
+  color: rgba(235,245,255,.42);
+  font-weight:600;
+}
+
+/* Inline notice (non-generic; no modal popups) */
+.inlineNotice{
+  margin-top: 10px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(120,170,255,.42);
+  background: rgba(47,120,255,.12);
+  color: rgba(235,245,255,.86);
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+
+/* Carousel viewport */
+.viewport{
+  overflow:hidden;
+  width:100%;
+  touch-action: pan-y;
+  padding: 0 var(--vpPadX);
+}
+
+.track{
+  display:flex;
+  width:100%;
+  will-change: transform;
+  transform: translate3d(0,0,0);
+  align-items:flex-start;
+  gap: 0;
+}
+
+.panel{
+  flex: 0 0 100%;
+  width:100%;
+  align-self:flex-start;
+}
+
+/* Fixed outer frame + inner scroll for panel content (consistent borders) */
+.panelFrame{
+  width:100%;
+  height: calc(100dvh - max(14px, env(safe-area-inset-top)) - max(14px, env(safe-area-inset-bottom)) - 12px);
+  max-height: calc(100dvh - max(14px, env(safe-area-inset-top)) - max(14px, env(safe-area-inset-bottom)) - 12px);
+  overflow:hidden;
+}
+.panelInner{
+  height:100%;
+  overflow:auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Small panel-specific tightening for parity */
+#log .label{ margin: 8px 4px 6px; }
+#log .filters{ margin-top: 8px; gap: 10px; }
+#log .dateField{ gap: 6px; }
+
+/*
+Vitals Tracker (Modular) — css/app.css (EOF)
+App Version: v2.001
+Notes:
+- Styling is intentionally kept very close to v1.19B44 to preserve look/feel.
+- Chart gesture/scroll isolation is supported via .chartWrap + canvas touch-action none; JS will further prevent panel scroll while interacting.
+- Next expected file: js/version.js
+*/
