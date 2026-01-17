@@ -1,23 +1,21 @@
 /*
 Vitals Tracker (Modular) — js/storage.js
 App Version: v2.001
-Purpose:
-- Single source of truth for persistence.
-- CRITICAL: Preserve existing v1 data by using the SAME storage key:
-    "vitals_tracker_records_v1"
-  This ensures modular v2 reads the same dataset and does not overwrite/migrate unless you explicitly ask.
 
-Data Safety Rules:
-- loadRecords() is defensive: validates shape and sorts newest-first.
-- saveRecords() writes JSON to the same key.
-- clearAllRecords() removes only the known key.
-- No automatic migrations; no schema changes; no alternate keys.
+Purpose:
+- Data persistence layer with strict “do not destroy existing data” guarantees.
+- Reads/writes the ORIGINAL v1 storage key so the modular app continues using the same dataset:
+    STORAGE_KEY = "vitals_tracker_records_v1"
+- Provides safe load/save/clear helpers with defensive parsing and stable sorting.
 
 Latest Update (v2.001):
-- Initial modular storage layer preserving v1 key and structure.
+- Initial modular storage module.
+- Guarantees compatibility with v1.19Bx records:
+  { ts:number, sys:number|null, dia:number|null, hr:number|null, notes:string, symptoms:string[] }
+- Clear operation removes only STORAGE_KEY.
 */
 
-export const STORAGE_KEY = "vitals_tracker_records_v1";
+import { STORAGE_KEY } from "./state.js";
 
 function numOrNull(v){
   const n = Number(v);
@@ -40,6 +38,7 @@ export function loadRecords(){
         notes: (r.notes ?? "").toString(),
         symptoms: Array.isArray(r.symptoms) ? r.symptoms.map(String) : []
       }))
+      // v1 behavior sorts newest-first
       .sort((a,b)=> b.ts - a.ts);
   }catch{
     return [];
@@ -47,36 +46,24 @@ export function loadRecords(){
 }
 
 export function saveRecords(recs){
-  // Expect newest-first; caller can sort. We will not re-order beyond a minimal sanity sort.
-  const safe = Array.isArray(recs) ? recs : [];
-  safe.sort((a,b)=> (b?.ts||0) - (a?.ts||0));
+  // expect newest-first ordering, but normalize just in case
+  const safe = Array.isArray(recs) ? recs.slice() : [];
+  safe
+    .filter(r => r && typeof r.ts === "number")
+    .sort((a,b)=> b.ts - a.ts);
+
   localStorage.setItem(STORAGE_KEY, JSON.stringify(safe));
 }
 
 export function upsertRecord(record){
   const recs = loadRecords();
-  const ts = record?.ts;
-  if(typeof ts !== "number") return;
-
-  const idx = recs.findIndex(r => r.ts === ts);
-  const clean = {
-    ts,
-    sys: numOrNull(record.sys),
-    dia: numOrNull(record.dia),
-    hr:  numOrNull(record.hr),
-    notes: (record.notes ?? "").toString(),
-    symptoms: Array.isArray(record.symptoms) ? record.symptoms.map(String) : []
-  };
-
-  if(idx >= 0) recs[idx] = clean;
-  else recs.unshift(clean);
-
-  recs.sort((a,b)=> b.ts - a.ts);
+  const idx = recs.findIndex(r => r.ts === record.ts);
+  if(idx >= 0) recs[idx] = record;
+  else recs.unshift(record);
   saveRecords(recs);
 }
 
-export function deleteRecord(ts){
-  if(typeof ts !== "number") return;
+export function deleteRecordByTs(ts){
   const recs = loadRecords().filter(r => r.ts !== ts);
   saveRecords(recs);
 }
@@ -89,7 +76,6 @@ export function clearAllRecords(){
 Vitals Tracker (Modular) — js/storage.js (EOF)
 App Version: v2.001
 Notes:
-- Uses v1 storage key exactly to preserve all existing records.
-- No migrations, no secondary keys, no schema changes.
-- Next expected file: js/utils.js (helpers: $, escape, date/time formatting, clamp, etc.)
+- This module intentionally continues to use the v1 key so your current data remains intact.
+- If you later want a new v2 key, we will add a one-time “import/migrate” routine with a user-visible confirmation.
 */
