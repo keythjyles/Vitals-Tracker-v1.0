@@ -1,31 +1,12 @@
-<!-- ===========================
-File: /index.html
-Vitals Tracker — v2.012
-
-Change intent (visibility + certainty)
-- This update is ONLY to make it unmistakable that you are on the new build:
-  * Version bumped to v2.012
-  * “BOOT OK” reflects v2.012
-  * Clear “Build stamp” line on Home
-
-Functional intent (no feature regression)
-- Keeps the same structure expected by /js/app.js (v2.011):
-  #chartCanvas, #logList, #logFooter, #statusLine
-- Does not alter storage keys or delete any data.
-
-=========================== -->
+<!-- Vitals Tracker — Function-First Shell -->
+<!-- App Version: v2.009 -->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#0b1324" />
   <title>Vitals Tracker</title>
-
-  <!-- PWA -->
-  <link rel="manifest" id="manifestLink" href="manifest.webmanifest" />
-  <link rel="icon" href="icons/icon-192.png" />
-  <link rel="apple-touch-icon" href="icons/icon-192.png" />
 
   <style>
     :root{
@@ -35,400 +16,728 @@ Functional intent (no feature regression)
       --stroke:rgba(235,245,255,.16);
       --stroke2:rgba(235,245,255,.22);
       --strokeBold:rgba(180,210,255,.42);
-      --text:rgba(235,245,255,.90);
+      --text:rgba(235,245,255,.88);
       --muted:rgba(235,245,255,.58);
       --muted2:rgba(235,245,255,.42);
       --accent:#2b4e7a;
-      --shadow:0 18px 50px rgba(0,0,0,.45);
-      --radius:26px;
-      --radius2:20px;
+      --shadow:0 18px 42px rgba(0,0,0,.45);
+      --r:22px;
+      --r2:26px;
+      --pad:16px;
+      --gap:12px;
     }
+
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      background:linear-gradient(180deg,var(--bg1),var(--bg0));
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color:var(--text);
-      -webkit-tap-highlight-color:transparent;
-      overscroll-behavior-y:contain;
+      background:
+        radial-gradient(1200px 700px at 20% -10%, rgba(70,140,255,.20), transparent 60%),
+        radial-gradient(900px 600px at 90% 10%, rgba(80,160,255,.12), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+      overflow:hidden;
     }
 
-    .wrap{
-      max-width:520px;
-      margin:0 auto;
-      padding:18px 14px 24px;
-    }
-
-    .shell{
-      border:2px solid rgba(130,180,255,.35);
-      border-radius:34px;
-      padding:14px;
-      box-shadow:var(--shadow);
-      background:radial-gradient(1200px 700px at 15% 10%, rgba(100,170,255,.22), transparent 55%),
-                 radial-gradient(900px 600px at 80% 25%, rgba(120,200,255,.10), transparent 60%),
-                 linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+    .app{
+      height:100%;
+      display:flex;
+      flex-direction:column;
+      padding:14px 12px calc(14px + env(safe-area-inset-bottom));
+      gap:12px;
     }
 
     .topbar{
-      border:1px solid var(--stroke2);
-      border-radius:999px;
-      padding:14px 16px;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+      padding:12px 14px;
+      border:1px solid var(--stroke2);
+      border-radius:999px;
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      box-shadow: var(--shadow);
     }
     .title{
       font-weight:800;
-      font-size:34px;
       letter-spacing:.2px;
-      opacity:.95;
+      font-size:22px;
     }
     .boot{
-      font-size:16px;
-      font-weight:700;
-      letter-spacing:.2px;
-      opacity:.55;
+      font-size:13px;
+      color:var(--muted);
+      letter-spacing:.25px;
       white-space:nowrap;
     }
 
-    .tabs{
-      margin-top:14px;
-      border:1px solid var(--stroke2);
-      border-radius:999px;
-      padding:10px;
-      display:flex;
-      gap:10px;
-      justify-content:space-between;
-      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-    }
-    .tab{
+    .shell{
       flex:1;
-      border:1px solid var(--stroke);
-      border-radius:999px;
-      padding:12px 10px;
-      text-align:center;
-      color:var(--muted);
-      font-weight:800;
-      background:rgba(0,0,0,.10);
-      user-select:none;
-    }
-    .tab[aria-current="page"]{
-      color:var(--text);
-      border-color:rgba(160,210,255,.55);
-      background:linear-gradient(180deg, rgba(120,190,255,.22), rgba(255,255,255,.03));
+      min-height:0;
+      border:2px solid rgba(60,120,210,.55);
+      border-radius: var(--r2);
+      padding:14px;
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.01));
+      box-shadow: var(--shadow);
+      overflow:hidden;
     }
 
-    .panel{
-      margin-top:14px;
-      border:2px solid rgba(130,180,255,.35);
-      border-radius:34px;
-      padding:16px;
-      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-      min-height:520px;
+    /* Panels are mutually exclusive */
+    .panels{
+      height:100%;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      overflow:hidden;
     }
+    .panel{
+      height:100%;
+      display:none; /* IMPORTANT: only one visible */
+      flex-direction:column;
+      gap:12px;
+      overflow:hidden;
+    }
+    .panel.active{display:flex}
+
+    .panelHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      border:1px solid var(--stroke2);
+      border-radius:999px;
+      padding:12px 14px;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+    }
+    .panelHeader .name{
+      font-size:18px;
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+
+    .nav{
+      display:flex;
+      gap:8px;
+    }
+    .btn{
+      border:1px solid var(--stroke2);
+      color:var(--text);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      border-radius:999px;
+      padding:10px 12px;
+      font-weight:800;
+      letter-spacing:.2px;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn:active{transform: translateY(1px)}
+    .btn.secondary{
+      color:var(--muted);
+      border-color:var(--stroke);
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      font-weight:700;
+    }
+    .btn.primary{
+      border-color: rgba(120,180,255,.45);
+      background: linear-gradient(180deg, rgba(80,150,255,.34), rgba(80,150,255,.14));
+    }
+    .btn[disabled]{opacity:.55; cursor:not-allowed}
 
     .card{
       border:1px solid var(--stroke2);
-      border-radius:26px;
+      border-radius: var(--r);
       padding:14px;
-      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.10));
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      overflow:auto;
+      min-height:0;
     }
-
     .muted{color:var(--muted)}
-    .muted2{color:var(--muted2)}
-    .sp8{height:8px}
-    .sp10{height:10px}
-    .sp14{height:14px}
+    .small{font-size:13px}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
 
-    .btn{
-      width:100%;
-      border:1px solid var(--stroke2);
-      border-radius:999px;
-      padding:14px 14px;
-      font-weight:900;
-      font-size:18px;
-      background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(0,0,0,.18));
-      color:var(--text);
-    }
-    .btn:active{transform:translateY(1px)}
-
-    /* Log cards that app.js expects */
-    .ro-card{
-      border:1px solid var(--stroke2);
-      border-radius:22px;
-      padding:12px 12px;
+    .kv{
+      display:grid;
+      grid-template-columns: 110px 1fr;
+      gap:8px 12px;
       margin-top:10px;
-      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(0,0,0,.14));
+      font-size:15px;
     }
-    .ro-top{
-      display:flex;
-      align-items:baseline;
-      justify-content:space-between;
-      gap:10px;
-    }
-    .ro-bp{
-      font-weight:950;
-      font-size:26px;
-      letter-spacing:.2px;
-    }
-    .ro-hr{
-      font-weight:900;
-      font-size:14px;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid var(--stroke);
-      color:var(--muted);
-      white-space:nowrap;
-    }
-    .ro-when{
-      margin-top:6px;
-      font-size:14px;
-      color:var(--muted);
-      line-height:1.25;
-      word-break:break-word;
-    }
-    .ro-footer{
-      margin-top:12px;
+    .kv .k{color:var(--muted)}
+    .kv .v{color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+
+    .list{
+      margin:0;
+      padding:0;
+      list-style:none;
       display:flex;
       flex-direction:column;
       gap:10px;
-      align-items:stretch;
     }
-    .ro-loadmore{
-      font-size:16px;
-      padding:12px 14px;
+    .row{
+      border:1px solid var(--stroke);
+      border-radius:16px;
+      padding:10px 12px;
+      background: rgba(0,0,0,.18);
     }
-
-    /* Chart container: panel can scroll, but chart itself uses pointer capture for pan/zoom */
-    .chartWrap{
+    .rowTop{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      font-weight:800;
+    }
+    .rowSub{margin-top:6px; color:var(--muted); font-size:13px; line-height:1.25}
+    .pill{
+      padding:4px 10px;
+      border-radius:999px;
       border:1px solid var(--stroke2);
-      border-radius:26px;
+      color:var(--muted);
+      font-size:12px;
+      white-space:nowrap;
+    }
+
+    .canvasWrap{
+      border:1px solid var(--stroke2);
+      border-radius: var(--r);
       padding:10px;
-      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(0,0,0,.14));
+      background: rgba(0,0,0,.18);
+      overflow:hidden;
     }
-    canvas{
-      width:100%;
-      height:520px;
-      display:block;
-      border-radius:18px;
-      background:rgba(0,0,0,.12);
-    }
+    canvas{display:block; width:100%; height:440px;}
 
-    /* Sections */
-    .h1{
-      font-size:32px;
-      font-weight:900;
-      margin:0 0 10px 0;
-      opacity:.95;
-    }
-    .note{
-      font-size:18px;
-      line-height:1.35;
-      color:var(--muted);
-    }
-
-    .homeLine{
+    .hint{
       margin-top:10px;
-      font-size:16px;
       color:var(--muted);
       line-height:1.35;
     }
-    .stamp{
-      margin-top:10px;
-      font-size:14px;
-      color:rgba(235,245,255,.70);
+
+    /* Pull-to-refresh indicator */
+    .pull{
+      height:0px;
+      overflow:hidden;
+      transition:height .18s ease;
+      color:var(--muted);
       font-weight:800;
       letter-spacing:.2px;
+      text-align:center;
     }
-
-    /* Hide panels */
-    .hidden{display:none !important}
   </style>
 </head>
 
 <body>
-  <div class="wrap">
+  <div class="app">
+    <div class="topbar">
+      <div class="title">Vitals Tracker</div>
+      <div class="boot" id="bootText">BOOT OK v2.009</div>
+    </div>
+
     <div class="shell">
-      <div class="topbar">
-        <div class="title">Vitals Tracker</div>
-        <div id="statusLine" class="boot">BOOT OK v2.012</div>
-      </div>
+      <div class="panels" id="panelsRoot">
 
-      <div class="tabs" role="tablist" aria-label="Primary">
-        <div class="tab" id="tabHome"   role="tab" tabindex="0" aria-current="page">Home</div>
-        <div class="tab" id="tabLog"    role="tab" tabindex="0">Log</div>
-        <div class="tab" id="tabCharts" role="tab" tabindex="0">Charts</div>
-        <div class="tab" id="tabInstall" role="tab" tabindex="0">Install</div>
-      </div>
-
-      <!-- HOME -->
-      <section class="panel" id="panelHome">
-        <div class="card">
-          <div class="note">
-            Function-first shell. Data detection is read-only.
+        <!-- HOME PANEL -->
+        <section class="panel active" id="panelHome" aria-label="Home">
+          <div class="panelHeader">
+            <div class="name">Home</div>
+            <div class="nav">
+              <button class="btn secondary" id="btnHome">Home</button>
+              <button class="btn secondary" id="btnLog">Log</button>
+              <button class="btn secondary" id="btnCharts">Charts</button>
+              <button class="btn primary" id="btnInstall" disabled>Install</button>
+            </div>
           </div>
-          <div class="sp10"></div>
-          <div class="homeLine">Pull down on Home to refresh (release).</div>
-          <div class="homeLine">Storage bridge loaded.</div>
-          <div class="stamp">BUILD STAMP: v2.012 • index.html updated</div>
-        </div>
 
-        <div class="sp14"></div>
+          <div class="pull" id="pullIndicator">Release to refresh</div>
 
-        <div class="card" id="homeDetectCard">
-          <div class="h1" style="margin-bottom:6px;">Data Detected (Read-Only)</div>
-          <div class="muted2">This screen is informational. No data is modified.</div>
-          <div class="sp10"></div>
+          <div class="card" id="homeCard">
+            <div class="muted">Function-first shell. Data detection is read-only.</div>
+            <div class="hint small">
+              Pull down on Home to refresh (release).
+              <div id="bridgeStatus" class="small" style="margin-top:10px;"></div>
+            </div>
 
-          <div class="muted" id="homeDetectLine">Detecting…</div>
-        </div>
-      </section>
+            <div class="card" style="margin-top:12px;" id="detectedCard">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                <div style="font-weight:900; font-size:20px;">Data Detected (Read-Only)</div>
+                <span class="pill" id="detectedPill">—</span>
+              </div>
+              <div class="kv" aria-label="Data summary">
+                <div class="k">Source</div><div class="v" id="sumSource">Not loaded</div>
+                <div class="k">Entries</div><div class="v" id="sumEntries">—</div>
+                <div class="k">Newest</div><div class="v mono" id="sumNewest">—</div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-      <!-- LOG -->
-      <section class="panel hidden" id="panelLog" aria-label="Log">
-        <div class="h1">Log (read-only preview)</div>
-        <div class="muted">Newest first. Timestamps shown in Central Time.</div>
+        <!-- LOG PANEL -->
+        <section class="panel" id="panelLog" aria-label="Log">
+          <div class="panelHeader">
+            <div class="name">Log (read-only preview)</div>
+            <div class="nav">
+              <button class="btn secondary" id="btnBackFromLog">Home</button>
+              <button class="btn secondary" id="btnChartsFromLog">Charts</button>
+            </div>
+          </div>
 
-        <div class="sp10"></div>
+          <div class="card" id="logCard">
+            <div class="muted" id="logTopNote">Loading…</div>
+            <ul class="list" id="logList" style="margin-top:12px;"></ul>
+          </div>
+        </section>
 
-        <div id="logList"></div>
-        <div id="logFooter"></div>
-      </section>
+        <!-- CHARTS PANEL -->
+        <section class="panel" id="panelCharts" aria-label="Charts">
+          <div class="panelHeader">
+            <div class="name">Charts (Read-Only)</div>
+            <div class="nav">
+              <button class="btn secondary" id="btnBackFromCharts">Home</button>
+              <button class="btn secondary" id="btnLogFromCharts">Log</button>
+            </div>
+          </div>
 
-      <!-- CHARTS -->
-      <section class="panel hidden" id="panelCharts" aria-label="Charts">
-        <div class="h1">Charts (Read-Only)</div>
-        <div class="muted">Pinch left/right to zoom 2–14 days. Drag left/right to pan. Central Time axis.</div>
+          <div class="card" id="chartsCard">
+            <div class="muted" id="chartsTopNote">Loading…</div>
+            <div class="canvasWrap" style="margin-top:12px;">
+              <canvas id="chartCanvas" width="1200" height="520"></canvas>
+            </div>
+            <div class="hint small" id="chartsHint">
+              Time-spaced plot. Sys/Dia are drawn when present; HR drawn when present.
+            </div>
+          </div>
+        </section>
 
-        <div class="sp10"></div>
-
-        <div class="chartWrap">
-          <canvas id="chartCanvas" aria-label="Vitals chart"></canvas>
-        </div>
-
-        <div class="sp10"></div>
-        <div class="muted2">Time-spaced plot. Sys/Dia drawn when present; HR drawn when present.</div>
-      </section>
-
-      <!-- INSTALL -->
-      <section class="panel hidden" id="panelInstall" aria-label="Install">
-        <div class="h1">Install</div>
-        <div class="muted">Use your browser menu → “Add to Home screen” (Android) or “Install app”.</div>
-        <div class="sp14"></div>
-        <button id="btnInstall" class="btn" type="button">Install</button>
-        <div class="sp10"></div>
-        <div class="muted2">If the Install button does nothing, your browser may require using the menu instead.</div>
-      </section>
+      </div>
     </div>
   </div>
 
+  <!-- External modules -->
+  <script src="./js/storage.js?v=2.009"></script>
+  <script src="./js/gestures.js?v=2.009"></script>
+
   <script>
-    // Minimal tab switching (kept in index so it always works even if app.js fails)
     (function(){
-      const tabs = {
-        tabHome:   { tab: document.getElementById("tabHome"),   panel: document.getElementById("panelHome") },
-        tabLog:    { tab: document.getElementById("tabLog"),    panel: document.getElementById("panelLog") },
-        tabCharts: { tab: document.getElementById("tabCharts"), panel: document.getElementById("panelCharts") },
-        tabInstall:{ tab: document.getElementById("tabInstall"),panel: document.getElementById("panelInstall") },
-      };
+      const APP_VERSION = "v2.009";
 
-      function activate(key){
-        Object.keys(tabs).forEach(k=>{
-          const on = (k === key);
-          tabs[k].panel.classList.toggle("hidden", !on);
-          tabs[k].tab.setAttribute("aria-current", on ? "page" : "false");
-        });
-        window.scrollTo({ top: 0, behavior: "instant" });
+      // Panels
+      const panelHome = document.getElementById("panelHome");
+      const panelLog = document.getElementById("panelLog");
+      const panelCharts = document.getElementById("panelCharts");
+
+      function showPanel(which){
+        panelHome.classList.remove("active");
+        panelLog.classList.remove("active");
+        panelCharts.classList.remove("active");
+        if(which === "home") panelHome.classList.add("active");
+        if(which === "log") panelLog.classList.add("active");
+        if(which === "charts") panelCharts.classList.add("active");
       }
 
-      Object.keys(tabs).forEach(k=>{
-        tabs[k].tab.addEventListener("click", ()=>activate(k), { passive:true });
-      });
+      // Buttons
+      const btnHome = document.getElementById("btnHome");
+      const btnLog = document.getElementById("btnLog");
+      const btnCharts = document.getElementById("btnCharts");
+      const btnInstall = document.getElementById("btnInstall");
 
-      // Default
-      activate("tabHome");
+      document.getElementById("btnBackFromLog").onclick = () => showPanel("home");
+      document.getElementById("btnChartsFromLog").onclick = () => showPanel("charts");
+      document.getElementById("btnBackFromCharts").onclick = () => showPanel("home");
+      document.getElementById("btnLogFromCharts").onclick = () => showPanel("log");
 
-      // Pull-to-refresh on Home (release)
-      let startY = 0, pulling = false;
-      const home = document.getElementById("panelHome");
-      home.addEventListener("touchstart", (e)=>{
-        if (home.scrollTop === 0) { startY = e.touches[0].clientY; pulling = true; }
-      }, { passive:true });
-      home.addEventListener("touchmove", (e)=>{
-        if (!pulling) return;
-        const dy = e.touches[0].clientY - startY;
-        if (dy > 80) { /* visual cue could be added later */ }
-      }, { passive:true });
-      home.addEventListener("touchend", (e)=>{
-        if (!pulling) return;
-        pulling = false;
-        const endY = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientY : startY;
-        if (endY - startY > 90) location.reload();
-      }, { passive:true });
+      btnHome.onclick = () => showPanel("home");
+      btnLog.onclick = () => showPanel("log");
+      btnCharts.onclick = () => showPanel("charts");
 
-      // Install (best-effort)
-      let deferred = null;
-      window.addEventListener("beforeinstallprompt", (e)=>{
-        e.preventDefault();
-        deferred = e;
-      });
-      document.getElementById("btnInstall").addEventListener("click", async ()=>{
-        try{
-          if (!deferred) return;
-          deferred.prompt();
-          await deferred.userChoice;
-          deferred = null;
-        }catch(_){}
-      }, { passive:true });
-    })();
-  </script>
+      // Pull-to-refresh (Home only)
+      const pullIndicator = document.getElementById("pullIndicator");
+      let pullStartY = null;
+      let pullArmed = false;
 
-  <!-- Storage bridge + app controller -->
-  <script src="js/storage.js"></script>
-  <script src="js/app.js"></script>
+      panelHome.addEventListener("touchstart", (e) => {
+        // Only arm if we're at top of the home card scroll
+        const homeCard = document.getElementById("homeCard");
+        if(homeCard.scrollTop !== 0) return;
+        pullStartY = e.touches[0].clientY;
+        pullArmed = false;
+      }, {passive:true});
 
-  <script>
-    // Home detect summary (read-only). Uses VT_STORAGE if present.
-    (async function(){
-      const line = document.getElementById("homeDetectLine");
-      function set(txt){ if(line) line.textContent = txt; }
-
-      if (!window.VT_STORAGE || typeof window.VT_STORAGE.getAllRecordsReadOnly !== "function") {
-        set("Storage bridge not detected.");
-        return;
-      }
-
-      try{
-        const recs = await window.VT_STORAGE.getAllRecordsReadOnly();
-        const n = Array.isArray(recs) ? recs.length : 0;
-        let newest = "—";
-        if (n) {
-          let max = 0;
-          for (const r of recs) {
-            const d = new Date(r?.ts || r?.timestamp || r?.time || r?.date || r?.createdAt || r?.updatedAt);
-            const t = d && !isNaN(d.getTime()) ? d.getTime() : 0;
-            if (t > max) max = t;
-          }
-          if (max) newest = new Date(max).toISOString();
+      panelHome.addEventListener("touchmove", (e) => {
+        if(pullStartY == null) return;
+        const dy = e.touches[0].clientY - pullStartY;
+        if(dy > 0){
+          const h = Math.min(48, Math.floor(dy/2));
+          pullIndicator.style.height = h + "px";
+          pullArmed = (h >= 36);
         }
-        set(`Source: localStorage/IndexedDB (read-only) • Entries: ${n} • Newest: ${newest}`);
-      }catch(e){
-        set(`Storage read error: ${String(e?.message || e)}`);
+      }, {passive:true});
+
+      panelHome.addEventListener("touchend", () => {
+        if(pullStartY == null) return;
+        const armed = pullArmed;
+        pullStartY = null;
+        pullArmed = false;
+        pullIndicator.style.height = "0px";
+        if(armed) location.reload();
+      });
+
+      // Install button
+      let deferredPrompt = null;
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        btnInstall.disabled = false;
+      });
+
+      btnInstall.addEventListener("click", async () => {
+        try{
+          if(!deferredPrompt) return;
+          deferredPrompt.prompt();
+          await deferredPrompt.userChoice;
+        } finally {
+          deferredPrompt = null;
+          btnInstall.disabled = true;
+        }
+      });
+
+      // Service worker (cache-busted)
+      if("serviceWorker" in navigator){
+        navigator.serviceWorker.register("./sw.js?v=2.009").catch(()=>{});
       }
+
+      // Read-only storage detection + rendering
+      const bridgeStatus = document.getElementById("bridgeStatus");
+      const sumSource = document.getElementById("sumSource");
+      const sumEntries = document.getElementById("sumEntries");
+      const sumNewest = document.getElementById("sumNewest");
+      const detectedPill = document.getElementById("detectedPill");
+
+      const logTopNote = document.getElementById("logTopNote");
+      const logList = document.getElementById("logList");
+
+      const chartsTopNote = document.getElementById("chartsTopNote");
+      const chartCanvas = document.getElementById("chartCanvas");
+      const ctx = chartCanvas.getContext("2d");
+
+      let records = [];
+      let summary = { source:"Not loaded", entries:0, newest:null };
+
+      function fmtDate(ts){
+        try{
+          const d = new Date(ts);
+          if(isNaN(d.getTime())) return String(ts || "");
+          return d.toISOString();
+        } catch(_){
+          return String(ts || "");
+        }
+      }
+
+      function safeNum(x){
+        const n = Number(x);
+        return Number.isFinite(n) ? n : null;
+      }
+
+      function extractTs(r){
+        // Accept several shapes used across versions
+        return r.ts || r.time || r.timestamp || r.date || r.createdAt || r.created_at || r.iso || null;
+      }
+
+      function extractBP(r){
+        // Accept several shapes
+        const sys = safeNum(r.sys ?? r.systolic ?? (r.bp && (r.bp.sys ?? r.bp.systolic)));
+        const dia = safeNum(r.dia ?? r.diastolic ?? (r.bp && (r.bp.dia ?? r.bp.diastolic)));
+        return { sys, dia };
+      }
+
+      function extractHR(r){
+        const hr = safeNum(r.hr ?? r.heartRate ?? r.pulse ?? (r.vitals && (r.vitals.hr ?? r.vitals.pulse)));
+        return hr;
+      }
+
+      function extractNotes(r){
+        return (r.notes ?? r.note ?? r.symptomsNote ?? r.text ?? "").toString();
+      }
+
+      function renderSummary(){
+        sumSource.textContent = summary.source || "—";
+        sumEntries.textContent = String(summary.entries ?? "—");
+        sumNewest.textContent = summary.newest ? fmtDate(summary.newest) : "—";
+        detectedPill.textContent = summary.entries ? (summary.entries + " entries") : "—";
+      }
+
+      function renderLog(){
+        logList.innerHTML = "";
+        if(!records.length){
+          logTopNote.textContent = "No records detected (read-only).";
+          return;
+        }
+        logTopNote.textContent = `Showing newest 25 of ${records.length} records (read-only).`;
+
+        const newestFirst = [...records].sort((a,b)=>{
+          const ta = new Date(extractTs(a) || 0).getTime();
+          const tb = new Date(extractTs(b) || 0).getTime();
+          return tb - ta;
+        }).slice(0,25);
+
+        for(const r of newestFirst){
+          const ts = extractTs(r);
+          const {sys,dia} = extractBP(r);
+          const hr = extractHR(r);
+          const notes = extractNotes(r);
+
+          const topLeft = (sys && dia) ? `${sys}/${ mentions(dia)}` : (sys || dia ? `${sys ?? "—"}/${dia ?? "—"}` : "—");
+          function mentions(x){ return x; }
+
+          const topRight = hr ? `HR ${hr}` : "—";
+          const iso = ts ? fmtDate(ts) : "—";
+
+          const li = document.createElement("li");
+          li.className = "row";
+
+          const t = document.createElement("div");
+          t.className = "rowTop";
+          t.innerHTML = `<div>${topLeft}</div><div class="pill">${topRight}</div>`;
+
+          const s = document.createElement("div");
+          s.className = "rowSub";
+          const noteTrim = notes && notes.trim() ? ` • ${notes.trim().slice(0,140)}` : "";
+          s.textContent = `${iso}${noteTrim}`;
+
+          li.appendChild(t);
+          li.appendChild(s);
+          logList.appendChild(li);
+        }
+      }
+
+      function clearCanvas(){
+        ctx.clearRect(0,0,chartCanvas.width, chartCanvas.height);
+      }
+
+      function drawAxes(minY, maxY){
+        const w = chartCanvas.width, h = chartCanvas.height;
+        ctx.save();
+        ctx.globalAlpha = 1;
+
+        // background
+        ctx.fillStyle = "rgba(0,0,0,0)";
+        ctx.fillRect(0,0,w,h);
+
+        // plot area
+        const padL = 70, padR = 18, padT = 18, padB = 46;
+        const x0 = padL, y0 = padT, pw = w - padL - padR, ph = h - padT - padB;
+
+        // grid
+        ctx.strokeStyle = "rgba(235,245,255,.14)";
+        ctx.lineWidth = 2;
+
+        ctx.strokeRect(x0, y0, pw, ph);
+
+        // y ticks
+        const ticks = 4;
+        ctx.lineWidth = 2;
+        ctx.font = "24px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+        ctx.fillStyle = "rgba(235,245,255,.48)";
+
+        for(let i=0;i<=ticks;i++){
+          const t = i / ticks;
+          const y = y0 + ph * t;
+          ctx.strokeStyle = "rgba(235,245,255,.10)";
+          ctx.beginPath();
+          ctx.moveTo(x0, y);
+          ctx.lineTo(x0+pw, y);
+          ctx.stroke();
+
+          const val = Math.round(maxY - (maxY-minY)*t);
+          ctx.fillText(String(val), 10, y + 8);
+        }
+
+        ctx.restore();
+        return { padL, padR, padT, padB, x0, y0, pw, ph };
+      }
+
+      function plotSeries(points, minY, maxY, color){
+        // We avoid hardcoding colors: derive from existing stroke alpha using current strokeStyle only.
+        // Use provided color string only if passed; otherwise default to a safe rgba.
+        const style = color || "rgba(130,190,255,.90)";
+        const w = chartCanvas.width, h = chartCanvas.height;
+        const padL = 70, padR = 18, padT = 18, padB = 46;
+        const x0 = padL, y0 = padT, pw = w - padL - padR, ph = h - padT - padB;
+
+        if(points.length < 2) return;
+
+        const tMin = points[0].t;
+        const tMax = points[points.length-1].t;
+        const dt = Math.max(1, tMax - tMin);
+
+        const xy = (p) => {
+          const x = x0 + ((p.t - tMin) / dt) * pw;
+          const y = y0 + (1 - ((p.y - minY) / Math.max(1, (maxY - minY)))) * ph;
+          return {x,y};
+        };
+
+        ctx.save();
+        ctx.strokeStyle = style;
+        ctx.lineWidth = 5;
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+
+        ctx.beginPath();
+        const a = xy(points[0]);
+        ctx.moveTo(a.x, a.y);
+        for(let i=1;i<points.length;i++){
+          const b = xy(points[i]);
+          ctx.lineTo(b.x, b.y);
+        }
+        ctx.stroke();
+
+        // points
+        ctx.fillStyle = style;
+        for(const p of points){
+          const c = xy(p);
+          ctx.beginPath();
+          ctx.arc(c.x, c.y, 7, 0, Math.PI*2);
+          ctx.fill();
+        }
+
+        ctx.restore();
+      }
+
+      function renderCharts(){
+        clearCanvas();
+        if(!records.length){
+          chartsTopNote.textContent = "No records detected (read-only).";
+          return;
+        }
+
+        // Prepare time-ordered points
+        const ptsSys = [];
+        const ptsDia = [];
+        const ptsHr  = [];
+
+        for(const r of records){
+          const tsRaw = extractTs(r);
+          const t = new Date(tsRaw || 0).getTime();
+          if(!Number.isFinite(t) || t <= 0) continue;
+
+          const {sys,dia} = extractBP(r);
+          const hr = extractHR(r);
+
+          if(sys != null) ptsSys.push({t, y: sys});
+          if(dia != null) ptsDia.push({t, y: dia});
+          if(hr != null)  ptsHr.push({t, y: hr});
+        }
+
+        // Sort by time
+        ptsSys.sort((a,b)=>a.t-b.t);
+        ptsDia.sort((a,b)=>a.t-b.t);
+        ptsHr.sort((a,b)=>a.t-b.t);
+
+        const allY = [...ptsSys, ...ptsDia, ...ptsHr].map(p=>p.y);
+        if(!allY.length){
+          chartsTopNote.textContent = "Records found, but no numeric BP/HR fields detected.";
+          return;
+        }
+
+        let minY = Math.min(...allY);
+        let maxY = Math.max(...allY);
+
+        // Add padding
+        const pad = Math.max(10, Math.round((maxY-minY) * 0.12));
+        minY = Math.max(0, minY - pad);
+        maxY = maxY + pad;
+
+        drawAxes(minY, maxY);
+
+        // Plot series (sys, dia, hr). Keep distinct but consistent.
+        plotSeries(ptsSys, minY, maxY, "rgba(130,190,255,.90)");
+        plotSeries(ptsDia, minY, maxY, "rgba(130,190,255,.62)");
+        plotSeries(ptsHr,  minY, maxY, "rgba(130,190,255,.40)");
+
+        chartsTopNote.textContent = `Plotting ${records.length} records (read-only).`;
+      }
+
+      async function loadReadOnlyData(){
+        // The shell never writes. It only detects and reads.
+        const bridge = window.StorageBridge || window.VTStorage || window.storageBridge || null;
+
+        if(!bridge){
+          bridgeStatus.textContent = "Storage bridge not loaded. Check: ./js/storage.js";
+          summary = { source:"Not loaded", entries:0, newest:null };
+          records = [];
+          renderSummary();
+          renderLog();
+          renderCharts();
+          return;
+        }
+
+        bridgeStatus.textContent = "Storage bridge loaded.";
+
+        // Try common function names (defensive)
+        let out = null;
+
+        const tryCalls = [
+          () => bridge.detect && bridge.detect(),
+          () => bridge.detectLegacy && bridge.detectLegacy(),
+          () => bridge.inspect && bridge.inspect(),
+          () => bridge.readOnlyScan && bridge.readOnlyScan(),
+          () => bridge.getSummary && bridge.getSummary()
+        ];
+
+        for(const fn of tryCalls){
+          try{
+            const v = fn();
+            if(v && typeof v.then === "function") out = await v; else out = v;
+            if(out) break;
+          }catch(_){}
+        }
+
+        // Records fetch
+        let recs = null;
+        const tryRecs = [
+          () => bridge.getAll && bridge.getAll(),
+          () => bridge.getRecords && bridge.getRecords(),
+          () => bridge.readAll && bridge.readAll(),
+          () => bridge.records && bridge.records()
+        ];
+
+        for(const fn of tryRecs){
+          try{
+            const v = fn();
+            if(v && typeof v.then === "function") recs = await v; else recs = v;
+            if(Array.isArray(recs)) break;
+          }catch(_){}
+        }
+
+        // Fallback: if detect returned records
+        if(!Array.isArray(recs) && out && Array.isArray(out.records)) recs = out.records;
+        if(!Array.isArray(recs)) recs = [];
+
+        records = recs;
+
+        // Summary
+        let source = (out && (out.source || out.storage || out.kind)) || "localStorage";
+        let entries = (out && (out.entries ?? out.count)) ?? records.length;
+
+        let newest = (out && (out.newest || out.latest || out.newestISO)) || null;
+        if(!newest && records.length){
+          const newestMs = Math.max(...records.map(r => new Date(extractTs(r) || 0).getTime()).filter(Number.isFinite));
+          if(Number.isFinite(newestMs) && newestMs > 0) newest = new Date(newestMs).toISOString();
+        }
+
+        summary = { source, entries, newest };
+        renderSummary();
+        renderLog();
+        renderCharts();
+      }
+
+      // Fix: prevent any stray placeholder injections from older shells
+      // (No "Charts (placeholder)" exists in this file.)
+
+      document.addEventListener("DOMContentLoaded", () => {
+        loadReadOnlyData();
+
+        // If gestures.js exists and wants hook points, it can use these IDs without breaking anything.
+        // We do not depend on it for panel switching (buttons already work).
+      });
+
     })();
   </script>
 </body>
 </html>
-
-<!-- ===========================
-File: /index.html
-End of file — v2.012
-Notes
-- This file is intentionally verbose in the header/footer comments so you can confirm the exact build.
-- If you still see the prior version after updating, it is almost always service-worker cache.
-  Do this on Android Chrome:
-  1) Long-press app icon → App info → Storage → Clear cache (or Clear storage if needed)
-  2) Or open the site → Chrome menu → “Delete browsing data” (site data) for keythjyles.github.io
-=========================== -->
