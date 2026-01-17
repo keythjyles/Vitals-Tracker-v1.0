@@ -1,18 +1,24 @@
 <!--
-Vitals Tracker — Functional Shell + Read-Only Data Detection
-App Version: v2.005
+Vitals Tracker — Modular PWA Shell (Function-First)
+App Version: v2.007
 
 Purpose:
-- Keep function-first UI stable (buttons, swipe, pull-to-refresh).
-- Load js/storage.js and detect existing v1 data READ-ONLY.
-- Display detected source + record count + newest timestamp on Home and Log.
-- No data writes, no migration, no destructive actions.
+- Provide a stable modular shell that preserves the v1 look/feel (panels + buttons + swipe).
+- Ensure correct script load order so storage bridge is available before app boot.
+- Detect existing v1 data READ-ONLY (no writes, no migration, no clears).
+- Keep offline-first via sw.js without stale JS issues.
 
-Latest Update (v2.005):
-- Fixed GitHub Pages base-path loading by using explicit relative script src:
-    ./js/storage.js
-  (prevents accidental fetch from site root).
-- No other behavior changes.
+Latest Update (v2.007):
+- Fixed script load order definitively:
+    storage.js → store.js → state.js → ui.js/panels.js/gestures.js → feature modules → pwa.js → app.js (LAST)
+- Ensured ALL script src paths are explicit relative paths (./js/...) to work under /Vitals-Tracker-v1.0/ base path.
+- Added simple runtime guard to show which scripts are missing (non-blocking) if a file was not found.
+- No other behavioral changes.
+
+Data Safety:
+- This file does not delete, migrate, or overwrite any existing data.
+- "Clear Data" remains disabled until you explicitly authorize.
+
 -->
 
 <!doctype html>
@@ -151,7 +157,7 @@ Latest Update (v2.005):
     .k{ color: rgba(235,245,255,.50); }
     .v{ color: rgba(235,245,255,.82); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
-    /* Bottom Sheet (no popups) */
+    /* Bottom Sheet (no browser popups) */
     .sheetMask{
       position:absolute;
       inset:0;
@@ -212,7 +218,7 @@ Latest Update (v2.005):
   <div class="app">
     <div class="hdr">
       <div class="title">Vitals Tracker</div>
-      <div class="boot" id="bootMark">BOOT OK v2.005</div>
+      <div class="boot" id="bootMark">BOOT OK v2.007</div>
     </div>
 
     <div class="viewport" id="viewport">
@@ -298,16 +304,60 @@ Latest Update (v2.005):
     </div>
   </div>
 
-  <!-- Read-only storage bridge (GitHub Pages safe relative path) -->
-  <script src="./js/storage.js"></script>
+  <!--
+    SCRIPT LOAD ORDER (DO NOT REORDER)
+    storage must be available before state/app boot.
+    All paths are explicit relative paths for GitHub Pages base path.
+  -->
 
   <script>
-    (function(){
-      const track = document.getElementById("track");
-      const viewport = document.getElementById("viewport");
-      const statusLine = document.getElementById("statusLine");
+    // Minimal non-blocking loader diagnostics
+    window.__VT_BOOT = {
+      version: "v2.007",
+      loaded: Object.create(null),
+      mark(name){ this.loaded[name]=true; },
+      missing(){
+        const expected = [
+          "utils","storage","store","state","ui","panels","gestures",
+          "log","add","chart","export","reporting","reports","pwa","app"
+        ];
+        return expected.filter(k=>!this.loaded[k]);
+      }
+    };
+  </script>
 
-      // Data UI
+  <!-- Core utilities -->
+  <script src="./js/utils.js" onload="__VT_BOOT.mark('utils')"></script>
+
+  <!-- Storage chain -->
+  <script src="./js/storage.js" onload="__VT_BOOT.mark('storage')"></script>
+  <script src="./js/store.js"   onload="__VT_BOOT.mark('store')"></script>
+  <script src="./js/state.js"   onload="__VT_BOOT.mark('state')"></script>
+
+  <!-- UI + panels + gestures -->
+  <script src="./js/ui.js"       onload="__VT_BOOT.mark('ui')"></script>
+  <script src="./js/panels.js"   onload="__VT_BOOT.mark('panels')"></script>
+  <script src="./js/gestures.js" onload="__VT_BOOT.mark('gestures')"></script>
+
+  <!-- Feature modules -->
+  <script src="./js/log.js"       onload="__VT_BOOT.mark('log')"></script>
+  <script src="./js/add.js"       onload="__VT_BOOT.mark('add')"></script>
+  <script src="./js/chart.js"     onload="__VT_BOOT.mark('chart')"></script>
+  <script src="./js/export.js"    onload="__VT_BOOT.mark('export')"></script>
+  <script src="./js/reporting.js" onload="__VT_BOOT.mark('reporting')"></script>
+  <script src="./js/reports.js"   onload="__VT_BOOT.mark('reports')"></script>
+
+  <!-- PWA registration -->
+  <script src="./js/pwa.js" onload="__VT_BOOT.mark('pwa')"></script>
+
+  <!-- App boot (MUST BE LAST) -->
+  <script src="./js/app.js" onload="__VT_BOOT.mark('app')"></script>
+
+  <script>
+    // If something failed to load, show it in the status line (non-blocking).
+    // This runs after a short delay so onload handlers have time to fire.
+    (function(){
+      const statusLine = document.getElementById("statusLine");
       const dataSource = document.getElementById("dataSource");
       const dataCount  = document.getElementById("dataCount");
       const dataNewest = document.getElementById("dataNewest");
@@ -315,14 +365,18 @@ Latest Update (v2.005):
       const logCount    = document.getElementById("logCount");
       const logNewest   = document.getElementById("logNewest");
 
-      // Sheet
+      function setStatus(msg){
+        if(statusLine) statusLine.textContent = msg || "";
+      }
+
+      // Panel navigation and sheet remain as in v2.005 shell (safe and self-contained).
+      const track = document.getElementById("track");
+      const viewport = document.getElementById("viewport");
+
       const sheetMask = document.getElementById("sheetMask");
       const sheetTitle = document.getElementById("sheetTitle");
       const sheetBody  = document.getElementById("sheetBody");
       const sheetClose = document.getElementById("sheetClose");
-
-      function setStatus(msg){ statusLine.textContent = msg || ""; }
-
       function openSheet(title, body){
         sheetTitle.textContent = title || "Action";
         sheetBody.textContent = body || "";
@@ -332,7 +386,6 @@ Latest Update (v2.005):
       sheetMask.addEventListener("click", closeSheet);
       sheetClose.addEventListener("click", closeSheet);
 
-      // Panels
       let idx = 0;
       function go(n){
         idx = Math.max(0, Math.min(2, n));
@@ -340,7 +393,7 @@ Latest Update (v2.005):
         closeSheet();
       }
 
-      // Buttons
+      // Buttons (safe placeholders until modules wire real flows)
       document.getElementById("btnLog").addEventListener("click", ()=>go(1));
       document.getElementById("btnCharts").addEventListener("click", ()=>go(2));
       document.getElementById("btnBackFromLog").addEventListener("click", ()=>go(0));
@@ -356,47 +409,40 @@ Latest Update (v2.005):
           "Add/Edit flow will be wired next.\n\nSafety: existing records remain untouched until you approve the add/edit UI."
         );
       });
-
       document.getElementById("btnAddFromLog").addEventListener("click", ()=>{
         placeholder("ADD Reading",
           "Add/Edit flow will be wired next from the Log panel.\n\nSafety: we will keep v1 storage intact."
         );
       });
-
       document.getElementById("btnInstall").addEventListener("click", ()=>{
         placeholder("Install",
           "Install will be wired after modular stability is confirmed.\n\nFor now: Chrome menu → Install app (if offered)."
         );
       });
-
       document.getElementById("btnClear").addEventListener("click", ()=>{
         placeholder("Clear Data (Disabled)",
           "Clear is disabled until your existing records are confirmed visible and exportable.\n\nNothing has been cleared."
         );
       });
-
       document.getElementById("btnExit").addEventListener("click", ()=>{
         placeholder("Exit (Pending)",
           "Exit will be restored using your known-good v1 handler later.\n\nThis placeholder avoids unexpected behavior."
         );
       });
-
       document.getElementById("btnExportCharts").addEventListener("click", ()=>{
         placeholder("Export Visible (Pending)",
           "Export will be wired after the chart has a visible-range window.\n\nRequirement: export only currently visible date range."
         );
       });
 
-      // Swipe
+      // Basic swipe (kept here as fallback; gestures.js may supersede later)
       let startX=0, startY=0, tracking=false;
-
       viewport.addEventListener("touchstart", (e)=>{
         if(!e.touches || e.touches.length!==1) return;
         tracking=true;
         startX = e.touches[0].clientX;
         startY = e.touches[0].clientY;
       }, {passive:true});
-
       viewport.addEventListener("touchmove", (e)=>{
         if(!tracking) return;
         if(viewport.classList.contains("sheetOpen")) return;
@@ -406,7 +452,6 @@ Latest Update (v2.005):
           e.preventDefault();
         }
       }, {passive:false});
-
       viewport.addEventListener("touchend", (e)=>{
         if(!tracking) return;
         tracking=false;
@@ -425,7 +470,6 @@ Latest Update (v2.005):
         if(!e.touches || e.touches.length!==1) return;
         pullStartY = e.touches[0].clientY;
       }, {passive:true});
-
       viewport.addEventListener("touchend", (e)=>{
         if(idx!==0) return;
         const endY = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientY : pullStartY;
@@ -433,11 +477,23 @@ Latest Update (v2.005):
         if(dy > 80) location.reload();
       }, {passive:true});
 
-      // Read-only data detection
-      async function probeData(){
-        setStatus("Detecting existing data (read-only)…");
+      // Read-only probe (uses whichever global your storage.js provides)
+      async function probe(){
+        // Wait briefly so storage.js has a chance to execute even on slower devices.
+        await new Promise(r=>setTimeout(r, 120));
 
-        if (!window.VTStorage || typeof window.VTStorage.detectAndLoadReadOnly !== "function") {
+        const missing = (window.__VT_BOOT && window.__VT_BOOT.missing) ? window.__VT_BOOT.missing() : [];
+        if(missing.length){
+          setStatus("Missing scripts: " + missing.join(", "));
+        } else {
+          setStatus("All scripts loaded. Probing data…");
+        }
+
+        // Most likely global from your storage.js:
+        const bridge = window.VTStorage || window.StorageBridge || window.VT_STORE || null;
+
+        if(!bridge || typeof bridge.detectAndLoadReadOnly !== "function"){
+          // Keep this message tight and actionable
           setStatus("Storage bridge not loaded. Check: ./js/storage.js");
           dataSource.textContent = "Not loaded";
           dataCount.textContent  = "—";
@@ -448,31 +504,27 @@ Latest Update (v2.005):
           return;
         }
 
-        try {
-          const res = await window.VTStorage.detectAndLoadReadOnly();
-          if (res.ok) {
+        try{
+          const res = await bridge.detectAndLoadReadOnly();
+          if(res && res.ok){
             const src = `${res.source} — ${res.sourceName}`;
             dataSource.textContent = src;
             dataCount.textContent  = String(res.meta.count);
             dataNewest.textContent = res.meta.newestIso || "N/A";
-
             logDetected.textContent = src;
             logCount.textContent    = String(res.meta.count);
             logNewest.textContent   = res.meta.newestIso || "N/A";
-
             setStatus(`Data detected: ${res.meta.count} entries (${res.source}).`);
           } else {
             dataSource.textContent = "None detected";
             dataCount.textContent  = "0";
             dataNewest.textContent = "—";
-
             logDetected.textContent = "None detected";
             logCount.textContent    = "0";
             logNewest.textContent   = "—";
-
             setStatus("No legacy data detected (read-only).");
           }
-        } catch (e) {
+        }catch(e){
           dataSource.textContent = "Error";
           dataCount.textContent  = "—";
           dataNewest.textContent = "—";
@@ -480,13 +532,12 @@ Latest Update (v2.005):
           logCount.textContent    = "—";
           logNewest.textContent   = "—";
           setStatus("Data probe error (see console).");
-          console.error("VTStorage probe error:", e);
+          console.error("Data probe error:", e);
         }
       }
 
-      // Boot
       go(0);
-      probeData();
+      probe();
     })();
   </script>
 </body>
@@ -494,9 +545,10 @@ Latest Update (v2.005):
 
 <!--
 EOF — index.html
-App Version: v2.005
+App Version: v2.007
 
 Notes:
-- Fixed GitHub Pages relative-path loading for modular scripts.
-- Next file after confirmation: js/log.js (render last 50 entries, read-only).
+- This version is about correctness: script order + path correctness.
+- If the status line shows "Missing scripts: ..." then one of the files is not being served (path/case/caching).
+- Next file after data shows up: js/log.js (render last 50 entries read-only).
 -->
