@@ -1,126 +1,127 @@
 /* File: js/ui.js */
 /*
-Vitals Tracker — UI Utilities & Wiring
+Vitals Tracker — UI Binder & Screen Text Controller
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
-App Version: v2.023
-Base: v2.021 (last known-good UI helpers)
+App Version: v2.023d
+Base: v2.021
 Date: 2026-01-18
 
-This file is: 8 of 10 (v2.023 phase)
-Touched in this release: YES
-Module owner: UI helpers only (DOM utilities, text, accessibility glue).
+FILE ROLE (LOCKED)
+- Owns ALL non-chart, non-gesture UI wiring.
+- Updates visible labels, notes, and status text.
+- Bridges core state/version info into the DOM.
+- MUST NOT implement business logic, storage, charts, or gestures.
 
-v2.023 LOCKED SCOPE
-- Provide safe DOM helpers used across modules.
-- Centralize small UI behaviors (text updates, empty states).
-- NO business logic.
-- NO chart math.
-- NO storage access.
-- Must fail silently if elements are missing.
+This file exists so index.html stays declarative and readable.
 
-Accessibility / mobile / low-vision rules:
-- Never assume mouse.
-- Never rely on color alone.
-- Prefer textContent over innerHTML.
-- All helpers defensive.
+v2.023d — Change Log (THIS FILE ONLY)
+1) Centralizes version display using js/version.js if present.
+2) Controls Home footer version + boot text.
+3) Controls Charts top note text (date range placeholder).
+4) Controls Log header/top note placeholder.
+5) Ensures UI text updates never crash app if modules are missing.
 
-EOF footer REQUIRED.
+ANTI-DRIFT RULES
+- Do NOT draw charts here.
+- Do NOT calculate data ranges here.
+- Do NOT store data here.
+- Text only. Wiring only.
+
+Schema position:
+File 10 of 10
+
+Previous file:
+File 9 — js/panels.js
 */
 
-(function(){
+(function () {
   "use strict";
 
-  const APP_VERSION = "v2.023";
+  const VERSION_FALLBACK = "v2.023d";
 
-  // ===== Safe helpers =====
+  /* ===== Safe DOM helpers ===== */
   function $(id){
-    try{ return document.getElementById(id); }catch(_){ return null; }
+    return document.getElementById(id);
   }
 
   function setText(id, text){
     const el = $(id);
-    if(!el) return;
-    try{ el.textContent = text; }catch(_){}
+    if (el) el.textContent = text;
   }
 
-  function show(el){
-    if(!el) return;
-    el.style.display = "";
+  /* ===== Version handling ===== */
+  function resolveVersion(){
+    try{
+      if (window.VTVersion &&
+          typeof window.VTVersion.getVersionString === "function") {
+        return window.VTVersion.getVersionString();
+      }
+    }catch(_){}
+    return VERSION_FALLBACK;
   }
 
-  function hide(el){
-    if(!el) return;
-    el.style.display = "none";
-  }
+  const APP_VERSION = resolveVersion();
 
-  function isVisible(el){
-    if(!el) return false;
-    return el.offsetParent !== null;
-  }
-
-  // ===== Version stamps =====
-  function stampVersion(){
+  /* ===== Home UI ===== */
+  function initHome(){
     setText("homeVersion", APP_VERSION);
-    const boot = $("bootText");
-    if(boot && !boot.textContent.includes(APP_VERSION)){
-      boot.textContent = `BOOT OK ${APP_VERSION}`;
-    }
+    setText("bootText", "BOOT OK " + APP_VERSION);
   }
 
-  // ===== Empty-state helpers =====
-  function setEmptyNote(id, msg){
-    const el = $(id);
-    if(!el) return;
-    el.textContent = msg;
+  /* ===== Charts UI ===== */
+  function initCharts(){
+    const note =
+      "Charts show only data recorded on this device. Swipe panels outside the chart.";
+    setText("chartsTopNote", note);
   }
 
-  // ===== Button safety =====
-  function bindClick(id, fn){
-    const el = $(id);
-    if(!el) return;
-    el.addEventListener("click", (e)=>{
-      try{
-        e.preventDefault();
-        fn(e);
-      }catch(_){}
-    });
+  function updateChartsDateLabel(label){
+    // Chart module may call this later
+    setText("chartsTopNote", label);
   }
 
-  // ===== Expose minimal API =====
-  window.VTUI = {
-    version: APP_VERSION,
-    $,
-    setText,
-    show,
-    hide,
-    isVisible,
-    setEmptyNote,
-    bindClick,
-    stampVersion
-  };
+  /* ===== Log UI ===== */
+  function initLog(){
+    const note =
+      "Log entries are ordered by time recorded. Times are critical for review.";
+    setText("logTopNote", note);
+  }
 
-  // ===== Init =====
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", stampVersion, { once:true });
+  /* ===== Settings UI ===== */
+  function initSettings(){
+    // Static for now; nothing dynamic required
+  }
+
+  /* ===== Init ===== */
+  function init(){
+    initHome();
+    initCharts();
+    initLog();
+    initSettings();
+  }
+
+  if (document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", init);
   } else {
-    stampVersion();
+    init();
   }
+
+  /* ===== Public API ===== */
+  window.VTUI = {
+    VERSION: APP_VERSION,
+    updateChartsDateLabel
+  };
 
 })();
 
-/* EOF: js/ui.js */
 /*
-App Version: v2.023
+Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
+File: js/ui.js
+App Version: v2.023d
 Base: v2.021
-Touched in this release: YES
-
-Delivered files so far (v2.023 phase):
-1) index.html
-6) js/add.js
-7) js/app.js
-8) js/ui.js
-
-Next file to deliver (on "N"):
-- File 9 of 10: js/storage.js (alignment only, no schema change)
+Touched in v2.023d: js/ui.js
+Schema order: File 10 of 10
+Implementation set COMPLETE for v2.023 series (shell + panels + UI)
+Next phase: Restore js/chart.js from known-good logic (v2.021 behavior)
 */
