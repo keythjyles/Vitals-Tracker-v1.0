@@ -1,101 +1,78 @@
 /* File: js/version.js */
 /*
-Vitals Tracker — Version Authority & Consistency Guard
+Vitals Tracker — Version Authority
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
-App Version: v2.023
+App Version: v2.023b
 Base: v2.021
 Date: 2026-01-18
 
-This file is: 10 of 10 (v2.023 phase)
-Touched in this release: YES (new authority + guard)
+FILE ROLE (LOCKED)
+- Single source of truth for application version metadata.
+- All other modules MUST read version info from this file (no hard-coded versions elsewhere).
+- index.html may DISPLAY the version, but MUST NOT define canonical values long-term.
 
-PURPOSE (LOCKED)
-- Single, human-readable version source for JS modules.
-- Provide a lightweight consistency check against index.html.
-- Expose version info for UI, reporting, and debugging.
-- NO UI rendering.
-- NO storage mutation.
-- NO chart logic.
+v2.023b — Change Log (THIS FILE ONLY)
+1) Introduces centralized VERSION object.
+2) Exposes read-only helpers for UI, logging, and cache-busting alignment.
+3) No runtime side effects. No DOM access. Safe to import anywhere.
 
-WHY THIS EXISTS
-You explicitly identified version drift (index at v21, JS at v20).
-This file is the anchor so that:
-- You can quickly see the version at EOF.
-- Other JS files can reference one constant.
-- Drift is detectable instead of silent.
+ANTI-DRIFT RULES
+- Do NOT duplicate version strings in other JS files.
+- Increment version HERE FIRST, then update index.html display + cache-busters.
+- If versions ever disagree, THIS FILE WINS.
 
-RULES GOING FORWARD
-- index.html remains the MASTER version authority.
-- This file must match index.html exactly.
-- Any JS file touched must import or reference VTVersion.version.
-- Cache-busting must use this version string.
-
-Accessibility / reliability
-- No exceptions thrown.
-- Safe to load even if other files fail.
-- Plain text values only.
-
-EOF footer REQUIRED.
+Next file in schema:
+File 3 — js/app.js
 */
 
-(function(){
+(function (global) {
   "use strict";
 
-  const VERSION = "v2.023";
-  const BASE_VERSION = "v2.021";
-  const BUILD_DATE = "2026-01-18";
-  const CHANNEL = "stable";
-
-  // Minimal surface — no logic, just facts.
-  const info = {
-    version: VERSION,
-    base: BASE_VERSION,
-    date: BUILD_DATE,
-    channel: CHANNEL
-  };
-
-  // Expose globally (read-only intent)
-  try{
-    Object.freeze(info);
-  }catch(_){}
-
-  window.VTVersion = info;
-
-  // Optional dev console signal (safe, non-blocking)
-  try{
-    if(typeof console !== "undefined" && console.info){
-      console.info("[VitalsTracker] Version", info.version, "Base", info.base);
+  const VERSION = Object.freeze({
+    app: "v2.023b",
+    base: "v2.021",
+    date: "2026-01-18",
+    codename: "stabilize-chart",
+    schema: {
+      major: 2,
+      minor: 23,
+      patch: "b"
     }
-  }catch(_){}
+  });
 
-})();
+  function getVersionString() {
+    return VERSION.app;
+  }
 
-/* EOF: js/version.js */
+  function getFullVersionLabel() {
+    return `${VERSION.app} (base ${VERSION.base})`;
+  }
+
+  function getVersionMeta() {
+    return {
+      app: VERSION.app,
+      base: VERSION.base,
+      date: VERSION.date,
+      codename: VERSION.codename,
+      schema: VERSION.schema
+    };
+  }
+
+  // Expose as global, read-only
+  global.VTVersion = Object.freeze({
+    getVersionString,
+    getFullVersionLabel,
+    getVersionMeta
+  });
+
+})(window);
+
 /*
-App Version: v2.023
+Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
+File: js/version.js
+App Version: v2.023b
 Base: v2.021
-
-Delivered files in v2.023 phase (COMPLETE SET):
-1) index.html
-2) js/panels.js
-3) js/gestures.js
-4) js/chart.js
-5) js/log.js
-6) js/add.js
-7) js/app.js
-8) js/ui.js
-9) js/storage.js
-10) js/version.js
-
-STATE:
-- Version authority established.
-- Storage preserved.
-- UI + carousel restored.
-- Chart restoration pending verification against v2.021 engine.
-
-NEXT STEP (you decide):
-- Verify chart behavior visually.
-- If chart regression exists, next action is targeted repair of js/chart.js ONLY,
-  without touching index.html or storage.
+Touched in v2.023b: js/version.js (new canonical version authority)
+Next planned file: js/app.js (File 3 of 10)
 */
