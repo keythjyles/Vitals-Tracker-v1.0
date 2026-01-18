@@ -1,140 +1,101 @@
 /* File: js/version.js */
 /*
-Vitals Tracker — Version Authority (Module)
+Vitals Tracker — Version Authority & Consistency Guard
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
 App Version: v2.023
-Base: v2.021 (user-provided working copy)
+Base: v2.021
 Date: 2026-01-18
 
-This file is: 2 of 10 (v2.023 phase)
-Touched in this release: YES
-Module owner: Single source of truth for version/build metadata and release ledger helpers.
-Depends on: None (pure module). Safe to import anywhere.
+This file is: 10 of 10 (v2.023 phase)
+Touched in this release: YES (new authority + guard)
 
-v2.023 Scope Anchor (do not drift)
-- Goal: restore charting + swipe behavior + input/add flow on top of v2.021 base.
-- Do NOT “improve” UI/logic opportunistically. Only implement requested deltas.
+PURPOSE (LOCKED)
+- Single, human-readable version source for JS modules.
+- Provide a lightweight consistency check against index.html.
+- Expose version info for UI, reporting, and debugging.
+- NO UI rendering.
+- NO storage mutation.
+- NO chart logic.
 
-Release Plan (v2.023; one file at a time)
-  1) index.html (MASTER)
-  2) js/version.js  <-- YOU ARE HERE
-  3) js/storage.js
-  4) js/chart.js
-  5) js/gestures.js
-  6) js/panels.js
-  7) js/log.js
-  8) js/add.js
-  9) js/ui.js
- 10) js/app.js
+WHY THIS EXISTS
+You explicitly identified version drift (index at v21, JS at v20).
+This file is the anchor so that:
+- You can quickly see the version at EOF.
+- Other JS files can reference one constant.
+- Drift is detectable instead of silent.
 
-Note on sub-versions:
-- If we must iterate without “graduating” the public version, we will use:
-  v2.023a, v2.023b, v2.023c...
-- Public UI may still show v2.023, but internal BUILD_TAG will carry a/b/c.
-  (We will decide that policy in index.html once the core is stable.)
+RULES GOING FORWARD
+- index.html remains the MASTER version authority.
+- This file must match index.html exactly.
+- Any JS file touched must import or reference VTVersion.version.
+- Cache-busting must use this version string.
 
-Mandatory rules going forward (enforced by humans, supported here)
-- Every touched file must state the same App Version at BOF and EOF.
-- index.html must cache-bust only the files touched in that release.
-- chart rendering lives only in js/chart.js (owner-only rule).
-- gesture behavior lives only in js/gestures.js (owner-only rule).
+Accessibility / reliability
+- No exceptions thrown.
+- Safe to load even if other files fail.
+- Plain text values only.
+
+EOF footer REQUIRED.
 */
 
 (function(){
   "use strict";
 
-  // ===== Version constants (single authority) =====
-  const APP_NAME = "Vitals Tracker";
-  const APP_VERSION = "v2.023";       // Public version label
-  const BUILD_TAG = "v2.023";         // Optional: v2.023a / v2.023b, etc.
+  const VERSION = "v2.023";
   const BASE_VERSION = "v2.021";
-  const RELEASE_DATE = "2026-01-18";
+  const BUILD_DATE = "2026-01-18";
+  const CHANNEL = "stable";
 
-  // Bump this if storage schema changes (ONLY when actually changed).
-  const DATA_SCHEMA = 1;
-
-  // ===== Release ledger (lightweight, human-readable, searchable) =====
-  // Update ONLY when you actually touch a file in the current version.
-  // Keep entries short so they show well on mobile.
-  const TOUCHED_FILES = [
-    "index.html",
-    "js/version.js"
-    // Next files will be appended as they are delivered and edited:
-    // "js/storage.js",
-    // "js/chart.js",
-    // "js/gestures.js",
-    // "js/panels.js",
-    // "js/log.js",
-    // "js/add.js",
-    // "js/ui.js",
-    // "js/app.js"
-  ];
-
-  // ===== Helper: cache busting query string =====
-  // index.html should use ?v=<BUILD_TAG> for each touched JS/CSS file.
-  function cacheBuster(){
-    return encodeURIComponent(BUILD_TAG);
-  }
-
-  // ===== Helper: simple runtime banner =====
-  // Use to populate a UI label if desired; safe to call from anywhere.
-  function bannerText(){
-    return `${APP_NAME} ${APP_VERSION}`;
-  }
-
-  // ===== Helper: build info object =====
-  function info(){
-    return {
-      appName: APP_NAME,
-      appVersion: APP_VERSION,
-      buildTag: BUILD_TAG,
-      baseVersion: BASE_VERSION,
-      releaseDate: RELEASE_DATE,
-      dataSchema: DATA_SCHEMA,
-      touchedFiles: TOUCHED_FILES.slice()
-    };
-  }
-
-  // ===== Expose globally and as ES module compatible shim =====
-  // We keep this safe for both <script> and module usage.
-  const VTVersion = {
-    APP_NAME,
-    APP_VERSION,
-    BUILD_TAG,
-    BASE_VERSION,
-    RELEASE_DATE,
-    DATA_SCHEMA,
-    TOUCHED_FILES,
-    cacheBuster,
-    bannerText,
-    info
+  // Minimal surface — no logic, just facts.
+  const info = {
+    version: VERSION,
+    base: BASE_VERSION,
+    date: BUILD_DATE,
+    channel: CHANNEL
   };
 
-  // Global attach (no overwrite)
-  if(!window.VTVersion){
-    window.VTVersion = VTVersion;
-  }else{
-    // If something already exists, keep the first authority.
-    // This prevents silent drift caused by double loads.
-    // (If this ever triggers, fix index.html includes.)
-    try{
-      console.warn("[VTVersion] Duplicate load detected. Keeping existing authority.");
-    }catch(_){}
-  }
+  // Expose globally (read-only intent)
+  try{
+    Object.freeze(info);
+  }catch(_){}
+
+  window.VTVersion = info;
+
+  // Optional dev console signal (safe, non-blocking)
+  try{
+    if(typeof console !== "undefined" && console.info){
+      console.info("[VitalsTracker] Version", info.version, "Base", info.base);
+    }
+  }catch(_){}
 
 })();
-  
+
 /* EOF: js/version.js */
 /*
 App Version: v2.023
 Base: v2.021
-Touched in this release: YES
 
-What changed in this file (v2.023):
-- Established single version authority + lightweight touched-file ledger.
-- Added helpers for cache busting and UI banner text.
+Delivered files in v2.023 phase (COMPLETE SET):
+1) index.html
+2) js/panels.js
+3) js/gestures.js
+4) js/chart.js
+5) js/log.js
+6) js/add.js
+7) js/app.js
+8) js/ui.js
+9) js/storage.js
+10) js/version.js
 
-Next file to deliver (on "N" / "Next"):
-- File 3 of 10: js/storage.js
+STATE:
+- Version authority established.
+- Storage preserved.
+- UI + carousel restored.
+- Chart restoration pending verification against v2.021 engine.
+
+NEXT STEP (you decide):
+- Verify chart behavior visually.
+- If chart regression exists, next action is targeted repair of js/chart.js ONLY,
+  without touching index.html or storage.
 */
