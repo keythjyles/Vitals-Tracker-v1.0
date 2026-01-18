@@ -1,161 +1,304 @@
 /* File: js/storage.js */
 /*
-Vitals Tracker — Storage Layer (Local-Only)
+Vitals Tracker — Storage Bridge (Read/Write Compatible)
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
-App Version: v2.023
-Base: v2.021 (last known-good storage behavior)
+App Version: v2.023b
+Base: v2.021
 Date: 2026-01-18
 
-This file is: 9 of 10 (v2.023 phase)
-Touched in this release: YES (alignment + defensive guards ONLY)
+FILE ROLE (LOCKED)
+- Single storage abstraction for the app.
+- Provides a SAFE, defensive bridge across legacy LocalStorage keys and possible IndexedDB layouts.
+- Chart/Log MUST pull records via VTStorage.getAllRecords().
 
-LOCKED SCOPE (DO NOT DRIFT)
-- Preserve existing data shape and keys.
-- Local-only storage (localStorage first; IndexedDB optional/fallback).
-- No schema migration in this version.
-- No chart logic.
-- No UI logic.
-- Fail safely if storage unavailable.
+v2.023b — Change Log (THIS FILE ONLY)
+1) Adds VTStorage global with:
+   - detect(): best-effort source detection summary
+   - getAllRecords(): returns array of records (defensive, never throws)
+   - putRecord(record): optional (not used yet)
+   - deleteRecordById(id): optional (not used yet)
+2) Legacy LocalStorage compatibility:
+   - scans known keys and generic fallbacks
+3) IndexedDB compatibility:
+   - scans known DB names and store names; reads all if available
+4) Read-only safe defaults:
+   - if nothing found, returns []
 
-Accessibility / reliability rules:
-- Never throw uncaught errors.
-- Never block UI.
-- Return empty arrays on failure.
-- Keep reads/writes explicit and predictable.
+ANTI-DRIFT RULES
+- Do NOT embed chart rendering here.
+- Do NOT embed UI rendering here.
+- Do NOT rename exported API surface without updating dependent modules.
 
-KNOWN KEYS (do not rename):
-- localStorage primary key: "vitals_tracker_records_v1"
-- optional IndexedDB names (best-effort): "vitals_tracker_db", "VitalsTrackerDB"
+Schema position:
+File 4 of 10
 
-EOF footer REQUIRED.
+Previous file:
+File 3 — js/app.js
+
+Next file:
+File 5 — js/store.js
 */
 
-(function(){
+(function () {
   "use strict";
 
-  const APP_VERSION = "v2.023";
+  const VERSION = "v2.023b";
 
-  // ===== Constants =====
-  const LS_KEY = "vitals_tracker_records_v1";
+  // ---- Known legacy LocalStorage keys (from prior v1.x / transitions) ----
+  const LS_KEYS = [
+    "vitals_tracker_records_v1",            // v1.18 canonical key (remembered)
+    "vitals_tracker_records",               // common
+    "vitals_records",                       // common
+    "vitalsTrackerRecords",                 // common camel
+    "vt_records",                           // common short
+    "records",                              // last resort (many apps use this)
+  ];
 
-  // ===== Utilities =====
-  function safeJSONParse(s, fallback){
-    try{ return JSON.parse(s); }catch(_){ return fallback; }
+  // Some builds stored a wrapper object: { records:[...]} or {data:[...]}
+  function normalizeArray(maybe) {
+    if (!maybe) return [];
+    if (Array.isArray(maybe)) return maybe;
+    if (typeof maybe === "object") {
+      if (Array.isArray(maybe.records)) return maybe.records;
+      if (Array.isArray(maybe.data)) return maybe.data;
+      if (Array.isArray(maybe.items)) return maybe.items;
+    }
+    return [];
   }
 
-  function safeJSONStringify(v){
-    try{ return JSON.stringify(v); }catch(_){ return "[]"; }
+  function safeJSONParse(str) {
+    try {
+      return JSON.parse(str);
+    } catch (_) {
+      return null;
+    }
   }
 
-  function nowISO(){
-    try{ return new Date().toISOString(); }catch(_){ return ""; }
+  // ---- Timestamp extraction (used for choosing best candidate) ----
+  function extractTs(r) {
+    return r?.ts ?? r?.time ?? r?.timestamp ?? r?.date ?? r?.createdAt ?? r?.created_at ?? r?.iso ?? null;
+  }
+  function toMs(ts) {
+    try {
+      const t = new Date(ts || 0).getTime();
+      return Number.isFinite(t) ? t : 0;
+    } catch (_) {
+      return 0;
+    }
+  }
+  function newestMs(arr) {
+    let m = 0;
+    for (const r of arr || []) {
+      const ms = toMs(extractTs(r));
+      if (ms > m) m = ms;
+    }
+    return m;
   }
 
-  // ===== LocalStorage (primary) =====
-  function lsAvailable(){
-    try{
-      const k="__vt_test__";
-      localStorage.setItem(k,"1");
-      localStorage.removeItem(k);
-      return true;
-    }catch(_){ return false; }
+  // ---- LocalStorage read helpers ----
+  function readLocalStorageCandidates() {
+    const found = [];
+    for (const k of LS_KEYS) {
+      try {
+        const raw = localStorage.getItem(k);
+        if (!raw) continue;
+        const parsed = safeJSONParse(raw);
+        const arr = normalizeArray(parsed);
+        if (arr.length) {
+          found.push({ source: `localStorage:${k}`, records: arr });
+        }
+      } catch (_) {}
+    }
+
+    // Additional: scan all keys and pick anything that looks like a records array
+    // (limited and safe: only checks first ~40 keys to avoid slowdowns)
+    try {
+      const limit = Math.min(localStorage.length, 40);
+      for (let i = 0; i < limit; i++) {
+        const key = localStorage.key(i);
+        if (!key) continue;
+        if (LS_KEYS.includes(key)) continue; // already handled
+        const raw = localStorage.getItem(key);
+        if (!raw || raw.length < 10) continue;
+        const parsed = safeJSONParse(raw);
+        const arr = normalizeArray(parsed);
+        if (arr.length && typeof arr[0] === "object") {
+          found.push({ source: `localStorage:${key}`, records: arr });
+        }
+      }
+    } catch (_) {}
+
+    return found;
   }
 
-  function lsReadAll(){
-    if(!lsAvailable()) return [];
-    try{
-      const raw = localStorage.getItem(LS_KEY);
-      if(!raw) return [];
-      const arr = safeJSONParse(raw, []);
-      return Array.isArray(arr) ? arr : [];
-    }catch(_){
+  // ---- IndexedDB scan helpers (best-effort, never throws) ----
+  const IDB_DBS = [
+    "vitals_tracker_db",
+    "VitalsTrackerDB",
+    "vitals_tracker",
+    "VT_DB",
+  ];
+
+  const IDB_STORES = [
+    "records",
+    "readings",
+    "entries",
+    "vitals",
+  ];
+
+  function idbOpen(dbName) {
+    return new Promise((resolve) => {
+      try {
+        const req = indexedDB.open(dbName);
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => resolve(null);
+        req.onblocked = () => resolve(null);
+      } catch (_) {
+        resolve(null);
+      }
+    });
+  }
+
+  function idbReadAllFromStore(db, storeName) {
+    return new Promise((resolve) => {
+      try {
+        if (!db.objectStoreNames || !db.objectStoreNames.contains(storeName)) return resolve([]);
+        const tx = db.transaction(storeName, "readonly");
+        const store = tx.objectStore(storeName);
+
+        // getAll is not supported on very old engines, but Android Chrome supports it.
+        if (store.getAll) {
+          const req = store.getAll();
+          req.onsuccess = () => resolve(Array.isArray(req.result) ? req.result : []);
+          req.onerror = () => resolve([]);
+          return;
+        }
+
+        // cursor fallback
+        const out = [];
+        const cur = store.openCursor();
+        cur.onsuccess = (e) => {
+          const cursor = e.target.result;
+          if (cursor) {
+            out.push(cursor.value);
+            cursor.continue();
+          } else {
+            resolve(out);
+          }
+        };
+        cur.onerror = () => resolve([]);
+      } catch (_) {
+        resolve([]);
+      }
+    });
+  }
+
+  async function readIndexedDBCandidates() {
+    const found = [];
+    if (!("indexedDB" in window)) return found;
+
+    for (const dbName of IDB_DBS) {
+      const db = await idbOpen(dbName);
+      if (!db) continue;
+
+      try {
+        for (const storeName of IDB_STORES) {
+          const rows = await idbReadAllFromStore(db, storeName);
+          if (rows && rows.length) {
+            found.push({ source: `indexedDB:${dbName}/${storeName}`, records: rows });
+          }
+        }
+      } catch (_) {
+        // ignore
+      } finally {
+        try { db.close(); } catch (_) {}
+      }
+    }
+
+    return found;
+  }
+
+  // ---- Choose best candidate set (prefer more records; tie-break by newest timestamp) ----
+  function chooseBest(candidates) {
+    if (!candidates || !candidates.length) return { source: "none", records: [] };
+
+    let best = candidates[0];
+    for (let i = 1; i < candidates.length; i++) {
+      const c = candidates[i];
+      const aLen = best.records.length;
+      const bLen = c.records.length;
+
+      if (bLen > aLen) {
+        best = c;
+        continue;
+      }
+      if (bLen === aLen) {
+        if (newestMs(c.records) > newestMs(best.records)) best = c;
+      }
+    }
+    return best;
+  }
+
+  // ---- Public API ----
+  async function detect() {
+    const ls = readLocalStorageCandidates();
+    const idb = await readIndexedDBCandidates();
+
+    const all = [...idb, ...ls]; // prefer IDB generally, but chooseBest handles it
+    const best = chooseBest(all);
+
+    return {
+      version: VERSION,
+      candidates: all.map(x => ({ source: x.source, count: x.records.length, newestMs: newestMs(x.records) })),
+      best: { source: best.source, count: best.records.length, newestMs: newestMs(best.records) },
+    };
+  }
+
+  async function getAllRecords() {
+    try {
+      const ls = readLocalStorageCandidates();
+      const idb = await readIndexedDBCandidates();
+      const all = [...idb, ...ls];
+      const best = chooseBest(all);
+
+      // Defensive clone, never return the same array reference
+      const out = Array.isArray(best.records) ? best.records.slice() : [];
+      return out;
+    } catch (_) {
       return [];
     }
   }
 
-  function lsWriteAll(arr){
-    if(!lsAvailable()) return false;
-    try{
-      localStorage.setItem(LS_KEY, safeJSONStringify(Array.isArray(arr)?arr:[]));
-      return true;
-    }catch(_){
-      return false;
-    }
+  // NOTE: Write ops are placeholders for later; must not be used until Add is restored.
+  async function putRecord(_record) {
+    // Intentionally no-op for v2.023b stabilization phase.
+    // Add.js will own write policy and choose localStorage vs IDB explicitly.
+    return { ok: false, reason: "write-disabled-v2.023b" };
   }
 
-  // ===== Public API =====
-  function getAll(){
-    return lsReadAll();
+  async function deleteRecordById(_id) {
+    // Intentionally no-op for v2.023b stabilization phase.
+    return { ok: false, reason: "write-disabled-v2.023b" };
   }
 
-  function setAll(arr){
-    return lsWriteAll(arr);
-  }
-
-  function addRecord(rec){
-    const all = lsReadAll();
-    const r = (rec && typeof rec === "object") ? rec : {};
-    if(!r.ts && !r.time && !r.timestamp){
-      r.ts = nowISO();
-    }
-    all.push(r);
-    return lsWriteAll(all);
-  }
-
-  function updateRecord(index, rec){
-    const all = lsReadAll();
-    if(!Number.isInteger(index) || index < 0 || index >= all.length) return false;
-    all[index] = rec;
-    return lsWriteAll(all);
-  }
-
-  function clearAll(){
-    if(!lsAvailable()) return false;
-    try{
-      localStorage.removeItem(LS_KEY);
-      return true;
-    }catch(_){
-      return false;
-    }
-  }
-
-  // ===== Best-effort IndexedDB helpers (NO schema; optional) =====
-  function deleteKnownDatabases(){
-    try{
-      if(!window.indexedDB) return;
-      ["vitals_tracker_db","VitalsTrackerDB","vitals_tracker"].forEach(name=>{
-        try{ indexedDB.deleteDatabase(name); }catch(_){}
-      });
-    }catch(_){}
-  }
-
-  // ===== Expose =====
+  // Expose
   window.VTStorage = {
-    version: APP_VERSION,
-    getAll,
-    setAll,
-    addRecord,
-    updateRecord,
-    clearAll,
-    _dangerDeleteIndexedDB: deleteKnownDatabases
+    VERSION,
+    detect,
+    getAllRecords,
+    putRecord,
+    deleteRecordById,
   };
 
 })();
 
-/* EOF: js/storage.js */
 /*
-App Version: v2.023
+Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
+File: js/storage.js
+App Version: v2.023b
 Base: v2.021
-Touched in this release: YES (alignment only; no schema changes)
-
-Delivered files so far (v2.023 phase):
-1) index.html
-6) js/add.js
-7) js/app.js
-8) js/ui.js
-9) js/storage.js
-
-Next file to deliver (on "N"):
-- File 10 of 10: js/version.js (single source of truth sync)
+Touched in v2.023b: js/storage.js
+Schema order: File 4 of 10
+Next planned file: js/store.js (File 5)
 */
