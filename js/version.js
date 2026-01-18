@@ -1,55 +1,54 @@
+/* File: js/version.js */
 /*
-Vitals Tracker (Modular) — js/version.js
-App Version: v2.001
-Purpose:
-- Single source of truth for app versioning metadata used across UI and exports.
-- Prevents version drift between footer labels, export headers, and internal constants.
-- Provides a simple, centralized change log string for reports.
+Vitals Tracker
+Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
-Latest Update (v2.001):
-- Initial v2 version scaffold created.
-- Defines VERSION constants and helper for composing the standard “method of capture” block used in all exports.
+Module: version.js
+App Version: v2.021
+Base: v2.021 (version sync hardening)
+Date: 2026-01-18
+
+Change Log (version.js v2.021)
+1) Single source of truth for app version (APP_VERSION).
+2) Provides stable helpers to read version in any module or UI.
+3) Prevents drift where index/app shows one version and modules show another.
+
+Exports
+- APP_VERSION (string)
+- getAppVersion(): string
+- setAppVersionForDebug(v: string): void   // no-op unless explicitly enabled (kept for future diagnostics)
 */
+(function () {
+  "use strict";
 
-export const APP_VERSION = "v2.001";
+  // Lock: update version here ONLY.
+  const APP_VERSION = "v2.021";
 
-/* Human-facing build notes for this version (keep succinct). */
-export const BUILD_NOTES = [
-  "Modular v2 baseline created from v1.19B44 look/feel.",
-  "No change to storage key to preserve existing data.",
-  "Chart work (horizontal pan/zoom + hypertension bands) implemented in v2.001."
-];
-
-/* Standard, consistent “method of capture” section for all exports */
-export function captureMethodBlock(){
-  return [
-    "How this data was captured:",
-    "- Readings are entered manually into Vitals Tracker on this device.",
-    "- Data is stored locally on the phone (no cloud sync, no account).",
-    "- Each record may include BP (systolic/diastolic), Heart Rate, Symptoms, and Notes."
-  ].join("\n");
-}
-
-/* Standard reviewer guidance (succinct; appended to every report) */
-export function reviewerNotesBlock(context){
-  const base = [
-    "What may matter to a medical / claim reviewer:",
-    "- This is contemporaneous self-tracking; each entry is timestamped at save time on the device.",
-    "- Patterns (clusters during symptoms, sustained elevation, response to meds/rest) are often more informative than single readings.",
-    "- Export scope is explicitly stated (Log filters or the visible Charts date range)."
-  ];
-
-  if(context){
-    base.push(`- Context: ${String(context)}`);
+  function getAppVersion() {
+    return APP_VERSION;
   }
-  return base.join("\n");
-}
+
+  // Debug hook intentionally disabled by default.
+  // If you ever need it later, you can toggle the flag below to true.
+  const ALLOW_DEBUG_SET = false;
+  function setAppVersionForDebug(v) {
+    if (!ALLOW_DEBUG_SET) return;
+    // eslint-disable-next-line no-unused-vars
+    const _ = v; // placeholder; intentionally inert
+  }
+
+  // Expose as both module-global and window for compatibility.
+  // Do NOT rename these keys; index/ui relies on them.
+  window.VTVersion = Object.freeze({
+    APP_VERSION,
+    getAppVersion,
+    setAppVersionForDebug,
+  });
+})();
 
 /*
-Vitals Tracker (Modular) — js/version.js (EOF)
-App Version: v2.001
-Notes:
-- Keep APP_VERSION updated every edit (v2.002, v2.003, ...).
-- BUILD_NOTES should mention ONLY what changed in that version.
-- Next expected file: js/storage.js
+EOF File: js/version.js
+Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
+App Version: v2.021
+Notes: Canonical version is defined here. Other files must read from window.VTVersion.APP_VERSION.
 */
