@@ -2,18 +2,15 @@
 <!--
 Vitals Tracker — Function-First Shell
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
-App Version: v2.019
-Base: v2.018
+App Version: v2.020
+Base: v2.019
 Date: 2026-01-17
 
-Change Log (v2.019)
-1) Pinch behavior corrected (explicit): fingers SPREAD apart => zoom IN (fewer days, down to 1). Fingers PINCH together => zoom OUT (more days, up to 14).
-2) Chart top label: centered; date-range only (CT). No day-count.
-3) X-axis: when hour labels are active (zoomed in), day/date row is hidden to prevent clipping. Hour labels are 12-hour numbers (12, 4, 8, 12...).
-4) Removed chart instruction block under canvas (kept removed).
-5) Y-axis padding reduced further (more plot width). Right-side plot padding increased to prevent label/line clipping at border.
-6) Log: CT date + TIME shown on each record (before notes).
-7) Dynamic Y scale: auto-fits to highest systolic in DB + small pad; ticks adapt; systolic bands extend to current Y_MAX.
+Change Log (v2.020)
+1) Hypertension systolic bands increased to ~75% opacity for clearer visual correlation.
+2) Chart right padding reduced (tighter plot) while preserving non-clipping behavior.
+3) X-axis labels never overlap: labels are selectively dropped (tick marks still drawn) to maintain readability.
+4) No other behavior changes intended.
 
 File Structure / Reference Points
 - Panels: #panelHome, #panelLog, #panelCharts
@@ -259,7 +256,7 @@ Dependencies expected:
       text-overflow:ellipsis;
       text-align:center;
       display:block;
-      padding:0 10px; /* extra breathing room to avoid visual edge clipping */
+      padding:0 10px;
     }
   </style>
 </head>
@@ -268,7 +265,7 @@ Dependencies expected:
   <div class="app">
     <div class="topbar">
       <div class="title">Vitals Tracker</div>
-      <div class="boot" id="bootText">BOOT OK v2.019</div>
+      <div class="boot" id="bootText">BOOT OK v2.020</div>
     </div>
 
     <div class="shell">
@@ -348,12 +345,12 @@ Dependencies expected:
     </div>
   </div>
 
-  <script src="./js/storage.js?v=2.019"></script>
-  <script src="./js/gestures.js?v=2.019"></script>
+  <script src="./js/storage.js?v=2.020"></script>
+  <script src="./js/gestures.js?v=2.020"></script>
 
   <script>
     (function(){
-      const APP_VERSION = "v2.019";
+      const APP_VERSION = "v2.020";
       const TZ = "America/Chicago";
       const MS_HOUR = 3600000;
       const MS_DAY  = 86400000;
@@ -438,7 +435,7 @@ Dependencies expected:
       });
 
       if("serviceWorker" in navigator){
-        navigator.serviceWorker.register("./sw.js?v=2.019").catch(()=>{});
+        navigator.serviceWorker.register("./sw.js?v=2.020").catch(()=>{});
       }
 
       const bridgeStatus = document.getElementById("bridgeStatus");
@@ -639,18 +636,19 @@ Dependencies expected:
         }
         if(maxSys == null) return 200;
 
-        const pad = 6; // small pad so top point isn't on the border
+        const pad = 6;
         const raw = maxSys + pad;
         const nice = Math.ceil(raw / 10) * 10;
         return Math.max(120, nice);
       }
 
       function rebuildBands(){
+        // More opaque (~75%) systolic bands
         return [
-          { name:"HTN2",      y0:140, y1:Y_MAX, fill:"rgba(255, 70, 70, .26)" },
-          { name:"HTN1",      y0:130, y1:140,  fill:"rgba(255, 210, 80, .24)" },
-          { name:"Optimal",   y0: 90, y1:130,  fill:"rgba(80, 160, 255, .22)" },
-          { name:"Hypotens.", y0: Y_MIN, y1: 90, fill:"rgba(170, 120, 255, .20)" }
+          { name:"HTN2",      y0:140, y1:Y_MAX, fill:"rgba(255, 70, 70, .75)" },
+          { name:"HTN1",      y0:130, y1:140,  fill:"rgba(255, 210, 80, .75)" },
+          { name:"Optimal",   y0: 90, y1:130,  fill:"rgba(80, 160, 255, .75)" },
+          { name:"Hypotens.", y0: Y_MIN, y1: 90, fill:"rgba(170, 120, 255, .75)" }
         ];
       }
       let SYS_BANDS = rebuildBands();
@@ -714,8 +712,8 @@ Dependencies expected:
         const rect = chartCanvas.getBoundingClientRect();
         const w = rect.width, h = rect.height;
 
-        // tighter left (more plot), more right (avoid clipping)
-        const padL = 30, padR = 24, padT = 10, padB = 42;
+        // Less right padding per v2.020 request (tighter plot)
+        const padL = 30, padR = 12, padT = 10, padB = 42;
         const x0 = padL, y0 = padT, pw = w - padL - padR, ph = h - padT - padB;
 
         ctx.strokeStyle = "rgba(235,245,255,.14)";
@@ -838,7 +836,6 @@ Dependencies expected:
         const spanDays = (t1 - t0) / MS_DAY;
         const out = [];
 
-        // Hour mode: show 4-hour cadence labels: 12, 4, 8, 12...
         if(spanDays <= 2.0){
           const step = 4 * MS_HOUR;
           let t = Math.ceil(t0/step)*step;
@@ -861,6 +858,7 @@ Dependencies expected:
         return { ticks: out, hourMode: false };
       }
 
+      // X-axis labels never overlap: drop selectively while keeping tick marks
       function drawXLabels(frame, t0, t1){
         const { x0, y0, pw, ph } = frame;
         const { ticks, hourMode } = chooseXTicks(t0, t1);
@@ -870,9 +868,13 @@ Dependencies expected:
         ctx.textAlign = "center";
         ctx.textBaseline = "top";
 
+        let lastRight = -Infinity;
+        const minGap = 6;
+
         for(const tick of ticks){
           const x = x0 + ((tick.t - t0) / (t1 - t0)) * pw;
 
+          // Tick mark always drawn
           ctx.strokeStyle = "rgba(235,245,255,.10)";
           ctx.lineWidth = 1;
           ctx.beginPath();
@@ -880,12 +882,24 @@ Dependencies expected:
           ctx.lineTo(x, y0 + ph + 5);
           ctx.stroke();
 
-          ctx.fillText(tick.labelTop || "", x, y0 + ph + 8);
+          const top = (tick.labelTop || "").trim();
+          const bot = (!hourMode && tick.labelBot) ? (tick.labelBot || "").trim() : "";
 
-          // When hour labels are visible, hide the date row (prevents clipping).
-          if(!hourMode && tick.labelBot){
-            ctx.fillText(tick.labelBot, x, y0 + ph + 22);
+          const wTop = top ? ctx.measureText(top).width : 0;
+          const wBot = bot ? ctx.measureText(bot).width : 0;
+          const w = Math.max(wTop, wBot);
+
+          const left = x - w/2;
+          const right = x + w/2;
+
+          if(left <= lastRight + minGap){
+            continue;
           }
+
+          if(top) ctx.fillText(top, x, y0 + ph + 8);
+          if(bot) ctx.fillText(bot, x, y0 + ph + 22);
+
+          lastRight = right;
         }
       }
 
@@ -934,7 +948,6 @@ Dependencies expected:
         }
         ctx.stroke();
 
-        // crisp points
         ctx.fillStyle = stroke;
         ctx.globalAlpha = Math.min(1, alpha + 0.08);
         for(const p of points){
@@ -1008,7 +1021,6 @@ Dependencies expected:
 
         drawLegend(frame);
 
-        // Only date range (CT). No time. No day count.
         chartsTopNote.textContent = `${fmtCTDateOnly(t0)} \u2192 ${fmtCTDateOnly(t1)} (CT)`;
       }
 
@@ -1080,14 +1092,11 @@ Dependencies expected:
           const a = e.touches[0], b = e.touches[1];
           const dist = Math.max(1, touchDist(a,b));
 
-          // Final semantics:
-          // - fingers spread apart (dist increases) => zoom IN => fewer days
-          // - fingers come together (dist decreases) => zoom OUT => more days
+          // Spread apart => zoom in (fewer days). Pinch together => zoom out (more days).
           const scale = dist / gesture.pinchStartDist;
           const newDays = clamp(gesture.startDays / scale, view.minDays, view.maxDays);
           view.windowDays = newDays;
 
-          // keep the pinch anchor stable under fingers
           const rect = canvasWrap.getBoundingClientRect();
           const midX = (a.clientX + b.clientX) / 2;
           const x = clamp(midX - rect.left, 0, rect.width);
@@ -1220,6 +1229,6 @@ Dependencies expected:
 <!--
 EOF File: index.html
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
-App Version: v2.019
+App Version: v2.020
 Reference: See header block for full change log + element IDs + dependency paths.
 -->
