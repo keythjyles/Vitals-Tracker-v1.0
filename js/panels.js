@@ -1,123 +1,162 @@
-/* File: js/panels.js
-------------------------------------------------------------
+/* File: js/panels.js */
+/*
 Vitals Tracker — Panel Carousel Controller
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
-App Version: v2.021
-Role: Panel navigation + swipe carousel
-Authoritative Version Source: js/version.js
+App Version: v2.023c
+Base: v2.021
+Date: 2026-01-18
 
-Change Log (v2.021)
-- Implements horizontal swipe carousel for panels:
-  Index order:
-    0 = Home
-    1 = Charts
-    2 = Log
-    3 = Settings (placeholder, may not yet exist)
-- Continuous loop behavior:
-    Swipe right from last panel → wraps to first
-    Swipe left from first panel → wraps to last
-- Explicit protection of chart interaction zone:
-    • Swipes starting inside #canvasWrap are ignored here
-    • Chart pinch/pan remains fully controlled by chart logic
-- No vertical swipe handling (vertical gestures belong to scroll/chart)
-- No visual logic, navigation only
-------------------------------------------------------------
+FILE ROLE (LOCKED)
+- Owns panel visibility and carousel logic ONLY.
+- Listens to gesture events emitted by js/gestures.js.
+- Provides a single source of truth for which panel is active.
+- Does NOT implement gestures, charts, storage, or UI rendering.
+
+v2.023c — Change Log (THIS FILE ONLY)
+1) Restores deterministic carousel order and wraparound.
+2) Listens for VT:swipeNext / VT:swipePrev events.
+3) Centralizes panel activation (add/remove .active).
+4) Emits lifecycle hooks for panels (onShow callbacks).
+5) Fixes drift where panels could desync from gesture state.
+
+ANTI-DRIFT RULES
+- Do NOT detect gestures here.
+- Do NOT draw charts here.
+- Do NOT read/write storage here.
+- Panel IDs and order are CONTRACTUAL.
+
+Schema position:
+File 9 of 10
+
+Previous file:
+File 8 — js/gestures.js
+
+Next file:
+File 10 — js/ui.js
 */
 
 (function () {
-  if (!window.VTVersion) {
-    console.error("VTVersion not found. version.js must load first.");
-    return;
-  }
+  "use strict";
 
-  const PANELS = [
-    "panelHome",
-    "panelCharts",
-    "panelLog",
-    "panelSettings" // may not exist yet; safely ignored
+  const VERSION = "v2.023c";
+
+  /* ===== Panel contract ===== */
+  const PANEL_ORDER = [
+    "panelHome",     // 0
+    "panelCharts",   // 1
+    "panelLog",      // 2
+    "panelSettings"  // 3
   ];
 
-  let currentIndex = 0;
-  let startX = null;
-  let startY = null;
-  let tracking = false;
+  const PANELS = {};
+  PANEL_ORDER.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) PANELS[id] = el;
+  });
 
-  const SWIPE_THRESHOLD = 48; // px horizontal movement required
-  const VERTICAL_TOLERANCE = 32; // ignore if vertical movement dominates
+  let activeIndex = 0; // default Home
+  let lastNonSettingsIndex = 0;
 
-  function getActiveIndex() {
-    return currentIndex;
-  }
+  /* ===== Helpers ===== */
+  function showPanelByIndex(idx){
+    if (idx < 0 || idx >= PANEL_ORDER.length) return;
 
-  function setActiveIndex(idx) {
-    const max = PANELS.length;
-    currentIndex = (idx + max) % max;
-
-    PANELS.forEach((id, i) => {
-      const el = document.getElementById(id);
+    PANEL_ORDER.forEach((id, i) => {
+      const el = PANELS[id];
       if (!el) return;
-      el.classList.toggle("active", i === currentIndex);
+      el.classList.toggle("active", i === idx);
     });
-  }
 
-  function isInProtectedZone(target) {
-    return !!target.closest("#canvasWrap");
-  }
-
-  function onTouchStart(e) {
-    if (e.touches.length !== 1) return;
-
-    const t = e.touches[0];
-    if (isInProtectedZone(e.target)) return;
-
-    startX = t.clientX;
-    startY = t.clientY;
-    tracking = true;
-  }
-
-  function onTouchMove(e) {
-    if (!tracking || e.touches.length !== 1) return;
-
-    const t = e.touches[0];
-    const dx = t.clientX - startX;
-    const dy = t.clientY - startY;
-
-    if (Math.abs(dy) > Math.abs(dx) + VERTICAL_TOLERANCE) {
-      tracking = false;
-      return;
+    if (PANEL_ORDER[idx] !== "panelSettings"){
+      lastNonSettingsIndex = idx;
     }
 
-    // do not preventDefault unless threshold crossed
+    activeIndex = idx;
+
+    // Lifecycle hook: onShow
+    const panelId = PANEL_ORDER[idx];
+    try{
+      if (panelId === "panelCharts" &&
+          window.VTChart &&
+          typeof window.VTChart.onShow === "function") {
+        window.VTChart.onShow();
+      }
+    }catch(_){}
   }
 
-  function onTouchEnd(e) {
-    if (!tracking) return;
-    tracking = false;
-
-    const t = e.changedTouches[0];
-    const dx = t.clientX - startX;
-    const dy = t.clientY - startY;
-
-    if (Math.abs(dx) < SWIPE_THRESHOLD) return;
-    if (Math.abs(dy) > Math.abs(dx) + VERTICAL_TOLERANCE) return;
-
-    if (dx < 0) {
-      // swipe left → next panel
-      setActiveIndex(currentIndex + 1);
-    } else {
-      // swipe right → previous panel
-      setActiveIndex(currentIndex - 1);
-    }
+  function next(){
+    const nextIndex = (activeIndex + 1) % PANEL_ORDER.length;
+    showPanelByIndex(nextIndex);
   }
 
-  document.addEventListener("touchstart", onTouchStart, { passive: true });
-  document.addEventListener("touchmove", onTouchMove, { passive: true });
-  document.addEventListener("touchend", onTouchEnd, { passive: true });
+  function prev(){
+    const prevIndex =
+      (activeIndex - 1 + PANEL_ORDER.length) % PANEL_ORDER.length;
+    showPanelByIndex(prevIndex);
+  }
 
-  // expose minimal API for index sync if needed
+  function goHome(){
+    showPanelByIndex(0);
+  }
+
+  function goCharts(){
+    showPanelByIndex(1);
+  }
+
+  function goLog(){
+    showPanelByIndex(2);
+  }
+
+  function openSettings(){
+    showPanelByIndex(3);
+  }
+
+  function closeSettings(){
+    showPanelByIndex(lastNonSettingsIndex || 0);
+  }
+
+  /* ===== Gesture bindings ===== */
+  window.addEventListener("VT:swipeNext", next);
+  window.addEventListener("VT:swipePrev", prev);
+
+  /* ===== Button bindings ===== */
+  function bind(id, fn){
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("click", fn);
+  }
+
+  bind("btnGoCharts", goCharts);
+  bind("btnGoLog", goLog);
+  bind("btnHomeFromCharts", goHome);
+  bind("btnHomeFromLog", goHome);
+
+  bind("btnSettings", openSettings);
+  bind("btnSettingsFromCharts", openSettings);
+  bind("btnSettingsFromLog", openSettings);
+  bind("btnBackFromSettings", closeSettings);
+
+  /* ===== Public API ===== */
   window.VTPanels = {
-    getIndex: getActiveIndex,
-    setIndex: setActiveIndex
+    VERSION,
+    showPanelByIndex,
+    goHome,
+    goCharts,
+    goLog,
+    openSettings
   };
+
+  /* ===== Init ===== */
+  showPanelByIndex(activeIndex);
+
 })();
+
+/*
+Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
+File: js/panels.js
+App Version: v2.023c
+Base: v2.021
+Touched in v2.023c: js/panels.js
+Schema order: File 9 of 10
+Next planned file: js/ui.js (File 10)
+*/
