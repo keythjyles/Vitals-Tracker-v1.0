@@ -1,195 +1,123 @@
-/* File: js/panels.js */
-/*
-Vitals Tracker — Panels Controller
+/* File: js/panels.js
+------------------------------------------------------------
+Vitals Tracker — Panel Carousel Controller
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
-File Purpose
-- Owns panel activation state ONLY.
-- Receives panel-change requests from gestures.js (and any other module) via CustomEvent:
-    window.dispatchEvent(new CustomEvent("vt:panelchange", { detail:{ toIndex:<number> } }))
-- Activates the correct panel element and deactivates all others.
-- Updates nav button pressed/active state (if present).
-- Maintains a fixed panel index map:
+App Version: v2.021
+Role: Panel navigation + swipe carousel
+Authoritative Version Source: js/version.js
+
+Change Log (v2.021)
+- Implements horizontal swipe carousel for panels:
+  Index order:
     0 = Home
     1 = Charts
     2 = Log
-    3 = Settings (future placeholder)
-- No chart rendering, no storage, no add/edit, no exports. This is strictly panel routing.
-
-Integration Contract (Locked)
-- index.html must include panels with: class="panel" and data-panel-index="<0..3>"
-- index.html may include nav buttons with: data-nav-to="<0..3>" (optional)
-- gestures.js must NOT directly toggle .active; it only dispatches "vt:panelchange".
-- panels.js is the single source of truth for active panel.
-
-App Version: v2.020
-Base: v2.019
-Date: 2026-01-18 (America/Chicago)
-
-Change Log (v2.020)
-1) Added deterministic panel registration by data-panel-index.
-2) Added safety clamp + wrap for requested index (0..max), preserving carousel behavior.
-3) Added optional nav button wiring via data-nav-to and active state styling hook:
-   - sets aria-current="page" and data-active="1" on active nav button, clears on others.
-4) Emits "vt:panelchanged" after activation so other modules can react (charts/log refresh).
-
-Reference IDs / Selectors
-- Panels: .panel[data-panel-index]
-- Active panel class: .active
-- Optional nav buttons: [data-nav-to]
-- Events:
-  - inbound:  vt:panelchange  { detail:{ toIndex:number } }
-  - outbound: vt:panelchanged { detail:{ index:number } }
+    3 = Settings (placeholder, may not yet exist)
+- Continuous loop behavior:
+    Swipe right from last panel → wraps to first
+    Swipe left from first panel → wraps to last
+- Explicit protection of chart interaction zone:
+    • Swipes starting inside #canvasWrap are ignored here
+    • Chart pinch/pan remains fully controlled by chart logic
+- No vertical swipe handling (vertical gestures belong to scroll/chart)
+- No visual logic, navigation only
+------------------------------------------------------------
 */
 
-(() => {
-  "use strict";
+(function () {
+  if (!window.VTVersion) {
+    console.error("VTVersion not found. version.js must load first.");
+    return;
+  }
 
-  const EVT_IN = "vt:panelchange";
-  const EVT_OUT = "vt:panelchanged";
+  const PANELS = [
+    "panelHome",
+    "panelCharts",
+    "panelLog",
+    "panelSettings" // may not exist yet; safely ignored
+  ];
 
-  const clampInt = (n, a, b) => {
-    n = Number.isFinite(n) ? Math.trunc(n) : a;
-    if (n < a) return a;
-    if (n > b) return b;
-    return n;
-  };
+  let currentIndex = 0;
+  let startX = null;
+  let startY = null;
+  let tracking = false;
 
-  // Wrap index into [0..max] (carousel wheel).
-  const wrapIndex = (n, max) => {
-    if (max <= 0) return 0;
-    n = Math.trunc(n);
-    // Proper modulo wrap for negatives
-    return ((n % (max + 1)) + (max + 1)) % (max + 1);
-  };
+  const SWIPE_THRESHOLD = 48; // px horizontal movement required
+  const VERTICAL_TOLERANCE = 32; // ignore if vertical movement dominates
 
-  const qsa = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+  function getActiveIndex() {
+    return currentIndex;
+  }
 
-  let panels = [];
-  let navButtons = [];
-  let maxIndex = 2; // default if only 0..2 exist
-  let activeIndex = 0;
+  function setActiveIndex(idx) {
+    const max = PANELS.length;
+    currentIndex = (idx + max) % max;
 
-  function registerPanels() {
-    panels = qsa(".panel[data-panel-index]").sort((a, b) => {
-      const ia = parseInt(a.getAttribute("data-panel-index"), 10);
-      const ib = parseInt(b.getAttribute("data-panel-index"), 10);
-      return (Number.isFinite(ia) ? ia : 0) - (Number.isFinite(ib) ? ib : 0);
+    PANELS.forEach((id, i) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.toggle("active", i === currentIndex);
     });
+  }
 
-    if (!panels.length) {
-      maxIndex = 0;
-      activeIndex = 0;
+  function isInProtectedZone(target) {
+    return !!target.closest("#canvasWrap");
+  }
+
+  function onTouchStart(e) {
+    if (e.touches.length !== 1) return;
+
+    const t = e.touches[0];
+    if (isInProtectedZone(e.target)) return;
+
+    startX = t.clientX;
+    startY = t.clientY;
+    tracking = true;
+  }
+
+  function onTouchMove(e) {
+    if (!tracking || e.touches.length !== 1) return;
+
+    const t = e.touches[0];
+    const dx = t.clientX - startX;
+    const dy = t.clientY - startY;
+
+    if (Math.abs(dy) > Math.abs(dx) + VERTICAL_TOLERANCE) {
+      tracking = false;
       return;
     }
 
-    // Determine maxIndex from actual DOM; supports future settings panel.
-    maxIndex = panels.reduce((m, el) => {
-      const i = parseInt(el.getAttribute("data-panel-index"), 10);
-      return Number.isFinite(i) ? Math.max(m, i) : m;
-    }, 0);
+    // do not preventDefault unless threshold crossed
+  }
 
-    // Identify current active panel if any
-    const current = panels.find(el => el.classList.contains("active"));
-    if (current) {
-      const i = parseInt(current.getAttribute("data-panel-index"), 10);
-      if (Number.isFinite(i)) activeIndex = clampInt(i, 0, maxIndex);
+  function onTouchEnd(e) {
+    if (!tracking) return;
+    tracking = false;
+
+    const t = e.changedTouches[0];
+    const dx = t.clientX - startX;
+    const dy = t.clientY - startY;
+
+    if (Math.abs(dx) < SWIPE_THRESHOLD) return;
+    if (Math.abs(dy) > Math.abs(dx) + VERTICAL_TOLERANCE) return;
+
+    if (dx < 0) {
+      // swipe left → next panel
+      setActiveIndex(currentIndex + 1);
     } else {
-      // Default to Home if present; otherwise first in list.
-      const home = panels.find(el => el.getAttribute("data-panel-index") === "0");
-      activeIndex = home ? 0 : clampInt(parseInt(panels[0].getAttribute("data-panel-index"), 10) || 0, 0, maxIndex);
-      activate(activeIndex, { silent: true });
+      // swipe right → previous panel
+      setActiveIndex(currentIndex - 1);
     }
   }
 
-  function registerNavButtons() {
-    navButtons = qsa("[data-nav-to]").filter(el => el instanceof HTMLElement);
+  document.addEventListener("touchstart", onTouchStart, { passive: true });
+  document.addEventListener("touchmove", onTouchMove, { passive: true });
+  document.addEventListener("touchend", onTouchEnd, { passive: true });
 
-    // Attach click handlers (optional; does not interfere with other modules)
-    navButtons.forEach(btn => {
-      btn.addEventListener("click", (e) => {
-        const to = parseInt(btn.getAttribute("data-nav-to"), 10);
-        if (!Number.isFinite(to)) return;
-        window.dispatchEvent(new CustomEvent(EVT_IN, { detail: { toIndex: to, source: "nav" } }));
-        e.preventDefault();
-      }, { passive: false });
-    });
-  }
-
-  function setNavActive(index) {
-    if (!navButtons.length) return;
-    navButtons.forEach(btn => {
-      const to = parseInt(btn.getAttribute("data-nav-to"), 10);
-      const isActive = Number.isFinite(to) && to === index;
-      if (isActive) {
-        btn.setAttribute("aria-current", "page");
-        btn.setAttribute("data-active", "1");
-      } else {
-        btn.removeAttribute("aria-current");
-        btn.removeAttribute("data-active");
-      }
-    });
-  }
-
-  function activate(requestedIndex, opts = {}) {
-    if (!panels.length) registerPanels();
-    if (!panels.length) return;
-
-    const idx = wrapIndex(requestedIndex, maxIndex);
-    activeIndex = idx;
-
-    panels.forEach(el => {
-      const i = parseInt(el.getAttribute("data-panel-index"), 10);
-      const on = Number.isFinite(i) && i === idx;
-      el.classList.toggle("active", on);
-      el.setAttribute("aria-hidden", on ? "false" : "true");
-    });
-
-    setNavActive(idx);
-
-    if (!opts.silent) {
-      window.dispatchEvent(new CustomEvent(EVT_OUT, { detail: { index: idx } }));
-    }
-  }
-
-  function onPanelChange(e) {
-    const d = e && e.detail ? e.detail : {};
-    const to = Number(d.toIndex);
-    if (!Number.isFinite(to)) return;
-    activate(to);
-  }
-
-  function boot() {
-    registerPanels();
-    registerNavButtons();
-    setNavActive(activeIndex);
-
-    window.addEventListener(EVT_IN, onPanelChange);
-
-    // Expose minimal debug handle (non-invasive)
-    window.VTPanels = Object.freeze({
-      get activeIndex() { return activeIndex; },
-      get maxIndex() { return maxIndex; },
-      activate: (i) => activate(i),
-      refresh: () => { registerPanels(); registerNavButtons(); setNavActive(activeIndex); }
-    });
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", boot, { once: true });
-  } else {
-    boot();
-  }
+  // expose minimal API for index sync if needed
+  window.VTPanels = {
+    getIndex: getActiveIndex,
+    setIndex: setActiveIndex
+  };
 })();
- 
-/* EOF File: js/panels.js */
-/*
-Vitals Tracker — Panels Controller
-Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
-App Version: v2.020
-
-EOF Notes
-- This file is the ONLY module that toggles .panel.active.
-- gestures.js (and others) must request changes via "vt:panelchange".
-- Emits "vt:panelchanged" after activation for dependent modules (charts/log refresh).
-*/
