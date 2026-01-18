@@ -1,118 +1,140 @@
-/* File: /js/gestures.js */
-/*
-Vitals Tracker — Gesture Controller
+/* ======================================================================
+File: /js/gestures.js
+Vitals Tracker — Panel Carousel Gestures
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
-Module: gestures.js
-Purpose:
-- Handle horizontal swipe gestures for panel carousel navigation.
-- Delegate panel changes to panels.js ONLY.
-- Protect chart interaction area from panel swipes.
-- Remain isolated from chart pinch/zoom logic.
+App Version: v2.020
+File #: 2 of 7
+Phase: Panel Navigation Foundation
 
-Dependencies (LOCKED):
-- panels.js (initPanels, nextPanel)
+Purpose
+- Implements horizontal swipe navigation between panels as a continuous carousel.
+- Order (fixed): Home = 0, Charts = 1, Log = 2, Settings = 3 (future).
+- Swiping right advances (+1), swiping left reverses (-1).
+- Wrap-around behavior: past last → first, before first → last.
+- STRICT PROTECTION: gestures are disabled when the touch originates inside
+  protected regions (e.g., chart canvas area) so chart pan/zoom is unaffected.
+- No UI rendering, no styling, no chart logic here. Navigation only.
 
-Protected Zones (LOCKED):
-- Any element matching: #canvasWrap, #chartCanvas
-  → Horizontal swipes starting inside these zones MUST NOT trigger panel navigation.
+Touched by this file
+- Reads: DOM panel elements via data-panel-index
+- Emits: Custom event `vt:panelchange` with { index }
+- Does NOT import or depend on other app modules.
 
-Gesture Rules (LOCKED):
-1) Horizontal swipe only (ignore vertical).
-2) Minimum swipe distance required.
-3) Carousel wraps (handled by panels.js).
-4) No interference with chart pan/pinch.
-5) Touch-only; no mouse emulation.
+Non-Negotiables
+- Horizontal only (vertical movement ignored).
+- No interference with chart gestures.
+- One responsibility only: panel index calculation + dispatch.
 
-Change Log:
-- v2.0xx: Initial locked swipe controller with chart protection.
-*/
+====================================================================== */
 
-import { nextPanel } from "./panels.js";
+(function () {
+  "use strict";
 
-const SWIPE_MIN_PX = 48;
-const SWIPE_MAX_VERTICAL = 32;
+  /* =========================
+     CONFIG
+  ========================= */
+  const SWIPE_MIN_DISTANCE = 50;     // px
+  const SWIPE_MAX_VERTICAL = 40;     // px
+  const TOTAL_PANELS = 4;            // 0..3 (Settings reserved)
 
-let touchStartX = 0;
-let touchStartY = 0;
-let tracking = false;
-let blocked = false;
+  /* =========================
+     STATE
+  ========================= */
+  let startX = null;
+  let startY = null;
+  let active = false;
 
-/* ---------- Utilities ---------- */
+  /* =========================
+     HELPERS
+  ========================= */
 
-function isProtectedTarget(target) {
-  if (!target) return false;
-  return (
-    target.closest("#canvasWrap") ||
-    target.closest("#chartCanvas")
-  );
-}
-
-/* ---------- Handlers ---------- */
-
-function onTouchStart(e) {
-  if (e.touches.length !== 1) return;
-
-  const t = e.touches[0];
-  touchStartX = t.clientX;
-  touchStartY = t.clientY;
-  tracking = true;
-  blocked = isProtectedTarget(e.target);
-}
-
-function onTouchMove(e) {
-  if (!tracking || blocked) return;
-
-  const t = e.touches[0];
-  const dx = t.clientX - touchStartX;
-  const dy = t.clientY - touchStartY;
-
-  // Abort if vertical intent detected
-  if (Math.abs(dy) > SWIPE_MAX_VERTICAL) {
-    tracking = false;
-    return;
+  function isInProtectedRegion(target) {
+    // Any element marked with data-gesture-lock blocks panel swipes
+    // Chart wrapper MUST include this attribute.
+    return !!target.closest("[data-gesture-lock]");
   }
 
-  // Prevent scroll once horizontal intent is clear
-  if (Math.abs(dx) > 12) {
-    e.preventDefault();
-  }
-}
-
-function onTouchEnd(e) {
-  if (!tracking || blocked) {
-    tracking = false;
-    blocked = false;
-    return;
+  function getCurrentIndex() {
+    const el = document.querySelector(".panel.active");
+    if (!el) return 0;
+    const idx = parseInt(el.getAttribute("data-panel-index"), 10);
+    return Number.isInteger(idx) ? idx : 0;
   }
 
-  const t = e.changedTouches[0];
-  const dx = t.clientX - touchStartX;
-  const dy = t.clientY - touchStartY;
+  function nextIndex(current, delta) {
+    let n = current + delta;
+    if (n < 0) n = TOTAL_PANELS - 1;
+    if (n >= TOTAL_PANELS) n = 0;
+    return n;
+  }
 
-  tracking = false;
+  function dispatchPanelChange(index) {
+    document.dispatchEvent(
+      new CustomEvent("vt:panelchange", {
+        detail: { index }
+      })
+    );
+  }
 
-  if (Math.abs(dy) > SWIPE_MAX_VERTICAL) return;
-  if (Math.abs(dx) < SWIPE_MIN_PX) return;
+  /* =========================
+     TOUCH HANDLERS
+  ========================= */
 
-  // Swipe direction:
-  // left swipe (dx < 0) → next panel
-  // right swipe (dx > 0) → previous panel
-  nextPanel(dx < 0 ? +1 : -1);
-}
+  function onTouchStart(e) {
+    if (e.touches.length !== 1) return;
+    if (isInProtectedRegion(e.target)) return;
 
-/* ---------- Init ---------- */
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    active = true;
+  }
 
-export function initGestures() {
+  function onTouchMove(e) {
+    if (!active || e.touches.length !== 1) return;
+
+    const dx = e.touches[0].clientX - startX;
+    const dy = e.touches[0].clientY - startY;
+
+    // Abort if vertical intent detected
+    if (Math.abs(dy) > SWIPE_MAX_VERTICAL) {
+      active = false;
+    }
+  }
+
+  function onTouchEnd(e) {
+    if (!active || startX === null) return;
+
+    const touch = e.changedTouches[0];
+    const dx = touch.clientX - startX;
+    const dy = touch.clientY - startY;
+
+    active = false;
+    startX = startY = null;
+
+    if (Math.abs(dx) < SWIPE_MIN_DISTANCE) return;
+    if (Math.abs(dy) > SWIPE_MAX_VERTICAL) return;
+
+    const direction = dx < 0 ? +1 : -1;
+    const current = getCurrentIndex();
+    const target = nextIndex(current, direction);
+
+    dispatchPanelChange(target);
+  }
+
+  /* =========================
+     INIT
+  ========================= */
+
   document.addEventListener("touchstart", onTouchStart, { passive: true });
-  document.addEventListener("touchmove", onTouchMove, { passive: false });
+  document.addEventListener("touchmove", onTouchMove, { passive: true });
   document.addEventListener("touchend", onTouchEnd, { passive: true });
-}
 
-/* EOF: /js/gestures.js
-Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
-Reference:
-- This file ONLY handles panel swipe gestures.
-- Chart gestures (pan/zoom) are owned elsewhere.
-- Any new interactive chart surface must be added to Protected Zones.
-*/
+})();
+  
+/* ======================================================================
+EOF — /js/gestures.js
+File #: 2 of 7
+Implements carousel swipe navigation only.
+Next file will consume `vt:panelchange` and apply panel visibility.
+====================================================================== */
