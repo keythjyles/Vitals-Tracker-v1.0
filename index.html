@@ -2,20 +2,19 @@
 <!--
 Vitals Tracker — Function-First Shell
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
-App Version: v2.020
-Base: v2.019
+App Version: v2.021
+Base: v2.020
 Date: 2026-01-17
 
-Change Log (v2.020)
-1) Hypertension systolic bands increased to ~75% opacity for clearer visual correlation.
-2) Chart right padding reduced (tighter plot) while preserving non-clipping behavior.
-3) X-axis labels never overlap: labels are selectively dropped (tick marks still drawn) to maintain readability.
-4) No other behavior changes intended.
+Change Log (v2.021)
+1) Hypertension systolic bands reduced ~30% opacity (relative) for better balance against plotted lines.
+2) X-axis hour mode: hour numbers remain on the top row; weekday labels appear BELOW the hours row, centered per day segment; date row hidden at that zoom level.
+3) Log paging UX: "Load next 25" now APPENDS in-place at the button location (no jump/reset). After click, the button moves down to the bottom of the newly added items; scrolling up reveals previous items; scrolling down continues naturally.
 
 File Structure / Reference Points
 - Panels: #panelHome, #panelLog, #panelCharts
 - Chart: #canvasWrap (gesture surface), #chartCanvas (canvas)
-- Log: #logList (UL), #logMoreLink (paging link)
+- Log: #logList (UL), #logMoreLink (paging link), #logCard (scroll container)
 Dependencies expected:
 - ./js/storage.js
 - ./js/gestures.js
@@ -265,7 +264,7 @@ Dependencies expected:
   <div class="app">
     <div class="topbar">
       <div class="title">Vitals Tracker</div>
-      <div class="boot" id="bootText">BOOT OK v2.020</div>
+      <div class="boot" id="bootText">BOOT OK v2.021</div>
     </div>
 
     <div class="shell">
@@ -345,12 +344,12 @@ Dependencies expected:
     </div>
   </div>
 
-  <script src="./js/storage.js?v=2.020"></script>
-  <script src="./js/gestures.js?v=2.020"></script>
+  <script src="./js/storage.js?v=2.021"></script>
+  <script src="./js/gestures.js?v=2.021"></script>
 
   <script>
     (function(){
-      const APP_VERSION = "v2.020";
+      const APP_VERSION = "v2.021";
       const TZ = "America/Chicago";
       const MS_HOUR = 3600000;
       const MS_DAY  = 86400000;
@@ -435,7 +434,7 @@ Dependencies expected:
       });
 
       if("serviceWorker" in navigator){
-        navigator.serviceWorker.register("./sw.js?v=2.020").catch(()=>{});
+        navigator.serviceWorker.register("./sw.js?v=2.021").catch(()=>{});
       }
 
       const bridgeStatus = document.getElementById("bridgeStatus");
@@ -444,6 +443,7 @@ Dependencies expected:
       const sumNewest = document.getElementById("sumNewest");
       const detectedPill = document.getElementById("detectedPill");
 
+      const logCard = document.getElementById("logCard");
       const logTopNote = document.getElementById("logTopNote");
       const logList = document.getElementById("logList");
       const logMoreLink = document.getElementById("logMoreLink");
@@ -536,8 +536,6 @@ Dependencies expected:
         detectedPill.textContent = summary.entries ? (summary.entries + " entries") : "—";
       }
 
-      let logOffset = 0;
-
       function sortedNewest(){
         return [...records].sort((a,b)=>{
           const ta = new Date(extractTs(a) || 0).getTime();
@@ -546,70 +544,108 @@ Dependencies expected:
         });
       }
 
-      function renderLog(reset){
-        if(reset){ logOffset = 0; }
-        logList.innerHTML = "";
-        logMoreLink.style.display = "none";
+      // Log paging state (append, no jump)
+      let logAll = [];
+      let renderedCount = 0;
 
-        if(!records.length){
+      function buildLogItem(r, index){
+        const tsRaw = extractTs(r);
+        const tms = new Date(tsRaw || 0).getTime();
+        const {sys,dia} = extractBP(r);
+        const hr = extractHR(r);
+        const notes = extractNotes(r);
+
+        const topLeft = (sys!=null && dia!=null) ? `${sys}/${dia}` : (sys!=null || dia!=null ? `${sys ?? "—"}/${dia ?? "—"}` : "—");
+        const topRight = (hr!=null) ? `HR ${hr}` : "—";
+        const when = (Number.isFinite(tms) && tms>0) ? fmtCTDateTime(tms) : "—";
+
+        const li = document.createElement("li");
+        li.className = "row";
+        li.dataset.index = String(index);
+
+        const t = document.createElement("div");
+        t.className = "rowTop";
+        t.innerHTML = `<div>${topLeft}</div><div class="pill">${topRight}</div>`;
+
+        const s = document.createElement("div");
+        s.className = "rowSub";
+        const noteTrim = notes && notes.trim() ? ` • ${notes.trim().slice(0,140)}` : "";
+        s.textContent = `${when}${noteTrim}`;
+
+        li.appendChild(t);
+        li.appendChild(s);
+        return li;
+      }
+
+      function updateLogHeader(){
+        if(!logAll.length){
           logTopNote.textContent = "No records detected (read-only).";
           return;
         }
+        logTopNote.textContent = `Showing ${Math.min(renderedCount, logAll.length)} of ${logAll.length} records (read-only).`;
+      }
 
-        const all = sortedNewest();
-        const slice = all.slice(logOffset, logOffset + 25);
+      function renderLogReset(){
+        logList.innerHTML = "";
+        renderedCount = 0;
+        logAll = records.length ? sortedNewest() : [];
+        updateLogHeader();
+        logMoreLink.style.display = (logAll.length > 0) ? "inline-block" : "none";
+        appendNext(25, false);
+      }
 
-        logTopNote.textContent = `Showing ${Math.min(logOffset+slice.length, all.length)} of ${all.length} records (read-only).`;
+      function appendNext(n, keepButtonAnchor){
+        if(!logAll.length){
+          logMoreLink.style.display = "none";
+          updateLogHeader();
+          return;
+        }
 
-        for(let i=0;i<slice.length;i++){
-          const r = slice[i];
-          const tsRaw = extractTs(r);
-          const tms = new Date(tsRaw || 0).getTime();
-          const {sys,dia} = extractBP(r);
-          const hr = extractHR(r);
-          const notes = extractNotes(r);
+        const start = renderedCount;
+        const end = Math.min(logAll.length, renderedCount + n);
+        if(end <= start){
+          logMoreLink.style.display = "none";
+          updateLogHeader();
+          return;
+        }
 
-          const topLeft = (sys!=null && dia!=null) ? `${sys}/${dia}` : (sys!=null || dia!=null ? `${sys ?? "—"}/${dia ?? "—"}` : "—");
-          const topRight = (hr!=null) ? `HR ${hr}` : "—";
-          const when = (Number.isFinite(tms) && tms>0) ? fmtCTDateTime(tms) : "—";
+        let anchorBefore = null;
+        if(keepButtonAnchor){
+          anchorBefore = {
+            btnTop: logMoreLink.getBoundingClientRect().top,
+            cardScrollTop: logCard.scrollTop
+          };
+        }
 
-          const li = document.createElement("li");
-          li.className = "row";
-          li.dataset.index = String(logOffset + i);
-
-          const t = document.createElement("div");
-          t.className = "rowTop";
-          t.innerHTML = `<div>${topLeft}</div><div class="pill">${topRight}</div>`;
-
-          const s = document.createElement("div");
-          s.className = "rowSub";
-          const noteTrim = notes && notes.trim() ? ` • ${notes.trim().slice(0,140)}` : "";
-          s.textContent = `${when}${noteTrim}`;
-
-          li.appendChild(t);
-          li.appendChild(s);
+        for(let i=start; i<end; i++){
+          const li = buildLogItem(logAll[i], i);
           logList.appendChild(li);
         }
 
-        if(logOffset + 25 < all.length){
+        renderedCount = end;
+        updateLogHeader();
+
+        if(renderedCount >= logAll.length){
+          logMoreLink.style.display = "none";
+        } else {
           logMoreLink.style.display = "inline-block";
+        }
+
+        if(keepButtonAnchor && anchorBefore){
+          // Keep the first newly appended record aligned where the button was.
+          const firstNew = logList.querySelector(`li.row[data-index="${start}"]`);
+          if(firstNew){
+            const afterTop = firstNew.getBoundingClientRect().top;
+            const delta = afterTop - anchorBefore.btnTop;
+            logCard.scrollTop = anchorBefore.cardScrollTop + delta;
+          }
         }
       }
 
       logMoreLink.addEventListener("click", (e)=>{
         e.preventDefault();
-        const all = sortedNewest();
-        logOffset = Math.min(all.length, logOffset + 25);
-        renderLog(false);
-
-        const firstNew = logList.querySelector(`li.row[data-index="${logOffset}"]`);
-        if(firstNew){
-          firstNew.scrollIntoView({ block:"start", behavior:"instant" });
-          firstNew.tabIndex = -1;
-          try{ firstNew.focus({ preventScroll:true }); }catch(_){}
-        }else{
-          logList.scrollIntoView({ block:"start", behavior:"instant" });
-        }
+        // Append right where the button is; button moves down; no jump/reset.
+        appendNext(25, true);
       });
 
       const view = {
@@ -643,12 +679,13 @@ Dependencies expected:
       }
 
       function rebuildBands(){
-        // More opaque (~75%) systolic bands
+        // Reduced ~30% from v2.020 (0.75 * 0.70 = 0.525)
+        const a = 0.525;
         return [
-          { name:"HTN2",      y0:140, y1:Y_MAX, fill:"rgba(255, 70, 70, .75)" },
-          { name:"HTN1",      y0:130, y1:140,  fill:"rgba(255, 210, 80, .75)" },
-          { name:"Optimal",   y0: 90, y1:130,  fill:"rgba(80, 160, 255, .75)" },
-          { name:"Hypotens.", y0: Y_MIN, y1: 90, fill:"rgba(170, 120, 255, .75)" }
+          { name:"HTN2",      y0:140, y1:Y_MAX, fill:`rgba(255, 70, 70, ${a})` },
+          { name:"HTN1",      y0:130, y1:140,  fill:`rgba(255, 210, 80, ${a})` },
+          { name:"Optimal",   y0: 90, y1:130,  fill:`rgba(80, 160, 255, ${a})` },
+          { name:"Hypotens.", y0: Y_MIN, y1: 90, fill:`rgba(170, 120, 255, ${a})` }
         ];
       }
       let SYS_BANDS = rebuildBands();
@@ -712,7 +749,6 @@ Dependencies expected:
         const rect = chartCanvas.getBoundingClientRect();
         const w = rect.width, h = rect.height;
 
-        // Less right padding per v2.020 request (tighter plot)
         const padL = 30, padR = 12, padT = 10, padB = 42;
         const x0 = padL, y0 = padT, pw = w - padL - padR, ph = h - padT - padB;
 
@@ -858,6 +894,27 @@ Dependencies expected:
         return { ticks: out, hourMode: false };
       }
 
+      function drawHourModeWeekdays(frame, t0, t1){
+        const { x0, y0, pw, ph } = frame;
+        const fmtWk = new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday:"short" });
+
+        const bounds = computeDayBoundaries(t0, t1);
+        const cuts = [t0, ...bounds, t1].filter((v,i,a)=> i===0 || v>a[i-1]);
+
+        ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+        ctx.fillStyle = "rgba(235,245,255,.58)";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "top";
+
+        for(let i=0;i<cuts.length-1;i++){
+          const a = cuts[i], b = cuts[i+1];
+          const mid = a + (b-a)/2;
+          const x = x0 + ((mid - t0) / (t1 - t0)) * pw;
+          const label = fmtWk.format(new Date(mid));
+          ctx.fillText(label, x, y0 + ph + 22);
+        }
+      }
+
       // X-axis labels never overlap: drop selectively while keeping tick marks
       function drawXLabels(frame, t0, t1){
         const { x0, y0, pw, ph } = frame;
@@ -900,6 +957,11 @@ Dependencies expected:
           if(bot) ctx.fillText(bot, x, y0 + ph + 22);
 
           lastRight = right;
+        }
+
+        // Hour mode: add weekday row below hours; date not shown.
+        if(hourMode){
+          drawHourModeWeekdays(frame, t0, t1);
         }
       }
 
@@ -1144,7 +1206,7 @@ Dependencies expected:
           summary = { source:"Not loaded", entries:0, newest:null };
           records = [];
           renderSummary();
-          renderLog(true);
+          renderLogReset();
           setupCanvas();
           renderCharts();
           return;
@@ -1212,7 +1274,7 @@ Dependencies expected:
         view.tMinData = b.tMin;
         view.tMaxData = b.tMax;
 
-        renderLog(true);
+        renderLogReset();
         setupCanvas();
         renderCharts();
       }
@@ -1229,6 +1291,6 @@ Dependencies expected:
 <!--
 EOF File: index.html
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
-App Version: v2.020
+App Version: v2.021
 Reference: See header block for full change log + element IDs + dependency paths.
 -->
