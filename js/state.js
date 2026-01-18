@@ -1,139 +1,173 @@
+/* File: js/state.js */
 /*
-Vitals Tracker (Modular) — js/state.js
-App Version: v2.001
-Purpose:
-- Centralized app state for navigation, filters, edit context, and charts.
-- Keeps UI modules and gesture modules loosely coupled.
-- Defines chart view constraints (horizontal-only pan/zoom).
+Vitals Tracker — State (View + Interaction State Authority)
+Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
-Latest Update (v2.001):
-- Introduced unified state object for: active panel, add/edit mode, log filters.
-- Chart view model supports horizontal-only zoom/pan with:
-  - default span 7 days
-  - min span 1 day
-  - max span 14 days
-  - view range computed from baseMin/baseMax
+App Version: v2.023b
+Base: v2.021
+Date: 2026-01-18
+
+FILE ROLE (LOCKED)
+- Holds transient application state (NO persistence).
+- Coordinates active panel, chart window, and view-related flags.
+- Acts as the single shared state object for app.js, chart.js, panels.js, ui.js.
+
+v2.023b — Change Log (THIS FILE ONLY)
+1) Introduces window.VTState as a plain, inspectable state container.
+2) Tracks:
+   - activePanel
+   - lastNonSettingsPanel
+   - chart window (days, center time)
+   - flags for first-load and chart-dirty
+3) Provides setters/getters with no side effects.
+4) Zero DOM access. Zero storage access.
+
+ANTI-DRIFT RULES
+- Do NOT read or write localStorage/IndexedDB here.
+- Do NOT render UI here.
+- Do NOT draw charts here.
+- Do NOT attach event listeners here.
+
+Schema position:
+File 6 of 10
+
+Previous file:
+File 5 — js/store.js
+
+Next file:
+File 7 — js/chart.js
 */
 
-export const DAY_MS = 24 * 60 * 60 * 1000;
+(function () {
+  "use strict";
 
-export const PANELS = ["home", "log", "charts"];
+  const VERSION = "v2.023b";
 
-/* Global app state */
-export const state = {
-  /* navigation */
-  activeIndex: 0,
-  isAddOpen: false,
-  returnPanel: "home",
+  const DEFAULTS = {
+    activePanel: "home",          // home | charts | log | settings
+    lastNonSettings: "home",
 
-  /* add/edit */
-  editTs: null,
+    // Chart view window
+    chartWindowDays: 7,            // visible days
+    chartMinDays: 1,
+    chartMaxDays: 14,
+    chartCenterMs: null,           // timestamp center for window
 
-  /* log filters */
-  log: {
-    search: "",
-    fromDate: "",
-    toDate: ""
-  },
+    // Flags
+    firstLoad: true,
+    chartDirty: true,              // chart needs redraw
+  };
 
-  /* chart view (horizontal only) */
-  chart: {
-    /* base = overall range we allow panning within */
-    baseMin: 0,
-    baseMax: 0,
+  // Internal mutable state (never expose directly)
+  const _state = { ...DEFAULTS };
 
-    /* visible range */
-    viewMin: 0,
-    viewMax: 0,
+  /* ===== Panel State ===== */
 
-    /* zoom constraints */
-    minSpan: 1 * DAY_MS,   // 1 day
-    maxSpan: 14 * DAY_MS,  // 14 days
-
-    /* default span */
-    defaultSpan: 7 * DAY_MS,
-
-    /* gesture tracking */
-    pinch: null,
-    pan: null
-  },
-
-  /* export scratch */
-  export: {
-    printToken: null
-  }
-};
-
-export function clamp(n, a, b){
-  return Math.max(a, Math.min(b, n));
-}
-
-export function startOfDay(ts){
-  const d = new Date(ts);
-  d.setHours(0,0,0,0);
-  return d.getTime();
-}
-
-export function endOfDay(ts){
-  const d = new Date(ts);
-  d.setHours(23,59,59,999);
-  return d.getTime();
-}
-
-/* Set chart base to a window that can hold up to 14 days and defaults to last 7 days */
-export function setChartBaseToMostRecent(records){
-  const now = Date.now();
-  const latestTs = records && records.length ? Math.max(...records.map(r => r.ts)) : now;
-
-  const baseMax = endOfDay(latestTs);
-  const baseMin = baseMax - (state.chart.maxSpan) + 1;
-
-  state.chart.baseMin = baseMin;
-  state.chart.baseMax = baseMax;
-
-  /* default visible = last 7 days ending at baseMax */
-  const span = state.chart.defaultSpan;
-  state.chart.viewMax = baseMax;
-  state.chart.viewMin = baseMax - span + 1;
-
-  clampChartViewToBase();
-}
-
-export function clampChartViewToBase(){
-  const c = state.chart;
-
-  const baseMin = c.baseMin;
-  const baseMax = c.baseMax;
-
-  let vMin = c.viewMin;
-  let vMax = c.viewMax;
-
-  /* normalize span */
-  let span = vMax - vMin;
-  span = Math.max(c.minSpan, Math.min(span, c.maxSpan));
-
-  const mid = (vMin + vMax) / 2;
-  vMin = mid - span/2;
-  vMax = mid + span/2;
-
-  if (vMin < baseMin){
-    vMin = baseMin;
-    vMax = baseMin + span;
-  }
-  if (vMax > baseMax){
-    vMax = baseMax;
-    vMin = baseMax - span;
+  function setActivePanel(panel) {
+    if (!panel) return;
+    _state.activePanel = panel;
+    if (panel !== "settings") {
+      _state.lastNonSettings = panel;
+    }
   }
 
-  c.viewMin = vMin;
-  c.viewMax = vMax;
-}
+  function getActivePanel() {
+    return _state.activePanel;
+  }
+
+  function getLastNonSettings() {
+    return _state.lastNonSettings;
+  }
+
+  /* ===== Chart Window State ===== */
+
+  function setChartWindowDays(days) {
+    if (!Number.isFinite(days)) return;
+    _state.chartWindowDays = Math.max(
+      _state.chartMinDays,
+      Math.min(_state.chartMaxDays, Math.floor(days))
+    );
+    _state.chartDirty = true;
+  }
+
+  function getChartWindowDays() {
+    return _state.chartWindowDays;
+  }
+
+  function setChartCenterMs(ms) {
+    if (!Number.isFinite(ms)) return;
+    _state.chartCenterMs = ms;
+    _state.chartDirty = true;
+  }
+
+  function getChartCenterMs() {
+    return _state.chartCenterMs;
+  }
+
+  function markChartClean() {
+    _state.chartDirty = false;
+  }
+
+  function isChartDirty() {
+    return _state.chartDirty;
+  }
+
+  /* ===== Lifecycle Flags ===== */
+
+  function isFirstLoad() {
+    return _state.firstLoad;
+  }
+
+  function clearFirstLoad() {
+    _state.firstLoad = false;
+  }
+
+  /* ===== Reset ===== */
+
+  function reset() {
+    for (const k of Object.keys(DEFAULTS)) {
+      _state[k] = DEFAULTS[k];
+    }
+  }
+
+  /* ===== Debug / Inspection ===== */
+
+  function snapshot() {
+    return { ..._state, version: VERSION };
+  }
+
+  window.VTState = {
+    VERSION,
+
+    // panel
+    setActivePanel,
+    getActivePanel,
+    getLastNonSettings,
+
+    // chart window
+    setChartWindowDays,
+    getChartWindowDays,
+    setChartCenterMs,
+    getChartCenterMs,
+    isChartDirty,
+    markChartClean,
+
+    // lifecycle
+    isFirstLoad,
+    clearFirstLoad,
+
+    // maintenance
+    reset,
+    snapshot,
+  };
+})();
 
 /*
-Vitals Tracker (Modular) — js/state.js (EOF)
-App Version: v2.001
-Notes:
-- Chart zoom/pan is constrained horizontally only.
-- Default chart view = most recent 7 days, pan within 14-day base.
-- Next expected file: js/gestures.js
+Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
+File: js/state.js
+App Version: v2.023b
+Base: v2.021
+Touched in v2.023b: js/state.js
+Schema order: File 6 of 10
+Next planned file: js/chart.js (File 7)
 */
