@@ -1,34 +1,52 @@
 <!-- File: index.html -->
 <!--
-Vitals Tracker — Function-First Shell
+Vitals Tracker — MASTER (Index Authority)
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
-App Version: v2.022
-Base: v2.021
+
+App Version: v2.023a
+Base: v2.021 (last known-good per user; reconstruction of index shell)
 Date: 2026-01-18
 
-Change Log (v2.022)
-1) Adds "Add Reading" as the primary CTA (Home + Top Nav) and introduces the Add panel shell (UI only).
-2) Add panel is a structured, collapsible UX shell for future functionality:
-   - Vitals section (BP/HR/Notes + Symptoms placeholder) is expanded by default.
-   - Distress and Medication sections are present but collapsed.
-3) No storage writes, no validation, no record creation in this version. Read-only behavior remains intact.
-4) Version drift guard: script cache-busters updated to v2.022.
+v2.023a — Change Log (THIS FILE ONLY)
+- Scope: Restore reliable shell + routing for Charts/Log/Add, and stop gesture conflicts.
+1) Version discipline:
+   - This file displays v2.023a and cache-busts module scripts with ?v=2.023a
+   - NOTE: File 2 (js/version.js) will become the single source of truth; for now index is authoritative.
+2) Panel carousel (loop):
+   - Order: Home(0) → Charts(1) → Log(2) → Settings(3) → Home(0)
+   - Swipe LEFT = Next, Swipe RIGHT = Prev
+3) Chart gesture protection:
+   - Carousel swipes are ignored when a gesture starts inside #canvasWrap or on the canvas itself.
+   - “Swipe zones” above/below chart are safe for panel swipes.
+4) Chart rendering is NOT implemented in index.html.
+   - Chart owner: js/chart.js (File 7). index calls window.VTChart if present.
+5) Add flow is NOT implemented in index.html.
+   - Add owner: js/add.js (future file). For now, the Add button routes to a placeholder panel note.
 
-Add Feature Contract (locked reference)
-- Flow: One tap -> Add panel -> Vitals expanded, others collapsed.
-- Data model target (future): {ts, sys, dia, hr, notes, symptoms[], distress?, meds?}
-- Distress scale target: 0–5 with user labels (never numbers alone).
+Release Schema (v2.023 series; one-file-at-a-time)
+1) index.html  (this file)
+2) js/version.js
+3) js/app.js
+4) js/storage.js
+5) js/store.js
+6) js/state.js
+7) js/chart.js
+8) js/gestures.js
+9) js/panels.js
+10) js/ui.js
 
-File Structure / Reference Points
-- Panels: #panelHome, #panelAdd, #panelLog, #panelCharts
-- Add: #addCard, #addVitals, #addDistress, #addMeds
-- Chart: #canvasWrap, #chartCanvas
-- Log: #logList, #logMoreLink, #logCard
-Dependencies expected:
-- ./js/storage.js
-- ./js/gestures.js
-(Next file to implement Add logic: ./js/add.js)
+Hard Rules (anti-drift)
+- Chart drawing logic lives ONLY in js/chart.js.
+- Swipe rules live ONLY in js/gestures.js (later), except the minimal protective gate kept here.
+- Do not rename IDs listed below without changing dependent modules.
+
+Key IDs (contract)
+- Panels: #panelHome, #panelCharts, #panelLog, #panelSettings
+- Chart: #canvasWrap, #chartCanvas, #chartsSwipeTop, #chartsSwipeBottom, #chartsTopNote
+- Home buttons: #btnGoAdd, #btnGoCharts, #btnGoLog
+- Settings buttons: #btnSettings, #btnBackFromSettings
 -->
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -52,8 +70,6 @@ Dependencies expected:
       --shadow:0 18px 42px rgba(0,0,0,.45);
       --r:22px;
       --r2:26px;
-      --pad:16px;
-      --gap:12px;
     }
 
     *{box-sizing:border-box}
@@ -86,10 +102,38 @@ Dependencies expected:
       border-radius:999px;
       background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
       box-shadow: var(--shadow);
-      gap:10px;
+      gap:12px;
     }
-    .title{font-weight:800; letter-spacing:.2px; font-size:22px;}
-    .boot{font-size:13px; color:var(--muted); letter-spacing:.25px; white-space:nowrap;}
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+    .logo{
+      width:34px;height:34px;
+      border-radius:10px;
+      border:1px solid rgba(180,210,255,.22);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+      display:grid;place-items:center;
+      flex:0 0 auto;
+      box-shadow: 0 10px 24px rgba(0,0,0,.25);
+    }
+    .title{
+      font-weight:900;
+      letter-spacing:.2px;
+      font-size:22px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:56vw;
+    }
+    .boot{
+      font-size:13px;
+      color:var(--muted);
+      letter-spacing:.25px;
+      white-space:nowrap;
+    }
 
     .shell{
       flex:1;
@@ -109,6 +153,7 @@ Dependencies expected:
       gap:12px;
       overflow:hidden;
     }
+
     .panel{
       height:100%;
       display:none;
@@ -130,39 +175,46 @@ Dependencies expected:
     }
     .panelHeader .name{
       font-size:18px;
-      font-weight:800;
+      font-weight:900;
       letter-spacing:.2px;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
-      max-width:56%;
+      max-width:60%;
     }
 
-    .nav{display:flex; gap:8px; flex-wrap:nowrap; overflow:auto; -webkit-overflow-scrolling:touch;}
+    .nav{display:flex; gap:8px; align-items:center;}
     .btn{
       border:1px solid var(--stroke2);
       color:var(--text);
       background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
       border-radius:999px;
       padding:10px 12px;
-      font-weight:800;
+      font-weight:900;
       letter-spacing:.2px;
       cursor:pointer;
       user-select:none;
       -webkit-tap-highlight-color: transparent;
       white-space:nowrap;
-      flex:0 0 auto;
     }
     .btn:active{transform: translateY(1px)}
     .btn.secondary{
       color:var(--muted);
       border-color:var(--stroke);
       background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-      font-weight:700;
+      font-weight:800;
     }
-    .btn.primary{
-      border-color: rgba(120,180,255,.45);
-      background: linear-gradient(180deg, rgba(80,150,255,.34), rgba(80,150,255,.14));
+    .btn.danger{
+      border-color: rgba(255,120,120,.22);
+      background: linear-gradient(180deg, rgba(255,90,90,.18), rgba(255,90,90,.08));
+      color: rgba(255,230,230,.92);
+      font-weight:900;
+    }
+    .btn.icon{
+      width:44px;
+      padding:10px 0;
+      display:grid;
+      place-items:center;
     }
     .btn[disabled]{opacity:.55; cursor:not-allowed}
 
@@ -176,93 +228,73 @@ Dependencies expected:
     }
     .muted{color:var(--muted)}
     .small{font-size:13px}
-    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
 
-    .kv{
-      display:grid;
-      grid-template-columns: 110px 1fr;
-      gap:8px 12px;
-      margin-top:10px;
-      font-size:15px;
-    }
-    .kv .k{color:var(--muted)}
-    .kv .v{color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-
-    .list{
-      margin:0;
-      padding:0;
-      list-style:none;
+    /* Home actions */
+    .homeActions{
       display:flex;
       flex-direction:column;
-      gap:10px;
+      gap:14px;
+      padding:6px 2px 2px;
     }
-    .row{
-      border:1px solid var(--stroke);
-      border-radius:16px;
-      padding:10px 12px;
-      background: rgba(0,0,0,.18);
+    .homeBig{
+      width:100%;
+      border-radius:999px;
+      padding:18px 16px;
+      font-size:20px;
+      font-weight:950;
+      letter-spacing:.25px;
+      border:1px solid rgba(120,180,255,.42);
+      background: linear-gradient(180deg, rgba(80,150,255,.38), rgba(80,150,255,.14));
+      box-shadow: 0 14px 32px rgba(0,0,0,.25);
+      color: rgba(235,245,255,.95);
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
     }
-    .rowTop{
+    .homeBig.secondary{
+      border-color: rgba(235,245,255,.18);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      color: rgba(235,245,255,.86);
+      font-weight:900;
+    }
+    .homeBig:active{transform: translateY(1px)}
+
+    .homeRow{
       display:flex;
-      justify-content:space-between;
       gap:10px;
-      font-weight:800;
+      margin-top:8px;
       flex-wrap:wrap;
     }
-    .rowSub{margin-top:6px; color:var(--muted); font-size:13px; line-height:1.25}
-    .pill{
-      padding:4px 10px;
-      border-radius:999px;
-      border:1px solid var(--stroke2);
-      color:var(--muted);
+    .homeRow .btn{
+      flex:1 1 auto;
+      min-width:110px;
+      justify-content:center;
+      text-align:center;
+    }
+    .homeFoot{
+      margin-top:10px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      color:var(--muted2);
       font-size:12px;
-      white-space:nowrap;
     }
+    .homeFoot .v{color:var(--muted); font-weight:900; letter-spacing:.2px}
+    .homeFoot .by{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:55%}
 
-    .canvasWrap{
-      border:1px solid var(--stroke2);
-      border-radius: var(--r);
-      padding:6px;
-      background: rgba(0,0,0,.18);
-      overflow:hidden;
-      touch-action:none;
-    }
-    canvas{
-      display:block;
-      width:100%;
-      height:260px;
-      image-rendering: crisp-edges;
-    }
-
-    .hint{margin-top:10px; color:var(--muted); line-height:1.35;}
-
+    /* Pull-to-refresh indicator (Home only) */
     .pull{
       height:0px;
       overflow:hidden;
       transition:height .18s ease;
       color:var(--muted);
-      font-weight:800;
+      font-weight:900;
       letter-spacing:.2px;
       text-align:center;
     }
 
-    .linkish{
-      margin-top:12px;
-      display:inline-block;
-      color:rgba(170,210,255,.92);
-      font-weight:900;
-      letter-spacing:.15px;
-      text-decoration:none;
-      border:1px solid rgba(170,210,255,.30);
-      background: rgba(60,120,210,.12);
-      padding:10px 12px;
-      border-radius:999px;
-      user-select:none;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .linkish:active{transform:translateY(1px)}
-
-    /* Chart label: hard single line, centered */
+    /* Charts */
     #chartsTopNote{
       white-space:nowrap;
       overflow:hidden;
@@ -272,89 +304,42 @@ Dependencies expected:
       padding:0 10px;
     }
 
-    /* Add panel accordion shell */
-    .acc{
-      border:1px solid var(--stroke);
-      border-radius:18px;
-      background: rgba(0,0,0,.14);
-      overflow:hidden;
-    }
-    .accHead{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      padding:12px 12px;
-      cursor:pointer;
-      user-select:none;
-      -webkit-tap-highlight-color: transparent;
-      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-      border-bottom:1px solid rgba(255,255,255,.04);
-    }
-    .accHead .hTitle{
-      font-weight:900;
-      letter-spacing:.15px;
-      font-size:15px;
-    }
-    .accHead .hMeta{
-      color:var(--muted);
-      font-weight:800;
-      font-size:12px;
-      white-space:nowrap;
-    }
-    .accBody{
-      display:none;
-      padding:12px;
-    }
-    .acc.open .accBody{display:block}
-    .acc.open .accHead{border-bottom:1px solid var(--stroke)}
-    .accArrow{
-      width:28px;
-      height:28px;
-      border:1px solid var(--stroke2);
-      border-radius:999px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:var(--muted);
-      font-weight:900;
-      flex:0 0 auto;
+    .swipeZone{
+      height:18px;
+      border-radius:12px;
+      border:1px solid rgba(235,245,255,.10);
+      background: rgba(0,0,0,.10);
     }
 
-    .grid2{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
+    .canvasWrap{
+      border:1px solid var(--stroke2);
+      border-radius: var(--r);
+      padding:6px;
+      background: rgba(0,0,0,.18);
+      overflow:hidden;
+      touch-action:none; /* chart module should manage its own gestures */
     }
-    .field{
+    canvas{
+      display:block;
+      width:100%;
+      height:280px;
+    }
+
+    /* Settings */
+    .settingsList{
       display:flex;
       flex-direction:column;
-      gap:6px;
+      gap:10px;
+      margin-top:10px;
     }
-    .label{
-      font-size:12px;
-      color:var(--muted);
-      font-weight:900;
-      letter-spacing:.15px;
-    }
-    .in{
-      width:100%;
-      border:1px solid var(--stroke2);
-      border-radius:14px;
-      padding:12px 12px;
-      background: rgba(0,0,0,.18);
-      color:var(--text);
-      font-size:16px;
-      outline:none;
-    }
-    .in:focus{
-      border-color: rgba(120,180,255,.45);
-      box-shadow: 0 0 0 3px rgba(80,150,255,.10);
-    }
-    textarea.in{
-      min-height:76px;
-      resize:none;
-      line-height:1.2;
+    .settingsItem{
+      border:1px solid var(--stroke);
+      border-radius:16px;
+      padding:12px;
+      background: rgba(0,0,0,.16);
+      color: var(--muted);
+      font-weight:800;
+      line-height:1.3;
     }
   </style>
 </head>
@@ -362,173 +347,130 @@ Dependencies expected:
 <body>
   <div class="app">
     <div class="topbar">
-      <div class="title">Vitals Tracker</div>
-      <div class="boot" id="bootText">BOOT OK v2.022</div>
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M3 12h4l2-5 4 12 2-7h6"
+              stroke="rgba(120,180,255,.95)" stroke-width="2.2"
+              stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="title">Vitals Tracker</div>
+      </div>
+      <div class="boot" id="bootText">BOOT OK v2.023a</div>
     </div>
 
     <div class="shell">
       <div class="panels" id="panelsRoot">
 
-        <!-- HOME PANEL -->
+        <!-- HOME (0) -->
         <section class="panel active" id="panelHome" aria-label="Home">
-          <div class="panelHeader">
-            <div class="name">Home</div>
-            <div class="nav">
-              <button class="btn primary" id="btnAdd">Add Reading</button>
-              <button class="btn secondary" id="btnHome">Home</button>
-              <button class="btn secondary" id="btnLog">Log</button>
-              <button class="btn secondary" id="btnCharts">Charts</button>
-              <button class="btn primary" id="btnInstall" disabled>Install</button>
-            </div>
-          </div>
-
           <div class="pull" id="pullIndicator">Release to refresh</div>
 
           <div class="card" id="homeCard">
-            <div style="display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap;">
-              <div class="muted">Function-first shell. Data detection is read-only.</div>
-              <button class="btn primary" id="btnAdd2">Add Reading</button>
-            </div>
+            <div class="homeActions">
+              <button class="homeBig" id="btnGoAdd">Add Reading</button>
+              <button class="homeBig secondary" id="btnGoCharts">Charts</button>
+              <button class="homeBig secondary" id="btnGoLog">Log</button>
 
-            <div class="hint small">
-              Pull down on Home to refresh (release).
-              <div id="bridgeStatus" class="small" style="margin-top:10px;"></div>
-            </div>
-
-            <div class="card" style="margin-top:12px;" id="detectedCard">
-              <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-                <div style="font-weight:900; font-size:20px;">Data Detected (Read-Only)</div>
-                <span class="pill" id="detectedPill">—</span>
+              <div class="homeRow">
+                <button class="btn secondary" id="btnInstall" disabled>Install</button>
+                <button class="btn secondary" id="btnClearData">Clear Data</button>
+                <button class="btn danger" id="btnExit">Exit</button>
+                <button class="btn icon secondary" id="btnSettings" aria-label="Settings" title="Settings">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"
+                      stroke="rgba(235,245,255,.78)" stroke-width="2"/>
+                    <path d="M19.4 15a7.9 7.9 0 0 0 .1-1 7.9 7.9 0 0 0-.1-1l2-1.6-2-3.4-2.4 1a8 8 0 0 0-1.7-1l-.4-2.6H11l-.4 2.6a8 8 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7.9 7.9 0 0 0-.1 1c0 .34.03.67.1 1l-2 1.6 2 3.4 2.4-1c.53.4 1.1.74 1.7 1l.4 2.6h4l.4-2.6c.6-.26 1.17-.6 1.7-1l2.4 1 2-3.4-2-1.6Z"
+                      stroke="rgba(235,245,255,.50)" stroke-width="2" stroke-linejoin="round"/>
+                  </svg>
+                </button>
               </div>
-              <div class="kv" aria-label="Data summary">
-                <div class="k">Source</div><div class="v" id="sumSource">Not loaded</div>
-                <div class="k">Entries</div><div class="v" id="sumEntries">—</div>
-                <div class="k">Newest</div><div class="v mono" id="sumNewest">—</div>
+
+              <div class="muted small" style="margin-top:2px;">
+                Data stays on your phone (local only). Pull down on Home to refresh (release).
+              </div>
+
+              <div class="homeFoot">
+                <div class="v" id="homeVersion">v2.023a</div>
+                <div class="by">developed by Keyth Jyles</div>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- ADD PANEL (SHELL ONLY) -->
-        <section class="panel" id="panelAdd" aria-label="Add Reading">
-          <div class="panelHeader">
-            <div class="name">Add Reading</div>
-            <div class="nav">
-              <button class="btn secondary" id="btnBackFromAdd">Home</button>
-              <button class="btn secondary" id="btnLogFromAdd">Log</button>
-              <button class="btn secondary" id="btnChartsFromAdd">Charts</button>
-            </div>
-          </div>
-
-          <div class="card" id="addCard">
-            <div class="muted" id="addTopNote">Shell only (no saving in v2.022).</div>
-
-            <div class="acc open" id="addVitals" style="margin-top:12px;">
-              <div class="accHead" role="button" aria-expanded="true" tabindex="0">
-                <div>
-                  <div class="hTitle">Vitals</div>
-                  <div class="hMeta">BP • HR • Notes</div>
-                </div>
-                <div class="accArrow" aria-hidden="true">▾</div>
-              </div>
-              <div class="accBody">
-                <div class="grid2">
-                  <div class="field">
-                    <div class="label">Systolic</div>
-                    <input class="in" id="inSys" inputmode="numeric" autocomplete="off" placeholder="e.g., 132" />
-                  </div>
-                  <div class="field">
-                    <div class="label">Diastolic</div>
-                    <input class="in" id="inDia" inputmode="numeric" autocomplete="off" placeholder="e.g., 84" />
-                  </div>
-                </div>
-                <div class="grid2" style="margin-top:10px;">
-                  <div class="field">
-                    <div class="label">Heart Rate</div>
-                    <input class="in" id="inHr" inputmode="numeric" autocomplete="off" placeholder="e.g., 74" />
-                  </div>
-                  <div class="field">
-                    <div class="label">Time</div>
-                    <input class="in" id="inTime" autocomplete="off" placeholder="Auto (next file)" disabled />
-                  </div>
-                </div>
-
-                <div class="field" style="margin-top:10px;">
-                  <div class="label">Notes</div>
-                  <textarea class="in" id="inNotes" placeholder="Optional"></textarea>
-                </div>
-
-                <div class="muted small" style="margin-top:10px;">
-                  Symptoms UI (expanded by default) will be wired in the next Add file.
-                </div>
-              </div>
-            </div>
-
-            <div class="acc" id="addDistress" style="margin-top:12px;">
-              <div class="accHead" role="button" aria-expanded="false" tabindex="0">
-                <div>
-                  <div class="hTitle">Distress</div>
-                  <div class="hMeta">0–5 labeled</div>
-                </div>
-                <div class="accArrow" aria-hidden="true">▸</div>
-              </div>
-              <div class="accBody">
-                <div class="muted small">Distress scale + follow-up prompts will be implemented in a later file.</div>
-              </div>
-            </div>
-
-            <div class="acc" id="addMeds" style="margin-top:12px;">
-              <div class="accHead" role="button" aria-expanded="false" tabindex="0">
-                <div>
-                  <div class="hTitle">Medication</div>
-                  <div class="hMeta">event marker only</div>
-                </div>
-                <div class="accArrow" aria-hidden="true">▸</div>
-              </div>
-              <div class="accBody">
-                <div class="muted small">Medication event entry will be implemented in a later file.</div>
-              </div>
-            </div>
-
-            <div class="muted small" style="margin-top:12px;">
-              Save/Submit button is intentionally not present in v2.022 to prevent any accidental writes.
-            </div>
-          </div>
-        </section>
-
-        <!-- LOG PANEL -->
-        <section class="panel" id="panelLog" aria-label="Log">
-          <div class="panelHeader">
-            <div class="name">Log (read-only)</div>
-            <div class="nav">
-              <button class="btn secondary" id="btnBackFromLog">Home</button>
-              <button class="btn secondary" id="btnChartsFromLog">Charts</button>
-              <button class="btn primary" id="btnAddFromLog">Add Reading</button>
-            </div>
-          </div>
-
-          <div class="card" id="logCard">
-            <div class="muted" id="logTopNote">Loading…</div>
-            <ul class="list" id="logList" style="margin-top:12px;"></ul>
-            <a href="#" class="linkish" id="logMoreLink" style="display:none;">Load next 25</a>
-          </div>
-        </section>
-
-        <!-- CHARTS PANEL -->
+        <!-- CHARTS (1) -->
         <section class="panel" id="panelCharts" aria-label="Charts">
-          <div class="panelHeader">
+          <div class="panelHeader" id="chartsHeader" data-swipezone="1">
             <div class="name">Charts (Read-Only)</div>
             <div class="nav">
-              <button class="btn secondary" id="btnBackFromCharts">Home</button>
-              <button class="btn secondary" id="btnLogFromCharts">Log</button>
-              <button class="btn primary" id="btnAddFromCharts">Add Reading</button>
+              <button class="btn secondary" id="btnHomeFromCharts">Home</button>
+              <button class="btn icon secondary" id="btnSettingsFromCharts" aria-label="Settings" title="Settings">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"
+                    stroke="rgba(235,245,255,.78)" stroke-width="2"/>
+                  <path d="M19.4 15a7.9 7.9 0 0 0 .1-1 7.9 7.9 0 0 0-.1-1l2-1.6-2-3.4-2.4 1a8 8 0 0 0-1.7-1l-.4-2.6H11l-.4 2.6a8 8 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7.9 7.9 0 0 0-.1 1c0 .34.03.67.1 1l-2 1.6 2 3.4 2.4-1c.53.4 1.1.74 1.7 1l.4 2.6h4l.4-2.6c.6-.26 1.17-.6 1.7-1l2.4 1 2-3.4-2-1.6Z"
+                    stroke="rgba(235,245,255,.50)" stroke-width="2" stroke-linejoin="round"/>
+                </svg>
+              </button>
             </div>
           </div>
 
           <div class="card" id="chartsCard" style="padding:12px;">
             <div class="muted" id="chartsTopNote">Loading…</div>
-            <div class="canvasWrap" id="canvasWrap" style="margin-top:10px;">
+
+            <!-- Safe swipe zone ABOVE chart -->
+            <div class="swipeZone" id="chartsSwipeTop" data-swipezone="1" style="margin:10px 0 8px;"></div>
+
+            <div class="canvasWrap" id="canvasWrap">
               <canvas id="chartCanvas"></canvas>
+            </div>
+
+            <!-- Safe swipe zone BELOW chart -->
+            <div class="swipeZone" id="chartsSwipeBottom" data-swipezone="1" style="margin:8px 0 0;"></div>
+          </div>
+        </section>
+
+        <!-- LOG (2) -->
+        <section class="panel" id="panelLog" aria-label="Log">
+          <div class="panelHeader" id="logHeader" data-swipezone="1">
+            <div class="name">Log</div>
+            <div class="nav">
+              <button class="btn secondary" id="btnHomeFromLog">Home</button>
+              <button class="btn icon secondary" id="btnSettingsFromLog" aria-label="Settings" title="Settings">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"
+                    stroke="rgba(235,245,255,.78)" stroke-width="2"/>
+                  <path d="M19.4 15a7.9 7.9 0 0 0 .1-1 7.9 7.9 0 0 0-.1-1l2-1.6-2-3.4-2.4 1a8 8 0 0 0-1.7-1l-.4-2.6H11l-.4 2.6a8 8 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7.9 7.9 0 0 0-.1 1c0 .34.03.67.1 1l-2 1.6 2 3.4 2.4-1c.53.4 1.1.74 1.7 1l.4 2.6h4l.4-2.6c.6-.26 1.17-.6 1.7-1l2.4 1 2-3.4-2-1.6Z"
+                    stroke="rgba(235,245,255,.50)" stroke-width="2" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="card" id="logCard">
+            <div class="muted" id="logTopNote">Loading…</div>
+            <div class="muted small" style="margin-top:10px;">
+              Log rendering is owned by modules (log.js/ui.js). We will restore it after chart stability.
+            </div>
+          </div>
+        </section>
+
+        <!-- SETTINGS (3) -->
+        <section class="panel" id="panelSettings" aria-label="Settings">
+          <div class="panelHeader" data-swipezone="1">
+            <div class="name">Settings</div>
+            <div class="nav">
+              <button class="btn secondary" id="btnBackFromSettings">Back</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="muted">v2.023 series: stabilize chart + swipe + input before adding features.</div>
+            <div class="settingsList">
+              <div class="settingsItem">Reporting + Export will be restored after chart stability.</div>
+              <div class="settingsItem">Distress (0–5) and Medication markers are on the roadmap (not in v2.023a).</div>
+              <div class="settingsItem">Version discipline: index shows version; File 2 will centralize version in js/version.js.</div>
             </div>
           </div>
         </section>
@@ -537,101 +479,100 @@ Dependencies expected:
     </div>
   </div>
 
-  <script src="./js/storage.js?v=2.022"></script>
-  <script src="./js/gestures.js?v=2.022"></script>
+  <!-- Script cache-busting is pinned to v2.023a in this file -->
+  <script src="./js/storage.js?v=2.023a"></script>
+  <script src="./js/store.js?v=2.023a"></script>
+  <script src="./js/state.js?v=2.023a"></script>
+  <script src="./js/chart.js?v=2.023a"></script>
+  <script src="./js/gestures.js?v=2.023a"></script>
+  <script src="./js/panels.js?v=2.023a"></script>
+  <script src="./js/ui.js?v=2.023a"></script>
+  <script src="./js/app.js?v=2.023a"></script>
 
   <script>
     (function(){
-      const APP_VERSION = "v2.022";
-      const TZ = "America/Chicago";
-      const PAGE_SIZE = 25;
+      const APP_VERSION = "v2.023a";
 
-      const panelHome = document.getElementById("panelHome");
-      const panelAdd = document.getElementById("panelAdd");
-      const panelLog = document.getElementById("panelLog");
-      const panelCharts = document.getElementById("panelCharts");
+      // Version text
+      const bootText = document.getElementById("bootText");
+      const homeVersion = document.getElementById("homeVersion");
+      if(bootText) bootText.textContent = "BOOT OK " + APP_VERSION;
+      if(homeVersion) homeVersion.textContent = APP_VERSION;
 
-      function showPanel(which){
-        panelHome.classList.remove("active");
-        panelAdd.classList.remove("active");
-        panelLog.classList.remove("active");
-        panelCharts.classList.remove("active");
+      // Panel refs
+      const panels = {
+        home: document.getElementById("panelHome"),
+        charts: document.getElementById("panelCharts"),
+        log: document.getElementById("panelLog"),
+        settings: document.getElementById("panelSettings"),
+      };
 
-        if(which === "home") panelHome.classList.add("active");
-        if(which === "add") panelAdd.classList.add("active");
-        if(which === "log") panelLog.classList.add("active");
-        if(which === "charts") panelCharts.classList.add("active");
+      const carousel = ["home","charts","log","settings"];
+      let active = "home";
+      let lastNonSettings = "home";
 
+      function setActive(which){
+        for(const k of Object.keys(panels)){
+          const el = panels[k];
+          if(el) el.classList.toggle("active", k === which);
+        }
+        if(which !== "settings") lastNonSettings = which;
+        active = which;
+
+        // On entering charts, ask chart module to render (if present)
         if(which === "charts"){
-          setupCanvas();
-          renderCharts();
+          try{
+            if(window.VTChart && typeof window.VTChart.onShow === "function"){
+              window.VTChart.onShow();
+            }
+          }catch(_){}
         }
       }
 
-      const btnHome = document.getElementById("btnHome");
-      const btnLog = document.getElementById("btnLog");
-      const btnCharts = document.getElementById("btnCharts");
-      const btnInstall = document.getElementById("btnInstall");
-
-      const btnAdd = document.getElementById("btnAdd");
-      const btnAdd2 = document.getElementById("btnAdd2");
-
-      document.getElementById("btnBackFromLog").onclick = () => showPanel("home");
-      document.getElementById("btnChartsFromLog").onclick = () => showPanel("charts");
-      document.getElementById("btnBackFromCharts").onclick = () => showPanel("home");
-      document.getElementById("btnLogFromCharts").onclick = () => showPanel("log");
-
-      document.getElementById("btnBackFromAdd").onclick = () => showPanel("home");
-      document.getElementById("btnLogFromAdd").onclick = () => showPanel("log");
-      document.getElementById("btnChartsFromAdd").onclick = () => showPanel("charts");
-
-      document.getElementById("btnAddFromLog").onclick = () => showPanel("add");
-      document.getElementById("btnAddFromCharts").onclick = () => showPanel("add");
-
-      btnHome.onclick = () => showPanel("home");
-      btnLog.onclick = () => showPanel("log");
-      btnCharts.onclick = () => showPanel("charts");
-
-      btnAdd.onclick = () => showPanel("add");
-      btnAdd2.onclick = () => showPanel("add");
-
-      // Accordion shell toggles (UI only)
-      function wireAcc(id){
-        const el = document.getElementById(id);
-        if(!el) return;
-        const head = el.querySelector(".accHead");
-        const arrow = el.querySelector(".accArrow");
-        const setOpen = (open) => {
-          el.classList.toggle("open", open);
-          head.setAttribute("aria-expanded", open ? "true" : "false");
-          if(arrow) arrow.textContent = open ? "▾" : "▸";
-        };
-        const toggle = () => setOpen(!el.classList.contains("open"));
-        head.addEventListener("click", toggle);
-        head.addEventListener("keydown", (e)=>{
-          if(e.key === "Enter" || e.key === " "){
-            e.preventDefault();
-            toggle();
-          }
-        });
+      function nextPanel(){
+        const i = carousel.indexOf(active);
+        if(i < 0) return;
+        setActive(carousel[(i+1) % carousel.length]);
       }
-      wireAcc("addVitals");
-      wireAcc("addDistress");
-      wireAcc("addMeds");
+      function prevPanel(){
+        const i = carousel.indexOf(active);
+        if(i < 0) return;
+        setActive(carousel[(i-1 + carousel.length) % carousel.length]);
+      }
 
-      // Pull-to-refresh (Home only; safe)
+      // Buttons
+      document.getElementById("btnGoAdd").addEventListener("click", () => {
+        // Input restoration happens in later files; keep user informed
+        alert("Add/Input restoration is part of v2.023 (will be restored after chart stability).");
+      });
+      document.getElementById("btnGoCharts").addEventListener("click", () => setActive("charts"));
+      document.getElementById("btnGoLog").addEventListener("click", () => setActive("log"));
+
+      document.getElementById("btnHomeFromCharts").addEventListener("click", () => setActive("home"));
+      document.getElementById("btnHomeFromLog").addEventListener("click", () => setActive("home"));
+
+      const openSettings = () => setActive("settings");
+      document.getElementById("btnSettings").addEventListener("click", openSettings);
+      document.getElementById("btnSettingsFromCharts").addEventListener("click", openSettings);
+      document.getElementById("btnSettingsFromLog").addEventListener("click", openSettings);
+
+      document.getElementById("btnBackFromSettings").addEventListener("click", () => {
+        setActive(lastNonSettings || "home");
+      });
+
+      // Pull-to-refresh (Home only)
       const pullIndicator = document.getElementById("pullIndicator");
-      const homeCard = document.getElementById("homeCard");
       let pullStartY = null;
       let pullArmed = false;
 
-      panelHome.addEventListener("touchstart", (e) => {
-        if(homeCard.scrollTop !== 0) return;
+      panels.home.addEventListener("touchstart", (e) => {
+        const homeCard = document.getElementById("homeCard");
+        if(homeCard && homeCard.scrollTop !== 0) return;
         pullStartY = e.touches[0].clientY;
         pullArmed = false;
       }, {passive:true});
 
-      panelHome.addEventListener("touchmove", (e) => {
+      panels.home.addEventListener("touchmove", (e) => {
         if(pullStartY == null) return;
         const dy = e.touches[0].clientY - pullStartY;
         if(dy > 0){
@@ -641,7 +582,7 @@ Dependencies expected:
         }
       }, {passive:true});
 
-      panelHome.addEventListener("touchend", () => {
+      panels.home.addEventListener("touchend", () => {
         if(pullStartY == null) return;
         const armed = pullArmed;
         pullStartY = null;
@@ -650,14 +591,14 @@ Dependencies expected:
         if(armed) location.reload();
       });
 
-      // Install prompt
+      // Install handling
+      const btnInstall = document.getElementById("btnInstall");
       let deferredPrompt = null;
       window.addEventListener("beforeinstallprompt", (e) => {
         e.preventDefault();
         deferredPrompt = e;
         btnInstall.disabled = false;
       });
-
       btnInstall.addEventListener("click", async () => {
         try{
           if(!deferredPrompt) return;
@@ -669,443 +610,100 @@ Dependencies expected:
         }
       });
 
-      // Service worker (cache-busted)
-      if("serviceWorker" in navigator){
-        navigator.serviceWorker.register("./sw.js?v=2.022").catch(()=>{});
-      }
+      // Clear data (best-effort)
+      document.getElementById("btnClearData").addEventListener("click", () => {
+        const ok = confirm("Clear all local data on this device?");
+        if(!ok) return;
+        try{ localStorage.clear(); }catch(_){}
+        try{
+          if(window.indexedDB){
+            const candidates = ["vitals_tracker_db","VitalsTrackerDB","vitals_tracker"];
+            for(const name of candidates){
+              try{ indexedDB.deleteDatabase(name); }catch(_){}
+            }
+          }
+        }catch(_){}
+        alert("Local data clear requested. Reloading.");
+        location.reload();
+      });
 
-      // UI summary nodes
-      const bridgeStatus = document.getElementById("bridgeStatus");
-      const sumSource = document.getElementById("sumSource");
-      const sumEntries = document.getElementById("sumEntries");
-      const sumNewest = document.getElementById("sumNewest");
-      const detectedPill = document.getElementById("detectedPill");
+      // Exit (known-good pattern)
+      document.getElementById("btnExit").addEventListener("click", () => {
+        try{
+          window.close();
+          setTimeout(() => {
+            alert("If the app did not close, use your device Back/Home button.");
+          }, 300);
+        }catch(_){
+          alert("Use your device Back/Home button to exit.");
+        }
+      });
 
-      // Log nodes
-      const logTopNote = document.getElementById("logTopNote");
-      const logList = document.getElementById("logList");
-      const logMoreLink = document.getElementById("logMoreLink");
-      const logCard = document.getElementById("logCard");
-
-      // Charts nodes
-      const chartsTopNote = document.getElementById("chartsTopNote");
+      // Carousel swipe gestures (minimal gate; chart protection here)
+      const panelsRoot = document.getElementById("panelsRoot");
       const canvasWrap = document.getElementById("canvasWrap");
-      const chartCanvas = document.getElementById("chartCanvas");
 
-      // Data (read-only)
-      let allRecords = [];
-      let logOffset = 0;
+      let swipe = { active:false, sx:0, sy:0, ok:false, mode:null };
 
-      // --- Time formatting (Central) ---
-      function fmtDT(ts){
-        try{
-          const d = new Date(ts);
-          const s = new Intl.DateTimeFormat("en-US", {
-            timeZone: TZ,
-            year:"numeric", month:"2-digit", day:"2-digit",
-            hour:"2-digit", minute:"2-digit",
-            hour12:true
-          }).format(d);
-          return s.replace(",", "");
-        }catch(_){ return String(ts); }
+      function within(el, target){
+        if(!el || !target) return false;
+        return el === target || el.contains(target);
       }
 
-      function fmtDateOnly(ts){
-        try{
-          const d = new Date(ts);
-          return new Intl.DateTimeFormat("en-US", {
-            timeZone: TZ,
-            year:"numeric", month:"2-digit", day:"2-digit"
-          }).format(d);
-        }catch(_){ return String(ts); }
+      function isSwipeAllowedStart(target){
+        // Hard block: chart interaction region
+        if(active === "charts" && canvasWrap && within(canvasWrap, target)) return false;
+
+        // Allow swipe starts only from marked swipe zones/headers
+        const z = target.closest("[data-swipezone='1']");
+        return !!z;
       }
 
-      function safeNum(x){
-        const n = Number(x);
-        return Number.isFinite(n) ? n : null;
+      panelsRoot.addEventListener("touchstart", (e) => {
+        if(e.touches.length !== 1) return;
+        const t = e.touches[0];
+        swipe.active = true;
+        swipe.sx = t.clientX;
+        swipe.sy = t.clientY;
+        swipe.ok = isSwipeAllowedStart(e.target);
+        swipe.mode = null;
+      }, {passive:true});
+
+      panelsRoot.addEventListener("touchmove", (e) => {
+        if(!swipe.active || !swipe.ok) return;
+        if(e.touches.length !== 1) return;
+        const t = e.touches[0];
+        const dx = t.clientX - swipe.sx;
+        const dy = t.clientY - swipe.sy;
+
+        if(!swipe.mode){
+          if(Math.abs(dx) > 18 && Math.abs(dx) > Math.abs(dy) * 1.2) swipe.mode = "h";
+          else if(Math.abs(dy) > 18 && Math.abs(dy) > Math.abs(dx) * 1.2) swipe.mode = "v";
+        }
+        if(swipe.mode === "h") e.preventDefault();
+      }, {passive:false});
+
+      panelsRoot.addEventListener("touchend", (e) => {
+        if(!swipe.active || !swipe.ok) { swipe.active=false; return; }
+        swipe.active = false;
+        if(swipe.mode !== "h") return;
+
+        const t = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : null;
+        if(!t) return;
+        const dx = t.clientX - swipe.sx;
+        if(Math.abs(dx) < 40) return;
+
+        if(dx < 0) nextPanel(); else prevPanel();
+      }, {passive:true});
+
+      // Service worker
+      if("serviceWorker" in navigator){
+        navigator.serviceWorker.register("./sw.js?v=2.023a").catch(()=>{});
       }
 
-      // --- Storage bridge (read-only) ---
-      function tryReadViaModule(){
-        const S = window.VTStorage || window.StorageBridge || null;
-        if(!S) return null;
-
-        // Try common shapes: getAllRecords(), readAll(), list(), getAll()
-        const candidates = [
-          () => S.getAllRecords && S.getAllRecords(),
-          () => S.readAll && S.readAll(),
-          () => S.getAll && S.getAll(),
-          () => S.list && S.list(),
-          () => S.records && S.records()
-        ];
-
-        for(const fn of candidates){
-          try{
-            const r = fn();
-            if(!r) continue;
-            if(typeof r.then === "function") return r;
-            return Promise.resolve(r);
-          }catch(_){}
-        }
-        return null;
-      }
-
-      function tryReadFromLocalStorage(){
-        const keys = [
-          "vitals_tracker_records_v2",
-          "vitals_tracker_records_v1",
-          "vitals_tracker_records",
-          "VT_RECORDS",
-          "records"
-        ];
-        for(const k of keys){
-          try{
-            const raw = localStorage.getItem(k);
-            if(!raw) continue;
-            const parsed = JSON.parse(raw);
-            if(Array.isArray(parsed)) return { source:`localStorage:${k}`, records: parsed };
-            if(parsed && Array.isArray(parsed.records)) return { source:`localStorage:${k}`, records: parsed.records };
-          }catch(_){}
-        }
-        return { source:"localStorage:none", records: [] };
-      }
-
-      function normalizeRecords(arr){
-        if(!Array.isArray(arr)) return [];
-        const out = [];
-        for(const it of arr){
-          if(!it) continue;
-          const ts = safeNum(it.ts ?? it.time ?? it.t ?? it.date ?? it.datetime);
-          const sys = safeNum(it.sys ?? it.systolic ?? it.SYS);
-          const dia = safeNum(it.dia ?? it.diastolic ?? it.DIA);
-          const hr  = safeNum(it.hr  ?? it.heartRate ?? it.pulse ?? it.HR);
-
-          // minimal acceptance: needs ts and at least one vital
-          if(!ts) continue;
-          if(sys==null && dia==null && hr==null) continue;
-
-          out.push({
-            ts,
-            sys, dia, hr,
-            notes: (it.notes ?? it.note ?? "").toString(),
-            symptoms: Array.isArray(it.symptoms) ? it.symptoms : (Array.isArray(it.sx) ? it.sx : []),
-          });
-        }
-        out.sort((a,b)=>a.ts-b.ts);
-        return out;
-      }
-
-      async function loadRecordsReadOnly(){
-        // 1) try module
-        const p = tryReadViaModule();
-        if(p){
-          try{
-            const r = await p;
-            // r might be array or object
-            if(Array.isArray(r)) return { source:"module", records: normalizeRecords(r) };
-            if(r && Array.isArray(r.records)) return { source:(r.source||"module"), records: normalizeRecords(r.records) };
-            // if module returns {items:[]}
-            if(r && Array.isArray(r.items)) return { source:(r.source||"module"), records: normalizeRecords(r.items) };
-          }catch(_){}
-        }
-        // 2) localStorage fallback
-        const ls = tryReadFromLocalStorage();
-        return { source: ls.source, records: normalizeRecords(ls.records) };
-      }
-
-      function updateHomeSummary(source, recs){
-        const count = recs.length;
-        const newest = count ? recs[count-1].ts : null;
-
-        sumSource.textContent = source || "unknown";
-        sumEntries.textContent = String(count);
-        sumNewest.textContent = newest ? fmtDT(newest) : "—";
-
-        detectedPill.textContent = count ? "YES" : "NO";
-        bridgeStatus.textContent = count
-          ? `Loaded ${count} record(s). No changes made.`
-          : `No records found. This version does not create new records.`;
-      }
-
-      function escapeHtml(s){
-        return (s ?? "").toString()
-          .replaceAll("&","&amp;")
-          .replaceAll("<","&lt;")
-          .replaceAll(">","&gt;")
-          .replaceAll('"',"&quot;")
-          .replaceAll("'","&#039;");
-      }
-
-      function renderLogPage(append){
-        if(!append){
-          logList.innerHTML = "";
-          logOffset = 0;
-        }
-
-        const slice = allRecords
-          .slice()
-          .sort((a,b)=>b.ts-a.ts)
-          .slice(logOffset, logOffset + PAGE_SIZE);
-
-        for(const r of slice){
-          const li = document.createElement("li");
-          li.className = "row";
-          const bp = (r.sys!=null && r.dia!=null) ? `${r.sys}/${r.dia}` : (r.sys!=null ? `${r.sys}/—` : `—/${r.dia??"—"}`);
-          const hr = (r.hr!=null) ? `${r.hr}` : "—";
-          const dt = fmtDT(r.ts);
-          li.innerHTML = `
-            <div class="rowTop">
-              <div>${escapeHtml(dt)}</div>
-              <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
-                <span class="pill">BP ${escapeHtml(bp)}</span>
-                <span class="pill">HR ${escapeHtml(hr)}</span>
-              </div>
-            </div>
-            ${r.notes ? `<div class="rowSub">${escapeHtml(r.notes)}</div>` : ``}
-          `;
-          logList.appendChild(li);
-        }
-
-        logOffset += slice.length;
-
-        const remaining = allRecords.length - logOffset;
-        logMoreLink.style.display = remaining > 0 ? "inline-block" : "none";
-
-        logTopNote.textContent = allRecords.length
-          ? `Showing ${Math.min(logOffset, allRecords.length)} of ${allRecords.length} record(s). Tap “Load next 25” to continue.`
-          : `No records found.`;
-      }
-
-      logMoreLink.addEventListener("click", (e)=>{
-        e.preventDefault();
-        // append right where the button sits (no jump)
-        const before = logMoreLink.getBoundingClientRect().top;
-        renderLogPage(true);
-        // keep viewport stable: keep the "button area" from jumping upward
-        const after = logMoreLink.getBoundingClientRect().top;
-        const delta = after - before;
-        // If the button moved, adjust scroll to keep context stable
-        if(delta !== 0){
-          logCard.scrollTop += delta;
-        }
-      });
-
-      // ---- Simple chart fallback (read-only) ----
-      let ctx = null;
-      let dpr = 1;
-
-      function setupCanvas(){
-        if(!chartCanvas) return;
-        dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
-        const cssW = canvasWrap.clientWidth - 2; // small safety
-        const cssH = 260;
-        chartCanvas.style.width = cssW + "px";
-        chartCanvas.style.height = cssH + "px";
-        chartCanvas.width = Math.floor(cssW * dpr);
-        chartCanvas.height = Math.floor(cssH * dpr);
-        ctx = chartCanvas.getContext("2d");
-        if(ctx) ctx.setTransform(dpr,0,0,dpr,0,0);
-      }
-
-      function getLatest7DaysWindow(){
-        if(!allRecords.length) return null;
-        const newest = allRecords[allRecords.length-1].ts;
-        const end = newest;
-        const start = end - (7*24*3600*1000);
-        return { start, end };
-      }
-
-      function renderCharts(){
-        if(!ctx) setupCanvas();
-        if(!ctx){
-          chartsTopNote.textContent = "Chart unavailable.";
-          return;
-        }
-
-        const W = chartCanvas.clientWidth || (chartCanvas.width/dpr);
-        const H = chartCanvas.clientHeight || (chartCanvas.height/dpr);
-
-        ctx.clearRect(0,0,W,H);
-
-        if(!allRecords.length){
-          chartsTopNote.textContent = "No data found.";
-          ctx.globalAlpha = 1;
-          ctx.fillStyle = "rgba(235,245,255,.65)";
-          ctx.font = "700 14px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-          ctx.fillText("No readings to chart.", 14, 26);
-          return;
-        }
-
-        // Preferred: if external chart module exists, let it take over.
-        if(window.VTChart && typeof window.VTChart.render === "function"){
-          try{
-            window.VTChart.render({
-              canvas: chartCanvas,
-              wrap: canvasWrap,
-              records: allRecords,
-              tz: TZ
-            });
-            return;
-          }catch(_){}
-        }
-
-        // Fallback chart: last 7 days, systolic line only.
-        const win = getLatest7DaysWindow();
-        const start = win.start, end = win.end;
-
-        const visible = allRecords.filter(r => r.ts>=start && r.ts<=end && r.sys!=null);
-        const d0 = fmtDateOnly(start);
-        const d1 = fmtDateOnly(end);
-        chartsTopNote.textContent = `${d0} – ${d1}`;
-
-        // margins
-        const padL = 34;
-        const padR = 12;
-        const padT = 10;
-        const padB = 18;
-
-        const x0 = padL, x1 = W - padR;
-        const y0 = padT, y1 = H - padB;
-
-        // Determine y range (fit to data with small pad)
-        let maxSys = -Infinity;
-        let minSys = Infinity;
-        for(const r of visible){
-          if(r.sys>maxSys) maxSys = r.sys;
-          if(r.sys<minSys) minSys = r.sys;
-        }
-        if(!Number.isFinite(maxSys)){
-          ctx.fillStyle = "rgba(235,245,255,.65)";
-          ctx.font = "700 14px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-          ctx.fillText("No systolic points in view.", 14, 26);
-          return;
-        }
-        const pad = Math.max(6, Math.round((maxSys-minSys)*0.06));
-        const yMin = Math.max(60, minSys - pad);
-        const yMax = Math.min(220, maxSys + pad);
-
-        function xFor(ts){
-          const t = (ts - start) / (end - start);
-          return x0 + t*(x1-x0);
-        }
-        function yFor(v){
-          const t = (v - yMin) / (yMax - yMin);
-          return y1 - t*(y1-y0);
-        }
-
-        // day bands (alternating)
-        const dayStart = Math.floor(start / 86400000) * 86400000;
-        let day = dayStart;
-        let idx = 0;
-        while(day < end + 86400000){
-          const a = Math.max(start, day);
-          const b = Math.min(end, day + 86400000);
-          const xa = xFor(a);
-          const xb = xFor(b);
-          ctx.fillStyle = idx % 2 === 0 ? "rgba(255,255,255,.03)" : "rgba(0,0,0,.10)";
-          ctx.fillRect(xa, y0, Math.max(0, xb-xa), (y1-y0));
-          idx++;
-          day += 86400000;
-        }
-
-        // light grid
-        ctx.strokeStyle = "rgba(235,245,255,.10)";
-        ctx.lineWidth = 1;
-        for(let i=0;i<=4;i++){
-          const y = y0 + (i/4)*(y1-y0);
-          ctx.beginPath();
-          ctx.moveTo(x0, y);
-          ctx.lineTo(x1, y);
-          ctx.stroke();
-        }
-
-        // y labels
-        ctx.fillStyle = "rgba(235,245,255,.62)";
-        ctx.font = "700 11px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-        const ticks = 4;
-        for(let i=0;i<=ticks;i++){
-          const v = Math.round(yMax - (i/ticks)*(yMax-yMin));
-          const y = yFor(v);
-          ctx.fillText(String(v), 6, y+4);
-        }
-
-        // line
-        ctx.strokeStyle = "rgba(235,245,255,.88)";
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        let started = false;
-        for(const r of visible){
-          const x = xFor(r.ts);
-          const y = yFor(r.sys);
-          if(!started){ ctx.moveTo(x,y); started = true; }
-          else ctx.lineTo(x,y);
-        }
-        ctx.stroke();
-
-        // points (small)
-        ctx.fillStyle = "rgba(235,245,255,.92)";
-        for(const r of visible){
-          const x = xFor(r.ts);
-          const y = yFor(r.sys);
-          ctx.beginPath();
-          ctx.arc(x,y,1.6,0,Math.PI*2);
-          ctx.fill();
-        }
-      }
-
-      // Boot: load records and render UI
-      async function boot(){
-        document.getElementById("bootText").textContent = `BOOT OK ${APP_VERSION}`;
-        bridgeStatus.textContent = "Loading records…";
-        logTopNote.textContent = "Loading…";
-        chartsTopNote.textContent = "Loading…";
-
-        const res = await loadRecordsReadOnly();
-        allRecords = res.records || [];
-
-        updateHomeSummary(res.source || "unknown", allRecords);
-
-        // Log
-        renderLogPage(false);
-
-        // Charts: render only when panel shown; but set a safe label now
-        if(allRecords.length){
-          const newest = allRecords[allRecords.length-1].ts;
-          chartsTopNote.textContent = `${fmtDateOnly(newest)} (open Charts to render)`;
-        }else{
-          chartsTopNote.textContent = "No data found.";
-        }
-
-        bridgeStatus.textContent = allRecords.length
-          ? `Loaded ${allRecords.length} record(s) (read-only).`
-          : `No records loaded (read-only).`;
-      }
-
-      // Minimal keyboard safety: prevent form submit reload
-      document.addEventListener("submit", (e)=>e.preventDefault());
-
-      boot().catch(()=>{
-        bridgeStatus.textContent = "Load error. Records not available.";
-        sumSource.textContent = "error";
-        sumEntries.textContent = "—";
-        sumNewest.textContent = "—";
-        detectedPill.textContent = "—";
-        logTopNote.textContent = "Load error.";
-        chartsTopNote.textContent = "Load error.";
-      });
+      // Initial panel
+      setActive("home");
     })();
   </script>
 </body>
 </html>
-
-<!-- EOF File: index.html
-------------------------------------------------------------
-Vitals Tracker — Function-First Shell
-Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
-App Version: v2.022
-Notes:
-- Read-only. No write operations performed.
-- Add panel is UI shell only in v2.022.
-- Next file: js/add.js to implement Add behavior without impacting existing data.
-------------------------------------------------------------
--->
