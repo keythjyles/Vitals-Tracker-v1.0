@@ -10,6 +10,8 @@ Change Log (v2.021)
 1) Hypertension systolic bands reduced ~30% opacity (relative) for better balance against plotted lines.
 2) X-axis hour mode: hour numbers remain on the top row; weekday labels appear BELOW the hours row, centered per day segment; date row hidden at that zoom level.
 3) Log paging UX: "Load next 25" now APPENDS in-place at the button location (no jump/reset). After click, the button moves down to the bottom of the newly added items; scrolling up reveals previous items; scrolling down continues naturally.
+4) Hour-mode label overlap defense: hours never overlap; selectively drops overlapping hour labels while preserving tick marks. Weekday row remains (day-centered).
+5) Light right-padding reduction on plot frame (more usable chart width) without clipping.
 
 File Structure / Reference Points
 - Panels: #panelHome, #panelLog, #panelCharts
@@ -644,7 +646,6 @@ Dependencies expected:
 
       logMoreLink.addEventListener("click", (e)=>{
         e.preventDefault();
-        // Append right where the button is; button moves down; no jump/reset.
         appendNext(25, true);
       });
 
@@ -679,7 +680,8 @@ Dependencies expected:
       }
 
       function rebuildBands(){
-        // Reduced ~30% from v2.020 (0.75 * 0.70 = 0.525)
+        // Reduced ~30% opacity (relative) vs prior band intent.
+        // Using a single alpha for all 4 bands for now (future: per-band alphas + legend).
         const a = 0.525;
         return [
           { name:"HTN2",      y0:140, y1:Y_MAX, fill:`rgba(255, 70, 70, ${a})` },
@@ -749,7 +751,8 @@ Dependencies expected:
         const rect = chartCanvas.getBoundingClientRect();
         const w = rect.width, h = rect.height;
 
-        const padL = 30, padR = 12, padT = 10, padB = 42;
+        // Slightly less right padding for more plot width; keep safe against label clipping.
+        const padL = 30, padR = 10, padT = 10, padB = 42;
         const x0 = padL, y0 = padT, pw = w - padL - padR, ph = h - padT - padB;
 
         ctx.strokeStyle = "rgba(235,245,255,.14)";
@@ -906,6 +909,7 @@ Dependencies expected:
         ctx.textAlign = "center";
         ctx.textBaseline = "top";
 
+        // Weekday row: centered per day segment, below hour row
         for(let i=0;i<cuts.length-1;i++){
           const a = cuts[i], b = cuts[i+1];
           const mid = a + (b-a)/2;
@@ -915,7 +919,8 @@ Dependencies expected:
         }
       }
 
-      // X-axis labels never overlap: drop selectively while keeping tick marks
+      // X-axis labels never overlap: drop selectively while keeping tick marks.
+      // Hour mode: show ONLY hour numbers; weekday row handled separately; date row hidden.
       function drawXLabels(frame, t0, t1){
         const { x0, y0, pw, ph } = frame;
         const { ticks, hourMode } = chooseXTicks(t0, t1);
@@ -942,6 +947,7 @@ Dependencies expected:
           const top = (tick.labelTop || "").trim();
           const bot = (!hourMode && tick.labelBot) ? (tick.labelBot || "").trim() : "";
 
+          // Measure only what we intend to draw at this zoom level.
           const wTop = top ? ctx.measureText(top).width : 0;
           const wBot = bot ? ctx.measureText(bot).width : 0;
           const w = Math.max(wTop, wBot);
@@ -953,13 +959,13 @@ Dependencies expected:
             continue;
           }
 
+          // Hour mode: date row is hidden (no bot); weekday row is handled below.
           if(top) ctx.fillText(top, x, y0 + ph + 8);
           if(bot) ctx.fillText(bot, x, y0 + ph + 22);
 
           lastRight = right;
         }
 
-        // Hour mode: add weekday row below hours; date not shown.
         if(hourMode){
           drawHourModeWeekdays(frame, t0, t1);
         }
