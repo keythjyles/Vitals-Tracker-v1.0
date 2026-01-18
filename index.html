@@ -1,16 +1,16 @@
 <!-- File: index.html -->
 <!--
 Vitals Tracker — Function-First Shell
-App Version: v2.016
-Base: v2.015
+App Version: v2.017
+Base: v2.016
 Date: 2026-01-17
 
-Change Log (v2.016)
-1) Chart Y-axis: no longer fixed at 40–200. Now fits to the highest *systolic* value in the database + a small pad so the max point never sits on the top gridline.
-   - Y-min remains anchored at 40 for consistent readability.
-2) Zoomed X-axis labels: now 12-hour numbers only (no military time). When zoomed in, labels follow 12, 4, 8, 12, 4, 8…
-3) Charts layout tightened: removed unnecessary vertical padding above/below the plot area (the “blue-marked” dead space), while keeping the single-line window label and the instructions.
-4) Version bumps: boot label, cache-busters, and constants advanced to v2.016.
+Change Log (v2.017)
+1) Pinch direction fix (again): pinch now uses HORIZONTAL finger spacing only (|x1-x2|), eliminating “backwards” behavior caused by vertical finger motion affecting distance math.
+2) Charts top label simplified: now shows ONLY the visible date range (date → date). No “Window”, no days count, no time, no “CT”.
+3) X-axis layout: day + date is always shown. When zoomed enough to show hour labels, hours appear on the first row and day/date shift down beneath them.
+4) Zoom range: pinch can now zoom down to 1 day (minDays=1).
+5) Chart padding: added a bit more right padding inside the plot frame to prevent label/plot clipping near the border.
 
 File Structure / Reference Points
 - Panels: #panelHome, #panelLog, #panelCharts
@@ -202,11 +202,10 @@ Dependencies expected:
       white-space:nowrap;
     }
 
-    /* TIGHTER CHART AREA (removes dead space) */
     .canvasWrap{
       border:1px solid var(--stroke2);
       border-radius: var(--r);
-      padding:2px;               /* tighter */
+      padding:2px;
       background: rgba(0,0,0,.18);
       overflow:hidden;
       touch-action:none;
@@ -214,7 +213,7 @@ Dependencies expected:
     canvas{
       display:block;
       width:100%;
-      height:240px;              /* compressed height */
+      height:240px;
     }
 
     .hint{margin-top:8px; color:var(--muted); line-height:1.25;}
@@ -258,7 +257,7 @@ Dependencies expected:
   <div class="app">
     <div class="topbar">
       <div class="title">Vitals Tracker</div>
-      <div class="boot" id="bootText">BOOT OK v2.016</div>
+      <div class="boot" id="bootText">BOOT OK v2.017</div>
     </div>
 
     <div class="shell">
@@ -326,14 +325,13 @@ Dependencies expected:
             </div>
           </div>
 
-          <!-- tighter padding to remove dead space -->
           <div class="card" id="chartsCard" style="padding:10px; overflow:hidden;">
             <div class="muted" id="chartsTopNote">Loading…</div>
             <div class="canvasWrap" id="canvasWrap" style="margin-top:8px;">
               <canvas id="chartCanvas"></canvas>
             </div>
             <div class="hint small" id="chartsHint" style="margin-top:8px;">
-              Pan left/right to move through time. Pinch horizontally to set window from 2–14 days (default 7).
+              Pan left/right to move through time. Pinch horizontally to set window from 1–14 days (default 7).
             </div>
           </div>
         </section>
@@ -342,12 +340,12 @@ Dependencies expected:
     </div>
   </div>
 
-  <script src="./js/storage.js?v=2.016"></script>
-  <script src="./js/gestures.js?v=2.016"></script>
+  <script src="./js/storage.js?v=2.017"></script>
+  <script src="./js/gestures.js?v=2.017"></script>
 
   <script>
     (function(){
-      const APP_VERSION = "v2.016";
+      const APP_VERSION = "v2.017";
       const TZ = "America/Chicago";
       const MS_HOUR = 3600000;
       const MS_DAY  = 86400000;
@@ -432,7 +430,7 @@ Dependencies expected:
       });
 
       if("serviceWorker" in navigator){
-        navigator.serviceWorker.register("./sw.js?v=2.016").catch(()=>{});
+        navigator.serviceWorker.register("./sw.js?v=2.017").catch(()=>{});
       }
 
       const bridgeStatus = document.getElementById("bridgeStatus");
@@ -450,10 +448,9 @@ Dependencies expected:
       const chartCanvas = document.getElementById("chartCanvas");
 
       let ctx = null;
-      let dpr = 1;
 
       function setupCanvas(){
-        dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+        const dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
         const rect = chartCanvas.getBoundingClientRect();
         const cssW = Math.max(280, Math.floor(rect.width));
         const cssH = Math.max(200, Math.floor(rect.height));
@@ -602,7 +599,7 @@ Dependencies expected:
 
       const view = {
         windowDays: 7,
-        minDays: 2,
+        minDays: 1,
         maxDays: 14,
         centerMs: null,
         tMinData: null,
@@ -611,16 +608,10 @@ Dependencies expected:
 
       function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
 
-      // v2.016: Dynamic Y-max (based on max systolic in DB)
       const Y_MIN_FIXED = 40;
-      let Y_MAX_DYNAMIC = 200; // recalculated after data load
+      let Y_MAX_DYNAMIC = 200;
 
-      // Increased opacity stays
-      const SYS_THRESH = {
-        hypoTop: 90,
-        optimalTop: 130,
-        htn1Top: 140
-      };
+      const SYS_THRESH = { hypoTop: 90, optimalTop: 130, htn1Top: 140 };
 
       function computeDataTimeBounds(){
         let tMin = Infinity, tMax = -Infinity;
@@ -646,7 +637,6 @@ Dependencies expected:
           }
         }
         if(maxSys == null) return 200;
-        // small pad so max point never touches top line
         const pad = (maxSys >= 180) ? 8 : 6;
         return maxSys + pad;
       }
@@ -695,7 +685,7 @@ Dependencies expected:
         const rect = chartCanvas.getBoundingClientRect();
         const w = rect.width, h = rect.height;
 
-        const padL = 48, padR = 8, padT = 8, padB = 34;   // tighter
+        const padL = 48, padR = 14, padT = 8, padB = 38; // more right padding
         const x0 = padL, y0 = padT, pw = w - padL - padR, ph = h - padT - padB;
 
         ctx.strokeStyle = "rgba(235,245,255,.14)";
@@ -758,12 +748,11 @@ Dependencies expected:
       function drawSystolicBands(frame){
         const { x0, pw } = frame;
 
-        // Bands are systolic-based; keep within current Y range
         const bands = [
-          { y0: SYS_THRESH.htn1Top, y1: Y_MAX_DYNAMIC, fill:"rgba(255, 70, 70, .28)" },      // HTN2+
-          { y0: SYS_THRESH.optimalTop, y1: SYS_THRESH.htn1Top, fill:"rgba(255, 210, 80, .26)" }, // HTN1
-          { y0: SYS_THRESH.hypoTop, y1: SYS_THRESH.optimalTop, fill:"rgba(80, 160, 255, .24)" }, // Optimal/Normal
-          { y0: Y_MIN_FIXED, y1: SYS_THRESH.hypoTop, fill:"rgba(170, 120, 255, .22)" }          // Hypotension-ish range tint
+          { y0: SYS_THRESH.htn1Top, y1: Y_MAX_DYNAMIC, fill:"rgba(255, 70, 70, .28)" },
+          { y0: SYS_THRESH.optimalTop, y1: SYS_THRESH.htn1Top, fill:"rgba(255, 210, 80, .26)" },
+          { y0: SYS_THRESH.hypoTop, y1: SYS_THRESH.optimalTop, fill:"rgba(80, 160, 255, .24)" },
+          { y0: Y_MIN_FIXED, y1: SYS_THRESH.hypoTop, fill:"rgba(170, 120, 255, .22)" }
         ];
 
         for(const b of bands){
@@ -776,10 +765,8 @@ Dependencies expected:
       }
 
       function drawYGridAndLabels(frame){
-        const { x0, y0, pw, ph } = frame;
+        const { x0, pw } = frame;
 
-        // Build ticks that make sense for dynamic max.
-        // Prefer 20-step around common BP ranges; keep legible.
         const span = Y_MAX_DYNAMIC - Y_MIN_FIXED;
         const step = (span <= 90) ? 10 : 20;
         const ticks = [];
@@ -808,11 +795,9 @@ Dependencies expected:
 
       function hour12Num(ms){
         try{
-          const parts = new Intl.DateTimeFormat("en-US", {
-            timeZone: TZ, hour:"2-digit", hour12:false
-          }).formatToParts(new Date(ms));
+          const parts = new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour:"2-digit", hour12:false })
+            .formatToParts(new Date(ms));
           const hh = parseInt(parts.find(p=>p.type==="hour")?.value || "0", 10);
-          // Convert 0..23 => 12-hour number only
           const h12 = (hh % 12) === 0 ? 12 : (hh % 12);
           return String(h12);
         }catch(_){
@@ -824,50 +809,51 @@ Dependencies expected:
         const spanMs = t1 - t0;
         const spanDays = spanMs / MS_DAY;
         const out = [];
-
-        if(spanDays <= 2.2){
-          const step = 4 * MS_HOUR;
-          let t = Math.ceil(t0/step)*step;
-          while(t <= t1){
-            out.push({ t, labelTop: hour12Num(t), labelBot: "" });
-            t += step;
-          }
-          return out;
-        }
-
-        if(spanDays <= 4.5){
-          const step = 6 * MS_HOUR;
-          let t = Math.ceil(t0/step)*step;
-          while(t <= t1){
-            out.push({ t, labelTop: hour12Num(t), labelBot: "" });
-            t += step;
-          }
-          return out;
-        }
+        const showHours = (spanDays <= 2.2);
 
         const fmtDay = new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday:"short" });
         const fmtMD  = new Intl.DateTimeFormat("en-US", { timeZone: TZ, month:"2-digit", day:"2-digit" });
 
-        if(spanDays <= 7.8){
-          const bounds = computeDayBoundaries(t0, t1);
-          const cuts = [t0, ...bounds].filter(v=>v>=t0 && v<=t1);
-          for(const t of cuts){
-            out.push({ t, labelTop: fmtDay.format(new Date(t)), labelBot: fmtMD.format(new Date(t)) });
+        // Always compute day boundaries so day+date can always be shown.
+        const dayBounds = computeDayBoundaries(t0, t1);
+        const dayCuts = [t0, ...dayBounds].filter(v=>v>=t0 && v<=t1);
+
+        if(showHours){
+          const step = 4 * MS_HOUR;
+          let t = Math.ceil(t0/step)*step;
+          while(t <= t1){
+            out.push({ t, hour: hour12Num(t), day: "", date: "" });
+            t += step;
           }
-          return out;
+          // Add day/date labels at day cuts (midnight boundary locations in visible range)
+          for(const dc of dayCuts){
+            out.push({ t: dc, hour: "", day: fmtDay.format(new Date(dc)), date: fmtMD.format(new Date(dc)) });
+          }
+          out.sort((a,b)=>a.t-b.t);
+          return { ticks: out, mode: "hours+day" };
         }
 
-        const bounds = computeDayBoundaries(t0, t1);
-        const cuts = [t0, ...bounds].filter(v=>v>=t0 && v<=t1);
-        for(let i=0;i<cuts.length;i+=2){
-          out.push({ t: cuts[i], labelTop: fmtDay.format(new Date(cuts[i])), labelBot: fmtMD.format(new Date(cuts[i])) });
+        if(spanDays <= 7.8){
+          const cuts = dayCuts;
+          for(const t of cuts){
+            out.push({ t, hour:"", day: fmtDay.format(new Date(t)), date: fmtMD.format(new Date(t)) });
+          }
+          return { ticks: out, mode:"day" };
         }
-        return out;
+
+        // 8–14 days: show every other day
+        for(let i=0;i<dayCuts.length;i+=2){
+          const t = dayCuts[i];
+          out.push({ t, hour:"", day: fmtDay.format(new Date(t)), date: fmtMD.format(new Date(t)) });
+        }
+        return { ticks: out, mode:"day" };
       }
 
       function drawXLabels(frame, t0, t1){
         const { x0, y0, pw, ph } = frame;
-        const ticks = chooseXTicks(t0, t1);
+        const packed = chooseXTicks(t0, t1);
+        const ticks = packed.ticks;
+        const mode = packed.mode;
 
         ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
         ctx.fillStyle = "rgba(235,245,255,.58)";
@@ -884,9 +870,22 @@ Dependencies expected:
           ctx.lineTo(x, y0 + ph + 5);
           ctx.stroke();
 
-          ctx.fillText(tick.labelTop || "", x, y0 + ph + 6);
-          if(tick.labelBot){
-            ctx.fillText(tick.labelBot, x, y0 + ph + 20);
+          if(mode === "hours+day"){
+            // Row 1: hour labels
+            if(tick.hour){
+              ctx.fillText(tick.hour, x, y0 + ph + 6);
+            }
+            // Row 2/3: day/date (shifted down)
+            if(tick.day){
+              ctx.fillText(tick.day, x, y0 + ph + 20);
+            }
+            if(tick.date){
+              ctx.fillText(tick.date, x, y0 + ph + 34);
+            }
+          } else {
+            // Normal mode: day then date
+            if(tick.day)  ctx.fillText(tick.day,  x, y0 + ph + 6);
+            if(tick.date) ctx.fillText(tick.date, x, y0 + ph + 20);
           }
         }
       }
@@ -937,7 +936,6 @@ Dependencies expected:
         }
         ctx.stroke();
 
-        // very small points, crisp
         ctx.fillStyle = stroke;
         ctx.globalAlpha = Math.min(1, alpha + 0.06);
         for(const p of points){
@@ -1013,7 +1011,8 @@ Dependencies expected:
 
         drawLegend(frame);
 
-        chartsTopNote.textContent = `Window: ${view.windowDays.toFixed(1)} days • ${fmtCTDateOnly(t0)} → ${fmtCTDateOnly(t1)} (CT)`;
+        // v2.017: label is ONLY date range
+        chartsTopNote.textContent = `${fmtCTDateOnly(t0)} → ${fmtCTDateOnly(t1)}`;
       }
 
       // Touch interactions on chart
@@ -1026,10 +1025,9 @@ Dependencies expected:
         pinchAnchorTime:0
       };
 
-      function touchDist(a,b){
-        const dx = a.clientX - b.clientX;
-        const dy = a.clientY - b.clientY;
-        return Math.hypot(dx, dy);
+      // v2.017: horizontal-only pinch distance
+      function touchDistH(a,b){
+        return Math.max(1, Math.abs(a.clientX - b.clientX));
       }
 
       function onChartTouchStart(e){
@@ -1044,7 +1042,7 @@ Dependencies expected:
         } else if(e.touches.length === 2){
           gesture.mode = "pinch";
           const a = e.touches[0], b = e.touches[1];
-          gesture.pinchStartDist = Math.max(1, touchDist(a,b));
+          gesture.pinchStartDist = touchDistH(a,b);
           gesture.startDays = view.windowDays;
 
           const { t0, t1, ok } = getVisibleRange();
@@ -1082,9 +1080,9 @@ Dependencies expected:
 
         if(gesture.mode === "pinch" && e.touches.length === 2){
           const a = e.touches[0], b = e.touches[1];
-          const dist = Math.max(1, touchDist(a,b));
+          const dist = touchDistH(a,b);
 
-          // pinch OUT => more days; pinch IN => fewer days
+          // pinch OUT (bigger horizontal distance) => more days
           const scale = dist / gesture.pinchStartDist;
           const newDays = clamp(gesture.startDays * scale, view.minDays, view.maxDays);
           view.windowDays = newDays;
@@ -1194,7 +1192,6 @@ Dependencies expected:
         summary = { source, entries, newest };
         renderSummary();
 
-        // v2.016: compute dynamic Y-max from DB systolic max
         Y_MAX_DYNAMIC = computeMaxSystolicInDB();
 
         view.windowDays = 7;
@@ -1219,6 +1216,6 @@ Dependencies expected:
 </html>
 <!--
 EOF File: index.html
-App Version: v2.016
+App Version: v2.017
 Reference: See header block for change log + element IDs + dependency paths.
 -->
