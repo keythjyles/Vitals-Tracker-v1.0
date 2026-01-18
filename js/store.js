@@ -1,191 +1,162 @@
+/* File: js/store.js */
 /*
-Vitals Tracker (Modular) — js/store.js
-App Version: v2.001
-Purpose:
-- Provides non-destructive data storage for v2 using IndexedDB.
-- Safely reads legacy v1 data (localStorage) and copies it forward on first run only.
-- Never deletes, overwrites, or mutates v1 storage.
-- Exposes CRUD operations for vitals records.
-- Supports JSON backup/export and restore for v2 data.
+Vitals Tracker — Store (Single Source of Records In-Memory)
+Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
-Latest Update (v2.001):
-- Initial IndexedDB store created (vitals_tracker_v2 / records).
-- Read-only import from legacy localStorage key(s).
-- Record normalization and validation added for safety.
+App Version: v2.023b
+Base: v2.021
+Date: 2026-01-18
+
+FILE ROLE (LOCKED)
+- Maintains the in-memory record list used by Chart/Log/UI.
+- Reads records from VTStorage.getAllRecords().
+- Normalizes record shape minimally (does NOT rewrite storage yet).
+
+v2.023b — Change Log (THIS FILE ONLY)
+1) Adds window.VTStore with:
+   - init(): loads records once
+   - refresh(): reloads records (safe)
+   - getAll(): returns shallow copy
+   - getStats(): record count + newest timestamp
+2) Defensive normalization:
+   - Ensures record is plain object
+   - Ensures ts is present if parseable (adds _ms for sorting convenience only)
+3) Never throws; always returns something usable.
+
+ANTI-DRIFT RULES
+- Do NOT draw charts here.
+- Do NOT render UI here.
+- Do NOT implement swipe here.
+- Do NOT implement write-back policy here (later in add.js/storage.js).
+
+Schema position:
+File 5 of 10
+
+Previous file:
+File 4 — js/storage.js
+
+Next file:
+File 6 — js/state.js
 */
 
-const DB_NAME = "vitals_tracker_v2";
-const DB_VERSION = 1;
-const STORE_NAME = "records";
+(function () {
+  "use strict";
 
-/* Legacy v1 localStorage keys (read-only) */
-const LEGACY_KEYS = [
-  "vitals_tracker_records_v1",
-  "vitals_tracker_records"
-];
+  const VERSION = "v2.023b";
 
-let _db = null;
+  let _records = [];
+  let _loaded = false;
 
-/* ---------- IndexedDB Core ---------- */
+  function isPlainObject(o) {
+    return !!o && typeof o === "object" && (o.constructor === Object || Object.getPrototypeOf(o) === Object.prototype);
+  }
 
-function openDB(){
-  if (_db) return Promise.resolve(_db);
+  function extractTs(r) {
+    return r?.ts ?? r?.time ?? r?.timestamp ?? r?.date ?? r?.createdAt ?? r?.created_at ?? r?.iso ?? null;
+  }
 
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-
-    req.onupgradeneeded = e => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)){
-        const store = db.createObjectStore(STORE_NAME, { keyPath: "ts" });
-        store.createIndex("ts", "ts", { unique: true });
-      }
-    };
-
-    req.onsuccess = e => {
-      _db = e.target.result;
-      resolve(_db);
-    };
-
-    req.onerror = () => reject(req.error);
-  });
-}
-
-function tx(storeName, mode="readonly"){
-  return openDB().then(db => db.transaction(storeName, mode).objectStore(storeName));
-}
-
-/* ---------- Utilities ---------- */
-
-function normalizeRecord(r){
-  if (!r) return null;
-
-  const ts = Number(r.ts || r.time || r.timestamp);
-  if (!ts || !Number.isFinite(ts)) return null;
-
-  return {
-    ts,
-    sys: r.sys != null ? Number(r.sys) : null,
-    dia: r.dia != null ? Number(r.dia) : null,
-    hr: r.hr != null ? Number(r.hr) : null,
-    notes: typeof r.notes === "string" ? r.notes : "",
-    symptoms: Array.isArray(r.symptoms) ? r.symptoms.slice() : []
-  };
-}
-
-function safeParseJSON(str){
-  try { return JSON.parse(str); }
-  catch { return null; }
-}
-
-/* ---------- CRUD ---------- */
-
-export async function getAllRecords(){
-  const store = await tx(STORE_NAME);
-  return new Promise(resolve => {
-    const req = store.getAll();
-    req.onsuccess = () => resolve(req.result || []);
-    req.onerror = () => resolve([]);
-  });
-}
-
-export async function getRecordsInRange(startTs, endTs){
-  const all = await getAllRecords();
-  return all.filter(r => r.ts >= startTs && r.ts <= endTs);
-}
-
-export async function saveRecord(record){
-  const norm = normalizeRecord(record);
-  if (!norm) return;
-
-  const store = await tx(STORE_NAME, "readwrite");
-  return new Promise((resolve, reject) => {
-    const req = store.put(norm);
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject(req.error);
-  });
-}
-
-export async function deleteRecord(ts){
-  const store = await tx(STORE_NAME, "readwrite");
-  return new Promise(resolve => {
-    const req = store.delete(ts);
-    req.onsuccess = () => resolve();
-    req.onerror = () => resolve();
-  });
-}
-
-export async function clearV2Data(){
-  const store = await tx(STORE_NAME, "readwrite");
-  return new Promise(resolve => {
-    const req = store.clear();
-    req.onsuccess = () => resolve();
-    req.onerror = () => resolve();
-  });
-}
-
-/* ---------- Legacy Import (Read-Only) ---------- */
-
-function readLegacyRecords(){
-  for (const key of LEGACY_KEYS){
-    const raw = localStorage.getItem(key);
-    if (!raw) continue;
-
-    const parsed = safeParseJSON(raw);
-    if (Array.isArray(parsed) && parsed.length){
-      return parsed;
+  function toMs(ts) {
+    try {
+      const ms = new Date(ts || 0).getTime();
+      return Number.isFinite(ms) ? ms : 0;
+    } catch (_) {
+      return 0;
     }
   }
-  return [];
-}
 
-export async function importFromLegacyIfEmpty(){
-  const existing = await getAllRecords();
-  if (existing.length) return { imported: 0, skipped: true };
+  function normalizeRecord(raw) {
+    // Do not mutate raw
+    if (!raw) return null;
 
-  const legacy = readLegacyRecords();
-  if (!legacy.length) return { imported: 0, skipped: true };
+    // If it's not a plain object but is object-like, still accept via shallow clone
+    if (typeof raw !== "object") return null;
 
-  let imported = 0;
-  for (const r of legacy){
-    const norm = normalizeRecord(r);
-    if (!norm) continue;
-    await saveRecord(norm);
-    imported++;
+    const r = isPlainObject(raw) ? { ...raw } : { ...raw };
+
+    const ts = extractTs(r);
+    const ms = toMs(ts);
+
+    // Add internal convenience fields only (do not conflict with user fields)
+    r._ms = ms;
+
+    // If no ts-like field exists but ms is valid, set r.ts (ISO) for downstream consistency
+    if (!ts && ms > 0) {
+      r.ts = new Date(ms).toISOString();
+    }
+
+    return r;
   }
-  return { imported, skipped: false };
-}
 
-/* ---------- Backup / Restore ---------- */
-
-export async function exportJSON(){
-  const records = await getAllRecords();
-  return JSON.stringify({
-    app: "Vitals Tracker",
-    version: "v2.001",
-    exportedAt: Date.now(),
-    records
-  }, null, 2);
-}
-
-export async function restoreFromJSON(jsonText){
-  const parsed = safeParseJSON(jsonText);
-  if (!parsed || !Array.isArray(parsed.records)) return false;
-
-  for (const r of parsed.records){
-    const norm = normalizeRecord(r);
-    if (!norm) continue;
-    await saveRecord(norm);
+  function normalizeList(list) {
+    const out = [];
+    if (!Array.isArray(list)) return out;
+    for (const item of list) {
+      const n = normalizeRecord(item);
+      if (n) out.push(n);
+    }
+    return out;
   }
-  return true;
-}
+
+  async function loadFromStorage() {
+    try {
+      if (!window.VTStorage || typeof window.VTStorage.getAllRecords !== "function") {
+        return { records: [], note: "VTStorage-missing" };
+      }
+
+      const raw = await window.VTStorage.getAllRecords();
+      const norm = normalizeList(raw);
+
+      // Sort oldest->newest for consistent downstream computations
+      norm.sort((a, b) => (a._ms || 0) - (b._ms || 0));
+
+      _records = norm;
+      _loaded = true;
+
+      return { records: _records, note: "ok" };
+    } catch (_) {
+      _records = [];
+      _loaded = true;
+      return { records: _records, note: "error" };
+    }
+  }
+
+  async function init() {
+    if (_loaded) return getStats();
+    await loadFromStorage();
+    return getStats();
+  }
+
+  async function refresh() {
+    await loadFromStorage();
+    return getStats();
+  }
+
+  function getAll() {
+    return _records.slice();
+  }
+
+  function getStats() {
+    const count = _records.length;
+    const newestMs = count ? (_records[count - 1]._ms || 0) : 0;
+    const oldestMs = count ? (_records[0]._ms || 0) : 0;
+    return { version: VERSION, loaded: _loaded, count, oldestMs, newestMs };
+  }
+
+  window.VTStore = {
+    VERSION,
+    init,
+    refresh,
+    getAll,
+    getStats,
+  };
+})();
 
 /*
-Vitals Tracker (Modular) — js/store.js (EOF)
-App Version: v2.001
-Notes:
-- Legacy data is read but never altered.
-- v2 data lives exclusively in IndexedDB.
-- Import occurs only when v2 store is empty.
-- Next expected file: js/state.js
+Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
+File: js/store.js
+App Version: v2.023b
+Base: v2.021
+Touched in v2.023b: js/store.js
+Schema order: File 5 of 10
+Next planned file: js/state.js (File 6)
 */
