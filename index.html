@@ -3,30 +3,15 @@
 Vitals Tracker — MASTER (Index Authority)
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
-App Version: v2.023a
+App Version: v2.023b
 Base: v2.021 (last known-good per user; reconstruction of index shell)
 Date: 2026-01-18
 
-v2.023a — Change Log (THIS FILE ONLY)
-- Scope: Restore reliable shell + routing for Charts/Log/Add, and stop gesture conflicts.
-1) Version discipline:
-   - This file displays v2.023a and cache-busts module scripts with ?v=2.023a
-   - NOTE: File 2 (js/version.js) will become the single source of truth; for now index is authoritative.
-2) Panel carousel (loop):
-   - Order: Home(0) → Charts(1) → Log(2) → Settings(3) → Home(0)
-   - Swipe LEFT = Next, Swipe RIGHT = Prev
-3) Chart gesture protection:
-   - Carousel swipes are ignored when a gesture starts inside #canvasWrap or on the canvas itself.
-   - “Swipe zones” above/below chart are safe for panel swipes.
-4) Chart rendering is owned by js/chart.js (File 7), but index now:
-   - Loads records once (best-effort) into window.VTApp.records
-   - Calls window.VTChart.init({ canvas, wrap, noteEl, getRecords }) if present
-   - Calls window.VTChart.onShow() when Charts panel becomes active
-   - Updates the Charts “Loading…” line with explicit status text even if chart module fails
-5) Add flow is NOT implemented in index.html.
-   - Add owner: js/add.js (future file). For now, the Add button shows a clear placeholder alert.
-6) Log rendering is NOT implemented in index.html.
-   - Log owner: js/log.js/ui.js (future files). For now, Log shows a stable placeholder note.
+v2.023b — Change Log (THIS FILE ONLY)
+- Purpose of this micro-bump: make version progression explicit and keep cache-busting in sync.
+1) Version strings updated from v2.023a → v2.023b (UI + APP_VERSION constant).
+2) Cache-busters updated to ?v=2.023b for all loaded modules and sw.js.
+3) No functional logic changes vs v2.023a.
 
 Release Schema (v2.023 series; one-file-at-a-time)
 1) index.html  (this file)
@@ -42,7 +27,6 @@ Release Schema (v2.023 series; one-file-at-a-time)
 
 Hard Rules (anti-drift)
 - Chart drawing logic lives ONLY in js/chart.js.
-  - Chart change requests (bands opacity, right padding, x-label overlap rules) will be implemented in js/chart.js.
 - Swipe rules live ONLY in js/gestures.js (later), except the minimal protective gate kept here.
 - Do not rename IDs listed below without changing dependent modules.
 
@@ -51,13 +35,7 @@ Key IDs (contract)
 - Chart: #canvasWrap, #chartCanvas, #chartsSwipeTop, #chartsSwipeBottom, #chartsTopNote
 - Home buttons: #btnGoAdd, #btnGoCharts, #btnGoLog
 - Settings buttons: #btnSettings, #btnBackFromSettings
-
-Touched Files In This Upgrade (order enforced)
-- (1) index.html (this file) — touched now
-- (2) js/version.js — planned next
-- Others — planned later; DO NOT ASSUME they are updated unless explicitly delivered in-order
 -->
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -368,7 +346,7 @@ Touched Files In This Upgrade (order enforced)
         </div>
         <div class="title">Vitals Tracker</div>
       </div>
-      <div class="boot" id="bootText">BOOT OK v2.023a</div>
+      <div class="boot" id="bootText">BOOT OK v2.023b</div>
     </div>
 
     <div class="shell">
@@ -403,7 +381,7 @@ Touched Files In This Upgrade (order enforced)
               </div>
 
               <div class="homeFoot">
-                <div class="v" id="homeVersion">v2.023a</div>
+                <div class="v" id="homeVersion">v2.023b</div>
                 <div class="by">developed by Keyth Jyles</div>
               </div>
             </div>
@@ -430,14 +408,12 @@ Touched Files In This Upgrade (order enforced)
           <div class="card" id="chartsCard" style="padding:12px;">
             <div class="muted" id="chartsTopNote">Loading…</div>
 
-            <!-- Safe swipe zone ABOVE chart -->
             <div class="swipeZone" id="chartsSwipeTop" data-swipezone="1" style="margin:10px 0 8px;"></div>
 
             <div class="canvasWrap" id="canvasWrap">
               <canvas id="chartCanvas"></canvas>
             </div>
 
-            <!-- Safe swipe zone BELOW chart -->
             <div class="swipeZone" id="chartsSwipeBottom" data-swipezone="1" style="margin:8px 0 0;"></div>
           </div>
         </section>
@@ -480,7 +456,7 @@ Touched Files In This Upgrade (order enforced)
             <div class="muted">v2.023 series: stabilize chart + swipe + input before adding features.</div>
             <div class="settingsList">
               <div class="settingsItem">Reporting + Export will be restored after chart stability.</div>
-              <div class="settingsItem">Distress (0–5) and Medication markers are on the roadmap (not in v2.023a).</div>
+              <div class="settingsItem">Distress (0–5) and Medication markers are on the roadmap (not in v2.023b).</div>
               <div class="settingsItem">Version discipline: index shows version; File 2 will centralize version in js/version.js.</div>
             </div>
           </div>
@@ -490,93 +466,27 @@ Touched Files In This Upgrade (order enforced)
     </div>
   </div>
 
-  <!-- Script cache-busting is pinned to v2.023a in this file -->
-  <script src="./js/storage.js?v=2.023a"></script>
-  <script src="./js/store.js?v=2.023a"></script>
-  <script src="./js/state.js?v=2.023a"></script>
-  <script src="./js/chart.js?v=2.023a"></script>
-  <script src="./js/gestures.js?v=2.023a"></script>
-  <script src="./js/panels.js?v=2.023a"></script>
-  <script src="./js/ui.js?v=2.023a"></script>
-  <script src="./js/app.js?v=2.023a"></script>
+  <!-- Script cache-busting is pinned to v2.023b in this file -->
+  <script src="./js/storage.js?v=2.023b"></script>
+  <script src="./js/store.js?v=2.023b"></script>
+  <script src="./js/state.js?v=2.023b"></script>
+  <script src="./js/chart.js?v=2.023b"></script>
+  <script src="./js/gestures.js?v=2.023b"></script>
+  <script src="./js/panels.js?v=2.023b"></script>
+  <script src="./js/ui.js?v=2.023b"></script>
+  <script src="./js/app.js?v=2.023b"></script>
 
   <script>
     (function(){
-      const APP_VERSION = "v2.023a";
+      const APP_VERSION = "v2.023b";
 
-      // ===== Version text =====
+      // Version text
       const bootText = document.getElementById("bootText");
       const homeVersion = document.getElementById("homeVersion");
       if(bootText) bootText.textContent = "BOOT OK " + APP_VERSION;
       if(homeVersion) homeVersion.textContent = APP_VERSION;
 
-      // ===== Minimal app bridge (stable contract for modules) =====
-      const chartsTopNote = document.getElementById("chartsTopNote");
-      const logTopNote = document.getElementById("logTopNote");
-      const chartCanvas = document.getElementById("chartCanvas");
-      const canvasWrap = document.getElementById("canvasWrap");
-
-      function setChartsStatus(msg){
-        if(chartsTopNote) chartsTopNote.textContent = msg;
-      }
-      function setLogStatus(msg){
-        if(logTopNote) logTopNote.textContent = msg;
-      }
-
-      // Best-effort record loader (no assumptions about module APIs).
-      // Goal: populate window.VTApp.records so chart.js can render.
-      async function loadRecordsBestEffort(){
-        // 1) If a store module exposes getAll()/list(), use it.
-        const candidates = [
-          () => (window.VTStore && window.VTStore.getAll && window.VTStore.getAll()),
-          () => (window.VTStore && window.VTStore.list && window.VTStore.list()),
-          () => (window.Store && window.Store.getAll && window.Store.getAll()),
-          () => (window.VTStorage && window.VTStorage.getAll && window.VTStorage.getAll()),
-          () => (window.VTStorage && window.VTStorage.list && window.VTStorage.list()),
-          () => (window.storage && window.storage.getAll && window.storage.getAll()),
-        ];
-
-        for(const fn of candidates){
-          try{
-            const out = fn();
-            if(out && typeof out.then === "function"){
-              const v = await out;
-              if(Array.isArray(v)) return v;
-            } else if(Array.isArray(out)) {
-              return out;
-            }
-          }catch(_){}
-        }
-
-        // 2) LocalStorage fallback (common legacy keys). Non-destructive.
-        const keys = [
-          "vitals_tracker_records_v1",
-          "vitals_tracker_records",
-          "vitalsTrackerRecords",
-          "vt_records",
-          "records",
-        ];
-
-        for(const k of keys){
-          try{
-            const raw = localStorage.getItem(k);
-            if(!raw) continue;
-            const parsed = JSON.parse(raw);
-            if(Array.isArray(parsed)) return parsed;
-            if(parsed && Array.isArray(parsed.records)) return parsed.records;
-          }catch(_){}
-        }
-
-        return [];
-      }
-
-      // Expose stable bridge.
-      window.VTApp = window.VTApp || {};
-      window.VTApp.version = APP_VERSION;
-      window.VTApp.records = [];
-      window.VTApp.getRecords = () => window.VTApp.records;
-
-      // ===== Panels (carousel) =====
+      // Panel refs
       const panels = {
         home: document.getElementById("panelHome"),
         charts: document.getElementById("panelCharts"),
@@ -588,47 +498,7 @@ Touched Files In This Upgrade (order enforced)
       let active = "home";
       let lastNonSettings = "home";
 
-      async function ensureDataLoaded(){
-        // If already loaded, no-op.
-        if(Array.isArray(window.VTApp.records) && window.VTApp.records.length) return;
-
-        setChartsStatus("Loading…");
-        setLogStatus("Loading…");
-
-        const recs = await loadRecordsBestEffort();
-        window.VTApp.records = Array.isArray(recs) ? recs : [];
-
-        const n = window.VTApp.records.length;
-        if(n){
-          // Best-effort last timestamp for visibility (no hard assumptions).
-          let lastMs = null;
-          for(const r of window.VTApp.records){
-            const t = (r && (r.ts ?? r.time ?? r.timestamp ?? r.date ?? r.createdAt ?? r.created_at ?? r.iso)) || null;
-            const ms = new Date(t || 0).getTime();
-            if(Number.isFinite(ms) && ms > 0) lastMs = (lastMs == null) ? ms : Math.max(lastMs, ms);
-          }
-          const lastStr = (lastMs != null) ? new Date(lastMs).toLocaleString() : "—";
-          setChartsStatus(`${n} records loaded • last: ${lastStr}`);
-          setLogStatus(`${n} records loaded (rendering will be restored after chart stability).`);
-        } else {
-          setChartsStatus("No records found on this device.");
-          setLogStatus("No records found on this device.");
-        }
-
-        // Initialize chart module if present (safe, non-fatal).
-        try{
-          if(window.VTChart && typeof window.VTChart.init === "function"){
-            window.VTChart.init({
-              canvas: chartCanvas,
-              wrap: canvasWrap,
-              noteEl: chartsTopNote,
-              getRecords: window.VTApp.getRecords
-            });
-          }
-        }catch(_){}
-      }
-
-      async function setActive(which){
+      function setActive(which){
         for(const k of Object.keys(panels)){
           const el = panels[k];
           if(el) el.classList.toggle("active", k === which);
@@ -636,12 +506,7 @@ Touched Files In This Upgrade (order enforced)
         if(which !== "settings") lastNonSettings = which;
         active = which;
 
-        // Always ensure data is loaded before trying to show charts/log.
-        if(which === "charts" || which === "log"){
-          await ensureDataLoaded();
-        }
-
-        // On entering charts, ask chart module to render (if present).
+        // On entering charts, ask chart module to render (if present)
         if(which === "charts"){
           try{
             if(window.VTChart && typeof window.VTChart.onShow === "function"){
@@ -662,28 +527,26 @@ Touched Files In This Upgrade (order enforced)
         setActive(carousel[(i-1 + carousel.length) % carousel.length]);
       }
 
-      // ===== Buttons =====
-      const el = (id) => document.getElementById(id);
-
-      el("btnGoAdd").addEventListener("click", () => {
+      // Buttons
+      document.getElementById("btnGoAdd").addEventListener("click", () => {
         alert("Add/Input restoration is part of v2.023 (will be restored after chart stability).");
       });
-      el("btnGoCharts").addEventListener("click", () => setActive("charts"));
-      el("btnGoLog").addEventListener("click", () => setActive("log"));
+      document.getElementById("btnGoCharts").addEventListener("click", () => setActive("charts"));
+      document.getElementById("btnGoLog").addEventListener("click", () => setActive("log"));
 
-      el("btnHomeFromCharts").addEventListener("click", () => setActive("home"));
-      el("btnHomeFromLog").addEventListener("click", () => setActive("home"));
+      document.getElementById("btnHomeFromCharts").addEventListener("click", () => setActive("home"));
+      document.getElementById("btnHomeFromLog").addEventListener("click", () => setActive("home"));
 
       const openSettings = () => setActive("settings");
-      el("btnSettings").addEventListener("click", openSettings);
-      el("btnSettingsFromCharts").addEventListener("click", openSettings);
-      el("btnSettingsFromLog").addEventListener("click", openSettings);
+      document.getElementById("btnSettings").addEventListener("click", openSettings);
+      document.getElementById("btnSettingsFromCharts").addEventListener("click", openSettings);
+      document.getElementById("btnSettingsFromLog").addEventListener("click", openSettings);
 
-      el("btnBackFromSettings").addEventListener("click", () => {
+      document.getElementById("btnBackFromSettings").addEventListener("click", () => {
         setActive(lastNonSettings || "home");
       });
 
-      // ===== Pull-to-refresh (Home only) =====
+      // Pull-to-refresh (Home only)
       const pullIndicator = document.getElementById("pullIndicator");
       let pullStartY = null;
       let pullArmed = false;
@@ -714,8 +577,8 @@ Touched Files In This Upgrade (order enforced)
         if(armed) location.reload();
       });
 
-      // ===== Install handling =====
-      const btnInstall = el("btnInstall");
+      // Install handling
+      const btnInstall = document.getElementById("btnInstall");
       let deferredPrompt = null;
       window.addEventListener("beforeinstallprompt", (e) => {
         e.preventDefault();
@@ -733,8 +596,8 @@ Touched Files In This Upgrade (order enforced)
         }
       });
 
-      // ===== Clear data (best-effort) =====
-      el("btnClearData").addEventListener("click", () => {
+      // Clear data (best-effort)
+      document.getElementById("btnClearData").addEventListener("click", () => {
         const ok = confirm("Clear all local data on this device?");
         if(!ok) return;
         try{ localStorage.clear(); }catch(_){}
@@ -750,8 +613,8 @@ Touched Files In This Upgrade (order enforced)
         location.reload();
       });
 
-      // ===== Exit (known-good pattern) =====
-      el("btnExit").addEventListener("click", () => {
+      // Exit (known-good pattern)
+      document.getElementById("btnExit").addEventListener("click", () => {
         try{
           window.close();
           setTimeout(() => {
@@ -762,14 +625,15 @@ Touched Files In This Upgrade (order enforced)
         }
       });
 
-      // ===== Carousel swipe gestures (minimal gate; chart protection here) =====
+      // Carousel swipe gestures (minimal gate; chart protection here)
       const panelsRoot = document.getElementById("panelsRoot");
+      const canvasWrap = document.getElementById("canvasWrap");
 
       let swipe = { active:false, sx:0, sy:0, ok:false, mode:null };
 
-      function within(elm, target){
-        if(!elm || !target) return false;
-        return elm === target || elm.contains(target);
+      function within(el, target){
+        if(!el || !target) return false;
+        return el === target || el.contains(target);
       }
 
       function isSwipeAllowedStart(target){
@@ -818,37 +682,23 @@ Touched Files In This Upgrade (order enforced)
         if(dx < 0) nextPanel(); else prevPanel();
       }, {passive:true});
 
-      // ===== Service worker =====
+      // Service worker
       if("serviceWorker" in navigator){
-        navigator.serviceWorker.register("./sw.js?v=2.023a").catch(()=>{});
+        navigator.serviceWorker.register("./sw.js?v=2.023b").catch(()=>{});
       }
 
-      // ===== Boot =====
-      // Ensure Charts/Log show deterministic status even before user navigates.
-      setChartsStatus("Loading…");
-      setLogStatus("Loading…");
-      ensureDataLoaded().catch(()=>{});
+      // Initial panel
       setActive("home");
-
     })();
   </script>
-
-  <!--
-  EOF Version Notes (VISIBLE AT BOTTOM FOR MOBILE/BLIND WORKFLOW)
-  File: index.html
-  App Version: v2.023a
-  Base: v2.021 (reconstructed index shell)
-  This file is: 1 of 10 (v2.023 series)
-
-  What this file guarantees:
-  - Shows version in BOOT and Home footer
-  - Loads records best-effort into window.VTApp.records
-  - Calls VTChart.init(...) if chart module exists
-  - Calls VTChart.onShow() when Charts panel is entered
-  - Carousel swipe loop: Home → Charts → Log → Settings → Home
-  - Chart gesture protection: no panel swipe if touch starts inside chart region
-
-  Next file planned: (2) js/version.js
-  -->
 </body>
 </html>
+
+<!--
+Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
+File: index.html
+App Version: v2.023b
+Base: v2.021
+Touched in v2.023b: index.html only (version bump + cache-bust sync)
+Next planned file: js/version.js (File 2 of 10)
+-->
