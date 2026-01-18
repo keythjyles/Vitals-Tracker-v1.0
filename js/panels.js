@@ -1,172 +1,130 @@
 /* File: /js/panels.js */
 /*
-Vitals Tracker — Panels Carousel Controller
+Vitals Tracker — Panel State & Carousel Controller
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
 Module: panels.js
 Purpose:
-- Own the canonical panel order and index-based navigation.
-- Provide wrap-around carousel behavior (0→1→2→3→0 and reverse).
-- Expose a single navigation surface for gestures.js and app.js (no duplicate nav logic elsewhere).
+- Own panel order, index, and visibility.
+- Provide a single source of truth for panel navigation.
+- Support circular (wrap-around) carousel behavior.
+- Be gesture-agnostic (gestures.js calls into this module).
 
-Panel Order (locked):
-0 = Home
-1 = Charts
-2 = Log
-3 = Settings (reserved slot; may be placeholder if panel not present yet)
+Panel Order (LOCKED):
+0 = Home      (#panelHome)
+1 = Charts    (#panelCharts)
+2 = Log       (#panelLog)
+3 = Settings  (#panelSettings)  // future-safe; may not exist yet
 
-DOM Contract:
-- Preferred: panels are registered by key -> element id.
-- Keys: "home", "charts", "log", "settings"
-- Expected element IDs (default mapping):
-  home     -> #panelHome
-  charts   -> #panelCharts
-  log      -> #panelLog
-  settings -> #panelSettings  (may not exist yet)
+Rules (LOCKED):
+1) Exactly one panel is .active at any time.
+2) Navigation wraps in both directions.
+3) This module NEVER handles touch events directly.
+4) Missing panels are skipped safely.
+5) Index remains stable even if a panel is temporarily absent.
 
-Behavior:
-- Only one panel is active at a time via class "active".
-- setPanel(index|key) applies active class safely even if a panel is missing.
-- nextPanel(dir) wraps around (dir = +1 / -1).
+Public API (LOCKED):
+- initPanels()
+- nextPanel(direction)
+- setPanel(index)
+- getPanelIndex()
 
 Change Log:
-- v2.0xx: Introduced canonical panel order + wrap-around next/prev helpers.
+- v2.0xx: Initial locked carousel panel controller.
 */
 
-const PANEL_ORDER = ["home", "charts", "log", "settings"];
+const PANEL_IDS = [
+  "panelHome",
+  "panelCharts",
+  "panelLog",
+  "panelSettings" // may not exist yet
+];
 
-const DEFAULT_ID_MAP = {
-  home: "panelHome",
-  charts: "panelCharts",
-  log: "panelLog",
-  settings: "panelSettings",
-};
+let panels = [];
+let currentIndex = 0;
 
-let _idMap = { ...DEFAULT_ID_MAP };
-let _els = {};
-let _currentIndex = 0;
+/* ---------- Internal ---------- */
 
-function _getElByKey(key) {
-  const id = _idMap[key];
-  if (!id) return null;
-  return document.getElementById(id) || null;
+function resolvePanels() {
+  panels = PANEL_IDS.map(id => document.getElementById(id));
 }
 
-function _refreshEls() {
-  _els = {};
-  for (const key of PANEL_ORDER) {
-    _els[key] = _getElByKey(key);
+function activateIndex(idx) {
+  if (!panels.length) return;
+
+  // Normalize index with wrap-around
+  const len = panels.length;
+  let i = ((idx % len) + len) % len;
+
+  // Skip null panels (future-safe)
+  let safety = 0;
+  while (!panels[i] && safety < len) {
+    i = (i + 1) % len;
+    safety++;
+  }
+
+  panels.forEach(p => {
+    if (p) p.classList.remove("active");
+  });
+
+  if (panels[i]) {
+    panels[i].classList.add("active");
+    currentIndex = i;
   }
 }
 
-function _normalizeIndex(i) {
-  const n = PANEL_ORDER.length;
-  const x = Number(i);
-  if (!Number.isFinite(x)) return 0;
-  // JS modulo that handles negatives:
-  return ((Math.trunc(x) % n) + n) % n;
-}
-
-function _keyToIndex(key) {
-  const k = String(key || "").toLowerCase();
-  const idx = PANEL_ORDER.indexOf(k);
-  return idx >= 0 ? idx : 0;
-}
-
-function _applyActive() {
-  // Ensure we have a fresh handle in case DOM was replaced.
-  _refreshEls();
-
-  const activeKey = PANEL_ORDER[_currentIndex];
-
-  for (const key of PANEL_ORDER) {
-    const el = _els[key];
-    if (!el) continue;
-    if (key === activeKey) el.classList.add("active");
-    else el.classList.remove("active");
-  }
-}
+/* ---------- Public API ---------- */
 
 /**
- * Initialize panel controller.
- * @param {Object} [opts]
- * @param {Object} [opts.idMap] - Optional override mapping key->elementId.
- * @param {number|string} [opts.start] - Start panel index or key.
+ * Initialize panel system.
+ * Call once after DOMContentLoaded.
  */
-export function initPanels(opts = {}) {
-  if (opts && typeof opts.idMap === "object" && opts.idMap) {
-    _idMap = { ...DEFAULT_ID_MAP, ...opts.idMap };
-  } else {
-    _idMap = { ...DEFAULT_ID_MAP };
-  }
+export function initPanels() {
+  resolvePanels();
 
-  if (typeof opts.start === "string") _currentIndex = _keyToIndex(opts.start);
-  else if (typeof opts.start === "number") _currentIndex = _normalizeIndex(opts.start);
-  else _currentIndex = 0;
+  // Find initially active panel if present
+  let found = false;
+  panels.forEach((p, i) => {
+    if (p && p.classList.contains("active") && !found) {
+      currentIndex = i;
+      found = true;
+    }
+  });
 
-  _applyActive();
+  // Enforce single-active invariant
+  activateIndex(currentIndex);
 }
 
 /**
- * Set the active panel by index or key.
- * Wraps safely; if the target panel element doesn't exist, index still updates.
- * @param {number|string} indexOrKey
- * @returns {number} current index
+ * Move to next or previous panel.
+ * @param {number} direction +1 = next, -1 = previous
  */
-export function setPanel(indexOrKey) {
-  if (typeof indexOrKey === "string") _currentIndex = _keyToIndex(indexOrKey);
-  else _currentIndex = _normalizeIndex(indexOrKey);
-
-  _applyActive();
-  return _currentIndex;
+export function nextPanel(direction) {
+  if (typeof direction !== "number" || !direction) return;
+  activateIndex(currentIndex + (direction > 0 ? 1 : -1));
 }
 
 /**
- * Move to next/previous panel with wrap-around.
- * @param {number} dir +1 or -1
- * @returns {number} current index
+ * Set panel by absolute index.
+ * @param {number} index
  */
-export function nextPanel(dir = 1) {
-  const step = dir >= 0 ? 1 : -1;
-  _currentIndex = _normalizeIndex(_currentIndex + step);
-  _applyActive();
-  return _currentIndex;
+export function setPanel(index) {
+  if (!Number.isInteger(index)) return;
+  activateIndex(index);
 }
 
 /**
- * Get current panel index.
+ * Get current active panel index.
  * @returns {number}
  */
 export function getPanelIndex() {
-  return _currentIndex;
-}
-
-/**
- * Get current panel key.
- * @returns {string}
- */
-export function getPanelKey() {
-  return PANEL_ORDER[_currentIndex];
-}
-
-/**
- * Get canonical panel order (do not mutate).
- * @returns {string[]}
- */
-export function getPanelOrder() {
-  return PANEL_ORDER.slice();
-}
-
-/**
- * Convenience: hard refresh current panel application (e.g., after DOM changes).
- */
-export function refreshPanels() {
-  _applyActive();
+  return currentIndex;
 }
 
 /* EOF: /js/panels.js
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 Reference:
-- Canonical order owned here: ["home","charts","log","settings"]
-- Public API: initPanels, setPanel, nextPanel, getPanelIndex, getPanelKey, refreshPanels
+- This module is the ONLY owner of panel order and index.
+- Gesture, button, or keyboard navigation must call into this API.
+- Do NOT duplicate panel state elsewhere.
 */
