@@ -1,156 +1,172 @@
-/* ------------------------------------------------------------
-   Vitals Tracker — js/panels.js
-   App Version: v2.010
+/* File: /js/panels.js */
+/*
+Vitals Tracker — Panels Carousel Controller
+Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
-   Purpose:
-   - Home panel content manager (shell-level)
-   - Keeps Home clean: no embedded Log/Chart preview cards
-   - Provides simple "Go to Log" / "Go to Charts" navigation
+Module: panels.js
+Purpose:
+- Own the canonical panel order and index-based navigation.
+- Provide wrap-around carousel behavior (0→1→2→3→0 and reverse).
+- Expose a single navigation surface for gestures.js and app.js (no duplicate nav logic elsewhere).
 
-   Latest update (v2.010):
-   - Removes legacy Home preview cards ("Log (read-only preview)" and
-     "Charts (placeholder)") so Charts no longer appears on Home.
-   - Injects two large navigation buttons on Home.
-   - Does not write/migrate data.
+Panel Order (locked):
+0 = Home
+1 = Charts
+2 = Log
+3 = Settings (reserved slot; may be placeholder if panel not present yet)
 
-   Safety:
-   - Read-only DOM edits only
-   - No storage writes
-   ------------------------------------------------------------ */
+DOM Contract:
+- Preferred: panels are registered by key -> element id.
+- Keys: "home", "charts", "log", "settings"
+- Expected element IDs (default mapping):
+  home     -> #panelHome
+  charts   -> #panelCharts
+  log      -> #panelLog
+  settings -> #panelSettings  (may not exist yet)
 
-(function () {
-  "use strict";
+Behavior:
+- Only one panel is active at a time via class "active".
+- setPanel(index|key) applies active class safely even if a panel is missing.
+- nextPanel(dir) wraps around (dir = +1 / -1).
 
-  const VT = (window.VT = window.VT || {});
-  VT.panels = VT.panels || {};
+Change Log:
+- v2.0xx: Introduced canonical panel order + wrap-around next/prev helpers.
+*/
 
-  function qsa(sel, root) {
-    return Array.from((root || document).querySelectorAll(sel));
+const PANEL_ORDER = ["home", "charts", "log", "settings"];
+
+const DEFAULT_ID_MAP = {
+  home: "panelHome",
+  charts: "panelCharts",
+  log: "panelLog",
+  settings: "panelSettings",
+};
+
+let _idMap = { ...DEFAULT_ID_MAP };
+let _els = {};
+let _currentIndex = 0;
+
+function _getElByKey(key) {
+  const id = _idMap[key];
+  if (!id) return null;
+  return document.getElementById(id) || null;
+}
+
+function _refreshEls() {
+  _els = {};
+  for (const key of PANEL_ORDER) {
+    _els[key] = _getElByKey(key);
+  }
+}
+
+function _normalizeIndex(i) {
+  const n = PANEL_ORDER.length;
+  const x = Number(i);
+  if (!Number.isFinite(x)) return 0;
+  // JS modulo that handles negatives:
+  return ((Math.trunc(x) % n) + n) % n;
+}
+
+function _keyToIndex(key) {
+  const k = String(key || "").toLowerCase();
+  const idx = PANEL_ORDER.indexOf(k);
+  return idx >= 0 ? idx : 0;
+}
+
+function _applyActive() {
+  // Ensure we have a fresh handle in case DOM was replaced.
+  _refreshEls();
+
+  const activeKey = PANEL_ORDER[_currentIndex];
+
+  for (const key of PANEL_ORDER) {
+    const el = _els[key];
+    if (!el) continue;
+    if (key === activeKey) el.classList.add("active");
+    else el.classList.remove("active");
+  }
+}
+
+/**
+ * Initialize panel controller.
+ * @param {Object} [opts]
+ * @param {Object} [opts.idMap] - Optional override mapping key->elementId.
+ * @param {number|string} [opts.start] - Start panel index or key.
+ */
+export function initPanels(opts = {}) {
+  if (opts && typeof opts.idMap === "object" && opts.idMap) {
+    _idMap = { ...DEFAULT_ID_MAP, ...opts.idMap };
+  } else {
+    _idMap = { ...DEFAULT_ID_MAP };
   }
 
-  function findPanelByName(name) {
-    const n = String(name || "").toLowerCase();
-    const panels = qsa(".panel, [data-panel], [data-name]");
-    for (const p of panels) {
-      const dn =
-        (p.getAttribute("data-panel") ||
-          p.getAttribute("data-name") ||
-          p.id ||
-          "")
-          .toLowerCase();
-      if (dn.includes(n)) return p;
-    }
-    return null;
-  }
+  if (typeof opts.start === "string") _currentIndex = _keyToIndex(opts.start);
+  else if (typeof opts.start === "number") _currentIndex = _normalizeIndex(opts.start);
+  else _currentIndex = 0;
 
-  function clickNavTarget(targetName) {
-    const t = String(targetName || "").toLowerCase();
+  _applyActive();
+}
 
-    // Preferred: any existing nav buttons (data-nav)
-    const btn = document.querySelector(`[data-nav="${t}"]`);
-    if (btn) {
-      btn.click();
-      return true;
-    }
+/**
+ * Set the active panel by index or key.
+ * Wraps safely; if the target panel element doesn't exist, index still updates.
+ * @param {number|string} indexOrKey
+ * @returns {number} current index
+ */
+export function setPanel(indexOrKey) {
+  if (typeof indexOrKey === "string") _currentIndex = _keyToIndex(indexOrKey);
+  else _currentIndex = _normalizeIndex(indexOrKey);
 
-    // Fallback: dispatch a generic navigation event
-    document.dispatchEvent(new CustomEvent("vt:navigate", { detail: { to: t } }));
-    return false;
-  }
+  _applyActive();
+  return _currentIndex;
+}
 
-  function removeHomePreviewCards(homePanel) {
-    if (!homePanel) return;
+/**
+ * Move to next/previous panel with wrap-around.
+ * @param {number} dir +1 or -1
+ * @returns {number} current index
+ */
+export function nextPanel(dir = 1) {
+  const step = dir >= 0 ? 1 : -1;
+  _currentIndex = _normalizeIndex(_currentIndex + step);
+  _applyActive();
+  return _currentIndex;
+}
 
-    // Remove obvious legacy preview cards by text match
-    const candidates = qsa("div, section, article", homePanel);
-    for (const el of candidates) {
-      const txt = (el.textContent || "").trim();
-      if (!txt) continue;
+/**
+ * Get current panel index.
+ * @returns {number}
+ */
+export function getPanelIndex() {
+  return _currentIndex;
+}
 
-      // These are the specific legacy blocks you’re seeing.
-      const isLogPreview =
-        txt.includes("Log (read-only preview)") ||
-        txt.includes("Next: render actual entries here");
-      const isChartsPreview =
-        txt.includes("Charts (placeholder)") ||
-        txt.includes("Next: attach chart engine");
+/**
+ * Get current panel key.
+ * @returns {string}
+ */
+export function getPanelKey() {
+  return PANEL_ORDER[_currentIndex];
+}
 
-      if (isLogPreview || isChartsPreview) {
-        // Remove the nearest "card-like" container if possible
-        const card = el.closest(".card, .box, .panelCard, .section") || el;
-        try { card.remove(); } catch (_) {}
-      }
-    }
-  }
+/**
+ * Get canonical panel order (do not mutate).
+ * @returns {string[]}
+ */
+export function getPanelOrder() {
+  return PANEL_ORDER.slice();
+}
 
-  function injectHomeNav(homePanel) {
-    if (!homePanel) return;
+/**
+ * Convenience: hard refresh current panel application (e.g., after DOM changes).
+ */
+export function refreshPanels() {
+  _applyActive();
+}
 
-    // Find a reasonable insertion point: first large inner container, else panel itself
-    const host =
-      homePanel.querySelector(".panel-inner") ||
-      homePanel.querySelector(".content") ||
-      homePanel;
-
-    // Remove any prior injected nav (idempotent)
-    const existing = host.querySelector("#vtHomeNav");
-    if (existing) existing.remove();
-
-    const wrap = document.createElement("div");
-    wrap.id = "vtHomeNav";
-    wrap.style.marginTop = "14px";
-
-    // Buttons styled to match your pill/glass theme without relying on CSS edits
-    function makeBtn(label, target) {
-      const b = document.createElement("button");
-      b.type = "button";
-      b.textContent = label;
-      b.setAttribute("aria-label", label);
-
-      b.style.width = "100%";
-      b.style.padding = "16px 16px";
-      b.style.margin = "10px 0";
-      b.style.borderRadius = "999px";
-      b.style.border = "1px solid rgba(235,245,255,.22)";
-      b.style.background = "rgba(12,21,40,.45)";
-      b.style.color = "rgba(235,245,255,.90)";
-      b.style.fontSize = "18px";
-      b.style.fontWeight = "700";
-      b.style.letterSpacing = ".2px";
-      b.style.boxShadow = "0 8px 20px rgba(0,0,0,.25) inset";
-
-      b.addEventListener("click", function () {
-        clickNavTarget(target);
-      });
-
-      return b;
-    }
-
-    const logBtn = makeBtn("Open Log", "log");
-    const chartBtn = makeBtn("Open Charts", "charts");
-
-    wrap.appendChild(logBtn);
-    wrap.appendChild(chartBtn);
-
-    // Insert near the top of Home content (after any header text)
-    host.insertBefore(wrap, host.firstChild);
-  }
-
-  function refreshHome() {
-    const home = findPanelByName("home");
-    if (!home) return;
-
-    removeHomePreviewCards(home);
-    injectHomeNav(home);
-  }
-
-  // Public helper (optional use)
-  VT.panels.refreshHome = refreshHome;
-
-  document.addEventListener("DOMContentLoaded", refreshHome);
-
-  // Also refresh whenever Home is shown (works with your app.js dispatcher)
-  document.addEventListener("vt:panel:home", refreshHome);
-  document.addEventListener("vt:show:home", refreshHome);
-
-})();
+/* EOF: /js/panels.js
+Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
+Reference:
+- Canonical order owned here: ["home","charts","log","settings"]
+- Public API: initPanels, setPanel, nextPanel, getPanelIndex, getPanelKey, refreshPanels
+*/
