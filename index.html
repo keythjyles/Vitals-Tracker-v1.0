@@ -1,6 +1,26 @@
 <!-- File: index.html -->
-<!-- Vitals Tracker — Function-First Shell -->
-<!-- App Version: v2.014 -->
+<!--
+Vitals Tracker — Function-First Shell
+App Version: v2.015
+Base: v2.014
+Date: 2026-01-17
+
+Change Log (v2.015)
+1) Hypertension systolic bands: increased opacity (still background tints; less transparent).
+2) Charts top label: now shows ONLY the visible date range (CT) on one line (no time); hard no-wrap.
+3) X-axis hour labels (when zoomed): simplified to a single number (e.g., 4 or 16).
+4) Pinch direction corrected: pinch OUT => more days (zoom out); pinch IN => fewer days (zoom in).
+5) Log paging: after "Load next 25", scroll/focus lands on the first newly loaded record (no manual scroll up).
+6) Preserved: fixed Y-axis (40–200), crisp canvas rendering, alternating day stripes, CT time conversion, pan+pinch (horizontal only).
+
+File Structure / Reference Points
+- Panels: #panelHome, #panelLog, #panelCharts
+- Chart: #canvasWrap (gesture surface), #chartCanvas (canvas)
+- Log: #logList (UL), #logMoreLink (paging link)
+Dependencies expected:
+- ./js/storage.js
+- ./js/gestures.js
+-->
 <!doctype html>
 <html lang="en">
 <head>
@@ -59,17 +79,8 @@
       background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
       box-shadow: var(--shadow);
     }
-    .title{
-      font-weight:800;
-      letter-spacing:.2px;
-      font-size:22px;
-    }
-    .boot{
-      font-size:13px;
-      color:var(--muted);
-      letter-spacing:.25px;
-      white-space:nowrap;
-    }
+    .title{font-weight:800; letter-spacing:.2px; font-size:22px;}
+    .boot{font-size:13px; color:var(--muted); letter-spacing:.25px; white-space:nowrap;}
 
     .shell{
       flex:1;
@@ -82,7 +93,6 @@
       overflow:hidden;
     }
 
-    /* Panels are mutually exclusive */
     .panels{
       height:100%;
       display:flex;
@@ -92,7 +102,7 @@
     }
     .panel{
       height:100%;
-      display:none; /* IMPORTANT: only one visible */
+      display:none;
       flex-direction:column;
       gap:12px;
       overflow:hidden;
@@ -115,10 +125,7 @@
       letter-spacing:.2px;
     }
 
-    .nav{
-      display:flex;
-      gap:8px;
-    }
+    .nav{display:flex; gap:8px;}
     .btn{
       border:1px solid var(--stroke2);
       color:var(--text);
@@ -196,28 +203,22 @@
       white-space:nowrap;
     }
 
-    /* CHART: make it wider/tighter like your example */
     .canvasWrap{
       border:1px solid var(--stroke2);
       border-radius: var(--r);
-      padding:6px;                 /* reduced */
+      padding:6px;
       background: rgba(0,0,0,.18);
       overflow:hidden;
-      touch-action:none;            /* IMPORTANT: stop page scroll/zoom on chart */
+      touch-action:none;
     }
     canvas{
       display:block;
       width:100%;
-      height:300px;               /* compressed height */
+      height:300px;
     }
 
-    .hint{
-      margin-top:10px;
-      color:var(--muted);
-      line-height:1.35;
-    }
+    .hint{margin-top:10px; color:var(--muted); line-height:1.35;}
 
-    /* Pull-to-refresh indicator */
     .pull{
       height:0px;
       overflow:hidden;
@@ -243,6 +244,13 @@
       -webkit-tap-highlight-color: transparent;
     }
     .linkish:active{transform:translateY(1px)}
+
+    /* Chart label: hard single line */
+    #chartsTopNote{
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
   </style>
 </head>
 
@@ -250,7 +258,7 @@
   <div class="app">
     <div class="topbar">
       <div class="title">Vitals Tracker</div>
-      <div class="boot" id="bootText">BOOT OK v2.014</div>
+      <div class="boot" id="bootText">BOOT OK v2.015</div>
     </div>
 
     <div class="shell">
@@ -318,7 +326,6 @@
             </div>
           </div>
 
-          <!-- tighter padding inside chart card -->
           <div class="card" id="chartsCard" style="padding:12px;">
             <div class="muted" id="chartsTopNote">Loading…</div>
             <div class="canvasWrap" id="canvasWrap" style="margin-top:10px;">
@@ -326,7 +333,6 @@
             </div>
             <div class="hint small" id="chartsHint">
               Pan left/right to move through time. Pinch horizontally to set window from 2–14 days (default 7).
-              Hypertension bands use systolic ranges (hypotension/optimal/HTN1/HTN2) in the background.
             </div>
           </div>
         </section>
@@ -335,18 +341,16 @@
     </div>
   </div>
 
-  <!-- External modules -->
-  <script src="./js/storage.js?v=2.014"></script>
-  <script src="./js/gestures.js?v=2.014"></script>
+  <script src="./js/storage.js?v=2.015"></script>
+  <script src="./js/gestures.js?v=2.015"></script>
 
   <script>
     (function(){
-      const APP_VERSION = "v2.014";
-      const TZ = "America/Chicago"; // Central Time
+      const APP_VERSION = "v2.015";
+      const TZ = "America/Chicago";
       const MS_HOUR = 3600000;
       const MS_DAY  = 86400000;
 
-      // Panels
       const panelHome = document.getElementById("panelHome");
       const panelLog = document.getElementById("panelLog");
       const panelCharts = document.getElementById("panelCharts");
@@ -358,15 +362,12 @@
         if(which === "home") panelHome.classList.add("active");
         if(which === "log") panelLog.classList.add("active");
         if(which === "charts") panelCharts.classList.add("active");
-
-        // ensure crisp redraw when entering charts
         if(which === "charts"){
           setupCanvas();
           renderCharts();
         }
       }
 
-      // Buttons
       const btnHome = document.getElementById("btnHome");
       const btnLog = document.getElementById("btnLog");
       const btnCharts = document.getElementById("btnCharts");
@@ -381,7 +382,6 @@
       btnLog.onclick = () => showPanel("log");
       btnCharts.onclick = () => showPanel("charts");
 
-      // Pull-to-refresh (Home only)
       const pullIndicator = document.getElementById("pullIndicator");
       let pullStartY = null;
       let pullArmed = false;
@@ -412,7 +412,6 @@
         if(armed) location.reload();
       });
 
-      // Install button
       let deferredPrompt = null;
       window.addEventListener("beforeinstallprompt", (e) => {
         e.preventDefault();
@@ -431,12 +430,10 @@
         }
       });
 
-      // Service worker (cache-busted)
       if("serviceWorker" in navigator){
-        navigator.serviceWorker.register("./sw.js?v=2.014").catch(()=>{});
+        navigator.serviceWorker.register("./sw.js?v=2.015").catch(()=>{});
       }
 
-      // Read-only storage detection + rendering
       const bridgeStatus = document.getElementById("bridgeStatus");
       const sumSource = document.getElementById("sumSource");
       const sumEntries = document.getElementById("sumEntries");
@@ -451,8 +448,8 @@
       const canvasWrap = document.getElementById("canvasWrap");
       const chartCanvas = document.getElementById("chartCanvas");
 
-      // DPR crisp canvas setup
       let ctx = null;
+
       function setupCanvas(){
         const dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
         const rect = chartCanvas.getBoundingClientRect();
@@ -461,31 +458,30 @@
         chartCanvas.width  = Math.floor(cssW * dpr);
         chartCanvas.height = Math.floor(cssH * dpr);
         ctx = chartCanvas.getContext("2d", { alpha:true, desynchronized:true });
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // draw in CSS pixels
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         ctx.imageSmoothingEnabled = false;
       }
 
-      // Central Time formatting helpers
-      const fmtISO = new Intl.DateTimeFormat("en-US", {
+      const fmtYMD = new Intl.DateTimeFormat("en-US", {
         timeZone: TZ,
-        year:"numeric", month:"2-digit", day:"2-digit",
-        hour:"2-digit", minute:"2-digit", second:"2-digit",
-        hour12:false
-      });
-      const fmtDayTwoLine = new Intl.DateTimeFormat("en-US", {
-        timeZone: TZ,
-        weekday:"short",
-        month:"2-digit", day:"2-digit"
-      });
-      const fmtHourLabel = new Intl.DateTimeFormat("en-US", {
-        timeZone: TZ,
-        hour:"2-digit", minute:"2-digit",
-        hour12:false
+        year:"numeric", month:"2-digit", day:"2-digit"
       });
       const fmtYMDParts = new Intl.DateTimeFormat("en-US", {
         timeZone: TZ,
         year:"numeric", month:"2-digit", day:"2-digit"
       });
+
+      function fmtCTDateOnly(ms){
+        try{
+          if(!Number.isFinite(ms)) return "—";
+          const parts = fmtYMD.formatToParts(new Date(ms));
+          const map = {};
+          for(const p of parts) map[p.type]=p.value;
+          return `${map.year}-${map.month}-${map.day}`;
+        }catch(_){
+          return "—";
+        }
+      }
 
       function ctParts(ms){
         const parts = fmtYMDParts.formatToParts(new Date(ms));
@@ -496,21 +492,6 @@
         const p = ctParts(ms);
         return `${p.y}-${String(p.m).padStart(2,"0")}-${String(p.d).padStart(2,"0")}`;
       }
-      function fmtCT(ms){
-        try{
-          if(!Number.isFinite(ms)) return "—";
-          const parts = fmtISO.formatToParts(new Date(ms));
-          const map = {};
-          for(const p of parts) map[p.type]=p.value;
-          return `${map.year}-${map.month}-${map.day} ${map.hour}:${map.minute}:${map.second}`;
-        }catch(_){
-          return "—";
-        }
-      }
-
-      // Data helpers
-      let records = [];
-      let summary = { source:"Not loaded", entries:0, newest:null };
 
       function safeNum(x){
         const n = Number(x);
@@ -535,15 +516,18 @@
         return (r.notes ?? r.note ?? r.symptomsNote ?? r.text ?? "").toString();
       }
 
+      let records = [];
+      let summary = { source:"Not loaded", entries:0, newest:null };
+
       function renderSummary(){
         sumSource.textContent = summary.source || "—";
         sumEntries.textContent = String(summary.entries ?? "—");
-        sumNewest.textContent = summary.newest ? fmtCT(new Date(summary.newest).getTime()) : "—";
+        sumNewest.textContent = summary.newest ? fmtCTDateOnly(new Date(summary.newest).getTime()) : "—";
         detectedPill.textContent = summary.entries ? (summary.entries + " entries") : "—";
       }
 
-      // LOG: paging (25 at a time)
       let logOffset = 0;
+
       function sortedNewest(){
         return [...records].sort((a,b)=>{
           const ta = new Date(extractTs(a) || 0).getTime();
@@ -567,7 +551,8 @@
 
         logTopNote.textContent = `Showing ${Math.min(logOffset+slice.length, all.length)} of ${all.length} records (read-only).`;
 
-        for(const r of slice){
+        for(let i=0;i<slice.length;i++){
+          const r = slice[i];
           const tsRaw = extractTs(r);
           const tms = new Date(tsRaw || 0).getTime();
           const {sys,dia} = extractBP(r);
@@ -576,10 +561,11 @@
 
           const topLeft = (sys!=null && dia!=null) ? `${sys}/${dia}` : (sys!=null || dia!=null ? `${sys ?? "—"}/${dia ?? "—"}` : "—");
           const topRight = (hr!=null) ? `HR ${hr}` : "—";
-          const when = Number.isFinite(tms) && tms>0 ? fmtCT(tms) : "—";
+          const when = (Number.isFinite(tms) && tms>0) ? fmtCTDateOnly(tms) : "—";
 
           const li = document.createElement("li");
           li.className = "row";
+          li.dataset.index = String(logOffset + i);
 
           const t = document.createElement("div");
           t.className = "rowTop";
@@ -603,11 +589,22 @@
       logMoreLink.addEventListener("click", (e)=>{
         e.preventDefault();
         const all = sortedNewest();
+        const prev = logOffset;
         logOffset = Math.min(all.length, logOffset + 25);
         renderLog(false);
+
+        // Focus/scroll to the first newly-loaded record (top of the new page)
+        const firstNew = logList.querySelector(`li.row[data-index="${logOffset}"]`);
+        if(firstNew){
+          firstNew.scrollIntoView({ block:"start", behavior:"instant" });
+          firstNew.tabIndex = -1;
+          try{ firstNew.focus({ preventScroll:true }); }catch(_){}
+        }else{
+          // Fallback: scroll to top of list
+          logList.scrollIntoView({ block:"start", behavior:"instant" });
+        }
       });
 
-      // CHART: view state (2–14 days), default 7
       const view = {
         windowDays: 7,
         minDays: 2,
@@ -619,16 +616,15 @@
 
       function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
 
-      // Fixed Y axis (does not fluctuate)
       const Y_MIN_FIXED = 40;
       const Y_MAX_FIXED = 200;
 
-      // Systolic bands (tint background)
+      // Increased opacity per request
       const SYS_BANDS = [
-        { name:"HTN2",      y0:140, y1:200, fill:"rgba(255, 70, 70, .16)" },   // red
-        { name:"HTN1",      y0:130, y1:140, fill:"rgba(255, 210, 80, .14)" },  // yellow
-        { name:"Optimal",   y0: 90, y1:130, fill:"rgba(80, 160, 255, .12)" },  // blue
-        { name:"Hypotens.", y0: 40, y1: 90, fill:"rgba(170, 120, 255, .10)" }  // purple
+        { name:"HTN2",      y0:140, y1:200, fill:"rgba(255, 70, 70, .24)" },
+        { name:"HTN1",      y0:130, y1:140, fill:"rgba(255, 210, 80, .22)" },
+        { name:"Optimal",   y0: 90, y1:130, fill:"rgba(80, 160, 255, .20)" },
+        { name:"Hypotens.", y0: 40, y1: 90, fill:"rgba(170, 120, 255, .18)" }
       ];
 
       function computeDataTimeBounds(){
@@ -652,7 +648,7 @@
         view.tMinData = tMin;
         view.tMaxData = tMax;
         if(tMin != null && tMax != null){
-          const wMs = view.windowDays * 86400000;
+          const wMs = view.windowDays * MS_DAY;
           view.centerMs = clamp(tMax - (wMs*0.35), tMin + wMs*0.5, tMax - wMs*0.5);
         }
       }
@@ -662,7 +658,7 @@
         if(view.centerMs == null || view.tMinData == null || view.tMaxData == null){
           return { t0:0, t1:0, ok:false };
         }
-        const wMs = view.windowDays * 86400000;
+        const wMs = view.windowDays * MS_DAY;
         let t0 = view.centerMs - wMs/2;
         let t1 = view.centerMs + wMs/2;
 
@@ -690,7 +686,6 @@
         const rect = chartCanvas.getBoundingClientRect();
         const w = rect.width, h = rect.height;
 
-        // Reduce padding to widen plot, but keep y labels readable
         const padL = 50, padR = 10, padT = 10, padB = 40;
         const x0 = padL, y0 = padT, pw = w - padL - padR, ph = h - padT - padB;
 
@@ -765,8 +760,7 @@
       function drawYGridAndLabels(frame){
         const { x0, y0, pw, ph } = frame;
 
-        const ticks = [40, 60, 80, 100, 120, 140, 160, 180, 200]
-          .filter(v => v>=Y_MIN_FIXED && v<=Y_MAX_FIXED);
+        const ticks = [40, 60, 80, 100, 120, 140, 160, 180, 200];
 
         ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
         ctx.fillStyle = "rgba(235,245,255,.58)";
@@ -787,14 +781,27 @@
 
       function chooseXTicks(t0, t1){
         const spanMs = t1 - t0;
-        const spanDays = spanMs / 86400000;
+        const spanDays = spanMs / MS_DAY;
         const out = [];
+
+        // Hour labels: just number (0-23)
+        function hourNum(ms){
+          try{
+            const parts = new Intl.DateTimeFormat("en-US", {
+              timeZone: TZ, hour:"2-digit", hour12:false
+            }).formatToParts(new Date(ms));
+            const h = parts.find(p=>p.type==="hour")?.value || "00";
+            return String(parseInt(h,10));
+          }catch(_){
+            return "";
+          }
+        }
 
         if(spanDays <= 2.2){
           const step = 4 * MS_HOUR;
           let t = Math.ceil(t0/step)*step;
           while(t <= t1){
-            out.push({ t, labelTop: fmtHourLabel.format(new Date(t)), labelBot: "" });
+            out.push({ t, labelTop: hourNum(t), labelBot: "" });
             t += step;
           }
           return out;
@@ -804,31 +811,29 @@
           const step = 6 * MS_HOUR;
           let t = Math.ceil(t0/step)*step;
           while(t <= t1){
-            out.push({ t, labelTop: fmtHourLabel.format(new Date(t)), labelBot: "" });
+            out.push({ t, labelTop: hourNum(t), labelBot: "" });
             t += step;
           }
           return out;
         }
 
-        // 7-day style: two-line labels like your example
+        // Day labels
+        const fmtDay = new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday:"short" });
+        const fmtMD  = new Intl.DateTimeFormat("en-US", { timeZone: TZ, month:"2-digit", day:"2-digit" });
+
         if(spanDays <= 7.8){
           const bounds = computeDayBoundaries(t0, t1);
           const cuts = [t0, ...bounds].filter(v=>v>=t0 && v<=t1);
           for(const t of cuts){
-            const s = fmtDayTwoLine.format(new Date(t)); // "Mon, 01/12"
-            const parts = s.split(", ");
-            out.push({ t, labelTop: (parts[0] || s), labelBot: (parts[1] || "") });
+            out.push({ t, labelTop: fmtDay.format(new Date(t)), labelBot: fmtMD.format(new Date(t)) });
           }
           return out;
         }
 
-        // 14-day style: every other day
         const bounds = computeDayBoundaries(t0, t1);
         const cuts = [t0, ...bounds].filter(v=>v>=t0 && v<=t1);
         for(let i=0;i<cuts.length;i+=2){
-          const s = fmtDayTwoLine.format(new Date(cuts[i]));
-          const parts = s.split(", ");
-          out.push({ t: cuts[i], labelTop: (parts[0] || s), labelBot: (parts[1] || "") });
+          out.push({ t: cuts[i], labelTop: fmtDay.format(new Date(cuts[i])), labelBot: fmtMD.format(new Date(cuts[i])) });
         }
         return out;
       }
@@ -892,7 +897,7 @@
         ctx.save();
         ctx.strokeStyle = stroke;
         ctx.globalAlpha = alpha;
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 1.4;
         ctx.lineJoin = "miter";
         ctx.lineCap = "butt";
 
@@ -905,14 +910,13 @@
         }
         ctx.stroke();
 
-        // very small points (crisp)
         ctx.fillStyle = stroke;
         ctx.globalAlpha = Math.min(1, alpha + 0.06);
         for(const p of points){
           const x = x0 + ((p.t - t0) / (t1 - t0)) * pw;
           const y = yToPx(p.y, frame);
           ctx.beginPath();
-          ctx.arc(x, y, 1.6, 0, Math.PI*2);
+          ctx.arc(x, y, 1.5, 0, Math.PI*2);
           ctx.fill();
         }
 
@@ -981,10 +985,11 @@
 
         drawLegend(frame);
 
-        chartsTopNote.textContent = `Window: ${view.windowDays.toFixed(1)} days • ${fmtCT(t0)} → ${fmtCT(t1)} (CT)`;
+        // One-line date-only range (CT)
+        chartsTopNote.textContent = `Window: ${view.windowDays.toFixed(1)} days • ${fmtCTDateOnly(t0)} → ${fmtCTDateOnly(t1)} (CT)`;
       }
 
-      // Touch interactions on chart: pan + horizontal pinch to adjust windowDays
+      // Touch interactions on chart
       let gesture = {
         mode:null,
         startX:0,
@@ -1015,7 +1020,6 @@
           gesture.pinchStartDist = Math.max(1, touchDist(a,b));
           gesture.startDays = view.windowDays;
 
-          // anchor time at pinch midpoint
           const { t0, t1, ok } = getVisibleRange();
           if(ok){
             const rect = canvasWrap.getBoundingClientRect();
@@ -1053,18 +1057,19 @@
           const a = e.touches[0], b = e.touches[1];
           const dist = Math.max(1, touchDist(a,b));
 
-          // bigger distance => zoom OUT (more days)
+          // Correct direction:
+          // dist bigger (pinch out) => window bigger (more days)
+          // dist smaller (pinch in) => window smaller (fewer days)
           const scale = dist / gesture.pinchStartDist;
           const newDays = clamp(gesture.startDays * scale, view.minDays, view.maxDays);
           view.windowDays = newDays;
 
-          // keep anchor time under pinch midpoint stable by adjusting center
           const rect = canvasWrap.getBoundingClientRect();
           const midX = (a.clientX + b.clientX)/2;
           const x = clamp(midX - rect.left, 0, rect.width);
           const frac = rect.width > 0 ? (x / rect.width) : 0.5;
 
-          const wMs = view.windowDays * 86400000;
+          const wMs = view.windowDays * MS_DAY;
           view.centerMs = gesture.pinchAnchorTime - wMs * (frac - 0.5);
           view.centerMs = clamp(view.centerMs, view.tMinData, view.tMaxData);
 
@@ -1090,7 +1095,6 @@
       canvasWrap.addEventListener("touchend", onChartTouchEnd, {passive:false});
       canvasWrap.addEventListener("touchcancel", onChartTouchEnd, {passive:false});
 
-      // Resize observer for crisp redraw
       const ro = new ResizeObserver(()=>{
         if(panelCharts.classList.contains("active")){
           setupCanvas();
@@ -1099,7 +1103,6 @@
       });
       ro.observe(canvasWrap);
 
-      // Data load
       async function loadReadOnlyData(){
         const bridge = window.StorageBridge || window.VTStorage || window.storageBridge || null;
 
@@ -1154,7 +1157,6 @@
 
         records = recs;
 
-        // Summary
         let source = (out && (out.source || out.storage || out.kind)) || "localStorage";
         let entries = (out && (out.entries ?? out.count)) ?? records.length;
 
@@ -1167,7 +1169,6 @@
         summary = { source, entries, newest };
         renderSummary();
 
-        // Reset view bounds with current data and default 7-day window
         view.windowDays = 7;
         view.centerMs = null;
         const b = computeDataTimeBounds();
@@ -1188,4 +1189,8 @@
   </script>
 </body>
 </html>
-<!-- EOF File: index.html | App Version: v2.014 -->
+<!--
+EOF File: index.html
+App Version: v2.015
+Reference: See header block for full change log + element IDs + dependency paths.
+-->
