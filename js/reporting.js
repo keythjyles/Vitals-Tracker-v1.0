@@ -1,161 +1,259 @@
 /* File: js/reporting.js */
 /*
-Vitals Tracker — Reporting & Export Orchestrator
+Vitals Tracker — Reporting / Export Foundation
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
+App Version: v2.021
+Base: v2.020
+Date: 2026-01-18
 
-File Purpose
-- Owns REPORTING (not raw export) for clinicians and caregivers.
-- Produces concise, discipline-aware summaries from existing data.
-- Exports ONLY the currently visible chart window when invoked from Charts.
-- Supports PDF generation (single-page default) with:
-    • Title + date range (CT)
-    • Key summary bullets (clinically relevant)
-    • Embedded chart image
-- Does NOT collect data, does NOT render charts directly.
-- Consumes chart image via callback provided by charts module.
+Change Log (v2.021)
+1) Established stable Reporting API surface (no UI yet):
+   - VTReporting.buildSummary({ records, range }) -> { ... }
+   - VTReporting.exportJSON({ records, meta }) -> { filename, blob }
+   - VTReporting.exportCSV({ records, meta }) -> { filename, blob }
+2) Clinically oriented wording (succinct):
+   - Summary includes: counts, date range, systolic/diastolic min/max, HR min/max, notable HTN spans count.
+3) Discipline presets scaffold (GP / MH / Cardio / Neuro) for future report templates:
+   - VTReporting.getTemplate("gp"|"mh"|"cardio"|"neuro") -> { title, sections[] }
+4) No external libraries, no PDF yet (reserved hook):
+   - VTReporting.exportPDF is a stub that throws with a clear message until implemented.
 
-Locked Scope (This Phase)
-- Read-only.
-- One-click report generation.
-- No modal popups; trigger returns a Blob for save/share.
-- Discipline presets: GP, Cardiology, Mental Health, Neurology.
+Ownership / Boundaries
+- This module produces report-ready data structures and export blobs.
+- UI buttons/menus live in ui.js / export.js / reports.js (later).
+- Chart capture for PDF will be implemented in chart.js (canvas toDataURL) and consumed here.
 
-Integration Contract (Locked)
-- charts module must expose:
-    window.VTCharts.getSnapshot() -> { pngDataUrl, t0, t1 }
-- storage module: window.VTStorage.getAll()
-- index.html provides buttons that call:
-    window.VTReporting.generate({ discipline })
-
-App Version: v2.020
-Base: v2.019
-Date: 2026-01-18 (America/Chicago)
-
-Change Log (v2.020)
-1) Added discipline-aware summary templates.
-2) Added visible-window-only export contract.
-3) Implemented PDF generator using native browser APIs (no libs).
-4) Centralized reporting language to remain succinct and clinical.
+Exports
+- window.VTReporting
 */
 
-(() => {
+(function(){
   "use strict";
 
-  const TZ = "America/Chicago";
-
-  const fmtDate = new Intl.DateTimeFormat("en-US", {
-    timeZone: TZ,
-    year: "numeric", month: "short", day: "2-digit"
-  });
-
-  function dateOnly(ms) {
-    try { return fmtDate.format(new Date(ms)); } catch { return "—"; }
+  function safeNum(x){
+    const n = Number(x);
+    return Number.isFinite(n) ? n : null;
   }
 
-  function summarize(records, t0, t1, discipline) {
-    const slice = records.filter(r => r.ts >= t0 && r.ts <= t1);
+  function extractTs(r){
+    return r.ts || r.time || r.timestamp || r.date || r.createdAt || r.created_at || r.iso || null;
+  }
+  function extractBP(r){
+    const sys = safeNum(r.sys ?? r.systolic ?? (r.bp && (r.bp.sys ?? r.bp.systolic)));
+    const dia = safeNum(r.dia ?? r.diastolic ?? (r.bp && (r.bp.dia ?? r.bp.diastolic)));
+    return { sys, dia };
+  }
+  function extractHR(r){
+    return safeNum(r.hr ?? r.heartRate ?? r.pulse ?? (r.vitals && (r.vitals.hr ?? r.vitals.pulse)));
+  }
+  function extractNote(r){
+    return (r.note ?? r.notes ?? r.text ?? r.comment ?? "").toString().trim();
+  }
 
-    let sys = [], dia = [], hr = [];
-    slice.forEach(r => {
-      if (r.sys != null) sys.push(r.sys);
-      if (r.dia != null) dia.push(r.dia);
-      if (r.hr  != null) hr.push(r.hr);
+  function ymd(ms){
+    if(!Number.isFinite(ms) || ms<=0) return "—";
+    const d = new Date(ms);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth()+1).padStart(2,"0");
+    const dd = String(d.getDate()).padStart(2,"0");
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
+
+  // HTN band definitions (systolic only), for span detection.
+  // NOTE: visuals/legend are owned by chart.js; this is for reporting logic only.
+  const SYS_BANDS = [
+    { key:"hypo",    name:"Hypotension (sys < 90)",      test:(s)=> s!=null && s < 90 },
+    { key:"optimal", name:"Optimal/Normal (90–129)",     test:(s)=> s!=null && s >= 90 && s < 130 },
+    { key:"htn1",    name:"Hypertension Stage 1 (130–139)", test:(s)=> s!=null && s >= 130 && s < 140 },
+    { key:"htn2",    name:"Hypertension Stage 2 (≥ 140)", test:(s)=> s!=null && s >= 140 }
+  ];
+
+  function bandKeyForSys(sys){
+    for(const b of SYS_BANDS){
+      if(b.test(sys)) return b.key;
+    }
+    return "unknown";
+  }
+
+  function normalizeRecords(records){
+    const out = Array.isArray(records) ? records.slice() : [];
+    out.sort((a,b)=>{
+      const ta = new Date(extractTs(a) || 0).getTime() || 0;
+      const tb = new Date(extractTs(b) || 0).getTime() || 0;
+      return ta - tb; // oldest->newest for span detection
     });
+    return out;
+  }
 
-    const avg = arr => arr.length ? Math.round(arr.reduce((a,b)=>a+b,0)/arr.length) : "—";
-    const max = arr => arr.length ? Math.max(...arr) : "—";
+  function computeRange(records){
+    let tMin = Infinity, tMax = -Infinity;
+    for(const r of records){
+      const t = new Date(extractTs(r) || 0).getTime();
+      if(Number.isFinite(t) && t>0){
+        tMin = Math.min(tMin, t);
+        tMax = Math.max(tMax, t);
+      }
+    }
+    if(!Number.isFinite(tMin) || !Number.isFinite(tMax) || tMin===Infinity || tMax===-Infinity){
+      return { tMin:null, tMax:null, ok:false };
+    }
+    return { tMin, tMax, ok:true };
+  }
 
-    const base = [
-      `Entries reviewed: ${slice.length}`,
-      `Date range: ${dateOnly(t0)} → ${dateOnly(t1)} (CT)`
-    ];
+  function computeMinMax(records){
+    let sysMin=null, sysMax=null, diaMin=null, diaMax=null, hrMin=null, hrMax=null;
 
-    const vitals = [
-      `Avg BP: ${avg(sys)}/${avg(dia)}`,
-      `Max systolic: ${max(sys)}`,
-      `Avg HR: ${avg(hr)}`
-    ];
+    for(const r of records){
+      const { sys, dia } = extractBP(r);
+      const hr = extractHR(r);
 
-    const focus = {
-      gp: [
-        "Focus: longitudinal vitals trend and variability.",
-      ],
-      cardio: [
-        "Focus: systolic burden and variability over time.",
-      ],
-      mh: [
-        "Focus: physiologic correlates during reported distress.",
-      ],
-      neuro: [
-        "Focus: autonomic variability and episodic spikes.",
-      ]
+      if(sys!=null){ sysMin = (sysMin==null)?sys:Math.min(sysMin,sys); sysMax = (sysMax==null)?sys:Math.max(sysMax,sys); }
+      if(dia!=null){ diaMin = (diaMin==null)?dia:Math.min(diaMin,dia); diaMax = (diaMax==null)?dia:Math.max(diaMax,dia); }
+      if(hr!=null){ hrMin = (hrMin==null)?hr:Math.min(hrMin,hr); hrMax = (hrMax==null)?hr:Math.max(hrMax,hr); }
+    }
+    return { sysMin, sysMax, diaMin, diaMax, hrMin, hrMax };
+  }
+
+  // Span detection: counts contiguous stretches where bandKey==target (using record-to-record adjacency).
+  // This is intentionally simple and deterministic; it will get richer once we add distress + med markers.
+  function countBandSpans(records, targetKey){
+    const recs = normalizeRecords(records);
+    let inSpan = false;
+    let spans = 0;
+
+    for(const r of recs){
+      const sys = extractBP(r).sys;
+      const key = bandKeyForSys(sys);
+      if(key === targetKey){
+        if(!inSpan){ inSpan=true; spans++; }
+      }else{
+        inSpan=false;
+      }
+    }
+    return spans;
+  }
+
+  function buildSummary({ records, range }){
+    const recs = Array.isArray(records) ? records : [];
+    const r = range && range.ok ? range : computeRange(recs);
+    const mm = computeMinMax(recs);
+
+    const notesCount = recs.reduce((acc,rr)=> acc + (extractNote(rr) ? 1 : 0), 0);
+
+    return {
+      generatedAt: new Date().toISOString(),
+      records: recs.length,
+      notesCount,
+      dateRange: r.ok ? { from: ymd(r.tMin), to: ymd(r.tMax) } : { from:"—", to:"—" },
+      bp: {
+        systolic: { min: mm.sysMin, max: mm.sysMax },
+        diastolic:{ min: mm.diaMin, max: mm.diaMax }
+      },
+      hr: { min: mm.hrMin, max: mm.hrMax },
+      spans: {
+        htn2: countBandSpans(recs, "htn2"),
+        htn1: countBandSpans(recs, "htn1"),
+        hypo: countBandSpans(recs, "hypo")
+      }
     };
-
-    return [...base, ...vitals, ...(focus[discipline] || [])];
   }
 
-  async function generatePDF({ discipline = "gp" } = {}) {
-    const charts = window.VTCharts;
-    const storage = window.VTStorage;
-
-    if (!charts || !storage) return null;
-
-    const snap = charts.getSnapshot();
-    if (!snap) return null;
-
-    const { pngDataUrl, t0, t1 } = snap;
-    const records = storage.getAll();
-
-    const bullets = summarize(records, t0, t1, discipline);
-
-    const doc = document.createElement("iframe");
-    doc.style.position = "fixed";
-    doc.style.right = "-9999px";
-    document.body.appendChild(doc);
-
-    const d = doc.contentDocument;
-    d.open();
-    d.write(`
-      <html><head><title>Vitals Report</title>
-      <style>
-        body{font-family:system-ui;margin:24px}
-        h1{font-size:20px;margin-bottom:8px}
-        ul{padding-left:18px}
-        img{max-width:100%;margin-top:12px}
-      </style>
-      </head><body>
-      <h1>Vitals Summary Report</h1>
-      <ul>${bullets.map(b=>`<li>${b}</li>`).join("")}</ul>
-      <img src="${pngDataUrl}" />
-      </body></html>
-    `);
-    d.close();
-
-    await new Promise(r => setTimeout(r, 300));
-    doc.contentWindow.print();
-    document.body.removeChild(doc);
+  function getTemplate(kind){
+    const k = (kind||"gp").toLowerCase();
+    const templates = {
+      gp: {
+        title: "Vitals Summary (Primary Care)",
+        sections: [
+          "Clinically relevant summary (counts, ranges).",
+          "BP/HR min/max, date range, frequency context.",
+          "Selected notes (future: filter by distress/med markers)."
+        ]
+      },
+      mh: {
+        title: "Vitals + Distress Summary (Mental Health)",
+        sections: [
+          "Distress distribution over time (future).",
+          "Correlation: distress vs BP/HR and symptom clusters (future).",
+          "Selected notes (panic/anxiety markers)."
+        ]
+      },
+      cardio: {
+        title: "BP/HR Trends (Cardiology)",
+        sections: [
+          "Hypertension span counts (sys bands).",
+          "BP/HR variability + clusters (future: meds markers).",
+          "Selected episodes with timestamps."
+        ]
+      },
+      neuro: {
+        title: "Headache/Neuro Context (Neurology)",
+        sections: [
+          "BP/HR context around headache episodes (notes).",
+          "Event clustering + physiologic response patterns (future).",
+          "Selected episodes with timestamps."
+        ]
+      }
+    };
+    return templates[k] || templates.gp;
   }
 
-  const API = Object.freeze({
-    generate: generatePDF
-  });
+  function exportJSON({ records, meta }){
+    const payload = {
+      meta: meta || {},
+      exportedAt: new Date().toISOString(),
+      records: Array.isArray(records) ? records : []
+    };
+    const text = JSON.stringify(payload, null, 2);
+    const blob = new Blob([text], { type:"application/json" });
+    const filename = (meta && meta.filename) ? meta.filename : `vitals_export_${Date.now()}.json`;
+    return { filename, blob };
+  }
 
-  Object.defineProperty(window, "VTReporting", {
-    value: API,
-    writable: false,
-    configurable: false
-  });
+  function exportCSV({ records, meta }){
+    const recs = Array.isArray(records) ? records : [];
+    const header = ["timestamp","date","time","systolic","diastolic","hr","notes"].join(",");
+    const rows = recs.map(r=>{
+      const t = new Date(extractTs(r) || 0).getTime();
+      const d = Number.isFinite(t) && t>0 ? new Date(t) : null;
+      const date = d ? `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}` : "";
+      const hh = d ? d.getHours() : "";
+      const mm = d ? String(d.getMinutes()).padStart(2,"0") : "";
+      const time = d ? `${String(hh).padStart(2,"0")}:${mm}` : "";
+      const bp = extractBP(r);
+      const hr = extractHR(r);
+      const note = extractNote(r).replace(/"/g,'""');
+      return [
+        Number.isFinite(t) ? t : "",
+        date,
+        time,
+        bp.sys ?? "",
+        bp.dia ?? "",
+        hr ?? "",
+        `"${note}"`
+      ].join(",");
+    });
+    const text = [header, ...rows].join("\n");
+    const blob = new Blob([text], { type:"text/csv" });
+    const filename = (meta && meta.filename) ? meta.filename : `vitals_export_${Date.now()}.csv`;
+    return { filename, blob };
+  }
+
+  function exportPDF(){
+    // Reserved hook. Implement later in a single place (reporting.js) using:
+    // - chart.js canvas toDataURL
+    // - simple, native print-to-PDF workflow OR embedded PDF generator (if we add one).
+    throw new Error("PDF export not implemented yet (reserved).");
+  }
+
+  window.VTReporting = {
+    computeRange,
+    buildSummary,
+    getTemplate,
+    exportJSON,
+    exportCSV,
+    exportPDF
+  };
 
 })();
- 
-/* EOF File: js/reporting.js */
-/*
-Vitals Tracker — Reporting & Export Orchestrator
-Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
-App Version: v2.020
-
-EOF Notes
-- Reporting is clinician-facing, not data-dump export.
-- Visible chart window defines report scope.
-- PDF output intentionally concise and single-page by default.
-*/
