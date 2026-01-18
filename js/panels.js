@@ -1,130 +1,103 @@
 /* File: /js/panels.js */
 /*
-Vitals Tracker — Panel State & Carousel Controller
+Vitals Tracker — Panel Controller
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
 Module: panels.js
 Purpose:
-- Own panel order, index, and visibility.
-- Provide a single source of truth for panel navigation.
-- Support circular (wrap-around) carousel behavior.
-- Be gesture-agnostic (gestures.js calls into this module).
+- Own ALL panel state and navigation.
+- Implement continuous carousel behavior.
+- Provide a single, authoritative API for panel changes.
+- Remain UI-agnostic (no gesture logic here).
 
-Panel Order (LOCKED):
-0 = Home      (#panelHome)
-1 = Charts    (#panelCharts)
-2 = Log       (#panelLog)
-3 = Settings  (#panelSettings)  // future-safe; may not exist yet
+Panels (LOCKED ORDER):
+Index 0 → Home
+Index 1 → Charts
+Index 2 → Log
+Index 3 → Settings (future)
 
-Rules (LOCKED):
-1) Exactly one panel is .active at any time.
-2) Navigation wraps in both directions.
-3) This module NEVER handles touch events directly.
-4) Missing panels are skipped safely.
-5) Index remains stable even if a panel is temporarily absent.
+Carousel Rules (LOCKED):
+- Swiping forward from last panel wraps to first.
+- Swiping backward from first panel wraps to last.
+- Only ONE panel has class `.active` at any time.
+- Panel switching triggers no side effects except visibility.
+- Rendering hooks are called explicitly where required.
 
-Public API (LOCKED):
+Dependencies:
+- DOM sections with class `.panel`
+- IDs must remain stable across versions.
+
+Exports (LOCKED):
 - initPanels()
 - nextPanel(direction)
-- setPanel(index)
-- getPanelIndex()
+- showPanelByIndex(index)
+- getActivePanelIndex()
 
 Change Log:
-- v2.0xx: Initial locked carousel panel controller.
+- v2.0xx: Initial locked carousel controller.
 */
 
-const PANEL_IDS = [
-  "panelHome",
-  "panelCharts",
-  "panelLog",
-  "panelSettings" // may not exist yet
-];
-
 let panels = [];
-let currentIndex = 0;
+let activeIndex = 0;
 
 /* ---------- Internal ---------- */
 
-function resolvePanels() {
-  panels = PANEL_IDS.map(id => document.getElementById(id));
+function clampIndex(i) {
+  const len = panels.length;
+  if (len === 0) return 0;
+  if (i < 0) return len - 1;
+  if (i >= len) return 0;
+  return i;
 }
 
-function activateIndex(idx) {
-  if (!panels.length) return;
-
-  // Normalize index with wrap-around
-  const len = panels.length;
-  let i = ((idx % len) + len) % len;
-
-  // Skip null panels (future-safe)
-  let safety = 0;
-  while (!panels[i] && safety < len) {
-    i = (i + 1) % len;
-    safety++;
-  }
-
-  panels.forEach(p => {
-    if (p) p.classList.remove("active");
+function applyActive() {
+  panels.forEach((p, i) => {
+    if (i === activeIndex) {
+      p.classList.add("active");
+      p.setAttribute("aria-hidden", "false");
+    } else {
+      p.classList.remove("active");
+      p.setAttribute("aria-hidden", "true");
+    }
   });
-
-  if (panels[i]) {
-    panels[i].classList.add("active");
-    currentIndex = i;
-  }
 }
 
 /* ---------- Public API ---------- */
 
-/**
- * Initialize panel system.
- * Call once after DOMContentLoaded.
- */
-export function initPanels() {
-  resolvePanels();
+export function initPanels(root = document) {
+  panels = Array.from(root.querySelectorAll(".panel"));
 
-  // Find initially active panel if present
-  let found = false;
-  panels.forEach((p, i) => {
-    if (p && p.classList.contains("active") && !found) {
-      currentIndex = i;
-      found = true;
-    }
-  });
+  if (!panels.length) {
+    console.warn("Panels: no .panel elements found");
+    return;
+  }
 
-  // Enforce single-active invariant
-  activateIndex(currentIndex);
+  activeIndex = panels.findIndex(p => p.classList.contains("active"));
+  if (activeIndex < 0) activeIndex = 0;
+
+  applyActive();
 }
 
-/**
- * Move to next or previous panel.
- * @param {number} direction +1 = next, -1 = previous
- */
-export function nextPanel(direction) {
-  if (typeof direction !== "number" || !direction) return;
-  activateIndex(currentIndex + (direction > 0 ? 1 : -1));
+export function nextPanel(direction = +1) {
+  if (!panels.length) return;
+  activeIndex = clampIndex(activeIndex + direction);
+  applyActive();
 }
 
-/**
- * Set panel by absolute index.
- * @param {number} index
- */
-export function setPanel(index) {
-  if (!Number.isInteger(index)) return;
-  activateIndex(index);
+export function showPanelByIndex(index) {
+  if (!panels.length) return;
+  activeIndex = clampIndex(index);
+  applyActive();
 }
 
-/**
- * Get current active panel index.
- * @returns {number}
- */
-export function getPanelIndex() {
-  return currentIndex;
+export function getActivePanelIndex() {
+  return activeIndex;
 }
 
 /* EOF: /js/panels.js
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
-Reference:
-- This module is the ONLY owner of panel order and index.
-- Gesture, button, or keyboard navigation must call into this API.
-- Do NOT duplicate panel state elsewhere.
+Reference Notes:
+- This file is the single source of truth for panel order.
+- Gesture code must NEVER manipulate DOM panel classes directly.
+- Any new panel must be appended to DOM and order list updated here.
 */
