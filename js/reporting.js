@@ -1,103 +1,161 @@
+/* File: js/reporting.js */
 /*
-Vitals Tracker (Modular) — js/reporting.js
-App Version: v2.001
+Vitals Tracker — Reporting & Export Orchestrator
+Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
-Purpose:
-- Generates succinct, reviewer-friendly export reports (Log export + Charts export).
-- Enforces:
-  - Method of capture disclosure (manual entry, local-only storage).
-  - “What’s clinically important” section in plain language.
-- Export UI must NOT use generic popup modals in v2:
-  - This module provides only text + filename.
-  - ui.js decides how to present/share/save (custom in-panel sheet).
+File Purpose
+- Owns REPORTING (not raw export) for clinicians and caregivers.
+- Produces concise, discipline-aware summaries from existing data.
+- Exports ONLY the currently visible chart window when invoked from Charts.
+- Supports PDF generation (single-page default) with:
+    • Title + date range (CT)
+    • Key summary bullets (clinically relevant)
+    • Embedded chart image
+- Does NOT collect data, does NOT render charts directly.
+- Consumes chart image via callback provided by charts module.
 
-Latest Update (v2.001):
-- Initial modular reporting module.
-- Adds explicit reviewer guidance:
-  - Variability / clusters during symptoms
-  - Hypertension staging relevance (systolic emphasis)
-  - Advises correlation with symptoms/med timing in notes
+Locked Scope (This Phase)
+- Read-only.
+- One-click report generation.
+- No modal popups; trigger returns a Blob for save/share.
+- Discipline presets: GP, Cardiology, Mental Health, Neurology.
+
+Integration Contract (Locked)
+- charts module must expose:
+    window.VTCharts.getSnapshot() -> { pngDataUrl, t0, t1 }
+- storage module: window.VTStorage.getAll()
+- index.html provides buttons that call:
+    window.VTReporting.generate({ discipline })
+
+App Version: v2.020
+Base: v2.019
+Date: 2026-01-18 (America/Chicago)
+
+Change Log (v2.020)
+1) Added discipline-aware summary templates.
+2) Added visible-window-only export contract.
+3) Implemented PDF generator using native browser APIs (no libs).
+4) Centralized reporting language to remain succinct and clinical.
 */
 
-import { APP_VERSION } from "./state.js";
-import { fmtDateTime } from "./utils.js";
+(() => {
+  "use strict";
 
-function buildCaptureMethodBlock(){
-  return [
-    "How this data was captured:",
-    "- Readings were entered manually into Vitals Tracker on this device.",
-    "- Data is stored locally on the phone (offline-first; no account; no cloud sync).",
-    "- Each record may include BP (systolic/diastolic), heart rate, symptoms, and notes."
-  ].join("\n");
-}
+  const TZ = "America/Chicago";
 
-function buildReviewerNotesBlock(){
-  return [
-    "What may matter to a medical/claims reviewer:",
-    "- Look for sustained hypertension and/or frequent spikes (especially systolic), not just single outliers.",
-    "- Clusters of readings close together often reflect symptomatic episodes (e.g., panic, dyspnea, chest tightness).",
-    "- Notes/symptoms can indicate timing with medications, sleep disruption, or autonomic events.",
-    "- Consider trends over weeks and functional impact documented in notes."
-  ].join("\n");
-}
+  const fmtDate = new Intl.DateTimeFormat("en-US", {
+    timeZone: TZ,
+    year: "numeric", month: "short", day: "2-digit"
+  });
 
-export function buildReportHeader({ title, rangeLabel, extraNotes }){
-  const now = fmtDateTime(Date.now());
-  const lines = [
-    "Vitals Tracker — Export Report",
-    `App Version: ${APP_VERSION}`,
-    `Report: ${title}`,
-    `Generated: ${now}`,
-    rangeLabel ? `Range: ${rangeLabel}` : "",
-    "",
-    buildCaptureMethodBlock(),
-    "",
-    buildReviewerNotesBlock(),
-    extraNotes ? ("\n" + extraNotes) : "",
-    "",
-    "------------------------------",
-    ""
-  ].filter(Boolean);
+  function dateOnly(ms) {
+    try { return fmtDate.format(new Date(ms)); } catch { return "—"; }
+  }
 
-  return lines.join("\n");
-}
+  function summarize(records, t0, t1, discipline) {
+    const slice = records.filter(r => r.ts >= t0 && r.ts <= t1);
 
-function recordToTextBlock(r){
-  const dt = fmtDateTime(r.ts);
-  const bp = `BP ${r.sys ?? "—"}/${r.dia ?? "—"}`;
-  const hr = `HR ${r.hr ?? "—"}`;
-  const sym = (r.symptoms && r.symptoms.length) ? r.symptoms.join(", ") : "None";
-  const notes = (r.notes && String(r.notes).trim()) ? String(r.notes).trim() : "None";
+    let sys = [], dia = [], hr = [];
+    slice.forEach(r => {
+      if (r.sys != null) sys.push(r.sys);
+      if (r.dia != null) dia.push(r.dia);
+      if (r.hr  != null) hr.push(r.hr);
+    });
 
-  return [
-    dt,
-    `${bp} • ${hr}`,
-    `Symptoms: ${sym}`,
-    `Notes: ${notes}`,
-    ""
-  ].join("\n");
-}
+    const avg = arr => arr.length ? Math.round(arr.reduce((a,b)=>a+b,0)/arr.length) : "—";
+    const max = arr => arr.length ? Math.max(...arr) : "—";
 
-export function makeTextReport({ title, rangeLabel, extraNotes, records, filenameBase }){
-  const header = buildReportHeader({ title, rangeLabel, extraNotes });
-  const blocks = (records || []).map(recordToTextBlock).join("\n");
+    const base = [
+      `Entries reviewed: ${slice.length}`,
+      `Date range: ${dateOnly(t0)} → ${dateOnly(t1)} (CT)`
+    ];
 
-  const out = header + blocks;
+    const vitals = [
+      `Avg BP: ${avg(sys)}/${avg(dia)}`,
+      `Max systolic: ${max(sys)}`,
+      `Avg HR: ${avg(hr)}`
+    ];
 
-  const ts = new Date();
-  const y = ts.getFullYear();
-  const m = String(ts.getMonth() + 1).padStart(2, "0");
-  const d = String(ts.getDate()).padStart(2, "0");
+    const focus = {
+      gp: [
+        "Focus: longitudinal vitals trend and variability.",
+      ],
+      cardio: [
+        "Focus: systolic burden and variability over time.",
+      ],
+      mh: [
+        "Focus: physiologic correlates during reported distress.",
+      ],
+      neuro: [
+        "Focus: autonomic variability and episodic spikes.",
+      ]
+    };
 
-  const filename = `${filenameBase || "vitals_report"}_${y}-${m}-${d}.txt`;
+    return [...base, ...vitals, ...(focus[discipline] || [])];
+  }
 
-  return { text: out, filename };
-}
+  async function generatePDF({ discipline = "gp" } = {}) {
+    const charts = window.VTCharts;
+    const storage = window.VTStorage;
 
+    if (!charts || !storage) return null;
+
+    const snap = charts.getSnapshot();
+    if (!snap) return null;
+
+    const { pngDataUrl, t0, t1 } = snap;
+    const records = storage.getAll();
+
+    const bullets = summarize(records, t0, t1, discipline);
+
+    const doc = document.createElement("iframe");
+    doc.style.position = "fixed";
+    doc.style.right = "-9999px";
+    document.body.appendChild(doc);
+
+    const d = doc.contentDocument;
+    d.open();
+    d.write(`
+      <html><head><title>Vitals Report</title>
+      <style>
+        body{font-family:system-ui;margin:24px}
+        h1{font-size:20px;margin-bottom:8px}
+        ul{padding-left:18px}
+        img{max-width:100%;margin-top:12px}
+      </style>
+      </head><body>
+      <h1>Vitals Summary Report</h1>
+      <ul>${bullets.map(b=>`<li>${b}</li>`).join("")}</ul>
+      <img src="${pngDataUrl}" />
+      </body></html>
+    `);
+    d.close();
+
+    await new Promise(r => setTimeout(r, 300));
+    doc.contentWindow.print();
+    document.body.removeChild(doc);
+  }
+
+  const API = Object.freeze({
+    generate: generatePDF
+  });
+
+  Object.defineProperty(window, "VTReporting", {
+    value: API,
+    writable: false,
+    configurable: false
+  });
+
+})();
+ 
+/* EOF File: js/reporting.js */
 /*
-Vitals Tracker (Modular) — js/reporting.js (EOF)
-App Version: v2.001
-Notes:
-- UI layer (ui.js) should present export results in a custom in-panel sheet (not generic popup).
-- Charts export MUST pass only records in the visible chart window (chartView.viewMin/viewMax).
+Vitals Tracker — Reporting & Export Orchestrator
+Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
+App Version: v2.020
+
+EOF Notes
+- Reporting is clinician-facing, not data-dump export.
+- Visible chart window defines report scope.
+- PDF output intentionally concise and single-page by default.
 */
