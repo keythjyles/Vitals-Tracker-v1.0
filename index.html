@@ -2,24 +2,32 @@
 <!--
 Vitals Tracker — Function-First Shell
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
-App Version: v2.021
-Base: v2.020
-Date: 2026-01-17
+App Version: v2.022
+Base: v2.021
+Date: 2026-01-18
 
-Change Log (v2.021)
-1) Hypertension systolic bands reduced ~30% opacity (relative) for better balance against plotted lines.
-2) X-axis hour mode: hour numbers remain on the top row; weekday labels appear BELOW the hours row, centered per day segment; date row hidden at that zoom level.
-3) Log paging UX: "Load next 25" now APPENDS in-place at the button location (no jump/reset). After click, the button moves down to the bottom of the newly added items; scrolling up reveals previous items; scrolling down continues naturally.
-4) Hour-mode label overlap defense: hours never overlap; selectively drops overlapping hour labels while preserving tick marks. Weekday row remains (day-centered).
-5) Light right-padding reduction on plot frame (more usable chart width) without clipping.
+Change Log (v2.022)
+1) Adds "Add Reading" as the primary CTA (Home + Top Nav) and introduces the Add panel shell (UI only).
+2) Add panel is a structured, collapsible UX shell for future functionality:
+   - Vitals section (BP/HR/Notes + Symptoms placeholder) is expanded by default.
+   - Distress and Medication sections are present but collapsed.
+3) No storage writes, no validation, no record creation in this version. Read-only behavior remains intact.
+4) Version drift guard: script cache-busters updated to v2.022.
+
+Add Feature Contract (locked reference)
+- Flow: One tap -> Add panel -> Vitals expanded, others collapsed.
+- Data model target (future): {ts, sys, dia, hr, notes, symptoms[], distress?, meds?}
+- Distress scale target: 0–5 with user labels (never numbers alone).
 
 File Structure / Reference Points
-- Panels: #panelHome, #panelLog, #panelCharts
-- Chart: #canvasWrap (gesture surface), #chartCanvas (canvas)
-- Log: #logList (UL), #logMoreLink (paging link), #logCard (scroll container)
+- Panels: #panelHome, #panelAdd, #panelLog, #panelCharts
+- Add: #addCard, #addVitals, #addDistress, #addMeds
+- Chart: #canvasWrap, #chartCanvas
+- Log: #logList, #logMoreLink, #logCard
 Dependencies expected:
 - ./js/storage.js
 - ./js/gestures.js
+(Next file to implement Add logic: ./js/add.js)
 -->
 <!doctype html>
 <html lang="en">
@@ -78,6 +86,7 @@ Dependencies expected:
       border-radius:999px;
       background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
       box-shadow: var(--shadow);
+      gap:10px;
     }
     .title{font-weight:800; letter-spacing:.2px; font-size:22px;}
     .boot{font-size:13px; color:var(--muted); letter-spacing:.25px; white-space:nowrap;}
@@ -129,7 +138,7 @@ Dependencies expected:
       max-width:56%;
     }
 
-    .nav{display:flex; gap:8px;}
+    .nav{display:flex; gap:8px; flex-wrap:nowrap; overflow:auto; -webkit-overflow-scrolling:touch;}
     .btn{
       border:1px solid var(--stroke2);
       color:var(--text);
@@ -142,6 +151,7 @@ Dependencies expected:
       user-select:none;
       -webkit-tap-highlight-color: transparent;
       white-space:nowrap;
+      flex:0 0 auto;
     }
     .btn:active{transform: translateY(1px)}
     .btn.secondary{
@@ -197,6 +207,7 @@ Dependencies expected:
       justify-content:space-between;
       gap:10px;
       font-weight:800;
+      flex-wrap:wrap;
     }
     .rowSub{margin-top:6px; color:var(--muted); font-size:13px; line-height:1.25}
     .pill{
@@ -219,7 +230,8 @@ Dependencies expected:
     canvas{
       display:block;
       width:100%;
-      height:280px;
+      height:260px;
+      image-rendering: crisp-edges;
     }
 
     .hint{margin-top:10px; color:var(--muted); line-height:1.35;}
@@ -259,6 +271,91 @@ Dependencies expected:
       display:block;
       padding:0 10px;
     }
+
+    /* Add panel accordion shell */
+    .acc{
+      border:1px solid var(--stroke);
+      border-radius:18px;
+      background: rgba(0,0,0,.14);
+      overflow:hidden;
+    }
+    .accHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:12px 12px;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border-bottom:1px solid rgba(255,255,255,.04);
+    }
+    .accHead .hTitle{
+      font-weight:900;
+      letter-spacing:.15px;
+      font-size:15px;
+    }
+    .accHead .hMeta{
+      color:var(--muted);
+      font-weight:800;
+      font-size:12px;
+      white-space:nowrap;
+    }
+    .accBody{
+      display:none;
+      padding:12px;
+    }
+    .acc.open .accBody{display:block}
+    .acc.open .accHead{border-bottom:1px solid var(--stroke)}
+    .accArrow{
+      width:28px;
+      height:28px;
+      border:1px solid var(--stroke2);
+      border-radius:999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--muted);
+      font-weight:900;
+      flex:0 0 auto;
+    }
+
+    .grid2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .label{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:900;
+      letter-spacing:.15px;
+    }
+    .in{
+      width:100%;
+      border:1px solid var(--stroke2);
+      border-radius:14px;
+      padding:12px 12px;
+      background: rgba(0,0,0,.18);
+      color:var(--text);
+      font-size:16px;
+      outline:none;
+    }
+    .in:focus{
+      border-color: rgba(120,180,255,.45);
+      box-shadow: 0 0 0 3px rgba(80,150,255,.10);
+    }
+    textarea.in{
+      min-height:76px;
+      resize:none;
+      line-height:1.2;
+    }
   </style>
 </head>
 
@@ -266,7 +363,7 @@ Dependencies expected:
   <div class="app">
     <div class="topbar">
       <div class="title">Vitals Tracker</div>
-      <div class="boot" id="bootText">BOOT OK v2.021</div>
+      <div class="boot" id="bootText">BOOT OK v2.022</div>
     </div>
 
     <div class="shell">
@@ -277,6 +374,7 @@ Dependencies expected:
           <div class="panelHeader">
             <div class="name">Home</div>
             <div class="nav">
+              <button class="btn primary" id="btnAdd">Add Reading</button>
               <button class="btn secondary" id="btnHome">Home</button>
               <button class="btn secondary" id="btnLog">Log</button>
               <button class="btn secondary" id="btnCharts">Charts</button>
@@ -287,7 +385,11 @@ Dependencies expected:
           <div class="pull" id="pullIndicator">Release to refresh</div>
 
           <div class="card" id="homeCard">
-            <div class="muted">Function-first shell. Data detection is read-only.</div>
+            <div style="display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap;">
+              <div class="muted">Function-first shell. Data detection is read-only.</div>
+              <button class="btn primary" id="btnAdd2">Add Reading</button>
+            </div>
+
             <div class="hint small">
               Pull down on Home to refresh (release).
               <div id="bridgeStatus" class="small" style="margin-top:10px;"></div>
@@ -307,6 +409,93 @@ Dependencies expected:
           </div>
         </section>
 
+        <!-- ADD PANEL (SHELL ONLY) -->
+        <section class="panel" id="panelAdd" aria-label="Add Reading">
+          <div class="panelHeader">
+            <div class="name">Add Reading</div>
+            <div class="nav">
+              <button class="btn secondary" id="btnBackFromAdd">Home</button>
+              <button class="btn secondary" id="btnLogFromAdd">Log</button>
+              <button class="btn secondary" id="btnChartsFromAdd">Charts</button>
+            </div>
+          </div>
+
+          <div class="card" id="addCard">
+            <div class="muted" id="addTopNote">Shell only (no saving in v2.022).</div>
+
+            <div class="acc open" id="addVitals" style="margin-top:12px;">
+              <div class="accHead" role="button" aria-expanded="true" tabindex="0">
+                <div>
+                  <div class="hTitle">Vitals</div>
+                  <div class="hMeta">BP • HR • Notes</div>
+                </div>
+                <div class="accArrow" aria-hidden="true">▾</div>
+              </div>
+              <div class="accBody">
+                <div class="grid2">
+                  <div class="field">
+                    <div class="label">Systolic</div>
+                    <input class="in" id="inSys" inputmode="numeric" autocomplete="off" placeholder="e.g., 132" />
+                  </div>
+                  <div class="field">
+                    <div class="label">Diastolic</div>
+                    <input class="in" id="inDia" inputmode="numeric" autocomplete="off" placeholder="e.g., 84" />
+                  </div>
+                </div>
+                <div class="grid2" style="margin-top:10px;">
+                  <div class="field">
+                    <div class="label">Heart Rate</div>
+                    <input class="in" id="inHr" inputmode="numeric" autocomplete="off" placeholder="e.g., 74" />
+                  </div>
+                  <div class="field">
+                    <div class="label">Time</div>
+                    <input class="in" id="inTime" autocomplete="off" placeholder="Auto (next file)" disabled />
+                  </div>
+                </div>
+
+                <div class="field" style="margin-top:10px;">
+                  <div class="label">Notes</div>
+                  <textarea class="in" id="inNotes" placeholder="Optional"></textarea>
+                </div>
+
+                <div class="muted small" style="margin-top:10px;">
+                  Symptoms UI (expanded by default) will be wired in the next Add file.
+                </div>
+              </div>
+            </div>
+
+            <div class="acc" id="addDistress" style="margin-top:12px;">
+              <div class="accHead" role="button" aria-expanded="false" tabindex="0">
+                <div>
+                  <div class="hTitle">Distress</div>
+                  <div class="hMeta">0–5 labeled</div>
+                </div>
+                <div class="accArrow" aria-hidden="true">▸</div>
+              </div>
+              <div class="accBody">
+                <div class="muted small">Distress scale + follow-up prompts will be implemented in a later file.</div>
+              </div>
+            </div>
+
+            <div class="acc" id="addMeds" style="margin-top:12px;">
+              <div class="accHead" role="button" aria-expanded="false" tabindex="0">
+                <div>
+                  <div class="hTitle">Medication</div>
+                  <div class="hMeta">event marker only</div>
+                </div>
+                <div class="accArrow" aria-hidden="true">▸</div>
+              </div>
+              <div class="accBody">
+                <div class="muted small">Medication event entry will be implemented in a later file.</div>
+              </div>
+            </div>
+
+            <div class="muted small" style="margin-top:12px;">
+              Save/Submit button is intentionally not present in v2.022 to prevent any accidental writes.
+            </div>
+          </div>
+        </section>
+
         <!-- LOG PANEL -->
         <section class="panel" id="panelLog" aria-label="Log">
           <div class="panelHeader">
@@ -314,6 +503,7 @@ Dependencies expected:
             <div class="nav">
               <button class="btn secondary" id="btnBackFromLog">Home</button>
               <button class="btn secondary" id="btnChartsFromLog">Charts</button>
+              <button class="btn primary" id="btnAddFromLog">Add Reading</button>
             </div>
           </div>
 
@@ -331,6 +521,7 @@ Dependencies expected:
             <div class="nav">
               <button class="btn secondary" id="btnBackFromCharts">Home</button>
               <button class="btn secondary" id="btnLogFromCharts">Log</button>
+              <button class="btn primary" id="btnAddFromCharts">Add Reading</button>
             </div>
           </div>
 
@@ -346,27 +537,31 @@ Dependencies expected:
     </div>
   </div>
 
-  <script src="./js/storage.js?v=2.021"></script>
-  <script src="./js/gestures.js?v=2.021"></script>
+  <script src="./js/storage.js?v=2.022"></script>
+  <script src="./js/gestures.js?v=2.022"></script>
 
   <script>
     (function(){
-      const APP_VERSION = "v2.021";
+      const APP_VERSION = "v2.022";
       const TZ = "America/Chicago";
-      const MS_HOUR = 3600000;
-      const MS_DAY  = 86400000;
+      const PAGE_SIZE = 25;
 
       const panelHome = document.getElementById("panelHome");
+      const panelAdd = document.getElementById("panelAdd");
       const panelLog = document.getElementById("panelLog");
       const panelCharts = document.getElementById("panelCharts");
 
       function showPanel(which){
         panelHome.classList.remove("active");
+        panelAdd.classList.remove("active");
         panelLog.classList.remove("active");
         panelCharts.classList.remove("active");
+
         if(which === "home") panelHome.classList.add("active");
+        if(which === "add") panelAdd.classList.add("active");
         if(which === "log") panelLog.classList.add("active");
         if(which === "charts") panelCharts.classList.add("active");
+
         if(which === "charts"){
           setupCanvas();
           renderCharts();
@@ -378,21 +573,59 @@ Dependencies expected:
       const btnCharts = document.getElementById("btnCharts");
       const btnInstall = document.getElementById("btnInstall");
 
+      const btnAdd = document.getElementById("btnAdd");
+      const btnAdd2 = document.getElementById("btnAdd2");
+
       document.getElementById("btnBackFromLog").onclick = () => showPanel("home");
       document.getElementById("btnChartsFromLog").onclick = () => showPanel("charts");
       document.getElementById("btnBackFromCharts").onclick = () => showPanel("home");
       document.getElementById("btnLogFromCharts").onclick = () => showPanel("log");
 
+      document.getElementById("btnBackFromAdd").onclick = () => showPanel("home");
+      document.getElementById("btnLogFromAdd").onclick = () => showPanel("log");
+      document.getElementById("btnChartsFromAdd").onclick = () => showPanel("charts");
+
+      document.getElementById("btnAddFromLog").onclick = () => showPanel("add");
+      document.getElementById("btnAddFromCharts").onclick = () => showPanel("add");
+
       btnHome.onclick = () => showPanel("home");
       btnLog.onclick = () => showPanel("log");
       btnCharts.onclick = () => showPanel("charts");
 
+      btnAdd.onclick = () => showPanel("add");
+      btnAdd2.onclick = () => showPanel("add");
+
+      // Accordion shell toggles (UI only)
+      function wireAcc(id){
+        const el = document.getElementById(id);
+        if(!el) return;
+        const head = el.querySelector(".accHead");
+        const arrow = el.querySelector(".accArrow");
+        const setOpen = (open) => {
+          el.classList.toggle("open", open);
+          head.setAttribute("aria-expanded", open ? "true" : "false");
+          if(arrow) arrow.textContent = open ? "▾" : "▸";
+        };
+        const toggle = () => setOpen(!el.classList.contains("open"));
+        head.addEventListener("click", toggle);
+        head.addEventListener("keydown", (e)=>{
+          if(e.key === "Enter" || e.key === " "){
+            e.preventDefault();
+            toggle();
+          }
+        });
+      }
+      wireAcc("addVitals");
+      wireAcc("addDistress");
+      wireAcc("addMeds");
+
+      // Pull-to-refresh (Home only; safe)
       const pullIndicator = document.getElementById("pullIndicator");
+      const homeCard = document.getElementById("homeCard");
       let pullStartY = null;
       let pullArmed = false;
 
       panelHome.addEventListener("touchstart", (e) => {
-        const homeCard = document.getElementById("homeCard");
         if(homeCard.scrollTop !== 0) return;
         pullStartY = e.touches[0].clientY;
         pullArmed = false;
@@ -417,6 +650,7 @@ Dependencies expected:
         if(armed) location.reload();
       });
 
+      // Install prompt
       let deferredPrompt = null;
       window.addEventListener("beforeinstallprompt", (e) => {
         e.preventDefault();
@@ -435,74 +669,55 @@ Dependencies expected:
         }
       });
 
+      // Service worker (cache-busted)
       if("serviceWorker" in navigator){
-        navigator.serviceWorker.register("./sw.js?v=2.021").catch(()=>{});
+        navigator.serviceWorker.register("./sw.js?v=2.022").catch(()=>{});
       }
 
+      // UI summary nodes
       const bridgeStatus = document.getElementById("bridgeStatus");
       const sumSource = document.getElementById("sumSource");
       const sumEntries = document.getElementById("sumEntries");
       const sumNewest = document.getElementById("sumNewest");
       const detectedPill = document.getElementById("detectedPill");
 
-      const logCard = document.getElementById("logCard");
+      // Log nodes
       const logTopNote = document.getElementById("logTopNote");
       const logList = document.getElementById("logList");
       const logMoreLink = document.getElementById("logMoreLink");
+      const logCard = document.getElementById("logCard");
 
+      // Charts nodes
       const chartsTopNote = document.getElementById("chartsTopNote");
       const canvasWrap = document.getElementById("canvasWrap");
       const chartCanvas = document.getElementById("chartCanvas");
 
-      let ctx = null;
+      // Data (read-only)
+      let allRecords = [];
+      let logOffset = 0;
 
-      function setupCanvas(){
-        const dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
-        const rect = chartCanvas.getBoundingClientRect();
-        const cssW = Math.max(280, Math.floor(rect.width));
-        const cssH = Math.max(220, Math.floor(rect.height));
-        chartCanvas.width  = Math.floor(cssW * dpr);
-        chartCanvas.height = Math.floor(cssH * dpr);
-        ctx = chartCanvas.getContext("2d", { alpha:true, desynchronized:true });
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        ctx.imageSmoothingEnabled = false;
-      }
-
-      const fmtYMDParts = new Intl.DateTimeFormat("en-US", {
-        timeZone: TZ,
-        year:"numeric", month:"2-digit", day:"2-digit"
-      });
-
-      const fmtTimeCT = new Intl.DateTimeFormat("en-US", {
-        timeZone: TZ,
-        hour:"numeric", minute:"2-digit", hour12:true
-      });
-
-      function fmtCTDateOnly(ms){
+      // --- Time formatting (Central) ---
+      function fmtDT(ts){
         try{
-          if(!Number.isFinite(ms)) return "—";
-          const parts = fmtYMDParts.formatToParts(new Date(ms));
-          const map = {};
-          for(const p of parts) map[p.type]=p.value;
-          return `${map.year}-${map.month}-${map.day}`;
-        }catch(_){
-          return "—";
-        }
+          const d = new Date(ts);
+          const s = new Intl.DateTimeFormat("en-US", {
+            timeZone: TZ,
+            year:"numeric", month:"2-digit", day:"2-digit",
+            hour:"2-digit", minute:"2-digit",
+            hour12:true
+          }).format(d);
+          return s.replace(",", "");
+        }catch(_){ return String(ts); }
       }
 
-      function fmtCTDateTime(ms){
-        if(!Number.isFinite(ms) || ms<=0) return "—";
-        return `${fmtCTDateOnly(ms)} ${fmtTimeCT.format(new Date(ms))}`;
-      }
-
-      function ctParts(ms){
-        const parts = fmtYMDParts.formatToParts(new Date(ms));
-        const get = (t)=> parts.find(p=>p.type===t)?.value || "";
-        return { y:+get("year"), m:+get("month"), d:+get("day") };
-      }
-      function ctDayKey(ms){
-        const p = ctParts(ms);
-        return `${p.y}-${String(p.m).padStart(2,"0")}-${String(p.d).padStart(2,"0")}`;
+      function fmtDateOnly(ts){
+        try{
+          const d = new Date(ts);
+          return new Intl.DateTimeFormat("en-US", {
+            timeZone: TZ,
+            year:"numeric", month:"2-digit", day:"2-digit"
+          }).format(d);
+        }catch(_){ return String(ts); }
       }
 
       function safeNum(x){
@@ -510,793 +725,387 @@ Dependencies expected:
         return Number.isFinite(n) ? n : null;
       }
 
-      function extractTs(r){
-        return r.ts || r.time || r.timestamp || r.date || r.createdAt || r.created_at || r.iso || null;
-      }
+      // --- Storage bridge (read-only) ---
+      function tryReadViaModule(){
+        const S = window.VTStorage || window.StorageBridge || null;
+        if(!S) return null;
 
-      function extractBP(r){
-        const sys = safeNum(r.sys ?? r.systolic ?? (r.bp && (r.bp.sys ?? r.bp.systolic)));
-        const dia = safeNum(r.dia ?? r.diastolic ?? (r.bp && (r.bp.dia ?? r.bp.diastolic)));
-        return { sys, dia };
-      }
+        // Try common shapes: getAllRecords(), readAll(), list(), getAll()
+        const candidates = [
+          () => S.getAllRecords && S.getAllRecords(),
+          () => S.readAll && S.readAll(),
+          () => S.getAll && S.getAll(),
+          () => S.list && S.list(),
+          () => S.records && S.records()
+        ];
 
-      function extractHR(r){
-        return safeNum(r.hr ?? r.heartRate ?? r.pulse ?? (r.vitals && (r.vitals.hr ?? r.vitals.pulse)));
-      }
-
-      function extractNotes(r){
-        return (r.notes ?? r.note ?? r.symptomsNote ?? r.text ?? "").toString();
-      }
-
-      let records = [];
-      let summary = { source:"Not loaded", entries:0, newest:null };
-
-      function renderSummary(){
-        sumSource.textContent = summary.source || "—";
-        sumEntries.textContent = String(summary.entries ?? "—");
-        sumNewest.textContent = summary.newest ? fmtCTDateOnly(new Date(summary.newest).getTime()) : "—";
-        detectedPill.textContent = summary.entries ? (summary.entries + " entries") : "—";
-      }
-
-      function sortedNewest(){
-        return [...records].sort((a,b)=>{
-          const ta = new Date(extractTs(a) || 0).getTime();
-          const tb = new Date(extractTs(b) || 0).getTime();
-          return tb - ta;
-        });
-      }
-
-      // Log paging state (append, no jump)
-      let logAll = [];
-      let renderedCount = 0;
-
-      function buildLogItem(r, index){
-        const tsRaw = extractTs(r);
-        const tms = new Date(tsRaw || 0).getTime();
-        const {sys,dia} = extractBP(r);
-        const hr = extractHR(r);
-        const notes = extractNotes(r);
-
-        const topLeft = (sys!=null && dia!=null) ? `${sys}/${dia}` : (sys!=null || dia!=null ? `${sys ?? "—"}/${dia ?? "—"}` : "—");
-        const topRight = (hr!=null) ? `HR ${hr}` : "—";
-        const when = (Number.isFinite(tms) && tms>0) ? fmtCTDateTime(tms) : "—";
-
-        const li = document.createElement("li");
-        li.className = "row";
-        li.dataset.index = String(index);
-
-        const t = document.createElement("div");
-        t.className = "rowTop";
-        t.innerHTML = `<div>${topLeft}</div><div class="pill">${topRight}</div>`;
-
-        const s = document.createElement("div");
-        s.className = "rowSub";
-        const noteTrim = notes && notes.trim() ? ` • ${notes.trim().slice(0,140)}` : "";
-        s.textContent = `${when}${noteTrim}`;
-
-        li.appendChild(t);
-        li.appendChild(s);
-        return li;
-      }
-
-      function updateLogHeader(){
-        if(!logAll.length){
-          logTopNote.textContent = "No records detected (read-only).";
-          return;
+        for(const fn of candidates){
+          try{
+            const r = fn();
+            if(!r) continue;
+            if(typeof r.then === "function") return r;
+            return Promise.resolve(r);
+          }catch(_){}
         }
-        logTopNote.textContent = `Showing ${Math.min(renderedCount, logAll.length)} of ${logAll.length} records (read-only).`;
+        return null;
       }
 
-      function renderLogReset(){
-        logList.innerHTML = "";
-        renderedCount = 0;
-        logAll = records.length ? sortedNewest() : [];
-        updateLogHeader();
-        logMoreLink.style.display = (logAll.length > 0) ? "inline-block" : "none";
-        appendNext(25, false);
+      function tryReadFromLocalStorage(){
+        const keys = [
+          "vitals_tracker_records_v2",
+          "vitals_tracker_records_v1",
+          "vitals_tracker_records",
+          "VT_RECORDS",
+          "records"
+        ];
+        for(const k of keys){
+          try{
+            const raw = localStorage.getItem(k);
+            if(!raw) continue;
+            const parsed = JSON.parse(raw);
+            if(Array.isArray(parsed)) return { source:`localStorage:${k}`, records: parsed };
+            if(parsed && Array.isArray(parsed.records)) return { source:`localStorage:${k}`, records: parsed.records };
+          }catch(_){}
+        }
+        return { source:"localStorage:none", records: [] };
       }
 
-      function appendNext(n, keepButtonAnchor){
-        if(!logAll.length){
-          logMoreLink.style.display = "none";
-          updateLogHeader();
-          return;
+      function normalizeRecords(arr){
+        if(!Array.isArray(arr)) return [];
+        const out = [];
+        for(const it of arr){
+          if(!it) continue;
+          const ts = safeNum(it.ts ?? it.time ?? it.t ?? it.date ?? it.datetime);
+          const sys = safeNum(it.sys ?? it.systolic ?? it.SYS);
+          const dia = safeNum(it.dia ?? it.diastolic ?? it.DIA);
+          const hr  = safeNum(it.hr  ?? it.heartRate ?? it.pulse ?? it.HR);
+
+          // minimal acceptance: needs ts and at least one vital
+          if(!ts) continue;
+          if(sys==null && dia==null && hr==null) continue;
+
+          out.push({
+            ts,
+            sys, dia, hr,
+            notes: (it.notes ?? it.note ?? "").toString(),
+            symptoms: Array.isArray(it.symptoms) ? it.symptoms : (Array.isArray(it.sx) ? it.sx : []),
+          });
+        }
+        out.sort((a,b)=>a.ts-b.ts);
+        return out;
+      }
+
+      async function loadRecordsReadOnly(){
+        // 1) try module
+        const p = tryReadViaModule();
+        if(p){
+          try{
+            const r = await p;
+            // r might be array or object
+            if(Array.isArray(r)) return { source:"module", records: normalizeRecords(r) };
+            if(r && Array.isArray(r.records)) return { source:(r.source||"module"), records: normalizeRecords(r.records) };
+            // if module returns {items:[]}
+            if(r && Array.isArray(r.items)) return { source:(r.source||"module"), records: normalizeRecords(r.items) };
+          }catch(_){}
+        }
+        // 2) localStorage fallback
+        const ls = tryReadFromLocalStorage();
+        return { source: ls.source, records: normalizeRecords(ls.records) };
+      }
+
+      function updateHomeSummary(source, recs){
+        const count = recs.length;
+        const newest = count ? recs[count-1].ts : null;
+
+        sumSource.textContent = source || "unknown";
+        sumEntries.textContent = String(count);
+        sumNewest.textContent = newest ? fmtDT(newest) : "—";
+
+        detectedPill.textContent = count ? "YES" : "NO";
+        bridgeStatus.textContent = count
+          ? `Loaded ${count} record(s). No changes made.`
+          : `No records found. This version does not create new records.`;
+      }
+
+      function escapeHtml(s){
+        return (s ?? "").toString()
+          .replaceAll("&","&amp;")
+          .replaceAll("<","&lt;")
+          .replaceAll(">","&gt;")
+          .replaceAll('"',"&quot;")
+          .replaceAll("'","&#039;");
+      }
+
+      function renderLogPage(append){
+        if(!append){
+          logList.innerHTML = "";
+          logOffset = 0;
         }
 
-        const start = renderedCount;
-        const end = Math.min(logAll.length, renderedCount + n);
-        if(end <= start){
-          logMoreLink.style.display = "none";
-          updateLogHeader();
-          return;
-        }
+        const slice = allRecords
+          .slice()
+          .sort((a,b)=>b.ts-a.ts)
+          .slice(logOffset, logOffset + PAGE_SIZE);
 
-        let anchorBefore = null;
-        if(keepButtonAnchor){
-          anchorBefore = {
-            btnTop: logMoreLink.getBoundingClientRect().top,
-            cardScrollTop: logCard.scrollTop
-          };
-        }
-
-        for(let i=start; i<end; i++){
-          const li = buildLogItem(logAll[i], i);
+        for(const r of slice){
+          const li = document.createElement("li");
+          li.className = "row";
+          const bp = (r.sys!=null && r.dia!=null) ? `${r.sys}/${r.dia}` : (r.sys!=null ? `${r.sys}/—` : `—/${r.dia??"—"}`);
+          const hr = (r.hr!=null) ? `${r.hr}` : "—";
+          const dt = fmtDT(r.ts);
+          li.innerHTML = `
+            <div class="rowTop">
+              <div>${escapeHtml(dt)}</div>
+              <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
+                <span class="pill">BP ${escapeHtml(bp)}</span>
+                <span class="pill">HR ${escapeHtml(hr)}</span>
+              </div>
+            </div>
+            ${r.notes ? `<div class="rowSub">${escapeHtml(r.notes)}</div>` : ``}
+          `;
           logList.appendChild(li);
         }
 
-        renderedCount = end;
-        updateLogHeader();
+        logOffset += slice.length;
 
-        if(renderedCount >= logAll.length){
-          logMoreLink.style.display = "none";
-        } else {
-          logMoreLink.style.display = "inline-block";
-        }
+        const remaining = allRecords.length - logOffset;
+        logMoreLink.style.display = remaining > 0 ? "inline-block" : "none";
 
-        if(keepButtonAnchor && anchorBefore){
-          // Keep the first newly appended record aligned where the button was.
-          const firstNew = logList.querySelector(`li.row[data-index="${start}"]`);
-          if(firstNew){
-            const afterTop = firstNew.getBoundingClientRect().top;
-            const delta = afterTop - anchorBefore.btnTop;
-            logCard.scrollTop = anchorBefore.cardScrollTop + delta;
-          }
-        }
+        logTopNote.textContent = allRecords.length
+          ? `Showing ${Math.min(logOffset, allRecords.length)} of ${allRecords.length} record(s). Tap “Load next 25” to continue.`
+          : `No records found.`;
       }
 
       logMoreLink.addEventListener("click", (e)=>{
         e.preventDefault();
-        appendNext(25, true);
+        // append right where the button sits (no jump)
+        const before = logMoreLink.getBoundingClientRect().top;
+        renderLogPage(true);
+        // keep viewport stable: keep the "button area" from jumping upward
+        const after = logMoreLink.getBoundingClientRect().top;
+        const delta = after - before;
+        // If the button moved, adjust scroll to keep context stable
+        if(delta !== 0){
+          logCard.scrollTop += delta;
+        }
       });
 
-      const view = {
-        windowDays: 7,
-        minDays: 1,
-        maxDays: 14,
-        centerMs: null,
-        tMinData: null,
-        tMaxData: null
-      };
+      // ---- Simple chart fallback (read-only) ----
+      let ctx = null;
+      let dpr = 1;
 
-      function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
-
-      let Y_MIN = 40;
-      let Y_MAX = 200;
-
-      function computeGlobalYMaxFromDB(){
-        let maxSys = null;
-        for(const r of records){
-          const bp = extractBP(r);
-          if(bp.sys != null){
-            maxSys = (maxSys == null) ? bp.sys : Math.max(maxSys, bp.sys);
-          }
-        }
-        if(maxSys == null) return 200;
-
-        const pad = 6;
-        const raw = maxSys + pad;
-        const nice = Math.ceil(raw / 10) * 10;
-        return Math.max(120, nice);
+      function setupCanvas(){
+        if(!chartCanvas) return;
+        dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+        const cssW = canvasWrap.clientWidth - 2; // small safety
+        const cssH = 260;
+        chartCanvas.style.width = cssW + "px";
+        chartCanvas.style.height = cssH + "px";
+        chartCanvas.width = Math.floor(cssW * dpr);
+        chartCanvas.height = Math.floor(cssH * dpr);
+        ctx = chartCanvas.getContext("2d");
+        if(ctx) ctx.setTransform(dpr,0,0,dpr,0,0);
       }
 
-      function rebuildBands(){
-        // Reduced ~30% opacity (relative) vs prior band intent.
-        // Using a single alpha for all 4 bands for now (future: per-band alphas + legend).
-        const a = 0.525;
-        return [
-          { name:"HTN2",      y0:140, y1:Y_MAX, fill:`rgba(255, 70, 70, ${a})` },
-          { name:"HTN1",      y0:130, y1:140,  fill:`rgba(255, 210, 80, ${a})` },
-          { name:"Optimal",   y0: 90, y1:130,  fill:`rgba(80, 160, 255, ${a})` },
-          { name:"Hypotens.", y0: Y_MIN, y1: 90, fill:`rgba(170, 120, 255, ${a})` }
-        ];
-      }
-      let SYS_BANDS = rebuildBands();
-
-      function computeDataTimeBounds(){
-        let tMin = Infinity, tMax = -Infinity;
-        for(const r of records){
-          const t = new Date(extractTs(r) || 0).getTime();
-          if(Number.isFinite(t) && t>0){
-            tMin = Math.min(tMin, t);
-            tMax = Math.max(tMax, t);
-          }
-        }
-        if(!Number.isFinite(tMin) || !Number.isFinite(tMax) || tMin===Infinity || tMax===-Infinity){
-          return { tMin:null, tMax:null };
-        }
-        return { tMin, tMax };
-      }
-
-      function ensureViewCenter(){
-        if(view.centerMs != null) return;
-        const { tMin, tMax } = computeDataTimeBounds();
-        view.tMinData = tMin;
-        view.tMaxData = tMax;
-        if(tMin != null && tMax != null){
-          const wMs = view.windowDays * MS_DAY;
-          view.centerMs = clamp(tMax - (wMs*0.35), tMin + wMs*0.5, tMax - wMs*0.5);
-        }
-      }
-
-      function getVisibleRange(){
-        ensureViewCenter();
-        if(view.centerMs == null || view.tMinData == null || view.tMaxData == null){
-          return { t0:0, t1:0, ok:false };
-        }
-        const wMs = view.windowDays * MS_DAY;
-        let t0 = view.centerMs - wMs/2;
-        let t1 = view.centerMs + wMs/2;
-
-        if(t0 < view.tMinData){
-          const shift = view.tMinData - t0;
-          t0 += shift; t1 += shift;
-        }
-        if(t1 > view.tMaxData){
-          const shift = t1 - view.tMaxData;
-          t0 -= shift; t1 -= shift;
-        }
-
-        t0 = Math.max(view.tMinData, t0);
-        t1 = Math.min(view.tMaxData, t1);
-        return { t0, t1, ok:true };
-      }
-
-      function clearCanvas(){
-        if(!ctx) return;
-        const rect = chartCanvas.getBoundingClientRect();
-        ctx.clearRect(0,0,rect.width, rect.height);
-      }
-
-      function drawPlotFrame(){
-        const rect = chartCanvas.getBoundingClientRect();
-        const w = rect.width, h = rect.height;
-
-        // Slightly less right padding for more plot width; keep safe against label clipping.
-        const padL = 30, padR = 10, padT = 10, padB = 42;
-        const x0 = padL, y0 = padT, pw = w - padL - padR, ph = h - padT - padB;
-
-        ctx.strokeStyle = "rgba(235,245,255,.14)";
-        ctx.lineWidth = 1;
-        ctx.strokeRect(x0, y0, pw, ph);
-
-        return { padL, padR, padT, padB, x0, y0, pw, ph, w, h };
-      }
-
-      function yToPx(y, frame){
-        const { y0, ph } = frame;
-        const t = (y - Y_MIN) / Math.max(1, (Y_MAX - Y_MIN));
-        return y0 + (1 - t) * ph;
-      }
-
-      function computeDayBoundaries(t0, t1){
-        const bounds = [];
-        if(!Number.isFinite(t0) || !Number.isFinite(t1) || t1<=t0) return bounds;
-
-        let t = Math.floor(t0 / MS_HOUR) * MS_HOUR;
-        let prevKey = ctDayKey(t);
-
-        while(t < t1 + MS_HOUR){
-          const tNext = t + MS_HOUR;
-          const nextKey = ctDayKey(tNext);
-          if(nextKey !== prevKey){
-            let lo = t, hi = tNext;
-            for(let i=0;i<12;i++){
-              const mid = Math.floor((lo+hi)/2);
-              if(ctDayKey(mid) === prevKey) lo = mid; else hi = mid;
-            }
-            const boundary = hi;
-            if(boundary >= t0 && boundary <= t1) bounds.push(boundary);
-            prevKey = nextKey;
-          }
-          t = tNext;
-        }
-        return bounds.sort((a,b)=>a-b);
-      }
-
-      function drawAlternatingDays(frame, t0, t1){
-        const { x0, y0, pw, ph } = frame;
-        const bounds = computeDayBoundaries(t0, t1);
-        const cuts = [t0, ...bounds, t1].filter((v,i,a)=> i===0 || v>a[i-1]);
-
-        const p = ctParts(t0);
-        let parity = (p.d % 2);
-
-        for(let i=0;i<cuts.length-1;i++){
-          const a = cuts[i], b = cuts[i+1];
-          const xa = x0 + ((a - t0)/(t1 - t0)) * pw;
-          const xb = x0 + ((b - t0)/(t1 - t0)) * pw;
-
-          const isAlt = ((parity + i) % 2) === 0;
-          ctx.fillStyle = isAlt ? "rgba(40,90,170,.12)" : "rgba(0,0,0,.12)";
-          ctx.fillRect(xa, y0, Math.max(0, xb-xa), ph);
-        }
-      }
-
-      function drawSystolicBands(frame){
-        const { x0, pw } = frame;
-        for(const b of SYS_BANDS){
-          const yTop = yToPx(b.y1, frame);
-          const yBot = yToPx(b.y0, frame);
-          const h = Math.max(0, yBot - yTop);
-          ctx.fillStyle = b.fill;
-          ctx.fillRect(x0, yTop, pw, h);
-        }
-      }
-
-      function buildNiceYTicks(){
-        const span = Math.max(1, Y_MAX - Y_MIN);
-        let step = 20;
-        if(span <= 90) step = 10;
-        else if(span <= 160) step = 20;
-        else step = 20;
-
-        const start = Math.floor(Y_MIN / step) * step;
-        const ticks = [];
-        for(let v=start; v<=Y_MAX; v+=step){
-          if(v >= Y_MIN) ticks.push(v);
-        }
-        if(ticks[ticks.length-1] !== Y_MAX) ticks.push(Y_MAX);
-        return ticks;
-      }
-
-      function drawYGridAndLabels(frame){
-        const { x0, pw } = frame;
-        const ticks = buildNiceYTicks();
-
-        ctx.font = "11px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-        ctx.fillStyle = "rgba(235,245,255,.58)";
-        ctx.textAlign = "left";
-        ctx.textBaseline = "middle";
-
-        for(const val of ticks){
-          const y = yToPx(val, frame);
-          ctx.strokeStyle = "rgba(235,245,255,.10)";
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          ctx.moveTo(x0, y);
-          ctx.lineTo(x0+pw, y);
-          ctx.stroke();
-          ctx.fillText(String(val), 4, y);
-        }
-      }
-
-      function hour12Num(ms){
-        try{
-          const parts = new Intl.DateTimeFormat("en-US", {
-            timeZone: TZ, hour:"numeric", hour12:true
-          }).formatToParts(new Date(ms));
-          return (parts.find(p=>p.type==="hour")?.value || "");
-        }catch(_){
-          return "";
-        }
-      }
-
-      function chooseXTicks(t0, t1){
-        const spanDays = (t1 - t0) / MS_DAY;
-        const out = [];
-
-        if(spanDays <= 2.0){
-          const step = 4 * MS_HOUR;
-          let t = Math.ceil(t0/step)*step;
-          while(t <= t1){
-            out.push({ t, labelTop: hour12Num(t), labelBot: "" });
-            t += step;
-          }
-          return { ticks: out, hourMode: true };
-        }
-
-        const fmtDay = new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday:"short" });
-        const fmtMD  = new Intl.DateTimeFormat("en-US", { timeZone: TZ, month:"2-digit", day:"2-digit" });
-
-        const bounds = computeDayBoundaries(t0, t1);
-        const cuts = [t0, ...bounds].filter(v=>v>=t0 && v<=t1);
-
-        for(const t of cuts){
-          out.push({ t, labelTop: fmtDay.format(new Date(t)), labelBot: fmtMD.format(new Date(t)) });
-        }
-        return { ticks: out, hourMode: false };
-      }
-
-      function drawHourModeWeekdays(frame, t0, t1){
-        const { x0, y0, pw, ph } = frame;
-        const fmtWk = new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday:"short" });
-
-        const bounds = computeDayBoundaries(t0, t1);
-        const cuts = [t0, ...bounds, t1].filter((v,i,a)=> i===0 || v>a[i-1]);
-
-        ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-        ctx.fillStyle = "rgba(235,245,255,.58)";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "top";
-
-        // Weekday row: centered per day segment, below hour row
-        for(let i=0;i<cuts.length-1;i++){
-          const a = cuts[i], b = cuts[i+1];
-          const mid = a + (b-a)/2;
-          const x = x0 + ((mid - t0) / (t1 - t0)) * pw;
-          const label = fmtWk.format(new Date(mid));
-          ctx.fillText(label, x, y0 + ph + 22);
-        }
-      }
-
-      // X-axis labels never overlap: drop selectively while keeping tick marks.
-      // Hour mode: show ONLY hour numbers; weekday row handled separately; date row hidden.
-      function drawXLabels(frame, t0, t1){
-        const { x0, y0, pw, ph } = frame;
-        const { ticks, hourMode } = chooseXTicks(t0, t1);
-
-        ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-        ctx.fillStyle = "rgba(235,245,255,.58)";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "top";
-
-        let lastRight = -Infinity;
-        const minGap = 6;
-
-        for(const tick of ticks){
-          const x = x0 + ((tick.t - t0) / (t1 - t0)) * pw;
-
-          // Tick mark always drawn
-          ctx.strokeStyle = "rgba(235,245,255,.10)";
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          ctx.moveTo(x, y0 + ph);
-          ctx.lineTo(x, y0 + ph + 5);
-          ctx.stroke();
-
-          const top = (tick.labelTop || "").trim();
-          const bot = (!hourMode && tick.labelBot) ? (tick.labelBot || "").trim() : "";
-
-          // Measure only what we intend to draw at this zoom level.
-          const wTop = top ? ctx.measureText(top).width : 0;
-          const wBot = bot ? ctx.measureText(bot).width : 0;
-          const w = Math.max(wTop, wBot);
-
-          const left = x - w/2;
-          const right = x + w/2;
-
-          if(left <= lastRight + minGap){
-            continue;
-          }
-
-          // Hour mode: date row is hidden (no bot); weekday row is handled below.
-          if(top) ctx.fillText(top, x, y0 + ph + 8);
-          if(bot) ctx.fillText(bot, x, y0 + ph + 22);
-
-          lastRight = right;
-        }
-
-        if(hourMode){
-          drawHourModeWeekdays(frame, t0, t1);
-        }
-      }
-
-      function buildSeriesVisible(t0, t1){
-        const sys = [];
-        const dia = [];
-        const hr  = [];
-
-        for(const r of records){
-          const t = new Date(extractTs(r) || 0).getTime();
-          if(!Number.isFinite(t) || t<=0) continue;
-          if(t < t0 || t > t1) continue;
-
-          const bp = extractBP(r);
-          const h = extractHR(r);
-
-          if(bp.sys != null) sys.push({t, y: bp.sys});
-          if(bp.dia != null) dia.push({t, y: bp.dia});
-          if(h != null)      hr.push({t, y: h});
-        }
-
-        sys.sort((a,b)=>a.t-b.t);
-        dia.sort((a,b)=>a.t-b.t);
-        hr.sort((a,b)=>a.t-b.t);
-
-        return { sys, dia, hr };
-      }
-
-      function plotLine(points, frame, t0, t1, stroke, alpha){
-        if(points.length < 2) return;
-        const { x0, pw } = frame;
-
-        ctx.save();
-        ctx.strokeStyle = stroke;
-        ctx.globalAlpha = alpha;
-        ctx.lineWidth = 1.35;
-        ctx.lineJoin = "miter";
-        ctx.lineCap = "butt";
-
-        ctx.beginPath();
-        for(let i=0;i<points.length;i++){
-          const p = points[i];
-          const x = x0 + ((p.t - t0) / (t1 - t0)) * pw;
-          const y = yToPx(p.y, frame);
-          if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-        }
-        ctx.stroke();
-
-        ctx.fillStyle = stroke;
-        ctx.globalAlpha = Math.min(1, alpha + 0.08);
-        for(const p of points){
-          const x = x0 + ((p.t - t0) / (t1 - t0)) * pw;
-          const y = yToPx(p.y, frame);
-          ctx.fillRect(Math.round(x)-1, Math.round(y)-1, 2, 2);
-        }
-
-        ctx.restore();
-      }
-
-      function drawLegend(frame){
-        const { x0, y0 } = frame;
-        ctx.save();
-        ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-        ctx.textAlign = "left";
-        ctx.textBaseline = "top";
-
-        const items = [
-          { label:"Systolic",  stroke:"rgba(170,210,255,1)", alpha:0.95 },
-          { label:"Diastolic", stroke:"rgba(235,245,255,1)", alpha:0.80 },
-          { label:"Heart Rate",stroke:"rgba(150,255,210,1)", alpha:0.70 }
-        ];
-
-        let lx = x0 + 8;
-        let ly = y0 + 6;
-        for(const it of items){
-          ctx.fillStyle = "rgba(235,245,255,.72)";
-          ctx.strokeStyle = it.stroke;
-          ctx.globalAlpha = it.alpha;
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.moveTo(lx, ly+7);
-          ctx.lineTo(lx+16, ly+7);
-          ctx.stroke();
-          ctx.globalAlpha = 1;
-          ctx.fillText(it.label, lx+22, ly);
-          ly += 18;
-        }
-        ctx.restore();
+      function getLatest7DaysWindow(){
+        if(!allRecords.length) return null;
+        const newest = allRecords[allRecords.length-1].ts;
+        const end = newest;
+        const start = end - (7*24*3600*1000);
+        return { start, end };
       }
 
       function renderCharts(){
-        if(!ctx) return;
-        clearCanvas();
-
-        if(!records.length){
-          chartsTopNote.textContent = "No records detected (read-only).";
+        if(!ctx) setupCanvas();
+        if(!ctx){
+          chartsTopNote.textContent = "Chart unavailable.";
           return;
         }
 
-        ensureViewCenter();
-        const range = getVisibleRange();
-        if(!range.ok){
-          chartsTopNote.textContent = "Records found, but no valid timestamps detected.";
+        const W = chartCanvas.clientWidth || (chartCanvas.width/dpr);
+        const H = chartCanvas.clientHeight || (chartCanvas.height/dpr);
+
+        ctx.clearRect(0,0,W,H);
+
+        if(!allRecords.length){
+          chartsTopNote.textContent = "No data found.";
+          ctx.globalAlpha = 1;
+          ctx.fillStyle = "rgba(235,245,255,.65)";
+          ctx.font = "700 14px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+          ctx.fillText("No readings to chart.", 14, 26);
           return;
         }
 
-        const { t0, t1 } = range;
-
-        const frame = drawPlotFrame();
-        drawAlternatingDays(frame, t0, t1);
-        drawSystolicBands(frame);
-        drawYGridAndLabels(frame);
-        drawXLabels(frame, t0, t1);
-
-        const series = buildSeriesVisible(t0, t1);
-        plotLine(series.sys, frame, t0, t1, "rgba(170,210,255,1)", 0.95);
-        plotLine(series.dia, frame, t0, t1, "rgba(235,245,255,1)", 0.78);
-        plotLine(series.hr,  frame, t0, t1, "rgba(150,255,210,1)", 0.72);
-
-        drawLegend(frame);
-
-        chartsTopNote.textContent = `${fmtCTDateOnly(t0)} \u2192 ${fmtCTDateOnly(t1)} (CT)`;
-      }
-
-      // Touch interactions on chart
-      let gesture = {
-        mode:null,
-        startX:0,
-        startCenter:0,
-        startDays:7,
-        pinchStartDist:0,
-        pinchAnchorTime:0
-      };
-
-      function touchDist(a,b){
-        const dx = a.clientX - b.clientX;
-        const dy = a.clientY - b.clientY;
-        return Math.hypot(dx, dy);
-      }
-
-      function onChartTouchStart(e){
-        if(!records.length) return;
-        setupCanvas();
-        ensureViewCenter();
-
-        if(e.touches.length === 1){
-          gesture.mode = "pan";
-          gesture.startX = e.touches[0].clientX;
-          gesture.startCenter = view.centerMs ?? Date.now();
-        } else if(e.touches.length === 2){
-          gesture.mode = "pinch";
-          const a = e.touches[0], b = e.touches[1];
-          gesture.pinchStartDist = Math.max(1, touchDist(a,b));
-          gesture.startDays = view.windowDays;
-
-          const { t0, t1, ok } = getVisibleRange();
-          if(ok){
-            const rect = canvasWrap.getBoundingClientRect();
-            const midX = (a.clientX + b.clientX) / 2;
-            const x = clamp(midX - rect.left, 0, rect.width);
-            const frac = rect.width > 0 ? (x / rect.width) : 0.5;
-            gesture.pinchAnchorTime = t0 + frac * (t1 - t0);
-          } else {
-            gesture.pinchAnchorTime = view.centerMs;
-          }
-        }
-        e.preventDefault();
-      }
-
-      function onChartTouchMove(e){
-        if(!records.length || !gesture.mode) return;
-
-        const range = getVisibleRange();
-        if(!range.ok) return;
-
-        if(gesture.mode === "pan" && e.touches.length === 1){
-          const x = e.touches[0].clientX;
-          const dx = x - gesture.startX;
-
-          const rect = canvasWrap.getBoundingClientRect();
-          const pxSpan = Math.max(1, rect.width);
-          const timeSpan = (range.t1 - range.t0);
-          const dt = (dx / pxSpan) * timeSpan;
-
-          view.centerMs = clamp(gesture.startCenter - dt, view.tMinData, view.tMaxData);
-          renderCharts();
-        }
-
-        if(gesture.mode === "pinch" && e.touches.length === 2){
-          const a = e.touches[0], b = e.touches[1];
-          const dist = Math.max(1, touchDist(a,b));
-
-          // Spread apart => zoom in (fewer days). Pinch together => zoom out (more days).
-          const scale = dist / gesture.pinchStartDist;
-          const newDays = clamp(gesture.startDays / scale, view.minDays, view.maxDays);
-          view.windowDays = newDays;
-
-          const rect = canvasWrap.getBoundingClientRect();
-          const midX = (a.clientX + b.clientX) / 2;
-          const x = clamp(midX - rect.left, 0, rect.width);
-          const frac = rect.width > 0 ? (x / rect.width) : 0.5;
-
-          const wMs = view.windowDays * MS_DAY;
-          view.centerMs = gesture.pinchAnchorTime - wMs * (frac - 0.5);
-          view.centerMs = clamp(view.centerMs, view.tMinData, view.tMaxData);
-
-          renderCharts();
-        }
-
-        e.preventDefault();
-      }
-
-      function onChartTouchEnd(e){
-        if(e.touches.length === 0){
-          gesture.mode = null;
-        } else if(e.touches.length === 1){
-          gesture.mode = "pan";
-          gesture.startX = e.touches[0].clientX;
-          gesture.startCenter = view.centerMs ?? gesture.startCenter;
-        }
-        e.preventDefault();
-      }
-
-      canvasWrap.addEventListener("touchstart", onChartTouchStart, {passive:false});
-      canvasWrap.addEventListener("touchmove", onChartTouchMove, {passive:false});
-      canvasWrap.addEventListener("touchend", onChartTouchEnd, {passive:false});
-      canvasWrap.addEventListener("touchcancel", onChartTouchEnd, {passive:false});
-
-      const ro = new ResizeObserver(()=>{
-        if(panelCharts.classList.contains("active")){
-          setupCanvas();
-          renderCharts();
-        }
-      });
-      ro.observe(canvasWrap);
-
-      async function loadReadOnlyData(){
-        const bridge = window.StorageBridge || window.VTStorage || window.storageBridge || null;
-
-        if(!bridge){
-          bridgeStatus.textContent = "Storage bridge not loaded. Check: ./js/storage.js";
-          summary = { source:"Not loaded", entries:0, newest:null };
-          records = [];
-          renderSummary();
-          renderLogReset();
-          setupCanvas();
-          renderCharts();
-          return;
-        }
-
-        bridgeStatus.textContent = "Storage bridge loaded.";
-
-        let out = null;
-        const tryCalls = [
-          () => bridge.detect && bridge.detect(),
-          () => bridge.detectLegacy && bridge.detectLegacy(),
-          () => bridge.inspect && bridge.inspect(),
-          () => bridge.readOnlyScan && bridge.readOnlyScan(),
-          () => bridge.getSummary && bridge.getSummary()
-        ];
-
-        for(const fn of tryCalls){
+        // Preferred: if external chart module exists, let it take over.
+        if(window.VTChart && typeof window.VTChart.render === "function"){
           try{
-            const v = fn();
-            out = (v && typeof v.then === "function") ? await v : v;
-            if(out) break;
+            window.VTChart.render({
+              canvas: chartCanvas,
+              wrap: canvasWrap,
+              records: allRecords,
+              tz: TZ
+            });
+            return;
           }catch(_){}
         }
 
-        let recs = null;
-        const tryRecs = [
-          () => bridge.getAll && bridge.getAll(),
-          () => bridge.getRecords && bridge.getRecords(),
-          () => bridge.readAll && bridge.readAll(),
-          () => bridge.records && bridge.records()
-        ];
+        // Fallback chart: last 7 days, systolic line only.
+        const win = getLatest7DaysWindow();
+        const start = win.start, end = win.end;
 
-        for(const fn of tryRecs){
-          try{
-            const v = fn();
-            recs = (v && typeof v.then === "function") ? await v : v;
-            if(Array.isArray(recs)) break;
-          }catch(_){}
+        const visible = allRecords.filter(r => r.ts>=start && r.ts<=end && r.sys!=null);
+        const d0 = fmtDateOnly(start);
+        const d1 = fmtDateOnly(end);
+        chartsTopNote.textContent = `${d0} – ${d1}`;
+
+        // margins
+        const padL = 34;
+        const padR = 12;
+        const padT = 10;
+        const padB = 18;
+
+        const x0 = padL, x1 = W - padR;
+        const y0 = padT, y1 = H - padB;
+
+        // Determine y range (fit to data with small pad)
+        let maxSys = -Infinity;
+        let minSys = Infinity;
+        for(const r of visible){
+          if(r.sys>maxSys) maxSys = r.sys;
+          if(r.sys<minSys) minSys = r.sys;
+        }
+        if(!Number.isFinite(maxSys)){
+          ctx.fillStyle = "rgba(235,245,255,.65)";
+          ctx.font = "700 14px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+          ctx.fillText("No systolic points in view.", 14, 26);
+          return;
+        }
+        const pad = Math.max(6, Math.round((maxSys-minSys)*0.06));
+        const yMin = Math.max(60, minSys - pad);
+        const yMax = Math.min(220, maxSys + pad);
+
+        function xFor(ts){
+          const t = (ts - start) / (end - start);
+          return x0 + t*(x1-x0);
+        }
+        function yFor(v){
+          const t = (v - yMin) / (yMax - yMin);
+          return y1 - t*(y1-y0);
         }
 
-        if(!Array.isArray(recs) && out && Array.isArray(out.records)) recs = out.records;
-        if(!Array.isArray(recs)) recs = [];
-
-        records = recs;
-
-        // Dynamic Y scale (global, based on DB max systolic)
-        Y_MAX = computeGlobalYMaxFromDB();
-        SYS_BANDS = rebuildBands();
-
-        let source = (out && (out.source || out.storage || out.kind)) || "localStorage";
-        let entries = (out && (out.entries ?? out.count)) ?? records.length;
-
-        let newest = (out && (out.newest || out.latest || out.newestISO)) || null;
-        if(!newest && records.length){
-          const newestMs = Math.max(...records.map(r => new Date(extractTs(r) || 0).getTime()).filter(Number.isFinite));
-          if(Number.isFinite(newestMs) && newestMs > 0) newest = new Date(newestMs).toISOString();
+        // day bands (alternating)
+        const dayStart = Math.floor(start / 86400000) * 86400000;
+        let day = dayStart;
+        let idx = 0;
+        while(day < end + 86400000){
+          const a = Math.max(start, day);
+          const b = Math.min(end, day + 86400000);
+          const xa = xFor(a);
+          const xb = xFor(b);
+          ctx.fillStyle = idx % 2 === 0 ? "rgba(255,255,255,.03)" : "rgba(0,0,0,.10)";
+          ctx.fillRect(xa, y0, Math.max(0, xb-xa), (y1-y0));
+          idx++;
+          day += 86400000;
         }
 
-        summary = { source, entries, newest };
-        renderSummary();
+        // light grid
+        ctx.strokeStyle = "rgba(235,245,255,.10)";
+        ctx.lineWidth = 1;
+        for(let i=0;i<=4;i++){
+          const y = y0 + (i/4)*(y1-y0);
+          ctx.beginPath();
+          ctx.moveTo(x0, y);
+          ctx.lineTo(x1, y);
+          ctx.stroke();
+        }
 
-        view.windowDays = 7;
-        view.centerMs = null;
-        const b = computeDataTimeBounds();
-        view.tMinData = b.tMin;
-        view.tMaxData = b.tMax;
+        // y labels
+        ctx.fillStyle = "rgba(235,245,255,.62)";
+        ctx.font = "700 11px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+        const ticks = 4;
+        for(let i=0;i<=ticks;i++){
+          const v = Math.round(yMax - (i/ticks)*(yMax-yMin));
+          const y = yFor(v);
+          ctx.fillText(String(v), 6, y+4);
+        }
 
-        renderLogReset();
-        setupCanvas();
-        renderCharts();
+        // line
+        ctx.strokeStyle = "rgba(235,245,255,.88)";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        let started = false;
+        for(const r of visible){
+          const x = xFor(r.ts);
+          const y = yFor(r.sys);
+          if(!started){ ctx.moveTo(x,y); started = true; }
+          else ctx.lineTo(x,y);
+        }
+        ctx.stroke();
+
+        // points (small)
+        ctx.fillStyle = "rgba(235,245,255,.92)";
+        for(const r of visible){
+          const x = xFor(r.ts);
+          const y = yFor(r.sys);
+          ctx.beginPath();
+          ctx.arc(x,y,1.6,0,Math.PI*2);
+          ctx.fill();
+        }
       }
 
-      document.addEventListener("DOMContentLoaded", () => {
-        document.getElementById("bootText").textContent = "BOOT OK " + APP_VERSION;
-        loadReadOnlyData();
-      });
+      // Boot: load records and render UI
+      async function boot(){
+        document.getElementById("bootText").textContent = `BOOT OK ${APP_VERSION}`;
+        bridgeStatus.textContent = "Loading records…";
+        logTopNote.textContent = "Loading…";
+        chartsTopNote.textContent = "Loading…";
 
+        const res = await loadRecordsReadOnly();
+        allRecords = res.records || [];
+
+        updateHomeSummary(res.source || "unknown", allRecords);
+
+        // Log
+        renderLogPage(false);
+
+        // Charts: render only when panel shown; but set a safe label now
+        if(allRecords.length){
+          const newest = allRecords[allRecords.length-1].ts;
+          chartsTopNote.textContent = `${fmtDateOnly(newest)} (open Charts to render)`;
+        }else{
+          chartsTopNote.textContent = "No data found.";
+        }
+
+        bridgeStatus.textContent = allRecords.length
+          ? `Loaded ${allRecords.length} record(s) (read-only).`
+          : `No records loaded (read-only).`;
+      }
+
+      // Minimal keyboard safety: prevent form submit reload
+      document.addEventListener("submit", (e)=>e.preventDefault());
+
+      boot().catch(()=>{
+        bridgeStatus.textContent = "Load error. Records not available.";
+        sumSource.textContent = "error";
+        sumEntries.textContent = "—";
+        sumNewest.textContent = "—";
+        detectedPill.textContent = "—";
+        logTopNote.textContent = "Load error.";
+        chartsTopNote.textContent = "Load error.";
+      });
     })();
   </script>
 </body>
 </html>
-<!--
-EOF File: index.html
+
+<!-- EOF File: index.html
+------------------------------------------------------------
+Vitals Tracker — Function-First Shell
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
-App Version: v2.021
-Reference: See header block for full change log + element IDs + dependency paths.
+App Version: v2.022
+Notes:
+- Read-only. No write operations performed.
+- Add panel is UI shell only in v2.022.
+- Next file: js/add.js to implement Add behavior without impacting existing data.
+------------------------------------------------------------
 -->
