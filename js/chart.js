@@ -2,20 +2,15 @@
 Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
 File: js/chart.js
 App Version Authority: js/version.js
-Base: v2.026a
-Pass: Swipe + Render Recovery (P0-R1)
-Pass order: File 7 of 9 (P0)
-Prev file: js/gestures.js (File 6 of 9)
-Next file: js/log.js (File 8 of 9)
+Base: v2.027a
+Pass: Chart Fire (Render/Data Recovery)
+Pass order: (ad hoc per user request)
 
-v2.026a — Change Log (THIS FILE ONLY)
-1) Bands opacity defaults to 60% (0.60).
-2) Adds a slider (below chart, inside legend area) to control band opacity live (0–100%).
-3) Legend/ledger always present: slider + band explanations.
-4) Tightens rendering: responsive canvas sizing, stable y-bounds rules, non-colliding X labels.
-5) Ensures canvas fills chartWrap via JS (no CSS dependency).
-
-ANTI-DRIFT: No panel swipe logic here.
+SCOPE (CHART ONLY)
+- Make chart “fire” reliably by ensuring data is available before render.
+- Do NOT touch swipe logic.
+- Do NOT change band rules or label rules beyond what already exists here.
+- Add vt:panelChanged hook so Charts always re-renders when activated.
 */
 
 (function () {
@@ -62,6 +57,11 @@ ANTI-DRIFT: No panel swipe logic here.
     bandOpacity: 0.60
   };
 
+  // Render control
+  let _renderQueued = false;
+  let _rendering = false;
+  let _storeInitDone = false;
+
   function $(id) { return document.getElementById(id); }
   function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 
@@ -98,11 +98,21 @@ ANTI-DRIFT: No panel swipe logic here.
       parseTs(r?.created_at) ??
       parseTs(r?.iso);
 
+    // Support multiple shapes; keep it defensive.
+    const bpObj =
+      r?.bp ??
+      r?.BP ??
+      r?.bloodPressure ??
+      r?.blood_pressure ??
+      null;
+
     const sys =
       num(r?.sys) ??
       num(r?.systolic) ??
       num(r?.sbp) ??
       num(r?.SBP) ??
+      num(bpObj?.sys) ??
+      num(bpObj?.systolic) ??
       num(r?.bp?.sys) ??
       num(r?.bp?.systolic);
 
@@ -111,6 +121,8 @@ ANTI-DRIFT: No panel swipe logic here.
       num(r?.diastolic) ??
       num(r?.dbp) ??
       num(r?.DBP) ??
+      num(bpObj?.dia) ??
+      num(bpObj?.diastolic) ??
       num(r?.bp?.dia) ??
       num(r?.bp?.diastolic);
 
@@ -125,12 +137,70 @@ ANTI-DRIFT: No panel swipe logic here.
     return { ts, sys, dia, hr };
   }
 
-  function getRawData() {
+  async function ensureStoreInitOnce() {
+    if (_storeInitDone) return;
+    _storeInitDone = true;
+
+    // If VTStore has init, call it once; do not fail hard.
     try {
-      if (window.VTStore && typeof window.VTStore.getAll === "function") {
-        return window.VTStore.getAll() || [];
+      if (window.VTStore && typeof window.VTStore.init === "function") {
+        await window.VTStore.init();
       }
     } catch (_) {}
+
+    // If storage layer has init, allow it too (non-fatal).
+    try {
+      if (window.VTStorage && typeof window.VTStorage.init === "function") {
+        await window.VTStorage.init();
+      }
+    } catch (_) {}
+  }
+
+  async function getRawDataAsync() {
+    // Ensure store is initialized before reading.
+    await ensureStoreInitOnce();
+
+    // Primary: VTStore.getAll()
+    try {
+      if (window.VTStore && typeof window.VTStore.getAll === "function") {
+        const v = window.VTStore.getAll();
+        if (v && typeof v.then === "function") {
+          const arr = await v;
+          return Array.isArray(arr) ? arr : [];
+        }
+        return Array.isArray(v) ? v : [];
+      }
+    } catch (_) {}
+
+    // Secondary: VTStorage.getAll()
+    try {
+      if (window.VTStorage && typeof window.VTStorage.getAll === "function") {
+        const v = window.VTStorage.getAll();
+        if (v && typeof v.then === "function") {
+          const arr = await v;
+          return Array.isArray(arr) ? arr : [];
+        }
+        return Array.isArray(v) ? v : [];
+      }
+    } catch (_) {}
+
+    // Final fallback: attempt common legacy localStorage keys (non-destructive read)
+    try {
+      const keys = [
+        "vitals_tracker_records_v1",
+        "vitals_tracker_records",
+        "vt_records",
+        "VT_RECORDS"
+      ];
+      for (const k of keys) {
+        const raw = localStorage.getItem(k);
+        if (!raw) continue;
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+        if (parsed && Array.isArray(parsed.records)) return parsed.records;
+      }
+    } catch (_) {}
+
     return [];
   }
 
@@ -201,13 +271,10 @@ ANTI-DRIFT: No panel swipe logic here.
   }
 
   function ensureCanvasFillsWrap(canvas) {
-    // Ensure the canvas has CSS size so getBoundingClientRect reflects intended layout.
     try {
       canvas.style.width = "100%";
       canvas.style.height = "100%";
       canvas.style.display = "block";
-      // Prevent browser scroll/pinch behaviors on the canvas surface itself.
-      // (Panel swipe is already blocked for chart region in gestures.js)
       canvas.style.touchAction = "none";
     } catch (_) {}
   }
@@ -258,7 +325,6 @@ ANTI-DRIFT: No panel swipe logic here.
   function drawBands(ctx, w, h, bounds, L, legendEl) {
     const opacity = clamp(STATE.bandOpacity, 0, 1);
 
-    // Bands are visual aids; paint behind everything.
     for (const b of STYLE.bands) {
       if (bounds.max < b.from) continue;
       const y = yScale(b.from, bounds, L);
@@ -273,7 +339,6 @@ ANTI-DRIFT: No panel swipe logic here.
     ctx.strokeStyle = STYLE.grid;
     ctx.lineWidth = 1;
 
-    // Horizontal grid + Y labels
     ctx.fillStyle = STYLE.text;
     ctx.font = "12px system-ui";
     ctx.textAlign = "left";
@@ -293,16 +358,13 @@ ANTI-DRIFT: No panel swipe logic here.
       ctx.fillText(String(v), 6, y);
     }
 
-    // Axes lines
     ctx.strokeStyle = STYLE.axes;
 
-    // Y axis
     ctx.beginPath();
     ctx.moveTo(L.plotX, L.plotY);
     ctx.lineTo(L.plotX, L.plotY + L.plotH);
     ctx.stroke();
 
-    // X axis
     ctx.beginPath();
     ctx.moveTo(L.plotX, L.plotY + L.plotH);
     ctx.lineTo(L.plotX + L.plotW, L.plotY + L.plotH);
@@ -384,20 +446,17 @@ ANTI-DRIFT: No panel swipe logic here.
   function ensureLegendUI(legendEl) {
     if (!legendEl) return;
 
-    // Build once; then update values/colors on each render.
     if (legendEl.dataset && legendEl.dataset.vtLegendBuilt === "1") {
       updateLegendUI(legendEl);
       return;
     }
     if (legendEl.dataset) legendEl.dataset.vtLegendBuilt = "1";
 
-    // Container styling (safe inline)
     legendEl.style.display = "grid";
     legendEl.style.gridTemplateColumns = "1fr";
     legendEl.style.gap = "10px";
     legendEl.style.paddingTop = "10px";
 
-    // Slider block (below chart)
     const sliderWrap = document.createElement("div");
     sliderWrap.className = "bandOpacityWrap";
     sliderWrap.style.display = "grid";
@@ -435,14 +494,13 @@ ANTI-DRIFT: No panel swipe logic here.
       const v = clamp(Number(slider.value) / 100, 0, 1);
       STATE.bandOpacity = v;
       pct.textContent = `${Math.round(v * 100)}%`;
-      try { render(); } catch (_) {}
+      requestRender();
     }, { passive: true });
 
     sliderWrap.appendChild(lbl);
     sliderWrap.appendChild(slider);
     sliderWrap.appendChild(pct);
 
-    // Ledger list
     const ledger = document.createElement("div");
     ledger.id = "bandLedger";
     ledger.style.display = "grid";
@@ -502,63 +560,93 @@ ANTI-DRIFT: No panel swipe logic here.
     }
   }
 
-  function render() {
+  async function renderAsync() {
+    if (_rendering) return;
+    _rendering = true;
+
     const canvas = $(ID_CANVAS);
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
     const legendEl = $(ID_LEGEND);
     const loadingEl = $(ID_LOADING);
 
-    // Always keep legend UI alive (even if no data)
-    ensureLegendUI(legendEl);
+    try {
+      if (!canvas) return;
 
-    const raw = getRawData();
-    const data = normalizeData(raw);
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
 
-    const sized = sizeToCSS(canvas);
-    const w = sized.w, h = sized.h;
-    const L = layout(w, h);
+      // Always keep legend alive (even if no data)
+      ensureLegendUI(legendEl);
 
-    clear(ctx, w, h);
+      if (loadingEl) loadingEl.style.display = "";
 
-    if (loadingEl) loadingEl.style.display = "none";
+      const raw = await getRawDataAsync();
+      const data = normalizeData(raw);
 
-    if (!data.length) {
-      ctx.fillStyle = STYLE.textMuted;
-      ctx.font = "14px system-ui";
-      ctx.fillText("No data to display.", 60, 80);
-      return;
+      const sized = sizeToCSS(canvas);
+      const w = sized.w, h = sized.h;
+      const L = layout(w, h);
+
+      clear(ctx, w, h);
+
+      if (loadingEl) loadingEl.style.display = "none";
+
+      if (!data.length) {
+        ctx.fillStyle = STYLE.textMuted;
+        ctx.font = "14px system-ui";
+        ctx.fillText("No data to display.", 60, 80);
+        return;
+      }
+
+      const win = computeWindow(data);
+      const windowed = win.windowed;
+      const start = win.start;
+      const end = win.end;
+
+      if (!windowed.length || start == null || end == null || end <= start) {
+        ctx.fillStyle = STYLE.textMuted;
+        ctx.font = "14px system-ui";
+        ctx.fillText("No data in current window.", 60, 80);
+        return;
+      }
+
+      const bounds = computeYBounds(windowed);
+
+      drawBands(ctx, w, h, bounds, L, legendEl);
+      drawAxes(ctx, w, h, bounds, L, start, end);
+      drawLines(ctx, windowed, bounds, start, end, L);
+    } catch (e) {
+      try {
+        const canvas2 = $(ID_CANVAS);
+        const ctx2 = canvas2 && canvas2.getContext ? canvas2.getContext("2d") : null;
+        if (ctx2) {
+          ctx2.fillStyle = STYLE.textMuted;
+          ctx2.font = "14px system-ui";
+          ctx2.fillText("Chart error. See console.", 60, 80);
+        }
+      } catch (_) {}
+      try { console.error(e); } catch (_) {}
+      try { const loadingEl2 = $(ID_LOADING); if (loadingEl2) loadingEl2.style.display = "none"; } catch (_) {}
+    } finally {
+      _rendering = false;
     }
+  }
 
-    const win = computeWindow(data);
-    const windowed = win.windowed;
-    const start = win.start;
-    const end = win.end;
-
-    if (!windowed.length || start == null || end == null || end <= start) {
-      ctx.fillStyle = STYLE.textMuted;
-      ctx.font = "14px system-ui";
-      ctx.fillText("No data in current window.", 60, 80);
-      return;
-    }
-
-    const bounds = computeYBounds(windowed);
-
-    drawBands(ctx, w, h, bounds, L, legendEl);
-    drawAxes(ctx, w, h, bounds, L, start, end);
-    drawLines(ctx, windowed, bounds, start, end, L);
+  function requestRender() {
+    if (_renderQueued) return;
+    _renderQueued = true;
+    window.requestAnimationFrame(function () {
+      _renderQueued = false;
+      renderAsync();
+    });
   }
 
   function onShow() {
-    render();
+    requestRender();
   }
 
   function setDays(d) {
     STATE.days = clamp(d, STATE.minDays, STATE.maxDays);
-    render();
+    requestRender();
   }
 
   function panBy(ms) {
@@ -572,7 +660,7 @@ ANTI-DRIFT: No panel swipe logic here.
       STATE.centerMs = clamp(STATE.centerMs, minC, maxC);
     }
 
-    render();
+    requestRender();
   }
 
   // Public API (do not expand without approval)
@@ -584,16 +672,25 @@ ANTI-DRIFT: No panel swipe logic here.
 
   // Re-render on resize
   window.addEventListener("resize", function () {
-    try { render(); } catch (_) {}
+    requestRender();
   }, { passive: true });
+
+  // Ensure we re-render when Charts becomes active
+  document.addEventListener("vt:panelChanged", function (e) {
+    try {
+      if (e?.detail?.active === "charts") requestRender();
+    } catch (_) {}
+  });
+
+  // Safe initial render (does not force panel change)
+  try { requestRender(); } catch (_) {}
 
 })();
 
 /*
 Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: js/chart.js
-Pass: Swipe + Render Recovery (P0-R1)
-Pass order: File 7 of 9 (P0)
-Prev file: js/gestures.js (File 6 of 9)
-Next file: js/log.js (File 8 of 9)
+App Version Authority: js/version.js
+Base: v2.027a
+Pass: Chart Fire (Render/Data Recovery)
 */
