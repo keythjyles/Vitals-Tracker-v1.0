@@ -12,6 +12,13 @@ CHANGES (per user request)
   Stage 2 = Red
   Crisis = Dark Red
 - Hypertension legend tightened (compact rows, minimal padding/height).
+
+ADDITIONAL CHANGES (per latest user instructions)
+- Axis labels increased for readability (both axes).
+- X-axis uses 2-row labels (day row + date row) with collision-free thinning as zoom/pan changes.
+- Default window remains most recent 7 days; no scrolling beyond data range (bounded).
+- Y-axis bounds: min fixed at 40; max = (highest visible value + 10), rounded to tens.
+- Smooth pan (drag) and pinch zoom (1–14 days) implemented on the chart canvas; no wrapping.
 */
 
 (function () {
@@ -56,6 +63,17 @@ CHANGES (per user request)
     dataMinMs: null,
     dataMaxMs: null,
     bandOpacity: 0.60
+  };
+
+  const GESTURE = {
+    active: false,
+    isPinch: false,
+    startDays: 7,
+    startDist: 0,
+    lastMidX: 0,
+    lastPanX: 0,
+    lastPanT: 0,
+    panAccum: 0
   };
 
   function $(id) { return document.getElementById(id); }
@@ -256,16 +274,17 @@ CHANGES (per user request)
       canvas.width = w;
       canvas.height = h;
     }
-    return { w, h, dpr };
+    return { w, h, dpr, rectW: rect.width, rectH: rect.height };
   }
 
   function clear(ctx, w, h) { ctx.clearRect(0, 0, w, h); }
 
   function layout(w, h) {
-    const padL = 62;
+    // Increased padL/padB to support larger axis fonts + 2-row X labels
+    const padL = 78;
     const padR = 20;
     const padT = 16;
-    const padB = 58;
+    const padB = 78;
 
     return {
       padL, padR, padT, padB,
@@ -291,6 +310,25 @@ CHANGES (per user request)
     return { min: data[0].ts, max: data[data.length - 1].ts };
   }
 
+  function clampCenterToData() {
+    if (!Number.isFinite(STATE.dataMinMs) || !Number.isFinite(STATE.dataMaxMs)) return;
+
+    const span = STATE.days * MS_DAY;
+    const half = span / 2;
+
+    // If dataset is smaller than span, center on middle of data range
+    if ((STATE.dataMaxMs - STATE.dataMinMs) <= span) {
+      STATE.centerMs = (STATE.dataMinMs + STATE.dataMaxMs) / 2;
+      return;
+    }
+
+    const minC = STATE.dataMinMs + half;
+    const maxC = STATE.dataMaxMs - half;
+
+    if (!Number.isFinite(STATE.centerMs)) STATE.centerMs = STATE.dataMaxMs;
+    STATE.centerMs = clamp(STATE.centerMs, minC, maxC);
+  }
+
   function computeWindow(data) {
     if (!data.length) return { windowed: [], start: null, end: null };
 
@@ -299,6 +337,7 @@ CHANGES (per user request)
     STATE.dataMaxMs = b.max;
 
     if (!Number.isFinite(STATE.centerMs)) STATE.centerMs = STATE.dataMaxMs;
+    clampCenterToData();
 
     const span = STATE.days * MS_DAY;
     const half = span / 2;
@@ -310,7 +349,7 @@ CHANGES (per user request)
     const max = STATE.dataMaxMs;
 
     if (Number.isFinite(min) && Number.isFinite(max)) {
-      if ((max - min) < span) {
+      if ((max - min) <= span) {
         start = min;
         end = max;
       } else {
@@ -330,30 +369,24 @@ CHANGES (per user request)
   }
 
   function computeYBounds(windowed) {
-    let minV = Infinity;
     let maxV = -Infinity;
 
     for (const r of windowed) {
-      if (typeof r.sys === "number") { minV = Math.min(minV, r.sys); maxV = Math.max(maxV, r.sys); }
-      if (typeof r.dia === "number") { minV = Math.min(minV, r.dia); maxV = Math.max(maxV, r.dia); }
-      if (typeof r.hr  === "number") { minV = Math.min(minV, r.hr);  maxV = Math.max(maxV, r.hr); }
+      if (typeof r.sys === "number") maxV = Math.max(maxV, r.sys);
+      if (typeof r.dia === "number") maxV = Math.max(maxV, r.dia);
+      if (typeof r.hr  === "number") maxV = Math.max(maxV, r.hr);
     }
 
-    if (!Number.isFinite(minV) || !Number.isFinite(maxV)) {
+    if (!Number.isFinite(maxV)) {
       return { min: 40, max: 180 };
     }
 
-    const pad = 10;
-    minV = Math.max(40, Math.floor((minV - pad) / 10) * 10);
-    maxV = Math.min(200, Math.ceil((maxV + pad) / 10) * 10);
+    // User instruction: min fixed at 40; max = (highest visible + 10), rounded to tens
+    const minV = 40;
+    const maxRounded = Math.ceil((maxV + 10) / 10) * 10;
+    const maxVOut = Math.max(minV + 20, maxRounded);
 
-    if ((maxV - minV) < 60) {
-      const mid = (minV + maxV) / 2;
-      minV = Math.max(40, Math.floor((mid - 30) / 10) * 10);
-      maxV = Math.min(200, Math.ceil((mid + 30) / 10) * 10);
-    }
-
-    return { min: minV, max: maxV };
+    return { min: minV, max: maxVOut };
   }
 
   function startOfDay(ms) {
@@ -406,15 +439,65 @@ CHANGES (per user request)
     ctx.restore();
   }
 
-  function drawGridAndAxes(ctx, bounds, L, start, end) {
-    const fontY = 16;
-    const fontX = 16;
+  function fmtDay(d) {
+    return d.toLocaleDateString([], { weekday: "short" });
+  }
+
+  function fmtMD(d) {
+    return d.toLocaleDateString([], { month: "2-digit", day: "2-digit" });
+  }
+
+  function buildXTicks(start, end, L, minPx) {
+    const spanMs = end - start;
+    if (spanMs <= 0) return [];
+
+    // Anchor ticks at local midnights to keep stable labels
+    const firstDay = startOfDay(start);
+    const lastDay = startOfDay(end);
+
+    const ticks = [];
+    for (let t = firstDay; t <= lastDay + MS_DAY; t += MS_DAY) {
+      if (t < start || t > end) continue;
+      const x = xScale(t, start, end, L);
+      ticks.push({ t, x });
+    }
+
+    // If we have few ticks, keep them.
+    if (ticks.length <= 1) return ticks;
+
+    // Collision-free thinning
+    const kept = [];
+    let lastX = -Infinity;
+    for (const tick of ticks) {
+      if ((tick.x - lastX) >= minPx) {
+        kept.push(tick);
+        lastX = tick.x;
+      }
+    }
+
+    // Ensure last label can appear if it fits better than the last kept
+    if (kept.length >= 1 && ticks.length >= 1) {
+      const last = ticks[ticks.length - 1];
+      const kLast = kept[kept.length - 1];
+      if (Math.abs(last.x - kLast.x) >= minPx * 0.85) {
+        kept.push(last);
+      }
+    }
+
+    return kept;
+  }
+
+  function drawGridAndAxes(ctx, bounds, L, start, end, sized) {
+    // Larger, readable axis fonts
+    const fontY = 20;
+    const fontX = 18;
 
     ctx.strokeStyle = STYLE.grid;
     ctx.lineWidth = 1;
 
-    ctx.fillStyle = STYLE.textMuted;
-    ctx.font = `${fontY}px system-ui`;
+    // Y labels
+    ctx.fillStyle = "rgba(255,255,255,0.72)";
+    ctx.font = `800 ${fontY}px system-ui`;
     ctx.textAlign = "right";
     ctx.textBaseline = "middle";
 
@@ -429,9 +512,10 @@ CHANGES (per user request)
       ctx.lineTo(L.plotX + L.plotW, y);
       ctx.stroke();
 
-      ctx.fillText(String(v), L.plotX - 12, y);
+      ctx.fillText(String(v), L.plotX - 14, y);
     }
 
+    // Axes
     ctx.strokeStyle = STYLE.axes;
 
     ctx.beginPath();
@@ -444,26 +528,25 @@ CHANGES (per user request)
     ctx.lineTo(L.plotX + L.plotW, L.plotY + L.plotH);
     ctx.stroke();
 
-    ctx.fillStyle = STYLE.textMuted;
-    ctx.font = `${fontX}px system-ui`;
+    // X labels: 2 rows, collision-free thinning
+    ctx.fillStyle = "rgba(255,255,255,0.68)";
+    ctx.font = `800 ${fontX}px system-ui`;
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
 
-    const yText = L.plotY + L.plotH + 10;
-    const spanMs = end - start;
-    const approxTicks = 4;
+    const yText1 = L.plotY + L.plotH + 10;
+    const yText2 = yText1 + 22;
 
-    for (let i = 1; i <= approxTicks; i++) {
-      const t = start + (spanMs * i) / (approxTicks + 1);
-      const d = new Date(t);
+    // Determine minimum spacing in physical pixels (scaled to DPR)
+    const minPx = Math.max(80 * (sized?.dpr || 1), 70 * (sized?.dpr || 1));
+    const ticks = buildXTicks(start, end, L, minPx);
 
-      const day = d.toLocaleDateString([], { weekday: "short" });
-      const md  = d.toLocaleDateString([], { month: "2-digit", day: "2-digit" });
-
-      const x = xScale(t, start, end, L);
-
-      ctx.fillText(day, x, yText);
-      ctx.fillText(md,  x, yText + 18);
+    for (const tick of ticks) {
+      const d = new Date(tick.t);
+      const day = fmtDay(d);
+      const md  = fmtMD(d);
+      ctx.fillText(day, tick.x, yText1);
+      ctx.fillText(md,  tick.x, yText2);
     }
   }
 
@@ -473,7 +556,8 @@ CHANGES (per user request)
     ctx.rect(L.plotX, L.plotY, L.plotW, L.plotH);
     ctx.clip();
 
-    ctx.lineWidth = 4;
+    // Slightly thicker than before
+    ctx.lineWidth = 5;
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
 
@@ -523,11 +607,11 @@ CHANGES (per user request)
       { label: "Heart Rate",color: STYLE.lineHr  }
     ];
 
-    const font = 15;
-    const lineH = 20;
+    const font = 16;
+    const lineH = 22;
 
     const pad = 8;
-    const w = 170;
+    const w = 178;
     const h = pad * 2 + items.length * lineH;
 
     ctx.save();
@@ -536,21 +620,21 @@ CHANGES (per user request)
     ctx.lineWidth = 1;
     roundRect(ctx, x0 - pad, y0 - pad, w, h, 12, true, true);
 
-    ctx.font = `800 ${font}px system-ui`;
+    ctx.font = `900 ${font}px system-ui`;
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
 
     let y = y0 + 1;
     for (const it of items) {
       ctx.strokeStyle = it.color;
-      ctx.lineWidth = 6;
+      ctx.lineWidth = 7;
       ctx.beginPath();
       ctx.moveTo(x0, y);
-      ctx.lineTo(x0 + 22, y);
+      ctx.lineTo(x0 + 24, y);
       ctx.stroke();
 
-      ctx.fillStyle = "rgba(255,255,255,0.74)";
-      ctx.fillText(it.label, x0 + 30, y);
+      ctx.fillStyle = "rgba(255,255,255,0.78)";
+      ctx.fillText(it.label, x0 + 34, y);
 
       y += lineH;
     }
@@ -740,6 +824,9 @@ CHANGES (per user request)
     }
   }
 
+  let _lastRenderSized = null;
+  let _lastRenderWin = null;
+
   async function render() {
     const canvas = $(ID_CANVAS);
     if (!canvas) return;
@@ -758,6 +845,7 @@ CHANGES (per user request)
     const data = normalizeData(raw);
 
     const sized = sizeToCSS(canvas);
+    _lastRenderSized = sized;
     const w = sized.w, h = sized.h;
     const L = layout(w, h);
 
@@ -769,13 +857,17 @@ CHANGES (per user request)
       ctx.textAlign = "left";
       ctx.textBaseline = "top";
       ctx.fillText("No data to display.", L.plotX, L.plotY);
+      _lastRenderWin = null;
       return;
     }
 
+    // Default window: most recent 7 days (no drift from your STATE defaults)
     const win = computeWindow(data);
     const windowed = win.windowed;
     const start = win.start;
     const end = win.end;
+
+    _lastRenderWin = { start, end, L };
 
     if (!windowed.length || start == null || end == null || end <= start) {
       ctx.fillStyle = STYLE.textMuted;
@@ -793,7 +885,7 @@ CHANGES (per user request)
     drawDayStripes(ctx, start, end, L);
     drawBPBands(ctx, bounds, L);
 
-    drawGridAndAxes(ctx, bounds, L, start, end);
+    drawGridAndAxes(ctx, bounds, L, start, end, sized);
     drawLines(ctx, windowed, bounds, start, end, L);
     drawOnChartSeriesLegend(ctx, L);
   }
@@ -802,27 +894,156 @@ CHANGES (per user request)
 
   function setDays(d) {
     STATE.days = clamp(d, STATE.minDays, STATE.maxDays);
+    clampCenterToData();
     render();
   }
 
   function panBy(ms) {
     STATE.centerMs = (Number.isFinite(STATE.centerMs) ? STATE.centerMs : Date.now()) + ms;
-
-    if (Number.isFinite(STATE.dataMinMs) && Number.isFinite(STATE.dataMaxMs)) {
-      const span = STATE.days * MS_DAY;
-      const half = span / 2;
-      const minC = STATE.dataMinMs + half;
-      const maxC = STATE.dataMaxMs - half;
-      STATE.centerMs = clamp(STATE.centerMs, minC, maxC);
-    }
-
+    clampCenterToData();
     render();
+  }
+
+  // ===== Smooth pan + pinch zoom on canvas =====
+  function getTouches(e) {
+    const t = [];
+    if (e.touches && e.touches.length) {
+      for (let i = 0; i < e.touches.length; i++) t.push(e.touches[i]);
+    } else if (e.changedTouches && e.changedTouches.length) {
+      for (let i = 0; i < e.changedTouches.length; i++) t.push(e.changedTouches[i]);
+    }
+    return t;
+  }
+
+  function dist2(a, b) {
+    const dx = (a.clientX - b.clientX);
+    const dy = (a.clientY - b.clientY);
+    return Math.sqrt(dx*dx + dy*dy);
+  }
+
+  function midX(a, b) {
+    return (a.clientX + b.clientX) / 2;
+  }
+
+  function attachGestures() {
+    const canvas = $(ID_CANVAS);
+    if (!canvas || canvas.dataset?.vtGestures === "1") return;
+    if (canvas.dataset) canvas.dataset.vtGestures = "1";
+
+    const onStart = (e) => {
+      const touches = getTouches(e);
+      if (!touches.length) return;
+
+      GESTURE.active = true;
+      GESTURE.panAccum = 0;
+
+      if (touches.length >= 2) {
+        GESTURE.isPinch = true;
+        GESTURE.startDays = STATE.days;
+        GESTURE.startDist = dist2(touches[0], touches[1]);
+        GESTURE.lastMidX = midX(touches[0], touches[1]);
+      } else {
+        GESTURE.isPinch = false;
+        GESTURE.lastPanX = touches[0].clientX;
+        GESTURE.lastPanT = performance.now();
+      }
+
+      try { e.preventDefault(); } catch (_) {}
+    };
+
+    const onMove = (e) => {
+      if (!GESTURE.active) return;
+
+      const touches = getTouches(e);
+      if (!touches.length) return;
+
+      // Pinch zoom
+      if (GESTURE.isPinch && touches.length >= 2) {
+        const d = dist2(touches[0], touches[1]);
+        const ratio = (d > 0 && GESTURE.startDist > 0) ? (GESTURE.startDist / d) : 1;
+
+        // Pinch OUT (fingers apart) => fewer days (zoom in)
+        // Pinch IN (fingers together) => more days (zoom out)
+        let targetDays = Math.round(GESTURE.startDays * ratio);
+        targetDays = clamp(targetDays, STATE.minDays, STATE.maxDays);
+
+        if (targetDays !== STATE.days) {
+          STATE.days = targetDays;
+          clampCenterToData();
+        }
+
+        // Optional: keep pan responsive while pinching (based on midpoint movement)
+        const mx = midX(touches[0], touches[1]);
+        const dx = mx - GESTURE.lastMidX;
+        GESTURE.lastMidX = mx;
+
+        // Convert dx pixels to ms shift using current window if available
+        if (_lastRenderWin && _lastRenderWin.start != null && _lastRenderWin.end != null && _lastRenderSized) {
+          const rectW = (_lastRenderSized.rectW || 1);
+          const spanMs = (_lastRenderWin.end - _lastRenderWin.start) || 1;
+          const msPerPx = spanMs / rectW;
+          // dragging right should move window earlier (pan left), so invert dx
+          STATE.centerMs = (Number.isFinite(STATE.centerMs) ? STATE.centerMs : Date.now()) - (dx * msPerPx);
+          clampCenterToData();
+        }
+
+        render();
+        try { e.preventDefault(); } catch (_) {}
+        return;
+      }
+
+      // Single-finger pan
+      if (!GESTURE.isPinch && touches.length === 1) {
+        const x = touches[0].clientX;
+        const dx = x - GESTURE.lastPanX;
+        GESTURE.lastPanX = x;
+
+        // Convert dx pixels to ms shift
+        if (_lastRenderWin && _lastRenderWin.start != null && _lastRenderWin.end != null && _lastRenderSized) {
+          const rectW = (_lastRenderSized.rectW || 1);
+          const spanMs = (_lastRenderWin.end - _lastRenderWin.start) || 1;
+          const msPerPx = spanMs / rectW;
+
+          // dragging right should move window earlier (pan left), so invert dx
+          const ms = -(dx * msPerPx);
+          STATE.centerMs = (Number.isFinite(STATE.centerMs) ? STATE.centerMs : Date.now()) + ms;
+          clampCenterToData();
+          render();
+        }
+
+        try { e.preventDefault(); } catch (_) {}
+      }
+    };
+
+    const onEnd = (e) => {
+      const touches = getTouches(e);
+      if (touches.length === 0) {
+        GESTURE.active = false;
+        GESTURE.isPinch = false;
+      } else if (touches.length === 1) {
+        // downgrade pinch -> pan if one finger remains
+        GESTURE.isPinch = false;
+        GESTURE.lastPanX = touches[0].clientX;
+        GESTURE.lastPanT = performance.now();
+      }
+      try { e.preventDefault(); } catch (_) {}
+    };
+
+    canvas.addEventListener("touchstart", onStart, { passive: false });
+    canvas.addEventListener("touchmove", onMove, { passive: false });
+    canvas.addEventListener("touchend", onEnd, { passive: false });
+    canvas.addEventListener("touchcancel", onEnd, { passive: false });
   }
 
   window.VTChart = { onShow, setDays, panBy };
 
   window.addEventListener("resize", function () {
     try { render(); } catch (_) {}
+  }, { passive: true });
+
+  // Attach gestures after DOM paint
+  window.addEventListener("load", function () {
+    try { attachGestures(); } catch (_) {}
   }, { passive: true });
 
 })();
