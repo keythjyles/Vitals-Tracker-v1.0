@@ -1,164 +1,164 @@
 /* File: js/panels.js */
 /*
-Vitals Tracker — Panel Controller (Home / Charts / Log)
+Vitals Tracker — Panels Router (Minimal + Stable)
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
-App Version: v2.025e
+App Version: v2.025f
 Base: v2.021
 Date: 2026-01-18
 
 Schema position:
-File 5 of 10
+File 9 of 10
 
 Former file:
-File 4 — js/chart.js
+File 8 — js/state.js
 
 Next file:
-File 6 — js/log.js
+File 10 — js/ui.js
 
 FILE ROLE (LOCKED)
-- Owns panel visibility and navigation state.
-- Owns LEFT/RIGHT swipe panel rotation.
-- Owns lifecycle hooks (onShow / onHide).
-- MUST ensure charts mount only when panel is visible.
-- MUST NOT implement chart gestures.
-- MUST NOT touch storage or rendering logic.
+- Owns WHICH panel is visible.
+- Emits lifecycle events ONLY.
+- NO swipe logic.
+- NO gesture logic.
+- Settings is NOT part of rotation.
 
-v2.025e — Change Log (THIS FILE ONLY)
-1) Restores deterministic panel rotation (Home ↔ Charts ↔ Log).
-2) Simplifies swipe logic (single horizontal gesture, no zones).
-3) Ensures VTChart.onShow() is called ONLY when Charts panel becomes active.
-4) Prevents premature chart rendering during hidden states.
-5) Restores Home pull-down release hook passthrough.
+v2.025f — Change Log (THIS FILE ONLY)
+1) Removes all swipe / rotation complexity.
+2) Explicit panel switching only.
+3) Settings accessible ONLY via gear.
+4) Emits `vt:panelChanged` on every change.
+5) Defensive: missing elements do not throw.
 
 ANTI-DRIFT RULES
-- Do NOT add Settings panel to rotation.
-- Do NOT handle chart drawing here.
-- Do NOT reintroduce gesture zones or thresholds.
+- Do NOT implement swipe here.
+- Do NOT draw charts here.
+- Do NOT read or write storage here.
 */
 
 (function () {
   "use strict";
 
-  const PANEL_IDS = ["home", "charts", "log"];
-  let activeIndex = 0;
-  let panels = {};
-  let bound = false;
+  const VERSION = "v2.025f";
+
+  const PANEL_IDS = Object.freeze({
+    home: "panelHome",
+    add: "panelAdd",
+    charts: "panelCharts",
+    log: "panelLog",
+    settings: "panelSettings"
+  });
+
+  let active = "home";
+  let lastMain = "home";
 
   function $(id) {
     return document.getElementById(id);
   }
 
+  function emit(name) {
+    try {
+      document.dispatchEvent(
+        new CustomEvent("vt:panelChanged", {
+          detail: { active: name }
+        })
+      );
+    } catch (_) {}
+  }
+
   function hideAll() {
-    PANEL_IDS.forEach(id => {
-      const el = panels[id];
-      if (el) el.style.display = "none";
+    Object.values(PANEL_IDS).forEach(id => {
+      const el = $(id);
+      if (el) el.classList.remove("active");
     });
   }
 
-  function showPanelByIndex(idx) {
-    idx = (idx + PANEL_IDS.length) % PANEL_IDS.length;
-    activeIndex = idx;
+  function show(name) {
+    if (!PANEL_IDS[name]) return;
 
     hideAll();
 
-    const id = PANEL_IDS[activeIndex];
-    const el = panels[id];
-    if (!el) return;
+    const el = $(PANEL_IDS[name]);
+    if (el) el.classList.add("active");
 
-    el.style.display = "block";
+    active = name;
 
-    // Lifecycle hook
-    if (id === "charts") {
-      try {
-        window.VTChart?.onShow?.();
-      } catch (_) {}
+    if (name !== "settings") {
+      lastMain = name;
     }
+
+    emit(name);
   }
 
-  function showPanel(id) {
-    const idx = PANEL_IDS.indexOf(id);
-    if (idx !== -1) showPanelByIndex(idx);
+  function openSettings() {
+    show("settings");
   }
 
-  function bindButtons() {
-    const homeBtns = document.querySelectorAll("[data-nav='home']");
-    const chartBtns = document.querySelectorAll("[data-nav='charts']");
-    const logBtns = document.querySelectorAll("[data-nav='log']");
-
-    homeBtns.forEach(b => b.onclick = () => showPanel("home"));
-    chartBtns.forEach(b => b.onclick = () => showPanel("charts"));
-    logBtns.forEach(b => b.onclick = () => showPanel("log"));
+  function closeSettings() {
+    show(lastMain || "home");
   }
 
-  // ===== Swipe Handling (Simple, Stable) =====
-  function bindSwipe() {
-    if (bound) return;
-    bound = true;
+  /* ===== Button Wiring ===== */
 
-    let startX = null;
-    let startY = null;
-    let tracking = false;
+  function bind(id, fn) {
+    const el = $(id);
+    if (!el) return;
+    el.addEventListener("click", function (e) {
+      e.preventDefault();
+      try { fn(); } catch (_) {}
+    });
+  }
 
-    document.addEventListener("touchstart", e => {
-      if (e.touches.length !== 1) return;
-      const t = e.touches[0];
-      startX = t.clientX;
-      startY = t.clientY;
-      tracking = true;
-    }, { passive: true });
+  function initButtons() {
+    // Home navigation
+    bind("btnGoAdd", () => show("add"));
+    bind("btnGoCharts", () => show("charts"));
+    bind("btnGoLog", () => show("log"));
 
-    document.addEventListener("touchmove", e => {
-      if (!tracking || !startX || !startY) return;
+    // Home buttons from other panels
+    bind("btnHomeFromAdd", () => show("home"));
+    bind("btnHomeFromCharts", () => show("home"));
+    bind("btnHomeFromLog", () => show("home"));
 
-      const t = e.touches[0];
-      const dx = t.clientX - startX;
-      const dy = t.clientY - startY;
+    // Settings (gear only)
+    bind("btnSettings", openSettings);
+    bind("btnSettingsFromCharts", openSettings);
+    bind("btnSettingsFromLog", openSettings);
 
-      // Abort if vertical intent
-      if (Math.abs(dy) > Math.abs(dx)) {
-        tracking = false;
+    // Settings back
+    bind("btnBackFromSettings", closeSettings);
+  }
+
+  function init() {
+    initButtons();
+
+    // Determine initial active panel from DOM
+    let found = null;
+    for (const name of Object.keys(PANEL_IDS)) {
+      const el = $(PANEL_IDS[name]);
+      if (el && el.classList.contains("active")) {
+        found = name;
+        break;
       }
-    }, { passive: true });
+    }
 
-    document.addEventListener("touchend", e => {
-      if (!tracking || startX == null) return;
-
-      const t = e.changedTouches[0];
-      const dx = t.clientX - startX;
-
-      const THRESH = 60;
-
-      if (dx > THRESH) {
-        showPanelByIndex(activeIndex - 1);
-      } else if (dx < -THRESH) {
-        showPanelByIndex(activeIndex + 1);
-      }
-
-      tracking = false;
-      startX = null;
-      startY = null;
-    }, { passive: true });
+    show(found || "home");
   }
 
-  function initPanels() {
-    panels = {
-      home: $("panel-home"),
-      charts: $("panel-charts"),
-      log: $("panel-log")
-    };
+  // Public API (small, explicit)
+  window.VTPanels = Object.freeze({
+    VERSION,
+    show,
+    openSettings,
+    closeSettings,
+    getActive: () => active
+  });
 
-    hideAll();
-    showPanelByIndex(0);
-
-    bindButtons();
-    bindSwipe();
+  // Auto-init
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
   }
-
-  // Public API
-  window.VTPanels = {
-    init: initPanels,
-    show: showPanel
-  };
 
 })();
