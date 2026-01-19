@@ -1,4 +1,4 @@
-/*
+5/*
 Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
 File: js/chart.js
 App Version Authority: js/version.js
@@ -691,4 +691,3 @@ Base: v2.028a
 Pass: Chart Display Recovery (P0-C1)
 Pass order: File 1 of 1 (P0-C1)
 */
-```0
