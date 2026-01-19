@@ -2,23 +2,23 @@
 Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
 File: js/panels.js
 App Version Authority: js/version.js
-Base: v2.025f
-Pass: Render Recovery + Swipe Feel
+Base: v2.026a
+Pass: Swipe + Render Recovery (P0-R1)
 Pass order: File 5 of 9 (P0)
 Prev file: js/ui.js (File 4 of 9)
 Next file: js/gestures.js (File 6 of 9)
 
 FIX (SWIPE RELEASE GLITCH ONLY)
-- On finger release, we now COMPLETE the snap from the CURRENT drag position (no instant revert).
+- On finger release, we COMPLETE the snap from the CURRENT drag position (no instant revert).
 - Mechanism:
-  1) Keep track pinned at current rotation index (0..2).
-  2) Animate the rotating panels’ per-panel transforms to the final snapped positions.
-  3) After that animation finishes, “commit” by moving the track to the target index with NO transition,
-     then clear per-panel transforms (so there is no visual jump).
-
-Rotation remains:
-Right swipe: Home -> Log -> Charts -> Home ...
-Left swipe:  Home -> Charts -> Log -> Home ...
+  1) Keep track pinned at current rotation index (0..2) during drag + release.
+  2) Animate rotating panels’ per-panel transforms from current drag position to final snapped offsets.
+  3) Commit with zero-jump:
+     - Move the track to the target index with NO transition while panels are still in snapped state,
+     - then clear per-panel transforms on the next frame.
+- Rotation remains locked:
+  Right swipe: Home -> Log -> Charts -> Home ...
+  Left swipe:  Home -> Charts -> Log -> Home ...
 */
 
 (function () {
@@ -122,7 +122,7 @@ Left swipe:  Home -> Charts -> Log -> Home ...
 
     if (on) {
       deck.track.style.transition = "none";
-      // actual pin set in swipeDelta() using current index
+      // actual pin applied inside swipeDelta()/swipeEnd()
     } else {
       clearRotationPanelTransforms();
     }
@@ -219,7 +219,7 @@ Left swipe:  Home -> Charts -> Log -> Home ...
 
       const desired = (rel + deltaRatio) * 100;
 
-      // transform is delta from natural
+      // Panel transform is delta from natural (so track pin stays consistent)
       const tx = desired - natural;
       el.style.transform = `translate3d(${tx}%, 0, 0)`;
     }
@@ -231,6 +231,27 @@ Left swipe:  Home -> Charts -> Log -> Home ...
 
     setDragMode(true);
     applyDragTransforms(deltaRatio);
+  }
+
+  function onceTransitionEnd(el, cb, msFallback) {
+    let done = false;
+
+    function finish() {
+      if (done) return;
+      done = true;
+      try { el.removeEventListener("transitionend", onEnd); } catch (_) {}
+      cb();
+    }
+
+    function onEnd(e) {
+      // Only care about transform transitions for rotating panels
+      if (e && e.propertyName && e.propertyName !== "transform") return;
+      finish();
+    }
+
+    try { el.addEventListener("transitionend", onEnd); } catch (_) {}
+
+    window.setTimeout(finish, msFallback || 320);
   }
 
   function swipeEnd(deltaRatio) {
@@ -259,13 +280,13 @@ Left swipe:  Home -> Charts -> Log -> Home ...
     const wrapped = ((targetRot % n) + n) % n;
     const targetName = ROTATION[wrapped];
 
-    // Stay in drag mode and animate the rotating panels to the final snapped offsets.
+    // Stay in drag mode and animate the rotating panels to snapped offsets.
     setDragMode(true);
 
-    // Ensure we’re pinned at the CURRENT index before animating
+    // Pin at CURRENT index before animating (prevents track drift)
     pinTrackToRotationIndex(curRot);
 
-    // Animate panels to finalDelta, continuing from current position (no revert).
+    // Animate per-panel transforms from current drag position to finalDelta
     ROTATION.forEach((name) => {
       const el = panels[name];
       if (!el) return;
@@ -274,26 +295,31 @@ Left swipe:  Home -> Charts -> Log -> Home ...
 
     applyDragTransforms(finalDelta);
 
-    // Commit: after the panel animation completes, move track to target (no transition)
-    // and clear per-panel transforms so we are back in normal track-driven mode.
-    window.setTimeout(() => {
-      try {
-        // Clear panel transitions/transforms first (but keep them visually stable via track move)
-        clearRotationPanelTransforms();
+    // Commit without hitch:
+    // 1) While panels remain visually snapped, move track to target with NO transition.
+    // 2) Next frame, clear per-panel transforms (so normal track-driven mode resumes).
+    const commitEl = panels[targetName] || panels.home;
 
-        // Update state + active
+    onceTransitionEnd(commitEl, () => {
+      try {
+        // Update state + active first (safe; does not move anything)
         currentPanel = targetName;
         lastMainPanel = targetName;
         setActivePanel(targetName);
 
-        // Move track to the real DOM index (home/charts/log are contiguous at 0/1/2)
-        // with NO transition (because we already animated the visual movement).
+        // Move track instantly to the target panel
         applyTransformToPanel(targetName, false);
-      } catch (_) {}
 
-      // Exit drag mode fully
-      dragMode = false;
-    }, 280);
+        // Clear per-panel transforms on next frame to avoid any visual jump
+        window.requestAnimationFrame(() => {
+          clearRotationPanelTransforms();
+          setDragMode(false);
+        });
+      } catch (_) {
+        try { clearRotationPanelTransforms(); } catch (_) {}
+        try { setDragMode(false); } catch (_) {}
+      }
+    }, 320);
   }
 
   function init() {
@@ -329,7 +355,7 @@ Left swipe:  Home -> Charts -> Log -> Home ...
 /* 
 Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: js/panels.js
-Pass: Render Recovery + Swipe Feel
+Pass: Swipe + Render Recovery (P0-R1)
 Pass order: File 5 of 9 (P0)
 Prev file: js/ui.js (File 4 of 9)
 Next file: js/gestures.js (File 6 of 9)
