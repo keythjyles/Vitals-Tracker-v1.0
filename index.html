@@ -3,23 +3,50 @@
 Vitals Tracker — MASTER (Index Authority)
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
-App Version: v2.024
-Base: v2.023e
+App Version: v2.025
+Base: v2.021
 Date: 2026-01-18
 
-v2.024 — Change Log (THIS FILE ONLY)
-1) Aligns cache-busters + SW registration to v2.024.
-2) Restores proper panel structure INCLUDING Add panel (#panelAdd).
-3) Fixes Add panel Home button wiring (routes to Home reliably).
-4) Restores Home pull-to-refresh (Home panel only).
-5) Removes legacy inline swipe carousel handlers (swipe is owned by js/gestures.js + js/panels.js).
-6) Version display now reads from VTVersion only (no hard-coded versions here).
+THIS PASS (v2.025) — WHAT WE ARE DOING RIGHT NOW
+Goal: Stabilize UX + Chart foundation BEFORE adding new features.
 
-Hard Rules (anti-drift)
-- Canonical version is owned by js/version.js only.
-- Swipe logic lives ONLY in js/gestures.js.
-- Panel routing lives ONLY in js/panels.js (with fallback safety in this file only).
-- Chart logic lives ONLY in js/chart.js.
+CURRENT SCOPE (v2.025)
+1) Version discipline:
+   - js/version.js is canonical.
+   - index.html displays version only and sets cache-busters.
+2) Home screen UX:
+   - Bottom button group (Install / Clear Data / Exit / Settings) must be EXACT same size.
+   - Pull-to-refresh on Home must work again.
+3) Swipe reset (IMPORTANT):
+   - Remove/peel back any swipe logic living in index.html.
+   - gestures.js will be the ONLY owner of panel swipe.
+   - index.html will only provide stable IDs + swipe zones.
+4) Chart constraints (implemented in chart.js next file, not here):
+   - Default 7 days, zoom 1–14 days, pan clamped to dataset bounds.
+   - Y-axis min 40; Y-axis max rule; labels must match the formatted example.
+
+FILES TO TOUCH (LOCKED LIST FOR THIS v2.025 STABILIZATION PASS)
+File 1: js/version.js   (DONE)  — bump canonical version + scope notes
+File 2: index.html      (THIS)  — unify cache-busters + fix Home buttons + restore pull + remove swipe logic
+File 3: js/gestures.js  (NEXT)  — re-implement simple panel swipe (start-zones only, chart-protected)
+File 4: js/chart.js     (NEXT)  — enforce viewport/zoom/pan clamps + formatted chart axis/labels/bands
+
+Hard Rules
+- One file delivered at a time; you prompt Next for the next file.
+- Full file output only (no partials).
+- EOF notes required so you can confirm you pasted the whole thing (blind/mobile workflow).
+
+Key IDs (contract — do not rename without updating modules)
+Panels:
+- #panelHome, #panelAdd, #panelCharts, #panelLog, #panelSettings
+
+Charts:
+- #canvasWrap, #chartCanvas, #chartsSwipeTop, #chartsSwipeBottom, #chartsTopNote
+
+Home:
+- #btnGoAdd, #btnGoCharts, #btnGoLog
+- #btnInstall, #btnClearData, #btnExit, #btnSettings
+- #pullIndicator
 -->
 
 <!doctype html>
@@ -159,6 +186,7 @@ Hard Rules (anti-drift)
     }
 
     .nav{display:flex; gap:8px; align-items:center;}
+
     .btn{
       border:1px solid var(--stroke2);
       color:var(--text);
@@ -171,6 +199,7 @@ Hard Rules (anti-drift)
       user-select:none;
       -webkit-tap-highlight-color: transparent;
       white-space:nowrap;
+      min-height:44px; /* touch target */
     }
     .btn:active{transform: translateY(1px)}
     .btn.secondary{
@@ -190,6 +219,7 @@ Hard Rules (anti-drift)
       padding:10px 0;
       display:grid;
       place-items:center;
+      flex:0 0 auto;
     }
     .btn[disabled]{opacity:.55; cursor:not-allowed}
 
@@ -225,6 +255,7 @@ Hard Rules (anti-drift)
       cursor:pointer;
       user-select:none;
       -webkit-tap-highlight-color: transparent;
+      min-height:64px;
     }
     .homeBig.secondary{
       border-color: rgba(235,245,255,.18);
@@ -234,18 +265,23 @@ Hard Rules (anti-drift)
     }
     .homeBig:active{transform: translateY(1px)}
 
-    .homeRow{
-      display:flex;
-      gap:10px;
+    /* HOME bottom button group: forced equal size */
+    .homeGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
       margin-top:8px;
-      flex-wrap:wrap;
     }
-    .homeRow .btn{
-      flex:1 1 auto;
-      min-width:110px;
+    .homeGrid .btn{
+      width:100%;
+      min-height:48px;
+      height:48px;              /* force same height */
+      display:flex;
+      align-items:center;
       justify-content:center;
-      text-align:center;
+      padding:0 12px;           /* keep consistent padding */
     }
+
     .homeFoot{
       margin-top:10px;
       display:flex;
@@ -267,6 +303,8 @@ Hard Rules (anti-drift)
       font-weight:900;
       letter-spacing:.2px;
       text-align:center;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     /* Charts */
@@ -292,12 +330,13 @@ Hard Rules (anti-drift)
       padding:6px;
       background: rgba(0,0,0,.18);
       overflow:hidden;
-      touch-action:none;
+      touch-action:none; /* chart module owns pinch/pan here */
     }
+
     canvas{
       display:block;
       width:100%;
-      height:280px;
+      height:320px; /* closer to your formatted example */
     }
 
     /* Settings */
@@ -315,17 +354,6 @@ Hard Rules (anti-drift)
       color: var(--muted);
       font-weight:800;
       line-height:1.3;
-    }
-
-    /* Add panel */
-    .addNotice{
-      border:1px solid var(--stroke);
-      border-radius:18px;
-      padding:14px;
-      background: rgba(0,0,0,.16);
-      color: var(--muted);
-      font-weight:800;
-      line-height:1.35;
     }
   </style>
 </head>
@@ -353,17 +381,18 @@ Hard Rules (anti-drift)
         <section class="panel active" id="panelHome" aria-label="Home">
           <div class="pull" id="pullIndicator">Release to refresh</div>
 
-          <div class="card" id="homeCard" data-swipezone="1">
+          <div class="card" id="homeCard">
             <div class="homeActions">
               <button class="homeBig" id="btnGoAdd">Add Reading</button>
               <button class="homeBig secondary" id="btnGoCharts">Charts</button>
               <button class="homeBig secondary" id="btnGoLog">Log</button>
 
-              <div class="homeRow">
+              <!-- Equal-size button group -->
+              <div class="homeGrid">
                 <button class="btn secondary" id="btnInstall" disabled>Install</button>
                 <button class="btn secondary" id="btnClearData">Clear Data</button>
                 <button class="btn danger" id="btnExit">Exit</button>
-                <button class="btn icon secondary" id="btnSettings" aria-label="Settings" title="Settings">
+                <button class="btn secondary" id="btnSettings" aria-label="Settings" title="Settings">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"
                       stroke="rgba(235,245,255,.78)" stroke-width="2"/>
@@ -385,7 +414,7 @@ Hard Rules (anti-drift)
           </div>
         </section>
 
-        <!-- ADD (overlay; excluded from swipe) -->
+        <!-- ADD (1) — UI/Save flow owned by add.js later; panel shell must still navigate -->
         <section class="panel" id="panelAdd" aria-label="Add Reading">
           <div class="panelHeader" id="addHeader" data-swipezone="1">
             <div class="name">Add Reading</div>
@@ -403,14 +432,13 @@ Hard Rules (anti-drift)
           </div>
 
           <div class="card">
-            <div class="addNotice">
+            <div class="muted">
               Add panel UI + save flow will be restored by the Add modules (not in index.html).
-              This panel exists now only to ensure navigation correctness and Home button reliability.
             </div>
           </div>
         </section>
 
-        <!-- CHARTS (1) -->
+        <!-- CHARTS (2) -->
         <section class="panel" id="panelCharts" aria-label="Charts">
           <div class="panelHeader" id="chartsHeader" data-swipezone="1">
             <div class="name">Charts</div>
@@ -440,7 +468,7 @@ Hard Rules (anti-drift)
           </div>
         </section>
 
-        <!-- LOG (2) -->
+        <!-- LOG (3) -->
         <section class="panel" id="panelLog" aria-label="Log">
           <div class="panelHeader" id="logHeader" data-swipezone="1">
             <div class="name">Log</div>
@@ -459,13 +487,10 @@ Hard Rules (anti-drift)
 
           <div class="card" id="logCard">
             <div class="muted" id="logTopNote">Loading…</div>
-            <div class="muted small" style="margin-top:10px;">
-              Log rendering is owned by modules (log.js/ui.js). Restore after Add/save is restored.
-            </div>
           </div>
         </section>
 
-        <!-- SETTINGS (3) -->
+        <!-- SETTINGS (4) -->
         <section class="panel" id="panelSettings" aria-label="Settings">
           <div class="panelHeader" data-swipezone="1">
             <div class="name">Settings</div>
@@ -475,11 +500,11 @@ Hard Rules (anti-drift)
           </div>
 
           <div class="card">
-            <div class="muted">v2.024: stabilize navigation + pull-to-refresh + swipe + formatted chart before new features.</div>
+            <div class="muted">v2.025 series: stabilize swipe + formatted chart + chart bounds + version discipline.</div>
             <div class="settingsList">
-              <div class="settingsItem">Bands opacity target: +35% (implemented in chart renderer, not here).</div>
-              <div class="settingsItem">Chart window: default last 7 days; zoom 1–14 days; pan clamped to dataset.</div>
-              <div class="settingsItem">Version discipline: js/version.js is canonical; UI displays from it only.</div>
+              <div class="settingsItem">Swipe is being re-implemented in gestures.js (simple + predictable).</div>
+              <div class="settingsItem">Chart bounds/labels/bands are being restored in chart.js next.</div>
+              <div class="settingsItem">Version is canonical in js/version.js only.</div>
             </div>
           </div>
         </section>
@@ -488,158 +513,153 @@ Hard Rules (anti-drift)
     </div>
   </div>
 
-  <!-- Scripts (cache-busting pinned to v2.024) -->
-  <script src="./js/version.js?v=2.024"></script>
-  <script src="./js/app.js?v=2.024"></script>
+  <!-- Script cache-busting pinned to v2.025 -->
+  <script src="./js/version.js?v=2.025"></script>
 
-  <script src="./js/storage.js?v=2.024"></script>
-  <script src="./js/store.js?v=2.024"></script>
-  <script src="./js/state.js?v=2.024"></script>
-  <script src="./js/chart.js?v=2.024"></script>
-  <script src="./js/gestures.js?v=2.024"></script>
-  <script src="./js/panels.js?v=2.024"></script>
-  <script src="./js/ui.js?v=2.024"></script>
+  <!-- Keep module order stable; some modules may be no-ops until restored -->
+  <script src="./js/app.js?v=2.025"></script>
+  <script src="./js/storage.js?v=2.025"></script>
+  <script src="./js/store.js?v=2.025"></script>
+  <script src="./js/state.js?v=2.025"></script>
+  <script src="./js/chart.js?v=2.025"></script>
+  <script src="./js/gestures.js?v=2.025"></script>
+  <script src="./js/panels.js?v=2.025"></script>
+  <script src="./js/ui.js?v=2.025"></script>
 
   <script>
     (function(){
       "use strict";
 
-      function $(id){ return document.getElementById(id); }
+      // Panel refs
+      const panels = {
+        home: document.getElementById("panelHome"),
+        add: document.getElementById("panelAdd"),
+        charts: document.getElementById("panelCharts"),
+        log: document.getElementById("panelLog"),
+        settings: document.getElementById("panelSettings"),
+      };
 
-      // ---- Version display (VTVersion is canonical) ----
-      function applyVersionText(){
-        try{
-          const v = window.VTVersion?.getVersionString?.() || "v?.???";
-          const boot = $("bootText");
-          const hv = $("homeVersion");
-          if(boot) boot.textContent = `BOOT OK ${v}`;
-          if(hv) hv.textContent = v;
-        }catch(_){}
-      }
+      const carousel = ["home","add","charts","log","settings"];
+      let active = "home";
+      let lastNonSettings = "home";
 
-      // ---- Navigation (prefer VTPanels; fallback if missing) ----
-      function showFallback(which){
-        const ids = ["panelHome","panelAdd","panelCharts","panelLog","panelSettings"];
-        const map = {
-          home:"panelHome",
-          add:"panelAdd",
-          charts:"panelCharts",
-          log:"panelLog",
-          settings:"panelSettings"
-        };
-        for(const id of ids){
-          const el = $(id);
-          if(el) el.classList.toggle("active", map[which] === id);
+      function setActive(which){
+        for(const k of Object.keys(panels)){
+          const el = panels[k];
+          if(el) el.classList.toggle("active", k === which);
         }
+        if(which !== "settings") lastNonSettings = which;
+        active = which;
+
+        // On entering charts, ask chart module to render (if present)
         if(which === "charts"){
-          try{ window.VTChart?.onShow?.(); }catch(_){}
+          try{
+            if(window.VTChart && typeof window.VTChart.onShow === "function"){
+              window.VTChart.onShow();
+            }
+          }catch(_){}
         }
       }
 
-      function go(panel){
-        if(window.VTPanels?.setActive) window.VTPanels.setActive(panel);
-        else showFallback(panel);
+      // Version display (read-only)
+      function paintVersion(){
+        const v = (window.VTVersion && typeof window.VTVersion.getVersionString === "function")
+          ? window.VTVersion.getVersionString()
+          : "v?.???";
+        const boot = document.getElementById("bootText");
+        const hv = document.getElementById("homeVersion");
+        if(boot) boot.textContent = `BOOT OK ${v}`;
+        if(hv) hv.textContent = v;
       }
+      paintVersion();
 
-      function bindClick(id, fn){
-        const el = $(id);
-        if(!el) return;
-        el.addEventListener("click", function(e){
-          try{ fn(e); }catch(_){}
-        });
-      }
+      // Buttons
+      document.getElementById("btnGoAdd").addEventListener("click", () => setActive("add"));
+      document.getElementById("btnGoCharts").addEventListener("click", () => setActive("charts"));
+      document.getElementById("btnGoLog").addEventListener("click", () => setActive("log"));
 
-      // Home buttons
-      bindClick("btnGoAdd", () => go("add"));
-      bindClick("btnGoCharts", () => go("charts"));
-      bindClick("btnGoLog", () => go("log"));
+      document.getElementById("btnHomeFromAdd").addEventListener("click", () => setActive("home"));
+      document.getElementById("btnHomeFromCharts").addEventListener("click", () => setActive("home"));
+      document.getElementById("btnHomeFromLog").addEventListener("click", () => setActive("home"));
 
-      // Home from other panels
-      bindClick("btnHomeFromAdd", () => go("home"));
-      bindClick("btnHomeFromCharts", () => go("home"));
-      bindClick("btnHomeFromLog", () => go("home"));
+      const openSettings = () => setActive("settings");
+      document.getElementById("btnSettings").addEventListener("click", openSettings);
+      document.getElementById("btnSettingsFromAdd").addEventListener("click", openSettings);
+      document.getElementById("btnSettingsFromCharts").addEventListener("click", openSettings);
+      document.getElementById("btnSettingsFromLog").addEventListener("click", openSettings);
 
-      // Settings open
-      const openSettings = () => go("settings");
-      bindClick("btnSettings", openSettings);
-      bindClick("btnSettingsFromAdd", openSettings);
-      bindClick("btnSettingsFromCharts", openSettings);
-      bindClick("btnSettingsFromLog", openSettings);
-
-      // Settings back (prefer panels.js behavior if present)
-      bindClick("btnBackFromSettings", () => {
-        if(window.VTPanels?.closeSettings) window.VTPanels.closeSettings();
-        else go("home");
+      document.getElementById("btnBackFromSettings").addEventListener("click", () => {
+        setActive(lastNonSettings || "home");
       });
 
-      // ---- Pull-to-refresh (Home only) ----
-      const homePanel = $("panelHome");
-      const pullIndicator = $("pullIndicator");
+      // Pull-to-refresh (Home only) — restored and isolated
+      const pullIndicator = document.getElementById("pullIndicator");
       let pullStartY = null;
       let pullArmed = false;
 
-      if(homePanel && pullIndicator){
-        homePanel.addEventListener("touchstart", (e) => {
-          if(e.touches.length !== 1) return;
-          // Only arm when at top (no scrolling within card)
-          const card = $("homeCard");
-          if(card && card.scrollTop > 0) return;
-          pullStartY = e.touches[0].clientY;
-          pullArmed = false;
-        }, {passive:true});
+      function homeAtTop(){
+        const homeCard = document.getElementById("homeCard");
+        if(!homeCard) return true;
+        return homeCard.scrollTop === 0;
+      }
 
-        homePanel.addEventListener("touchmove", (e) => {
-          if(pullStartY == null) return;
-          if(e.touches.length !== 1) return;
-          const dy = e.touches[0].clientY - pullStartY;
-          if(dy <= 0) return;
-          const h = Math.min(52, Math.floor(dy/2));
+      panels.home.addEventListener("touchstart", (e) => {
+        if(active !== "home") return;
+        if(!homeAtTop()) return;
+        if(e.touches.length !== 1) return;
+        pullStartY = e.touches[0].clientY;
+        pullArmed = false;
+      }, {passive:true});
+
+      panels.home.addEventListener("touchmove", (e) => {
+        if(active !== "home") return;
+        if(pullStartY == null) return;
+        if(e.touches.length !== 1) return;
+        const dy = e.touches[0].clientY - pullStartY;
+        if(dy > 0){
+          const h = Math.min(56, Math.floor(dy/2));
           pullIndicator.style.height = h + "px";
-          pullArmed = (h >= 36);
-        }, {passive:true});
+          pullArmed = (h >= 40);
+        }
+      }, {passive:true});
 
-        homePanel.addEventListener("touchend", () => {
-          if(pullStartY == null) return;
-          const armed = pullArmed;
-          pullStartY = null;
-          pullArmed = false;
-          pullIndicator.style.height = "0px";
-          if(armed) location.reload();
-        }, {passive:true});
-      }
+      panels.home.addEventListener("touchend", () => {
+        if(active !== "home") return;
+        if(pullStartY == null) return;
+        const armed = pullArmed;
+        pullStartY = null;
+        pullArmed = false;
+        pullIndicator.style.height = "0px";
+        if(armed) location.reload();
+      }, {passive:true});
 
-      // ---- Install handling ----
-      const btnInstall = $("btnInstall");
+      // Install handling
+      const btnInstall = document.getElementById("btnInstall");
       let deferredPrompt = null;
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        btnInstall.disabled = false;
+      });
+      btnInstall.addEventListener("click", async () => {
+        try{
+          if(!deferredPrompt) return;
+          deferredPrompt.prompt();
+          await deferredPrompt.userChoice;
+        } finally {
+          deferredPrompt = null;
+          btnInstall.disabled = true;
+        }
+      });
 
-      if(btnInstall){
-        window.addEventListener("beforeinstallprompt", (e) => {
-          e.preventDefault();
-          deferredPrompt = e;
-          btnInstall.disabled = false;
-        });
-
-        btnInstall.addEventListener("click", async () => {
-          try{
-            if(!deferredPrompt) return;
-            deferredPrompt.prompt();
-            await deferredPrompt.userChoice;
-          }catch(_){
-          }finally{
-            deferredPrompt = null;
-            btnInstall.disabled = true;
-          }
-        });
-      }
-
-      // ---- Clear data (best-effort) ----
-      bindClick("btnClearData", () => {
+      // Clear data (best-effort)
+      document.getElementById("btnClearData").addEventListener("click", () => {
         const ok = confirm("Clear all local data on this device?");
         if(!ok) return;
         try{ localStorage.clear(); }catch(_){}
         try{
           if(window.indexedDB){
-            const candidates = ["vitals_tracker_db","VitalsTrackerDB","vitals_tracker","VT_DB"];
+            const candidates = ["vitals_tracker_db","VitalsTrackerDB","vitals_tracker"];
             for(const name of candidates){
               try{ indexedDB.deleteDatabase(name); }catch(_){}
             }
@@ -649,8 +669,8 @@ Hard Rules (anti-drift)
         location.reload();
       });
 
-      // ---- Exit (known-good pattern) ----
-      bindClick("btnExit", () => {
+      // Exit (known-good pattern)
+      document.getElementById("btnExit").addEventListener("click", () => {
         try{
           window.close();
           setTimeout(() => {
@@ -661,22 +681,16 @@ Hard Rules (anti-drift)
         }
       });
 
-      // ---- Service Worker ----
-      try{
-        if("serviceWorker" in navigator){
-          navigator.serviceWorker.register("./sw.js?v=2.024").catch(()=>{});
-        }
-      }catch(_){}
+      // IMPORTANT: Swipe is NOT implemented in index.html anymore.
+      // gestures.js owns swipe completely in v2.025.
 
-      // ---- Boot ----
-      applyVersionText();
-      // Ensure a sane initial panel if panels.js fails to init for any reason
-      go("home");
+      // Service worker
+      if("serviceWorker" in navigator){
+        navigator.serviceWorker.register("./sw.js?v=2.025").catch(()=>{});
+      }
 
-      // Keep version text correct even if modules load later
-      setTimeout(applyVersionText, 60);
-      setTimeout(applyVersionText, 250);
-
+      // Initial panel
+      setActive("home");
     })();
   </script>
 </body>
@@ -685,8 +699,8 @@ Hard Rules (anti-drift)
 <!--
 Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: index.html
-App Version: v2.024
-Base: v2.023e
-Touched in v2.024: index.html
-Next file to deliver: js/chart.js (File 3 of 6)
+App Version: v2.025
+Base: v2.021
+Touched in v2.025: index.html (equal-size Home buttons, pull refresh restored, swipe removed from index)
+Next planned file: js/gestures.js (File 3 of 4 in this pass)
 -->
