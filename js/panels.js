@@ -8,17 +8,18 @@ Pass order: File 5 of 9 (P0)
 Prev file: js/ui.js (File 4 of 9)
 Next file: js/gestures.js (File 6 of 9)
 
-FIX (SWIPE RELEASE GLITCH ONLY)
-- On finger release, we COMPLETE the snap from the CURRENT drag position (no instant revert).
-- Mechanism:
-  1) Keep track pinned at current rotation index (0..2) during drag + release.
-  2) Animate rotating panels’ per-panel transforms from current drag position to final snapped offsets.
-  3) Commit with zero-jump:
-     - Move the track to the target index with NO transition while panels are still in snapped state,
-     - then clear per-panel transforms on the next frame.
-- Rotation remains locked:
-  Right swipe: Home -> Log -> Charts -> Home ...
-  Left swipe:  Home -> Charts -> Log -> Home ...
+FIX (BUTTON NAV = INSTANT, NO SCROLL)
+Requirement:
+- Button-driven navigation must NOT animate/scroll/slide.
+- Swipes remain “smooth as butter” for the rotating deck only.
+
+Implementation:
+- All non-swipe navigation forces animated=false (instant track jump).
+- Keep swipeEnd animation behavior intact for touch gestures.
+- Preserve cancellable commit logic to prevent snap-backs.
+
+ANTI-DRIFT:
+- No changes to gesture detection here; only panel routing behavior.
 */
 
 (function () {
@@ -34,6 +35,10 @@ FIX (SWIPE RELEASE GLITCH ONLY)
 
   let dragMode = false;
 
+  // Prevent stale swipeEnd commits from firing after button navigation
+  let commitTimer = 0;
+  let commitToken = 0;
+
   const panels = {};
   const deck = {};
 
@@ -46,6 +51,16 @@ FIX (SWIPE RELEASE GLITCH ONLY)
     panels.log = document.getElementById("panelLog");
     panels.settings = document.getElementById("panelSettings");
     panels.add = document.getElementById("panelAdd");
+  }
+
+  function cancelPendingCommit() {
+    try {
+      if (commitTimer) {
+        clearTimeout(commitTimer);
+        commitTimer = 0;
+      }
+    } catch (_) {}
+    commitToken++;
   }
 
   function trackIndexFor(name) {
@@ -122,14 +137,17 @@ FIX (SWIPE RELEASE GLITCH ONLY)
 
     if (on) {
       deck.track.style.transition = "none";
-      // actual pin applied inside swipeDelta()/swipeEnd()
+      // actual pin set in swipeDelta() using current index
     } else {
       clearRotationPanelTransforms();
     }
   }
 
-  function go(name, animated = true) {
+  // IMPORTANT: direct navigation (buttons) must be instant => force animated=false always.
+  function go(name /*, animatedIgnored */) {
     if (!panels[name]) return;
+
+    cancelPendingCommit();
 
     if (inSettings && name !== "settings") inSettings = false;
     if (inAdd && name !== "add") inAdd = false;
@@ -137,47 +155,49 @@ FIX (SWIPE RELEASE GLITCH ONLY)
     if (isRotatingPanel(name)) lastMainPanel = name;
     currentPanel = name;
 
+    // Always leave drag mode for button nav
+    setDragMode(false);
+
     if (name === "settings") {
       inSettings = true;
-      setDragMode(false);
       setActivePanel("settings");
-      applyTransformToPanel("settings", animated);
+      applyTransformToPanel("settings", false);
       return;
     }
 
     if (name === "add") {
       inAdd = true;
-      setDragMode(false);
       setActivePanel("add");
-      applyTransformToPanel("add", animated);
+      applyTransformToPanel("add", false);
       return;
     }
 
-    setDragMode(false);
     setActivePanel(name);
-    applyTransformToPanel(name, animated);
+    applyTransformToPanel(name, false);
   }
 
   function openSettings() {
     if (!panels.settings) return;
-    go("settings", false);
+    go("settings");
   }
 
-  function closeSettings(animated = true) {
+  function closeSettings() {
+    cancelPendingCommit();
     inSettings = false;
     const target = isRotatingPanel(lastMainPanel) ? lastMainPanel : "home";
-    go(target, animated);
+    go(target);
   }
 
   function openAdd() {
     if (!panels.add) return;
-    go("add", false);
+    go("add");
   }
 
-  function closeAdd(animated = true) {
+  function closeAdd() {
+    cancelPendingCommit();
     inAdd = false;
     const target = isRotatingPanel(lastMainPanel) ? lastMainPanel : "home";
-    go(target, animated);
+    go(target);
   }
 
   function canSwipe() {
@@ -189,18 +209,18 @@ FIX (SWIPE RELEASE GLITCH ONLY)
     return idx === -1 ? 0 : idx;
   }
 
-  function showByRotationIndex(rotIdx, animated = true) {
+  function showByRotationIndex(rotIdx /*, animatedIgnored */) {
+    cancelPendingCommit();
     const n = ROTATION.length;
     const wrapped = ((rotIdx % n) + n) % n;
     const name = ROTATION[wrapped];
-    go(name, animated);
+    go(name);
   }
 
   function applyDragTransforms(deltaRatio) {
     const n = ROTATION.length;
     const cur = getRotationIndex();
 
-    // Track is pinned at current index; panels are offset relative to that.
     pinTrackToRotationIndex(cur);
 
     for (let i = 0; i < n; i++) {
@@ -208,18 +228,14 @@ FIX (SWIPE RELEASE GLITCH ONLY)
       const el = panels[name];
       if (!el) continue;
 
-      // Natural position relative to pinned track
       const raw = i - cur;
       const natural = raw * 100;
 
-      // Wrapped rel into [-1,0,+1]
       let rel = raw;
       if (rel > 1) rel -= n;
       if (rel < -1) rel += n;
 
       const desired = (rel + deltaRatio) * 100;
-
-      // Panel transform is delta from natural (so track pin stays consistent)
       const tx = desired - natural;
       el.style.transform = `translate3d(${tx}%, 0, 0)`;
     }
@@ -229,34 +245,17 @@ FIX (SWIPE RELEASE GLITCH ONLY)
     if (!canSwipe()) return;
     if (!deck.track) return;
 
+    cancelPendingCommit();
+
     setDragMode(true);
     applyDragTransforms(deltaRatio);
-  }
-
-  function onceTransitionEnd(el, cb, msFallback) {
-    let done = false;
-
-    function finish() {
-      if (done) return;
-      done = true;
-      try { el.removeEventListener("transitionend", onEnd); } catch (_) {}
-      cb();
-    }
-
-    function onEnd(e) {
-      // Only care about transform transitions for rotating panels
-      if (e && e.propertyName && e.propertyName !== "transform") return;
-      finish();
-    }
-
-    try { el.addEventListener("transitionend", onEnd); } catch (_) {}
-
-    window.setTimeout(finish, msFallback || 320);
   }
 
   function swipeEnd(deltaRatio) {
     if (!canSwipe()) return;
     if (!deck.track) return;
+
+    cancelPendingCommit();
 
     const THRESH = 0.2;
 
@@ -280,13 +279,9 @@ FIX (SWIPE RELEASE GLITCH ONLY)
     const wrapped = ((targetRot % n) + n) % n;
     const targetName = ROTATION[wrapped];
 
-    // Stay in drag mode and animate the rotating panels to snapped offsets.
     setDragMode(true);
-
-    // Pin at CURRENT index before animating (prevents track drift)
     pinTrackToRotationIndex(curRot);
 
-    // Animate per-panel transforms from current drag position to finalDelta
     ROTATION.forEach((name) => {
       const el = panels[name];
       if (!el) return;
@@ -295,41 +290,35 @@ FIX (SWIPE RELEASE GLITCH ONLY)
 
     applyDragTransforms(finalDelta);
 
-    // Commit without hitch:
-    // 1) While panels remain visually snapped, move track to target with NO transition.
-    // 2) Next frame, clear per-panel transforms (so normal track-driven mode resumes).
-    const commitEl = panels[targetName] || panels.home;
+    const myToken = ++commitToken;
 
-    onceTransitionEnd(commitEl, () => {
+    commitTimer = window.setTimeout(() => {
+      if (myToken !== commitToken) return;
+
       try {
-        // Update state + active first (safe; does not move anything)
+        clearRotationPanelTransforms();
+
         currentPanel = targetName;
         lastMainPanel = targetName;
         setActivePanel(targetName);
 
-        // Move track instantly to the target panel
         applyTransformToPanel(targetName, false);
+      } catch (_) {}
 
-        // Clear per-panel transforms on next frame to avoid any visual jump
-        window.requestAnimationFrame(() => {
-          clearRotationPanelTransforms();
-          setDragMode(false);
-        });
-      } catch (_) {
-        try { clearRotationPanelTransforms(); } catch (_) {}
-        try { setDragMode(false); } catch (_) {}
-      }
-    }, 320);
+      dragMode = false;
+      commitTimer = 0;
+    }, 280);
   }
 
   function init() {
     cacheDom();
+    cancelPendingCommit();
     currentPanel = "home";
     lastMainPanel = "home";
     inSettings = false;
     inAdd = false;
     setDragMode(false);
-    go("home", false);
+    go("home");
   }
 
   window.VTPanels = Object.freeze({
@@ -355,6 +344,8 @@ FIX (SWIPE RELEASE GLITCH ONLY)
 /* 
 Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: js/panels.js
+App Version Authority: js/version.js
+Base: v2.026a
 Pass: Swipe + Render Recovery (P0-R1)
 Pass order: File 5 of 9 (P0)
 Prev file: js/ui.js (File 4 of 9)
