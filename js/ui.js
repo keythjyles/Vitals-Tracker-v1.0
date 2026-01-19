@@ -44,23 +44,50 @@ Next file: js/panels.js (File 5 of 9)
   }
 
   /* ==============================
+     Helpers (load-order safe)
+     ============================== */
+
+  function withPanels(fn) {
+    try {
+      if (!window.VTPanels) return;
+      fn(window.VTPanels);
+    } catch (_) {}
+  }
+
+  function showPanel(name, animated = true) {
+    withPanels(p => {
+      // Prefer go(); allow show() alias if later added
+      if (typeof p.go === "function") p.go(name, animated);
+      else if (typeof p.show === "function") p.show(name, animated);
+    });
+  }
+
+  function openSettings() {
+    withPanels(p => {
+      if (typeof p.openSettings === "function") p.openSettings();
+      else showPanel("settings", false);
+    });
+  }
+
+  function closeSettings() {
+    withPanels(p => {
+      if (typeof p.closeSettings === "function") p.closeSettings(true);
+      else showPanel("home", true);
+    });
+  }
+
+  /* ==============================
      Version Display
      ============================== */
 
   function updateVersionLabels() {
-    if (!window.VTVersion) return;
+    if (!window.VTVersion || typeof window.VTVersion.getVersionString !== "function") return;
 
     const v = window.VTVersion.getVersionString();
 
-    if (dom.bootText) {
-      dom.bootText.textContent = "BOOT OK " + v;
-    }
-    if (dom.homeVersion) {
-      dom.homeVersion.textContent = v;
-    }
-    if (dom.settingsVersion) {
-      dom.settingsVersion.textContent = v;
-    }
+    if (dom.bootText) dom.bootText.textContent = "BOOT OK " + v;
+    if (dom.homeVersion) dom.homeVersion.textContent = v;
+    if (dom.settingsVersion) dom.settingsVersion.textContent = v;
   }
 
   /* ==============================
@@ -68,49 +95,26 @@ Next file: js/panels.js (File 5 of 9)
      ============================== */
 
   function wireNavigation() {
-    if (!window.VTPanels) return;
+    dom.btnGoAdd && dom.btnGoAdd.addEventListener("click", () => showPanel("add", true));
+    dom.btnGoCharts && dom.btnGoCharts.addEventListener("click", () => showPanel("charts", true));
+    dom.btnGoLog && dom.btnGoLog.addEventListener("click", () => showPanel("log", true));
 
-    dom.btnGoAdd && dom.btnGoAdd.addEventListener("click", () => {
-      window.VTPanels.go("add");
-    });
-
-    dom.btnGoCharts && dom.btnGoCharts.addEventListener("click", () => {
-      window.VTPanels.go("charts");
-    });
-
-    dom.btnGoLog && dom.btnGoLog.addEventListener("click", () => {
-      window.VTPanels.go("log");
-    });
-
-    dom.btnHomeFromCharts && dom.btnHomeFromCharts.addEventListener("click", () => {
-      window.VTPanels.go("home");
-    });
-
-    dom.btnHomeFromLog && dom.btnHomeFromLog.addEventListener("click", () => {
-      window.VTPanels.go("home");
-    });
-
-    dom.btnHomeFromAdd && dom.btnHomeFromAdd.addEventListener("click", () => {
-      window.VTPanels.go("home");
-    });
+    dom.btnHomeFromCharts && dom.btnHomeFromCharts.addEventListener("click", () => showPanel("home", true));
+    dom.btnHomeFromLog && dom.btnHomeFromLog.addEventListener("click", () => showPanel("home", true));
+    dom.btnHomeFromAdd && dom.btnHomeFromAdd.addEventListener("click", () => showPanel("home", true));
   }
 
   function wireSettings() {
-    if (!window.VTPanels) return;
-
-    const openSettings = () => window.VTPanels.openSettings();
-
     dom.btnSettings && dom.btnSettings.addEventListener("click", openSettings);
     dom.btnSettingsHomeAlt && dom.btnSettingsHomeAlt.addEventListener("click", openSettings);
     dom.btnSettingsFromCharts && dom.btnSettingsFromCharts.addEventListener("click", openSettings);
     dom.btnSettingsFromLog && dom.btnSettingsFromLog.addEventListener("click", openSettings);
 
-    dom.btnBackFromSettings && dom.btnBackFromSettings.addEventListener("click", () => {
-      window.VTPanels.closeSettings();
-    });
+    dom.btnBackFromSettings && dom.btnBackFromSettings.addEventListener("click", closeSettings);
   }
 
   function wireUtilities() {
+    // EXIT HANDLER (DO NOT CHANGE)
     dom.btnExit && dom.btnExit.addEventListener("click", () => {
       try {
         window.close();
@@ -140,7 +144,11 @@ Next file: js/panels.js (File 5 of 9)
   }
 
   window.VTUI = Object.freeze({
-    init
+    init,
+    // Stable routing surface for other modules
+    showPanel,
+    openSettings,
+    closeSettings
   });
 
 })();
