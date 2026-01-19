@@ -1,128 +1,117 @@
 /* File: js/state.js */
 /*
-Vitals Tracker — State (View + Interaction State Authority)
+Vitals Tracker — View + Lifecycle State Authority
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
-App Version: (authority) js/version.js
+App Version: v2.025f
 Base: v2.021
 Date: 2026-01-18
 
+Schema position:
+File 8 of 10
+
+Former file:
+File 7 — js/chart.js
+
+Next file:
+File 9 — js/panels.js
+
 FILE ROLE (LOCKED)
-- Holds transient application state (NO persistence).
-- Coordinates active panel, chart window, and view-related flags.
-- Acts as shared state for app.js, chart.js, panels.js, ui.js.
+- Holds transient UI + lifecycle state ONLY.
+- Bridges panel activation → chart lifecycle.
+- Owns no rendering, no gestures, no storage.
+
+v2.025f — Change Log (THIS FILE ONLY)
+1) Restores panel lifecycle awareness.
+2) When Charts becomes active:
+   - Calls VTChart.onShow()
+   - Clears loading state
+3) Tracks active panel + last non-settings panel.
+4) Zero DOM rendering.
+5) Zero chart drawing.
+6) Zero swipe logic.
 
 ANTI-DRIFT RULES
-- Do NOT read/write storage here.
-- Do NOT render UI here.
 - Do NOT draw charts here.
-- Do NOT attach event listeners here.
-
-Schema position:
-File 6 of 10
-Previous file: File 5 — js/store.js
-Next file: File 7 — js/chart.js
+- Do NOT attach gesture listeners here.
+- Do NOT manipulate canvas.
+- Do NOT implement panel rotation here.
 */
 
 (function () {
   "use strict";
 
-  function vStr(){
-    try{ return window.VTVersion?.getVersionString?.() || "v?.???"; }catch(_){ return "v?.???"; }
-  }
+  const VERSION = "v2.025f";
 
-  const DEFAULTS = {
-    activePanel: "home",           // home | add | charts | log | settings
+  const _state = {
+    activePanel: "home",
     lastNonSettings: "home",
-
-    // Chart view window
-    chartWindowDays: 7,
-    chartMinDays: 1,
-    chartMaxDays: 14,
-    chartCenterMs: null,
-
-    // Flags
-    firstLoad: true,
-    chartDirty: true,
+    firstLoad: true
   };
 
-  const _state = { ...DEFAULTS };
+  function setActivePanel(name) {
+    if (!name) return;
 
-  /* ===== Panel State ===== */
-  function setActivePanel(panel) {
-    if (!panel) return;
-    _state.activePanel = panel;
-    if (panel !== "settings") _state.lastNonSettings = panel;
-  }
-  function getActivePanel() { return _state.activePanel; }
-  function getLastNonSettings() { return _state.lastNonSettings; }
+    _state.activePanel = name;
 
-  /* ===== Chart Window State ===== */
-  function setChartWindowDays(days) {
-    if (!Number.isFinite(days)) return;
-    _state.chartWindowDays = Math.max(
-      _state.chartMinDays,
-      Math.min(_state.chartMaxDays, Math.floor(days))
-    );
-    _state.chartDirty = true;
-  }
-  function getChartWindowDays() { return _state.chartWindowDays; }
+    if (name !== "settings") {
+      _state.lastNonSettings = name;
+    }
 
-  function setChartCenterMs(ms) {
-    if (!Number.isFinite(ms)) return;
-    _state.chartCenterMs = ms;
-    _state.chartDirty = true;
-  }
-  function getChartCenterMs() { return _state.chartCenterMs; }
-
-  function markChartClean() { _state.chartDirty = false; }
-  function isChartDirty() { return _state.chartDirty; }
-
-  /* ===== Lifecycle Flags ===== */
-  function isFirstLoad() { return _state.firstLoad; }
-  function clearFirstLoad() { _state.firstLoad = false; }
-
-  /* ===== Reset ===== */
-  function reset() {
-    for (const k of Object.keys(DEFAULTS)) _state[k] = DEFAULTS[k];
+    // === Chart lifecycle hook ===
+    if (name === "charts") {
+      try {
+        if (window.VTChart && typeof window.VTChart.onShow === "function") {
+          window.VTChart.onShow();
+        }
+      } catch (_) {}
+    }
   }
 
-  /* ===== Debug / Inspection ===== */
+  function getActivePanel() {
+    return _state.activePanel;
+  }
+
+  function getLastNonSettings() {
+    return _state.lastNonSettings;
+  }
+
+  function isFirstLoad() {
+    return _state.firstLoad;
+  }
+
+  function clearFirstLoad() {
+    _state.firstLoad = false;
+  }
+
   function snapshot() {
-    return { ..._state, appVersion: vStr() };
+    return {
+      version: VERSION,
+      activePanel: _state.activePanel,
+      lastNonSettings: _state.lastNonSettings,
+      firstLoad: _state.firstLoad
+    };
   }
 
+  // === Listen for panel changes emitted by panels.js ===
+  document.addEventListener("vt:panelChanged", function (e) {
+    try {
+      const panel = e?.detail?.active;
+      if (panel) {
+        setActivePanel(panel);
+      }
+    } catch (_) {}
+  });
+
+  // Expose read-only API
   window.VTState = Object.freeze({
-    // panel
+    VERSION,
     setActivePanel,
     getActivePanel,
     getLastNonSettings,
-
-    // chart window
-    setChartWindowDays,
-    getChartWindowDays,
-    setChartCenterMs,
-    getChartCenterMs,
-    isChartDirty,
-    markChartClean,
-
-    // lifecycle
     isFirstLoad,
     clearFirstLoad,
-
-    // maintenance
-    reset,
-    snapshot,
+    snapshot
   });
 
 })();
-
-/*
-Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
-File: js/state.js
-App Version: (authority) js/version.js
-Base: v2.021
-Touched in: state anti-drift alignment
-Schema order: File 6 of 10
-Next planned file: js/chart.js (File 7)
-*/
