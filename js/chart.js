@@ -5,12 +5,18 @@ Vitals Tracker — Charts (Canvas)
 App Version Authority: js/version.js
 
 GOAL (per user request)
-- Make chart match the v2.025-style example:
-  - Subtle alternating DAY vertical bands (background stripes)
-  - BP category horizontal bands (colored) with adjustable opacity slider
-  - Legend for Systolic / Diastolic / Heart Rate
-  - “Loading…” element hidden once rendered
-  - Pull data from VTStore first, then VTStorage fallbacks, then localStorage best-effort
+- Match the v2.021-style chart presentation:
+  1) BP background bands in correct order with better colors:
+     - Hypertensive Crisis (>=180) = red (better red)
+     - Stage 2 (140–179) = brighter yellow
+     - Stage 1 (130–139) = blue
+     - Elevated (120–129) = purple
+     - Normal (<120) = green (base)
+  2) Series legend (Systolic / Diastolic / Heart Rate) ON the graph.
+  3) A BP-band legend UNDER the chart (corresponding to accepted stages).
+  4) Thicker chart lines.
+  5) Larger axis labels.
+  6) Date range displayed ABOVE the chart.
 
 NOTES
 - This file does NOT write to storage.
@@ -26,45 +32,42 @@ NOTES
 
   const MS_DAY = 86400000;
 
-  // ====== LOOK & FEEL (matches the example vibe) ======
+  // ====== LOOK & FEEL ======
   const STYLE = Object.freeze({
     // Chart chrome
     axes: "rgba(255,255,255,0.22)",
     grid: "rgba(255,255,255,0.10)",
-    text: "rgba(255,255,255,0.70)",
-    textMuted: "rgba(255,255,255,0.52)",
+    text: "rgba(255,255,255,0.78)",
+    textMuted: "rgba(255,255,255,0.58)",
 
-    // Series colors (example-like)
-    lineSys: "rgba(170,205,255,0.95)", // light blue
-    lineDia: "rgba(235,235,235,0.82)", // light gray
-    lineHr:  "rgba(120,230,160,0.82)", // green
+    // Series colors (kept close to the example)
+    lineSys: "rgba(175,210,255,0.98)", // light blue
+    lineDia: "rgba(240,240,240,0.88)", // light gray
+    lineHr:  "rgba(120,235,170,0.90)", // green
 
     // Alternating day bands (vertical stripes)
     dayA: "rgba(0,0,0,0.00)",
     dayB: "rgba(0,0,0,0.10)",
 
-    // BP category horizontal bands (example-like palette)
-    // Order: lowest -> highest so we can paint ranges cleanly.
+    // BP category horizontal bands (accepted systolic stages)
+    // Order matters: bottom -> top for painting.
     bpBands: [
-      { from: 0,   to: 120, rgb: [ 60, 110,  90], label: "Normal <120" },          // deep green
-      { from: 120, to: 130, rgb: [120, 120,  60], label: "Elevated 120–129" },     // olive
-      { from: 130, to: 140, rgb: [160, 120,  60], label: "Stage 1 130–139" },      // brown/orange
-      { from: 140, to: 160, rgb: [ 90,  80, 150], label: "Stage 2 140–159" },      // purple
-      { from: 160, to: 999, rgb: [150,  60,  70], label: "Stage 2 ≥160" }          // maroon
+      { from: 0,   to: 120, rgb: [ 35, 115,  85], label: "Normal <120" },                 // green
+      { from: 120, to: 130, rgb: [120,  75, 165], label: "Elevated 120–129" },            // purple
+      { from: 130, to: 140, rgb: [ 40, 115, 190], label: "Stage 1 HTN 130–139" },         // blue
+      { from: 140, to: 180, rgb: [235, 185,  40], label: "Stage 2 HTN 140–179" },         // brighter yellow
+      { from: 180, to: 999, rgb: [200,  55,  70], label: "Hypertensive Crisis ≥180" }     // better red
     ]
   });
 
   // ===== Runtime state =====
   const STATE = {
-    // time window
     minDays: 1,
     maxDays: 14,
     days: 7,
     centerMs: null,
     dataMinMs: null,
     dataMaxMs: null,
-
-    // bands
     bandOpacity: 0.60
   };
 
@@ -148,7 +151,6 @@ NOTES
   async function getFromVTStore() {
     try {
       if (window.VTStore && typeof window.VTStore.getAll === "function") {
-        // Some builds have async, some sync — support both.
         const res = window.VTStore.getAll();
         const arr = (res && typeof res.then === "function") ? await res : res;
         return safeArray(arr);
@@ -161,16 +163,7 @@ NOTES
     try {
       const s = window.VTStorage;
       if (!s) return [];
-
-      const fns = [
-        "getAll",
-        "getAllRecords",
-        "loadAll",
-        "readAll",
-        "exportAll",
-        "getRecords"
-      ];
-
+      const fns = ["getAll","getAllRecords","loadAll","readAll","exportAll","getRecords"];
       for (const fn of fns) {
         if (typeof s[fn] === "function") {
           const res = s[fn]();
@@ -184,10 +177,7 @@ NOTES
 
   function isPlausibleVitalsArray(arr) {
     if (!Array.isArray(arr) || arr.length < 1) return 0;
-
-    let score = 0;
-    let checked = 0;
-
+    let score = 0, checked = 0;
     for (let i = 0; i < arr.length; i++) {
       const r = arr[i];
       if (!r || typeof r !== "object") continue;
@@ -196,7 +186,7 @@ NOTES
       if (e.ts != null) score += 2;
       if (e.sys != null) score += 2;
       if (e.dia != null) score += 2;
-      if (e.hr != null)  score += 1;
+      if (e.hr  != null) score += 1;
       if (checked >= 60) break;
     }
     score += Math.min(200, Math.floor(arr.length / 5));
@@ -232,7 +222,6 @@ NOTES
           else if (Array.isArray(parsed.data)) candidate = parsed.data;
           else if (Array.isArray(parsed.items)) candidate = parsed.items;
         }
-
         if (!candidate) continue;
 
         const sc = isPlausibleVitalsArray(candidate);
@@ -241,7 +230,6 @@ NOTES
           best = candidate;
         }
       }
-
       return best;
     } catch (_) {
       return [];
@@ -283,17 +271,16 @@ NOTES
       canvas.width = w;
       canvas.height = h;
     }
-    return { w, h };
+    return { w, h, dpr };
   }
 
   function clear(ctx, w, h) { ctx.clearRect(0, 0, w, h); }
 
   function layout(w, h) {
-    // Leave space for y labels and x labels like the example
-    const padL = 48;
-    const padR = 18;
-    const padT = 18;
-    const padB = 44;
+    const padL = 62;  // larger for bigger y labels
+    const padR = 20;
+    const padT = 16;
+    const padB = 58;  // larger for bigger x labels
 
     return {
       padL, padR, padT, padB,
@@ -353,14 +340,12 @@ NOTES
   }
 
   function niceStep(span) {
-    // Example-like grid: 10s or 20s
     if (span <= 60) return 10;
     if (span <= 120) return 10;
     return 20;
   }
 
   function computeYBounds(windowed) {
-    // Match the example: include sys/dia/hr in one scale BUT keep it tight.
     let minV = Infinity;
     let maxV = -Infinity;
 
@@ -374,12 +359,10 @@ NOTES
       return { min: 40, max: 180 };
     }
 
-    // Padding like the example (keeps lines centered, not “all the way up”)
-    const pad = 8;
+    const pad = 10;
     minV = Math.max(40, Math.floor((minV - pad) / 10) * 10);
     maxV = Math.min(200, Math.ceil((maxV + pad) / 10) * 10);
 
-    // Ensure a minimum range so grid doesn’t look cramped
     if ((maxV - minV) < 60) {
       const mid = (minV + maxV) / 2;
       minV = Math.max(40, Math.floor((mid - 30) / 10) * 10);
@@ -389,7 +372,7 @@ NOTES
     return { min: minV, max: maxV };
   }
 
-  // ===== Drawing: vertical day stripes + horizontal BP bands =====
+  // ===== Drawing helpers =====
   function startOfDay(ms) {
     const d = new Date(ms);
     d.setHours(0, 0, 0, 0);
@@ -399,8 +382,8 @@ NOTES
   function drawDayStripes(ctx, start, end, L) {
     const first = startOfDay(start);
     let t = first;
-
     let i = 0;
+
     while (t < end + MS_DAY) {
       const a = Math.max(start, t);
       const b = Math.min(end, t + MS_DAY);
@@ -419,20 +402,18 @@ NOTES
   function drawBPBands(ctx, bounds, L) {
     const op = clamp(STATE.bandOpacity, 0, 1);
 
-    // Draw only within plot area, clipped
     ctx.save();
     ctx.beginPath();
     ctx.rect(L.plotX, L.plotY, L.plotW, L.plotH);
     ctx.clip();
 
     for (const b of STYLE.bpBands) {
-      // Convert band y-range to pixels
       const yTop = yScale(Math.min(bounds.max, b.to), bounds, L);
       const yBot = yScale(Math.max(bounds.min, b.from), bounds, L);
 
-      // If completely outside current y-range, skip
       const top = Math.min(yTop, yBot);
       const bot = Math.max(yTop, yBot);
+
       if (bot < L.plotY || top > (L.plotY + L.plotH)) continue;
 
       ctx.fillStyle = rgba(b.rgb, op);
@@ -443,12 +424,16 @@ NOTES
   }
 
   function drawGridAndAxes(ctx, bounds, L, start, end) {
-    // Horizontal grid lines + y labels like example
+    // Larger labels (accessibility)
+    const fontY = 16;
+    const fontX = 16;
+
+    // Horizontal grid lines + y labels
     ctx.strokeStyle = STYLE.grid;
     ctx.lineWidth = 1;
 
     ctx.fillStyle = STYLE.textMuted;
-    ctx.font = "12px system-ui";
+    ctx.font = `${fontY}px system-ui`;
     ctx.textAlign = "right";
     ctx.textBaseline = "middle";
 
@@ -463,10 +448,10 @@ NOTES
       ctx.lineTo(L.plotX + L.plotW, y);
       ctx.stroke();
 
-      ctx.fillText(String(v), L.plotX - 10, y);
+      ctx.fillText(String(v), L.plotX - 12, y);
     }
 
-    // Axes lines
+    // Axes
     ctx.strokeStyle = STYLE.axes;
 
     ctx.beginPath();
@@ -479,15 +464,13 @@ NOTES
     ctx.lineTo(L.plotX + L.plotW, L.plotY + L.plotH);
     ctx.stroke();
 
-    // X labels: Wed 01/07 style (sample-like)
+    // X labels (bigger)
     ctx.fillStyle = STYLE.textMuted;
-    ctx.font = "12px system-ui";
+    ctx.font = `${fontX}px system-ui`;
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
 
     const yText = L.plotY + L.plotH + 10;
-
-    // Place 4 ticks across window, aligned to day boundaries
     const spanMs = end - start;
     const approxTicks = 4;
 
@@ -497,25 +480,22 @@ NOTES
 
       const day = d.toLocaleDateString([], { weekday: "short" });
       const md  = d.toLocaleDateString([], { month: "2-digit", day: "2-digit" });
-      const label = `${day}\n${md}`;
 
       const x = xScale(t, start, end, L);
 
-      // two-line label
-      const lines = label.split("\n");
-      ctx.fillText(lines[0], x, yText);
-      ctx.fillText(lines[1], x, yText + 14);
+      ctx.fillText(day, x, yText);
+      ctx.fillText(md,  x, yText + 18);
     }
   }
 
   function drawLines(ctx, data, bounds, start, end, L) {
-    // Clip to plot area
     ctx.save();
     ctx.beginPath();
     ctx.rect(L.plotX, L.plotY, L.plotW, L.plotH);
     ctx.clip();
 
-    ctx.lineWidth = 3;
+    // Slightly thicker lines (user request)
+    ctx.lineWidth = 4;
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
 
@@ -542,7 +522,108 @@ NOTES
     ctx.restore();
   }
 
-  // ===== Legend UI (slider + series legend) =====
+  // Series legend ON chart (top-left inside plot)
+  function drawOnChartSeriesLegend(ctx, L) {
+    const x0 = L.plotX + 14;
+    const y0 = L.plotY + 14;
+
+    const items = [
+      { label: "Systolic",  color: STYLE.lineSys },
+      { label: "Diastolic", color: STYLE.lineDia },
+      { label: "Heart Rate",color: STYLE.lineHr  }
+    ];
+
+    const font = 16;
+    const lineH = 22;
+
+    // Backplate like the example (subtle)
+    const pad = 10;
+    const w = 190;
+    const h = pad * 2 + items.length * lineH;
+
+    ctx.save();
+    ctx.fillStyle = "rgba(0,0,0,0.18)";
+    ctx.strokeStyle = "rgba(255,255,255,0.10)";
+    ctx.lineWidth = 1;
+    roundRect(ctx, x0 - pad, y0 - pad, w, h, 12, true, true);
+
+    ctx.font = `800 ${font}px system-ui`;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "rgba(255,255,255,0.74)";
+
+    let y = y0 + 2;
+    for (const it of items) {
+      // swatch
+      ctx.strokeStyle = it.color;
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(x0, y);
+      ctx.lineTo(x0 + 24, y);
+      ctx.stroke();
+
+      // label
+      ctx.fillStyle = "rgba(255,255,255,0.72)";
+      ctx.fillText(it.label, x0 + 34, y);
+
+      y += lineH;
+    }
+
+    ctx.restore();
+  }
+
+  function roundRect(ctx, x, y, w, h, r, fill, stroke) {
+    const rr = Math.max(0, Math.min(r, Math.min(w, h) / 2));
+    ctx.beginPath();
+    ctx.moveTo(x + rr, y);
+    ctx.arcTo(x + w, y, x + w, y + h, rr);
+    ctx.arcTo(x + w, y + h, x, y + h, rr);
+    ctx.arcTo(x, y + h, x, y, rr);
+    ctx.arcTo(x, y, x + w, y, rr);
+    ctx.closePath();
+    if (fill) ctx.fill();
+    if (stroke) ctx.stroke();
+  }
+
+  // ===== Date range label ABOVE chart (DOM) =====
+  function ensureRangeLabel(canvas, start, end) {
+    try {
+      if (!canvas || start == null || end == null) return;
+
+      const parent = canvas.parentElement;
+      if (!parent) return;
+
+      let el = parent.querySelector("#chartRangeLabel");
+      if (!el) {
+        el = document.createElement("div");
+        el.id = "chartRangeLabel";
+        el.style.width = "100%";
+        el.style.textAlign = "center";
+        el.style.padding = "6px 8px 10px 8px";
+        el.style.fontWeight = "800";
+        el.style.letterSpacing = ".2px";
+        el.style.color = "rgba(255,255,255,0.62)";
+        el.style.fontSize = "18px";
+        el.style.userSelect = "none";
+        // Insert above canvas
+        parent.insertBefore(el, canvas);
+      }
+
+      const a = new Date(start);
+      const b = new Date(end);
+
+      const fmt = (d) => {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const dd = String(d.getDate()).padStart(2, "0");
+        return `${y}-${m}-${dd}`;
+      };
+
+      el.textContent = `${fmt(a)} \u2192 ${fmt(b)}`;
+    } catch (_) {}
+  }
+
+  // ===== Legend UI under chart: BP bands + slider =====
   function ensureLegendUI(legendEl) {
     if (!legendEl) return;
 
@@ -558,6 +639,67 @@ NOTES
     legendEl.style.gap = "10px";
     legendEl.style.paddingTop = "10px";
 
+    // BP Bands legend (under chart)
+    const bandBox = document.createElement("div");
+    bandBox.id = "bpBandsLegend";
+    bandBox.style.display = "grid";
+    bandBox.style.gap = "10px";
+    bandBox.style.padding = "10px 12px";
+    bandBox.style.border = "1px solid rgba(255,255,255,0.14)";
+    bandBox.style.borderRadius = "16px";
+    bandBox.style.background = "rgba(0,0,0,0.06)";
+
+    const bandTitle = document.createElement("div");
+    bandTitle.textContent = "Blood Pressure Bands (Systolic)";
+    bandTitle.style.fontWeight = "900";
+    bandTitle.style.letterSpacing = ".2px";
+    bandTitle.style.color = "rgba(255,255,255,0.72)";
+    bandTitle.style.fontSize = "14px";
+
+    const bandList = document.createElement("div");
+    bandList.style.display = "grid";
+    bandList.style.gap = "8px";
+
+    // Display in TOP->BOTTOM order like the user called out (red -> yellow -> blue -> purple -> green)
+    const topDown = STYLE.bpBands.slice().reverse();
+
+    function bandRow(label, rgb) {
+      const row = document.createElement("div");
+      row.style.display = "grid";
+      row.style.gridTemplateColumns = "20px 1fr";
+      row.style.alignItems = "center";
+      row.style.gap = "10px";
+      row.style.padding = "10px 10px";
+      row.style.border = "1px solid rgba(255,255,255,0.10)";
+      row.style.borderRadius = "999px";
+      row.style.background = "rgba(0,0,0,0.04)";
+
+      const sw = document.createElement("span");
+      sw.style.width = "18px";
+      sw.style.height = "12px";
+      sw.style.borderRadius = "6px";
+      sw.style.background = rgba(rgb, clamp(STATE.bandOpacity, 0, 1));
+      sw.style.border = "1px solid rgba(255,255,255,0.10)";
+
+      const tx = document.createElement("span");
+      tx.textContent = label;
+      tx.style.color = "rgba(255,255,255,0.70)";
+      tx.style.fontSize = "14px";
+      tx.style.fontWeight = "900";
+      tx.style.letterSpacing = ".15px";
+
+      row.appendChild(sw);
+      row.appendChild(tx);
+      return row;
+    }
+
+    for (const b of topDown) {
+      bandList.appendChild(bandRow(b.label, b.rgb));
+    }
+
+    bandBox.appendChild(bandTitle);
+    bandBox.appendChild(bandList);
+
     // Slider wrap (Bands opacity)
     const sliderWrap = document.createElement("div");
     sliderWrap.style.display = "grid";
@@ -566,15 +708,15 @@ NOTES
     sliderWrap.style.gap = "10px";
     sliderWrap.style.padding = "10px 12px";
     sliderWrap.style.border = "1px solid rgba(255,255,255,0.14)";
-    sliderWrap.style.borderRadius = "12px";
+    sliderWrap.style.borderRadius = "16px";
     sliderWrap.style.background = "rgba(0,0,0,0.08)";
 
     const lbl = document.createElement("div");
     lbl.textContent = "Bands";
-    lbl.style.fontWeight = "800";
+    lbl.style.fontWeight = "900";
     lbl.style.letterSpacing = ".2px";
     lbl.style.color = "rgba(255,255,255,0.76)";
-    lbl.style.fontSize = "12px";
+    lbl.style.fontSize = "14px";
 
     const slider = document.createElement("input");
     slider.type = "range";
@@ -587,14 +729,16 @@ NOTES
     const pct = document.createElement("div");
     pct.id = "bandOpacityValue";
     pct.textContent = `${slider.value}%`;
-    pct.style.fontWeight = "800";
+    pct.style.fontWeight = "900";
     pct.style.color = "rgba(255,255,255,0.70)";
-    pct.style.fontSize = "12px";
+    pct.style.fontSize = "14px";
 
     slider.addEventListener("input", function () {
       const v = clamp(Number(slider.value) / 100, 0, 1);
       STATE.bandOpacity = v;
       pct.textContent = `${Math.round(v * 100)}%`;
+      // Update swatches in the BP band legend
+      try { updateLegendUI(legendEl); } catch (_) {}
       try { render(); } catch (_) {}
     }, { passive: true });
 
@@ -602,46 +746,7 @@ NOTES
     sliderWrap.appendChild(slider);
     sliderWrap.appendChild(pct);
 
-    // Series legend (Systolic/Diastolic/Heart Rate)
-    const series = document.createElement("div");
-    series.id = "seriesLegend";
-    series.style.display = "grid";
-    series.style.gap = "8px";
-
-    function seriesRow(name, color) {
-      const row = document.createElement("div");
-      row.style.display = "grid";
-      row.style.gridTemplateColumns = "22px 1fr";
-      row.style.alignItems = "center";
-      row.style.gap = "10px";
-      row.style.padding = "8px 10px";
-      row.style.border = "1px solid rgba(255,255,255,0.12)";
-      row.style.borderRadius = "999px";
-      row.style.background = "rgba(0,0,0,0.06)";
-
-      const sw = document.createElement("span");
-      sw.style.width = "22px";
-      sw.style.height = "4px";
-      sw.style.borderRadius = "999px";
-      sw.style.background = color;
-
-      const tx = document.createElement("span");
-      tx.textContent = name;
-      tx.style.color = "rgba(255,255,255,0.70)";
-      tx.style.fontSize = "12px";
-      tx.style.fontWeight = "800";
-      tx.style.letterSpacing = ".15px";
-
-      row.appendChild(sw);
-      row.appendChild(tx);
-      return row;
-    }
-
-    series.appendChild(seriesRow("Systolic", STYLE.lineSys));
-    series.appendChild(seriesRow("Diastolic", STYLE.lineDia));
-    series.appendChild(seriesRow("Heart Rate", STYLE.lineHr));
-
-    legendEl.appendChild(series);
+    legendEl.appendChild(bandBox);
     legendEl.appendChild(sliderWrap);
 
     updateLegendUI(legendEl);
@@ -649,11 +754,33 @@ NOTES
 
   function updateLegendUI(legendEl) {
     if (!legendEl) return;
+
     const slider = legendEl.querySelector("#bandOpacitySlider");
     const pct = legendEl.querySelector("#bandOpacityValue");
     const op = clamp(STATE.bandOpacity, 0, 1);
+
     if (slider) slider.value = String(Math.round(op * 100));
     if (pct) pct.textContent = `${Math.round(op * 100)}%`;
+
+    // Update band swatches to match opacity
+    const bandLegend = legendEl.querySelector("#bpBandsLegend");
+    if (bandLegend) {
+      const swatches = bandLegend.querySelectorAll("span");
+      // swatches include only our colored rectangles (first span of each row)
+      // safest: rebuild those rectangles’ background by mapping rows in order
+      const rows = bandLegend.querySelectorAll("div > div");
+      // rows selects many; instead, target pills:
+      const pills = bandLegend.querySelectorAll("div[style*='border-radius: 999px']");
+      if (pills && pills.length) {
+        const topDown = STYLE.bpBands.slice().reverse();
+        for (let i = 0; i < pills.length && i < topDown.length; i++) {
+          const pill = pills[i];
+          const sw = pill.querySelector("span");
+          if (!sw) continue;
+          sw.style.background = rgba(topDown[i].rgb, op);
+        }
+      }
+    }
   }
 
   // ===== Render =====
@@ -669,7 +796,6 @@ NOTES
 
     ensureLegendUI(legendEl);
 
-    // Hide "Loading..." once we start rendering for real
     if (loadingEl) loadingEl.style.display = "none";
 
     const raw = await getRawDataMultiSource();
@@ -683,7 +809,7 @@ NOTES
 
     if (!data.length) {
       ctx.fillStyle = STYLE.textMuted;
-      ctx.font = "14px system-ui";
+      ctx.font = "16px system-ui";
       ctx.textAlign = "left";
       ctx.textBaseline = "top";
       ctx.fillText("No data to display.", L.plotX, L.plotY);
@@ -697,22 +823,26 @@ NOTES
 
     if (!windowed.length || start == null || end == null || end <= start) {
       ctx.fillStyle = STYLE.textMuted;
-      ctx.font = "14px system-ui";
+      ctx.font = "16px system-ui";
       ctx.textAlign = "left";
       ctx.textBaseline = "top";
       ctx.fillText("No data in current window.", L.plotX, L.plotY);
       return;
     }
 
+    // Date range label above the chart
+    ensureRangeLabel(canvas, start, end);
+
     const bounds = computeYBounds(windowed);
 
-    // Background stripes + BP bands (example look)
+    // Background stripes + BP bands
     drawDayStripes(ctx, start, end, L);
     drawBPBands(ctx, bounds, L);
 
-    // Grid & axes, then lines
+    // Grid + axes + lines + on-chart series legend
     drawGridAndAxes(ctx, bounds, L, start, end);
     drawLines(ctx, windowed, bounds, start, end, L);
+    drawOnChartSeriesLegend(ctx, L);
   }
 
   function onShow() { render(); }
