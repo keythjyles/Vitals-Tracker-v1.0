@@ -1,18 +1,25 @@
-<!-- File: index.html -->
+<!-- Vitals Tracker v2.024 -->
 <!--
 Vitals Tracker — MASTER (Index Authority)
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
-App Version: v2.023f
+App Version: v2.024
 Base: v2.021
 Date: 2026-01-18
 
-v2.023f — Change Log (THIS FILE ONLY)
-1) Cache-busters updated to match canonical version v2.023f.
+CHANGE LOG (index.html only)
+- Removes ALL inline swipe + inline panel router logic (modules own behavior).
+- Restores Home pull-to-refresh (bound to the Home card scroll surface).
+- Restores Add panel shell with working Home button + defensive fallbacks.
+- Keeps swipe gating via data-swipezone="1" and protects #canvasWrap for chart gestures.
+- Keeps IDs stable for modules.
 
 Hard Rules (anti-drift)
 - Canonical version is owned by js/version.js only.
-- index.html may DISPLAY version but MUST NOT define canonical values.
+- index.html may display version but must not define canonical values.
+- Chart logic lives only in js/chart.js.
+- Swipe logic lives only in js/gestures.js.
+- Panel routing lives only in js/panels.js.
 -->
 <!doctype html>
 <html lang="en">
@@ -192,10 +199,12 @@ Hard Rules (anti-drift)
       background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
       overflow:auto;
       min-height:0;
+      -webkit-overflow-scrolling: touch;
     }
     .muted{color:var(--muted)}
     .small{font-size:13px}
 
+    /* Home actions */
     .homeActions{
       display:flex;
       flex-direction:column;
@@ -249,6 +258,7 @@ Hard Rules (anti-drift)
     .homeFoot .v{color:var(--muted); font-weight:900; letter-spacing:.2px}
     .homeFoot .by{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:55%}
 
+    /* Pull-to-refresh indicator (Home only) */
     .pull{
       height:0px;
       overflow:hidden;
@@ -259,6 +269,7 @@ Hard Rules (anti-drift)
       text-align:center;
     }
 
+    /* Charts */
     #chartsTopNote{
       white-space:nowrap;
       overflow:hidden;
@@ -281,7 +292,7 @@ Hard Rules (anti-drift)
       padding:6px;
       background: rgba(0,0,0,.18);
       overflow:hidden;
-      touch-action:none;
+      touch-action:none; /* chart module manages its own gestures */
     }
     canvas{
       display:block;
@@ -289,6 +300,7 @@ Hard Rules (anti-drift)
       height:280px;
     }
 
+    /* Settings */
     .settingsList{
       display:flex;
       flex-direction:column;
@@ -309,7 +321,7 @@ Hard Rules (anti-drift)
 
 <body>
   <div class="app">
-    <div class="topbar">
+    <div class="topbar" data-swipezone="1">
       <div class="brand">
         <div class="logo" aria-hidden="true">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
@@ -326,6 +338,7 @@ Hard Rules (anti-drift)
     <div class="shell">
       <div class="panels" id="panelsRoot">
 
+        <!-- HOME -->
         <section class="panel active" id="panelHome" aria-label="Home">
           <div class="pull" id="pullIndicator">Release to refresh</div>
 
@@ -335,7 +348,7 @@ Hard Rules (anti-drift)
               <button class="homeBig secondary" id="btnGoCharts">Charts</button>
               <button class="homeBig secondary" id="btnGoLog">Log</button>
 
-              <div class="homeRow">
+              <div class="homeRow" data-swipezone="1">
                 <button class="btn secondary" id="btnInstall" disabled>Install</button>
                 <button class="btn secondary" id="btnClearData">Clear Data</button>
                 <button class="btn danger" id="btnExit">Exit</button>
@@ -361,7 +374,8 @@ Hard Rules (anti-drift)
           </div>
         </section>
 
-        <section class="panel" id="panelAdd" aria-label="Add">
+        <!-- ADD -->
+        <section class="panel" id="panelAdd" aria-label="Add Reading">
           <div class="panelHeader" id="addHeader" data-swipezone="1">
             <div class="name">Add Reading</div>
             <div class="nav">
@@ -376,11 +390,15 @@ Hard Rules (anti-drift)
               </button>
             </div>
           </div>
+
           <div class="card" id="addCard">
-            <div class="muted">Add panel UI + save flow will be restored by the Add modules.</div>
+            <div class="muted">
+              Add panel UI + save flow will be restored by the Add modules (not in index.html).
+            </div>
           </div>
         </section>
 
+        <!-- CHARTS -->
         <section class="panel" id="panelCharts" aria-label="Charts">
           <div class="panelHeader" id="chartsHeader" data-swipezone="1">
             <div class="name">Charts</div>
@@ -410,6 +428,7 @@ Hard Rules (anti-drift)
           </div>
         </section>
 
+        <!-- LOG -->
         <section class="panel" id="panelLog" aria-label="Log">
           <div class="panelHeader" id="logHeader" data-swipezone="1">
             <div class="name">Log</div>
@@ -429,13 +448,14 @@ Hard Rules (anti-drift)
           <div class="card" id="logCard">
             <div class="muted" id="logTopNote">Loading…</div>
             <div class="muted small" style="margin-top:10px;">
-              Log rendering is owned by modules (log.js/ui.js). We will restore it after input is restored.
+              Log rendering is owned by modules (log.js/ui.js). It will populate when those modules are restored.
             </div>
           </div>
         </section>
 
+        <!-- SETTINGS -->
         <section class="panel" id="panelSettings" aria-label="Settings">
-          <div class="panelHeader" data-swipezone="1">
+          <div class="panelHeader" id="settingsHeader" data-swipezone="1">
             <div class="name">Settings</div>
             <div class="nav">
               <button class="btn secondary" id="btnBackFromSettings">Back</button>
@@ -443,10 +463,10 @@ Hard Rules (anti-drift)
           </div>
 
           <div class="card">
-            <div class="muted">Stabilize: version authority + chart + swipe + input before new features.</div>
+            <div class="muted">v2.02x series: stabilize version authority + chart + swipe + input before new features.</div>
             <div class="settingsList">
               <div class="settingsItem">Reporting + Export will be restored after input is restored.</div>
-              <div class="settingsItem">Distress (0–5) + Medication markers are on the roadmap (not in v2.023).</div>
+              <div class="settingsItem">Distress (0–5) and Medication markers are roadmap items (not enabled here).</div>
               <div class="settingsItem">Version discipline: js/version.js is canonical; UI displays from it only.</div>
             </div>
           </div>
@@ -456,21 +476,165 @@ Hard Rules (anti-drift)
     </div>
   </div>
 
-  <script src="./js/version.js?v=2.023f"></script>
-  <script src="./js/app.js?v=2.023f"></script>
-  <script src="./js/storage.js?v=2.023f"></script>
-  <script src="./js/store.js?v=2.023f"></script>
-  <script src="./js/state.js?v=2.023f"></script>
-  <script src="./js/chart.js?v=2.023f"></script>
-  <script src="./js/gestures.js?v=2.023f"></script>
-  <script src="./js/panels.js?v=2.023f"></script>
-  <script src="./js/ui.js?v=2.023f"></script>
+  <!-- Script cache-busting pinned to v2.024 -->
+  <script src="./js/version.js?v=2.024"></script>
+  <script src="./js/app.js?v=2.024"></script>
+  <script src="./js/storage.js?v=2.024"></script>
+  <script src="./js/store.js?v=2.024"></script>
+  <script src="./js/state.js?v=2.024"></script>
+  <script src="./js/chart.js?v=2.024"></script>
+  <script src="./js/gestures.js?v=2.024"></script>
+  <script src="./js/panels.js?v=2.024"></script>
+  <script src="./js/ui.js?v=2.024"></script>
 
   <script>
     (function(){
-      if("serviceWorker" in navigator){
-        navigator.serviceWorker.register("./sw.js?v=2.023f").catch(()=>{});
+      "use strict";
+
+      function safe(fn){ try{ fn(); }catch(_){ } }
+
+      // Display version (read-only; canonical is version.js)
+      safe(function(){
+        var v = (window.VTVersion && window.VTVersion.getVersionString) ? window.VTVersion.getVersionString() : "v?.???";
+        var boot = document.getElementById("bootText");
+        var hv = document.getElementById("homeVersion");
+        if(boot) boot.textContent = "BOOT OK " + v;
+        if(hv) hv.textContent = v;
+      });
+
+      // Defensive button fallbacks (modules should own; these prevent dead UI)
+      function go(panel){
+        if(window.VTPanels && typeof window.VTPanels.setActive === "function"){
+          window.VTPanels.setActive(panel);
+          return;
+        }
+        // Hard fallback: toggle .active manually if modules missing
+        var ids = ["panelHome","panelAdd","panelCharts","panelLog","panelSettings"];
+        for(var i=0;i<ids.length;i++){
+          var el = document.getElementById(ids[i]);
+          if(!el) continue;
+          el.classList.toggle("active", ids[i] === ("panel"+panel.charAt(0).toUpperCase()+panel.slice(1)));
+        }
       }
+
+      var btnGoAdd = document.getElementById("btnGoAdd");
+      var btnGoCharts = document.getElementById("btnGoCharts");
+      var btnGoLog = document.getElementById("btnGoLog");
+
+      if(btnGoAdd) btnGoAdd.addEventListener("click", function(){ go("add"); });
+      if(btnGoCharts) btnGoCharts.addEventListener("click", function(){ go("charts"); safe(function(){ window.VTChart && window.VTChart.onShow && window.VTChart.onShow(); }); });
+      if(btnGoLog) btnGoLog.addEventListener("click", function(){ go("log"); });
+
+      var btnHomeFromAdd = document.getElementById("btnHomeFromAdd");
+      if(btnHomeFromAdd) btnHomeFromAdd.addEventListener("click", function(){ go("home"); });
+
+      // Pull-to-refresh: bind to Home card scroll surface (this is the piece that commonly breaks)
+      (function(){
+        var homeCard = document.getElementById("homeCard");
+        var pullIndicator = document.getElementById("pullIndicator");
+        if(!homeCard || !pullIndicator) return;
+
+        var pullStartY = null;
+        var pullArmed = false;
+
+        homeCard.addEventListener("touchstart", function(e){
+          if(homeCard.scrollTop !== 0) return;
+          if(!e.touches || e.touches.length !== 1) return;
+          pullStartY = e.touches[0].clientY;
+          pullArmed = false;
+        }, {passive:true});
+
+        homeCard.addEventListener("touchmove", function(e){
+          if(pullStartY == null) return;
+          if(!e.touches || e.touches.length !== 1) return;
+          var dy = e.touches[0].clientY - pullStartY;
+          if(dy <= 0) return;
+
+          // Visual feedback
+          var h = Math.min(52, Math.floor(dy/2));
+          pullIndicator.style.height = h + "px";
+          pullArmed = (h >= 36);
+        }, {passive:true});
+
+        homeCard.addEventListener("touchend", function(){
+          if(pullStartY == null) return;
+          var armed = pullArmed;
+          pullStartY = null;
+          pullArmed = false;
+          pullIndicator.style.height = "0px";
+          if(armed) location.reload();
+        }, {passive:true});
+      })();
+
+      // Install handling (kept here; safe + isolated)
+      (function(){
+        var btnInstall = document.getElementById("btnInstall");
+        if(!btnInstall) return;
+
+        var deferredPrompt = null;
+        window.addEventListener("beforeinstallprompt", function(e){
+          e.preventDefault();
+          deferredPrompt = e;
+          btnInstall.disabled = false;
+        });
+
+        btnInstall.addEventListener("click", async function(){
+          try{
+            if(!deferredPrompt) return;
+            deferredPrompt.prompt();
+            await deferredPrompt.userChoice;
+          } catch(_){
+          } finally {
+            deferredPrompt = null;
+            btnInstall.disabled = true;
+          }
+        });
+      })();
+
+      // Clear data (best-effort)
+      (function(){
+        var btn = document.getElementById("btnClearData");
+        if(!btn) return;
+        btn.addEventListener("click", function(){
+          var ok = confirm("Clear all local data on this device?");
+          if(!ok) return;
+          safe(function(){ localStorage.clear(); });
+          safe(function(){
+            if(window.indexedDB){
+              var candidates = ["vitals_tracker_db","VitalsTrackerDB","vitals_tracker","VT_DB"];
+              for(var i=0;i<candidates.length;i++){
+                safe(function(){ indexedDB.deleteDatabase(candidates[i]); });
+              }
+            }
+          });
+          alert("Local data clear requested. Reloading.");
+          location.reload();
+        });
+      })();
+
+      // Exit (keep your known-good pattern)
+      (function(){
+        var btn = document.getElementById("btnExit");
+        if(!btn) return;
+        btn.addEventListener("click", function(){
+          try{
+            window.close();
+            setTimeout(function(){
+              alert("If the app did not close, use your device Back/Home button.");
+            }, 300);
+          } catch(_){
+            alert("Use your device Back/Home button to exit.");
+          }
+        });
+      })();
+
+      // Service worker
+      safe(function(){
+        if("serviceWorker" in navigator){
+          navigator.serviceWorker.register("./sw.js?v=2.024").catch(function(){});
+        }
+      });
+
     })();
   </script>
 </body>
@@ -479,7 +643,7 @@ Hard Rules (anti-drift)
 <!--
 Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: index.html
-App Version: v2.023f
+App Version: v2.024
 Base: v2.021
-Touched in v2.023f: index.html (cache-buster alignment)
+Touched in v2.024: index.html
 -->
