@@ -7,152 +7,167 @@ Pass: Render Recovery + Swipe Feel
 Pass order: File 6 of 9 (P0)
 Prev file: js/panels.js (File 5 of 9)
 Next file: js/chart.js (File 7 of 9)
-
-v2.025f — Change Log (THIS FILE ONLY)
-1) FIX: bind gestures after DOM is ready (deck may not exist at parse time).
-2) FIX: safe rebind guard (prevents duplicate listeners).
-3) No behavior changes to swipe logic besides ensuring it initializes reliably.
 */
 
 (function () {
   "use strict";
 
   /*
-    GESTURE MODEL (SIMPLIFIED, LIQUID)
+    GESTURE MODEL (STABLE, NO-DRIFT)
     - Translates touch movement into panel drag + snap.
-    - NO panel decisions here (panels.js owns rotation + wrap + activation).
+    - panels.js owns rotation, wrap, and transforms.
     - MUST NOT hijack chart interactions: swipes starting on chart canvas/wrap are ignored.
+    - CRITICAL: If a swipe is aborted (vertical scroll, lock, etc.), we MUST snap back to avoid
+      leaving the deckTrack between panels (causes p0->p1 snapping to p2 on next swipe).
   */
 
-  function bindGestures() {
-    const deck = document.getElementById("panelDeck");
-    if (!deck) return false;
+  const deck = document.getElementById("panelDeck");
+  if (!deck) return;
 
-    // Prevent double-binding across hot reloads / repeated init
-    if (deck.dataset && deck.dataset.vtGesturesBound === "1") return true;
-    if (deck.dataset) deck.dataset.vtGesturesBound = "1";
+  let active = false;
+  let startX = 0;
+  let startY = 0;
+  let currentX = 0;
+  let width = 1;
+  let locked = false;
 
-    let active = false;
-    let startX = 0;
-    let startY = 0;
-    let currentX = 0;
-    let width = 0;
-    let locked = false; // locked = we decided this gesture is NOT a horizontal swipe
+  // Once we have moved horizontally enough to start dragging, we must ensure we snap back on abort.
+  let didDrag = false;
 
-    function inChartRegion(target) {
-      try {
-        if (!target) return false;
-        return !!target.closest("#chartCanvas, .chartWrap, .chartCard");
-      } catch (_) {
-        return false;
-      }
-    }
-
-    function shouldIgnoreStart(e) {
-      // If starting on chart, do not swipe panels (allow chart interactions)
-      const t = e.target;
-      if (inChartRegion(t)) return true;
-
-      // If panels says swiping is currently disabled, ignore
-      if (window.VTPanels && typeof window.VTPanels.canSwipe === "function") {
-        return !window.VTPanels.canSwipe();
-      }
+  function inChartRegion(target) {
+    try {
+      if (!target) return false;
+      return !!target.closest("#chartCanvas, .chartWrap, .chartCard");
+    } catch (_) {
       return false;
     }
+  }
 
-    function onStart(e) {
-      if (!e.touches || e.touches.length !== 1) return;
+  function canSwipeNow() {
+    try {
+      return !!(window.VTPanels && typeof window.VTPanels.canSwipe === "function" && window.VTPanels.canSwipe());
+    } catch (_) {
+      return false;
+    }
+  }
 
-      locked = false;
-      if (shouldIgnoreStart(e)) {
-        locked = true;
-        return;
+  function shouldIgnoreStart(e) {
+    const t = e.target;
+    if (inChartRegion(t)) return true;
+    if (!canSwipeNow()) return true;
+    return false;
+  }
+
+  function snapBackIfNeeded() {
+    // Use panels.js snap logic (ratio 0 => snap to current)
+    try {
+      if (window.VTPanels && typeof window.VTPanels.swipeEnd === "function") {
+        window.VTPanels.swipeEnd(0);
       }
+    } catch (_) {}
+  }
 
-      active = true;
-      startX = e.touches[0].clientX;
-      startY = e.touches[0].clientY;
-      currentX = startX;
-      width = deck.clientWidth || window.innerWidth || 1;
+  function onStart(e) {
+    if (!e.touches || e.touches.length !== 1) return;
+
+    locked = false;
+    active = false;
+    didDrag = false;
+
+    if (shouldIgnoreStart(e)) {
+      locked = true;
+      return;
     }
 
-    function onMove(e) {
-      if (!active) return;
-      if (locked) return;
-      if (!e.touches || e.touches.length !== 1) return;
+    active = true;
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    currentX = startX;
+    width = deck.clientWidth || window.innerWidth || 1;
+  }
 
-      const x = e.touches[0].clientX;
-      const y = e.touches[0].clientY;
+  function onMove(e) {
+    if (!active) return;
+    if (locked) return;
+    if (!e.touches || e.touches.length !== 1) return;
 
-      const dx = x - startX;
-      const dy = y - startY;
+    // If panels says no swipe (state changed mid-gesture), abort safely.
+    if (!canSwipeNow()) {
+      locked = true;
+      active = false;
+      if (didDrag) snapBackIfNeeded();
+      return;
+    }
 
-      // If user is moving more vertically than horizontally, treat as non-swipe.
-      // (Home pull-down handled elsewhere; we don't block it.)
-      if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 10) {
-        locked = true;
-        active = false;
-        return;
-      }
+    const x = e.touches[0].clientX;
+    const y = e.touches[0].clientY;
 
-      currentX = x;
-      const ratio = dx / width;
+    const dx = x - startX;
+    const dy = y - startY;
 
-      if (window.VTPanels && window.VTPanels.swipeDelta) {
+    // If user is moving more vertically than horizontally, treat as non-swipe.
+    // IMPORTANT: If we already dragged, snap back to avoid deck drift.
+    if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 10) {
+      locked = true;
+      active = false;
+      if (didDrag) snapBackIfNeeded();
+      return;
+    }
+
+    currentX = x;
+
+    // Treat tiny motions as noise; don't start a drag until we have intent.
+    if (Math.abs(dx) < 6) return;
+
+    didDrag = true;
+
+    const ratio = dx / width;
+
+    try {
+      if (window.VTPanels && typeof window.VTPanels.swipeDelta === "function") {
         window.VTPanels.swipeDelta(ratio);
       }
+    } catch (_) {}
 
-      // Only preventDefault when we're actively dragging horizontally
-      e.preventDefault();
+    // Only preventDefault while actively dragging horizontally
+    e.preventDefault();
+  }
+
+  function onEnd() {
+    if (!active) {
+      // If we locked mid-gesture after dragging, we already snapped back.
+      return;
+    }
+    if (locked) {
+      active = false;
+      if (didDrag) snapBackIfNeeded();
+      return;
     }
 
-    function onEnd() {
-      if (!active) return;
-      if (locked) {
-        active = false;
-        return;
-      }
+    active = false;
 
-      active = false;
+    const dx = currentX - startX;
+    const ratio = dx / width;
 
-      const dx = currentX - startX;
-      const ratio = dx / width;
-
-      if (window.VTPanels && window.VTPanels.swipeEnd) {
+    try {
+      if (window.VTPanels && typeof window.VTPanels.swipeEnd === "function") {
         window.VTPanels.swipeEnd(ratio);
       }
-    }
-
-    deck.addEventListener("touchstart", onStart, { passive: true });
-    deck.addEventListener("touchmove", onMove, { passive: false });
-    deck.addEventListener("touchend", onEnd, { passive: true });
-    deck.addEventListener("touchcancel", onEnd, { passive: true });
-
-    return true;
+    } catch (_) {}
   }
 
-  function init() {
-    // Attempt bind now; if deck isn't present yet, retry once on the next tick.
-    if (bindGestures()) return;
-    setTimeout(bindGestures, 0);
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init, { once: true });
-  } else {
-    init();
-  }
+  deck.addEventListener("touchstart", onStart, { passive: true });
+  deck.addEventListener("touchmove", onMove, { passive: false });
+  deck.addEventListener("touchend", onEnd, { passive: true });
+  deck.addEventListener("touchcancel", onEnd, { passive: true });
 
 })();
 
 /*
 Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: js/gestures.js
-App Version Authority: js/version.js
-Base: v2.025f
 Pass: Render Recovery + Swipe Feel
 Pass order: File 6 of 9 (P0)
 Prev file: js/panels.js (File 5 of 9)
 Next file: js/chart.js (File 7 of 9)
-Touched in v2.025f: js/gestures.js (defer bind + guard)
 */
