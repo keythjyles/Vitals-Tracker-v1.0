@@ -17,8 +17,8 @@ Next file: js/chart.js (File 7 of 9)
     - Translates touch movement into panel drag + snap.
     - panels.js owns rotation, wrap, and transforms.
     - MUST NOT hijack chart interactions: swipes starting on chart canvas/wrap are ignored.
-    - CRITICAL: If a swipe is aborted (vertical scroll, lock, etc.), we MUST snap back to avoid
-      leaving the deckTrack between panels (causes p0->p1 snapping to p2 on next swipe).
+    - CRITICAL: If a swipe is aborted (vertical scroll, lock, cancel, etc.), we MUST snap back
+      to avoid leaving the deckTrack between panels (causes p0->p1 snapping to p2 on next swipe).
   */
 
   const deck = document.getElementById("panelDeck");
@@ -67,12 +67,16 @@ Next file: js/chart.js (File 7 of 9)
     } catch (_) {}
   }
 
+  function resetGesture() {
+    active = false;
+    locked = false;
+    didDrag = false;
+  }
+
   function onStart(e) {
     if (!e.touches || e.touches.length !== 1) return;
 
-    locked = false;
-    active = false;
-    didDrag = false;
+    resetGesture();
 
     if (shouldIgnoreStart(e)) {
       locked = true;
@@ -133,11 +137,21 @@ Next file: js/chart.js (File 7 of 9)
     e.preventDefault();
   }
 
-  function onEnd() {
-    if (!active) {
-      // If we locked mid-gesture after dragging, we already snapped back.
-      return;
+  function finalizeSwipe(ratio) {
+    try {
+      if (window.VTPanels && typeof window.VTPanels.swipeEnd === "function") {
+        window.VTPanels.swipeEnd(ratio);
+      }
+    } catch (_) {
+      // If something throws during finalize, force a snap-back to avoid drift.
+      snapBackIfNeeded();
     }
+  }
+
+  function onEnd() {
+    if (!active) return;
+
+    // If we were locked mid-gesture, ensure we don't leave the deck in a dragged state.
     if (locked) {
       active = false;
       if (didDrag) snapBackIfNeeded();
@@ -149,17 +163,27 @@ Next file: js/chart.js (File 7 of 9)
     const dx = currentX - startX;
     const ratio = dx / width;
 
-    try {
-      if (window.VTPanels && typeof window.VTPanels.swipeEnd === "function") {
-        window.VTPanels.swipeEnd(ratio);
-      }
-    } catch (_) {}
+    // If we never actually dragged (noise), treat as snap-back.
+    if (!didDrag) {
+      finalizeSwipe(0);
+      return;
+    }
+
+    finalizeSwipe(ratio);
+  }
+
+  function onCancel() {
+    // Touch cancelled by OS/browser: always snap back if we dragged.
+    const wasDragging = active && !locked && didDrag;
+    active = false;
+    locked = true;
+    if (wasDragging) snapBackIfNeeded();
   }
 
   deck.addEventListener("touchstart", onStart, { passive: true });
   deck.addEventListener("touchmove", onMove, { passive: false });
   deck.addEventListener("touchend", onEnd, { passive: true });
-  deck.addEventListener("touchcancel", onEnd, { passive: true });
+  deck.addEventListener("touchcancel", onCancel, { passive: true });
 
 })();
 
