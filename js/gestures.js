@@ -3,7 +3,7 @@
 Vitals Tracker — Panel Swipe Gestures (OWNER)
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
-App Version: v2.023d
+App Version: (authority) js/version.js
 Base: v2.021
 Date: 2026-01-18
 
@@ -11,11 +11,16 @@ FILE ROLE (LOCKED)
 - Owns horizontal panel swipe between core panels only.
 - Settings is EXCLUDED from swipe rotation (gear-only access).
 - Must NOT implement chart pan/zoom (chart.js owns that).
+- Must NOT steal gestures inside the chart interaction region (#canvasWrap).
 
-v2.023d — Change Log (THIS FILE ONLY)
-1) Restores working horizontal swipe.
-2) Swipe allowed only from elements marked data-swipezone="1".
-3) Hard-block swipe starts inside #canvasWrap so chart gestures always win.
+Swipe policy:
+- Swipe allowed ONLY when touchstart begins inside an element marked data-swipezone="1".
+- Swipe hard-blocked when touchstart begins inside #canvasWrap while on Charts.
+
+Schema position:
+File 8 of 10
+Previous file: File 7 — js/chart.js
+Next file: File 9 — js/panels.js
 */
 
 (function(){
@@ -26,10 +31,12 @@ v2.023d — Change Log (THIS FILE ONLY)
   const root = $("panelsRoot");
   if(!root) return;
 
-  const canvasWrap = $("canvasWrap");
+  // Idempotency guard (prevents duplicate listeners after hot reload / cache behavior)
+  if(root.dataset && root.dataset.vtGesturesBound === "1") return;
+  if(root.dataset) root.dataset.vtGesturesBound = "1";
 
-  // Core panels only (no settings)
-  const order = ["home","charts","log"];
+  const canvasWrap = $("canvasWrap");
+  const order = ["home","charts","log"]; // settings excluded by design
 
   function getActive(){
     if($("panelHome")?.classList.contains("active")) return "home";
@@ -41,23 +48,15 @@ v2.023d — Change Log (THIS FILE ONLY)
   }
 
   function show(which){
-    // Prefer panels module if it exists
-    if(window.VTPanels?.show) return window.VTPanels.show(which);
+    // Prefer the router if present
+    if(window.VTPanels?.setActive) return window.VTPanels.setActive(which);
 
-    const map = {
-      home:"panelHome",
-      charts:"panelCharts",
-      log:"panelLog",
-      settings:"panelSettings",
-      add:"panelAdd"
-    };
-
+    const map = { home:"panelHome", add:"panelAdd", charts:"panelCharts", log:"panelLog", settings:"panelSettings" };
     const allIds = ["panelHome","panelAdd","panelCharts","panelLog","panelSettings"];
     for(const id of allIds){
       const el = $(id);
       if(el) el.classList.toggle("active", map[which] === id);
     }
-
     if(which === "charts"){
       try{ window.VTChart?.onShow?.(); }catch(_){}
     }
@@ -65,8 +64,8 @@ v2.023d — Change Log (THIS FILE ONLY)
 
   function next(){
     const a = getActive();
-    if(a === "settings") return; // no swipe in/out of settings
-    if(a === "add") return;      // do not swipe from add in this build
+    if(a === "settings") return;
+    if(a === "add") return;
     const i = order.indexOf(a);
     if(i < 0) return;
     show(order[(i+1) % order.length]);
@@ -81,16 +80,16 @@ v2.023d — Change Log (THIS FILE ONLY)
     show(order[(i-1 + order.length) % order.length]);
   }
 
-  function within(el, target){
-    if(!el || !target) return false;
-    return el === target || el.contains(target);
+  function within(container, target){
+    if(!container || !target) return false;
+    return container === target || container.contains(target);
   }
 
   function isSwipeStartAllowed(target){
-    // Chart area is protected: chart.js must receive gestures
+    // Chart area is protected
     if(getActive() === "charts" && canvasWrap && within(canvasWrap, target)) return false;
 
-    // Only allow swipe when start is in explicit swipe zone/header areas
+    // Must start in explicit swipe zones only
     const z = target.closest?.("[data-swipezone='1']");
     return !!z;
   }
@@ -121,6 +120,7 @@ v2.023d — Change Log (THIS FILE ONLY)
     }
 
     if(swipe.mode === "h"){
+      // We must preventDefault or the page will scroll horizontally / eat the gesture
       e.preventDefault();
     }
   }, { passive:false });
