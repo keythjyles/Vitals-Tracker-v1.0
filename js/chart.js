@@ -15,6 +15,9 @@ Next file: js/log.js (File 8 of 9)
   const canvas = document.getElementById("chartCanvas");
   if (!canvas) return;
 
+  // Mark chart as a "no-swipe zone" target (gestures.js should honor this next)
+  try { canvas.setAttribute("data-vt-noswipe", "1"); } catch (_) {}
+
   const ctx = canvas.getContext("2d");
   const legendEl = document.getElementById("chartLegend");
   const loadingEl = document.getElementById("chartsLoading");
@@ -30,9 +33,19 @@ Next file: js/log.js (File 8 of 9)
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 
+  function setLegendHTML(html) {
+    if (!legendEl) return;
+    legendEl.innerHTML = html || "";
+  }
+
   function getData() {
-    if (!window.VTStore || !window.VTStore.getAll) return [];
-    return window.VTStore.getAll() || [];
+    try {
+      if (!window.VTStore || typeof window.VTStore.getAll !== "function") return [];
+      const rows = window.VTStore.getAll();
+      return Array.isArray(rows) ? rows : [];
+    } catch (_) {
+      return [];
+    }
   }
 
   function clamp(v, min, max) {
@@ -42,15 +55,16 @@ Next file: js/log.js (File 8 of 9)
   function computeWindow(data) {
     if (!data.length) return [];
 
-    const sorted = data.slice().sort((a, b) => a.ts - b.ts);
+    const sorted = data.slice().sort((a, b) => (a.ts || 0) - (b.ts || 0));
     const half = (STATE.days * 86400000) / 2;
     const start = STATE.center - half;
     const end = STATE.center + half;
 
-    return sorted.filter(r => r.ts >= start && r.ts <= end);
+    return sorted.filter(r => typeof r.ts === "number" && r.ts >= start && r.ts <= end);
   }
 
   function computeYBounds(data) {
+    // Default clinical range baseline
     let min = 40;
     let max = 140;
 
@@ -65,6 +79,7 @@ Next file: js/log.js (File 8 of 9)
       }
     });
 
+    // Keep floor stable; expand top as needed
     min = 40;
     max = clamp(max + 10, 60, 250);
     return { min, max };
@@ -73,21 +88,24 @@ Next file: js/log.js (File 8 of 9)
   function yScale(val, bounds) {
     const pad = 30;
     const h = canvas.height - pad * 2;
-    return pad + (1 - (val - bounds.min) / (bounds.max - bounds.min)) * h;
+    const denom = (bounds.max - bounds.min) || 1;
+    return pad + (1 - (val - bounds.min) / denom) * h;
   }
 
   function xScale(ts, start, end) {
     const pad = 40;
     const w = canvas.width - pad * 2;
-    return pad + ((ts - start) / (end - start)) * w;
+    const denom = (end - start) || 1;
+    return pad + ((ts - start) / denom) * w;
   }
 
   function drawBands(bounds) {
+    // Reduce opacity by 25% from prior (0.35 -> 0.2625, 0.25 -> 0.1875)
     const bands = [
-      { from: 180, color: "rgba(220,60,60,0.35)", label: "Hypertensive Crisis" },
-      { from: 140, color: "rgba(220,140,60,0.35)", label: "Stage 2 HTN" },
-      { from: 130, color: "rgba(220,200,60,0.35)", label: "Stage 1 HTN" },
-      { from: 120, color: "rgba(120,200,120,0.25)", label: "Elevated" }
+      { from: 180, color: "rgba(220,60,60,0.2625)", label: "Hypertensive Crisis" },
+      { from: 140, color: "rgba(220,140,60,0.2625)", label: "Stage 2 HTN" },
+      { from: 130, color: "rgba(220,200,60,0.2625)", label: "Stage 1 HTN" },
+      { from: 120, color: "rgba(120,200,120,0.1875)", label: "Elevated" }
     ];
 
     bands.forEach(b => {
@@ -97,17 +115,18 @@ Next file: js/log.js (File 8 of 9)
       ctx.fillRect(0, y, canvas.width, canvas.height - y);
     });
 
-    if (legendEl) {
-      legendEl.innerHTML = bands.map(b =>
+    // Always refresh legend (even if some bands are above max)
+    setLegendHTML(
+      bands.map(b =>
         `<div class="legendRow">
            <span class="legendSwatch" style="background:${b.color}"></span>
            <span>${b.label}</span>
          </div>`
-      ).join("");
-    }
+      ).join("")
+    );
   }
 
-  function drawAxes(bounds, start, end) {
+  function drawAxes(bounds) {
     ctx.strokeStyle = "rgba(255,255,255,0.3)";
     ctx.lineWidth = 1;
 
@@ -127,7 +146,7 @@ Next file: js/log.js (File 8 of 9)
     const step = 20;
     for (let v = bounds.min; v <= bounds.max; v += step) {
       const y = yScale(v, bounds);
-      ctx.fillText(v.toString(), 6, y + 4);
+      ctx.fillText(String(v), 6, y + 4);
     }
   }
 
@@ -164,21 +183,29 @@ Next file: js/log.js (File 8 of 9)
     const data = getData();
     clear();
 
+    ctx.fillStyle = "rgba(255,255,255,0.6)";
+    ctx.font = "14px system-ui";
+
     if (!data.length) {
-      ctx.fillStyle = "rgba(255,255,255,0.6)";
+      setLegendHTML(""); // prevent stale legend when no data
       ctx.fillText("No data to display.", 60, 80);
       return;
     }
 
     const windowed = computeWindow(data);
-    if (!windowed.length) return;
+    if (!windowed.length) {
+      // Still clear legend so you don't see old bands on an empty window
+      setLegendHTML("");
+      ctx.fillText("No data in this window.", 60, 80);
+      return;
+    }
 
     const bounds = computeYBounds(windowed);
     const start = Math.min(...windowed.map(r => r.ts));
     const end = Math.max(...windowed.map(r => r.ts));
 
     drawBands(bounds);
-    drawAxes(bounds, start, end);
+    drawAxes(bounds);
     drawLines(windowed, bounds, start, end);
   }
 
