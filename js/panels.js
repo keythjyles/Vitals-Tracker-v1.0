@@ -7,6 +7,13 @@ Pass: Render Recovery + Swipe Feel
 Pass order: File 5 of 9 (P0)
 Prev file: js/ui.js (File 4 of 9)
 Next file: js/gestures.js (File 6 of 9)
+
+FIX (SWIPE ONLY)
+- Corrects drag-mode math so panels do not “double offset” (natural flex position + transform),
+  which is the root cause of p0->p1 snapping to p2 and general drift.
+- Keeps rotation order stable:
+    Right swipe: Home -> Log -> Charts -> Home ...
+    Left swipe:  Home -> Charts -> Log -> Home ...
 */
 
 (function () {
@@ -23,7 +30,7 @@ Next file: js/gestures.js (File 6 of 9)
       We must respect TRACK_ORDER for transforms.
   */
 
-  const ROTATION = ["home", "charts", "log"];                       // swipe carousel
+  const ROTATION = ["home", "charts", "log"];                      // swipe carousel
   const TRACK_ORDER = ["home", "charts", "log", "settings", "add"]; // DOM order in deckTrack
 
   let currentPanel = "home";
@@ -31,7 +38,7 @@ Next file: js/gestures.js (File 6 of 9)
   let inSettings = false;
   let inAdd = false;
 
-  // Drag mode for seamless wrap preview (0 <-> 2)
+  // Drag mode: track is positioned at the CURRENT rotating index; panels are moved relative to that.
   let dragMode = false;
 
   const panels = {};
@@ -99,14 +106,6 @@ Next file: js/gestures.js (File 6 of 9)
     deck.track.style.transform = `translate3d(${x}%, 0, 0)`;
   }
 
-  function snapTrackToPanelNoAnim(name) {
-    if (!deck.track) return;
-    const idx = trackIndexFor(name);
-    if (idx === -1) return;
-    deck.track.style.transition = "none";
-    deck.track.style.transform = `translate3d(${-idx * 100}%, 0, 0)`;
-  }
-
   function clearRotationPanelTransforms() {
     ROTATION.forEach(n => {
       const el = panels[n];
@@ -121,9 +120,9 @@ Next file: js/gestures.js (File 6 of 9)
     if (!deck.track) return;
 
     if (on) {
-      // Freeze track; we will move panels individually to enable seamless wrap preview.
+      // We keep transition off during drag. The track position is set in swipeDelta()
+      // because it depends on the current rotation index.
       deck.track.style.transition = "none";
-      deck.track.style.transform = "translate3d(0,0,0)";
     } else {
       clearRotationPanelTransforms();
     }
@@ -215,36 +214,42 @@ Next file: js/gestures.js (File 6 of 9)
     go(name, animated);
   }
 
-  // Seamless wrap preview:
-  // We render a 3-panel carousel by moving panels individually. This avoids abrupt jumps at 0<->2.
+  // Seamless wrap preview (corrected):
+  // - During drag, the track is pinned to the CURRENT rotation index (so natural flex offsets are stable).
+  // - Each rotating panel gets an additional transform equal to (desiredPosition - naturalPosition),
+  //   preventing the “double offset” bug that causes drift and wrong snaps.
   function swipeDelta(deltaRatio) {
     if (!canSwipe()) return;
     if (!deck.track) return;
 
-    // Enter drag mode as soon as a horizontal delta exists
-    setDragMode(true);
-
     const n = ROTATION.length;
     const cur = getRotationIndex();
 
-    // Track stays at 0 during drag; panels are moved instead.
-    deck.track.style.transition = "none";
-    deck.track.style.transform = "translate3d(0,0,0)";
+    setDragMode(true);
 
-    // Place each rotating panel at the nearest relative position (-1, 0, +1) around current,
-    // then apply drag delta to all for continuous motion (including wrap).
+    // Pin track at the current rotation panel index (0..2), not at 0.
+    deck.track.style.transition = "none";
+    deck.track.style.transform = `translate3d(${-cur * 100}%, 0, 0)`;
+
     for (let i = 0; i < n; i++) {
       const name = ROTATION[i];
       const el = panels[name];
       if (!el) continue;
 
-      // smallest circular distance into [-1,0,+1]
-      let rel = i - cur;
+      // Natural position relative to pinned track is (i - cur) * 100.
+      const raw = i - cur;
+      const natural = raw * 100;
+
+      // Wrapped relative position into [-1, 0, +1] for continuous wrap preview.
+      let rel = raw;
       if (rel > 1) rel -= n;
       if (rel < -1) rel += n;
 
-      const x = (rel + deltaRatio) * 100;
-      el.style.transform = `translate3d(${x}%, 0, 0)`;
+      const desired = (rel + deltaRatio) * 100;
+
+      // Apply only the delta needed beyond natural position.
+      const tx = desired - natural;
+      el.style.transform = `translate3d(${tx}%, 0, 0)`;
     }
   }
 
@@ -253,22 +258,18 @@ Next file: js/gestures.js (File 6 of 9)
 
     const THRESH = 0.2;
 
-    // Decide destination FIRST (while currentPanel is still the correct source).
-    let dest = currentPanel;
-    if (deltaRatio > THRESH) dest = ROTATION[((getRotationIndex() - 1) + ROTATION.length) % ROTATION.length];
-    else if (deltaRatio < -THRESH) dest = ROTATION[(getRotationIndex() + 1) % ROTATION.length];
+    // Exit drag mode before snapping to the track transform
+    setDragMode(false);
 
-    // Critical: convert from drag-mode (track at 0, panels moved) back to track-mode
-    // BEFORE animating, otherwise animations can jump multiple panels and “snap” to wrong index.
-    if (dragMode) {
-      // Put track at the true current panel position without animation, then clear per-panel transforms.
-      snapTrackToPanelNoAnim(currentPanel);
-      setDragMode(false);
+    // Right swipe => PREV (wrap enabled)
+    if (deltaRatio > THRESH) {
+      showByRotationIndex(getRotationIndex() - 1, true);
+      return;
     }
 
-    // Now animate via standard go()
-    if (dest !== currentPanel) {
-      go(dest, true);
+    // Left swipe => NEXT (wrap enabled)
+    if (deltaRatio < -THRESH) {
+      showByRotationIndex(getRotationIndex() + 1, true);
       return;
     }
 
