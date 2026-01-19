@@ -7,6 +7,11 @@ Pass: Render Recovery + Swipe Feel
 Pass order: File 9 of 9 (P0)
 Prev file: js/log.js (File 8 of 9)
 Next file: (end of pass)
+
+FILE ROLE (LOCKED)
+- Owns ONLY the Add Reading panel UI + Save action (minimal schema: ts/sys/dia/hr/notes).
+- Must NOT implement swipe/rotation.
+- Must NOT implement delete/edit (future pass).
 */
 
 (function () {
@@ -17,12 +22,26 @@ Next file: (end of pass)
   const bodyEl = document.getElementById("addBody");
   const cardEl = document.getElementById("addCard");
 
+  let saving = false;
+
   function safeAlert(msg) {
     try { alert(msg); } catch (_) {}
   }
 
+  function bindOnce(el, key, handler, opts) {
+    if (!el) return;
+    const k = `vtBound_${key}`;
+    try {
+      if (el.dataset && el.dataset[k] === "1") return;
+      if (el.dataset) el.dataset[k] = "1";
+    } catch (_) {}
+    el.addEventListener("click", handler, opts || false);
+  }
+
   function ensureStoreReady() {
-    return (window.VTStore && typeof window.VTStore.add === "function" && typeof window.VTStore.init === "function");
+    return !!(window.VTStore &&
+      typeof window.VTStore.init === "function" &&
+      typeof window.VTStore.add === "function");
   }
 
   async function initStoreIfNeeded() {
@@ -38,8 +57,6 @@ Next file: (end of pass)
   }
 
   function defaultRecord() {
-    // Minimal record schema used by chart.js + log.js
-    // (sys, dia, hr, ts, notes)
     return {
       ts: nowTs(),
       sys: null,
@@ -49,10 +66,8 @@ Next file: (end of pass)
     };
   }
 
-  function buildBasicForm() {
+  function ensureFormPresent() {
     if (!bodyEl) return;
-
-    // If a real form already exists, do not replace it.
     if (document.getElementById("addForm")) return;
 
     const form = document.createElement("div");
@@ -83,8 +98,8 @@ Next file: (end of pass)
       </div>
     `;
 
-    // Insert above the Save button/card text so the panel is usable immediately
-    if (cardEl && cardEl.parentNode) {
+    // Insert above any existing content in card
+    if (cardEl) {
       cardEl.insertBefore(form, cardEl.firstChild);
     } else {
       bodyEl.appendChild(form);
@@ -106,11 +121,32 @@ Next file: (end of pass)
     return String(el.value || "").trim();
   }
 
+  function clearInputs() {
+    const ids = ["inSys", "inDia", "inHr", "inNotes"];
+    for (const id of ids) {
+      const el = document.getElementById(id);
+      if (el) el.value = "";
+    }
+  }
+
+  function setSaveEnabled(on) {
+    if (!btnSave) return;
+    try {
+      btnSave.disabled = !on;
+      btnSave.style.opacity = on ? "" : "0.65";
+    } catch (_) {}
+  }
+
   async function save() {
+    if (saving) return;
+
     if (!ensureStoreReady()) {
       safeAlert("Storage is not ready (VTStore). Fix store.js/storage.js wiring first.");
       return;
     }
+
+    saving = true;
+    setSaveEnabled(false);
 
     await initStoreIfNeeded();
 
@@ -120,43 +156,44 @@ Next file: (end of pass)
     rec.hr  = readNumber("inHr");
     rec.notes = readText("inNotes");
 
-    // Basic validation: allow saving notes-only, but if any BP is entered, require both sys & dia.
     const hasSys = rec.sys != null;
     const hasDia = rec.dia != null;
 
+    // Allow notes-only OR vitals; but if BP is entered, require both sys+dia.
     if ((hasSys && !hasDia) || (!hasSys && hasDia)) {
       safeAlert("If entering BP, please enter BOTH systolic and diastolic.");
+      saving = false;
+      setSaveEnabled(true);
       return;
     }
 
     try {
       await window.VTStore.add(rec);
 
-      // Refresh log/chart if present
+      // Refresh features if present
       try { window.VTLog?.onShow?.(); } catch (_) {}
       try { window.VTChart?.onShow?.(); } catch (_) {}
 
       safeAlert("Saved.");
-
-      // Clear inputs for quick repeats
-      const ids = ["inSys", "inDia", "inHr", "inNotes"];
-      ids.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = "";
-      });
-
+      clearInputs();
     } catch (e) {
       safeAlert("Save failed. Check console for details.");
       try { console.error(e); } catch (_) {}
+    } finally {
+      saving = false;
+      setSaveEnabled(true);
     }
   }
 
   function goHome() {
-    if (window.VTPanels && typeof window.VTPanels.go === "function") {
-      window.VTPanels.go("home", true);
-      return;
-    }
-    // Fallback
+    try {
+      if (window.VTPanels && typeof window.VTPanels.go === "function") {
+        window.VTPanels.go("home", true);
+        return;
+      }
+    } catch (_) {}
+
+    // Fallback DOM toggle (non-invasive)
     try {
       document.getElementById("panelAdd")?.classList.remove("active");
       document.getElementById("panelHome")?.classList.add("active");
@@ -164,21 +201,20 @@ Next file: (end of pass)
   }
 
   function bind() {
-    buildBasicForm();
+    ensureFormPresent();
 
-    if (btnSave) {
-      btnSave.addEventListener("click", (e) => {
-        e.preventDefault();
-        save();
-      }, false);
-    }
+    bindOnce(btnSave, "saveReading", (e) => {
+      try { e.preventDefault(); } catch (_) {}
+      save();
+    });
 
-    if (btnHome) {
-      btnHome.addEventListener("click", (e) => {
-        e.preventDefault();
-        goHome();
-      }, false);
-    }
+    bindOnce(btnHome, "homeFromAdd", (e) => {
+      try { e.preventDefault(); } catch (_) {}
+      goHome();
+    });
+
+    // If user taps Save before store init completes elsewhere, we still initialize on demand.
+    setSaveEnabled(true);
   }
 
   if (document.readyState === "loading") {
