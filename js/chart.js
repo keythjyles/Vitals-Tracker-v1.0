@@ -19,7 +19,9 @@ LATEST CHANGES (per user instructions ONLY)
   - max = (global dataset max + 10), rounded to tens
 - X-axis day + date labels ensured (2 rows, collision-safe thinning).
 - BP bands legend height reduced ~50% (tighter title/rows/padding).
-- Alternating background per day (day stripes) remains, with HTN bands overlaying the day stripes.
+
+ADJUSTMENT (per latest user instruction)
+- Day stripes are 20% opacity and OVERLAY the hypertension bands.
 */
 
 (function () {
@@ -41,9 +43,9 @@ LATEST CHANGES (per user instructions ONLY)
     lineDia: "rgba(240,240,240,0.88)",
     lineHr:  "rgba(120,235,170,0.90)",
 
-    // Alternating day stripes (stay behind HTN bands)
+    // Alternating day stripes (OVERLAY HTN bands)
     dayA: "rgba(0,0,0,0.00)",
-    dayB: "rgba(0,0,0,0.12)",
+    dayB: "rgba(0,0,0,0.20)",
 
     // BP category bands (SYSTOLIC)
     // Required palette:
@@ -871,9 +873,9 @@ LATEST CHANGES (per user instructions ONLY)
 
     const bounds = computeYBoundsStatic();
 
-    // Day stripes behind HTN bands (HTN overlays stripes)
-    drawDayStripes(ctx, start, end, L);
+    // HTN bands first, then day stripes OVERLAY (per instruction)
     drawBPBands(ctx, bounds, L);
+    drawDayStripes(ctx, start, end, L);
 
     drawGridAndAxes(ctx, bounds, L, start, end, sized);
     drawLines(ctx, windowed, bounds, start, end, L);
