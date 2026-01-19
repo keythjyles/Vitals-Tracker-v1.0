@@ -1,42 +1,47 @@
 /* File: js/version.js */
 /*
 Vitals Tracker — Version Authority
-Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
+Copyright (c) 2026 Wendell K. Jiles.
+All rights reserved.
 
-App Version: v2.025d
-Base: v2.021
+App Version: v2.025e
+Base: v2.025d
 Date: 2026-01-18
+
+Schema position:
+File 10 of 10
+
+Former file:
+File 9 — js/panels.js
+
+Next file:
+— END OF SCHEMA —
 
 FILE ROLE (LOCKED)
 - Single source of truth for application version metadata.
-- All other modules MUST read version info from this file (no hard-coded versions elsewhere).
-- index.html may DISPLAY the version, but MUST NOT define canonical values long-term.
-
-v2.025d — Change Log (THIS FILE ONLY)
-1) Bumps canonical app version to v2.025d for the “gesture restart + chart restore” pass.
-2) No runtime side effects. No DOM access. Safe to import anywhere.
+- Header display, boot banner, and diagnostics MUST read from this file.
+- No other file may hardcode the version string.
+- Provides read-only accessors only.
 
 ANTI-DRIFT RULES
-- Do NOT duplicate version strings in other JS files.
-- Increment version HERE FIRST, then update index.html display + cache-busters.
-- If versions ever disagree, THIS FILE WINS.
-
-Next planned file:
-js/gestures.js (restart swipe implementation)
+- Increment version HERE FIRST.
+- If any displayed version disagrees, THIS FILE WINS.
+- No DOM access.
+- No side effects.
 */
 
 (function (global) {
   "use strict";
 
   const VERSION = Object.freeze({
-    app: "v2.025d",
-    base: "v2.021",
+    app: "v2.025e",
+    base: "v2.025d",
     date: "2026-01-18",
-    codename: "gesture-restart-chart-restore",
+    codename: "chart-stabilization",
     schema: {
       major: 2,
       minor: 25,
-      patch: "d"
+      patch: "e"
     }
   });
 
@@ -44,11 +49,11 @@ js/gestures.js (restart swipe implementation)
     return VERSION.app;
   }
 
-  function getFullVersionLabel() {
+  function getFullLabel() {
     return `${VERSION.app} (base ${VERSION.base})`;
   }
 
-  function getVersionMeta() {
+  function getMeta() {
     return {
       app: VERSION.app,
       base: VERSION.base,
@@ -58,11 +63,11 @@ js/gestures.js (restart swipe implementation)
     };
   }
 
-  // Expose as global, read-only
+  // Expose immutable public API
   global.VTVersion = Object.freeze({
     getVersionString,
-    getFullVersionLabel,
-    getVersionMeta
+    getFullLabel,
+    getMeta
   });
 
 })(window);
@@ -70,8 +75,7 @@ js/gestures.js (restart swipe implementation)
 /*
 Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: js/version.js
-App Version: v2.025d
-Base: v2.021
-Touched in v2.025d: js/version.js (version bump only)
-Next planned file: js/gestures.js (swipe restart)
+App Version: v2.025e
+Base: v2.025d
+Schema: COMPLETE (10/10)
 */
