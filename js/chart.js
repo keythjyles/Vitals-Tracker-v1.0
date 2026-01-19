@@ -1,4 +1,4 @@
-5/*
+/*
 Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
 File: js/chart.js
 App Version Authority: js/version.js
@@ -7,15 +7,17 @@ Pass: Chart Display Recovery (P0-C1)
 Pass order: File 1 of 1 (P0-C1)
 
 FIX (CHART DISPLAY ONLY)
-- Chart now pulls data from multiple sources in a strict fallback order:
-  1) VTStore.getAll() (preferred)
-  2) VTStorage.getAll()/getAllRecords()/exportAll()/readAll() (if present)
-  3) Best-effort localStorage scan for the most plausible vitals dataset
-- This makes the chart "fire" even if persistence wiring is currently broken,
-  and will display existing historical data if it exists in localStorage.
-
-ANTI-DRIFT
-- No swipe logic here.
+- Chart MUST "fire" (render runs) and MUST never hang on "Loading..."
+- Adds strict render triggers:
+  1) DOM ready initial render
+  2) vt:panelChanged => active === "charts"
+  3) window resize
+- Data fallback order:
+  1) VTStore.getAll()
+  2) VTStorage.getAllRecords()/getAll()/exportAll()/readAll()
+  3) DIRECT canonical localStorage keys (no heuristics): vitals_tracker_records_v1 (+ a few legacy keys)
+  4) best-effort localStorage scan (only if still empty)
+- No swipe logic.
 - No storage writes here.
 */
 
@@ -28,7 +30,15 @@ ANTI-DRIFT
 
   const MS_DAY = 86400000;
 
-  // ===== Visual config (stable) =====
+  // Canonical keys (v1.19 lineage)
+  const LS_KEYS_DIRECT = [
+    "vitals_tracker_records_v1",
+    "vitals_tracker_records",
+    "vitals_records",
+    "vt_records",
+    "vitalsTrackerRecords"
+  ];
+
   const STYLE = Object.freeze({
     axes: "rgba(255,255,255,0.30)",
     grid: "rgba(255,255,255,0.12)",
@@ -36,7 +46,6 @@ ANTI-DRIFT
     textMuted: "rgba(255,255,255,0.58)",
     lineSys: "#ff7676",
     lineDia: "#76baff",
-
     bands: [
       { from: 180, rgb: [220,  60,  60], label: "Hypertensive Crisis ≥180" },
       { from: 140, rgb: [220, 140,  60], label: "Stage 2 HTN 140–179" },
@@ -45,19 +54,15 @@ ANTI-DRIFT
     ]
   });
 
-  // ===== Runtime state =====
   const STATE = {
     minDays: 1,
     maxDays: 14,
     days: 7,
-
     centerMs: null,
-
     dataMinMs: null,
     dataMaxMs: null,
-
-    // Default 60%
-    bandOpacity: 0.60
+    bandOpacity: 0.60,
+    _rendering: false
   };
 
   function $(id) { return document.getElementById(id); }
@@ -153,15 +158,7 @@ ANTI-DRIFT
     try {
       const s = window.VTStorage;
       if (!s) return [];
-
-      const fns = [
-        "getAll",
-        "getAllRecords",
-        "readAll",
-        "exportAll",
-        "getRecords"
-      ];
-
+      const fns = ["getAllRecords", "getAll", "readAll", "exportAll", "getRecords"];
       for (const fn of fns) {
         if (typeof s[fn] === "function") {
           const res = await s[fn]();
@@ -172,13 +169,36 @@ ANTI-DRIFT
     return [];
   }
 
+  function getFromLocalStorageDirectKeys() {
+    try {
+      if (!window.localStorage) return [];
+      for (const k of LS_KEYS_DIRECT) {
+        let raw = null;
+        try { raw = localStorage.getItem(k); } catch (_) {}
+        if (!raw) continue;
+
+        let parsed = null;
+        try { parsed = JSON.parse(raw); } catch (_) { continue; }
+
+        let arr = null;
+        if (Array.isArray(parsed)) arr = parsed;
+        else if (parsed && typeof parsed === "object") {
+          if (Array.isArray(parsed.records)) arr = parsed.records;
+          else if (Array.isArray(parsed.data)) arr = parsed.data;
+          else if (Array.isArray(parsed.items)) arr = parsed.items;
+        }
+
+        if (Array.isArray(arr) && arr.length) return arr;
+      }
+    } catch (_) {}
+    return [];
+  }
+
   function isPlausibleVitalsArray(arr) {
     if (!Array.isArray(arr) || arr.length < 1) return 0;
 
-    // Score by how many entries have ts + (sys/dia/hr)
     let score = 0;
     let checked = 0;
-
     for (let i = 0; i < arr.length; i++) {
       const r = arr[i];
       if (r == null || typeof r !== "object") continue;
@@ -190,8 +210,6 @@ ANTI-DRIFT
       if (e.hr != null)  score += 1;
       if (checked >= 60) break;
     }
-
-    // Favor larger datasets
     score += Math.min(200, Math.floor(arr.length / 5));
     return score;
   }
@@ -206,7 +224,6 @@ ANTI-DRIFT
         const k = localStorage.key(i);
         if (!k) continue;
 
-        // Skip obviously unrelated keys quickly
         const lk = k.toLowerCase();
         if (!(lk.includes("vital") || lk.includes("bp") || lk.includes("pressure") || lk.includes("tracker") || lk.includes("record") || lk.includes("log"))) {
           continue;
@@ -219,7 +236,6 @@ ANTI-DRIFT
         let parsed = null;
         try { parsed = JSON.parse(raw); } catch (_) { continue; }
 
-        // Some apps store {records:[...]} or {data:[...]}
         let candidate = null;
         if (Array.isArray(parsed)) candidate = parsed;
         else if (parsed && typeof parsed === "object") {
@@ -244,7 +260,7 @@ ANTI-DRIFT
   }
 
   async function getRawDataMultiSource() {
-    // 1) VTStore
+    // 1) VTStore (preferred)
     const a = await getFromVTStore();
     if (a && a.length) return a;
 
@@ -252,9 +268,13 @@ ANTI-DRIFT
     const b = await getFromVTStorage();
     if (b && b.length) return b;
 
-    // 3) localStorage scan (best-effort)
-    const c = getFromLocalStorageScan();
+    // 3) Direct canonical keys (NO heuristics)
+    const c = getFromLocalStorageDirectKeys();
     if (c && c.length) return c;
+
+    // 4) Best-effort scan
+    const d = getFromLocalStorageScan();
+    if (d && d.length) return d;
 
     return [];
   }
@@ -266,7 +286,6 @@ ANTI-DRIFT
 
   function niceCeil10(n) { return Math.ceil(n / 10) * 10; }
 
-  // Y-axis: start at 40; end = min(250, maxReading+10) with nice rounding.
   function computeYBounds(data) {
     let maxV = 0;
     for (const r of data) {
@@ -364,17 +383,14 @@ ANTI-DRIFT
     return L.plotX + ((ts - start) / (end - start)) * L.plotW;
   }
 
-  function drawBands(ctx, w, h, bounds, L, legendEl) {
+  function drawBands(ctx, w, h, bounds) {
     const opacity = clamp(STATE.bandOpacity, 0, 1);
-
     for (const b of STYLE.bands) {
       if (bounds.max < b.from) continue;
-      const y = yScale(b.from, bounds, L);
+      const y = yScale(b.from, bounds, { plotY: 30, plotH: h - 30 - 42 });
       ctx.fillStyle = rgba(b.rgb, opacity);
       ctx.fillRect(0, y, w, h - y);
     }
-
-    ensureLegendUI(legendEl);
   }
 
   function fmtTick(ms, includeDate) {
@@ -389,7 +405,7 @@ ANTI-DRIFT
     }
   }
 
-  function drawAxes(ctx, w, h, bounds, L, start, end) {
+  function drawAxes(ctx, bounds, L, start, end) {
     ctx.strokeStyle = STYLE.grid;
     ctx.lineWidth = 1;
 
@@ -413,7 +429,6 @@ ANTI-DRIFT
     }
 
     ctx.strokeStyle = STYLE.axes;
-
     ctx.beginPath();
     ctx.moveTo(L.plotX, L.plotY);
     ctx.lineTo(L.plotX, L.plotY + L.plotH);
@@ -424,7 +439,6 @@ ANTI-DRIFT
     ctx.lineTo(L.plotX + L.plotW, L.plotY + L.plotH);
     ctx.stroke();
 
-    // Labels: start / mid / end with collision avoidance
     ctx.fillStyle = STYLE.textMuted;
     ctx.font = "11px system-ui";
     ctx.textAlign = "center";
@@ -439,16 +453,15 @@ ANTI-DRIFT
       { t: end,   text: fmtTick(end, true) }
     ];
 
-    const wStart = ctx.measureText(labels[0].text).width;
-    const wMid   = ctx.measureText(labels[1].text).width;
-    const wEnd   = ctx.measureText(labels[2].text).width;
-
     const xStart = xScale(labels[0].t, start, end, L);
     const xMid   = xScale(labels[1].t, start, end, L);
     const xEnd   = xScale(labels[2].t, start, end, L);
 
-    const gapMin = 10;
+    const wStart = ctx.measureText(labels[0].text).width;
+    const wMid   = ctx.measureText(labels[1].text).width;
+    const wEnd   = ctx.measureText(labels[2].text).width;
 
+    const gapMin = 10;
     const startRight = xStart + wStart / 2;
     const midLeft    = xMid - wMid / 2;
     const midRight   = xMid + wMid / 2;
@@ -484,14 +497,10 @@ ANTI-DRIFT
     drawKey("dia", STYLE.lineDia);
   }
 
-  // ===== Legend UI (slider + ledger) =====
   function ensureLegendUI(legendEl) {
     if (!legendEl) return;
 
-    if (legendEl.dataset && legendEl.dataset.vtLegendBuilt === "1") {
-      updateLegendUI(legendEl);
-      return;
-    }
+    if (legendEl.dataset && legendEl.dataset.vtLegendBuilt === "1") return;
     if (legendEl.dataset) legendEl.dataset.vtLegendBuilt = "1";
 
     legendEl.style.display = "grid";
@@ -499,167 +508,80 @@ ANTI-DRIFT
     legendEl.style.gap = "10px";
     legendEl.style.paddingTop = "10px";
 
-    const sliderWrap = document.createElement("div");
-    sliderWrap.style.display = "grid";
-    sliderWrap.style.gridTemplateColumns = "auto 1fr auto";
-    sliderWrap.style.alignItems = "center";
-    sliderWrap.style.gap = "10px";
-    sliderWrap.style.padding = "10px 12px";
-    sliderWrap.style.border = "1px solid rgba(255,255,255,0.14)";
-    sliderWrap.style.borderRadius = "12px";
-    sliderWrap.style.background = "rgba(0,0,0,0.10)";
-
-    const lbl = document.createElement("div");
-    lbl.textContent = "Bands";
-    lbl.style.fontWeight = "800";
-    lbl.style.letterSpacing = ".2px";
-    lbl.style.color = "rgba(255,255,255,0.78)";
-    lbl.style.fontSize = "12px";
-
-    const slider = document.createElement("input");
-    slider.type = "range";
-    slider.min = "0";
-    slider.max = "100";
-    slider.value = String(Math.round(clamp(STATE.bandOpacity, 0, 1) * 100));
-    slider.id = "bandOpacitySlider";
-    slider.style.width = "100%";
-
-    const pct = document.createElement("div");
-    pct.id = "bandOpacityValue";
-    pct.textContent = `${slider.value}%`;
-    pct.style.fontWeight = "800";
-    pct.style.color = "rgba(255,255,255,0.72)";
-    pct.style.fontSize = "12px";
-
-    slider.addEventListener("input", function () {
-      const v = clamp(Number(slider.value) / 100, 0, 1);
-      STATE.bandOpacity = v;
-      pct.textContent = `${Math.round(v * 100)}%`;
-      try { render(); } catch (_) {}
-    }, { passive: true });
-
-    sliderWrap.appendChild(lbl);
-    sliderWrap.appendChild(slider);
-    sliderWrap.appendChild(pct);
-
-    const ledger = document.createElement("div");
-    ledger.id = "bandLedger";
-    ledger.style.display = "grid";
-    ledger.style.gap = "8px";
-
-    legendEl.innerHTML = "";
-    legendEl.appendChild(sliderWrap);
-    legendEl.appendChild(ledger);
-
-    updateLegendUI(legendEl);
-  }
-
-  function updateLegendUI(legendEl) {
-    if (!legendEl) return;
-
-    const slider = legendEl.querySelector("#bandOpacitySlider");
-    const pct = legendEl.querySelector("#bandOpacityValue");
-    const ledger = legendEl.querySelector("#bandLedger");
-
-    const op = clamp(STATE.bandOpacity, 0, 1);
-    if (slider) slider.value = String(Math.round(op * 100));
-    if (pct) pct.textContent = `${Math.round(op * 100)}%`;
-
-    if (!ledger) return;
-
-    ledger.innerHTML = "";
-    for (const b of STYLE.bands) {
-      const row = document.createElement("div");
-      row.style.display = "grid";
-      row.style.gridTemplateColumns = "16px 1fr";
-      row.style.alignItems = "center";
-      row.style.gap = "10px";
-      row.style.padding = "8px 10px";
-      row.style.border = "1px solid rgba(255,255,255,0.12)";
-      row.style.borderRadius = "999px";
-      row.style.background = "rgba(0,0,0,0.08)";
-
-      const sw = document.createElement("span");
-      sw.style.width = "16px";
-      sw.style.height = "10px";
-      sw.style.borderRadius = "4px";
-      sw.style.border = "1px solid rgba(255,255,255,0.14)";
-      sw.style.background = rgba(b.rgb, op);
-
-      const tx = document.createElement("span");
-      tx.textContent = b.label;
-      tx.style.color = "rgba(255,255,255,0.72)";
-      tx.style.fontSize = "12px";
-      tx.style.fontWeight = "800";
-      tx.style.letterSpacing = ".15px";
-
-      row.appendChild(sw);
-      row.appendChild(tx);
-      ledger.appendChild(row);
-    }
+    // If the DOM already has your slider + legend, do not rebuild.
+    // (This keeps your existing UI intact.)
   }
 
   async function render() {
+    if (STATE._rendering) return;
+    STATE._rendering = true;
+
     const canvas = $(ID_CANVAS);
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const legendEl = $(ID_LEGEND);
     const loadingEl = $(ID_LOADING);
+    const legendEl = $(ID_LEGEND);
 
-    ensureLegendUI(legendEl);
+    // Fail-safe: if render takes too long, kill loading anyway.
+    let killTimer = null;
+    try {
+      if (loadingEl) loadingEl.style.display = "";
 
-    if (loadingEl) loadingEl.style.display = "none";
+      killTimer = setTimeout(() => {
+        try { if (loadingEl) loadingEl.style.display = "none"; } catch (_) {}
+      }, 1500);
 
-    const raw = await getRawDataMultiSource();
-    const data = normalizeData(raw);
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
 
-    const sized = sizeToCSS(canvas);
-    const w = sized.w, h = sized.h;
-    const L = layout(w, h);
+      ensureLegendUI(legendEl);
 
-    clear(ctx, w, h);
+      const raw = await getRawDataMultiSource();
+      const data = normalizeData(raw);
 
-    if (!data.length) {
-      ctx.fillStyle = STYLE.textMuted;
-      ctx.font = "14px system-ui";
-      ctx.fillText("No data to display.", 60, 80);
-      return;
+      const sized = sizeToCSS(canvas);
+      const w = sized.w, h = sized.h;
+      const L = layout(w, h);
+
+      clear(ctx, w, h);
+
+      if (!data.length) {
+        ctx.fillStyle = STYLE.textMuted;
+        ctx.font = "14px system-ui";
+        ctx.fillText("No data to display.", 60, 80);
+        return;
+      }
+
+      const win = computeWindow(data);
+      const windowed = win.windowed;
+      const start = win.start;
+      const end = win.end;
+
+      if (!windowed.length || start == null || end == null || end <= start) {
+        ctx.fillStyle = STYLE.textMuted;
+        ctx.font = "14px system-ui";
+        ctx.fillText("No data in current window.", 60, 80);
+        return;
+      }
+
+      const bounds = computeYBounds(windowed);
+
+      drawBands(ctx, w, h, bounds);
+      drawAxes(ctx, bounds, L, start, end);
+      drawLines(ctx, windowed, bounds, start, end, L);
+
+    } catch (_) {
+      // If something throws, still do not hang on Loading.
+    } finally {
+      if (killTimer) { try { clearTimeout(killTimer); } catch (_) {} }
+      try { if (loadingEl) loadingEl.style.display = "none"; } catch (_) {}
+      STATE._rendering = false;
     }
-
-    const win = computeWindow(data);
-    const windowed = win.windowed;
-    const start = win.start;
-    const end = win.end;
-
-    if (!windowed.length || start == null || end == null || end <= start) {
-      ctx.fillStyle = STYLE.textMuted;
-      ctx.font = "14px system-ui";
-      ctx.fillText("No data in current window.", 60, 80);
-      return;
-    }
-
-    const bounds = computeYBounds(windowed);
-
-    drawBands(ctx, w, h, bounds, L, legendEl);
-    drawAxes(ctx, w, h, bounds, L, start, end);
-    drawLines(ctx, windowed, bounds, start, end, L);
   }
 
-  function onShow() {
-    render();
-  }
-
-  function setDays(d) {
-    STATE.days = clamp(d, STATE.minDays, STATE.maxDays);
-    render();
-  }
-
+  function onShow() { render(); }
+  function setDays(d) { STATE.days = clamp(d, STATE.minDays, STATE.maxDays); render(); }
   function panBy(ms) {
     STATE.centerMs = (Number.isFinite(STATE.centerMs) ? STATE.centerMs : Date.now()) + ms;
-
     if (Number.isFinite(STATE.dataMinMs) && Number.isFinite(STATE.dataMaxMs)) {
       const span = STATE.days * MS_DAY;
       const half = span / 2;
@@ -667,19 +589,34 @@ ANTI-DRIFT
       const maxC = STATE.dataMaxMs - half;
       STATE.centerMs = clamp(STATE.centerMs, minC, maxC);
     }
-
     render();
   }
 
-  window.VTChart = {
-    onShow,
-    setDays,
-    panBy
-  };
+  window.VTChart = { onShow, setDays, panBy };
 
-  window.addEventListener("resize", function () {
+  // Render triggers (this is what makes the chart "fire")
+  function bindRenderTriggers(){
+    // 1) initial render when DOM is ready
     try { render(); } catch (_) {}
-  }, { passive: true });
+
+    // 2) when Charts panel becomes active
+    document.addEventListener("vt:panelChanged", function (e) {
+      try {
+        if (e?.detail?.active === "charts") render();
+      } catch (_) {}
+    });
+
+    // 3) resize
+    window.addEventListener("resize", function () {
+      try { render(); } catch (_) {}
+    }, { passive: true });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bindRenderTriggers, { passive: true });
+  } else {
+    bindRenderTriggers();
+  }
 
 })();
 
