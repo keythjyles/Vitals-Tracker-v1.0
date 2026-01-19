@@ -12,6 +12,11 @@ FILE ROLE (LOCKED)
 - Owns ONLY the Add Reading panel UI + Save action (minimal schema: ts/sys/dia/hr/notes).
 - Must NOT implement swipe/rotation.
 - Must NOT implement delete/edit (future pass).
+
+v2.025f — Change Log (THIS FILE ONLY)
+1) Adds visual softening for Add panel (reduces “harsh/blinding” look) using safe inline styles.
+2) Ensures form is present exactly once and keeps Save button below the form.
+3) Routes Home through panels.js closeAdd() when available (keeps state consistent).
 */
 
 (function () {
@@ -66,8 +71,22 @@ FILE ROLE (LOCKED)
     };
   }
 
+  function softenAddCard() {
+    // Purely cosmetic. Does not depend on CSS presence.
+    if (!cardEl) return;
+    try {
+      cardEl.style.background = "rgba(0,0,0,0.14)";
+      cardEl.style.border = "1px solid rgba(255,255,255,0.12)";
+      cardEl.style.boxShadow = "inset 0 0 0 1px rgba(235,245,255,.08)";
+      cardEl.style.backdropFilter = "blur(6px)";
+      cardEl.style.webkitBackdropFilter = "blur(6px)";
+    } catch (_) {}
+  }
+
   function ensureFormPresent() {
     if (!bodyEl) return;
+
+    // If already built, do nothing.
     if (document.getElementById("addForm")) return;
 
     const form = document.createElement("div");
@@ -98,12 +117,21 @@ FILE ROLE (LOCKED)
       </div>
     `;
 
-    // Insert above any existing content in card
+    // Insert form at top of card so Save stays below it.
     if (cardEl) {
       cardEl.insertBefore(form, cardEl.firstChild);
     } else {
       bodyEl.appendChild(form);
     }
+
+    // Further soften form controls (safe, minimal)
+    try {
+      const inputs = form.querySelectorAll("input,textarea");
+      inputs.forEach(el => {
+        el.style.background = "rgba(8,12,20,0.45)";
+        el.style.borderColor = "rgba(235,245,255,0.16)";
+      });
+    } catch (_) {}
   }
 
   function readNumber(id) {
@@ -186,10 +214,17 @@ FILE ROLE (LOCKED)
   }
 
   function goHome() {
+    // Prefer panels closeAdd() so panels.js can restore lastMainPanel correctly.
     try {
-      if (window.VTPanels && typeof window.VTPanels.go === "function") {
-        window.VTPanels.go("home", true);
-        return;
+      if (window.VTPanels) {
+        if (typeof window.VTPanels.closeAdd === "function") {
+          window.VTPanels.closeAdd(true);
+          return;
+        }
+        if (typeof window.VTPanels.go === "function") {
+          window.VTPanels.go("home", true);
+          return;
+        }
       }
     } catch (_) {}
 
@@ -201,6 +236,7 @@ FILE ROLE (LOCKED)
   }
 
   function bind() {
+    softenAddCard();
     ensureFormPresent();
 
     bindOnce(btnSave, "saveReading", (e) => {
@@ -213,7 +249,6 @@ FILE ROLE (LOCKED)
       goHome();
     });
 
-    // If user taps Save before store init completes elsewhere, we still initialize on demand.
     setSaveEnabled(true);
   }
 
