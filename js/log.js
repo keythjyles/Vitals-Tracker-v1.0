@@ -26,16 +26,19 @@ Next file: js/add.js (File 9 of 9)
     try {
       const d = new Date(ts);
       return d.toLocaleString();
-       } catch (_) {
+    } catch (_) {
       return "";
     }
   }
 
   function getData() {
-    if (!window.VTStore || typeof window.VTStore.getAll !== "function") {
+    try {
+      if (!window.VTStore || typeof window.VTStore.getAll !== "function") return [];
+      const rows = window.VTStore.getAll();
+      return Array.isArray(rows) ? rows : [];
+    } catch (_) {
       return [];
     }
-    return window.VTStore.getAll() || [];
   }
 
   function renderRow(r) {
@@ -58,9 +61,7 @@ Next file: js/add.js (File 9 of 9)
 
     const right = document.createElement("div");
     right.className = "logMeta";
-    if (r.notes) {
-      right.textContent = r.notes;
-    }
+    right.textContent = r.notes ? String(r.notes) : "";
 
     row.appendChild(left);
     row.appendChild(right);
@@ -70,7 +71,7 @@ Next file: js/add.js (File 9 of 9)
   function render() {
     if (loadingEl) loadingEl.style.display = "none";
 
-    const data = getData().slice().sort((a, b) => b.ts - a.ts);
+    const data = getData().slice().sort((a, b) => (b.ts || 0) - (a.ts || 0));
     clear();
 
     if (!data.length) {
@@ -85,21 +86,18 @@ Next file: js/add.js (File 9 of 9)
     });
   }
 
-  // React to panel changes so Log refreshes when opened
-  document.addEventListener("vt:panelChanged", function (e) {
-    if (e.detail && e.detail.active === "log") {
-      render();
-    }
-  });
+  // panels.js calls VTLog.onShow() when Log becomes active
+  function onShow() {
+    try { render(); } catch (_) {}
+  }
 
   // Initial render (safe if hidden)
-  try {
-    render();
-  } catch (_) {}
+  onShow();
 
-  window.VTLog = {
+  window.VTLog = Object.freeze({
+    onShow,
     render
-  };
+  });
 
 })();
 
