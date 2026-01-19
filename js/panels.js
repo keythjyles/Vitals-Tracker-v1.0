@@ -23,7 +23,7 @@ Next file: js/gestures.js (File 6 of 9)
       We must respect TRACK_ORDER for transforms.
   */
 
-  const ROTATION = ["home", "charts", "log"];                      // swipe carousel
+  const ROTATION = ["home", "charts", "log"];                       // swipe carousel
   const TRACK_ORDER = ["home", "charts", "log", "settings", "add"]; // DOM order in deckTrack
 
   let currentPanel = "home";
@@ -97,6 +97,14 @@ Next file: js/gestures.js (File 6 of 9)
 
     const x = -idx * 100;
     deck.track.style.transform = `translate3d(${x}%, 0, 0)`;
+  }
+
+  function snapTrackToPanelNoAnim(name) {
+    if (!deck.track) return;
+    const idx = trackIndexFor(name);
+    if (idx === -1) return;
+    deck.track.style.transition = "none";
+    deck.track.style.transform = `translate3d(${-idx * 100}%, 0, 0)`;
   }
 
   function clearRotationPanelTransforms() {
@@ -211,7 +219,6 @@ Next file: js/gestures.js (File 6 of 9)
   // We render a 3-panel carousel by moving panels individually. This avoids abrupt jumps at 0<->2.
   function swipeDelta(deltaRatio) {
     if (!canSwipe()) return;
-
     if (!deck.track) return;
 
     // Enter drag mode as soon as a horizontal delta exists
@@ -220,6 +227,7 @@ Next file: js/gestures.js (File 6 of 9)
     const n = ROTATION.length;
     const cur = getRotationIndex();
 
+    // Track stays at 0 during drag; panels are moved instead.
     deck.track.style.transition = "none";
     deck.track.style.transform = "translate3d(0,0,0)";
 
@@ -245,18 +253,22 @@ Next file: js/gestures.js (File 6 of 9)
 
     const THRESH = 0.2;
 
-    // Exit drag mode before snapping to the track transform
-    setDragMode(false);
+    // Decide destination FIRST (while currentPanel is still the correct source).
+    let dest = currentPanel;
+    if (deltaRatio > THRESH) dest = ROTATION[((getRotationIndex() - 1) + ROTATION.length) % ROTATION.length];
+    else if (deltaRatio < -THRESH) dest = ROTATION[(getRotationIndex() + 1) % ROTATION.length];
 
-    // Right swipe => PREV (wrap enabled)
-    if (deltaRatio > THRESH) {
-      showByRotationIndex(getRotationIndex() - 1, true);
-      return;
+    // Critical: convert from drag-mode (track at 0, panels moved) back to track-mode
+    // BEFORE animating, otherwise animations can jump multiple panels and “snap” to wrong index.
+    if (dragMode) {
+      // Put track at the true current panel position without animation, then clear per-panel transforms.
+      snapTrackToPanelNoAnim(currentPanel);
+      setDragMode(false);
     }
 
-    // Left swipe => NEXT (wrap enabled)
-    if (deltaRatio < -THRESH) {
-      showByRotationIndex(getRotationIndex() + 1, true);
+    // Now animate via standard go()
+    if (dest !== currentPanel) {
+      go(dest, true);
       return;
     }
 
