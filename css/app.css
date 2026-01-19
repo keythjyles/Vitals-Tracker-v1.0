@@ -1,469 +1,470 @@
+/* File: css/app.css */
 /*
-Vitals Tracker (Modular) — css/app.css
-App Version: v2.001
+Vitals Tracker - Stylesheet
+Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
-Purpose:
-- Centralized styling to preserve the v1.19Bx look/feel:
-  - Glass panel, accent frame, typography, buttons
-  - Carousel viewport/track/panels
-  - Add/Edit form styling
-  - Log entry styling
-  - Charts canvas styling
-  - Custom in-panel “sheet” components for export (no generic popups)
+App Version Authority: js/version.js
+Base: v2.025e
+Pass: Render Recovery + Swipe Feel
+Pass order: File 3 of 9 (P0)
+Prev file: index.html (File 2 of 9)
+Next file: js/panels.js (File 4 of 9)
 
-Latest Update (v2.001):
-- Initial modular stylesheet extracted from v1.19B44.
-- Preserves accent frame + card look.
-- Adds classes for custom sheets:
-  - .sheet, .sheetCard, .sheetTitle, .sheetSub, .sheetBtns
+SCOPE (THIS FILE)
+- Provide liquid swipe feel foundation (deck/track layout, transitions).
+- Keep panels visually consistent with the existing glass UI.
+- Do NOT implement logic. No JS here.
 */
 
 :root{
   --bg0:#08101f;
   --bg1:#0b1324;
-  --panel:#0c1528cc;
+
+  --panel:rgba(12,21,40,.80);
+
   --stroke:rgba(235,245,255,.16);
   --stroke2:rgba(235,245,255,.22);
   --strokeBold:rgba(180,210,255,.42);
+
   --text:rgba(235,245,255,.86);
   --muted:rgba(235,245,255,.58);
   --muted2:rgba(235,245,255,.42);
+
   --accent:#2b4e7a;
-  --shadow:0 14px 40px rgba(0,0,0,.38);
-  --radius:26px;
+
+  --shadow:0 18px 60px rgba(0,0,0,.45);
+
+  --r1:18px;
+  --r2:26px;
+  --pad:16px;
+
   --btnH:56px;
-  --pad:18px;
-  --font: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-  --vpPadX:6px;
+  --btnMiniH:46px;
 }
 
 *{ box-sizing:border-box; }
-html,body{ height:100%; }
 
-body{
+html,body{
+  height:100%;
   margin:0;
-  font-family:var(--font);
-  color:var(--text);
   background:
-    radial-gradient(1200px 700px at 30% 0%, rgba(47,120,255,.22), transparent 55%),
-    radial-gradient(900px 600px at 80% 20%, rgba(91,214,178,.10), transparent 55%),
-    linear-gradient(180deg, var(--bg1), var(--bg0));
-  display:flex;
-  justify-content:center;
-  padding: max(14px, env(safe-area-inset-top)) 12px max(14px, env(safe-area-inset-bottom));
+    radial-gradient(1200px 900px at 20% 10%, rgba(90,140,210,.24), transparent 55%),
+    radial-gradient(900px 800px at 80% 0%, rgba(60,120,255,.18), transparent 60%),
+    radial-gradient(900px 900px at 50% 110%, rgba(0,0,0,.30), transparent 60%),
+    linear-gradient(180deg, var(--bg0), var(--bg1));
+  color:var(--text);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overflow:hidden;
 }
 
-.app{
-  width:min(520px, 100%);
+button{
+  font-family:inherit;
+  color:inherit;
+}
+
+.app-root{
+  height:100%;
   display:flex;
   flex-direction:column;
-  gap:14px;
+  padding:14px 14px 18px;
+  gap:12px;
 }
 
-.logoTitle{
-  margin:10px 6px 0;
+.topbar{
+  height:62px;
+  border-radius:22px;
+  background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(0,0,0,.12));
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow:0 18px 50px rgba(0,0,0,.28);
   display:flex;
-  justify-content:center;
   align-items:center;
-  text-shadow: 0 10px 22px rgba(0,0,0,.35);
-}
-.logoTitle svg{
-  width:min(520px, 100%);
-  height:auto;
-  display:block;
+  justify-content:space-between;
+  padding:10px 14px;
 }
 
-.card{
-  background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-  border:1px solid var(--stroke);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: var(--pad);
-  backdrop-filter: blur(10px);
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
 }
 
-.accentFrame{
-  position:relative;
-  border-color: transparent;
-}
-.accentFrame::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  border:3px solid var(--accent);
-  border-radius: var(--radius);
-  pointer-events:none;
-  z-index:0;
-}
-.accentFrame > *{
-  position:relative;
-  z-index:1;
+.brandIcon{
+  width:34px;
+  height:34px;
+  border-radius:12px;
+  background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(0,0,0,.18));
+  border:1px solid rgba(255,255,255,.10);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:rgba(200,230,255,.95);
 }
 
-.hidden{ display:none !important; }
-
-.btn{
-  height:var(--btnH);
-  border-radius: 999px;
-  border:1px solid var(--stroke2);
-  background: rgba(255,255,255,.03);
-  color:rgba(235,245,255,.78);
-  font-weight:650;
+.brandTitle{
+  font-weight:700;
+  font-size:22px;
   letter-spacing:.2px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:0 18px;
-  user-select:none;
-  -webkit-tap-highlight-color: transparent;
-  font-size:18px;
-}
-.btn:active{ transform: translateY(1px); }
-
-.btn.primary{
-  background: linear-gradient(180deg, rgba(47,120,255,.92), rgba(47,120,255,.72));
-  border-color: rgba(120,170,255,.55);
-  color: rgba(235,245,255,.90);
-}
-
-.btn.danger{
-  background: linear-gradient(180deg, rgba(255,80,80,.18), rgba(255,80,80,.10));
-  border-color: rgba(255,120,120,.42);
-  color: rgba(255,225,225,.92);
-  box-shadow: 0 10px 26px rgba(0,0,0,.22);
-}
-
-.btn.small{
-  height:44px;
-  font-size:16px;
-  padding:0 14px;
-  font-weight:650;
-  white-space:nowrap;
-}
-
-.btn:disabled{
-  opacity:.55;
-  filter:saturate(.85);
-  transform:none !important;
-  pointer-events:none;
-}
-
-.row{ display:flex; gap:12px; }
-.row.center{ align-items:center; }
-.grow{ flex:1; }
-
-.label{
-  font-size:16px;
-  color:var(--muted);
-  font-weight:650;
-  margin: 12px 4px 8px;
-}
-.subtle{
-  font-size:14px;
-  color:var(--muted2);
-  margin: 6px 4px 0;
-}
-
-.field{
-  border:2px solid var(--strokeBold);
-  background: rgba(255,255,255,.06);
-  color: rgba(235,245,255,.86);
-  border-radius: 18px;
-  height:54px;
-  padding: 0 14px;
-  font-size:18px;
-  outline:none;
-  width:100%;
-}
-.field::placeholder{ color: rgba(235,245,255,.35); }
-.field:focus{
-  border-color: rgba(90,150,255,.78);
-  box-shadow: 0 0 0 4px rgba(47,120,255,.16);
-}
-textarea.field{
-  height:64px;
-  padding: 12px 14px;
-  resize:none;
-  line-height:1.25;
-}
-
-.timeLine{
-  margin: 4px 4px 14px;
-  color: rgba(235,245,255,.82);
-  font-weight:750;
-  letter-spacing:.3px;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
-  line-height:1.05;
-  font-size: clamp(18px, 6.4vw, 44px);
 }
 
-.triple{
-  display:grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 12px;
-}
-.triple .miniLabel{
-  margin: 0 4px 8px;
-  color: var(--muted);
-  font-weight:650;
-  font-size:16px;
+.bootpill{
+  font-size:14px;
+  letter-spacing:.4px;
+  color:rgba(235,245,255,.70);
+  padding:8px 12px;
+  border-radius:999px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.10);
+  white-space:nowrap;
 }
 
-.symGrid{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4px 14px;
-  padding: 2px 2px 0;
-  margin-top: 0;
+/* Deck */
+.deck{
+  flex:1;
+  position:relative;
+  border-radius:28px;
+  border:2px solid rgba(75,140,210,.55);
+  background:rgba(10,18,35,.28);
+  box-shadow:0 22px 70px rgba(0,0,0,.42);
+  overflow:hidden;
 }
-.symItem{
+
+/* Track is translated by panels.js for swipe.
+   We keep will-change to help "liquid" feel. */
+.deckTrack{
+  position:absolute;
+  inset:0;
   display:flex;
-  align-items:center;
-  gap:10px;
-  padding: 2px 6px;
-  border-radius: 14px;
-  transition: background .12s ease, border-color .12s ease;
-}
-.box{
-  width:30px;
-  height:30px;
-  border-radius: 8px;
-  border:2px solid rgba(235,245,255,.40);
-  background: rgba(255,255,255,.03);
-  display:grid;
-  place-items:center;
-  flex:0 0 auto;
-}
-.check{
-  width:14px;
-  height:8px;
-  border-left:3px solid transparent;
-  border-bottom:3px solid transparent;
-  transform: rotate(-45deg);
-  margin-top:-2px;
-}
-.symText{
-  font-size:16px;
-  font-weight:500;
-  color: rgba(235,245,255,.76);
-  line-height:1.1;
-}
-.symItem.selected{ background: rgba(47,120,255,.16); }
-.symItem.selected .box{
-  border-color: rgba(90,150,255,.90);
-  background: rgba(47,120,255,.18);
-}
-.symItem.selected .check{
-  border-left-color: rgba(235,245,255,.92);
-  border-bottom-color: rgba(235,245,255,.92);
+  width:500%;
+  height:100%;
+  transform:translate3d(0,0,0);
+  will-change:transform;
 }
 
-.panelButtons{
-  display:flex;
-  gap:12px;
-  margin-top: 10px;
-  flex-wrap:wrap;
+/* Panel */
+.panel{
+  width:100%;
+  height:100%;
+  flex:0 0 100%;
+  padding:16px;
+  opacity:1;
 }
 
-/* Log entries */
-.filters{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top:10px;
-}
-.dateField{
+.screenFrame{
+  height:100%;
+  border-radius:24px;
+  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.10));
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+  padding:14px;
   display:flex;
   flex-direction:column;
-  gap:8px;
-}
-.dateField .miniLabel{
-  margin: 0 4px;
-  color: var(--muted);
-  font-weight:650;
-  font-size:14px;
-}
-input[type="date"].field, input[type="week"].field{
-  font-size:16px;
-  padding-right: 10px;
+  gap:12px;
 }
 
-.searchRow{
+/* Screen header */
+.screenHeader{
   display:flex;
-  gap:10px;
   align-items:center;
-}
-.searchRow .field{
-  flex: 1 1 auto;
-  min-width: 0;
-}
-.searchRow .btn.small{
-  flex: 0 0 auto;
-  height:54px;
-  font-size:16px;
-  padding: 0 16px;
-  border-radius: 18px;
-}
-
-.entry{
-  border:1px solid var(--stroke);
-  background: rgba(255,255,255,.03);
-  border-radius: 22px;
-  padding: 8px 10px 7px;
-  margin-top: 6px;
-  touch-action: pan-y;
-}
-.entry.pressed{
-  background: rgba(47,120,255,.14);
-  border-color: rgba(90,150,255,.55);
-}
-.entry:active{ transform: translateY(1px); }
-.entryTop{
-  display:flex;
   justify-content:space-between;
-  align-items:flex-end;
-  gap:10px;
-  margin-bottom: 2px;
+  padding:10px 10px;
+  border-radius:18px;
+  background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(0,0,0,.10));
+  border:1px solid rgba(255,255,255,.10);
 }
-.entryTime{
-  font-size:13px;
-  color: rgba(235,245,255,.46);
-  white-space:nowrap;
-}
-.entryBPHR{
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  align-items:baseline;
-}
-.bpBig{
-  font-size:20px;
+
+.screenTitle{
+  font-size:28px;
   font-weight:800;
-  letter-spacing:.1px;
-  white-space:nowrap;
-}
-.hrBig{
-  font-size:20px;
-  font-weight:800;
-  color: rgba(235,245,255,.72);
-  white-space:nowrap;
-  letter-spacing:.1px;
-}
-.entryLine{
-  margin-top: 3px;
-  color: rgba(235,245,255,.62);
-  font-size:15px;
-  line-height:1.12;
-}
-.entryLine b{ color: rgba(235,245,255,.70); }
-
-/* Chart canvas */
-canvas{
-  width:100%;
-  height:280px;
-  border-radius: 22px;
-  border:1px solid var(--stroke);
-  background: rgba(255,255,255,.02);
-  margin-top: 10px;
-  touch-action: none; /* critical: chart owns gestures */
+  letter-spacing:.2px;
 }
 
-.ptrHint{
-  margin: 0 4px 10px;
-  color: rgba(235,245,255,.40);
-  font-size: 12px;
-  font-weight: 650;
-  letter-spacing: .2px;
-  user-select:none;
-}
-
-/* Carousel */
-.viewport{
-  overflow:hidden;
-  width:100%;
-  touch-action: pan-y;
-  padding: 0 var(--vpPadX);
-}
-.track{
+.screenHeaderRight{
   display:flex;
-  width:100%;
-  will-change: transform;
-  transform: translate3d(0,0,0);
-  align-items:flex-start;
-  gap:0;
-}
-.panel{
-  flex: 0 0 100%;
-  width:100%;
-  align-self:flex-start;
+  align-items:center;
+  gap:10px;
 }
 
-/* Fixed frame + inner scroll (matches v1.19B44 behavior) */
-.panelFrame{
-  width:100%;
-  height: calc(100dvh - max(14px, env(safe-area-inset-top)) - max(14px, env(safe-area-inset-bottom)) - 12px);
-  max-height: calc(100dvh - max(14px, env(safe-area-inset-top)) - max(14px, env(safe-area-inset-bottom)) - 12px);
-  overflow:hidden;
-}
-.panelInner{
-  height:100%;
-  overflow:auto;
-  -webkit-overflow-scrolling: touch;
+/* Pills / icon buttons */
+.pillBtn{
+  height:42px;
+  padding:0 18px;
+  border-radius:999px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);
+  font-weight:700;
+  letter-spacing:.2px;
 }
 
-/* Custom sheet (export UI) — not a generic popup modal */
-.sheet{
-  position:fixed;
-  inset:0;
+.iconBtn{
+  width:42px;
+  height:42px;
+  border-radius:999px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);
   display:flex;
   align-items:center;
   justify-content:center;
-  padding: max(16px, env(safe-area-inset-top)) 14px max(16px, env(safe-area-inset-bottom));
-  background: rgba(0,0,0,.56);
-  z-index: 9998;
 }
-.sheetCard{
-  width:min(520px, 100%);
-  border-radius: 26px;
-  border: 3px solid var(--accent);
-  background: linear-gradient(180deg, rgba(12,21,40,.96), rgba(8,16,31,.96));
-  box-shadow: 0 18px 60px rgba(0,0,0,.55);
-  padding: 18px;
-  backdrop-filter: blur(10px);
+
+.iconBtn svg,
+.brandIcon svg{
+  display:block;
 }
-.sheetTitle{
-  font-weight: 900;
-  letter-spacing: .2px;
-  color: rgba(235,245,255,.92);
-  font-size: clamp(22px, 6.5vw, 34px);
-  line-height: 1.05;
-  margin: 4px 2px 14px;
-}
-.sheetSub{
-  color: rgba(235,245,255,.56);
-  font-size: 14px;
-  margin: 0 2px 14px;
-  white-space: pre-wrap;
-}
-.sheetBtns{
+
+.loadingPill{
+  height:52px;
+  border-radius:18px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
   display:flex;
-  gap:12px;
-  margin-top: 6px;
-  flex-wrap:wrap;
+  align-items:center;
+  justify-content:center;
+  color:rgba(235,245,255,.55);
+  font-size:24px;
+  letter-spacing:.2px;
 }
-.sheetBtns .btn{
+
+/* Home buttons */
+.homeButtons{
   flex:1;
-  height: 54px;
-  font-size: 18px;
-  font-weight: 800;
-  min-width: 140px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  padding:10px 6px 2px;
+}
+
+.primaryBtn,
+.ghostBtn{
+  height:var(--btnH);
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.12);
+  font-size:26px;
+  font-weight:800;
+  letter-spacing:.2px;
+}
+
+.primaryBtn{
+  background:linear-gradient(180deg, rgba(100,160,255,.40), rgba(30,70,140,.28));
+  border:1px solid rgba(140,200,255,.35);
+  box-shadow:0 14px 44px rgba(0,0,0,.35);
+}
+
+.ghostBtn{
+  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.12));
+}
+
+.homeRow{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.miniBtn{
+  height:var(--btnMiniH);
+  border-radius:999px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.10);
+  font-weight:800;
+  font-size:18px;
+  letter-spacing:.2px;
+}
+
+.miniBtn:disabled{
+  opacity:.55;
+}
+
+.dangerBtn{
+  height:var(--btnMiniH);
+  border-radius:999px;
+  background:linear-gradient(180deg, rgba(220,70,90,.22), rgba(0,0,0,.14));
+  border:1px solid rgba(240,110,130,.28);
+  font-weight:900;
+  font-size:18px;
+  letter-spacing:.4px;
+}
+
+.homeHint{
+  margin-top:2px;
+  color:rgba(235,245,255,.42);
+  font-size:16px;
+  line-height:1.2;
+  padding:4px 6px 0;
+}
+
+.homeFooter{
+  margin-top:auto;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:10px;
+  padding:4px 6px 0;
+}
+
+.homeVer{
+  font-weight:900;
+  color:rgba(235,245,255,.55);
+}
+
+.homeSig{
+  color:rgba(235,245,255,.42);
+}
+
+/* Chart card */
+.chartCard{
+  flex:1;
+  border-radius:24px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.10);
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  overflow:hidden;
+}
+
+.chartWrap{
+  flex:1;
+  border-radius:20px;
+  background:rgba(0,0,0,.18);
+  border:1px solid rgba(255,255,255,.10);
+  overflow:hidden;
+  display:flex;
+}
+
+#chartCanvas{
+  width:100%;
+  height:100%;
+  display:block;
+  touch-action:none; /* chart.js may use pinch/pan */
+}
+
+.chartLegend{
+  min-height:44px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:center;
+  justify-content:center;
+  padding:4px 2px;
+}
+
+.chartFooterSpacer{
+  height:10px;
+}
+
+/* Legend pills (chart.js can inject these classes) */
+.legendPill{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 14px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.05);
+  color:rgba(235,245,255,.78);
+  font-weight:900;
+  letter-spacing:.2px;
+}
+
+.legendDot{
+  width:12px;
+  height:12px;
+  border-radius:4px;
+  opacity:.95;
+}
+
+/* Log */
+.logList{
+  flex:1;
+  border-radius:24px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.10);
+  overflow:auto;
+  padding:10px;
+}
+
+.logEmpty{
+  color:rgba(235,245,255,.52);
+  text-align:center;
+  padding:18px 8px;
+}
+
+.logFooterSpacer{
+  height:10px;
+}
+
+/* Settings */
+.settingsBody{
+  flex:1;
+  overflow:auto;
+  padding:6px 2px 2px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.settingsCard{
+  border-radius:22px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.10);
+  padding:14px;
+}
+
+.settingsLine{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+
+.muted{ color:var(--muted); }
+
+/* Add panel */
+.addBody{
+  flex:1;
+  overflow:auto;
+  padding:6px 2px 2px;
+}
+
+.addCard{
+  border-radius:22px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.10);
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+/* Tap states */
+.primaryBtn:active,
+.ghostBtn:active,
+.pillBtn:active,
+.iconBtn:active,
+.miniBtn:active,
+.dangerBtn:active{
+  transform:translateY(1px);
+  filter:brightness(1.06);
+}
+
+/* Prefer reduced motion */
+@media (prefers-reduced-motion: reduce){
+  .deckTrack{ will-change:auto; }
 }
 
 /*
-Vitals Tracker (Modular) — css/app.css (EOF)
-App Version: v2.001
-Notes:
-- Next expected file: js/chart.js
+Vitals Tracker - EOF Version/Detail Notes (REQUIRED)
+File: css/app.css
+App Version Authority: js/version.js
+Pass: Render Recovery + Swipe Feel
+Pass order: File 3 of 9 (P0)
+Prev file: index.html (File 2 of 9)
+Next file: js/panels.js (File 4 of 9)
 */
+```0
