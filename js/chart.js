@@ -2,18 +2,18 @@
 Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
 File: js/chart.js
 App Version Authority: js/version.js
-Base: v2.025f
-Pass: Render Recovery + Swipe Feel
+Base: v2.026a
+Pass: Swipe + Render Recovery (P0-R1)
 Pass order: File 7 of 9 (P0)
 Prev file: js/gestures.js (File 6 of 9)
 Next file: js/log.js (File 8 of 9)
 
-v2.025f — Change Log (THIS FILE ONLY)
-1) Bands opacity now defaults to 60% (0.60).
+v2.026a — Change Log (THIS FILE ONLY)
+1) Bands opacity defaults to 60% (0.60).
 2) Adds a slider (below chart, inside legend area) to control band opacity live (0–100%).
-3) Legend/ledger is always present: slider + band explanations.
+3) Legend/ledger always present: slider + band explanations.
 4) Tightens rendering: responsive canvas sizing, stable y-bounds rules, non-colliding X labels.
-5) Ensures canvas fills chartWrap (CSS sizing applied by JS; no CSS dependency).
+5) Ensures canvas fills chartWrap via JS (no CSS dependency).
 
 ANTI-DRIFT: No panel swipe logic here.
 */
@@ -201,12 +201,14 @@ ANTI-DRIFT: No panel swipe logic here.
   }
 
   function ensureCanvasFillsWrap(canvas) {
-    // Ensure the canvas has CSS size so getBoundingClientRect reflects the intended layout.
+    // Ensure the canvas has CSS size so getBoundingClientRect reflects intended layout.
     try {
       canvas.style.width = "100%";
       canvas.style.height = "100%";
       canvas.style.display = "block";
-      canvas.style.touchAction = "none"; // chart gestures handled elsewhere; keeps chart stable
+      // Prevent browser scroll/pinch behaviors on the canvas surface itself.
+      // (Panel swipe is already blocked for chart region in gestures.js)
+      canvas.style.touchAction = "none";
     } catch (_) {}
   }
 
@@ -590,7 +592,7 @@ ANTI-DRIFT: No panel swipe logic here.
 /*
 Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: js/chart.js
-Pass: Render Recovery + Swipe Feel
+Pass: Swipe + Render Recovery (P0-R1)
 Pass order: File 7 of 9 (P0)
 Prev file: js/gestures.js (File 6 of 9)
 Next file: js/log.js (File 8 of 9)
