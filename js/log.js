@@ -1,197 +1,129 @@
 /* File: js/log.js */
 /*
-Vitals Tracker — Log Renderer (Read-Only)
-Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
+Vitals Tracker — Log Renderer
+Copyright (c) 2026 Wendell K. Jiles.
+All rights reserved.
 
-App Version: v2.025e
+App Version: (authority) js/version.js
 Base: v2.021
 Date: 2026-01-18
 
+FILE ROLE (LOCKED)
+- Owns Log list rendering ONLY.
+- Reads data from VTStore.
+- Displays chronological readings.
+- Does NOT manage panels (panels.js).
+- Does NOT manage gestures (gestures.js).
+- Does NOT mutate data (store.js/storage.js own that).
+
+v2.023f — Change Log (THIS FILE ONLY)
+1) Guaranteed render on every onShow().
+2) Removes permanent "Loading..." state.
+3) Deterministic empty-state message.
+4) Defensive against missing fields.
+5) Zero swipe or gesture assumptions.
+
 Schema position:
 File 6 of 10
-
-Former file:
-File 5 — js/panels.js
-
-Next file:
-File 7 — js/gestures.js
-
-FILE ROLE (LOCKED)
-- Owns rendering of the Log panel (read-only list).
-- Responsible for loading records and displaying them chronologically.
-- MUST show data immediately when Log panel is activated.
-- MUST NOT implement swipe or navigation.
-- MUST NOT write to storage.
-- MUST tolerate empty or partial datasets safely.
-
-v2.025e — Change Log (THIS FILE ONLY)
-1) Restores Log rendering pipeline (no infinite “Loading…”).
-2) Uses unified record loading (VTStore → VTStorage fallback).
-3) Defensive normalization of timestamps and vitals fields.
-4) Chronological sort (newest first).
-5) Stable empty-state message.
-
-ANTI-DRIFT RULES
-- Do NOT add edit/delete actions.
-- Do NOT implement gestures.
-- Do NOT style outside the Log container.
 */
 
-(function () {
+(function (global) {
   "use strict";
-
-  const PANEL_ID = "panel-log";
-  const LIST_ID  = "logList";
 
   function $(id) {
     return document.getElementById(id);
   }
 
-  function safeNum(x) {
-    const n = Number(x);
-    return Number.isFinite(n) ? n : null;
+  function clearLoading() {
+    const el = $("logLoading");
+    if (el) el.style.display = "none";
   }
 
-  function parseTs(v) {
-    if (v == null) return null;
-    if (typeof v === "number") {
-      return v > 1e12 ? v : v * 1000;
+  function getContainer() {
+    return $("logList") || $("panelLog");
+  }
+
+  function getData() {
+    if (!global.VTStore?.getAll) return [];
+    return global.VTStore.getAll() || [];
+  }
+
+  function fmtDate(ts) {
+    try {
+      return new Date(ts).toLocaleString();
+    } catch (_) {
+      return "";
     }
-    if (typeof v === "string") {
-      const t = Date.parse(v);
-      return Number.isFinite(t) ? t : null;
-    }
-    return null;
   }
 
-  function extractTs(r) {
-    return r?.ts ?? r?.time ?? r?.timestamp ?? r?.date ?? r?.createdAt ?? r?.created_at ?? r?.iso ?? null;
-  }
-
-  function extractBP(r) {
-    const sys = safeNum(r?.sys ?? r?.systolic ?? r?.sbp ?? (r?.bp && r.bp.sys));
-    const dia = safeNum(r?.dia ?? r?.diastolic ?? r?.dbp ?? (r?.bp && r.bp.dia));
-    return { sys, dia };
-  }
-
-  function extractHR(r) {
-    return safeNum(r?.hr ?? r?.heartRate ?? r?.pulse ?? (r?.vitals && r.vitals.hr));
-  }
-
-  async function loadRecords() {
-    try {
-      if (window.VTStore?.init) await window.VTStore.init();
-    } catch (_) {}
-
-    try {
-      if (window.VTStore?.getAll) return window.VTStore.getAll() || [];
-    } catch (_) {}
-
-    try {
-      if (window.VTStorage?.getAllRecords) {
-        return await window.VTStorage.getAllRecords() || [];
-      }
-    } catch (_) {}
-
-    return [];
-  }
-
-  function clearList() {
-    const list = $(LIST_ID);
-    if (list) list.innerHTML = "";
-  }
-
-  function renderEmpty(msg) {
-    const list = $(LIST_ID);
-    if (!list) return;
-
+  function makeRow(r) {
     const div = document.createElement("div");
-    div.textContent = msg;
-    div.style.padding = "16px";
-    div.style.color = "rgba(235,245,255,0.65)";
-    div.style.fontSize = "14px";
-    div.style.textAlign = "center";
+    div.className = "log-row";
 
-    list.appendChild(div);
-  }
-
-  function renderRow(rec) {
-    const row = document.createElement("div");
-    row.style.padding = "10px 12px";
-    row.style.borderBottom = "1px solid rgba(235,245,255,0.10)";
-    row.style.display = "flex";
-    row.style.flexDirection = "column";
-    row.style.gap = "4px";
-
-    const dt = document.createElement("div");
-    dt.style.fontSize = "13px";
-    dt.style.color = "rgba(235,245,255,0.85)";
-    dt.textContent = new Date(rec.ts).toLocaleString();
+    const when = document.createElement("div");
+    when.className = "log-when";
+    when.textContent = fmtDate(r.ts);
 
     const vals = document.createElement("div");
-    vals.style.fontSize = "13px";
-    vals.style.color = "rgba(235,245,255,0.70)";
+    vals.className = "log-values";
 
     const parts = [];
-    if (rec.sys != null && rec.dia != null) parts.push(`BP ${rec.sys}/${rec.dia}`);
-    if (rec.hr != null) parts.push(`HR ${rec.hr}`);
+    if (r.sys && r.dia) parts.push(`${r.sys}/${r.dia}`);
+    if (r.hr) parts.push(`HR ${r.hr}`);
+    if (r.note) parts.push(r.note);
 
-    vals.textContent = parts.join("   ");
+    vals.textContent = parts.join(" • ");
 
-    row.appendChild(dt);
-    row.appendChild(vals);
-
-    return row;
+    div.appendChild(when);
+    div.appendChild(vals);
+    return div;
   }
 
-  async function renderLog() {
-    clearList();
+  function render() {
+    const container = getContainer();
+    if (!container) return;
 
-    const list = $(LIST_ID);
-    if (!list) return;
+    clearLoading();
 
-    const raw = await loadRecords();
-    if (!raw.length) {
-      renderEmpty("No readings logged yet.");
+    // Clear existing rows (preserve header if present)
+    container.querySelectorAll(".log-row").forEach(el => el.remove());
+    container.querySelectorAll(".log-empty").forEach(el => el.remove());
+
+    const data = getData();
+    if (!data.length) {
+      const empty = document.createElement("div");
+      empty.className = "log-empty";
+      empty.textContent = "No readings recorded yet.";
+      container.appendChild(empty);
       return;
     }
 
-    const records = [];
+    // Newest first
+    const sorted = data.slice().sort((a, b) => b.ts - a.ts);
 
-    for (const r of raw) {
-      const ts = parseTs(extractTs(r));
-      if (ts == null) continue;
-
-      const bp = extractBP(r);
-      const hr = extractHR(r);
-
-      records.push({
-        ts,
-        sys: bp.sys,
-        dia: bp.dia,
-        hr
-      });
-    }
-
-    if (!records.length) {
-      renderEmpty("No usable readings found.");
-      return;
-    }
-
-    records.sort((a, b) => b.ts - a.ts);
-
-    for (const rec of records) {
-      list.appendChild(renderRow(rec));
+    for (const r of sorted) {
+      if (!r.ts) continue;
+      container.appendChild(makeRow(r));
     }
   }
 
   function onShow() {
-    renderLog();
+    render();
   }
 
   // Public API
-  window.VTLog = {
-    onShow
-  };
+  global.VTLog = Object.freeze({
+    onShow,
+    render
+  });
 
-})();
+})(window);
+
+/*
+Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
+File: js/log.js
+App Version: (authority) js/version.js
+Base: v2.021
+Touched in: v2.023f (deterministic log render)
+Schema order: File 6 of 10
+*/
