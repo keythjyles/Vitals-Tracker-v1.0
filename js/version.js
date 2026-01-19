@@ -1,47 +1,45 @@
 /* File: js/version.js */
 /*
 Vitals Tracker — Version Authority
-Copyright (c) 2026 Wendell K. Jiles.
-All rights reserved.
+Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
-App Version: v2.025e
-Base: v2.025d
-Date: 2026-01-18
-
-Schema position:
-File 10 of 10
-
-Former file:
-File 9 — js/panels.js
-
-Next file:
-— END OF SCHEMA —
+App Version: v2.025f
+Base: v2.025e
+Date: 2026-01-19
 
 FILE ROLE (LOCKED)
 - Single source of truth for application version metadata.
-- Header display, boot banner, and diagnostics MUST read from this file.
-- No other file may hardcode the version string.
-- Provides read-only accessors only.
+- All other modules MUST read version info from this file (no hard-coded versions elsewhere).
+- index.html may DISPLAY the version, but MUST NOT define canonical values long-term.
+
+v2.025f — Change Log (THIS FILE ONLY)
+1) Version bump for Render Recovery + Swipe Feel stabilization pass.
+2) No runtime side effects. No DOM access. Safe to import anywhere.
 
 ANTI-DRIFT RULES
-- Increment version HERE FIRST.
-- If any displayed version disagrees, THIS FILE WINS.
-- No DOM access.
-- No side effects.
+- Do NOT duplicate version strings in other JS files.
+- Increment version HERE FIRST, then update index.html display + cache-busters.
+- If versions ever disagree, THIS FILE WINS.
+
+Stabilization Pass: Render Recovery + Swipe Feel
+- P0 File 1 of 9: js/version.js
+
+Next file in pass:
+File 2 — index.html
 */
 
 (function (global) {
   "use strict";
 
   const VERSION = Object.freeze({
-    app: "v2.025e",
-    base: "v2.025d",
-    date: "2026-01-18",
-    codename: "chart-stabilization",
+    app: "v2.025f",
+    base: "v2.025e",
+    date: "2026-01-19",
+    codename: "render-recovery",
     schema: {
       major: 2,
       minor: 25,
-      patch: "e"
+      patch: "f"
     }
   });
 
@@ -49,11 +47,11 @@ ANTI-DRIFT RULES
     return VERSION.app;
   }
 
-  function getFullLabel() {
+  function getFullVersionLabel() {
     return `${VERSION.app} (base ${VERSION.base})`;
   }
 
-  function getMeta() {
+  function getVersionMeta() {
     return {
       app: VERSION.app,
       base: VERSION.base,
@@ -63,11 +61,11 @@ ANTI-DRIFT RULES
     };
   }
 
-  // Expose immutable public API
+  // Expose as global, read-only
   global.VTVersion = Object.freeze({
     getVersionString,
-    getFullLabel,
-    getMeta
+    getFullVersionLabel,
+    getVersionMeta
   });
 
 })(window);
@@ -75,7 +73,12 @@ ANTI-DRIFT RULES
 /*
 Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: js/version.js
-App Version: v2.025e
-Base: v2.025d
-Schema: COMPLETE (10/10)
+App Version: v2.025f
+Base: v2.025e
+Touched in v2.025f: js/version.js (version bump only)
+Pass: Render Recovery + Swipe Feel
+Pass order: File 1 of 9 (P0)
+Prev file: (none — pass start)
+Next file: index.html (File 2 of 9)
 */
+```0
