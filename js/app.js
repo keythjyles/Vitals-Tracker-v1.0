@@ -129,4 +129,3 @@ App Version: (authority) js/version.js
 Pass: Render Recovery + Swipe Feel
 Notes: Boot order fixed. Removed duplicate UI wiring from app.js (ui.js owns buttons).
 */
-```0
