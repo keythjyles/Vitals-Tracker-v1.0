@@ -2,8 +2,8 @@
 Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
 File: js/add.js
 App Version Authority: js/version.js
-Base: v2.025f
-Pass: Render Recovery + Swipe Feel
+Base: v2.026a
+Pass: Swipe + Render Recovery (P0-R1)
 Pass order: File 9 of 9 (P0)
 Prev file: js/log.js (File 8 of 9)
 Next file: (end of pass)
@@ -13,10 +13,10 @@ FILE ROLE (LOCKED)
 - Must NOT implement swipe/rotation.
 - Must NOT implement delete/edit (future pass).
 
-v2.025f — Change Log (THIS FILE ONLY)
-1) Adds visual softening for Add panel (reduces “harsh/blinding” look) using safe inline styles.
-2) Ensures form is present exactly once and keeps Save button below the form.
-3) Routes Home through panels.js closeAdd() when available (keeps state consistent).
+v2.026a — Change Log (THIS FILE ONLY)
+1) Carries forward Add panel UI + Save action (no swipe changes).
+2) Maintains cosmetic softening + single-form enforcement.
+3) Maintains Home routing via panels.js closeAdd() when available.
 */
 
 (function () {
@@ -264,8 +264,8 @@ v2.025f — Change Log (THIS FILE ONLY)
 Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: js/add.js
 App Version Authority: js/version.js
-Base: v2.025f
-Pass: Render Recovery + Swipe Feel
+Base: v2.026a
+Pass: Swipe + Render Recovery (P0-R1)
 Pass order: File 9 of 9 (P0)
 Prev file: js/log.js (File 8 of 9)
 Next file: (end of pass)
