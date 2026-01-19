@@ -2,15 +2,21 @@
 Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
 File: js/chart.js
 App Version Authority: js/version.js
-Base: v2.027a
-Pass: Chart Fire (Render/Data Recovery)
-Pass order: (ad hoc per user request)
+Base: v2.028a
+Pass: Chart Display Recovery (P0-C1)
+Pass order: File 1 of 1 (P0-C1)
 
-SCOPE (CHART ONLY)
-- Make chart “fire” reliably by ensuring data is available before render.
-- Do NOT touch swipe logic.
-- Do NOT change band rules or label rules beyond what already exists here.
-- Add vt:panelChanged hook so Charts always re-renders when activated.
+FIX (CHART DISPLAY ONLY)
+- Chart now pulls data from multiple sources in a strict fallback order:
+  1) VTStore.getAll() (preferred)
+  2) VTStorage.getAll()/getAllRecords()/exportAll()/readAll() (if present)
+  3) Best-effort localStorage scan for the most plausible vitals dataset
+- This makes the chart "fire" even if persistence wiring is currently broken,
+  and will display existing historical data if it exists in localStorage.
+
+ANTI-DRIFT
+- No swipe logic here.
+- No storage writes here.
 */
 
 (function () {
@@ -31,7 +37,6 @@ SCOPE (CHART ONLY)
     lineSys: "#ff7676",
     lineDia: "#76baff",
 
-    // Bands expressed as RGB so we can apply live opacity.
     bands: [
       { from: 180, rgb: [220,  60,  60], label: "Hypertensive Crisis ≥180" },
       { from: 140, rgb: [220, 140,  60], label: "Stage 2 HTN 140–179" },
@@ -46,21 +51,14 @@ SCOPE (CHART ONLY)
     maxDays: 14,
     days: 7,
 
-    // center is ms
     centerMs: null,
 
-    // dataset bounds (ms)
     dataMinMs: null,
     dataMaxMs: null,
 
-    // band opacity (0..1). Default 60%.
+    // Default 60%
     bandOpacity: 0.60
   };
-
-  // Render control
-  let _renderQueued = false;
-  let _rendering = false;
-  let _storeInitDone = false;
 
   function $(id) { return document.getElementById(id); }
   function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
@@ -74,7 +72,7 @@ SCOPE (CHART ONLY)
   function parseTs(v) {
     if (v == null) return null;
     if (typeof v === "number" && Number.isFinite(v)) {
-      return (v > 1e12) ? v : Math.round(v * 1000); // seconds -> ms
+      return (v > 1e12) ? v : Math.round(v * 1000);
     }
     if (typeof v === "string") {
       const t = Date.parse(v);
@@ -98,21 +96,11 @@ SCOPE (CHART ONLY)
       parseTs(r?.created_at) ??
       parseTs(r?.iso);
 
-    // Support multiple shapes; keep it defensive.
-    const bpObj =
-      r?.bp ??
-      r?.BP ??
-      r?.bloodPressure ??
-      r?.blood_pressure ??
-      null;
-
     const sys =
       num(r?.sys) ??
       num(r?.systolic) ??
       num(r?.sbp) ??
       num(r?.SBP) ??
-      num(bpObj?.sys) ??
-      num(bpObj?.systolic) ??
       num(r?.bp?.sys) ??
       num(r?.bp?.systolic);
 
@@ -121,8 +109,6 @@ SCOPE (CHART ONLY)
       num(r?.diastolic) ??
       num(r?.dbp) ??
       num(r?.DBP) ??
-      num(bpObj?.dia) ??
-      num(bpObj?.diastolic) ??
       num(r?.bp?.dia) ??
       num(r?.bp?.diastolic);
 
@@ -137,73 +123,6 @@ SCOPE (CHART ONLY)
     return { ts, sys, dia, hr };
   }
 
-  async function ensureStoreInitOnce() {
-    if (_storeInitDone) return;
-    _storeInitDone = true;
-
-    // If VTStore has init, call it once; do not fail hard.
-    try {
-      if (window.VTStore && typeof window.VTStore.init === "function") {
-        await window.VTStore.init();
-      }
-    } catch (_) {}
-
-    // If storage layer has init, allow it too (non-fatal).
-    try {
-      if (window.VTStorage && typeof window.VTStorage.init === "function") {
-        await window.VTStorage.init();
-      }
-    } catch (_) {}
-  }
-
-  async function getRawDataAsync() {
-    // Ensure store is initialized before reading.
-    await ensureStoreInitOnce();
-
-    // Primary: VTStore.getAll()
-    try {
-      if (window.VTStore && typeof window.VTStore.getAll === "function") {
-        const v = window.VTStore.getAll();
-        if (v && typeof v.then === "function") {
-          const arr = await v;
-          return Array.isArray(arr) ? arr : [];
-        }
-        return Array.isArray(v) ? v : [];
-      }
-    } catch (_) {}
-
-    // Secondary: VTStorage.getAll()
-    try {
-      if (window.VTStorage && typeof window.VTStorage.getAll === "function") {
-        const v = window.VTStorage.getAll();
-        if (v && typeof v.then === "function") {
-          const arr = await v;
-          return Array.isArray(arr) ? arr : [];
-        }
-        return Array.isArray(v) ? v : [];
-      }
-    } catch (_) {}
-
-    // Final fallback: attempt common legacy localStorage keys (non-destructive read)
-    try {
-      const keys = [
-        "vitals_tracker_records_v1",
-        "vitals_tracker_records",
-        "vt_records",
-        "VT_RECORDS"
-      ];
-      for (const k of keys) {
-        const raw = localStorage.getItem(k);
-        if (!raw) continue;
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) return parsed;
-        if (parsed && Array.isArray(parsed.records)) return parsed.records;
-      }
-    } catch (_) {}
-
-    return [];
-  }
-
   function normalizeData(raw) {
     const out = [];
     for (const r of raw || []) {
@@ -216,6 +135,130 @@ SCOPE (CHART ONLY)
     return out;
   }
 
+  function safeArray(v) {
+    return Array.isArray(v) ? v : [];
+  }
+
+  async function getFromVTStore() {
+    try {
+      if (window.VTStore && typeof window.VTStore.getAll === "function") {
+        const res = await window.VTStore.getAll();
+        return safeArray(res);
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  async function getFromVTStorage() {
+    try {
+      const s = window.VTStorage;
+      if (!s) return [];
+
+      const fns = [
+        "getAll",
+        "getAllRecords",
+        "readAll",
+        "exportAll",
+        "getRecords"
+      ];
+
+      for (const fn of fns) {
+        if (typeof s[fn] === "function") {
+          const res = await s[fn]();
+          if (Array.isArray(res) && res.length) return res;
+        }
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  function isPlausibleVitalsArray(arr) {
+    if (!Array.isArray(arr) || arr.length < 1) return 0;
+
+    // Score by how many entries have ts + (sys/dia/hr)
+    let score = 0;
+    let checked = 0;
+
+    for (let i = 0; i < arr.length; i++) {
+      const r = arr[i];
+      if (r == null || typeof r !== "object") continue;
+      checked++;
+      const e = extractFromRecord(r);
+      if (e.ts != null) score += 2;
+      if (e.sys != null) score += 2;
+      if (e.dia != null) score += 2;
+      if (e.hr != null)  score += 1;
+      if (checked >= 60) break;
+    }
+
+    // Favor larger datasets
+    score += Math.min(200, Math.floor(arr.length / 5));
+    return score;
+  }
+
+  function getFromLocalStorageScan() {
+    try {
+      if (!window.localStorage) return [];
+      let best = [];
+      let bestScore = 0;
+
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!k) continue;
+
+        // Skip obviously unrelated keys quickly
+        const lk = k.toLowerCase();
+        if (!(lk.includes("vital") || lk.includes("bp") || lk.includes("pressure") || lk.includes("tracker") || lk.includes("record") || lk.includes("log"))) {
+          continue;
+        }
+
+        let raw = null;
+        try { raw = localStorage.getItem(k); } catch (_) {}
+        if (!raw || raw.length < 2) continue;
+
+        let parsed = null;
+        try { parsed = JSON.parse(raw); } catch (_) { continue; }
+
+        // Some apps store {records:[...]} or {data:[...]}
+        let candidate = null;
+        if (Array.isArray(parsed)) candidate = parsed;
+        else if (parsed && typeof parsed === "object") {
+          if (Array.isArray(parsed.records)) candidate = parsed.records;
+          else if (Array.isArray(parsed.data)) candidate = parsed.data;
+          else if (Array.isArray(parsed.items)) candidate = parsed.items;
+        }
+
+        if (!candidate) continue;
+
+        const sc = isPlausibleVitalsArray(candidate);
+        if (sc > bestScore) {
+          bestScore = sc;
+          best = candidate;
+        }
+      }
+
+      return best;
+    } catch (_) {
+      return [];
+    }
+  }
+
+  async function getRawDataMultiSource() {
+    // 1) VTStore
+    const a = await getFromVTStore();
+    if (a && a.length) return a;
+
+    // 2) VTStorage
+    const b = await getFromVTStorage();
+    if (b && b.length) return b;
+
+    // 3) localStorage scan (best-effort)
+    const c = getFromLocalStorageScan();
+    if (c && c.length) return c;
+
+    return [];
+  }
+
   function computeDatasetBounds(data) {
     if (!data.length) return { min: null, max: null };
     return { min: data[0].ts, max: data[data.length - 1].ts };
@@ -223,7 +266,7 @@ SCOPE (CHART ONLY)
 
   function niceCeil10(n) { return Math.ceil(n / 10) * 10; }
 
-  // Y-axis rule: start at 40; end = min(250, maxReading+10) with nice rounding.
+  // Y-axis: start at 40; end = min(250, maxReading+10) with nice rounding.
   function computeYBounds(data) {
     let maxV = 0;
     for (const r of data) {
@@ -237,7 +280,6 @@ SCOPE (CHART ONLY)
     return { min, max };
   }
 
-  // Default viewport: newest 7 days. Pan/center clamps to dataset.
   function computeWindow(data) {
     if (!data.length) return { windowed: [], start: null, end: null };
 
@@ -335,6 +377,18 @@ SCOPE (CHART ONLY)
     ensureLegendUI(legendEl);
   }
 
+  function fmtTick(ms, includeDate) {
+    try {
+      const d = new Date(ms);
+      const time = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+      if (!includeDate) return time;
+      const date = d.toLocaleDateString([], { month: "2-digit", day: "2-digit" });
+      return `${date} ${time}`;
+    } catch (_) {
+      return "";
+    }
+  }
+
   function drawAxes(ctx, w, h, bounds, L, start, end) {
     ctx.strokeStyle = STYLE.grid;
     ctx.lineWidth = 1;
@@ -370,7 +424,7 @@ SCOPE (CHART ONLY)
     ctx.lineTo(L.plotX + L.plotW, L.plotY + L.plotH);
     ctx.stroke();
 
-    // X labels: start / mid / end (drop mid if it collides)
+    // Labels: start / mid / end with collision avoidance
     ctx.fillStyle = STYLE.textMuted;
     ctx.font = "11px system-ui";
     ctx.textAlign = "center";
@@ -405,18 +459,6 @@ SCOPE (CHART ONLY)
     ctx.fillText(labels[0].text, xStart, yText);
     if (midFits) ctx.fillText(labels[1].text, xMid, yText);
     ctx.fillText(labels[2].text, xEnd, yText);
-  }
-
-  function fmtTick(ms, includeDate) {
-    try {
-      const d = new Date(ms);
-      const time = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-      if (!includeDate) return time;
-      const date = d.toLocaleDateString([], { month: "2-digit", day: "2-digit" });
-      return `${date} ${time}`;
-    } catch (_) {
-      return "";
-    }
   }
 
   function drawLines(ctx, data, bounds, start, end, L) {
@@ -458,7 +500,6 @@ SCOPE (CHART ONLY)
     legendEl.style.paddingTop = "10px";
 
     const sliderWrap = document.createElement("div");
-    sliderWrap.className = "bandOpacityWrap";
     sliderWrap.style.display = "grid";
     sliderWrap.style.gridTemplateColumns = "auto 1fr auto";
     sliderWrap.style.alignItems = "center";
@@ -494,7 +535,7 @@ SCOPE (CHART ONLY)
       const v = clamp(Number(slider.value) / 100, 0, 1);
       STATE.bandOpacity = v;
       pct.textContent = `${Math.round(v * 100)}%`;
-      requestRender();
+      try { render(); } catch (_) {}
     }, { passive: true });
 
     sliderWrap.appendChild(lbl);
@@ -529,7 +570,6 @@ SCOPE (CHART ONLY)
     ledger.innerHTML = "";
     for (const b of STYLE.bands) {
       const row = document.createElement("div");
-      row.className = "legendRow";
       row.style.display = "grid";
       row.style.gridTemplateColumns = "16px 1fr";
       row.style.alignItems = "center";
@@ -540,7 +580,6 @@ SCOPE (CHART ONLY)
       row.style.background = "rgba(0,0,0,0.08)";
 
       const sw = document.createElement("span");
-      sw.className = "legendSwatch";
       sw.style.width = "16px";
       sw.style.height = "10px";
       sw.style.borderRadius = "4px";
@@ -560,93 +599,62 @@ SCOPE (CHART ONLY)
     }
   }
 
-  async function renderAsync() {
-    if (_rendering) return;
-    _rendering = true;
-
+  async function render() {
     const canvas = $(ID_CANVAS);
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
     const legendEl = $(ID_LEGEND);
     const loadingEl = $(ID_LOADING);
 
-    try {
-      if (!canvas) return;
+    ensureLegendUI(legendEl);
 
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
+    if (loadingEl) loadingEl.style.display = "none";
 
-      // Always keep legend alive (even if no data)
-      ensureLegendUI(legendEl);
+    const raw = await getRawDataMultiSource();
+    const data = normalizeData(raw);
 
-      if (loadingEl) loadingEl.style.display = "";
+    const sized = sizeToCSS(canvas);
+    const w = sized.w, h = sized.h;
+    const L = layout(w, h);
 
-      const raw = await getRawDataAsync();
-      const data = normalizeData(raw);
+    clear(ctx, w, h);
 
-      const sized = sizeToCSS(canvas);
-      const w = sized.w, h = sized.h;
-      const L = layout(w, h);
-
-      clear(ctx, w, h);
-
-      if (loadingEl) loadingEl.style.display = "none";
-
-      if (!data.length) {
-        ctx.fillStyle = STYLE.textMuted;
-        ctx.font = "14px system-ui";
-        ctx.fillText("No data to display.", 60, 80);
-        return;
-      }
-
-      const win = computeWindow(data);
-      const windowed = win.windowed;
-      const start = win.start;
-      const end = win.end;
-
-      if (!windowed.length || start == null || end == null || end <= start) {
-        ctx.fillStyle = STYLE.textMuted;
-        ctx.font = "14px system-ui";
-        ctx.fillText("No data in current window.", 60, 80);
-        return;
-      }
-
-      const bounds = computeYBounds(windowed);
-
-      drawBands(ctx, w, h, bounds, L, legendEl);
-      drawAxes(ctx, w, h, bounds, L, start, end);
-      drawLines(ctx, windowed, bounds, start, end, L);
-    } catch (e) {
-      try {
-        const canvas2 = $(ID_CANVAS);
-        const ctx2 = canvas2 && canvas2.getContext ? canvas2.getContext("2d") : null;
-        if (ctx2) {
-          ctx2.fillStyle = STYLE.textMuted;
-          ctx2.font = "14px system-ui";
-          ctx2.fillText("Chart error. See console.", 60, 80);
-        }
-      } catch (_) {}
-      try { console.error(e); } catch (_) {}
-      try { const loadingEl2 = $(ID_LOADING); if (loadingEl2) loadingEl2.style.display = "none"; } catch (_) {}
-    } finally {
-      _rendering = false;
+    if (!data.length) {
+      ctx.fillStyle = STYLE.textMuted;
+      ctx.font = "14px system-ui";
+      ctx.fillText("No data to display.", 60, 80);
+      return;
     }
-  }
 
-  function requestRender() {
-    if (_renderQueued) return;
-    _renderQueued = true;
-    window.requestAnimationFrame(function () {
-      _renderQueued = false;
-      renderAsync();
-    });
+    const win = computeWindow(data);
+    const windowed = win.windowed;
+    const start = win.start;
+    const end = win.end;
+
+    if (!windowed.length || start == null || end == null || end <= start) {
+      ctx.fillStyle = STYLE.textMuted;
+      ctx.font = "14px system-ui";
+      ctx.fillText("No data in current window.", 60, 80);
+      return;
+    }
+
+    const bounds = computeYBounds(windowed);
+
+    drawBands(ctx, w, h, bounds, L, legendEl);
+    drawAxes(ctx, w, h, bounds, L, start, end);
+    drawLines(ctx, windowed, bounds, start, end, L);
   }
 
   function onShow() {
-    requestRender();
+    render();
   }
 
   function setDays(d) {
     STATE.days = clamp(d, STATE.minDays, STATE.maxDays);
-    requestRender();
+    render();
   }
 
   function panBy(ms) {
@@ -660,30 +668,18 @@ SCOPE (CHART ONLY)
       STATE.centerMs = clamp(STATE.centerMs, minC, maxC);
     }
 
-    requestRender();
+    render();
   }
 
-  // Public API (do not expand without approval)
   window.VTChart = {
     onShow,
     setDays,
     panBy
   };
 
-  // Re-render on resize
   window.addEventListener("resize", function () {
-    requestRender();
+    try { render(); } catch (_) {}
   }, { passive: true });
-
-  // Ensure we re-render when Charts becomes active
-  document.addEventListener("vt:panelChanged", function (e) {
-    try {
-      if (e?.detail?.active === "charts") requestRender();
-    } catch (_) {}
-  });
-
-  // Safe initial render (does not force panel change)
-  try { requestRender(); } catch (_) {}
 
 })();
 
@@ -691,6 +687,8 @@ SCOPE (CHART ONLY)
 Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: js/chart.js
 App Version Authority: js/version.js
-Base: v2.027a
-Pass: Chart Fire (Render/Data Recovery)
+Base: v2.028a
+Pass: Chart Display Recovery (P0-C1)
+Pass order: File 1 of 1 (P0-C1)
 */
+```0
