@@ -2,11 +2,11 @@
 Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
 File: index.html
 App Version Authority: js/version.js (do not hardcode versions here)
-Base: v2.025f
-Pass: Swipe + Render Recovery (P0-R1)
-Pass order: File 2 of 9 (P0)
-Prev file: js/version.js (File 1 of 9)
-Next file: css/app.css (File 3 of 9)
+Base: v2.027a
+Pass: Add-as-Modal (P1)
+Pass order: File 2 of 7 (P1)
+Prev file: js/version.js (File 1 of 7)
+Next file: css/app.css (File 3 of 7)
 -->
 
 <!doctype html>
@@ -23,7 +23,7 @@ Next file: css/app.css (File 3 of 9)
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
 
   <!-- App CSS (single source) -->
-  <link rel="stylesheet" href="css/app.css?v=20260119a" />
+  <link rel="stylesheet" href="css/app.css?v=20260119b" />
 
   <!-- Minimal critical fallback (only for catastrophic CSS load failure) -->
   <style>
@@ -65,13 +65,7 @@ Next file: css/app.css (File 3 of 9)
             <div class="screenHeader">
               <div class="screenTitle">Home</div>
               <div class="screenHeaderRight">
-                <button class="iconBtn" id="btnSettings" type="button" aria-label="Settings">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" stroke="currentColor" stroke-width="2"/>
-                    <path d="M19.4 15a7.8 7.8 0 0 0 .1-2l2-1.5-2-3.5-2.4 1a7.6 7.6 0 0 0-1.7-1l-.4-2.6H9l-.4 2.6a7.6 7.6 0 0 0-1.7 1l-2.4-1-2 3.5 2 1.5a7.8 7.8 0 0 0 .1 2l-2 1.5 2 3.5 2.4-1a7.6 7.6 0 0 0 1.7 1l.4 2.6h6l.4-2.6a7.6 7.6 0 0 0 1.7-1l2.4 1 2-3.5-2-1.5Z"
-                          stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-                  </svg>
-                </button>
+                <!-- Header Settings button removed (per lock-in) -->
               </div>
             </div>
 
@@ -87,7 +81,7 @@ Next file: css/app.css (File 3 of 9)
 
               <div class="homeRow">
                 <button class="dangerBtn" id="btnExit" type="button">Exit</button>
-                <button class="miniBtn" id="btnSettingsHomeAlt" type="button" aria-label="Settings (alt)">
+                <button class="miniBtn" id="btnSettingsHomeAlt" type="button" aria-label="Settings">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                     <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" stroke="currentColor" stroke-width="2"/>
                     <path d="M19.4 15a7.8 7.8 0 0 0 .1-2l2-1.5-2-3.5-2.4 1a7.6 7.6 0 0 0-1.7-1l-.4-2.6H9l-.4 2.6a7.6 7.6 0 0 0-1.7 1l-2.4-1-2 3.5 2 1.5a7.8 7.8 0 0 0 .1 2l-2 1.5 2 3.5 2.4-1a7.6 7.6 0 0 0 1.7 1l.4 2.6h6l.4-2.6a7.6 7.6 0 0 0 1.7-1l2.4 1 2-3.5-2-1.5Z"
@@ -114,6 +108,7 @@ Next file: css/app.css (File 3 of 9)
             <div class="screenHeader">
               <div class="screenTitle">Charts</div>
               <div class="screenHeaderRight">
+                <button class="pillBtn" id="btnAddFromCharts" type="button">Add</button>
                 <button class="pillBtn" id="btnHomeFromCharts" type="button">Home</button>
                 <button class="iconBtn" id="btnSettingsFromCharts" type="button" aria-label="Settings">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -144,6 +139,7 @@ Next file: css/app.css (File 3 of 9)
             <div class="screenHeader">
               <div class="screenTitle">Log</div>
               <div class="screenHeaderRight">
+                <button class="pillBtn" id="btnAddFromLog" type="button">Add</button>
                 <button class="pillBtn" id="btnHomeFromLog" type="button">Home</button>
                 <button class="iconBtn" id="btnSettingsFromLog" type="button" aria-label="Settings">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -185,7 +181,7 @@ Next file: css/app.css (File 3 of 9)
           </div>
         </section>
 
-        <!-- PANEL: ADD -->
+        <!-- PANEL: ADD (temporary; will become modal in next files) -->
         <section class="panel" id="panelAdd" data-panel="add" aria-label="Add Reading">
           <div class="screenFrame">
             <div class="screenHeader">
@@ -209,19 +205,19 @@ Next file: css/app.css (File 3 of 9)
   </div>
 
   <!-- Scripts (order matters) -->
-  <script src="js/version.js?v=20260119a"></script>
-  <script src="js/utils.js?v=20260119a"></script>
-  <script src="js/storage.js?v=20260119a"></script>
-  <script src="js/store.js?v=20260119a"></script>
-  <script src="js/state.js?v=20260119a"></script>
-  <script src="js/ui.js?v=20260119a"></script>
-  <script src="js/panels.js?v=20260119a"></script>
-  <script src="js/gestures.js?v=20260119a"></script>
-  <script src="js/chart.js?v=20260119a"></script>
-  <script src="js/log.js?v=20260119a"></script>
-  <script src="js/add.js?v=20260119a"></script>
-  <script src="js/pwa.js?v=20260119a"></script>
-  <script src="js/app.js?v=20260119a"></script>
+  <script src="js/version.js?v=20260119b"></script>
+  <script src="js/utils.js?v=20260119b"></script>
+  <script src="js/storage.js?v=20260119b"></script>
+  <script src="js/store.js?v=20260119b"></script>
+  <script src="js/state.js?v=20260119b"></script>
+  <script src="js/ui.js?v=20260119b"></script>
+  <script src="js/panels.js?v=20260119b"></script>
+  <script src="js/gestures.js?v=20260119b"></script>
+  <script src="js/chart.js?v=20260119b"></script>
+  <script src="js/log.js?v=20260119b"></script>
+  <script src="js/add.js?v=20260119b"></script>
+  <script src="js/pwa.js?v=20260119b"></script>
+  <script src="js/app.js?v=20260119b"></script>
 
   <script>
     (function(){
@@ -243,9 +239,9 @@ Next file: css/app.css (File 3 of 9)
 Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: index.html
 App Version Authority: js/version.js
-Base: v2.025f
-Pass: Swipe + Render Recovery (P0-R1)
-Pass order: File 2 of 9 (P0)
-Prev file: js/version.js (File 1 of 9)
-Next file: css/app.css (File 3 of 9)
+Base: v2.027a
+Pass: Add-as-Modal (P1)
+Pass order: File 2 of 7 (P1)
+Prev file: js/version.js (File 1 of 7)
+Next file: css/app.css (File 3 of 7)
 -->
