@@ -6,10 +6,11 @@ Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 App Version: (authority) js/version.js
 
 FILE ROLE (LOCKED)
-- App-level wiring only: version display, high-level navigation delegation, safe boot checks.
+- App-level wiring only: version display + calling module init() in correct order + safe boot checks.
 - Must NOT contain chart render logic (chart.js owns that).
 - Must NOT implement swipe rules (gestures.js owns that).
 - Must NOT own panel show/hide rules long-term (panels.js owns that).
+- Must NOT duplicate UI button wiring long-term (ui.js owns that).
 
 Stabilization Pass: Render Recovery + Swipe Feel
 - This file is responsible for calling module init() in the correct order.
@@ -30,84 +31,9 @@ Stabilization Pass: Render Recovery + Swipe Feel
 
   function $(id){ return document.getElementById(id); }
 
-  function firstEl(ids){
-    for(const id of ids){
-      const el = $(id);
-      if(el) return el;
-    }
-    return null;
-  }
-
   function setText(id, text){
     const el = $(id);
     if(el) el.textContent = text;
-  }
-
-  function bindOnce(el, key, handler, opts){
-    if(!el) return;
-    const k = "vtBound_" + key;
-    try{
-      if(el.dataset && el.dataset[k] === "1") return;
-      if(el.dataset) el.dataset[k] = "1";
-    }catch(_){}
-    el.addEventListener("click", handler, opts || false);
-  }
-
-  function bindOnceAny(ids, key, handler, opts){
-    const el = firstEl(ids);
-    bindOnce(el, key, handler, opts);
-  }
-
-  function safeAlert(msg){
-    try{ alert(msg); }catch(_){}
-  }
-
-  function callChartOnShowIfPresent(){
-    try{
-      if(window.VTChart && typeof window.VTChart.onShow === "function"){
-        window.VTChart.onShow();
-      }
-    }catch(_){}
-  }
-
-  function showPanel(name){
-    // Preferred delegation path
-    try{
-      if(window.VTPanels && typeof window.VTPanels.show === "function"){
-        window.VTPanels.show(name);
-        return;
-      }
-    }catch(_){}
-    try{
-      if(window.VTUI && typeof window.VTUI.showPanel === "function"){
-        window.VTUI.showPanel(name);
-        return;
-      }
-    }catch(_){}
-
-    // Fallback: direct DOM toggle
-    const ids = {
-      home: "panelHome",
-      add: "panelAdd",
-      charts: "panelCharts",
-      log: "panelLog",
-      settings: "panelSettings"
-    };
-
-    const targetId = ids[name];
-    const all = ["panelHome","panelAdd","panelCharts","panelLog","panelSettings"]
-      .map($).filter(Boolean);
-
-    for(const p of all) p.classList.remove("active");
-
-    const tgt = targetId ? $(targetId) : null;
-    if(tgt) tgt.classList.add("active");
-
-    if(name === "charts") callChartOnShowIfPresent();
-  }
-
-  function addPanelExists(){
-    return !!$("panelAdd") || !!$("addCard") || !!$("addForm") || !!$("btnSaveReading");
   }
 
   async function safeInitStore(){
@@ -134,14 +60,6 @@ Stabilization Pass: Render Recovery + Swipe Feel
     }catch(_){}
   }
 
-  function safeInitGestures(){
-    try{
-      if(window.VTGestures && typeof window.VTGestures.init === "function"){
-        window.VTGestures.init();
-      }
-    }catch(_){}
-  }
-
   function safeInitPWA(){
     try{
       if(window.VTPWA && typeof window.VTPWA.init === "function"){
@@ -150,42 +68,26 @@ Stabilization Pass: Render Recovery + Swipe Feel
     }catch(_){}
   }
 
-  function wireButtons(){
-    // Home main buttons
-    bindOnceAny(["btnGoCharts"], "goCharts", () => showPanel("charts"));
-    bindOnceAny(["btnGoLog"], "goLog", () => showPanel("log"));
+  function safeInitialRender(){
+    try{
+      const active = (function(){
+        if($("panelHome")?.classList.contains("active")) return "home";
+        if($("panelCharts")?.classList.contains("active")) return "charts";
+        if($("panelLog")?.classList.contains("active")) return "log";
+        if($("panelAdd")?.classList.contains("active")) return "add";
+        if($("panelSettings")?.classList.contains("active")) return "settings";
+        return "home";
+      })();
 
-    bindOnceAny(["btnGoAdd"], "goAdd", () => {
-      if(addPanelExists()){
-        showPanel("add");
-        return;
+      if(active === "charts" && window.VTChart && typeof window.VTChart.onShow === "function"){
+        window.VTChart.onShow();
       }
-      safeAlert("Add Reading panel is not installed in this build yet.");
-    });
-
-    // Home-from panels
-    bindOnceAny(["btnHomeFromCharts"], "homeFromCharts", () => showPanel("home"));
-    bindOnceAny(["btnHomeFromLog"], "homeFromLog", () => showPanel("home"));
-    bindOnceAny(["btnHomeFromAdd"], "homeFromAdd", () => showPanel("home"));
-
-    // Settings via gear only (including alt gear button on Home)
-    const openSettings = () => showPanel("settings");
-    bindOnceAny(["btnSettings", "btnSettingsHomeAlt"], "openSettingsHome", openSettings);
-    bindOnceAny(["btnSettingsFromCharts"], "openSettingsCharts", openSettings);
-    bindOnceAny(["btnSettingsFromLog"], "openSettingsLog", openSettings);
-
-    bindOnceAny(["btnBackFromSettings"], "backFromSettings", () => {
-      try{
-        if(window.VTPanels && typeof window.VTPanels.backFromSettings === "function"){
-          window.VTPanels.backFromSettings();
-          return;
-        }
-      }catch(_){}
-      showPanel("home");
-    });
-
-    // Install / Clear Data / Exit are owned elsewhere.
-    // We do NOT reimplement them here; this file only ensures panels and gestures are alive.
+      if(active === "log" && window.VTLog){
+        // support either name
+        if(typeof window.VTLog.onShow === "function") window.VTLog.onShow();
+        else if(typeof window.VTLog.render === "function") window.VTLog.render();
+      }
+    }catch(_){}
   }
 
   async function init(){
@@ -194,31 +96,22 @@ Stabilization Pass: Render Recovery + Swipe Feel
     // Version labels
     setText("bootText", "BOOT OK " + ver);
     setText("homeVersion", ver);
-
-    // Settings panel version label (if present)
     setText("settingsVersion", ver);
 
-    // Store first (so charts/log can render when opened)
+    /*
+      CRITICAL BOOT ORDER (LOCKED):
+      1) VTStore.init()   -> data layer ready for chart/log
+      2) VTPanels.init()  -> deck DOM cached + transform set + swipe API ready
+      3) VTUI.init()      -> buttons wired (load-order safe)
+      4) VTPWA.init()     -> install prompt etc. (optional)
+    */
     await safeInitStore();
-
-    // Then init UI/panels/gestures (so binding + interactions are active)
-    safeInitUI();
     safeInitPanels();
-    safeInitGestures();
-
-    // PWA init (install prompt wiring etc.) if module provides it
+    safeInitUI();
     safeInitPWA();
 
-    // Finally wire top-level buttons
-    wireButtons();
-
-    // If charts panel is active on load, render now
-    try{
-      const charts = $("panelCharts");
-      if(charts && charts.classList.contains("active")){
-        callChartOnShowIfPresent();
-      }
-    }catch(_){}
+    // If a panel is already active on load (or after a restore), render once.
+    safeInitialRender();
   }
 
   if(document.readyState === "loading"){
@@ -234,5 +127,6 @@ Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: js/app.js
 App Version: (authority) js/version.js
 Pass: Render Recovery + Swipe Feel
-Notes: Restores init chain (Store -> UI/Panels/Gestures -> bindings)
+Notes: Boot order fixed. Removed duplicate UI wiring from app.js (ui.js owns buttons).
 */
+```0
