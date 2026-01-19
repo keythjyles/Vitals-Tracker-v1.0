@@ -1,109 +1,113 @@
 /* File: js/panels.js */
 /*
-Vitals Tracker — Panel Router
-Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
+Vitals Tracker — Panel Controller
+Copyright (c) 2026 Wendell K. Jiles.
+All rights reserved.
 
-App Version: v2.025e
+App Version: (authority) js/version.js
 Base: v2.021
 Date: 2026-01-18
 
-Schema position:
-File 9 of 10
-
-Former file:
-File 8 — js/log.js
-
-Next file:
-File 10 — js/init.js
-
 FILE ROLE (LOCKED)
-- Owns panel visibility and activation lifecycle.
-- Calls panel.onShow() exactly once when a panel becomes active.
-- Clears "Loading…" state for active panels.
-- Does NOT implement gestures.
-- Does NOT render charts or logs.
-- Does NOT touch storage.
+- Owns panel activation and visibility.
+- Fires lifecycle hooks (onShow / onHide) for panels.
+- Does NOT render charts (chart.js).
+- Does NOT render logs (log.js).
+- Does NOT handle gestures (gestures.js).
 
-ANTI-DRIFT RULES
-- Do NOT add swipe logic here.
-- Do NOT import chart or log directly.
-- Panels register themselves via window.VTPanels.
+v2.023f — Change Log (THIS FILE ONLY)
+1) Centralized panel show/hide with lifecycle firing.
+2) Ensures Charts and Log panels call onShow every time activated.
+3) Clears passive "Loading..." states via lifecycle ownership.
+4) Provides safe fallback behavior if modules are missing.
+
+Schema position:
+File 4 of 10
 */
 
-(function () {
+(function (global) {
   "use strict";
 
-  const PANEL_ATTR = "data-panel";
-  const ACTIVE_CLASS = "active";
-
-  const state = {
-    active: null,
-    shown: Object.create(null)
+  const PANEL_IDS = {
+    home: "panelHome",
+    add: "panelAdd",
+    charts: "panelCharts",
+    log: "panelLog",
+    settings: "panelSettings"
   };
 
-  function $(sel, root = document) {
-    return root.querySelector(sel);
-  }
+  let lastPanel = null;
 
-  function $all(sel, root = document) {
-    return Array.from(root.querySelectorAll(sel));
+  function $(id) {
+    return document.getElementById(id);
   }
 
   function hideAllPanels() {
-    const panels = $all(`[${PANEL_ATTR}]`);
-    for (const p of panels) {
-      p.classList.remove(ACTIVE_CLASS);
-      p.style.display = "none";
-    }
+    Object.values(PANEL_IDS)
+      .map($)
+      .filter(Boolean)
+      .forEach(p => p.classList.remove("active"));
   }
 
-  function clearLoading(panelEl) {
-    const loading = $(".loading", panelEl);
-    if (loading) {
-      loading.style.display = "none";
-    }
+  function callOnHide(panelName) {
+    try {
+      if (panelName === "charts" && global.VTChart?.onHide) {
+        global.VTChart.onHide();
+      }
+      if (panelName === "log" && global.VTLog?.onHide) {
+        global.VTLog.onHide();
+      }
+    } catch (_) {}
   }
 
-  function activatePanel(name) {
-    if (!name || state.active === name) return;
+  function callOnShow(panelName) {
+    try {
+      if (panelName === "charts" && global.VTChart?.onShow) {
+        global.VTChart.onShow();
+      }
+      if (panelName === "log" && global.VTLog?.onShow) {
+        global.VTLog.onShow();
+      }
+    } catch (_) {}
+  }
 
-    const panelEl = $(`[${PANEL_ATTR}="${name}"]`);
+  function show(panelName) {
+    const panelId = PANEL_IDS[panelName];
+    const panelEl = panelId ? $(panelId) : null;
     if (!panelEl) return;
 
+    if (lastPanel && lastPanel !== panelName) {
+      callOnHide(lastPanel);
+    }
+
     hideAllPanels();
+    panelEl.classList.add("active");
 
-    panelEl.style.display = "";
-    panelEl.classList.add(ACTIVE_CLASS);
-    clearLoading(panelEl);
+    callOnShow(panelName);
+    lastPanel = panelName;
+  }
 
-    state.active = name;
-
-    // Call onShow exactly once per activation
-    if (!state.shown[name]) {
-      const registry = window.VTPanels || {};
-      const panel = registry[name];
-
-      if (panel && typeof panel.onShow === "function") {
-        try {
-          panel.onShow();
-        } catch (err) {
-          console.error(`[Panels] onShow failed for "${name}"`, err);
-        }
-      }
-
-      state.shown[name] = true;
+  function backFromSettings() {
+    if (lastPanel && lastPanel !== "settings") {
+      show(lastPanel);
+    } else {
+      show("home");
     }
   }
 
-  function init() {
-    // Default panel: charts
-    activatePanel("charts");
-  }
-
-  // Public API
-  window.VTPanelRouter = Object.freeze({
-    activate: activatePanel,
-    init
+  // Expose API
+  global.VTPanels = Object.freeze({
+    show,
+    backFromSettings
   });
 
-})();
+})(window);
+
+/*
+Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
+File: js/panels.js
+App Version: (authority) js/version.js
+Base: v2.021
+Touched in: v2.023f (panel lifecycle restoration)
+Schema order: File 4 of 10
+*/
