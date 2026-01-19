@@ -3,15 +3,16 @@
 Vitals Tracker — MASTER (Index Authority)
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
-App Version: v2.023b
+App Version: v2.023c
 Base: v2.021 (last known-good per user; reconstruction of index shell)
 Date: 2026-01-18
 
-v2.023b — Change Log (THIS FILE ONLY)
-- Purpose of this micro-bump: make version progression explicit and keep cache-busting in sync.
-1) Version strings updated from v2.023a → v2.023b (UI + APP_VERSION constant).
-2) Cache-busters updated to ?v=2.023b for all loaded modules and sw.js.
-3) No functional logic changes vs v2.023a.
+v2.023c — Change Log (THIS FILE ONLY)
+1) Adds js/version.js to script chain (missing previously).
+2) Loads js/version.js FIRST to eliminate v?.??? drift.
+3) Moves js/app.js immediately after js/version.js.
+4) Removes hard-coded APP_VERSION assignments in inline script (version is owned by js/version.js + js/app.js).
+5) Updates ALL cache-busters to ?v=2.023c including sw.js.
 
 Release Schema (v2.023 series; one-file-at-a-time)
 1) index.html  (this file)
@@ -26,8 +27,10 @@ Release Schema (v2.023 series; one-file-at-a-time)
 10) js/ui.js
 
 Hard Rules (anti-drift)
-- Chart drawing logic lives ONLY in js/chart.js.
-- Swipe rules live ONLY in js/gestures.js (later), except the minimal protective gate kept here.
+- Canonical version is owned by js/version.js only.
+- index.html may DISPLAY version but MUST NOT define canonical values long-term.
+- Chart logic lives ONLY in js/chart.js.
+- Swipe logic lives ONLY in js/gestures.js (except minimal gating in this file until gestures.js owns it fully).
 - Do not rename IDs listed below without changing dependent modules.
 
 Key IDs (contract)
@@ -346,7 +349,7 @@ Key IDs (contract)
         </div>
         <div class="title">Vitals Tracker</div>
       </div>
-      <div class="boot" id="bootText">BOOT OK v2.023b</div>
+      <div class="boot" id="bootText">BOOT OK v?.???</div>
     </div>
 
     <div class="shell">
@@ -381,7 +384,7 @@ Key IDs (contract)
               </div>
 
               <div class="homeFoot">
-                <div class="v" id="homeVersion">v2.023b</div>
+                <div class="v" id="homeVersion">v?.???</div>
                 <div class="by">developed by Keyth Jyles</div>
               </div>
             </div>
@@ -438,7 +441,7 @@ Key IDs (contract)
           <div class="card" id="logCard">
             <div class="muted" id="logTopNote">Loading…</div>
             <div class="muted small" style="margin-top:10px;">
-              Log rendering is owned by modules (log.js/ui.js). We will restore it after chart stability.
+              Log rendering is owned by modules (log.js/ui.js). We will restore it after input is restored.
             </div>
           </div>
         </section>
@@ -453,11 +456,11 @@ Key IDs (contract)
           </div>
 
           <div class="card">
-            <div class="muted">v2.023 series: stabilize chart + swipe + input before adding features.</div>
+            <div class="muted">v2.023 series: stabilize version authority + chart + swipe + input before new features.</div>
             <div class="settingsList">
-              <div class="settingsItem">Reporting + Export will be restored after chart stability.</div>
-              <div class="settingsItem">Distress (0–5) and Medication markers are on the roadmap (not in v2.023b).</div>
-              <div class="settingsItem">Version discipline: index shows version; File 2 will centralize version in js/version.js.</div>
+              <div class="settingsItem">Reporting + Export will be restored after input is restored.</div>
+              <div class="settingsItem">Distress (0–5) and Medication markers are on the roadmap (not in v2.023).</div>
+              <div class="settingsItem">Version discipline: js/version.js is canonical; UI displays from it only.</div>
             </div>
           </div>
         </section>
@@ -466,25 +469,23 @@ Key IDs (contract)
     </div>
   </div>
 
-  <!-- Script cache-busting is pinned to v2.023b in this file -->
-  <script src="./js/storage.js?v=2.023b"></script>
-  <script src="./js/store.js?v=2.023b"></script>
-  <script src="./js/state.js?v=2.023b"></script>
-  <script src="./js/chart.js?v=2.023b"></script>
-  <script src="./js/gestures.js?v=2.023b"></script>
-  <script src="./js/panels.js?v=2.023b"></script>
-  <script src="./js/ui.js?v=2.023b"></script>
-  <script src="./js/app.js?v=2.023b"></script>
+  <!-- Script cache-busting pinned to v2.023c -->
+  <script src="./js/version.js?v=2.023c"></script>
+  <script src="./js/app.js?v=2.023c"></script>
+
+  <script src="./js/storage.js?v=2.023c"></script>
+  <script src="./js/store.js?v=2.023c"></script>
+  <script src="./js/state.js?v=2.023c"></script>
+  <script src="./js/chart.js?v=2.023c"></script>
+  <script src="./js/gestures.js?v=2.023c"></script>
+  <script src="./js/panels.js?v=2.023c"></script>
+  <script src="./js/ui.js?v=2.023c"></script>
 
   <script>
     (function(){
-      const APP_VERSION = "v2.023b";
 
-      // Version text
-      const bootText = document.getElementById("bootText");
-      const homeVersion = document.getElementById("homeVersion");
-      if(bootText) bootText.textContent = "BOOT OK " + APP_VERSION;
-      if(homeVersion) homeVersion.textContent = APP_VERSION;
+      // Version text is owned by js/version.js + js/app.js (VTVersion).
+      // Do not set or hard-code version strings here.
 
       // Panel refs
       const panels = {
@@ -529,7 +530,7 @@ Key IDs (contract)
 
       // Buttons
       document.getElementById("btnGoAdd").addEventListener("click", () => {
-        alert("Add/Input restoration is part of v2.023 (will be restored after chart stability).");
+        alert("Add/Input restoration is part of the next step. (Input is currently disabled in v2.023c.)");
       });
       document.getElementById("btnGoCharts").addEventListener("click", () => setActive("charts"));
       document.getElementById("btnGoLog").addEventListener("click", () => setActive("log"));
@@ -684,7 +685,7 @@ Key IDs (contract)
 
       // Service worker
       if("serviceWorker" in navigator){
-        navigator.serviceWorker.register("./sw.js?v=2.023b").catch(()=>{});
+        navigator.serviceWorker.register("./sw.js?v=2.023c").catch(()=>{});
       }
 
       // Initial panel
@@ -697,8 +698,8 @@ Key IDs (contract)
 <!--
 Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: index.html
-App Version: v2.023b
+App Version: v2.023c
 Base: v2.021
-Touched in v2.023b: index.html only (version bump + cache-bust sync)
+Touched in v2.023c: index.html only (load-order + version authority fix)
 Next planned file: js/version.js (File 2 of 10)
 -->
