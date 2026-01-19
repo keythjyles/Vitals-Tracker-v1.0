@@ -8,9 +8,11 @@ Pass order: File 5 of 9 (P0)
 Prev file: js/ui.js (File 4 of 9)
 Next file: js/gestures.js (File 6 of 9)
 
-FIX (SWIPE ONLY)
-- Corrects drag-mode math so panels do not “double offset” (natural flex position + transform),
-  which is the root cause of p0->p1 snapping to p2 and general drift.
+FIX (SWIPE HITCH ONLY)
+- Removes the “snap back then snap forward” hitch at gesture end by:
+  1) Pinning the track to the current rotation index (no transition),
+  2) Clearing per-panel drag transforms,
+  3) Snapping to the target panel on the next animation frame (with transition).
 - Keeps rotation order stable:
     Right swipe: Home -> Log -> Charts -> Home ...
     Left swipe:  Home -> Charts -> Log -> Home ...
@@ -19,22 +21,11 @@ FIX (SWIPE ONLY)
 (function () {
   "use strict";
 
-  /*
-    PANEL MODEL (LOCKED FOR THIS PASS)
-    - Swipe rotation is ONLY: Home / Charts / Log (loop)
-      Home=0, Charts=1, Log=2 (rotation indices)
-    - Settings is NOT in rotation. Opened by gear only.
-    - Add is NOT in rotation. Opened explicitly by button only.
-    - Deck track DOM order is:
-        home(0), charts(1), log(2), settings(3), add(4)
-      We must respect TRACK_ORDER for transforms.
-  */
-
-  const ROTATION = ["home", "charts", "log"];                      // swipe carousel
-  const TRACK_ORDER = ["home", "charts", "log", "settings", "add"]; // DOM order in deckTrack
+  const ROTATION = ["home", "charts", "log"];
+  const TRACK_ORDER = ["home", "charts", "log", "settings", "add"];
 
   let currentPanel = "home";
-  let lastMainPanel = "home";   // last rotating panel (home/charts/log)
+  let lastMainPanel = "home";
   let inSettings = false;
   let inAdd = false;
 
@@ -83,7 +74,6 @@ FIX (SWIPE ONLY)
     const p = panels[name];
     p && p.classList.add("active");
 
-    // Feature hooks
     try {
       if (name === "charts" && window.VTChart?.onShow) window.VTChart.onShow();
       if (name === "log" && window.VTLog?.onShow) window.VTLog.onShow();
@@ -113,6 +103,12 @@ FIX (SWIPE ONLY)
     });
   }
 
+  function pinTrackToRotationIndex(rotIdx) {
+    if (!deck.track) return;
+    deck.track.style.transition = "none";
+    deck.track.style.transform = `translate3d(${-rotIdx * 100}%, 0, 0)`;
+  }
+
   function setDragMode(on) {
     if (dragMode === on) return;
     dragMode = on;
@@ -120,9 +116,8 @@ FIX (SWIPE ONLY)
     if (!deck.track) return;
 
     if (on) {
-      // We keep transition off during drag. The track position is set in swipeDelta()
-      // because it depends on the current rotation index.
       deck.track.style.transition = "none";
+      // actual track pin is set in swipeDelta() because it depends on current rotation index
     } else {
       clearRotationPanelTransforms();
     }
@@ -131,16 +126,13 @@ FIX (SWIPE ONLY)
   function go(name, animated = true) {
     if (!panels[name]) return;
 
-    // Leaving special modes
     if (inSettings && name !== "settings") inSettings = false;
     if (inAdd && name !== "add") inAdd = false;
 
-    // Track last main panel (rotating only)
     if (isRotatingPanel(name)) lastMainPanel = name;
 
     currentPanel = name;
 
-    // Settings (non-rotating)
     if (name === "settings") {
       inSettings = true;
       setDragMode(false);
@@ -149,7 +141,6 @@ FIX (SWIPE ONLY)
       return;
     }
 
-    // Add (non-rotating)
     if (name === "add") {
       inAdd = true;
       setDragMode(false);
@@ -158,15 +149,10 @@ FIX (SWIPE ONLY)
       return;
     }
 
-    // Normal rotating panels
     setDragMode(false);
     setActivePanel(name);
     applyTransformToPanel(name, animated);
   }
-
-  /* ============================
-     Settings (NON-ROTATING)
-     ============================ */
 
   function openSettings() {
     if (!panels.settings) return;
@@ -179,10 +165,6 @@ FIX (SWIPE ONLY)
     go(target, animated);
   }
 
-  /* ============================
-     Add (NON-ROTATING)
-     ============================ */
-
   function openAdd() {
     if (!panels.add) return;
     go("add", false);
@@ -193,10 +175,6 @@ FIX (SWIPE ONLY)
     const target = isRotatingPanel(lastMainPanel) ? lastMainPanel : "home";
     go(target, animated);
   }
-
-  /* ============================
-     Swipe API (gestures.js calls these)
-     ============================ */
 
   function canSwipe() {
     return !inSettings && !inAdd && isRotatingPanel(currentPanel);
@@ -214,10 +192,6 @@ FIX (SWIPE ONLY)
     go(name, animated);
   }
 
-  // Seamless wrap preview (corrected):
-  // - During drag, the track is pinned to the CURRENT rotation index (so natural flex offsets are stable).
-  // - Each rotating panel gets an additional transform equal to (desiredPosition - naturalPosition),
-  //   preventing the “double offset” bug that causes drift and wrong snaps.
   function swipeDelta(deltaRatio) {
     if (!canSwipe()) return;
     if (!deck.track) return;
@@ -227,9 +201,8 @@ FIX (SWIPE ONLY)
 
     setDragMode(true);
 
-    // Pin track at the current rotation panel index (0..2), not at 0.
-    deck.track.style.transition = "none";
-    deck.track.style.transform = `translate3d(${-cur * 100}%, 0, 0)`;
+    // Pin track at the current rotation index (0..2)
+    pinTrackToRotationIndex(cur);
 
     for (let i = 0; i < n; i++) {
       const name = ROTATION[i];
@@ -255,31 +228,40 @@ FIX (SWIPE ONLY)
 
   function swipeEnd(deltaRatio) {
     if (!canSwipe()) return;
+    if (!deck.track) return;
 
     const THRESH = 0.2;
 
-    // Exit drag mode before snapping to the track transform
-    setDragMode(false);
+    const curRot = getRotationIndex();
+    let targetRot = curRot;
 
-    // Right swipe => PREV (wrap enabled)
-    if (deltaRatio > THRESH) {
-      showByRotationIndex(getRotationIndex() - 1, true);
-      return;
-    }
+    if (deltaRatio > THRESH) targetRot = curRot - 1;     // right swipe => prev
+    if (deltaRatio < -THRESH) targetRot = curRot + 1;    // left swipe => next
 
-    // Left swipe => NEXT (wrap enabled)
-    if (deltaRatio < -THRESH) {
-      showByRotationIndex(getRotationIndex() + 1, true);
-      return;
-    }
+    // Step 1: lock the track at the current position immediately (no animation)
+    // Step 2: clear per-panel transforms (removes drag offsets)
+    // Step 3: on next frame, animate track to the target panel
+    setDragMode(true);
+    pinTrackToRotationIndex(curRot);
+    clearRotationPanelTransforms();
 
-    // Snap back (no change)
-    go(currentPanel, true);
+    const n = ROTATION.length;
+    const wrapped = ((targetRot % n) + n) % n;
+    const targetName = ROTATION[wrapped];
+
+    // Exit drag mode *after* we’ve neutralized transforms, but before the animated snap.
+    dragMode = false;
+
+    requestAnimationFrame(() => {
+      // Update state + active class immediately
+      currentPanel = targetName;
+      lastMainPanel = targetName;
+      setActivePanel(targetName);
+
+      // Animated snap to the track index (home/charts/log are contiguous in DOM)
+      applyTransformToPanel(targetName, true);
+    });
   }
-
-  /* ============================
-     Init
-     ============================ */
 
   function init() {
     cacheDom();
@@ -295,20 +277,16 @@ FIX (SWIPE ONLY)
     init,
     go,
 
-    // settings
     openSettings,
     closeSettings,
 
-    // add
     openAdd,
     closeAdd,
 
-    // swipe API
     canSwipe,
     swipeDelta,
     swipeEnd,
 
-    // utilities
     getRotationIndex,
     showByRotationIndex
   });
