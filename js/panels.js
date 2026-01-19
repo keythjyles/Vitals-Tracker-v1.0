@@ -1,6 +1,6 @@
 /* File: js/panels.js */
 /*
-Vitals Tracker — Panel Carousel Controller
+Vitals Tracker — Panel Router & Carousel Controller
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
 App Version: v2.023c
@@ -8,23 +8,18 @@ Base: v2.021
 Date: 2026-01-18
 
 FILE ROLE (LOCKED)
-- Owns panel visibility and carousel logic ONLY.
-- Listens to gesture events emitted by js/gestures.js.
-- Provides a single source of truth for which panel is active.
-- Does NOT implement gestures, charts, storage, or UI rendering.
+- Owns panel visibility, order, and carousel-style navigation.
+- Enforces continuous looping (wrap-around) behavior.
+- Dispatches lifecycle events so other modules (charts, log) can react.
+- NO chart logic. NO storage logic. NO gesture math.
 
 v2.023c — Change Log (THIS FILE ONLY)
-1) Restores deterministic carousel order and wraparound.
-2) Listens for VT:swipeNext / VT:swipePrev events.
-3) Centralizes panel activation (add/remove .active).
-4) Emits lifecycle hooks for panels (onShow callbacks).
-5) Fixes drift where panels could desync from gesture state.
-
-ANTI-DRIFT RULES
-- Do NOT detect gestures here.
-- Do NOT draw charts here.
-- Do NOT read/write storage here.
-- Panel IDs and order are CONTRACTUAL.
+1) Restores canonical panel order and looping behavior:
+   Order: home → charts → log → settings → (wraps to home)
+2) Adds goStep(+1 / -1) API for gestures.js.
+3) Emits `vt:panelChanged` CustomEvent with `{ active }`.
+4) Ensures only ONE panel is aria-visible at any time.
+5) Safe no-op if panels are missing (defensive for partial builds).
 
 Schema position:
 File 9 of 10
@@ -33,121 +28,100 @@ Previous file:
 File 8 — js/gestures.js
 
 Next file:
-File 10 — js/ui.js
+File 10 — js/log.js
 */
 
 (function () {
   "use strict";
 
-  const VERSION = "v2.023c";
+  // ---- Canonical panel order (LOCKED) ----
+  const PANEL_ORDER = ["home", "charts", "log", "settings"];
 
-  /* ===== Panel contract ===== */
-  const PANEL_ORDER = [
-    "panelHome",     // 0
-    "panelCharts",   // 1
-    "panelLog",      // 2
-    "panelSettings"  // 3
-  ];
-
-  const PANELS = {};
-  PANEL_ORDER.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) PANELS[id] = el;
-  });
-
-  let activeIndex = 0; // default Home
-  let lastNonSettingsIndex = 0;
-
-  /* ===== Helpers ===== */
-  function showPanelByIndex(idx){
-    if (idx < 0 || idx >= PANEL_ORDER.length) return;
-
-    PANEL_ORDER.forEach((id, i) => {
-      const el = PANELS[id];
-      if (!el) return;
-      el.classList.toggle("active", i === idx);
-    });
-
-    if (PANEL_ORDER[idx] !== "panelSettings"){
-      lastNonSettingsIndex = idx;
-    }
-
-    activeIndex = idx;
-
-    // Lifecycle hook: onShow
-    const panelId = PANEL_ORDER[idx];
-    try{
-      if (panelId === "panelCharts" &&
-          window.VTChart &&
-          typeof window.VTChart.onShow === "function") {
-        window.VTChart.onShow();
-      }
-    }catch(_){}
-  }
-
-  function next(){
-    const nextIndex = (activeIndex + 1) % PANEL_ORDER.length;
-    showPanelByIndex(nextIndex);
-  }
-
-  function prev(){
-    const prevIndex =
-      (activeIndex - 1 + PANEL_ORDER.length) % PANEL_ORDER.length;
-    showPanelByIndex(prevIndex);
-  }
-
-  function goHome(){
-    showPanelByIndex(0);
-  }
-
-  function goCharts(){
-    showPanelByIndex(1);
-  }
-
-  function goLog(){
-    showPanelByIndex(2);
-  }
-
-  function openSettings(){
-    showPanelByIndex(3);
-  }
-
-  function closeSettings(){
-    showPanelByIndex(lastNonSettingsIndex || 0);
-  }
-
-  /* ===== Gesture bindings ===== */
-  window.addEventListener("VT:swipeNext", next);
-  window.addEventListener("VT:swipePrev", prev);
-
-  /* ===== Button bindings ===== */
-  function bind(id, fn){
-    const el = document.getElementById(id);
-    if (el) el.addEventListener("click", fn);
-  }
-
-  bind("btnGoCharts", goCharts);
-  bind("btnGoLog", goLog);
-  bind("btnHomeFromCharts", goHome);
-  bind("btnHomeFromLog", goHome);
-
-  bind("btnSettings", openSettings);
-  bind("btnSettingsFromCharts", openSettings);
-  bind("btnSettingsFromLog", openSettings);
-  bind("btnBackFromSettings", closeSettings);
-
-  /* ===== Public API ===== */
-  window.VTPanels = {
-    VERSION,
-    showPanelByIndex,
-    goHome,
-    goCharts,
-    goLog,
-    openSettings
+  const PANEL_IDS = {
+    home: "homePanel",
+    charts: "chartsPanel",
+    log: "logPanel",
+    settings: "settingsPanel",
   };
 
-  /* ===== Init ===== */
-  showPanelByIndex(activeIndex);
+  let active = "home";
+
+  function el(id) {
+    return document.getElementById(id);
+  }
+
+  function hideAll() {
+    for (const key of PANEL_ORDER) {
+      const p = el(PANEL_IDS[key]);
+      if (p) {
+        p.setAttribute("aria-hidden", "true");
+        p.style.display = "none";
+      }
+    }
+  }
+
+  function show(name) {
+    const id = PANEL_IDS[name];
+    const p = el(id);
+    if (!p) return;
+
+    hideAll();
+
+    p.style.display = "";
+    p.setAttribute("aria-hidden", "false");
+    active = name;
+
+    // Notify listeners (app.js, charts, log)
+    try {
+      document.dispatchEvent(
+        new CustomEvent("vt:panelChanged", {
+          detail: { active: name }
+        })
+      );
+    } catch (_) {}
+  }
+
+  function goTo(name) {
+    if (!PANEL_ORDER.includes(name)) return;
+    show(name);
+  }
+
+  function goStep(step) {
+    const idx = PANEL_ORDER.indexOf(active);
+    const len = PANEL_ORDER.length;
+    if (idx < 0) {
+      show(PANEL_ORDER[0]);
+      return;
+    }
+    let next = (idx + step) % len;
+    if (next < 0) next += len;
+    show(PANEL_ORDER[next]);
+  }
+
+  function getActive() {
+    return active;
+  }
+
+  function init() {
+    // On boot, show home by default
+    show(active);
+  }
+
+  // ---- Expose API ----
+  window.VTPanels = {
+    init,
+    goTo,
+    goStep,
+    getActive,
+    order: PANEL_ORDER.slice()
+  };
+
+  // ---- Auto-init on DOM ready ----
+  if (document.readyState === "complete" || document.readyState === "interactive") {
+    setTimeout(init, 0);
+  } else {
+    document.addEventListener("DOMContentLoaded", init);
+  }
 
 })();
 
@@ -156,7 +130,7 @@ Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: js/panels.js
 App Version: v2.023c
 Base: v2.021
-Touched in v2.023c: js/panels.js
+Touched in v2.023c: js/panels.js (panel carousel + lifecycle restore)
 Schema order: File 9 of 10
-Next planned file: js/ui.js (File 10)
+Next planned file: js/log.js (File 10)
 */
