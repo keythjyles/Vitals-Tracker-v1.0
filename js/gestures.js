@@ -1,198 +1,153 @@
 /* File: js/gestures.js */
 /*
-Vitals Tracker — Gestures (Panel Swipe + Pull-to-Refresh)
+Vitals Tracker — Gestures (Panel Swipe ONLY)
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
-App Version: v2.025a
+App Version: v2.025c
 Base: v2.021
 Date: 2026-01-18
 
 FILE ROLE (LOCKED)
-- Owns ONLY:
-  1) Horizontal panel rotation swipe (Home <-> Charts <-> Log)
-  2) Pull-to-refresh on Home panel ONLY
-- Does NOT own chart pan/zoom (chart.js owns that)
-- Does NOT own panel visibility rules (panels.js owns that)
+- Owns ONLY: horizontal swipe between main panels (home <-> charts <-> log).
+- Settings is NOT part of swipe rotation.
+- Chart pan/zoom belongs ONLY to chart.js and must win inside the chart area.
 
-DESIGN (SIMPLIFIED)
-- No “zones”. Swipe works anywhere on the active panel EXCEPT:
-  - inside chart interaction region (#canvasWrap) while Charts is active
-- Settings is NOT in rotation (gear-only)
-- Add is NOT in rotation
+DESIGN (SIMPLE, RELIABLE)
+- Swipe works from anywhere on the app EXCEPT inside the chart interaction region.
+- No "zones". No header-only constraints. Those are unreliable on mobile.
+- Swipe triggers only when:
+    - single finger
+    - horizontal intent dominates vertical
+    - distance threshold exceeded
+- Does NOT block normal vertical scroll unless we have clearly committed to horizontal swipe.
 
-ANTI-DRIFT RULES
-- Do NOT implement chart gestures here.
-- Do NOT implement rendering here.
+HARD RULES
+- Never swipe when user starts gesture inside #canvasWrap (chart).
+- Never swipe while active panel is "settings".
 */
 
-(function(){
+(function () {
   "use strict";
 
-  function $(id){ return document.getElementById(id); }
+  function $(id) { return document.getElementById(id); }
 
   const root = $("panelsRoot") || document.body;
-  const canvasWrap = $("canvasWrap"); // chart gesture protected region (if present)
+  const canvasWrap = $("canvasWrap");
 
-  // Tune thresholds for Android touch
-  const H_START_PX = 12;     // when we decide it's horizontal
-  const V_START_PX = 14;     // when we decide it's vertical
-  const SWIPE_COMMIT_PX = 42;// required dx to rotate panels
-  const DOMINANCE = 1.15;    // dx must exceed dy*DOMINANCE (or vice versa)
+  function within(el, target) {
+    if (!el || !target) return false;
+    return el === target || el.contains(target);
+  }
 
-  function activePanelName(){
-    // Prefer panels module
-    const p = window.VTPanels?.getActive?.();
-    if (p) return p;
-
-    // Fallback DOM detection
+  function getActivePanelName() {
+    try {
+      if (window.VTPanels && typeof window.VTPanels.getActive === "function") {
+        return window.VTPanels.getActive();
+      }
+    } catch (_) {}
+    // Fallback by DOM classes
     if ($("panelHome")?.classList.contains("active")) return "home";
     if ($("panelCharts")?.classList.contains("active")) return "charts";
     if ($("panelLog")?.classList.contains("active")) return "log";
-    if ($("panelAdd")?.classList.contains("active")) return "add";
     if ($("panelSettings")?.classList.contains("active")) return "settings";
+    if ($("panelAdd")?.classList.contains("active")) return "add";
     return "home";
   }
 
-  function within(el, target){
-    try{
-      return !!(el && target && (el === target || el.contains(target)));
-    }catch(_){
-      return false;
-    }
+  function goNext() {
+    if (window.VTPanels?.next) return window.VTPanels.next();
+  }
+  function goPrev() {
+    if (window.VTPanels?.prev) return window.VTPanels.prev();
   }
 
-  function canStartSwipe(target){
-    const a = activePanelName();
+  // Gesture state
+  const G = {
+    active: false,
+    sx: 0,
+    sy: 0,
+    lastX: 0,
+    lastY: 0,
+    mode: null,     // null | "h" | "v"
+    ok: false
+  };
 
-    // Never rotate while in settings or add (not in rotation)
-    if (a === "settings" || a === "add") return false;
+  // Tunables
+  const INTENT_PX = 14;     // pixels to decide intent
+  const SWIPE_PX = 48;      // pixels to trigger panel change
+  const DOMINANCE = 1.25;   // dx must exceed dy * DOMINANCE
 
-    // On charts: protect chart region so chart gestures always win
-    if (a === "charts" && canvasWrap && within(canvasWrap, target)) return false;
+  function swipeAllowed(target) {
+    const active = getActivePanelName();
+
+    // Never swipe in/out of settings
+    if (active === "settings") return false;
+
+    // Optional: do not swipe from add panel (you have explicit buttons there)
+    if (active === "add") return false;
+
+    // Chart interaction region is protected
+    if (canvasWrap && within(canvasWrap, target)) return false;
 
     return true;
   }
 
-  function rotateNext(){
-    try { window.VTPanels?.next?.(); } catch(_){}
-  }
-  function rotatePrev(){
-    try { window.VTPanels?.prev?.(); } catch(_){}
-  }
-
-  // ===== Panel swipe =====
-  const swipe = {
-    active:false,
-    ok:false,
-    sx:0, sy:0,
-    lx:0, ly:0,
-    mode:null // "h" | "v" | null
-  };
-
-  root.addEventListener("touchstart", (e) => {
-    if (!e.touches || e.touches.length !== 1) return;
+  root.addEventListener("touchstart", function (e) {
+    if (e.touches.length !== 1) return;
 
     const t = e.touches[0];
-    swipe.active = true;
-    swipe.sx = swipe.lx = t.clientX;
-    swipe.sy = swipe.ly = t.clientY;
-    swipe.mode = null;
-    swipe.ok = canStartSwipe(e.target);
-  }, { passive:true });
+    G.active = true;
+    G.sx = G.lastX = t.clientX;
+    G.sy = G.lastY = t.clientY;
+    G.mode = null;
+    G.ok = swipeAllowed(e.target);
+  }, { passive: true });
 
-  root.addEventListener("touchmove", (e) => {
-    if (!swipe.active || !swipe.ok) return;
-    if (!e.touches || e.touches.length !== 1) return;
+  root.addEventListener("touchmove", function (e) {
+    if (!G.active || !G.ok) return;
+    if (e.touches.length !== 1) return;
 
     const t = e.touches[0];
-    swipe.lx = t.clientX;
-    swipe.ly = t.clientY;
+    const x = t.clientX;
+    const y = t.clientY;
 
-    const dx = swipe.lx - swipe.sx;
-    const dy = swipe.ly - swipe.sy;
+    const dx = x - G.sx;
+    const dy = y - G.sy;
 
-    // Decide intent once
-    if (!swipe.mode){
-      const adx = Math.abs(dx), ady = Math.abs(dy);
+    // Decide intent
+    if (!G.mode) {
+      const adx = Math.abs(dx);
+      const ady = Math.abs(dy);
 
-      if (adx > H_START_PX && adx > ady * DOMINANCE) swipe.mode = "h";
-      else if (ady > V_START_PX && ady > adx * DOMINANCE) swipe.mode = "v";
+      if (adx > INTENT_PX && adx > ady * DOMINANCE) G.mode = "h";
+      else if (ady > INTENT_PX && ady > adx * DOMINANCE) G.mode = "v";
     }
 
-    // If horizontal swipe, prevent scrolling so swipe is reliable
-    if (swipe.mode === "h"){
+    // Once we commit to horizontal swipe, prevent scroll
+    if (G.mode === "h") {
       e.preventDefault();
     }
-  }, { passive:false });
 
-  root.addEventListener("touchend", (e) => {
-    if (!swipe.active || !swipe.ok){
-      swipe.active = false;
-      return;
-    }
-    swipe.active = false;
+    G.lastX = x;
+    G.lastY = y;
+  }, { passive: false });
 
-    if (!e.changedTouches || e.changedTouches.length !== 1) return;
-    if (swipe.mode !== "h") return;
+  root.addEventListener("touchend", function (e) {
+    if (!G.active) return;
+    G.active = false;
 
-    const t = e.changedTouches[0];
-    const dx = t.clientX - swipe.sx;
+    if (!G.ok) return;
+    if (G.mode !== "h") return;
 
-    if (Math.abs(dx) < SWIPE_COMMIT_PX) return;
+    const t = e.changedTouches && e.changedTouches[0];
+    if (!t) return;
 
-    // Left swipe -> next; Right swipe -> prev
-    if (dx < 0) rotateNext();
-    else rotatePrev();
-  }, { passive:true });
+    const dx = t.clientX - G.sx;
+    if (Math.abs(dx) < SWIPE_PX) return;
 
-  // ===== Pull-to-refresh (Home only) =====
-  // This restores your “pull down on Home to refresh (release)” behavior,
-  // but ONLY when Home is active and user pulls from near the top.
-  const PULL_TOP_PX = 24;
-  const PULL_TRIGGER_PX = 70;
-
-  let pull = { active:false, sy:0, armed:false };
-
-  root.addEventListener("touchstart", (e) => {
-    if (!e.touches || e.touches.length !== 1) return;
-    if (activePanelName() !== "home") return;
-
-    // Only arm if at (or near) top of scroll.
-    // Home is usually not scroll-heavy, but we guard anyway.
-    const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
-    if (scrollY > PULL_TOP_PX) return;
-
-    pull.active = true;
-    pull.sy = e.touches[0].clientY;
-    pull.armed = false;
-  }, { passive:true });
-
-  root.addEventListener("touchmove", (e) => {
-    if (!pull.active) return;
-    if (!e.touches || e.touches.length !== 1) return;
-    if (activePanelName() !== "home") { pull.active = false; return; }
-
-    const y = e.touches[0].clientY;
-    const dy = y - pull.sy;
-
-    // Only consider downward pull
-    if (dy > PULL_TRIGGER_PX) pull.armed = true;
-  }, { passive:true });
-
-  root.addEventListener("touchend", () => {
-    if (!pull.active) return;
-    pull.active = false;
-
-    if (!pull.armed) return;
-    pull.armed = false;
-
-    // Soft refresh hook: prefer app module, then fall back to reload
-    try{
-      if (window.VTApp?.refresh) return window.VTApp.refresh();
-      if (window.VTStore?.refresh) return window.VTStore.refresh();
-    }catch(_){}
-
-    try { location.reload(); } catch(_){}
-  }, { passive:true });
+    // Left swipe => next, right swipe => prev
+    if (dx < 0) goNext();
+    else goPrev();
+  }, { passive: true });
 
 })();
