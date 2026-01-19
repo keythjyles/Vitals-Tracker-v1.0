@@ -2,15 +2,16 @@
 Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
 File: js/gestures.js
 App Version Authority: js/version.js
-Base: v2.025f
-Pass: Render Recovery + Swipe Feel
+Base: v2.026a
+Pass: Swipe + Render Recovery (P0-R1)
 Pass order: File 6 of 9 (P0)
 Prev file: js/panels.js (File 5 of 9)
 Next file: js/chart.js (File 7 of 9)
 
 FIX (SWIPE ONLY)
-- Strengthens abort handling so any drag that started is ALWAYS snapped back on abort/end,
-  eliminating “between panels” drift that later causes wrong snaps.
+- Strengthens abort handling so any drag that started is ALWAYS snapped safely on abort/end.
+- Keeps chart area protected (no swipe capture when gesture begins on chart canvas/wrap/card).
+- Also snaps back on touchcancel and on unexpected multi-touch interruption after drag begins.
 */
 
 (function () {
@@ -26,7 +27,7 @@ FIX (SWIPE ONLY)
   let width = 1;
   let locked = false;
 
-  // Once we have moved horizontally enough to start dragging, we must ensure we snap back on abort.
+  // Once we have moved horizontally enough to start dragging, ensure we resolve cleanly.
   let didDrag = false;
 
   function inChartRegion(target) {
@@ -40,7 +41,9 @@ FIX (SWIPE ONLY)
 
   function canSwipeNow() {
     try {
-      return !!(window.VTPanels && typeof window.VTPanels.canSwipe === "function" && window.VTPanels.canSwipe());
+      return !!(window.VTPanels &&
+        typeof window.VTPanels.canSwipe === "function" &&
+        window.VTPanels.canSwipe());
     } catch (_) {
       return false;
     }
@@ -59,6 +62,13 @@ FIX (SWIPE ONLY)
         window.VTPanels.swipeEnd(0);
       }
     } catch (_) {}
+  }
+
+  function abortGesture() {
+    // Abort safely and resolve any started drag.
+    locked = true;
+    active = false;
+    if (didDrag) snapBack();
   }
 
   function onStart(e) {
@@ -83,13 +93,16 @@ FIX (SWIPE ONLY)
   function onMove(e) {
     if (!active) return;
     if (locked) return;
-    if (!e.touches || e.touches.length !== 1) return;
+
+    // If multi-touch appears mid-gesture, abort cleanly.
+    if (!e.touches || e.touches.length !== 1) {
+      abortGesture();
+      return;
+    }
 
     // If panels says no swipe (state changed mid-gesture), abort safely.
     if (!canSwipeNow()) {
-      locked = true;
-      active = false;
-      if (didDrag) snapBack();
+      abortGesture();
       return;
     }
 
@@ -99,12 +112,9 @@ FIX (SWIPE ONLY)
     const dx = x - startX;
     const dy = y - startY;
 
-    // If user is moving more vertically than horizontally, treat as non-swipe.
-    // If we already dragged, snap back immediately to avoid drift.
+    // Vertical intent => treat as scroll; if we already dragged, snap back immediately.
     if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 10) {
-      locked = true;
-      active = false;
-      if (didDrag) snapBack();
+      abortGesture();
       return;
     }
 
@@ -128,10 +138,10 @@ FIX (SWIPE ONLY)
   }
 
   function onEnd() {
-    // If we never became active (ignored start), nothing to do.
+    // If start was ignored, nothing to do.
     if (!active) return;
 
-    // If we locked mid-gesture, we must snap back if we had started dragging.
+    // If we locked mid-gesture, ensure we resolved.
     if (locked) {
       active = false;
       if (didDrag) snapBack();
@@ -147,7 +157,6 @@ FIX (SWIPE ONLY)
       if (window.VTPanels && typeof window.VTPanels.swipeEnd === "function") {
         window.VTPanels.swipeEnd(ratio);
       } else if (didDrag) {
-        // Defensive: if panels API missing at end, snap back to avoid drift.
         snapBack();
       }
     } catch (_) {
@@ -155,17 +164,24 @@ FIX (SWIPE ONLY)
     }
   }
 
+  function onCancel() {
+    // Always resolve cancel (OS gesture interruption, app switch, etc.)
+    if (!active) return;
+    active = false;
+    if (didDrag) snapBack();
+  }
+
   deck.addEventListener("touchstart", onStart, { passive: true });
   deck.addEventListener("touchmove", onMove, { passive: false });
   deck.addEventListener("touchend", onEnd, { passive: true });
-  deck.addEventListener("touchcancel", onEnd, { passive: true });
+  deck.addEventListener("touchcancel", onCancel, { passive: true });
 
 })();
 
 /*
 Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: js/gestures.js
-Pass: Render Recovery + Swipe Feel
+Pass: Swipe + Render Recovery (P0-R1)
 Pass order: File 6 of 9 (P0)
 Prev file: js/panels.js (File 5 of 9)
 Next file: js/chart.js (File 7 of 9)
