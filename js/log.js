@@ -11,7 +11,8 @@ Next file: js/add.js (File 9 of 9)
 v2.025f — Change Log (THIS FILE ONLY)
 1) Guarantees Log re-renders when Log panel becomes active.
 2) Adds defensive normalization for record field names (ts/sys/dia/hr/notes).
-3) No delete/edit changes here (UI wiring handled in add.js + store.js later).
+3) Adds lightweight DOM-safe styling fallback if CSS classes are missing (does not override if present).
+4) No delete/edit changes here (UI wiring handled in add.js + store.js later).
 
 ANTI-DRIFT: No swipe logic here.
 */
@@ -121,6 +122,42 @@ ANTI-DRIFT: No swipe logic here.
     }
   }
 
+  function applyRowFallbackStyles(row, left, title, sub, right) {
+    // If your CSS defines these classes, it will win. These are minimal safety nets.
+    try {
+      row.style.display = "grid";
+      row.style.gridTemplateColumns = "1fr";
+      row.style.gap = "8px";
+      row.style.padding = "12px 12px";
+      row.style.border = "1px solid rgba(255,255,255,0.12)";
+      row.style.borderRadius = "16px";
+      row.style.background = "rgba(0,0,0,0.12)";
+    } catch (_) {}
+
+    try {
+      left.style.display = "grid";
+      left.style.gap = "2px";
+    } catch (_) {}
+
+    try {
+      title.style.fontWeight = "800";
+      title.style.letterSpacing = ".1px";
+      title.style.color = "rgba(255,255,255,0.86)";
+      title.style.fontSize = "14px";
+    } catch (_) {}
+
+    try {
+      sub.style.color = "rgba(255,255,255,0.56)";
+      sub.style.fontSize = "12px";
+    } catch (_) {}
+
+    try {
+      right.style.color = "rgba(255,255,255,0.66)";
+      right.style.fontSize = "12px";
+      right.style.lineHeight = "1.25";
+    } catch (_) {}
+  }
+
   function renderRow(r) {
     const row = document.createElement("div");
     row.className = "logRow";
@@ -145,6 +182,9 @@ ANTI-DRIFT: No swipe logic here.
 
     row.appendChild(left);
     row.appendChild(right);
+
+    // Fallback styling (safe)
+    applyRowFallbackStyles(row, left, title, sub, right);
 
     return row;
   }
@@ -173,7 +213,7 @@ ANTI-DRIFT: No swipe logic here.
     } catch (_) {}
   });
 
-  // Fallback: if app doesn't emit events yet, allow manual refresh
+  // Fallback API for panels.js hooks
   window.VTLog = {
     render,
     onShow: render
