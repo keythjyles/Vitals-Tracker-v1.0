@@ -214,4 +214,3 @@ Pass order: File 5 of 9
 Prev file: js/panels.js
 Next file: js/chart.js
 */
-```0
