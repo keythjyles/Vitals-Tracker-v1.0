@@ -1,696 +1,258 @@
-<!-- File: index.html -->
 <!--
-Vitals Tracker — MASTER (Index Authority)
-Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
-
-App Version: v2.025
-Base: v2.021
-Date: 2026-01-18
-
-THIS PASS (v2.025) — WHAT WE ARE DOING RIGHT NOW
-Goal: Stabilize UX + Chart foundation BEFORE adding new features.
-
-CURRENT SCOPE (v2.025)
-1) Version discipline:
-   - js/version.js is canonical.
-   - index.html displays version only and sets cache-busters.
-2) Home screen UX:
-   - Bottom button group (Install / Clear Data / Exit / Settings) must be EXACT same size.
-   - Pull-to-refresh on Home must work again.
-3) Swipe reset (IMPORTANT):
-   - Remove/peel back any swipe logic living in index.html.
-   - gestures.js will be the ONLY owner of panel swipe.
-   - index.html will only provide stable IDs + swipe zones.
-4) Chart constraints (implemented in chart.js next file, not here):
-   - Default 7 days, zoom 1–14 days, pan clamped to dataset bounds.
-   - Y-axis min 40; Y-axis max rule; labels must match the formatted example.
-
-FILES TO TOUCH (LOCKED LIST FOR THIS v2.025 STABILIZATION PASS)
-File 1: js/version.js   (DONE)  — bump canonical version + scope notes
-File 2: index.html      (THIS)  — unify cache-busters + fix Home buttons + restore pull + remove swipe logic
-File 3: js/gestures.js  (NEXT)  — re-implement simple panel swipe (start-zones only, chart-protected)
-File 4: js/chart.js     (NEXT)  — enforce viewport/zoom/pan clamps + formatted chart axis/labels/bands
-
-Hard Rules
-- One file delivered at a time; you prompt Next for the next file.
-- Full file output only (no partials).
-- EOF notes required so you can confirm you pasted the whole thing (blind/mobile workflow).
-
-Key IDs (contract — do not rename without updating modules)
-Panels:
-- #panelHome, #panelAdd, #panelCharts, #panelLog, #panelSettings
-
-Charts:
-- #canvasWrap, #chartCanvas, #chartsSwipeTop, #chartsSwipeBottom, #chartsTopNote
-
-Home:
-- #btnGoAdd, #btnGoCharts, #btnGoLog
-- #btnInstall, #btnClearData, #btnExit, #btnSettings
-- #pullIndicator
+Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
+File: index.html
+App Version Authority: js/version.js (do not hardcode versions here)
+Base: v2.025e
+Pass: Render Recovery + Swipe Feel
+Pass order: File 2 of 9 (P0)
+Prev file: js/version.js (File 1 of 9)
+Next file: css/app.css (File 3 of 9)
 -->
 
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1324" />
   <title>Vitals Tracker</title>
 
+  <!-- PWA -->
+  <link rel="manifest" id="manifestLink" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/icon-192.png" sizes="192x192" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+  <!-- App CSS (single source) -->
+  <link rel="stylesheet" href="css/app.css?v=20260119" />
+
+  <!-- Minimal critical fallback (only for catastrophic CSS load failure) -->
   <style>
-    :root{
-      --bg0:#08101f;
-      --bg1:#0b1324;
-      --panel:#0c1528cc;
-      --stroke:rgba(235,245,255,.16);
-      --stroke2:rgba(235,245,255,.22);
-      --strokeBold:rgba(180,210,255,.42);
-      --text:rgba(235,245,255,.88);
-      --muted:rgba(235,245,255,.58);
-      --muted2:rgba(235,245,255,.42);
-      --accent:#2b4e7a;
-      --shadow:0 18px 42px rgba(0,0,0,.45);
-      --r:22px;
-      --r2:26px;
-    }
-
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(1200px 700px at 20% -10%, rgba(70,140,255,.20), transparent 60%),
-        radial-gradient(900px 600px at 90% 10%, rgba(80,160,255,.12), transparent 55%),
-        linear-gradient(180deg, var(--bg1), var(--bg0));
-      overflow:hidden;
-    }
-
-    .app{
-      height:100%;
-      display:flex;
-      flex-direction:column;
-      padding:14px 12px calc(14px + env(safe-area-inset-bottom));
-      gap:12px;
-    }
-
-    .topbar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:12px 14px;
-      border:1px solid var(--stroke2);
-      border-radius:999px;
-      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
-      box-shadow: var(--shadow);
-      gap:12px;
-    }
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width:0;
-    }
-    .logo{
-      width:34px;height:34px;
-      border-radius:10px;
-      border:1px solid rgba(180,210,255,.22);
-      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
-      display:grid;place-items:center;
-      flex:0 0 auto;
-      box-shadow: 0 10px 24px rgba(0,0,0,.25);
-    }
-    .title{
-      font-weight:900;
-      letter-spacing:.2px;
-      font-size:22px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      max-width:56vw;
-    }
-    .boot{
-      font-size:13px;
-      color:var(--muted);
-      letter-spacing:.25px;
-      white-space:nowrap;
-    }
-
-    .shell{
-      flex:1;
-      min-height:0;
-      border:2px solid rgba(60,120,210,.55);
-      border-radius: var(--r2);
-      padding:14px;
-      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.01));
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-
-    .panels{
-      height:100%;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-      overflow:hidden;
-    }
-
-    .panel{
-      height:100%;
-      display:none;
-      flex-direction:column;
-      gap:12px;
-      overflow:hidden;
-    }
-    .panel.active{display:flex}
-
-    .panelHeader{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      border:1px solid var(--stroke2);
-      border-radius:999px;
-      padding:12px 14px;
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-    }
-    .panelHeader .name{
-      font-size:18px;
-      font-weight:900;
-      letter-spacing:.2px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      max-width:60%;
-    }
-
-    .nav{display:flex; gap:8px; align-items:center;}
-
-    .btn{
-      border:1px solid var(--stroke2);
-      color:var(--text);
-      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
-      border-radius:999px;
-      padding:10px 12px;
-      font-weight:900;
-      letter-spacing:.2px;
-      cursor:pointer;
-      user-select:none;
-      -webkit-tap-highlight-color: transparent;
-      white-space:nowrap;
-      min-height:44px; /* touch target */
-    }
-    .btn:active{transform: translateY(1px)}
-    .btn.secondary{
-      color:var(--muted);
-      border-color:var(--stroke);
-      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-      font-weight:800;
-    }
-    .btn.danger{
-      border-color: rgba(255,120,120,.22);
-      background: linear-gradient(180deg, rgba(255,90,90,.18), rgba(255,90,90,.08));
-      color: rgba(255,230,230,.92);
-      font-weight:900;
-    }
-    .btn.icon{
-      width:44px;
-      padding:10px 0;
-      display:grid;
-      place-items:center;
-      flex:0 0 auto;
-    }
-    .btn[disabled]{opacity:.55; cursor:not-allowed}
-
-    .card{
-      border:1px solid var(--stroke2);
-      border-radius: var(--r);
-      padding:14px;
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-      overflow:auto;
-      min-height:0;
-    }
-    .muted{color:var(--muted)}
-    .small{font-size:13px}
-
-    /* Home actions */
-    .homeActions{
-      display:flex;
-      flex-direction:column;
-      gap:14px;
-      padding:6px 2px 2px;
-    }
-    .homeBig{
-      width:100%;
-      border-radius:999px;
-      padding:18px 16px;
-      font-size:20px;
-      font-weight:950;
-      letter-spacing:.25px;
-      border:1px solid rgba(120,180,255,.42);
-      background: linear-gradient(180deg, rgba(80,150,255,.38), rgba(80,150,255,.14));
-      box-shadow: 0 14px 32px rgba(0,0,0,.25);
-      color: rgba(235,245,255,.95);
-      cursor:pointer;
-      user-select:none;
-      -webkit-tap-highlight-color: transparent;
-      min-height:64px;
-    }
-    .homeBig.secondary{
-      border-color: rgba(235,245,255,.18);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-      color: rgba(235,245,255,.86);
-      font-weight:900;
-    }
-    .homeBig:active{transform: translateY(1px)}
-
-    /* HOME bottom button group: forced equal size */
-    .homeGrid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:12px;
-      margin-top:8px;
-    }
-    .homeGrid .btn{
-      width:100%;
-      min-height:48px;
-      height:48px;              /* force same height */
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:0 12px;           /* keep consistent padding */
-    }
-
-    .homeFoot{
-      margin-top:10px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-      color:var(--muted2);
-      font-size:12px;
-    }
-    .homeFoot .v{color:var(--muted); font-weight:900; letter-spacing:.2px}
-    .homeFoot .by{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:55%}
-
-    /* Pull-to-refresh indicator (Home only) */
-    .pull{
-      height:0px;
-      overflow:hidden;
-      transition:height .18s ease;
-      color:var(--muted);
-      font-weight:900;
-      letter-spacing:.2px;
-      text-align:center;
-      user-select:none;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    /* Charts */
-    #chartsTopNote{
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      text-align:center;
-      display:block;
-      padding:0 10px;
-    }
-
-    .swipeZone{
-      height:18px;
-      border-radius:12px;
-      border:1px solid rgba(235,245,255,.10);
-      background: rgba(0,0,0,.10);
-    }
-
-    .canvasWrap{
-      border:1px solid var(--stroke2);
-      border-radius: var(--r);
-      padding:6px;
-      background: rgba(0,0,0,.18);
-      overflow:hidden;
-      touch-action:none; /* chart module owns pinch/pan here */
-    }
-
-    canvas{
-      display:block;
-      width:100%;
-      height:320px; /* closer to your formatted example */
-    }
-
-    /* Settings */
-    .settingsList{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      margin-top:10px;
-    }
-    .settingsItem{
-      border:1px solid var(--stroke);
-      border-radius:16px;
-      padding:12px;
-      background: rgba(0,0,0,.16);
-      color: var(--muted);
-      font-weight:800;
-      line-height:1.3;
-    }
+    html,body{height:100%;margin:0;background:#08101f;color:#eaf2ff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    .noscript{padding:16px}
   </style>
 </head>
 
 <body>
-  <div class="app">
-    <div class="topbar">
+  <noscript>
+    <div class="noscript">
+      This app requires JavaScript to run.
+    </div>
+  </noscript>
+
+  <!-- App Shell -->
+  <div id="appRoot" class="app-root">
+
+    <!-- Top Header -->
+    <header class="topbar" id="topbar">
       <div class="brand">
-        <div class="logo" aria-hidden="true">
+        <div class="brandIcon" aria-hidden="true">
+          <!-- simple pulse icon -->
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-            <path d="M3 12h4l2-5 4 12 2-7h6"
-              stroke="rgba(120,180,255,.95)" stroke-width="2.2"
-              stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 12h4l2-6 4 12 2-6h8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
-        <div class="title">Vitals Tracker</div>
+        <div class="brandTitle">Vitals Tracker</div>
       </div>
-      <div class="boot" id="bootText">BOOT OK v?.???</div>
-    </div>
 
-    <div class="shell">
-      <div class="panels" id="panelsRoot">
+      <div class="bootpill" id="bootText">BOOT…</div>
+    </header>
 
-        <!-- HOME (0) -->
-        <section class="panel active" id="panelHome" aria-label="Home">
-          <div class="pull" id="pullIndicator">Release to refresh</div>
+    <!-- Swipe Deck (Home / Charts / Log / Settings / Add) -->
+    <!-- NOTE: We are NOT adding Settings to rotation later per your rule,
+         but the DOM still exists because the gear opens it. Rotation logic lives in panels.js. -->
+    <main class="deck" id="panelDeck" aria-label="Vitals Tracker Panels">
+      <div class="deckTrack" id="deckTrack">
 
-          <div class="card" id="homeCard">
-            <div class="homeActions">
-              <button class="homeBig" id="btnGoAdd">Add Reading</button>
-              <button class="homeBig secondary" id="btnGoCharts">Charts</button>
-              <button class="homeBig secondary" id="btnGoLog">Log</button>
+        <!-- PANEL: HOME -->
+        <section class="panel active" id="panelHome" data-panel="home" aria-label="Home">
+          <div class="screenFrame">
+            <div class="screenHeader">
+              <div class="screenTitle">Home</div>
+              <div class="screenHeaderRight">
+                <button class="iconBtn" id="btnSettings" type="button" aria-label="Settings">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" stroke="currentColor" stroke-width="2"/>
+                    <path d="M19.4 15a7.8 7.8 0 0 0 .1-2l2-1.5-2-3.5-2.4 1a7.6 7.6 0 0 0-1.7-1l-.4-2.6H9l-.4 2.6a7.6 7.6 0 0 0-1.7 1l-2.4-1-2 3.5 2 1.5a7.8 7.8 0 0 0 .1 2l-2 1.5 2 3.5 2.4-1a7.6 7.6 0 0 0 1.7 1l.4 2.6h6l.4-2.6a7.6 7.6 0 0 0 1.7-1l2.4 1 2-3.5-2-1.5Z"
+                          stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
 
-              <!-- Equal-size button group -->
-              <div class="homeGrid">
-                <button class="btn secondary" id="btnInstall" disabled>Install</button>
-                <button class="btn secondary" id="btnClearData">Clear Data</button>
-                <button class="btn danger" id="btnExit">Exit</button>
-                <button class="btn secondary" id="btnSettings" aria-label="Settings" title="Settings">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"
-                      stroke="rgba(235,245,255,.78)" stroke-width="2"/>
-                    <path d="M19.4 15a7.9 7.9 0 0 0 .1-1 7.9 7.9 0 0 0-.1-1l2-1.6-2-3.4-2.4 1a8 8 0 0 0-1.7-1l-.4-2.6H11l-.4 2.6a8 8 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7.9 7.9 0 0 0-.1 1c0 .34.03.67.1 1l-2 1.6 2 3.4 2.4-1c.53.4 1.1.74 1.7 1l.4 2.6h4l.4-2.6c.6-.26 1.17-.6 1.7-1l2.4 1 2-3.4-2-1.6Z"
-                      stroke="rgba(235,245,255,.50)" stroke-width="2" stroke-linejoin="round"/>
+            <div class="homeButtons">
+              <button class="primaryBtn" id="btnGoAdd" type="button">Add Reading</button>
+              <button class="ghostBtn" id="btnGoCharts" type="button">Charts</button>
+              <button class="ghostBtn" id="btnGoLog" type="button">Log</button>
+
+              <div class="homeRow">
+                <button class="miniBtn" id="btnInstall" type="button" disabled>Install</button>
+                <button class="miniBtn" id="btnClearData" type="button">Clear Data</button>
+              </div>
+
+              <div class="homeRow">
+                <button class="dangerBtn" id="btnExit" type="button">Exit</button>
+                <button class="miniBtn" id="btnSettingsHomeAlt" type="button" aria-label="Settings (alt)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" stroke="currentColor" stroke-width="2"/>
+                    <path d="M19.4 15a7.8 7.8 0 0 0 .1-2l2-1.5-2-3.5-2.4 1a7.6 7.6 0 0 0-1.7-1l-.4-2.6H9l-.4 2.6a7.6 7.6 0 0 0-1.7 1l-2.4-1-2 3.5 2 1.5a7.8 7.8 0 0 0 .1 2l-2 1.5 2 3.5 2.4-1a7.6 7.6 0 0 0 1.7 1l.4 2.6h6l.4-2.6a7.6 7.6 0 0 0 1.7-1l2.4 1 2-3.5-2-1.5Z"
+                          stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
                   </svg>
                 </button>
               </div>
 
-              <div class="muted small" style="margin-top:2px;">
+              <div class="homeHint">
                 Data stays on your phone (local only). Pull down on Home to refresh (release).
               </div>
 
-              <div class="homeFoot">
-                <div class="v" id="homeVersion">v?.???</div>
-                <div class="by">developed by Keyth Jyles</div>
+              <div class="homeFooter">
+                <div class="homeVer" id="homeVersion">v?.???</div>
+                <div class="homeSig">developed by Keyth Jyles</div>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- ADD (1) — UI/Save flow owned by add.js later; panel shell must still navigate -->
-        <section class="panel" id="panelAdd" aria-label="Add Reading">
-          <div class="panelHeader" id="addHeader" data-swipezone="1">
-            <div class="name">Add Reading</div>
-            <div class="nav">
-              <button class="btn secondary" id="btnHomeFromAdd">Home</button>
-              <button class="btn icon secondary" id="btnSettingsFromAdd" aria-label="Settings" title="Settings">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"
-                    stroke="rgba(235,245,255,.78)" stroke-width="2"/>
-                  <path d="M19.4 15a7.9 7.9 0 0 0 .1-1 7.9 7.9 0 0 0-.1-1l2-1.6-2-3.4-2.4 1a8 8 0 0 0-1.7-1l-.4-2.6H11l-.4 2.6a8 8 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7.9 7.9 0 0 0-.1 1c0 .34.03.67.1 1l-2 1.6 2 3.4 2.4-1c.53.4 1.1.74 1.7 1l.4 2.6h4l.4-2.6c.6-.26 1.17-.6 1.7-1l2.4 1 2-3.4-2-1.6Z"
-                    stroke="rgba(235,245,255,.50)" stroke-width="2" stroke-linejoin="round"/>
-                </svg>
-              </button>
+        <!-- PANEL: CHARTS -->
+        <section class="panel" id="panelCharts" data-panel="charts" aria-label="Charts">
+          <div class="screenFrame">
+            <div class="screenHeader">
+              <div class="screenTitle">Charts</div>
+              <div class="screenHeaderRight">
+                <button class="pillBtn" id="btnHomeFromCharts" type="button">Home</button>
+                <button class="iconBtn" id="btnSettingsFromCharts" type="button" aria-label="Settings">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" stroke="currentColor" stroke-width="2"/>
+                    <path d="M19.4 15a7.8 7.8 0 0 0 .1-2l2-1.5-2-3.5-2.4 1a7.6 7.6 0 0 0-1.7-1l-.4-2.6H9l-.4 2.6a7.6 7.6 0 0 0-1.7 1l-2.4-1-2 3.5 2 1.5a7.8 7.8 0 0 0 .1 2l-2 1.5 2 3.5 2.4-1a7.6 7.6 0 0 0 1.7 1l.4 2.6h6l.4-2.6a7.6 7.6 0 0 0 1.7-1l2.4 1 2-3.5-2-1.5Z"
+                          stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
             </div>
-          </div>
 
-          <div class="card">
-            <div class="muted">
-              Add panel UI + save flow will be restored by the Add modules (not in index.html).
+            <div class="loadingPill" id="chartsLoading">Loading...</div>
+
+            <div class="chartCard">
+              <div class="chartWrap">
+                <!-- chart.js MUST find this canvas -->
+                <canvas id="chartCanvas" width="900" height="700" aria-label="Vitals chart"></canvas>
+              </div>
+
+              <!-- chart.js may populate this; kept present to prevent “legend vanished” -->
+              <div class="chartLegend" id="chartLegend" aria-label="Chart legend"></div>
+            </div>
+
+            <div class="chartFooterSpacer"></div>
+          </div>
+        </section>
+
+        <!-- PANEL: LOG -->
+        <section class="panel" id="panelLog" data-panel="log" aria-label="Log">
+          <div class="screenFrame">
+            <div class="screenHeader">
+              <div class="screenTitle">Log</div>
+              <div class="screenHeaderRight">
+                <button class="pillBtn" id="btnHomeFromLog" type="button">Home</button>
+                <button class="iconBtn" id="btnSettingsFromLog" type="button" aria-label="Settings">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" stroke="currentColor" stroke-width="2"/>
+                    <path d="M19.4 15a7.8 7.8 0 0 0 .1-2l2-1.5-2-3.5-2.4 1a7.6 7.6 0 0 0-1.7-1l-.4-2.6H9l-.4 2.6a7.6 7.6 0 0 0-1.7 1l-2.4-1-2 3.5 2 1.5a7.8 7.8 0 0 0 .1 2l-2 1.5 2 3.5 2.4-1a7.6 7.6 0 0 0 1.7 1l.4 2.6h6l.4-2.6a7.6 7.6 0 0 0 1.7-1l2.4 1 2-3.5-2-1.5Z"
+                          stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="loadingPill" id="logLoading">Loading...</div>
+
+            <!-- log.js MUST find this container -->
+            <div class="logList" id="logList" aria-label="Log list"></div>
+            <div class="logEmpty" id="logEmpty" hidden>No readings yet.</div>
+
+            <div class="logFooterSpacer"></div>
+          </div>
+        </section>
+
+        <!-- PANEL: SETTINGS (NOT IN ROTATION; opened by gear only) -->
+        <section class="panel" id="panelSettings" data-panel="settings" aria-label="Settings">
+          <div class="screenFrame">
+            <div class="screenHeader">
+              <div class="screenTitle">Settings</div>
+              <div class="screenHeaderRight">
+                <button class="pillBtn" id="btnBackFromSettings" type="button">Back</button>
+              </div>
+            </div>
+
+            <div class="settingsBody" id="settingsBody">
+              <div class="settingsCard">
+                <div class="settingsLine"><span class="muted">Version</span> <span id="settingsVersion">v?.???</span></div>
+              </div>
+
+              <!-- Placeholder for future toggles; do not remove -->
+              <div class="settingsCard">
+                <div class="muted">Settings are limited in this build. Use the gear for access; panel is not part of swipe rotation.</div>
+              </div>
             </div>
           </div>
         </section>
 
-        <!-- CHARTS (2) -->
-        <section class="panel" id="panelCharts" aria-label="Charts">
-          <div class="panelHeader" id="chartsHeader" data-swipezone="1">
-            <div class="name">Charts</div>
-            <div class="nav">
-              <button class="btn secondary" id="btnHomeFromCharts">Home</button>
-              <button class="btn icon secondary" id="btnSettingsFromCharts" aria-label="Settings" title="Settings">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"
-                    stroke="rgba(235,245,255,.78)" stroke-width="2"/>
-                  <path d="M19.4 15a7.9 7.9 0 0 0 .1-1 7.9 7.9 0 0 0-.1-1l2-1.6-2-3.4-2.4 1a8 8 0 0 0-1.7-1l-.4-2.6H11l-.4 2.6a8 8 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7.9 7.9 0 0 0-.1 1c0 .34.03.67.1 1l-2 1.6 2 3.4 2.4-1c.53.4 1.1.74 1.7 1l.4 2.6h4l.4-2.6c.6-.26 1.17-.6 1.7-1l2.4 1 2-3.4-2-1.6Z"
-                    stroke="rgba(235,245,255,.50)" stroke-width="2" stroke-linejoin="round"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          <div class="card" id="chartsCard" style="padding:12px;">
-            <div class="muted" id="chartsTopNote">Loading…</div>
-
-            <div class="swipeZone" id="chartsSwipeTop" data-swipezone="1" style="margin:10px 0 8px;"></div>
-
-            <div class="canvasWrap" id="canvasWrap">
-              <canvas id="chartCanvas"></canvas>
+        <!-- PANEL: ADD (UI exists; behavior owned by add.js) -->
+        <section class="panel" id="panelAdd" data-panel="add" aria-label="Add Reading">
+          <div class="screenFrame">
+            <div class="screenHeader">
+              <div class="screenTitle">Add Reading</div>
+              <div class="screenHeaderRight">
+                <button class="pillBtn" id="btnHomeFromAdd" type="button">Home</button>
+              </div>
             </div>
 
-            <div class="swipeZone" id="chartsSwipeBottom" data-swipezone="1" style="margin:8px 0 0;"></div>
-          </div>
-        </section>
-
-        <!-- LOG (3) -->
-        <section class="panel" id="panelLog" aria-label="Log">
-          <div class="panelHeader" id="logHeader" data-swipezone="1">
-            <div class="name">Log</div>
-            <div class="nav">
-              <button class="btn secondary" id="btnHomeFromLog">Home</button>
-              <button class="btn icon secondary" id="btnSettingsFromLog" aria-label="Settings" title="Settings">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"
-                    stroke="rgba(235,245,255,.78)" stroke-width="2"/>
-                  <path d="M19.4 15a7.9 7.9 0 0 0 .1-1 7.9 7.9 0 0 0-.1-1l2-1.6-2-3.4-2.4 1a8 8 0 0 0-1.7-1l-.4-2.6H11l-.4 2.6a8 8 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7.9 7.9 0 0 0-.1 1c0 .34.03.67.1 1l-2 1.6 2 3.4 2.4-1c.53.4 1.1.74 1.7 1l.4 2.6h4l.4-2.6c.6-.26 1.17-.6 1.7-1l2.4 1 2-3.4-2-1.6Z"
-                    stroke="rgba(235,245,255,.50)" stroke-width="2" stroke-linejoin="round"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          <div class="card" id="logCard">
-            <div class="muted" id="logTopNote">Loading…</div>
-          </div>
-        </section>
-
-        <!-- SETTINGS (4) -->
-        <section class="panel" id="panelSettings" aria-label="Settings">
-          <div class="panelHeader" data-swipezone="1">
-            <div class="name">Settings</div>
-            <div class="nav">
-              <button class="btn secondary" id="btnBackFromSettings">Back</button>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="muted">v2.025 series: stabilize swipe + formatted chart + chart bounds + version discipline.</div>
-            <div class="settingsList">
-              <div class="settingsItem">Swipe is being re-implemented in gestures.js (simple + predictable).</div>
-              <div class="settingsItem">Chart bounds/labels/bands are being restored in chart.js next.</div>
-              <div class="settingsItem">Version is canonical in js/version.js only.</div>
+            <div class="addBody" id="addBody">
+              <!-- add.js will fully own this; kept minimal so app doesn’t “dead-end” -->
+              <div class="addCard" id="addCard">
+                <div class="muted">Add panel is present. If Save is not working, that will be repaired in add.js/storage.js later in this pass.</div>
+                <button class="primaryBtn" id="btnSaveReading" type="button">Save (wired by add.js)</button>
+              </div>
             </div>
           </div>
         </section>
 
       </div>
-    </div>
+    </main>
   </div>
 
-  <!-- Script cache-busting pinned to v2.025 -->
-  <script src="./js/version.js?v=2.025"></script>
+  <!-- Scripts: order matters -->
+  <!-- Version authority first (global VTVersion) -->
+  <script src="js/version.js?v=20260119"></script>
 
-  <!-- Keep module order stable; some modules may be no-ops until restored -->
-  <script src="./js/app.js?v=2.025"></script>
-  <script src="./js/storage.js?v=2.025"></script>
-  <script src="./js/store.js?v=2.025"></script>
-  <script src="./js/state.js?v=2.025"></script>
-  <script src="./js/chart.js?v=2.025"></script>
-  <script src="./js/gestures.js?v=2.025"></script>
-  <script src="./js/panels.js?v=2.025"></script>
-  <script src="./js/ui.js?v=2.025"></script>
+  <!-- Core runtime / store -->
+  <script src="js/utils.js?v=20260119"></script>
+  <script src="js/storage.js?v=20260119"></script>
+  <script src="js/store.js?v=20260119"></script>
+  <script src="js/state.js?v=20260119"></script>
 
+  <!-- UI + panels + gestures -->
+  <script src="js/ui.js?v=20260119"></script>
+  <script src="js/panels.js?v=20260119"></script>
+  <script src="js/gestures.js?v=20260119"></script>
+
+  <!-- Features -->
+  <script src="js/chart.js?v=20260119"></script>
+  <script src="js/log.js?v=20260119"></script>
+  <script src="js/add.js?v=20260119"></script>
+
+  <!-- PWA -->
+  <script src="js/pwa.js?v=20260119"></script>
+
+  <!-- App orchestrator LAST -->
+  <script src="js/app.js?v=20260119"></script>
+
+  <!-- Small post-boot sanity: unify settings version label -->
   <script>
     (function(){
-      "use strict";
-
-      // Panel refs
-      const panels = {
-        home: document.getElementById("panelHome"),
-        add: document.getElementById("panelAdd"),
-        charts: document.getElementById("panelCharts"),
-        log: document.getElementById("panelLog"),
-        settings: document.getElementById("panelSettings"),
-      };
-
-      const carousel = ["home","add","charts","log","settings"];
-      let active = "home";
-      let lastNonSettings = "home";
-
-      function setActive(which){
-        for(const k of Object.keys(panels)){
-          const el = panels[k];
-          if(el) el.classList.toggle("active", k === which);
-        }
-        if(which !== "settings") lastNonSettings = which;
-        active = which;
-
-        // On entering charts, ask chart module to render (if present)
-        if(which === "charts"){
-          try{
-            if(window.VTChart && typeof window.VTChart.onShow === "function"){
-              window.VTChart.onShow();
-            }
-          }catch(_){}
-        }
-      }
-
-      // Version display (read-only)
-      function paintVersion(){
-        const v = (window.VTVersion && typeof window.VTVersion.getVersionString === "function")
-          ? window.VTVersion.getVersionString()
-          : "v?.???";
-        const boot = document.getElementById("bootText");
-        const hv = document.getElementById("homeVersion");
-        if(boot) boot.textContent = `BOOT OK ${v}`;
-        if(hv) hv.textContent = v;
-      }
-      paintVersion();
-
-      // Buttons
-      document.getElementById("btnGoAdd").addEventListener("click", () => setActive("add"));
-      document.getElementById("btnGoCharts").addEventListener("click", () => setActive("charts"));
-      document.getElementById("btnGoLog").addEventListener("click", () => setActive("log"));
-
-      document.getElementById("btnHomeFromAdd").addEventListener("click", () => setActive("home"));
-      document.getElementById("btnHomeFromCharts").addEventListener("click", () => setActive("home"));
-      document.getElementById("btnHomeFromLog").addEventListener("click", () => setActive("home"));
-
-      const openSettings = () => setActive("settings");
-      document.getElementById("btnSettings").addEventListener("click", openSettings);
-      document.getElementById("btnSettingsFromAdd").addEventListener("click", openSettings);
-      document.getElementById("btnSettingsFromCharts").addEventListener("click", openSettings);
-      document.getElementById("btnSettingsFromLog").addEventListener("click", openSettings);
-
-      document.getElementById("btnBackFromSettings").addEventListener("click", () => {
-        setActive(lastNonSettings || "home");
-      });
-
-      // Pull-to-refresh (Home only) — restored and isolated
-      const pullIndicator = document.getElementById("pullIndicator");
-      let pullStartY = null;
-      let pullArmed = false;
-
-      function homeAtTop(){
-        const homeCard = document.getElementById("homeCard");
-        if(!homeCard) return true;
-        return homeCard.scrollTop === 0;
-      }
-
-      panels.home.addEventListener("touchstart", (e) => {
-        if(active !== "home") return;
-        if(!homeAtTop()) return;
-        if(e.touches.length !== 1) return;
-        pullStartY = e.touches[0].clientY;
-        pullArmed = false;
-      }, {passive:true});
-
-      panels.home.addEventListener("touchmove", (e) => {
-        if(active !== "home") return;
-        if(pullStartY == null) return;
-        if(e.touches.length !== 1) return;
-        const dy = e.touches[0].clientY - pullStartY;
-        if(dy > 0){
-          const h = Math.min(56, Math.floor(dy/2));
-          pullIndicator.style.height = h + "px";
-          pullArmed = (h >= 40);
-        }
-      }, {passive:true});
-
-      panels.home.addEventListener("touchend", () => {
-        if(active !== "home") return;
-        if(pullStartY == null) return;
-        const armed = pullArmed;
-        pullStartY = null;
-        pullArmed = false;
-        pullIndicator.style.height = "0px";
-        if(armed) location.reload();
-      }, {passive:true});
-
-      // Install handling
-      const btnInstall = document.getElementById("btnInstall");
-      let deferredPrompt = null;
-      window.addEventListener("beforeinstallprompt", (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        btnInstall.disabled = false;
-      });
-      btnInstall.addEventListener("click", async () => {
-        try{
-          if(!deferredPrompt) return;
-          deferredPrompt.prompt();
-          await deferredPrompt.userChoice;
-        } finally {
-          deferredPrompt = null;
-          btnInstall.disabled = true;
-        }
-      });
-
-      // Clear data (best-effort)
-      document.getElementById("btnClearData").addEventListener("click", () => {
-        const ok = confirm("Clear all local data on this device?");
-        if(!ok) return;
-        try{ localStorage.clear(); }catch(_){}
-        try{
-          if(window.indexedDB){
-            const candidates = ["vitals_tracker_db","VitalsTrackerDB","vitals_tracker"];
-            for(const name of candidates){
-              try{ indexedDB.deleteDatabase(name); }catch(_){}
-            }
-          }
-        }catch(_){}
-        alert("Local data clear requested. Reloading.");
-        location.reload();
-      });
-
-      // Exit (known-good pattern)
-      document.getElementById("btnExit").addEventListener("click", () => {
-        try{
-          window.close();
-          setTimeout(() => {
-            alert("If the app did not close, use your device Back/Home button.");
-          }, 300);
-        }catch(_){
-          alert("Use your device Back/Home button to exit.");
-        }
-      });
-
-      // IMPORTANT: Swipe is NOT implemented in index.html anymore.
-      // gestures.js owns swipe completely in v2.025.
-
-      // Service worker
-      if("serviceWorker" in navigator){
-        navigator.serviceWorker.register("./sw.js?v=2.025").catch(()=>{});
-      }
-
-      // Initial panel
-      setActive("home");
+      try{
+        var v = window.VTVersion && window.VTVersion.getVersionString ? window.VTVersion.getVersionString() : "v?.???";
+        var el = document.getElementById("settingsVersion");
+        if(el) el.textContent = v;
+      }catch(_){}
     })();
   </script>
 </body>
@@ -699,8 +261,10 @@ Home:
 <!--
 Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: index.html
-App Version: v2.025
-Base: v2.021
-Touched in v2.025: index.html (equal-size Home buttons, pull refresh restored, swipe removed from index)
-Next planned file: js/gestures.js (File 3 of 4 in this pass)
+App Version Authority: js/version.js
+Pass: Render Recovery + Swipe Feel
+Pass order: File 2 of 9 (P0)
+Prev file: js/version.js (File 1 of 9)
+Next file: css/app.css (File 3 of 9)
 -->
+```0
