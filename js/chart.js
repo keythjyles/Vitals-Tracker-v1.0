@@ -13,12 +13,13 @@ CHANGES (per user request)
   Crisis = Dark Red
 - Hypertension legend tightened (compact rows, minimal padding/height).
 
-ADDITIONAL CHANGES (per latest user instructions)
-- Axis labels increased for readability (both axes).
-- X-axis uses 2-row labels (day row + date row) with collision-free thinning as zoom/pan changes.
-- Default window remains most recent 7 days; no scrolling beyond data range (bounded).
-- Y-axis bounds: min fixed at 40; max = (highest visible value + 10), rounded to tens.
-- Smooth pan (drag) and pinch zoom (1–14 days) implemented on the chart canvas; no wrapping.
+LATEST CHANGES (per user instructions ONLY)
+- Y-axis is STATIC for the session based on the highest reading in the FULL dataset (so pan/zoom never “jumps”).
+  - min fixed at 40
+  - max = (global dataset max + 10), rounded to tens
+- X-axis day + date labels ensured (2 rows, collision-safe thinning).
+- BP bands legend height reduced ~50% (tighter title/rows/padding).
+- Alternating background per day (day stripes) remains, with HTN bands overlaying the day stripes.
 */
 
 (function () {
@@ -40,8 +41,9 @@ ADDITIONAL CHANGES (per latest user instructions)
     lineDia: "rgba(240,240,240,0.88)",
     lineHr:  "rgba(120,235,170,0.90)",
 
+    // Alternating day stripes (stay behind HTN bands)
     dayA: "rgba(0,0,0,0.00)",
-    dayB: "rgba(0,0,0,0.10)",
+    dayB: "rgba(0,0,0,0.12)",
 
     // BP category bands (SYSTOLIC)
     // Required palette:
@@ -62,7 +64,10 @@ ADDITIONAL CHANGES (per latest user instructions)
     centerMs: null,
     dataMinMs: null,
     dataMaxMs: null,
-    bandOpacity: 0.60
+    bandOpacity: 0.60,
+
+    // STATIC Y axis (set once from full dataset)
+    yMaxStatic: null
   };
 
   const GESTURE = {
@@ -71,9 +76,7 @@ ADDITIONAL CHANGES (per latest user instructions)
     startDays: 7,
     startDist: 0,
     lastMidX: 0,
-    lastPanX: 0,
-    lastPanT: 0,
-    panAccum: 0
+    lastPanX: 0
   };
 
   function $(id) { return document.getElementById(id); }
@@ -280,7 +283,6 @@ ADDITIONAL CHANGES (per latest user instructions)
   function clear(ctx, w, h) { ctx.clearRect(0, 0, w, h); }
 
   function layout(w, h) {
-    // Increased padL/padB to support larger axis fonts + 2-row X labels
     const padL = 78;
     const padR = 20;
     const padT = 16;
@@ -316,7 +318,6 @@ ADDITIONAL CHANGES (per latest user instructions)
     const span = STATE.days * MS_DAY;
     const half = span / 2;
 
-    // If dataset is smaller than span, center on middle of data range
     if ((STATE.dataMaxMs - STATE.dataMinMs) <= span) {
       STATE.centerMs = (STATE.dataMinMs + STATE.dataMaxMs) / 2;
       return;
@@ -362,31 +363,27 @@ ADDITIONAL CHANGES (per latest user instructions)
     return { windowed, start, end };
   }
 
-  function niceStep(span) {
-    if (span <= 60) return 10;
-    if (span <= 120) return 10;
-    return 20;
-  }
+  function computeGlobalYMaxOnce(data) {
+    if (STATE.yMaxStatic != null) return;
 
-  function computeYBounds(windowed) {
     let maxV = -Infinity;
-
-    for (const r of windowed) {
+    for (const r of data) {
       if (typeof r.sys === "number") maxV = Math.max(maxV, r.sys);
       if (typeof r.dia === "number") maxV = Math.max(maxV, r.dia);
       if (typeof r.hr  === "number") maxV = Math.max(maxV, r.hr);
     }
 
     if (!Number.isFinite(maxV)) {
-      return { min: 40, max: 180 };
+      STATE.yMaxStatic = 180;
+      return;
     }
 
-    // User instruction: min fixed at 40; max = (highest visible + 10), rounded to tens
-    const minV = 40;
     const maxRounded = Math.ceil((maxV + 10) / 10) * 10;
-    const maxVOut = Math.max(minV + 20, maxRounded);
+    STATE.yMaxStatic = Math.max(60, maxRounded);
+  }
 
-    return { min: minV, max: maxVOut };
+  function computeYBoundsStatic() {
+    return { min: 40, max: (STATE.yMaxStatic != null ? STATE.yMaxStatic : 180) };
   }
 
   function startOfDay(ms) {
@@ -451,9 +448,8 @@ ADDITIONAL CHANGES (per latest user instructions)
     const spanMs = end - start;
     if (spanMs <= 0) return [];
 
-    // Anchor ticks at local midnights to keep stable labels
     const firstDay = startOfDay(start);
-    const lastDay = startOfDay(end);
+    const lastDay  = startOfDay(end);
 
     const ticks = [];
     for (let t = firstDay; t <= lastDay + MS_DAY; t += MS_DAY) {
@@ -462,10 +458,8 @@ ADDITIONAL CHANGES (per latest user instructions)
       ticks.push({ t, x });
     }
 
-    // If we have few ticks, keep them.
     if (ticks.length <= 1) return ticks;
 
-    // Collision-free thinning
     const kept = [];
     let lastX = -Infinity;
     for (const tick of ticks) {
@@ -475,7 +469,6 @@ ADDITIONAL CHANGES (per latest user instructions)
       }
     }
 
-    // Ensure last label can appear if it fits better than the last kept
     if (kept.length >= 1 && ticks.length >= 1) {
       const last = ticks[ticks.length - 1];
       const kLast = kept[kept.length - 1];
@@ -488,21 +481,20 @@ ADDITIONAL CHANGES (per latest user instructions)
   }
 
   function drawGridAndAxes(ctx, bounds, L, start, end, sized) {
-    // Larger, readable axis fonts
     const fontY = 20;
     const fontX = 18;
 
+    // Y grid + labels
     ctx.strokeStyle = STYLE.grid;
     ctx.lineWidth = 1;
 
-    // Y labels
     ctx.fillStyle = "rgba(255,255,255,0.72)";
     ctx.font = `800 ${fontY}px system-ui`;
     ctx.textAlign = "right";
     ctx.textBaseline = "middle";
 
     const span = bounds.max - bounds.min;
-    const step = niceStep(span);
+    const step = (span <= 120) ? 10 : 20;
 
     for (let v = bounds.min; v <= bounds.max; v += step) {
       const y = yScale(v, bounds, L);
@@ -528,7 +520,7 @@ ADDITIONAL CHANGES (per latest user instructions)
     ctx.lineTo(L.plotX + L.plotW, L.plotY + L.plotH);
     ctx.stroke();
 
-    // X labels: 2 rows, collision-free thinning
+    // X labels (day row + date row)
     ctx.fillStyle = "rgba(255,255,255,0.68)";
     ctx.font = `800 ${fontX}px system-ui`;
     ctx.textAlign = "center";
@@ -537,16 +529,13 @@ ADDITIONAL CHANGES (per latest user instructions)
     const yText1 = L.plotY + L.plotH + 10;
     const yText2 = yText1 + 22;
 
-    // Determine minimum spacing in physical pixels (scaled to DPR)
-    const minPx = Math.max(80 * (sized?.dpr || 1), 70 * (sized?.dpr || 1));
+    const minPx = Math.max(78 * (sized?.dpr || 1), 70 * (sized?.dpr || 1));
     const ticks = buildXTicks(start, end, L, minPx);
 
     for (const tick of ticks) {
       const d = new Date(tick.t);
-      const day = fmtDay(d);
-      const md  = fmtMD(d);
-      ctx.fillText(day, tick.x, yText1);
-      ctx.fillText(md,  tick.x, yText2);
+      ctx.fillText(fmtDay(d), tick.x, yText1);
+      ctx.fillText(fmtMD(d),  tick.x, yText2);
     }
   }
 
@@ -556,7 +545,6 @@ ADDITIONAL CHANGES (per latest user instructions)
     ctx.rect(L.plotX, L.plotY, L.plotW, L.plotH);
     ctx.clip();
 
-    // Slightly thicker than before
     ctx.lineWidth = 5;
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
@@ -678,7 +666,7 @@ ADDITIONAL CHANGES (per latest user instructions)
     } catch (_) {}
   }
 
-  // ===== Tight BP legend + slider =====
+  // ===== Tight BP legend + slider (reduced height ~50%) =====
   function ensureLegendUI(legendEl) {
     if (!legendEl) return;
 
@@ -691,14 +679,14 @@ ADDITIONAL CHANGES (per latest user instructions)
     legendEl.innerHTML = "";
     legendEl.style.display = "grid";
     legendEl.style.gridTemplateColumns = "1fr";
-    legendEl.style.gap = "10px";
-    legendEl.style.paddingTop = "10px";
+    legendEl.style.gap = "8px";
+    legendEl.style.paddingTop = "8px";
 
     const bandBox = document.createElement("div");
     bandBox.id = "bpBandsLegend";
     bandBox.style.display = "grid";
-    bandBox.style.gap = "8px";
-    bandBox.style.padding = "10px 12px";
+    bandBox.style.gap = "6px";
+    bandBox.style.padding = "8px 10px";
     bandBox.style.border = "1px solid rgba(255,255,255,0.14)";
     bandBox.style.borderRadius = "16px";
     bandBox.style.background = "rgba(0,0,0,0.06)";
@@ -707,42 +695,41 @@ ADDITIONAL CHANGES (per latest user instructions)
     bandTitle.textContent = "Blood Pressure Bands (Systolic)";
     bandTitle.style.fontWeight = "900";
     bandTitle.style.letterSpacing = ".2px";
-    bandTitle.style.color = "rgba(255,255,255,0.70)";
-    bandTitle.style.fontSize = "13px";
-    bandTitle.style.marginBottom = "2px";
+    bandTitle.style.color = "rgba(255,255,255,0.66)";
+    bandTitle.style.fontSize = "12px";
+    bandTitle.style.marginBottom = "0px";
 
     const bandList = document.createElement("div");
     bandList.style.display = "grid";
-    bandList.style.gap = "6px";
+    bandList.style.gap = "4px";
 
-    // Display TOP->BOTTOM order: dark red, red, yellow, purple, blue
     const topDown = STYLE.bpBands.slice().reverse();
 
     function tightRow(label, rgb) {
       const row = document.createElement("div");
       row.style.display = "grid";
-      row.style.gridTemplateColumns = "14px 1fr";
+      row.style.gridTemplateColumns = "12px 1fr";
       row.style.alignItems = "center";
-      row.style.gap = "10px";
-      row.style.padding = "8px 10px";
+      row.style.gap = "8px";
+      row.style.padding = "4px 8px";
       row.style.border = "1px solid rgba(255,255,255,0.10)";
       row.style.borderRadius = "12px";
       row.style.background = "rgba(0,0,0,0.04)";
 
       const sw = document.createElement("span");
       sw.className = "bpBandSwatch";
-      sw.style.width = "14px";
-      sw.style.height = "10px";
+      sw.style.width = "12px";
+      sw.style.height = "8px";
       sw.style.borderRadius = "6px";
       sw.style.background = rgba(rgb, clamp(STATE.bandOpacity, 0, 1));
       sw.style.border = "1px solid rgba(255,255,255,0.10)";
 
       const tx = document.createElement("span");
       tx.textContent = label;
-      tx.style.color = "rgba(255,255,255,0.70)";
-      tx.style.fontSize = "14px";
+      tx.style.color = "rgba(255,255,255,0.68)";
+      tx.style.fontSize = "12px";
       tx.style.fontWeight = "900";
-      tx.style.letterSpacing = ".15px";
+      tx.style.letterSpacing = ".12px";
       tx.style.lineHeight = "1.05";
 
       row.appendChild(sw);
@@ -762,7 +749,7 @@ ADDITIONAL CHANGES (per latest user instructions)
     sliderWrap.style.gridTemplateColumns = "auto 1fr auto";
     sliderWrap.style.alignItems = "center";
     sliderWrap.style.gap = "10px";
-    sliderWrap.style.padding = "10px 12px";
+    sliderWrap.style.padding = "8px 10px";
     sliderWrap.style.border = "1px solid rgba(255,255,255,0.14)";
     sliderWrap.style.borderRadius = "16px";
     sliderWrap.style.background = "rgba(0,0,0,0.08)";
@@ -771,8 +758,8 @@ ADDITIONAL CHANGES (per latest user instructions)
     lbl.textContent = "Bands";
     lbl.style.fontWeight = "900";
     lbl.style.letterSpacing = ".2px";
-    lbl.style.color = "rgba(255,255,255,0.76)";
-    lbl.style.fontSize = "14px";
+    lbl.style.color = "rgba(255,255,255,0.74)";
+    lbl.style.fontSize = "13px";
 
     const slider = document.createElement("input");
     slider.type = "range";
@@ -787,7 +774,7 @@ ADDITIONAL CHANGES (per latest user instructions)
     pct.textContent = `${slider.value}%`;
     pct.style.fontWeight = "900";
     pct.style.color = "rgba(255,255,255,0.70)";
-    pct.style.fontSize = "14px";
+    pct.style.fontSize = "13px";
 
     slider.addEventListener("input", function () {
       const v = clamp(Number(slider.value) / 100, 0, 1);
@@ -824,8 +811,8 @@ ADDITIONAL CHANGES (per latest user instructions)
     }
   }
 
-  let _lastRenderSized = null;
-  let _lastRenderWin = null;
+  let _lastSized = null;
+  let _lastWin = null;
 
   async function render() {
     const canvas = $(ID_CANVAS);
@@ -838,14 +825,14 @@ ADDITIONAL CHANGES (per latest user instructions)
     const loadingEl = $(ID_LOADING);
 
     ensureLegendUI(legendEl);
-
     if (loadingEl) loadingEl.style.display = "none";
 
     const raw = await getRawDataMultiSource();
     const data = normalizeData(raw);
 
     const sized = sizeToCSS(canvas);
-    _lastRenderSized = sized;
+    _lastSized = sized;
+
     const w = sized.w, h = sized.h;
     const L = layout(w, h);
 
@@ -857,17 +844,19 @@ ADDITIONAL CHANGES (per latest user instructions)
       ctx.textAlign = "left";
       ctx.textBaseline = "top";
       ctx.fillText("No data to display.", L.plotX, L.plotY);
-      _lastRenderWin = null;
+      _lastWin = null;
       return;
     }
 
-    // Default window: most recent 7 days (no drift from your STATE defaults)
+    // STATIC Y axis from global dataset max (set once)
+    computeGlobalYMaxOnce(data);
+
     const win = computeWindow(data);
     const windowed = win.windowed;
     const start = win.start;
     const end = win.end;
 
-    _lastRenderWin = { start, end, L };
+    _lastWin = { start, end, L };
 
     if (!windowed.length || start == null || end == null || end <= start) {
       ctx.fillStyle = STYLE.textMuted;
@@ -880,8 +869,9 @@ ADDITIONAL CHANGES (per latest user instructions)
 
     ensureRangeLabel(canvas, start, end);
 
-    const bounds = computeYBounds(windowed);
+    const bounds = computeYBoundsStatic();
 
+    // Day stripes behind HTN bands (HTN overlays stripes)
     drawDayStripes(ctx, start, end, L);
     drawBPBands(ctx, bounds, L);
 
@@ -935,7 +925,6 @@ ADDITIONAL CHANGES (per latest user instructions)
       if (!touches.length) return;
 
       GESTURE.active = true;
-      GESTURE.panAccum = 0;
 
       if (touches.length >= 2) {
         GESTURE.isPinch = true;
@@ -945,7 +934,6 @@ ADDITIONAL CHANGES (per latest user instructions)
       } else {
         GESTURE.isPinch = false;
         GESTURE.lastPanX = touches[0].clientX;
-        GESTURE.lastPanT = performance.now();
       }
 
       try { e.preventDefault(); } catch (_) {}
@@ -957,13 +945,11 @@ ADDITIONAL CHANGES (per latest user instructions)
       const touches = getTouches(e);
       if (!touches.length) return;
 
-      // Pinch zoom
+      // Pinch zoom: fingers together => more days; apart => fewer days
       if (GESTURE.isPinch && touches.length >= 2) {
         const d = dist2(touches[0], touches[1]);
         const ratio = (d > 0 && GESTURE.startDist > 0) ? (GESTURE.startDist / d) : 1;
 
-        // Pinch OUT (fingers apart) => fewer days (zoom in)
-        // Pinch IN (fingers together) => more days (zoom out)
         let targetDays = Math.round(GESTURE.startDays * ratio);
         targetDays = clamp(targetDays, STATE.minDays, STATE.maxDays);
 
@@ -972,17 +958,15 @@ ADDITIONAL CHANGES (per latest user instructions)
           clampCenterToData();
         }
 
-        // Optional: keep pan responsive while pinching (based on midpoint movement)
+        // midpoint drift allows subtle pan while pinching
         const mx = midX(touches[0], touches[1]);
         const dx = mx - GESTURE.lastMidX;
         GESTURE.lastMidX = mx;
 
-        // Convert dx pixels to ms shift using current window if available
-        if (_lastRenderWin && _lastRenderWin.start != null && _lastRenderWin.end != null && _lastRenderSized) {
-          const rectW = (_lastRenderSized.rectW || 1);
-          const spanMs = (_lastRenderWin.end - _lastRenderWin.start) || 1;
+        if (_lastWin && _lastWin.start != null && _lastWin.end != null && _lastSized) {
+          const rectW = (_lastSized.rectW || 1);
+          const spanMs = (_lastWin.end - _lastWin.start) || 1;
           const msPerPx = spanMs / rectW;
-          // dragging right should move window earlier (pan left), so invert dx
           STATE.centerMs = (Number.isFinite(STATE.centerMs) ? STATE.centerMs : Date.now()) - (dx * msPerPx);
           clampCenterToData();
         }
@@ -998,13 +982,11 @@ ADDITIONAL CHANGES (per latest user instructions)
         const dx = x - GESTURE.lastPanX;
         GESTURE.lastPanX = x;
 
-        // Convert dx pixels to ms shift
-        if (_lastRenderWin && _lastRenderWin.start != null && _lastRenderWin.end != null && _lastRenderSized) {
-          const rectW = (_lastRenderSized.rectW || 1);
-          const spanMs = (_lastRenderWin.end - _lastRenderWin.start) || 1;
+        if (_lastWin && _lastWin.start != null && _lastWin.end != null && _lastSized) {
+          const rectW = (_lastSized.rectW || 1);
+          const spanMs = (_lastWin.end - _lastWin.start) || 1;
           const msPerPx = spanMs / rectW;
 
-          // dragging right should move window earlier (pan left), so invert dx
           const ms = -(dx * msPerPx);
           STATE.centerMs = (Number.isFinite(STATE.centerMs) ? STATE.centerMs : Date.now()) + ms;
           clampCenterToData();
@@ -1021,18 +1003,16 @@ ADDITIONAL CHANGES (per latest user instructions)
         GESTURE.active = false;
         GESTURE.isPinch = false;
       } else if (touches.length === 1) {
-        // downgrade pinch -> pan if one finger remains
         GESTURE.isPinch = false;
         GESTURE.lastPanX = touches[0].clientX;
-        GESTURE.lastPanT = performance.now();
       }
       try { e.preventDefault(); } catch (_) {}
     };
 
     canvas.addEventListener("touchstart", onStart, { passive: false });
-    canvas.addEventListener("touchmove", onMove, { passive: false });
-    canvas.addEventListener("touchend", onEnd, { passive: false });
-    canvas.addEventListener("touchcancel", onEnd, { passive: false });
+    canvas.addEventListener("touchmove",  onMove,  { passive: false });
+    canvas.addEventListener("touchend",   onEnd,   { passive: false });
+    canvas.addEventListener("touchcancel",onEnd,   { passive: false });
   }
 
   window.VTChart = { onShow, setDays, panBy };
@@ -1041,7 +1021,6 @@ ADDITIONAL CHANGES (per latest user instructions)
     try { render(); } catch (_) {}
   }, { passive: true });
 
-  // Attach gestures after DOM paint
   window.addEventListener("load", function () {
     try { attachGestures(); } catch (_) {}
   }, { passive: true });
