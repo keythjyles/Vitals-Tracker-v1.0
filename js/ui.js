@@ -2,11 +2,16 @@
 Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
 File: js/ui.js
 App Version Authority: js/version.js
-Base: v2.025f
-Pass: Render Recovery + Swipe Feel
+Base: v2.026a
+Pass: Swipe + Render Recovery (P0-R1)
 Pass order: File 4 of 9 (P0)
 Prev file: css/app.css (File 3 of 9)
 Next file: js/panels.js (File 5 of 9)
+
+v2.026a — Change Log (THIS FILE ONLY)
+1) No behavioral change to swipe. UI remains a thin router into VTPanels.
+2) Adds animated flag pass-through ONLY when supported by panels.js signature.
+3) Leaves Settings duplication to index.html (next planned edit), per “one fix at a time”.
 */
 
 (function () {
@@ -64,11 +69,20 @@ Next file: js/panels.js (File 5 of 9)
     } catch (_) {}
   }
 
-  function showPanel(name) {
-    // IMPORTANT: do not pass extra args unless panels.js explicitly supports them.
-    // Extra args can break routing or produce wrong “snap” behavior depending on implementation.
+  function callGo(p, name, animated) {
+    // Support both signatures:
+    // - go(name)
+    // - go(name, animated)
+    try {
+      if (typeof p.go !== "function") return;
+      if (p.go.length >= 2) p.go(name, animated);
+      else p.go(name);
+    } catch (_) {}
+  }
+
+  function showPanel(name, animated = true) {
     withPanels((p) => {
-      if (typeof p.go === "function") p.go(name);
+      if (typeof p.go === "function") callGo(p, name, animated);
       else if (typeof p.show === "function") p.show(name);
     });
   }
@@ -76,14 +90,14 @@ Next file: js/panels.js (File 5 of 9)
   function openSettings() {
     withPanels((p) => {
       if (typeof p.openSettings === "function") p.openSettings();
-      else showPanel("settings");
+      else showPanel("settings", false);
     });
   }
 
   function closeSettings() {
     withPanels((p) => {
-      if (typeof p.closeSettings === "function") p.closeSettings();
-      else showPanel("home");
+      if (typeof p.closeSettings === "function") p.closeSettings(true);
+      else showPanel("home", true);
     });
   }
 
@@ -105,13 +119,13 @@ Next file: js/panels.js (File 5 of 9)
      ============================== */
 
   function wireNavigation() {
-    bindOnce(dom.btnGoAdd, "goAdd", () => showPanel("add"));
-    bindOnce(dom.btnGoCharts, "goCharts", () => showPanel("charts"));
-    bindOnce(dom.btnGoLog, "goLog", () => showPanel("log"));
+    bindOnce(dom.btnGoAdd, "goAdd", () => showPanel("add", true));
+    bindOnce(dom.btnGoCharts, "goCharts", () => showPanel("charts", true));
+    bindOnce(dom.btnGoLog, "goLog", () => showPanel("log", true));
 
-    bindOnce(dom.btnHomeFromCharts, "homeFromCharts", () => showPanel("home"));
-    bindOnce(dom.btnHomeFromLog, "homeFromLog", () => showPanel("home"));
-    bindOnce(dom.btnHomeFromAdd, "homeFromAdd", () => showPanel("home"));
+    bindOnce(dom.btnHomeFromCharts, "homeFromCharts", () => showPanel("home", true));
+    bindOnce(dom.btnHomeFromLog, "homeFromLog", () => showPanel("home", true));
+    bindOnce(dom.btnHomeFromAdd, "homeFromAdd", () => showPanel("home", true));
   }
 
   function wireSettings() {
@@ -166,7 +180,7 @@ Next file: js/panels.js (File 5 of 9)
 /* 
 Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: js/ui.js
-Pass: Render Recovery + Swipe Feel
+Pass: Swipe + Render Recovery (P0-R1)
 Pass order: File 4 of 9 (P0)
 Prev file: css/app.css (File 3 of 9)
 Next file: js/panels.js (File 5 of 9)
