@@ -1,244 +1,119 @@
 /* File: js/gestures.js */
 /*
-Vitals Tracker — Panel Swipe Gestures (OWNER)
-Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
+Vitals Tracker — Panel Navigation Gestures (SIMPLIFIED RESET)
 
-App Version: v2.023f
-Base: v2.021
-Date: 2026-01-18
+App Version: v2.024a
+Purpose:
+- Handle ONLY panel-to-panel navigation (Home, Charts, Log).
+- Explicitly EXCLUDES:
+  - Chart pan/zoom
+  - Pull-to-refresh
+  - Settings panel rotation
 
-CURRENT UPGRADE — FILE TOUCH ORDER (LOCKED)
-1) index.html
-2) js/version.js
-3) js/app.js
-4) js/storage.js
-5) js/store.js
-6) js/state.js
-7) js/chart.js
-8) js/gestures.js  <-- THIS FILE
-9) js/panels.js
-10) js/ui.js
-
-SCOPE (THIS MOMENT)
-- Fix swipe to be SIMPLE and consistent.
-- Settings is NOT in rotation. Settings is gear-only.
-- Swipe anywhere on the active panel EXCEPT protected regions (chart + form controls + buttons).
-- No “swipe zones”. No wraparound. No accidental swipes while interacting with chart or inputs.
-
-ROTATION (authoritative)
-Home ↔ Add ↔ Charts ↔ Log
-Settings excluded.
-
-FILE ROLE (LOCKED)
-- Owns horizontal panel swipe between core panels only.
-- Must NOT implement chart pan/zoom (chart.js owns that).
-- Must NOT implement panel show/hide rules long-term (panels.js owns that), but may fall back safely.
-
-v2.023f — Change Log (THIS FILE ONLY)
-1) Removes swipe-zone gating entirely (swipe works across panel background).
-2) Enforces protected islands:
-   - Chart area (#canvasWrap / #chartCanvas) is NEVER a swipe start.
-   - Inputs/textareas/select/contenteditable are NEVER swipe starts.
-   - Buttons/links (.btn, button, a) are NEVER swipe starts.
-3) Rotation excludes Settings and DOES NOT wrap.
+OWNERSHIP RULES (LOCKED):
+- This file controls panel index ONLY.
+- chart.js controls all chart gestures.
+- panels.js controls visibility + activation.
 */
 
 (function () {
   "use strict";
 
-  function $(id) { return document.getElementById(id); }
+  const SWIPE_THRESHOLD = 50;   // px
+  const AXIS_LOCK_RATIO = 1.6;  // must be clearly horizontal
 
-  const root = $("panelsRoot");
-  if (!root) return;
+  let startX = 0;
+  let startY = 0;
+  let tracking = false;
 
-  const canvasWrap = $("canvasWrap");
-  const chartCanvas = $("chartCanvas");
+  function $(id){ return document.getElementById(id); }
 
-  // Rotation excludes settings by design.
-  const ORDER = ["home", "add", "charts", "log"];
-
-  // Gesture tuning
-  const THRESH_PX = 44;            // required horizontal travel
-  const INTENT_PX = 18;            // intent detection
-  const H_OVER_V = 1.25;           // must be dominantly horizontal
-
-  function within(container, target) {
-    if (!container || !target) return false;
-    return container === target || container.contains(target);
+  function activePanelIndex(){
+    return window.VTState?.getPanelIndex?.() ?? 0;
   }
 
-  function closestAny(el, selectors) {
-    if (!el || !el.closest) return null;
-    for (const s of selectors) {
-      const hit = el.closest(s);
-      if (hit) return hit;
-    }
-    return null;
+  function setPanelIndex(i){
+    window.VTState?.setPanelIndex?.(i);
+    window.VTPanels?.showIndex?.(i);
   }
 
-  function isProtectedStart(target) {
-    // 1) Chart interaction must win
-    if (within(canvasWrap, target) || within(chartCanvas, target)) return true;
-
-    // 2) Any form controls (avoid accidental swipe while entering data)
-    if (closestAny(target, ["input", "textarea", "select", "[contenteditable='true']"])) return true;
-
-    // 3) Buttons/links (taps should stay taps)
-    if (closestAny(target, ["button", "a", ".btn"])) return true;
-
-    // 4) Optional explicit opt-out hook
-    if (closestAny(target, ["[data-noswipe='1']"])) return true;
-
-    return false;
+  function panelCount(){
+    // Home, Charts, Log ONLY
+    return 3;
   }
 
-  function getActivePanelName() {
-    // Prefer panels module
-    try {
-      if (window.VTPanels && typeof window.VTPanels.getActive === "function") {
-        const a = window.VTPanels.getActive();
-        if (a) return a;
-      }
-    } catch (_) {}
-
-    // Fallback: DOM
-    if ($("panelHome")?.classList.contains("active")) return "home";
-    if ($("panelAdd")?.classList.contains("active")) return "add";
-    if ($("panelCharts")?.classList.contains("active")) return "charts";
-    if ($("panelLog")?.classList.contains("active")) return "log";
-    if ($("panelSettings")?.classList.contains("active")) return "settings";
-    return "home";
+  function isInsideChart(target){
+    const chartWrap = $("canvasWrap");
+    if(!chartWrap) return false;
+    return chartWrap.contains(target);
   }
 
-  function showPanel(name) {
-    // Prefer panels module
-    try {
-      if (window.VTPanels && typeof window.VTPanels.setActive === "function") {
-        window.VTPanels.setActive(name);
-        return;
-      }
-    } catch (_) {}
+  function onTouchStart(e){
+    if(e.touches.length !== 1) return;
 
-    // Fallback: DOM toggle
-    const map = {
-      home: "panelHome",
-      add: "panelAdd",
-      charts: "panelCharts",
-      log: "panelLog",
-      settings: "panelSettings"
-    };
-
-    const allIds = ["panelHome", "panelAdd", "panelCharts", "panelLog", "panelSettings"];
-    for (const id of allIds) {
-      const el = $(id);
-      if (el) el.classList.toggle("active", map[name] === id);
-    }
-
-    // On entering charts, request render
-    if (name === "charts") {
-      try { window.VTChart?.onShow?.(); } catch (_) {}
-    }
-  }
-
-  function move(delta) {
-    const active = getActivePanelName();
-
-    // Settings is gear-only; do not swipe in/out of it.
-    if (active === "settings") return;
-
-    const idx = ORDER.indexOf(active);
-    if (idx < 0) return;
-
-    const nextIdx = idx + delta;
-
-    // No wraparound
-    if (nextIdx < 0 || nextIdx >= ORDER.length) return;
-
-    showPanel(ORDER[nextIdx]);
-  }
-
-  const swipe = {
-    active: false,
-    sx: 0,
-    sy: 0,
-    mode: null,    // "h" | "v" | null
-    ok: false
-  };
-
-  root.addEventListener("touchstart", (e) => {
-    if (!e.touches || e.touches.length !== 1) return;
+    // Do NOT intercept chart gestures
+    if(isInsideChart(e.target)) return;
 
     const t = e.touches[0];
-    swipe.active = true;
-    swipe.sx = t.clientX;
-    swipe.sy = t.clientY;
-    swipe.mode = null;
-    swipe.ok = !isProtectedStart(e.target);
-  }, { passive: true });
+    startX = t.clientX;
+    startY = t.clientY;
+    tracking = true;
+  }
 
-  root.addEventListener("touchmove", (e) => {
-    if (!swipe.active || !swipe.ok) return;
-    if (!e.touches || e.touches.length !== 1) return;
+  function onTouchMove(e){
+    if(!tracking) return;
 
     const t = e.touches[0];
-    const dx = t.clientX - swipe.sx;
-    const dy = t.clientY - swipe.sy;
+    const dx = t.clientX - startX;
+    const dy = t.clientY - startY;
 
-    if (!swipe.mode) {
-      if (Math.abs(dx) > INTENT_PX && Math.abs(dx) > Math.abs(dy) * H_OVER_V) {
-        swipe.mode = "h";
-      } else if (Math.abs(dy) > INTENT_PX && Math.abs(dy) > Math.abs(dx) * H_OVER_V) {
-        swipe.mode = "v";
-      }
+    // If vertical movement dominates, abort (no panel change)
+    if(Math.abs(dy) > Math.abs(dx) / AXIS_LOCK_RATIO){
+      tracking = false;
     }
+  }
 
-    // If we committed to horizontal swipe, prevent vertical scroll bounce.
-    if (swipe.mode === "h") {
-      e.preventDefault();
+  function onTouchEnd(e){
+    if(!tracking) return;
+    tracking = false;
+
+    if(e.changedTouches.length !== 1) return;
+
+    const t = e.changedTouches[0];
+    const dx = t.clientX - startX;
+    const dy = t.clientY - startY;
+
+    // Horizontal intent only
+    if(Math.abs(dx) < SWIPE_THRESHOLD) return;
+    if(Math.abs(dx) < Math.abs(dy) * AXIS_LOCK_RATIO) return;
+
+    const dir = dx > 0 ? -1 : 1; // swipe left = next panel
+    const current = activePanelIndex();
+    const next = clamp(current + dir, 0, panelCount() - 1);
+
+    if(next !== current){
+      setPanelIndex(next);
     }
-  }, { passive: false });
+  }
 
-  root.addEventListener("touchend", (e) => {
-    if (!swipe.active) return;
+  function clamp(n, a, b){
+    return Math.max(a, Math.min(b, n));
+  }
 
-    const ok = swipe.ok;
-    const mode = swipe.mode;
+  function init(){
+    document.addEventListener("touchstart", onTouchStart, { passive:true });
+    document.addEventListener("touchmove",  onTouchMove,  { passive:true });
+    document.addEventListener("touchend",   onTouchEnd,   { passive:true });
+  }
 
-    swipe.active = false;
-    swipe.ok = false;
-    swipe.mode = null;
+  function onReady(fn){
+    if(document.readyState === "complete" || document.readyState === "interactive"){
+      setTimeout(fn, 0);
+    } else {
+      document.addEventListener("DOMContentLoaded", fn);
+    }
+  }
 
-    if (!ok || mode !== "h") return;
-
-    const t = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : null;
-    if (!t) return;
-
-    const dx = t.clientX - swipe.sx;
-    const dy = t.clientY - swipe.sy;
-
-    // Require strong horizontal intent at release
-    if (Math.abs(dx) < THRESH_PX) return;
-    if (Math.abs(dx) < Math.abs(dy) * H_OVER_V) return;
-
-    // dx < 0 means swipe left → move forward
-    if (dx < 0) move(+1);
-    else move(-1);
-  }, { passive: true });
-
-  root.addEventListener("touchcancel", () => {
-    swipe.active = false;
-    swipe.ok = false;
-    swipe.mode = null;
-  }, { passive: true });
+  onReady(init);
 
 })();
-
-/*
-Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
-File: js/gestures.js
-App Version: v2.023f
-Base: v2.021
-Touched in v2.023f: js/gestures.js (simplified swipe; settings excluded; protected islands)
-Rotation: home <-> add <-> charts <-> log (no wrap)
-Next planned file: js/panels.js (File 9 of 10)
-*/
