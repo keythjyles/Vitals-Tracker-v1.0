@@ -4,23 +4,14 @@ Vitals Tracker — Charts (Canvas)
 
 App Version Authority: js/version.js
 
-GOAL (per user request)
-- Match the v2.021-style chart presentation:
-  1) BP background bands in correct order with better colors:
-     - Hypertensive Crisis (>=180) = red (better red)
-     - Stage 2 (140–179) = brighter yellow
-     - Stage 1 (130–139) = blue
-     - Elevated (120–129) = purple
-     - Normal (<120) = green (base)
-  2) Series legend (Systolic / Diastolic / Heart Rate) ON the graph.
-  3) A BP-band legend UNDER the chart (corresponding to accepted stages).
-  4) Thicker chart lines.
-  5) Larger axis labels.
-  6) Date range displayed ABOVE the chart.
-
-NOTES
-- This file does NOT write to storage.
-- This file does NOT own swipe logic/panels.
+CHANGES (per user request)
+- BP band color scheme:
+  Normal = Blue
+  Elevated = Purple
+  Stage 1 = Yellow
+  Stage 2 = Red
+  Crisis = Dark Red
+- Hypertension legend tightened (compact rows, minimal padding/height).
 */
 
 (function () {
@@ -32,35 +23,31 @@ NOTES
 
   const MS_DAY = 86400000;
 
-  // ====== LOOK & FEEL ======
   const STYLE = Object.freeze({
-    // Chart chrome
     axes: "rgba(255,255,255,0.22)",
     grid: "rgba(255,255,255,0.10)",
     text: "rgba(255,255,255,0.78)",
     textMuted: "rgba(255,255,255,0.58)",
 
-    // Series colors (kept close to the example)
-    lineSys: "rgba(175,210,255,0.98)", // light blue
-    lineDia: "rgba(240,240,240,0.88)", // light gray
-    lineHr:  "rgba(120,235,170,0.90)", // green
+    lineSys: "rgba(175,210,255,0.98)",
+    lineDia: "rgba(240,240,240,0.88)",
+    lineHr:  "rgba(120,235,170,0.90)",
 
-    // Alternating day bands (vertical stripes)
     dayA: "rgba(0,0,0,0.00)",
     dayB: "rgba(0,0,0,0.10)",
 
-    // BP category horizontal bands (accepted systolic stages)
-    // Order matters: bottom -> top for painting.
+    // BP category bands (SYSTOLIC)
+    // Required palette:
+    // Normal=Blue, Elevated=Purple, Stage1=Yellow, Stage2=Red, Crisis=Dark Red
     bpBands: [
-      { from: 0,   to: 120, rgb: [ 35, 115,  85], label: "Normal <120" },                 // green
-      { from: 120, to: 130, rgb: [120,  75, 165], label: "Elevated 120–129" },            // purple
-      { from: 130, to: 140, rgb: [ 40, 115, 190], label: "Stage 1 HTN 130–139" },         // blue
-      { from: 140, to: 180, rgb: [235, 185,  40], label: "Stage 2 HTN 140–179" },         // brighter yellow
-      { from: 180, to: 999, rgb: [200,  55,  70], label: "Hypertensive Crisis ≥180" }     // better red
+      { from: 0,   to: 120, rgb: [ 40, 120, 210], label: "Normal <120" },               // blue
+      { from: 120, to: 130, rgb: [125,  80, 180], label: "Elevated 120–129" },          // purple
+      { from: 130, to: 140, rgb: [245, 200,  55], label: "Stage 1 HTN 130–139" },       // yellow
+      { from: 140, to: 180, rgb: [210,  70,  80], label: "Stage 2 HTN 140–179" },       // red
+      { from: 180, to: 999, rgb: [135,  25,  35], label: "Hypertensive Crisis ≥180" }   // dark red
     ]
   });
 
-  // ===== Runtime state =====
   const STATE = {
     minDays: 1,
     maxDays: 14,
@@ -79,7 +66,6 @@ NOTES
     return `rgba(${r},${g},${b},${clamp(a,0,1)})`;
   }
 
-  // ===== Data extraction (tolerant) =====
   function parseTs(v) {
     if (v == null) return null;
     if (typeof v === "number" && Number.isFinite(v)) {
@@ -249,7 +235,6 @@ NOTES
     return [];
   }
 
-  // ===== Canvas sizing/layout =====
   function ensureCanvasFillsWrap(canvas) {
     try {
       canvas.style.width = "100%";
@@ -277,10 +262,10 @@ NOTES
   function clear(ctx, w, h) { ctx.clearRect(0, 0, w, h); }
 
   function layout(w, h) {
-    const padL = 62;  // larger for bigger y labels
+    const padL = 62;
     const padR = 20;
     const padT = 16;
-    const padB = 58;  // larger for bigger x labels
+    const padB = 58;
 
     return {
       padL, padR, padT, padB,
@@ -301,7 +286,6 @@ NOTES
     return L.plotX + ((ts - start) / (end - start)) * L.plotW;
   }
 
-  // ===== Bounds/window =====
   function computeDatasetBounds(data) {
     if (!data.length) return { min: null, max: null };
     return { min: data[0].ts, max: data[data.length - 1].ts };
@@ -372,7 +356,6 @@ NOTES
     return { min: minV, max: maxV };
   }
 
-  // ===== Drawing helpers =====
   function startOfDay(ms) {
     const d = new Date(ms);
     d.setHours(0, 0, 0, 0);
@@ -424,11 +407,9 @@ NOTES
   }
 
   function drawGridAndAxes(ctx, bounds, L, start, end) {
-    // Larger labels (accessibility)
     const fontY = 16;
     const fontX = 16;
 
-    // Horizontal grid lines + y labels
     ctx.strokeStyle = STYLE.grid;
     ctx.lineWidth = 1;
 
@@ -451,7 +432,6 @@ NOTES
       ctx.fillText(String(v), L.plotX - 12, y);
     }
 
-    // Axes
     ctx.strokeStyle = STYLE.axes;
 
     ctx.beginPath();
@@ -464,7 +444,6 @@ NOTES
     ctx.lineTo(L.plotX + L.plotW, L.plotY + L.plotH);
     ctx.stroke();
 
-    // X labels (bigger)
     ctx.fillStyle = STYLE.textMuted;
     ctx.font = `${fontX}px system-ui`;
     ctx.textAlign = "center";
@@ -494,7 +473,6 @@ NOTES
     ctx.rect(L.plotX, L.plotY, L.plotW, L.plotH);
     ctx.clip();
 
-    // Slightly thicker lines (user request)
     ctx.lineWidth = 4;
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
@@ -522,56 +500,6 @@ NOTES
     ctx.restore();
   }
 
-  // Series legend ON chart (top-left inside plot)
-  function drawOnChartSeriesLegend(ctx, L) {
-    const x0 = L.plotX + 14;
-    const y0 = L.plotY + 14;
-
-    const items = [
-      { label: "Systolic",  color: STYLE.lineSys },
-      { label: "Diastolic", color: STYLE.lineDia },
-      { label: "Heart Rate",color: STYLE.lineHr  }
-    ];
-
-    const font = 16;
-    const lineH = 22;
-
-    // Backplate like the example (subtle)
-    const pad = 10;
-    const w = 190;
-    const h = pad * 2 + items.length * lineH;
-
-    ctx.save();
-    ctx.fillStyle = "rgba(0,0,0,0.18)";
-    ctx.strokeStyle = "rgba(255,255,255,0.10)";
-    ctx.lineWidth = 1;
-    roundRect(ctx, x0 - pad, y0 - pad, w, h, 12, true, true);
-
-    ctx.font = `800 ${font}px system-ui`;
-    ctx.textAlign = "left";
-    ctx.textBaseline = "middle";
-    ctx.fillStyle = "rgba(255,255,255,0.74)";
-
-    let y = y0 + 2;
-    for (const it of items) {
-      // swatch
-      ctx.strokeStyle = it.color;
-      ctx.lineWidth = 6;
-      ctx.beginPath();
-      ctx.moveTo(x0, y);
-      ctx.lineTo(x0 + 24, y);
-      ctx.stroke();
-
-      // label
-      ctx.fillStyle = "rgba(255,255,255,0.72)";
-      ctx.fillText(it.label, x0 + 34, y);
-
-      y += lineH;
-    }
-
-    ctx.restore();
-  }
-
   function roundRect(ctx, x, y, w, h, r, fill, stroke) {
     const rr = Math.max(0, Math.min(r, Math.min(w, h) / 2));
     ctx.beginPath();
@@ -585,7 +513,51 @@ NOTES
     if (stroke) ctx.stroke();
   }
 
-  // ===== Date range label ABOVE chart (DOM) =====
+  function drawOnChartSeriesLegend(ctx, L) {
+    const x0 = L.plotX + 14;
+    const y0 = L.plotY + 14;
+
+    const items = [
+      { label: "Systolic",  color: STYLE.lineSys },
+      { label: "Diastolic", color: STYLE.lineDia },
+      { label: "Heart Rate",color: STYLE.lineHr  }
+    ];
+
+    const font = 15;
+    const lineH = 20;
+
+    const pad = 8;
+    const w = 170;
+    const h = pad * 2 + items.length * lineH;
+
+    ctx.save();
+    ctx.fillStyle = "rgba(0,0,0,0.18)";
+    ctx.strokeStyle = "rgba(255,255,255,0.10)";
+    ctx.lineWidth = 1;
+    roundRect(ctx, x0 - pad, y0 - pad, w, h, 12, true, true);
+
+    ctx.font = `800 ${font}px system-ui`;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+
+    let y = y0 + 1;
+    for (const it of items) {
+      ctx.strokeStyle = it.color;
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(x0, y);
+      ctx.lineTo(x0 + 22, y);
+      ctx.stroke();
+
+      ctx.fillStyle = "rgba(255,255,255,0.74)";
+      ctx.fillText(it.label, x0 + 30, y);
+
+      y += lineH;
+    }
+
+    ctx.restore();
+  }
+
   function ensureRangeLabel(canvas, start, end) {
     try {
       if (!canvas || start == null || end == null) return;
@@ -600,12 +572,11 @@ NOTES
         el.style.width = "100%";
         el.style.textAlign = "center";
         el.style.padding = "6px 8px 10px 8px";
-        el.style.fontWeight = "800";
+        el.style.fontWeight = "900";
         el.style.letterSpacing = ".2px";
         el.style.color = "rgba(255,255,255,0.62)";
         el.style.fontSize = "18px";
         el.style.userSelect = "none";
-        // Insert above canvas
         parent.insertBefore(el, canvas);
       }
 
@@ -623,7 +594,7 @@ NOTES
     } catch (_) {}
   }
 
-  // ===== Legend UI under chart: BP bands + slider =====
+  // ===== Tight BP legend + slider =====
   function ensureLegendUI(legendEl) {
     if (!legendEl) return;
 
@@ -639,11 +610,10 @@ NOTES
     legendEl.style.gap = "10px";
     legendEl.style.paddingTop = "10px";
 
-    // BP Bands legend (under chart)
     const bandBox = document.createElement("div");
     bandBox.id = "bpBandsLegend";
     bandBox.style.display = "grid";
-    bandBox.style.gap = "10px";
+    bandBox.style.gap = "8px";
     bandBox.style.padding = "10px 12px";
     bandBox.style.border = "1px solid rgba(255,255,255,0.14)";
     bandBox.style.borderRadius = "16px";
@@ -653,30 +623,32 @@ NOTES
     bandTitle.textContent = "Blood Pressure Bands (Systolic)";
     bandTitle.style.fontWeight = "900";
     bandTitle.style.letterSpacing = ".2px";
-    bandTitle.style.color = "rgba(255,255,255,0.72)";
-    bandTitle.style.fontSize = "14px";
+    bandTitle.style.color = "rgba(255,255,255,0.70)";
+    bandTitle.style.fontSize = "13px";
+    bandTitle.style.marginBottom = "2px";
 
     const bandList = document.createElement("div");
     bandList.style.display = "grid";
-    bandList.style.gap = "8px";
+    bandList.style.gap = "6px";
 
-    // Display in TOP->BOTTOM order like the user called out (red -> yellow -> blue -> purple -> green)
+    // Display TOP->BOTTOM order: dark red, red, yellow, purple, blue
     const topDown = STYLE.bpBands.slice().reverse();
 
-    function bandRow(label, rgb) {
+    function tightRow(label, rgb) {
       const row = document.createElement("div");
       row.style.display = "grid";
-      row.style.gridTemplateColumns = "20px 1fr";
+      row.style.gridTemplateColumns = "14px 1fr";
       row.style.alignItems = "center";
       row.style.gap = "10px";
-      row.style.padding = "10px 10px";
+      row.style.padding = "8px 10px";
       row.style.border = "1px solid rgba(255,255,255,0.10)";
-      row.style.borderRadius = "999px";
+      row.style.borderRadius = "12px";
       row.style.background = "rgba(0,0,0,0.04)";
 
       const sw = document.createElement("span");
-      sw.style.width = "18px";
-      sw.style.height = "12px";
+      sw.className = "bpBandSwatch";
+      sw.style.width = "14px";
+      sw.style.height = "10px";
       sw.style.borderRadius = "6px";
       sw.style.background = rgba(rgb, clamp(STATE.bandOpacity, 0, 1));
       sw.style.border = "1px solid rgba(255,255,255,0.10)";
@@ -687,6 +659,7 @@ NOTES
       tx.style.fontSize = "14px";
       tx.style.fontWeight = "900";
       tx.style.letterSpacing = ".15px";
+      tx.style.lineHeight = "1.05";
 
       row.appendChild(sw);
       row.appendChild(tx);
@@ -694,13 +667,12 @@ NOTES
     }
 
     for (const b of topDown) {
-      bandList.appendChild(bandRow(b.label, b.rgb));
+      bandList.appendChild(tightRow(b.label, b.rgb));
     }
 
     bandBox.appendChild(bandTitle);
     bandBox.appendChild(bandList);
 
-    // Slider wrap (Bands opacity)
     const sliderWrap = document.createElement("div");
     sliderWrap.style.display = "grid";
     sliderWrap.style.gridTemplateColumns = "auto 1fr auto";
@@ -737,7 +709,6 @@ NOTES
       const v = clamp(Number(slider.value) / 100, 0, 1);
       STATE.bandOpacity = v;
       pct.textContent = `${Math.round(v * 100)}%`;
-      // Update swatches in the BP band legend
       try { updateLegendUI(legendEl); } catch (_) {}
       try { render(); } catch (_) {}
     }, { passive: true });
@@ -762,28 +733,13 @@ NOTES
     if (slider) slider.value = String(Math.round(op * 100));
     if (pct) pct.textContent = `${Math.round(op * 100)}%`;
 
-    // Update band swatches to match opacity
-    const bandLegend = legendEl.querySelector("#bpBandsLegend");
-    if (bandLegend) {
-      const swatches = bandLegend.querySelectorAll("span");
-      // swatches include only our colored rectangles (first span of each row)
-      // safest: rebuild those rectangles’ background by mapping rows in order
-      const rows = bandLegend.querySelectorAll("div > div");
-      // rows selects many; instead, target pills:
-      const pills = bandLegend.querySelectorAll("div[style*='border-radius: 999px']");
-      if (pills && pills.length) {
-        const topDown = STYLE.bpBands.slice().reverse();
-        for (let i = 0; i < pills.length && i < topDown.length; i++) {
-          const pill = pills[i];
-          const sw = pill.querySelector("span");
-          if (!sw) continue;
-          sw.style.background = rgba(topDown[i].rgb, op);
-        }
-      }
+    const swatches = legendEl.querySelectorAll(".bpBandSwatch");
+    const topDown = STYLE.bpBands.slice().reverse();
+    for (let i = 0; i < swatches.length && i < topDown.length; i++) {
+      swatches[i].style.background = rgba(topDown[i].rgb, op);
     }
   }
 
-  // ===== Render =====
   async function render() {
     const canvas = $(ID_CANVAS);
     if (!canvas) return;
@@ -830,16 +786,13 @@ NOTES
       return;
     }
 
-    // Date range label above the chart
     ensureRangeLabel(canvas, start, end);
 
     const bounds = computeYBounds(windowed);
 
-    // Background stripes + BP bands
     drawDayStripes(ctx, start, end, L);
     drawBPBands(ctx, bounds, L);
 
-    // Grid + axes + lines + on-chart series legend
     drawGridAndAxes(ctx, bounds, L, start, end);
     drawLines(ctx, windowed, bounds, start, end, L);
     drawOnChartSeriesLegend(ctx, L);
