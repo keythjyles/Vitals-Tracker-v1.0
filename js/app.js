@@ -3,7 +3,7 @@
 Vitals Tracker — App Orchestrator
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
-App Version: v2.023c
+App Version: (authority) js/version.js
 Base: v2.021
 Date: 2026-01-18
 
@@ -13,11 +13,11 @@ FILE ROLE (LOCKED)
 - Must NOT implement swipe rules (gestures.js owns that).
 - Must NOT own panel show/hide rules long-term (panels.js owns that).
 
-v2.023c — Change Log (THIS FILE ONLY)
-1) Reads version exclusively from window.VTVersion (no hard-coded versions).
-2) Updates BOOT + Home footer version labels from VTVersion.
-3) “Turn back on Add Reading element” behavior: if an Add panel exists and panels/ui module exposes navigation, it will route there; otherwise it will show a controlled alert.
-4) Settings is NOT part of carousel/rotation (handled in gestures/panels later); this file only ensures gear routes to Settings when present.
+v2.023e — Change Log (THIS FILE ONLY)
+1) Initializes VTStore on boot (so Charts/Log have data).
+2) Ensures VTChart.onShow() runs every time Charts is opened (not just on load).
+3) Continues reading version exclusively from window.VTVersion.
+4) Settings remains accessible ONLY via gear button (rotation handled elsewhere).
 
 Schema position:
 File 3 of 10
@@ -28,11 +28,10 @@ File 3 of 10
 
   function vStr(){
     try{
-      if(window.VTVersion && typeof window.VTVersion.getVersionString === "function"){
-        return window.VTVersion.getVersionString();
-      }
-    }catch(_){}
-    return "v?.???";
+      return window.VTVersion?.getVersionString?.() || "v?.???";
+    }catch(_){
+      return "v?.???";
+    }
   }
 
   function $(id){ return document.getElementById(id); }
@@ -48,6 +47,18 @@ File 3 of 10
     if(el.dataset && el.dataset[k] === "1") return;
     if(el.dataset) el.dataset[k] = "1";
     el.addEventListener("click", handler, opts || false);
+  }
+
+  function safeAlert(msg){
+    try{ alert(msg); }catch(_){}
+  }
+
+  function callChartOnShowIfPresent(){
+    try{
+      if(window.VTChart && typeof window.VTChart.onShow === "function"){
+        window.VTChart.onShow();
+      }
+    }catch(_){}
   }
 
   function showPanel(name){
@@ -69,37 +80,47 @@ File 3 of 10
     };
     const targetId = ids[name];
     const all = ["panelHome","panelAdd","panelCharts","panelLog","panelSettings"].map($).filter(Boolean);
+
     for(const p of all) p.classList.remove("active");
     const tgt = targetId ? $(targetId) : null;
     if(tgt) tgt.classList.add("active");
+
+    // If we just opened Charts, render now
+    if(name === "charts") callChartOnShowIfPresent();
   }
 
   function addPanelExists(){
     return !!$("panelAdd") || !!$("addCard") || !!$("addForm") || !!$("btnSaveReading");
   }
 
-  function safeAlert(msg){
-    try{ alert(msg); }catch(_){}
+  async function safeInitStore(){
+    try{
+      if(window.VTStore && typeof window.VTStore.init === "function"){
+        await window.VTStore.init();
+      }
+    }catch(_){}
   }
 
-  function init(){
+  async function init(){
     const ver = vStr();
 
     // Version labels
     setText("bootText", `BOOT OK ${ver}`);
     setText("homeVersion", ver);
 
-    // Wire buttons (non-destructive; binds only once)
+    // Ensure store is loaded early (Charts and Log rely on this)
+    await safeInitStore();
+
+    // Wire buttons
     bindOnce($("btnGoCharts"), "goCharts", () => showPanel("charts"));
     bindOnce($("btnGoLog"), "goLog", () => showPanel("log"));
 
-    // Turn Add Reading element back on (routes if Add panel exists)
+    // Add Reading button (routes if Add panel exists)
     bindOnce($("btnGoAdd"), "goAdd", () => {
       if(addPanelExists()){
         showPanel("add");
         return;
       }
-      // Controlled message: Add panel not restored in current build
       safeAlert("Add Reading panel is not installed in this build yet. Next steps: restore Add panel + save flow (add.js/storage).");
     });
 
@@ -114,7 +135,6 @@ File 3 of 10
     bindOnce($("btnSettingsFromLog"), "openSettingsLog", openSettings);
 
     bindOnce($("btnBackFromSettings"), "backFromSettings", () => {
-      // Prefer returning to Home unless a panels module tracks last panel
       if(window.VTPanels && typeof window.VTPanels.backFromSettings === "function"){
         window.VTPanels.backFromSettings();
       }else{
@@ -122,22 +142,28 @@ File 3 of 10
       }
     });
 
-    // On entry to Charts, ask chart module to render (if present)
+    // If charts panel is active on load, render now (and store is loaded)
     try{
-      if(window.VTChart && typeof window.VTChart.onShow === "function"){
-        // If charts panel is active on load, render now
-        const charts = $("panelCharts");
-        if(charts && charts.classList.contains("active")){
-          window.VTChart.onShow();
-        }
+      const charts = $("panelCharts");
+      if(charts && charts.classList.contains("active")){
+        callChartOnShowIfPresent();
       }
     }catch(_){}
   }
 
   if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", init);
+    document.addEventListener("DOMContentLoaded", () => { init(); });
   }else{
     init();
   }
 
 })();
+
+/*
+Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
+File: js/app.js
+App Version: (authority) js/version.js
+Base: v2.021
+Touched in: v2.023e (store init + charts onShow on nav)
+Schema order: File 3 of 10
+*/
