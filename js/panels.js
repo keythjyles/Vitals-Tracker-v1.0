@@ -1,11 +1,10 @@
 /* File: js/panels.js */
 /*
-Vitals Tracker — Panel Controller
-Copyright (c) 2026 Wendell K. Jiles.
-All rights reserved.
+Vitals Tracker — Panel Router
+Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
 App Version: v2.025e
-Base: v2.025d
+Base: v2.021
 Date: 2026-01-18
 
 Schema position:
@@ -15,93 +14,96 @@ Former file:
 File 8 — js/log.js
 
 Next file:
-File 10 — js/version.js
+File 10 — js/init.js
 
 FILE ROLE (LOCKED)
-- Owns panel visibility and active panel state.
-- Owns panel rotation (left / right).
-- Dispatches onShow() for panels that require activation.
-- Does NOT render content itself.
-- Does NOT handle gestures directly (gestures.js owns swipe detection).
-- Does NOT touch storage, charts, or settings.
+- Owns panel visibility and activation lifecycle.
+- Calls panel.onShow() exactly once when a panel becomes active.
+- Clears "Loading…" state for active panels.
+- Does NOT implement gestures.
+- Does NOT render charts or logs.
+- Does NOT touch storage.
 
 ANTI-DRIFT RULES
-- Do NOT add settings logic here.
-- Do NOT add chart rendering logic here.
-- Do NOT add storage access here.
+- Do NOT add swipe logic here.
+- Do NOT import chart or log directly.
+- Panels register themselves via window.VTPanels.
 */
 
 (function () {
   "use strict";
 
-  const PANELS = ["home", "charts", "log"];
-  let activeIndex = 0;
+  const PANEL_ATTR = "data-panel";
+  const ACTIVE_CLASS = "active";
 
-  function $(id) {
-    return document.getElementById(id);
+  const state = {
+    active: null,
+    shown: Object.create(null)
+  };
+
+  function $(sel, root = document) {
+    return root.querySelector(sel);
+  }
+
+  function $all(sel, root = document) {
+    return Array.from(root.querySelectorAll(sel));
   }
 
   function hideAllPanels() {
-    for (const id of PANELS) {
-      const el = $(`panel-${id}`);
-      if (el) el.style.display = "none";
+    const panels = $all(`[${PANEL_ATTR}]`);
+    for (const p of panels) {
+      p.classList.remove(ACTIVE_CLASS);
+      p.style.display = "none";
     }
   }
 
-  function showPanelByIndex(idx) {
-    if (idx < 0 || idx >= PANELS.length) return;
+  function clearLoading(panelEl) {
+    const loading = $(".loading", panelEl);
+    if (loading) {
+      loading.style.display = "none";
+    }
+  }
+
+  function activatePanel(name) {
+    if (!name || state.active === name) return;
+
+    const panelEl = $(`[${PANEL_ATTR}="${name}"]`);
+    if (!panelEl) return;
 
     hideAllPanels();
 
-    const id = PANELS[idx];
-    const el = $(`panel-${id}`);
-    if (el) el.style.display = "block";
+    panelEl.style.display = "";
+    panelEl.classList.add(ACTIVE_CLASS);
+    clearLoading(panelEl);
 
-    activeIndex = idx;
+    state.active = name;
 
-    dispatchOnShow(id);
-  }
+    // Call onShow exactly once per activation
+    if (!state.shown[name]) {
+      const registry = window.VTPanels || {};
+      const panel = registry[name];
 
-  function dispatchOnShow(panelId) {
-    try {
-      if (panelId === "charts" && window.VTChart?.onShow) {
-        window.VTChart.onShow();
+      if (panel && typeof panel.onShow === "function") {
+        try {
+          panel.onShow();
+        } catch (err) {
+          console.error(`[Panels] onShow failed for "${name}"`, err);
+        }
       }
 
-      if (panelId === "log" && window.VTLog?.onShow) {
-        window.VTLog.onShow();
-      }
-    } catch (e) {
-      console.warn("Panel onShow dispatch error:", panelId, e);
+      state.shown[name] = true;
     }
   }
 
-  function rotateLeft() {
-    const next = (activeIndex - 1 + PANELS.length) % PANELS.length;
-    showPanelByIndex(next);
-  }
-
-  function rotateRight() {
-    const next = (activeIndex + 1) % PANELS.length;
-    showPanelByIndex(next);
-  }
-
-  function goHome() {
-    showPanelByIndex(0);
-  }
-
   function init() {
-    // Initial panel is Home
-    showPanelByIndex(0);
+    // Default panel: charts
+    activatePanel("charts");
   }
 
   // Public API
-  window.VTPanels = {
-    init,
-    rotateLeft,
-    rotateRight,
-    goHome,
-    showPanelByIndex,
-    getActivePanel: () => PANELS[activeIndex]
-  };
+  window.VTPanelRouter = Object.freeze({
+    activate: activatePanel,
+    init
+  });
+
 })();
