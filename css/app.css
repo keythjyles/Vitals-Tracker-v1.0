@@ -1,469 +1,384 @@
-/* File: css/app.css */
-/*
-Vitals Tracker - Stylesheet
-Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
-
+/* 
+Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
+File: css/app.css
 App Version Authority: js/version.js
-Base: v2.025e
+Base: v2.025f
 Pass: Render Recovery + Swipe Feel
 Pass order: File 3 of 9 (P0)
 Prev file: index.html (File 2 of 9)
-Next file: js/panels.js (File 4 of 9)
-
-SCOPE (THIS FILE)
-- Provide liquid swipe feel foundation (deck/track layout, transitions).
-- Keep panels visually consistent with the existing glass UI.
-- Do NOT implement logic. No JS here.
+Next file: js/ui.js (File 4 of 9)
 */
+
+/* ==============================
+   Root Variables / Theme
+   ============================== */
 
 :root{
   --bg0:#08101f;
   --bg1:#0b1324;
-
-  --panel:rgba(12,21,40,.80);
+  --panel:#0c1528cc;
 
   --stroke:rgba(235,245,255,.16);
   --stroke2:rgba(235,245,255,.22);
   --strokeBold:rgba(180,210,255,.42);
 
-  --text:rgba(235,245,255,.86);
+  --text:rgba(235,245,255,.92);
   --muted:rgba(235,245,255,.58);
   --muted2:rgba(235,245,255,.42);
 
   --accent:#2b4e7a;
+  --accentSoft:rgba(80,140,220,.25);
 
-  --shadow:0 18px 60px rgba(0,0,0,.45);
+  --danger:#8b3a44;
+  --dangerSoft:rgba(180,60,80,.28);
 
-  --r1:18px;
-  --r2:26px;
-  --pad:16px;
+  --radiusXL:28px;
+  --radiusL:22px;
+  --radiusM:16px;
 
-  --btnH:56px;
-  --btnMiniH:46px;
+  --shadowSoft:0 12px 40px rgba(0,0,0,.35);
+  --shadowInset:inset 0 0 0 1px var(--stroke);
+
+  --touchTarget:48px;
 }
 
-*{ box-sizing:border-box; }
+/* ==============================
+   Global Reset / Base
+   ============================== */
+
+*,
+*::before,
+*::after{
+  box-sizing:border-box;
+}
 
 html,body{
+  width:100%;
   height:100%;
   margin:0;
   background:
-    radial-gradient(1200px 900px at 20% 10%, rgba(90,140,210,.24), transparent 55%),
-    radial-gradient(900px 800px at 80% 0%, rgba(60,120,255,.18), transparent 60%),
-    radial-gradient(900px 900px at 50% 110%, rgba(0,0,0,.30), transparent 60%),
-    linear-gradient(180deg, var(--bg0), var(--bg1));
+    radial-gradient(1200px 600px at 50% -200px, #13244a, transparent 60%),
+    linear-gradient(180deg, var(--bg1), var(--bg0));
   color:var(--text);
   font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-  overflow:hidden;
+  overscroll-behavior-y:contain;
+  -webkit-tap-highlight-color:transparent;
 }
 
 button{
   font-family:inherit;
+  border:none;
+  background:none;
   color:inherit;
 }
 
+button:focus{
+  outline:none;
+}
+
+/* ==============================
+   App Shell
+   ============================== */
+
 .app-root{
+  width:100%;
   height:100%;
   display:flex;
   flex-direction:column;
-  padding:14px 14px 18px;
-  gap:12px;
 }
 
+/* ==============================
+   Top Bar
+   ============================== */
+
 .topbar{
-  height:62px;
-  border-radius:22px;
-  background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(0,0,0,.12));
-  border:1px solid rgba(255,255,255,.10);
-  box-shadow:0 18px 50px rgba(0,0,0,.28);
   display:flex;
   align-items:center;
   justify-content:space-between;
-  padding:10px 14px;
+  padding:12px 16px;
+  margin:10px 12px;
+  border-radius:999px;
+  background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+  box-shadow:var(--shadowInset), var(--shadowSoft);
 }
 
 .brand{
   display:flex;
   align-items:center;
   gap:10px;
-  min-width:0;
 }
 
 .brandIcon{
-  width:34px;
-  height:34px;
-  border-radius:12px;
-  background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(0,0,0,.18));
-  border:1px solid rgba(255,255,255,.10);
+  width:36px;
+  height:36px;
+  border-radius:50%;
   display:flex;
   align-items:center;
   justify-content:center;
-  color:rgba(200,230,255,.95);
+  background:linear-gradient(180deg, #1b335e, #0e1d38);
+  box-shadow:var(--shadowInset);
 }
 
 .brandTitle{
-  font-weight:700;
-  font-size:22px;
+  font-size:18px;
+  font-weight:600;
   letter-spacing:.2px;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
 }
 
 .bootpill{
-  font-size:14px;
-  letter-spacing:.4px;
-  color:rgba(235,245,255,.70);
-  padding:8px 12px;
+  padding:6px 12px;
+  font-size:12px;
   border-radius:999px;
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.10);
-  white-space:nowrap;
+  background:rgba(255,255,255,.08);
+  color:var(--muted);
+  box-shadow:var(--shadowInset);
 }
 
-/* Deck */
+/* ==============================
+   Deck / Panels
+   ============================== */
+
 .deck{
   flex:1;
   position:relative;
-  border-radius:28px;
-  border:2px solid rgba(75,140,210,.55);
-  background:rgba(10,18,35,.28);
-  box-shadow:0 22px 70px rgba(0,0,0,.42);
   overflow:hidden;
 }
 
-/* Track is translated by panels.js for swipe.
-   We keep will-change to help "liquid" feel. */
 .deckTrack{
-  position:absolute;
-  inset:0;
-  display:flex;
-  width:500%;
   height:100%;
-  transform:translate3d(0,0,0);
+  display:flex;
+  flex-direction:row;
   will-change:transform;
 }
 
-/* Panel */
 .panel{
-  width:100%;
+  min-width:100%;
   height:100%;
-  flex:0 0 100%;
-  padding:16px;
-  opacity:1;
+  padding:12px;
+}
+
+.panel.active{
+  pointer-events:auto;
 }
 
 .screenFrame{
   height:100%;
-  border-radius:24px;
-  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.10));
-  border:1px solid rgba(255,255,255,.10);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
-  padding:14px;
+  border-radius:var(--radiusXL);
+  background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.01));
+  box-shadow:var(--shadowInset), var(--shadowSoft);
+  border:1px solid var(--strokeBold);
+  padding:16px;
   display:flex;
   flex-direction:column;
-  gap:12px;
 }
 
-/* Screen header */
+/* ==============================
+   Screen Header
+   ============================== */
+
 .screenHeader{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  padding:10px 10px;
-  border-radius:18px;
-  background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(0,0,0,.10));
-  border:1px solid rgba(255,255,255,.10);
+  margin-bottom:14px;
 }
 
 .screenTitle{
   font-size:28px;
-  font-weight:800;
-  letter-spacing:.2px;
+  font-weight:600;
 }
 
 .screenHeaderRight{
   display:flex;
-  align-items:center;
   gap:10px;
 }
 
-/* Pills / icon buttons */
-.pillBtn{
-  height:42px;
-  padding:0 18px;
-  border-radius:999px;
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.12);
-  font-weight:700;
-  letter-spacing:.2px;
-}
-
-.iconBtn{
-  width:42px;
-  height:42px;
-  border-radius:999px;
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.12);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.iconBtn svg,
-.brandIcon svg{
-  display:block;
-}
-
-.loadingPill{
-  height:52px;
-  border-radius:18px;
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.08);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:rgba(235,245,255,.55);
-  font-size:24px;
-  letter-spacing:.2px;
-}
-
-/* Home buttons */
-.homeButtons{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-  padding:10px 6px 2px;
-}
+/* ==============================
+   Buttons
+   ============================== */
 
 .primaryBtn,
-.ghostBtn{
-  height:var(--btnH);
+.ghostBtn,
+.miniBtn,
+.pillBtn,
+.dangerBtn,
+.iconBtn{
+  min-height:var(--touchTarget);
+  padding:0 18px;
   border-radius:999px;
-  border:1px solid rgba(255,255,255,.12);
-  font-size:26px;
-  font-weight:800;
-  letter-spacing:.2px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:600;
+  box-shadow:var(--shadowInset);
 }
 
 .primaryBtn{
-  background:linear-gradient(180deg, rgba(100,160,255,.40), rgba(30,70,140,.28));
-  border:1px solid rgba(140,200,255,.35);
-  box-shadow:0 14px 44px rgba(0,0,0,.35);
+  background:linear-gradient(180deg, #3a63a6, #24457e);
 }
 
 .ghostBtn{
-  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.12));
-}
-
-.homeRow{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
+  background:rgba(255,255,255,.06);
 }
 
 .miniBtn{
-  height:var(--btnMiniH);
-  border-radius:999px;
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.10);
-  font-weight:800;
-  font-size:18px;
-  letter-spacing:.2px;
+  min-height:42px;
+  font-size:14px;
+  background:rgba(255,255,255,.06);
 }
 
-.miniBtn:disabled{
-  opacity:.55;
+.pillBtn{
+  background:rgba(255,255,255,.08);
 }
 
 .dangerBtn{
-  height:var(--btnMiniH);
-  border-radius:999px;
-  background:linear-gradient(180deg, rgba(220,70,90,.22), rgba(0,0,0,.14));
-  border:1px solid rgba(240,110,130,.28);
-  font-weight:900;
-  font-size:18px;
-  letter-spacing:.4px;
+  background:linear-gradient(180deg, #7a3340, #55222c);
+}
+
+.iconBtn{
+  width:var(--touchTarget);
+  padding:0;
+  background:rgba(255,255,255,.06);
+}
+
+/* ==============================
+   Home Panel
+   ============================== */
+
+.homeButtons{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  flex:1;
+}
+
+.homeRow{
+  display:flex;
+  gap:12px;
 }
 
 .homeHint{
-  margin-top:2px;
-  color:rgba(235,245,255,.42);
-  font-size:16px;
-  line-height:1.2;
-  padding:4px 6px 0;
+  margin-top:auto;
+  font-size:14px;
+  color:var(--muted2);
 }
 
 .homeFooter{
-  margin-top:auto;
   display:flex;
-  align-items:flex-end;
   justify-content:space-between;
-  gap:10px;
-  padding:4px 6px 0;
+  font-size:13px;
+  color:var(--muted2);
+  margin-top:8px;
 }
 
-.homeVer{
-  font-weight:900;
-  color:rgba(235,245,255,.55);
-}
+/* ==============================
+   Charts Panel
+   ============================== */
 
-.homeSig{
-  color:rgba(235,245,255,.42);
-}
-
-/* Chart card */
 .chartCard{
   flex:1;
-  border-radius:24px;
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.10);
-  padding:14px;
+  border-radius:var(--radiusL);
+  background:rgba(0,0,0,.18);
+  box-shadow:var(--shadowInset);
+  padding:12px;
   display:flex;
   flex-direction:column;
-  gap:12px;
-  overflow:hidden;
 }
 
 .chartWrap{
   flex:1;
-  border-radius:20px;
-  background:rgba(0,0,0,.18);
-  border:1px solid rgba(255,255,255,.10);
-  overflow:hidden;
-  display:flex;
-}
-
-#chartCanvas{
-  width:100%;
-  height:100%;
-  display:block;
-  touch-action:none; /* chart.js may use pinch/pan */
+  position:relative;
 }
 
 .chartLegend{
-  min-height:44px;
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  align-items:center;
-  justify-content:center;
-  padding:4px 2px;
+  margin-top:10px;
+  font-size:13px;
+  color:var(--muted);
 }
 
-.chartFooterSpacer{
-  height:10px;
-}
+/* ==============================
+   Log Panel
+   ============================== */
 
-/* Legend pills (chart.js can inject these classes) */
-.legendPill{
-  display:inline-flex;
-  align-items:center;
-  gap:10px;
-  padding:10px 14px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.10);
-  background:rgba(255,255,255,.05);
-  color:rgba(235,245,255,.78);
-  font-weight:900;
-  letter-spacing:.2px;
-}
-
-.legendDot{
-  width:12px;
-  height:12px;
-  border-radius:4px;
-  opacity:.95;
-}
-
-/* Log */
 .logList{
   flex:1;
-  border-radius:24px;
-  background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.10);
-  overflow:auto;
-  padding:10px;
+  overflow-y:auto;
 }
 
 .logEmpty{
-  color:rgba(235,245,255,.52);
   text-align:center;
-  padding:18px 8px;
+  color:var(--muted2);
+  margin-top:20px;
 }
 
-.logFooterSpacer{
-  height:10px;
-}
+/* ==============================
+   Settings Panel
+   ============================== */
 
-/* Settings */
 .settingsBody{
-  flex:1;
-  overflow:auto;
-  padding:6px 2px 2px;
   display:flex;
   flex-direction:column;
-  gap:12px;
+  gap:14px;
 }
 
 .settingsCard{
-  border-radius:22px;
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.10);
   padding:14px;
+  border-radius:var(--radiusM);
+  background:rgba(255,255,255,.05);
+  box-shadow:var(--shadowInset);
 }
 
 .settingsLine{
   display:flex;
-  align-items:center;
   justify-content:space-between;
-  gap:10px;
 }
 
-.muted{ color:var(--muted); }
+/* ==============================
+   Add Panel
+   ============================== */
 
-/* Add panel */
 .addBody{
   flex:1;
-  overflow:auto;
-  padding:6px 2px 2px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
 .addCard{
-  border-radius:22px;
+  width:100%;
+  padding:18px;
+  border-radius:var(--radiusL);
   background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.10);
-  padding:14px;
+  box-shadow:var(--shadowInset);
   display:flex;
   flex-direction:column;
   gap:12px;
 }
 
-/* Tap states */
-.primaryBtn:active,
-.ghostBtn:active,
-.pillBtn:active,
-.iconBtn:active,
-.miniBtn:active,
-.dangerBtn:active{
-  transform:translateY(1px);
-  filter:brightness(1.06);
+/* ==============================
+   Loading Pills / Spacers
+   ============================== */
+
+.loadingPill{
+  align-self:flex-start;
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:13px;
+  background:rgba(255,255,255,.08);
+  color:var(--muted);
+  margin-bottom:8px;
 }
 
-/* Prefer reduced motion */
-@media (prefers-reduced-motion: reduce){
-  .deckTrack{ will-change:auto; }
+.chartFooterSpacer,
+.logFooterSpacer{
+  height:6px;
 }
 
-/*
-Vitals Tracker - EOF Version/Detail Notes (REQUIRED)
+/* 
+Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: css/app.css
-App Version Authority: js/version.js
 Pass: Render Recovery + Swipe Feel
 Pass order: File 3 of 9 (P0)
 Prev file: index.html (File 2 of 9)
-Next file: js/panels.js (File 4 of 9)
+Next file: js/ui.js (File 4 of 9)
 */
