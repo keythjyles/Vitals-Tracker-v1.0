@@ -3,15 +3,24 @@ Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
 File: css/app.css
 App Version Authority: js/version.js
 Base: v2.026a
-Pass: Swipe + Render Recovery (P0-R1)
-Pass order: File 3 of 9 (P0)
-Prev file: index.html (File 2 of 9)
-Next file: js/ui.js (File 4 of 9)
-*/
+Pass: UI Layout Consistency (P1-L1)
+Pass order: File 1 of 1
+Prev file: (n/a)
+Next file: (n/a)
 
-/* ==============================
-   Root Variables / Theme
-   ============================== */
+CHANGE (CSS ONLY)
+1) Force a consistent top-right Settings button position on Home/Charts/Log:
+   - The icon button is pinned to the top-right of the screen header area.
+   - Header layout becomes position:relative; title stays left; right container fills.
+2) Home bottom buttons layout:
+   - The 3 “bottom” buttons on Home are kept on a single row, evenly spaced,
+     and positioned underneath the Log button (i.e., after the Log button in the stack).
+   - This targets .homeRow (existing markup) and improves spacing without changing HTML.
+
+ANTI-DRIFT
+- No JS changes.
+- No DOM/HTML edits.
+*/
 
 :root{
   --bg0:#08101f;
@@ -41,10 +50,6 @@ Next file: js/ui.js (File 4 of 9)
 
   --touchTarget:48px;
 }
-
-/* ==============================
-   Global Reset / Base
-   ============================== */
 
 *,
 *::before,
@@ -146,8 +151,6 @@ canvas{
   flex:1;
   position:relative;
   overflow:hidden;
-
-  /* Important: prevent any “white behind panel” flashes during transform/scroll */
   background:
     radial-gradient(1200px 600px at 50% -200px, #13244a, transparent 60%),
     linear-gradient(180deg, var(--bg1), var(--bg0));
@@ -173,18 +176,15 @@ canvas{
 .screenFrame{
   height:100%;
   border-radius:var(--radiusXL);
-
-  /* Slightly more opaque so inner content never “washes out” */
   background:
     linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.015)),
     rgba(10,16,30,.28);
-
   box-shadow:var(--shadowInset), var(--shadowSoft);
   border:1px solid var(--strokeBold);
   padding:16px;
   display:flex;
   flex-direction:column;
-  overflow:hidden; /* stops any inner white overscroll flashes */
+  overflow:hidden;
 }
 
 /* ==============================
@@ -192,10 +192,13 @@ canvas{
    ============================== */
 
 .screenHeader{
+  position:relative;            /* NEW: enables absolute pinning */
   display:flex;
   align-items:center;
   justify-content:space-between;
   margin-bottom:14px;
+  padding-right:58px;           /* NEW: reserve space for pinned icon */
+  min-height:var(--touchTarget);/* NEW: stable height across panels */
 }
 
 .screenTitle{
@@ -206,6 +209,19 @@ canvas{
 .screenHeaderRight{
   display:flex;
   gap:10px;
+  align-items:center;
+}
+
+/* NEW: pin settings icon to the exact same top-right spot on any header */
+.screenHeader .iconBtn{
+  position:absolute;
+  top:0;
+  right:0;
+}
+
+/* If a header has both Home pill + settings icon, keep pill aligned left of icon */
+.screenHeaderRight .pillBtn{
+  margin-right:8px;
 }
 
 /* ==============================
@@ -270,7 +286,21 @@ canvas{
 
 .homeRow{
   display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content:space-between; /* NEW: evenly space */
   gap:12px;
+}
+
+/* NEW: 3-button row sizing (keeps a clean single row under Log) */
+.homeRow > button{
+  flex:1 1 0;
+  min-width:0;
+}
+
+/* If a row has only 2 buttons (Install/Clear), keep it balanced as well */
+.homeRow > button:only-child{
+  flex:0 0 auto;
 }
 
 .homeHint{
@@ -391,7 +421,6 @@ canvas{
   gap:12px;
 }
 
-/* Force dark, non-blinding inputs even if markup lacks classes */
 .addCard input,
 .addCard textarea,
 .addBody input,
@@ -411,10 +440,6 @@ canvas{
 .addBody textarea::placeholder{
   color:rgba(235,245,255,.38);
 }
-
-/* ==============================
-   Add Panel (form styling)
-   ============================== */
 
 .addForm{
   display:block;
@@ -485,8 +510,10 @@ canvas{
 /* 
 Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: css/app.css
-Pass: Swipe + Render Recovery (P0-R1)
-Pass order: File 3 of 9 (P0)
-Prev file: index.html (File 2 of 9)
-Next file: js/ui.js (File 4 of 9)
+App Version Authority: js/version.js
+Base: v2.026a
+Pass: UI Layout Consistency (P1-L1)
+Pass order: File 1 of 1
+Prev file: (n/a)
+Next file: (n/a)
 */
