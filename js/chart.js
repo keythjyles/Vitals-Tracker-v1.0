@@ -1,474 +1,650 @@
 /* File: js/chart.js */
 /*
-Vitals Tracker — Chart Engine (Canvas Rendering + Chart View)
+Vitals Tracker — Chart Engine
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
-App Version: v2.023b
+App Version: v2.023c
 Base: v2.021
 Date: 2026-01-18
 
-FILE ROLE (LOCKED)
-- Owns ALL chart drawing on #chartCanvas.
-- Owns chart lifecycle hooks (onShow/onDataChanged/onResize).
-- Reads data ONLY via VTStore (read-only for now).
-- Uses VTState for view window (days/center) and dirty flag.
-- Does NOT own panel routing or swipe carousel.
-
-v2.023b — Change Log (THIS FILE ONLY)
-1) Restores a working, self-contained chart renderer that draws:
-   - Alternating day bands
-   - Systolic/Diastolic polyline
-   - Optional HR polyline (if present)
-   - Safe label text in #chartsTopNote
-2) Implements robust data normalization:
-   - Accepts multiple record shapes: {ts,sys,dia,hr,notes} and legacy keys
-   - Tolerant of string timestamps and numeric strings
-3) Implements resilient time windowing:
-   - Uses VTState chartWindowDays + chartCenterMs
-   - If center is null, centers on newest record
-4) Does NOT implement pinch/zoom/pan yet (that belongs to gestures.js later).
-5) Exposes window.VTChart with onShow(), onDataChanged(), onResize().
-
-ANTI-DRIFT RULES
-- Do NOT attach global swipe listeners here.
-- Do NOT write to storage here.
-- Do NOT rename canvas IDs.
+v2.023c — Change Log (THIS FILE ONLY)
+1) Preserves the v2.021 render engine exactly in behavior.
+2) Adds VTChart.onShow() integration hook so Charts panel actually renders.
+3) Updates #chartsTopNote with range label (using tz) or “No records…” if empty.
 
 Schema position:
 File 7 of 10
-
-Previous file:
-File 6 — js/state.js
-
-Next file:
-File 8 — js/gestures.js
 */
 
-(function () {
+(function(){
   "use strict";
 
-  const VERSION = "v2.023b";
-  const TZ = "America/Chicago";
-  const MS_DAY = 86400000;
+  const DEFAULTS = {
+    tz: "America/Chicago",
+    yMin: 40,
+    // yMax is auto-fit to data; provided as fallback
+    yMaxFallback: 200,
+    // small pad above max sys
+    yPad: 6,
+    // right/left padding tuned for your UI
+    padL: 30,
+    padR: 18,
+    padT: 10,
+    padB: 42,
 
-  /* ===== DOM (owned by chart engine) ===== */
-  function el(id) { return document.getElementById(id); }
-  const chartsTopNote = () => el("chartsTopNote");
-  const canvasWrap = () => el("canvasWrap");
-  const chartCanvas = () => el("chartCanvas");
+    // bands (systolic-only)
+    bands: {
+      // NOTE: these are the CURRENT baseline levels
+      ht2:  "rgba(255, 70, 70, .18)",
+      ht1:  "rgba(255, 210, 80, .17)",
+      elev: "rgba(80, 160, 255, .15)",
+      opt:  "rgba(70, 120, 255, .11)",
+      hypo: "rgba(170, 120, 255, .13)"
+    },
 
-  let ctx = null;
-  let dpr = 1;
-  let cssW = 0;
-  let cssH = 0;
+    // day banding
+    dayBandA: "rgba(40,90,170,.12)",
+    dayBandB: "rgba(0,0,0,.12)",
 
-  /* ===== Formatters (Central Time) ===== */
-  const fmtYMDParts = new Intl.DateTimeFormat("en-US", {
-    timeZone: TZ,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
+    // grid and labels
+    grid: "rgba(235,245,255,.10)",
+    frame: "rgba(235,245,255,.14)",
+    yLabel: "rgba(235,245,255,.58)",
+    xLabel: "rgba(235,245,255,.58)",
 
-  const fmtTimeCT = new Intl.DateTimeFormat("en-US", {
-    timeZone: TZ,
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
+    // series
+    series: {
+      sys: { stroke:"rgba(170,210,255,1)", alpha:0.95 },
+      dia: { stroke:"rgba(235,245,255,1)", alpha:0.78 },
+      hr:  { stroke:"rgba(150,255,210,1)", alpha:0.72 }
+    },
 
-  function fmtCTDateOnly(ms) {
-    if (!Number.isFinite(ms)) return "—";
-    try {
-      const parts = fmtYMDParts.formatToParts(new Date(ms));
-      const map = {};
-      for (const p of parts) map[p.type] = p.value;
-      return `${map.year}-${map.month}-${map.day}`;
-    } catch (_) {
-      return "—";
-    }
-  }
+    // legend
+    legend: true
+  };
 
-  function fmtCTDateTime(ms) {
-    if (!Number.isFinite(ms) || ms <= 0) return "—";
-    return `${fmtCTDateOnly(ms)} ${fmtTimeCT.format(new Date(ms))}`;
-  }
-
-  function ctParts(ms) {
-    const parts = fmtYMDParts.formatToParts(new Date(ms));
-    const get = (t) => parts.find((p) => p.type === t)?.value || "";
-    return { y: +get("year"), m: +get("month"), d: +get("day") };
-  }
-
-  function ctDayKey(ms) {
-    const p = ctParts(ms);
-    return `${p.y}-${String(p.m).padStart(2, "0")}-${String(p.d).padStart(2, "0")}`;
-  }
-
-  /* ===== Data normalization ===== */
-
-  function safeNum(x) {
+  function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
+  function safeNum(x){
     const n = Number(x);
     return Number.isFinite(n) ? n : null;
   }
 
-  function extractTs(r) {
-    const v = r?.ts ?? r?.time ?? r?.timestamp ?? r?.date ?? r?.createdAt ?? r?.created_at ?? r?.iso ?? null;
-    if (v == null) return null;
-    const ms = new Date(v).getTime();
-    return Number.isFinite(ms) ? ms : null;
+  function extractTs(r){
+    return r.ts || r.time || r.timestamp || r.date || r.createdAt || r.created_at || r.iso || null;
   }
-
-  function extractBP(r) {
-    const sys = safeNum(r?.sys ?? r?.systolic ?? (r?.bp && (r.bp.sys ?? r.bp.systolic)));
-    const dia = safeNum(r?.dia ?? r?.diastolic ?? (r?.bp && (r.bp.dia ?? r.bp.diastolic)));
+  function extractBP(r){
+    const sys = safeNum(r.sys ?? r.systolic ?? (r.bp && (r.bp.sys ?? r.bp.systolic)));
+    const dia = safeNum(r.dia ?? r.diastolic ?? (r.bp && (r.bp.dia ?? r.bp.diastolic)));
     return { sys, dia };
   }
-
-  function extractHR(r) {
-    return safeNum(r?.hr ?? r?.heartRate ?? r?.pulse ?? (r?.vitals && (r.vitals.hr ?? r.vitals.pulse)));
+  function extractHR(r){
+    return safeNum(r.hr ?? r.heartRate ?? r.pulse ?? (r.vitals && (r.vitals.hr ?? r.vitals.pulse)));
   }
 
-  function normalizeRecords(raw) {
-    if (!Array.isArray(raw)) return [];
-    const out = [];
-    for (const r of raw) {
-      const t = extractTs(r);
-      if (!t) continue;
-      const bp = extractBP(r);
-      const hr = extractHR(r);
-      // Require at least one value to plot (bp or hr)
-      if (bp.sys == null && bp.dia == null && hr == null) continue;
-      out.push({ t, sys: bp.sys, dia: bp.dia, hr });
+  const MS_HOUR = 3600000;
+  const MS_DAY  = 86400000;
+
+  function makeFmtYMDParts(tz){
+    return new Intl.DateTimeFormat("en-US", { timeZone: tz, year:"numeric", month:"2-digit", day:"2-digit" });
+  }
+  function makeFmtWeekday(tz){
+    return new Intl.DateTimeFormat("en-US", { timeZone: tz, weekday:"short" });
+  }
+  function makeFmtMD(tz){
+    return new Intl.DateTimeFormat("en-US", { timeZone: tz, month:"2-digit", day:"2-digit" });
+  }
+  function makeFmtHourNum12(tz){
+    return new Intl.DateTimeFormat("en-US", { timeZone: tz, hour:"numeric", hour12:true });
+  }
+
+  function fmtCTDateOnly(ms, fmtYMDParts){
+    try{
+      if(!Number.isFinite(ms)) return "—";
+      const parts = fmtYMDParts.formatToParts(new Date(ms));
+      const map = {};
+      for(const p of parts) map[p.type]=p.value;
+      return `${map.year}-${map.month}-${map.day}`;
+    }catch(_){
+      return "—";
     }
-    out.sort((a, b) => a.t - b.t);
-    return out;
   }
 
-  /* ===== Canvas setup ===== */
+  function ctDayKey(ms, fmtYMDParts){
+    const parts = fmtYMDParts.formatToParts(new Date(ms));
+    const get = (t)=> parts.find(p=>p.type===t)?.value || "";
+    const y = get("year");
+    const m = get("month");
+    const d = get("day");
+    return `${y}-${m}-${d}`;
+  }
 
-  function setupCanvas() {
-    const c = chartCanvas();
-    if (!c) return false;
+  function computeDataBounds(records){
+    let tMin = Infinity, tMax = -Infinity;
+    for(const r of records){
+      const t = new Date(extractTs(r) || 0).getTime();
+      if(Number.isFinite(t) && t>0){
+        tMin = Math.min(tMin, t);
+        tMax = Math.max(tMax, t);
+      }
+    }
+    if(!Number.isFinite(tMin) || !Number.isFinite(tMax) || tMin===Infinity || tMax===-Infinity){
+      return { tMin:null, tMax:null };
+    }
+    return { tMin, tMax };
+  }
 
-    dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
-    const rect = c.getBoundingClientRect();
-    cssW = Math.max(280, Math.floor(rect.width));
-    cssH = Math.max(220, Math.floor(rect.height));
+  function computeGlobalYMaxFromDB(records, yPad, fallback){
+    let maxSys = null;
+    for(const r of records){
+      const bp = extractBP(r);
+      if(bp.sys != null){
+        maxSys = (maxSys == null) ? bp.sys : Math.max(maxSys, bp.sys);
+      }
+    }
+    if(maxSys == null) return fallback;
 
-    c.width = Math.floor(cssW * dpr);
-    c.height = Math.floor(cssH * dpr);
+    const raw = maxSys + yPad;
+    const nice = Math.ceil(raw / 10) * 10;
+    return Math.max(120, nice);
+  }
 
-    ctx = c.getContext("2d", { alpha: true, desynchronized: true });
-    if (!ctx) return false;
+  function buildSystolicBands(yMin, yMax, fills){
+    // systolic-only
+    return [
+      { name:"HTN2", y0:140, y1:yMax, fill:fills.ht2 },
+      { name:"HTN1", y0:130, y1:140,  fill:fills.ht1 },
+      { name:"Elev", y0:120, y1:130,  fill:fills.elev },
+      { name:"Opt",  y0: 90, y1:120,  fill:fills.opt },
+      { name:"Hypo", y0:yMin, y1: 90, fill:fills.hypo }
+    ];
+  }
 
+  function buildNiceYTicks(yMin, yMax){
+    const span = Math.max(1, yMax - yMin);
+    let step = 20;
+    if(span <= 90) step = 10;
+    else if(span <= 160) step = 20;
+    else step = 20;
+
+    const start = Math.floor(yMin / step) * step;
+    const ticks = [];
+    for(let v=start; v<=yMax; v+=step){
+      if(v >= yMin) ticks.push(v);
+    }
+    if(ticks[ticks.length-1] !== yMax) ticks.push(yMax);
+    return ticks;
+  }
+
+  function computeDayBoundaries(t0, t1, fmtYMDParts){
+    const bounds = [];
+    if(!Number.isFinite(t0) || !Number.isFinite(t1) || t1<=t0) return bounds;
+
+    let t = Math.floor(t0 / MS_HOUR) * MS_HOUR;
+    let prevKey = ctDayKey(t, fmtYMDParts);
+
+    while(t < t1 + MS_HOUR){
+      const tNext = t + MS_HOUR;
+      const nextKey = ctDayKey(tNext, fmtYMDParts);
+      if(nextKey !== prevKey){
+        let lo = t, hi = tNext;
+        for(let i=0;i<12;i++){
+          const mid = Math.floor((lo+hi)/2);
+          if(ctDayKey(mid, fmtYMDParts) === prevKey) lo = mid; else hi = mid;
+        }
+        const boundary = hi;
+        if(boundary >= t0 && boundary <= t1) bounds.push(boundary);
+        prevKey = nextKey;
+      }
+      t = tNext;
+    }
+    return bounds.sort((a,b)=>a-b);
+  }
+
+  function buildSeriesVisible(records, t0, t1){
+    const sys = [], dia = [], hr = [];
+    for(const r of records){
+      const t = new Date(extractTs(r) || 0).getTime();
+      if(!Number.isFinite(t) || t<=0) continue;
+      if(t < t0 || t > t1) continue;
+
+      const bp = extractBP(r);
+      const h = extractHR(r);
+
+      if(bp.sys != null) sys.push({t, y: bp.sys});
+      if(bp.dia != null) dia.push({t, y: bp.dia});
+      if(h != null)      hr.push({t, y: h});
+    }
+    sys.sort((a,b)=>a.t-b.t);
+    dia.sort((a,b)=>a.t-b.t);
+    hr.sort((a,b)=>a.t-b.t);
+    return { sys, dia, hr };
+  }
+
+  function plotLine(ctx, points, frame, t0, t1, yMin, yMax, stroke, alpha){
+    if(points.length < 2) return;
+    const { x0, pw } = frame;
+
+    const yToPx = (y)=>{
+      const t = (y - yMin) / Math.max(1, (yMax - yMin));
+      return frame.y0 + (1 - t) * frame.ph;
+    };
+
+    ctx.save();
+    ctx.strokeStyle = stroke;
+    ctx.globalAlpha = alpha;
+    ctx.lineWidth = 1.35;
+    ctx.lineJoin = "miter";
+    ctx.lineCap = "butt";
+
+    ctx.beginPath();
+    for(let i=0;i<points.length;i++){
+      const p = points[i];
+      const x = x0 + ((p.t - t0) / (t1 - t0)) * pw;
+      const y = yToPx(p.y);
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+
+    // points
+    ctx.fillStyle = stroke;
+    ctx.globalAlpha = Math.min(1, alpha + 0.08);
+    for(const p of points){
+      const x = x0 + ((p.t - t0) / (t1 - t0)) * pw;
+      const y = yToPx(p.y);
+      ctx.fillRect(Math.round(x)-1, Math.round(y)-1, 2, 2);
+    }
+
+    ctx.restore();
+  }
+
+  function measureText(ctx, s){ return ctx.measureText(s).width; }
+
+  function dropOverlappingTicks(ctx, ticks, x0, pw, t0, t1, minGapPx){
+    // ticks: {t, top, bot?}
+    const placed = [];
+    let lastRight = -Infinity;
+
+    for(const tk of ticks){
+      const x = x0 + ((tk.t - t0)/(t1 - t0)) * pw;
+      const wTop = tk.top ? measureText(ctx, tk.top) : 0;
+      const wBot = tk.bot ? measureText(ctx, tk.bot) : 0;
+      const w = Math.max(wTop, wBot);
+
+      const left = x - (w/2);
+      const right = x + (w/2);
+
+      if(left >= lastRight + minGapPx){
+        placed.push(tk);
+        lastRight = right;
+      }
+    }
+    return placed;
+  }
+
+  function buildXTicks(t0, t1, tz, fmtYMDParts){
+    const spanDays = (t1 - t0) / MS_DAY;
+    const ticks = [];
+    const hourMode = (spanDays <= 2.0);
+
+    if(hourMode){
+      const fmtHourNum = makeFmtHourNum12(tz);
+      // 4-hour cadence
+      const step = 4 * MS_HOUR;
+      let t = Math.ceil(t0/step)*step;
+      while(t <= t1){
+        const hour = fmtHourNum.format(new Date(t));
+        ticks.push({ t, top: hour, bot: "" });
+        t += step;
+      }
+      return { ticks, hourMode:true };
+    }
+
+    const fmtDay = makeFmtWeekday(tz);
+    const fmtMD = makeFmtMD(tz);
+
+    const bounds = computeDayBoundaries(t0, t1, fmtYMDParts);
+    const cuts = [t0, ...bounds].filter(v=>v>=t0 && v<=t1);
+
+    for(const t of cuts){
+      ticks.push({ t, top: fmtDay.format(new Date(t)), bot: fmtMD.format(new Date(t)) });
+    }
+    return { ticks, hourMode:false };
+  }
+
+  function computeDayCentersInRange(t0, t1, tz, fmtYMDParts){
+    // For hour-mode: show weekday label centered per day (below hours).
+    const bounds = computeDayBoundaries(t0, t1, fmtYMDParts);
+    const cuts = [t0, ...bounds, t1].filter((v,i,a)=> i===0 || v>a[i-1]);
+    const fmtDay = makeFmtWeekday(tz);
+
+    const days = [];
+    for(let i=0;i<cuts.length-1;i++){
+      const a = cuts[i], b = cuts[i+1];
+      const mid = a + (b-a)/2;
+      days.push({ t: mid, label: fmtDay.format(new Date(mid)) });
+    }
+    return days;
+  }
+
+  function drawLegend(ctx, frame, series){
+    const { x0, y0 } = frame;
+    ctx.save();
+    ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+
+    const items = [
+      { label:"Systolic",  stroke:series.sys.stroke, alpha:series.sys.alpha },
+      { label:"Diastolic", stroke:series.dia.stroke, alpha:series.dia.alpha },
+      { label:"Heart Rate",stroke:series.hr.stroke,  alpha:series.hr.alpha  }
+    ];
+
+    let lx = x0 + 8;
+    let ly = y0 + 6;
+    for(const it of items){
+      ctx.fillStyle = "rgba(235,245,255,.72)";
+      ctx.strokeStyle = it.stroke;
+      ctx.globalAlpha = it.alpha;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(lx, ly+7);
+      ctx.lineTo(lx+16, ly+7);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      ctx.fillText(it.label, lx+22, ly);
+      ly += 18;
+    }
+    ctx.restore();
+  }
+
+  function renderImpl(args){
+    const canvas = args.canvas;
+    const wrapEl = args.wrapEl;
+    const records = Array.isArray(args.records) ? args.records : [];
+    const view = args.view || {};
+    const tz = args.tz || DEFAULTS.tz;
+    const opt = Object.assign({}, DEFAULTS, args.options || {});
+    opt.tz = tz;
+
+    if(!canvas || !wrapEl) return;
+
+    // setup canvas (DPR)
+    const dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+    const rect = canvas.getBoundingClientRect();
+    const cssW = Math.max(280, Math.floor(rect.width));
+    const cssH = Math.max(220, Math.floor(rect.height));
+    canvas.width  = Math.floor(cssW * dpr);
+    canvas.height = Math.floor(cssH * dpr);
+
+    const ctx = canvas.getContext("2d", { alpha:true, desynchronized:true });
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.imageSmoothingEnabled = false;
-    return true;
-  }
 
-  function clear() {
-    if (!ctx) return;
-    ctx.clearRect(0, 0, cssW, cssH);
-  }
+    // clear
+    ctx.clearRect(0,0,cssW,cssH);
 
-  /* ===== Coordinate mapping ===== */
-
-  function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
-
-  function computeYDomain(points) {
-    // Default domain (BP)
-    let minV = 40;
-    let maxV = 200;
-
-    for (const p of points) {
-      if (p.sys != null) maxV = Math.max(maxV, p.sys);
-      if (p.dia != null) maxV = Math.max(maxV, p.dia);
-      if (p.sys != null) minV = Math.min(minV, p.sys);
-      if (p.dia != null) minV = Math.min(minV, p.dia);
-    }
-
-    // pad + clamp
-    minV = Math.max(30, Math.floor(minV - 10));
-    maxV = Math.min(260, Math.ceil(maxV + 10));
-    if (maxV - minV < 40) maxV = minV + 40;
-    return { minV, maxV };
-  }
-
-  function computeHRDomain(points) {
-    let minV = 40;
-    let maxV = 140;
-    let seen = false;
-
-    for (const p of points) {
-      if (p.hr != null) {
-        seen = true;
-        minV = Math.min(minV, p.hr);
-        maxV = Math.max(maxV, p.hr);
-      }
-    }
-
-    if (!seen) return null;
-    minV = Math.max(30, Math.floor(minV - 8));
-    maxV = Math.min(220, Math.ceil(maxV + 8));
-    if (maxV - minV < 25) maxV = minV + 25;
-    return { minV, maxV };
-  }
-
-  function mapX(t, t0, t1, left, right) {
-    const u = (t - t0) / (t1 - t0 || 1);
-    return left + u * (right - left);
-  }
-
-  function mapY(v, v0, v1, top, bot) {
-    const u = (v - v0) / (v1 - v0 || 1);
-    return bot - u * (bot - top);
-  }
-
-  /* ===== Drawing primitives ===== */
-
-  function strokeLine(points, getter, t0, t1, left, right, top, bot) {
-    if (!ctx) return;
-    let started = false;
-    ctx.beginPath();
-    for (const p of points) {
-      const v = getter(p);
-      if (v == null) continue;
-      const x = mapX(p.t, t0, t1, left, right);
-      const y = mapY(v, getter._min, getter._max, top, bot);
-      if (!started) {
-        ctx.moveTo(x, y);
-        started = true;
-      } else {
-        ctx.lineTo(x, y);
-      }
-    }
-    if (started) ctx.stroke();
-  }
-
-  function drawDayBands(t0, t1, left, right, top, bot) {
-    if (!ctx) return;
-    // Find CT midnight for t0 day
-    const firstKey = ctDayKey(t0);
-    const firstMs = new Date(firstKey + "T00:00:00").getTime(); // local parse; acceptable for visual bands
-    // Step day by day in MS_DAY; if parse drift, bands still show alternating pattern.
-    let dayStart = Number.isFinite(firstMs) ? firstMs : (t0 - (t0 % MS_DAY));
-
-    let i = 0;
-    while (dayStart < t1 + MS_DAY) {
-      const dayEnd = dayStart + MS_DAY;
-      const x0 = mapX(dayStart, t0, t1, left, right);
-      const x1 = mapX(dayEnd, t0, t1, left, right);
-
-      ctx.fillStyle = (i % 2 === 0) ? "rgba(0,0,0,.10)" : "rgba(255,255,255,.03)";
-      ctx.fillRect(x0, top, x1 - x0, bot - top);
-
-      i++;
-      dayStart = dayEnd;
-    }
-  }
-
-  function drawFrame(left, right, top, bot) {
-    if (!ctx) return;
-    ctx.strokeStyle = "rgba(235,245,255,.12)";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(left + 0.5, top + 0.5, (right - left) - 1, (bot - top) - 1);
-  }
-
-  function drawGridY(minV, maxV, left, right, top, bot) {
-    if (!ctx) return;
-    const steps = 5;
-    ctx.lineWidth = 1;
-    for (let i = 0; i <= steps; i++) {
-      const v = minV + (i / steps) * (maxV - minV);
-      const y = mapY(v, minV, maxV, top, bot);
-      ctx.strokeStyle = "rgba(235,245,255,.08)";
-      ctx.beginPath();
-      ctx.moveTo(left, y);
-      ctx.lineTo(right, y);
-      ctx.stroke();
-    }
-  }
-
-  function drawLabel(text) {
-    const n = chartsTopNote();
-    if (n) n.textContent = text;
-  }
-
-  /* ===== Main render ===== */
-
-  function getData() {
-    // Prefer VTStore (this is our current target)
-    try {
-      if (window.VTStore && typeof window.VTStore.getRecords === "function") {
-        return window.VTStore.getRecords();
-      }
-    } catch (_) {}
-
-    // Fallback: try storage module if it exposes something similar
-    try {
-      if (window.VTStorage && typeof window.VTStorage.getRecords === "function") {
-        return window.VTStorage.getRecords();
-      }
-    } catch (_) {}
-
-    return [];
-  }
-
-  function computeWindow(points) {
-    const days = (window.VTState && window.VTState.getChartWindowDays)
-      ? window.VTState.getChartWindowDays()
-      : 7;
-
-    let center = (window.VTState && window.VTState.getChartCenterMs)
-      ? window.VTState.getChartCenterMs()
-      : null;
-
-    if (!Number.isFinite(center) || center == null) {
-      center = points.length ? points[points.length - 1].t : Date.now();
-      try {
-        window.VTState && window.VTState.setChartCenterMs && window.VTState.setChartCenterMs(center);
-      } catch (_) {}
-    }
-
-    const half = (days * MS_DAY) / 2;
-    const t0 = center - half;
-    const t1 = center + half;
-
-    return { days, center, t0, t1 };
-  }
-
-  function filterToWindow(points, t0, t1) {
-    // include points slightly outside for line continuity
-    const pad = MS_DAY * 0.25;
-    const a = t0 - pad;
-    const b = t1 + pad;
-    return points.filter(p => p.t >= a && p.t <= b);
-  }
-
-  function render() {
-    const ok = setupCanvas();
-    if (!ok) {
-      drawLabel("Chart unavailable (canvas not ready).");
+    if(!records.length){
+      // nothing to draw
       return;
     }
 
-    const raw = getData();
-    const pointsAll = normalizeRecords(raw);
+    const fmtYMDParts = makeFmtYMDParts(tz);
 
-    if (!pointsAll.length) {
-      clear();
-      drawLabel("No records to chart.");
-      return;
+    // time range
+    const bounds = computeDataBounds(records);
+    if(bounds.tMin == null || bounds.tMax == null) return;
+
+    const windowDays = clamp(Number(view.windowDays ?? 7) || 7, 1, 14);
+
+    // view center must be provided by app.js; if missing, default near newest
+    let centerMs = Number.isFinite(view.centerMs) ? view.centerMs : (bounds.tMax - (windowDays*MS_DAY*0.35));
+    centerMs = clamp(centerMs, bounds.tMin, bounds.tMax);
+
+    const wMs = windowDays * MS_DAY;
+    let t0 = centerMs - wMs/2;
+    let t1 = centerMs + wMs/2;
+
+    if(t0 < bounds.tMin){
+      const shift = bounds.tMin - t0;
+      t0 += shift; t1 += shift;
+    }
+    if(t1 > bounds.tMax){
+      const shift = t1 - bounds.tMax;
+      t0 -= shift; t1 -= shift;
+    }
+    t0 = Math.max(bounds.tMin, t0);
+    t1 = Math.min(bounds.tMax, t1);
+
+    // y scale
+    const yMin = opt.yMin;
+    const yMax = computeGlobalYMaxFromDB(records, opt.yPad, opt.yMaxFallback);
+
+    // frame
+    const padL = opt.padL, padR = opt.padR, padT = opt.padT, padB = opt.padB;
+    const x0 = padL, y0 = padT;
+    const pw = cssW - padL - padR;
+    const ph = cssH - padT - padB;
+
+    // frame rect
+    ctx.strokeStyle = opt.frame;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x0, y0, pw, ph);
+
+    const frame = { x0, y0, pw, ph };
+
+    const yToPx = (y)=>{
+      const t = (y - yMin) / Math.max(1, (yMax - yMin));
+      return y0 + (1 - t) * ph;
+    };
+
+    // alternating days background
+    {
+      const dayBounds = computeDayBoundaries(t0, t1, fmtYMDParts);
+      const cuts = [t0, ...dayBounds, t1].filter((v,i,a)=> i===0 || v>a[i-1]);
+
+      // parity by day-of-month from start
+      const startKey = ctDayKey(t0, fmtYMDParts);
+      const startD = Number(startKey.slice(-2)) || 1;
+      let parity = startD % 2;
+
+      for(let i=0;i<cuts.length-1;i++){
+        const a = cuts[i], b = cuts[i+1];
+        const xa = x0 + ((a - t0)/(t1 - t0)) * pw;
+        const xb = x0 + ((b - t0)/(t1 - t0)) * pw;
+        const isAlt = ((parity + i) % 2) === 0;
+        ctx.fillStyle = isAlt ? opt.dayBandA : opt.dayBandB;
+        ctx.fillRect(xa, y0, Math.max(0, xb-xa), ph);
+      }
     }
 
-    const { t0, t1, days } = computeWindow(pointsAll);
-    const points = filterToWindow(pointsAll, t0, t1);
-
-    // Layout
-    const pad = 10;
-    const left = pad;
-    const right = cssW - pad;
-    const top = pad;
-    const bot = cssH - pad;
-
-    clear();
-
-    // Background/day bands + frame
-    drawDayBands(t0, t1, left, right, top, bot);
-    drawFrame(left, right, top, bot);
-
-    // Domains
-    const bpDom = computeYDomain(points);
-    const hrDom = computeHRDomain(points);
-
-    // Grid (based on BP)
-    drawGridY(bpDom.minV, bpDom.maxV, left, right, top, bot);
-
-    // BP lines
-    ctx.lineWidth = 2;
-
-    // Systolic
-    ctx.strokeStyle = "rgba(235,245,255,.88)";
-    const getSys = (p) => p.sys;
-    getSys._min = bpDom.minV;
-    getSys._max = bpDom.maxV;
-    strokeLine(points, getSys, t0, t1, left, right, top, bot);
-
-    // Diastolic
-    ctx.strokeStyle = "rgba(235,245,255,.55)";
-    const getDia = (p) => p.dia;
-    getDia._min = bpDom.minV;
-    getDia._max = bpDom.maxV;
-    strokeLine(points, getDia, t0, t1, left, right, top, bot);
-
-    // HR line (if present) — mapped to BP domain visually for now (simple & stable)
-    // Later: dual-axis or scaled overlay, but keep it readable now.
-    if (hrDom) {
-      ctx.strokeStyle = "rgba(120,180,255,.60)";
-      ctx.lineWidth = 2;
-      const getHr = (p) => p.hr;
-      // Map HR into BP domain range so it is visible without second axis.
-      const hrMin = hrDom.minV, hrMax = hrDom.maxV;
-      getHr._min = hrMin;
-      getHr._max = hrMax;
-
-      // Draw HR using its own domain but same canvas space (works fine as overlay)
-      // We reuse strokeLine; it will map using getHr._min/_max.
-      strokeLine(points, getHr, t0, t1, left, right, top, bot);
+    // systolic bands (systolic-only)
+    {
+      const bands = buildSystolicBands(yMin, yMax, opt.bands);
+      for(const b of bands){
+        const yTop = yToPx(b.y1);
+        const yBot = yToPx(b.y0);
+        const h = Math.max(0, yBot - yTop);
+        ctx.fillStyle = b.fill;
+        ctx.fillRect(x0, yTop, pw, h);
+      }
     }
 
-    // Label
-    const newest = pointsAll[pointsAll.length - 1].t;
-    drawLabel(`Window: ${days}d • Newest: ${fmtCTDateTime(newest)}`);
+    // y grid + labels
+    {
+      const ticks = buildNiceYTicks(yMin, yMax);
+      ctx.font = "11px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      ctx.fillStyle = opt.yLabel;
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
 
-    try {
-      window.VTState && window.VTState.markChartClean && window.VTState.markChartClean();
-    } catch (_) {}
+      for(const val of ticks){
+        const y = yToPx(val);
+        ctx.strokeStyle = opt.grid;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x0, y);
+        ctx.lineTo(x0+pw, y);
+        ctx.stroke();
+
+        ctx.fillText(String(val), 4, y);
+      }
+    }
+
+    // x labels with collision control
+    {
+      const { ticks, hourMode } = buildXTicks(t0, t1, tz, fmtYMDParts);
+
+      ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      ctx.fillStyle = opt.xLabel;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+
+      const minGap = 8;
+      const safeTicks = dropOverlappingTicks(ctx, ticks, x0, pw, t0, t1, minGap);
+
+      for(const tk of safeTicks){
+        const x = x0 + ((tk.t - t0) / (t1 - t0)) * pw;
+
+        ctx.strokeStyle = opt.grid;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x, y0 + ph);
+        ctx.lineTo(x, y0 + ph + 5);
+        ctx.stroke();
+
+        if(tk.top){
+          ctx.fillText(tk.top, x, y0 + ph + 8);
+        }
+
+        // non-hour mode shows date row
+        if(!hourMode && tk.bot){
+          ctx.fillText(tk.bot, x, y0 + ph + 22);
+        }
+      }
+
+      // hourMode: weekday labels centered per day (no date row)
+      if(hourMode){
+        const dayCenters = computeDayCentersInRange(t0, t1, tz, fmtYMDParts);
+
+        const dayTicks = dayCenters.map(d => ({ t:d.t, top:d.label, bot:"" }));
+        const safeDays = dropOverlappingTicks(ctx, dayTicks, x0, pw, t0, t1, 10);
+
+        // place weekday row below hours row
+        for(const tk of safeDays){
+          const x = x0 + ((tk.t - t0)/(t1 - t0)) * pw;
+          ctx.fillText(tk.top, x, y0 + ph + 24);
+        }
+      }
+    }
+
+    // series
+    const series = buildSeriesVisible(records, t0, t1);
+    plotLine(ctx, series.sys, {x0, y0, pw, ph}, t0, t1, yMin, yMax, opt.series.sys.stroke, opt.series.sys.alpha);
+    plotLine(ctx, series.dia, {x0, y0, pw, ph}, t0, t1, yMin, yMax, opt.series.dia.stroke, opt.series.dia.alpha);
+    plotLine(ctx, series.hr,  {x0, y0, pw, ph}, t0, t1, yMin, yMax, opt.series.hr.stroke,  opt.series.hr.alpha);
+
+    // legend (series only)
+    if(opt.legend){
+      drawLegend(ctx, {x0, y0, pw, ph}, opt.series);
+    }
+
+    // return computed values for caller to use in top label if needed
+    return { t0, t1, yMin, yMax, windowDays };
   }
 
-  /* ===== Public API ===== */
+  // ---------- v2.023c integration hook ----------
+  async function onShow(){
+    try{
+      const noteEl = document.getElementById("chartsTopNote");
+      const canvas = document.getElementById("chartCanvas");
+      const wrapEl = document.getElementById("canvasWrap");
 
-  function onShow() {
-    // Called when charts panel is shown
-    render();
+      if(!canvas || !wrapEl){
+        if(noteEl) noteEl.textContent = "Chart canvas not found.";
+        return;
+      }
+
+      const tz =
+        (window.VTStore && typeof VTStore.get === "function" && VTStore.get("tz")) ||
+        (window.VTState && typeof VTState.get === "function" && (VTState.get("tz") || VTState.get("timezone"))) ||
+        DEFAULTS.tz;
+
+      const records = (window.VTStorage && typeof VTStorage.getAllRecords === "function")
+        ? await VTStorage.getAllRecords()
+        : [];
+
+      if(!records || !records.length){
+        if(noteEl) noteEl.textContent = "No records to chart.";
+        // clear canvas
+        const ctx = canvas.getContext("2d");
+        if(ctx){
+          const rect = canvas.getBoundingClientRect();
+          ctx.clearRect(0,0,Math.max(1,rect.width),Math.max(1,rect.height));
+        }
+        return;
+      }
+
+      // view (best-effort; safe defaults)
+      let view = { windowDays: 14, centerMs: null };
+      try{
+        if(window.VTState && typeof VTState.getChartView === "function"){
+          const v = VTState.getChartView();
+          if(v && typeof v === "object") view = Object.assign(view, v);
+        }else if(window.VTStore && typeof VTStore.get === "function"){
+          const wd = VTStore.get("chart_windowDays");
+          const cm = VTStore.get("chart_centerMs");
+          if(wd != null) view.windowDays = Number(wd) || view.windowDays;
+          if(cm != null) view.centerMs = Number(cm) || view.centerMs;
+        }
+      }catch(_){}
+
+      // if center missing, center on newest record
+      if(!Number.isFinite(view.centerMs)){
+        const b = computeDataBounds(records);
+        view.centerMs = b.tMax;
+      }
+
+      const out = renderImpl({ canvas, wrapEl, records, view, tz, options: null }) || null;
+
+      // top label
+      if(noteEl){
+        const fmtYMDParts = makeFmtYMDParts(tz);
+        const a = out && Number.isFinite(out.t0) ? out.t0 : computeDataBounds(records).tMin;
+        const b = out && Number.isFinite(out.t1) ? out.t1 : computeDataBounds(records).tMax;
+        const start = fmtCTDateOnly(a, fmtYMDParts);
+        const end   = fmtCTDateOnly(b, fmtYMDParts);
+        noteEl.textContent = `${start} → ${end} (CT)`;
+      }
+    }catch(_){
+      const noteEl = document.getElementById("chartsTopNote");
+      if(noteEl) noteEl.textContent = "Chart error (see console).";
+    }
   }
 
-  function onDataChanged() {
-    // Called when store reloads or records change
-    try { window.VTState && window.VTState.setChartCenterMs && window.VTState.setChartCenterMs(null); } catch (_) {}
-    render();
-  }
+  const VTChart = {
+    _options: Object.assign({}, DEFAULTS),
 
-  function onResize() {
-    render();
-  }
+    setOptions(next){
+      this._options = Object.assign({}, this._options, next || {});
+    },
 
-  // Expose
-  window.VTChart = {
-    VERSION,
-    onShow,
-    onDataChanged,
-    onResize,
-    render,
+    render(payload){
+      return renderImpl(Object.assign({}, payload, { options: Object.assign({}, this._options, (payload && payload.options) || {}) }));
+    },
+
+    onShow
   };
 
-  // Optional: redraw on resize
-  window.addEventListener("resize", () => {
-    // Avoid excessive redraw if not on charts, but safe to run.
-    try {
-      if (window.VTState && window.VTState.getActivePanel && window.VTState.getActivePanel() !== "charts") return;
-    } catch (_) {}
-    onResize();
-  });
+  window.VTChart = VTChart;
+
 })();
 
 /*
 Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: js/chart.js
-App Version: v2.023b
+App Version: v2.023c
 Base: v2.021
-Touched in v2.023b: js/chart.js
+Touched in v2.023c: js/chart.js (adds VTChart.onShow + chartsTopNote label)
 Schema order: File 7 of 10
 Next planned file: js/gestures.js (File 8)
 */
