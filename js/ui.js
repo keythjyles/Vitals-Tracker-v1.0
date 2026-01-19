@@ -1,129 +1,152 @@
 /* File: js/ui.js */
 /*
-Vitals Tracker — UI Glue + Home UX Fixes (OWNER)
+Vitals Tracker — UI Glue + Home UX
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
-App Version: v2.023h
+App Version: v2.025g
 Base: v2.021
 Date: 2026-01-18
 
-SCOPE (THIS FILE)
-- Normalize Home screen button sizing (ALL equal size).
-- Restore Home pull-to-refresh (simple, reliable).
-- Keep UI concerns ONLY (no chart math, no swipe routing).
-- De-risk gesture conflicts by NOT handling horizontal swipe here.
+Schema position:
+File 10 of 10
 
-ANTI-DRIFT
-- Do NOT manage panels here (js/panels.js owns that).
-- Do NOT manage chart gestures here (js/chart.js owns that).
+Former file:
+File 9 — js/panels.js
+
+Next file:
+NONE (end of current stabilization pass)
+
+FILE ROLE (LOCKED)
+- Home screen UX only.
+- Pull-to-refresh on Home ONLY.
+- Button sizing normalization (Home).
+- Passive listeners for panel change events.
+
+v2.025g — Change Log (THIS FILE ONLY)
+1) Restores pull-to-refresh on Home panel.
+2) Normalizes Home action buttons to identical size.
+3) Listens for `vt:panelChanged` events to reset UI state.
+4) Zero chart logic.
+5) Zero swipe logic.
+
+ANTI-DRIFT RULES
+- Do NOT implement panel routing here.
+- Do NOT implement swipe gestures here.
+- Do NOT touch chart rendering here.
 */
 
 (function () {
   "use strict";
 
-  function $(id){ return document.getElementById(id); }
+  const VERSION = "v2.025g";
 
-  /* =========================
-     HOME BUTTON NORMALIZATION
-     ========================= */
+  function $(id) {
+    return document.getElementById(id);
+  }
 
-  function normalizeHomeButtons(){
+  /* ============================
+     Button Size Normalization
+     ============================ */
+
+  function normalizeHomeButtons() {
     const ids = [
       "btnGoAdd",
       "btnGoCharts",
       "btnGoLog"
     ];
-    const buttons = ids.map(id => $(id)).filter(Boolean);
-    if(!buttons.length) return;
 
-    // Find max height/width actually rendered
-    let maxH = 0, maxW = 0;
-    buttons.forEach(b => {
-      const r = b.getBoundingClientRect();
-      maxH = Math.max(maxH, r.height);
+    const btns = ids.map(id => $(id)).filter(Boolean);
+    if (!btns.length) return;
+
+    let maxW = 0;
+    let maxH = 0;
+
+    btns.forEach(btn => {
+      const r = btn.getBoundingClientRect();
       maxW = Math.max(maxW, r.width);
+      maxH = Math.max(maxH, r.height);
     });
 
-    // Apply uniform sizing
-    buttons.forEach(b => {
-      b.style.height = Math.ceil(maxH) + "px";
-      b.style.width  = Math.ceil(maxW) + "px";
+    btns.forEach(btn => {
+      btn.style.minWidth = Math.ceil(maxW) + "px";
+      btn.style.minHeight = Math.ceil(maxH) + "px";
     });
   }
 
-  /* =========================
-     HOME PULL-TO-REFRESH
-     ========================= */
+  /* ============================
+     Pull-To-Refresh (Home Only)
+     ============================ */
 
-  function initPullToRefresh(){
-    const panel = $("panelHome");
+  function initPullToRefresh() {
+    const home = $("panelHome");
     const indicator = $("pullIndicator");
     const card = $("homeCard");
-    if(!panel || !indicator || !card) return;
+
+    if (!home || !indicator || !card) return;
 
     let startY = null;
     let armed = false;
 
-    panel.addEventListener("touchstart", (e) => {
-      if(card.scrollTop !== 0) return;
+    home.addEventListener("touchstart", (e) => {
+      if (card.scrollTop !== 0) return;
       startY = e.touches[0].clientY;
       armed = false;
-    }, { passive:true });
+    }, { passive: true });
 
-    panel.addEventListener("touchmove", (e) => {
-      if(startY == null) return;
+    home.addEventListener("touchmove", (e) => {
+      if (startY == null) return;
+
       const dy = e.touches[0].clientY - startY;
-      if(dy <= 0) return;
+      if (dy <= 0) return;
 
-      const h = Math.min(52, Math.floor(dy / 2));
+      const h = Math.min(56, Math.floor(dy / 2));
       indicator.style.height = h + "px";
-      armed = (h >= 40);
-    }, { passive:true });
+      armed = h >= 40;
+    }, { passive: true });
 
-    panel.addEventListener("touchend", () => {
-      if(startY == null) return;
+    home.addEventListener("touchend", () => {
+      if (startY == null) return;
+
       indicator.style.height = "0px";
-      if(armed){
-        location.reload();
+
+      if (armed) {
+        try {
+          location.reload();
+        } catch (_) {}
       }
+
       startY = null;
       armed = false;
-    }, { passive:true });
+    }, { passive: true });
   }
 
-  /* =========================
-     VERSION DISPLAY
-     ========================= */
+  /* ============================
+     Panel Change Listener
+     ============================ */
 
-  function paintVersion(){
-    try{
-      const v = window.VTVersion?.getVersionString?.();
-      if(!v) return;
-      const homeV = $("homeVersion");
-      const boot  = $("bootText");
-      if(homeV) homeV.textContent = v;
-      if(boot)  boot.textContent  = "BOOT OK " + v;
-    }catch(_){}
-  }
+  function onPanelChanged(e) {
+    const active = e?.detail?.active;
 
-  /* =========================
-     INIT
-     ========================= */
-
-  function init(){
-    normalizeHomeButtons();
-    initPullToRefresh();
-    paintVersion();
-  }
-
-  function onReady(fn){
-    if(document.readyState === "complete" || document.readyState === "interactive"){
-      setTimeout(fn, 0);
-    } else {
-      document.addEventListener("DOMContentLoaded", fn, { once:true });
+    if (active === "home") {
+      normalizeHomeButtons();
     }
   }
 
-  onReady(init);
+  /* ============================
+     Init
+     ============================ */
+
+  function init() {
+    normalizeHomeButtons();
+    initPullToRefresh();
+
+    document.addEventListener("vt:panelChanged", onPanelChanged);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
 
 })();
