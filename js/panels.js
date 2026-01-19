@@ -1,25 +1,41 @@
 /* File: js/panels.js */
 /*
-Vitals Tracker — Panel Router & Carousel Controller
+Vitals Tracker — Panels Router (Home / Charts / Log) + Settings Access
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
-App Version: v2.023c
+App Version: v2.023d
 Base: v2.021
 Date: 2026-01-18
 
-FILE ROLE (LOCKED)
-- Owns panel visibility, order, and carousel-style navigation.
-- Enforces continuous looping (wrap-around) behavior.
-- Dispatches lifecycle events so other modules (charts, log) can react.
-- NO chart logic. NO storage logic. NO gesture math.
+CURRENT UPGRADE — FILE TOUCH ORDER (LOCKED)
+1) index.html
+2) js/version.js
+3) js/app.js
+4) js/storage.js
+5) js/store.js
+6) js/state.js
+7) js/chart.js
+8) js/gestures.js
+9) js/panels.js   <-- THIS FILE
+10) js/ui.js
 
-v2.023c — Change Log (THIS FILE ONLY)
-1) Restores canonical panel order and looping behavior:
-   Order: home → charts → log → settings → (wraps to home)
-2) Adds goStep(+1 / -1) API for gestures.js.
-3) Emits `vt:panelChanged` CustomEvent with `{ active }`.
-4) Ensures only ONE panel is aria-visible at any time.
-5) Safe no-op if panels are missing (defensive for partial builds).
+FILE ROLE (LOCKED)
+- Owns which panels are in the swipe rotation (carousel).
+- Settings is NOT in the rotation. Settings is only opened via gear buttons.
+- Emits vt:panelChanged events so js/app.js can run lifecycle hooks.
+- Provides a single global API: VTPanels
+
+v2.023d — Change Log (THIS FILE ONLY)
+1) Removes Settings from rotation (rotation is: home -> charts -> log -> home).
+2) Settings becomes an overlay panel reachable ONLY via gear buttons.
+3) Back from Settings returns to the last non-settings panel.
+4) Fires document event "vt:panelChanged" {active: <panelName>} on every transition.
+5) Defensive: if panels missing, no throw; stays stable.
+
+ANTI-DRIFT RULES
+- Do NOT implement swipe detection here (that is js/gestures.js).
+- Do NOT implement chart rendering here (that is js/chart.js).
+- Do NOT hard-code version strings here (js/version.js wins).
 
 Schema position:
 File 9 of 10
@@ -28,109 +44,166 @@ Previous file:
 File 8 — js/gestures.js
 
 Next file:
-File 10 — js/log.js
+File 10 — js/ui.js
 */
 
 (function () {
   "use strict";
 
-  // ---- Canonical panel order (LOCKED) ----
-  const PANEL_ORDER = ["home", "charts", "log", "settings"];
+  const PANEL_IDS = Object.freeze({
+    home: "panelHome",
+    charts: "panelCharts",
+    log: "panelLog",
+    settings: "panelSettings"
+  });
 
-  const PANEL_IDS = {
-    home: "homePanel",
-    charts: "chartsPanel",
-    log: "logPanel",
-    settings: "settingsPanel",
+  // Rotation excludes settings by design.
+  const ROTATION = Object.freeze(["home", "charts", "log"]);
+
+  const state = {
+    active: "home",
+    lastMain: "home"
   };
 
-  let active = "home";
+  function $(id) { return document.getElementById(id); }
 
-  function el(id) {
-    return document.getElementById(id);
-  }
-
-  function hideAll() {
-    for (const key of PANEL_ORDER) {
-      const p = el(PANEL_IDS[key]);
-      if (p) {
-        p.setAttribute("aria-hidden", "true");
-        p.style.display = "none";
-      }
-    }
-  }
-
-  function show(name) {
+  function getPanelEl(name) {
     const id = PANEL_IDS[name];
-    const p = el(id);
-    if (!p) return;
+    return id ? $(id) : null;
+  }
 
-    hideAll();
-
-    p.style.display = "";
-    p.setAttribute("aria-hidden", "false");
-    active = name;
-
-    // Notify listeners (app.js, charts, log)
+  function emitPanelChanged(name) {
     try {
-      document.dispatchEvent(
-        new CustomEvent("vt:panelChanged", {
-          detail: { active: name }
-        })
-      );
+      document.dispatchEvent(new CustomEvent("vt:panelChanged", {
+        detail: { active: name }
+      }));
     } catch (_) {}
   }
 
-  function goTo(name) {
-    if (!PANEL_ORDER.includes(name)) return;
-    show(name);
-  }
+  function setActive(name) {
+    if (!name || !PANEL_IDS[name]) return;
 
-  function goStep(step) {
-    const idx = PANEL_ORDER.indexOf(active);
-    const len = PANEL_ORDER.length;
-    if (idx < 0) {
-      show(PANEL_ORDER[0]);
-      return;
+    // Toggle DOM
+    const keys = Object.keys(PANEL_IDS);
+    for (const k of keys) {
+      const el = getPanelEl(k);
+      if (!el) continue;
+      el.classList.toggle("active", k === name);
     }
-    let next = (idx + step) % len;
-    if (next < 0) next += len;
-    show(PANEL_ORDER[next]);
+
+    // Track last non-settings (main) panel
+    if (name !== "settings") state.lastMain = name;
+
+    state.active = name;
+    emitPanelChanged(name);
   }
 
   function getActive() {
-    return active;
+    return state.active;
+  }
+
+  function goHome() { setActive("home"); }
+  function goCharts() { setActive("charts"); }
+  function goLog() { setActive("log"); }
+
+  function openSettings() { setActive("settings"); }
+  function closeSettings() { setActive(state.lastMain || "home"); }
+
+  function next() {
+    const i = ROTATION.indexOf(state.active);
+    if (i === -1) {
+      // If currently in settings, advance relative to last main
+      const j = ROTATION.indexOf(state.lastMain);
+      setActive(ROTATION[(Math.max(0, j) + 1) % ROTATION.length]);
+      return;
+    }
+    setActive(ROTATION[(i + 1) % ROTATION.length]);
+  }
+
+  function prev() {
+    const i = ROTATION.indexOf(state.active);
+    if (i === -1) {
+      const j = ROTATION.indexOf(state.lastMain);
+      setActive(ROTATION[(Math.max(0, j) - 1 + ROTATION.length) % ROTATION.length]);
+      return;
+    }
+    setActive(ROTATION[(i - 1 + ROTATION.length) % ROTATION.length]);
+  }
+
+  function bindClick(id, fn) {
+    const el = $(id);
+    if (!el) return;
+    el.addEventListener("click", function (e) {
+      try { fn(e); } catch (_) {}
+    });
+  }
+
+  function initButtons() {
+    // Home main nav
+    bindClick("btnGoCharts", goCharts);
+    bindClick("btnGoLog", goLog);
+
+    // Charts / Log home buttons
+    bindClick("btnHomeFromCharts", goHome);
+    bindClick("btnHomeFromLog", goHome);
+
+    // Settings open (gear)
+    bindClick("btnSettings", openSettings);
+    bindClick("btnSettingsFromCharts", openSettings);
+    bindClick("btnSettingsFromLog", openSettings);
+
+    // Settings back
+    bindClick("btnBackFromSettings", closeSettings);
   }
 
   function init() {
-    // On boot, show home by default
-    show(active);
+    initButtons();
+
+    // Ensure active panel reflects DOM state at load:
+    // Prefer any panel already marked .active; otherwise default to home.
+    let found = null;
+    for (const name of Object.keys(PANEL_IDS)) {
+      const el = getPanelEl(name);
+      if (el && el.classList.contains("active")) { found = name; break; }
+    }
+    setActive(found || "home");
   }
 
-  // ---- Expose API ----
-  window.VTPanels = {
+  // Public API
+  window.VTPanels = Object.freeze({
+    ROTATION,
     init,
-    goTo,
-    goStep,
+    setActive,
     getActive,
-    order: PANEL_ORDER.slice()
-  };
+    next,
+    prev,
+    goHome,
+    goCharts,
+    goLog,
+    openSettings,
+    closeSettings
+  });
 
-  // ---- Auto-init on DOM ready ----
-  if (document.readyState === "complete" || document.readyState === "interactive") {
-    setTimeout(init, 0);
-  } else {
-    document.addEventListener("DOMContentLoaded", init);
+  // Auto-init on DOM ready (safe + idempotent)
+  function onReady(fn) {
+    if (document.readyState === "complete" || document.readyState === "interactive") {
+      setTimeout(fn, 0);
+    } else {
+      document.addEventListener("DOMContentLoaded", fn);
+    }
   }
+  onReady(function () {
+    try { window.VTPanels.init(); } catch (_) {}
+  });
 
 })();
 
 /*
 Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: js/panels.js
-App Version: v2.023c
+App Version: v2.023d
 Base: v2.021
-Touched in v2.023c: js/panels.js (panel carousel + lifecycle restore)
-Schema order: File 9 of 10
-Next planned file: js/log.js (File 10)
+Touched in v2.023d: js/panels.js (remove Settings from rotation; event wiring)
+Rotation: home <-> charts <-> log (settings excluded)
+Next planned file: js/ui.js (File 10 of 10)
 */
