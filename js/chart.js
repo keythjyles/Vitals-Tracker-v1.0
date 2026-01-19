@@ -10,9 +10,10 @@ Next file: js/log.js (File 8 of 9)
 
 v2.025f — Change Log (THIS FILE ONLY)
 1) Bands opacity now defaults to 60% (0.60).
-2) Adds an in-legend slider to control band opacity live (0–100%).
-3) Legend/ledger is always present: slider + color-coded band explanations.
-4) Tightens rendering: responsive canvas sizing, y-bounds rules, simple non-colliding X labels.
+2) Adds a slider (below chart, inside legend area) to control band opacity live (0–100%).
+3) Legend/ledger is always present: slider + band explanations.
+4) Tightens rendering: responsive canvas sizing, stable y-bounds rules, non-colliding X labels.
+5) Ensures canvas fills chartWrap (CSS sizing applied by JS; no CSS dependency).
 
 ANTI-DRIFT: No panel swipe logic here.
 */
@@ -26,7 +27,7 @@ ANTI-DRIFT: No panel swipe logic here.
 
   const MS_DAY = 86400000;
 
-  // ===== Visual config (keep stable; no external CSS assumptions) =====
+  // ===== Visual config (stable) =====
   const STYLE = Object.freeze({
     axes: "rgba(255,255,255,0.30)",
     grid: "rgba(255,255,255,0.12)",
@@ -36,7 +37,6 @@ ANTI-DRIFT: No panel swipe logic here.
     lineDia: "#76baff",
 
     // Bands expressed as RGB so we can apply live opacity.
-    // Order matters (highest threshold first for legend clarity).
     bands: [
       { from: 180, rgb: [220,  60,  60], label: "Hypertensive Crisis ≥180" },
       { from: 140, rgb: [220, 140,  60], label: "Stage 2 HTN 140–179" },
@@ -200,11 +200,25 @@ ANTI-DRIFT: No panel swipe logic here.
     return { windowed, start, end };
   }
 
+  function ensureCanvasFillsWrap(canvas) {
+    // Ensure the canvas has CSS size so getBoundingClientRect reflects the intended layout.
+    try {
+      canvas.style.width = "100%";
+      canvas.style.height = "100%";
+      canvas.style.display = "block";
+      canvas.style.touchAction = "none"; // chart gestures handled elsewhere; keeps chart stable
+    } catch (_) {}
+  }
+
   function sizeToCSS(canvas) {
+    ensureCanvasFillsWrap(canvas);
+
     const dpr = Math.max(1, window.devicePixelRatio || 1);
     const rect = canvas.getBoundingClientRect();
+
     const w = Math.max(1, Math.floor(rect.width * dpr));
     const h = Math.max(1, Math.floor(rect.height * dpr));
+
     if (canvas.width !== w || canvas.height !== h) {
       canvas.width = w;
       canvas.height = h;
@@ -217,7 +231,6 @@ ANTI-DRIFT: No panel swipe logic here.
   }
 
   function layout(w, h) {
-    // Slightly tighter, stable padding
     return {
       padL: 40,
       padR: 20,
@@ -243,7 +256,7 @@ ANTI-DRIFT: No panel swipe logic here.
   function drawBands(ctx, w, h, bounds, L, legendEl) {
     const opacity = clamp(STATE.bandOpacity, 0, 1);
 
-    // Draw from each threshold down to bottom of plot area
+    // Bands are visual aids; paint behind everything.
     for (const b of STYLE.bands) {
       if (bounds.max < b.from) continue;
       const y = yScale(b.from, bounds, L);
@@ -255,11 +268,10 @@ ANTI-DRIFT: No panel swipe logic here.
   }
 
   function drawAxes(ctx, w, h, bounds, L, start, end) {
-    // Grid + axes
     ctx.strokeStyle = STYLE.grid;
     ctx.lineWidth = 1;
 
-    // Horizontal grid lines + Y labels
+    // Horizontal grid + Y labels
     ctx.fillStyle = STYLE.text;
     ctx.font = "12px system-ui";
     ctx.textAlign = "left";
@@ -267,6 +279,7 @@ ANTI-DRIFT: No panel swipe logic here.
 
     const span = bounds.max - bounds.min;
     const step = span <= 100 ? 10 : 20;
+
     for (let v = bounds.min; v <= bounds.max; v += step) {
       const y = yScale(v, bounds, L);
 
@@ -293,7 +306,7 @@ ANTI-DRIFT: No panel swipe logic here.
     ctx.lineTo(L.plotX + L.plotW, L.plotY + L.plotH);
     ctx.stroke();
 
-    // X labels (simple, non-colliding): start / mid / end
+    // X labels: start / mid / end (drop mid if it collides)
     ctx.fillStyle = STYLE.textMuted;
     ctx.font = "11px system-ui";
     ctx.textAlign = "center";
@@ -308,7 +321,6 @@ ANTI-DRIFT: No panel swipe logic here.
       { t: end,   text: fmtTick(end, true) }
     ];
 
-    // Drop mid if it would collide with start/end
     const wStart = ctx.measureText(labels[0].text).width;
     const wMid   = ctx.measureText(labels[1].text).width;
     const wEnd   = ctx.measureText(labels[2].text).width;
@@ -383,7 +395,7 @@ ANTI-DRIFT: No panel swipe logic here.
     legendEl.style.gap = "10px";
     legendEl.style.paddingTop = "10px";
 
-    // Slider block
+    // Slider block (below chart)
     const sliderWrap = document.createElement("div");
     sliderWrap.className = "bandOpacityWrap";
     sliderWrap.style.display = "grid";
@@ -421,7 +433,6 @@ ANTI-DRIFT: No panel swipe logic here.
       const v = clamp(Number(slider.value) / 100, 0, 1);
       STATE.bandOpacity = v;
       pct.textContent = `${Math.round(v * 100)}%`;
-      // Live update (no debounce; it’s lightweight)
       try { render(); } catch (_) {}
     }, { passive: true });
 
@@ -498,7 +509,9 @@ ANTI-DRIFT: No panel swipe logic here.
 
     const legendEl = $(ID_LEGEND);
     const loadingEl = $(ID_LOADING);
-    if (loadingEl) loadingEl.style.display = "none";
+
+    // Always keep legend UI alive (even if no data)
+    ensureLegendUI(legendEl);
 
     const raw = getRawData();
     const data = normalizeData(raw);
@@ -509,8 +522,7 @@ ANTI-DRIFT: No panel swipe logic here.
 
     clear(ctx, w, h);
 
-    // Always keep legend UI alive (even when no data)
-    ensureLegendUI(legendEl);
+    if (loadingEl) loadingEl.style.display = "none";
 
     if (!data.length) {
       ctx.fillStyle = STYLE.textMuted;
@@ -548,7 +560,6 @@ ANTI-DRIFT: No panel swipe logic here.
   }
 
   function panBy(ms) {
-    // clamp center to dataset bounds (if known)
     STATE.centerMs = (Number.isFinite(STATE.centerMs) ? STATE.centerMs : Date.now()) + ms;
 
     if (Number.isFinite(STATE.dataMinMs) && Number.isFinite(STATE.dataMaxMs)) {
