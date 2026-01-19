@@ -76,6 +76,10 @@ button:focus{
   outline:none;
 }
 
+canvas{
+  display:block;
+}
+
 /* ==============================
    App Shell
    ============================== */
@@ -142,6 +146,11 @@ button:focus{
   flex:1;
   position:relative;
   overflow:hidden;
+
+  /* Important: prevent any “white behind panel” flashes during transform/scroll */
+  background:
+    radial-gradient(1200px 600px at 50% -200px, #13244a, transparent 60%),
+    linear-gradient(180deg, var(--bg1), var(--bg0));
 }
 
 .deckTrack{
@@ -164,12 +173,18 @@ button:focus{
 .screenFrame{
   height:100%;
   border-radius:var(--radiusXL);
-  background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.01));
+
+  /* Slightly more opaque so inner content never “washes out” */
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.015)),
+    rgba(10,16,30,.28);
+
   box-shadow:var(--shadowInset), var(--shadowSoft);
   border:1px solid var(--strokeBold);
   padding:16px;
   display:flex;
   flex-direction:column;
+  overflow:hidden; /* stops any inner white overscroll flashes */
 }
 
 /* ==============================
@@ -250,6 +265,7 @@ button:focus{
   flex-direction:column;
   gap:14px;
   flex:1;
+  min-height:0;
 }
 
 .homeRow{
@@ -277,17 +293,29 @@ button:focus{
 
 .chartCard{
   flex:1;
+  min-height:0;
   border-radius:var(--radiusL);
-  background:rgba(0,0,0,.18);
+  background:rgba(10,16,30,.30);
   box-shadow:var(--shadowInset);
   padding:12px;
   display:flex;
   flex-direction:column;
+  overflow:hidden;
 }
 
 .chartWrap{
   flex:1;
+  min-height:0;
   position:relative;
+  border-radius:16px;
+  overflow:hidden;
+  background:rgba(0,0,0,.12);
+}
+
+#chartCanvas{
+  width:100%;
+  height:100%;
+  background:transparent;
 }
 
 .chartLegend{
@@ -302,6 +330,7 @@ button:focus{
 
 .logList{
   flex:1;
+  min-height:0;
   overflow-y:auto;
 }
 
@@ -319,6 +348,8 @@ button:focus{
   display:flex;
   flex-direction:column;
   gap:14px;
+  flex:1;
+  min-height:0;
 }
 
 .settingsCard{
@@ -333,12 +364,17 @@ button:focus{
   justify-content:space-between;
 }
 
+.muted{
+  color:var(--muted);
+}
+
 /* ==============================
    Add Panel
    ============================== */
 
 .addBody{
   flex:1;
+  min-height:0;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -353,6 +389,27 @@ button:focus{
   display:flex;
   flex-direction:column;
   gap:12px;
+}
+
+/* Force dark, non-blinding inputs even if markup lacks classes */
+.addCard input,
+.addCard textarea,
+.addBody input,
+.addBody textarea{
+  width:100%;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid var(--stroke2);
+  background:rgba(10,16,30,.55);
+  color:var(--text);
+  box-shadow:var(--shadowInset);
+}
+
+.addCard input::placeholder,
+.addCard textarea::placeholder,
+.addBody input::placeholder,
+.addBody textarea::placeholder{
+  color:rgba(235,245,255,.38);
 }
 
 /* ==============================
