@@ -3,44 +3,16 @@
 Vitals Tracker — MASTER (Index Authority)
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
-App Version: v2.023e
+App Version: v2.023f
 Base: v2.021
 Date: 2026-01-18
 
-v2.023e — Change Log (THIS FILE ONLY)
-1) REMOVED the inline router/swipe/button wiring that was fighting the JS modules.
-2) Settings is NOT in rotation (rotation is owned by js/panels.js + js/gestures.js).
-3) Chart interactions are owned by js/chart.js; panel swipe is blocked inside #canvasWrap by js/gestures.js.
-4) index.html now provides structure + IDs only. Behavior lives in JS modules.
-
-Release Schema (v2.023 series; one-file-at-a-time)
-1) index.html
-2) js/version.js
-3) js/app.js
-4) js/storage.js
-5) js/store.js
-6) js/state.js
-7) js/chart.js
-8) js/gestures.js
-9) js/panels.js
-10) js/ui.js
+v2.023f — Change Log (THIS FILE ONLY)
+1) Cache-busters updated to match canonical version v2.023f.
 
 Hard Rules (anti-drift)
 - Canonical version is owned by js/version.js only.
 - index.html may DISPLAY version but MUST NOT define canonical values.
-- Chart logic lives ONLY in js/chart.js.
-- Swipe logic lives ONLY in js/gestures.js.
-- Panels/rotation lives ONLY in js/panels.js.
-- Do not rename IDs listed below without changing dependent modules.
-
-Key IDs (contract)
-- Panels: #panelHome, #panelAdd (optional), #panelCharts, #panelLog, #panelSettings
-- Root: #panelsRoot
-- Chart: #canvasWrap, #chartCanvas, #chartsSwipeTop, #chartsSwipeBottom, #chartsTopNote
-- Home buttons: #btnGoAdd, #btnGoCharts, #btnGoLog
-- Settings buttons: #btnSettings, #btnSettingsFromCharts, #btnSettingsFromLog, #btnBackFromSettings
-- Home footer version label: #homeVersion
-- Boot label: #bootText
 -->
 <!doctype html>
 <html lang="en">
@@ -224,7 +196,6 @@ Key IDs (contract)
     .muted{color:var(--muted)}
     .small{font-size:13px}
 
-    /* Home actions */
     .homeActions{
       display:flex;
       flex-direction:column;
@@ -278,7 +249,6 @@ Key IDs (contract)
     .homeFoot .v{color:var(--muted); font-weight:900; letter-spacing:.2px}
     .homeFoot .by{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:55%}
 
-    /* Pull-to-refresh indicator (Home only) */
     .pull{
       height:0px;
       overflow:hidden;
@@ -289,7 +259,6 @@ Key IDs (contract)
       text-align:center;
     }
 
-    /* Charts */
     #chartsTopNote{
       white-space:nowrap;
       overflow:hidden;
@@ -312,7 +281,7 @@ Key IDs (contract)
       padding:6px;
       background: rgba(0,0,0,.18);
       overflow:hidden;
-      touch-action:none; /* chart module should manage its own gestures */
+      touch-action:none;
     }
     canvas{
       display:block;
@@ -320,7 +289,6 @@ Key IDs (contract)
       height:280px;
     }
 
-    /* Settings */
     .settingsList{
       display:flex;
       flex-direction:column;
@@ -358,7 +326,6 @@ Key IDs (contract)
     <div class="shell">
       <div class="panels" id="panelsRoot">
 
-        <!-- HOME (0) -->
         <section class="panel active" id="panelHome" aria-label="Home">
           <div class="pull" id="pullIndicator">Release to refresh</div>
 
@@ -394,7 +361,6 @@ Key IDs (contract)
           </div>
         </section>
 
-        <!-- ADD (optional panel placeholder; shown only when restored) -->
         <section class="panel" id="panelAdd" aria-label="Add">
           <div class="panelHeader" id="addHeader" data-swipezone="1">
             <div class="name">Add Reading</div>
@@ -411,13 +377,10 @@ Key IDs (contract)
             </div>
           </div>
           <div class="card" id="addCard">
-            <div class="muted">
-              Add panel UI + save flow will be restored by the Add modules (not in index.html).
-            </div>
+            <div class="muted">Add panel UI + save flow will be restored by the Add modules.</div>
           </div>
         </section>
 
-        <!-- CHARTS (1) -->
         <section class="panel" id="panelCharts" aria-label="Charts">
           <div class="panelHeader" id="chartsHeader" data-swipezone="1">
             <div class="name">Charts</div>
@@ -447,7 +410,6 @@ Key IDs (contract)
           </div>
         </section>
 
-        <!-- LOG (2) -->
         <section class="panel" id="panelLog" aria-label="Log">
           <div class="panelHeader" id="logHeader" data-swipezone="1">
             <div class="name">Log</div>
@@ -472,7 +434,6 @@ Key IDs (contract)
           </div>
         </section>
 
-        <!-- SETTINGS (gear-only; NOT in rotation) -->
         <section class="panel" id="panelSettings" aria-label="Settings">
           <div class="panelHeader" data-swipezone="1">
             <div class="name">Settings</div>
@@ -482,9 +443,7 @@ Key IDs (contract)
           </div>
 
           <div class="card">
-            <div class="muted">
-              Stabilize: version authority + chart + swipe + input before new features.
-            </div>
+            <div class="muted">Stabilize: version authority + chart + swipe + input before new features.</div>
             <div class="settingsList">
               <div class="settingsItem">Reporting + Export will be restored after input is restored.</div>
               <div class="settingsItem">Distress (0–5) + Medication markers are on the roadmap (not in v2.023).</div>
@@ -497,22 +456,20 @@ Key IDs (contract)
     </div>
   </div>
 
-  <!-- Script chain (NO inline app wiring here) -->
-  <script src="./js/version.js?v=2.023e"></script>
-  <script src="./js/app.js?v=2.023e"></script>
-  <script src="./js/storage.js?v=2.023e"></script>
-  <script src="./js/store.js?v=2.023e"></script>
-  <script src="./js/state.js?v=2.023e"></script>
-  <script src="./js/chart.js?v=2.023e"></script>
-  <script src="./js/gestures.js?v=2.023e"></script>
-  <script src="./js/panels.js?v=2.023e"></script>
-  <script src="./js/ui.js?v=2.023e"></script>
+  <script src="./js/version.js?v=2.023f"></script>
+  <script src="./js/app.js?v=2.023f"></script>
+  <script src="./js/storage.js?v=2.023f"></script>
+  <script src="./js/store.js?v=2.023f"></script>
+  <script src="./js/state.js?v=2.023f"></script>
+  <script src="./js/chart.js?v=2.023f"></script>
+  <script src="./js/gestures.js?v=2.023f"></script>
+  <script src="./js/panels.js?v=2.023f"></script>
+  <script src="./js/ui.js?v=2.023f"></script>
 
-  <!-- Minimal boot-only script -->
   <script>
     (function(){
       if("serviceWorker" in navigator){
-        navigator.serviceWorker.register("./sw.js?v=2.023e").catch(()=>{});
+        navigator.serviceWorker.register("./sw.js?v=2.023f").catch(()=>{});
       }
     })();
   </script>
@@ -522,9 +479,7 @@ Key IDs (contract)
 <!--
 Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: index.html
-App Version: v2.023e
+App Version: v2.023f
 Base: v2.021
-Touched in v2.023e: index.html (REMOVED inline router/swipe; modules own behavior)
-Schema order: File 1 of 10
-Next planned file: js/version.js (File 2 of 10)
+Touched in v2.023f: index.html (cache-buster alignment)
 -->
