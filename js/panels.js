@@ -23,11 +23,16 @@ Next file: js/gestures.js (File 6 of 9)
       We must respect TRACK_ORDER for transforms.
   */
 
-  const ROTATION = ["home", "charts", "log"];                 // swipe carousel
+  const ROTATION = ["home", "charts", "log"];                      // swipe carousel
   const TRACK_ORDER = ["home", "charts", "log", "settings", "add"]; // DOM order in deckTrack
 
   let currentPanel = "home";
+  let lastMainPanel = "home";   // last rotating panel (home/charts/log)
   let inSettings = false;
+  let inAdd = false;
+
+  // Drag mode for seamless wrap preview (0 <-> 2)
+  let dragMode = false;
 
   const panels = {};
   const deck = {};
@@ -55,6 +60,14 @@ Next file: js/gestures.js (File 6 of 9)
     return rotationIndexFor(name) !== -1;
   }
 
+  function dispatchPanelChanged(activeName) {
+    try {
+      document.dispatchEvent(new CustomEvent("vt:panelChanged", {
+        detail: { active: activeName }
+      }));
+    } catch (_) {}
+  }
+
   function setActivePanel(name) {
     Object.keys(panels).forEach(k => {
       panels[k] && panels[k].classList.remove("active");
@@ -68,6 +81,8 @@ Next file: js/gestures.js (File 6 of 9)
       if (name === "charts" && window.VTChart?.onShow) window.VTChart.onShow();
       if (name === "log" && window.VTLog?.onShow) window.VTLog.onShow();
     } catch (_) {}
+
+    dispatchPanelChanged(name);
   }
 
   function applyTransformToPanel(name, animated = true) {
@@ -84,25 +99,60 @@ Next file: js/gestures.js (File 6 of 9)
     deck.track.style.transform = `translate3d(${x}%, 0, 0)`;
   }
 
-  function go(name, animated = true) {
-    // Close settings if we are leaving it
-    if (inSettings && name !== "settings") {
-      inSettings = false;
-    }
+  function clearRotationPanelTransforms() {
+    ROTATION.forEach(n => {
+      const el = panels[n];
+      if (el) el.style.transform = "";
+    });
+  }
 
+  function setDragMode(on) {
+    if (dragMode === on) return;
+    dragMode = on;
+
+    if (!deck.track) return;
+
+    if (on) {
+      // Freeze track; we will move panels individually to enable seamless wrap preview.
+      deck.track.style.transition = "none";
+      deck.track.style.transform = "translate3d(0,0,0)";
+    } else {
+      clearRotationPanelTransforms();
+    }
+  }
+
+  function go(name, animated = true) {
     if (!panels[name]) return;
+
+    // Leaving special modes
+    if (inSettings && name !== "settings") inSettings = false;
+    if (inAdd && name !== "add") inAdd = false;
+
+    // Track last main panel (rotating only)
+    if (isRotatingPanel(name)) lastMainPanel = name;
 
     currentPanel = name;
 
-    // Settings is allowed, but NOT part of swipe rotation
+    // Settings (non-rotating)
     if (name === "settings") {
       inSettings = true;
+      setDragMode(false);
       setActivePanel("settings");
       applyTransformToPanel("settings", animated);
       return;
     }
 
-    // Normal panels
+    // Add (non-rotating)
+    if (name === "add") {
+      inAdd = true;
+      setDragMode(false);
+      setActivePanel("add");
+      applyTransformToPanel("add", animated);
+      return;
+    }
+
+    // Normal rotating panels
+    setDragMode(false);
     setActivePanel(name);
     applyTransformToPanel(name, animated);
   }
@@ -118,9 +168,23 @@ Next file: js/gestures.js (File 6 of 9)
 
   function closeSettings(animated = true) {
     inSettings = false;
-    // Return to last non-settings panel
-    if (!panels[currentPanel] || currentPanel === "settings") currentPanel = "home";
-    go(currentPanel === "settings" ? "home" : currentPanel, animated);
+    const target = isRotatingPanel(lastMainPanel) ? lastMainPanel : "home";
+    go(target, animated);
+  }
+
+  /* ============================
+     Add (NON-ROTATING)
+     ============================ */
+
+  function openAdd() {
+    if (!panels.add) return;
+    go("add", false);
+  }
+
+  function closeAdd(animated = true) {
+    inAdd = false;
+    const target = isRotatingPanel(lastMainPanel) ? lastMainPanel : "home";
+    go(target, animated);
   }
 
   /* ============================
@@ -128,7 +192,7 @@ Next file: js/gestures.js (File 6 of 9)
      ============================ */
 
   function canSwipe() {
-    return !inSettings && isRotatingPanel(currentPanel);
+    return !inSettings && !inAdd && isRotatingPanel(currentPanel);
   }
 
   function getRotationIndex() {
@@ -143,34 +207,46 @@ Next file: js/gestures.js (File 6 of 9)
     go(name, animated);
   }
 
-  // Visual drag while swiping (only within the non-wrapping neighbors)
-  // NOTE: For wrap edges (Home drag-right, Log drag-left), we do NOT drag across;
-  // we only wrap on release. This keeps motion stable with current DOM order.
+  // Seamless wrap preview:
+  // We render a 3-panel carousel by moving panels individually. This avoids abrupt jumps at 0<->2.
   function swipeDelta(deltaRatio) {
     if (!canSwipe()) return;
+
     if (!deck.track) return;
 
-    const rot = getRotationIndex();
-    const isAtLeftEdge = (rot === 0);               // Home
-    const isAtRightEdge = (rot === ROTATION.length - 1); // Log
+    // Enter drag mode as soon as a horizontal delta exists
+    setDragMode(true);
 
-    // Block drag beyond edges (wrap will occur on end)
-    if (deltaRatio > 0 && isAtLeftEdge) deltaRatio = 0;
-    if (deltaRatio < 0 && isAtRightEdge) deltaRatio = 0;
+    const n = ROTATION.length;
+    const cur = getRotationIndex();
 
     deck.track.style.transition = "none";
+    deck.track.style.transform = "translate3d(0,0,0)";
 
-    const trackIdx = trackIndexFor(currentPanel);
-    if (trackIdx === -1) return;
+    // Place each rotating panel at the nearest relative position (-1, 0, +1) around current,
+    // then apply drag delta to all for continuous motion (including wrap).
+    for (let i = 0; i < n; i++) {
+      const name = ROTATION[i];
+      const el = panels[name];
+      if (!el) continue;
 
-    const x = (-trackIdx * 100) + (deltaRatio * 100);
-    deck.track.style.transform = `translate3d(${x}%, 0, 0)`;
+      // smallest circular distance into [-1,0,+1]
+      let rel = i - cur;
+      if (rel > 1) rel -= n;
+      if (rel < -1) rel += n;
+
+      const x = (rel + deltaRatio) * 100;
+      el.style.transform = `translate3d(${x}%, 0, 0)`;
+    }
   }
 
   function swipeEnd(deltaRatio) {
     if (!canSwipe()) return;
 
     const THRESH = 0.2;
+
+    // Exit drag mode before snapping to the track transform
+    setDragMode(false);
 
     // Right swipe => PREV (wrap enabled)
     if (deltaRatio > THRESH) {
@@ -184,9 +260,8 @@ Next file: js/gestures.js (File 6 of 9)
       return;
     }
 
-    // Snap back
-    applyTransformToPanel(currentPanel, true);
-    setActivePanel(currentPanel);
+    // Snap back (no change)
+    go(currentPanel, true);
   }
 
   /* ============================
@@ -196,22 +271,31 @@ Next file: js/gestures.js (File 6 of 9)
   function init() {
     cacheDom();
     currentPanel = "home";
+    lastMainPanel = "home";
     inSettings = false;
+    inAdd = false;
+    setDragMode(false);
     go("home", false);
   }
 
   window.VTPanels = Object.freeze({
     init,
     go,
+
+    // settings
     openSettings,
     closeSettings,
+
+    // add
+    openAdd,
+    closeAdd,
 
     // swipe API
     canSwipe,
     swipeDelta,
     swipeEnd,
 
-    // utilities (optional, but useful)
+    // utilities
     getRotationIndex,
     showByRotationIndex
   });
@@ -226,3 +310,4 @@ Pass order: File 5 of 9 (P0)
 Prev file: js/ui.js (File 4 of 9)
 Next file: js/gestures.js (File 6 of 9)
 */
+```0
