@@ -2,7 +2,7 @@
 Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
 File: index.html
 App Version Authority: js/version.js (do not hardcode versions here)
-Base: v2.025e
+Base: v2.025f
 Pass: Render Recovery + Swipe Feel
 Pass order: File 2 of 9 (P0)
 Prev file: js/version.js (File 1 of 9)
@@ -46,20 +46,16 @@ Next file: css/app.css (File 3 of 9)
     <header class="topbar" id="topbar">
       <div class="brand">
         <div class="brandIcon" aria-hidden="true">
-          <!-- simple pulse icon -->
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
             <path d="M2 12h4l2-6 4 12 2-6h8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
         <div class="brandTitle">Vitals Tracker</div>
       </div>
-
       <div class="bootpill" id="bootText">BOOT…</div>
     </header>
 
-    <!-- Swipe Deck (Home / Charts / Log / Settings / Add) -->
-    <!-- NOTE: We are NOT adding Settings to rotation later per your rule,
-         but the DOM still exists because the gear opens it. Rotation logic lives in panels.js. -->
+    <!-- Swipe Deck -->
     <main class="deck" id="panelDeck" aria-label="Vitals Tracker Panels">
       <div class="deckTrack" id="deckTrack">
 
@@ -133,11 +129,8 @@ Next file: css/app.css (File 3 of 9)
 
             <div class="chartCard">
               <div class="chartWrap">
-                <!-- chart.js MUST find this canvas -->
                 <canvas id="chartCanvas" width="900" height="700" aria-label="Vitals chart"></canvas>
               </div>
-
-              <!-- chart.js may populate this; kept present to prevent “legend vanished” -->
               <div class="chartLegend" id="chartLegend" aria-label="Chart legend"></div>
             </div>
 
@@ -164,7 +157,6 @@ Next file: css/app.css (File 3 of 9)
 
             <div class="loadingPill" id="logLoading">Loading...</div>
 
-            <!-- log.js MUST find this container -->
             <div class="logList" id="logList" aria-label="Log list"></div>
             <div class="logEmpty" id="logEmpty" hidden>No readings yet.</div>
 
@@ -172,7 +164,7 @@ Next file: css/app.css (File 3 of 9)
           </div>
         </section>
 
-        <!-- PANEL: SETTINGS (NOT IN ROTATION; opened by gear only) -->
+        <!-- PANEL: SETTINGS -->
         <section class="panel" id="panelSettings" data-panel="settings" aria-label="Settings">
           <div class="screenFrame">
             <div class="screenHeader">
@@ -186,16 +178,14 @@ Next file: css/app.css (File 3 of 9)
               <div class="settingsCard">
                 <div class="settingsLine"><span class="muted">Version</span> <span id="settingsVersion">v?.???</span></div>
               </div>
-
-              <!-- Placeholder for future toggles; do not remove -->
               <div class="settingsCard">
-                <div class="muted">Settings are limited in this build. Use the gear for access; panel is not part of swipe rotation.</div>
+                <div class="muted">Settings are limited in this build.</div>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- PANEL: ADD (UI exists; behavior owned by add.js) -->
+        <!-- PANEL: ADD -->
         <section class="panel" id="panelAdd" data-panel="add" aria-label="Add Reading">
           <div class="screenFrame">
             <div class="screenHeader">
@@ -206,10 +196,9 @@ Next file: css/app.css (File 3 of 9)
             </div>
 
             <div class="addBody" id="addBody">
-              <!-- add.js will fully own this; kept minimal so app doesn’t “dead-end” -->
               <div class="addCard" id="addCard">
-                <div class="muted">Add panel is present. If Save is not working, that will be repaired in add.js/storage.js later in this pass.</div>
-                <button class="primaryBtn" id="btnSaveReading" type="button">Save (wired by add.js)</button>
+                <div class="muted">Add panel present.</div>
+                <button class="primaryBtn" id="btnSaveReading" type="button">Save</button>
               </div>
             </div>
           </div>
@@ -219,40 +208,32 @@ Next file: css/app.css (File 3 of 9)
     </main>
   </div>
 
-  <!-- Scripts: order matters -->
-  <!-- Version authority first (global VTVersion) -->
+  <!-- Scripts (order matters) -->
   <script src="js/version.js?v=20260119"></script>
-
-  <!-- Core runtime / store -->
   <script src="js/utils.js?v=20260119"></script>
   <script src="js/storage.js?v=20260119"></script>
   <script src="js/store.js?v=20260119"></script>
   <script src="js/state.js?v=20260119"></script>
-
-  <!-- UI + panels + gestures -->
   <script src="js/ui.js?v=20260119"></script>
   <script src="js/panels.js?v=20260119"></script>
   <script src="js/gestures.js?v=20260119"></script>
-
-  <!-- Features -->
   <script src="js/chart.js?v=20260119"></script>
   <script src="js/log.js?v=20260119"></script>
   <script src="js/add.js?v=20260119"></script>
-
-  <!-- PWA -->
   <script src="js/pwa.js?v=20260119"></script>
-
-  <!-- App orchestrator LAST -->
   <script src="js/app.js?v=20260119"></script>
 
-  <!-- Small post-boot sanity: unify settings version label -->
   <script>
     (function(){
       try{
         var v = window.VTVersion && window.VTVersion.getVersionString ? window.VTVersion.getVersionString() : "v?.???";
-        var el = document.getElementById("settingsVersion");
-        if(el) el.textContent = v;
-      }catch(_){}
+        var el1 = document.getElementById("homeVersion");
+        var el2 = document.getElementById("settingsVersion");
+        var el3 = document.getElementById("bootText");
+        if(el1) el1.textContent = v;
+        if(el2) el2.textContent = v;
+        if(el3) el3.textContent = "BOOT OK " + v;
+      }catch(e){}
     })();
   </script>
 </body>
