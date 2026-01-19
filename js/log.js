@@ -2,13 +2,13 @@
 Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
 File: js/log.js
 App Version Authority: js/version.js
-Base: v2.025f
-Pass: Render Recovery + Swipe Feel
+Base: v2.026a
+Pass: Swipe + Render Recovery (P0-R1)
 Pass order: File 8 of 9 (P0)
 Prev file: js/chart.js (File 7 of 9)
 Next file: js/add.js (File 9 of 9)
 
-v2.025f — Change Log (THIS FILE ONLY)
+v2.026a — Change Log (THIS FILE ONLY)
 1) Guarantees Log re-renders when Log panel becomes active.
 2) Adds defensive normalization for record field names (ts/sys/dia/hr/notes).
 3) Adds lightweight DOM-safe styling fallback if CSS classes are missing (does not override if present).
@@ -214,10 +214,10 @@ ANTI-DRIFT: No swipe logic here.
   });
 
   // Fallback API for panels.js hooks
-  window.VTLog = {
+  window.VTLog = Object.freeze({
     render,
     onShow: render
-  };
+  });
 
   // Safe initial render (even if hidden)
   try { render(); } catch (_) {}
@@ -227,7 +227,7 @@ ANTI-DRIFT: No swipe logic here.
 /*
 Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: js/log.js
-Pass: Render Recovery + Swipe Feel
+Pass: Swipe + Render Recovery (P0-R1)
 Pass order: File 8 of 9 (P0)
 Prev file: js/chart.js (File 7 of 9)
 Next file: js/add.js (File 9 of 9)
