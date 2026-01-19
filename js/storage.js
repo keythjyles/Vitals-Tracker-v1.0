@@ -3,7 +3,7 @@
 Vitals Tracker — Storage Bridge (Read/Write Compatible)
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
-App Version: v2.023b
+App Version: (authority) js/version.js
 Base: v2.021
 Date: 2026-01-18
 
@@ -12,18 +12,10 @@ FILE ROLE (LOCKED)
 - Provides a SAFE, defensive bridge across legacy LocalStorage keys and possible IndexedDB layouts.
 - Chart/Log MUST pull records via VTStorage.getAllRecords().
 
-v2.023b — Change Log (THIS FILE ONLY)
-1) Adds VTStorage global with:
-   - detect(): best-effort source detection summary
-   - getAllRecords(): returns array of records (defensive, never throws)
-   - putRecord(record): optional (not used yet)
-   - deleteRecordById(id): optional (not used yet)
-2) Legacy LocalStorage compatibility:
-   - scans known keys and generic fallbacks
-3) IndexedDB compatibility:
-   - scans known DB names and store names; reads all if available
-4) Read-only safe defaults:
-   - if nothing found, returns []
+v2.023e — Change Log (THIS FILE ONLY)
+1) Removes hard-coded VERSION; reports app version via VTVersion (anti-drift).
+2) Adds an in-session read cache to avoid repeated IndexedDB scans (mobile responsiveness).
+3) Preserves read-only behavior; write ops remain disabled.
 
 ANTI-DRIFT RULES
 - Do NOT embed chart rendering here.
@@ -32,27 +24,41 @@ ANTI-DRIFT RULES
 
 Schema position:
 File 4 of 10
-
-Previous file:
-File 3 — js/app.js
-
-Next file:
-File 5 — js/store.js
+Previous file: File 3 — js/app.js
+Next file: File 5 — js/store.js
 */
 
 (function () {
   "use strict";
 
-  const VERSION = "v2.023b";
+  function vStr(){
+    try{ return window.VTVersion?.getVersionString?.() || "v?.???"; }catch(_){ return "v?.???"; }
+  }
+
+  // ---- In-session cache (read-only stabilization) ----
+  // Prevents repeated IDB scans that can feel like "no actions" on mobile.
+  let _cache = null;          // { source, records:Array }
+  let _cacheAt = 0;           // ms
+  const CACHE_TTL_MS = 4000;  // short TTL; still allows fresh loads after rapid changes
+
+  function cacheSet(obj){
+    _cache = obj ? { source: obj.source, records: Array.isArray(obj.records) ? obj.records.slice() : [] } : null;
+    _cacheAt = Date.now();
+  }
+  function cacheGet(){
+    if(!_cache) return null;
+    if((Date.now() - _cacheAt) > CACHE_TTL_MS) return null;
+    return { source: _cache.source, records: _cache.records.slice() };
+  }
 
   // ---- Known legacy LocalStorage keys (from prior v1.x / transitions) ----
   const LS_KEYS = [
     "vitals_tracker_records_v1",            // v1.18 canonical key (remembered)
-    "vitals_tracker_records",               // common
-    "vitals_records",                       // common
-    "vitalsTrackerRecords",                 // common camel
-    "vt_records",                           // common short
-    "records",                              // last resort (many apps use this)
+    "vitals_tracker_records",
+    "vitals_records",
+    "vitalsTrackerRecords",
+    "vt_records",
+    "records",
   ];
 
   // Some builds stored a wrapper object: { records:[...]} or {data:[...]}
@@ -68,11 +74,7 @@ File 5 — js/store.js
   }
 
   function safeJSONParse(str) {
-    try {
-      return JSON.parse(str);
-    } catch (_) {
-      return null;
-    }
+    try { return JSON.parse(str); } catch (_) { return null; }
   }
 
   // ---- Timestamp extraction (used for choosing best candidate) ----
@@ -99,26 +101,24 @@ File 5 — js/store.js
   // ---- LocalStorage read helpers ----
   function readLocalStorageCandidates() {
     const found = [];
+
     for (const k of LS_KEYS) {
       try {
         const raw = localStorage.getItem(k);
         if (!raw) continue;
         const parsed = safeJSONParse(raw);
         const arr = normalizeArray(parsed);
-        if (arr.length) {
-          found.push({ source: `localStorage:${k}`, records: arr });
-        }
+        if (arr.length) found.push({ source: `localStorage:${k}`, records: arr });
       } catch (_) {}
     }
 
-    // Additional: scan all keys and pick anything that looks like a records array
-    // (limited and safe: only checks first ~40 keys to avoid slowdowns)
+    // Additional: scan some keys for array-like payloads (safe cap)
     try {
       const limit = Math.min(localStorage.length, 40);
       for (let i = 0; i < limit; i++) {
         const key = localStorage.key(i);
         if (!key) continue;
-        if (LS_KEYS.includes(key)) continue; // already handled
+        if (LS_KEYS.includes(key)) continue;
         const raw = localStorage.getItem(key);
         if (!raw || raw.length < 10) continue;
         const parsed = safeJSONParse(raw);
@@ -167,7 +167,6 @@ File 5 — js/store.js
         const tx = db.transaction(storeName, "readonly");
         const store = tx.objectStore(storeName);
 
-        // getAll is not supported on very old engines, but Android Chrome supports it.
         if (store.getAll) {
           const req = store.getAll();
           req.onsuccess = () => resolve(Array.isArray(req.result) ? req.result : []);
@@ -175,17 +174,12 @@ File 5 — js/store.js
           return;
         }
 
-        // cursor fallback
         const out = [];
         const cur = store.openCursor();
         cur.onsuccess = (e) => {
           const cursor = e.target.result;
-          if (cursor) {
-            out.push(cursor.value);
-            cursor.continue();
-          } else {
-            resolve(out);
-          }
+          if (cursor) { out.push(cursor.value); cursor.continue(); }
+          else resolve(out);
         };
         cur.onerror = () => resolve([]);
       } catch (_) {
@@ -205,9 +199,7 @@ File 5 — js/store.js
       try {
         for (const storeName of IDB_STORES) {
           const rows = await idbReadAllFromStore(db, storeName);
-          if (rows && rows.length) {
-            found.push({ source: `indexedDB:${dbName}/${storeName}`, records: rows });
-          }
+          if (rows && rows.length) found.push({ source: `indexedDB:${dbName}/${storeName}`, records: rows });
         }
       } catch (_) {
         // ignore
@@ -229,10 +221,7 @@ File 5 — js/store.js
       const aLen = best.records.length;
       const bLen = c.records.length;
 
-      if (bLen > aLen) {
-        best = c;
-        continue;
-      }
+      if (bLen > aLen) { best = c; continue; }
       if (bLen === aLen) {
         if (newestMs(c.records) > newestMs(best.records)) best = c;
       }
@@ -244,12 +233,11 @@ File 5 — js/store.js
   async function detect() {
     const ls = readLocalStorageCandidates();
     const idb = await readIndexedDBCandidates();
-
-    const all = [...idb, ...ls]; // prefer IDB generally, but chooseBest handles it
+    const all = [...idb, ...ls];
     const best = chooseBest(all);
 
     return {
-      version: VERSION,
+      appVersion: vStr(),
       candidates: all.map(x => ({ source: x.source, count: x.records.length, newestMs: newestMs(x.records) })),
       best: { source: best.source, count: best.records.length, newestMs: newestMs(best.records) },
     };
@@ -257,13 +245,16 @@ File 5 — js/store.js
 
   async function getAllRecords() {
     try {
+      const cached = cacheGet();
+      if (cached) return cached.records.slice();
+
       const ls = readLocalStorageCandidates();
       const idb = await readIndexedDBCandidates();
       const all = [...idb, ...ls];
       const best = chooseBest(all);
 
-      // Defensive clone, never return the same array reference
       const out = Array.isArray(best.records) ? best.records.slice() : [];
+      cacheSet({ source: best.source, records: out });
       return out;
     } catch (_) {
       return [];
@@ -272,19 +263,15 @@ File 5 — js/store.js
 
   // NOTE: Write ops are placeholders for later; must not be used until Add is restored.
   async function putRecord(_record) {
-    // Intentionally no-op for v2.023b stabilization phase.
-    // Add.js will own write policy and choose localStorage vs IDB explicitly.
-    return { ok: false, reason: "write-disabled-v2.023b" };
+    return { ok: false, reason: "write-disabled-stabilization" };
   }
 
   async function deleteRecordById(_id) {
-    // Intentionally no-op for v2.023b stabilization phase.
-    return { ok: false, reason: "write-disabled-v2.023b" };
+    return { ok: false, reason: "write-disabled-stabilization" };
   }
 
   // Expose
   window.VTStorage = {
-    VERSION,
     detect,
     getAllRecords,
     putRecord,
@@ -296,9 +283,9 @@ File 5 — js/store.js
 /*
 Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: js/storage.js
-App Version: v2.023b
+App Version: (authority) js/version.js
 Base: v2.021
-Touched in v2.023b: js/storage.js
+Touched in: v2.023e (remove drift + add session cache)
 Schema order: File 4 of 10
 Next planned file: js/store.js (File 5)
 */
