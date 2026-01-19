@@ -1,55 +1,67 @@
 /* File: js/log.js */
 /*
-Vitals Tracker — Log Renderer (Read-Only, Stabilization Phase)
+Vitals Tracker — Log Renderer (Read-Only)
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
-App Version: v2.023c
+App Version: v2.025e
 Base: v2.021
 Date: 2026-01-18
 
-FILE ROLE (LOCKED)
-- Owns rendering of the Log panel list.
-- Reads records ONLY via VTStorage.getAllRecords().
-- Read-only in v2.023c (no edit/delete yet).
-- Emits no navigation events; purely visual + lifecycle aware.
+Schema position:
+File 6 of 10
 
-v2.023c — Change Log (THIS FILE ONLY)
-1) Restores basic Log rendering so data presence is visible.
-2) Adds VTLog.onShow() lifecycle hook (mirrors VTChart.onShow()).
-3) Displays clear empty-state messaging when no records exist.
-4) Defensive against missing storage, malformed records, or partial fields.
-5) Accessibility-oriented: simple vertical list, high contrast text.
+Former file:
+File 5 — js/panels.js
+
+Next file:
+File 7 — js/gestures.js
+
+FILE ROLE (LOCKED)
+- Owns rendering of the Log panel (read-only list).
+- Responsible for loading records and displaying them chronologically.
+- MUST show data immediately when Log panel is activated.
+- MUST NOT implement swipe or navigation.
+- MUST NOT write to storage.
+- MUST tolerate empty or partial datasets safely.
+
+v2.025e — Change Log (THIS FILE ONLY)
+1) Restores Log rendering pipeline (no infinite “Loading…”).
+2) Uses unified record loading (VTStore → VTStorage fallback).
+3) Defensive normalization of timestamps and vitals fields.
+4) Chronological sort (newest first).
+5) Stable empty-state message.
 
 ANTI-DRIFT RULES
-- Do NOT write to storage here.
-- Do NOT add chart logic here.
-- Editing/deleting records will be handled later by add.js / ui.js.
-
-Schema position:
-File 10 of 10
-
-Previous file:
-File 9 — js/panels.js
+- Do NOT add edit/delete actions.
+- Do NOT implement gestures.
+- Do NOT style outside the Log container.
 */
 
 (function () {
   "use strict";
 
-  const LOG_CONTAINER_ID = "logCard";
-  const LOG_NOTE_ID = "logTopNote";
+  const PANEL_ID = "panel-log";
+  const LIST_ID  = "logList";
 
-  function el(id) {
+  function $(id) {
     return document.getElementById(id);
   }
 
-  function fmtTs(ts) {
-    try {
-      const d = new Date(ts);
-      if (isNaN(d.getTime())) return "—";
-      return d.toLocaleString();
-    } catch (_) {
-      return "—";
+  function safeNum(x) {
+    const n = Number(x);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function parseTs(v) {
+    if (v == null) return null;
+    if (typeof v === "number") {
+      return v > 1e12 ? v : v * 1000;
     }
+    if (typeof v === "string") {
+      const t = Date.parse(v);
+      return Number.isFinite(t) ? t : null;
+    }
+    return null;
   }
 
   function extractTs(r) {
@@ -57,117 +69,129 @@ File 9 — js/panels.js
   }
 
   function extractBP(r) {
-    const sys = r?.sys ?? r?.systolic ?? r?.bp?.sys ?? r?.bp?.systolic ?? null;
-    const dia = r?.dia ?? r?.diastolic ?? r?.bp?.dia ?? r?.bp?.diastolic ?? null;
-    if (sys == null && dia == null) return null;
-    return `${sys ?? "—"}/${dia ?? "—"}`;
+    const sys = safeNum(r?.sys ?? r?.systolic ?? r?.sbp ?? (r?.bp && r.bp.sys));
+    const dia = safeNum(r?.dia ?? r?.diastolic ?? r?.dbp ?? (r?.bp && r.bp.dia));
+    return { sys, dia };
   }
 
   function extractHR(r) {
-    return r?.hr ?? r?.heartRate ?? r?.pulse ?? r?.vitals?.hr ?? r?.vitals?.pulse ?? null;
+    return safeNum(r?.hr ?? r?.heartRate ?? r?.pulse ?? (r?.vitals && r.vitals.hr));
   }
 
-  function clearContainer(c) {
-    while (c.firstChild) c.removeChild(c.firstChild);
+  async function loadRecords() {
+    try {
+      if (window.VTStore?.init) await window.VTStore.init();
+    } catch (_) {}
+
+    try {
+      if (window.VTStore?.getAll) return window.VTStore.getAll() || [];
+    } catch (_) {}
+
+    try {
+      if (window.VTStorage?.getAllRecords) {
+        return await window.VTStorage.getAllRecords() || [];
+      }
+    } catch (_) {}
+
+    return [];
+  }
+
+  function clearList() {
+    const list = $(LIST_ID);
+    if (list) list.innerHTML = "";
+  }
+
+  function renderEmpty(msg) {
+    const list = $(LIST_ID);
+    if (!list) return;
+
+    const div = document.createElement("div");
+    div.textContent = msg;
+    div.style.padding = "16px";
+    div.style.color = "rgba(235,245,255,0.65)";
+    div.style.fontSize = "14px";
+    div.style.textAlign = "center";
+
+    list.appendChild(div);
+  }
+
+  function renderRow(rec) {
+    const row = document.createElement("div");
+    row.style.padding = "10px 12px";
+    row.style.borderBottom = "1px solid rgba(235,245,255,0.10)";
+    row.style.display = "flex";
+    row.style.flexDirection = "column";
+    row.style.gap = "4px";
+
+    const dt = document.createElement("div");
+    dt.style.fontSize = "13px";
+    dt.style.color = "rgba(235,245,255,0.85)";
+    dt.textContent = new Date(rec.ts).toLocaleString();
+
+    const vals = document.createElement("div");
+    vals.style.fontSize = "13px";
+    vals.style.color = "rgba(235,245,255,0.70)";
+
+    const parts = [];
+    if (rec.sys != null && rec.dia != null) parts.push(`BP ${rec.sys}/${rec.dia}`);
+    if (rec.hr != null) parts.push(`HR ${rec.hr}`);
+
+    vals.textContent = parts.join("   ");
+
+    row.appendChild(dt);
+    row.appendChild(vals);
+
+    return row;
   }
 
   async function renderLog() {
-    const container = el(LOG_CONTAINER_ID);
-    const note = el(LOG_NOTE_ID);
-    if (!container) return;
+    clearList();
 
-    clearContainer(container);
+    const list = $(LIST_ID);
+    if (!list) return;
 
-    let records = [];
-    try {
-      if (window.VTStorage && VTStorage.getAllRecords) {
-        records = await VTStorage.getAllRecords();
-      }
-    } catch (_) {
-      records = [];
-    }
-
-    if (!Array.isArray(records) || records.length === 0) {
-      if (note) note.textContent = "No records found.";
-      const empty = document.createElement("div");
-      empty.className = "muted small";
-      empty.style.padding = "8px";
-      empty.textContent = "Add readings to see them listed here.";
-      container.appendChild(empty);
+    const raw = await loadRecords();
+    if (!raw.length) {
+      renderEmpty("No readings logged yet.");
       return;
     }
 
-    // Sort newest first
-    records.sort((a, b) => {
-      const ta = new Date(extractTs(a) || 0).getTime();
-      const tb = new Date(extractTs(b) || 0).getTime();
-      return tb - ta;
-    });
+    const records = [];
 
-    if (note) note.textContent = `${records.length} record${records.length === 1 ? "" : "s"}`;
-
-    const list = document.createElement("div");
-    list.style.display = "flex";
-    list.style.flexDirection = "column";
-    list.style.gap = "10px";
-
-    for (const r of records) {
-      const row = document.createElement("div");
-      row.style.border = "1px solid rgba(235,245,255,.16)";
-      row.style.borderRadius = "14px";
-      row.style.padding = "10px";
-      row.style.background = "rgba(0,0,0,.18)";
-
-      const ts = document.createElement("div");
-      ts.className = "small";
-      ts.style.color = "rgba(235,245,255,.58)";
-      ts.textContent = fmtTs(extractTs(r));
-
-      const main = document.createElement("div");
-      main.style.display = "flex";
-      main.style.flexWrap = "wrap";
-      main.style.gap = "12px";
-      main.style.marginTop = "4px";
-      main.style.fontWeight = "900";
+    for (const r of raw) {
+      const ts = parseTs(extractTs(r));
+      if (ts == null) continue;
 
       const bp = extractBP(r);
-      if (bp) {
-        const b = document.createElement("div");
-        b.textContent = `BP ${bp}`;
-        main.appendChild(b);
-      }
-
       const hr = extractHR(r);
-      if (hr != null) {
-        const h = document.createElement("div");
-        h.textContent = `HR ${hr}`;
-        main.appendChild(h);
-      }
 
-      row.appendChild(ts);
-      row.appendChild(main);
-      list.appendChild(row);
+      records.push({
+        ts,
+        sys: bp.sys,
+        dia: bp.dia,
+        hr
+      });
     }
 
-    container.appendChild(list);
+    if (!records.length) {
+      renderEmpty("No usable readings found.");
+      return;
+    }
+
+    records.sort((a, b) => b.ts - a.ts);
+
+    for (const rec of records) {
+      list.appendChild(renderRow(rec));
+    }
   }
 
   function onShow() {
     renderLog();
   }
 
-  // ---- Expose lifecycle hook ----
+  // Public API
   window.VTLog = {
     onShow
   };
 
 })();
-
-/*
-Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
-File: js/log.js
-App Version: v2.023c
-Base: v2.021
-Touched in v2.023c: js/log.js (log visibility restored)
-Schema order: File 10 of 10
-*/
