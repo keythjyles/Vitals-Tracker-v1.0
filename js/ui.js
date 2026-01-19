@@ -44,8 +44,18 @@ Next file: js/panels.js (File 5 of 9)
   }
 
   /* ==============================
-     Helpers (load-order safe)
+     Helpers (safe + no double-bind)
      ============================== */
+
+  function bindOnce(el, key, handler, opts) {
+    if (!el) return;
+    const k = "vtBound_" + key;
+    try {
+      if (el.dataset && el.dataset[k] === "1") return;
+      if (el.dataset) el.dataset[k] = "1";
+    } catch (_) {}
+    el.addEventListener("click", handler, opts || false);
+  }
 
   function withPanels(fn) {
     try {
@@ -54,25 +64,26 @@ Next file: js/panels.js (File 5 of 9)
     } catch (_) {}
   }
 
-  function showPanel(name, animated = true) {
-    withPanels(p => {
-      // Prefer go(); allow show() alias if later added
-      if (typeof p.go === "function") p.go(name, animated);
-      else if (typeof p.show === "function") p.show(name, animated);
+  function showPanel(name) {
+    // IMPORTANT: do not pass extra args unless panels.js explicitly supports them.
+    // Extra args can break routing or produce wrong “snap” behavior depending on implementation.
+    withPanels((p) => {
+      if (typeof p.go === "function") p.go(name);
+      else if (typeof p.show === "function") p.show(name);
     });
   }
 
   function openSettings() {
-    withPanels(p => {
+    withPanels((p) => {
       if (typeof p.openSettings === "function") p.openSettings();
-      else showPanel("settings", false);
+      else showPanel("settings");
     });
   }
 
   function closeSettings() {
-    withPanels(p => {
-      if (typeof p.closeSettings === "function") p.closeSettings(true);
-      else showPanel("home", true);
+    withPanels((p) => {
+      if (typeof p.closeSettings === "function") p.closeSettings();
+      else showPanel("home");
     });
   }
 
@@ -82,7 +93,6 @@ Next file: js/panels.js (File 5 of 9)
 
   function updateVersionLabels() {
     if (!window.VTVersion || typeof window.VTVersion.getVersionString !== "function") return;
-
     const v = window.VTVersion.getVersionString();
 
     if (dom.bootText) dom.bootText.textContent = "BOOT OK " + v;
@@ -95,34 +105,34 @@ Next file: js/panels.js (File 5 of 9)
      ============================== */
 
   function wireNavigation() {
-    dom.btnGoAdd && dom.btnGoAdd.addEventListener("click", () => showPanel("add", true));
-    dom.btnGoCharts && dom.btnGoCharts.addEventListener("click", () => showPanel("charts", true));
-    dom.btnGoLog && dom.btnGoLog.addEventListener("click", () => showPanel("log", true));
+    bindOnce(dom.btnGoAdd, "goAdd", () => showPanel("add"));
+    bindOnce(dom.btnGoCharts, "goCharts", () => showPanel("charts"));
+    bindOnce(dom.btnGoLog, "goLog", () => showPanel("log"));
 
-    dom.btnHomeFromCharts && dom.btnHomeFromCharts.addEventListener("click", () => showPanel("home", true));
-    dom.btnHomeFromLog && dom.btnHomeFromLog.addEventListener("click", () => showPanel("home", true));
-    dom.btnHomeFromAdd && dom.btnHomeFromAdd.addEventListener("click", () => showPanel("home", true));
+    bindOnce(dom.btnHomeFromCharts, "homeFromCharts", () => showPanel("home"));
+    bindOnce(dom.btnHomeFromLog, "homeFromLog", () => showPanel("home"));
+    bindOnce(dom.btnHomeFromAdd, "homeFromAdd", () => showPanel("home"));
   }
 
   function wireSettings() {
-    dom.btnSettings && dom.btnSettings.addEventListener("click", openSettings);
-    dom.btnSettingsHomeAlt && dom.btnSettingsHomeAlt.addEventListener("click", openSettings);
-    dom.btnSettingsFromCharts && dom.btnSettingsFromCharts.addEventListener("click", openSettings);
-    dom.btnSettingsFromLog && dom.btnSettingsFromLog.addEventListener("click", openSettings);
+    bindOnce(dom.btnSettings, "openSettings", openSettings);
+    bindOnce(dom.btnSettingsHomeAlt, "openSettingsAlt", openSettings);
+    bindOnce(dom.btnSettingsFromCharts, "openSettingsCharts", openSettings);
+    bindOnce(dom.btnSettingsFromLog, "openSettingsLog", openSettings);
 
-    dom.btnBackFromSettings && dom.btnBackFromSettings.addEventListener("click", closeSettings);
+    bindOnce(dom.btnBackFromSettings, "backFromSettings", closeSettings);
   }
 
   function wireUtilities() {
     // EXIT HANDLER (DO NOT CHANGE)
-    dom.btnExit && dom.btnExit.addEventListener("click", () => {
+    bindOnce(dom.btnExit, "exit", () => {
       try {
         window.close();
         setTimeout(() => alert("You may now close this app."), 300);
       } catch (_) {}
     });
 
-    dom.btnClearData && dom.btnClearData.addEventListener("click", () => {
+    bindOnce(dom.btnClearData, "clearData", () => {
       if (!window.confirm("This will permanently delete all local data. Continue?")) return;
       if (window.VTStorage && window.VTStorage.clearAll) {
         window.VTStorage.clearAll();
