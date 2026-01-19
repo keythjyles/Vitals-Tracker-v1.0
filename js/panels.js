@@ -8,14 +8,17 @@ Pass order: File 5 of 9 (P0)
 Prev file: js/ui.js (File 4 of 9)
 Next file: js/gestures.js (File 6 of 9)
 
-FIX (SWIPE HITCH ONLY)
-- Removes the “snap back then snap forward” hitch at gesture end by:
-  1) Pinning the track to the current rotation index (no transition),
-  2) Clearing per-panel drag transforms,
-  3) Snapping to the target panel on the next animation frame (with transition).
-- Keeps rotation order stable:
-    Right swipe: Home -> Log -> Charts -> Home ...
-    Left swipe:  Home -> Charts -> Log -> Home ...
+FIX (SWIPE RELEASE GLITCH ONLY)
+- On finger release, we now COMPLETE the snap from the CURRENT drag position (no instant revert).
+- Mechanism:
+  1) Keep track pinned at current rotation index (0..2).
+  2) Animate the rotating panels’ per-panel transforms to the final snapped positions.
+  3) After that animation finishes, “commit” by moving the track to the target index with NO transition,
+     then clear per-panel transforms (so there is no visual jump).
+
+Rotation remains:
+Right swipe: Home -> Log -> Charts -> Home ...
+Left swipe:  Home -> Charts -> Log -> Home ...
 */
 
 (function () {
@@ -29,7 +32,6 @@ FIX (SWIPE HITCH ONLY)
   let inSettings = false;
   let inAdd = false;
 
-  // Drag mode: track is positioned at the CURRENT rotating index; panels are moved relative to that.
   let dragMode = false;
 
   const panels = {};
@@ -99,7 +101,10 @@ FIX (SWIPE HITCH ONLY)
   function clearRotationPanelTransforms() {
     ROTATION.forEach(n => {
       const el = panels[n];
-      if (el) el.style.transform = "";
+      if (el) {
+        el.style.transition = "";
+        el.style.transform = "";
+      }
     });
   }
 
@@ -117,7 +122,7 @@ FIX (SWIPE HITCH ONLY)
 
     if (on) {
       deck.track.style.transition = "none";
-      // actual track pin is set in swipeDelta() because it depends on current rotation index
+      // actual pin set in swipeDelta() using current index
     } else {
       clearRotationPanelTransforms();
     }
@@ -130,7 +135,6 @@ FIX (SWIPE HITCH ONLY)
     if (inAdd && name !== "add") inAdd = false;
 
     if (isRotatingPanel(name)) lastMainPanel = name;
-
     currentPanel = name;
 
     if (name === "settings") {
@@ -192,16 +196,11 @@ FIX (SWIPE HITCH ONLY)
     go(name, animated);
   }
 
-  function swipeDelta(deltaRatio) {
-    if (!canSwipe()) return;
-    if (!deck.track) return;
-
+  function applyDragTransforms(deltaRatio) {
     const n = ROTATION.length;
     const cur = getRotationIndex();
 
-    setDragMode(true);
-
-    // Pin track at the current rotation index (0..2)
+    // Track is pinned at current index; panels are offset relative to that.
     pinTrackToRotationIndex(cur);
 
     for (let i = 0; i < n; i++) {
@@ -209,21 +208,29 @@ FIX (SWIPE HITCH ONLY)
       const el = panels[name];
       if (!el) continue;
 
-      // Natural position relative to pinned track is (i - cur) * 100.
+      // Natural position relative to pinned track
       const raw = i - cur;
       const natural = raw * 100;
 
-      // Wrapped relative position into [-1, 0, +1] for continuous wrap preview.
+      // Wrapped rel into [-1,0,+1]
       let rel = raw;
       if (rel > 1) rel -= n;
       if (rel < -1) rel += n;
 
       const desired = (rel + deltaRatio) * 100;
 
-      // Apply only the delta needed beyond natural position.
+      // transform is delta from natural
       const tx = desired - natural;
       el.style.transform = `translate3d(${tx}%, 0, 0)`;
     }
+  }
+
+  function swipeDelta(deltaRatio) {
+    if (!canSwipe()) return;
+    if (!deck.track) return;
+
+    setDragMode(true);
+    applyDragTransforms(deltaRatio);
   }
 
   function swipeEnd(deltaRatio) {
@@ -234,33 +241,59 @@ FIX (SWIPE HITCH ONLY)
 
     const curRot = getRotationIndex();
     let targetRot = curRot;
+    let finalDelta = 0;
 
-    if (deltaRatio > THRESH) targetRot = curRot - 1;     // right swipe => prev
-    if (deltaRatio < -THRESH) targetRot = curRot + 1;    // left swipe => next
+    // Right swipe => PREV (wrap)
+    if (deltaRatio > THRESH) {
+      targetRot = curRot - 1;
+      finalDelta = 1;
+    }
 
-    // Step 1: lock the track at the current position immediately (no animation)
-    // Step 2: clear per-panel transforms (removes drag offsets)
-    // Step 3: on next frame, animate track to the target panel
-    setDragMode(true);
-    pinTrackToRotationIndex(curRot);
-    clearRotationPanelTransforms();
+    // Left swipe => NEXT (wrap)
+    if (deltaRatio < -THRESH) {
+      targetRot = curRot + 1;
+      finalDelta = -1;
+    }
 
     const n = ROTATION.length;
     const wrapped = ((targetRot % n) + n) % n;
     const targetName = ROTATION[wrapped];
 
-    // Exit drag mode *after* we’ve neutralized transforms, but before the animated snap.
-    dragMode = false;
+    // Stay in drag mode and animate the rotating panels to the final snapped offsets.
+    setDragMode(true);
 
-    requestAnimationFrame(() => {
-      // Update state + active class immediately
-      currentPanel = targetName;
-      lastMainPanel = targetName;
-      setActivePanel(targetName);
+    // Ensure we’re pinned at the CURRENT index before animating
+    pinTrackToRotationIndex(curRot);
 
-      // Animated snap to the track index (home/charts/log are contiguous in DOM)
-      applyTransformToPanel(targetName, true);
+    // Animate panels to finalDelta, continuing from current position (no revert).
+    ROTATION.forEach((name) => {
+      const el = panels[name];
+      if (!el) return;
+      el.style.transition = "transform 260ms cubic-bezier(.2,.8,.2,1)";
     });
+
+    applyDragTransforms(finalDelta);
+
+    // Commit: after the panel animation completes, move track to target (no transition)
+    // and clear per-panel transforms so we are back in normal track-driven mode.
+    window.setTimeout(() => {
+      try {
+        // Clear panel transitions/transforms first (but keep them visually stable via track move)
+        clearRotationPanelTransforms();
+
+        // Update state + active
+        currentPanel = targetName;
+        lastMainPanel = targetName;
+        setActivePanel(targetName);
+
+        // Move track to the real DOM index (home/charts/log are contiguous at 0/1/2)
+        // with NO transition (because we already animated the visual movement).
+        applyTransformToPanel(targetName, false);
+      } catch (_) {}
+
+      // Exit drag mode fully
+      dragMode = false;
+    }, 280);
   }
 
   function init() {
