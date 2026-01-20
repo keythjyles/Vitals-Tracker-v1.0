@@ -289,7 +289,7 @@ GOAL (per user request)
 
   function layout(pxW, pxH) {
     // Reduce padding by ~70% to the left of the chart (46 -> 14)
-    const padL = 14;
+    const padL = 24;
     const padR = 14;
     const padT = 12;
     const padB = 64;
