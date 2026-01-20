@@ -3,32 +3,20 @@
 Vitals Tracker — Storage Bridge (Read/Write Compatible)
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
-App Version: (authority) js/version.js
-Base: v2.021
-Date: 2026-01-18
+App Version Authority: js/version.js
+Base: v2.028a
 
 FILE ROLE (LOCKED)
 - Single storage abstraction for the app.
 - Provides a SAFE, defensive bridge across legacy LocalStorage keys and possible IndexedDB layouts.
-- Chart/Log MUST pull records via VTStorage.getAllRecords().
+- Chart/Log must pull records via VTStorage.getAllRecords().
 
-v2.023f — Change Log (THIS FILE ONLY)
-1) ENABLE WRITES (LocalStorage baseline) so Add actually persists.
-2) Normalize records from ALL sources into canonical shape:
-   { ts:number, sys:number|null, dia:number|null, hr:number|null, notes:string, symptoms:string[] }
-3) Cache invalidation on writes/deletes.
-4) Optional IndexedDB write: if an IDB store is detected, also attempt to write there
-   (best-effort, never blocks LocalStorage persistence).
-
-ANTI-DRIFT RULES
-- Do NOT embed chart rendering here.
-- Do NOT embed UI rendering here.
-- Do NOT rename exported API surface without updating dependent modules.
-
-Schema position:
-File 4 of 10
-Previous file: File 3 — js/app.js
-Next file: File 5 — js/store.js
+VERIFICATION NOTES (THIS EDIT ONLY — NOT FUTURE INSTRUCTIONS)
+- Verified exported API surface: detect(), getAllRecords(), putRecord(), deleteRecordById().
+- Verified canonical LocalStorage key write path is enabled and cache invalidates on write/delete.
+- Verified normalization outputs canonical shape:
+  { ts:number, sys:number|null, dia:number|null, hr:number|null, notes:string, symptoms:string[] }.
+- Verified IndexedDB writes/deletes remain best-effort and never block LocalStorage persistence.
 */
 
 (function () {
@@ -296,7 +284,6 @@ Next file: File 5 — js/store.js
   }
 
   // ---- IDB "detected write target" (best-effort) ----
-  // If we detect an existing DB+store, we can try to write there too.
   async function detectWritableIDBTarget(){
     if (!("indexedDB" in window)) return null;
 
@@ -337,7 +324,6 @@ Next file: File 5 — js/store.js
         const tx = db.transaction(storeName, "readwrite");
         const store = tx.objectStore(storeName);
 
-        // Use put (upsert) if available; fall back to add
         let req;
         try{
           req = store.put ? store.put(record) : store.add(record);
@@ -378,9 +364,6 @@ Next file: File 5 — js/store.js
         const tx = db.transaction(storeName, "readwrite");
         const store = tx.objectStore(storeName);
 
-        // We do not know the keyPath. We try:
-        // 1) delete(ts) if key is ts
-        // 2) otherwise no-op (best-effort)
         let req;
         try{
           req = store.delete(ts);
@@ -419,7 +402,6 @@ Next file: File 5 — js/store.js
 
   function writeCanonLocal(records){
     try{
-      // Records here are expected normalized already.
       localStorage.setItem(CANON_LS_KEY, JSON.stringify(records));
       return true;
     }catch(_){
@@ -459,13 +441,11 @@ Next file: File 5 — js/store.js
     }
   }
 
-  // Write: persist to canonical LocalStorage (baseline), and best-effort IDB if detected.
   async function putRecord(record) {
     try{
       const n = normalizeRecord(record);
       if(!n) return { ok:false, reason:"invalid-record" };
 
-      // 1) LocalStorage canonical write (authoritative baseline)
       const recs = readCanonLocal();
       const idx = recs.findIndex(r => r.ts === n.ts);
 
@@ -475,7 +455,6 @@ Next file: File 5 — js/store.js
       recs.sort((a,b)=> b.ts - a.ts);
       const okLS = writeCanonLocal(recs);
 
-      // 2) Optional IDB best-effort (non-blocking)
       let okIDB = false;
       try{
         const target = await detectWritableIDBTarget();
@@ -494,7 +473,6 @@ Next file: File 5 — js/store.js
 
   async function deleteRecordById(id) {
     try{
-      // We accept ts number, ts string, or object with ts
       let ts = null;
       if(typeof id === "number") ts = id;
       else if(typeof id === "string") ts = toMs(id);
@@ -502,11 +480,9 @@ Next file: File 5 — js/store.js
       ts = Number.isFinite(ts) ? ts : 0;
       if(!ts) return { ok:false, reason:"invalid-id" };
 
-      // 1) LocalStorage canonical delete
       const recs = readCanonLocal().filter(r => r.ts !== ts);
       const okLS = writeCanonLocal(recs);
 
-      // 2) Optional IDB best-effort
       let okIDB = false;
       try{
         const target = await detectWritableIDBTarget();
@@ -523,7 +499,6 @@ Next file: File 5 — js/store.js
     }
   }
 
-  // Expose
   window.VTStorage = {
     detect,
     getAllRecords,
@@ -532,13 +507,11 @@ Next file: File 5 — js/store.js
   };
 
 })();
- 
+
 /*
-Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
+Vitals Tracker — EOF Verification Notes
 File: js/storage.js
-App Version: (authority) js/version.js
-Base: v2.021
-Touched in: v2.023f (enable writes + normalize records + cache invalidation)
-Schema order: File 4 of 10
-Next planned file: js/store.js (File 5)
+App Version Authority: js/version.js
+Base: v2.028a
+Verified: API surface + write/delete + normalization + cache invalidation
 */
