@@ -16,9 +16,6 @@ CHANGE (CSS ONLY)
    - The 3 “bottom” buttons on Home are kept on a single row, evenly spaced,
      and positioned underneath the Log button (i.e., after the Log button in the stack).
    - This targets .homeRow (existing markup) and improves spacing without changing HTML.
-3) Chart window fits the chart (labels never clipped):
-   - Increase chart canvas area by giving .chartWrap a stable minimum/target height.
-   - Prevent legend area from compressing the canvas by capping legend height + allowing scroll.
 
 ANTI-DRIFT
 - No JS changes.
@@ -195,13 +192,13 @@ canvas{
    ============================== */
 
 .screenHeader{
-  position:relative;            /* enables absolute pinning */
+  position:relative;            /* NEW: enables absolute pinning */
   display:flex;
   align-items:center;
   justify-content:space-between;
   margin-bottom:14px;
-  padding-right:58px;           /* reserve space for pinned icon */
-  min-height:var(--touchTarget);/* stable height across panels */
+  padding-right:58px;           /* NEW: reserve space for pinned icon */
+  min-height:var(--touchTarget);/* NEW: stable height across panels */
 }
 
 .screenTitle{
@@ -215,7 +212,7 @@ canvas{
   align-items:center;
 }
 
-/* pin settings icon to the exact same top-right spot on any header */
+/* NEW: pin settings icon to the exact same top-right spot on any header */
 .screenHeader .iconBtn{
   position:absolute;
   top:0;
@@ -291,11 +288,11 @@ canvas{
   display:flex;
   flex-direction:row;
   align-items:center;
-  justify-content:space-between; /* evenly space */
+  justify-content:space-between; /* NEW: evenly space */
   gap:12px;
 }
 
-/* 3-button row sizing (keeps a clean single row under Log) */
+/* NEW: 3-button row sizing (keeps a clean single row under Log) */
 .homeRow > button{
   flex:1 1 0;
   min-width:0;
@@ -337,11 +334,8 @@ canvas{
 }
 
 .chartWrap{
-  /* Make the window fit the chart: lock a stable canvas area so 2-row X labels never clip */
-  flex:0 0 auto;
-  height:min(52vh, 520px);
-  min-height:390px;
-
+  flex:1;
+  min-height:0;
   position:relative;
   border-radius:16px;
   overflow:hidden;
@@ -354,17 +348,10 @@ canvas{
   background:transparent;
 }
 
-/* Legend must not compress the canvas: cap height + allow scroll */
-.chartLegend,
-#chartLegend{
+.chartLegend{
   margin-top:10px;
   font-size:13px;
   color:var(--muted);
-
-  max-height:240px;
-  overflow:auto;
-  padding-right:4px;
-  -webkit-overflow-scrolling:touch;
 }
 
 /* ==============================
