@@ -5,13 +5,13 @@ Vitals Tracker — Charts (Canvas)
 App Version Authority: js/version.js
 
 LATEST CHANGES (per user instructions ONLY)
-- Pinch zoom is SMOOTH (no snapping): STATE.days is continuous (float), not rounded.
-- X-axis labels (Day + Date, 2 rows) are FORCED to render:
-  - higher contrast
-  - guaranteed first + last labels
-  - collision-safe thinning without ever dropping all labels
-- Day bands are FIXED to calendar days and remain 20% opacity, OVERLAYING HTN bands.
+- Fix X-axis label clipping/near-invisibility by correcting DPR handling:
+  - Canvas is sized in device pixels, but ALL drawing is done in CSS pixels via ctx.setTransform(dpr,...)
+  - Fonts/labels render at intended size and no longer appear as clipped dots
+- X-axis labels (Day + Date, 2 rows) remain reserved space and forced to render with thinning.
+- Day bands remain fixed to calendar days, 20% opacity, overlaying HTN bands.
 - Y-axis remains STATIC for the session based on FULL dataset max (no jumping on pan/zoom).
+- Pinch zoom remains SMOOTH (continuous float days).
 */
 
 (function () {
@@ -55,8 +55,6 @@ LATEST CHANGES (per user instructions ONLY)
     dataMinMs: null,
     dataMaxMs: null,
     bandOpacity: 0.60,
-
-    // STATIC Y axis (set once from full dataset)
     yMaxStatic: null
   };
 
@@ -257,17 +255,19 @@ LATEST CHANGES (per user instructions ONLY)
 
   function sizeToCSS(canvas) {
     ensureCanvasFillsWrap(canvas);
+
     const dpr = Math.max(1, window.devicePixelRatio || 1);
     const rect = canvas.getBoundingClientRect();
 
-    const w = Math.max(1, Math.floor(rect.width * dpr));
-    const h = Math.max(1, Math.floor(rect.height * dpr));
+    const wPx = Math.max(1, Math.floor(rect.width * dpr));
+    const hPx = Math.max(1, Math.floor(rect.height * dpr));
 
-    if (canvas.width !== w || canvas.height !== h) {
-      canvas.width = w;
-      canvas.height = h;
+    if (canvas.width !== wPx || canvas.height !== hPx) {
+      canvas.width = wPx;
+      canvas.height = hPx;
     }
-    return { w, h, dpr, rectW: rect.width, rectH: rect.height };
+
+    return { dpr, rectW: rect.width, rectH: rect.height, wPx, hPx };
   }
 
   function clear(ctx, w, h) { ctx.clearRect(0, 0, w, h); }
@@ -277,7 +277,7 @@ LATEST CHANGES (per user instructions ONLY)
     const padR = 20;
     const padT = 16;
 
-    // Reserve extra space so the 2-row X labels are never clipped.
+    // Reserve enough space so 2-row X labels never clip.
     const padB = 118;
 
     return {
@@ -456,7 +456,6 @@ LATEST CHANGES (per user instructions ONLY)
 
     if (ticks.length <= 1) return ticks;
 
-    // Thin for collisions, but never drop everything.
     const kept = [];
     let lastX = -Infinity;
 
@@ -467,7 +466,6 @@ LATEST CHANGES (per user instructions ONLY)
       }
     }
 
-    // Force include first + last
     const first = ticks[0];
     const last  = ticks[ticks.length - 1];
 
@@ -481,10 +479,8 @@ LATEST CHANGES (per user instructions ONLY)
     if (!hasNear(first.x)) kept.unshift(first);
     if (!hasNear(last.x)) kept.push(last);
 
-    // Ensure at least 2 labels when possible
     if (kept.length === 1 && ticks.length >= 2) kept.push(last);
 
-    // Sort by x
     kept.sort((a, b) => a.x - b.x);
     return kept;
   }
@@ -538,9 +534,7 @@ LATEST CHANGES (per user instructions ONLY)
     const yText1 = L.plotY + L.plotH + 10;
     const yText2 = yText1 + 24;
 
-    const dpr = (sized?.dpr || 1);
-    const minPx = Math.max(84 * dpr, 72 * dpr);
-
+    const minPx = 84; // CSS px now (DPR corrected by transform)
     const ticks = buildXTicks(start, end, L, minPx);
 
     for (const tick of ticks) {
@@ -844,7 +838,13 @@ LATEST CHANGES (per user instructions ONLY)
     const sized = sizeToCSS(canvas);
     _lastSized = sized;
 
-    const w = sized.w, h = sized.h;
+    // Draw in CSS pixels (fixes tiny/clipped labels on high-DPR screens)
+    const dpr = sized.dpr || 1;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const w = sized.rectW;
+    const h = sized.rectH;
+
     const L = layout(w, h);
 
     clear(ctx, w, h);
@@ -904,7 +904,6 @@ LATEST CHANGES (per user instructions ONLY)
     render();
   }
 
-  // ===== Smooth pan + pinch zoom on canvas =====
   function getTouches(e) {
     const t = [];
     if (e.touches && e.touches.length) {
@@ -938,7 +937,7 @@ LATEST CHANGES (per user instructions ONLY)
 
       if (touches.length >= 2) {
         GESTURE.isPinch = true;
-        GESTURE.startDays = STATE.days; // float
+        GESTURE.startDays = STATE.days;
         GESTURE.startDist = dist2(touches[0], touches[1]);
         GESTURE.lastMidX = midX(touches[0], touches[1]);
       } else {
@@ -955,7 +954,6 @@ LATEST CHANGES (per user instructions ONLY)
       const touches = getTouches(e);
       if (!touches.length) return;
 
-      // Pinch zoom: fingers together => more days; apart => fewer days (SMOOTH, no rounding)
       if (GESTURE.isPinch && touches.length >= 2) {
         const d = dist2(touches[0], touches[1]);
         const ratio = (d > 0 && GESTURE.startDist > 0) ? (GESTURE.startDist / d) : 1;
@@ -967,7 +965,6 @@ LATEST CHANGES (per user instructions ONLY)
           clampCenterToData();
         }
 
-        // midpoint drift allows subtle pan while pinching
         const mx = midX(touches[0], touches[1]);
         const dx = mx - GESTURE.lastMidX;
         GESTURE.lastMidX = mx;
@@ -985,7 +982,6 @@ LATEST CHANGES (per user instructions ONLY)
         return;
       }
 
-      // Single-finger pan
       if (!GESTURE.isPinch && touches.length === 1) {
         const x = touches[0].clientX;
         const dx = x - GESTURE.lastPanX;
