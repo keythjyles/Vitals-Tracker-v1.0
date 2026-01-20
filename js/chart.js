@@ -4,14 +4,10 @@ Vitals Tracker — Charts (Canvas)
 
 App Version Authority: js/version.js
 
-LATEST CHANGES (per user instructions ONLY)
-- Fix X-axis label clipping/near-invisibility by correcting DPR handling:
-  - Canvas is sized in device pixels, but ALL drawing is done in CSS pixels via ctx.setTransform(dpr,...)
-  - Fonts/labels render at intended size and no longer appear as clipped dots
-- X-axis labels (Day + Date, 2 rows) remain reserved space and forced to render with thinning.
-- Day bands remain fixed to calendar days, 20% opacity, overlaying HTN bands.
-- Y-axis remains STATIC for the session based on FULL dataset max (no jumping on pan/zoom).
-- Pinch zoom remains SMOOTH (continuous float days).
+FIX (per user instruction):
+- Restore the “smaller label” look (undo oversized axis/legend fonts created after DPR correction)
+- Prevent X-axis label clipping by reserving a bit more bottom space (compress plot height slightly)
+- Keep all existing behavior: DPR transform, static Y max, day stripes overlay HTN bands, smooth pinch/drag
 */
 
 (function () {
@@ -273,12 +269,13 @@ LATEST CHANGES (per user instructions ONLY)
   function clear(ctx, w, h) { ctx.clearRect(0, 0, w, h); }
 
   function layout(w, h) {
-    const padL = 78;
-    const padR = 20;
-    const padT = 16;
+    const padL = 70; // slightly tighter than 78 (keeps overall look compact)
+    const padR = 18;
+    const padT = 14;
 
-    // Reserve enough space so 2-row X labels never clip.
-    const padB = 118;
+    // Key fix: reserve more space for 2-row X labels so they NEVER clip.
+    // This compresses the plot height slightly (what you requested).
+    const padB = 136;
 
     return {
       padL, padR, padT, padB,
@@ -485,9 +482,10 @@ LATEST CHANGES (per user instructions ONLY)
     return kept;
   }
 
-  function drawGridAndAxes(ctx, bounds, L, start, end, sized) {
-    const fontY = 20;
-    const fontX = 18;
+  function drawGridAndAxes(ctx, bounds, L, start, end) {
+    // Restore compact sizing (pre-DPR-fix look), but keep DPR transform.
+    const fontY = 14;
+    const fontX = 14;
 
     // Y grid + labels
     ctx.strokeStyle = STYLE.grid;
@@ -509,7 +507,7 @@ LATEST CHANGES (per user instructions ONLY)
       ctx.lineTo(L.plotX + L.plotW, y);
       ctx.stroke();
 
-      ctx.fillText(String(v), L.plotX - 14, y);
+      ctx.fillText(String(v), L.plotX - 12, y);
     }
 
     // Axes
@@ -531,10 +529,12 @@ LATEST CHANGES (per user instructions ONLY)
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
 
-    const yText1 = L.plotY + L.plotH + 10;
-    const yText2 = yText1 + 24;
+    // Slightly tighter vertical spacing, with more reserved padB above.
+    const yText1 = L.plotY + L.plotH + 8;
+    const yText2 = yText1 + 18;
 
-    const minPx = 84; // CSS px now (DPR corrected by transform)
+    // A bit tighter than 84 now that font is smaller (keeps “good chart” density)
+    const minPx = 72;
     const ticks = buildXTicks(start, end, L, minPx);
 
     for (const tick of ticks) {
@@ -591,8 +591,8 @@ LATEST CHANGES (per user instructions ONLY)
   }
 
   function drawOnChartSeriesLegend(ctx, L) {
-    const x0 = L.plotX + 14;
-    const y0 = L.plotY + 14;
+    const x0 = L.plotX + 12;
+    const y0 = L.plotY + 12;
 
     const items = [
       { label: "Systolic",  color: STYLE.lineSys },
@@ -600,11 +600,12 @@ LATEST CHANGES (per user instructions ONLY)
       { label: "Heart Rate",color: STYLE.lineHr  }
     ];
 
-    const font = 16;
-    const lineH = 22;
+    // Restore compact legend
+    const font = 12;
+    const lineH = 18;
 
-    const pad = 8;
-    const w = 178;
+    const pad = 7;
+    const w = 152;
     const h = pad * 2 + items.length * lineH;
 
     ctx.save();
@@ -617,17 +618,17 @@ LATEST CHANGES (per user instructions ONLY)
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
 
-    let y = y0 + 1;
+    let y = y0;
     for (const it of items) {
       ctx.strokeStyle = it.color;
-      ctx.lineWidth = 7;
+      ctx.lineWidth = 6;
       ctx.beginPath();
       ctx.moveTo(x0, y);
-      ctx.lineTo(x0 + 24, y);
+      ctx.lineTo(x0 + 20, y);
       ctx.stroke();
 
       ctx.fillStyle = "rgba(255,255,255,0.78)";
-      ctx.fillText(it.label, x0 + 34, y);
+      ctx.fillText(it.label, x0 + 28, y);
 
       y += lineH;
     }
@@ -652,7 +653,7 @@ LATEST CHANGES (per user instructions ONLY)
         el.style.fontWeight = "900";
         el.style.letterSpacing = ".2px";
         el.style.color = "rgba(255,255,255,0.62)";
-        el.style.fontSize = "18px";
+        el.style.fontSize = "16px"; // slightly smaller to preserve canvas height
         el.style.userSelect = "none";
         parent.insertBefore(el, canvas);
       }
@@ -671,7 +672,6 @@ LATEST CHANGES (per user instructions ONLY)
     } catch (_) {}
   }
 
-  // ===== Tight BP legend + slider (unchanged behavior) =====
   function ensureLegendUI(legendEl) {
     if (!legendEl) return;
 
@@ -838,7 +838,7 @@ LATEST CHANGES (per user instructions ONLY)
     const sized = sizeToCSS(canvas);
     _lastSized = sized;
 
-    // Draw in CSS pixels (fixes tiny/clipped labels on high-DPR screens)
+    // Draw in CSS pixels (keep DPR fix)
     const dpr = sized.dpr || 1;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
@@ -885,7 +885,7 @@ LATEST CHANGES (per user instructions ONLY)
     drawBPBands(ctx, bounds, L);
     drawDayStripes(ctx, start, end, L);
 
-    drawGridAndAxes(ctx, bounds, L, start, end, sized);
+    drawGridAndAxes(ctx, bounds, L, start, end);
     drawLines(ctx, windowed, bounds, start, end, L);
     drawOnChartSeriesLegend(ctx, L);
   }
