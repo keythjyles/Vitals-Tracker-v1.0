@@ -5,9 +5,13 @@ Vitals Tracker — Charts (Canvas)
 App Version Authority: js/version.js
 
 LATEST CHANGES (per user instructions ONLY)
-- Day bands are FIXED to calendar days (a given date is always striped or always unstriped), so panning does NOT “flip” stripes.
-- X-axis day + date labels restored and kept visible (extra bottom padding reserved).
-- Day stripes remain 20% opacity and OVERLAY HTN bands.
+- Pinch zoom is SMOOTH (no snapping): STATE.days is continuous (float), not rounded.
+- X-axis labels (Day + Date, 2 rows) are FORCED to render:
+  - higher contrast
+  - guaranteed first + last labels
+  - collision-safe thinning without ever dropping all labels
+- Day bands are FIXED to calendar days and remain 20% opacity, OVERLAYING HTN bands.
+- Y-axis remains STATIC for the session based on FULL dataset max (no jumping on pan/zoom).
 */
 
 (function () {
@@ -46,7 +50,7 @@ LATEST CHANGES (per user instructions ONLY)
   const STATE = {
     minDays: 1,
     maxDays: 14,
-    days: 7,
+    days: 7,               // continuous float
     centerMs: null,
     dataMinMs: null,
     dataMaxMs: null,
@@ -273,8 +277,8 @@ LATEST CHANGES (per user instructions ONLY)
     const padR = 20;
     const padT = 16;
 
-    // Reserve more space so the 2-row X labels are not clipped.
-    const padB = 108;
+    // Reserve extra space so the 2-row X labels are never clipped.
+    const padB = 118;
 
     return {
       padL, padR, padT, padB,
@@ -381,8 +385,6 @@ LATEST CHANGES (per user instructions ONLY)
   }
 
   function dayIndexUTC(midnightLocalMs) {
-    // Use UTC day index so a given calendar date remains consistently striped,
-    // independent of the current visible window.
     return Math.floor(midnightLocalMs / MS_DAY);
   }
 
@@ -449,14 +451,15 @@ LATEST CHANGES (per user instructions ONLY)
     const ticks = [];
     for (let t = firstDay; t <= lastDay + MS_DAY; t += MS_DAY) {
       const x = xScale(t, start, end, L);
-      if (x < L.plotX - 2 || x > L.plotX + L.plotW + 2) continue;
       ticks.push({ t, x });
     }
 
     if (ticks.length <= 1) return ticks;
 
+    // Thin for collisions, but never drop everything.
     const kept = [];
     let lastX = -Infinity;
+
     for (const tick of ticks) {
       if ((tick.x - lastX) >= minPx) {
         kept.push(tick);
@@ -464,14 +467,25 @@ LATEST CHANGES (per user instructions ONLY)
       }
     }
 
-    // Always keep last tick if reasonable
-    const last = ticks[ticks.length - 1];
-    if (kept.length === 0) kept.push(last);
-    else {
-      const kLast = kept[kept.length - 1];
-      if (Math.abs(last.x - kLast.x) >= minPx * 0.70) kept.push(last);
+    // Force include first + last
+    const first = ticks[0];
+    const last  = ticks[ticks.length - 1];
+
+    function hasNear(x) {
+      for (const k of kept) {
+        if (Math.abs(k.x - x) < (minPx * 0.45)) return true;
+      }
+      return false;
     }
 
+    if (!hasNear(first.x)) kept.unshift(first);
+    if (!hasNear(last.x)) kept.push(last);
+
+    // Ensure at least 2 labels when possible
+    if (kept.length === 1 && ticks.length >= 2) kept.push(last);
+
+    // Sort by x
+    kept.sort((a, b) => a.x - b.x);
     return kept;
   }
 
@@ -516,7 +530,7 @@ LATEST CHANGES (per user instructions ONLY)
     ctx.stroke();
 
     // X labels (day row + date row)
-    ctx.fillStyle = "rgba(255,255,255,0.68)";
+    ctx.fillStyle = "rgba(255,255,255,0.82)";
     ctx.font = `900 ${fontX}px system-ui`;
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
@@ -524,7 +538,6 @@ LATEST CHANGES (per user instructions ONLY)
     const yText1 = L.plotY + L.plotH + 10;
     const yText2 = yText1 + 24;
 
-    // Use DEVICE pixels because tick.x is in device pixel space.
     const dpr = (sized?.dpr || 1);
     const minPx = Math.max(84 * dpr, 72 * dpr);
 
@@ -664,7 +677,7 @@ LATEST CHANGES (per user instructions ONLY)
     } catch (_) {}
   }
 
-  // ===== Tight BP legend + slider (reduced height ~50%) =====
+  // ===== Tight BP legend + slider (unchanged behavior) =====
   function ensureLegendUI(legendEl) {
     if (!legendEl) return;
 
@@ -925,7 +938,7 @@ LATEST CHANGES (per user instructions ONLY)
 
       if (touches.length >= 2) {
         GESTURE.isPinch = true;
-        GESTURE.startDays = STATE.days;
+        GESTURE.startDays = STATE.days; // float
         GESTURE.startDist = dist2(touches[0], touches[1]);
         GESTURE.lastMidX = midX(touches[0], touches[1]);
       } else {
@@ -942,18 +955,19 @@ LATEST CHANGES (per user instructions ONLY)
       const touches = getTouches(e);
       if (!touches.length) return;
 
+      // Pinch zoom: fingers together => more days; apart => fewer days (SMOOTH, no rounding)
       if (GESTURE.isPinch && touches.length >= 2) {
         const d = dist2(touches[0], touches[1]);
         const ratio = (d > 0 && GESTURE.startDist > 0) ? (GESTURE.startDist / d) : 1;
 
-        let targetDays = Math.round(GESTURE.startDays * ratio);
-        targetDays = clamp(targetDays, STATE.minDays, STATE.maxDays);
+        const targetDays = clamp(GESTURE.startDays * ratio, STATE.minDays, STATE.maxDays);
 
-        if (targetDays !== STATE.days) {
+        if (Math.abs(targetDays - STATE.days) > 0.0005) {
           STATE.days = targetDays;
           clampCenterToData();
         }
 
+        // midpoint drift allows subtle pan while pinching
         const mx = midX(touches[0], touches[1]);
         const dx = mx - GESTURE.lastMidX;
         GESTURE.lastMidX = mx;
@@ -971,6 +985,7 @@ LATEST CHANGES (per user instructions ONLY)
         return;
       }
 
+      // Single-finger pan
       if (!GESTURE.isPinch && touches.length === 1) {
         const x = touches[0].clientX;
         const dx = x - GESTURE.lastPanX;
