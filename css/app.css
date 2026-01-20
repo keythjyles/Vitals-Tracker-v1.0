@@ -16,6 +16,9 @@ CHANGE (CSS ONLY)
    - The 3 “bottom” buttons on Home are kept on a single row, evenly spaced,
      and positioned underneath the Log button (i.e., after the Log button in the stack).
    - This targets .homeRow (existing markup) and improves spacing without changing HTML.
+3) Log panel density:
+   - Define .logRow layout, spacing, and typography so JS fallback does not drive appearance.
+   - Make log list feel “tighter” and more readable.
 
 ANTI-DRIFT
 - No JS changes.
@@ -192,13 +195,13 @@ canvas{
    ============================== */
 
 .screenHeader{
-  position:relative;            /* NEW: enables absolute pinning */
+  position:relative;
   display:flex;
   align-items:center;
   justify-content:space-between;
   margin-bottom:14px;
-  padding-right:58px;           /* NEW: reserve space for pinned icon */
-  min-height:var(--touchTarget);/* NEW: stable height across panels */
+  padding-right:58px;
+  min-height:var(--touchTarget);
 }
 
 .screenTitle{
@@ -212,14 +215,12 @@ canvas{
   align-items:center;
 }
 
-/* NEW: pin settings icon to the exact same top-right spot on any header */
 .screenHeader .iconBtn{
   position:absolute;
   top:0;
   right:0;
 }
 
-/* If a header has both Home pill + settings icon, keep pill aligned left of icon */
 .screenHeaderRight .pillBtn{
   margin-right:8px;
 }
@@ -288,17 +289,15 @@ canvas{
   display:flex;
   flex-direction:row;
   align-items:center;
-  justify-content:space-between; /* NEW: evenly space */
+  justify-content:space-between;
   gap:12px;
 }
 
-/* NEW: 3-button row sizing (keeps a clean single row under Log) */
 .homeRow > button{
   flex:1 1 0;
   min-width:0;
 }
 
-/* If a row has only 2 buttons (Install/Clear), keep it balanced as well */
 .homeRow > button:only-child{
   flex:0 0 auto;
 }
@@ -358,10 +357,61 @@ canvas{
    Log Panel
    ============================== */
 
+#logLoading{
+  margin-bottom:8px;
+}
+
 .logList{
   flex:1;
   min-height:0;
   overflow-y:auto;
+  padding-right:4px;
+}
+
+.logRow{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:8px;
+  padding:10px 10px;
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:16px;
+  background:rgba(0,0,0,0.10);
+  box-shadow:var(--shadowInset);
+}
+
+.logRow + .logRow{
+  margin-top:10px;
+}
+
+.logMain{
+  display:grid;
+  gap:2px;
+  min-width:0;
+}
+
+.logTitle{
+  font-size:14px;
+  font-weight:650;
+  letter-spacing:.12px;
+  color:rgba(255,255,255,0.86);
+  line-height:1.15;
+}
+
+.logSub{
+  font-size:12px;
+  font-weight:550;
+  color:rgba(255,255,255,0.56);
+  line-height:1.15;
+}
+
+.logMeta{
+  font-size:12px;
+  font-weight:550;
+  color:rgba(255,255,255,0.66);
+  line-height:1.25;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 
 .logEmpty{
