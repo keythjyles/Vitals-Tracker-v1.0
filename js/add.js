@@ -1,29 +1,8 @@
+/* File: js/add.js */
 /*
-Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
-File: js/add.js
-App Version Authority: js/version.js
-Base: v2.026a
-Pass: Swipe + Render Recovery (P0-R1)
-Pass order: File 9 of 9 (P0)
-Prev file: js/log.js (File 8 of 9)
-Next file: (end of pass)
-
-FILE ROLE (LOCKED)
-- Owns ONLY the Add Reading panel UI + Save action (minimal schema: ts/sys/dia/hr/notes).
-- Must NOT implement swipe/rotation.
-- Must NOT implement delete (future pass).
-- Edit support is LIMITED to: open + prefill + update-if-available; otherwise warn.
-
-v2.026a — Change Log (THIS FILE ONLY)
-1) Carries forward Add panel UI + Save action (no swipe changes).
-2) Maintains cosmetic softening + single-form enforcement.
-3) Maintains Home routing via panels.js closeAdd() when available.
-
-v2.026a+ (THIS FILE ONLY)
-4) Adds EDIT mode support for Log “Edit” hyperlink:
-   - VTAdd.openEdit({ id | ts | record }) opens Add panel and pre-fills.
-   - Save performs update ONLY if VTStore update method exists; otherwise warns.
-   - Dosage remains in notes (no dosage field).
+Purpose of this header: verification metadata for this edit (not instructions).
+Edited: 2026-01-20
+Change focus: Add/Edit expanded with Distress (0–5 + descriptor popup) and Medications (event markers w/ settings prefill).
 */
 
 (function () {
@@ -36,11 +15,18 @@ v2.026a+ (THIS FILE ONLY)
 
   let saving = false;
 
-  // Edit mode state (no schema changes)
+  // Edit mode state
   const EDIT = {
     active: false,
-    key: null,      // { id } or { ts } or best-effort key
-    original: null  // normalized record snapshot
+    key: null,
+    original: null
+  };
+
+  // Local UI state (per-record)
+  const UI = {
+    distress: null,           // 0..5 or null
+    distressTags: [],         // strings
+    meds: []                  // [{ name, atTs }]
   };
 
   function safeAlert(msg) {
@@ -71,9 +57,7 @@ v2.026a+ (THIS FILE ONLY)
     } catch (_) {}
   }
 
-  function nowTs() {
-    return Date.now();
-  }
+  function nowTs() { return Date.now(); }
 
   function defaultRecord() {
     return {
@@ -81,12 +65,14 @@ v2.026a+ (THIS FILE ONLY)
       sys: null,
       dia: null,
       hr: null,
-      notes: ""
+      notes: "",
+      distress: null,
+      distressTags: [],
+      meds: []
     };
   }
 
   function softenAddCard() {
-    // Purely cosmetic. Does not depend on CSS presence.
     if (!cardEl) return;
     try {
       cardEl.style.background = "rgba(0,0,0,0.14)";
@@ -99,8 +85,6 @@ v2.026a+ (THIS FILE ONLY)
 
   function ensureFormPresent() {
     if (!bodyEl) return;
-
-    // If already built, do nothing.
     if (document.getElementById("addForm")) return;
 
     const form = document.createElement("div");
@@ -124,21 +108,81 @@ v2.026a+ (THIS FILE ONLY)
           <input id="inHr" inputmode="numeric" class="addInput" placeholder="e.g., 74" />
         </label>
 
+        <div class="addSection" id="secDistress">
+          <div class="addSectionH">
+            <div>
+              <div class="addSectionTitle">Distress</div>
+              <div class="addSectionHint">Select a level (0–5) to choose descriptors.</div>
+            </div>
+          </div>
+
+          <div class="distressRow" id="distressBtns">
+            <button class="distressBtn" type="button" data-d="0">0</button>
+            <button class="distressBtn" type="button" data-d="1">1</button>
+            <button class="distressBtn" type="button" data-d="2">2</button>
+            <button class="distressBtn" type="button" data-d="3">3</button>
+            <button class="distressBtn" type="button" data-d="4">4</button>
+            <button class="distressBtn" type="button" data-d="5">5</button>
+            <button class="pillBtn" id="btnClearDistress" type="button">Clear</button>
+          </div>
+
+          <div class="tagList" id="distressTagList" aria-label="Distress descriptors"></div>
+        </div>
+
+        <div class="addSection" id="secMeds">
+          <div class="addSectionH">
+            <div>
+              <div class="addSectionTitle">Medications</div>
+              <div class="addSectionHint">Add medication event markers. Dosage stays in Notes.</div>
+            </div>
+          </div>
+
+          <div class="medsRow">
+            <input id="inMedName" class="addInput" placeholder="Medication name" list="dlMedNames" />
+            <datalist id="dlMedNames"></datalist>
+            <button class="medsAddBtn" id="btnAddMedToRecord" type="button">Add</button>
+          </div>
+
+          <div class="tagList" id="medsTagList" aria-label="Medication markers"></div>
+        </div>
+
         <label class="addField addNotes">
           <div class="addLabel">Notes</div>
           <textarea id="inNotes" class="addTextArea" placeholder="Symptoms, meds, context..."></textarea>
         </label>
       </div>
+
+      <!-- Distress popup -->
+      <div class="vtOverlay" id="distressOverlay" aria-hidden="true">
+        <div class="vtModal" role="dialog" aria-modal="true" aria-label="Distress descriptors">
+          <div class="vtModalHead">
+            <div>
+              <div class="vtModalTitle" id="distressModalTitle">Distress Level</div>
+              <div class="vtModalSub" id="distressModalSub">Select descriptors that fit right now.</div>
+            </div>
+            <button class="iconBtn" id="btnCloseDistressModal" type="button" aria-label="Close">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="vtModalBody" id="distressPickBody"></div>
+
+          <div class="vtModalFoot">
+            <button class="pillBtn" id="btnDistressCancel" type="button">Cancel</button>
+            <button class="pillBtn" id="btnDistressApply" type="button">Apply</button>
+          </div>
+        </div>
+      </div>
     `;
 
-    // Insert form at top of card so Save stays below it.
     if (cardEl) {
       cardEl.insertBefore(form, cardEl.firstChild);
     } else {
       bodyEl.appendChild(form);
     }
 
-    // Further soften form controls (safe, minimal)
     try {
       const inputs = form.querySelectorAll("input,textarea");
       inputs.forEach(el => {
@@ -146,6 +190,10 @@ v2.026a+ (THIS FILE ONLY)
         el.style.borderColor = "rgba(235,245,255,0.16)";
       });
     } catch (_) {}
+
+    bindDistressUI();
+    bindMedsUI();
+    refreshMedDatalist();
   }
 
   function readNumber(id) {
@@ -166,25 +214,27 @@ v2.026a+ (THIS FILE ONLY)
   function writeNumber(id, v) {
     const el = document.getElementById(id);
     if (!el) return;
-    try {
-      el.value = (v == null || v === "") ? "" : String(v);
-    } catch (_) {}
+    try { el.value = (v == null || v === "") ? "" : String(v); } catch (_) {}
   }
 
   function writeText(id, v) {
     const el = document.getElementById(id);
     if (!el) return;
-    try {
-      el.value = (v == null) ? "" : String(v);
-    } catch (_) {}
+    try { el.value = (v == null) ? "" : String(v); } catch (_) {}
   }
 
   function clearInputs() {
-    const ids = ["inSys", "inDia", "inHr", "inNotes"];
+    const ids = ["inSys", "inDia", "inHr", "inNotes", "inMedName"];
     for (const id of ids) {
       const el = document.getElementById(id);
       if (el) el.value = "";
     }
+    UI.distress = null;
+    UI.distressTags = [];
+    UI.meds = [];
+    renderDistressButtons();
+    renderDistressTags();
+    renderMedsTags();
   }
 
   function setSaveEnabled(on) {
@@ -197,9 +247,7 @@ v2.026a+ (THIS FILE ONLY)
 
   function setSaveLabelEditing(isEditing) {
     if (!btnSave) return;
-    try {
-      btnSave.textContent = isEditing ? "Save Changes" : "Save";
-    } catch (_) {}
+    try { btnSave.textContent = isEditing ? "Save Changes" : "Save"; } catch (_) {}
   }
 
   function setHeaderEditing(isEditing) {
@@ -211,13 +259,61 @@ v2.026a+ (THIS FILE ONLY)
   }
 
   function normalizeRecord(r) {
-    // Be tolerant: accept {ts/sys/dia/hr/notes} or nested structures.
     const ts = (r && typeof r.ts === "number") ? r.ts : null;
     const sys = (r && typeof r.sys === "number") ? r.sys : (r && typeof r.systolic === "number" ? r.systolic : null);
     const dia = (r && typeof r.dia === "number") ? r.dia : (r && typeof r.diastolic === "number" ? r.diastolic : null);
     const hr  = (r && typeof r.hr  === "number") ? r.hr  : (r && typeof r.heartRate === "number" ? r.heartRate : null);
     const notes = (r && (r.notes ?? r.note ?? r.comment ?? r.memo)) ?? "";
-    return { ts, sys, dia, hr, notes: String(notes || "") };
+
+    const distress = (r && Number.isFinite(Number(r.distress))) ? Number(r.distress) : null;
+    const distressTags = Array.isArray(r && r.distressTags) ? r.distressTags.slice() : [];
+
+    const meds = Array.isArray(r && r.meds) ? r.meds.slice() : [];
+
+    return {
+      ts,
+      sys,
+      dia,
+      hr,
+      notes: String(notes || ""),
+      distress: (distress === null ? null : clampInt(distress, 0, 5)),
+      distressTags: normalizeStringArray(distressTags),
+      meds: normalizeMeds(meds)
+    };
+  }
+
+  function clampInt(n, lo, hi) {
+    const x = Math.trunc(Number(n));
+    if (!Number.isFinite(x)) return lo;
+    return Math.max(lo, Math.min(hi, x));
+  }
+
+  function normalizeStringArray(arr) {
+    const out = [];
+    const seen = new Set();
+    for (const x of (arr || [])) {
+      const v = String(x || "").trim();
+      if (!v) continue;
+      const key = v.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(v);
+    }
+    return out;
+  }
+
+  function normalizeMeds(arr) {
+    const out = [];
+    const seen = new Set();
+    for (const m of (arr || [])) {
+      const name = String(m && m.name || "").trim();
+      if (!name) continue;
+      const key = name.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({ name: name, atTs: (m && typeof m.atTs === "number") ? m.atTs : null });
+    }
+    return out;
   }
 
   async function getAllRecords() {
@@ -234,14 +330,12 @@ v2.026a+ (THIS FILE ONLY)
   function findByIdOrTs(all, key) {
     if (!Array.isArray(all) || !key) return null;
 
-    // Prefer id match if present
     if (key.id != null) {
       for (const r of all) {
         if (r && (r.id === key.id || r._id === key.id)) return r;
       }
     }
 
-    // Fallback to ts match
     if (key.ts != null) {
       for (const r of all) {
         const t = (r && typeof r.ts === "number") ? r.ts : null;
@@ -265,6 +359,15 @@ v2.026a+ (THIS FILE ONLY)
       writeNumber("inDia", record.dia);
       writeNumber("inHr",  record.hr);
       writeText("inNotes", record.notes || "");
+
+      UI.distress = (record.distress == null ? null : clampInt(record.distress, 0, 5));
+      UI.distressTags = normalizeStringArray(record.distressTags || []);
+      UI.meds = normalizeMeds(record.meds || []);
+
+      renderDistressButtons();
+      renderDistressTags();
+      renderMedsTags();
+      refreshMedDatalist();
     }
   }
 
@@ -295,7 +398,6 @@ v2.026a+ (THIS FILE ONLY)
   }
 
   async function openEdit(payload) {
-    // payload may be: { id }, { ts }, { record }, raw record
     ensureFormPresent();
     await initStoreIfNeeded();
 
@@ -307,7 +409,6 @@ v2.026a+ (THIS FILE ONLY)
         rec = normalizeRecord(payload.record);
         key = { id: payload.id ?? payload.record.id ?? payload.record._id ?? null, ts: payload.ts ?? payload.record.ts ?? null };
       } else if (payload && typeof payload === "object" && ("ts" in payload || "sys" in payload || "dia" in payload || "hr" in payload || "notes" in payload)) {
-        // raw record-like object
         rec = normalizeRecord(payload);
         key = { id: payload.id ?? payload._id ?? null, ts: payload.ts ?? null };
       } else if (payload && typeof payload === "object" && ("id" in payload || "ts" in payload)) {
@@ -325,7 +426,6 @@ v2.026a+ (THIS FILE ONLY)
         return;
       }
 
-      // Open Add panel (do not change swipe logic)
       try {
         if (window.VTPanels && typeof window.VTPanels.openAdd === "function") {
           window.VTPanels.openAdd(true);
@@ -357,6 +457,312 @@ v2.026a+ (THIS FILE ONLY)
     throw new Error("No update API");
   }
 
+  function getMedList() {
+    try {
+      if (window.VTSettings && typeof window.VTSettings.getMedNames === "function") {
+        return window.VTSettings.getMedNames() || [];
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  function addMedToSettings(name) {
+    try {
+      if (window.VTSettings && typeof window.VTSettings.addMedName === "function") {
+        window.VTSettings.addMedName(name);
+      }
+    } catch (_) {}
+  }
+
+  function refreshMedDatalist() {
+    const dl = document.getElementById("dlMedNames");
+    if (!dl) return;
+    const meds = getMedList();
+    dl.innerHTML = "";
+    meds.forEach(m => {
+      const opt = document.createElement("option");
+      opt.value = m;
+      dl.appendChild(opt);
+    });
+  }
+
+  // -----------------------------
+  // Distress descriptors catalog
+  // -----------------------------
+  const DISTRESS = Object.freeze({
+    0: [
+      { k:"Calm", d:"No distress; baseline." },
+      { k:"Stable", d:"Able to function normally." },
+      { k:"No urgent symptoms", d:"No acute complaints." }
+    ],
+    1: [
+      { k:"Mild unease", d:"Slight discomfort or worry." },
+      { k:"Light tension", d:"Noticeable but manageable." },
+      { k:"Slight restlessness", d:"Minor agitation." },
+      { k:"Mild fatigue", d:"Tired but functional." }
+    ],
+    2: [
+      { k:"Moderate discomfort", d:"More noticeable; still coping." },
+      { k:"Elevated worry", d:"Persistent concern." },
+      { k:"Irritability", d:"Short temper / easily bothered." },
+      { k:"Body tension", d:"Tight chest/neck/shoulders." },
+      { k:"Mild dizziness", d:"Occasional lightheadedness." }
+    ],
+    3: [
+      { k:"High anxiety", d:"Hard to ignore; affects focus." },
+      { k:"Breath hunger", d:"Feeling air-starved / dyspnea sensation." },
+      { k:"Chest tightness", d:"Pressure/tight feeling." },
+      { k:"Tremor / shakes", d:"Physically keyed up." },
+      { k:"Racing thoughts", d:"Mind won’t settle." },
+      { k:"Nausea", d:"Stomach upset." }
+    ],
+    4: [
+      { k:"Severe distress", d:"Functioning significantly impaired." },
+      { k:"Panic sensations", d:"Surge of fear / doom." },
+      { k:"Marked dizziness", d:"Feels unsteady / near-faint." },
+      { k:"Severe headache flare", d:"Pain spike impacting function." },
+      { k:"Unable to relax", d:"Cannot downshift." },
+      { k:"Safety concern", d:"Feels unsafe being alone right now." }
+    ],
+    5: [
+      { k:"Crisis-level", d:"Cannot function; needs immediate support." },
+      { k:"Overwhelmed", d:"Unable to cope." },
+      { k:"Severe air hunger", d:"Breathing feels critically compromised." },
+      { k:"Severe chest symptoms", d:"Concerning chest pressure/tightness." },
+      { k:"Near-syncope", d:"Feels close to passing out." },
+      { k:"Emergency-level fear", d:"Panic with loss of control." }
+    ]
+  });
+
+  // --- Distress UI ---
+  function bindDistressUI() {
+    const wrap = document.getElementById("distressBtns");
+    if (!wrap) return;
+
+    // Level buttons
+    wrap.querySelectorAll("button[data-d]").forEach(btn => {
+      bindOnce(btn, "distressLevel_" + btn.getAttribute("data-d"), function () {
+        const d = Number(btn.getAttribute("data-d"));
+        UI.distress = clampInt(d, 0, 5);
+        UI.distressTags = []; // reset per spec: tags are level-aligned
+        renderDistressButtons();
+        renderDistressTags();
+        openDistressPicker(UI.distress);
+      });
+    });
+
+    const btnClear = document.getElementById("btnClearDistress");
+    bindOnce(btnClear, "clearDistress", function () {
+      UI.distress = null;
+      UI.distressTags = [];
+      renderDistressButtons();
+      renderDistressTags();
+      closeDistressPicker(true);
+    });
+
+    // Modal buttons
+    bindOnce(document.getElementById("btnCloseDistressModal"), "closeDistressModal", function(){ closeDistressPicker(true); });
+    bindOnce(document.getElementById("btnDistressCancel"), "cancelDistressModal", function(){ closeDistressPicker(true); });
+    bindOnce(document.getElementById("btnDistressApply"), "applyDistressModal", function(){ applyDistressPicker(); });
+  }
+
+  function renderDistressButtons() {
+    const wrap = document.getElementById("distressBtns");
+    if (!wrap) return;
+    wrap.querySelectorAll("button[data-d]").forEach(btn => {
+      const d = Number(btn.getAttribute("data-d"));
+      if (UI.distress === d) btn.classList.add("active");
+      else btn.classList.remove("active");
+    });
+  }
+
+  function renderDistressTags() {
+    const host = document.getElementById("distressTagList");
+    if (!host) return;
+    host.innerHTML = "";
+
+    if (UI.distress == null) {
+      // per spec: hidden until level selected; show nothing (not even empty pill)
+      return;
+    }
+
+    const tags = UI.distressTags || [];
+    if (!tags.length) {
+      const muted = document.createElement("div");
+      muted.className = "muted";
+      muted.style.fontSize = "12px";
+      muted.textContent = "No descriptors selected.";
+      host.appendChild(muted);
+      return;
+    }
+
+    tags.forEach(t => {
+      const chip = document.createElement("div");
+      chip.className = "tagChip";
+      chip.textContent = t;
+
+      const x = document.createElement("button");
+      x.type = "button";
+      x.setAttribute("aria-label", "Remove");
+      x.innerHTML = "×";
+      x.addEventListener("click", function () {
+        UI.distressTags = (UI.distressTags || []).filter(v => v !== t);
+        renderDistressTags();
+      });
+
+      chip.appendChild(x);
+      host.appendChild(chip);
+    });
+  }
+
+  let pickerTemp = null;
+
+  function openDistressPicker(level) {
+    const overlay = document.getElementById("distressOverlay");
+    const body = document.getElementById("distressPickBody");
+    const ttl = document.getElementById("distressModalTitle");
+    if (!overlay || !body || level == null) return;
+
+    const L = clampInt(level, 0, 5);
+    const items = (DISTRESS[L] || []).slice();
+
+    pickerTemp = new Set((UI.distressTags || []).map(x => String(x).trim()));
+
+    if (ttl) ttl.textContent = "Distress Level " + L;
+
+    body.innerHTML = "";
+    items.forEach(it => {
+      const row = document.createElement("div");
+      row.className = "vtPickItem";
+
+      const left = document.createElement("div");
+      left.className = "vtPickItemLeft";
+
+      const nm = document.createElement("div");
+      nm.className = "vtPickItemName";
+      nm.textContent = it.k;
+
+      const ds = document.createElement("div");
+      ds.className = "vtPickItemDesc";
+      ds.textContent = it.d;
+
+      left.appendChild(nm);
+      left.appendChild(ds);
+
+      const tog = document.createElement("button");
+      tog.type = "button";
+      tog.className = "vtToggle" + (pickerTemp.has(it.k) ? " on" : "");
+      tog.setAttribute("aria-pressed", pickerTemp.has(it.k) ? "true" : "false");
+
+      tog.addEventListener("click", function () {
+        if (pickerTemp.has(it.k)) pickerTemp.delete(it.k);
+        else pickerTemp.add(it.k);
+        tog.className = "vtToggle" + (pickerTemp.has(it.k) ? " on" : "");
+        tog.setAttribute("aria-pressed", pickerTemp.has(it.k) ? "true" : "false");
+      });
+
+      row.appendChild(left);
+      row.appendChild(tog);
+      body.appendChild(row);
+    });
+
+    overlay.classList.add("show");
+    overlay.setAttribute("aria-hidden", "false");
+  }
+
+  function closeDistressPicker(clearTemp) {
+    const overlay = document.getElementById("distressOverlay");
+    if (!overlay) return;
+    overlay.classList.remove("show");
+    overlay.setAttribute("aria-hidden", "true");
+    if (clearTemp) pickerTemp = null;
+  }
+
+  function applyDistressPicker() {
+    if (!pickerTemp) {
+      closeDistressPicker(true);
+      return;
+    }
+    UI.distressTags = Array.from(pickerTemp);
+    UI.distressTags.sort((a,b) => a.localeCompare(b));
+    pickerTemp = null;
+    renderDistressTags();
+    closeDistressPicker(true);
+  }
+
+  // --- Meds UI ---
+  function bindMedsUI() {
+    const btnAdd = document.getElementById("btnAddMedToRecord");
+    const inMed = document.getElementById("inMedName");
+    bindOnce(btnAdd, "addMedToRecord", function () {
+      const name = String((inMed && inMed.value) || "").trim();
+      if (!name) return;
+
+      // add to record
+      const key = name.toLowerCase();
+      const exists = (UI.meds || []).some(m => String(m.name).toLowerCase() === key);
+      if (!exists) {
+        UI.meds.push({ name: name, atTs: nowTs() });
+        UI.meds = normalizeMeds(UI.meds);
+        renderMedsTags();
+      }
+
+      // add to settings list (prefill)
+      addMedToSettings(name);
+      refreshMedDatalist();
+
+      if (inMed) inMed.value = "";
+    });
+
+    if (inMed) {
+      inMed.addEventListener("keydown", function (e) {
+        if (e && e.key === "Enter") {
+          try { e.preventDefault(); } catch (_) {}
+          btnAdd && btnAdd.click();
+        }
+      });
+    }
+
+    document.addEventListener("vt:settingsChanged", function () {
+      refreshMedDatalist();
+    });
+  }
+
+  function renderMedsTags() {
+    const host = document.getElementById("medsTagList");
+    if (!host) return;
+    host.innerHTML = "";
+
+    const meds = UI.meds || [];
+    if (!meds.length) {
+      const muted = document.createElement("div");
+      muted.className = "muted";
+      muted.style.fontSize = "12px";
+      muted.textContent = "No medication markers added.";
+      host.appendChild(muted);
+      return;
+    }
+
+    meds.forEach(m => {
+      const chip = document.createElement("div");
+      chip.className = "tagChip";
+      chip.textContent = m.name;
+
+      const x = document.createElement("button");
+      x.type = "button";
+      x.setAttribute("aria-label", "Remove");
+      x.innerHTML = "×";
+      x.addEventListener("click", function () {
+        const key = String(m.name).toLowerCase();
+        UI.meds = (UI.meds || []).filter(z => String(z.name).toLowerCase() !== key);
+        renderMedsTags();
+      });
+
+      chip.appendChild(x);
+      host.appendChild(chip);
+    });
+  }
+
   async function save() {
     if (saving) return;
 
@@ -376,10 +782,13 @@ v2.026a+ (THIS FILE ONLY)
     rec.hr  = readNumber("inHr");
     rec.notes = readText("inNotes");
 
+    rec.distress = (UI.distress == null ? null : clampInt(UI.distress, 0, 5));
+    rec.distressTags = normalizeStringArray(UI.distressTags || []);
+    rec.meds = normalizeMeds(UI.meds || []);
+
     const hasSys = rec.sys != null;
     const hasDia = rec.dia != null;
 
-    // Allow notes-only OR vitals; but if BP is entered, require both sys+dia.
     if ((hasSys && !hasDia) || (!hasSys && hasDia)) {
       safeAlert("If entering BP, please enter BOTH systolic and diastolic.");
       saving = false;
@@ -394,7 +803,6 @@ v2.026a+ (THIS FILE ONLY)
           return;
         }
 
-        // Preserve original timestamp if we have one; otherwise keep the new ts.
         const tsToKeep =
           (EDIT.original && typeof EDIT.original.ts === "number") ? EDIT.original.ts :
           (EDIT.key && typeof EDIT.key.ts === "number") ? EDIT.key.ts :
@@ -403,10 +811,8 @@ v2.026a+ (THIS FILE ONLY)
         if (tsToKeep != null) rec.ts = tsToKeep;
 
         const key = EDIT.key || { ts: rec.ts };
-
         await updateRecord(key, rec);
 
-        // Refresh features if present
         try { window.VTLog?.onShow?.(); } catch (_) {}
         try { window.VTChart?.onShow?.(); } catch (_) {}
 
@@ -418,7 +824,6 @@ v2.026a+ (THIS FILE ONLY)
 
       await window.VTStore.add(rec);
 
-      // Refresh features if present
       try { window.VTLog?.onShow?.(); } catch (_) {}
       try { window.VTChart?.onShow?.(); } catch (_) {}
 
@@ -434,7 +839,6 @@ v2.026a+ (THIS FILE ONLY)
   }
 
   function goHome() {
-    // Prefer panels closeAdd() so panels.js can restore lastMainPanel correctly.
     try {
       if (window.VTPanels) {
         if (typeof window.VTPanels.closeAdd === "function") {
@@ -448,7 +852,6 @@ v2.026a+ (THIS FILE ONLY)
       }
     } catch (_) {}
 
-    // Fallback DOM toggle (non-invasive)
     try {
       document.getElementById("panelAdd")?.classList.remove("active");
       document.getElementById("panelHome")?.classList.add("active");
@@ -469,7 +872,6 @@ v2.026a+ (THIS FILE ONLY)
       goHome();
     });
 
-    // Listen for log edit requests (non-swipe, decoupled)
     document.addEventListener("vt:editRequested", function (e) {
       try {
         if (!e || !e.detail) return;
@@ -482,7 +884,6 @@ v2.026a+ (THIS FILE ONLY)
     setHeaderEditing(false);
   }
 
-  // Public API (for log hyperlink wiring)
   window.VTAdd = Object.freeze({
     openNew: openAddNew,
     openEdit: openEdit
@@ -496,14 +897,4 @@ v2.026a+ (THIS FILE ONLY)
 
 })();
 
-/*
-Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
-File: js/add.js
-App Version Authority: js/version.js
-Base: v2.026a
-Pass: Swipe + Render Recovery (P0-R1)
-Pass order: File 9 of 9 (P0)
-Prev file: js/log.js (File 8 of 9)
-Next file: (end of pass)
-*/
-```0
+/* EOF: js/add.js (verified: Distress 0–5 + descriptor popup + meds markers + settings prefill) */
