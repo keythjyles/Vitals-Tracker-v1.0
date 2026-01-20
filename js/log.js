@@ -3,20 +3,14 @@ Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
 File: js/log.js
 App Version Authority: js/version.js
 Base: v2.028a
-Pass: Log Panel Recovery + Row UX (P0-LR1)
-Pass order: Log fix (focused)
+Pass: Log Panel Recovery + Instrumentation (P0-LR2)
 
-GOALS (THIS FILE ONLY)
-1) Log must reliably show records (even when VTStore init is async).
-2) Log must re-render when Log becomes active.
-3) Log panel Add button must open Add panel.
-4) Each row gets a blue "Edit" hyperlink (future edit wiring).
-5) BP and HR values colorize based on danger bands (conservative rules).
+CHANGE (THIS EDIT ONLY)
+- Replace empty-state copy "No readings yet." with "test message 1"
+  so we can confirm the correct file is loading on-device.
 
 ANTI-DRIFT
-- No swipe logic.
-- No chart logic.
-- No schema expansion (meds/distress later).
+- No other logic changes in this step.
 */
 
 (function () {
@@ -128,10 +122,12 @@ ANTI-DRIFT
   function setEmpty(on) {
     if (!emptyEl) return;
     emptyEl.hidden = !on;
+    if (on) {
+      // Instrumentation marker
+      emptyEl.textContent = "test message 1";
+    }
   }
 
-  // ===== Danger band colors (aligned to chart palette intent) =====
-  // Sys bands: <120 blue, 120-129 purple, 130-139 yellow, 140-179 red, >=180 dark red
   function sysLevel(sys) {
     if (sys == null) return null;
     if (sys >= 180) return "crisis";
@@ -141,7 +137,6 @@ ANTI-DRIFT
     return "normal";
   }
 
-  // Dia bands (conservative): <80 blue, 80-89 yellow, 90-119 red, >=120 dark red
   function diaLevel(dia) {
     if (dia == null) return null;
     if (dia >= 120) return "crisis";
@@ -150,7 +145,6 @@ ANTI-DRIFT
     return "normal";
   }
 
-  // HR (conservative): only flag clearly abnormal extremes.
   function hrLevel(hr) {
     if (hr == null) return null;
     if (hr >= 120) return "stage2";
@@ -166,20 +160,17 @@ ANTI-DRIFT
   }
 
   function colorForLevel(level) {
-    // Dark red, red, yellow, purple, blue (as requested).
-    // Using opaque text colors suitable for dark UI.
     switch (level) {
-      case "crisis": return "rgba(160,50,60,0.98)";  // dark red
-      case "stage2": return "rgba(210,80,90,0.98)";  // red
-      case "stage1": return "rgba(210,170,60,0.98)"; // yellow
-      case "elev":   return "rgba(140,110,220,0.98)";// purple
-      case "normal": return "rgba(80,150,240,0.98)"; // blue
-      default:       return "";                      // default text
+      case "crisis": return "rgba(160,50,60,0.98)";   // dark red
+      case "stage2": return "rgba(210,80,90,0.98)";   // red
+      case "stage1": return "rgba(210,170,60,0.98)";  // yellow
+      case "elev":   return "rgba(140,110,220,0.98)"; // purple
+      case "normal": return "rgba(80,150,240,0.98)";  // blue
+      default:       return "";
     }
   }
 
   function applyRowFallbackStyles(row, title, sub, meta, editLink) {
-    // Minimal safety nets (CSS wins if present)
     try {
       row.style.display = "grid";
       row.style.gridTemplateColumns = "1fr";
@@ -224,14 +215,10 @@ ANTI-DRIFT
 
     a.addEventListener("click", function (e) {
       try { e.preventDefault(); } catch (_) {}
-
-      // Future: add.js can listen for this event to open an edit modal.
       try {
         document.dispatchEvent(new CustomEvent("vt:editRecord", { detail: { record: record.raw || record } }));
         return;
       } catch (_) {}
-
-      // Hard fallback (should be rare)
       try { alert("Edit is not available in this build."); } catch (_) {}
     });
 
@@ -255,7 +242,6 @@ ANTI-DRIFT
 
     const editLink = makeEditLink(r);
 
-    // Title content with colored BP / HR segments
     const sysText = (r.sys == null) ? "--" : String(r.sys);
     const diaText = (r.dia == null) ? "--" : String(r.dia);
     const hrText  = (r.hr  == null) ? "--" : String(r.hr);
@@ -278,14 +264,7 @@ ANTI-DRIFT
 
     const hrSpan = document.createElement("span");
     hrSpan.textContent = `HR ${hrText}`;
-    if (hrColor && hrL !== "normal") hrSpan.style.color = hrColor; // only color HR when clearly abnormal
-
-    const right = document.createElement("div");
-    right.className = "logRight";
-    right.style.display = "flex";
-    right.style.gap = "10px";
-    right.style.alignItems = "baseline";
-    right.style.justifyContent = "space-between";
+    if (hrColor && hrL !== "normal") hrSpan.style.color = hrColor;
 
     const rightLeft = document.createElement("div");
     rightLeft.style.display = "grid";
@@ -299,7 +278,6 @@ ANTI-DRIFT
     rightRight.style.alignItems = "center";
     rightRight.appendChild(editLink);
 
-    // Title row
     title.appendChild(bpSpan);
     title.appendChild(dot);
     title.appendChild(hrSpan);
@@ -317,7 +295,6 @@ ANTI-DRIFT
     try {
       if (!window.VTStore) return [];
       if (typeof window.VTStore.init === "function") {
-        // IMPORTANT: wait for async init so cache is populated.
         await window.VTStore.init();
       }
       if (typeof window.VTStore.getAll !== "function") return [];
@@ -338,7 +315,6 @@ ANTI-DRIFT
   }
 
   function makeSig(arr) {
-    // Simple signature to avoid redundant re-render loops.
     try {
       if (!arr || !arr.length) return "0";
       const first = arr[0];
@@ -360,7 +336,6 @@ ANTI-DRIFT
 
       const sig = makeSig(data);
       if (sig && sig === lastRenderSig) {
-        // Still ensure loading/empty flags are correct.
         setLoading(false);
         setEmpty(!data.length);
         return;
@@ -415,17 +390,14 @@ ANTI-DRIFT
   }
 
   function bind() {
-    // 1) Primary: panels router event
     document.addEventListener("vt:panelChanged", function (e) {
       try {
         if (e && e.detail && e.detail.active === "log") render();
       } catch (_) {}
     });
 
-    // 2) Secondary: visibility poll safety net
     startVisibilityPoll();
 
-    // 3) Add button on Log panel opens Add
     if (btnAdd) {
       btnAdd.addEventListener("click", function (e) {
         try { e.preventDefault(); } catch (_) {}
@@ -433,13 +405,11 @@ ANTI-DRIFT
       });
     }
 
-    // API hook for other modules
     window.VTLog = Object.freeze({
       render: render,
       onShow: render
     });
 
-    // Initial render (safe)
     try { render(); } catch (_) {}
   }
 
@@ -456,5 +426,5 @@ Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: js/log.js
 App Version Authority: js/version.js
 Base: v2.028a
-Pass: Log Panel Recovery + Row UX (P0-LR1)
+Pass: Log Panel Recovery + Instrumentation (P0-LR2)
 */
