@@ -1097,4 +1097,3 @@ GOAL (per user request)
   }
 
 })();
-```0
