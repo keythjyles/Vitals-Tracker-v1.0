@@ -1,18 +1,27 @@
+/* File: js/log.js */
 /*
 Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
 File: js/log.js
 App Version Authority: js/version.js
 Base: v2.028a
-Pass: Log Panel Recovery + Instrumentation (P0-LR3)
+Pass: Log Panel UX + Edit Prefill (P0-LR5)
 
 CHANGE (THIS EDIT ONLY)
-- Advance marker to "test message 2"
-- When empty, print a one-line pipeline status so we can see:
-  store present? init ok? rawLen? keptLen? firstTs?
+1) Edit link layout:
+   - "Edit" is right-aligned on the SAME line as the BP/HR readings.
+2) Edit behavior:
+   - Clicking Edit opens the Add/Edit panel prefilled with the record data,
+     INCLUDING the original timestamp (ts) so saving does NOT create a new time.
+   - We keep the existing vt:editRecord event for compatibility and ALSO attempt
+     direct panel open if available.
+3) Notes wrapping:
+   - Notes/meta field wraps (no single-line truncation requirement).
+   - Safe long-word wrapping enabled.
 
 ANTI-DRIFT
-- No UI/layout changes beyond empty-state text.
-- No changes to swipe/panels/other modules.
+- No swipe/gesture/panel engine changes.
+- No chart changes.
+- No storage/store changes.
 */
 
 (function () {
@@ -34,17 +43,6 @@ ANTI-DRIFT
 
   function safeText(v) {
     try { return (v == null) ? "" : String(v); } catch (_) { return ""; }
-  }
-
-  function clampStr(s, max) {
-    try {
-      if (s == null) return "";
-      const t = String(s);
-      if (!max) return t;
-      return t.length > max ? (t.slice(0, max - 1) + "…") : t;
-    } catch (_) {
-      return "";
-    }
   }
 
   function parseTs(v) {
@@ -124,9 +122,7 @@ ANTI-DRIFT
   function setEmpty(on, msg) {
     if (!emptyEl) return;
     emptyEl.hidden = !on;
-    if (on) {
-      emptyEl.textContent = msg || "test message 2";
-    }
+    if (on) emptyEl.textContent = msg || "No readings yet.";
   }
 
   function sysLevel(sys) {
@@ -171,7 +167,8 @@ ANTI-DRIFT
     }
   }
 
-  function applyRowFallbackStyles(row, title, sub, meta, editLink) {
+  function applyRowFallbackStyles(row, headRow, tsEl, notesEl, editLink, leftReadings) {
+    // Card
     try {
       row.style.display = "grid";
       row.style.gridTemplateColumns = "1fr";
@@ -182,33 +179,75 @@ ANTI-DRIFT
       row.style.background = "rgba(0,0,0,0.12)";
     } catch (_) {}
 
+    // Header row (readings + edit)
     try {
-      title.style.fontWeight = "800";
-      title.style.letterSpacing = ".1px";
-      title.style.color = "rgba(255,255,255,0.86)";
-      title.style.fontSize = "14px";
+      headRow.style.display = "flex";
+      headRow.style.alignItems = "center";
+      headRow.style.justifyContent = "space-between";
+      headRow.style.gap = "10px";
     } catch (_) {}
 
     try {
-      sub.style.color = "rgba(255,255,255,0.56)";
-      sub.style.fontSize = "12px";
+      leftReadings.style.fontWeight = "800";
+      leftReadings.style.letterSpacing = ".1px";
+      leftReadings.style.color = "rgba(255,255,255,0.86)";
+      leftReadings.style.fontSize = "14px";
+      leftReadings.style.display = "inline-flex";
+      leftReadings.style.alignItems = "baseline";
+      leftReadings.style.flexWrap = "wrap";
+      leftReadings.style.gap = "0px";
     } catch (_) {}
 
+    // Timestamp
     try {
-      meta.style.color = "rgba(255,255,255,0.66)";
-      meta.style.fontSize = "12px";
-      meta.style.lineHeight = "1.25";
+      tsEl.style.color = "rgba(255,255,255,0.56)";
+      tsEl.style.fontSize = "12px";
     } catch (_) {}
 
+    // Notes wrap
+    try {
+      notesEl.style.color = "rgba(255,255,255,0.66)";
+      notesEl.style.fontSize = "12px";
+      notesEl.style.lineHeight = "1.25";
+      notesEl.style.whiteSpace = "normal";
+      notesEl.style.overflowWrap = "anywhere";
+      notesEl.style.wordBreak = "break-word";
+    } catch (_) {}
+
+    // Edit link
     try {
       editLink.style.color = "rgba(80,150,240,0.98)";
       editLink.style.textDecoration = "underline";
       editLink.style.fontWeight = "700";
       editLink.style.fontSize = "13px";
+      editLink.style.flex = "0 0 auto";
+      editLink.style.marginLeft = "10px";
     } catch (_) {}
   }
 
-  function makeEditLink(record) {
+  function openEditPrefilled(payload) {
+    // payload should include original ts
+    try {
+      if (window.VTPanels && typeof window.VTPanels.openAdd === "function") {
+        // Best-effort: pass data; openAdd may ignore args if not supported.
+        window.VTPanels.openAdd({ mode: "edit", record: payload });
+        return true;
+      }
+    } catch (_) {}
+
+    try {
+      if (window.VTPanels && typeof window.VTPanels.go === "function") {
+        window.VTPanels.go("add", true);
+        // Fire event so Add panel can prefill even if go() is used.
+        try { document.dispatchEvent(new CustomEvent("vt:editRecord", { detail: { record: payload } })); } catch (_) {}
+        return true;
+      }
+    } catch (_) {}
+
+    return false;
+  }
+
+  function makeEditLink(recordNorm) {
     const a = document.createElement("a");
     a.href = "#";
     a.className = "logEditLink";
@@ -216,10 +255,29 @@ ANTI-DRIFT
 
     a.addEventListener("click", function (e) {
       try { e.preventDefault(); } catch (_) {}
+
+      // Build a canonical payload that preserves the original timestamp.
+      // IMPORTANT: We never generate a new time here.
+      const payload = {
+        ts: recordNorm.ts,
+        sys: recordNorm.sys,
+        dia: recordNorm.dia,
+        hr: recordNorm.hr,
+        notes: recordNorm.notes,
+        // Also include raw for maximum compatibility with existing listeners.
+        raw: recordNorm.raw || null
+      };
+
+      // 1) Always dispatch compatibility event (existing app behavior).
       try {
-        document.dispatchEvent(new CustomEvent("vt:editRecord", { detail: { record: record.raw || record } }));
-        return;
+        document.dispatchEvent(new CustomEvent("vt:editRecord", { detail: { record: payload } }));
       } catch (_) {}
+
+      // 2) Attempt to open the add/edit panel prefilled.
+      const opened = openEditPrefilled(payload);
+      if (opened) return;
+
+      // Fallback
       try { alert("Edit is not available in this build."); } catch (_) {}
     });
 
@@ -230,16 +288,12 @@ ANTI-DRIFT
     const row = document.createElement("div");
     row.className = "logRow";
 
-    const title = document.createElement("div");
-    title.className = "logTitle";
+    // Header row: readings (left) + edit (right)
+    const headRow = document.createElement("div");
+    headRow.className = "logHeadRow";
 
-    const sub = document.createElement("div");
-    sub.className = "logSub";
-    sub.textContent = fmtTs(r.ts);
-
-    const meta = document.createElement("div");
-    meta.className = "logMeta";
-    meta.textContent = clampStr(r.notes, 180);
+    const leftReadings = document.createElement("div");
+    leftReadings.className = "logTitle";
 
     const editLink = makeEditLink(r);
 
@@ -267,70 +321,42 @@ ANTI-DRIFT
     hrSpan.textContent = `HR ${hrText}`;
     if (hrColor && hrL !== "normal") hrSpan.style.color = hrColor;
 
-    const rightLeft = document.createElement("div");
-    rightLeft.style.display = "grid";
-    rightLeft.style.gap = "2px";
-    rightLeft.appendChild(sub);
-    rightLeft.appendChild(meta);
+    leftReadings.appendChild(bpSpan);
+    leftReadings.appendChild(dot);
+    leftReadings.appendChild(hrSpan);
 
-    const rightRight = document.createElement("div");
-    rightRight.style.display = "flex";
-    rightRight.style.justifyContent = "flex-end";
-    rightRight.style.alignItems = "center";
-    rightRight.appendChild(editLink);
+    headRow.appendChild(leftReadings);
+    headRow.appendChild(editLink);
 
-    title.appendChild(bpSpan);
-    title.appendChild(dot);
-    title.appendChild(hrSpan);
+    // Timestamp
+    const tsEl = document.createElement("div");
+    tsEl.className = "logSub";
+    tsEl.textContent = fmtTs(r.ts);
 
-    row.appendChild(title);
-    row.appendChild(rightLeft);
-    row.appendChild(rightRight);
+    // Notes (wrap)
+    const notesEl = document.createElement("div");
+    notesEl.className = "logMeta";
+    notesEl.textContent = safeText(r.notes);
 
-    applyRowFallbackStyles(row, title, sub, meta, editLink);
+    row.appendChild(headRow);
+    row.appendChild(tsEl);
+    row.appendChild(notesEl);
+
+    applyRowFallbackStyles(row, headRow, tsEl, notesEl, editLink, leftReadings);
 
     return row;
   }
 
   async function getDataAsync() {
-    const out = {
-      storePresent: false,
-      initOk: false,
-      rawLen: 0,
-      keptLen: 0,
-      firstRawTs: null,
-      firstKeptTs: null,
-      data: []
-    };
-
     try {
-      out.storePresent = !!window.VTStore;
-
-      if (!window.VTStore) return out;
-
+      if (!window.VTStore) return [];
       if (typeof window.VTStore.init === "function") {
-        try {
-          await window.VTStore.init();
-          out.initOk = true;
-        } catch (_) {
-          out.initOk = false;
-        }
-      } else {
-        out.initOk = true;
+        await window.VTStore.init();
       }
-
-      if (typeof window.VTStore.getAll !== "function") return out;
+      if (typeof window.VTStore.getAll !== "function") return [];
 
       const raw = window.VTStore.getAll() || [];
-      if (!Array.isArray(raw)) return out;
-
-      out.rawLen = raw.length;
-
-      // Try to capture a hint of the raw timestamp shape
-      if (raw.length) {
-        const r0 = raw[0];
-        out.firstRawTs = safeText(r0 && (r0.ts ?? r0.time ?? r0.timestamp ?? r0.date ?? r0.iso));
-      }
+      if (!Array.isArray(raw)) return [];
 
       const norm = [];
       for (const rr of raw) {
@@ -338,14 +364,9 @@ ANTI-DRIFT
         if (n.ts == null) continue;
         norm.push(n);
       }
-
-      out.keptLen = norm.length;
-      if (norm.length) out.firstKeptTs = norm[0].ts;
-
-      out.data = norm;
-      return out;
+      return norm;
     } catch (_) {
-      return out;
+      return [];
     }
   }
 
@@ -380,18 +401,12 @@ ANTI-DRIFT
     try {
       setLoading(true);
 
-      const info = await getDataAsync();
-      const data = (info.data || []).slice().sort((a, b) => b.ts - a.ts);
+      const data = (await getDataAsync()).slice().sort((a, b) => b.ts - a.ts);
 
       const sig = makeSig(data);
       if (sig && sig === lastRenderSig) {
         setLoading(false);
-        if (!data.length) {
-          const msg = `test message 2 | store:${info.storePresent ? "YES" : "NO"} | init:${info.initOk ? "OK" : "NO"} | rawLen:${info.rawLen} | keptLen:${info.keptLen} | firstRawTs:${safeText(info.firstRawTs)}`;
-          setEmpty(true, msg);
-        } else {
-          setEmpty(false);
-        }
+        setEmpty(!data.length);
         return;
       }
       lastRenderSig = sig;
@@ -400,8 +415,7 @@ ANTI-DRIFT
 
       if (!data.length) {
         setLoading(false);
-        const msg = `test message 2 | store:${info.storePresent ? "YES" : "NO"} | init:${info.initOk ? "OK" : "NO"} | rawLen:${info.rawLen} | keptLen:${info.keptLen} | firstRawTs:${safeText(info.firstRawTs)}`;
-        setEmpty(true, msg);
+        setEmpty(true);
         return;
       }
 
@@ -468,5 +482,5 @@ Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: js/log.js
 App Version Authority: js/version.js
 Base: v2.028a
-Pass: Log Panel Recovery + Instrumentation (P0-LR3)
+Pass: Log Panel UX + Edit Prefill (P0-LR5)
 */
