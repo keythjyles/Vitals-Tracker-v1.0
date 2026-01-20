@@ -18,6 +18,12 @@ Implementation:
 - Keep swipeEnd animation behavior intact for touch gestures.
 - Preserve cancellable commit logic to prevent snap-backs.
 
+ADDED (RECOVERY / HARDENING)
+- Auto-initialize panels routing if app.js fails to call VTPanels.init().
+- Bind critical nav buttons here as a last-resort fallback:
+  (Add/Home/Settings buttons on Charts + Log, Home buttons, Settings Back)
+- Ensure VTStore.init() is called before Log/Charts onShow render, so records load.
+
 ANTI-DRIFT:
 - No changes to gesture detection here; only panel routing behavior.
 */
@@ -83,6 +89,14 @@ ANTI-DRIFT:
     } catch (_) {}
   }
 
+  async function ensureStoreReadyForRender() {
+    try {
+      if (window.VTStore && typeof window.VTStore.init === "function") {
+        await window.VTStore.init();
+      }
+    } catch (_) {}
+  }
+
   function setActivePanel(name) {
     Object.keys(panels).forEach(k => {
       panels[k] && panels[k].classList.remove("active");
@@ -91,9 +105,19 @@ ANTI-DRIFT:
     const p = panels[name];
     p && p.classList.add("active");
 
+    // Ensure storage is initialized before renderers run.
+    // Do NOT block navigation; kick init then render.
     try {
-      if (name === "charts" && window.VTChart?.onShow) window.VTChart.onShow();
-      if (name === "log" && window.VTLog?.onShow) window.VTLog.onShow();
+      if (name === "charts") {
+        ensureStoreReadyForRender().then(() => {
+          try { window.VTChart?.onShow?.(); } catch (_) {}
+        });
+      }
+      if (name === "log") {
+        ensureStoreReadyForRender().then(() => {
+          try { window.VTLog?.onShow?.(); } catch (_) {}
+        });
+      }
     } catch (_) {}
 
     dispatchPanelChanged(name);
@@ -310,15 +334,108 @@ ANTI-DRIFT:
     }, 280);
   }
 
+  function bindOnce(el, key, handler, opts) {
+    if (!el) return;
+    const k = `vtBound_${key}`;
+    try {
+      if (el.dataset && el.dataset[k] === "1") return;
+      if (el.dataset) el.dataset[k] = "1";
+    } catch (_) {}
+    el.addEventListener("click", handler, opts || false);
+  }
+
+  function bindNavFallbacks() {
+    // HOME
+    bindOnce(document.getElementById("btnGoCharts"), "goCharts", (e) => {
+      try { e.preventDefault(); } catch (_) {}
+      go("charts");
+    });
+    bindOnce(document.getElementById("btnGoLog"), "goLog", (e) => {
+      try { e.preventDefault(); } catch (_) {}
+      go("log");
+    });
+    bindOnce(document.getElementById("btnGoAdd"), "goAddHome", (e) => {
+      try { e.preventDefault(); } catch (_) {}
+      openAdd();
+    });
+
+    // CHARTS header
+    bindOnce(document.getElementById("btnAddFromCharts"), "addCharts", (e) => {
+      try { e.preventDefault(); } catch (_) {}
+      openAdd();
+    });
+    bindOnce(document.getElementById("btnHomeFromCharts"), "homeCharts", (e) => {
+      try { e.preventDefault(); } catch (_) {}
+      go("home");
+    });
+    bindOnce(document.getElementById("btnSettingsFromCharts"), "settingsCharts", (e) => {
+      try { e.preventDefault(); } catch (_) {}
+      openSettings();
+    });
+
+    // LOG header
+    bindOnce(document.getElementById("btnAddFromLog"), "addLog", (e) => {
+      try { e.preventDefault(); } catch (_) {}
+      openAdd();
+    });
+    bindOnce(document.getElementById("btnHomeFromLog"), "homeLog", (e) => {
+      try { e.preventDefault(); } catch (_) {}
+      go("home");
+    });
+    bindOnce(document.getElementById("btnSettingsFromLog"), "settingsLog", (e) => {
+      try { e.preventDefault(); } catch (_) {}
+      openSettings();
+    });
+
+    // SETTINGS
+    bindOnce(document.getElementById("btnBackFromSettings"), "backSettings", (e) => {
+      try { e.preventDefault(); } catch (_) {}
+      closeSettings();
+    });
+
+    // HOME alt settings icon (if present)
+    bindOnce(document.getElementById("btnSettingsHomeAlt"), "settingsHomeAlt", (e) => {
+      try { e.preventDefault(); } catch (_) {}
+      openSettings();
+    });
+
+    // ADD home/back button (if present)
+    bindOnce(document.getElementById("btnHomeFromAdd"), "homeFromAddFallback", (e) => {
+      // add.js also binds; this is a safe fallback
+      try { e.preventDefault(); } catch (_) {}
+      closeAdd();
+    });
+  }
+
+  let didInit = false;
+
   function init() {
     cacheDom();
     cancelPendingCommit();
+
     currentPanel = "home";
     lastMainPanel = "home";
     inSettings = false;
     inAdd = false;
     setDragMode(false);
+
+    bindNavFallbacks();
+
     go("home");
+
+    didInit = true;
+  }
+
+  // Auto-init (recovery) if app.js forgot to call VTPanels.init()
+  function autoInitIfNeeded() {
+    if (didInit) return;
+    try {
+      cacheDom();
+      // only init if core DOM is present
+      if (deck.root && deck.track && panels.home && panels.charts && panels.log) {
+        init();
+      }
+    } catch (_) {}
   }
 
   window.VTPanels = Object.freeze({
@@ -338,6 +455,12 @@ ANTI-DRIFT:
     getRotationIndex,
     showByRotationIndex
   });
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", autoInitIfNeeded, { passive: true });
+  } else {
+    autoInitIfNeeded();
+  }
 
 })();
 
