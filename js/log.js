@@ -1,3 +1,4 @@
+/* File: js/log.js */
 /*
 Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
 File: js/log.js
@@ -122,8 +123,33 @@ ANTI-DRIFT: No swipe logic here.
     }
   }
 
+  function hasRealCssForLogRow(row) {
+    // We only apply fallback styling if CSS appears not to be styling the row.
+    // Heuristic: if computed padding/border-radius remains at default-ish values, CSS likely missing.
+    try {
+      const cs = window.getComputedStyle(row);
+      if (!cs) return false;
+
+      const padL = parseFloat(cs.paddingLeft || "0") || 0;
+      const padT = parseFloat(cs.paddingTop || "0") || 0;
+      const br   = parseFloat(cs.borderTopLeftRadius || "0") || 0;
+
+      // If padding or radius is present, assume CSS is active.
+      if (padL >= 6 || padT >= 6 || br >= 8) return true;
+
+      // If a border is present, assume CSS is active.
+      if (cs.borderTopWidth && cs.borderTopWidth !== "0px") return true;
+
+      return false;
+    } catch (_) {
+      return false;
+    }
+  }
+
   function applyRowFallbackStyles(row, left, title, sub, right) {
-    // If your CSS defines these classes, it will win. These are minimal safety nets.
+    // Only apply if CSS is NOT taking control.
+    if (hasRealCssForLogRow(row)) return;
+
     try {
       row.style.display = "grid";
       row.style.gridTemplateColumns = "1fr";
