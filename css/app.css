@@ -1,28 +1,8 @@
-/* 
-Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
-File: css/app.css
-App Version Authority: js/version.js
-Base: v2.026a
-Pass: UI Layout Consistency (P1-L1)
-Pass order: File 1 of 1
-Prev file: (n/a)
-Next file: (n/a)
-
-CHANGE (CSS ONLY)
-1) Force a consistent top-right Settings button position on Home/Charts/Log:
-   - The icon button is pinned to the top-right of the screen header area.
-   - Header layout becomes position:relative; title stays left; right container fills.
-2) Home bottom buttons layout:
-   - The 3 “bottom” buttons on Home are kept on a single row, evenly spaced,
-     and positioned underneath the Log button (i.e., after the Log button in the stack).
-   - This targets .homeRow (existing markup) and improves spacing without changing HTML.
-3) Log panel density:
-   - Define .logRow layout, spacing, and typography so JS fallback does not drive appearance.
-   - Make log list feel “tighter” and more readable.
-
-ANTI-DRIFT
-- No JS changes.
-- No DOM/HTML edits.
+/* File: css/app.css */
+/*
+Purpose of this header: verification metadata for this edit (not instructions).
+Edited: 2026-01-20
+Change focus: Add/Edit UI expanded styles for Distress + Meds + popup selector and Settings med list.
 */
 
 :root{
@@ -80,18 +60,11 @@ button{
   color:inherit;
 }
 
-button:focus{
-  outline:none;
-}
+button:focus{ outline:none; }
 
-canvas{
-  display:block;
-}
+canvas{ display:block; }
 
-/* ==============================
-   App Shell
-   ============================== */
-
+/* App Shell */
 .app-root{
   width:100%;
   height:100%;
@@ -99,10 +72,7 @@ canvas{
   flex-direction:column;
 }
 
-/* ==============================
-   Top Bar
-   ============================== */
-
+/* Top Bar */
 .topbar{
   display:flex;
   align-items:center;
@@ -146,10 +116,7 @@ canvas{
   box-shadow:var(--shadowInset);
 }
 
-/* ==============================
-   Deck / Panels
-   ============================== */
-
+/* Deck / Panels */
 .deck{
   flex:1;
   position:relative;
@@ -190,10 +157,7 @@ canvas{
   overflow:hidden;
 }
 
-/* ==============================
-   Screen Header
-   ============================== */
-
+/* Screen Header */
 .screenHeader{
   position:relative;
   display:flex;
@@ -221,14 +185,9 @@ canvas{
   right:0;
 }
 
-.screenHeaderRight .pillBtn{
-  margin-right:8px;
-}
+.screenHeaderRight .pillBtn{ margin-right:8px; }
 
-/* ==============================
-   Buttons
-   ============================== */
-
+/* Buttons */
 .primaryBtn,
 .ghostBtn,
 .miniBtn,
@@ -245,38 +204,22 @@ canvas{
   box-shadow:var(--shadowInset);
 }
 
-.primaryBtn{
-  background:linear-gradient(180deg, #3a63a6, #24457e);
-}
-
-.ghostBtn{
-  background:rgba(255,255,255,.06);
-}
-
+.primaryBtn{ background:linear-gradient(180deg, #3a63a6, #24457e); }
+.ghostBtn{ background:rgba(255,255,255,.06); }
 .miniBtn{
   min-height:42px;
   font-size:14px;
   background:rgba(255,255,255,.06);
 }
-
-.pillBtn{
-  background:rgba(255,255,255,.08);
-}
-
-.dangerBtn{
-  background:linear-gradient(180deg, #7a3340, #55222c);
-}
-
+.pillBtn{ background:rgba(255,255,255,.08); }
+.dangerBtn{ background:linear-gradient(180deg, #7a3340, #55222c); }
 .iconBtn{
   width:var(--touchTarget);
   padding:0;
   background:rgba(255,255,255,.06);
 }
 
-/* ==============================
-   Home Panel
-   ============================== */
-
+/* Home */
 .homeButtons{
   display:flex;
   flex-direction:column;
@@ -298,10 +241,6 @@ canvas{
   min-width:0;
 }
 
-.homeRow > button:only-child{
-  flex:0 0 auto;
-}
-
 .homeHint{
   margin-top:auto;
   font-size:14px;
@@ -316,10 +255,7 @@ canvas{
   margin-top:8px;
 }
 
-/* ==============================
-   Charts Panel
-   ============================== */
-
+/* Charts */
 .chartCard{
   flex:1;
   min-height:0;
@@ -353,13 +289,8 @@ canvas{
   color:var(--muted);
 }
 
-/* ==============================
-   Log Panel
-   ============================== */
-
-#logLoading{
-  margin-bottom:8px;
-}
+/* Log */
+#logLoading{ margin-bottom:8px; }
 
 .logList{
   flex:1;
@@ -379,9 +310,7 @@ canvas{
   box-shadow:var(--shadowInset);
 }
 
-.logRow + .logRow{
-  margin-top:10px;
-}
+.logRow + .logRow{ margin-top:10px; }
 
 .logMain{
   display:grid;
@@ -420,10 +349,7 @@ canvas{
   margin-top:20px;
 }
 
-/* ==============================
-   Settings Panel
-   ============================== */
-
+/* Settings */
 .settingsBody{
   display:flex;
   flex-direction:column;
@@ -444,14 +370,75 @@ canvas{
   justify-content:space-between;
 }
 
-.muted{
-  color:var(--muted);
+.settingsH{
+  font-weight:700;
+  letter-spacing:.12px;
+  margin-bottom:6px;
 }
 
-/* ==============================
-   Add Panel
-   ============================== */
+.settingsHint{
+  font-size:13px;
+  margin-bottom:10px;
+}
 
+.settingsRow{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+.settingsInput{
+  flex:1;
+  min-width:0;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid var(--stroke2);
+  background:rgba(10,16,30,.55);
+  color:var(--text);
+  box-shadow:var(--shadowInset);
+}
+
+.settingsList{
+  margin-top:10px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.settingsItem{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:10px 10px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,0.12);
+  background:rgba(0,0,0,0.10);
+  box-shadow:var(--shadowInset);
+}
+
+.settingsItemName{
+  font-weight:650;
+  color:rgba(255,255,255,0.86);
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.settingsItemBtn{
+  min-height:42px;
+  padding:0 14px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  font-weight:650;
+  box-shadow:var(--shadowInset);
+}
+
+.settingsItemBtn.danger{
+  background:rgba(180,60,80,.22);
+}
+
+/* Add Panel */
 .addBody{
   flex:1;
   min-height:0;
@@ -491,9 +478,7 @@ canvas{
   color:rgba(235,245,255,.38);
 }
 
-.addForm{
-  display:block;
-}
+.addForm{ display:block; }
 
 .addGrid{
   display:flex;
@@ -513,35 +498,235 @@ canvas{
   letter-spacing:.2px;
 }
 
-.addInput,
-.addTextArea{
-  width:100%;
-  padding:10px 12px;
-  border-radius:12px;
-  border:1px solid var(--stroke2);
-  background:rgba(10,16,30,.55);
-  color:var(--text);
-  box-shadow:var(--shadowInset);
-}
-
-.addInput::placeholder,
-.addTextArea::placeholder{
-  color:rgba(235,245,255,.38);
-}
-
 .addTextArea{
   min-height:86px;
   resize:vertical;
 }
 
-.addNotes{
+.addSection{
+  margin-top:6px;
+  padding-top:10px;
+  border-top:1px solid rgba(255,255,255,0.10);
+}
+
+.addSectionH{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:8px;
+}
+
+.addSectionTitle{
+  font-weight:750;
+  letter-spacing:.12px;
+  color:rgba(255,255,255,0.86);
+}
+
+.addSectionHint{
+  font-size:12px;
+  color:var(--muted2);
+}
+
+.distressRow{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.distressBtn{
+  min-height:42px;
+  padding:0 14px;
+  border-radius:999px;
+  background:rgba(255,255,255,.07);
+  box-shadow:var(--shadowInset);
+  font-weight:750;
+}
+
+.distressBtn.active{
+  background:rgba(80,140,220,.22);
+  border:1px solid rgba(180,210,255,.22);
+}
+
+.tagList{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.tagChip{
+  padding:8px 10px;
+  border-radius:999px;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow:var(--shadowInset);
+  font-size:12px;
+  font-weight:650;
+  color:rgba(255,255,255,0.86);
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.tagChip button{
+  width:22px;
+  height:22px;
+  border-radius:999px;
+  background:rgba(180,60,80,.16);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:var(--shadowInset);
+}
+
+.medsRow{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+.medsRow input{
+  flex:1;
+  min-width:0;
+}
+
+.medsAddBtn{
+  min-height:42px;
+  padding:0 14px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  font-weight:750;
+  box-shadow:var(--shadowInset);
+}
+
+/* Popup overlay (Distress descriptors) */
+.vtOverlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.55);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  z-index:9999;
+}
+
+.vtOverlay.show{ display:flex; }
+
+.vtModal{
+  width:min(680px, 100%);
+  max-height:min(78vh, 720px);
+  overflow:hidden;
+  border-radius:22px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02)),
+    rgba(10,16,30,.86);
+  border:1px solid rgba(180,210,255,.22);
+  box-shadow:0 18px 60px rgba(0,0,0,.55);
+  display:flex;
+  flex-direction:column;
+}
+
+.vtModalHead{
+  padding:14px 14px 10px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  border-bottom:1px solid rgba(255,255,255,0.10);
+}
+
+.vtModalTitle{
+  font-size:16px;
+  font-weight:800;
+  letter-spacing:.12px;
+}
+
+.vtModalSub{
+  font-size:12px;
+  color:var(--muted);
   margin-top:2px;
 }
 
-/* ==============================
-   Loading Pills / Spacers
-   ============================== */
+.vtModalBody{
+  padding:12px 14px;
+  overflow:auto;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
 
+.vtPickItem{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:10px 10px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,0.12);
+  background:rgba(0,0,0,0.12);
+  box-shadow:var(--shadowInset);
+}
+
+.vtPickItemLeft{
+  min-width:0;
+}
+
+.vtPickItemName{
+  font-weight:750;
+  color:rgba(255,255,255,0.86);
+}
+
+.vtPickItemDesc{
+  font-size:12px;
+  color:rgba(235,245,255,.56);
+  margin-top:2px;
+}
+
+.vtToggle{
+  width:48px;
+  min-height:32px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  box-shadow:var(--shadowInset);
+  position:relative;
+  flex:0 0 auto;
+}
+
+.vtToggle::after{
+  content:"";
+  position:absolute;
+  top:4px;
+  left:4px;
+  width:24px;
+  height:24px;
+  border-radius:999px;
+  background:rgba(235,245,255,.70);
+  transition:transform .14s ease;
+}
+
+.vtToggle.on{
+  background:rgba(80,140,220,.25);
+}
+
+.vtToggle.on::after{
+  transform:translateX(16px);
+}
+
+.vtModalFoot{
+  padding:12px 14px;
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
+  border-top:1px solid rgba(255,255,255,0.10);
+}
+
+.vtModalFoot .pillBtn{
+  min-height:42px;
+}
+
+/* Loading pills / spacers */
 .loadingPill{
   align-self:flex-start;
   padding:6px 12px;
@@ -553,17 +738,8 @@ canvas{
 }
 
 .chartFooterSpacer,
-.logFooterSpacer{
-  height:6px;
-}
+.logFooterSpacer{ height:6px; }
 
-/* 
-Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
-File: css/app.css
-App Version Authority: js/version.js
-Base: v2.026a
-Pass: UI Layout Consistency (P1-L1)
-Pass order: File 1 of 1
-Prev file: (n/a)
-Next file: (n/a)
-*/
+.muted{ color:var(--muted); }
+
+/* EOF: css/app.css (verified: added styles for distress + meds + popup + settings list) */
