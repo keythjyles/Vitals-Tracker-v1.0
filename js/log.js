@@ -3,14 +3,16 @@ Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
 File: js/log.js
 App Version Authority: js/version.js
 Base: v2.028a
-Pass: Log Panel Recovery + Instrumentation (P0-LR2)
+Pass: Log Panel Recovery + Instrumentation (P0-LR3)
 
 CHANGE (THIS EDIT ONLY)
-- Replace empty-state copy "No readings yet." with "test message 1"
-  so we can confirm the correct file is loading on-device.
+- Advance marker to "test message 2"
+- When empty, print a one-line pipeline status so we can see:
+  store present? init ok? rawLen? keptLen? firstTs?
 
 ANTI-DRIFT
-- No other logic changes in this step.
+- No UI/layout changes beyond empty-state text.
+- No changes to swipe/panels/other modules.
 */
 
 (function () {
@@ -119,12 +121,11 @@ ANTI-DRIFT
     loadingEl.style.display = on ? "" : "none";
   }
 
-  function setEmpty(on) {
+  function setEmpty(on, msg) {
     if (!emptyEl) return;
     emptyEl.hidden = !on;
     if (on) {
-      // Instrumentation marker
-      emptyEl.textContent = "test message 1";
+      emptyEl.textContent = msg || "test message 2";
     }
   }
 
@@ -292,15 +293,44 @@ ANTI-DRIFT
   }
 
   async function getDataAsync() {
+    const out = {
+      storePresent: false,
+      initOk: false,
+      rawLen: 0,
+      keptLen: 0,
+      firstRawTs: null,
+      firstKeptTs: null,
+      data: []
+    };
+
     try {
-      if (!window.VTStore) return [];
+      out.storePresent = !!window.VTStore;
+
+      if (!window.VTStore) return out;
+
       if (typeof window.VTStore.init === "function") {
-        await window.VTStore.init();
+        try {
+          await window.VTStore.init();
+          out.initOk = true;
+        } catch (_) {
+          out.initOk = false;
+        }
+      } else {
+        out.initOk = true;
       }
-      if (typeof window.VTStore.getAll !== "function") return [];
+
+      if (typeof window.VTStore.getAll !== "function") return out;
 
       const raw = window.VTStore.getAll() || [];
-      if (!Array.isArray(raw)) return [];
+      if (!Array.isArray(raw)) return out;
+
+      out.rawLen = raw.length;
+
+      // Try to capture a hint of the raw timestamp shape
+      if (raw.length) {
+        const r0 = raw[0];
+        out.firstRawTs = safeText(r0 && (r0.ts ?? r0.time ?? r0.timestamp ?? r0.date ?? r0.iso));
+      }
 
       const norm = [];
       for (const rr of raw) {
@@ -308,9 +338,14 @@ ANTI-DRIFT
         if (n.ts == null) continue;
         norm.push(n);
       }
-      return norm;
+
+      out.keptLen = norm.length;
+      if (norm.length) out.firstKeptTs = norm[0].ts;
+
+      out.data = norm;
+      return out;
     } catch (_) {
-      return [];
+      return out;
     }
   }
 
@@ -325,6 +360,19 @@ ANTI-DRIFT
     }
   }
 
+  function openAddFromLog() {
+    try {
+      if (window.VTPanels && typeof window.VTPanels.openAdd === "function") {
+        window.VTPanels.openAdd();
+        return;
+      }
+      if (window.VTPanels && typeof window.VTPanels.go === "function") {
+        window.VTPanels.go("add", true);
+        return;
+      }
+    } catch (_) {}
+  }
+
   async function render() {
     if (renderInFlight) return;
     renderInFlight = true;
@@ -332,12 +380,18 @@ ANTI-DRIFT
     try {
       setLoading(true);
 
-      const data = (await getDataAsync()).slice().sort((a, b) => b.ts - a.ts);
+      const info = await getDataAsync();
+      const data = (info.data || []).slice().sort((a, b) => b.ts - a.ts);
 
       const sig = makeSig(data);
       if (sig && sig === lastRenderSig) {
         setLoading(false);
-        setEmpty(!data.length);
+        if (!data.length) {
+          const msg = `test message 2 | store:${info.storePresent ? "YES" : "NO"} | init:${info.initOk ? "OK" : "NO"} | rawLen:${info.rawLen} | keptLen:${info.keptLen} | firstRawTs:${safeText(info.firstRawTs)}`;
+          setEmpty(true, msg);
+        } else {
+          setEmpty(false);
+        }
         return;
       }
       lastRenderSig = sig;
@@ -346,7 +400,8 @@ ANTI-DRIFT
 
       if (!data.length) {
         setLoading(false);
-        setEmpty(true);
+        const msg = `test message 2 | store:${info.storePresent ? "YES" : "NO"} | init:${info.initOk ? "OK" : "NO"} | rawLen:${info.rawLen} | keptLen:${info.keptLen} | firstRawTs:${safeText(info.firstRawTs)}`;
+        setEmpty(true, msg);
         return;
       }
 
@@ -360,19 +415,6 @@ ANTI-DRIFT
     } finally {
       renderInFlight = false;
     }
-  }
-
-  function openAddFromLog() {
-    try {
-      if (window.VTPanels && typeof window.VTPanels.openAdd === "function") {
-        window.VTPanels.openAdd();
-        return;
-      }
-      if (window.VTPanels && typeof window.VTPanels.go === "function") {
-        window.VTPanels.go("add", true);
-        return;
-      }
-    } catch (_) {}
   }
 
   function startVisibilityPoll() {
@@ -426,5 +468,5 @@ Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: js/log.js
 App Version Authority: js/version.js
 Base: v2.028a
-Pass: Log Panel Recovery + Instrumentation (P0-LR2)
+Pass: Log Panel Recovery + Instrumentation (P0-LR3)
 */
