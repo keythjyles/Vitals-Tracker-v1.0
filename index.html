@@ -1,12 +1,8 @@
+<!-- File: index.html -->
 <!--
-Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
-File: index.html
-App Version Authority: js/version.js (do not hardcode versions here)
-Base: v2.027a
-Pass: Add-as-Modal (P1)
-Pass order: File 2 of 7 (P1)
-Prev file: js/version.js (File 1 of 7)
-Next file: css/app.css (File 3 of 7)
+Purpose of this header: verification metadata for this edit (not instructions).
+Edited: 2026-01-20
+Change focus: add Settings module (med name list) and keep Add/Edit + Distress/Meds wiring.
 -->
 
 <!doctype html>
@@ -17,15 +13,12 @@ Next file: css/app.css (File 3 of 7)
   <meta name="theme-color" content="#0b1324" />
   <title>Vitals Tracker</title>
 
-  <!-- PWA -->
   <link rel="manifest" id="manifestLink" href="manifest.webmanifest" />
   <link rel="icon" href="icons/icon-192.png" sizes="192x192" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
 
-  <!-- App CSS (single source) -->
-  <link rel="stylesheet" href="css/app.css?v=20260119b" />
+  <link rel="stylesheet" href="css/app.css?v=20260120a" />
 
-  <!-- Minimal critical fallback (only for catastrophic CSS load failure) -->
   <style>
     html,body{height:100%;margin:0;background:#08101f;color:#eaf2ff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
     .noscript{padding:16px}
@@ -39,10 +32,8 @@ Next file: css/app.css (File 3 of 7)
     </div>
   </noscript>
 
-  <!-- App Shell -->
   <div id="appRoot" class="app-root">
 
-    <!-- Top Header -->
     <header class="topbar" id="topbar">
       <div class="brand">
         <div class="brandIcon" aria-hidden="true">
@@ -55,18 +46,15 @@ Next file: css/app.css (File 3 of 7)
       <div class="bootpill" id="bootText">BOOT…</div>
     </header>
 
-    <!-- Swipe Deck -->
     <main class="deck" id="panelDeck" aria-label="Vitals Tracker Panels">
       <div class="deckTrack" id="deckTrack">
 
-        <!-- PANEL: HOME -->
+        <!-- HOME -->
         <section class="panel active" id="panelHome" data-panel="home" aria-label="Home">
           <div class="screenFrame">
             <div class="screenHeader">
               <div class="screenTitle">Home</div>
-              <div class="screenHeaderRight">
-                <!-- Header Settings button removed (per lock-in) -->
-              </div>
+              <div class="screenHeaderRight"></div>
             </div>
 
             <div class="homeButtons">
@@ -102,7 +90,7 @@ Next file: css/app.css (File 3 of 7)
           </div>
         </section>
 
-        <!-- PANEL: CHARTS -->
+        <!-- CHARTS -->
         <section class="panel" id="panelCharts" data-panel="charts" aria-label="Charts">
           <div class="screenFrame">
             <div class="screenHeader">
@@ -133,7 +121,7 @@ Next file: css/app.css (File 3 of 7)
           </div>
         </section>
 
-        <!-- PANEL: LOG -->
+        <!-- LOG -->
         <section class="panel" id="panelLog" data-panel="log" aria-label="Log">
           <div class="screenFrame">
             <div class="screenHeader">
@@ -160,7 +148,7 @@ Next file: css/app.css (File 3 of 7)
           </div>
         </section>
 
-        <!-- PANEL: SETTINGS -->
+        <!-- SETTINGS -->
         <section class="panel" id="panelSettings" data-panel="settings" aria-label="Settings">
           <div class="screenFrame">
             <div class="screenHeader">
@@ -174,14 +162,27 @@ Next file: css/app.css (File 3 of 7)
               <div class="settingsCard">
                 <div class="settingsLine"><span class="muted">Version</span> <span id="settingsVersion">v?.???</span></div>
               </div>
+
               <div class="settingsCard">
-                <div class="muted">Settings are limited in this build.</div>
+                <div class="settingsH">Medication Names</div>
+                <div class="muted settingsHint">Used to prefill Add/Edit medication picker. Add/remove names here.</div>
+
+                <div class="settingsRow">
+                  <input id="inMedNameSetting" class="settingsInput" placeholder="e.g., Lisinopril" />
+                  <button id="btnAddMedNameSetting" class="pillBtn" type="button">Add</button>
+                </div>
+
+                <div id="medNameListSetting" class="settingsList" aria-label="Medication names list"></div>
+              </div>
+
+              <div class="settingsCard">
+                <div class="muted">Notes: Dosage remains in Notes (not structured).</div>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- PANEL: ADD (temporary; will become modal in next files) -->
+        <!-- ADD -->
         <section class="panel" id="panelAdd" data-panel="add" aria-label="Add Reading">
           <div class="screenFrame">
             <div class="screenHeader">
@@ -204,20 +205,24 @@ Next file: css/app.css (File 3 of 7)
     </main>
   </div>
 
-  <!-- Scripts (order matters) -->
-  <script src="js/version.js?v=20260119b"></script>
-  <script src="js/utils.js?v=20260119b"></script>
-  <script src="js/storage.js?v=20260119b"></script>
-  <script src="js/store.js?v=20260119b"></script>
-  <script src="js/state.js?v=20260119b"></script>
-  <script src="js/ui.js?v=20260119b"></script>
-  <script src="js/panels.js?v=20260119b"></script>
-  <script src="js/gestures.js?v=20260119b"></script>
-  <script src="js/chart.js?v=20260119b"></script>
-  <script src="js/log.js?v=20260119b"></script>
-  <script src="js/add.js?v=20260119b"></script>
-  <script src="js/pwa.js?v=20260119b"></script>
-  <script src="js/app.js?v=20260119b"></script>
+  <!-- Scripts -->
+  <script src="js/version.js?v=20260120a"></script>
+  <script src="js/utils.js?v=20260120a"></script>
+  <script src="js/storage.js?v=20260120a"></script>
+  <script src="js/store.js?v=20260120a"></script>
+  <script src="js/state.js?v=20260120a"></script>
+
+  <!-- NEW: Settings module -->
+  <script src="js/settings.js?v=20260120a"></script>
+
+  <script src="js/ui.js?v=20260120a"></script>
+  <script src="js/panels.js?v=20260120a"></script>
+  <script src="js/gestures.js?v=20260120a"></script>
+  <script src="js/chart.js?v=20260120a"></script>
+  <script src="js/log.js?v=20260120a"></script>
+  <script src="js/add.js?v=20260120a"></script>
+  <script src="js/pwa.js?v=20260120a"></script>
+  <script src="js/app.js?v=20260120a"></script>
 
   <script>
     (function(){
@@ -235,13 +240,4 @@ Next file: css/app.css (File 3 of 7)
 </body>
 </html>
 
-<!--
-Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
-File: index.html
-App Version Authority: js/version.js
-Base: v2.027a
-Pass: Add-as-Modal (P1)
-Pass order: File 2 of 7 (P1)
-Prev file: js/version.js (File 1 of 7)
-Next file: css/app.css (File 3 of 7)
--->
+<!-- EOF: index.html (verified: added js/settings.js + settings UI for med names) -->
