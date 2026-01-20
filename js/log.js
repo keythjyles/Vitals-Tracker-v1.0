@@ -2,31 +2,42 @@
 Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
 File: js/log.js
 App Version Authority: js/version.js
-Base: v2.027a
-Pass: Log Wiring + Severity Rendering (P1-L2)
-Pass order: Log file (standalone fix)
+Base: v2.028a
+Pass: Log Panel Recovery + Row UX (P0-LR1)
+Pass order: Log fix (focused)
 
-Changes (THIS FILE ONLY)
-1) Log renders with VTStore.getAll() whether sync OR async (Promise).
-2) Adds an "Edit" blue hyperlink per row (minimal; emits vt:logEditRequest).
-3) BP + HR values render in band-matched colors when in danger zones.
-4) Keeps existing defensive normalization and safe fallback styles.
-ANTI-DRIFT: No swipe logic here.
+GOALS (THIS FILE ONLY)
+1) Log must reliably show records (even when VTStore init is async).
+2) Log must re-render when Log becomes active.
+3) Log panel Add button must open Add panel.
+4) Each row gets a blue "Edit" hyperlink (future edit wiring).
+5) BP and HR values colorize based on danger bands (conservative rules).
+
+ANTI-DRIFT
+- No swipe logic.
+- No chart logic.
+- No schema expansion (meds/distress later).
 */
 
 (function () {
   "use strict";
 
+  const panelEl = document.getElementById("panelLog");
   const listEl = document.getElementById("logList");
   const emptyEl = document.getElementById("logEmpty");
   const loadingEl = document.getElementById("logLoading");
 
+  const btnAdd = document.getElementById("btnAddFromLog");
+
   if (!listEl) return;
 
-  let renderSeq = 0;
+  let renderInFlight = false;
+  let lastRenderSig = "";
+  let visPollTimer = 0;
+  let lastVisActive = false;
 
-  function clear() {
-    listEl.innerHTML = "";
+  function safeText(v) {
+    try { return (v == null) ? "" : String(v); } catch (_) { return ""; }
   }
 
   function clampStr(s, max) {
@@ -42,9 +53,7 @@ ANTI-DRIFT: No swipe logic here.
 
   function parseTs(v) {
     if (v == null) return null;
-    if (typeof v === "number" && Number.isFinite(v)) {
-      return (v > 1e12) ? v : Math.round(v * 1000);
-    }
+    if (typeof v === "number" && Number.isFinite(v)) return v;
     if (typeof v === "string") {
       const t = Date.parse(v);
       return Number.isFinite(t) ? t : null;
@@ -58,45 +67,44 @@ ANTI-DRIFT: No swipe logic here.
   }
 
   function normalize(r) {
+    if (!r || typeof r !== "object") return { ts: null, sys: null, dia: null, hr: null, notes: "", raw: r };
+
     const ts =
-      parseTs(r?.ts) ??
-      parseTs(r?.time) ??
-      parseTs(r?.timestamp) ??
-      parseTs(r?.date) ??
-      parseTs(r?.createdAt) ??
-      parseTs(r?.created_at) ??
-      parseTs(r?.iso);
+      parseTs(r.ts) ??
+      parseTs(r.time) ??
+      parseTs(r.timestamp) ??
+      parseTs(r.date) ??
+      parseTs(r.createdAt) ??
+      parseTs(r.created_at) ??
+      parseTs(r.iso);
 
     const sys =
-      num(r?.sys) ??
-      num(r?.systolic) ??
-      num(r?.sbp) ??
-      num(r?.SBP) ??
-      num(r?.bp?.sys) ??
-      num(r?.bp?.systolic);
+      num(r.sys) ??
+      num(r.systolic) ??
+      num(r.sbp) ??
+      num(r.SBP) ??
+      num(r.bp?.sys) ??
+      num(r.bp?.systolic);
 
     const dia =
-      num(r?.dia) ??
-      num(r?.diastolic) ??
-      num(r?.dbp) ??
-      num(r?.DBP) ??
-      num(r?.bp?.dia) ??
-      num(r?.bp?.diastolic);
+      num(r.dia) ??
+      num(r.diastolic) ??
+      num(r.dbp) ??
+      num(r.DBP) ??
+      num(r.bp?.dia) ??
+      num(r.bp?.diastolic);
 
     const hr =
-      num(r?.hr) ??
-      num(r?.heartRate) ??
-      num(r?.pulse) ??
-      num(r?.HR) ??
-      num(r?.vitals?.hr) ??
-      num(r?.vitals?.pulse);
+      num(r.hr) ??
+      num(r.heartRate) ??
+      num(r.pulse) ??
+      num(r.HR) ??
+      num(r.vitals?.hr) ??
+      num(r.vitals?.pulse);
 
-    const notes = (r?.notes ?? r?.note ?? r?.comment ?? r?.memo ?? "");
+    const notes = safeText(r.notes ?? r.note ?? r.comment ?? r.memo ?? "");
 
-    // Preserve a stable reference for edit requests (prefer id, else ts)
-    const id = (r?.id ?? r?._id ?? r?.key ?? null);
-
-    return { id, ts, sys, dia, hr, notes, _raw: r };
+    return { ts, sys, dia, hr, notes, raw: r };
   }
 
   function fmtTs(ts) {
@@ -108,82 +116,70 @@ ANTI-DRIFT: No swipe logic here.
     }
   }
 
-  function isPromise(x) {
-    return !!x && (typeof x === "object" || typeof x === "function") && typeof x.then === "function";
+  function clear() {
+    listEl.innerHTML = "";
   }
 
-  async function getDataAsync() {
-    try {
-      if (!window.VTStore || typeof window.VTStore.getAll !== "function") return [];
-      const got = window.VTStore.getAll();
-      const raw = isPromise(got) ? await got : got;
-      const arr = Array.isArray(raw) ? raw : [];
-      const norm = [];
-      for (const r of arr) {
-        const n = normalize(r);
-        if (n.ts == null) continue;
-        norm.push(n);
-      }
-      return norm;
-    } catch (_) {
-      return [];
+  function setLoading(on) {
+    if (!loadingEl) return;
+    loadingEl.style.display = on ? "" : "none";
+  }
+
+  function setEmpty(on) {
+    if (!emptyEl) return;
+    emptyEl.hidden = !on;
+  }
+
+  // ===== Danger band colors (aligned to chart palette intent) =====
+  // Sys bands: <120 blue, 120-129 purple, 130-139 yellow, 140-179 red, >=180 dark red
+  function sysLevel(sys) {
+    if (sys == null) return null;
+    if (sys >= 180) return "crisis";
+    if (sys >= 140) return "stage2";
+    if (sys >= 130) return "stage1";
+    if (sys >= 120) return "elev";
+    return "normal";
+  }
+
+  // Dia bands (conservative): <80 blue, 80-89 yellow, 90-119 red, >=120 dark red
+  function diaLevel(dia) {
+    if (dia == null) return null;
+    if (dia >= 120) return "crisis";
+    if (dia >= 90) return "stage2";
+    if (dia >= 80) return "stage1";
+    return "normal";
+  }
+
+  // HR (conservative): only flag clearly abnormal extremes.
+  function hrLevel(hr) {
+    if (hr == null) return null;
+    if (hr >= 120) return "stage2";
+    if (hr <= 45) return "elev";
+    return "normal";
+  }
+
+  function worstLevel(a, b) {
+    const rank = { crisis: 5, stage2: 4, stage1: 3, elev: 2, normal: 1 };
+    const ra = rank[a] || 0;
+    const rb = rank[b] || 0;
+    return (ra >= rb) ? a : b;
+  }
+
+  function colorForLevel(level) {
+    // Dark red, red, yellow, purple, blue (as requested).
+    // Using opaque text colors suitable for dark UI.
+    switch (level) {
+      case "crisis": return "rgba(160,50,60,0.98)";  // dark red
+      case "stage2": return "rgba(210,80,90,0.98)";  // red
+      case "stage1": return "rgba(210,170,60,0.98)"; // yellow
+      case "elev":   return "rgba(140,110,220,0.98)";// purple
+      case "normal": return "rgba(80,150,240,0.98)"; // blue
+      default:       return "";                      // default text
     }
   }
 
-  // Band colors (match chart scheme)
-  const BAND = Object.freeze({
-    crisis: "rgba(120,20,32,0.95)",   // dark red
-    stage2: "rgba(190,60,75,0.95)",   // red
-    stage1: "rgba(200,160,40,0.95)",  // yellow
-    elevated: "rgba(140,95,200,0.95)",// purple
-    normal: "rgba(60,130,220,0.95)"   // blue
-  });
-
-  function bpBandColor(sys, dia) {
-    // Use the WORST of systolic and diastolic classification
-    // Systolic bands per your ledger: <120 blue, 120-129 purple, 130-139 yellow, 140-179 red, >=180 dark red
-    // Diastolic bands (clinical): <80 blue, 80-89 yellow, 90-119 red, >=120 dark red
-    function sysLevel(v) {
-      if (v == null) return 0;
-      if (v >= 180) return 4;
-      if (v >= 140) return 3;
-      if (v >= 130) return 2;
-      if (v >= 120) return 1;
-      return 0;
-    }
-    function diaLevel(v) {
-      if (v == null) return 0;
-      if (v >= 120) return 4;
-      if (v >= 90) return 3;
-      if (v >= 80) return 2;
-      // we treat 70-79 as normal (blue) to avoid over-labeling
-      return 0;
-    }
-    const lvl = Math.max(sysLevel(sys), diaLevel(dia));
-    if (lvl >= 4) return BAND.crisis;
-    if (lvl === 3) return BAND.stage2;
-    if (lvl === 2) return BAND.stage1;
-    if (lvl === 1) return BAND.elevated;
-    return BAND.normal;
-  }
-
-  function hrBandColor(hr) {
-    // Practical, non-alarming bands; still uses your 5-color palette.
-    // Normal: 60–99 (blue)
-    // Elevated: 100–109 or 55–59 (purple)
-    // Stage 1: 110–129 or 50–54 (yellow)
-    // Stage 2: 130–149 or 45–49 (red)
-    // Crisis: >=150 or <=44 (dark red)
-    if (hr == null) return "rgba(235,245,255,0.86)";
-    if (hr >= 150 || hr <= 44) return BAND.crisis;
-    if (hr >= 130 || hr <= 49) return BAND.stage2;
-    if (hr >= 110 || hr <= 54) return BAND.stage1;
-    if (hr >= 100 || hr <= 59) return BAND.elevated;
-    return BAND.normal;
-  }
-
-  function applyRowFallbackStyles(row, head, title, sub, notes, edit) {
-    // Minimal safety nets (do not override if CSS exists)
+  function applyRowFallbackStyles(row, title, sub, meta, editLink) {
+    // Minimal safety nets (CSS wins if present)
     try {
       row.style.display = "grid";
       row.style.gridTemplateColumns = "1fr";
@@ -195,166 +191,270 @@ ANTI-DRIFT: No swipe logic here.
     } catch (_) {}
 
     try {
-      head.style.display = "flex";
-      head.style.alignItems = "baseline";
-      head.style.justifyContent = "space-between";
-      head.style.gap = "10px";
-    } catch (_) {}
-
-    try {
       title.style.fontWeight = "800";
       title.style.letterSpacing = ".1px";
       title.style.color = "rgba(255,255,255,0.86)";
       title.style.fontSize = "14px";
-      title.style.lineHeight = "1.15";
-    } catch (_) {}
-
-    try {
-      edit.style.fontSize = "13px";
-      edit.style.fontWeight = "700";
-      edit.style.textDecoration = "underline";
-      edit.style.color = "rgba(60,130,220,0.95)"; // blue hyperlink
-      edit.style.cursor = "pointer";
-      edit.style.whiteSpace = "nowrap";
-      edit.style.userSelect = "none";
-      edit.style.webkitUserSelect = "none";
     } catch (_) {}
 
     try {
       sub.style.color = "rgba(255,255,255,0.56)";
       sub.style.fontSize = "12px";
-      sub.style.marginTop = "2px";
     } catch (_) {}
 
     try {
-      notes.style.color = "rgba(255,255,255,0.66)";
-      notes.style.fontSize = "12px";
-      notes.style.lineHeight = "1.25";
+      meta.style.color = "rgba(255,255,255,0.66)";
+      meta.style.fontSize = "12px";
+      meta.style.lineHeight = "1.25";
+    } catch (_) {}
+
+    try {
+      editLink.style.color = "rgba(80,150,240,0.98)";
+      editLink.style.textDecoration = "underline";
+      editLink.style.fontWeight = "700";
+      editLink.style.fontSize = "13px";
     } catch (_) {}
   }
 
-  function emitEditRequest(rec) {
-    try {
-      const detail = {
-        // prefer id; fall back to ts
-        id: rec.id ?? null,
-        ts: rec.ts ?? null,
-        record: rec._raw ?? null
-      };
-      document.dispatchEvent(new CustomEvent("vt:logEditRequest", { detail }));
-    } catch (_) {}
+  function makeEditLink(record) {
+    const a = document.createElement("a");
+    a.href = "#";
+    a.className = "logEditLink";
+    a.textContent = "Edit";
+
+    a.addEventListener("click", function (e) {
+      try { e.preventDefault(); } catch (_) {}
+
+      // Future: add.js can listen for this event to open an edit modal.
+      try {
+        document.dispatchEvent(new CustomEvent("vt:editRecord", { detail: { record: record.raw || record } }));
+        return;
+      } catch (_) {}
+
+      // Hard fallback (should be rare)
+      try { alert("Edit is not available in this build."); } catch (_) {}
+    });
+
+    return a;
   }
 
   function renderRow(r) {
     const row = document.createElement("div");
     row.className = "logRow";
 
-    const head = document.createElement("div");
-    head.className = "logHead";
-
     const title = document.createElement("div");
     title.className = "logTitle";
-
-    const sysTxt = (r.sys ?? "--");
-    const diaTxt = (r.dia ?? "--");
-    const hrTxt = (r.hr ?? "--");
-
-    // Build title with per-part coloring
-    const bpColor = bpBandColor(r.sys, r.dia);
-    const hrColor = hrBandColor(r.hr);
-
-    // Title structure: BP ####/###  •  HR ##
-    title.innerHTML = `
-      <span class="logBP" style="color:${bpColor}">BP ${sysTxt}/${diaTxt}</span>
-      <span style="color:rgba(235,245,255,0.72)">  •  </span>
-      <span class="logHR" style="color:${hrColor}">HR ${hrTxt}</span>
-    `;
-
-    const edit = document.createElement("a");
-    edit.className = "logEdit";
-    edit.href = "#";
-    edit.textContent = "Edit";
-    edit.addEventListener("click", function (e) {
-      try { e.preventDefault(); } catch (_) {}
-      emitEditRequest(r);
-    });
-
-    head.appendChild(title);
-    head.appendChild(edit);
 
     const sub = document.createElement("div");
     sub.className = "logSub";
     sub.textContent = fmtTs(r.ts);
 
-    const notes = document.createElement("div");
-    notes.className = "logMeta";
-    notes.textContent = clampStr(r.notes, 220);
+    const meta = document.createElement("div");
+    meta.className = "logMeta";
+    meta.textContent = clampStr(r.notes, 180);
 
-    row.appendChild(head);
-    row.appendChild(sub);
-    row.appendChild(notes);
+    const editLink = makeEditLink(r);
 
-    // Fallback styling (safe)
-    applyRowFallbackStyles(row, head, title, sub, notes, edit);
+    // Title content with colored BP / HR segments
+    const sysText = (r.sys == null) ? "--" : String(r.sys);
+    const diaText = (r.dia == null) ? "--" : String(r.dia);
+    const hrText  = (r.hr  == null) ? "--" : String(r.hr);
+
+    const sysL = sysLevel(r.sys);
+    const diaL = diaLevel(r.dia);
+    const bpL = worstLevel(sysL, diaL);
+    const hrL = hrLevel(r.hr);
+
+    const bpColor = colorForLevel(bpL);
+    const hrColor = colorForLevel(hrL);
+
+    const bpSpan = document.createElement("span");
+    bpSpan.textContent = `BP ${sysText}/${diaText}`;
+    if (bpColor) bpSpan.style.color = bpColor;
+
+    const dot = document.createElement("span");
+    dot.textContent = "  •  ";
+    dot.style.color = "rgba(255,255,255,0.52)";
+
+    const hrSpan = document.createElement("span");
+    hrSpan.textContent = `HR ${hrText}`;
+    if (hrColor && hrL !== "normal") hrSpan.style.color = hrColor; // only color HR when clearly abnormal
+
+    const right = document.createElement("div");
+    right.className = "logRight";
+    right.style.display = "flex";
+    right.style.gap = "10px";
+    right.style.alignItems = "baseline";
+    right.style.justifyContent = "space-between";
+
+    const rightLeft = document.createElement("div");
+    rightLeft.style.display = "grid";
+    rightLeft.style.gap = "2px";
+    rightLeft.appendChild(sub);
+    rightLeft.appendChild(meta);
+
+    const rightRight = document.createElement("div");
+    rightRight.style.display = "flex";
+    rightRight.style.justifyContent = "flex-end";
+    rightRight.style.alignItems = "center";
+    rightRight.appendChild(editLink);
+
+    // Title row
+    title.appendChild(bpSpan);
+    title.appendChild(dot);
+    title.appendChild(hrSpan);
+
+    row.appendChild(title);
+    row.appendChild(rightLeft);
+    row.appendChild(rightRight);
+
+    applyRowFallbackStyles(row, title, sub, meta, editLink);
 
     return row;
   }
 
-  async function render() {
-    const mySeq = ++renderSeq;
-
+  async function getDataAsync() {
     try {
-      if (loadingEl) loadingEl.style.display = "";
-    } catch (_) {}
+      if (!window.VTStore) return [];
+      if (typeof window.VTStore.init === "function") {
+        // IMPORTANT: wait for async init so cache is populated.
+        await window.VTStore.init();
+      }
+      if (typeof window.VTStore.getAll !== "function") return [];
 
-    let data = [];
-    try {
-      data = await getDataAsync();
+      const raw = window.VTStore.getAll() || [];
+      if (!Array.isArray(raw)) return [];
+
+      const norm = [];
+      for (const rr of raw) {
+        const n = normalize(rr);
+        if (n.ts == null) continue;
+        norm.push(n);
+      }
+      return norm;
     } catch (_) {
-      data = [];
-    }
-
-    // If another render started after this one, abort to avoid flicker
-    if (mySeq !== renderSeq) return;
-
-    try {
-      if (loadingEl) loadingEl.style.display = "none";
-    } catch (_) {}
-
-    data = data.slice().sort((a, b) => b.ts - a.ts);
-    clear();
-
-    if (!data.length) {
-      if (emptyEl) emptyEl.hidden = false;
-      return;
-    }
-    if (emptyEl) emptyEl.hidden = true;
-
-    for (const r of data) {
-      listEl.appendChild(renderRow(r));
+      return [];
     }
   }
 
-  // Preferred: panels router emits vt:panelChanged
-  document.addEventListener("vt:panelChanged", function (e) {
+  function makeSig(arr) {
+    // Simple signature to avoid redundant re-render loops.
     try {
-      if (e?.detail?.active === "log") render();
+      if (!arr || !arr.length) return "0";
+      const first = arr[0];
+      const last = arr[arr.length - 1];
+      return `${arr.length}|${first.ts}|${last.ts}`;
+    } catch (_) {
+      return "";
+    }
+  }
+
+  async function render() {
+    if (renderInFlight) return;
+    renderInFlight = true;
+
+    try {
+      setLoading(true);
+
+      const data = (await getDataAsync()).slice().sort((a, b) => b.ts - a.ts);
+
+      const sig = makeSig(data);
+      if (sig && sig === lastRenderSig) {
+        // Still ensure loading/empty flags are correct.
+        setLoading(false);
+        setEmpty(!data.length);
+        return;
+      }
+      lastRenderSig = sig;
+
+      clear();
+
+      if (!data.length) {
+        setLoading(false);
+        setEmpty(true);
+        return;
+      }
+
+      setEmpty(false);
+
+      for (const r of data) {
+        listEl.appendChild(renderRow(r));
+      }
+
+      setLoading(false);
+    } finally {
+      renderInFlight = false;
+    }
+  }
+
+  function openAddFromLog() {
+    try {
+      if (window.VTPanels && typeof window.VTPanels.openAdd === "function") {
+        window.VTPanels.openAdd();
+        return;
+      }
+      if (window.VTPanels && typeof window.VTPanels.go === "function") {
+        window.VTPanels.go("add", true);
+        return;
+      }
     } catch (_) {}
-  });
+  }
 
-  // Refresh after saves (add.js calls VTLog.onShow)
-  window.VTLog = Object.freeze({
-    render,
-    onShow: render
-  });
+  function startVisibilityPoll() {
+    if (visPollTimer) return;
+    visPollTimer = window.setInterval(() => {
+      try {
+        const active = !!panelEl && panelEl.classList.contains("active");
+        if (active && !lastVisActive) {
+          lastVisActive = true;
+          render();
+        }
+        if (!active) lastVisActive = false;
+      } catch (_) {}
+    }, 350);
+  }
 
-  // Safe initial render (even if hidden)
-  try { render(); } catch (_) {}
+  function bind() {
+    // 1) Primary: panels router event
+    document.addEventListener("vt:panelChanged", function (e) {
+      try {
+        if (e && e.detail && e.detail.active === "log") render();
+      } catch (_) {}
+    });
+
+    // 2) Secondary: visibility poll safety net
+    startVisibilityPoll();
+
+    // 3) Add button on Log panel opens Add
+    if (btnAdd) {
+      btnAdd.addEventListener("click", function (e) {
+        try { e.preventDefault(); } catch (_) {}
+        openAddFromLog();
+      });
+    }
+
+    // API hook for other modules
+    window.VTLog = Object.freeze({
+      render: render,
+      onShow: render
+    });
+
+    // Initial render (safe)
+    try { render(); } catch (_) {}
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bind, { passive: true });
+  } else {
+    bind();
+  }
 
 })();
 
 /*
 Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: js/log.js
-Pass: Log Wiring + Severity Rendering (P1-L2)
+App Version Authority: js/version.js
+Base: v2.028a
+Pass: Log Panel Recovery + Row UX (P0-LR1)
 */
