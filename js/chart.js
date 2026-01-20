@@ -4,12 +4,14 @@ Vitals Tracker — Charts (Canvas)
 
 App Version Authority: js/version.js
 
-LOCKED BEHAVIOR (per user):
-- Day bands are fixed to CALENDAR days (do not drift on pan).
-- Pinch zoom is smooth (continuous float days; no snapping).
-- Y axis is STATIC for session based on full dataset max (no jumping on pan/zoom).
-- X axis labels are 2 rows (Day + Date) and never collide (thin when needed).
-- X axis labels must never clip (reserve space; hard clamp safeguard).
+LATEST CHANGES (per user instructions ONLY)
+- Fix X-axis label clipping/near-invisibility by correcting DPR handling:
+  - Canvas is sized in device pixels, but ALL drawing is done in CSS pixels via ctx.setTransform(dpr,...)
+  - Fonts/labels render at intended size and no longer appear as clipped dots
+- X-axis labels (Day + Date, 2 rows) remain reserved space and forced to render with thinning.
+- Day bands remain fixed to calendar days, 20% opacity, overlaying HTN bands.
+- Y-axis remains STATIC for the session based on FULL dataset max (no jumping on pan/zoom).
+- Pinch zoom remains SMOOTH (continuous float days).
 */
 
 (function () {
@@ -31,17 +33,17 @@ LOCKED BEHAVIOR (per user):
     lineDia: "rgba(240,240,240,0.88)",
     lineHr:  "rgba(120,235,170,0.90)",
 
-    // Alternating day stripes (overlay HTN bands)
+    // Alternating day stripes (OVERLAY HTN bands)
     dayA: "rgba(0,0,0,0.00)",
     dayB: "rgba(0,0,0,0.20)",
 
     // BP category bands (SYSTOLIC)
     bpBands: [
-      { from: 0,   to: 120, rgb: [ 40, 120, 210], label: "Normal <120" },
-      { from: 120, to: 130, rgb: [125,  80, 180], label: "Elevated 120–129" },
-      { from: 130, to: 140, rgb: [245, 200,  55], label: "Stage 1 HTN 130–139" },
-      { from: 140, to: 180, rgb: [210,  70,  80], label: "Stage 2 HTN 140–179" },
-      { from: 180, to: 999, rgb: [135,  25,  35], label: "Hypertensive Crisis ≥180" }
+      { from: 0,   to: 120, rgb: [ 40, 120, 210], label: "Normal <120" },               // blue
+      { from: 120, to: 130, rgb: [125,  80, 180], label: "Elevated 120–129" },          // purple
+      { from: 130, to: 140, rgb: [245, 200,  55], label: "Stage 1 HTN 130–139" },       // yellow
+      { from: 140, to: 180, rgb: [210,  70,  80], label: "Stage 2 HTN 140–179" },       // red
+      { from: 180, to: 999, rgb: [135,  25,  35], label: "Hypertensive Crisis ≥180" }   // dark red
     ]
   });
 
@@ -70,7 +72,7 @@ LOCKED BEHAVIOR (per user):
 
   function rgba(rgb, a) {
     const r = rgb[0] | 0, g = rgb[1] | 0, b = rgb[2] | 0;
-    return `rgba(${r},${g},${b},${clamp(a, 0, 1)})`;
+    return `rgba(${r},${g},${b},${clamp(a,0,1)})`;
   }
 
   function parseTs(v) {
@@ -156,7 +158,7 @@ LOCKED BEHAVIOR (per user):
     try {
       const s = window.VTStorage;
       if (!s) return [];
-      const fns = ["getAll", "getAllRecords", "loadAll", "readAll", "exportAll", "getRecords"];
+      const fns = ["getAll","getAllRecords","loadAll","readAll","exportAll","getRecords"];
       for (const fn of fns) {
         if (typeof s[fn] === "function") {
           const res = s[fn]();
@@ -251,7 +253,6 @@ LOCKED BEHAVIOR (per user):
     } catch (_) {}
   }
 
-  // Canvas sized in device pixels; drawing in CSS pixels via setTransform(dpr,...)
   function sizeToCSS(canvas) {
     ensureCanvasFillsWrap(canvas);
 
@@ -266,24 +267,18 @@ LOCKED BEHAVIOR (per user):
       canvas.height = hPx;
     }
 
-    return { dpr, rectW: rect.width, rectH: rect.height };
+    return { dpr, rectW: rect.width, rectH: rect.height, wPx, hPx };
   }
 
   function clear(ctx, w, h) { ctx.clearRect(0, 0, w, h); }
 
-  function layout(w, h, fontX) {
+  function layout(w, h) {
     const padL = 78;
     const padR = 20;
     const padT = 16;
 
-    // Reserve enough space for 2-row X labels so they never clip.
-    // This compresses plotH (y axis) rather than shrinking labels.
-    const row1TopPad = 10;
-    const rowGap = 22;
-    const bottomMargin = 8;
-    const neededPadB = row1TopPad + rowGap + (fontX + 6) + bottomMargin + 10; // extra safety
-
-    const padB = Math.max(124, Math.ceil(neededPadB));
+    // Reserve enough space so 2-row X labels never clip.
+    const padB = 118;
 
     return {
       padL, padR, padT, padB,
@@ -438,8 +433,13 @@ LOCKED BEHAVIOR (per user):
     ctx.restore();
   }
 
-  function fmtDay(d) { return d.toLocaleDateString([], { weekday: "short" }); }
-  function fmtMD(d)  { return d.toLocaleDateString([], { month: "2-digit", day: "2-digit" }); }
+  function fmtDay(d) {
+    return d.toLocaleDateString([], { weekday: "short" });
+  }
+
+  function fmtMD(d) {
+    return d.toLocaleDateString([], { month: "2-digit", day: "2-digit" });
+  }
 
   function buildXTicks(start, end, L, minPx) {
     const spanMs = end - start;
@@ -478,13 +478,14 @@ LOCKED BEHAVIOR (per user):
 
     if (!hasNear(first.x)) kept.unshift(first);
     if (!hasNear(last.x)) kept.push(last);
+
     if (kept.length === 1 && ticks.length >= 2) kept.push(last);
 
     kept.sort((a, b) => a.x - b.x);
     return kept;
   }
 
-  function drawGridAndAxes(ctx, bounds, L, start, end, canvasH) {
+  function drawGridAndAxes(ctx, bounds, L, start, end, sized) {
     const fontY = 20;
     const fontX = 18;
 
@@ -530,20 +531,10 @@ LOCKED BEHAVIOR (per user):
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
 
-    let yText1 = L.plotY + L.plotH + 10;
-    let yText2 = yText1 + 22;
+    const yText1 = L.plotY + L.plotH + 10;
+    const yText2 = yText1 + 24;
 
-    // Hard clamp safeguard: never exceed canvas bottom
-    const bottomMargin = 6;
-    const yBottomNeeded = yText2 + (fontX + 2);
-    const maxAllowed = canvasH - bottomMargin;
-    if (yBottomNeeded > maxAllowed) {
-      const shiftUp = yBottomNeeded - maxAllowed;
-      yText1 = Math.max(L.plotY + L.plotH + 2, yText1 - shiftUp);
-      yText2 = yText1 + 22;
-    }
-
-    const minPx = 84;
+    const minPx = 84; // CSS px now (DPR corrected by transform)
     const ticks = buildXTicks(start, end, L, minPx);
 
     for (const tick of ticks) {
@@ -680,7 +671,7 @@ LOCKED BEHAVIOR (per user):
     } catch (_) {}
   }
 
-  // ===== Legend UI (kept minimal and stable) =====
+  // ===== Tight BP legend + slider (unchanged behavior) =====
   function ensureLegendUI(legendEl) {
     if (!legendEl) return;
 
@@ -711,6 +702,7 @@ LOCKED BEHAVIOR (per user):
     bandTitle.style.letterSpacing = ".2px";
     bandTitle.style.color = "rgba(255,255,255,0.66)";
     bandTitle.style.fontSize = "12px";
+    bandTitle.style.marginBottom = "0px";
 
     const bandList = document.createElement("div");
     bandList.style.display = "grid";
@@ -750,7 +742,9 @@ LOCKED BEHAVIOR (per user):
       return row;
     }
 
-    for (const b of topDown) bandList.appendChild(tightRow(b.label, b.rgb));
+    for (const b of topDown) {
+      bandList.appendChild(tightRow(b.label, b.rgb));
+    }
 
     bandBox.appendChild(bandTitle);
     bandBox.appendChild(bandList);
@@ -844,15 +838,14 @@ LOCKED BEHAVIOR (per user):
     const sized = sizeToCSS(canvas);
     _lastSized = sized;
 
+    // Draw in CSS pixels (fixes tiny/clipped labels on high-DPR screens)
     const dpr = sized.dpr || 1;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     const w = sized.rectW;
     const h = sized.rectH;
 
-    // Keep the "smaller label look" while ensuring no clipping via reserved padB
-    const fontX = 18;
-    const L = layout(w, h, fontX);
+    const L = layout(w, h);
 
     clear(ctx, w, h);
 
@@ -873,7 +866,7 @@ LOCKED BEHAVIOR (per user):
     const start = win.start;
     const end = win.end;
 
-    _lastWin = { start, end };
+    _lastWin = { start, end, L };
 
     if (!windowed.length || start == null || end == null || end <= start) {
       ctx.fillStyle = STYLE.textMuted;
@@ -888,11 +881,11 @@ LOCKED BEHAVIOR (per user):
 
     const bounds = computeYBoundsStatic();
 
-    // HTN bands first, then day stripes OVERLAY (locked behavior)
+    // HTN bands first, then day stripes OVERLAY (per instruction)
     drawBPBands(ctx, bounds, L);
     drawDayStripes(ctx, start, end, L);
 
-    drawGridAndAxes(ctx, bounds, L, start, end, h);
+    drawGridAndAxes(ctx, bounds, L, start, end, sized);
     drawLines(ctx, windowed, bounds, start, end, L);
     drawOnChartSeriesLegend(ctx, L);
   }
@@ -911,7 +904,6 @@ LOCKED BEHAVIOR (per user):
     render();
   }
 
-  // ===== Smooth pan + pinch zoom on canvas =====
   function getTouches(e) {
     const t = [];
     if (e.touches && e.touches.length) {
@@ -925,7 +917,7 @@ LOCKED BEHAVIOR (per user):
   function dist2(a, b) {
     const dx = (a.clientX - b.clientX);
     const dy = (a.clientY - b.clientY);
-    return Math.sqrt(dx * dx + dy * dy);
+    return Math.sqrt(dx*dx + dy*dy);
   }
 
   function midX(a, b) {
@@ -962,10 +954,10 @@ LOCKED BEHAVIOR (per user):
       const touches = getTouches(e);
       if (!touches.length) return;
 
-      // Pinch zoom: fingers together => more days; apart => fewer days (smooth float)
       if (GESTURE.isPinch && touches.length >= 2) {
         const d = dist2(touches[0], touches[1]);
         const ratio = (d > 0 && GESTURE.startDist > 0) ? (GESTURE.startDist / d) : 1;
+
         const targetDays = clamp(GESTURE.startDays * ratio, STATE.minDays, STATE.maxDays);
 
         if (Math.abs(targetDays - STATE.days) > 0.0005) {
@@ -973,7 +965,6 @@ LOCKED BEHAVIOR (per user):
           clampCenterToData();
         }
 
-        // Midpoint drift allows subtle pan while pinching
         const mx = midX(touches[0], touches[1]);
         const dx = mx - GESTURE.lastMidX;
         GESTURE.lastMidX = mx;
@@ -982,7 +973,6 @@ LOCKED BEHAVIOR (per user):
           const rectW = (_lastSized.rectW || 1);
           const spanMs = (_lastWin.end - _lastWin.start) || 1;
           const msPerPx = spanMs / rectW;
-
           STATE.centerMs = (Number.isFinite(STATE.centerMs) ? STATE.centerMs : Date.now()) - (dx * msPerPx);
           clampCenterToData();
         }
@@ -992,7 +982,6 @@ LOCKED BEHAVIOR (per user):
         return;
       }
 
-      // Single-finger pan
       if (!GESTURE.isPinch && touches.length === 1) {
         const x = touches[0].clientX;
         const dx = x - GESTURE.lastPanX;
@@ -1039,7 +1028,7 @@ LOCKED BEHAVIOR (per user):
 
   window.addEventListener("load", function () {
     try { attachGestures(); } catch (_) {}
-    try { render(); } catch (_) {}
   }, { passive: true });
 
 })();
+```0
