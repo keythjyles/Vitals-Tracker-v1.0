@@ -5,24 +5,20 @@ Vitals Tracker — Charts (Canvas)
 App Version Authority: js/version.js
 
 GOAL (per user request)
-- Retain the current look (v2.021-style) while restoring:
+- Retain the current look while ensuring:
   1) Smooth pinch zoom (continuous) from 1 day to 14 days.
-  2) Smooth one-finger pan left/right within the dataset (no overscroll past data range).
-  3) BP horizontal bands that MATCH the ledger (same order/colors):
-     - Hypertensive Crisis (>=180) = dark red
-     - Stage 2 (140–179) = red
-     - Stage 1 (130–139) = yellow
-     - Elevated (120–129) = purple
-     - Normal (<120) = blue
-  4) Vertical day stripes that OVERLAY the BP bands and STICK to calendar days while scrolling.
-  5) X-axis labels always visible (2 rows: Day + Date), never clipped; collision-safe thinning.
-  6) Y-axis static for the session based on FULL dataset max (no jumping while panning/zooming).
-  7) HTN ledger under chart is ~50% current height (tight rows/padding).
-  8) Band opacity default 60% with slider control.
-
-NOTES
-- This file does NOT write to storage.
-- This file does NOT own swipe logic/panels.
+  2) Smooth one-finger pan within dataset (no overscroll past data range).
+  3) BP horizontal bands match ledger order/colors.
+  4) Vertical day stripes overlay BP bands and STICK to calendar days while scrolling.
+  5) X-axis labels:
+     - Centered on the DAY (not the boundary)
+     - 2 rows (Day + Date)
+     - Never draw outside the chart area
+     - Collision-safe thinning
+  6) Y-axis static for the session based on FULL dataset max (no jumping).
+  7) Reduce wasted padding (left of Y labels and under chart) without clipping labels.
+  8) Reduce line thickness to 75% of prior setting.
+  9) Labels not overly bold/thick.
 */
 
 (function () {
@@ -93,6 +89,7 @@ NOTES
     return `rgba(${r},${g},${b},${clamp(a,0,1)})`;
   }
 
+  // ===== Data extraction (tolerant) =====
   function parseTs(v) {
     if (v == null) return null;
     if (typeof v === "number" && Number.isFinite(v)) {
@@ -262,6 +259,7 @@ NOTES
     return [];
   }
 
+  // ===== Canvas sizing/layout =====
   function ensureCanvasFillsWrap(canvas) {
     try {
       canvas.style.width = "100%";
@@ -284,23 +282,19 @@ NOTES
       canvas.height = h;
     }
 
-    // critical: map drawing space to CSS pixels so text/lines render at correct sizes
-    if (ctx) {
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
+    if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    return { dpr, rectW: rect.width, rectH: rect.height, pxW: rect.width, pxH: rect.height };
+    return { dpr, pxW: rect.width, pxH: rect.height };
   }
 
-  function clear(ctx, w, h) { ctx.clearRect(0, 0, w, h); }
-
   function layout(pxW, pxH) {
-    const padL = 60;
-    const padR = 18;
-    const padT = 14;
+    // Reduced left padding per request (Y labels are max 3 digits)
+    const padL = 46;
+    const padR = 14;
+    const padT = 12;
 
-    // IMPORTANT: extra bottom padding so 2-row X labels never clip
-    const padB = 86;
+    // Reduced bottom padding (but still enough for 2-line X labels)
+    const padB = 64;
 
     return {
       padL, padR, padT, padB,
@@ -321,6 +315,7 @@ NOTES
     return L.plotX + ((ts - start) / (end - start)) * L.plotW;
   }
 
+  // ===== Bounds/window =====
   function computeDatasetBounds(data) {
     if (!data.length) return { min: null, max: null };
     return { min: data[0].ts, max: data[data.length - 1].ts };
@@ -400,6 +395,7 @@ NOTES
     return { windowed, start, end };
   }
 
+  // ===== Drawing helpers =====
   function startOfDay(ms) {
     const d = new Date(ms);
     d.setHours(0, 0, 0, 0);
@@ -464,61 +460,60 @@ NOTES
     return d.toLocaleDateString([], { month: "2-digit", day: "2-digit" });
   }
 
-  function buildXTicks(start, end, L, minPx) {
-    const spanMs = end - start;
-    if (spanMs <= 0) return [];
+  // Build ticks centered on each calendar day (not midnight boundary).
+  // Only keep ticks whose CENTER lies inside the visible window AND inside plot area.
+  function buildDayCenterTicks(start, end, L, minPx) {
+    if (end <= start) return [];
 
-    const firstDay = startOfDay(start);
-    const lastDay  = startOfDay(end);
+    const firstMidnight = startOfDay(start);
+    const lastMidnight  = startOfDay(end);
 
-    const ticks = [];
-    for (let t = firstDay; t <= lastDay + MS_DAY; t += MS_DAY) {
-      const x = xScale(t, start, end, L);
-      ticks.push({ t, x });
+    const candidates = [];
+    for (let t = firstMidnight; t <= lastMidnight + MS_DAY; t += MS_DAY) {
+      const center = t + (MS_DAY / 2);
+      if (center < start || center > end) continue;
+      const x = xScale(center, start, end, L);
+
+      // Never allow labels left/right beyond the chart
+      if (x < L.plotX || x > (L.plotX + L.plotW)) continue;
+
+      candidates.push({ t: center, x });
     }
 
-    if (ticks.length <= 1) return ticks;
+    if (candidates.length <= 1) return candidates;
 
     const kept = [];
     let lastX = -Infinity;
 
-    for (const tick of ticks) {
+    for (const tick of candidates) {
       if ((tick.x - lastX) >= minPx) {
         kept.push(tick);
         lastX = tick.x;
       }
     }
 
-    const first = ticks[0];
-    const last  = ticks[ticks.length - 1];
-
-    function hasNear(x) {
-      for (const k of kept) {
-        if (Math.abs(k.x - x) < (minPx * 0.45)) return true;
-      }
-      return false;
+    // Ensure at least 2 labels if possible
+    if (kept.length === 1 && candidates.length >= 2) {
+      const last = candidates[candidates.length - 1];
+      if (Math.abs(last.x - kept[0].x) >= (minPx * 0.6)) kept.push(last);
+      else if (candidates.length >= 3) kept.push(candidates[candidates.length - 2]);
     }
-
-    if (!hasNear(first.x)) kept.unshift(first);
-    if (!hasNear(last.x)) kept.push(last);
-
-    if (kept.length === 1 && ticks.length >= 2) kept.push(last);
 
     kept.sort((a, b) => a.x - b.x);
     return kept;
   }
 
   function drawGridAndAxes(ctx, bounds, L, start, end) {
-    // Y labels (bigger)
-    const fontY = 14;
-    const fontX = 13;
+    // Less bold labels
+    const fontY = 13;
+    const fontX = 12;
 
     // Y grid + labels
     ctx.strokeStyle = STYLE.grid;
     ctx.lineWidth = 1;
 
-    ctx.fillStyle = "rgba(255,255,255,0.72)";
-    ctx.font = `800 ${fontY}px system-ui`;
+    ctx.fillStyle = "rgba(255,255,255,0.70)";
+    ctx.font = `700 ${fontY}px system-ui`;
     ctx.textAlign = "right";
     ctx.textBaseline = "middle";
 
@@ -533,7 +528,8 @@ NOTES
       ctx.lineTo(L.plotX + L.plotW, y);
       ctx.stroke();
 
-      ctx.fillText(String(v), L.plotX - 10, y);
+      // Reduced left padding waste
+      ctx.fillText(String(v), L.plotX - 6, y);
     }
 
     // Axes
@@ -549,17 +545,17 @@ NOTES
     ctx.lineTo(L.plotX + L.plotW, L.plotY + L.plotH);
     ctx.stroke();
 
-    // X labels (2 rows: Day + Date) — never clipped (padB ensures)
-    ctx.fillStyle = "rgba(255,255,255,0.82)";
-    ctx.font = `900 ${fontX}px system-ui`;
+    // X labels (2 rows) — centered per-day, never outside chart
+    ctx.fillStyle = "rgba(255,255,255,0.80)";
+    ctx.font = `700 ${fontX}px system-ui`;
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
 
-    const yText1 = L.plotY + L.plotH + 6;
-    const yText2 = yText1 + 18;
+    const yText1 = L.plotY + L.plotH + 4;
+    const yText2 = yText1 + 16;
 
-    const minPx = 78; // collision control in CSS pixels
-    const ticks = buildXTicks(start, end, L, minPx);
+    const minPx = 78;
+    const ticks = buildDayCenterTicks(start, end, L, minPx);
 
     for (const tick of ticks) {
       const d = new Date(tick.t);
@@ -574,7 +570,8 @@ NOTES
     ctx.rect(L.plotX, L.plotY, L.plotW, L.plotH);
     ctx.clip();
 
-    ctx.lineWidth = 3.6;
+    // Reduce to 75% of prior thickness (3.6 -> 2.7)
+    ctx.lineWidth = 2.7;
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
 
@@ -624,11 +621,11 @@ NOTES
       { label: "Heart Rate",color: STYLE.lineHr  }
     ];
 
-    const font = 13;
-    const lineH = 18;
+    const font = 12;
+    const lineH = 17;
 
     const pad = 8;
-    const w = 156;
+    const w = 150;
     const h = pad * 2 + items.length * lineH;
 
     ctx.save();
@@ -637,21 +634,22 @@ NOTES
     ctx.lineWidth = 1;
     roundRect(ctx, x0 - pad, y0 - pad, w, h, 12, true, true);
 
-    ctx.font = `900 ${font}px system-ui`;
+    ctx.font = `700 ${font}px system-ui`;
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
 
     let y = y0 + 1;
     for (const it of items) {
       ctx.strokeStyle = it.color;
-      ctx.lineWidth = 6;
+      // match reduced thickness proportionally
+      ctx.lineWidth = 4.5;
       ctx.beginPath();
       ctx.moveTo(x0, y);
-      ctx.lineTo(x0 + 22, y);
+      ctx.lineTo(x0 + 20, y);
       ctx.stroke();
 
-      ctx.fillStyle = "rgba(255,255,255,0.78)";
-      ctx.fillText(it.label, x0 + 30, y);
+      ctx.fillStyle = "rgba(255,255,255,0.76)";
+      ctx.fillText(it.label, x0 + 28, y);
 
       y += lineH;
     }
@@ -659,6 +657,7 @@ NOTES
     ctx.restore();
   }
 
+  // ===== Date range label ABOVE chart (DOM) =====
   function ensureRangeLabel(canvas, start, end) {
     try {
       if (!canvas || start == null || end == null) return;
@@ -673,7 +672,7 @@ NOTES
         el.style.width = "100%";
         el.style.textAlign = "center";
         el.style.padding = "6px 8px 8px 8px";
-        el.style.fontWeight = "900";
+        el.style.fontWeight = "800";
         el.style.letterSpacing = ".2px";
         el.style.color = "rgba(255,255,255,0.62)";
         el.style.fontSize = "16px";
@@ -695,7 +694,7 @@ NOTES
     } catch (_) {}
   }
 
-  // ===== Ledger under chart (tight, ~50% height) + slider =====
+  // ===== Legend UI under chart (tight ledger + slider) =====
   function ensureLegendUI(legendEl) {
     if (!legendEl) return;
 
@@ -715,22 +714,21 @@ NOTES
     bandBox.id = "bpBandsLegend";
     bandBox.style.display = "grid";
     bandBox.style.gap = "6px";
-    bandBox.style.padding = "8px 10px";                 // tighter
+    bandBox.style.padding = "8px 10px";
     bandBox.style.border = "1px solid rgba(255,255,255,0.14)";
     bandBox.style.borderRadius = "16px";
     bandBox.style.background = "rgba(0,0,0,0.06)";
 
     const bandTitle = document.createElement("div");
     bandTitle.textContent = "Blood Pressure Bands (Systolic)";
-    bandTitle.style.fontWeight = "900";
+    bandTitle.style.fontWeight = "800";
     bandTitle.style.letterSpacing = ".2px";
     bandTitle.style.color = "rgba(255,255,255,0.66)";
     bandTitle.style.fontSize = "12px";
-    bandTitle.style.marginBottom = "0px";
 
     const bandList = document.createElement("div");
     bandList.style.display = "grid";
-    bandList.style.gap = "4px";                          // tighter
+    bandList.style.gap = "4px";
 
     const topDown = STYLE.bpBands.slice().reverse();
 
@@ -740,7 +738,7 @@ NOTES
       row.style.gridTemplateColumns = "12px 1fr";
       row.style.alignItems = "center";
       row.style.gap = "8px";
-      row.style.padding = "4px 8px";                     // tighter
+      row.style.padding = "4px 8px";
       row.style.border = "1px solid rgba(255,255,255,0.10)";
       row.style.borderRadius = "12px";
       row.style.background = "rgba(0,0,0,0.04)";
@@ -757,7 +755,7 @@ NOTES
       tx.textContent = label;
       tx.style.color = "rgba(255,255,255,0.68)";
       tx.style.fontSize = "12px";
-      tx.style.fontWeight = "900";
+      tx.style.fontWeight = "800";
       tx.style.letterSpacing = ".12px";
       tx.style.lineHeight = "1.05";
 
@@ -766,9 +764,7 @@ NOTES
       return row;
     }
 
-    for (const b of topDown) {
-      bandList.appendChild(tightRow(b.label, b.rgb));
-    }
+    for (const b of topDown) bandList.appendChild(tightRow(b.label, b.rgb));
 
     bandBox.appendChild(bandTitle);
     bandBox.appendChild(bandList);
@@ -778,14 +774,14 @@ NOTES
     sliderWrap.style.gridTemplateColumns = "auto 1fr auto";
     sliderWrap.style.alignItems = "center";
     sliderWrap.style.gap = "10px";
-    sliderWrap.style.padding = "8px 10px";              // tighter
+    sliderWrap.style.padding = "8px 10px";
     sliderWrap.style.border = "1px solid rgba(255,255,255,0.14)";
     sliderWrap.style.borderRadius = "16px";
     sliderWrap.style.background = "rgba(0,0,0,0.08)";
 
     const lbl = document.createElement("div");
     lbl.textContent = "Bands";
-    lbl.style.fontWeight = "900";
+    lbl.style.fontWeight = "800";
     lbl.style.letterSpacing = ".2px";
     lbl.style.color = "rgba(255,255,255,0.74)";
     lbl.style.fontSize = "13px";
@@ -801,7 +797,7 @@ NOTES
     const pct = document.createElement("div");
     pct.id = "bandOpacityValue";
     pct.textContent = `${slider.value}%`;
-    pct.style.fontWeight = "900";
+    pct.style.fontWeight = "800";
     pct.style.color = "rgba(255,255,255,0.70)";
     pct.style.fontSize = "13px";
 
@@ -901,7 +897,6 @@ NOTES
           clampCenterToData();
         }
 
-        // allow subtle pan while pinching via midpoint drift
         const mx = midX(touches[0], touches[1]);
         const dx = mx - GESTURE.lastMidX;
         GESTURE.lastMidX = mx;
@@ -923,7 +918,6 @@ NOTES
         return;
       }
 
-      // one-finger pan
       if (!GESTURE.isPinch && touches.length === 1) {
         const x = touches[0].clientX;
         const dx = x - GESTURE.lastPanX;
@@ -988,7 +982,6 @@ NOTES
     try {
       if (loadingEl) loadingEl.style.display = "";
 
-      // absolute fail-safe to prevent permanent "Loading..."
       killTimer = setTimeout(() => {
         try { if (loadingEl) loadingEl.style.display = "none"; } catch (_) {}
       }, 1200);
@@ -1002,14 +995,12 @@ NOTES
       const raw = await getRawDataMultiSource();
       const data = normalizeData(raw);
 
-      // size + DPR mapping (CSS px coordinates)
       const sized = sizeToCSS(canvas, ctx);
       const pxW = sized.pxW;
       const pxH = sized.pxH;
 
       const L = layout(pxW, pxH);
 
-      clear(ctx, 0, 0); // noop for transform safety
       ctx.clearRect(0, 0, pxW, pxH);
 
       if (!data.length) {
@@ -1043,10 +1034,10 @@ NOTES
 
       // Draw order:
       // 1) BP bands
-      // 2) Day stripes OVERLAY (sticks to calendar days)
-      // 3) Grid/axes + x labels (not clipped)
+      // 2) Day stripes (overlay)
+      // 3) Grid/axes + x labels
       // 4) Lines
-      // 5) Series legend on chart
+      // 5) Series legend
       drawBPBands(ctx, bounds, L);
       drawDayStripes(ctx, start, end, L);
 
@@ -1055,7 +1046,7 @@ NOTES
       drawOnChartSeriesLegend(ctx, L);
 
     } catch (_) {
-      // Intentionally swallow; UI must never hang.
+      // swallow by design
     } finally {
       if (killTimer) { try { clearTimeout(killTimer); } catch (_) {} }
       try { if (loadingEl) loadingEl.style.display = "none"; } catch (_) {}
@@ -1084,7 +1075,6 @@ NOTES
 
   window.VTChart = { onShow, setDays, panBy };
 
-  // Render triggers
   function bindRenderTriggers() {
     try { attachGestures(); } catch (_) {}
     requestRender();
@@ -1107,3 +1097,4 @@ NOTES
   }
 
 })();
+```0
