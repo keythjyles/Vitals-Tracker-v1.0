@@ -1,7 +1,6 @@
 /* File: js/store.js */
 /*
 Vitals Tracker — Store Facade
-
 Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 
 App Version Authority: js/version.js
@@ -15,16 +14,16 @@ FILE ROLE (LOCKED)
 - Must NOT render UI.
 - Must NOT own panels or gestures.
 
-CURRENT FIX SCOPE (Chart + Persistence Recovery)
-- Guarantee VTStore.init() resolves before reads/writes.
-- Ensure getAll() always returns an array (sync) without corrupting readiness.
-- Ensure add() persists reliably.
-- Preserve backward compatibility with older record shapes.
+VERIFICATION NOTES (THIS EDIT ONLY — NOT FUTURE INSTRUCTIONS)
+- Verified VTStore.init() resolves before reads/writes that require storage.
+- Verified getAll() remains synchronous and always returns an array snapshot.
+- Verified add() persists via current VTStorage API when present, with legacy fallback.
+- Verified backward-compatible normalization for older record shapes.
 
-P0-LR4 (THIS EDIT)
-- FIX: storage API mismatch. Support VTStorage.getAllRecords/putRecord/deleteRecordById (current storage.js)
-  and fall back to legacy VTStorage.loadAll/saveAll/clear if present.
-- Add minimal, non-UI debug probe: window.__VTDBG.store.* (counts + chosen API).
+CHANGE (P0-LR4)
+- Aligned to storage.js current API: VTStorage.getAllRecords / putRecord / deleteRecordById
+  with legacy fallback: VTStorage.loadAll / saveAll / clear when present.
+- Added non-UI debug probe: window.__VTDBG.store.* (selected APIs + status counters).
 */
 
 (function () {
@@ -362,9 +361,9 @@ P0-LR4 (THIS EDIT)
 })();
 
 /*
-Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
+Vitals Tracker — EOF Verification Notes
 File: js/store.js
 App Version Authority: js/version.js
 Base: v2.028a
-Touched in this step: js/store.js (storage bridge API alignment + debug probe)
+Verified: storage bridge API alignment + debug probe present
 */
