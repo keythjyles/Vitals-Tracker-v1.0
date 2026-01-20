@@ -11,12 +11,19 @@ Next file: (end of pass)
 FILE ROLE (LOCKED)
 - Owns ONLY the Add Reading panel UI + Save action (minimal schema: ts/sys/dia/hr/notes).
 - Must NOT implement swipe/rotation.
-- Must NOT implement delete/edit (future pass).
+- Must NOT implement delete (future pass).
+- Edit support is LIMITED to: open + prefill + update-if-available; otherwise warn.
 
 v2.026a — Change Log (THIS FILE ONLY)
 1) Carries forward Add panel UI + Save action (no swipe changes).
 2) Maintains cosmetic softening + single-form enforcement.
 3) Maintains Home routing via panels.js closeAdd() when available.
+
+v2.026a+ (THIS FILE ONLY)
+4) Adds EDIT mode support for Log “Edit” hyperlink:
+   - VTAdd.openEdit({ id | ts | record }) opens Add panel and pre-fills.
+   - Save performs update ONLY if VTStore update method exists; otherwise warns.
+   - Dosage remains in notes (no dosage field).
 */
 
 (function () {
@@ -28,6 +35,13 @@ v2.026a — Change Log (THIS FILE ONLY)
   const cardEl = document.getElementById("addCard");
 
   let saving = false;
+
+  // Edit mode state (no schema changes)
+  const EDIT = {
+    active: false,
+    key: null,      // { id } or { ts } or best-effort key
+    original: null  // normalized record snapshot
+  };
 
   function safeAlert(msg) {
     try { alert(msg); } catch (_) {}
@@ -149,6 +163,22 @@ v2.026a — Change Log (THIS FILE ONLY)
     return String(el.value || "").trim();
   }
 
+  function writeNumber(id, v) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    try {
+      el.value = (v == null || v === "") ? "" : String(v);
+    } catch (_) {}
+  }
+
+  function writeText(id, v) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    try {
+      el.value = (v == null) ? "" : String(v);
+    } catch (_) {}
+  }
+
   function clearInputs() {
     const ids = ["inSys", "inDia", "inHr", "inNotes"];
     for (const id of ids) {
@@ -163,6 +193,168 @@ v2.026a — Change Log (THIS FILE ONLY)
       btnSave.disabled = !on;
       btnSave.style.opacity = on ? "" : "0.65";
     } catch (_) {}
+  }
+
+  function setSaveLabelEditing(isEditing) {
+    if (!btnSave) return;
+    try {
+      btnSave.textContent = isEditing ? "Save Changes" : "Save";
+    } catch (_) {}
+  }
+
+  function setHeaderEditing(isEditing) {
+    try {
+      const title = document.querySelector("#panelAdd .screenTitle");
+      if (!title) return;
+      title.textContent = isEditing ? "Edit Reading" : "Add Reading";
+    } catch (_) {}
+  }
+
+  function normalizeRecord(r) {
+    // Be tolerant: accept {ts/sys/dia/hr/notes} or nested structures.
+    const ts = (r && typeof r.ts === "number") ? r.ts : null;
+    const sys = (r && typeof r.sys === "number") ? r.sys : (r && typeof r.systolic === "number" ? r.systolic : null);
+    const dia = (r && typeof r.dia === "number") ? r.dia : (r && typeof r.diastolic === "number" ? r.diastolic : null);
+    const hr  = (r && typeof r.hr  === "number") ? r.hr  : (r && typeof r.heartRate === "number" ? r.heartRate : null);
+    const notes = (r && (r.notes ?? r.note ?? r.comment ?? r.memo)) ?? "";
+    return { ts, sys, dia, hr, notes: String(notes || "") };
+  }
+
+  async function getAllRecords() {
+    try {
+      if (!window.VTStore || typeof window.VTStore.getAll !== "function") return [];
+      const res = window.VTStore.getAll();
+      const arr = (res && typeof res.then === "function") ? await res : res;
+      return Array.isArray(arr) ? arr : [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function findByIdOrTs(all, key) {
+    if (!Array.isArray(all) || !key) return null;
+
+    // Prefer id match if present
+    if (key.id != null) {
+      for (const r of all) {
+        if (r && (r.id === key.id || r._id === key.id)) return r;
+      }
+    }
+
+    // Fallback to ts match
+    if (key.ts != null) {
+      for (const r of all) {
+        const t = (r && typeof r.ts === "number") ? r.ts : null;
+        if (t === key.ts) return r;
+      }
+    }
+
+    return null;
+  }
+
+  function enterEditMode(key, record) {
+    EDIT.active = true;
+    EDIT.key = key || null;
+    EDIT.original = record || null;
+
+    setSaveLabelEditing(true);
+    setHeaderEditing(true);
+
+    if (record) {
+      writeNumber("inSys", record.sys);
+      writeNumber("inDia", record.dia);
+      writeNumber("inHr",  record.hr);
+      writeText("inNotes", record.notes || "");
+    }
+  }
+
+  function exitEditMode() {
+    EDIT.active = false;
+    EDIT.key = null;
+    EDIT.original = null;
+
+    setSaveLabelEditing(false);
+    setHeaderEditing(false);
+  }
+
+  async function openAddNew() {
+    ensureFormPresent();
+    exitEditMode();
+    clearInputs();
+
+    try {
+      if (window.VTPanels && typeof window.VTPanels.openAdd === "function") {
+        window.VTPanels.openAdd(true);
+        return;
+      }
+      if (window.VTPanels && typeof window.VTPanels.go === "function") {
+        window.VTPanels.go("add", true);
+        return;
+      }
+    } catch (_) {}
+  }
+
+  async function openEdit(payload) {
+    // payload may be: { id }, { ts }, { record }, raw record
+    ensureFormPresent();
+    await initStoreIfNeeded();
+
+    let key = null;
+    let rec = null;
+
+    try {
+      if (payload && payload.record && typeof payload.record === "object") {
+        rec = normalizeRecord(payload.record);
+        key = { id: payload.id ?? payload.record.id ?? payload.record._id ?? null, ts: payload.ts ?? payload.record.ts ?? null };
+      } else if (payload && typeof payload === "object" && ("ts" in payload || "sys" in payload || "dia" in payload || "hr" in payload || "notes" in payload)) {
+        // raw record-like object
+        rec = normalizeRecord(payload);
+        key = { id: payload.id ?? payload._id ?? null, ts: payload.ts ?? null };
+      } else if (payload && typeof payload === "object" && ("id" in payload || "ts" in payload)) {
+        key = { id: payload.id ?? null, ts: payload.ts ?? null };
+      }
+
+      if (!rec && key) {
+        const all = await getAllRecords();
+        const found = findByIdOrTs(all, key);
+        if (found) rec = normalizeRecord(found);
+      }
+
+      if (!rec) {
+        safeAlert("Edit failed: could not locate that record.");
+        return;
+      }
+
+      // Open Add panel (do not change swipe logic)
+      try {
+        if (window.VTPanels && typeof window.VTPanels.openAdd === "function") {
+          window.VTPanels.openAdd(true);
+        } else if (window.VTPanels && typeof window.VTPanels.go === "function") {
+          window.VTPanels.go("add", true);
+        }
+      } catch (_) {}
+
+      enterEditMode(key, rec);
+    } catch (_) {
+      safeAlert("Edit failed.");
+    }
+  }
+
+  function hasUpdateAPI() {
+    const s = window.VTStore || {};
+    return (typeof s.update === "function") ||
+           (typeof s.put === "function") ||
+           (typeof s.set === "function") ||
+           (typeof s.upsert === "function");
+  }
+
+  async function updateRecord(key, rec) {
+    const s = window.VTStore || {};
+    if (typeof s.update === "function") return s.update(key, rec);
+    if (typeof s.put === "function") return s.put(key, rec);
+    if (typeof s.set === "function") return s.set(key, rec);
+    if (typeof s.upsert === "function") return s.upsert(key, rec);
+    throw new Error("No update API");
   }
 
   async function save() {
@@ -196,6 +388,34 @@ v2.026a — Change Log (THIS FILE ONLY)
     }
 
     try {
+      if (EDIT.active) {
+        if (!hasUpdateAPI()) {
+          safeAlert("Edit is not available yet (VTStore has no update method).");
+          return;
+        }
+
+        // Preserve original timestamp if we have one; otherwise keep the new ts.
+        const tsToKeep =
+          (EDIT.original && typeof EDIT.original.ts === "number") ? EDIT.original.ts :
+          (EDIT.key && typeof EDIT.key.ts === "number") ? EDIT.key.ts :
+          null;
+
+        if (tsToKeep != null) rec.ts = tsToKeep;
+
+        const key = EDIT.key || { ts: rec.ts };
+
+        await updateRecord(key, rec);
+
+        // Refresh features if present
+        try { window.VTLog?.onShow?.(); } catch (_) {}
+        try { window.VTChart?.onShow?.(); } catch (_) {}
+
+        safeAlert("Saved.");
+        exitEditMode();
+        clearInputs();
+        return;
+      }
+
       await window.VTStore.add(rec);
 
       // Refresh features if present
@@ -249,8 +469,24 @@ v2.026a — Change Log (THIS FILE ONLY)
       goHome();
     });
 
+    // Listen for log edit requests (non-swipe, decoupled)
+    document.addEventListener("vt:editRequested", function (e) {
+      try {
+        if (!e || !e.detail) return;
+        openEdit(e.detail);
+      } catch (_) {}
+    });
+
     setSaveEnabled(true);
+    setSaveLabelEditing(false);
+    setHeaderEditing(false);
   }
+
+  // Public API (for log hyperlink wiring)
+  window.VTAdd = Object.freeze({
+    openNew: openAddNew,
+    openEdit: openEdit
+  });
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", bind, { passive: true });
@@ -270,3 +506,4 @@ Pass order: File 9 of 9 (P0)
 Prev file: js/log.js (File 8 of 9)
 Next file: (end of pass)
 */
+```0
