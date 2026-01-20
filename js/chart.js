@@ -42,7 +42,7 @@ GOAL (per user request)
 
     // Day stripes OVERLAY BP bands
     dayA: "rgba(0,0,0,0.00)",
-    dayB: "rgba(0,0,0,0.20)",
+    dayB: "rgba(0,0,0,0.22)",
 
     // BP category bands (SYSTOLIC) — MUST match ledger order/colors
     // Order is bottom->top for painting.
@@ -288,12 +288,10 @@ GOAL (per user request)
   }
 
   function layout(pxW, pxH) {
-    // Reduced left padding per request (Y labels are max 3 digits)
-    const padL = 46;
+    // Reduce padding by ~70% to the left of the chart (46 -> 14)
+    const padL = 14;
     const padR = 14;
     const padT = 12;
-
-    // Reduced bottom padding (but still enough for 2-line X labels)
     const padB = 64;
 
     return {
@@ -460,51 +458,51 @@ GOAL (per user request)
     return d.toLocaleDateString([], { month: "2-digit", day: "2-digit" });
   }
 
-  // Build ticks centered on each calendar day (not midnight boundary).
-  // Only keep ticks whose CENTER lies inside the visible window AND inside plot area.
-  function buildDayCenterTicks(start, end, L, minPx) {
+  function computeXLabelStepDays(L) {
+    const dayW = L.plotW / Math.max(1e-6, STATE.days);
+    const minPx = 78; // existing target spacing
+    const step = Math.max(1, Math.ceil(minPx / Math.max(1, dayW)));
+    return step;
+  }
+
+  // Persistent X labels: choose calendar-day centers using an ABSOLUTE day-index modulus,
+  // so labels do NOT "reset" with tiny pans; they only enter/exit when their day enters/exits view.
+  function buildPersistentDayTicks(start, end, L) {
     if (end <= start) return [];
 
+    const stepDays = computeXLabelStepDays(L);
     const firstMidnight = startOfDay(start);
     const lastMidnight  = startOfDay(end);
 
-    const candidates = [];
+    const ticks = [];
     for (let t = firstMidnight; t <= lastMidnight + MS_DAY; t += MS_DAY) {
+      const idx = dayIndexAbs(t);
+      if ((idx % stepDays) !== 0) continue;
+
       const center = t + (MS_DAY / 2);
       if (center < start || center > end) continue;
-      const x = xScale(center, start, end, L);
 
-      // Never allow labels left/right beyond the chart
+      const x = xScale(center, start, end, L);
       if (x < L.plotX || x > (L.plotX + L.plotW)) continue;
 
-      candidates.push({ t: center, x });
+      ticks.push({ t: center, x });
     }
 
-    if (candidates.length <= 1) return candidates;
-
-    const kept = [];
-    let lastX = -Infinity;
-
-    for (const tick of candidates) {
-      if ((tick.x - lastX) >= minPx) {
-        kept.push(tick);
-        lastX = tick.x;
-      }
+    // If nothing matched modulus (edge case), fall back to a minimal set (first/last in view)
+    if (!ticks.length) {
+      const a = firstMidnight + (MS_DAY / 2);
+      const b = lastMidnight + (MS_DAY / 2);
+      const xa = xScale(a, start, end, L);
+      const xb = xScale(b, start, end, L);
+      if (xa >= L.plotX && xa <= (L.plotX + L.plotW) && a >= start && a <= end) ticks.push({ t: a, x: xa });
+      if (xb >= L.plotX && xb <= (L.plotX + L.plotW) && b >= start && b <= end && Math.abs(xb - xa) > 20) ticks.push({ t: b, x: xb });
     }
 
-    // Ensure at least 2 labels if possible
-    if (kept.length === 1 && candidates.length >= 2) {
-      const last = candidates[candidates.length - 1];
-      if (Math.abs(last.x - kept[0].x) >= (minPx * 0.6)) kept.push(last);
-      else if (candidates.length >= 3) kept.push(candidates[candidates.length - 2]);
-    }
-
-    kept.sort((a, b) => a.x - b.x);
-    return kept;
+    ticks.sort((p, q) => p.x - q.x);
+    return ticks;
   }
 
   function drawGridAndAxes(ctx, bounds, L, start, end) {
-    // Less bold labels
     const fontY = 13;
     const fontX = 12;
 
@@ -528,8 +526,7 @@ GOAL (per user request)
       ctx.lineTo(L.plotX + L.plotW, y);
       ctx.stroke();
 
-      // Reduced left padding waste
-      ctx.fillText(String(v), L.plotX - 6, y);
+      ctx.fillText(String(v), Math.max(0, L.plotX - 4), y);
     }
 
     // Axes
@@ -545,7 +542,7 @@ GOAL (per user request)
     ctx.lineTo(L.plotX + L.plotW, L.plotY + L.plotH);
     ctx.stroke();
 
-    // X labels (2 rows) — centered per-day, never outside chart
+    // X labels (2 rows) — persistent calendar selection
     ctx.fillStyle = "rgba(255,255,255,0.80)";
     ctx.font = `700 ${fontX}px system-ui`;
     ctx.textAlign = "center";
@@ -554,8 +551,7 @@ GOAL (per user request)
     const yText1 = L.plotY + L.plotH + 4;
     const yText2 = yText1 + 16;
 
-    const minPx = 78;
-    const ticks = buildDayCenterTicks(start, end, L, minPx);
+    const ticks = buildPersistentDayTicks(start, end, L);
 
     for (const tick of ticks) {
       const d = new Date(tick.t);
@@ -570,8 +566,8 @@ GOAL (per user request)
     ctx.rect(L.plotX, L.plotY, L.plotW, L.plotH);
     ctx.clip();
 
-    // Reduce to 75% of prior thickness (3.6 -> 2.7)
-    ctx.lineWidth = 2.7;
+    // Reduce chart line thickness by 35% (2.7 -> 1.755)
+    ctx.lineWidth = 1.75;
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
 
@@ -629,10 +625,12 @@ GOAL (per user request)
     const h = pad * 2 + items.length * lineH;
 
     ctx.save();
-    ctx.fillStyle = "rgba(0,0,0,0.18)";
-    ctx.strokeStyle = "rgba(255,255,255,0.10)";
+
+    // Remove legend background tint: keep only a very light translucent wash, no outlined panel.
+    ctx.fillStyle = "rgba(0,0,0,0.06)";
+    ctx.strokeStyle = "rgba(255,255,255,0.00)";
     ctx.lineWidth = 1;
-    roundRect(ctx, x0 - pad, y0 - pad, w, h, 12, true, true);
+    roundRect(ctx, x0 - pad, y0 - pad, w, h, 12, true, false);
 
     ctx.font = `700 ${font}px system-ui`;
     ctx.textAlign = "left";
@@ -641,8 +639,7 @@ GOAL (per user request)
     let y = y0 + 1;
     for (const it of items) {
       ctx.strokeStyle = it.color;
-      // match reduced thickness proportionally
-      ctx.lineWidth = 4.5;
+      ctx.lineWidth = 3.0;
       ctx.beginPath();
       ctx.moveTo(x0, y);
       ctx.lineTo(x0 + 20, y);
