@@ -2,23 +2,16 @@
 Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
 File: js/log.js
 App Version Authority: js/version.js
-Base: v2.026a
-Pass: Log Row Severity Colors (P0-L2)
-Pass order: File 8 of 9 (P0)
-Prev file: js/chart.js (File 7 of 9)
-Next file: js/add.js (File 9 of 9)
+Base: v2.027a
+Pass: Log Wiring + Severity Rendering (P1-L2)
+Pass order: Log file (standalone fix)
 
-v2.026a — Change Log (THIS FILE ONLY)
-1) Renders “Edit” as a blue hyperlink-style text link (visual only; no wiring here).
-2) Colors BP and HR values when they fall into defined danger/severity zones.
-   - BP uses systolic bands aligned with chart ledger colors.
-   - HR uses common clinical thresholds (constants below; easy to adjust later).
-3) Guarantees Log re-renders when Log panel becomes active.
-4) Defensive normalization for record field names (ts/sys/dia/hr/notes).
-5) Lightweight DOM-safe styling fallback if CSS classes are missing (does not override if present).
-6) No swipe logic here. No edit/delete wiring here.
-
-ANTI-DRIFT: No swipe logic. No add/edit/delete orchestration in this file.
+Changes (THIS FILE ONLY)
+1) Log renders with VTStore.getAll() whether sync OR async (Promise).
+2) Adds an "Edit" blue hyperlink per row (minimal; emits vt:logEditRequest).
+3) BP + HR values render in band-matched colors when in danger zones.
+4) Keeps existing defensive normalization and safe fallback styles.
+ANTI-DRIFT: No swipe logic here.
 */
 
 (function () {
@@ -30,44 +23,7 @@ ANTI-DRIFT: No swipe logic. No add/edit/delete orchestration in this file.
 
   if (!listEl) return;
 
-  // ===== Severity color constants (match chart ledger palette) =====
-  const COLORS = Object.freeze({
-    blue:      "rgba(45,115,205,1)",   // Normal
-    purple:    "rgba(125,80,180,1)",   // Elevated
-    yellow:    "rgba(245,200,55,1)",   // Stage 1 / caution
-    red:       "rgba(210,70,80,1)",    // Stage 2 / high
-    darkRed:   "rgba(135,25,35,1)",    // Crisis / extreme
-    linkBlue:  "#4aa3ff"               // Edit hyperlink color
-  });
-
-  // BP severity is based on SYSTOLIC to mirror the chart bands/ledger.
-  function bpSeverityColor(sys) {
-    if (typeof sys !== "number") return null;
-    if (sys >= 180) return COLORS.darkRed;
-    if (sys >= 140) return COLORS.red;
-    if (sys >= 130) return COLORS.yellow;
-    if (sys >= 120) return COLORS.purple;
-    return COLORS.blue;
-  }
-
-  /*
-    HR thresholds (adjustable):
-    - >=140: dark red (very high)
-    - 120–139: red (high)
-    - 100–119: yellow (elevated)
-    - 50–59: purple (low)
-    - <50: blue (very low)  [kept blue to remain consistent with 5-color set]
-    - 60–99: no color (normal)
-  */
-  function hrSeverityColor(hr) {
-    if (typeof hr !== "number") return null;
-    if (hr >= 140) return COLORS.darkRed;
-    if (hr >= 120) return COLORS.red;
-    if (hr >= 100) return COLORS.yellow;
-    if (hr < 50) return COLORS.blue;
-    if (hr < 60) return COLORS.purple;
-    return null; // normal
-  }
+  let renderSeq = 0;
 
   function clear() {
     listEl.innerHTML = "";
@@ -137,8 +93,10 @@ ANTI-DRIFT: No swipe logic. No add/edit/delete orchestration in this file.
 
     const notes = (r?.notes ?? r?.note ?? r?.comment ?? r?.memo ?? "");
 
-    // Future fields (distress/meds) will be added later; do not invent schema here.
-    return { ts, sys, dia, hr, notes };
+    // Preserve a stable reference for edit requests (prefer id, else ts)
+    const id = (r?.id ?? r?._id ?? r?.key ?? null);
+
+    return { id, ts, sys, dia, hr, notes, _raw: r };
   }
 
   function fmtTs(ts) {
@@ -150,13 +108,18 @@ ANTI-DRIFT: No swipe logic. No add/edit/delete orchestration in this file.
     }
   }
 
+  function isPromise(x) {
+    return !!x && (typeof x === "object" || typeof x === "function") && typeof x.then === "function";
+  }
+
   async function getDataAsync() {
     try {
       if (!window.VTStore || typeof window.VTStore.getAll !== "function") return [];
-      const res = window.VTStore.getAll();
-      const raw = (res && typeof res.then === "function") ? await res : (res || []);
+      const got = window.VTStore.getAll();
+      const raw = isPromise(got) ? await got : got;
+      const arr = Array.isArray(raw) ? raw : [];
       const norm = [];
-      for (const r of raw) {
+      for (const r of arr) {
         const n = normalize(r);
         if (n.ts == null) continue;
         norm.push(n);
@@ -167,8 +130,60 @@ ANTI-DRIFT: No swipe logic. No add/edit/delete orchestration in this file.
     }
   }
 
-  function applyRowFallbackStyles(row, head, tsEl, editEl, left, title, sub, right) {
-    // If your CSS defines these classes, it will win. These are minimal safety nets.
+  // Band colors (match chart scheme)
+  const BAND = Object.freeze({
+    crisis: "rgba(120,20,32,0.95)",   // dark red
+    stage2: "rgba(190,60,75,0.95)",   // red
+    stage1: "rgba(200,160,40,0.95)",  // yellow
+    elevated: "rgba(140,95,200,0.95)",// purple
+    normal: "rgba(60,130,220,0.95)"   // blue
+  });
+
+  function bpBandColor(sys, dia) {
+    // Use the WORST of systolic and diastolic classification
+    // Systolic bands per your ledger: <120 blue, 120-129 purple, 130-139 yellow, 140-179 red, >=180 dark red
+    // Diastolic bands (clinical): <80 blue, 80-89 yellow, 90-119 red, >=120 dark red
+    function sysLevel(v) {
+      if (v == null) return 0;
+      if (v >= 180) return 4;
+      if (v >= 140) return 3;
+      if (v >= 130) return 2;
+      if (v >= 120) return 1;
+      return 0;
+    }
+    function diaLevel(v) {
+      if (v == null) return 0;
+      if (v >= 120) return 4;
+      if (v >= 90) return 3;
+      if (v >= 80) return 2;
+      // we treat 70-79 as normal (blue) to avoid over-labeling
+      return 0;
+    }
+    const lvl = Math.max(sysLevel(sys), diaLevel(dia));
+    if (lvl >= 4) return BAND.crisis;
+    if (lvl === 3) return BAND.stage2;
+    if (lvl === 2) return BAND.stage1;
+    if (lvl === 1) return BAND.elevated;
+    return BAND.normal;
+  }
+
+  function hrBandColor(hr) {
+    // Practical, non-alarming bands; still uses your 5-color palette.
+    // Normal: 60–99 (blue)
+    // Elevated: 100–109 or 55–59 (purple)
+    // Stage 1: 110–129 or 50–54 (yellow)
+    // Stage 2: 130–149 or 45–49 (red)
+    // Crisis: >=150 or <=44 (dark red)
+    if (hr == null) return "rgba(235,245,255,0.86)";
+    if (hr >= 150 || hr <= 44) return BAND.crisis;
+    if (hr >= 130 || hr <= 49) return BAND.stage2;
+    if (hr >= 110 || hr <= 54) return BAND.stage1;
+    if (hr >= 100 || hr <= 59) return BAND.elevated;
+    return BAND.normal;
+  }
+
+  function applyRowFallbackStyles(row, head, title, sub, notes, edit) {
+    // Minimal safety nets (do not override if CSS exists)
     try {
       row.style.display = "grid";
       row.style.gridTemplateColumns = "1fr";
@@ -181,27 +196,9 @@ ANTI-DRIFT: No swipe logic. No add/edit/delete orchestration in this file.
 
     try {
       head.style.display = "flex";
-      head.style.alignItems = "center";
+      head.style.alignItems = "baseline";
       head.style.justifyContent = "space-between";
       head.style.gap = "10px";
-    } catch (_) {}
-
-    try {
-      tsEl.style.color = "rgba(255,255,255,0.56)";
-      tsEl.style.fontSize = "12px";
-      tsEl.style.fontWeight = "700";
-    } catch (_) {}
-
-    try {
-      editEl.style.color = COLORS.linkBlue;
-      editEl.style.fontSize = "12px";
-      editEl.style.fontWeight = "800";
-      editEl.style.textDecoration = "none";
-    } catch (_) {}
-
-    try {
-      left.style.display = "grid";
-      left.style.gap = "2px";
     } catch (_) {}
 
     try {
@@ -209,137 +206,132 @@ ANTI-DRIFT: No swipe logic. No add/edit/delete orchestration in this file.
       title.style.letterSpacing = ".1px";
       title.style.color = "rgba(255,255,255,0.86)";
       title.style.fontSize = "14px";
-      title.style.display = "flex";
-      title.style.flexWrap = "wrap";
-      title.style.gap = "8px";
-      title.style.alignItems = "baseline";
+      title.style.lineHeight = "1.15";
+    } catch (_) {}
+
+    try {
+      edit.style.fontSize = "13px";
+      edit.style.fontWeight = "700";
+      edit.style.textDecoration = "underline";
+      edit.style.color = "rgba(60,130,220,0.95)"; // blue hyperlink
+      edit.style.cursor = "pointer";
+      edit.style.whiteSpace = "nowrap";
+      edit.style.userSelect = "none";
+      edit.style.webkitUserSelect = "none";
     } catch (_) {}
 
     try {
       sub.style.color = "rgba(255,255,255,0.56)";
       sub.style.fontSize = "12px";
+      sub.style.marginTop = "2px";
     } catch (_) {}
 
     try {
-      right.style.color = "rgba(255,255,255,0.66)";
-      right.style.fontSize = "12px";
-      right.style.lineHeight = "1.25";
+      notes.style.color = "rgba(255,255,255,0.66)";
+      notes.style.fontSize = "12px";
+      notes.style.lineHeight = "1.25";
     } catch (_) {}
   }
 
-  function makeSpan(text, color) {
-    const s = document.createElement("span");
-    s.textContent = text;
-    if (color) s.style.color = color;
-    return s;
+  function emitEditRequest(rec) {
+    try {
+      const detail = {
+        // prefer id; fall back to ts
+        id: rec.id ?? null,
+        ts: rec.ts ?? null,
+        record: rec._raw ?? null
+      };
+      document.dispatchEvent(new CustomEvent("vt:logEditRequest", { detail }));
+    } catch (_) {}
   }
 
   function renderRow(r) {
     const row = document.createElement("div");
     row.className = "logRow";
 
-    // Header line: timestamp (left) + Edit link (right)
     const head = document.createElement("div");
     head.className = "logHead";
-
-    const tsEl = document.createElement("div");
-    tsEl.className = "logTs";
-    tsEl.textContent = fmtTs(r.ts);
-
-    const editEl = document.createElement("a");
-    editEl.className = "logEdit";
-    editEl.href = "javascript:void(0)";
-    editEl.textContent = "Edit";
-    // Visual only; wiring handled later (add.js/store.js)
-    editEl.setAttribute("role", "link");
-    editEl.setAttribute("aria-label", "Edit this entry");
-
-    head.appendChild(tsEl);
-    head.appendChild(editEl);
-
-    const left = document.createElement("div");
-    left.className = "logMain";
 
     const title = document.createElement("div");
     title.className = "logTitle";
 
-    const sys = (typeof r.sys === "number") ? r.sys : null;
-    const dia = (typeof r.dia === "number") ? r.dia : null;
-    const hr  = (typeof r.hr === "number")  ? r.hr  : null;
+    const sysTxt = (r.sys ?? "--");
+    const diaTxt = (r.dia ?? "--");
+    const hrTxt = (r.hr ?? "--");
 
-    const bpColor = bpSeverityColor(sys);
-    const hrColor = hrSeverityColor(hr);
+    // Build title with per-part coloring
+    const bpColor = bpBandColor(r.sys, r.dia);
+    const hrColor = hrBandColor(r.hr);
 
-    const bpText = `${sys ?? "--"}/${dia ?? "--"}`;
-    const hrText = `HR ${hr ?? "--"}`;
+    // Title structure: BP ####/###  •  HR ##
+    title.innerHTML = `
+      <span class="logBP" style="color:${bpColor}">BP ${sysTxt}/${diaTxt}</span>
+      <span style="color:rgba(235,245,255,0.72)">  •  </span>
+      <span class="logHR" style="color:${hrColor}">HR ${hrTxt}</span>
+    `;
 
-    // BP label (colored when in severity zone; BP uses systolic severity)
-    title.appendChild(makeSpan("BP", null));
-    title.appendChild(makeSpan(bpText, bpColor));
+    const edit = document.createElement("a");
+    edit.className = "logEdit";
+    edit.href = "#";
+    edit.textContent = "Edit";
+    edit.addEventListener("click", function (e) {
+      try { e.preventDefault(); } catch (_) {}
+      emitEditRequest(r);
+    });
 
-    // Separator
-    title.appendChild(makeSpan("•", "rgba(255,255,255,0.42)"));
-
-    // HR label (colored when in severity zone)
-    title.appendChild(makeSpan(hrText, hrColor));
+    head.appendChild(title);
+    head.appendChild(edit);
 
     const sub = document.createElement("div");
     sub.className = "logSub";
-    sub.textContent = ""; // reserved for future (symptoms/distress/meds lines). Keep minimal now.
+    sub.textContent = fmtTs(r.ts);
 
-    left.appendChild(title);
-    if (sub.textContent) left.appendChild(sub);
-
-    const right = document.createElement("div");
-    right.className = "logMeta";
-    right.textContent = clampStr(r.notes, 220);
+    const notes = document.createElement("div");
+    notes.className = "logMeta";
+    notes.textContent = clampStr(r.notes, 220);
 
     row.appendChild(head);
-    row.appendChild(left);
-    row.appendChild(right);
+    row.appendChild(sub);
+    row.appendChild(notes);
 
     // Fallback styling (safe)
-    applyRowFallbackStyles(row, head, tsEl, editEl, left, title, sub, right);
-
-    // Ensure hyperlink behavior feels correct even without CSS
-    try {
-      editEl.addEventListener("mouseover", function () {
-        editEl.style.textDecoration = "underline";
-      }, { passive: true });
-      editEl.addEventListener("mouseout", function () {
-        editEl.style.textDecoration = "none";
-      }, { passive: true });
-    } catch (_) {}
+    applyRowFallbackStyles(row, head, title, sub, notes, edit);
 
     return row;
   }
 
-  let _rendering = false;
-
   async function render() {
-    if (_rendering) return;
-    _rendering = true;
+    const mySeq = ++renderSeq;
 
     try {
       if (loadingEl) loadingEl.style.display = "";
-      if (emptyEl) emptyEl.hidden = true;
+    } catch (_) {}
 
-      const data = (await getDataAsync()).slice().sort((a, b) => b.ts - a.ts);
-      clear();
-
-      if (!data.length) {
-        if (emptyEl) emptyEl.hidden = false;
-        return;
-      }
-
-      for (const r of data) {
-        listEl.appendChild(renderRow(r));
-      }
+    let data = [];
+    try {
+      data = await getDataAsync();
     } catch (_) {
-      // swallow by design
-    } finally {
-      try { if (loadingEl) loadingEl.style.display = "none"; } catch (_) {}
-      _rendering = false;
+      data = [];
+    }
+
+    // If another render started after this one, abort to avoid flicker
+    if (mySeq !== renderSeq) return;
+
+    try {
+      if (loadingEl) loadingEl.style.display = "none";
+    } catch (_) {}
+
+    data = data.slice().sort((a, b) => b.ts - a.ts);
+    clear();
+
+    if (!data.length) {
+      if (emptyEl) emptyEl.hidden = false;
+      return;
+    }
+    if (emptyEl) emptyEl.hidden = true;
+
+    for (const r of data) {
+      listEl.appendChild(renderRow(r));
     }
   }
 
@@ -350,7 +342,7 @@ ANTI-DRIFT: No swipe logic. No add/edit/delete orchestration in this file.
     } catch (_) {}
   });
 
-  // Fallback API for panels.js hooks
+  // Refresh after saves (add.js calls VTLog.onShow)
   window.VTLog = Object.freeze({
     render,
     onShow: render
@@ -364,8 +356,5 @@ ANTI-DRIFT: No swipe logic. No add/edit/delete orchestration in this file.
 /*
 Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: js/log.js
-Pass: Log Row Severity Colors (P0-L2)
-Pass order: File 8 of 9 (P0)
-Prev file: js/chart.js (File 7 of 9)
-Next file: js/add.js (File 9 of 9)
+Pass: Log Wiring + Severity Rendering (P1-L2)
 */
