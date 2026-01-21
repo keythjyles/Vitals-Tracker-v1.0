@@ -6,6 +6,19 @@ Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
 App Version Authority: js/version.js
 Base: v2.028a
 
+MASTER SCHEMA vs IMPLEMENTATION SCHEMA (READ THIS FIRST — ANTI-DRIFT)
+- Master Schema = the authoritative plan/ownership map for what each file is responsible for.
+- Implementation Schema = the current repository state (the exact file contents pasted into chat).
+RULE: Do NOT “guess” file contents. Only change files that the user pasted in this chat turn.
+RULE: Whole-file outputs only. No partial patches. No line edits.
+
+FILE EDIT ID (PER-FILE COUNTER)
+- FileEditId: 0
+- Increment FileEditId by +1 ONLY when:
+  (1) the user pastes this file, and
+  (2) the assistant returns a full updated version of this file.
+- Do not change FileEditId for discussion-only replies.
+
 FILE ROLE (LOCKED)
 - Canonical symptom catalog (clinician-friendly labels + weights).
 - Canonical distress computation from selected symptoms (0–100).
@@ -22,7 +35,7 @@ VERIFICATION NOTES (THIS EDIT ONLY — NOT FUTURE INSTRUCTIONS)
 - Verified computeScore returns stable 0–100 with defensive caps and empty selection => 0.
 - Verified stable symptom keys (do not change once deployed; add new items only).
 
-IMPLEMENTATION ORDER
+IMPLEMENTATION ORDER (VISIBLE AT TOP + BOTTOM)
 - Step: 3 of 6
 - Previous: js/store.js
 - Current:  js/symptoms.js
@@ -378,8 +391,11 @@ export function setSelectedSymptoms(names){
 /*
 Vitals Tracker — EOF Verification Notes
 File: js/symptoms.js
-App Version Authority: js/version.js
 Base: v2.028a
+FileEditId: 0
+
+Master vs Implementation Schema:
+- Do not guess. Only edit pasted files. Whole-file outputs only.
 
 Implementation Order:
 - Step: 3 of 6
