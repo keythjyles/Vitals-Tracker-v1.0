@@ -1,8 +1,32 @@
-<!-- File: index.html -->
 <!--
-Purpose of this header: verification metadata for this edit (not instructions).
-Edited: 2026-01-20
-Change focus: add Settings module (med name list) and keep Add/Edit + Distress/Meds wiring.
+Vitals Tracker — BOF (Prime Pass Header)
+File: index.html
+App Version Authority: js/version.js
+Prime Pass: File 1 of 24
+Prev: (none)
+Next: sw.js
+FileEditId: 1
+Edited: 2026-01-21
+
+Role / Ownership
+- App shell + DOM for panel deck (Home / Charts / Log / Settings / Add)
+- Loads CSS + JS in required order
+- Provides stable element IDs used by modules
+
+Implemented (facts only)
+- Panel deck structure with rotating panels (home/charts/log) plus non-rotating panels (settings/add)
+- Settings panel includes Medication Names UI (med name list managed by js/settings.js)
+- Version label injection into Home/Settings + boot pill
+
+Drift locks (do not change without intentional decision)
+- Keep element IDs referenced by modules (e.g., panelDeck, deckTrack, panelHome, chartCanvas, chartLegend, logList, etc.)
+- Keep script load order: version/utils/storage/store/state/settings/ui/panels/gestures/chart/log/add/pwa/app
+- Keep manifest link id="manifestLink" and icon paths as-is unless we intentionally revise PWA packaging
+- Do not rename panels or data-panel attributes without updating js/panels.js + related modules
+
+Developer prompts (for future work; not instructions)
+- When adding new UI controls, prefer adding IDs and wiring in the owning module (not inline scripts)
+- Keep DOM minimal; avoid duplicating logic that belongs in js/* modules
 -->
 
 <!doctype html>
@@ -205,16 +229,13 @@ Change focus: add Settings module (med name list) and keep Add/Edit + Distress/M
     </main>
   </div>
 
-  <!-- Scripts -->
+  <!-- Scripts (load order is a drift lock) -->
   <script src="js/version.js?v=20260120a"></script>
   <script src="js/utils.js?v=20260120a"></script>
   <script src="js/storage.js?v=20260120a"></script>
   <script src="js/store.js?v=20260120a"></script>
   <script src="js/state.js?v=20260120a"></script>
-
-  <!-- NEW: Settings module -->
   <script src="js/settings.js?v=20260120a"></script>
-
   <script src="js/ui.js?v=20260120a"></script>
   <script src="js/panels.js?v=20260120a"></script>
   <script src="js/gestures.js?v=20260120a"></script>
@@ -240,4 +261,22 @@ Change focus: add Settings module (med name list) and keep Add/Edit + Distress/M
 </body>
 </html>
 
-<!-- EOF: index.html (verified: added js/settings.js + settings UI for med names) -->
+<!--
+Vitals Tracker — EOF (Prime Pass Footer)
+File: index.html
+App Version Authority: js/version.js
+Prime Pass: File 1 of 24
+Prev: (none)
+Next: sw.js
+FileEditId: 1
+Edited: 2026-01-21
+
+Exports / Public Surface
+- DOM IDs + structure consumed by all modules
+
+Events
+- None emitted here by design
+
+Acceptance checks
+- App boots; version renders on Home + Settings; Settings med list UI renders; panel IDs unchanged.
+-->
