@@ -6,7 +6,7 @@ Copyright © 2026 Wendell K. Jiles. All rights reserved.
 File: js/add.js
 App Version Authority: js/version.js
 ImplementationId: ADD-20260121-001
-FileEditId: 2
+FileEditId: 3
 Edited: 2026-01-21
 
 Current file: js/add.js, File 3 of 7
@@ -26,7 +26,8 @@ Beacon Drift Control Note (persist until user changes)
 
 Role / Ownership (LOCKED)
 - Owns Add/Edit form UI wiring, per-record transient UI state, and save/update orchestration
-- Owns Distress (0–5 + descriptor picker) and Medication marker capture for records
+- Owns Distress (0–100) and Symptoms popup capture for records
+- Owns Medication marker capture for records
 - Must NOT implement chart rendering logic here (chart.js consumes stored data later)
 - Must NOT implement panel-deck transforms here (delegates to VTPanels)
 ------------------------------------------------------------ 
@@ -35,8 +36,8 @@ Role / Ownership (LOCKED)
 /* File: js/add.js */
 /*
 Purpose of this header: verification metadata for this edit (not instructions).
-Edited: 2026-01-20
-Change focus: Add/Edit expanded with Distress (0–5 + descriptor popup) and Medications (event markers w/ settings prefill).
+Edited: 2026-01-21
+Change focus: Distress becomes 0–100 (user-settable). Symptoms move to popup modal. Symptoms contribute a computed distress value without being required.
 */
 
 (function () {
@@ -58,9 +59,14 @@ Change focus: Add/Edit expanded with Distress (0–5 + descriptor popup) and Med
 
   // Local UI state (per-record)
   const UI = {
-    distress: null,           // 0..5 or null
-    distressTags: [],         // strings
-    meds: []                  // [{ name, atTs }]
+    // Distress: user can set final 0..100 without symptoms.
+    distressFinal: null,        // 0..100 or null
+    distressComputed: null,     // 0..100 or null (derived from symptoms, if available)
+    distressTouched: false,     // user manually set final
+    // Symptoms: selected keys
+    symptoms: [],               // [string]
+    // Medications: event markers
+    meds: []                    // [{ name, atTs }]
   };
 
   function safeAlert(msg) {
@@ -93,6 +99,40 @@ Change focus: Add/Edit expanded with Distress (0–5 + descriptor popup) and Med
 
   function nowTs() { return Date.now(); }
 
+  function clampInt(n, lo, hi) {
+    const x = Math.trunc(Number(n));
+    if (!Number.isFinite(x)) return null;
+    return Math.max(lo, Math.min(hi, x));
+  }
+
+  function normalizeStringArray(arr) {
+    const out = [];
+    const seen = new Set();
+    for (const x of (arr || [])) {
+      const v = String(x || "").trim();
+      if (!v) continue;
+      const key = v.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(v);
+    }
+    return out;
+  }
+
+  function normalizeMeds(arr) {
+    const out = [];
+    const seen = new Set();
+    for (const m of (arr || [])) {
+      const name = String(m && m.name || "").trim();
+      if (!name) continue;
+      const key = name.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({ name: name, atTs: (m && typeof m.atTs === "number") ? m.atTs : null });
+    }
+    return out;
+  }
+
   function defaultRecord() {
     return {
       ts: nowTs(),
@@ -100,8 +140,10 @@ Change focus: Add/Edit expanded with Distress (0–5 + descriptor popup) and Med
       dia: null,
       hr: null,
       notes: "",
-      distress: null,
-      distressTags: [],
+      distressFinal: null,       // 0..100
+      distressComputed: null,    // 0..100 (from symptoms)
+      distressDelta: null,       // final - computed (if both present)
+      symptoms: [],              // symptom keys/labels
       meds: []
     };
   }
@@ -142,25 +184,33 @@ Change focus: Add/Edit expanded with Distress (0–5 + descriptor popup) and Med
           <input id="inHr" inputmode="numeric" class="addInput" placeholder="e.g., 74" />
         </label>
 
+        <div class="addSection" id="secSymptoms">
+          <div class="addSectionH">
+            <div>
+              <div class="addSectionTitle">Symptoms</div>
+              <div class="addSectionHint">Tap to select symptoms (popup). Symptoms can contribute to a computed distress score.</div>
+            </div>
+            <button class="pillBtn" id="btnOpenSymptoms" type="button">Select</button>
+          </div>
+
+          <div class="tagList" id="symptomsTagList" aria-label="Selected symptoms"></div>
+        </div>
+
         <div class="addSection" id="secDistress">
           <div class="addSectionH">
             <div>
               <div class="addSectionTitle">Distress</div>
-              <div class="addSectionHint">Select a level (0–5) to choose descriptors.</div>
+              <div class="addSectionHint">Set your distress (0–100). Symptoms are optional.</div>
             </div>
-          </div>
-
-          <div class="distressRow" id="distressBtns">
-            <button class="distressBtn" type="button" data-d="0">0</button>
-            <button class="distressBtn" type="button" data-d="1">1</button>
-            <button class="distressBtn" type="button" data-d="2">2</button>
-            <button class="distressBtn" type="button" data-d="3">3</button>
-            <button class="distressBtn" type="button" data-d="4">4</button>
-            <button class="distressBtn" type="button" data-d="5">5</button>
             <button class="pillBtn" id="btnClearDistress" type="button">Clear</button>
           </div>
 
-          <div class="tagList" id="distressTagList" aria-label="Distress descriptors"></div>
+          <div class="distressRow" style="gap:10px; align-items:center;">
+            <input id="inDistress100" inputmode="numeric" class="addInput" placeholder="0–100" style="max-width:120px;" />
+            <input id="rngDistress100" type="range" min="0" max="100" step="1" value="0" style="flex:1; opacity:.95;" />
+          </div>
+
+          <div class="tagList" id="distressMeta" aria-label="Distress meta"></div>
         </div>
 
         <div class="addSection" id="secMeds">
@@ -186,26 +236,26 @@ Change focus: Add/Edit expanded with Distress (0–5 + descriptor popup) and Med
         </label>
       </div>
 
-      <!-- Distress popup -->
-      <div class="vtOverlay" id="distressOverlay" aria-hidden="true">
-        <div class="vtModal" role="dialog" aria-modal="true" aria-label="Distress descriptors">
+      <!-- Symptoms popup -->
+      <div class="vtOverlay" id="symptomsOverlay" aria-hidden="true">
+        <div class="vtModal" role="dialog" aria-modal="true" aria-label="Symptoms">
           <div class="vtModalHead">
             <div>
-              <div class="vtModalTitle" id="distressModalTitle">Distress Level</div>
-              <div class="vtModalSub" id="distressModalSub">Select descriptors that fit right now.</div>
+              <div class="vtModalTitle" id="symptomsModalTitle">Symptoms</div>
+              <div class="vtModalSub" id="symptomsModalSub">Select symptoms that apply right now.</div>
             </div>
-            <button class="iconBtn" id="btnCloseDistressModal" type="button" aria-label="Close">
+            <button class="iconBtn" id="btnCloseSymptomsModal" type="button" aria-label="Close">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                 <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
               </svg>
             </button>
           </div>
 
-          <div class="vtModalBody" id="distressPickBody"></div>
+          <div class="vtModalBody" id="symptomsPickBody"></div>
 
           <div class="vtModalFoot">
-            <button class="pillBtn" id="btnDistressCancel" type="button">Cancel</button>
-            <button class="pillBtn" id="btnDistressApply" type="button">Apply</button>
+            <button class="pillBtn" id="btnSymptomsCancel" type="button">Cancel</button>
+            <button class="pillBtn" id="btnSymptomsApply" type="button">Apply</button>
           </div>
         </div>
       </div>
@@ -225,9 +275,15 @@ Change focus: Add/Edit expanded with Distress (0–5 + descriptor popup) and Med
       });
     } catch (_) {}
 
+    bindSymptomsUI();
     bindDistressUI();
     bindMedsUI();
     refreshMedDatalist();
+
+    // Render empty state
+    renderSymptomsTags();
+    renderDistressMeta();
+    renderMedsTags();
   }
 
   function readNumber(id) {
@@ -258,16 +314,26 @@ Change focus: Add/Edit expanded with Distress (0–5 + descriptor popup) and Med
   }
 
   function clearInputs() {
-    const ids = ["inSys", "inDia", "inHr", "inNotes", "inMedName"];
+    const ids = ["inSys", "inDia", "inHr", "inNotes", "inMedName", "inDistress100"];
     for (const id of ids) {
       const el = document.getElementById(id);
       if (el) el.value = "";
     }
-    UI.distress = null;
-    UI.distressTags = [];
+
+    // Reset UI state
+    UI.distressFinal = null;
+    UI.distressComputed = null;
+    UI.distressDelta = null;
+    UI.distressTouched = false;
+    UI.symptoms = [];
     UI.meds = [];
-    renderDistressButtons();
-    renderDistressTags();
+
+    // Reset range
+    const rng = document.getElementById("rngDistress100");
+    if (rng) rng.value = "0";
+
+    renderSymptomsTags();
+    renderDistressMeta();
     renderMedsTags();
   }
 
@@ -299,54 +365,34 @@ Change focus: Add/Edit expanded with Distress (0–5 + descriptor popup) and Med
     const hr  = (r && typeof r.hr  === "number") ? r.hr  : (r && typeof r.heartRate === "number" ? r.heartRate : null);
     const notes = (r && (r.notes ?? r.note ?? r.comment ?? r.memo)) ?? "";
 
-    const distress = (r && Number.isFinite(Number(r.distress))) ? Number(r.distress) : null;
-    const distressTags = Array.isArray(r && r.distressTags) ? r.distressTags.slice() : [];
+    const distressFinal = (r && Number.isFinite(Number(r.distressFinal))) ? clampInt(Number(r.distressFinal), 0, 100) : null;
+    const distressComputed = (r && Number.isFinite(Number(r.distressComputed))) ? clampInt(Number(r.distressComputed), 0, 100) : null;
 
+    const symptoms = Array.isArray(r && r.symptoms) ? normalizeStringArray(r.symptoms) : [];
     const meds = Array.isArray(r && r.meds) ? r.meds.slice() : [];
 
-    return {
+    const out = {
       ts,
       sys,
       dia,
       hr,
       notes: String(notes || ""),
-      distress: (distress === null ? null : clampInt(distress, 0, 5)),
-      distressTags: normalizeStringArray(distressTags),
+      distressFinal,
+      distressComputed,
+      distressDelta: (distressFinal != null && distressComputed != null) ? (distressFinal - distressComputed) : null,
+      symptoms,
       meds: normalizeMeds(meds)
     };
-  }
 
-  function clampInt(n, lo, hi) {
-    const x = Math.trunc(Number(n));
-    if (!Number.isFinite(x)) return lo;
-    return Math.max(lo, Math.min(hi, x));
-  }
+    // Back-compat: if older field names exist, do not guess; only map the ones we can safely interpret.
+    // If a legacy `distress` exists and is in 0..100 range, treat it as distressFinal.
+    try {
+      if (out.distressFinal == null && r && Number.isFinite(Number(r.distress))) {
+        const dv = clampInt(Number(r.distress), 0, 100);
+        if (dv != null) out.distressFinal = dv;
+      }
+    } catch (_) {}
 
-  function normalizeStringArray(arr) {
-    const out = [];
-    const seen = new Set();
-    for (const x of (arr || [])) {
-      const v = String(x || "").trim();
-      if (!v) continue;
-      const key = v.toLowerCase();
-      if (seen.has(key)) continue;
-      seen.add(key);
-      out.push(v);
-    }
-    return out;
-  }
-
-  function normalizeMeds(arr) {
-    const out = [];
-    const seen = new Set();
-    for (const m of (arr || [])) {
-      const name = String(m && m.name || "").trim();
-      if (!name) continue;
-      const key = name.toLowerCase();
-      if (seen.has(key)) continue;
-      seen.add(key);
-      out.push({ name: name, atTs: (m && typeof m.atTs === "number") ? m.atTs : null });
-    }
     return out;
   }
 
@@ -380,6 +426,19 @@ Change focus: Add/Edit expanded with Distress (0–5 + descriptor popup) and Med
     return null;
   }
 
+  function devEchoToken() {
+    // Visual reference requested: place a removable token in Notes while building.
+    return `#DEV ADD-20260121-001 add.js FE3`;
+  }
+
+  function devPrefillNotesIfEmpty() {
+    const el = document.getElementById("inNotes");
+    if (!el) return;
+    const cur = String(el.value || "");
+    if (cur.trim()) return;
+    try { el.value = devEchoToken(); } catch (_) {}
+  }
+
   function enterEditMode(key, record) {
     EDIT.active = true;
     EDIT.key = key || null;
@@ -394,14 +453,28 @@ Change focus: Add/Edit expanded with Distress (0–5 + descriptor popup) and Med
       writeNumber("inHr",  record.hr);
       writeText("inNotes", record.notes || "");
 
-      UI.distress = (record.distress == null ? null : clampInt(record.distress, 0, 5));
-      UI.distressTags = normalizeStringArray(record.distressTags || []);
+      UI.symptoms = normalizeStringArray(record.symptoms || []);
       UI.meds = normalizeMeds(record.meds || []);
 
-      renderDistressButtons();
-      renderDistressTags();
+      UI.distressComputed = (record.distressComputed == null ? null : clampInt(record.distressComputed, 0, 100));
+      UI.distressFinal = (record.distressFinal == null ? null : clampInt(record.distressFinal, 0, 100));
+      UI.distressDelta = (UI.distressFinal != null && UI.distressComputed != null) ? (UI.distressFinal - UI.distressComputed) : null;
+
+      // Editing: do not force-treat as touched. Preserve what record has.
+      UI.distressTouched = (UI.distressFinal != null);
+
+      // Update UI elements
+      const rng = document.getElementById("rngDistress100");
+      if (rng) rng.value = String(UI.distressFinal != null ? UI.distressFinal : 0);
+      writeNumber("inDistress100", UI.distressFinal);
+
+      renderSymptomsTags();
+      renderDistressMeta();
       renderMedsTags();
       refreshMedDatalist();
+
+      // Visual reference token if notes are empty
+      devPrefillNotesIfEmpty();
     }
   }
 
@@ -418,6 +491,9 @@ Change focus: Add/Edit expanded with Distress (0–5 + descriptor popup) and Med
     ensureFormPresent();
     exitEditMode();
     clearInputs();
+
+    // Visual reference token while building
+    devPrefillNotesIfEmpty();
 
     try {
       if (window.VTPanels && typeof window.VTPanels.openAdd === "function") {
@@ -521,111 +597,181 @@ Change focus: Add/Edit expanded with Distress (0–5 + descriptor popup) and Med
   }
 
   // -----------------------------
-  // Distress descriptors catalog
+  // Symptoms popup (Add-only)
   // -----------------------------
-  const DISTRESS = Object.freeze({
-    0: [
-      { k:"Calm", d:"No distress; baseline." },
-      { k:"Stable", d:"Able to function normally." },
-      { k:"No urgent symptoms", d:"No acute complaints." }
-    ],
-    1: [
-      { k:"Mild unease", d:"Slight discomfort or worry." },
-      { k:"Light tension", d:"Noticeable but manageable." },
-      { k:"Slight restlessness", d:"Minor agitation." },
-      { k:"Mild fatigue", d:"Tired but functional." }
-    ],
-    2: [
-      { k:"Moderate discomfort", d:"More noticeable; still coping." },
-      { k:"Elevated worry", d:"Persistent concern." },
-      { k:"Irritability", d:"Short temper / easily bothered." },
-      { k:"Body tension", d:"Tight chest/neck/shoulders." },
-      { k:"Mild dizziness", d:"Occasional lightheadedness." }
-    ],
-    3: [
-      { k:"High anxiety", d:"Hard to ignore; affects focus." },
-      { k:"Breath hunger", d:"Feeling air-starved / dyspnea sensation." },
-      { k:"Chest tightness", d:"Pressure/tight feeling." },
-      { k:"Tremor / shakes", d:"Physically keyed up." },
-      { k:"Racing thoughts", d:"Mind won’t settle." },
-      { k:"Nausea", d:"Stomach upset." }
-    ],
-    4: [
-      { k:"Severe distress", d:"Functioning significantly impaired." },
-      { k:"Panic sensations", d:"Surge of fear / doom." },
-      { k:"Marked dizziness", d:"Feels unsteady / near-faint." },
-      { k:"Severe headache flare", d:"Pain spike impacting function." },
-      { k:"Unable to relax", d:"Cannot downshift." },
-      { k:"Safety concern", d:"Feels unsafe being alone right now." }
-    ],
-    5: [
-      { k:"Crisis-level", d:"Cannot function; needs immediate support." },
-      { k:"Overwhelmed", d:"Unable to cope." },
-      { k:"Severe air hunger", d:"Breathing feels critically compromised." },
-      { k:"Severe chest symptoms", d:"Concerning chest pressure/tightness." },
-      { k:"Near-syncope", d:"Feels close to passing out." },
-      { k:"Emergency-level fear", d:"Panic with loss of control." }
-    ]
-  });
+  let symptomsTemp = null;
 
-  // --- Distress UI ---
-  function bindDistressUI() {
-    const wrap = document.getElementById("distressBtns");
-    if (!wrap) return;
+  function symptomsAdapter() {
+    // We do NOT guess weights here. We only call into symptoms.js if it exposes an API.
+    // Supported shapes (non-exhaustive):
+    // - window.VTSymptoms.getCatalog(): [{ k, label, desc, ... }]
+    // - window.VTSymptoms.catalog: array
+    // - window.VTSymptoms.computeDistress(keys): number 0..100
+    try {
+      const s = window.VTSymptoms || null;
+      if (!s) return null;
 
-    // Level buttons
-    wrap.querySelectorAll("button[data-d]").forEach(btn => {
-      bindOnce(btn, "distressLevel_" + btn.getAttribute("data-d"), function () {
-        const d = Number(btn.getAttribute("data-d"));
-        UI.distress = clampInt(d, 0, 5);
-        UI.distressTags = []; // reset per spec: tags are level-aligned
-        renderDistressButtons();
-        renderDistressTags();
-        openDistressPicker(UI.distress);
+      const getCatalog =
+        (typeof s.getCatalog === "function") ? () => s.getCatalog() :
+        (Array.isArray(s.catalog)) ? () => s.catalog :
+        null;
+
+      const compute =
+        (typeof s.computeDistress === "function") ? (keys) => s.computeDistress(keys) :
+        (typeof s.computeScore === "function") ? (keys) => s.computeScore(keys) :
+        null;
+
+      return { getCatalog, compute };
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function bindSymptomsUI() {
+    bindOnce(document.getElementById("btnOpenSymptoms"), "openSymptoms", function () {
+      openSymptomsPicker();
+    });
+
+    bindOnce(document.getElementById("btnCloseSymptomsModal"), "closeSymptomsModal", function () {
+      closeSymptomsPicker(true);
+    });
+
+    bindOnce(document.getElementById("btnSymptomsCancel"), "cancelSymptomsModal", function () {
+      closeSymptomsPicker(true);
+    });
+
+    bindOnce(document.getElementById("btnSymptomsApply"), "applySymptomsModal", function () {
+      applySymptomsPicker();
+    });
+  }
+
+  function openSymptomsPicker() {
+    const overlay = document.getElementById("symptomsOverlay");
+    const body = document.getElementById("symptomsPickBody");
+    if (!overlay || !body) return;
+
+    symptomsTemp = new Set((UI.symptoms || []).map(x => String(x).trim()).filter(Boolean));
+
+    const ad = symptomsAdapter();
+    const catalog = (ad && ad.getCatalog) ? (ad.getCatalog() || []) : [];
+
+    body.innerHTML = "";
+
+    if (!Array.isArray(catalog) || !catalog.length) {
+      // No guessing: if symptoms.js isn’t providing a catalog, we show a hard stop message.
+      const msg = document.createElement("div");
+      msg.className = "muted";
+      msg.style.fontSize = "13px";
+      msg.style.lineHeight = "1.35";
+      msg.textContent = "Symptoms catalog not available yet (js/symptoms.js). Paste/implement symptoms.js to enable symptom selection.";
+      body.appendChild(msg);
+    } else {
+      catalog.forEach(it => {
+        const key = String(it.k ?? it.key ?? it.id ?? it.label ?? "").trim();
+        if (!key) return;
+
+        const label = String(it.label ?? it.name ?? it.k ?? key).trim();
+        const desc = String(it.desc ?? it.d ?? it.description ?? "").trim();
+
+        const row = document.createElement("div");
+        row.className = "vtPickItem";
+
+        const left = document.createElement("div");
+        left.className = "vtPickItemLeft";
+
+        const nm = document.createElement("div");
+        nm.className = "vtPickItemName";
+        nm.textContent = label;
+
+        const ds = document.createElement("div");
+        ds.className = "vtPickItemDesc";
+        ds.textContent = desc;
+
+        left.appendChild(nm);
+        if (desc) left.appendChild(ds);
+
+        const tog = document.createElement("button");
+        tog.type = "button";
+        tog.className = "vtToggle" + (symptomsTemp.has(key) ? " on" : "");
+        tog.setAttribute("aria-pressed", symptomsTemp.has(key) ? "true" : "false");
+
+        tog.addEventListener("click", function () {
+          if (symptomsTemp.has(key)) symptomsTemp.delete(key);
+          else symptomsTemp.add(key);
+          tog.className = "vtToggle" + (symptomsTemp.has(key) ? " on" : "");
+          tog.setAttribute("aria-pressed", symptomsTemp.has(key) ? "true" : "false");
+        });
+
+        row.appendChild(left);
+        row.appendChild(tog);
+        body.appendChild(row);
       });
-    });
+    }
 
-    const btnClear = document.getElementById("btnClearDistress");
-    bindOnce(btnClear, "clearDistress", function () {
-      UI.distress = null;
-      UI.distressTags = [];
-      renderDistressButtons();
-      renderDistressTags();
-      closeDistressPicker(true);
-    });
-
-    // Modal buttons
-    bindOnce(document.getElementById("btnCloseDistressModal"), "closeDistressModal", function(){ closeDistressPicker(true); });
-    bindOnce(document.getElementById("btnDistressCancel"), "cancelDistressModal", function(){ closeDistressPicker(true); });
-    bindOnce(document.getElementById("btnDistressApply"), "applyDistressModal", function(){ applyDistressPicker(); });
+    overlay.classList.add("show");
+    overlay.setAttribute("aria-hidden", "false");
   }
 
-  function renderDistressButtons() {
-    const wrap = document.getElementById("distressBtns");
-    if (!wrap) return;
-    wrap.querySelectorAll("button[data-d]").forEach(btn => {
-      const d = Number(btn.getAttribute("data-d"));
-      if (UI.distress === d) btn.classList.add("active");
-      else btn.classList.remove("active");
-    });
+  function closeSymptomsPicker(clearTemp) {
+    const overlay = document.getElementById("symptomsOverlay");
+    if (!overlay) return;
+    overlay.classList.remove("show");
+    overlay.setAttribute("aria-hidden", "true");
+    if (clearTemp) symptomsTemp = null;
   }
 
-  function renderDistressTags() {
-    const host = document.getElementById("distressTagList");
-    if (!host) return;
-    host.innerHTML = "";
+  function computeDistressFromSymptoms(keys) {
+    const ad = symptomsAdapter();
+    if (!ad || typeof ad.compute !== "function") return null;
+    try {
+      const v = ad.compute(keys);
+      const n = Number(v);
+      if (!Number.isFinite(n)) return null;
+      return clampInt(n, 0, 100);
+    } catch (_) {
+      return null;
+    }
+  }
 
-    if (UI.distress == null) {
-      // per spec: hidden until level selected; show nothing (not even empty pill)
+  function applySymptomsPicker() {
+    if (!symptomsTemp) {
+      closeSymptomsPicker(true);
       return;
     }
 
-    const tags = UI.distressTags || [];
+    UI.symptoms = normalizeStringArray(Array.from(symptomsTemp));
+    symptomsTemp = null;
+
+    // Update computed distress from symptoms (if symptoms.js provides it)
+    const computed = computeDistressFromSymptoms(UI.symptoms);
+    UI.distressComputed = (computed == null ? null : computed);
+
+    // If user has not manually set distress, auto-set final to computed
+    if (!UI.distressTouched) {
+      UI.distressFinal = (UI.distressComputed == null ? null : UI.distressComputed);
+      const rng = document.getElementById("rngDistress100");
+      if (rng) rng.value = String(UI.distressFinal != null ? UI.distressFinal : 0);
+      writeNumber("inDistress100", UI.distressFinal);
+    }
+
+    UI.distressDelta = (UI.distressFinal != null && UI.distressComputed != null) ? (UI.distressFinal - UI.distressComputed) : null;
+
+    renderSymptomsTags();
+    renderDistressMeta();
+    closeSymptomsPicker(true);
+  }
+
+  function renderSymptomsTags() {
+    const host = document.getElementById("symptomsTagList");
+    if (!host) return;
+    host.innerHTML = "";
+
+    const tags = UI.symptoms || [];
     if (!tags.length) {
       const muted = document.createElement("div");
       muted.className = "muted";
       muted.style.fontSize = "12px";
-      muted.textContent = "No descriptors selected.";
+      muted.textContent = "No symptoms selected.";
       host.appendChild(muted);
       return;
     }
@@ -640,8 +786,23 @@ Change focus: Add/Edit expanded with Distress (0–5 + descriptor popup) and Med
       x.setAttribute("aria-label", "Remove");
       x.innerHTML = "×";
       x.addEventListener("click", function () {
-        UI.distressTags = (UI.distressTags || []).filter(v => v !== t);
-        renderDistressTags();
+        UI.symptoms = (UI.symptoms || []).filter(v => v !== t);
+
+        // Recompute computed distress if possible
+        const computed = computeDistressFromSymptoms(UI.symptoms);
+        UI.distressComputed = (computed == null ? null : computed);
+
+        if (!UI.distressTouched) {
+          UI.distressFinal = (UI.distressComputed == null ? null : UI.distressComputed);
+          const rng = document.getElementById("rngDistress100");
+          if (rng) rng.value = String(UI.distressFinal != null ? UI.distressFinal : 0);
+          writeNumber("inDistress100", UI.distressFinal);
+        }
+
+        UI.distressDelta = (UI.distressFinal != null && UI.distressComputed != null) ? (UI.distressFinal - UI.distressComputed) : null;
+
+        renderSymptomsTags();
+        renderDistressMeta();
       });
 
       chip.appendChild(x);
@@ -649,90 +810,91 @@ Change focus: Add/Edit expanded with Distress (0–5 + descriptor popup) and Med
     });
   }
 
-  let pickerTemp = null;
+  // -----------------------------
+  // Distress 0–100 UI
+  // -----------------------------
+  function bindDistressUI() {
+    const inD = document.getElementById("inDistress100");
+    const rng = document.getElementById("rngDistress100");
+    const btnClear = document.getElementById("btnClearDistress");
 
-  function openDistressPicker(level) {
-    const overlay = document.getElementById("distressOverlay");
-    const body = document.getElementById("distressPickBody");
-    const ttl = document.getElementById("distressModalTitle");
-    if (!overlay || !body || level == null) return;
-
-    const L = clampInt(level, 0, 5);
-    const items = (DISTRESS[L] || []).slice();
-
-    pickerTemp = new Set((UI.distressTags || []).map(x => String(x).trim()));
-
-    if (ttl) ttl.textContent = "Distress Level " + L;
-
-    body.innerHTML = "";
-    items.forEach(it => {
-      const row = document.createElement("div");
-      row.className = "vtPickItem";
-
-      const left = document.createElement("div");
-      left.className = "vtPickItemLeft";
-
-      const nm = document.createElement("div");
-      nm.className = "vtPickItemName";
-      nm.textContent = it.k;
-
-      const ds = document.createElement("div");
-      ds.className = "vtPickItemDesc";
-      ds.textContent = it.d;
-
-      left.appendChild(nm);
-      left.appendChild(ds);
-
-      const tog = document.createElement("button");
-      tog.type = "button";
-      tog.className = "vtToggle" + (pickerTemp.has(it.k) ? " on" : "");
-      tog.setAttribute("aria-pressed", pickerTemp.has(it.k) ? "true" : "false");
-
-      tog.addEventListener("click", function () {
-        if (pickerTemp.has(it.k)) pickerTemp.delete(it.k);
-        else pickerTemp.add(it.k);
-        tog.className = "vtToggle" + (pickerTemp.has(it.k) ? " on" : "");
-        tog.setAttribute("aria-pressed", pickerTemp.has(it.k) ? "true" : "false");
+    if (rng) {
+      rng.addEventListener("input", function () {
+        const v = clampInt(rng.value, 0, 100);
+        UI.distressFinal = (v == null ? null : v);
+        UI.distressTouched = true;
+        writeNumber("inDistress100", UI.distressFinal);
+        UI.distressDelta = (UI.distressFinal != null && UI.distressComputed != null) ? (UI.distressFinal - UI.distressComputed) : null;
+        renderDistressMeta();
       });
-
-      row.appendChild(left);
-      row.appendChild(tog);
-      body.appendChild(row);
-    });
-
-    overlay.classList.add("show");
-    overlay.setAttribute("aria-hidden", "false");
-  }
-
-  function closeDistressPicker(clearTemp) {
-    const overlay = document.getElementById("distressOverlay");
-    if (!overlay) return;
-    overlay.classList.remove("show");
-    overlay.setAttribute("aria-hidden", "true");
-    if (clearTemp) pickerTemp = null;
-  }
-
-  function applyDistressPicker() {
-    if (!pickerTemp) {
-      closeDistressPicker(true);
-      return;
     }
-    UI.distressTags = Array.from(pickerTemp);
-    UI.distressTags.sort((a,b) => a.localeCompare(b));
-    pickerTemp = null;
-    renderDistressTags();
-    closeDistressPicker(true);
+
+    if (inD) {
+      inD.addEventListener("input", function () {
+        const v = clampInt(inD.value, 0, 100);
+        UI.distressFinal = (v == null ? null : v);
+        UI.distressTouched = true;
+        if (rng) rng.value = String(UI.distressFinal != null ? UI.distressFinal : 0);
+        UI.distressDelta = (UI.distressFinal != null && UI.distressComputed != null) ? (UI.distressFinal - UI.distressComputed) : null;
+        renderDistressMeta();
+      });
+    }
+
+    bindOnce(btnClear, "clearDistress100", function () {
+      UI.distressFinal = null;
+      UI.distressTouched = false;
+      UI.distressDelta = null;
+
+      if (rng) rng.value = "0";
+      if (inD) inD.value = "";
+
+      renderDistressMeta();
+    });
   }
 
-  // --- Meds UI ---
+  function renderDistressMeta() {
+    const host = document.getElementById("distressMeta");
+    if (!host) return;
+    host.innerHTML = "";
+
+    const metaLine = document.createElement("div");
+    metaLine.className = "muted";
+    metaLine.style.fontSize = "12px";
+
+    const parts = [];
+    if (UI.distressFinal != null) parts.push(`Final: ${UI.distressFinal}`);
+    else parts.push("Final: (not set)");
+
+    if (UI.distressComputed != null) parts.push(`Computed: ${UI.distressComputed}`);
+    else parts.push("Computed: (n/a)");
+
+    if (UI.distressFinal != null && UI.distressComputed != null) parts.push(`Δ: ${UI.distressFinal - UI.distressComputed}`);
+
+    metaLine.textContent = parts.join("  •  ");
+    host.appendChild(metaLine);
+
+    // Soft hint if symptoms catalog compute isn't available
+    if ((UI.symptoms || []).length && UI.distressComputed == null) {
+      const warn = document.createElement("div");
+      warn.className = "muted";
+      warn.style.fontSize = "12px";
+      warn.style.marginTop = "6px";
+      warn.textContent = "Computed distress requires symptoms.js scoring API.";
+      host.appendChild(warn);
+    }
+  }
+
+  // -----------------------------
+  // Meds UI
+  // -----------------------------
   function bindMedsUI() {
     const btnAdd = document.getElementById("btnAddMedToRecord");
     const inMed = document.getElementById("inMedName");
+
     bindOnce(btnAdd, "addMedToRecord", function () {
       const name = String((inMed && inMed.value) || "").trim();
       if (!name) return;
 
-      // add to record
       const key = name.toLowerCase();
       const exists = (UI.meds || []).some(m => String(m.name).toLowerCase() === key);
       if (!exists) {
@@ -741,7 +903,6 @@ Change focus: Add/Edit expanded with Distress (0–5 + descriptor popup) and Med
         renderMedsTags();
       }
 
-      // add to settings list (prefill)
       addMedToSettings(name);
       refreshMedDatalist();
 
@@ -816,8 +977,14 @@ Change focus: Add/Edit expanded with Distress (0–5 + descriptor popup) and Med
     rec.hr  = readNumber("inHr");
     rec.notes = readText("inNotes");
 
-    rec.distress = (UI.distress == null ? null : clampInt(UI.distress, 0, 5));
-    rec.distressTags = normalizeStringArray(UI.distressTags || []);
+    // Distress (0..100) is optional and independent.
+    // Symptoms selection (optional) may produce computed distress if symptoms.js provides it.
+    const finalV = clampInt(readNumber("inDistress100"), 0, 100);
+    rec.distressFinal = (finalV == null ? (UI.distressFinal == null ? null : UI.distressFinal) : finalV);
+    rec.distressComputed = (UI.distressComputed == null ? null : clampInt(UI.distressComputed, 0, 100));
+    rec.distressDelta = (rec.distressFinal != null && rec.distressComputed != null) ? (rec.distressFinal - rec.distressComputed) : null;
+
+    rec.symptoms = normalizeStringArray(UI.symptoms || []);
     rec.meds = normalizeMeds(UI.meds || []);
 
     const hasSys = rec.sys != null;
@@ -863,6 +1030,7 @@ Change focus: Add/Edit expanded with Distress (0–5 + descriptor popup) and Med
 
       safeAlert("Saved.");
       clearInputs();
+      devPrefillNotesIfEmpty(); // keep visual reference on next entry
     } catch (e) {
       safeAlert("Save failed. Check console for details.");
       try { console.error(e); } catch (_) {}
@@ -916,6 +1084,9 @@ Change focus: Add/Edit expanded with Distress (0–5 + descriptor popup) and Med
     setSaveEnabled(true);
     setSaveLabelEditing(false);
     setHeaderEditing(false);
+
+    // Visual reference token for current session if empty
+    devPrefillNotesIfEmpty();
   }
 
   window.VTAdd = Object.freeze({
@@ -939,7 +1110,7 @@ Copyright © 2026 Wendell K. Jiles. All rights reserved.
 File: js/add.js
 App Version Authority: js/version.js
 ImplementationId: ADD-20260121-001
-FileEditId: 2
+FileEditId: 3
 Edited: 2026-01-21
 
 Current file: js/add.js, File 3 of 7
@@ -953,8 +1124,10 @@ Beacon: update FileEditId by incrementing by one each time you generate a new fu
 
 Current file (pasted/edited in this step): js/add.js
 Acceptance checks
-- Add/Edit supports Distress 0–5 with descriptor picker modal and removable descriptor chips
-- Add/Edit supports Medication event markers with settings prefill datalist
+- Distress is 0–100 and can be set without symptoms
+- Symptoms selection is a popup modal (requires symptoms.js catalog/scoring API to be fully enabled)
+- Symptoms can compute a distress score (0–100) when symptoms.js provides computeDistress/computeScore
+- Medications event markers preserved and stored
 - Save enforces BP pairs (sys+dia) while allowing HR/Notes-only entries
 - Add panel returns to previous panel via VTPanels.closeAdd()
 
