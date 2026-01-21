@@ -15,15 +15,10 @@ FILE ROLE (LOCKED)
 - Must NOT own panels or gestures.
 
 VERIFICATION NOTES (THIS EDIT ONLY — NOT FUTURE INSTRUCTIONS)
-- Verified VTStore.init() resolves before reads/writes that require storage.
-- Verified getAll() remains synchronous and always returns an array snapshot.
-- Verified add() persists via current VTStorage API when present, with legacy fallback.
-- Verified backward-compatible normalization for older record shapes.
-
-CHANGE (P0-LR4)
-- Aligned to storage.js current API: VTStorage.getAllRecords / putRecord / deleteRecordById
-  with legacy fallback: VTStorage.loadAll / saveAll / clear when present.
-- Added non-UI debug probe: window.__VTDBG.store.* (selected APIs + status counters).
+- Verified VTStore.update() exists for Add/Edit mode and persists via VTStorage.putRecord when available.
+- Verified unknown fields (e.g., distress, meds, symptom selections) are preserved pass-through.
+- Verified getAll() remains synchronous and returns an array snapshot.
+- Verified add() continues to persist via current VTStorage API when present, with legacy fallback.
 */
 
 (function () {
@@ -88,7 +83,7 @@ CHANGE (P0-LR4)
              ""
     };
 
-    // Preserve any other fields (symptoms, etc.) without altering them.
+    // Preserve any other fields (symptoms, distress, meds, etc.) without altering them.
     for (var k in r) {
       if (!Object.prototype.hasOwnProperty.call(r, k)) continue;
       if (k === "ts" || k === "sys" || k === "dia" || k === "hr" || k === "notes") continue;
@@ -166,7 +161,6 @@ CHANGE (P0-LR4)
         if (isThenable(r)) r = await r;
         return !!(r && r.ok);
       }
-      // saveAll requires full array; caller should prefer batch path
     } catch (_) {}
 
     return false;
@@ -185,9 +179,7 @@ CHANGE (P0-LR4)
         return true;
       }
 
-      // No batch API; best-effort: clear then putRecord each (only when explicitly asked).
       if (writeApi === "putRecord") {
-        // Clear existing by deleting by ts if possible.
         if (typeof window.VTStorage.deleteRecordById === "function") {
           try {
             var existing = await readAllFromStorage();
@@ -213,14 +205,12 @@ CHANGE (P0-LR4)
     if (!window.VTStorage) return false;
 
     try {
-      // Legacy clear
       if (typeof window.VTStorage.clear === "function") {
         var r0 = window.VTStorage.clear();
         if (isThenable(r0)) await r0;
         return true;
       }
 
-      // New storage bridge: delete by ts/object
       if (typeof window.VTStorage.deleteRecordById === "function") {
         var existing = await readAllFromStorage();
         if (Array.isArray(existing) && existing.length) {
@@ -231,7 +221,6 @@ CHANGE (P0-LR4)
         return true;
       }
 
-      // Fallback: if saveAll exists, save empty
       if (typeof window.VTStorage.saveAll === "function") {
         var r1 = window.VTStorage.saveAll([]);
         if (isThenable(r1)) await r1;
@@ -258,12 +247,10 @@ CHANGE (P0-LR4)
         return;
       }
 
-      // Optional detect probe (read-only)
       try {
         if (typeof window.VTStorage.detect === "function") {
           var det = window.VTStorage.detect();
           if (isThenable(det)) det = await det;
-          // Keep it minimal (string-ish) for debugging without UI.
           try {
             dbgSet("detectBest", det && det.best && det.best.source ? String(det.best.source) : "");
             dbgSet("detectBestCount", det && det.best && typeof det.best.count === "number" ? det.best.count : "");
@@ -288,9 +275,27 @@ CHANGE (P0-LR4)
   }
 
   function getAll() {
-    // SYNC by contract. If not ready, kick async init and return current cache snapshot.
     if (!ready) { try { init(); } catch (_) {} }
     return clone(Array.isArray(cache) ? cache : []);
+  }
+
+  function findIndexByKey(key, rec) {
+    var ts = null;
+    if (key && typeof key === "object") {
+      if (typeof key.ts === "number" && isFinite(key.ts)) ts = key.ts;
+      else if (typeof key.id === "number" && isFinite(key.id)) ts = key.id;
+    }
+    if (ts == null && rec && typeof rec.ts === "number" && isFinite(rec.ts)) ts = rec.ts;
+    if (ts == null) return -1;
+
+    for (var i = 0; i < cache.length; i++) {
+      var r = cache[i];
+      if (!r) continue;
+      var rts = (typeof r.ts === "number" && isFinite(r.ts)) ? r.ts : null;
+      if (rts != null && rts === ts) return i;
+      if (r && (r.id === ts || r._id === ts)) return i;
+    }
+    return -1;
   }
 
   async function add(record) {
@@ -299,11 +304,9 @@ CHANGE (P0-LR4)
     var rec = normalizeRecord(record);
     cache.push(rec);
 
-    // Persist in whatever storage bridge is present.
     try {
       var ok = false;
 
-      // Prefer putRecord (non-destructive, single write)
       if (window.VTStorage && typeof window.VTStorage.putRecord === "function") {
         var r = window.VTStorage.putRecord(rec);
         if (isThenable(r)) r = await r;
@@ -315,6 +318,43 @@ CHANGE (P0-LR4)
       }
 
       dbgSet("lastAddOk", ok ? "YES" : "NO");
+    } catch (_) {}
+
+    return rec;
+  }
+
+  async function update(key, record) {
+    await init();
+
+    var rec = normalizeRecord(record);
+
+    // Preserve timestamp if caller provided a key.ts (edit should not move the record in time)
+    try {
+      if (key && typeof key === "object" && typeof key.ts === "number" && isFinite(key.ts)) {
+        rec.ts = key.ts;
+      } else if (key && typeof key === "object" && typeof key.id === "number" && isFinite(key.id)) {
+        rec.ts = key.id;
+      }
+    } catch (_) {}
+
+    var idx = findIndexByKey(key, rec);
+    if (idx >= 0) cache[idx] = rec;
+    else cache.push(rec);
+
+    try {
+      var ok = false;
+
+      if (window.VTStorage && typeof window.VTStorage.putRecord === "function") {
+        var r = window.VTStorage.putRecord(rec);
+        if (isThenable(r)) r = await r;
+        ok = !!(r && r.ok);
+      } else if (window.VTStorage && typeof window.VTStorage.saveAll === "function") {
+        var res = window.VTStorage.saveAll(cache);
+        if (isThenable(res)) await res;
+        ok = true;
+      }
+
+      dbgSet("lastUpdateOk", ok ? "YES" : "NO");
     } catch (_) {}
 
     return rec;
@@ -351,11 +391,11 @@ CHANGE (P0-LR4)
     init: init,
     getAll: getAll,
     add: add,
+    update: update,
     replaceAll: replaceAll,
     clear: clear
   };
 
-  // Boot-load cache as early as possible (no UI).
   try { init(); } catch (_) {}
 
 })();
@@ -365,5 +405,5 @@ Vitals Tracker — EOF Verification Notes
 File: js/store.js
 App Version Authority: js/version.js
 Base: v2.028a
-Verified: storage bridge API alignment + debug probe present
+Verified: VTStore.update added; persistence via VTStorage.putRecord; pass-through fields preserved
 */
