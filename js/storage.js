@@ -1,25 +1,46 @@
-/* File: js/storage.js */
-/*
-Vitals Tracker — Storage Bridge (Read/Write Compatible)
-Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
+/* 
+Vitals Tracker — BOF (Prime Pass Header)
 
+
+
+NEXT FILE TO FETCH (PP-20260121-001): js/store.js
+
+
+
+Beacon Drift Control Note (for this Prime Pass run only; ends at the next divider)
+- Beacon, focus on THIS pasted file and THIS chat message only.
+- Follow only the instructions/prompts inside THIS paste and THIS message.
+- Do NOT use or “blend” prior chat messages for decisions in this step.
+End Beacon Drift Control Note
+------------------------------------------------------------
+
+File: js/storage.js
 App Version Authority: js/version.js
-Base: v2.028a
+ImplementationId: PP-20260121-001
+Prime Pass: Step 6 of 23
+Prev (this run): js/utils.js
+Next (this run): js/store.js
+FileEditId: 1
+Edited: 2026-01-21
 
-FILE ROLE (LOCKED)
+Role / Ownership (LOCKED)
 - Single storage abstraction for the app.
-- Provides a SAFE, defensive bridge across legacy LocalStorage keys and possible IndexedDB layouts.
+- SAFE, defensive bridge across legacy LocalStorage keys and possible IndexedDB layouts.
 - Chart/Log must pull records via VTStorage.getAllRecords().
 
-VERIFICATION NOTES (THIS EDIT ONLY — NOT FUTURE INSTRUCTIONS)
-- Verified exported API surface: detect(), getAllRecords(), putRecord(), deleteRecordById().
-- Verified canonical LocalStorage key write path is enabled and cache invalidates on write/delete.
-- Verified normalization outputs canonical required fields:
-  { ts:number, sys:number|null, dia:number|null, hr:number|null, notes:string, symptoms:string[] }.
-- Verified PASS-THROUGH persistence: additional fields (e.g., distress, mood, meds markers, symptom scoring maps)
-  are preserved and stored alongside canonical fields (no data loss).
-- Verified IndexedDB writes/deletes remain best-effort and never block LocalStorage persistence.
-*/
+Implemented (facts only)
+- Exported API surface: detect(), getAllRecords(), putRecord(), deleteRecordById()
+- Canonical LocalStorage key write path enabled; cache invalidates on write/delete
+- Normalization outputs canonical required fields:
+  { ts:number, sys:number|null, dia:number|null, hr:number|null, notes:string, symptoms:string[] }
+- PASS-THROUGH persistence: additional fields preserved (distress/mood/med markers/symptom scoring maps/etc)
+- IndexedDB writes/deletes are best-effort and never block LocalStorage persistence
+
+Drift locks (do not change without intentional decision)
+- Do not remove pass-through field preservation
+- Do not change CANON_LS_KEY without a deliberate migration plan
+- Do not allow IDB failures to prevent LocalStorage writes
+------------------------------------------------------------ */
 
 (function () {
   "use strict";
@@ -542,10 +563,28 @@ VERIFICATION NOTES (THIS EDIT ONLY — NOT FUTURE INSTRUCTIONS)
 
 })();
 
-/*
-Vitals Tracker — EOF Verification Notes
+/* 
+Vitals Tracker — EOF (Prime Pass Footer)
 File: js/storage.js
 App Version Authority: js/version.js
-Base: v2.028a
-Verified: API surface + write/delete + normalization + cache invalidation + pass-through fields preserved
-*/
+ImplementationId: PP-20260121-001
+Prime Pass: Step 6 of 23
+Prev (this run): js/utils.js
+Next (this run): js/store.js
+FileEditId: 1
+Edited: 2026-01-21
+
+Implementation Fetch Aid (ONE-TIME ONLY; NOT A MASTER ORDER)
+Meaning:
+- This block exists ONLY to tell the human operator which file to paste NEXT during this one run.
+- This is NOT an instruction set, NOT a schema, and NOT an ordering guarantee.
+- Future AI/editors MUST IGNORE this block once PP-20260121-001 is complete.
+
+Current file (pasted/edited in this step): js/storage.js
+Next file to fetch/paste (this run): js/store.js
+
+Acceptance checks
+- VTStorage global exists with required methods.
+- putRecord/deleteRecordById always persist to LocalStorage even if IDB fails.
+- normalizeRecord preserves extra fields without duplicating alias keys.
+*/ 
