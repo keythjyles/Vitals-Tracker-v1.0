@@ -1,44 +1,33 @@
 /* 
-Vitals Tracker — BOF (Add Implementation Header)
-Copyright © 2026 Wendell K. Jiles. All rights reserved.
-(Pen name: Keyth Jyles)
+Vitals Tracker — BOF (Implementation Header)
+Copyright © 2026 Wendell K. Jiles. All rights reserved. (Pen name: Keyth Jyles)
 
 File: js/panels.js
 App Version Authority: js/version.js
 ImplementationId: ADD-20260121-001
-Add Implementation: Step 7 of 12
-Prev (this run): index.html
-Next (this run): js/gestures.js
-FileEditId: 4
+FileEditId: 5
 Edited: 2026-01-21
 
-Current file: js/panels.js, File 7 of 12
-
-
-Next file to fetch: js/gestures.js, File 8 of 12
-
-
-
-Beacon Sticky Note (persist until user changes)
-- Beacon: update FileEditId by incrementing by one each time you generate a new full file.
-- Follow only the instructions/prompts inside THIS paste and THIS message for this step.
-- Scope for this pass: Add screen data capture; no chart changes in this phase.
+Prev (this run): css/app.css
+Next (this run): js/add.js
 
 Role / Ownership (LOCKED)
 - Panel routing + deck transform control
 - Owns navigation behavior (button nav vs swipe nav)
 - Must NOT implement gesture detection here (only consumes swipeDelta/swipeEnd inputs)
 
-Implemented (facts only)
-- Button navigation is INSTANT (animated=false forced)
-- Swipe end retains smooth commit animation behavior
-- Recovery/hardening: auto-init if app.js fails to call VTPanels.init()
-- Fallback binding for critical nav buttons (Home/Charts/Log/Add/Settings/Back)
-- Store readiness is ensured before Charts/Log onShow render
+Beacon (sticky)
+- Beacon: update FileEditId by incrementing by one each time you generate a new full file.
+- Follow only the instructions/prompts inside THIS paste and THIS message for this step.
+- Scope: navigation/escape hardening only (no chart rendering logic beyond existing onShow calls).
 
-Anti-drift rules
-- No gesture detection changes here
-- No chart drawing or log rendering here (only calls VTChart.onShow / VTLog.onShow)
+Current file: js/panels.js, File 3 of 7
+
+
+Next file to fetch: js/add.js, File 4 of 7
+
+
+
 ------------------------------------------------------------ */
 
 (function () {
@@ -478,30 +467,27 @@ Anti-drift rules
 })();
 
 /* 
-Vitals Tracker — EOF (Add Implementation Footer)
-Copyright © 2026 Wendell K. Jiles. All rights reserved.
-(Pen name: Keyth Jyles)
+Vitals Tracker — EOF (Implementation Footer)
+Copyright © 2026 Wendell K. Jiles. All rights reserved. (Pen name: Keyth Jyles)
 
 File: js/panels.js
 App Version Authority: js/version.js
 ImplementationId: ADD-20260121-001
-Add Implementation: Step 7 of 12
-Prev (this run): index.html
-Next (this run): js/gestures.js
-FileEditId: 4
+FileEditId: 5
 Edited: 2026-01-21
 
-Current file: js/panels.js, File 7 of 12
+Current file: js/panels.js, File 3 of 7
 
 
-Next file to fetch: js/gestures.js, File 8 of 12
+Next file to fetch: js/add.js, File 4 of 7
 
 
 
-Beacon: update FileEditId by incrementing by one each time you generate a new full file.
-
-Acceptance checks
+Acceptance checks (this file)
 - Direct nav is instant; Add remains non-rotating and excluded from swipe.
 - Closing Add returns to last main panel (home/charts/log) reliably.
-- No gesture or chart logic added here; events still dispatch on panel change.
-*/
+- No gesture detection added here; only swipeDelta/swipeEnd consumption.
+
+Implementation Fetch Aid (ONE-TIME ONLY; NOT AUTHORITATIVE)
+- This is only a human paste directive for ADD-20260121-001, not a master schema/order.
+------------------------------------------------------------ */
