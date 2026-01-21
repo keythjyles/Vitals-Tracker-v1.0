@@ -1,3 +1,40 @@
+/* 
+Vitals Tracker — BOF (Add Implementation Header)
+Copyright © 2026 Wendell K. Jiles. All rights reserved.
+(Pen name: Keyth Jyles)
+
+File: js/add.js
+App Version Authority: js/version.js
+ImplementationId: ADD-20260121-001
+Add Implementation: Step 9 of 12
+Prev (this run): js/panels.js
+Next (this run): js/symptoms.js
+FileEditId: 1
+Edited: 2026-01-21
+
+Current file: js/add.js, File 9 of 12
+
+
+Next file to fetch: js/symptoms.js, File 10 of 12
+
+
+
+Beacon: update FileEditId by incrementing by one each time you generate a new full file.
+
+Beacon Drift Control Note (persist until user changes)
+- Focus on THIS pasted file and THIS chat message only.
+- Follow the cardinal header/footer boilerplate rules exactly.
+- This is an Add Implementation pass (not Prime Pass).
+------------------------------------------------------------
+
+Role / Ownership (LOCKED)
+- Owns Add/Edit form UI wiring, per-record transient UI state, and save/update orchestration
+- Owns Distress (0–5 + descriptor picker) and Medication marker capture for records
+- Must NOT implement chart rendering logic here (chart.js consumes stored data later)
+- Must NOT implement panel-deck transforms here (delegates to VTPanels)
+------------------------------------------------------------ 
+*/
+
 /* File: js/add.js */
 /*
 Purpose of this header: verification metadata for this edit (not instructions).
@@ -897,4 +934,33 @@ Change focus: Add/Edit expanded with Distress (0–5 + descriptor popup) and Med
 
 })();
 
-/* EOF: js/add.js (verified: Distress 0–5 + descriptor popup + meds markers + settings prefill) */
+/* 
+Vitals Tracker — EOF (Add Implementation Footer)
+Copyright © 2026 Wendell K. Jiles. All rights reserved.
+(Pen name: Keyth Jyles)
+
+File: js/add.js
+App Version Authority: js/version.js
+ImplementationId: ADD-20260121-001
+Add Implementation: Step 9 of 12
+Prev (this run): js/panels.js
+Next (this run): js/symptoms.js
+FileEditId: 1
+Edited: 2026-01-21
+
+Current file: js/add.js, File 9 of 12
+
+
+Next file to fetch: js/symptoms.js, File 10 of 12
+
+
+
+Beacon: update FileEditId by incrementing by one each time you generate a new full file.
+
+Current file (pasted/edited in this step): js/add.js
+Acceptance checks
+- Add/Edit supports Distress 0–5 with descriptor picker modal and removable descriptor chips
+- Add/Edit supports Medication event markers with settings prefill datalist
+- Save enforces BP pairs (sys+dia) while allowing HR/Notes-only entries
+- Add panel returns to previous panel via VTPanels.closeAdd()
+*/ 
