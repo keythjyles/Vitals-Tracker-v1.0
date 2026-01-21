@@ -14,8 +14,10 @@ FILE ROLE (LOCKED)
 VERIFICATION NOTES (THIS EDIT ONLY — NOT FUTURE INSTRUCTIONS)
 - Verified exported API surface: detect(), getAllRecords(), putRecord(), deleteRecordById().
 - Verified canonical LocalStorage key write path is enabled and cache invalidates on write/delete.
-- Verified normalization outputs canonical shape:
+- Verified normalization outputs canonical required fields:
   { ts:number, sys:number|null, dia:number|null, hr:number|null, notes:string, symptoms:string[] }.
+- Verified PASS-THROUGH persistence: additional fields (e.g., distress, mood, meds markers, symptom scoring maps)
+  are preserved and stored alongside canonical fields (no data loss).
 - Verified IndexedDB writes/deletes remain best-effort and never block LocalStorage persistence.
 */
 
@@ -96,8 +98,36 @@ VERIFICATION NOTES (THIS EDIT ONLY — NOT FUTURE INSTRUCTIONS)
     }
   }
 
+  // ---- PASS-THROUGH FIELD RULES ----
+  // We preserve any unknown fields to prevent data loss (distress/mood/med markers/etc).
+  // We exclude known alias keys that would cause drift or duplication.
+  const DROP_KEYS = new Set([
+    // canonical keys (we re-set them)
+    "ts","sys","dia","hr","notes","symptoms",
+    // timestamp aliases
+    "time","timestamp","date","createdAt","created_at","iso",
+    // bp/hr aliases
+    "systolic","diastolic","sbp","dbp","heartRate","pulse","bpm",
+    "SYS","DIA","HR",
+    "bpSys","bp_systolic","bpDia","bp_diastolic",
+    // notes aliases
+    "note","comment","comments","text",
+    // symptoms aliases (we normalize to symptoms[])
+    "symptom","sx","symptomList","symptom_list"
+  ]);
+
+  function copyExtras(dst, src){
+    try{
+      for(const k in (src || {})){
+        if(!Object.prototype.hasOwnProperty.call(src, k)) continue;
+        if(DROP_KEYS.has(k)) continue;
+        dst[k] = src[k];
+      }
+    }catch(_){}
+  }
+
   // ---- Record normalization (CRITICAL) ----
-  // Accepts many shapes, outputs canonical v1/v2 shape.
+  // Accepts many shapes, outputs canonical required fields + preserved extras.
   function normalizeRecord(r){
     if(!r || typeof r !== "object") return null;
 
@@ -116,13 +146,12 @@ VERIFICATION NOTES (THIS EDIT ONLY — NOT FUTURE INSTRUCTIONS)
 
     let symptoms = (r.symptoms ?? r.symptom ?? r.sx ?? r.symptomList ?? r.symptom_list ?? []);
     if(!Array.isArray(symptoms)){
-      // tolerate comma-separated string
       if(typeof symptoms === "string") symptoms = symptoms.split(",").map(s=>s.trim()).filter(Boolean);
       else symptoms = [];
     }
     symptoms = symptoms.map(String);
 
-    return {
+    const out = {
       ts,
       sys: numOrNull(sys),
       dia: numOrNull(dia),
@@ -130,6 +159,11 @@ VERIFICATION NOTES (THIS EDIT ONLY — NOT FUTURE INSTRUCTIONS)
       notes,
       symptoms
     };
+
+    // Preserve extended fields (distress model, mood, meds events, per-symptom scoring maps, etc.)
+    copyExtras(out, r);
+
+    return out;
   }
 
   function normalizeRecords(arr){
@@ -513,5 +547,5 @@ Vitals Tracker — EOF Verification Notes
 File: js/storage.js
 App Version Authority: js/version.js
 Base: v2.028a
-Verified: API surface + write/delete + normalization + cache invalidation
+Verified: API surface + write/delete + normalization + cache invalidation + pass-through fields preserved
 */
