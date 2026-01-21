@@ -1,47 +1,29 @@
 <!--
-Vitals Tracker — BOF (Prime Pass Header)
-File: index.html
+Vitals Tracker — BOF (Implementation Header)
+Copyright © 2026 Keyth Jyles
+
+ImplementationId: ADD-20260121-001
 App Version Authority: js/version.js
-Prime Pass: File 1 of 24
-FileEditId: 2
-Edited: 2026-01-21
--->
 
-<!--
-===== BEGIN IMPLEMENTATION FETCH AID (HUMAN-ONLY / ONE-TIME USE) =====
-ImplementationId: PP-20260121-001
+Current file: index.html, File 1 of 7
 
-IMPORTANT:
-- This block exists ONLY to guide the human operator during THIS implementation run.
-- This is NOT a schema, NOT instructions, and NOT an authoritative ordering.
-- Future AI/editors MUST IGNORE this block entirely after this run completes.
 
-Current file (this step): index.html
-Next file to fetch/paste (this run): sw.js
-Prev (this run): (none — start)
-Step: 1 of 24
-===== END IMPLEMENTATION FETCH AID =====
--->
+Next file to fetch: js/panels.js, File 2 of 7
 
-<!--
+
+
 Role / Ownership
 - App shell + DOM for panel deck (Home / Charts / Log / Settings / Add)
-- Loads CSS + JS in required order
-- Provides stable element IDs used by modules
+- Stable element IDs consumed by js/* modules
+- Script load order is a drift lock
 
-Implemented (facts only)
-- Panel deck structure with rotating panels (home/charts/log) plus non-rotating panels (settings/add)
-- Settings panel includes Medication Names UI (med name list managed by js/settings.js)
-- Version label injection into Home/Settings + boot pill
+Status (why this file matters right now)
+- Add panel must always have an escape route (Home/Cancel) and a visible Save.
+- This file defines the header buttons/IDs the Add module must bind to.
 
-Drift locks (do not change without intentional decision)
-- Keep element IDs referenced by modules (e.g., panelDeck, deckTrack, panelHome, chartCanvas, chartLegend, logList, etc.)
-- Keep script load order: version/utils/storage/store/state/settings/ui/panels/gestures/chart/log/add/pwa/app
-- Keep manifest link id="manifestLink" and icon paths as-is unless we intentionally revise PWA packaging
-
-Developer prompts (context only; NOT instructions)
-- When adding new UI controls, prefer adding IDs and wiring in the owning module (not inline scripts)
-- Keep DOM minimal; avoid duplicating logic that belongs in js/* modules
+Notes
+- Do not implement Add logic here; only provide IDs/structure.
+- Next work is in js/panels.js to guarantee Add panel navigation/escape behavior.
 -->
 
 <!doctype html>
@@ -277,27 +259,25 @@ Developer prompts (context only; NOT instructions)
 </html>
 
 <!--
-Vitals Tracker — EOF (Prime Pass Footer)
-File: index.html
+Vitals Tracker — EOF (Implementation Footer)
+Copyright © 2026 Keyth Jyles
+
+ImplementationId: ADD-20260121-001
 App Version Authority: js/version.js
-Prime Pass: File 1 of 24
-Prev: (none)
-Next: sw.js
-FileEditId: 2
-Edited: 2026-01-21
 
-===== BEGIN IMPLEMENTATION FETCH AID (HUMAN-ONLY / ONE-TIME USE) =====
-ImplementationId: PP-20260121-001
+Current file: index.html, File 1 of 7
 
-IMPORTANT:
-- This block exists ONLY to guide the human operator during THIS implementation run.
-- This is NOT a schema, NOT instructions, and NOT an authoritative ordering.
-- Future AI/editors MUST IGNORE this block entirely after this run completes.
 
-Current file (pasted/edited in this step): index.html
-Next file to fetch/paste (this run): sw.js
-===== END IMPLEMENTATION FETCH AID =====
+Next file to fetch: js/panels.js, File 2 of 7
 
-Acceptance checks
-- App boots; version renders on Home + Settings; Settings med list UI renders; panel IDs unchanged.
+
+
+Implementation Fetch Aid (ONE-TIME ONLY; NOT A MASTER ORDER)
+- Exists only to guide the human operator during ADD-20260121-001.
+- Ignore after this run completes.
+
+Acceptance checks (this file)
+- panelAdd contains visible Home button id="btnHomeFromAdd"
+- Save button exists id="btnSaveReading"
+- Script load order unchanged
 -->
