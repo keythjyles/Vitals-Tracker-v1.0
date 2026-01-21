@@ -6,7 +6,7 @@ Copyright © 2026 Wendell K. Jiles. All rights reserved.
 File: js/add.js
 App Version Authority: js/version.js
 ImplementationId: ADD-20260121-001
-FileEditId: 3
+FileEditId: 4
 Edited: 2026-01-21
 
 Current file: js/add.js, File 3 of 7
@@ -37,7 +37,7 @@ Role / Ownership (LOCKED)
 /*
 Purpose of this header: verification metadata for this edit (not instructions).
 Edited: 2026-01-21
-Change focus: Distress becomes 0–100 (user-settable). Symptoms move to popup modal. Symptoms contribute a computed distress value without being required.
+Change focus: SYS/DIA/HR forced into one row; thicker borders to visually stand out.
 */
 
 (function () {
@@ -62,6 +62,7 @@ Change focus: Distress becomes 0–100 (user-settable). Symptoms move to popup m
     // Distress: user can set final 0..100 without symptoms.
     distressFinal: null,        // 0..100 or null
     distressComputed: null,     // 0..100 or null (derived from symptoms, if available)
+    distressDelta: null,        // final - computed
     distressTouched: false,     // user manually set final
     // Symptoms: selected keys
     symptoms: [],               // [string]
@@ -159,6 +160,30 @@ Change focus: Distress becomes 0–100 (user-settable). Symptoms move to popup m
     } catch (_) {}
   }
 
+  function applyThickFieldBorders(formRoot) {
+    try {
+      if (!formRoot) return;
+      const ids = ["inSys", "inDia", "inHr"];
+      ids.forEach(id => {
+        const el = formRoot.querySelector("#" + id);
+        if (!el) return;
+        el.style.borderWidth = "2px";
+        el.style.borderStyle = "solid";
+        el.style.borderColor = "rgba(180,210,255,.42)";
+        el.style.boxShadow = "inset 0 0 0 1px rgba(235,245,255,.10)";
+      });
+
+      // Ensure the row itself stays 3 columns even if app.css changes
+      const row = formRoot.querySelector("#vtVitalsRow");
+      if (row) {
+        row.style.display = "grid";
+        row.style.gridTemplateColumns = "1fr 1fr 1fr";
+        row.style.gap = "10px";
+        row.style.alignItems = "stretch";
+      }
+    } catch (_) {}
+  }
+
   function ensureFormPresent() {
     if (!bodyEl) return;
     if (document.getElementById("addForm")) return;
@@ -169,20 +194,24 @@ Change focus: Distress becomes 0–100 (user-settable). Symptoms move to popup m
 
     form.innerHTML = `
       <div class="addGrid">
-        <label class="addField">
-          <div class="addLabel">Systolic</div>
-          <input id="inSys" inputmode="numeric" class="addInput" placeholder="e.g., 132" />
-        </label>
 
-        <label class="addField">
-          <div class="addLabel">Diastolic</div>
-          <input id="inDia" inputmode="numeric" class="addInput" placeholder="e.g., 84" />
-        </label>
+        <!-- SYS/DIA/HR on ONE row -->
+        <div id="vtVitalsRow" class="addRow3">
+          <label class="addField">
+            <div class="addLabel">Systolic</div>
+            <input id="inSys" inputmode="numeric" class="addInput" placeholder="e.g., 132" />
+          </label>
 
-        <label class="addField">
-          <div class="addLabel">Heart Rate</div>
-          <input id="inHr" inputmode="numeric" class="addInput" placeholder="e.g., 74" />
-        </label>
+          <label class="addField">
+            <div class="addLabel">Diastolic</div>
+            <input id="inDia" inputmode="numeric" class="addInput" placeholder="e.g., 84" />
+          </label>
+
+          <label class="addField">
+            <div class="addLabel">Heart Rate</div>
+            <input id="inHr" inputmode="numeric" class="addInput" placeholder="e.g., 74" />
+          </label>
+        </div>
 
         <div class="addSection" id="secSymptoms">
           <div class="addSectionH">
@@ -274,6 +303,9 @@ Change focus: Distress becomes 0–100 (user-settable). Symptoms move to popup m
         el.style.borderColor = "rgba(235,245,255,0.16)";
       });
     } catch (_) {}
+
+    // Force 1-row vitals + thick borders
+    applyThickFieldBorders(form);
 
     bindSymptomsUI();
     bindDistressUI();
@@ -384,8 +416,7 @@ Change focus: Distress becomes 0–100 (user-settable). Symptoms move to popup m
       meds: normalizeMeds(meds)
     };
 
-    // Back-compat: if older field names exist, do not guess; only map the ones we can safely interpret.
-    // If a legacy `distress` exists and is in 0..100 range, treat it as distressFinal.
+    // Back-compat: legacy `distress` in 0..100 -> distressFinal
     try {
       if (out.distressFinal == null && r && Number.isFinite(Number(r.distress))) {
         const dv = clampInt(Number(r.distress), 0, 100);
@@ -427,8 +458,7 @@ Change focus: Distress becomes 0–100 (user-settable). Symptoms move to popup m
   }
 
   function devEchoToken() {
-    // Visual reference requested: place a removable token in Notes while building.
-    return `#DEV ADD-20260121-001 add.js FE3`;
+    return `#DEV ADD-20260121-001 add.js FE4`;
   }
 
   function devPrefillNotesIfEmpty() {
@@ -460,10 +490,8 @@ Change focus: Distress becomes 0–100 (user-settable). Symptoms move to popup m
       UI.distressFinal = (record.distressFinal == null ? null : clampInt(record.distressFinal, 0, 100));
       UI.distressDelta = (UI.distressFinal != null && UI.distressComputed != null) ? (UI.distressFinal - UI.distressComputed) : null;
 
-      // Editing: do not force-treat as touched. Preserve what record has.
       UI.distressTouched = (UI.distressFinal != null);
 
-      // Update UI elements
       const rng = document.getElementById("rngDistress100");
       if (rng) rng.value = String(UI.distressFinal != null ? UI.distressFinal : 0);
       writeNumber("inDistress100", UI.distressFinal);
@@ -473,7 +501,6 @@ Change focus: Distress becomes 0–100 (user-settable). Symptoms move to popup m
       renderMedsTags();
       refreshMedDatalist();
 
-      // Visual reference token if notes are empty
       devPrefillNotesIfEmpty();
     }
   }
@@ -492,7 +519,6 @@ Change focus: Distress becomes 0–100 (user-settable). Symptoms move to popup m
     exitEditMode();
     clearInputs();
 
-    // Visual reference token while building
     devPrefillNotesIfEmpty();
 
     try {
@@ -602,11 +628,6 @@ Change focus: Distress becomes 0–100 (user-settable). Symptoms move to popup m
   let symptomsTemp = null;
 
   function symptomsAdapter() {
-    // We do NOT guess weights here. We only call into symptoms.js if it exposes an API.
-    // Supported shapes (non-exhaustive):
-    // - window.VTSymptoms.getCatalog(): [{ k, label, desc, ... }]
-    // - window.VTSymptoms.catalog: array
-    // - window.VTSymptoms.computeDistress(keys): number 0..100
     try {
       const s = window.VTSymptoms || null;
       if (!s) return null;
@@ -658,7 +679,6 @@ Change focus: Distress becomes 0–100 (user-settable). Symptoms move to popup m
     body.innerHTML = "";
 
     if (!Array.isArray(catalog) || !catalog.length) {
-      // No guessing: if symptoms.js isn’t providing a catalog, we show a hard stop message.
       const msg = document.createElement("div");
       msg.className = "muted";
       msg.style.fontSize = "13px";
@@ -742,11 +762,9 @@ Change focus: Distress becomes 0–100 (user-settable). Symptoms move to popup m
     UI.symptoms = normalizeStringArray(Array.from(symptomsTemp));
     symptomsTemp = null;
 
-    // Update computed distress from symptoms (if symptoms.js provides it)
     const computed = computeDistressFromSymptoms(UI.symptoms);
     UI.distressComputed = (computed == null ? null : computed);
 
-    // If user has not manually set distress, auto-set final to computed
     if (!UI.distressTouched) {
       UI.distressFinal = (UI.distressComputed == null ? null : UI.distressComputed);
       const rng = document.getElementById("rngDistress100");
@@ -788,7 +806,6 @@ Change focus: Distress becomes 0–100 (user-settable). Symptoms move to popup m
       x.addEventListener("click", function () {
         UI.symptoms = (UI.symptoms || []).filter(v => v !== t);
 
-        // Recompute computed distress if possible
         const computed = computeDistressFromSymptoms(UI.symptoms);
         UI.distressComputed = (computed == null ? null : computed);
 
@@ -873,7 +890,6 @@ Change focus: Distress becomes 0–100 (user-settable). Symptoms move to popup m
     metaLine.textContent = parts.join("  •  ");
     host.appendChild(metaLine);
 
-    // Soft hint if symptoms catalog compute isn't available
     if ((UI.symptoms || []).length && UI.distressComputed == null) {
       const warn = document.createElement("div");
       warn.className = "muted";
@@ -977,8 +993,6 @@ Change focus: Distress becomes 0–100 (user-settable). Symptoms move to popup m
     rec.hr  = readNumber("inHr");
     rec.notes = readText("inNotes");
 
-    // Distress (0..100) is optional and independent.
-    // Symptoms selection (optional) may produce computed distress if symptoms.js provides it.
     const finalV = clampInt(readNumber("inDistress100"), 0, 100);
     rec.distressFinal = (finalV == null ? (UI.distressFinal == null ? null : UI.distressFinal) : finalV);
     rec.distressComputed = (UI.distressComputed == null ? null : clampInt(UI.distressComputed, 0, 100));
@@ -1030,7 +1044,7 @@ Change focus: Distress becomes 0–100 (user-settable). Symptoms move to popup m
 
       safeAlert("Saved.");
       clearInputs();
-      devPrefillNotesIfEmpty(); // keep visual reference on next entry
+      devPrefillNotesIfEmpty();
     } catch (e) {
       safeAlert("Save failed. Check console for details.");
       try { console.error(e); } catch (_) {}
@@ -1085,7 +1099,6 @@ Change focus: Distress becomes 0–100 (user-settable). Symptoms move to popup m
     setSaveLabelEditing(false);
     setHeaderEditing(false);
 
-    // Visual reference token for current session if empty
     devPrefillNotesIfEmpty();
   }
 
@@ -1110,7 +1123,7 @@ Copyright © 2026 Wendell K. Jiles. All rights reserved.
 File: js/add.js
 App Version Authority: js/version.js
 ImplementationId: ADD-20260121-001
-FileEditId: 3
+FileEditId: 4
 Edited: 2026-01-21
 
 Current file: js/add.js, File 3 of 7
@@ -1124,6 +1137,7 @@ Beacon: update FileEditId by incrementing by one each time you generate a new fu
 
 Current file (pasted/edited in this step): js/add.js
 Acceptance checks
+- SYS/DIA/HR are forced into one row and each input has a thicker border for visibility
 - Distress is 0–100 and can be set without symptoms
 - Symptoms selection is a popup modal (requires symptoms.js catalog/scoring API to be fully enabled)
 - Symptoms can compute a distress score (0–100) when symptoms.js provides computeDistress/computeScore
