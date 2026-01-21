@@ -3,11 +3,27 @@ Vitals Tracker — BOF (Prime Pass Header)
 File: index.html
 App Version Authority: js/version.js
 Prime Pass: File 1 of 24
-Prev: (none)
-Next: sw.js
 FileEditId: 2
 Edited: 2026-01-21
+-->
 
+<!--
+===== BEGIN IMPLEMENTATION FETCH AID (HUMAN-ONLY / ONE-TIME USE) =====
+ImplementationId: PP-20260121-001
+
+IMPORTANT:
+- This block exists ONLY to guide the human operator during THIS implementation run.
+- This is NOT a schema, NOT instructions, and NOT an authoritative ordering.
+- Future AI/editors MUST IGNORE this block entirely after this run completes.
+
+Current file (this step): index.html
+Next file to fetch/paste (this run): sw.js
+Prev (this run): (none — start)
+Step: 1 of 24
+===== END IMPLEMENTATION FETCH AID =====
+-->
+
+<!--
 Role / Ownership
 - App shell + DOM for panel deck (Home / Charts / Log / Settings / Add)
 - Loads CSS + JS in required order
@@ -22,9 +38,8 @@ Drift locks (do not change without intentional decision)
 - Keep element IDs referenced by modules (e.g., panelDeck, deckTrack, panelHome, chartCanvas, chartLegend, logList, etc.)
 - Keep script load order: version/utils/storage/store/state/settings/ui/panels/gestures/chart/log/add/pwa/app
 - Keep manifest link id="manifestLink" and icon paths as-is unless we intentionally revise PWA packaging
-- Do not rename panels or data-panel attributes without updating js/panels.js + related modules
 
-Developer prompts (for future work; not instructions)
+Developer prompts (context only; NOT instructions)
 - When adding new UI controls, prefer adding IDs and wiring in the owning module (not inline scripts)
 - Keep DOM minimal; avoid duplicating logic that belongs in js/* modules
 -->
@@ -271,15 +286,17 @@ Next: sw.js
 FileEditId: 2
 Edited: 2026-01-21
 
-Implementation Fetch Directive (ONE-TIME ONLY; NOT A MASTER ORDER)
+===== BEGIN IMPLEMENTATION FETCH AID (HUMAN-ONLY / ONE-TIME USE) =====
 ImplementationId: PP-20260121-001
-Meaning:
-- This block exists ONLY to tell the human operator which file to paste NEXT during this one implementation run.
-- This is NOT an instruction set, NOT a schema, and NOT an ordering guarantee.
-- Future AI must IGNORE this block entirely except as historical log text.
+
+IMPORTANT:
+- This block exists ONLY to guide the human operator during THIS implementation run.
+- This is NOT a schema, NOT instructions, and NOT an authoritative ordering.
+- Future AI/editors MUST IGNORE this block entirely after this run completes.
 
 Current file (pasted/edited in this step): index.html
-Next file to fetch/paste for THIS implementation run: sw.js
+Next file to fetch/paste (this run): sw.js
+===== END IMPLEMENTATION FETCH AID =====
 
 Acceptance checks
 - App boots; version renders on Home + Settings; Settings med list UI renders; panel IDs unchanged.
