@@ -6,16 +6,13 @@ Copyright © 2026 Wendell K. Jiles. All rights reserved.
 File: js/add.js
 App Version Authority: js/version.js
 ImplementationId: ADD-20260121-001
-Add Implementation: Step 9 of 12
-Prev (this run): js/panels.js
-Next (this run): js/symptoms.js
-FileEditId: 1
+FileEditId: 2
 Edited: 2026-01-21
 
-Current file: js/add.js, File 9 of 12
+Current file: js/add.js, File 3 of 7
 
 
-Next file to fetch: js/symptoms.js, File 10 of 12
+Next file to fetch: js/symptoms.js, File 4 of 7
 
 
 
@@ -942,16 +939,13 @@ Copyright © 2026 Wendell K. Jiles. All rights reserved.
 File: js/add.js
 App Version Authority: js/version.js
 ImplementationId: ADD-20260121-001
-Add Implementation: Step 9 of 12
-Prev (this run): js/panels.js
-Next (this run): js/symptoms.js
-FileEditId: 1
+FileEditId: 2
 Edited: 2026-01-21
 
-Current file: js/add.js, File 9 of 12
+Current file: js/add.js, File 3 of 7
 
 
-Next file to fetch: js/symptoms.js, File 10 of 12
+Next file to fetch: js/symptoms.js, File 4 of 7
 
 
 
@@ -963,4 +957,7 @@ Acceptance checks
 - Add/Edit supports Medication event markers with settings prefill datalist
 - Save enforces BP pairs (sys+dia) while allowing HR/Notes-only entries
 - Add panel returns to previous panel via VTPanels.closeAdd()
+
+Implementation Fetch Aid (ONE-TIME ONLY; NOT AUTHORITATIVE)
+- This is only a human paste directive for ADD-20260121-001, not a master schema/order.
 */ 
