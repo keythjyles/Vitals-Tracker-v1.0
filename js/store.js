@@ -1,27 +1,27 @@
 /* 
-Vitals Tracker — BOF (Prime Pass Header)
-
-
-
-NEXT FILE TO FETCH (PP-20260121-001): js/state.js
-
-
-
-Beacon Drift Control Note (for this Prime Pass run only; ends at the next divider)
-- Beacon, focus on THIS pasted file and THIS chat message only.
-- Follow only the instructions/prompts inside THIS paste and THIS message.
-- Do NOT use or “blend” prior chat messages for decisions in this step.
-End Beacon Drift Control Note
-------------------------------------------------------------
+Vitals Tracker — BOF (Add Implementation Header)
+Copyright © 2026 Wendell K. Jiles. All rights reserved.
+(Pen name: Keyth Jyles)
 
 File: js/store.js
 App Version Authority: js/version.js
-ImplementationId: PP-20260121-001
-Prime Pass: Step 7 of 23
-Prev (this run): js/storage.js
-Next (this run): js/state.js
-FileEditId: 1
+ImplementationId: ADD-20260121-001
+FileEditId: 2
 Edited: 2026-01-21
+
+Prime/Implementation Context
+- This pass: Add panel data capture (NO charting changes in this pass).
+- Files 6 and 7 are separate future passes.
+
+Current file: js/store.js, File 5 of 7
+
+
+Next file to fetch: js/add.js, File 3 of 7
+
+
+
+Beacon (persist until user changes)
+- Beacon: update FileEditId by incrementing by one each time you generate a new full file.
 
 Role / Ownership (LOCKED)
 - Canonical data access layer for the app.
@@ -31,17 +31,10 @@ Role / Ownership (LOCKED)
 - Must NOT render UI.
 - Must NOT own panels or gestures.
 
-Implemented (facts only)
-- VTStore.update() exists for Add/Edit mode and persists via VTStorage.putRecord when available
-- Unknown fields (distress, meds, symptom selections, etc.) preserved pass-through
-- getAll() remains synchronous and returns an array snapshot
-- add() persists via current VTStorage API when present, with legacy fallback
-
-Drift locks (do not change without intentional decision)
-- Do not add UI rendering here
-- Do not move persistence ownership away from VTStorage
-- Keep “minimal normalization” posture (do not invent values)
------------------------------------------------------------- */
+Anti-drift rules
+- Do NOT guess. Only edit pasted files. Whole-file outputs only.
+------------------------------------------------------------ 
+*/
 
 (function () {
   "use strict";
@@ -423,27 +416,32 @@ Drift locks (do not change without intentional decision)
 })();
 
 /* 
-Vitals Tracker — EOF (Prime Pass Footer)
+Vitals Tracker — EOF (Add Implementation Footer)
+Copyright © 2026 Wendell K. Jiles. All rights reserved.
+(Pen name: Keyth Jyles)
+
 File: js/store.js
 App Version Authority: js/version.js
-ImplementationId: PP-20260121-001
-Prime Pass: Step 7 of 23
-Prev (this run): js/storage.js
-Next (this run): js/state.js
-FileEditId: 1
+ImplementationId: ADD-20260121-001
+FileEditId: 2
 Edited: 2026-01-21
 
-Implementation Fetch Aid (ONE-TIME ONLY; NOT A MASTER ORDER)
-Meaning:
-- This block exists ONLY to tell the human operator which file to paste NEXT during this one run.
-- This is NOT an instruction set, NOT a schema, and NOT an ordering guarantee.
-- Future AI/editors MUST IGNORE this block once PP-20260121-001 is complete.
+Current file: js/store.js, File 5 of 7
+
+
+Next file to fetch: js/add.js, File 3 of 7
+
+
+
+Beacon: update FileEditId by incrementing by one each time you generate a new full file.
 
 Current file (pasted/edited in this step): js/store.js
-Next file to fetch/paste (this run): js/state.js
 
 Acceptance checks
 - window.VTStore exists; getAll() remains synchronous
 - add()/update() preserve pass-through fields and persist via VTStorage when present
 - No UI rendering logic introduced
+
+Implementation Fetch Aid (ONE-TIME ONLY; NOT AUTHORITATIVE)
+- This is only a human paste directive for ADD-20260121-001, not a master schema/order.
 */ 
