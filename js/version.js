@@ -1,12 +1,24 @@
-/* File: js/version.js */
-/*
-Vitals Tracker - Version Authority
-Purpose of this header: verification metadata for this edit (not instructions).
-Edited: 2026-01-20
-
+/* 
+Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
+File: js/version.js
+Role: Version Authority (single source of truth for UI/version reporting)
 App Version: v2.028a
 Base: v2.027a
-Change focus: Add/Edit expanded to include Distress + Medications (event markers) + Settings med-name list.
+Edited: 2026-01-20
+FileEditId: 1
+
+Prime Pass Goal (PP): Normalize headers/footers, remove misleading “instruction-like” commentary,
+and preserve a stable, minimal API contract for version access.
+
+Public API Contract (do not break without an intentional version bump plan):
+- window.VTVersion.getVersionString() -> "vX.XXXx"
+- window.VTVersion.getFullVersionLabel() -> "vX.XXXx (base vX.XXXx)"
+- window.VTVersion.getVersionMeta() -> { app, base, date, codename, schema }
+
+Implementation Process Pointer (ONE-TIME FETCH AID ONLY):
+- The footer section labeled “Implementation Fetch Aid” is NOT an instruction set and MUST be ignored
+  by any future AI/editor once this Prime Pass run is complete. It exists only to help the user fetch
+  the next file during this specific run.
 */
 
 (function (global) {
@@ -17,11 +29,11 @@ Change focus: Add/Edit expanded to include Distress + Medications (event markers
     base: "v2.027a",
     date: "2026-01-20",
     codename: "distress-meds",
-    schema: {
+    schema: Object.freeze({
       major: 2,
       minor: 28,
       patch: "a"
-    }
+    })
   });
 
   function getVersionString() {
@@ -50,7 +62,20 @@ Change focus: Add/Edit expanded to include Distress + Medications (event markers
 
 })(window);
 
-/*
-EOF: js/version.js
-Verified edit: version bumped to v2.028a and codename updated.
+/* 
+Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
+File: js/version.js
+Role: Version Authority
+App Version: v2.028a
+Base: v2.027a
+Edited: 2026-01-20
+FileEditId: 1
+
+Implementation Fetch Aid (ONE-TIME FETCH AID ONLY — IGNORE AFTER RUN)
+ImplementationId: PP-20260121-001
+Current file (this step): js/version.js
+Next file to fetch/paste (this run): index.html
+Step: 1 of 24
+Prev (this run): (none — start)
 */
+```0
