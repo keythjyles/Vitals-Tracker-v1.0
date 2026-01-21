@@ -1,27 +1,29 @@
 /* 
-Vitals Tracker — BOF (Prime Pass Header)
-
-
-
-NEXT FILE TO FETCH (PP-20260121-001): js/chart.js
-
-
-
-Beacon Drift Control Note (for this implementation run only; ends at the next divider)
-- Beacon, focus on THIS pasted file and THIS chat message only.
-- Follow only the instructions/prompts inside THIS paste and THIS message.
-- Do NOT use or “blend” prior chat messages for decisions in this step.
-End Beacon Drift Control Note
-------------------------------------------------------------
+Vitals Tracker — BOF (Add Implementation Header)
+Copyright © 2026 Wendell K. Jiles. All rights reserved.
+(Pen name: Keyth Jyles)
 
 File: js/gestures.js
 App Version Authority: js/version.js
-ImplementationId: PP-20260121-001
-Prime Pass: Step 10 of 23
+ImplementationId: ADD-20260121-001
+Add Implementation: Step 8 of 12
 Prev (this run): js/panels.js
 Next (this run): js/chart.js
-FileEditId: 1
+FileEditId: 2
 Edited: 2026-01-21
+
+Current file: js/gestures.js, File 8 of 12
+
+
+Next file to fetch: js/chart.js, File 9 of 12
+
+
+
+Beacon Sticky Note (persist until user changes)
+- Beacon: update FileEditId by incrementing by one each time you generate a new full file.
+
+Scope guard (this pass)
+- Add screen/data-capture implementation only. Do not implement chart changes in this step.
 
 Role / Ownership (LOCKED)
 - Touch gesture plumbing for panel deck swipe (consumes VTPanels API)
@@ -206,27 +208,30 @@ Anti-drift rules
 })();
 
 /* 
-Vitals Tracker — EOF (Prime Pass Footer)
+Vitals Tracker — EOF (Add Implementation Footer)
+Copyright © 2026 Wendell K. Jiles. All rights reserved.
+(Pen name: Keyth Jyles)
+
 File: js/gestures.js
 App Version Authority: js/version.js
-ImplementationId: PP-20260121-001
-Prime Pass: Step 10 of 23
+ImplementationId: ADD-20260121-001
+Add Implementation: Step 8 of 12
 Prev (this run): js/panels.js
 Next (this run): js/chart.js
-FileEditId: 1
+FileEditId: 2
 Edited: 2026-01-21
 
-Implementation Fetch Aid (ONE-TIME ONLY; NOT A MASTER ORDER)
-Meaning:
-- This block exists ONLY to tell the human operator which file to paste NEXT during this one run.
-- This is NOT an instruction set, NOT a schema, and NOT an ordering guarantee.
-- Future AI/editors MUST IGNORE this block once PP-20260121-001 is complete.
+Current file: js/gestures.js, File 8 of 12
 
-Current file (pasted/edited in this step): js/gestures.js
-Next file to fetch/paste (this run): js/chart.js
+
+Next file to fetch: js/chart.js, File 9 of 12
+
+
+
+Beacon: update FileEditId by incrementing by one each time you generate a new full file.
 
 Acceptance checks
-- Chart region is protected from swipe capture at gesture start
-- Any started drag resolves cleanly on abort, cancel, or multi-touch interruption
-- VTPanels.swipeDelta only called after horizontal intent threshold
-*/ 
+- Chart region is protected from swipe capture at gesture start.
+- Any started drag resolves cleanly on abort, cancel, or multi-touch interruption.
+- VTPanels.swipeDelta only called after horizontal intent threshold.
+*/
