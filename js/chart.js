@@ -1,3 +1,23 @@
+/* =================================================================================================
+Vitals Tracker — PRIME PASS (METADATA-ONLY) — DO NOT TOUCH FUNCTIONAL CODE
+File: js/chart.js
+App Version Authority: js/version.js
+Pass: Prime Run — Step 11 (Chart.js Metadata Header/Footer Only)
+Context: Prime Pass. Only update this header and the EOF metadata footer block. Do NOT implement
+         any comment-notes or TODOs in the pasted file. Do NOT change any code/logic/formatting.
+Chart Engine Note: chart.js is a known-good working chart engine baseline. Preserve behavior.
+Master Schema vs Implementation Schema: This edit is a Prime Pass metadata alignment step (no code change).
+
+FileEditId: 0
+RULE (PERSIST UNTIL USER CHANGES IT): On EVERY subsequent full-file edit of THIS file, increment FileEditId by +1.
+If a conflict arises with instructions, stop and ask the user.
+
+Step Tracking:
+Prev: Step 10
+Current: Step 11 (this file)
+Next: Step 12
+================================================================================================= */
+
 /* Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
 File: js/chart.js
 App Version Authority: js/version.js
@@ -1078,10 +1098,20 @@ if (document.readyState === "loading") {
 
 })();
 
-/*
+/* =================================================================================================
 Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: js/chart.js
 App Version Authority: js/version.js
-Pass: Chart Line Persistence Fix (CLP-1)
-Touched in this step: js/chart.js (drawLines uses full dataset + clip)
-*/
+Pass: Prime Run — Step 11 (Metadata Only)
+
+Prime Pass Rules (PERSIST UNTIL USER CHANGES IT):
+- This step edits ONLY header/footer metadata blocks. No functional/code changes.
+- Do NOT implement any TODOs/notes found inside comments.
+- Maintain Master Schema vs Implementation Schema note in header.
+- Maintain FileEditId in header; increment by +1 on every subsequent full-file edit of this file.
+
+Step Tracking:
+Prev: Step 10
+Current: Step 11
+Next: Step 12
+================================================================================================= */
