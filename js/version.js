@@ -78,4 +78,3 @@ Next file to fetch/paste (this run): index.html
 Step: 1 of 24
 Prev (this run): (none — start)
 */
-```0
