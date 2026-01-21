@@ -1,19 +1,28 @@
 /* 
-Vitals Tracker — BOF (Prime Pass Header)
+Vitals Tracker — BOF (Add Implementation Header)
+Copyright © 2026 Wendell K. Jiles. All rights reserved.
+(Pen name: Keyth Jyles)
+
 File: js/panels.js
 App Version Authority: js/version.js
-ImplementationId: PP-20260121-001
-Prime Pass: Step 9 of 23
-Prev (this run): js/state.js
+ImplementationId: ADD-20260121-001
+Add Implementation: Step 7 of 12
+Prev (this run): index.html
 Next (this run): js/gestures.js
-FileEditId: 2
+FileEditId: 4
 Edited: 2026-01-21
 
-Beacon Drift Control Note (persist until user changes)
-- Beacon, focus on THIS pasted file and THIS chat message only.
-- Follow only the instructions/prompts inside THIS paste and THIS message.
-- Prime Pass rule: DO NOT change functional code. Update header/footer only.
-- On every subsequent full-file edit of this file, increment FileEditId by +1.
+Current file: js/panels.js, File 7 of 12
+
+
+Next file to fetch: js/gestures.js, File 8 of 12
+
+
+
+Beacon Sticky Note (persist until user changes)
+- Beacon: update FileEditId by incrementing by one each time you generate a new full file.
+- Follow only the instructions/prompts inside THIS paste and THIS message for this step.
+- Scope for this pass: Add screen data capture; no chart changes in this phase.
 
 Role / Ownership (LOCKED)
 - Panel routing + deck transform control
@@ -469,21 +478,30 @@ Anti-drift rules
 })();
 
 /* 
-Vitals Tracker — EOF (Prime Pass Footer)
+Vitals Tracker — EOF (Add Implementation Footer)
+Copyright © 2026 Wendell K. Jiles. All rights reserved.
+(Pen name: Keyth Jyles)
+
 File: js/panels.js
 App Version Authority: js/version.js
-ImplementationId: PP-20260121-001
-Prime Pass: Step 9 of 23
-Prev (this run): js/state.js
+ImplementationId: ADD-20260121-001
+Add Implementation: Step 7 of 12
+Prev (this run): index.html
 Next (this run): js/gestures.js
-FileEditId: 2
+FileEditId: 4
 Edited: 2026-01-21
 
-Current file (pasted/edited in this step): js/panels.js
+Current file: js/panels.js, File 7 of 12
+
+
+Next file to fetch: js/gestures.js, File 8 of 12
+
+
+
+Beacon: update FileEditId by incrementing by one each time you generate a new full file.
 
 Acceptance checks
-- Button navigation is instant (no slide animation)
-- Swipe navigation remains smooth with commit animation and no snap-back drift
-- Auto-init runs only when core DOM exists and app.js missed init
-- Fallback nav bindings work for Home/Charts/Log/Add/Settings/Back
-*/ 
+- Direct nav is instant; Add remains non-rotating and excluded from swipe.
+- Closing Add returns to last main panel (home/charts/log) reliably.
+- No gesture or chart logic added here; events still dispatch on panel change.
+*/
