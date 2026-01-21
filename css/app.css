@@ -1,9 +1,27 @@
-/* File: css/app.css */
-/*
-Purpose of this header: verification metadata for this edit (not instructions).
-Edited: 2026-01-20
-Change focus: Add/Edit UI expanded styles for Distress + Meds + popup selector and Settings med list.
-*/
+/* 
+Vitals Tracker — BOF (Prime Pass Header)
+File: css/app.css
+App Version Authority: js/version.js
+Prime Pass: File 3 of 24
+Prev: sw.js
+Next: manifest.webmanifest
+FileEditId: 0
+Edited: 2026-01-21
+
+Role / Ownership
+- Global UI styling for modular shell (panels, headers, buttons, charts/log/settings/add)
+- Must remain purely presentational (no behavioral assumptions)
+
+Implemented (facts only)
+- Core theme tokens (bg/panel/strokes/text/accent/radius/shadows/touch target)
+- Panel deck + screen frame styling
+- Buttons + Home/Charts/Log/Settings/Add layouts
+- Distress + meds UI styling + overlay modal styling
+
+Drift locks (do not change without intentional decision)
+- Preserve overall spacing/typography rhythm and “glass” panel treatment
+- Keep touch targets >= --touchTarget where possible
+------------------------------------------------------------ */
 
 :root{
   --bg0:#08101f;
@@ -742,4 +760,23 @@ canvas{ display:block; }
 
 .muted{ color:var(--muted); }
 
-/* EOF: css/app.css (verified: added styles for distress + meds + popup + settings list) */
+/*
+Vitals Tracker — EOF (Prime Pass Footer)
+File: css/app.css
+App Version Authority: js/version.js
+Prime Pass: File 3 of 24
+Prev: sw.js
+Next: manifest.webmanifest
+FileEditId: 0
+Edited: 2026-01-21
+
+Implementation Fetch Directive (ONE-TIME ONLY; NOT A MASTER ORDER)
+ImplementationId: PP-20260121-001
+Meaning:
+- This block exists ONLY to tell the human operator which file to paste NEXT during this one implementation run.
+- This is NOT an instruction set, NOT a schema, and NOT an ordering guarantee.
+- Future AI must IGNORE this block entirely except as historical log text.
+
+Current file (pasted/edited in this step): css/app.css
+Next file to fetch/paste for THIS implementation run: manifest.webmanifest
+*/
