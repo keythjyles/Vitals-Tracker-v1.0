@@ -1,45 +1,46 @@
-/* File: js/symptoms.js */
-/*
-Vitals Tracker — Symptoms Catalog + Scoring + UI Builder
-Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
+/* 
+Vitals Tracker — BOF (Add Implementation Header)
+Copyright © 2026 Wendell K. Jiles. All rights reserved.
+(Pen name: Keyth Jyles)
 
+File: js/symptoms.js
 App Version Authority: js/version.js
-Base: v2.028a
+ImplementationId: ADD-20260121-001
+FileEditId: 1
+Edited: 2026-01-21
 
-MASTER SCHEMA vs IMPLEMENTATION SCHEMA (READ THIS FIRST — ANTI-DRIFT)
-- Master Schema = the authoritative plan/ownership map for what each file is responsible for.
-- Implementation Schema = the current repository state (the exact file contents pasted into chat).
-RULE: Do NOT “guess” file contents. Only change files that the user pasted in this chat turn.
-RULE: Whole-file outputs only. No partial patches. No line edits.
+Current file: js/symptoms.js, File 4 of 7
 
-FILE EDIT ID (PER-FILE COUNTER)
-- FileEditId: 0
-- Increment FileEditId by +1 ONLY when:
-  (1) the user pastes this file, and
-  (2) the assistant returns a full updated version of this file.
-- Do not change FileEditId for discussion-only replies.
 
-FILE ROLE (LOCKED)
+Next file to fetch: js/store.js, File 5 of 7
+
+
+
+Beacon Sticky Note (persist until user changes)
+- Beacon: update FileEditId by incrementing by one each time you generate a new full file.
+- Follow only the instructions/prompts inside THIS paste and THIS message for this step.
+- Scope for this pass: Add screen data capture; no chart changes in this phase.
+
+Role / Ownership (LOCKED)
 - Canonical symptom catalog (clinician-friendly labels + weights).
 - Canonical distress computation from selected symptoms (0–100).
 - Optional lightweight symptom-grid builder for legacy/simple UIs.
 - Must NOT read/write storage.
 - Must NOT render panels or own navigation.
 
-VERIFICATION NOTES (THIS EDIT ONLY — NOT FUTURE INSTRUCTIONS)
-- Verified backwards compatibility with v2.001 API:
-  buildSymptoms(containerEl, symptomList), getSelectedSymptoms(), clearSymptoms(), setSelectedSymptoms(names)
-- Added canonical APIs:
-  getCatalog(), flattenCatalog(), computeScore(selectedKeys), labelsForKeys(keys),
-  normalizeSelection(input), migrateLegacyNamesToKeys(names)
-- Verified computeScore returns stable 0–100 with defensive caps and empty selection => 0.
-- Verified stable symptom keys (do not change once deployed; add new items only).
+Anti-drift rules
+- Do NOT guess. Only edit pasted files. Whole-file outputs only.
+------------------------------------------------------------ 
+*/
 
-IMPLEMENTATION ORDER (VISIBLE AT TOP + BOTTOM)
-- Step: 3 of 6
-- Previous: js/store.js
-- Current:  js/symptoms.js
-- Next:     js/add.js
+/* File: js/symptoms.js */
+/*
+Vitals Tracker — Symptoms Catalog + Scoring + UI Builder
+Copyright © 2026 Wendell K. Jiles. All rights reserved.
+
+Notes (non-instructional)
+- File updated in this step only to align with required BOF/EOF metadata + counters.
+- Functional code intentionally preserved as-is.
 */
 
 export const SYMPTOM_CATALOG = Object.freeze([
@@ -388,20 +389,32 @@ export function setSelectedSymptoms(names){
   }
 }
 
-/*
-Vitals Tracker — EOF Verification Notes
+/* 
+Vitals Tracker — EOF (Add Implementation Footer)
+Copyright © 2026 Wendell K. Jiles. All rights reserved.
+(Pen name: Keyth Jyles)
+
 File: js/symptoms.js
-Base: v2.028a
-FileEditId: 0
+App Version Authority: js/version.js
+ImplementationId: ADD-20260121-001
+FileEditId: 1
+Edited: 2026-01-21
 
-Master vs Implementation Schema:
-- Do not guess. Only edit pasted files. Whole-file outputs only.
+Current file: js/symptoms.js, File 4 of 7
 
-Implementation Order:
-- Step: 3 of 6
-- Previous: js/store.js
-- Current:  js/symptoms.js
-- Next:     js/add.js
 
-Verified: catalog + scoring + v2.001 compatibility APIs retained
-*/
+Next file to fetch: js/store.js, File 5 of 7
+
+
+
+Beacon: update FileEditId by incrementing by one each time you generate a new full file.
+
+Current file (pasted/edited in this step): js/symptoms.js
+Acceptance checks
+- Exports remain ESM-compatible (export const / export function).
+- computeScore() remains stable 0–100; empty selection returns 0.
+- Legacy APIs retained: buildSymptoms(), getSelectedSymptoms(), clearSymptoms(), setSelectedSymptoms().
+
+Implementation Fetch Aid (ONE-TIME ONLY; NOT AUTHORITATIVE)
+- This is only a human paste directive for ADD-20260121-001, not a master schema/order.
+*/ 
