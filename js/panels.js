@@ -1,32 +1,44 @@
 /* 
-Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
+Vitals Tracker — BOF (Prime Pass Header)
+
+
+
+NEXT FILE TO FETCH (PP-20260121-001): js/gestures.js
+
+
+
+Beacon Drift Control Note (for this implementation run only; ends at the next divider)
+- Beacon, focus on THIS pasted file and THIS chat message only.
+- Follow only the instructions/prompts inside THIS paste and THIS message.
+- Do NOT use or “blend” prior chat messages for decisions in this step.
+End Beacon Drift Control Note
+------------------------------------------------------------
+
 File: js/panels.js
 App Version Authority: js/version.js
-Base: v2.026a
-Pass: Swipe + Render Recovery (P0-R1)
-Pass order: File 5 of 9 (P0)
-Prev file: js/ui.js (File 4 of 9)
-Next file: js/gestures.js (File 6 of 9)
+ImplementationId: PP-20260121-001
+Prime Pass: Step 9 of 23
+Prev (this run): js/state.js
+Next (this run): js/gestures.js
+FileEditId: 1
+Edited: 2026-01-21
 
-FIX (BUTTON NAV = INSTANT, NO SCROLL)
-Requirement:
-- Button-driven navigation must NOT animate/scroll/slide.
-- Swipes remain “smooth as butter” for the rotating deck only.
+Role / Ownership (LOCKED)
+- Panel routing + deck transform control
+- Owns navigation behavior (button nav vs swipe nav)
+- Must NOT implement gesture detection here (only consumes swipeDelta/swipeEnd inputs)
 
-Implementation:
-- All non-swipe navigation forces animated=false (instant track jump).
-- Keep swipeEnd animation behavior intact for touch gestures.
-- Preserve cancellable commit logic to prevent snap-backs.
+Implemented (facts only)
+- Button navigation is INSTANT (animated=false forced)
+- Swipe end retains smooth commit animation behavior
+- Recovery/hardening: auto-init if app.js fails to call VTPanels.init()
+- Fallback binding for critical nav buttons (Home/Charts/Log/Add/Settings/Back)
+- Store readiness is ensured before Charts/Log onShow render
 
-ADDED (RECOVERY / HARDENING)
-- Auto-initialize panels routing if app.js fails to call VTPanels.init().
-- Bind critical nav buttons here as a last-resort fallback:
-  (Add/Home/Settings buttons on Charts + Log, Home buttons, Settings Back)
-- Ensure VTStore.init() is called before Log/Charts onShow render, so records load.
-
-ANTI-DRIFT:
-- No changes to gesture detection here; only panel routing behavior.
-*/
+Anti-drift rules
+- No gesture detection changes here
+- No chart drawing or log rendering here (only calls VTChart.onShow / VTLog.onShow)
+------------------------------------------------------------ */
 
 (function () {
   "use strict";
@@ -465,12 +477,28 @@ ANTI-DRIFT:
 })();
 
 /* 
-Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
+Vitals Tracker — EOF (Prime Pass Footer)
 File: js/panels.js
 App Version Authority: js/version.js
-Base: v2.026a
-Pass: Swipe + Render Recovery (P0-R1)
-Pass order: File 5 of 9 (P0)
-Prev file: js/ui.js (File 4 of 9)
-Next file: js/gestures.js (File 6 of 9)
+ImplementationId: PP-20260121-001
+Prime Pass: Step 9 of 23
+Prev (this run): js/state.js
+Next (this run): js/gestures.js
+FileEditId: 1
+Edited: 2026-01-21
+
+Implementation Fetch Aid (ONE-TIME ONLY; NOT A MASTER ORDER)
+Meaning:
+- This block exists ONLY to tell the human operator which file to paste NEXT during this one run.
+- This is NOT an instruction set, NOT a schema, and NOT an ordering guarantee.
+- Future AI/editors MUST IGNORE this block once PP-20260121-001 is complete.
+
+Current file (pasted/edited in this step): js/panels.js
+Next file to fetch/paste (this run): js/gestures.js
+
+Acceptance checks
+- Button navigation is instant (no slide animation)
+- Swipe navigation remains smooth with commit animation and no snap-back drift
+- Auto-init runs only when core DOM exists and app.js missed init
+- Fallback nav bindings work for Home/Charts/Log/Add/Settings/Back
 */
