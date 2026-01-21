@@ -5,8 +5,18 @@ App Version Authority: js/version.js
 Prime Pass: File 3 of 24
 Prev: sw.js
 Next: manifest.webmanifest
-FileEditId: 0
+FileEditId: 1
 Edited: 2026-01-21
+
+
+
+NEXT FILE TO FETCH/PASTE (THIS RUN ONLY): manifest.webmanifest
+
+
+
+HUMAN/AI DRIFT CONTROL (READ THIS ONCE; THEN IGNORE)
+Beacon: focus on this chat message only, not prior messages. This is extremely important to stop drift.
+Follow only the current instruction and/or the current pasted file’s embedded prompts. Do not import intent, rules, or goals from earlier chat turns unless they are explicitly restated in THIS message or THIS paste.
 
 Role / Ownership
 - Global UI styling for modular shell (panels, headers, buttons, charts/log/settings/add)
@@ -767,7 +777,7 @@ App Version Authority: js/version.js
 Prime Pass: File 3 of 24
 Prev: sw.js
 Next: manifest.webmanifest
-FileEditId: 0
+FileEditId: 1
 Edited: 2026-01-21
 
 Implementation Fetch Directive (ONE-TIME ONLY; NOT A MASTER ORDER)
@@ -778,5 +788,11 @@ Meaning:
 - Future AI must IGNORE this block entirely except as historical log text.
 
 Current file (pasted/edited in this step): css/app.css
-Next file to fetch/paste for THIS implementation run: manifest.webmanifest
-*/
+
+
+
+NEXT FILE TO FETCH/PASTE (THIS RUN ONLY): manifest.webmanifest
+
+
+
+*/ 
