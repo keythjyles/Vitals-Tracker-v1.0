@@ -1,37 +1,32 @@
 /* 
-Vitals Tracker — BOF (Prime Pass Header)
+Vitals Tracker — BOF (Implementation Header)
+Copyright © 2026 Wendell K. Jiles. All rights reserved. (Pen name: Keyth Jyles)
+
 File: css/app.css
 App Version Authority: js/version.js
-Prime Pass: File 3 of 24
-Prev: sw.js
-Next: manifest.webmanifest
-FileEditId: 1
+ImplementationId: ADD-20260121-001
+FileEditId: 2
 Edited: 2026-01-21
 
-
-
-NEXT FILE TO FETCH/PASTE (THIS RUN ONLY): manifest.webmanifest
-
-
-
-HUMAN/AI DRIFT CONTROL (READ THIS ONCE; THEN IGNORE)
-Beacon: focus on this chat message only, not prior messages. This is extremely important to stop drift.
-Follow only the current instruction and/or the current pasted file’s embedded prompts. Do not import intent, rules, or goals from earlier chat turns unless they are explicitly restated in THIS message or THIS paste.
+Prev (this run): index.html
+Next (this run): js/panels.js
 
 Role / Ownership
 - Global UI styling for modular shell (panels, headers, buttons, charts/log/settings/add)
-- Must remain purely presentational (no behavioral assumptions)
+- Purely presentational (no behavioral assumptions)
 
-Implemented (facts only)
-- Core theme tokens (bg/panel/strokes/text/accent/radius/shadows/touch target)
-- Panel deck + screen frame styling
-- Buttons + Home/Charts/Log/Settings/Add layouts
-- Distress + meds UI styling + overlay modal styling
+Beacon (sticky)
+- Beacon: update FileEditId by incrementing by one each time you generate a new full file.
+- Do not guess other files. Only edit pasted files. Whole-file outputs only.
 
-Drift locks (do not change without intentional decision)
-- Preserve overall spacing/typography rhythm and “glass” panel treatment
-- Keep touch targets >= --touchTarget where possible
------------------------------------------------------------- */
+Current file: css/app.css, File 2 of 7
+
+
+Next file to fetch: js/panels.js, File 3 of 7
+
+
+
+------------------------------------------------------------------ */
 
 :root{
   --bg0:#08101f;
@@ -526,6 +521,41 @@ canvas{ display:block; }
   letter-spacing:.2px;
 }
 
+/* Add: quick-capture top row (SYS/DIA/HR across) */
+.addTopVitals{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:10px;
+  align-items:end;
+}
+
+.addTopVitals .addLabel{
+  font-size:13px;
+}
+
+.addTopVitals input{
+  padding:10px 10px;
+}
+
+@media (max-width: 420px){
+  .addTopVitals{
+    grid-template-columns:1fr;
+  }
+}
+
+/* Add: deterministic action row (Save / Cancel) */
+.addActions{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.addActions > button{
+  flex:1 1 0;
+  min-width:0;
+}
+
 .addTextArea{
   min-height:86px;
   resize:vertical;
@@ -583,11 +613,12 @@ canvas{ display:block; }
   gap:8px;
 }
 
+/* Med chips: event-like look (not settings) */
 .tagChip{
   padding:8px 10px;
   border-radius:999px;
-  background:rgba(255,255,255,.07);
-  border:1px solid rgba(255,255,255,.10);
+  background:rgba(10,16,30,.40);
+  border:1px solid rgba(180,210,255,.18);
   box-shadow:var(--shadowInset);
   font-size:12px;
   font-weight:650;
@@ -595,6 +626,12 @@ canvas{ display:block; }
   display:flex;
   align-items:center;
   gap:8px;
+}
+
+.tagChip .tagMeta{
+  font-size:11px;
+  color:rgba(235,245,255,.56);
+  font-weight:600;
 }
 
 .tagChip button{
@@ -628,7 +665,7 @@ canvas{ display:block; }
   box-shadow:var(--shadowInset);
 }
 
-/* Popup overlay (Distress descriptors) */
+/* Popup overlay (Distress descriptors / Symptoms checklist) */
 .vtOverlay{
   position:fixed;
   inset:0;
@@ -704,12 +741,14 @@ canvas{ display:block; }
 .vtPickItemName{
   font-weight:750;
   color:rgba(255,255,255,0.86);
+  line-height:1.15;
 }
 
 .vtPickItemDesc{
   font-size:12px;
   color:rgba(235,245,255,.56);
-  margin-top:2px;
+  margin-top:3px;
+  line-height:1.25;
 }
 
 .vtToggle{
@@ -771,28 +810,28 @@ canvas{ display:block; }
 .muted{ color:var(--muted); }
 
 /*
-Vitals Tracker — EOF (Prime Pass Footer)
+Vitals Tracker — EOF (Implementation Footer)
+Copyright © 2026 Wendell K. Jiles. All rights reserved. (Pen name: Keyth Jyles)
+
 File: css/app.css
 App Version Authority: js/version.js
-Prime Pass: File 3 of 24
-Prev: sw.js
-Next: manifest.webmanifest
-FileEditId: 1
+ImplementationId: ADD-20260121-001
+FileEditId: 2
 Edited: 2026-01-21
 
-Implementation Fetch Directive (ONE-TIME ONLY; NOT A MASTER ORDER)
-ImplementationId: PP-20260121-001
-Meaning:
-- This block exists ONLY to tell the human operator which file to paste NEXT during this one implementation run.
-- This is NOT an instruction set, NOT a schema, and NOT an ordering guarantee.
-- Future AI must IGNORE this block entirely except as historical log text.
+Current file: css/app.css, File 2 of 7
 
-Current file (pasted/edited in this step): css/app.css
+
+Next file to fetch: js/panels.js, File 3 of 7
 
 
 
-NEXT FILE TO FETCH/PASTE (THIS RUN ONLY): manifest.webmanifest
+Acceptance checks (this file)
+- Add supports “3 fields across the top” styling via .addTopVitals
+- Add actions row supports clear primary actions via .addActions
+- Med chips appear event-like (not settings) via updated .tagChip styling
+- Popup overlay remains readable/tappable (vtModal/vtPickItem)
 
-
-
-*/ 
+Implementation Fetch Aid (ONE-TIME ONLY; NOT AUTHORITATIVE)
+- This is only a human paste directive for ADD-20260121-001, not a master schema/order.
+------------------------------------------------------------------ */
