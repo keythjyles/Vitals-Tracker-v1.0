@@ -1,42 +1,45 @@
-/* File: js/state.js */
-/*
-Vitals Tracker — View + Lifecycle State Authority
-Copyright (c) 2026 Wendell K. Jiles. All rights reserved.
+/* 
+Vitals Tracker — BOF (Prime Pass Header)
 
-App Version: v2.025f
-Base: v2.021
-Date: 2026-01-18
 
-Schema position:
-File 8 of 10
 
-Former file:
-File 7 — js/chart.js
+NEXT FILE TO FETCH (PP-20260121-001): js/panels.js
 
-Next file:
-File 9 — js/panels.js
 
-FILE ROLE (LOCKED)
+
+Beacon Drift Control Note (for this Prime Pass run only; ends at the next divider)
+- Beacon, focus on THIS pasted file and THIS chat message only.
+- Follow only the instructions/prompts inside THIS paste and THIS message.
+- Do NOT use or “blend” prior chat messages for decisions in this step.
+End Beacon Drift Control Note
+------------------------------------------------------------
+
+File: js/state.js
+App Version Authority: js/version.js
+ImplementationId: PP-20260121-001
+Prime Pass: Step 8 of 23
+Prev (this run): js/store.js
+Next (this run): js/panels.js
+FileEditId: 1
+Edited: 2026-01-21
+
+Role / Ownership (LOCKED)
 - Holds transient UI + lifecycle state ONLY.
 - Bridges panel activation → chart lifecycle.
 - Owns no rendering, no gestures, no storage.
 
-v2.025f — Change Log (THIS FILE ONLY)
-1) Restores panel lifecycle awareness.
-2) When Charts becomes active:
-   - Calls VTChart.onShow()
-   - Clears loading state
-3) Tracks active panel + last non-settings panel.
-4) Zero DOM rendering.
-5) Zero chart drawing.
-6) Zero swipe logic.
+Implemented (facts only)
+- Tracks activePanel and lastNonSettings
+- Emits chart lifecycle hook when Charts becomes active (VTChart.onShow)
+- Exposes read-only VTState API + snapshot()
+- Listens for "vt:panelChanged" events (from panels.js)
 
-ANTI-DRIFT RULES
-- Do NOT draw charts here.
-- Do NOT attach gesture listeners here.
-- Do NOT manipulate canvas.
-- Do NOT implement panel rotation here.
-*/
+Anti-drift rules (do not violate)
+- Do NOT draw charts here
+- Do NOT attach gesture listeners here
+- Do NOT manipulate canvas here
+- Do NOT implement panel rotation here
+------------------------------------------------------------ */
 
 (function () {
   "use strict";
@@ -115,3 +118,29 @@ ANTI-DRIFT RULES
   });
 
 })();
+
+/* 
+Vitals Tracker — EOF (Prime Pass Footer)
+File: js/state.js
+App Version Authority: js/version.js
+ImplementationId: PP-20260121-001
+Prime Pass: Step 8 of 23
+Prev (this run): js/store.js
+Next (this run): js/panels.js
+FileEditId: 1
+Edited: 2026-01-21
+
+Implementation Fetch Aid (ONE-TIME ONLY; NOT A MASTER ORDER)
+Meaning:
+- This block exists ONLY to tell the human operator which file to paste NEXT during this one run.
+- This is NOT an instruction set, NOT a schema, and NOT an ordering guarantee.
+- Future AI/editors MUST IGNORE this block once PP-20260121-001 is complete.
+
+Current file (pasted/edited in this step): js/state.js
+Next file to fetch/paste (this run): js/panels.js
+
+Acceptance checks
+- VTState exposes the same methods as before
+- No UI rendering or gesture/canvas logic added
+- Chart lifecycle hook still fires on charts activation via vt:panelChanged
+*/ 
