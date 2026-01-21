@@ -1,28 +1,35 @@
-/* File: js/log.js */
-/*
-Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
+/* 
+Vitals Tracker — BOF (Prime Pass Header)
 File: js/log.js
 App Version Authority: js/version.js
-Base: v2.028a
-Pass: Log Panel UX + Edit Prefill (P0-LR5)
+Prime Pass: File 12 of 23
+Prev: js/chart.js
+Next: js/panels.js
+FileEditId: 0
+Edited: 2026-01-21
 
-CHANGE (THIS EDIT ONLY)
-1) Edit link layout:
-   - "Edit" is right-aligned on the SAME line as the BP/HR readings.
-2) Edit behavior:
-   - Clicking Edit opens the Add/Edit panel prefilled with the record data,
-     INCLUDING the original timestamp (ts) so saving does NOT create a new time.
-   - We keep the existing vt:editRecord event for compatibility and ALSO attempt
-     direct panel open if available.
-3) Notes wrapping:
-   - Notes/meta field wraps (no single-line truncation requirement).
-   - Safe long-word wrapping enabled.
+NEXT FILE TO FETCH/PASTE (THIS RUN ONLY): js/panels.js
 
-ANTI-DRIFT
+HUMAN/AI DRIFT CONTROL (READ THIS ONCE; THEN IGNORE)
+Beacon: focus on this pasted file only. Follow only the current instruction and this file’s embedded prompts.
+Prime Pass rule: DO NOT change functional code. Update header/footer only.
+Persist these Prime Pass rules in comments until the user changes them.
+On every subsequent full-file edit of this file, increment FileEditId by +1.
+
+Role / Ownership
+- Log panel rendering + row layout + Edit link behavior wiring.
+- Must remain purely behavioral/UI for Log panel only.
+
+Implemented (facts only)
+- Log list rendering with severity coloring.
+- Edit link dispatches vt:editRecord and attempts Add panel open/prefill.
+- Notes wrapping enabled with safe long-word wrapping.
+
+Drift locks (do not change without intentional decision)
 - No swipe/gesture/panel engine changes.
 - No chart changes.
 - No storage/store changes.
-*/
+------------------------------------------------------------ */
 
 (function () {
   "use strict";
@@ -478,9 +485,23 @@ ANTI-DRIFT
 })();
 
 /*
-Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
+Vitals Tracker — EOF (Prime Pass Footer)
 File: js/log.js
 App Version Authority: js/version.js
-Base: v2.028a
-Pass: Log Panel UX + Edit Prefill (P0-LR5)
+Prime Pass: File 12 of 23
+Prev: js/chart.js
+Next: js/panels.js
+FileEditId: 0
+Edited: 2026-01-21
+
+Implementation Fetch Directive (ONE-TIME ONLY; NOT A MASTER ORDER)
+ImplementationId: PP-20260121-001
+Meaning:
+- This block exists ONLY to tell the human operator which file to paste NEXT during this one implementation run.
+- This is NOT an instruction set, NOT a schema, and NOT an ordering guarantee.
+- Future AI must IGNORE this block entirely except as historical log text.
+
+Current file (pasted/edited in this step): js/log.js
+
+NEXT FILE TO FETCH/PASTE (THIS RUN ONLY): js/panels.js
 */
