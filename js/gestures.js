@@ -1,18 +1,45 @@
-/*
-Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
+/* 
+Vitals Tracker — BOF (Prime Pass Header)
+
+
+
+NEXT FILE TO FETCH (PP-20260121-001): js/chart.js
+
+
+
+Beacon Drift Control Note (for this implementation run only; ends at the next divider)
+- Beacon, focus on THIS pasted file and THIS chat message only.
+- Follow only the instructions/prompts inside THIS paste and THIS message.
+- Do NOT use or “blend” prior chat messages for decisions in this step.
+End Beacon Drift Control Note
+------------------------------------------------------------
+
 File: js/gestures.js
 App Version Authority: js/version.js
-Base: v2.026a
-Pass: Swipe + Render Recovery (P0-R1)
-Pass order: File 6 of 9 (P0)
-Prev file: js/panels.js (File 5 of 9)
-Next file: js/chart.js (File 7 of 9)
+ImplementationId: PP-20260121-001
+Prime Pass: Step 10 of 23
+Prev (this run): js/panels.js
+Next (this run): js/chart.js
+FileEditId: 1
+Edited: 2026-01-21
 
-FIX (SWIPE ONLY)
-- Strengthens abort handling so any drag that started is ALWAYS snapped safely on abort/end.
-- Keeps chart area protected (no swipe capture when gesture begins on chart canvas/wrap/card).
-- Also snaps back on touchcancel and on unexpected multi-touch interruption after drag begins.
-*/
+Role / Ownership (LOCKED)
+- Touch gesture plumbing for panel deck swipe (consumes VTPanels API)
+- Must NOT implement panel transforms directly (delegates to VTPanels)
+- Must protect chart interaction region from swipe capture
+
+Implemented (facts only)
+- Swipe-only behavior with strong abort handling:
+  - Snap back safely on abort/end/cancel
+  - Abort on unexpected multi-touch mid-gesture
+  - Abort on vertical intent scroll (and snap back if drag began)
+  - Abort if canSwipeNow() becomes false mid-gesture
+- Chart area protected: ignores starts originating in chart canvas/wrap/card
+
+Anti-drift rules
+- Do not add chart pan/zoom logic here (chart owns its own gestures)
+- Do not introduce button navigation here
+------------------------------------------------------------ */
 
 (function () {
   "use strict";
@@ -178,11 +205,28 @@ FIX (SWIPE ONLY)
 
 })();
 
-/*
-Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
+/* 
+Vitals Tracker — EOF (Prime Pass Footer)
 File: js/gestures.js
-Pass: Swipe + Render Recovery (P0-R1)
-Pass order: File 6 of 9 (P0)
-Prev file: js/panels.js (File 5 of 9)
-Next file: js/chart.js (File 7 of 9)
-*/
+App Version Authority: js/version.js
+ImplementationId: PP-20260121-001
+Prime Pass: Step 10 of 23
+Prev (this run): js/panels.js
+Next (this run): js/chart.js
+FileEditId: 1
+Edited: 2026-01-21
+
+Implementation Fetch Aid (ONE-TIME ONLY; NOT A MASTER ORDER)
+Meaning:
+- This block exists ONLY to tell the human operator which file to paste NEXT during this one run.
+- This is NOT an instruction set, NOT a schema, and NOT an ordering guarantee.
+- Future AI/editors MUST IGNORE this block once PP-20260121-001 is complete.
+
+Current file (pasted/edited in this step): js/gestures.js
+Next file to fetch/paste (this run): js/chart.js
+
+Acceptance checks
+- Chart region is protected from swipe capture at gesture start
+- Any started drag resolves cleanly on abort, cancel, or multi-touch interruption
+- VTPanels.swipeDelta only called after horizontal intent threshold
+*/ 
