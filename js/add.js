@@ -5,8 +5,8 @@ Copyright © 2026 Wendell K. Jiles. All rights reserved.
 
 File: js/add.js
 App Version Authority: js/version.js
-ImplementationId: ADD-20260121-003
-FileEditId: 4
+ImplementationId: ADD-20260121-004
+FileEditId: 5
 Edited: 2026-01-21
 
 Current file: js/add.js, File 1 of 1
@@ -25,12 +25,12 @@ Beacon Sticky Notes (persist until user changes)
 ------------------------------------------------------------
 
 Scope (this Pass)
-- Restore historical Add UI injection approach (vitals + notes) and extend it:
-  - Symptoms popup (clinically grouped) with weighted checkboxes
-  - Computed distress score (0–100) derived from symptoms
-  - Final distress score editable (slider) with delta stored
-  - Distress pill background color-coded blue→red by severity band
-- Must support Cancel/Apply in modals and Home navigation reliably.
+- Top row: 4 boxes (SYS/DIA/HR/Distress). Labels bold, centered, tight to boxes.
+- Distress box: prominent, eye-catching, transparent/label-like; editable only via slider + symptoms weighting.
+- Slider: directly under the Distress box (4th column).
+- Add Mood module: 5 choices (Depressed, Neutral/Calm, Elevated/Up, Agitated, Panic).
+- Medications module remains (event markers).
+- Must be able to cancel modals and navigate Home reliably.
 - No log work. No chart work.
 ------------------------------------------------------------ 
 */
@@ -38,7 +38,6 @@ Scope (this Pass)
 (function () {
   "use strict";
 
-  // --- shell elements (expected to exist in index.html/panel markup) ---
   const btnSave = document.getElementById("btnSaveReading");
   const btnHome = document.getElementById("btnHomeFromAdd");
   const bodyEl  = document.getElementById("addBody");
@@ -49,13 +48,11 @@ Scope (this Pass)
   const EDIT = { active:false, key:null, original:null };
 
   const UI = {
-    // Symptoms
-    symptoms: [],             // array of keys
-    // Distress scoring (0..100)
-    distressComputed: null,   // computed from symptoms
-    distressFinal: null,      // user adjusted (defaults to computed)
-    // Meds markers
-    meds: []                  // [{name, atTs}]
+    symptoms: [],
+    distressComputed: null,   // 0..100 (computed)
+    distressFinal: null,      // 0..100 (user)
+    meds: [],                 // [{name, atTs}]
+    mood: null                // one of MOODS.k
   };
 
   // ---------- utilities ----------
@@ -140,6 +137,19 @@ Scope (this Pass)
     return null;
   }
 
+  function normalizeMeds(arr){
+    const out=[], seen=new Set();
+    (arr||[]).forEach(m=>{
+      const name = normStr(m && m.name);
+      if(!name) return;
+      const k=name.toLowerCase();
+      if(seen.has(k)) return;
+      seen.add(k);
+      out.push({ name, atTs: (m && typeof m.atTs==="number") ? m.atTs : null });
+    });
+    return out;
+  }
+
   function defaultRecord(){
     const computed = (UI.distressComputed==null) ? null : Math.round(clamp(UI.distressComputed,0,100));
     const final    = (UI.distressFinal==null) ? null : Math.round(clamp(UI.distressFinal,0,100));
@@ -149,11 +159,11 @@ Scope (this Pass)
       ts: nowTs(),
       sys:null, dia:null, hr:null,
       notes:"",
-      // new fields
       symptoms: (UI.symptoms||[]).slice(),
       distressComputed: computed,
       distressFinal: final,
       distressDelta: delta,
+      mood: UI.mood || null,
       meds: (UI.meds||[]).slice()
     };
   }
@@ -179,83 +189,52 @@ Scope (this Pass)
 
     const meds = Array.isArray(r && r.meds) ? normalizeMeds(r.meds) : [];
 
-    return { ts, sys, dia, hr, notes, symptoms, distressComputed: dc, distressFinal: df, meds };
+    const mood = (r && typeof r.mood==="string") ? normStr(r.mood) : null;
+
+    return { ts, sys, dia, hr, notes, symptoms, distressComputed: dc, distressFinal: df, meds, mood };
   }
 
-  function normalizeMeds(arr){
-    const out=[], seen=new Set();
-    (arr||[]).forEach(m=>{
-      const name = normStr(m && m.name);
-      if(!name) return;
-      const k=name.toLowerCase();
-      if(seen.has(k)) return;
-      seen.add(k);
-      out.push({ name, atTs: (m && typeof m.atTs==="number") ? m.atTs : null });
-    });
-    return out;
-  }
-
-  // ---------- weighted symptoms catalog ----------
-  // Weights are intentionally non-linear: more checks ramps burden faster.
-  // The scoring compresses to 0..100.
+  // ---------- symptoms catalog + scoring ----------
   const SYMPTOMS = Object.freeze([
-    {
-      section: "Cardiovascular",
-      items: [
-        { k:"chest_tight",   label:"Chest tightness/pressure", w:18 },
-        { k:"palpitations",  label:"Palpitations/irregular beat", w:12 },
-        { k:"bp_spike",      label:"Feels BP spike/pounding", w:10 },
-        { k:"near_syncope",  label:"Near-faint / feels like passing out", w:18 },
-        { k:"edema",         label:"Swelling/edema", w:8 }
-      ]
-    },
-    {
-      section: "Respiratory",
-      items: [
-        { k:"air_hunger",    label:"Air hunger / starving for air", w:18 },
-        { k:"sob",           label:"Shortness of breath", w:14 },
-        { k:"wheeze",        label:"Wheezing", w:8 },
-        { k:"apnea_fear",    label:"Woke gasping / apnea episode", w:16 }
-      ]
-    },
-    {
-      section: "Neurologic",
-      items: [
-        { k:"dizzy",         label:"Dizziness/lightheaded", w:12 },
-        { k:"vertigo",       label:"Vertigo/spinning", w:14 },
-        { k:"brain_fog",     label:"Brain fog / confusion", w:12 },
-        { k:"tremor",        label:"Shakes/tremor", w:10 },
-        { k:"headache_flare",label:"Headache flare", w:14 }
-      ]
-    },
-    {
-      section: "GI / Autonomic",
-      items: [
-        { k:"nausea",        label:"Nausea", w:10 },
-        { k:"gi_cramp",      label:"Stomach pain/cramping", w:10 },
-        { k:"diarrhea",      label:"Diarrhea/urgent bowel", w:10 },
-        { k:"sweats",        label:"Sweats/hot flashes", w:10 },
-        { k:"cold_clammy",   label:"Cold/clammy", w:10 }
-      ]
-    },
-    {
-      section: "Pain / Body",
-      items: [
-        { k:"body_tension",  label:"Severe body tension", w:10 },
-        { k:"back_pain",     label:"Back/leg pain flare", w:10 },
-        { k:"chest_pain",    label:"Chest pain (non-cardiac suspected)", w:12 }
-      ]
-    },
-    {
-      section: "Mental / Distress",
-      items: [
-        { k:"panic",         label:"Panic episode sensations", w:18 },
-        { k:"doom",          label:"Sense of doom", w:14 },
-        { k:"agitated",      label:"Agitated/irritable", w:10 },
-        { k:"cannot_relax",  label:"Cannot downshift/relax", w:12 },
-        { k:"unsafe_alone",  label:"Feels unsafe alone right now", w:18 }
-      ]
-    }
+    { section:"Cardiovascular", items:[
+      { k:"chest_tight",  label:"Chest tightness/pressure", w:18 },
+      { k:"palpitations", label:"Palpitations/irregular beat", w:12 },
+      { k:"bp_spike",     label:"Feels BP spike/pounding", w:10 },
+      { k:"near_syncope", label:"Near-faint / feels like passing out", w:18 },
+      { k:"edema",        label:"Swelling/edema", w:8 }
+    ]},
+    { section:"Respiratory", items:[
+      { k:"air_hunger",   label:"Air hunger / starving for air", w:18 },
+      { k:"sob",          label:"Shortness of breath", w:14 },
+      { k:"wheeze",       label:"Wheezing", w:8 },
+      { k:"apnea_fear",   label:"Woke gasping / apnea episode", w:16 }
+    ]},
+    { section:"Neurologic", items:[
+      { k:"dizzy",        label:"Dizziness/lightheaded", w:12 },
+      { k:"vertigo",      label:"Vertigo/spinning", w:14 },
+      { k:"brain_fog",    label:"Brain fog / confusion", w:12 },
+      { k:"tremor",       label:"Shakes/tremor", w:10 },
+      { k:"headache_flare",label:"Headache flare", w:14 }
+    ]},
+    { section:"GI / Autonomic", items:[
+      { k:"nausea",       label:"Nausea", w:10 },
+      { k:"gi_cramp",     label:"Stomach pain/cramping", w:10 },
+      { k:"diarrhea",     label:"Diarrhea/urgent bowel", w:10 },
+      { k:"sweats",       label:"Sweats/hot flashes", w:10 },
+      { k:"cold_clammy",  label:"Cold/clammy", w:10 }
+    ]},
+    { section:"Pain / Body", items:[
+      { k:"body_tension", label:"Severe body tension", w:10 },
+      { k:"back_pain",    label:"Back/leg pain flare", w:10 },
+      { k:"chest_pain",   label:"Chest pain (non-cardiac suspected)", w:12 }
+    ]},
+    { section:"Mental / Distress", items:[
+      { k:"panic",        label:"Panic sensations", w:18 },
+      { k:"doom",         label:"Sense of doom", w:14 },
+      { k:"agitated",     label:"Agitated/irritable", w:10 },
+      { k:"cannot_relax", label:"Cannot downshift/relax", w:12 },
+      { k:"unsafe_alone", label:"Feels unsafe alone right now", w:18 }
+    ]}
   ]);
 
   function symptomWeightTotal(keys){
@@ -273,27 +252,36 @@ Scope (this Pass)
     const n = (keys||[]).length;
     const w = symptomWeightTotal(keys);
 
-    // Burden curve: weight drives score; count adds compounding.
-    // Tuned for meaningful separation without always pegging 100.
     const base = w;
     const comp = (n<=2) ? 0 : (n<=4 ? 6 : (n<=7 ? 14 : 22));
     const raw  = base + comp;
 
-    // Soft cap into 0..100 using a saturation curve
-    // score = 100 * (1 - exp(-raw / 45))
     const score = 100 * (1 - Math.exp(-raw / 45));
     return clamp(score, 0, 100);
   }
 
-  // ---------- distress color coding ----------
-  // Blue -> Green -> Yellow -> Orange -> Red
+  // ---------- distress colors ----------
   function distressColor(score){
     const s = clamp(score, 0, 100);
-    if (s <= 10) return "rgba(80,140,220,.30)";   // calm blue
-    if (s <= 25) return "rgba(90,190,170,.26)";   // teal
-    if (s <= 45) return "rgba(230,210,90,.24)";   // yellow
-    if (s <= 70) return "rgba(230,150,70,.26)";   // orange
-    return "rgba(200,70,90,.30)";                 // red
+    if (s <= 10) return "rgba(80,140,220,.28)";
+    if (s <= 25) return "rgba(90,190,170,.26)";
+    if (s <= 45) return "rgba(230,210,90,.24)";
+    if (s <= 70) return "rgba(230,150,70,.26)";
+    return "rgba(200,70,90,.30)";
+  }
+
+  // ---------- Mood module ----------
+  const MOODS = Object.freeze([
+    { k:"depressed", label:"Depressed" },
+    { k:"neutral",   label:"Neutral/Calm" },
+    { k:"elevated",  label:"Elevated/Up" },   // clinically relevant (bipolar spectrum / activation)
+    { k:"agitated",  label:"Agitated" },
+    { k:"panic",     label:"Panic" }
+  ]);
+
+  function moodLabel(k){
+    const hit = MOODS.find(x=>x.k===k);
+    return hit ? hit.label : "";
   }
 
   // ---------- DOM read/write ----------
@@ -314,17 +302,30 @@ Scope (this Pass)
     try{ el.value = (v==null) ? "" : String(v); }catch(_){}
   }
 
-  // ---------- styles + form injection ----------
+  // ---------- styles + injection ----------
   function ensureAddPassStyles(){
     if(document.getElementById("vtAddPassStyles")) return;
     const st=document.createElement("style");
     st.id="vtAddPassStyles";
     st.textContent=`
-      /* top vitals row with thicker borders */
-      .vtVitalsRow{display:flex;gap:12px;align-items:flex-start;width:100%;margin-bottom:12px}
-      .vtVitalsField{flex:1 1 0;min-width:0}
-      .vtVitalsField .addLabel{font-weight:800;font-size:14px;letter-spacing:.2px;margin-bottom:8px;opacity:.9}
-      .vtVitalsField .addInput{
+      /* Top 4-box row (SYS/DIA/HR/Distress) */
+      .vtTopGrid{
+        display:grid;
+        grid-template-columns:repeat(4, minmax(0,1fr));
+        gap:12px;
+        width:100%;
+        margin-bottom:10px;
+      }
+      .vtBoxField{min-width:0}
+      .vtBoxLabel{
+        font-weight:900;
+        font-size:13px;
+        letter-spacing:.3px;
+        opacity:.92;
+        text-align:center;
+        margin:0 0 4px 0; /* tight to box */
+      }
+      .vtBoxInput{
         width:100%;
         font-size:20px;
         text-align:center;
@@ -336,43 +337,57 @@ Scope (this Pass)
           0 0 0 1px rgba(0,0,0,.20);
       }
 
-      /* section blocks */
-      .vtSection{margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.10)}
-      .vtSectionHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
-      .vtSectionTitle{font-weight:850;letter-spacing:.12px;color:rgba(255,255,255,.88)}
-      .vtSectionHint{font-size:12px;color:rgba(235,245,255,.52);line-height:1.25}
-
-      /* symptoms button row */
-      .vtRow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-      .vtRow .pillBtn, .vtRow .medsAddBtn, .vtRow .distressBtn{min-height:42px}
-      .vtRow .pillBtn{padding:0 14px}
-
-      /* distress pill */
-      .vtDistressPill{
-        min-height:42px;
-        padding:0 14px;
-        border-radius:999px;
+      /* Distress box: prominent, transparent/label-like */
+      .vtDistressBox{
+        width:100%;
+        min-height:46px;
+        border-radius:16px;
         display:flex;
         align-items:center;
         justify-content:center;
-        font-weight:900;
-        letter-spacing:.2px;
-        border:1px solid rgba(180,210,255,.22);
-        box-shadow: inset 0 0 0 1px rgba(235,245,255,.10);
+        font-weight:950;
+        font-size:26px;
+        letter-spacing:.6px;
+        border:1px solid rgba(180,210,255,.20);
+        box-shadow:inset 0 0 0 1px rgba(235,245,255,.10);
+        background:rgba(0,0,0,.08); /* still mostly transparent */
+        color:rgba(255,255,255,.92);
       }
-      .vtDistressMeta{font-size:12px;color:rgba(235,245,255,.58);margin-top:6px}
-      .vtSlider{width:100%}
-      .vtInline{display:flex;gap:10px;align-items:center}
-      .vtInline > *{flex:1 1 auto}
 
-      /* tags */
+      /* Slider under 4th column only */
+      .vtTopGridSliderRow{
+        display:grid;
+        grid-template-columns:repeat(4, minmax(0,1fr));
+        gap:12px;
+        width:100%;
+        margin:8px 0 2px;
+      }
+      .vtTopGridSliderRow .vtSliderHost{grid-column:4 / 5}
+      .vtSlider{
+        width:100%;
+        height:28px;
+      }
+      .vtDistressMeta{
+        font-size:12px;
+        color:rgba(235,245,255,.58);
+        line-height:1.25;
+        margin-top:6px;
+      }
+
+      /* Sections */
+      .vtSection{margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.10)}
+      .vtSectionHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+      .vtSectionTitle{font-weight:950;letter-spacing:.12px;color:rgba(255,255,255,.90)}
+      .vtSectionHint{font-size:12px;color:rgba(235,245,255,.52);line-height:1.25}
+
+      .vtRow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
       .vtTagList{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
       .vtTag{
         padding:8px 10px;border-radius:999px;
         background:rgba(10,16,30,.40);
         border:1px solid rgba(180,210,255,.18);
         box-shadow:inset 0 0 0 1px rgba(235,245,255,.08);
-        font-size:12px;font-weight:750;color:rgba(255,255,255,.86);
+        font-size:12px;font-weight:800;color:rgba(255,255,255,.86);
         display:flex;align-items:center;gap:8px
       }
       .vtTag button{
@@ -380,6 +395,24 @@ Scope (this Pass)
         background:rgba(180,60,80,.16);
         display:flex;align-items:center;justify-content:center;
         box-shadow:inset 0 0 0 1px rgba(235,245,255,.08);
+      }
+
+      /* Mood pills */
+      .vtMoodRow{display:flex;gap:8px;flex-wrap:wrap}
+      .vtMoodBtn{
+        padding:10px 12px;
+        border-radius:999px;
+        border:1px solid rgba(180,210,255,.18);
+        background:rgba(0,0,0,.10);
+        box-shadow:inset 0 0 0 1px rgba(235,245,255,.08);
+        font-weight:850;
+        font-size:12px;
+        letter-spacing:.15px;
+        color:rgba(255,255,255,.86);
+      }
+      .vtMoodBtn.on{
+        border-color:rgba(180,210,255,.34);
+        background:rgba(80,140,220,.18);
       }
 
       /* overlay modal */
@@ -414,11 +447,10 @@ Scope (this Pass)
         gap:10px;
         border-bottom:1px solid rgba(255,255,255,.10);
       }
-      .vtModalTitle{font-size:16px;font-weight:900;letter-spacing:.12px}
+      .vtModalTitle{font-size:16px;font-weight:950;letter-spacing:.12px}
       .vtModalSub{font-size:12px;color:rgba(235,245,255,.60);margin-top:3px;line-height:1.25}
       .vtModalBody{padding:12px 14px;overflow:auto;display:flex;flex-direction:column;gap:12px}
       .vtModalFoot{padding:12px 14px;display:flex;gap:10px;justify-content:flex-end;border-top:1px solid rgba(255,255,255,.10)}
-      .vtModalFoot .pillBtn{min-height:42px}
 
       .vtSecCard{
         border:1px solid rgba(255,255,255,.12);
@@ -427,14 +459,14 @@ Scope (this Pass)
         box-shadow: inset 0 0 0 1px rgba(235,245,255,.08);
         padding:10px;
       }
-      .vtSecName{font-weight:900;color:rgba(255,255,255,.88);margin-bottom:8px}
+      .vtSecName{font-weight:950;color:rgba(255,255,255,.88);margin-bottom:8px}
       .vtChkRow{
         display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
         padding:8px 8px;border-radius:12px;
       }
       .vtChkRow:hover{background:rgba(255,255,255,.04)}
       .vtChkLeft{min-width:0}
-      .vtChkLabel{font-weight:750;color:rgba(255,255,255,.86);line-height:1.2}
+      .vtChkLabel{font-weight:850;color:rgba(255,255,255,.86);line-height:1.2}
       .vtChkHint{font-size:12px;color:rgba(235,245,255,.56);line-height:1.25;margin-top:3px}
       .vtChk{
         width:22px;height:22px;border-radius:6px;
@@ -462,22 +494,34 @@ Scope (this Pass)
     wrap.innerHTML=`
       <div class="addGrid">
 
-        <div class="vtVitalsRow">
-          <label class="addField vtVitalsField">
-            <div class="addLabel">SYS</div>
-            <input id="inSys" class="addInput" inputmode="numeric" placeholder="e.g., 132" />
-          </label>
-
-          <label class="addField vtVitalsField">
-            <div class="addLabel">DIA</div>
-            <input id="inDia" class="addInput" inputmode="numeric" placeholder="e.g., 84" />
-          </label>
-
-          <label class="addField vtVitalsField">
-            <div class="addLabel">HR</div>
-            <input id="inHr" class="addInput" inputmode="numeric" placeholder="e.g., 74" />
-          </label>
+        <!-- Top 4 boxes -->
+        <div class="vtTopGrid" id="vtTopGrid">
+          <div class="vtBoxField">
+            <div class="vtBoxLabel">SYS</div>
+            <input id="inSys" class="addInput vtBoxInput" inputmode="numeric" placeholder="e.g., 132" />
+          </div>
+          <div class="vtBoxField">
+            <div class="vtBoxLabel">DIA</div>
+            <input id="inDia" class="addInput vtBoxInput" inputmode="numeric" placeholder="e.g., 84" />
+          </div>
+          <div class="vtBoxField">
+            <div class="vtBoxLabel">HR</div>
+            <input id="inHr" class="addInput vtBoxInput" inputmode="numeric" placeholder="e.g., 74" />
+          </div>
+          <div class="vtBoxField">
+            <div class="vtBoxLabel">DISTRESS</div>
+            <div class="vtDistressBox" id="distressBox">—</div>
+          </div>
         </div>
+
+        <!-- Slider directly under 4th box -->
+        <div class="vtTopGridSliderRow">
+          <div></div><div></div><div></div>
+          <div class="vtSliderHost">
+            <input class="vtSlider" id="distressSlider" type="range" min="0" max="100" step="1" value="0" />
+          </div>
+        </div>
+        <div class="vtDistressMeta" id="distressMeta">Final: (not set)  Computed: (n/a)</div>
 
         <div class="vtSection" id="secSymptoms">
           <div class="vtSectionHead">
@@ -490,20 +534,16 @@ Scope (this Pass)
           <div id="symptomSummary" class="vtSectionHint">No symptoms selected.</div>
         </div>
 
-        <div class="vtSection" id="secDistress">
+        <div class="vtSection" id="secMood">
           <div class="vtSectionHead">
             <div>
-              <div class="vtSectionTitle">Distress</div>
-              <div class="vtSectionHint">Computed from Symptoms (0–100). You can adjust before saving.</div>
+              <div class="vtSectionTitle">Mood</div>
+              <div class="vtSectionHint">5-point clinical snapshot for chart overlay.</div>
             </div>
-            <button class="pillBtn" id="btnClearDistress" type="button">Clear</button>
+            <button class="pillBtn" id="btnClearMood" type="button">Clear</button>
           </div>
-
-          <div class="vtInline">
-            <div class="vtDistressPill" id="distressPill">—</div>
-            <input class="vtSlider" id="distressSlider" type="range" min="0" max="100" step="1" value="0" />
-          </div>
-          <div class="vtDistressMeta" id="distressMeta">Final: (not set)  Computed: (n/a)</div>
+          <div class="vtMoodRow" id="moodRow"></div>
+          <div class="vtSectionHint" id="moodSummary">No mood selected.</div>
         </div>
 
         <div class="vtSection" id="secMeds">
@@ -513,13 +553,11 @@ Scope (this Pass)
               <div class="vtSectionHint">Add medication event markers. Dosage stays in Notes.</div>
             </div>
           </div>
-
           <div class="vtRow">
             <input id="inMedName" class="addInput" placeholder="Medication name" list="dlMedNames" />
             <datalist id="dlMedNames"></datalist>
             <button class="medsAddBtn" id="btnAddMedToRecord" type="button">Add</button>
           </div>
-
           <div class="vtTagList" id="medsTagList" aria-label="Medication markers"></div>
         </div>
 
@@ -550,12 +588,12 @@ Scope (this Pass)
           <div class="vtModalFoot">
             <button class="pillBtn" id="btnSymptomsCancel" type="button">Cancel</button>
             <button class="pillBtn" id="btnSymptomsApply" type="button">Apply</button>
+            <button class="pillBtn" id="btnSymptomsClear" type="button">Clear</button>
           </div>
         </div>
       </div>
     `;
 
-    // Insert at top so existing Save/Bottom bar remains below if present
     try{
       if(host === cardEl && cardEl.firstChild){
         cardEl.insertBefore(wrap, cardEl.firstChild);
@@ -568,14 +606,18 @@ Scope (this Pass)
 
     bindSymptomsUI();
     bindDistressUI();
+    bindMoodUI();
     bindMedsUI();
     refreshMedDatalist();
-    syncDistressUI();
+
+    renderMoodRow();
+    renderMoodSummary();
     renderSymptomSummary();
     renderMedsTags();
+    syncDistressUI();
   }
 
-  // ---------- meds list (settings integration if present) ----------
+  // ---------- meds helpers ----------
   function getMedList(){
     try{
       if(window.VTSettings && typeof window.VTSettings.getMedNames==="function"){
@@ -675,24 +717,15 @@ Scope (this Pass)
   }
 
   // ---------- symptoms popup ----------
-  let symptomTemp = null; // Set of keys while modal open
+  let symptomTemp = null;
+  let distressTouched = false;
 
   function bindSymptomsUI(){
-    bindOnce(document.getElementById("btnOpenSymptoms"),"openSymptoms",function(){
-      openSymptoms();
-    });
-
-    bindOnce(document.getElementById("btnCloseSymptoms"),"closeSymptoms",function(){
-      closeSymptoms(true); // cancel
-    });
-
-    bindOnce(document.getElementById("btnSymptomsCancel"),"cancelSymptoms",function(){
-      closeSymptoms(true); // cancel
-    });
-
-    bindOnce(document.getElementById("btnSymptomsApply"),"applySymptoms",function(){
-      applySymptoms();
-    });
+    bindOnce(document.getElementById("btnOpenSymptoms"),"openSymptoms",function(){ openSymptoms(); });
+    bindOnce(document.getElementById("btnCloseSymptoms"),"closeSymptoms",function(){ closeSymptoms(true); });
+    bindOnce(document.getElementById("btnSymptomsCancel"),"cancelSymptoms",function(){ closeSymptoms(true); });
+    bindOnce(document.getElementById("btnSymptomsApply"),"applySymptoms",function(){ applySymptoms(); });
+    bindOnce(document.getElementById("btnSymptomsClear"),"clearSymptoms",function(){ clearSymptomsTemp(); });
   }
 
   function openSymptoms(){
@@ -743,7 +776,6 @@ Scope (this Pass)
         }
 
         row.addEventListener("click",function(e){
-          // allow tap anywhere on row
           try{ e.preventDefault(); }catch(_){}
           toggle();
         });
@@ -768,6 +800,13 @@ Scope (this Pass)
     if(cancel) symptomTemp = null;
   }
 
+  function clearSymptomsTemp(){
+    if(!symptomTemp) symptomTemp = new Set();
+    symptomTemp.clear();
+    // refresh UI by rebuilding quickly
+    openSymptoms();
+  }
+
   function applySymptoms(){
     if(!symptomTemp){
       closeSymptoms(true);
@@ -777,28 +816,16 @@ Scope (this Pass)
     UI.symptoms.sort((a,b)=>String(a).localeCompare(String(b)));
     symptomTemp = null;
 
-    // recompute distress from symptoms; set final default to computed unless user already changed final
     const computed = computeDistressFromSymptoms(UI.symptoms);
     UI.distressComputed = computed;
 
-    // If final is null OR final previously matched old computed, reset final to new computed
-    // (keeps user adjustment if they intentionally moved the slider)
-    if(UI.distressFinal==null){
+    if(UI.distressFinal==null || !distressTouched){
       UI.distressFinal = computed;
-    }else{
-      // heuristic: if final within 1 point of computed before (or computed was null), snap
-      // We cannot know old computed precisely after apply, so do a conservative snap only if
-      // final was previously exactly equal to slider value we were showing from computed.
-      // In practice: if user adjusted slider, it stays; if not, it tracks computed.
-      // We'll treat "no manual adjust" as: slider hasn't been touched since last sync.
-      // We track that with a flag.
-      if(!distressTouched){
-        UI.distressFinal = computed;
-      }
+      distressTouched = false;
     }
 
-    syncDistressUI();
     renderSymptomSummary();
+    syncDistressUI();
     closeSymptoms(false);
   }
 
@@ -806,20 +833,12 @@ Scope (this Pass)
     const el=document.getElementById("symptomSummary");
     if(!el) return;
     const n=(UI.symptoms||[]).length;
-    if(!n){
-      el.textContent="No symptoms selected.";
-      return;
-    }
-    el.textContent=`${n} symptom${n===1?"":"s"} selected.`;
+    el.textContent = n ? `${n} symptom${n===1?"":"s"} selected.` : "No symptoms selected.";
   }
 
-  // ---------- distress UI (computed + final slider + color pill) ----------
-  let distressTouched = false;
-
+  // ---------- distress UI ----------
   function bindDistressUI(){
     const slider=document.getElementById("distressSlider");
-    const btnClear=document.getElementById("btnClearDistress");
-
     if(slider){
       slider.addEventListener("input",function(){
         distressTouched = true;
@@ -828,32 +847,23 @@ Scope (this Pass)
         syncDistressUI();
       });
     }
-
-    bindOnce(btnClear,"clearDistress",function(){
-      distressTouched = false;
-      UI.symptoms = [];
-      UI.distressComputed = null;
-      UI.distressFinal = null;
-      renderSymptomSummary();
-      syncDistressUI();
-    });
   }
 
   function syncDistressUI(){
-    const pill=document.getElementById("distressPill");
+    const box=document.getElementById("distressBox");
     const slider=document.getElementById("distressSlider");
     const meta=document.getElementById("distressMeta");
 
     const computed = (UI.distressComputed==null) ? null : Math.round(clamp(UI.distressComputed,0,100));
     const final    = (UI.distressFinal==null) ? null : Math.round(clamp(UI.distressFinal,0,100));
 
-    if(pill){
+    if(box){
       if(final==null){
-        pill.textContent="—";
-        pill.style.background="rgba(80,140,220,.12)";
+        box.textContent="—";
+        box.style.background="rgba(0,0,0,.08)";
       }else{
-        pill.textContent=String(final);
-        pill.style.background = distressColor(final);
+        box.textContent=String(final);
+        box.style.background = distressColor(final);
       }
     }
 
@@ -870,7 +880,42 @@ Scope (this Pass)
     }
   }
 
-  // ---------- edit mode / navigation ----------
+  // ---------- Mood UI ----------
+  function bindMoodUI(){
+    bindOnce(document.getElementById("btnClearMood"),"clearMood",function(){
+      UI.mood = null;
+      renderMoodRow();
+      renderMoodSummary();
+    });
+  }
+
+  function renderMoodRow(){
+    const host=document.getElementById("moodRow");
+    if(!host) return;
+    host.innerHTML="";
+
+    MOODS.forEach(m=>{
+      const b=document.createElement("button");
+      b.type="button";
+      b.className="vtMoodBtn" + (UI.mood===m.k ? " on" : "");
+      b.textContent=m.label;
+      b.setAttribute("aria-pressed", UI.mood===m.k ? "true":"false");
+      b.addEventListener("click",function(){
+        UI.mood = (UI.mood===m.k) ? null : m.k;
+        renderMoodRow();
+        renderMoodSummary();
+      });
+      host.appendChild(b);
+    });
+  }
+
+  function renderMoodSummary(){
+    const el=document.getElementById("moodSummary");
+    if(!el) return;
+    el.textContent = UI.mood ? `Mood: ${moodLabel(UI.mood)}` : "No mood selected.";
+  }
+
+  // ---------- navigation / edit ----------
   function setSaveEnabled(on){
     if(!btnSave) return;
     try{
@@ -905,7 +950,10 @@ Scope (this Pass)
     distressTouched = false;
 
     UI.meds = [];
+    UI.mood = null;
 
+    renderMoodRow();
+    renderMoodSummary();
     renderSymptomSummary();
     renderMedsTags();
     syncDistressUI();
@@ -928,10 +976,13 @@ Scope (this Pass)
       UI.symptoms = uniqLower(record.symptoms||[]);
       UI.distressComputed = (record.distressComputed==null) ? computeDistressFromSymptoms(UI.symptoms) : clamp(record.distressComputed,0,100);
       UI.distressFinal    = (record.distressFinal==null) ? UI.distressComputed : clamp(record.distressFinal,0,100);
-      distressTouched = (record.distressDelta!=null); // best-effort hint
+      distressTouched = (record.distressDelta!=null);
 
       UI.meds = normalizeMeds(record.meds||[]);
+      UI.mood = (record.mood && typeof record.mood==="string") ? record.mood : null;
 
+      renderMoodRow();
+      renderMoodSummary();
       renderSymptomSummary();
       renderMedsTags();
       syncDistressUI();
@@ -1007,9 +1058,14 @@ Scope (this Pass)
   }
 
   function goHome(){
-    // Hard requirement: must be able to cancel/navigate home.
-    // Close any open overlays first.
-    try{ closeSymptoms(true); }catch(_){}
+    try{
+      const overlay=document.getElementById("symptomOverlay");
+      if(overlay){
+        overlay.classList.remove("show");
+        overlay.setAttribute("aria-hidden","true");
+      }
+    }catch(_){}
+
     try{
       if(window.VTPanels){
         if(typeof window.VTPanels.closeAdd==="function"){
@@ -1022,7 +1078,6 @@ Scope (this Pass)
         }
       }
     }catch(_){}
-    // fallback: best effort class toggle
     try{
       document.getElementById("panelAdd")?.classList.remove("active");
       document.getElementById("panelHome")?.classList.add("active");
@@ -1049,7 +1104,6 @@ Scope (this Pass)
     rec.hr  = readNumber("inHr");
     rec.notes = readText("inNotes");
 
-    // BP completeness rule
     const hasSys = rec.sys!=null;
     const hasDia = rec.dia!=null;
     if((hasSys && !hasDia) || (!hasSys && hasDia)){
@@ -1066,7 +1120,6 @@ Scope (this Pass)
           return;
         }
 
-        // Preserve original timestamp if present
         const tsToKeep =
           (EDIT.original && typeof EDIT.original.ts==="number") ? EDIT.original.ts :
           (EDIT.key && typeof EDIT.key.ts==="number") ? EDIT.key.ts :
@@ -1116,7 +1169,6 @@ Scope (this Pass)
       goHome();
     });
 
-    // edit events if log triggers them
     document.addEventListener("vt:editRequested",function(e){
       try{
         if(!e || !e.detail) return;
@@ -1129,7 +1181,6 @@ Scope (this Pass)
     setHeaderEditing(false);
   }
 
-  // Public API
   window.VTAdd = Object.freeze({
     openNew: openAddNew,
     openEdit: openEdit
@@ -1148,8 +1199,8 @@ Copyright © 2026 Wendell K. Jiles. All rights reserved.
 
 File: js/add.js
 App Version Authority: js/version.js
-ImplementationId: ADD-20260121-003
-FileEditId: 4
+ImplementationId: ADD-20260121-004
+FileEditId: 5
 Edited: 2026-01-21
 
 Current file: js/add.js, File 1 of 1
@@ -1163,12 +1214,12 @@ Beacon: update FileEditId by incrementing by one each time you generate a new fu
 
 Current file (pasted/edited in this step): js/add.js
 Acceptance checks
-- Historical injected Add UI restored (SYS/DIA/HR + Notes) and extended with Symptoms popup.
-- Symptoms popup is clinically grouped and uses weighted checkboxes.
-- Distress computed (0–100) from Symptoms; Final can be adjusted via slider; delta is stored.
-- Distress pill background color-coded blue→red by severity.
-- Cancel in popup does not change selection; Apply commits selection and recomputes.
-- Home navigation always works; overlays are closed before navigating.
+- Top row is 4 boxes (SYS/DIA/HR/DISTRESS) with bold centered tight labels.
+- Distress number is prominent; changes only via slider and symptom weighting.
+- Slider sits directly under the Distress (4th) box.
+- Mood module added with 5 clinically relevant choices (Depressed, Neutral/Calm, Elevated/Up, Agitated, Panic).
+- Medications module present as event markers.
+- Symptoms modal supports Cancel/Apply/Clear and Home navigation closes overlays.
 
 Test and regroup for next pass.
 */
