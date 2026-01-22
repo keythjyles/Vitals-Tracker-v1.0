@@ -5,8 +5,8 @@ Copyright © 2026 Wendell K. Jiles. All rights reserved.
 
 File: js/add.js
 App Version Authority: js/version.js
-ImplementationId: ADD-20260121-004
-FileEditId: 5
+ImplementationId: ADD-20260121-005
+FileEditId: 6
 Edited: 2026-01-21
 
 Current file: js/add.js, File 1 of 1
@@ -25,12 +25,10 @@ Beacon Sticky Notes (persist until user changes)
 ------------------------------------------------------------
 
 Scope (this Pass)
-- Top row: 4 boxes (SYS/DIA/HR/Distress). Labels bold, centered, tight to boxes.
-- Distress box: prominent, eye-catching, transparent/label-like; editable only via slider + symptoms weighting.
-- Slider: directly under the Distress box (4th column).
-- Add Mood module: 5 choices (Depressed, Neutral/Calm, Elevated/Up, Agitated, Panic).
-- Medications module remains (event markers).
-- Must be able to cancel modals and navigate Home reliably.
+- Fix Symptoms Select button: popup must open reliably (robust binding + pointer-events fixes).
+- Fix Distress slider: must work immediately (default Final=0, slider enabled).
+- Fix top-row clipping: enforce box-sizing and overflow constraints.
+- Mood: single-select checkbox-style (one choice max), default none; all 5 options forced into one row.
 - No log work. No chart work.
 ------------------------------------------------------------ 
 */
@@ -50,9 +48,9 @@ Scope (this Pass)
   const UI = {
     symptoms: [],
     distressComputed: null,   // 0..100 (computed)
-    distressFinal: null,      // 0..100 (user)
+    distressFinal: 0,         // 0..100 (user) — default 0 so slider works
     meds: [],                 // [{name, atTs}]
-    mood: null                // one of MOODS.k
+    mood: null                // one of MOODS.k (default none)
   };
 
   // ---------- utilities ----------
@@ -270,13 +268,13 @@ Scope (this Pass)
     return "rgba(200,70,90,.30)";
   }
 
-  // ---------- Mood module ----------
+  // ---------- Mood module (single-select checkbox-style) ----------
   const MOODS = Object.freeze([
-    { k:"depressed", label:"Depressed" },
-    { k:"neutral",   label:"Neutral/Calm" },
-    { k:"elevated",  label:"Elevated/Up" },   // clinically relevant (bipolar spectrum / activation)
-    { k:"agitated",  label:"Agitated" },
-    { k:"panic",     label:"Panic" }
+    { k:"depressed", short:"Dep",  label:"Depressed" },
+    { k:"neutral",   short:"Calm", label:"Neutral/Calm" },
+    { k:"elevated",  short:"Up",   label:"Elevated/Up" },
+    { k:"agitated",  short:"Agit", label:"Agitated" },
+    { k:"panic",     short:"Panic",label:"Panic" }
   ]);
 
   function moodLabel(k){
@@ -308,6 +306,9 @@ Scope (this Pass)
     const st=document.createElement("style");
     st.id="vtAddPassStyles";
     st.textContent=`
+      /* global box sizing for injected UI to stop clipping */
+      #vtAddForm, #vtAddForm * { box-sizing:border-box; }
+
       /* Top 4-box row (SYS/DIA/HR/Distress) */
       .vtTopGrid{
         display:grid;
@@ -315,6 +316,7 @@ Scope (this Pass)
         gap:12px;
         width:100%;
         margin-bottom:10px;
+        overflow:hidden;
       }
       .vtBoxField{min-width:0}
       .vtBoxLabel{
@@ -350,8 +352,9 @@ Scope (this Pass)
         letter-spacing:.6px;
         border:1px solid rgba(180,210,255,.20);
         box-shadow:inset 0 0 0 1px rgba(235,245,255,.10);
-        background:rgba(0,0,0,.08); /* still mostly transparent */
+        background:rgba(0,0,0,.08);
         color:rgba(255,255,255,.92);
+        overflow:hidden;
       }
 
       /* Slider under 4th column only */
@@ -397,18 +400,27 @@ Scope (this Pass)
         box-shadow:inset 0 0 0 1px rgba(235,245,255,.08);
       }
 
-      /* Mood pills */
-      .vtMoodRow{display:flex;gap:8px;flex-wrap:wrap}
+      /* Mood: force 5 options into a single row */
+      .vtMoodRow{
+        display:grid;
+        grid-template-columns:repeat(5, minmax(0,1fr));
+        gap:8px;
+        width:100%;
+      }
       .vtMoodBtn{
-        padding:10px 12px;
+        width:100%;
+        padding:9px 6px;
         border-radius:999px;
         border:1px solid rgba(180,210,255,.18);
         background:rgba(0,0,0,.10);
         box-shadow:inset 0 0 0 1px rgba(235,245,255,.08);
-        font-weight:850;
+        font-weight:900;
         font-size:12px;
         letter-spacing:.15px;
         color:rgba(255,255,255,.86);
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
       }
       .vtMoodBtn.on{
         border-color:rgba(180,210,255,.34);
@@ -424,8 +436,12 @@ Scope (this Pass)
         justify-content:center;
         padding:16px;
         z-index:9999;
+        pointer-events:none; /* critical: prevent hidden overlay from blocking clicks */
       }
-      .vtOverlay.show{display:flex;}
+      .vtOverlay.show{
+        display:flex;
+        pointer-events:auto; /* allow interaction when visible */
+      }
       .vtModal{
         width:min(760px,100%);
         max-height:min(80vh,760px);
@@ -510,7 +526,7 @@ Scope (this Pass)
           </div>
           <div class="vtBoxField">
             <div class="vtBoxLabel">DISTRESS</div>
-            <div class="vtDistressBox" id="distressBox">—</div>
+            <div class="vtDistressBox" id="distressBox">0</div>
           </div>
         </div>
 
@@ -521,7 +537,7 @@ Scope (this Pass)
             <input class="vtSlider" id="distressSlider" type="range" min="0" max="100" step="1" value="0" />
           </div>
         </div>
-        <div class="vtDistressMeta" id="distressMeta">Final: (not set)  Computed: (n/a)</div>
+        <div class="vtDistressMeta" id="distressMeta">Final: 0  Computed: (n/a)</div>
 
         <div class="vtSection" id="secSymptoms">
           <div class="vtSectionHead">
@@ -529,7 +545,7 @@ Scope (this Pass)
               <div class="vtSectionTitle">Symptoms</div>
               <div class="vtSectionHint">Tap to select symptoms (popup). Symptoms contribute to computed distress score.</div>
             </div>
-            <button class="pillBtn" id="btnOpenSymptoms" type="button">Select</button>
+            <button class="pillBtn" id="btnOpenSymptoms" data-action="openSymptoms" type="button">Select</button>
           </div>
           <div id="symptomSummary" class="vtSectionHint">No symptoms selected.</div>
         </div>
@@ -721,11 +737,28 @@ Scope (this Pass)
   let distressTouched = false;
 
   function bindSymptomsUI(){
-    bindOnce(document.getElementById("btnOpenSymptoms"),"openSymptoms",function(){ openSymptoms(); });
-    bindOnce(document.getElementById("btnCloseSymptoms"),"closeSymptoms",function(){ closeSymptoms(true); });
-    bindOnce(document.getElementById("btnSymptomsCancel"),"cancelSymptoms",function(){ closeSymptoms(true); });
-    bindOnce(document.getElementById("btnSymptomsApply"),"applySymptoms",function(){ applySymptoms(); });
-    bindOnce(document.getElementById("btnSymptomsClear"),"clearSymptoms",function(){ clearSymptomsTemp(); });
+    // direct binds (if present)
+    bindOnce(document.getElementById("btnOpenSymptoms"),"openSymptoms",function(e){ try{ e.preventDefault(); }catch(_){} openSymptoms(); });
+    bindOnce(document.getElementById("btnCloseSymptoms"),"closeSymptoms",function(e){ try{ e.preventDefault(); }catch(_){} closeSymptoms(true); });
+    bindOnce(document.getElementById("btnSymptomsCancel"),"cancelSymptoms",function(e){ try{ e.preventDefault(); }catch(_){} closeSymptoms(true); });
+    bindOnce(document.getElementById("btnSymptomsApply"),"applySymptoms",function(e){ try{ e.preventDefault(); }catch(_){} applySymptoms(); });
+    bindOnce(document.getElementById("btnSymptomsClear"),"clearSymptoms",function(e){ try{ e.preventDefault(); }catch(_){} clearSymptomsTemp(); });
+
+    // robust fallback: event delegation (covers cases where DOM is re-rendered)
+    if(!document.documentElement.dataset.vtSymptomDelegation){
+      document.documentElement.dataset.vtSymptomDelegation = "1";
+      document.addEventListener("click", function(ev){
+        const t = ev && ev.target ? ev.target : null;
+        if(!t) return;
+
+        const btn = t.closest ? t.closest('[data-action="openSymptoms"], #btnOpenSymptoms') : null;
+        if(btn){
+          try{ ev.preventDefault(); }catch(_){}
+          openSymptoms();
+          return;
+        }
+      }, true);
+    }
   }
 
   function openSymptoms(){
@@ -803,7 +836,6 @@ Scope (this Pass)
   function clearSymptomsTemp(){
     if(!symptomTemp) symptomTemp = new Set();
     symptomTemp.clear();
-    // refresh UI by rebuilding quickly
     openSymptoms();
   }
 
@@ -819,9 +851,9 @@ Scope (this Pass)
     const computed = computeDistressFromSymptoms(UI.symptoms);
     UI.distressComputed = computed;
 
-    if(UI.distressFinal==null || !distressTouched){
+    // If user has not manually adjusted the slider, follow computed.
+    if(!distressTouched){
       UI.distressFinal = computed;
-      distressTouched = false;
     }
 
     renderSymptomSummary();
@@ -855,34 +887,31 @@ Scope (this Pass)
     const meta=document.getElementById("distressMeta");
 
     const computed = (UI.distressComputed==null) ? null : Math.round(clamp(UI.distressComputed,0,100));
-    const final    = (UI.distressFinal==null) ? null : Math.round(clamp(UI.distressFinal,0,100));
+    const final    = (UI.distressFinal==null) ? 0 : Math.round(clamp(UI.distressFinal,0,100));
+
+    UI.distressFinal = final;
 
     if(box){
-      if(final==null){
-        box.textContent="—";
-        box.style.background="rgba(0,0,0,.08)";
-      }else{
-        box.textContent=String(final);
-        box.style.background = distressColor(final);
-      }
+      box.textContent = String(final);
+      box.style.background = distressColor(final);
     }
 
     if(slider){
-      slider.value = String(final==null ? 0 : final);
-      slider.disabled = (final==null);
-      slider.style.opacity = (final==null) ? "0.55" : "";
+      slider.disabled = false;
+      slider.style.opacity = "";
+      slider.value = String(final);
     }
 
     if(meta){
       const cTxt = (computed==null) ? "(n/a)" : String(computed);
-      const fTxt = (final==null) ? "(not set)" : String(final);
-      meta.textContent = `Final: ${fTxt}  Computed: ${cTxt}`;
+      meta.textContent = `Final: ${final}  Computed: ${cTxt}`;
     }
   }
 
   // ---------- Mood UI ----------
   function bindMoodUI(){
-    bindOnce(document.getElementById("btnClearMood"),"clearMood",function(){
+    bindOnce(document.getElementById("btnClearMood"),"clearMood",function(e){
+      try{ e.preventDefault(); }catch(_){}
       UI.mood = null;
       renderMoodRow();
       renderMoodSummary();
@@ -898,9 +927,12 @@ Scope (this Pass)
       const b=document.createElement("button");
       b.type="button";
       b.className="vtMoodBtn" + (UI.mood===m.k ? " on" : "");
-      b.textContent=m.label;
+      b.textContent=m.short;
+      b.title=m.label;
       b.setAttribute("aria-pressed", UI.mood===m.k ? "true":"false");
-      b.addEventListener("click",function(){
+      b.addEventListener("click",function(e){
+        try{ e.preventDefault(); }catch(_){}
+        // single-select checkbox behavior: clicking selected clears; otherwise selects only this.
         UI.mood = (UI.mood===m.k) ? null : m.k;
         renderMoodRow();
         renderMoodSummary();
@@ -946,7 +978,7 @@ Scope (this Pass)
 
     UI.symptoms = [];
     UI.distressComputed = null;
-    UI.distressFinal = null;
+    UI.distressFinal = 0;
     distressTouched = false;
 
     UI.meds = [];
@@ -975,7 +1007,7 @@ Scope (this Pass)
 
       UI.symptoms = uniqLower(record.symptoms||[]);
       UI.distressComputed = (record.distressComputed==null) ? computeDistressFromSymptoms(UI.symptoms) : clamp(record.distressComputed,0,100);
-      UI.distressFinal    = (record.distressFinal==null) ? UI.distressComputed : clamp(record.distressFinal,0,100);
+      UI.distressFinal    = (record.distressFinal==null) ? (UI.distressComputed==null ? 0 : UI.distressComputed) : clamp(record.distressFinal,0,100);
       distressTouched = (record.distressDelta!=null);
 
       UI.meds = normalizeMeds(record.meds||[]);
@@ -1057,7 +1089,7 @@ Scope (this Pass)
     }
   }
 
-  function goHome(){
+  function closeOverlays(){
     try{
       const overlay=document.getElementById("symptomOverlay");
       if(overlay){
@@ -1065,6 +1097,10 @@ Scope (this Pass)
         overlay.setAttribute("aria-hidden","true");
       }
     }catch(_){}
+  }
+
+  function goHome(){
+    closeOverlays();
 
     try{
       if(window.VTPanels){
@@ -1199,8 +1235,8 @@ Copyright © 2026 Wendell K. Jiles. All rights reserved.
 
 File: js/add.js
 App Version Authority: js/version.js
-ImplementationId: ADD-20260121-004
-FileEditId: 5
+ImplementationId: ADD-20260121-005
+FileEditId: 6
 Edited: 2026-01-21
 
 Current file: js/add.js, File 1 of 1
@@ -1214,12 +1250,10 @@ Beacon: update FileEditId by incrementing by one each time you generate a new fu
 
 Current file (pasted/edited in this step): js/add.js
 Acceptance checks
-- Top row is 4 boxes (SYS/DIA/HR/DISTRESS) with bold centered tight labels.
-- Distress number is prominent; changes only via slider and symptom weighting.
-- Slider sits directly under the Distress (4th) box.
-- Mood module added with 5 clinically relevant choices (Depressed, Neutral/Calm, Elevated/Up, Agitated, Panic).
-- Medications module present as event markers.
-- Symptoms modal supports Cancel/Apply/Clear and Home navigation closes overlays.
+- Symptoms Select reliably opens popup (direct bind + delegated fallback; overlay pointer-events fixed).
+- Distress slider works immediately (Final defaults to 0; slider never disabled).
+- Top row no longer clips (box-sizing enforced; overflow constraints applied).
+- Mood is single-select checkbox-style (one max), default none, forced into one row.
 
 Test and regroup for next pass.
 */
