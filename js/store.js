@@ -1,38 +1,33 @@
 /* 
-Vitals Tracker — BOF (Add Implementation Header)
+Vitals Tracker — BOF (Add Pass Header)
 Copyright © 2026 Wendell K. Jiles. All rights reserved.
 (Pen name: Keyth Jyles)
 
 File: js/store.js
 App Version Authority: js/version.js
-ImplementationId: ADD-20260121-001
-FileEditId: 2
+ImplementationId: ADD-20260121-006
+FileEditId: 3
 Edited: 2026-01-21
 
-Prime/Implementation Context
-- This pass: Add panel data capture (NO charting changes in this pass).
-- Files 6 and 7 are separate future passes.
-
-Current file: js/store.js, File 5 of 7
+Current file: js/store.js, File 2 of 3
 
 
-Next file to fetch: js/add.js, File 3 of 7
+Next file to fetch: js/add.js, File 1 of 3
 
 
 
-Beacon (persist until user changes)
-- Beacon: update FileEditId by incrementing by one each time you generate a new full file.
+Beacon: update FileEditId by incrementing by one each time you generate a new full file.
 
-Role / Ownership (LOCKED)
-- Canonical data access layer for the app.
-- Delegates persistence to storage.js.
-- Normalizes records for consumers (charts, log, reports).
-- Owns init sequencing and in-memory cache.
-- Must NOT render UI.
-- Must NOT own panels or gestures.
+Beacon Sticky Notes (persist until user changes)
+- Every file edit is its own Pass with a unique ImplementationId.
+- Each Pass includes an explicit file list; even one file is “1 of 1.”
+- Replace prior non-sticky header/footer content each Pass; keep only explicitly-sticky Beacon rules.
+------------------------------------------------------------
 
-Anti-drift rules
-- Do NOT guess. Only edit pasted files. Whole-file outputs only.
+Scope (this Pass)
+- Support Add “Save-per-step” wizard by adding a tiny Draft API in VTStore (no UI).
+- No chart work. No log work.
+- Do NOT change record normalization semantics.
 ------------------------------------------------------------ 
 */
 
@@ -42,6 +37,9 @@ Anti-drift rules
   var ready = false;
   var initPromise = null;
   var cache = [];
+
+  // Draft storage (wizard support). Local-only; intentionally not part of record cache.
+  var DRAFT_KEY = "vt_add_draft_v1";
 
   function dbgInit() {
     try {
@@ -246,6 +244,42 @@ Anti-drift rules
     return false;
   }
 
+  // ---------- Draft API (wizard support) ----------
+  function getDraft() {
+    try {
+      var raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return null;
+      var obj = JSON.parse(raw);
+      if (!obj || typeof obj !== "object") return null;
+      return clone(obj);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function setDraft(draftObj) {
+    try {
+      if (!draftObj || typeof draftObj !== "object") return false;
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(draftObj));
+      dbgSet("draft", "SET");
+      return true;
+    } catch (_) {
+      dbgSet("draft", "SET_FAIL");
+      return false;
+    }
+  }
+
+  function clearDraft() {
+    try {
+      localStorage.removeItem(DRAFT_KEY);
+      dbgSet("draft", "CLEARED");
+      return true;
+    } catch (_) {
+      dbgSet("draft", "CLEAR_FAIL");
+      return false;
+    }
+  }
+
   async function init() {
     if (ready) return;
     if (initPromise) return initPromise;
@@ -408,7 +442,12 @@ Anti-drift rules
     add: add,
     update: update,
     replaceAll: replaceAll,
-    clear: clear
+    clear: clear,
+
+    // Draft API (wizard support)
+    getDraft: getDraft,
+    setDraft: setDraft,
+    clearDraft: clearDraft
   };
 
   try { init(); } catch (_) {}
@@ -416,32 +455,30 @@ Anti-drift rules
 })();
 
 /* 
-Vitals Tracker — EOF (Add Implementation Footer)
+Vitals Tracker — EOF (Add Pass Footer)
 Copyright © 2026 Wendell K. Jiles. All rights reserved.
 (Pen name: Keyth Jyles)
 
 File: js/store.js
 App Version Authority: js/version.js
-ImplementationId: ADD-20260121-001
-FileEditId: 2
+ImplementationId: ADD-20260121-006
+FileEditId: 3
 Edited: 2026-01-21
 
-Current file: js/store.js, File 5 of 7
+Current file: js/store.js, File 2 of 3
 
 
-Next file to fetch: js/add.js, File 3 of 7
+Next file to fetch: js/add.js, File 1 of 3
 
 
 
 Beacon: update FileEditId by incrementing by one each time you generate a new full file.
 
 Current file (pasted/edited in this step): js/store.js
-
 Acceptance checks
 - window.VTStore exists; getAll() remains synchronous
 - add()/update() preserve pass-through fields and persist via VTStorage when present
-- No UI rendering logic introduced
+- Draft API exists (getDraft/setDraft/clearDraft) and does not touch record cache
 
-Implementation Fetch Aid (ONE-TIME ONLY; NOT AUTHORITATIVE)
-- This is only a human paste directive for ADD-20260121-001, not a master schema/order.
-*/ 
+Test and regroup for next pass.
+*/
