@@ -4,21 +4,29 @@ Copyright © 2026 Wendell K. Jiles. All rights reserved. (Pen name: Keyth Jyles)
 
 File: css/app.css
 App Version Authority: js/version.js
-ImplementationId: ADD-UIA-20260121-001
-FileEditId: 3
+ImplementationId: VT-PASS-20260121-ADDWIZ-001
+FileEditId: 4
 Edited: 2026-01-21
 
-Current file: css/app.css, File 4 of 4
+Prev (this pass): index.html
+Next (this pass): js/<add-wizard-controller>.js
 
+Role / Ownership (LOCKED)
+- Global theme + layout primitives
+- Add UI card/bottom-sheet styling primitives
+- Must remain compatible with all panels and Add wizard steps
 
-Next file to fetch: EOL, EOP, File 0 of 0
-
-
-
-Beacon: update FileEditId by incrementing by one each time you generate a new full file.
-
-Beacon Sticky Notes (persist until user changes)
+Beacon (sticky; persists until user changes)
+- Beacon: update FileEditId by incrementing by one each time you generate a new full file.
 - Do not guess other files. Only edit pasted files. Whole-file outputs only.
+
+Current file: css/app.css, File 2 of 3
+
+
+Next file to fetch: js/<add-wizard-controller>.js, File 3 of 3
+
+
+
 ------------------------------------------------------------------ */
 
 :root{
@@ -899,25 +907,23 @@ Copyright © 2026 Wendell K. Jiles. All rights reserved. (Pen name: Keyth Jyles)
 
 File: css/app.css
 App Version Authority: js/version.js
-ImplementationId: ADD-UIA-20260121-001
-FileEditId: 3
+ImplementationId: VT-PASS-20260121-ADDWIZ-001
+FileEditId: 4
 Edited: 2026-01-21
 
-Current file: css/app.css, File 4 of 4
+Current file: css/app.css, File 2 of 3
 
 
-Next file to fetch: EOL, EOP, File 0 of 0
+Next file to fetch: js/<add-wizard-controller>.js, File 3 of 3
 
 
 
 Beacon: update FileEditId by incrementing by one each time you generate a new full file.
 
 Current file (pasted/edited in this step): css/app.css
-Acceptance checks (this file)
-- Color constants centralized in :root (BP band RGB + distress RGB)
-- Add panel body is scroll-safe; safe-area padding applied
-- Add actions row supports sticky bottom behavior
-- Official styling exists for vtVitalsRow/vtVitalsField (not JS-only)
 
-Test and regroup for next pass.
+Acceptance checks (this file)
+- Pass stamp applied (ImplementationId updated) and FileEditId incremented
+- No functional CSS changes made outside header/footer replacement
+
 ------------------------------------------------------------------ */
