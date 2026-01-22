@@ -1,31 +1,38 @@
 <!--
 Vitals Tracker — BOF (Implementation Header)
-Copyright © 2026 Keyth Jyles
+Copyright © 2026 Wendell K. Jiles. All rights reserved. (Pen name: Keyth Jyles)
 
-ImplementationId: ADD-20260121-001
+PASS: Add Wizard Regression Fix
+ImplementationId: VT-PASS-20260121-ADDWIZ-001
 App Version Authority: js/version.js
 
-Current file: index.html, File 1 of 7
+File: index.html
+FileEditId: 1
+Edited: 2026-01-21
 
+Prev (this pass): (none — BOF)
+Next (this pass): css/app.css
 
-Next file to fetch: js/panels.js, File 2 of 7
-
-
-
-Role / Ownership
-- App shell + DOM for panel deck (Home / Charts / Log / Settings / Add)
-- Stable element IDs consumed by js/* modules
+Role / Ownership (LOCKED)
+- App shell + DOM for panels + Add entry surface (modal/panel/wizard container)
+- Defines stable element IDs consumed by JS modules
 - Script load order is a drift lock
 
-Status (why this file matters right now)
-- Add panel must always have an escape route (Home/Cancel) and a visible Save.
-- This file defines the header buttons/IDs the Add module must bind to.
+Scope (this pass; index.html)
+- No behavioral logic edits here.
+- Only structure/IDs/layout support needed for the Add wizard regression fix (if explicitly required later).
 
-Notes
-- Do not implement Add logic here; only provide IDs/structure.
-- Next work is in js/panels.js to guarantee Add panel navigation/escape behavior.
--->
+Beacon (sticky)
+- Beacon: update FileEditId by incrementing by one each time you generate a new full file.
 
+Current file: index.html, File 1 of 3
+
+
+Next file to fetch: css/app.css, File 2 of 3
+
+
+
+------------------------------------------------------------ -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -257,27 +264,29 @@ Notes
   </script>
 </body>
 </html>
-
 <!--
 Vitals Tracker — EOF (Implementation Footer)
-Copyright © 2026 Keyth Jyles
+Copyright © 2026 Wendell K. Jiles. All rights reserved. (Pen name: Keyth Jyles)
 
-ImplementationId: ADD-20260121-001
+PASS: Add Wizard Regression Fix
+ImplementationId: VT-PASS-20260121-ADDWIZ-001
 App Version Authority: js/version.js
 
-Current file: index.html, File 1 of 7
+File: index.html
+FileEditId: 1
+Edited: 2026-01-21
+
+Current file: index.html, File 1 of 3
 
 
-Next file to fetch: js/panels.js, File 2 of 7
+Next file to fetch: css/app.css, File 2 of 3
 
 
+
+Acceptance checks (index.html)
+- No functional code changes introduced in this step.
+- Existing IDs and script load order preserved.
 
 Implementation Fetch Aid (ONE-TIME ONLY; NOT A MASTER ORDER)
-- Exists only to guide the human operator during ADD-20260121-001.
-- Ignore after this run completes.
-
-Acceptance checks (this file)
-- panelAdd contains visible Home button id="btnHomeFromAdd"
-- Save button exists id="btnSaveReading"
-- Script load order unchanged
--->
+- Only a human paste directive for VT-PASS-20260121-ADDWIZ-001.
+------------------------------------------------------------ -->p
