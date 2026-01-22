@@ -4,28 +4,21 @@ Copyright © 2026 Wendell K. Jiles. All rights reserved. (Pen name: Keyth Jyles)
 
 File: css/app.css
 App Version Authority: js/version.js
-ImplementationId: ADD-20260121-001
-FileEditId: 2
+ImplementationId: ADD-UIA-20260121-001
+FileEditId: 3
 Edited: 2026-01-21
 
-Prev (this run): index.html
-Next (this run): js/panels.js
+Current file: css/app.css, File 4 of 4
 
-Role / Ownership
-- Global UI styling for modular shell (panels, headers, buttons, charts/log/settings/add)
-- Purely presentational (no behavioral assumptions)
 
-Beacon (sticky)
-- Beacon: update FileEditId by incrementing by one each time you generate a new full file.
+Next file to fetch: EOL, EOP, File 0 of 0
+
+
+
+Beacon: update FileEditId by incrementing by one each time you generate a new full file.
+
+Beacon Sticky Notes (persist until user changes)
 - Do not guess other files. Only edit pasted files. Whole-file outputs only.
-
-Current file: css/app.css, File 2 of 7
-
-
-Next file to fetch: js/panels.js, File 3 of 7
-
-
-
 ------------------------------------------------------------------ */
 
 :root{
@@ -55,6 +48,30 @@ Next file to fetch: js/panels.js, File 3 of 7
   --shadowInset:inset 0 0 0 1px var(--stroke);
 
   --touchTarget:48px;
+
+  /* ============================================================================================
+     Single-source theme constants (change colors HERE)
+     NOTE: These are RGB triplets so both CSS and JS can derive rgba(...) consistently if needed.
+  ============================================================================================ */
+
+  /* BP Bands (Systolic) — ledger order: Normal, Elevated, Stage1, Stage2, Crisis */
+  --bpBandNormal:   45, 115, 205;   /* blue */
+  --bpBandElevated: 125, 80, 180;   /* purple */
+  --bpBandStage1:   245, 200, 55;   /* yellow */
+  --bpBandStage2:   210, 70, 80;    /* red */
+  --bpBandCrisis:   135, 25, 35;    /* dark red */
+
+  /* Distress palette (0–5) — used for “snap” / badge coloring if/when applied */
+  --distress0:  80, 140, 220;  /* calm/blue */
+  --distress1:  110, 170, 235; /* mild */
+  --distress2:  245, 200, 55;  /* moderate/yellow */
+  --distress3:  235, 145, 55;  /* high/orange */
+  --distress4:  210, 70, 80;   /* severe/red */
+  --distress5:  135, 25, 35;   /* crisis/dark red */
+
+  /* Safe-area helpers */
+  --safeB: env(safe-area-inset-bottom, 0px);
+  --safeT: env(safe-area-inset-top, 0px);
 }
 
 *,
@@ -466,8 +483,10 @@ canvas{ display:block; }
   flex:1;
   min-height:0;
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:center;
+  overflow:hidden;
+  padding-bottom: calc(8px + var(--safeB));
 }
 
 .addCard{
@@ -479,6 +498,8 @@ canvas{ display:block; }
   display:flex;
   flex-direction:column;
   gap:12px;
+  min-height:0;
+  overflow:hidden;
 }
 
 .addCard input,
@@ -501,12 +522,16 @@ canvas{ display:block; }
   color:rgba(235,245,255,.38);
 }
 
-.addForm{ display:block; }
+.addForm{ display:block; min-height:0; overflow:hidden; }
 
 .addGrid{
   display:flex;
   flex-direction:column;
   gap:10px;
+  min-height:0;
+  overflow:auto;
+  padding-right:2px;
+  padding-bottom: calc(12px + var(--safeB));
 }
 
 .addField{
@@ -529,26 +554,85 @@ canvas{ display:block; }
   align-items:end;
 }
 
-.addTopVitals .addLabel{
-  font-size:13px;
-}
-
-.addTopVitals input{
-  padding:10px 10px;
-}
+.addTopVitals .addLabel{ font-size:13px; }
+.addTopVitals input{ padding:10px 10px; }
 
 @media (max-width: 420px){
-  .addTopVitals{
-    grid-template-columns:1fr;
-  }
+  .addTopVitals{ grid-template-columns:1fr; }
 }
 
-/* Add: deterministic action row (Save / Cancel) */
+/* Official styling for vtVitalsRow/vtVitalsField (matches your JS fallback) */
+.vtVitalsRow{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  width:100%;
+  margin-bottom: 10px;
+}
+
+.vtVitalsField{
+  flex:1 1 0;
+  min-width:0;
+}
+
+.vtVitalsField .addLabel{ margin-bottom:8px; }
+
+.vtVitalsField .addInput{
+  width:100%;
+  border-width: 2px !important;
+  border-style: solid !important;
+  border-color: rgba(180,210,255,.55) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(235,245,255,.10),
+    0 0 0 1px rgba(0,0,0,.20);
+}
+
+/* Optional: “4-box” look hook (if you later implement 4 boxes instead of inputs) */
+.vtBoxRow{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr 1fr;
+  gap:10px;
+}
+@media (max-width: 520px){
+  .vtBoxRow{ grid-template-columns:1fr 1fr; }
+}
+.vtBox{
+  border-radius:16px;
+  border:2px solid rgba(180,210,255,.45);
+  background:rgba(10,16,30,.40);
+  box-shadow:var(--shadowInset);
+  padding:10px 10px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-height:72px;
+}
+.vtBoxLabel{
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.14px;
+  color:rgba(235,245,255,.62);
+  line-height:1.05;
+}
+.vtBoxValue{
+  font-size:20px;
+  font-weight:900;
+  letter-spacing:.2px;
+  color:rgba(255,255,255,.90);
+  line-height:1.05;
+}
+
+/* Add: deterministic action row (Save / Cancel) — sticky-ready */
 .addActions{
   display:flex;
   gap:10px;
   align-items:center;
   justify-content:space-between;
+  position:sticky;
+  bottom:0;
+  padding:10px 0 calc(10px + var(--safeB));
+  margin-top:6px;
+  background:linear-gradient(180deg, rgba(0,0,0,0.00), rgba(0,0,0,0.18));
 }
 
 .addActions > button{
@@ -815,23 +899,25 @@ Copyright © 2026 Wendell K. Jiles. All rights reserved. (Pen name: Keyth Jyles)
 
 File: css/app.css
 App Version Authority: js/version.js
-ImplementationId: ADD-20260121-001
-FileEditId: 2
+ImplementationId: ADD-UIA-20260121-001
+FileEditId: 3
 Edited: 2026-01-21
 
-Current file: css/app.css, File 2 of 7
+Current file: css/app.css, File 4 of 4
 
 
-Next file to fetch: js/panels.js, File 3 of 7
+Next file to fetch: EOL, EOP, File 0 of 0
 
 
 
+Beacon: update FileEditId by incrementing by one each time you generate a new full file.
+
+Current file (pasted/edited in this step): css/app.css
 Acceptance checks (this file)
-- Add supports “3 fields across the top” styling via .addTopVitals
-- Add actions row supports clear primary actions via .addActions
-- Med chips appear event-like (not settings) via updated .tagChip styling
-- Popup overlay remains readable/tappable (vtModal/vtPickItem)
+- Color constants centralized in :root (BP band RGB + distress RGB)
+- Add panel body is scroll-safe; safe-area padding applied
+- Add actions row supports sticky bottom behavior
+- Official styling exists for vtVitalsRow/vtVitalsField (not JS-only)
 
-Implementation Fetch Aid (ONE-TIME ONLY; NOT AUTHORITATIVE)
-- This is only a human paste directive for ADD-20260121-001, not a master schema/order.
+Test and regroup for next pass.
 ------------------------------------------------------------------ */
