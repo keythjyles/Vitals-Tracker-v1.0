@@ -1,12 +1,12 @@
 /* 
-Vitals Tracker — BOF (Add Pass Header)
+Vitals Tracker — BOF (Wizard Add Pass Header)
 Copyright © 2026 Wendell K. Jiles. All rights reserved.
 (Pen name: Keyth Jyles)
 
 File: js/add.js
 App Version Authority: js/version.js
-ImplementationId: ADD-20260121-005
-FileEditId: 6
+ImplementationId: WIZ-20260121-001
+FileEditId: 8
 Edited: 2026-01-21
 
 Current file: js/add.js, File 1 of 1
@@ -22,35 +22,49 @@ Beacon Sticky Notes (persist until user changes)
 - Every file edit is its own Pass with a unique ImplementationId.
 - Each Pass includes an explicit file list; even one file is “1 of 1.”
 - Replace prior non-sticky header/footer content each Pass; keep only explicitly-sticky Beacon rules.
+
 ------------------------------------------------------------
 
 Scope (this Pass)
-- Fix Symptoms Select button: popup must open reliably (robust binding + pointer-events fixes).
-- Fix Distress slider: must work immediately (default Final=0, slider enabled).
-- Fix top-row clipping: enforce box-sizing and overflow constraints.
-- Mood: single-select checkbox-style (one choice max), default none; all 5 options forced into one row.
-- No log work. No chart work.
+- Implement Wizard-style Add flow (reduce overwhelm):
+  Step 1: Vitals (BP/HR) -> Save/Next
+  Step 2: Symptoms (clinical categories, multi-select) -> auto-weight distress + adjustable slider -> Save/Next
+  Step 3: Mood (5 choices, single-select toggle) -> Save/Next
+  Step 4: Medications + Notes -> Save/Finish
+  Finish: Show summary “pill card” + Close returns to parent of Add panel.
+- Save on every step so partial data persists if user aborts mid-process.
+- No Log work. No Chart work.
+
 ------------------------------------------------------------ 
 */
 
 (function () {
   "use strict";
 
-  const btnSave = document.getElementById("btnSaveReading");
-  const btnHome = document.getElementById("btnHomeFromAdd");
+  const btnSaveLegacy = document.getElementById("btnSaveReading");   // may exist in older UI
+  const btnHomeLegacy = document.getElementById("btnHomeFromAdd");   // may exist in older UI
   const bodyEl  = document.getElementById("addBody");
   const cardEl  = document.getElementById("addCard");
 
   let saving = false;
 
+  // Edit mode (opened from Log)
   const EDIT = { active:false, key:null, original:null };
 
+  // Wizard state
+  const WIZ = {
+    step: 1,                 // 1..5 (5 = summary)
+    createdTs: null,         // ts for new record
+    key: null,               // {id?, ts?} used for updates
+    lastSaved: null          // normalized record snapshot
+  };
+
   const UI = {
-    symptoms: [],
-    distressComputed: null,   // 0..100 (computed)
-    distressFinal: 0,         // 0..100 (user) — default 0 so slider works
-    meds: [],                 // [{name, atTs}]
-    mood: null                // one of MOODS.k (default none)
+    symptoms: [],            // array of symptom keys
+    distressComputed: null,  // 0..100 computed from symptoms
+    distressFinal: 0,        // 0..100 user override (default 0)
+    meds: [],                // [{name, atTs}]
+    mood: null               // one of MOODS.k (default none)
   };
 
   // ---------- utilities ----------
@@ -148,48 +162,31 @@ Scope (this Pass)
     return out;
   }
 
-  function defaultRecord(){
-    const computed = (UI.distressComputed==null) ? null : Math.round(clamp(UI.distressComputed,0,100));
-    const final    = (UI.distressFinal==null) ? null : Math.round(clamp(UI.distressFinal,0,100));
-    const delta    = (computed==null || final==null) ? null : (final - computed);
-
-    return {
-      ts: nowTs(),
-      sys:null, dia:null, hr:null,
-      notes:"",
-      symptoms: (UI.symptoms||[]).slice(),
-      distressComputed: computed,
-      distressFinal: final,
-      distressDelta: delta,
-      mood: UI.mood || null,
-      meds: (UI.meds||[]).slice()
-    };
+  function readNumber(id){
+    const v = document.getElementById(id)?.value?.trim();
+    if(!v) return null;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
   }
 
-  function normalizeRecord(r){
-    const ts = (r && typeof r.ts==="number") ? r.ts : null;
+  function readText(id){
+    return String(document.getElementById(id)?.value||"").trim();
+  }
 
-    const sys = (r && typeof r.sys==="number") ? r.sys :
-                (r && typeof r.systolic==="number") ? r.systolic : null;
+  function writeVal(id, v){
+    const el=document.getElementById(id);
+    if(!el) return;
+    try{ el.value = (v==null) ? "" : String(v); }catch(_){}
+  }
 
-    const dia = (r && typeof r.dia==="number") ? r.dia :
-                (r && typeof r.diastolic==="number") ? r.diastolic : null;
+  function formatBP(sys,dia){
+    if(sys==null && dia==null) return "—";
+    if(sys==null || dia==null) return "—";
+    return `${Math.round(sys)}/${Math.round(dia)}`;
+  }
 
-    const hr  = (r && typeof r.hr==="number") ? r.hr :
-                (r && typeof r.heartRate==="number") ? r.heartRate : null;
-
-    const notes = String((r && (r.notes ?? r.note ?? r.comment ?? r.memo)) ?? "");
-
-    const symptoms = Array.isArray(r && r.symptoms) ? uniqLower(r.symptoms) : [];
-
-    const dc = (r && Number.isFinite(Number(r.distressComputed))) ? clamp(Number(r.distressComputed),0,100) : null;
-    const df = (r && Number.isFinite(Number(r.distressFinal))) ? clamp(Number(r.distressFinal),0,100) : null;
-
-    const meds = Array.isArray(r && r.meds) ? normalizeMeds(r.meds) : [];
-
-    const mood = (r && typeof r.mood==="string") ? normStr(r.mood) : null;
-
-    return { ts, sys, dia, hr, notes, symptoms, distressComputed: dc, distressFinal: df, meds, mood };
+  function fmtHr(hr){
+    return (hr==null) ? "—" : String(Math.round(hr));
   }
 
   // ---------- symptoms catalog + scoring ----------
@@ -282,34 +279,134 @@ Scope (this Pass)
     return hit ? hit.label : "";
   }
 
-  // ---------- DOM read/write ----------
-  function readNumber(id){
-    const v = document.getElementById(id)?.value?.trim();
-    if(!v) return null;
-    const n = Number(v);
-    return Number.isFinite(n) ? n : null;
+  // ---------- record normalize/build ----------
+  function normalizeRecord(r){
+    const ts = (r && typeof r.ts==="number") ? r.ts : null;
+
+    const sys = (r && typeof r.sys==="number") ? r.sys :
+                (r && typeof r.systolic==="number") ? r.systolic : null;
+
+    const dia = (r && typeof r.dia==="number") ? r.dia :
+                (r && typeof r.diastolic==="number") ? r.diastolic : null;
+
+    const hr  = (r && typeof r.hr==="number") ? r.hr :
+                (r && typeof r.heartRate==="number") ? r.heartRate : null;
+
+    const notes = String((r && (r.notes ?? r.note ?? r.comment ?? r.memo)) ?? "");
+    const symptoms = Array.isArray(r && r.symptoms) ? uniqLower(r.symptoms) : [];
+
+    const dc = (r && Number.isFinite(Number(r.distressComputed))) ? clamp(Number(r.distressComputed),0,100) : null;
+    const df = (r && Number.isFinite(Number(r.distressFinal))) ? clamp(Number(r.distressFinal),0,100) : null;
+
+    const meds = Array.isArray(r && r.meds) ? normalizeMeds(r.meds) : [];
+    const mood = (r && typeof r.mood==="string") ? normStr(r.mood) : null;
+
+    return { ts, sys, dia, hr, notes, symptoms, distressComputed: dc, distressFinal: df, meds, mood };
   }
 
-  function readText(id){
-    return String(document.getElementById(id)?.value||"").trim();
+  function buildRecordFromUI(){
+    const sys = readNumber("inSys");
+    const dia = readNumber("inDia");
+    const hr  = readNumber("inHr");
+    const notes = readText("inNotes");
+
+    const computed = (UI.distressComputed==null) ? null : Math.round(clamp(UI.distressComputed,0,100));
+    const final    = (UI.distressFinal==null) ? null : Math.round(clamp(UI.distressFinal,0,100));
+    const delta    = (computed==null || final==null) ? null : (final - computed);
+
+    const ts = (EDIT.active && EDIT.original && typeof EDIT.original.ts==="number") ? EDIT.original.ts :
+               (WIZ.createdTs!=null) ? WIZ.createdTs :
+               nowTs();
+
+    return {
+      ts,
+      sys: (sys==null ? null : Number(sys)),
+      dia: (dia==null ? null : Number(dia)),
+      hr:  (hr==null  ? null : Number(hr)),
+      notes: notes || "",
+      symptoms: (UI.symptoms||[]).slice(),
+      distressComputed: computed,
+      distressFinal: final,
+      distressDelta: delta,
+      mood: UI.mood || null,
+      meds: (UI.meds||[]).slice()
+    };
   }
 
-  function writeVal(id, v){
-    const el=document.getElementById(id);
-    if(!el) return;
-    try{ el.value = (v==null) ? "" : String(v); }catch(_){}
+  function validateVitalsStep(rec){
+    const hasSys = rec.sys!=null;
+    const hasDia = rec.dia!=null;
+    if((hasSys && !hasDia) || (!hasSys && hasDia)){
+      safeAlert("If entering BP, please enter BOTH systolic and diastolic.");
+      return false;
+    }
+    // HR is optional.
+    return true;
+  }
+
+  // ---------- settings meds ----------
+  function getMedList(){
+    try{
+      if(window.VTSettings && typeof window.VTSettings.getMedNames==="function"){
+        return window.VTSettings.getMedNames() || [];
+      }
+    }catch(_){}
+    return [];
+  }
+
+  function addMedToSettings(name){
+    try{
+      if(window.VTSettings && typeof window.VTSettings.addMedName==="function"){
+        window.VTSettings.addMedName(name);
+      }
+    }catch(_){}
+  }
+
+  function refreshMedDatalist(){
+    const dl=document.getElementById("dlMedNames");
+    if(!dl) return;
+    const meds=getMedList();
+    dl.innerHTML="";
+    meds.forEach(m=>{
+      const opt=document.createElement("option");
+      opt.value=m;
+      dl.appendChild(opt);
+    });
   }
 
   // ---------- styles + injection ----------
-  function ensureAddPassStyles(){
-    if(document.getElementById("vtAddPassStyles")) return;
+  function ensureWizardStyles(){
+    if(document.getElementById("vtAddWizardStyles")) return;
     const st=document.createElement("style");
-    st.id="vtAddPassStyles";
+    st.id="vtAddWizardStyles";
     st.textContent=`
-      /* global box sizing for injected UI to stop clipping */
-      #vtAddForm, #vtAddForm * { box-sizing:border-box; }
+      #vtAddWizard, #vtAddWizard * { box-sizing:border-box; }
 
-      /* Top 4-box row (SYS/DIA/HR/Distress) */
+      .vtWizHeader{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:10px;
+        margin-bottom:10px;
+      }
+      .vtWizTitle{
+        font-weight:950;
+        letter-spacing:.14px;
+        color:rgba(255,255,255,.92);
+      }
+      .vtWizStep{
+        font-size:12px;
+        color:rgba(235,245,255,.58);
+        white-space:nowrap;
+      }
+      .vtWizClose{
+        flex:0 0 auto;
+      }
+
+      .vtWizPane{ display:none; }
+      .vtWizPane.show{ display:block; }
+
+      /* Vitals grid */
       .vtTopGrid{
         display:grid;
         grid-template-columns:repeat(4, minmax(0,1fr));
@@ -325,7 +422,7 @@ Scope (this Pass)
         letter-spacing:.3px;
         opacity:.92;
         text-align:center;
-        margin:0 0 4px 0; /* tight to box */
+        margin:0 0 4px 0;
       }
       .vtBoxInput{
         width:100%;
@@ -338,8 +435,6 @@ Scope (this Pass)
           inset 0 0 0 1px rgba(235,245,255,.10),
           0 0 0 1px rgba(0,0,0,.20);
       }
-
-      /* Distress box: prominent, transparent/label-like */
       .vtDistressBox{
         width:100%;
         min-height:46px;
@@ -357,7 +452,6 @@ Scope (this Pass)
         overflow:hidden;
       }
 
-      /* Slider under 4th column only */
       .vtTopGridSliderRow{
         display:grid;
         grid-template-columns:repeat(4, minmax(0,1fr));
@@ -366,10 +460,7 @@ Scope (this Pass)
         margin:8px 0 2px;
       }
       .vtTopGridSliderRow .vtSliderHost{grid-column:4 / 5}
-      .vtSlider{
-        width:100%;
-        height:28px;
-      }
+      .vtSlider{ width:100%; height:28px; }
       .vtDistressMeta{
         font-size:12px;
         color:rgba(235,245,255,.58);
@@ -377,7 +468,6 @@ Scope (this Pass)
         margin-top:6px;
       }
 
-      /* Sections */
       .vtSection{margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.10)}
       .vtSectionHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
       .vtSectionTitle{font-weight:950;letter-spacing:.12px;color:rgba(255,255,255,.90)}
@@ -400,7 +490,6 @@ Scope (this Pass)
         box-shadow:inset 0 0 0 1px rgba(235,245,255,.08);
       }
 
-      /* Mood: force 5 options into a single row */
       .vtMoodRow{
         display:grid;
         grid-template-columns:repeat(5, minmax(0,1fr));
@@ -427,7 +516,16 @@ Scope (this Pass)
         background:rgba(80,140,220,.18);
       }
 
-      /* overlay modal */
+      .vtNavRow{
+        margin-top:12px;
+        display:flex;
+        justify-content:space-between;
+        gap:10px;
+      }
+      .vtNavRow .left{ display:flex; gap:10px; }
+      .vtNavRow .right{ display:flex; gap:10px; }
+
+      /* Symptoms modal overlay */
       .vtOverlay{
         position:fixed; inset:0;
         background:rgba(0,0,0,.55);
@@ -436,12 +534,9 @@ Scope (this Pass)
         justify-content:center;
         padding:16px;
         z-index:9999;
-        pointer-events:none; /* critical: prevent hidden overlay from blocking clicks */
+        pointer-events:none;
       }
-      .vtOverlay.show{
-        display:flex;
-        pointer-events:auto; /* allow interaction when visible */
-      }
+      .vtOverlay.show{ display:flex; pointer-events:auto; }
       .vtModal{
         width:min(760px,100%);
         max-height:min(80vh,760px);
@@ -492,95 +587,231 @@ Scope (this Pass)
         flex:0 0 auto;
       }
       .vtChk.on{background:rgba(80,140,220,.25);border-color:rgba(180,210,255,.40)}
+
+      /* Summary card */
+      .vtSummaryCard{
+        border:1px solid rgba(180,210,255,.22);
+        border-radius:18px;
+        background:rgba(0,0,0,.10);
+        box-shadow: inset 0 0 0 1px rgba(235,245,255,.08);
+        padding:12px;
+      }
+      .vtSummaryTop{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:10px;
+        margin-bottom:10px;
+      }
+      .vtSummaryTitle{
+        font-weight:950;
+        letter-spacing:.14px;
+        color:rgba(255,255,255,.92);
+      }
+      .vtSummaryGrid{
+        display:grid;
+        grid-template-columns:repeat(3, minmax(0,1fr));
+        gap:10px;
+        margin-bottom:10px;
+      }
+      .vtSummaryStat{
+        border:1px solid rgba(255,255,255,.10);
+        border-radius:14px;
+        padding:10px;
+        background:rgba(0,0,0,.08);
+      }
+      .vtSummaryK{
+        font-size:12px;
+        color:rgba(235,245,255,.58);
+        margin-bottom:4px;
+      }
+      .vtSummaryV{
+        font-weight:950;
+        font-size:18px;
+        color:rgba(255,255,255,.90);
+        letter-spacing:.2px;
+      }
     `;
     document.head.appendChild(st);
   }
 
-  function ensureFormPresent(){
+  // ---------- UI injection ----------
+  function ensureWizardPresent(){
     if(!cardEl && !bodyEl) return;
-    if(document.getElementById("vtAddForm")) return;
+    if(document.getElementById("vtAddWizard")) return;
 
-    ensureAddPassStyles();
+    ensureWizardStyles();
 
     const host = cardEl || bodyEl;
-
     const wrap=document.createElement("div");
-    wrap.id="vtAddForm";
+    wrap.id="vtAddWizard";
     wrap.className="addForm";
     wrap.innerHTML=`
       <div class="addGrid">
 
-        <!-- Top 4 boxes -->
-        <div class="vtTopGrid" id="vtTopGrid">
-          <div class="vtBoxField">
-            <div class="vtBoxLabel">SYS</div>
-            <input id="inSys" class="addInput vtBoxInput" inputmode="numeric" placeholder="e.g., 132" />
+        <div class="vtWizHeader">
+          <div>
+            <div class="vtWizTitle" id="vtWizTitle">Add Reading</div>
+            <div class="vtWizStep" id="vtWizStep">Step 1 of 4</div>
           </div>
-          <div class="vtBoxField">
-            <div class="vtBoxLabel">DIA</div>
-            <input id="inDia" class="addInput vtBoxInput" inputmode="numeric" placeholder="e.g., 84" />
-          </div>
-          <div class="vtBoxField">
-            <div class="vtBoxLabel">HR</div>
-            <input id="inHr" class="addInput vtBoxInput" inputmode="numeric" placeholder="e.g., 74" />
-          </div>
-          <div class="vtBoxField">
-            <div class="vtBoxLabel">DISTRESS</div>
-            <div class="vtDistressBox" id="distressBox">0</div>
-          </div>
+          <button class="iconBtn vtWizClose" id="btnWizAbort" type="button" aria-label="Close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
         </div>
 
-        <!-- Slider directly under 4th box -->
-        <div class="vtTopGridSliderRow">
-          <div></div><div></div><div></div>
-          <div class="vtSliderHost">
-            <input class="vtSlider" id="distressSlider" type="range" min="0" max="100" step="1" value="0" />
-          </div>
-        </div>
-        <div class="vtDistressMeta" id="distressMeta">Final: 0  Computed: (n/a)</div>
-
-        <div class="vtSection" id="secSymptoms">
-          <div class="vtSectionHead">
-            <div>
-              <div class="vtSectionTitle">Symptoms</div>
-              <div class="vtSectionHint">Tap to select symptoms (popup). Symptoms contribute to computed distress score.</div>
+        <!-- STEP 1: Vitals -->
+        <div class="vtWizPane" id="wizStep1">
+          <div class="vtTopGrid">
+            <div class="vtBoxField">
+              <div class="vtBoxLabel">SYS</div>
+              <input id="inSys" class="addInput vtBoxInput" inputmode="numeric" placeholder="e.g., 132" />
             </div>
-            <button class="pillBtn" id="btnOpenSymptoms" data-action="openSymptoms" type="button">Select</button>
-          </div>
-          <div id="symptomSummary" class="vtSectionHint">No symptoms selected.</div>
-        </div>
-
-        <div class="vtSection" id="secMood">
-          <div class="vtSectionHead">
-            <div>
-              <div class="vtSectionTitle">Mood</div>
-              <div class="vtSectionHint">5-point clinical snapshot for chart overlay.</div>
+            <div class="vtBoxField">
+              <div class="vtBoxLabel">DIA</div>
+              <input id="inDia" class="addInput vtBoxInput" inputmode="numeric" placeholder="e.g., 84" />
             </div>
-            <button class="pillBtn" id="btnClearMood" type="button">Clear</button>
-          </div>
-          <div class="vtMoodRow" id="moodRow"></div>
-          <div class="vtSectionHint" id="moodSummary">No mood selected.</div>
-        </div>
-
-        <div class="vtSection" id="secMeds">
-          <div class="vtSectionHead">
-            <div>
-              <div class="vtSectionTitle">Medications</div>
-              <div class="vtSectionHint">Add medication event markers. Dosage stays in Notes.</div>
+            <div class="vtBoxField">
+              <div class="vtBoxLabel">HR</div>
+              <input id="inHr" class="addInput vtBoxInput" inputmode="numeric" placeholder="e.g., 74" />
+            </div>
+            <div class="vtBoxField">
+              <div class="vtBoxLabel">DISTRESS</div>
+              <div class="vtDistressBox" id="distressBox">0</div>
             </div>
           </div>
-          <div class="vtRow">
-            <input id="inMedName" class="addInput" placeholder="Medication name" list="dlMedNames" />
-            <datalist id="dlMedNames"></datalist>
-            <button class="medsAddBtn" id="btnAddMedToRecord" type="button">Add</button>
+
+          <div class="vtSectionHint">Enter BP and/or HR. Press Save to lock this step, even if you stop later.</div>
+
+          <div class="vtNavRow">
+            <div class="left"></div>
+            <div class="right">
+              <button class="pillBtn" id="btnStep1Save" type="button">Save & Next</button>
+            </div>
           </div>
-          <div class="vtTagList" id="medsTagList" aria-label="Medication markers"></div>
         </div>
 
-        <label class="addField addNotes">
-          <div class="addLabel">Notes</div>
-          <textarea id="inNotes" class="addTextArea" placeholder="Context, symptoms, meds, events..."></textarea>
-        </label>
+        <!-- STEP 2: Symptoms + Distress -->
+        <div class="vtWizPane" id="wizStep2">
+          <div class="vtSection" id="secSymptoms">
+            <div class="vtSectionHead">
+              <div>
+                <div class="vtSectionTitle">Symptoms</div>
+                <div class="vtSectionHint">Select symptoms by clinical category. Multiple selections allowed.</div>
+              </div>
+              <button class="pillBtn" id="btnOpenSymptoms" data-action="openSymptoms" type="button">Select</button>
+            </div>
+            <div id="symptomSummary" class="vtSectionHint">No symptoms selected.</div>
+          </div>
+
+          <div class="vtTopGridSliderRow">
+            <div></div><div></div><div></div>
+            <div class="vtSliderHost">
+              <input class="vtSlider" id="distressSlider" type="range" min="0" max="100" step="1" value="0" />
+            </div>
+          </div>
+          <div class="vtDistressMeta" id="distressMeta">Final: 0  Computed: (n/a)</div>
+
+          <div class="vtNavRow">
+            <div class="left">
+              <button class="pillBtn" id="btnStep2Back" type="button">Back</button>
+            </div>
+            <div class="right">
+              <button class="pillBtn" id="btnStep2Save" type="button">Save & Next</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 3: Mood -->
+        <div class="vtWizPane" id="wizStep3">
+          <div class="vtSection" id="secMood">
+            <div class="vtSectionHead">
+              <div>
+                <div class="vtSectionTitle">Mood</div>
+                <div class="vtSectionHint">Pick one (tap again to clear).</div>
+              </div>
+              <button class="pillBtn" id="btnClearMood" type="button">Clear</button>
+            </div>
+            <div class="vtMoodRow" id="moodRow"></div>
+            <div class="vtSectionHint" id="moodSummary">No mood selected.</div>
+          </div>
+
+          <div class="vtNavRow">
+            <div class="left">
+              <button class="pillBtn" id="btnStep3Back" type="button">Back</button>
+            </div>
+            <div class="right">
+              <button class="pillBtn" id="btnStep3Save" type="button">Save & Next</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 4: Medications + Notes -->
+        <div class="vtWizPane" id="wizStep4">
+          <div class="vtSection" id="secMeds">
+            <div class="vtSectionHead">
+              <div>
+                <div class="vtSectionTitle">Medications</div>
+                <div class="vtSectionHint">Tap a prior med or add a new one (event marker).</div>
+              </div>
+            </div>
+
+            <div class="vtRow" id="priorMedsRow"></div>
+
+            <div class="vtRow" style="margin-top:10px">
+              <input id="inMedName" class="addInput" placeholder="Medication name" list="dlMedNames" />
+              <datalist id="dlMedNames"></datalist>
+              <button class="medsAddBtn" id="btnAddMedToRecord" type="button">Add</button>
+            </div>
+
+            <div class="vtTagList" id="medsTagList" aria-label="Medication markers"></div>
+          </div>
+
+          <label class="addField addNotes" style="margin-top:10px">
+            <div class="addLabel">Notes</div>
+            <textarea id="inNotes" class="addTextArea" placeholder="Context, symptoms, meds, events..."></textarea>
+          </label>
+
+          <div class="vtNavRow">
+            <div class="left">
+              <button class="pillBtn" id="btnStep4Back" type="button">Back</button>
+            </div>
+            <div class="right">
+              <button class="pillBtn" id="btnStep4Save" type="button">Save & Finish</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 5: Summary -->
+        <div class="vtWizPane" id="wizStep5">
+          <div class="vtSummaryCard">
+            <div class="vtSummaryTop">
+              <div class="vtSummaryTitle">Saved</div>
+              <button class="pillBtn" id="btnSummaryClose" type="button">Close</button>
+            </div>
+
+            <div class="vtSummaryGrid">
+              <div class="vtSummaryStat">
+                <div class="vtSummaryK">BP</div>
+                <div class="vtSummaryV" id="sumBP">—</div>
+              </div>
+              <div class="vtSummaryStat">
+                <div class="vtSummaryK">HR</div>
+                <div class="vtSummaryV" id="sumHR">—</div>
+              </div>
+              <div class="vtSummaryStat">
+                <div class="vtSummaryK">Distress</div>
+                <div class="vtSummaryV" id="sumDistress">0</div>
+              </div>
+            </div>
+
+            <div class="vtSectionHint" id="sumMood">Mood: —</div>
+            <div class="vtSectionHint" id="sumSymptoms">Symptoms: —</div>
+            <div class="vtSectionHint" id="sumMeds">Meds: —</div>
+            <div class="vtSectionHint" id="sumNotes">Notes: —</div>
+          </div>
+        </div>
 
       </div>
 
@@ -620,142 +851,32 @@ Scope (this Pass)
       host.appendChild(wrap);
     }
 
-    bindSymptomsUI();
-    bindDistressUI();
-    bindMoodUI();
-    bindMedsUI();
-    refreshMedDatalist();
-
-    renderMoodRow();
-    renderMoodSummary();
-    renderSymptomSummary();
-    renderMedsTags();
-    syncDistressUI();
+    // If legacy buttons exist, disable them visually (wizard owns flow)
+    try{ if(btnSaveLegacy) btnSaveLegacy.style.display="none"; }catch(_){}
+    try{ if(btnHomeLegacy) btnHomeLegacy.style.display="none"; }catch(_){}
   }
 
-  // ---------- meds helpers ----------
-  function getMedList(){
-    try{
-      if(window.VTSettings && typeof window.VTSettings.getMedNames==="function"){
-        return window.VTSettings.getMedNames() || [];
-      }
-    }catch(_){}
-    return [];
-  }
-
-  function addMedToSettings(name){
-    try{
-      if(window.VTSettings && typeof window.VTSettings.addMedName==="function"){
-        window.VTSettings.addMedName(name);
-      }
-    }catch(_){}
-  }
-
-  function refreshMedDatalist(){
-    const dl=document.getElementById("dlMedNames");
-    if(!dl) return;
-    const meds=getMedList();
-    dl.innerHTML="";
-    meds.forEach(m=>{
-      const opt=document.createElement("option");
-      opt.value=m;
-      dl.appendChild(opt);
-    });
-  }
-
-  function bindMedsUI(){
-    const btnAdd=document.getElementById("btnAddMedToRecord");
-    const inMed=document.getElementById("inMedName");
-
-    bindOnce(btnAdd,"addMedToRecord",function(){
-      const name=normStr(inMed && inMed.value);
-      if(!name) return;
-
-      const key=name.toLowerCase();
-      const exists=(UI.meds||[]).some(m=>String(m.name).toLowerCase()===key);
-      if(!exists){
-        UI.meds.push({name, atTs: nowTs()});
-        UI.meds = normalizeMeds(UI.meds);
-        renderMedsTags();
-      }
-
-      addMedToSettings(name);
-      refreshMedDatalist();
-      if(inMed) inMed.value="";
-    });
-
-    if(inMed){
-      inMed.addEventListener("keydown",function(e){
-        if(e && e.key==="Enter"){
-          try{ e.preventDefault(); }catch(_){}
-          try{ btnAdd && btnAdd.click(); }catch(_){}
-        }
-      });
-    }
-
-    document.addEventListener("vt:settingsChanged",function(){
-      refreshMedDatalist();
-    });
-  }
-
-  function renderMedsTags(){
-    const host=document.getElementById("medsTagList");
-    if(!host) return;
-    host.innerHTML="";
-
-    const meds=UI.meds||[];
-    if(!meds.length){
-      const muted=document.createElement("div");
-      muted.className="vtSectionHint";
-      muted.textContent="No medication markers added.";
-      host.appendChild(muted);
-      return;
-    }
-
-    meds.forEach(m=>{
-      const chip=document.createElement("div");
-      chip.className="vtTag";
-      chip.textContent=m.name;
-
-      const x=document.createElement("button");
-      x.type="button";
-      x.setAttribute("aria-label","Remove");
-      x.innerHTML="×";
-      x.addEventListener("click",function(){
-        const k=String(m.name).toLowerCase();
-        UI.meds = (UI.meds||[]).filter(z=>String(z.name).toLowerCase()!==k);
-        renderMedsTags();
-      });
-
-      chip.appendChild(x);
-      host.appendChild(chip);
-    });
-  }
-
-  // ---------- symptoms popup ----------
+  // ---------- symptoms modal ----------
   let symptomTemp = null;
   let distressTouched = false;
 
   function bindSymptomsUI(){
-    // direct binds (if present)
     bindOnce(document.getElementById("btnOpenSymptoms"),"openSymptoms",function(e){ try{ e.preventDefault(); }catch(_){} openSymptoms(); });
     bindOnce(document.getElementById("btnCloseSymptoms"),"closeSymptoms",function(e){ try{ e.preventDefault(); }catch(_){} closeSymptoms(true); });
     bindOnce(document.getElementById("btnSymptomsCancel"),"cancelSymptoms",function(e){ try{ e.preventDefault(); }catch(_){} closeSymptoms(true); });
     bindOnce(document.getElementById("btnSymptomsApply"),"applySymptoms",function(e){ try{ e.preventDefault(); }catch(_){} applySymptoms(); });
     bindOnce(document.getElementById("btnSymptomsClear"),"clearSymptoms",function(e){ try{ e.preventDefault(); }catch(_){} clearSymptomsTemp(); });
 
-    // robust fallback: event delegation (covers cases where DOM is re-rendered)
+    // Robust delegation for opening (in case DOM is re-rendered elsewhere)
     if(!document.documentElement.dataset.vtSymptomDelegation){
       document.documentElement.dataset.vtSymptomDelegation = "1";
       document.addEventListener("click", function(ev){
         const t = ev && ev.target ? ev.target : null;
         if(!t) return;
-
         const btn = t.closest ? t.closest('[data-action="openSymptoms"], #btnOpenSymptoms') : null;
         if(btn){
           try{ ev.preventDefault(); }catch(_){}
           openSymptoms();
-          return;
         }
       }, true);
     }
@@ -767,8 +888,8 @@ Scope (this Pass)
     if(!overlay || !body) return;
 
     symptomTemp = new Set((UI.symptoms||[]).map(k=>String(k)));
-
     body.innerHTML="";
+
     for(const sec of SYMPTOMS){
       const card=document.createElement("div");
       card.className="vtSecCard";
@@ -834,9 +955,16 @@ Scope (this Pass)
   }
 
   function clearSymptomsTemp(){
-    if(!symptomTemp) symptomTemp = new Set();
-    symptomTemp.clear();
-    openSymptoms();
+    symptomTemp = new Set();
+    const body=document.getElementById("symptomBody");
+    if(!body) return;
+    const buttons = body.querySelectorAll(".vtChk");
+    for(const b of buttons){
+      try{
+        b.classList.remove("on");
+        b.setAttribute("aria-pressed","false");
+      }catch(_){}
+    }
   }
 
   function applySymptoms(){
@@ -844,6 +972,7 @@ Scope (this Pass)
       closeSymptoms(true);
       return;
     }
+
     UI.symptoms = Array.from(symptomTemp);
     UI.symptoms.sort((a,b)=>String(a).localeCompare(String(b)));
     symptomTemp = null;
@@ -851,7 +980,7 @@ Scope (this Pass)
     const computed = computeDistressFromSymptoms(UI.symptoms);
     UI.distressComputed = computed;
 
-    // If user has not manually adjusted the slider, follow computed.
+    // If user has not manually adjusted slider, follow computed
     if(!distressTouched){
       UI.distressFinal = computed;
     }
@@ -898,7 +1027,6 @@ Scope (this Pass)
 
     if(slider){
       slider.disabled = false;
-      slider.style.opacity = "";
       slider.value = String(final);
     }
 
@@ -908,7 +1036,7 @@ Scope (this Pass)
     }
   }
 
-  // ---------- Mood UI ----------
+  // ---------- mood UI ----------
   function bindMoodUI(){
     bindOnce(document.getElementById("btnClearMood"),"clearMood",function(e){
       try{ e.preventDefault(); }catch(_){}
@@ -932,8 +1060,7 @@ Scope (this Pass)
       b.setAttribute("aria-pressed", UI.mood===m.k ? "true":"false");
       b.addEventListener("click",function(e){
         try{ e.preventDefault(); }catch(_){}
-        // single-select checkbox behavior: clicking selected clears; otherwise selects only this.
-        UI.mood = (UI.mood===m.k) ? null : m.k;
+        UI.mood = (UI.mood===m.k) ? null : m.k; // single-select toggle
         renderMoodRow();
         renderMoodSummary();
       });
@@ -947,29 +1074,314 @@ Scope (this Pass)
     el.textContent = UI.mood ? `Mood: ${moodLabel(UI.mood)}` : "No mood selected.";
   }
 
-  // ---------- navigation / edit ----------
-  function setSaveEnabled(on){
-    if(!btnSave) return;
+  // ---------- meds UI ----------
+  function bindMedsUI(){
+    const btnAdd=document.getElementById("btnAddMedToRecord");
+    const inMed=document.getElementById("inMedName");
+
+    bindOnce(btnAdd,"addMedToRecord",function(){
+      const name=normStr(inMed && inMed.value);
+      if(!name) return;
+
+      const key=name.toLowerCase();
+      const exists=(UI.meds||[]).some(m=>String(m.name).toLowerCase()===key);
+      if(!exists){
+        UI.meds.push({name, atTs: nowTs()});
+        UI.meds = normalizeMeds(UI.meds);
+        renderMedsTags();
+      }
+
+      addMedToSettings(name);
+      refreshMedDatalist();
+      renderPriorMedsRow(); // keep prior list current
+      if(inMed) inMed.value="";
+    });
+
+    if(inMed){
+      inMed.addEventListener("keydown",function(e){
+        if(e && e.key==="Enter"){
+          try{ e.preventDefault(); }catch(_){}
+          try{ btnAdd && btnAdd.click(); }catch(_){}
+        }
+      });
+    }
+
+    document.addEventListener("vt:settingsChanged",function(){
+      refreshMedDatalist();
+      renderPriorMedsRow();
+    });
+  }
+
+  function renderMedsTags(){
+    const host=document.getElementById("medsTagList");
+    if(!host) return;
+    host.innerHTML="";
+
+    const meds=UI.meds||[];
+    if(!meds.length){
+      const muted=document.createElement("div");
+      muted.className="vtSectionHint";
+      muted.textContent="No medication markers added.";
+      host.appendChild(muted);
+      return;
+    }
+
+    meds.forEach(m=>{
+      const chip=document.createElement("div");
+      chip.className="vtTag";
+      chip.textContent=m.name;
+
+      const x=document.createElement("button");
+      x.type="button";
+      x.setAttribute("aria-label","Remove");
+      x.innerHTML="×";
+      x.addEventListener("click",function(){
+        const k=String(m.name).toLowerCase();
+        UI.meds = (UI.meds||[]).filter(z=>String(z.name).toLowerCase()!==k);
+        renderMedsTags();
+      });
+
+      chip.appendChild(x);
+      host.appendChild(chip);
+    });
+  }
+
+  function renderPriorMedsRow(){
+    const host=document.getElementById("priorMedsRow");
+    if(!host) return;
+    host.innerHTML="";
+
+    const list=getMedList();
+    if(!list.length){
+      const hint=document.createElement("div");
+      hint.className="vtSectionHint";
+      hint.textContent="No prior medications saved yet.";
+      host.appendChild(hint);
+      return;
+    }
+
+    // Show up to 10 pills (tap to add marker)
+    const shown = list.slice(0,10);
+    shown.forEach(name=>{
+      const b=document.createElement("button");
+      b.type="button";
+      b.className="pillBtn";
+      b.textContent=name;
+      b.addEventListener("click",function(e){
+        try{ e.preventDefault(); }catch(_){}
+        const key=String(name).toLowerCase();
+        const exists=(UI.meds||[]).some(m=>String(m.name).toLowerCase()===key);
+        if(!exists){
+          UI.meds.push({name, atTs: nowTs()});
+          UI.meds = normalizeMeds(UI.meds);
+          renderMedsTags();
+        }
+      });
+      host.appendChild(b);
+    });
+  }
+
+  // ---------- wizard navigation ----------
+  function showStep(step){
+    WIZ.step = clamp(step, 1, 5);
+
+    const panes = [
+      document.getElementById("wizStep1"),
+      document.getElementById("wizStep2"),
+      document.getElementById("wizStep3"),
+      document.getElementById("wizStep4"),
+      document.getElementById("wizStep5")
+    ];
+
+    panes.forEach((p,i)=>{
+      if(!p) return;
+      const s = i+1;
+      if(s===WIZ.step) p.classList.add("show");
+      else p.classList.remove("show");
+    });
+
+    const stepLbl=document.getElementById("vtWizStep");
+    const title=document.getElementById("vtWizTitle");
+    if(stepLbl){
+      if(WIZ.step<=4) stepLbl.textContent = `Step ${WIZ.step} of 4`;
+      else stepLbl.textContent = `Done`;
+    }
+    if(title){
+      title.textContent = EDIT.active ? "Edit Reading" : "Add Reading";
+    }
+  }
+
+  function goHome(){
+    closeOverlays();
+
     try{
-      btnSave.disabled=!on;
-      btnSave.style.opacity = on ? "" : "0.65";
+      if(window.VTPanels){
+        if(typeof window.VTPanels.closeAdd==="function"){
+          window.VTPanels.closeAdd(true);
+          return;
+        }
+        if(typeof window.VTPanels.go==="function"){
+          window.VTPanels.go("home",true);
+          return;
+        }
+      }
+    }catch(_){}
+    try{
+      document.getElementById("panelAdd")?.classList.remove("active");
+      document.getElementById("panelHome")?.classList.add("active");
     }catch(_){}
   }
 
-  function setSaveLabelEditing(isEditing){
-    if(!btnSave) return;
-    try{ btnSave.textContent = isEditing ? "Save Changes" : "Save"; }catch(_){}
-  }
-
-  function setHeaderEditing(isEditing){
+  function closeOverlays(){
     try{
-      const title=document.querySelector("#panelAdd .screenTitle");
-      if(!title) return;
-      title.textContent = isEditing ? "Edit Reading" : "Add Reading";
+      const overlay=document.getElementById("symptomOverlay");
+      if(overlay){
+        overlay.classList.remove("show");
+        overlay.setAttribute("aria-hidden","true");
+      }
     }catch(_){}
   }
 
-  function clearInputs(){
+  // ---------- save semantics (per-step) ----------
+  async function saveStep(step){
+    if(saving) return false;
+
+    if(!ensureStoreReady()){
+      safeAlert("Storage is not ready (VTStore).");
+      return false;
+    }
+
+    saving=true;
+    await initStoreIfNeeded();
+
+    try{
+      const rec = buildRecordFromUI();
+
+      // Step 1 validation for vitals
+      if(step===1){
+        if(!validateVitalsStep(rec)){
+          saving=false;
+          return false;
+        }
+      }
+
+      // Ensure distress consistency at Step 2+ (always keep Final numeric)
+      if(step>=2){
+        const computed = (UI.distressComputed==null) ? null : Math.round(clamp(UI.distressComputed,0,100));
+        const final    = (UI.distressFinal==null) ? 0 : Math.round(clamp(UI.distressFinal,0,100));
+        rec.distressComputed = computed;
+        rec.distressFinal = final;
+        rec.distressDelta = (computed==null) ? null : (final - computed);
+      }
+
+      // Edit mode: always update
+      if(EDIT.active){
+        if(!hasUpdateAPI()){
+          safeAlert("Edit is not available yet (VTStore has no update method).");
+          saving=false;
+          return false;
+        }
+        const key = EDIT.key || { ts: rec.ts };
+        await updateRecord(key, rec);
+        WIZ.lastSaved = normalizeRecord(rec);
+        return true;
+      }
+
+      // New wizard entry
+      if(WIZ.createdTs==null){
+        WIZ.createdTs = rec.ts;
+        WIZ.key = { ts: rec.ts };
+      }
+
+      // Step 1 creates the record if it does not exist yet
+      if(WIZ.key && WIZ.key._created!==true){
+        // Create record on first save only
+        const created = await window.VTStore.add(rec);
+        // Try to capture id if store returns it
+        if(created && (typeof created==="number" || typeof created==="string")){
+          WIZ.key = { id: created, ts: rec.ts };
+        }else{
+          // If no id, keep ts; attempt to resolve id if possible
+          try{
+            const all = await getAllRecords();
+            const found = findByIdOrTs(all, { ts: rec.ts });
+            const id = found && (found.id ?? found._id);
+            if(id!=null) WIZ.key = { id, ts: rec.ts };
+          }catch(_){}
+        }
+        WIZ.key._created = true;
+        WIZ.lastSaved = normalizeRecord(rec);
+        return true;
+      }
+
+      // Step 2-4 update existing record
+      if(!hasUpdateAPI()){
+        safeAlert("Partial-step saving requires VTStore update/put support. Record was created at Step 1, but later steps cannot update on this build.");
+        saving=false;
+        return false;
+      }
+
+      const key = (WIZ.key && (WIZ.key.id!=null || WIZ.key.ts!=null)) ? WIZ.key : { ts: rec.ts };
+      await updateRecord(key, rec);
+
+      WIZ.lastSaved = normalizeRecord(rec);
+      return true;
+    }catch(e){
+      console.error(e);
+      safeAlert("Save failed. Check console.");
+      return false;
+    }finally{
+      saving=false;
+    }
+  }
+
+  function refreshAfterSave(){
+    try{ window.VTLog?.onShow?.(); }catch(_){}
+    try{ window.VTChart?.onShow?.(); }catch(_){}
+  }
+
+  // ---------- summary ----------
+  function renderSummary(){
+    const r = WIZ.lastSaved ? WIZ.lastSaved : normalizeRecord(buildRecordFromUI());
+
+    const bp = formatBP(r.sys, r.dia);
+    const hr = fmtHr(r.hr);
+    const distress = (r.distressFinal==null) ? 0 : Math.round(r.distressFinal);
+    const mood = r.mood ? moodLabel(r.mood) : "—";
+    const symCount = (r.symptoms||[]).length;
+    const meds = (r.meds||[]).map(m=>m && m.name).filter(Boolean);
+
+    const sumBP=document.getElementById("sumBP");
+    const sumHR=document.getElementById("sumHR");
+    const sumDist=document.getElementById("sumDistress");
+    const sumMood=document.getElementById("sumMood");
+    const sumSymptoms=document.getElementById("sumSymptoms");
+    const sumMeds=document.getElementById("sumMeds");
+    const sumNotes=document.getElementById("sumNotes");
+
+    if(sumBP) sumBP.textContent = bp;
+    if(sumHR) sumHR.textContent = hr;
+    if(sumDist) sumDist.textContent = String(distress);
+
+    if(sumMood) sumMood.textContent = `Mood: ${mood}`;
+    if(sumSymptoms) sumSymptoms.textContent = `Symptoms: ${symCount ? (symCount + " selected") : "—"}`;
+    if(sumMeds) sumMeds.textContent = `Meds: ${meds.length ? meds.join(", ") : "—"}`;
+
+    const notes = String(r.notes||"").trim();
+    const noteOut = notes ? (notes.length>120 ? notes.slice(0,120)+"…" : notes) : "—";
+    if(sumNotes) sumNotes.textContent = `Notes: ${noteOut}`;
+
+    // Color distress box to match
+    const box=document.getElementById("distressBox");
+    if(box){
+      box.textContent = String(distress);
+      box.style.background = distressColor(distress);
+    }
+  }
+
+  // ---------- edit/open flows ----------
+  function clearWizardUI(){
+    // Keep UI state clean
     writeVal("inSys","");
     writeVal("inDia","");
     writeVal("inHr","");
@@ -988,52 +1400,25 @@ Scope (this Pass)
     renderMoodSummary();
     renderSymptomSummary();
     renderMedsTags();
+    refreshMedDatalist();
+    renderPriorMedsRow();
     syncDistressUI();
-  }
 
-  function enterEditMode(key, record){
-    EDIT.active=true;
-    EDIT.key=key||null;
-    EDIT.original=record||null;
-
-    setSaveLabelEditing(true);
-    setHeaderEditing(true);
-
-    if(record){
-      writeVal("inSys", record.sys);
-      writeVal("inDia", record.dia);
-      writeVal("inHr",  record.hr);
-      writeVal("inNotes", record.notes||"");
-
-      UI.symptoms = uniqLower(record.symptoms||[]);
-      UI.distressComputed = (record.distressComputed==null) ? computeDistressFromSymptoms(UI.symptoms) : clamp(record.distressComputed,0,100);
-      UI.distressFinal    = (record.distressFinal==null) ? (UI.distressComputed==null ? 0 : UI.distressComputed) : clamp(record.distressFinal,0,100);
-      distressTouched = (record.distressDelta!=null);
-
-      UI.meds = normalizeMeds(record.meds||[]);
-      UI.mood = (record.mood && typeof record.mood==="string") ? record.mood : null;
-
-      renderMoodRow();
-      renderMoodSummary();
-      renderSymptomSummary();
-      renderMedsTags();
-      syncDistressUI();
-      refreshMedDatalist();
-    }
-  }
-
-  function exitEditMode(){
-    EDIT.active=false;
-    EDIT.key=null;
-    EDIT.original=null;
-    setSaveLabelEditing(false);
-    setHeaderEditing(false);
+    // Reset wizard tracking
+    WIZ.step = 1;
+    WIZ.createdTs = null;
+    WIZ.key = null;
+    WIZ.lastSaved = null;
   }
 
   async function openAddNew(){
-    ensureFormPresent();
-    exitEditMode();
-    clearInputs();
+    ensureWizardPresent();
+    EDIT.active=false;
+    EDIT.key=null;
+    EDIT.original=null;
+    clearWizardUI();
+    showStep(1);
+
     try{
       if(window.VTPanels && typeof window.VTPanels.openAdd==="function"){
         window.VTPanels.openAdd(true);
@@ -1047,7 +1432,7 @@ Scope (this Pass)
   }
 
   async function openEdit(payload){
-    ensureFormPresent();
+    ensureWizardPresent();
     await initStoreIfNeeded();
 
     let key=null;
@@ -1075,6 +1460,36 @@ Scope (this Pass)
         return;
       }
 
+      // Enter edit mode
+      EDIT.active=true;
+      EDIT.key=key || { ts: rec.ts };
+      EDIT.original=rec;
+
+      // Populate fields and UI state
+      writeVal("inSys", rec.sys);
+      writeVal("inDia", rec.dia);
+      writeVal("inHr",  rec.hr);
+      writeVal("inNotes", rec.notes||"");
+
+      UI.symptoms = uniqLower(rec.symptoms||[]);
+      UI.distressComputed = (rec.distressComputed==null) ? computeDistressFromSymptoms(UI.symptoms) : clamp(rec.distressComputed,0,100);
+      UI.distressFinal    = (rec.distressFinal==null) ? (UI.distressComputed==null ? 0 : UI.distressComputed) : clamp(rec.distressFinal,0,100);
+      distressTouched = (rec.distressDelta!=null);
+
+      UI.meds = normalizeMeds(rec.meds||[]);
+      UI.mood = (rec.mood && typeof rec.mood==="string") ? rec.mood : null;
+
+      WIZ.lastSaved = normalizeRecord(buildRecordFromUI());
+
+      renderMoodRow();
+      renderMoodSummary();
+      renderSymptomSummary();
+      renderMedsTags();
+      refreshMedDatalist();
+      renderPriorMedsRow();
+      syncDistressUI();
+
+      // Open Add panel and show Step 1 by default
       try{
         if(window.VTPanels && typeof window.VTPanels.openAdd==="function"){
           window.VTPanels.openAdd(true);
@@ -1083,140 +1498,105 @@ Scope (this Pass)
         }
       }catch(_){}
 
-      enterEditMode(key, rec);
+      showStep(1);
     }catch(_){
       safeAlert("Edit failed.");
     }
   }
 
-  function closeOverlays(){
-    try{
-      const overlay=document.getElementById("symptomOverlay");
-      if(overlay){
-        overlay.classList.remove("show");
-        overlay.setAttribute("aria-hidden","true");
-      }
-    }catch(_){}
-  }
-
-  function goHome(){
-    closeOverlays();
-
-    try{
-      if(window.VTPanels){
-        if(typeof window.VTPanels.closeAdd==="function"){
-          window.VTPanels.closeAdd(true);
-          return;
-        }
-        if(typeof window.VTPanels.go==="function"){
-          window.VTPanels.go("home",true);
-          return;
-        }
-      }
-    }catch(_){}
-    try{
-      document.getElementById("panelAdd")?.classList.remove("active");
-      document.getElementById("panelHome")?.classList.add("active");
-    }catch(_){}
-  }
-
-  // ---------- save ----------
-  async function save(){
-    if(saving) return;
-
-    if(!ensureStoreReady()){
-      safeAlert("Storage is not ready (VTStore).");
-      return;
-    }
-
-    saving=true;
-    setSaveEnabled(false);
-
-    await initStoreIfNeeded();
-
-    const rec=defaultRecord();
-    rec.sys = readNumber("inSys");
-    rec.dia = readNumber("inDia");
-    rec.hr  = readNumber("inHr");
-    rec.notes = readText("inNotes");
-
-    const hasSys = rec.sys!=null;
-    const hasDia = rec.dia!=null;
-    if((hasSys && !hasDia) || (!hasSys && hasDia)){
-      safeAlert("If entering BP, please enter BOTH systolic and diastolic.");
-      saving=false;
-      setSaveEnabled(true);
-      return;
-    }
-
-    try{
-      if(EDIT.active){
-        if(!hasUpdateAPI()){
-          safeAlert("Edit is not available yet (VTStore has no update method).");
-          return;
-        }
-
-        const tsToKeep =
-          (EDIT.original && typeof EDIT.original.ts==="number") ? EDIT.original.ts :
-          (EDIT.key && typeof EDIT.key.ts==="number") ? EDIT.key.ts :
-          null;
-
-        if(tsToKeep!=null) rec.ts = tsToKeep;
-
-        const key = EDIT.key || { ts: rec.ts };
-        await updateRecord(key, rec);
-
-        try{ window.VTLog?.onShow?.(); }catch(_){}
-        try{ window.VTChart?.onShow?.(); }catch(_){}
-
-        safeAlert("Saved.");
-        exitEditMode();
-        clearInputs();
-        return;
-      }
-
-      await window.VTStore.add(rec);
-
-      try{ window.VTLog?.onShow?.(); }catch(_){}
-      try{ window.VTChart?.onShow?.(); }catch(_){}
-
-      safeAlert("Saved.");
-      clearInputs();
-    }catch(e){
-      console.error(e);
-      safeAlert("Save failed. Check console.");
-    }finally{
-      saving=false;
-      setSaveEnabled(true);
-    }
-  }
-
-  // ---------- bind ----------
-  function bind(){
-    ensureFormPresent();
-
-    bindOnce(btnSave,"saveReading",function(e){
+  // ---------- bindings ----------
+  function bindWizardNav(){
+    bindOnce(document.getElementById("btnWizAbort"),"wizAbort",function(e){
       try{ e.preventDefault(); }catch(_){}
-      save();
+      goHome(); // partial data already saved per-step
     });
 
-    bindOnce(btnHome,"homeFromAdd",function(e){
+    // Step 1
+    bindOnce(document.getElementById("btnStep1Save"),"step1Save",async function(e){
       try{ e.preventDefault(); }catch(_){}
+      const ok = await saveStep(1);
+      if(!ok) return;
+      refreshAfterSave();
+      showStep(2);
+    });
+
+    // Step 2
+    bindOnce(document.getElementById("btnStep2Back"),"step2Back",function(e){
+      try{ e.preventDefault(); }catch(_){}
+      showStep(1);
+    });
+    bindOnce(document.getElementById("btnStep2Save"),"step2Save",async function(e){
+      try{ e.preventDefault(); }catch(_){}
+      const ok = await saveStep(2);
+      if(!ok) return;
+      refreshAfterSave();
+      showStep(3);
+    });
+
+    // Step 3
+    bindOnce(document.getElementById("btnStep3Back"),"step3Back",function(e){
+      try{ e.preventDefault(); }catch(_){}
+      showStep(2);
+    });
+    bindOnce(document.getElementById("btnStep3Save"),"step3Save",async function(e){
+      try{ e.preventDefault(); }catch(_){}
+      const ok = await saveStep(3);
+      if(!ok) return;
+      refreshAfterSave();
+      showStep(4);
+    });
+
+    // Step 4
+    bindOnce(document.getElementById("btnStep4Back"),"step4Back",function(e){
+      try{ e.preventDefault(); }catch(_){}
+      showStep(3);
+    });
+    bindOnce(document.getElementById("btnStep4Save"),"step4Save",async function(e){
+      try{ e.preventDefault(); }catch(_){}
+      const ok = await saveStep(4);
+      if(!ok) return;
+      refreshAfterSave();
+      renderSummary();
+      showStep(5);
+    });
+
+    // Summary close
+    bindOnce(document.getElementById("btnSummaryClose"),"summaryClose",function(e){
+      try{ e.preventDefault(); }catch(_){}
+      // After final, close back to parent of Add panel
       goHome();
     });
+  }
 
+  function bind(){
+    ensureWizardPresent();
+
+    bindSymptomsUI();
+    bindDistressUI();
+    bindMoodUI();
+    bindMedsUI();
+    refreshMedDatalist();
+    renderPriorMedsRow();
+
+    renderMoodRow();
+    renderMoodSummary();
+    renderSymptomSummary();
+    renderMedsTags();
+    syncDistressUI();
+
+    bindWizardNav();
+    showStep(1);
+
+    // Listen for edit requests
     document.addEventListener("vt:editRequested",function(e){
       try{
         if(!e || !e.detail) return;
         openEdit(e.detail);
       }catch(_){}
     });
-
-    setSaveEnabled(true);
-    setSaveLabelEditing(false);
-    setHeaderEditing(false);
   }
 
+  // Public API
   window.VTAdd = Object.freeze({
     openNew: openAddNew,
     openEdit: openEdit
@@ -1224,19 +1604,21 @@ Scope (this Pass)
 
   if(document.readyState==="loading"){
     document.addEventListener("DOMContentLoaded",bind,{passive:true});
-  }else bind();
+  }else{
+    bind();
+  }
 
 })();
 
-/* 
-Vitals Tracker — EOF (Add Pass Footer)
+/*
+Vitals Tracker — EOF (Wizard Add Pass Footer)
 Copyright © 2026 Wendell K. Jiles. All rights reserved.
 (Pen name: Keyth Jyles)
 
 File: js/add.js
 App Version Authority: js/version.js
-ImplementationId: ADD-20260121-005
-FileEditId: 6
+ImplementationId: WIZ-20260121-001
+FileEditId: 8
 Edited: 2026-01-21
 
 Current file: js/add.js, File 1 of 1
@@ -1250,10 +1632,14 @@ Beacon: update FileEditId by incrementing by one each time you generate a new fu
 
 Current file (pasted/edited in this step): js/add.js
 Acceptance checks
-- Symptoms Select reliably opens popup (direct bind + delegated fallback; overlay pointer-events fixed).
-- Distress slider works immediately (Final defaults to 0; slider never disabled).
-- Top row no longer clips (box-sizing enforced; overflow constraints applied).
-- Mood is single-select checkbox-style (one max), default none, forced into one row.
+- Wizard flow exists: Step 1 Vitals -> Step 2 Symptoms+Distress -> Step 3 Mood -> Step 4 Meds+Notes -> Summary.
+- Save occurs at each step:
+  - Step 1 creates record.
+  - Steps 2–4 update existing record (requires VTStore update/put/set/upsert).
+- Symptoms are category-based, multi-select, compute distress automatically; distress is visible and adjustable.
+- Mood is single-select toggle (tap to select; tap again to clear).
+- Medications module shows prior meds as quick taps and allows new med entry; record stores markers.
+- Summary shows saved card and Close returns to parent of Add panel.
 
 Test and regroup for next pass.
 */
