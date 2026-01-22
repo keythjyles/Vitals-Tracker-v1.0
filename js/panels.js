@@ -5,21 +5,8 @@ Copyright © 2026 Wendell K. Jiles. All rights reserved. (Pen name: Keyth Jyles)
 File: js/panels.js
 App Version Authority: js/version.js
 ImplementationId: ADD-20260121-001
-FileEditId: 5
+FileEditId: 6
 Edited: 2026-01-21
-
-Prev (this run): css/app.css
-Next (this run): js/add.js
-
-Role / Ownership (LOCKED)
-- Panel routing + deck transform control
-- Owns navigation behavior (button nav vs swipe nav)
-- Must NOT implement gesture detection here (only consumes swipeDelta/swipeEnd inputs)
-
-Beacon (sticky)
-- Beacon: update FileEditId by incrementing by one each time you generate a new full file.
-- Follow only the instructions/prompts inside THIS paste and THIS message for this step.
-- Scope: navigation/escape hardening only (no chart rendering logic beyond existing onShow calls).
 
 Current file: js/panels.js, File 3 of 7
 
@@ -28,6 +15,17 @@ Next file to fetch: js/add.js, File 4 of 7
 
 
 
+Role / Ownership (LOCKED)
+- Panel routing + deck transform control
+- Owns navigation behavior (button nav vs swipe nav)
+- Must NOT implement gesture detection here (only consumes swipeDelta/swipeEnd inputs)
+
+Scope (this step)
+- Navigation/escape hardening only.
+- Add-panel lifecycle signaling for wizard reset (event dispatch only; no wizard logic here).
+
+Beacon (sticky)
+- Beacon: update FileEditId by incrementing by one each time you generate a new full file.
 ------------------------------------------------------------ */
 
 (function () {
@@ -85,9 +83,18 @@ Next file to fetch: js/add.js, File 4 of 7
 
   function dispatchPanelChanged(activeName) {
     try {
-      document.dispatchEvent(new CustomEvent("vt:panelChanged", {
-        detail: { active: activeName }
-      }));
+      document.dispatchEvent(
+        new CustomEvent("vt:panelChanged", { detail: { active: activeName } })
+      );
+    } catch (_) {}
+  }
+
+  // Add wizard lifecycle signaling (controller lives in add.js)
+  function dispatchAddLifecycle(type, detail) {
+    try {
+      document.dispatchEvent(
+        new CustomEvent(type, { detail: detail || {} })
+      );
     } catch (_) {}
   }
 
@@ -100,7 +107,7 @@ Next file to fetch: js/add.js, File 4 of 7
   }
 
   function setActivePanel(name) {
-    Object.keys(panels).forEach(k => {
+    Object.keys(panels).forEach((k) => {
       panels[k] && panels[k].classList.remove("active");
     });
 
@@ -112,12 +119,16 @@ Next file to fetch: js/add.js, File 4 of 7
     try {
       if (name === "charts") {
         ensureStoreReadyForRender().then(() => {
-          try { window.VTChart?.onShow?.(); } catch (_) {}
+          try {
+            window.VTChart?.onShow?.();
+          } catch (_) {}
         });
       }
       if (name === "log") {
         ensureStoreReadyForRender().then(() => {
-          try { window.VTLog?.onShow?.(); } catch (_) {}
+          try {
+            window.VTLog?.onShow?.();
+          } catch (_) {}
         });
       }
     } catch (_) {}
@@ -140,7 +151,7 @@ Next file to fetch: js/add.js, File 4 of 7
   }
 
   function clearRotationPanelTransforms() {
-    ROTATION.forEach(n => {
+    ROTATION.forEach((n) => {
       const el = panels[n];
       if (el) {
         el.style.transition = "";
@@ -214,13 +225,29 @@ Next file to fetch: js/add.js, File 4 of 7
     go(target);
   }
 
-  function openAdd() {
+  function openAdd(source) {
     if (!panels.add) return;
+
+    // Signal add.js to start a fresh wizard session every time Add opens.
+    dispatchAddLifecycle("vt:addOpen", {
+      source: source || "unknown",
+      from: currentPanel,
+      lastMainPanel
+    });
+
     go("add");
   }
 
-  function closeAdd() {
+  function closeAdd(reason) {
     cancelPendingCommit();
+
+    // Signal add.js to teardown/clear transient wizard UI state if needed.
+    dispatchAddLifecycle("vt:addClose", {
+      reason: reason || "user",
+      from: currentPanel,
+      lastMainPanel
+    });
+
     inAdd = false;
     const target = isRotatingPanel(lastMainPanel) ? lastMainPanel : "home";
     go(target);
@@ -349,63 +376,87 @@ Next file to fetch: js/add.js, File 4 of 7
   function bindNavFallbacks() {
     // HOME
     bindOnce(document.getElementById("btnGoCharts"), "goCharts", (e) => {
-      try { e.preventDefault(); } catch (_) {}
+      try {
+        e.preventDefault();
+      } catch (_) {}
       go("charts");
     });
     bindOnce(document.getElementById("btnGoLog"), "goLog", (e) => {
-      try { e.preventDefault(); } catch (_) {}
+      try {
+        e.preventDefault();
+      } catch (_) {}
       go("log");
     });
     bindOnce(document.getElementById("btnGoAdd"), "goAddHome", (e) => {
-      try { e.preventDefault(); } catch (_) {}
-      openAdd();
+      try {
+        e.preventDefault();
+      } catch (_) {}
+      openAdd("home");
     });
 
     // CHARTS header
     bindOnce(document.getElementById("btnAddFromCharts"), "addCharts", (e) => {
-      try { e.preventDefault(); } catch (_) {}
-      openAdd();
+      try {
+        e.preventDefault();
+      } catch (_) {}
+      openAdd("charts");
     });
     bindOnce(document.getElementById("btnHomeFromCharts"), "homeCharts", (e) => {
-      try { e.preventDefault(); } catch (_) {}
+      try {
+        e.preventDefault();
+      } catch (_) {}
       go("home");
     });
     bindOnce(document.getElementById("btnSettingsFromCharts"), "settingsCharts", (e) => {
-      try { e.preventDefault(); } catch (_) {}
+      try {
+        e.preventDefault();
+      } catch (_) {}
       openSettings();
     });
 
     // LOG header
     bindOnce(document.getElementById("btnAddFromLog"), "addLog", (e) => {
-      try { e.preventDefault(); } catch (_) {}
-      openAdd();
+      try {
+        e.preventDefault();
+      } catch (_) {}
+      openAdd("log");
     });
     bindOnce(document.getElementById("btnHomeFromLog"), "homeLog", (e) => {
-      try { e.preventDefault(); } catch (_) {}
+      try {
+        e.preventDefault();
+      } catch (_) {}
       go("home");
     });
     bindOnce(document.getElementById("btnSettingsFromLog"), "settingsLog", (e) => {
-      try { e.preventDefault(); } catch (_) {}
+      try {
+        e.preventDefault();
+      } catch (_) {}
       openSettings();
     });
 
     // SETTINGS
     bindOnce(document.getElementById("btnBackFromSettings"), "backSettings", (e) => {
-      try { e.preventDefault(); } catch (_) {}
+      try {
+        e.preventDefault();
+      } catch (_) {}
       closeSettings();
     });
 
     // HOME alt settings icon (if present)
     bindOnce(document.getElementById("btnSettingsHomeAlt"), "settingsHomeAlt", (e) => {
-      try { e.preventDefault(); } catch (_) {}
+      try {
+        e.preventDefault();
+      } catch (_) {}
       openSettings();
     });
 
     // ADD home/back button (if present)
     bindOnce(document.getElementById("btnHomeFromAdd"), "homeFromAddFallback", (e) => {
       // add.js also binds; this is a safe fallback
-      try { e.preventDefault(); } catch (_) {}
-      closeAdd();
+      try {
+        e.preventDefault();
+      } catch (_) {}
+      closeAdd("homeBtn");
     });
   }
 
@@ -463,7 +514,6 @@ Next file to fetch: js/add.js, File 4 of 7
   } else {
     autoInitIfNeeded();
   }
-
 })();
 
 /* 
@@ -473,7 +523,7 @@ Copyright © 2026 Wendell K. Jiles. All rights reserved. (Pen name: Keyth Jyles)
 File: js/panels.js
 App Version Authority: js/version.js
 ImplementationId: ADD-20260121-001
-FileEditId: 5
+FileEditId: 6
 Edited: 2026-01-21
 
 Current file: js/panels.js, File 3 of 7
@@ -486,8 +536,6 @@ Next file to fetch: js/add.js, File 4 of 7
 Acceptance checks (this file)
 - Direct nav is instant; Add remains non-rotating and excluded from swipe.
 - Closing Add returns to last main panel (home/charts/log) reliably.
+- Add open always dispatches vt:addOpen so add.js can start a fresh wizard session.
 - No gesture detection added here; only swipeDelta/swipeEnd consumption.
-
-Implementation Fetch Aid (ONE-TIME ONLY; NOT AUTHORITATIVE)
-- This is only a human paste directive for ADD-20260121-001, not a master schema/order.
 ------------------------------------------------------------ */
