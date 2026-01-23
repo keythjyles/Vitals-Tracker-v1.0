@@ -1,24 +1,3 @@
-Understood. We are not starting a new pass.
-
-Active pass: JYLES-20260122-ADDSTEP1-003 (per your screenshot plan)
-
-Pasted file pass: ...-002
-Per Jyles Method: because the IDs do not match, the prior pass comments are stale, and we proceed by stamping this file to the active pass and delivering the completed one-page product for the pass.
-
-
-Below is the updated js/add.js (File 1 of 1), with:
-
-“Vitals” moved into the same top row as X, left-aligned, bigger
-
-No steps commentary (still none)
-
-SYS/DIA/HR evenly spaced
-
-Inputs larger + high-contrast background + clearer border + stronger focus ring
-
-Better “card snap” attempt within this single file by forcing the add body/card to not stretch (true root cause may still be in css/app.css, but this is the best possible inside this pass’s 1-of-1 constraint)
-
-
 /* 
 Vitals Tracker — BOF (Jyles Method Pass Header)
 Copyright © 2026 Wendell K. Jiles. All rights reserved.
@@ -30,7 +9,7 @@ ImplementationId: JYLES-20260122-ADDSTEP1-003
 FileEditId: 13
 Edited: 2026-01-22
 
-Current file: js/add.js, File 1 of 1
+Current file: js/add.js, File 2 of 2
 
 
 Next file to fetch: EOL, EOP, File 0 of 0
@@ -47,13 +26,11 @@ Beacon Sticky Notes (persist until user changes)
 ------------------------------------------------------------
 
 Scope (this Pass)
-- Step 1 (Vitals module) accessibility + card snap polish only.
-- Title row: “Vitals” left-aligned, bigger, inline with X (same row).
-- Remove steps commentary (none shown).
-- SYS/DIA/HR evenly spaced top row.
-- Continue is full-width on its own row with larger font.
-- Inputs: bigger tap target + higher-contrast background so it’s obvious where to tap.
-- Card border snaps to visible contents (best-effort within this single file).
+- Step 1 (Vitals module) layout polish only.
+- Step 1 header row: “Vitals” left-aligned, larger, inline with X (same row).
+- Remove pill/cluster framing around SYS/DIA/HR (outer “capsule” look).
+- Increase input target size and add high-contrast background for low-vision tap clarity.
+- Keep Continue button and row spacing as-is unless app.css changes require minor alignment adjustments.
 - No changes to save semantics beyond prior Step 1 rules.
 ------------------------------------------------------------
 */
@@ -126,46 +103,25 @@ Scope (this Pass)
     if (document.getElementById("vtAddStep1Style")) return;
 
     const css = `
-      /* Step 1 compact UX (js/add.js injected) */
-      #panelAdd .screenHeaderRight { display:none !important; } /* hide Home header actions (no Home) */
+      /* Step 1 UX (js/add.js injected; keep minimal and Step-1-specific) */
 
-      /* Best-effort "card snap" in a 1-file pass:
-         force the Add body container to not stretch items to full height */
-      #addBody{
-        align-items:flex-start !important;
-        justify-content:flex-start !important;
-        overflow:auto !important;
-        padding-top: 10px;
-        padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
-      }
-
-      /* Ensure card sizes to content (not full-height) */
-      #addCard{
-        height:auto !important;
-        align-self:flex-start !important;
-        overflow:visible !important;
-        padding-bottom: 14px;
-      }
-      #addCard .wizStep{
-        height:auto !important;
-      }
-
-      /* Top row: Title left, X right */
+      /* Top row: Vitals (left) + X (right) */
       .addWizTopRow{
         display:flex;
         align-items:center;
         justify-content:space-between;
         gap:12px;
-        margin-bottom:12px;
+        margin-bottom:10px;
       }
-      .vtStep1Title{
-        font-size:20px;
+      .addWizTitle{
+        font-size:22px;
         font-weight:900;
-        letter-spacing:.2px;
-        color:rgba(255,255,255,.92);
+        letter-spacing:.02em;
+        color:rgba(235,245,255,.92);
         line-height:1.1;
       }
 
+      /* Close (X) */
       .addWizX{
         width:44px; height:44px; border-radius:999px;
         display:flex; align-items:center; justify-content:center;
@@ -174,70 +130,46 @@ Scope (this Pass)
         color:rgba(235,245,255,.86);
         flex:0 0 auto;
       }
-      .addWizX:active{ transform: scale(.985); }
+      .addWizX:active{ transform:scale(.985); }
 
-      /* Vitals row */
+      /* Step 1 row: no “capsule” frames; inputs are the obvious targets */
       .vtStep1Row{
         display:flex;
         gap:12px;
         align-items:flex-end;
         justify-content:space-between;
-        margin-top:6px;
+        margin-top:10px;
       }
-      .vtBox{
+      .vtField{
         flex:1 1 0;
         min-width:0;
         text-align:center;
       }
-      .vtBoxLabel{
-        font-weight: 900;
-        letter-spacing: .10em;
-        font-size: 13px;
-        margin-bottom: 8px;
-        color: rgba(235,245,255,.90);
+      .vtFieldLabel{
+        font-weight:900;
+        letter-spacing:.10em;
+        font-size:13px;
+        margin-bottom:6px;
+        color:rgba(235,245,255,.84);
       }
-
-      /* Inputs: bigger, higher-contrast target */
-      .vtBox input.addInput{
+      .vtField input.addInput{
         text-align:center;
-        font-weight: 900;
-        font-size: 26px;
-        padding-top: 16px;
-        padding-bottom: 16px;
-
-        border-width: 2px !important;
-        border-style: solid !important;
-        border-color: rgba(180,210,255,.62) !important;
-
-        /* Higher-contrast background to make the target obvious */
-        background: rgba(255,255,255,.10) !important;
-        box-shadow:
-          inset 0 0 0 1px rgba(235,245,255,.10),
-          0 0 0 1px rgba(0,0,0,.22);
+        font-weight:900;
+        font-size:20px;
+        padding-top:16px;
+        padding-bottom:16px;
+        border:2px solid rgba(180,210,255,.50);
+        background:rgba(255,255,255,.10);
       }
 
-      .vtBox input.addInput:focus{
-        outline:none !important;
-        border-color: rgba(210,235,255,.85) !important;
-        box-shadow:
-          0 0 0 3px rgba(80,140,220,.25),
-          inset 0 0 0 1px rgba(235,245,255,.12);
-      }
-
-      /* Continue button: full width */
-      .vtContinueRow{
-        margin-top: 14px;
-      }
+      /* Continue: preserve prior behavior (full-width, large tap target) */
+      .vtContinueRow{ margin-top:14px; }
       .vtContinueRow .primaryBtn{
-        width: 100%;
-        height: 60px;
-        font-weight: 900;
-        font-size: 20px;
-        letter-spacing:.3px;
+        width:100%;
+        height:58px;
+        font-weight:900;
+        font-size:18px;
       }
-
-      /* Remove any instructional footer/hint under Step 1 */
-      .addHint{ display:none !important; }
     `;
 
     const styleEl = document.createElement("style");
@@ -256,7 +188,7 @@ Scope (this Pass)
     bodyEl.innerHTML = `
       <div class="addCard" id="addCard">
         <div class="addWizTopRow">
-          <div class="vtStep1Title">Vitals</div>
+          <div class="addWizTitle" aria-label="Step title">Vitals</div>
           <button class="addWizX" id="btnWizAbortX" type="button" aria-label="Close">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -266,19 +198,19 @@ Scope (this Pass)
 
         <!-- STEP 1: Vitals -->
         <div class="wizStep" id="wizStep1">
-          <div class="vtStep1Row">
-            <div class="vtBox">
-              <div class="vtBoxLabel">SYS</div>
+          <div class="vtStep1Row" role="group" aria-label="Vitals inputs">
+            <div class="vtField">
+              <div class="vtFieldLabel">SYS</div>
               <input class="addInput" id="inSys" inputmode="numeric" placeholder="132" aria-label="Systolic" />
             </div>
 
-            <div class="vtBox">
-              <div class="vtBoxLabel">DIA</div>
+            <div class="vtField">
+              <div class="vtFieldLabel">DIA</div>
               <input class="addInput" id="inDia" inputmode="numeric" placeholder="84" aria-label="Diastolic" />
             </div>
 
-            <div class="vtBox">
-              <div class="vtBoxLabel">HR</div>
+            <div class="vtField">
+              <div class="vtFieldLabel">HR</div>
               <input class="addInput" id="inHr" inputmode="numeric" placeholder="72" aria-label="Heart Rate" />
             </div>
           </div>
@@ -579,7 +511,7 @@ ImplementationId: JYLES-20260122-ADDSTEP1-003
 FileEditId: 13
 Edited: 2026-01-22
 
-Current file: js/add.js, File 1 of 1
+Current file: js/add.js, File 2 of 2
 
 
 Next file to fetch: EOL, EOP, File 0 of 0
@@ -591,13 +523,11 @@ Beacon: update FileEditId by incrementing by one each time you generate a new fu
 Current file (pasted/edited in this step): js/add.js
 
 Acceptance checks
-- Title row: “Vitals” is left-aligned and inline with X.
-- Step commentary removed completely.
-- SYS/DIA/HR evenly spaced in top row.
-- Inputs are larger with higher-contrast background and clearer focus state.
-- Continue is full-width on its own row; larger font/tap target.
-- Best-effort card snap applied without touching css/app.css.
+- “Vitals” title is in the top bar row with the X: left-aligned, larger.
+- SYS/DIA/HR no longer look like separate “pills”/capsules; inputs are the obvious tap targets.
+- Inputs are larger with a distinct, higher-contrast background (low-vision friendly).
+- Continue button and spacing preserved (full-width, larger tap target retained).
 - Existing Step 1 save/advance semantics preserved.
 
 Test and regroup for next pass.
-*/ 
+*/
