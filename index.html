@@ -2,16 +2,16 @@
 Vitals Tracker — BOF (Jyles Method Pass Header)
 Copyright © 2026 Wendell K. Jiles. All rights reserved. (Pen name: Keyth Jyles)
 
-PASS: Add Shell Header Alignment (Remove Home on Add)
-ImplementationId: JYLES-20260122-ADDHEADER-005
+PASS: Module Header Standardization (Hide Add Shell Title)
+ImplementationId: JYLES-20260122-MODHDR-001
 App Version Authority: js/version.js
 
 File: index.html
-FileEditId: 2
+FileEditId: 3
 Edited: 2026-01-22
 
 Prev (this pass): (none — BOF)
-Next (this pass): EOL, EOP
+Next (this pass): css/app.css
 
 Role / Ownership (LOCKED)
 - App shell + DOM for panels + stable element IDs consumed by JS modules
@@ -19,16 +19,16 @@ Role / Ownership (LOCKED)
 
 Beacon: update FileEditId by incrementing by one each time you generate a new full file.
 
-Current file: index.html, File 1 of 1
+Current file: index.html, File 1 of 2
 
 
-Next file to fetch: EOL, EOP, File 0 of 0
+Next file to fetch: css/app.css, File 2 of 2
 
 
 
 Scope (this pass; index.html)
-- Add panel shell header: remove the Home pill/button to prevent the “wrong photo” (Add shell controls) from showing/competing.
-- Preserve all IDs and script load order.
+- Hide/remove the Add shell heading (“Add Reading”) so modules own the header area.
+- Preserve IDs and script load order.
 ------------------------------------------------------------ -->
 <!doctype html>
 <html lang="en">
@@ -210,11 +210,10 @@ Scope (this pass; index.html)
         <!-- ADD -->
         <section class="panel" id="panelAdd" data-panel="add" aria-label="Add Reading">
           <div class="screenFrame">
-            <div class="screenHeader">
-              <div class="screenTitle">Add Reading</div>
-              <div class="screenHeaderRight">
-                <!-- Intentionally empty for Add: wizard uses its own top-row controls (Vitals + X). -->
-              </div>
+            <!-- Add shell header intentionally present for layout consistency, but visually suppressed by css/app.css in this pass. -->
+            <div class="screenHeader vtAddShellHeader" id="addShellHeader" aria-hidden="true">
+              <div class="screenTitle" id="addShellTitle"></div>
+              <div class="screenHeaderRight"></div>
             </div>
 
             <div class="addBody" id="addBody">
@@ -265,18 +264,18 @@ Scope (this pass; index.html)
 Vitals Tracker — EOF (Jyles Method Pass Footer)
 Copyright © 2026 Wendell K. Jiles. All rights reserved. (Pen name: Keyth Jyles)
 
-PASS: Add Shell Header Alignment (Remove Home on Add)
-ImplementationId: JYLES-20260122-ADDHEADER-005
+PASS: Module Header Standardization (Hide Add Shell Title)
+ImplementationId: JYLES-20260122-MODHDR-001
 App Version Authority: js/version.js
 
 File: index.html
-FileEditId: 2
+FileEditId: 3
 Edited: 2026-01-22
 
-Current file: index.html, File 1 of 1
+Current file: index.html, File 1 of 2
 
 
-Next file to fetch: EOL, EOP, File 0 of 0
+Next file to fetch: css/app.css, File 2 of 2
 
 
 
@@ -285,9 +284,8 @@ Beacon: update FileEditId by incrementing by one each time you generate a new fu
 Current file (pasted/edited in this step): index.html
 
 Acceptance checks
-- Add panel shell header has no Home pill/button.
+- Add shell heading (“Add Reading”) no longer appears (module card owns the header area).
 - IDs and script load order preserved.
-- Add wizard remains responsible for in-card “Vitals + X” row.
 
-Test and regroup for next pass.
+Test: after css/app.css update, verify Add shell header is fully suppressed with no layout jump.
 ------------------------------------------------------------ -->
