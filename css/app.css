@@ -1,935 +1,963 @@
-/* 
-Vitals Tracker — BOF (Jyles Method Pass Header)
-Copyright © 2026 Wendell K. Jiles. All rights reserved. (Pen name: Keyth Jyles)
-
-File: css/app.css
-App Version Authority: js/version.js
-ImplementationId: JYLES-20260122-ADDSTEP1-003
-FileEditId: 5
-Edited: 2026-01-22
-
-Current file: css/app.css, File 1 of 2
-
-
-Next file to fetch: js/add.js, File 2 of 2
-
-
-
-Beacon: update FileEditId by incrementing by one each time you generate a new full file.
-
-Beacon Sticky Notes (persist until user changes)
-- Jyles Method: If pasted file ImplementationId != active pass ImplementationId, prior in-file pass commentary is stale and must be replaced.
-- Do not guess other files. Only edit pasted files. Whole-file outputs only.
-
-Pass Scope (this file)
-- Fix Add “card snap” (remove forced full-height stretching).
-- Improve Add panel scroll behavior without breaking other panels.
------------------------------------------------------------------- */
-
-:root{
-  --bg0:#08101f;
-  --bg1:#0b1324;
-  --panel:#0c1528cc;
-
-  --stroke:rgba(235,245,255,.16);
-  --stroke2:rgba(235,245,255,.22);
-  --strokeBold:rgba(180,210,255,.42);
-
-  --text:rgba(235,245,255,.92);
-  --muted:rgba(235,245,255,.58);
-  --muted2:rgba(235,245,255,.42);
-
-  --accent:#2b4e7a;
-  --accentSoft:rgba(80,140,220,.25);
-
-  --danger:#8b3a44;
-  --dangerSoft:rgba(180,60,80,.28);
-
-  --radiusXL:28px;
-  --radiusL:22px;
-  --radiusM:16px;
-
-  --shadowSoft:0 12px 40px rgba(0,0,0,.35);
-  --shadowInset:inset 0 0 0 1px var(--stroke);
-
-  --touchTarget:48px;
-
-  /* ============================================================================================
-     Single-source theme constants (change colors HERE)
-     NOTE: These are RGB triplets so both CSS and JS can derive rgba(...) consistently if needed.
-  ============================================================================================ */
-
-  /* BP Bands (Systolic) — ledger order: Normal, Elevated, Stage1, Stage2, Crisis */
-  --bpBandNormal:   45, 115, 205;   /* blue */
-  --bpBandElevated: 125, 80, 180;   /* purple */
-  --bpBandStage1:   245, 200, 55;   /* yellow */
-  --bpBandStage2:   210, 70, 80;    /* red */
-  --bpBandCrisis:   135, 25, 35;    /* dark red */
-
-  /* Distress palette (0–5) — used for “snap” / badge coloring if/when applied */
-  --distress0:  80, 140, 220;  /* calm/blue */
-  --distress1:  110, 170, 235; /* mild */
-  --distress2:  245, 200, 55;  /* moderate/yellow */
-  --distress3:  235, 145, 55;  /* high/orange */
-  --distress4:  210, 70, 80;   /* severe/red */
-  --distress5:  135, 25, 35;   /* crisis/dark red */
-
-  /* Safe-area helpers */
-  --safeB: env(safe-area-inset-bottom, 0px);
-  --safeT: env(safe-area-inset-top, 0px);
-}
-
-*,
-*::before,
-*::after{
-  box-sizing:border-box;
-}
-
-html,body{
-  width:100%;
-  height:100%;
-  margin:0;
-  background:
-    radial-gradient(1200px 600px at 50% -200px, #13244a, transparent 60%),
-    linear-gradient(180deg, var(--bg1), var(--bg0));
-  color:var(--text);
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-  overscroll-behavior-y:contain;
-  -webkit-tap-highlight-color:transparent;
-}
-
-button{
-  font-family:inherit;
-  border:none;
-  background:none;
-  color:inherit;
-}
-
-button:focus{ outline:none; }
-
-canvas{ display:block; }
-
-/* App Shell */
-.app-root{
-  width:100%;
-  height:100%;
-  display:flex;
-  flex-direction:column;
-}
-
-/* Top Bar */
-.topbar{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:12px 16px;
-  margin:10px 12px;
-  border-radius:999px;
-  background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
-  box-shadow:var(--shadowInset), var(--shadowSoft);
-}
-
-.brand{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.brandIcon{
-  width:36px;
-  height:36px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:linear-gradient(180deg, #1b335e, #0e1d38);
-  box-shadow:var(--shadowInset);
-}
-
-.brandTitle{
-  font-size:18px;
-  font-weight:600;
-  letter-spacing:.2px;
-}
-
-.bootpill{
-  padding:6px 12px;
-  font-size:12px;
-  border-radius:999px;
-  background:rgba(255,255,255,.08);
-  color:var(--muted);
-  box-shadow:var(--shadowInset);
-}
-
-/* Deck / Panels */
-.deck{
-  flex:1;
-  position:relative;
-  overflow:hidden;
-  background:
-    radial-gradient(1200px 600px at 50% -200px, #13244a, transparent 60%),
-    linear-gradient(180deg, var(--bg1), var(--bg0));
-}
-
-.deckTrack{
-  height:100%;
-  display:flex;
-  flex-direction:row;
-  will-change:transform;
-}
-
-.panel{
-  min-width:100%;
-  height:100%;
-  padding:12px;
-}
-
-.panel.active{
-  pointer-events:auto;
-}
-
-.screenFrame{
-  height:100%;
-  border-radius:var(--radiusXL);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.015)),
-    rgba(10,16,30,.28);
-  box-shadow:var(--shadowInset), var(--shadowSoft);
-  border:1px solid var(--strokeBold);
-  padding:16px;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-}
-
-/* Screen Header */
-.screenHeader{
-  position:relative;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom:14px;
-  padding-right:58px;
-  min-height:var(--touchTarget);
-}
-
-.screenTitle{
-  font-size:28px;
-  font-weight:600;
-}
-
-.screenHeaderRight{
-  display:flex;
-  gap:10px;
-  align-items:center;
-}
-
-.screenHeader .iconBtn{
-  position:absolute;
-  top:0;
-  right:0;
-}
-
-.screenHeaderRight .pillBtn{ margin-right:8px; }
-
-/* Buttons */
-.primaryBtn,
-.ghostBtn,
-.miniBtn,
-.pillBtn,
-.dangerBtn,
-.iconBtn{
-  min-height:var(--touchTarget);
-  padding:0 18px;
-  border-radius:999px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:600;
-  box-shadow:var(--shadowInset);
-}
-
-.primaryBtn{ background:linear-gradient(180deg, #3a63a6, #24457e); }
-.ghostBtn{ background:rgba(255,255,255,.06); }
-.miniBtn{
-  min-height:42px;
-  font-size:14px;
-  background:rgba(255,255,255,.06);
-}
-.pillBtn{ background:rgba(255,255,255,.08); }
-.dangerBtn{ background:linear-gradient(180deg, #7a3340, #55222c); }
-.iconBtn{
-  width:var(--touchTarget);
-  padding:0;
-  background:rgba(255,255,255,.06);
-}
-
-/* Home */
-.homeButtons{
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-  flex:1;
-  min-height:0;
-}
-
-.homeRow{
-  display:flex;
-  flex-direction:row;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-}
-
-.homeRow > button{
-  flex:1 1 0;
-  min-width:0;
-}
-
-.homeHint{
-  margin-top:auto;
-  font-size:14px;
-  color:var(--muted2);
-}
-
-.homeFooter{
-  display:flex;
-  justify-content:space-between;
-  font-size:13px;
-  color:var(--muted2);
-  margin-top:8px;
-}
-
-/* Charts */
-.chartCard{
-  flex:1;
-  min-height:0;
-  border-radius:var(--radiusL);
-  background:rgba(10,16,30,.30);
-  box-shadow:var(--shadowInset);
-  padding:12px;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-}
-
-.chartWrap{
-  flex:1;
-  min-height:0;
-  position:relative;
-  border-radius:16px;
-  overflow:hidden;
-  background:rgba(0,0,0,.12);
-}
-
-#chartCanvas{
-  width:100%;
-  height:100%;
-  background:transparent;
-}
-
-.chartLegend{
-  margin-top:10px;
-  font-size:13px;
-  color:var(--muted);
-}
-
-/* Log */
-#logLoading{ margin-bottom:8px; }
-
-.logList{
-  flex:1;
-  min-height:0;
-  overflow-y:auto;
-  padding-right:4px;
-}
-
-.logRow{
-  display:grid;
-  grid-template-columns: 1fr;
-  gap:8px;
-  padding:10px 10px;
-  border:1px solid rgba(255,255,255,0.12);
-  border-radius:16px;
-  background:rgba(0,0,0,0.10);
-  box-shadow:var(--shadowInset);
-}
-
-.logRow + .logRow{ margin-top:10px; }
-
-.logMain{
-  display:grid;
-  gap:2px;
-  min-width:0;
-}
-
-.logTitle{
-  font-size:14px;
-  font-weight:650;
-  letter-spacing:.12px;
-  color:rgba(255,255,255,0.86);
-  line-height:1.15;
-}
-
-.logSub{
-  font-size:12px;
-  font-weight:550;
-  color:rgba(255,255,255,0.56);
-  line-height:1.15;
-}
-
-.logMeta{
-  font-size:12px;
-  font-weight:550;
-  color:rgba(255,255,255,0.66);
-  line-height:1.25;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.logEmpty{
-  text-align:center;
-  color:var(--muted2);
-  margin-top:20px;
-}
-
-/* Settings */
-.settingsBody{
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-  flex:1;
-  min-height:0;
-}
-
-.settingsCard{
-  padding:14px;
-  border-radius:var(--radiusM);
-  background:rgba(255,255,255,.05);
-  box-shadow:var(--shadowInset);
-}
-
-.settingsLine{
-  display:flex;
-  justify-content:space-between;
-}
-
-.settingsH{
-  font-weight:700;
-  letter-spacing:.12px;
-  margin-bottom:6px;
-}
-
-.settingsHint{
-  font-size:13px;
-  margin-bottom:10px;
-}
-
-.settingsRow{
-  display:flex;
-  gap:10px;
-  align-items:center;
-}
-
-.settingsInput{
-  flex:1;
-  min-width:0;
-  padding:10px 12px;
-  border-radius:12px;
-  border:1px solid var(--stroke2);
-  background:rgba(10,16,30,.55);
-  color:var(--text);
-  box-shadow:var(--shadowInset);
-}
-
-.settingsList{
-  margin-top:10px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-
-.settingsItem{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  padding:10px 10px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,0.12);
-  background:rgba(0,0,0,0.10);
-  box-shadow:var(--shadowInset);
-}
-
-.settingsItemName{
-  font-weight:650;
-  color:rgba(255,255,255,0.86);
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
-
-.settingsItemBtn{
-  min-height:42px;
-  padding:0 14px;
-  border-radius:999px;
-  background:rgba(255,255,255,.08);
-  font-weight:650;
-  box-shadow:var(--shadowInset);
-}
-
-.settingsItemBtn.danger{
-  background:rgba(180,60,80,.22);
-}
-
-/* Add Panel */
-.addBody{
-  flex:1;
-  min-height:0;
-  display:flex;
-
-  /* CRITICAL: card “snap” — stop vertical stretching */
-  align-items:flex-start;
-
-  justify-content:center;
-
-  /* allow content-height card; scroll only if content exceeds viewport */
-  overflow:auto;
-
-  padding-bottom: calc(8px + var(--safeB));
-}
-
-.addCard{
-  width:100%;
-  padding:18px;
-  border-radius:var(--radiusL);
-  background:rgba(255,255,255,.05);
-  box-shadow:var(--shadowInset);
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-
-  /* do not force full-height behaviors */
-  min-height:auto;
-
-  /* allow natural height; prevent “filling” look from clipping/hidden overflow */
-  overflow:visible;
-}
-
-.addCard input,
-.addCard textarea,
-.addBody input,
-.addBody textarea{
-  width:100%;
-  padding:10px 12px;
-  border-radius:12px;
-  border:1px solid var(--stroke2);
-  background:rgba(10,16,30,.55);
-  color:var(--text);
-  box-shadow:var(--shadowInset);
-}
-
-.addCard input::placeholder,
-.addCard textarea::placeholder,
-.addBody input::placeholder,
-.addBody textarea::placeholder{
-  color:rgba(235,245,255,.38);
-}
-
-.addForm{ display:block; min-height:0; overflow:hidden; }
-
-.addGrid{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  min-height:0;
-  overflow:auto;
-  padding-right:2px;
-  padding-bottom: calc(12px + var(--safeB));
-}
-
-.addField{
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-}
-
-.addLabel{
-  font-size:14px;
-  color:var(--muted);
-  letter-spacing:.2px;
-}
-
-/* Add: quick-capture top row (SYS/DIA/HR across) */
-.addTopVitals{
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  gap:10px;
-  align-items:end;
-}
-
-.addTopVitals .addLabel{ font-size:13px; }
-.addTopVitals input{ padding:10px 10px; }
-
-@media (max-width: 420px){
-  .addTopVitals{ grid-template-columns:1fr; }
-}
-
-/* Official styling for vtVitalsRow/vtVitalsField (matches your JS fallback) */
-.vtVitalsRow{
-  display:flex;
-  gap:12px;
-  align-items:flex-start;
-  width:100%;
-  margin-bottom: 10px;
-}
-
-.vtVitalsField{
-  flex:1 1 0;
-  min-width:0;
-}
-
-.vtVitalsField .addLabel{ margin-bottom:8px; }
-
-.vtVitalsField .addInput{
-  width:100%;
-  border-width: 2px !important;
-  border-style: solid !important;
-  border-color: rgba(180,210,255,.55) !important;
-  box-shadow:
-    inset 0 0 0 1px rgba(235,245,255,.10),
-    0 0 0 1px rgba(0,0,0,.20);
-}
-
-/* Optional: “4-box” look hook (if you later implement 4 boxes instead of inputs) */
-.vtBoxRow{
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr 1fr;
-  gap:10px;
-}
-@media (max-width: 520px){
-  .vtBoxRow{ grid-template-columns:1fr 1fr; }
-}
-.vtBox{
-  border-radius:16px;
-  border:2px solid rgba(180,210,255,.45);
-  background:rgba(10,16,30,.40);
-  box-shadow:var(--shadowInset);
-  padding:10px 10px;
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-  min-height:72px;
-}
-.vtBoxLabel{
-  font-size:12px;
-  font-weight:800;
-  letter-spacing:.14px;
-  color:rgba(235,245,255,.62);
-  line-height:1.05;
-}
-.vtBoxValue{
-  font-size:20px;
-  font-weight:900;
-  letter-spacing:.2px;
-  color:rgba(255,255,255,.90);
-  line-height:1.05;
-}
-
-/* Add: deterministic action row (Save / Cancel) — sticky-ready */
-.addActions{
-  display:flex;
-  gap:10px;
-  align-items:center;
-  justify-content:space-between;
-  position:sticky;
-  bottom:0;
-  padding:10px 0 calc(10px + var(--safeB));
-  margin-top:6px;
-  background:linear-gradient(180deg, rgba(0,0,0,0.00), rgba(0,0,0,0.18));
-}
-
-.addActions > button{
-  flex:1 1 0;
-  min-width:0;
-}
-
-.addTextArea{
-  min-height:86px;
-  resize:vertical;
-}
-
-.addSection{
-  margin-top:6px;
-  padding-top:10px;
-  border-top:1px solid rgba(255,255,255,0.10);
-}
-
-.addSectionH{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  margin-bottom:8px;
-}
-
-.addSectionTitle{
-  font-weight:750;
-  letter-spacing:.12px;
-  color:rgba(255,255,255,0.86);
-}
-
-.addSectionHint{
-  font-size:12px;
-  color:var(--muted2);
-}
-
-.distressRow{
-  display:flex;
-  gap:10px;
-  align-items:center;
-  flex-wrap:wrap;
-}
-
-.distressBtn{
-  min-height:42px;
-  padding:0 14px;
-  border-radius:999px;
-  background:rgba(255,255,255,.07);
-  box-shadow:var(--shadowInset);
-  font-weight:750;
-}
-
-.distressBtn.active{
-  background:rgba(80,140,220,.22);
-  border:1px solid rgba(180,210,255,.22);
-}
-
-.tagList{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-}
-
-/* Med chips: event-like look (not settings) */
-.tagChip{
-  padding:8px 10px;
-  border-radius:999px;
-  background:rgba(10,16,30,.40);
-  border:1px solid rgba(180,210,255,.18);
-  box-shadow:var(--shadowInset);
-  font-size:12px;
-  font-weight:650;
-  color:rgba(255,255,255,0.86);
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-
-.tagChip .tagMeta{
-  font-size:11px;
-  color:rgba(235,245,255,.56);
-  font-weight:600;
-}
-
-.tagChip button{
-  width:22px;
-  height:22px;
-  border-radius:999px;
-  background:rgba(180,60,80,.16);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  box-shadow:var(--shadowInset);
-}
-
-.medsRow{
-  display:flex;
-  gap:10px;
-  align-items:center;
-}
-
-.medsRow input{
-  flex:1;
-  min-width:0;
-}
-
-.medsAddBtn{
-  min-height:42px;
-  padding:0 14px;
-  border-radius:999px;
-  background:rgba(255,255,255,.08);
-  font-weight:750;
-  box-shadow:var(--shadowInset);
-}
-
-/* Popup overlay (Distress descriptors / Symptoms checklist) */
-.vtOverlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.55);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:16px;
-  z-index:9999;
-}
-
-.vtOverlay.show{ display:flex; }
-
-.vtModal{
-  width:min(680px, 100%);
-  max-height:min(78vh, 720px);
-  overflow:hidden;
-  border-radius:22px;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02)),
-    rgba(10,16,30,.86);
-  border:1px solid rgba(180,210,255,.22);
-  box-shadow:0 18px 60px rgba(0,0,0,.55);
-  display:flex;
-  flex-direction:column;
-}
-
-.vtModalHead{
-  padding:14px 14px 10px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  border-bottom:1px solid rgba(255,255,255,0.10);
-}
-
-.vtModalTitle{
-  font-size:16px;
-  font-weight:800;
-  letter-spacing:.12px;
-}
-
-.vtModalSub{
-  font-size:12px;
-  color:var(--muted);
-  margin-top:2px;
-}
-
-.vtModalBody{
-  padding:12px 14px;
-  overflow:auto;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-
-.vtPickItem{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  padding:10px 10px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,0.12);
-  background:rgba(0,0,0,0.12);
-  box-shadow:var(--shadowInset);
-}
-
-.vtPickItemLeft{
-  min-width:0;
-}
-
-.vtPickItemName{
-  font-weight:750;
-  color:rgba(255,255,255,0.86);
-  line-height:1.15;
-}
-
-.vtPickItemDesc{
-  font-size:12px;
-  color:rgba(235,245,255,.56);
-  margin-top:3px;
-  line-height:1.25;
-}
-
-.vtToggle{
-  width:48px;
-  min-height:32px;
-  border-radius:999px;
-  background:rgba(255,255,255,.08);
-  box-shadow:var(--shadowInset);
-  position:relative;
-  flex:0 0 auto;
-}
-
-.vtToggle::after{
-  content:"";
-  position:absolute;
-  top:4px;
-  left:4px;
-  width:24px;
-  height:24px;
-  border-radius:999px;
-  background:rgba(235,245,255,.70);
-  transition:transform .14s ease;
-}
-
-.vtToggle.on{
-  background:rgba(80,140,220,.25);
-}
-
-.vtToggle.on::after{
-  transform:translateX(16px);
-}
-
-.vtModalFoot{
-  padding:12px 14px;
-  display:flex;
-  gap:10px;
-  justify-content:flex-end;
-  border-top:1px solid rgba(255,255,255,0.10);
-}
-
-.vtModalFoot .pillBtn{
-  min-height:42px;
-}
-
-/* Loading pills / spacers */
-.loadingPill{
-  align-self:flex-start;
-  padding:6px 12px;
-  border-radius:999px;
-  font-size:13px;
-  background:rgba(255,255,255,.08);
-  color:var(--muted);
-  margin-bottom:8px;
-}
-
-.chartFooterSpacer,
-.logFooterSpacer{ height:6px; }
-
-.muted{ color:var(--muted); }
-
-/* 
-Vitals Tracker — EOF (Jyles Method Pass Footer)
-Copyright © 2026 Wendell K. Jiles. All rights reserved. (Pen name: Keyth Jyles)
-
-File: css/app.css
-App Version Authority: js/version.js
-ImplementationId: JYLES-20260122-ADDSTEP1-003
-FileEditId: 5
-Edited: 2026-01-22
-
-Current file: css/app.css, File 1 of 2
-
-
-Next file to fetch: js/add.js, File 2 of 2
-
-
-
-Beacon: update FileEditId by incrementing by one each time you generate a new full file.
-
-Current file (pasted/edited in this step): css/app.css
-
-Acceptance checks (this file)
-- Add card no longer stretches to full panel height; it snaps to content height.
-- Add panel scroll works when content exceeds viewport; no regressions to other panels.
+/*      
+Vitals Tracker — BOF (Jyles Method Pass Header)      
+Copyright © 2026 Wendell K. Jiles. All rights reserved. (Pen name: Keyth Jyles)      
+      
+PASS: Module Header Standardization (Hide Add Shell Title)      
+ImplementationId: JYLES-20260122-MODHDR-001      
+App Version Authority: js/version.js      
+      
+File: css/app.css      
+FileEditId: 6      
+Edited: 2026-01-22      
+      
+Prev (this pass): index.html      
+Next (this pass): EOL, EOP      
+      
+Role / Ownership (LOCKED)      
+- Global theme + panel layout + shared component styles      
+- Must not introduce regressions across Home / Charts / Log / Settings      
+      
+Beacon: update FileEditId by incrementing by one each time you generate a new full file.      
+      
+Current file: css/app.css, File 2 of 2      
+      
+      
+Next file to fetch: EOL, EOP      
+      
+      
+      
+Scope (this pass; css/app.css)      
+- Fully suppress the Add shell header (vtAddShellHeader / addShellTitle) so modules own the header area      
+- No layout jump; preserve other panel headers      
+------------------------------------------------------------------ */      
+      
+:root{      
+  --bg0:#08101f;      
+  --bg1:#0b1324;      
+  --panel:#0c1528cc;      
+      
+  --stroke:rgba(235,245,255,.16);      
+  --stroke2:rgba(235,245,255,.22);      
+  --strokeBold:rgba(180,210,255,.42);      
+      
+  --text:rgba(235,245,255,.92);      
+  --muted:rgba(235,245,255,.58);      
+  --muted2:rgba(235,245,255,.42);      
+      
+  --accent:#2b4e7a;      
+  --accentSoft:rgba(80,140,220,.25);      
+      
+  --danger:#8b3a44;      
+  --dangerSoft:rgba(180,60,80,.28);      
+      
+  --radiusXL:28px;      
+  --radiusL:22px;      
+  --radiusM:16px;      
+      
+  --shadowSoft:0 12px 40px rgba(0,0,0,.35);      
+  --shadowInset:inset 0 0 0 1px var(--stroke);      
+      
+  --touchTarget:48px;      
+      
+  /* ============================================================================================      
+     Single-source theme constants (change colors HERE)      
+     NOTE: These are RGB triplets so both CSS and JS can derive rgba(...) consistently if needed.      
+  ============================================================================================ */      
+      
+  /* BP Bands (Systolic) — ledger order: Normal, Elevated, Stage1, Stage2, Crisis */      
+  --bpBandNormal:   45, 115, 205;   /* blue */      
+  --bpBandElevated: 125, 80, 180;   /* purple */      
+  --bpBandStage1:   245, 200, 55;   /* yellow */      
+  --bpBandStage2:   210, 70, 80;    /* red */      
+  --bpBandCrisis:   135, 25, 35;    /* dark red */      
+      
+  /* Distress palette (0–5) — used for “snap” / badge coloring if/when applied */      
+  --distress0:  80, 140, 220;  /* calm/blue */      
+  --distress1:  110, 170, 235; /* mild */      
+  --distress2:  245, 200, 55;  /* moderate/yellow */      
+  --distress3:  235, 145, 55;  /* high/orange */      
+  --distress4:  210, 70, 80;   /* severe/red */      
+  --distress5:  135, 25, 35;   /* crisis/dark red */      
+      
+  /* Safe-area helpers */      
+  --safeB: env(safe-area-inset-bottom, 0px);      
+  --safeT: env(safe-area-inset-top, 0px);      
+}      
+      
+*,      
+*::before,      
+*::after{      
+  box-sizing:border-box;      
+}      
+      
+html,body{      
+  width:100%;      
+  height:100%;      
+  margin:0;      
+  background:      
+    radial-gradient(1200px 600px at 50% -200px, #13244a, transparent 60%),      
+    linear-gradient(180deg, var(--bg1), var(--bg0));      
+  color:var(--text);      
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;      
+  overscroll-behavior-y:contain;      
+  -webkit-tap-highlight-color:transparent;      
+}      
+      
+button{      
+  font-family:inherit;      
+  border:none;      
+  background:none;      
+  color:inherit;      
+}      
+      
+button:focus{ outline:none; }      
+      
+canvas{ display:block; }      
+      
+/* App Shell */      
+.app-root{      
+  width:100%;      
+  height:100%;      
+  display:flex;      
+  flex-direction:column;      
+}      
+      
+/* Top Bar */      
+.topbar{      
+  display:flex;      
+  align-items:center;      
+  justify-content:space-between;      
+  padding:12px 16px;      
+  margin:10px 12px;      
+  border-radius:999px;      
+  background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));      
+  box-shadow:var(--shadowInset), var(--shadowSoft);      
+}      
+      
+.brand{      
+  display:flex;      
+  align-items:center;      
+  gap:10px;      
+}      
+      
+.brandIcon{      
+  width:36px;      
+  height:36px;      
+  border-radius:50%;      
+  display:flex;      
+  align-items:center;      
+  justify-content:center;      
+  background:linear-gradient(180deg, #1b335e, #0e1d38);      
+  box-shadow:var(--shadowInset);      
+}      
+      
+.brandTitle{      
+  font-size:18px;      
+  font-weight:600;      
+  letter-spacing:.2px;      
+}      
+      
+.bootpill{      
+  padding:6px 12px;      
+  font-size:12px;      
+  border-radius:999px;      
+  background:rgba(255,255,255,.08);      
+  color:var(--muted);      
+  box-shadow:var(--shadowInset);      
+}      
+      
+/* Deck / Panels */      
+.deck{      
+  flex:1;      
+  position:relative;      
+  overflow:hidden;      
+  background:      
+    radial-gradient(1200px 600px at 50% -200px, #13244a, transparent 60%),      
+    linear-gradient(180deg, var(--bg1), var(--bg0));      
+}      
+      
+.deckTrack{      
+  height:100%;      
+  display:flex;      
+  flex-direction:row;      
+  will-change:transform;      
+}      
+      
+.panel{      
+  min-width:100%;      
+  height:100%;      
+  padding:12px;      
+}      
+      
+.panel.active{      
+  pointer-events:auto;      
+}      
+      
+.screenFrame{      
+  height:100%;      
+  border-radius:var(--radiusXL);      
+  background:      
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.015)),      
+    rgba(10,16,30,.28);      
+  box-shadow:var(--shadowInset), var(--shadowSoft);      
+  border:1px solid var(--strokeBold);      
+  padding:16px;      
+  display:flex;      
+  flex-direction:column;      
+  overflow:hidden;      
+}      
+      
+/* Screen Header */      
+.screenHeader{      
+  position:relative;      
+  display:flex;      
+  align-items:center;      
+  justify-content:space-between;      
+  margin-bottom:14px;      
+  padding-right:58px;      
+  min-height:var(--touchTarget);      
+}      
+      
+.screenTitle{      
+  font-size:28px;      
+  font-weight:600;      
+}      
+      
+.screenHeaderRight{      
+  display:flex;      
+  gap:10px;      
+  align-items:center;      
+}      
+      
+.screenHeader .iconBtn{      
+  position:absolute;      
+  top:0;      
+  right:0;      
+}      
+      
+.screenHeaderRight .pillBtn{ margin-right:8px; }      
+      
+/* Buttons */      
+.primaryBtn,      
+.ghostBtn,      
+.miniBtn,      
+.pillBtn,      
+.dangerBtn,      
+.iconBtn{      
+  min-height:var(--touchTarget);      
+  padding:0 18px;      
+  border-radius:999px;      
+  display:flex;      
+  align-items:center;      
+  justify-content:center;      
+  font-weight:600;      
+  box-shadow:var(--shadowInset);      
+}      
+      
+.primaryBtn{ background:linear-gradient(180deg, #3a63a6, #24457e); }      
+.ghostBtn{ background:rgba(255,255,255,.06); }      
+.miniBtn{      
+  min-height:42px;      
+  font-size:14px;      
+  background:rgba(255,255,255,.06);      
+}      
+.pillBtn{ background:rgba(255,255,255,.08); }      
+.dangerBtn{ background:linear-gradient(180deg, #7a3340, #55222c); }      
+.iconBtn{      
+  width:var(--touchTarget);      
+  padding:0;      
+  background:rgba(255,255,255,.06);      
+}      
+      
+/* Home */      
+.homeButtons{      
+  display:flex;      
+  flex-direction:column;      
+  gap:14px;      
+  flex:1;      
+  min-height:0;      
+}      
+      
+.homeRow{      
+  display:flex;      
+  flex-direction:row;      
+  align-items:center;      
+  justify-content:space-between;      
+  gap:12px;      
+}      
+      
+.homeRow > button{      
+  flex:1 1 0;      
+  min-width:0;      
+}      
+      
+.homeHint{      
+  margin-top:auto;      
+  font-size:14px;      
+  color:var(--muted2);      
+}      
+      
+.homeFooter{      
+  display:flex;      
+  justify-content:space-between;      
+  font-size:13px;      
+  color:var(--muted2);      
+  margin-top:8px;      
+}      
+      
+/* Charts */      
+.chartCard{      
+  flex:1;      
+  min-height:0;      
+  border-radius:var(--radiusL);      
+  background:rgba(10,16,30,.30);      
+  box-shadow:var(--shadowInset);      
+  padding:12px;      
+  display:flex;      
+  flex-direction:column;      
+  overflow:hidden;      
+}      
+      
+.chartWrap{      
+  flex:1;      
+  min-height:0;      
+  position:relative;      
+  border-radius:16px;      
+  overflow:hidden;      
+  background:rgba(0,0,0,.12);      
+}      
+      
+#chartCanvas{      
+  width:100%;      
+  height:100%;      
+  background:transparent;      
+}      
+      
+.chartLegend{      
+  margin-top:10px;      
+  font-size:13px;      
+  color:var(--muted);      
+}      
+      
+/* Log */      
+#logLoading{ margin-bottom:8px; }      
+      
+.logList{      
+  flex:1;      
+  min-height:0;      
+  overflow-y:auto;      
+  padding-right:4px;      
+}      
+      
+.logRow{      
+  display:grid;      
+  grid-template-columns: 1fr;      
+  gap:8px;      
+  padding:10px 10px;      
+  border:1px solid rgba(255,255,255,0.12);      
+  border-radius:16px;      
+  background:rgba(0,0,0,0.10);      
+  box-shadow:var(--shadowInset);      
+}      
+      
+.logRow + .logRow{ margin-top:10px; }      
+      
+.logMain{      
+  display:grid;      
+  gap:2px;      
+  min-width:0;      
+}      
+      
+.logTitle{      
+  font-size:14px;      
+  font-weight:650;      
+  letter-spacing:.12px;      
+  color:rgba(255,255,255,0.86);      
+  line-height:1.15;      
+}      
+      
+.logSub{      
+  font-size:12px;      
+  font-weight:550;      
+  color:rgba(255,255,255,0.56);      
+  line-height:1.15;      
+}      
+      
+.logMeta{      
+  font-size:12px;      
+  font-weight:550;      
+  color:rgba(255,255,255,0.66);      
+  line-height:1.25;      
+  white-space:nowrap;      
+  overflow:hidden;      
+  text-overflow:ellipsis;      
+}      
+      
+.logEmpty{      
+  text-align:center;      
+  color:var(--muted2);      
+  margin-top:20px;      
+}      
+      
+/* Settings */      
+.settingsBody{      
+  display:flex;      
+  flex-direction:column;      
+  gap:14px;      
+  flex:1;      
+  min-height:0;      
+}      
+      
+.settingsCard{      
+  padding:14px;      
+  border-radius:var(--radiusM);      
+  background:rgba(255,255,255,.05);      
+  box-shadow:var(--shadowInset);      
+}      
+      
+.settingsLine{      
+  display:flex;      
+  justify-content:space-between;      
+}      
+      
+.settingsH{      
+  font-weight:700;      
+  letter-spacing:.12px;      
+  margin-bottom:6px;      
+}      
+      
+.settingsHint{      
+  font-size:13px;      
+  margin-bottom:10px;      
+}      
+      
+.settingsRow{      
+  display:flex;      
+  gap:10px;      
+  align-items:center;      
+}      
+      
+.settingsInput{      
+  flex:1;      
+  min-width:0;      
+  padding:10px 12px;      
+  border-radius:12px;      
+  border:1px solid var(--stroke2);      
+  background:rgba(10,16,30,.55);      
+  color:var(--text);      
+  box-shadow:var(--shadowInset);      
+}      
+      
+.settingsList{      
+  margin-top:10px;      
+  display:flex;      
+  flex-direction:column;      
+  gap:10px;      
+}      
+      
+.settingsItem{      
+  display:flex;      
+  align-items:center;      
+  justify-content:space-between;      
+  gap:10px;      
+  padding:10px 10px;      
+  border-radius:14px;      
+  border:1px solid rgba(255,255,255,0.12);      
+  background:rgba(0,0,0,0.10);      
+  box-shadow:var(--shadowInset);      
+}      
+      
+.settingsItemName{      
+  font-weight:650;      
+  color:rgba(255,255,255,0.86);      
+  overflow:hidden;      
+  text-overflow:ellipsis;      
+  white-space:nowrap;      
+}      
+      
+.settingsItemBtn{      
+  min-height:42px;      
+  padding:0 14px;      
+  border-radius:999px;      
+  background:rgba(255,255,255,.08);      
+  font-weight:650;      
+  box-shadow:var(--shadowInset);      
+}      
+      
+.settingsItemBtn.danger{      
+  background:rgba(180,60,80,.22);      
+}      
+
+/* =====================================================================
+   ADD PANEL — MODULE HEADER OWNERSHIP (THIS PASS)
+   Goal: Hide the shell header row entirely so add.js can own header content
+   without a duplicate “Add Reading” shell title or layout jump.
+   ===================================================================== */
+#panelAdd .vtAddShellHeader,
+#panelAdd #addShellHeader{
+  display:none !important;
+  height:0 !important;
+  min-height:0 !important;
+  margin:0 !important;
+  padding:0 !important;
+  border:0 !important;
+}
+#panelAdd #addShellTitle{
+  display:none !important;
+}
+
+/* Add Panel */      
+.addBody{      
+  flex:1;      
+  min-height:0;      
+  display:flex;      
+      
+  /* CRITICAL: card “snap” — stop vertical stretching */      
+  align-items:flex-start;      
+      
+  justify-content:center;      
+      
+  /* allow content-height card; scroll only if content exceeds viewport */      
+  overflow:auto;      
+      
+  padding-bottom: calc(8px + var(--safeB));      
+}      
+      
+.addCard{      
+  width:100%;      
+  padding:18px;      
+  border-radius:var(--radiusL);      
+  background:rgba(255,255,255,.05);      
+  box-shadow:var(--shadowInset);      
+  display:flex;      
+  flex-direction:column;      
+  gap:12px;      
+      
+  /* do not force full-height behaviors */      
+  min-height:auto;      
+      
+  /* allow natural height; prevent “filling” look from clipping/hidden overflow */      
+  overflow:visible;      
+}      
+      
+.addCard input,      
+.addCard textarea,      
+.addBody input,      
+.addBody textarea{      
+  width:100%;      
+  padding:10px 12px;      
+  border-radius:12px;      
+  border:1px solid var(--stroke2);      
+  background:rgba(10,16,30,.55);      
+  color:var(--text);      
+  box-shadow:var(--shadowInset);      
+}      
+      
+.addCard input::placeholder,      
+.addCard textarea::placeholder,      
+.addBody input::placeholder,      
+.addBody textarea::placeholder{      
+  color:rgba(235,245,255,.38);      
+}      
+      
+.addForm{ display:block; min-height:0; overflow:hidden; }      
+      
+.addGrid{      
+  display:flex;      
+  flex-direction:column;      
+  gap:10px;      
+  min-height:0;      
+  overflow:auto;      
+  padding-right:2px;      
+  padding-bottom: calc(12px + var(--safeB));      
+}      
+      
+.addField{      
+  display:flex;      
+  flex-direction:column;      
+  gap:6px;      
+}      
+      
+.addLabel{      
+  font-size:14px;      
+  color:var(--muted);      
+  letter-spacing:.2px;      
+}      
+      
+/* Add: quick-capture top row (SYS/DIA/HR across) */      
+.addTopVitals{      
+  display:grid;      
+  grid-template-columns:1fr 1fr 1fr;      
+  gap:10px;      
+  align-items:end;      
+}      
+      
+.addTopVitals .addLabel{ font-size:13px; }      
+.addTopVitals input{ padding:10px 10px; }      
+      
+@media (max-width: 420px){      
+  .addTopVitals{ grid-template-columns:1fr; }      
+}      
+      
+/* Official styling for vtVitalsRow/vtVitalsField (matches your JS fallback) */      
+.vtVitalsRow{      
+  display:flex;      
+  gap:12px;      
+  align-items:flex-start;      
+  width:100%;      
+  margin-bottom: 10px;      
+}      
+      
+.vtVitalsField{      
+  flex:1 1 0;      
+  min-width:0;      
+}      
+      
+.vtVitalsField .addLabel{ margin-bottom:8px; }      
+      
+.vtVitalsField .addInput{      
+  width:100%;      
+  border-width: 2px !important;      
+  border-style: solid !important;      
+  border-color: rgba(180,210,255,.55) !important;      
+  box-shadow:      
+    inset 0 0 0 1px rgba(235,245,255,.10),      
+    0 0 0 1px rgba(0,0,0,.20);      
+}      
+      
+/* Optional: “4-box” look hook (if you later implement 4 boxes instead of inputs) */      
+.vtBoxRow{      
+  display:grid;      
+  grid-template-columns:1fr 1fr 1fr 1fr;      
+  gap:10px;      
+}      
+@media (max-width: 520px){      
+  .vtBoxRow{ grid-template-columns:1fr 1fr; }      
+}      
+.vtBox{      
+  border-radius:16px;      
+  border:2px solid rgba(180,210,255,.45);      
+  background:rgba(10,16,30,.40);      
+  box-shadow:var(--shadowInset);      
+  padding:10px 10px;      
+  display:flex;      
+  flex-direction:column;      
+  gap:6px;      
+  min-height:72px;      
+}      
+.vtBoxLabel{      
+  font-size:12px;      
+  font-weight:800;      
+  letter-spacing:.14px;      
+  color:rgba(235,245,255,.62);      
+  line-height:1.05;      
+}      
+.vtBoxValue{      
+  font-size:20px;      
+  font-weight:900;      
+  letter-spacing:.2px;      
+  color:rgba(255,255,255,.90);      
+  line-height:1.05;      
+}      
+      
+/* Add: deterministic action row (Save / Cancel) — sticky-ready */      
+.addActions{      
+  display:flex;      
+  gap:10px;      
+  align-items:center;      
+  justify-content:space-between;      
+  position:sticky;      
+  bottom:0;      
+  padding:10px 0 calc(10px + var(--safeB));      
+  margin-top:6px;      
+  background:linear-gradient(180deg, rgba(0,0,0,0.00), rgba(0,0,0,0.18));      
+}      
+      
+.addActions > button{      
+  flex:1 1 0;      
+  min-width:0;      
+}      
+      
+.addTextArea{      
+  min-height:86px;      
+  resize:vertical;      
+}      
+      
+.addSection{      
+  margin-top:6px;      
+  padding-top:10px;      
+  border-top:1px solid rgba(255,255,255,0.10);      
+}      
+      
+.addSectionH{      
+  display:flex;      
+  align-items:center;      
+  justify-content:space-between;      
+  gap:10px;      
+  margin-bottom:8px;      
+}      
+      
+.addSectionTitle{      
+  font-weight:750;      
+  letter-spacing:.12px;      
+  color:rgba(255,255,255,0.86);      
+}      
+      
+.addSectionHint{      
+  font-size:12px;      
+  color:var(--muted2);      
+}      
+      
+.distressRow{      
+  display:flex;      
+  gap:10px;      
+  align-items:center;      
+  flex-wrap:wrap;      
+}      
+      
+.distressBtn{      
+  min-height:42px;      
+  padding:0 14px;      
+  border-radius:999px;      
+  background:rgba(255,255,255,.07);      
+  box-shadow:var(--shadowInset);      
+  font-weight:750;      
+}      
+      
+.distressBtn.active{      
+  background:rgba(80,140,220,.22);      
+  border:1px solid rgba(180,210,255,.22);      
+}      
+      
+.tagList{      
+  display:flex;      
+  flex-wrap:wrap;      
+  gap:8px;      
+}      
+      
+/* Med chips: event-like look (not settings) */      
+.tagChip{      
+  padding:8px 10px;      
+  border-radius:999px;      
+  background:rgba(10,16,30,.40);      
+  border:1px solid rgba(180,210,255,.18);      
+  box-shadow:var(--shadowInset);      
+  font-size:12px;      
+  font-weight:650;      
+  color:rgba(255,255,255,0.86);      
+  display:flex;      
+  align-items:center;      
+  gap:8px;      
+}      
+      
+.tagChip .tagMeta{      
+  font-size:11px;      
+  color:rgba(235,245,255,.56);      
+  font-weight:600;      
+}      
+      
+.tagChip button{      
+  width:22px;      
+  height:22px;      
+  border-radius:999px;      
+  background:rgba(180,60,80,.16);      
+  display:flex;      
+  align-items:center;      
+  justify-content:center;      
+  box-shadow:var(--shadowInset);      
+}      
+      
+.medsRow{      
+  display:flex;      
+  gap:10px;      
+  align-items:center;      
+}      
+      
+.medsRow input{      
+  flex:1;      
+  min-width:0;      
+}      
+      
+.medsAddBtn{      
+  min-height:42px;      
+  padding:0 14px;      
+  border-radius:999px;      
+  background:rgba(255,255,255,.08);      
+  font-weight:750;      
+  box-shadow:var(--shadowInset);      
+}      
+      
+/* Popup overlay (Distress descriptors / Symptoms checklist) */      
+.vtOverlay{      
+  position:fixed;      
+  inset:0;      
+  background:rgba(0,0,0,.55);      
+  display:none;      
+  align-items:center;      
+  justify-content:center;      
+  padding:16px;      
+  z-index:9999;      
+}      
+      
+.vtOverlay.show{ display:flex; }      
+      
+.vtModal{      
+  width:min(680px, 100%);      
+  max-height:min(78vh, 720px);      
+  overflow:hidden;      
+  border-radius:22px;      
+  background:      
+    linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02)),      
+    rgba(10,16,30,.86);      
+  border:1px solid rgba(180,210,255,.22);      
+  box-shadow:0 18px 60px rgba(0,0,0,.55);      
+  display:flex;      
+  flex-direction:column;      
+}      
+      
+.vtModalHead{      
+  padding:14px 14px 10px;      
+  display:flex;      
+  align-items:center;      
+  justify-content:space-between;      
+  gap:10px;      
+  border-bottom:1px solid rgba(255,255,255,0.10);      
+}      
+      
+.vtModalTitle{      
+  font-size:16px;      
+  font-weight:800;      
+  letter-spacing:.12px;      
+}      
+      
+.vtModalSub{      
+  font-size:12px;      
+  color:var(--muted);      
+  margin-top:2px;      
+}      
+      
+.vtModalBody{      
+  padding:12px 14px;      
+  overflow:auto;      
+  display:flex;      
+  flex-direction:column;      
+  gap:10px;      
+}      
+      
+.vtPickItem{      
+  display:flex;      
+  align-items:center;      
+  justify-content:space-between;      
+  gap:10px;      
+  padding:10px 10px;      
+  border-radius:14px;      
+  border:1px solid rgba(255,255,255,0.12);      
+  background:rgba(0,0,0,0.12);      
+  box-shadow:var(--shadowInset);      
+}      
+      
+.vtPickItemLeft{      
+  min-width:0;      
+}      
+      
+.vtPickItemName{      
+  font-weight:750;      
+  color:rgba(255,255,255,0.86);      
+  line-height:1.15;      
+}      
+      
+.vtPickItemDesc{      
+  font-size:12px;      
+  color:rgba(235,245,255,.56);      
+  margin-top:3px;      
+  line-height:1.25;      
+}      
+      
+.vtToggle{      
+  width:48px;      
+  min-height:32px;      
+  border-radius:999px;      
+  background:rgba(255,255,255,.08);      
+  box-shadow:var(--shadowInset);      
+  position:relative;      
+  flex:0 0 auto;      
+}      
+      
+.vtToggle::after{      
+  content:"";      
+  position:absolute;      
+  top:4px;      
+  left:4px;      
+  width:24px;      
+  height:24px;      
+  border-radius:999px;      
+  background:rgba(235,245,255,.70);      
+  transition:transform .14s ease;      
+}      
+      
+.vtToggle.on{      
+  background:rgba(80,140,220,.25);      
+}      
+      
+.vtToggle.on::after{      
+  transform:translateX(16px);      
+}      
+      
+.vtModalFoot{      
+  padding:12px 14px;      
+  display:flex;      
+  gap:10px;      
+  justify-content:flex-end;      
+  border-top:1px solid rgba(255,255,255,0.10);      
+}      
+      
+.vtModalFoot .pillBtn{      
+  min-height:42px;      
+}      
+      
+/* Loading pills / spacers */      
+.loadingPill{      
+  align-self:flex-start;      
+  padding:6px 12px;      
+  border-radius:999px;      
+  font-size:13px;      
+  background:rgba(255,255,255,.08);      
+  color:var(--muted);      
+  margin-bottom:8px;      
+}      
+      
+.chartFooterSpacer,      
+.logFooterSpacer{ height:6px; }      
+      
+.muted{ color:var(--muted); }      
+      
+/*       
+Vitals Tracker — EOF (Jyles Method Pass Footer)      
+Copyright © 2026 Wendell K. Jiles. All rights reserved. (Pen name: Keyth Jyles)      
+      
+PASS: Module Header Standardization (Hide Add Shell Title)      
+ImplementationId: JYLES-20260122-MODHDR-001      
+App Version Authority: js/version.js      
+      
+File: css/app.css      
+FileEditId: 6      
+Edited: 2026-01-22      
+      
+Current file: css/app.css, File 2 of 2      
+      
+      
+Next file to fetch: EOL, EOP      
+      
+      
+      
+Beacon: update FileEditId by incrementing by one each time you generate a new full file.      
+      
+Current file (pasted/edited in this step): css/app.css      
+      
+Acceptance checks      
+- Add shell heading (“Add Reading”) no longer appears (module card owns the header area).      
+- Add shell header row is fully suppressed (no layout jump).      
+- No regressions to other panels’ headers.      
+      
+Test and regroup for next pass.      
 ------------------------------------------------------------------ */
