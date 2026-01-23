@@ -3,35 +3,34 @@ Vitals Tracker — BOF (Jyles Method Pass Header)
 Copyright © 2026 Wendell K. Jiles. All rights reserved.
 (Pen name: Keyth Jyles)
 
-File: js/add.js
+PASS: Add Launch Reset (Force Step 1 New)
+ImplementationId: JYLES-20260122-ADDRESET-001
 App Version Authority: js/version.js
-ImplementationId: JYLES-20260122-ADDSTEP1-003
-FileEditId: 13
+
+File: js/add.js
+FileEditId: 14
 Edited: 2026-01-22
 
-Current file: js/add.js, File 2 of 2
+Prev (this pass): (none — BOF)
+Next (this pass): EOL, EOP
+
+Role / Ownership (LOCKED)
+- Add wizard state machine + step rendering + Save semantics
+- Must ensure “Add” always starts NEW reading at Step 1 (no resume)
+
+Beacon: update FileEditId by incrementing by one each time you generate a new full file.
+
+Current file: js/add.js, File 1 of 1
 
 
 Next file to fetch: EOL, EOP, File 0 of 0
 
 
 
-Beacon: update FileEditId by incrementing by one each time you generate a new full file.
-
-Beacon Sticky Notes (persist until user changes)
-- Every file edit is its own Pass with a unique ImplementationId.
-- Each Pass includes an explicit file list; even one file is “1 of 1.”
-- If pasted file ImplementationId does NOT match active pass ImplementationId, prior pass comments are stale; strip/replace.
-- If pasted file ImplementationId DOES match active pass ImplementationId, STOP and ask how to proceed.
-------------------------------------------------------------
-
 Scope (this Pass)
-- Step 1 (Vitals module) layout polish only.
-- Step 1 header row: “Vitals” left-aligned, larger, inline with X (same row).
-- Remove pill/cluster framing around SYS/DIA/HR (outer “capsule” look).
-- Increase input target size and add high-contrast background for low-vision tap clarity.
-- Keep Continue button and row spacing as-is unless app.css changes require minor alignment adjustments.
-- No changes to save semantics beyond prior Step 1 rules.
+- Any navigation to panel "add" must start a NEW reading at Step 1.
+- Prevent “resume last step” after finishing/closing summary and returning Home.
+- Implement within js/add.js only (no guessing other files).
 ------------------------------------------------------------
 */
 
@@ -58,6 +57,10 @@ Scope (this Pass)
 
   let saving = false;
   let bound = false;
+
+  // Add-reset enforcement
+  let _panelsGoWrapped = false;
+  let _internalGoToAdd = false;
 
   // ---------- utilities ----------
   const nowTs = () => Date.now();
@@ -384,10 +387,6 @@ Scope (this Pass)
     }
   }
 
-  function closeWizard() {
-    try { window.VTPanels?.go?.("home", true); } catch (_) {}
-  }
-
   // ---------- summary ----------
   function renderSummary() {
     if (!WIZ.lastSaved) return;
@@ -400,6 +399,41 @@ Scope (this Pass)
     safeSetText("sumSymptoms", (r.symptoms && r.symptoms.length) ? ("Symptoms: " + r.symptoms.length) : "Symptoms: —");
     safeSetText("sumMeds", (r.meds && r.meds.length) ? ("Meds: " + r.meds.map(m => (m && m.name) ? m.name : "").filter(Boolean).join(", ")) : "Meds: —");
     safeSetText("sumNotes", r.notes ? ("Notes: " + String(r.notes).slice(0, 120)) : "Notes: —");
+  }
+
+  // ---------- session reset (hard) ----------
+  function resetSession() {
+    WIZ.step = 1;
+    WIZ.key = null;
+    WIZ.createdTs = null;
+    WIZ.lastSaved = null;
+    WIZ.hasSaved = false;
+
+    UI.symptoms = [];
+    UI.distressComputed = null;
+    UI.distressFinal = null;
+    UI.mood = null;
+    UI.meds = [];
+
+    saving = false;
+    bound = false;
+  }
+
+  // ---------- mount fresh Step 1 (deterministic Add launch) ----------
+  function mountFreshStep1() {
+    resetSession();
+    injectWizardUI();
+    bind();       // bind() is idempotent per "bound" reset above
+    showStep(1);
+
+    // Best-effort focus SYS for speed; ignore failures.
+    try { $("inSys")?.focus?.(); } catch (_) {}
+  }
+
+  // Close should also clear wizard so next Add is always NEW/Step1
+  function closeWizard() {
+    mountFreshStep1(); // clear any progress before leaving Add
+    try { window.VTPanels?.go?.("home", true); } catch (_) {}
   }
 
   // ---------- bindings (idempotent) ----------
@@ -442,48 +476,74 @@ Scope (this Pass)
     if (bClose) bClose.addEventListener("click", closeWizard);
   }
 
-  function resetSession() {
-    WIZ.step = 1;
-    WIZ.key = null;
-    WIZ.createdTs = null;
-    WIZ.lastSaved = null;
-    WIZ.hasSaved = false;
+  // ---------- HARD GUARANTEE: Any go("add") starts NEW/Step1 ----------
+  function wrapPanelsGoForAddReset() {
+    if (_panelsGoWrapped) return;
 
-    UI.symptoms = [];
-    UI.distressComputed = null;
-    UI.distressFinal = null;
-    UI.mood = null;
-    UI.meds = [];
+    const vp = window.VTPanels;
+    if (!vp || typeof vp.go !== "function") return;
 
-    saving = false;
-    bound = false;
+    const origGo = vp.go.bind(vp);
+
+    // Avoid double-wrapping.
+    if (vp.go && vp.go.__vtAddResetWrapped) {
+      _panelsGoWrapped = true;
+      return;
+    }
+
+    function wrappedGo(panel, instant) {
+      try {
+        if (panel === "add" && !_internalGoToAdd) {
+          // External navigation to Add (Home/Charts/Log/Add button, or any caller):
+          // force NEW/Step1 deterministically before showing Add.
+          mountFreshStep1();
+        }
+      } catch (_) {}
+
+      return origGo(panel, instant);
+    }
+    wrappedGo.__vtAddResetWrapped = true;
+
+    vp.go = wrappedGo;
+    _panelsGoWrapped = true;
   }
 
   // ---------- public API ----------
   window.VTAdd = Object.freeze({
+    // Called by any explicit "Add" action when available.
+    // Guarantees NEW reading + Step 1 and navigates to Add.
     openNew() {
-      resetSession();
-      injectWizardUI();
-      bind();
-      showStep(1);
-      try { window.VTPanels?.go?.("add", true); } catch (_) {}
+      mountFreshStep1();
+      try {
+        _internalGoToAdd = true;
+        window.VTPanels?.go?.("add", true);
+      } catch (_) {
+        // no-op
+      } finally {
+        _internalGoToAdd = false;
+      }
     },
 
+    // Safe to call on any panel-enter hook; always forces NEW Step 1.
+    startNewAtStep1() {
+      mountFreshStep1();
+    },
+
+    // Legacy compatibility: enforce Step 1 even if caller only "ensures" UI.
     ensureMounted() {
-      if (!$("wizStep1") || !$("btnStep1Continue")) {
-        injectWizardUI();
-        resetSession();
-        bind();
-        showStep(1);
-      }
+      mountFreshStep1();
     }
   });
 
   function boot() {
+    // Mount once for initial DOM availability, but do not rely on preserved state.
     injectWizardUI();
     resetSession();
     bind();
     showStep(1);
+
+    // Enforce global guarantee: any VTPanels.go("add") starts NEW/Step1.
+    wrapPanelsGoForAddReset();
 
     // Hard-hide any Home button that may exist in the Add header (index-owned).
     try {
@@ -505,13 +565,15 @@ Vitals Tracker — EOF (Jyles Method Pass Footer)
 Copyright © 2026 Wendell K. Jiles. All rights reserved.
 (Pen name: Keyth Jyles)
 
-File: js/add.js
+PASS: Add Launch Reset (Force Step 1 New)
+ImplementationId: JYLES-20260122-ADDRESET-001
 App Version Authority: js/version.js
-ImplementationId: JYLES-20260122-ADDSTEP1-003
-FileEditId: 13
+
+File: js/add.js
+FileEditId: 14
 Edited: 2026-01-22
 
-Current file: js/add.js, File 2 of 2
+Current file: js/add.js, File 1 of 1
 
 
 Next file to fetch: EOL, EOP, File 0 of 0
@@ -523,11 +585,10 @@ Beacon: update FileEditId by incrementing by one each time you generate a new fu
 Current file (pasted/edited in this step): js/add.js
 
 Acceptance checks
-- “Vitals” title is in the top bar row with the X: left-aligned, larger.
-- SYS/DIA/HR no longer look like separate “pills”/capsules; inputs are the obvious tap targets.
-- Inputs are larger with a distinct, higher-contrast background (low-vision friendly).
-- Continue button and spacing preserved (full-width, larger tap target retained).
-- Existing Step 1 save/advance semantics preserved.
+- Clicking Add (from anywhere) always starts a NEW reading at Step 1 (Vitals).
+- After completing the wizard and closing (X or Close), returning Home, then clicking Add again does NOT resume; it starts Step 1.
+- No changes to save semantics beyond enforcing the Step 1 reset on Add launch.
+- No dependency on other files; enforcement works via VTPanels.go("add") interception.
 
 Test and regroup for next pass.
 */
