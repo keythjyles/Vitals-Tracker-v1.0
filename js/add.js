@@ -1,3 +1,24 @@
+Understood. We are not starting a new pass.
+
+Active pass: JYLES-20260122-ADDSTEP1-003 (per your screenshot plan)
+
+Pasted file pass: ...-002
+Per Jyles Method: because the IDs do not match, the prior pass comments are stale, and we proceed by stamping this file to the active pass and delivering the completed one-page product for the pass.
+
+
+Below is the updated js/add.js (File 1 of 1), with:
+
+“Vitals” moved into the same top row as X, left-aligned, bigger
+
+No steps commentary (still none)
+
+SYS/DIA/HR evenly spaced
+
+Inputs larger + high-contrast background + clearer border + stronger focus ring
+
+Better “card snap” attempt within this single file by forcing the add body/card to not stretch (true root cause may still be in css/app.css, but this is the best possible inside this pass’s 1-of-1 constraint)
+
+
 /* 
 Vitals Tracker — BOF (Jyles Method Pass Header)
 Copyright © 2026 Wendell K. Jiles. All rights reserved.
@@ -5,8 +26,8 @@ Copyright © 2026 Wendell K. Jiles. All rights reserved.
 
 File: js/add.js
 App Version Authority: js/version.js
-ImplementationId: JYLES-20260122-ADDSTEP1-002
-FileEditId: 12
+ImplementationId: JYLES-20260122-ADDSTEP1-003
+FileEditId: 13
 Edited: 2026-01-22
 
 Current file: js/add.js, File 1 of 1
@@ -26,11 +47,13 @@ Beacon Sticky Notes (persist until user changes)
 ------------------------------------------------------------
 
 Scope (this Pass)
-- Step 1 (Vitals module) layout polish only.
-- Remove steps commentary.
+- Step 1 (Vitals module) accessibility + card snap polish only.
+- Title row: “Vitals” left-aligned, bigger, inline with X (same row).
+- Remove steps commentary (none shown).
 - SYS/DIA/HR evenly spaced top row.
 - Continue is full-width on its own row with larger font.
-- Card border snaps to visible contents (no dead space).
+- Inputs: bigger tap target + higher-contrast background so it’s obvious where to tap.
+- Card border snaps to visible contents (best-effort within this single file).
 - No changes to save semantics beyond prior Step 1 rules.
 ------------------------------------------------------------
 */
@@ -104,66 +127,117 @@ Scope (this Pass)
 
     const css = `
       /* Step 1 compact UX (js/add.js injected) */
-      #panelAdd .screenHeaderRight { display:none !important; } /* hide Home button header area (no Home) */
+      #panelAdd .screenHeaderRight { display:none !important; } /* hide Home header actions (no Home) */
 
-      #addBody { padding-top: 10px; }
-      #addCard { padding-bottom: 14px; } /* float bottom border up */
+      /* Best-effort "card snap" in a 1-file pass:
+         force the Add body container to not stretch items to full height */
+      #addBody{
+        align-items:flex-start !important;
+        justify-content:flex-start !important;
+        overflow:auto !important;
+        padding-top: 10px;
+        padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+      }
 
-      .addWizTopRow { display:flex; align-items:center; justify-content:flex-end; gap:10px; margin-bottom:10px; }
-      /* removed step commentary entirely (no left element) */
+      /* Ensure card sizes to content (not full-height) */
+      #addCard{
+        height:auto !important;
+        align-self:flex-start !important;
+        overflow:visible !important;
+        padding-bottom: 14px;
+      }
+      #addCard .wizStep{
+        height:auto !important;
+      }
 
-      .addWizX {
+      /* Top row: Title left, X right */
+      .addWizTopRow{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:12px;
+        margin-bottom:12px;
+      }
+      .vtStep1Title{
+        font-size:20px;
+        font-weight:900;
+        letter-spacing:.2px;
+        color:rgba(255,255,255,.92);
+        line-height:1.1;
+      }
+
+      .addWizX{
         width:44px; height:44px; border-radius:999px;
         display:flex; align-items:center; justify-content:center;
         border:1px solid rgba(235,245,255,.16);
         background:rgba(12,21,40,.35);
         color:rgba(235,245,255,.86);
+        flex:0 0 auto;
       }
-      .addWizX:active { transform: scale(.985); }
+      .addWizX:active{ transform: scale(.985); }
 
-      /* Card snaps to content */
-      #addCard { height:auto !important; }
-      #addCard .wizStep { height:auto !important; }
-
-      .vtStep1Row {
+      /* Vitals row */
+      .vtStep1Row{
         display:flex;
         gap:12px;
         align-items:flex-end;
         justify-content:space-between;
-        margin-top:12px;
+        margin-top:6px;
       }
-      .vtBox {
-        flex: 1 1 0;
-        min-width: 0;
+      .vtBox{
+        flex:1 1 0;
+        min-width:0;
         text-align:center;
       }
-      .vtBoxLabel {
+      .vtBoxLabel{
         font-weight: 900;
         letter-spacing: .10em;
         font-size: 13px;
-        margin-bottom: 6px;
-        color: rgba(235,245,255,.88);
-      }
-      .vtBox input.addInput{
-        text-align:center;
-        font-weight: 800;
-        font-size: 20px;
-        padding-top: 16px;
-        padding-bottom: 16px;
+        margin-bottom: 8px;
+        color: rgba(235,245,255,.90);
       }
 
+      /* Inputs: bigger, higher-contrast target */
+      .vtBox input.addInput{
+        text-align:center;
+        font-weight: 900;
+        font-size: 26px;
+        padding-top: 16px;
+        padding-bottom: 16px;
+
+        border-width: 2px !important;
+        border-style: solid !important;
+        border-color: rgba(180,210,255,.62) !important;
+
+        /* Higher-contrast background to make the target obvious */
+        background: rgba(255,255,255,.10) !important;
+        box-shadow:
+          inset 0 0 0 1px rgba(235,245,255,.10),
+          0 0 0 1px rgba(0,0,0,.22);
+      }
+
+      .vtBox input.addInput:focus{
+        outline:none !important;
+        border-color: rgba(210,235,255,.85) !important;
+        box-shadow:
+          0 0 0 3px rgba(80,140,220,.25),
+          inset 0 0 0 1px rgba(235,245,255,.12);
+      }
+
+      /* Continue button: full width */
       .vtContinueRow{
         margin-top: 14px;
       }
       .vtContinueRow .primaryBtn{
         width: 100%;
-        height: 58px;
+        height: 60px;
         font-weight: 900;
-        font-size: 18px;
+        font-size: 20px;
+        letter-spacing:.3px;
       }
 
       /* Remove any instructional footer/hint under Step 1 */
-      .addHint { display:none !important; }
+      .addHint{ display:none !important; }
     `;
 
     const styleEl = document.createElement("style");
@@ -182,6 +256,7 @@ Scope (this Pass)
     bodyEl.innerHTML = `
       <div class="addCard" id="addCard">
         <div class="addWizTopRow">
+          <div class="vtStep1Title">Vitals</div>
           <button class="addWizX" id="btnWizAbortX" type="button" aria-label="Close">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -191,8 +266,6 @@ Scope (this Pass)
 
         <!-- STEP 1: Vitals -->
         <div class="wizStep" id="wizStep1">
-          <div class="addSectionTitle">Vitals</div>
-
           <div class="vtStep1Row">
             <div class="vtBox">
               <div class="vtBoxLabel">SYS</div>
@@ -502,8 +575,8 @@ Copyright © 2026 Wendell K. Jiles. All rights reserved.
 
 File: js/add.js
 App Version Authority: js/version.js
-ImplementationId: JYLES-20260122-ADDSTEP1-002
-FileEditId: 12
+ImplementationId: JYLES-20260122-ADDSTEP1-003
+FileEditId: 13
 Edited: 2026-01-22
 
 Current file: js/add.js, File 1 of 1
@@ -518,11 +591,13 @@ Beacon: update FileEditId by incrementing by one each time you generate a new fu
 Current file (pasted/edited in this step): js/add.js
 
 Acceptance checks
+- Title row: “Vitals” is left-aligned and inline with X.
 - Step commentary removed completely.
 - SYS/DIA/HR evenly spaced in top row.
+- Inputs are larger with higher-contrast background and clearer focus state.
 - Continue is full-width on its own row; larger font/tap target.
-- Card height snaps to content; no large empty lower area.
+- Best-effort card snap applied without touching css/app.css.
 - Existing Step 1 save/advance semantics preserved.
 
 Test and regroup for next pass.
-*/
+*/ 
