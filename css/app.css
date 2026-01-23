@@ -1,32 +1,29 @@
 /* 
-Vitals Tracker — BOF (Implementation Header)
+Vitals Tracker — BOF (Jyles Method Pass Header)
 Copyright © 2026 Wendell K. Jiles. All rights reserved. (Pen name: Keyth Jyles)
 
 File: css/app.css
 App Version Authority: js/version.js
-ImplementationId: VT-PASS-20260121-ADDWIZ-001
-FileEditId: 4
-Edited: 2026-01-21
+ImplementationId: JYLES-20260122-ADDSTEP1-003
+FileEditId: 5
+Edited: 2026-01-22
 
-Prev (this pass): index.html
-Next (this pass): js/<add-wizard-controller>.js
+Current file: css/app.css, File 1 of 2
 
-Role / Ownership (LOCKED)
-- Global theme + layout primitives
-- Add UI card/bottom-sheet styling primitives
-- Must remain compatible with all panels and Add wizard steps
 
-Beacon (sticky; persists until user changes)
-- Beacon: update FileEditId by incrementing by one each time you generate a new full file.
+Next file to fetch: js/add.js, File 2 of 2
+
+
+
+Beacon: update FileEditId by incrementing by one each time you generate a new full file.
+
+Beacon Sticky Notes (persist until user changes)
+- Jyles Method: If pasted file ImplementationId != active pass ImplementationId, prior in-file pass commentary is stale and must be replaced.
 - Do not guess other files. Only edit pasted files. Whole-file outputs only.
 
-Current file: css/app.css, File 2 of 3
-
-
-Next file to fetch: js/<add-wizard-controller>.js, File 3 of 3
-
-
-
+Pass Scope (this file)
+- Fix Add “card snap” (remove forced full-height stretching).
+- Improve Add panel scroll behavior without breaking other panels.
 ------------------------------------------------------------------ */
 
 :root{
@@ -491,9 +488,15 @@ canvas{ display:block; }
   flex:1;
   min-height:0;
   display:flex;
-  align-items:stretch;
+
+  /* CRITICAL: card “snap” — stop vertical stretching */
+  align-items:flex-start;
+
   justify-content:center;
-  overflow:hidden;
+
+  /* allow content-height card; scroll only if content exceeds viewport */
+  overflow:auto;
+
   padding-bottom: calc(8px + var(--safeB));
 }
 
@@ -506,8 +509,12 @@ canvas{ display:block; }
   display:flex;
   flex-direction:column;
   gap:12px;
-  min-height:0;
-  overflow:hidden;
+
+  /* do not force full-height behaviors */
+  min-height:auto;
+
+  /* allow natural height; prevent “filling” look from clipping/hidden overflow */
+  overflow:visible;
 }
 
 .addCard input,
@@ -901,20 +908,20 @@ canvas{ display:block; }
 
 .muted{ color:var(--muted); }
 
-/*
-Vitals Tracker — EOF (Implementation Footer)
+/* 
+Vitals Tracker — EOF (Jyles Method Pass Footer)
 Copyright © 2026 Wendell K. Jiles. All rights reserved. (Pen name: Keyth Jyles)
 
 File: css/app.css
 App Version Authority: js/version.js
-ImplementationId: VT-PASS-20260121-ADDWIZ-001
-FileEditId: 4
-Edited: 2026-01-21
+ImplementationId: JYLES-20260122-ADDSTEP1-003
+FileEditId: 5
+Edited: 2026-01-22
 
-Current file: css/app.css, File 2 of 3
+Current file: css/app.css, File 1 of 2
 
 
-Next file to fetch: js/<add-wizard-controller>.js, File 3 of 3
+Next file to fetch: js/add.js, File 2 of 2
 
 
 
@@ -923,7 +930,6 @@ Beacon: update FileEditId by incrementing by one each time you generate a new fu
 Current file (pasted/edited in this step): css/app.css
 
 Acceptance checks (this file)
-- Pass stamp applied (ImplementationId updated) and FileEditId incremented
-- No functional CSS changes made outside header/footer replacement
-
+- Add card no longer stretches to full panel height; it snaps to content height.
+- Add panel scroll works when content exceeds viewport; no regressions to other panels.
 ------------------------------------------------------------------ */
