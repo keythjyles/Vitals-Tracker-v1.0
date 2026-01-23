@@ -1,37 +1,34 @@
 <!--
-Vitals Tracker — BOF (Implementation Header)
+Vitals Tracker — BOF (Jyles Method Pass Header)
 Copyright © 2026 Wendell K. Jiles. All rights reserved. (Pen name: Keyth Jyles)
 
-PASS: Add Wizard Regression Fix
-ImplementationId: VT-PASS-20260121-ADDWIZ-001
+PASS: Add Shell Header Alignment (Remove Home on Add)
+ImplementationId: JYLES-20260122-ADDHEADER-005
 App Version Authority: js/version.js
 
 File: index.html
-FileEditId: 1
-Edited: 2026-01-21
+FileEditId: 2
+Edited: 2026-01-22
 
 Prev (this pass): (none — BOF)
-Next (this pass): css/app.css
+Next (this pass): EOL, EOP
 
 Role / Ownership (LOCKED)
-- App shell + DOM for panels + Add entry surface (modal/panel/wizard container)
-- Defines stable element IDs consumed by JS modules
+- App shell + DOM for panels + stable element IDs consumed by JS modules
 - Script load order is a drift lock
 
+Beacon: update FileEditId by incrementing by one each time you generate a new full file.
+
+Current file: index.html, File 1 of 1
+
+
+Next file to fetch: EOL, EOP, File 0 of 0
+
+
+
 Scope (this pass; index.html)
-- No behavioral logic edits here.
-- Only structure/IDs/layout support needed for the Add wizard regression fix (if explicitly required later).
-
-Beacon (sticky)
-- Beacon: update FileEditId by incrementing by one each time you generate a new full file.
-
-Current file: index.html, File 1 of 3
-
-
-Next file to fetch: css/app.css, File 2 of 3
-
-
-
+- Add panel shell header: remove the Home pill/button to prevent the “wrong photo” (Add shell controls) from showing/competing.
+- Preserve all IDs and script load order.
 ------------------------------------------------------------ -->
 <!doctype html>
 <html lang="en">
@@ -216,7 +213,7 @@ Next file to fetch: css/app.css, File 2 of 3
             <div class="screenHeader">
               <div class="screenTitle">Add Reading</div>
               <div class="screenHeaderRight">
-                <button class="pillBtn" id="btnHomeFromAdd" type="button">Home</button>
+                <!-- Intentionally empty for Add: wizard uses its own top-row controls (Vitals + X). -->
               </div>
             </div>
 
@@ -265,28 +262,32 @@ Next file to fetch: css/app.css, File 2 of 3
 </body>
 </html>
 <!--
-Vitals Tracker — EOF (Implementation Footer)
+Vitals Tracker — EOF (Jyles Method Pass Footer)
 Copyright © 2026 Wendell K. Jiles. All rights reserved. (Pen name: Keyth Jyles)
 
-PASS: Add Wizard Regression Fix
-ImplementationId: VT-PASS-20260121-ADDWIZ-001
+PASS: Add Shell Header Alignment (Remove Home on Add)
+ImplementationId: JYLES-20260122-ADDHEADER-005
 App Version Authority: js/version.js
 
 File: index.html
-FileEditId: 1
-Edited: 2026-01-21
+FileEditId: 2
+Edited: 2026-01-22
 
-Current file: index.html, File 1 of 3
-
-
-Next file to fetch: css/app.css, File 2 of 3
+Current file: index.html, File 1 of 1
 
 
+Next file to fetch: EOL, EOP, File 0 of 0
 
-Acceptance checks (index.html)
-- No functional code changes introduced in this step.
-- Existing IDs and script load order preserved.
 
-Implementation Fetch Aid (ONE-TIME ONLY; NOT A MASTER ORDER)
-- Only a human paste directive for VT-PASS-20260121-ADDWIZ-001.
+
+Beacon: update FileEditId by incrementing by one each time you generate a new full file.
+
+Current file (pasted/edited in this step): index.html
+
+Acceptance checks
+- Add panel shell header has no Home pill/button.
+- IDs and script load order preserved.
+- Add wizard remains responsible for in-card “Vitals + X” row.
+
+Test and regroup for next pass.
 ------------------------------------------------------------ -->
