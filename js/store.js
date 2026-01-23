@@ -5,14 +5,14 @@ Copyright © 2026 Wendell K. Jiles. All rights reserved.
 
 File: js/store.js
 App Version Authority: js/version.js
-ImplementationId: ADD-20260121-006
-FileEditId: 3
-Edited: 2026-01-21
+ImplementationId: ADD-20260122-001
+FileEditId: 4
+Edited: 2026-01-22
 
 Current file: js/store.js, File 2 of 3
 
 
-Next file to fetch: js/add.js, File 1 of 3
+Next file to fetch: js/ui.js, File 3 of 3
 
 
 
@@ -25,7 +25,8 @@ Beacon Sticky Notes (persist until user changes)
 ------------------------------------------------------------
 
 Scope (this Pass)
-- Support Add “Save-per-step” wizard by adding a tiny Draft API in VTStore (no UI).
+- Convert Draft API to memory-only (no localStorage resume).
+- One-time cleanup: delete any legacy localStorage key used for drafts.
 - No chart work. No log work.
 - Do NOT change record normalization semantics.
 ------------------------------------------------------------ 
@@ -38,8 +39,10 @@ Scope (this Pass)
   var initPromise = null;
   var cache = [];
 
-  // Draft storage (wizard support). Local-only; intentionally not part of record cache.
+  // Draft support (wizard). MUST be runtime-only.
+  // Legacy localStorage key is cleaned once during init to eliminate resume behavior.
   var DRAFT_KEY = "vt_add_draft_v1";
+  var _draftMem = null;
 
   function dbgInit() {
     try {
@@ -244,14 +247,11 @@ Scope (this Pass)
     return false;
   }
 
-  // ---------- Draft API (wizard support) ----------
+  // ---------- Draft API (wizard support; memory-only) ----------
   function getDraft() {
     try {
-      var raw = localStorage.getItem(DRAFT_KEY);
-      if (!raw) return null;
-      var obj = JSON.parse(raw);
-      if (!obj || typeof obj !== "object") return null;
-      return clone(obj);
+      if (!_draftMem || typeof _draftMem !== "object") return null;
+      return clone(_draftMem);
     } catch (_) {
       return null;
     }
@@ -260,23 +260,38 @@ Scope (this Pass)
   function setDraft(draftObj) {
     try {
       if (!draftObj || typeof draftObj !== "object") return false;
-      localStorage.setItem(DRAFT_KEY, JSON.stringify(draftObj));
-      dbgSet("draft", "SET");
+      _draftMem = clone(draftObj);
+      dbgSet("draft", "SET_MEM");
       return true;
     } catch (_) {
-      dbgSet("draft", "SET_FAIL");
+      dbgSet("draft", "SET_MEM_FAIL");
       return false;
     }
   }
 
   function clearDraft() {
     try {
-      localStorage.removeItem(DRAFT_KEY);
-      dbgSet("draft", "CLEARED");
+      _draftMem = null;
+      dbgSet("draft", "CLEARED_MEM");
       return true;
     } catch (_) {
-      dbgSet("draft", "CLEAR_FAIL");
+      dbgSet("draft", "CLEAR_MEM_FAIL");
       return false;
+    }
+  }
+
+  function legacyDraftCleanupOnce() {
+    // One-time cleanup: remove any legacy persistent draft key to prevent resume.
+    try {
+      if (!window.localStorage) return;
+      if (localStorage.getItem(DRAFT_KEY) != null) {
+        localStorage.removeItem(DRAFT_KEY);
+        dbgSet("draftLegacy", "REMOVED");
+      } else {
+        dbgSet("draftLegacy", "NONE");
+      }
+    } catch (_) {
+      dbgSet("draftLegacy", "REMOVE_FAIL");
     }
   }
 
@@ -287,6 +302,9 @@ Scope (this Pass)
     initPromise = (async function () {
       dbgInit();
       dbgSet("storagePresent", hasStorage() ? "YES" : "NO");
+
+      // Ensure no draft resume can occur from prior builds.
+      legacyDraftCleanupOnce();
 
       if (!hasStorage()) {
         try { console.warn("VTStore: storage layer not available"); } catch (_) {}
@@ -444,7 +462,7 @@ Scope (this Pass)
     replaceAll: replaceAll,
     clear: clear,
 
-    // Draft API (wizard support)
+    // Draft API (wizard support; memory-only)
     getDraft: getDraft,
     setDraft: setDraft,
     clearDraft: clearDraft
@@ -461,24 +479,26 @@ Copyright © 2026 Wendell K. Jiles. All rights reserved.
 
 File: js/store.js
 App Version Authority: js/version.js
-ImplementationId: ADD-20260121-006
-FileEditId: 3
-Edited: 2026-01-21
+ImplementationId: ADD-20260122-001
+FileEditId: 4
+Edited: 2026-01-22
 
 Current file: js/store.js, File 2 of 3
 
 
-Next file to fetch: js/add.js, File 1 of 3
+Next file to fetch: js/ui.js, File 3 of 3
 
 
 
 Beacon: update FileEditId by incrementing by one each time you generate a new full file.
 
 Current file (pasted/edited in this step): js/store.js
+
 Acceptance checks
-- window.VTStore exists; getAll() remains synchronous
-- add()/update() preserve pass-through fields and persist via VTStorage when present
-- Draft API exists (getDraft/setDraft/clearDraft) and does not touch record cache
+- window.VTStore exists; getAll() remains synchronous.
+- add()/update() preserve pass-through fields and persist via VTStorage when present.
+- Draft API exists (getDraft/setDraft/clearDraft) and is memory-only.
+- Legacy localStorage draft key is removed once during init to prevent resume behavior.
 
 Test and regroup for next pass.
 */
