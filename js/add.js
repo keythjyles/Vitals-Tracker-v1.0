@@ -3,20 +3,19 @@ Vitals Tracker — BOF (Jyles Method Pass Header)
 Copyright © 2026 Wendell K. Jiles. All rights reserved.
 (Pen name: Keyth Jyles)
 
-PASS: Add Launch Reset (Force Step 1 New)
-ImplementationId: JYLES-20260122-ADDRESET-001
+PASS: Add Close Behavior (No Step1 Flash / True Exit)
+ImplementationId: JYLES-20260122-ADDCLOSE-001
 App Version Authority: js/version.js
 
 File: js/add.js
-FileEditId: 14
+FileEditId: 15
 Edited: 2026-01-22
 
 Prev (this pass): (none — BOF)
 Next (this pass): EOL, EOP
 
 Role / Ownership (LOCKED)
-- Add wizard state machine + step rendering + Save semantics
-- Must ensure “Add” always starts NEW reading at Step 1 (no resume)
+- Add wizard state machine + step rendering + close/exit behavior
 
 Beacon: update FileEditId by incrementing by one each time you generate a new full file.
 
@@ -28,9 +27,10 @@ Next file to fetch: EOL, EOP, File 0 of 0
 
 
 Scope (this Pass)
-- Any navigation to panel "add" must start a NEW reading at Step 1.
-- Prevent “resume last step” after finishing/closing summary and returning Home.
-- Implement within js/add.js only (no guessing other files).
+- Summary “Close” (and X) must exit Add and return Home cleanly.
+- Do NOT remount Step 1 before navigating away (prevents Step1 appearing during panel slide / mid-rotation).
+- Still guarantee next Add starts NEW at Step 1.
+- js/add.js only.
 ------------------------------------------------------------
 */
 
@@ -392,7 +392,7 @@ Scope (this Pass)
     if (!WIZ.lastSaved) return;
     const r = WIZ.lastSaved;
 
-    safeSetText("sumBP", (isNum(r.sys) && isNum(r.dia)) ? (r.sys + "/" + r.dia) : "—");
+    safeSetText("sumBP", (typeof r.sys === "number" && typeof r.dia === "number") ? (r.sys + "/" + r.dia) : "—");
     safeSetText("sumHR", isNum(r.hr) ? String(r.hr) : "—");
     safeSetText("sumDistress", isNum(r.distressFinal) ? String(r.distressFinal) : "—");
     safeSetText("sumMood", r.mood ? ("Mood: " + r.mood) : "Mood: —");
@@ -423,17 +423,23 @@ Scope (this Pass)
   function mountFreshStep1() {
     resetSession();
     injectWizardUI();
-    bind();       // bind() is idempotent per "bound" reset above
+    bind();
     showStep(1);
 
     // Best-effort focus SYS for speed; ignore failures.
     try { $("inSys")?.focus?.(); } catch (_) {}
   }
 
-  // Close should also clear wizard so next Add is always NEW/Step1
+  // IMPORTANT: Close must exit Add FIRST, then reset Step1 AFTER navigation
+  // to avoid flashing Step1 in a mid-rotation / sliding panel state.
   function closeWizard() {
-    mountFreshStep1(); // clear any progress before leaving Add
     try { window.VTPanels?.go?.("home", true); } catch (_) {}
+
+    // After leaving Add, prep next Add launch as NEW Step1 without visual artifacts.
+    // (0ms is enough to get off the current click stack; no timing assumptions beyond that.)
+    setTimeout(() => {
+      try { mountFreshStep1(); } catch (_) {}
+    }, 0);
   }
 
   // ---------- bindings (idempotent) ----------
@@ -494,8 +500,7 @@ Scope (this Pass)
     function wrappedGo(panel, instant) {
       try {
         if (panel === "add" && !_internalGoToAdd) {
-          // External navigation to Add (Home/Charts/Log/Add button, or any caller):
-          // force NEW/Step1 deterministically before showing Add.
+          // External navigation to Add: force NEW/Step1 deterministically before showing Add.
           mountFreshStep1();
         }
       } catch (_) {}
@@ -510,7 +515,6 @@ Scope (this Pass)
 
   // ---------- public API ----------
   window.VTAdd = Object.freeze({
-    // Called by any explicit "Add" action when available.
     // Guarantees NEW reading + Step 1 and navigates to Add.
     openNew() {
       mountFreshStep1();
@@ -536,7 +540,7 @@ Scope (this Pass)
   });
 
   function boot() {
-    // Mount once for initial DOM availability, but do not rely on preserved state.
+    // Mount once for initial DOM availability.
     injectWizardUI();
     resetSession();
     bind();
@@ -565,12 +569,12 @@ Vitals Tracker — EOF (Jyles Method Pass Footer)
 Copyright © 2026 Wendell K. Jiles. All rights reserved.
 (Pen name: Keyth Jyles)
 
-PASS: Add Launch Reset (Force Step 1 New)
-ImplementationId: JYLES-20260122-ADDRESET-001
+PASS: Add Close Behavior (No Step1 Flash / True Exit)
+ImplementationId: JYLES-20260122-ADDCLOSE-001
 App Version Authority: js/version.js
 
 File: js/add.js
-FileEditId: 14
+FileEditId: 15
 Edited: 2026-01-22
 
 Current file: js/add.js, File 1 of 1
@@ -585,10 +589,11 @@ Beacon: update FileEditId by incrementing by one each time you generate a new fu
 Current file (pasted/edited in this step): js/add.js
 
 Acceptance checks
-- Clicking Add (from anywhere) always starts a NEW reading at Step 1 (Vitals).
-- After completing the wizard and closing (X or Close), returning Home, then clicking Add again does NOT resume; it starts Step 1.
-- No changes to save semantics beyond enforcing the Step 1 reset on Add launch.
-- No dependency on other files; enforcement works via VTPanels.go("add") interception.
+- On Saved screen: tapping Close returns fully to Home (no mid-panel rotation showing Step 1).
+- Tapping X behaves the same as Close.
+- Next time Add is tapped, Step 1 starts NEW (fresh wizard).
+- No changes to save semantics.
 
 Test and regroup for next pass.
+------------------------------------------------------------
 */
