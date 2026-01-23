@@ -5,8 +5,8 @@ Copyright © 2026 Wendell K. Jiles. All rights reserved.
 
 File: js/add.js
 App Version Authority: js/version.js
-ImplementationId: JYLES-20260122-ADDSTEP1-001
-FileEditId: 11
+ImplementationId: JYLES-20260122-ADDSTEP1-002
+FileEditId: 12
 Edited: 2026-01-22
 
 Current file: js/add.js, File 1 of 1
@@ -26,14 +26,12 @@ Beacon Sticky Notes (persist until user changes)
 ------------------------------------------------------------
 
 Scope (this Pass)
-- Step 1 (Vitals module) UX only.
-- Change “Save & Next” button to “Continue”.
-- On Continue: if ANY new value is present (non-null AND non-zero) then save; advance either way.
-- SYS/DIA/HR inputs + Continue button on ONE row; labels are SYS/DIA/HR centered, bold, easy.
-- No Home button (hide if present).
-- No Close button; replace with X (top-right) exit.
-- Remove bottom instructional commentary; tighten vertical space; float bottom border up.
-- No Log work. No Chart work. No Store semantics changes.
+- Step 1 (Vitals module) layout polish only.
+- Remove steps commentary.
+- SYS/DIA/HR evenly spaced top row.
+- Continue is full-width on its own row with larger font.
+- Card border snaps to visible contents (no dead space).
+- No changes to save semantics beyond prior Step 1 rules.
 ------------------------------------------------------------
 */
 
@@ -103,13 +101,17 @@ Scope (this Pass)
   // ---------- DOM style helpers (Step 1 UX) ----------
   function ensureStep1Style() {
     if (document.getElementById("vtAddStep1Style")) return;
+
     const css = `
       /* Step 1 compact UX (js/add.js injected) */
       #panelAdd .screenHeaderRight { display:none !important; } /* hide Home button header area (no Home) */
 
       #addBody { padding-top: 10px; }
-      #addCard { padding-bottom: 12px; } /* float bottom border up */
-      .addWizTopRow { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+      #addCard { padding-bottom: 14px; } /* float bottom border up */
+
+      .addWizTopRow { display:flex; align-items:center; justify-content:flex-end; gap:10px; margin-bottom:10px; }
+      /* removed step commentary entirely (no left element) */
+
       .addWizX {
         width:44px; height:44px; border-radius:999px;
         display:flex; align-items:center; justify-content:center;
@@ -119,11 +121,16 @@ Scope (this Pass)
       }
       .addWizX:active { transform: scale(.985); }
 
+      /* Card snaps to content */
+      #addCard { height:auto !important; }
+      #addCard .wizStep { height:auto !important; }
+
       .vtStep1Row {
         display:flex;
-        gap:10px;
+        gap:12px;
         align-items:flex-end;
-        margin-top:10px;
+        justify-content:space-between;
+        margin-top:12px;
       }
       .vtBox {
         flex: 1 1 0;
@@ -131,33 +138,34 @@ Scope (this Pass)
         text-align:center;
       }
       .vtBoxLabel {
-        font-weight: 800;
-        letter-spacing: .08em;
+        font-weight: 900;
+        letter-spacing: .10em;
         font-size: 13px;
         margin-bottom: 6px;
-        color: rgba(235,245,255,.86);
+        color: rgba(235,245,255,.88);
       }
       .vtBox input.addInput{
         text-align:center;
-        font-weight: 700;
-        font-size: 18px;
-        padding-top: 14px;
-        padding-bottom: 14px;
-      }
-      .vtContinueWrap {
-        flex: 0 0 140px;
-        min-width: 120px;
-      }
-      .vtContinueWrap .primaryBtn{
-        width:100%;
-        height: 52px;
         font-weight: 800;
+        font-size: 20px;
+        padding-top: 16px;
+        padding-bottom: 16px;
       }
 
-      /* tighten vertical whitespace (remove footer hint) */
+      .vtContinueRow{
+        margin-top: 14px;
+      }
+      .vtContinueRow .primaryBtn{
+        width: 100%;
+        height: 58px;
+        font-weight: 900;
+        font-size: 18px;
+      }
+
+      /* Remove any instructional footer/hint under Step 1 */
       .addHint { display:none !important; }
-      .addSectionTitle { margin-bottom: 6px; }
     `;
+
     const styleEl = document.createElement("style");
     styleEl.id = "vtAddStep1Style";
     styleEl.textContent = css;
@@ -171,11 +179,9 @@ Scope (this Pass)
 
     ensureStep1Style();
 
-    // Replace any placeholder content deterministically.
     bodyEl.innerHTML = `
       <div class="addCard" id="addCard">
         <div class="addWizTopRow">
-          <div class="muted" id="vtWizStep">Step 1 of 4</div>
           <button class="addWizX" id="btnWizAbortX" type="button" aria-label="Close">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -202,10 +208,10 @@ Scope (this Pass)
               <div class="vtBoxLabel">HR</div>
               <input class="addInput" id="inHr" inputmode="numeric" placeholder="72" aria-label="Heart Rate" />
             </div>
+          </div>
 
-            <div class="vtContinueWrap">
-              <button class="primaryBtn" id="btnStep1Continue" type="button">Continue</button>
-            </div>
+          <div class="vtContinueRow">
+            <button class="primaryBtn" id="btnStep1Continue" type="button">Continue</button>
           </div>
         </div>
 
@@ -286,14 +292,10 @@ Scope (this Pass)
 
   function patchSymptoms() {
     const p = {};
-
-    if (Array.isArray(UI.symptoms) && UI.symptoms.length) {
-      p.symptoms = UI.symptoms.slice();
-    }
+    if (Array.isArray(UI.symptoms) && UI.symptoms.length) p.symptoms = UI.symptoms.slice();
     if (UI.distressComputed != null) p.distressComputed = clamp(UI.distressComputed, 0, 100);
     if (UI.distressFinal != null) p.distressFinal = clamp(UI.distressFinal, 0, 100);
     if (p.distressComputed != null && p.distressFinal != null) p.distressDelta = p.distressFinal - p.distressComputed;
-
     return p;
   }
 
@@ -336,17 +338,13 @@ Scope (this Pass)
 
     try {
       const patch = buildPatch(step);
-
       if (patch && patch.__invalid) return { ok: false };
 
-      // If nothing to save, still allow navigation.
       if (!hasMeaning(patch)) return { ok: true };
 
-      // First save → create record
       if (!WIZ.hasSaved) {
         const ts = nowTs();
         const rec = Object.assign({ ts }, patch);
-
         await window.VTStore.add(rec);
 
         WIZ.key = { ts };
@@ -356,10 +354,8 @@ Scope (this Pass)
         return { ok: true };
       }
 
-      // Subsequent save → merge patch into lastSaved (preserve ts)
       const base = WIZ.lastSaved || {};
       const merged = Object.assign({}, base, patch, { ts: base.ts });
-
       await window.VTStore.update(WIZ.key, merged);
 
       WIZ.lastSaved = merged;
@@ -381,9 +377,6 @@ Scope (this Pass)
       if (on) el.classList.add("show");
       else el.classList.remove("show");
     }
-
-    const lbl = $("vtWizStep");
-    if (lbl) lbl.textContent = (n <= 4) ? ("Step " + n + " of 4") : "Done";
   }
 
   function closeWizard() {
@@ -418,7 +411,6 @@ Scope (this Pass)
 
     if (bX) bX.addEventListener("click", closeWizard);
 
-    // Step 1: Continue saves only if any non-null/non-zero values exist; advances either way.
     if (b1) b1.addEventListener("click", async () => {
       const res = await savePatchIfAny(1);
       if (res && res.ok) showStep(2);
@@ -465,7 +457,6 @@ Scope (this Pass)
   // ---------- public API ----------
   window.VTAdd = Object.freeze({
     openNew() {
-      // Each Add tap starts a NEW wizard session (no resume).
       resetSession();
       injectWizardUI();
       bind();
@@ -474,7 +465,6 @@ Scope (this Pass)
     },
 
     ensureMounted() {
-      // If wizard DOM isn't present, mount it (does not start a session).
       if (!$("wizStep1") || !$("btnStep1Continue")) {
         injectWizardUI();
         resetSession();
@@ -485,7 +475,6 @@ Scope (this Pass)
   });
 
   function boot() {
-    // Mount wizard UI on load so the Add panel is never blank.
     injectWizardUI();
     resetSession();
     bind();
@@ -513,8 +502,8 @@ Copyright © 2026 Wendell K. Jiles. All rights reserved.
 
 File: js/add.js
 App Version Authority: js/version.js
-ImplementationId: JYLES-20260122-ADDSTEP1-001
-FileEditId: 11
+ImplementationId: JYLES-20260122-ADDSTEP1-002
+FileEditId: 12
 Edited: 2026-01-22
 
 Current file: js/add.js, File 1 of 1
@@ -529,12 +518,11 @@ Beacon: update FileEditId by incrementing by one each time you generate a new fu
 Current file (pasted/edited in this step): js/add.js
 
 Acceptance checks
-- Step 1 button is “Continue”.
-- Continue saves ONLY if any new values are non-null and non-zero; advances either way.
-- SYS/DIA pair rule enforced; partial BP blocks advance.
-- Step 1: SYS/DIA/HR + Continue on one row; labels are SYS/DIA/HR bold centered.
-- No Close button; X exits. No Home button (hidden).
-- Bottom instructional commentary removed; card tightened; bottom border floats up.
+- Step commentary removed completely.
+- SYS/DIA/HR evenly spaced in top row.
+- Continue is full-width on its own row; larger font/tap target.
+- Card height snaps to content; no large empty lower area.
+- Existing Step 1 save/advance semantics preserved.
 
 Test and regroup for next pass.
 */
