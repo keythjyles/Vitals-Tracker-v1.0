@@ -1,17 +1,51 @@
 /* 
+Vitals Tracker — BOF (Pass Header)
+Copyright © 2026 Wendell K. Jiles. All rights reserved.
+(Pen name: Keyth Jyles)
+
+File: js/ui.js
+App Version Authority: js/version.js
+ImplementationId: ADD-20260121-006
+FileEditId: 1
+Edited: 2026-01-22
+
+Current file: js/ui.js, File 3 of 3
+
+
+Next file to fetch: EOL, EOP
+
+
+
+Beacon: update FileEditId by incrementing by one each time you generate a new full file.
+
+Beacon Sticky Notes (persist until user changes)
+- Every file edit is its own Pass with a unique ImplementationId.
+- Each Pass includes an explicit file list; even one file is “1 of 1.”
+- Replace prior non-sticky header/footer content each Pass; keep only explicitly-sticky Beacon rules.
+------------------------------------------------------------
+
+Scope (this Pass)
+- File list (3 files, fixed order):
+  1) js/add.js — File 1 of 3
+  2) js/store.js — File 2 of 3
+  3) js/ui.js — File 3 of 3
+- This file: align BOF/EOF to Pass Method; do not invent next files; end-of-pass only (EOL, EOP).
+- No UI behavior changes in this step.
+------------------------------------------------------------ 
+*/
+
+/*
 Vitals Tracker — BOF Version/Detail Notes (REQUIRED)
 File: js/ui.js
 App Version Authority: js/version.js
-Base: v2.026a
-Pass: Swipe + Render Recovery (P0-R1)
-Pass order: File 4 of 9 (P0)
-Prev file: css/app.css (File 3 of 9)
-Next file: js/panels.js (File 5 of 9)
+Base: v2.026a (as currently pasted)
+Pass: ADD-20260121-006
+Pass order: File 3 of 3
+Prev file: js/store.js (File 2 of 3)
+Next file: EOL, EOP
 
-v2.026a — Change Log (THIS FILE ONLY)
-1) No behavioral change to swipe. UI remains a thin router into VTPanels.
-2) Adds animated flag pass-through ONLY when supported by panels.js signature.
-3) Leaves Settings duplication to index.html (next planned edit), per “one fix at a time”.
+Change Log (THIS FILE ONLY)
+1) No functional changes. Metadata alignment only.
 */
 
 (function () {
@@ -177,11 +211,41 @@ v2.026a — Change Log (THIS FILE ONLY)
 
 })();
 
-/* 
+/*
 Vitals Tracker — EOF Version/Detail Notes (REQUIRED)
 File: js/ui.js
-Pass: Swipe + Render Recovery (P0-R1)
-Pass order: File 4 of 9 (P0)
-Prev file: css/app.css (File 3 of 9)
-Next file: js/panels.js (File 5 of 9)
+Pass: ADD-20260121-006
+Pass order: File 3 of 3
+Prev file: js/store.js (File 2 of 3)
+Next file: EOL, EOP
+*/
+
+/* 
+Vitals Tracker — EOF (Pass Footer)
+Copyright © 2026 Wendell K. Jiles. All rights reserved.
+(Pen name: Keyth Jyles)
+
+File: js/ui.js
+App Version Authority: js/version.js
+ImplementationId: ADD-20260121-006
+FileEditId: 1
+Edited: 2026-01-22
+
+Current file: js/ui.js, File 3 of 3
+
+
+Next file to fetch: EOL, EOP
+
+
+
+Beacon: update FileEditId by incrementing by one each time you generate a new full file.
+
+Current file (pasted/edited in this step): js/ui.js
+
+Acceptance checks
+- Pass header/footer aligned to ADD-20260121-006 (File 3 of 3).
+- Next file correctly marked as EOL, EOP (end of pass).
+- No functional/UI behavior changes in this step.
+
+Test and regroup for next pass.
 */
