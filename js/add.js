@@ -1,18 +1,18 @@
 /* 
-Vitals Tracker — BOF (Wizard Add Pass Header)
+Vitals Tracker — BOF (Jyles Method Pass Header)
 Copyright © 2026 Wendell K. Jiles. All rights reserved.
 (Pen name: Keyth Jyles)
 
 File: js/add.js
 App Version Authority: js/version.js
-ImplementationId: ADD-20260122-001
-FileEditId: 10
+ImplementationId: JYLES-20260122-ADDSTEP1-001
+FileEditId: 11
 Edited: 2026-01-22
 
-Current file: js/add.js, File 1 of 3
+Current file: js/add.js, File 1 of 1
 
 
-Next file to fetch: js/store.js, File 2 of 3
+Next file to fetch: EOL, EOP, File 0 of 0
 
 
 
@@ -21,18 +21,19 @@ Beacon: update FileEditId by incrementing by one each time you generate a new fu
 Beacon Sticky Notes (persist until user changes)
 - Every file edit is its own Pass with a unique ImplementationId.
 - Each Pass includes an explicit file list; even one file is “1 of 1.”
-- Replace prior non-sticky header/footer content each Pass; keep only explicitly-sticky Beacon rules.
+- If pasted file ImplementationId does NOT match active pass ImplementationId, prior pass comments are stale; strip/replace.
+- If pasted file ImplementationId DOES match active pass ImplementationId, STOP and ask how to proceed.
 ------------------------------------------------------------
 
 Scope (this Pass)
-- Wizard-driven Add flow with SAVE-PER-STEP compliance.
-- Each Add tap starts a NEW wizard session (no resume).
-- Save commits ONLY module-owned fields (patch semantics).
-- Empty inputs NEVER overwrite prior saved values.
-- Explicit clears are required to remove data.
-- Symptoms-only, Mood-only, or Meds-only entries are allowed.
-- Summary appears only after at least one Save.
-- No Log work. No Chart work.
+- Step 1 (Vitals module) UX only.
+- Change “Save & Next” button to “Continue”.
+- On Continue: if ANY new value is present (non-null AND non-zero) then save; advance either way.
+- SYS/DIA/HR inputs + Continue button on ONE row; labels are SYS/DIA/HR centered, bold, easy.
+- No Home button (hide if present).
+- No Close button; replace with X (top-right) exit.
+- Remove bottom instructional commentary; tighten vertical space; float bottom border up.
+- No Log work. No Chart work. No Store semantics changes.
 ------------------------------------------------------------
 */
 
@@ -41,11 +42,11 @@ Scope (this Pass)
 
   // ---------- Wizard session (ephemeral only) ----------
   const WIZ = {
-    step: 1,            // 1–5
+    step: 1,
     key: null,          // {ts} after first save
-    createdTs: null,    // ts anchor
-    lastSaved: null,    // last merged record snapshot
-    hasSaved: false     // at least one Save occurred
+    createdTs: null,
+    lastSaved: null,
+    hasSaved: false
   };
 
   // ---------- UI state (not persisted unless saved) ----------
@@ -66,16 +67,17 @@ Scope (this Pass)
   const norm = (s) => String(s || "").trim();
   const isNum = (n) => typeof n === "number" && Number.isFinite(n);
 
-  function $(id) {
-    return document.getElementById(id);
-  }
+  function $(id) { return document.getElementById(id); }
 
-  function readNum(id) {
+  // Non-null numeric input; treats 0 as "not provided" for this pass per requirement.
+  function readNumNZ(id) {
     const el = $(id);
     const v = el && typeof el.value === "string" ? el.value.trim() : "";
     if (!v) return null;
     const n = Number(v);
-    return Number.isFinite(n) ? n : null;
+    if (!Number.isFinite(n)) return null;
+    if (n === 0) return null;
+    return n;
   }
 
   function readTxt(id) {
@@ -84,7 +86,9 @@ Scope (this Pass)
   }
 
   function ensureStore() {
-    return window.VTStore && typeof window.VTStore.add === "function" && typeof window.VTStore.update === "function";
+    return window.VTStore &&
+      typeof window.VTStore.add === "function" &&
+      typeof window.VTStore.update === "function";
   }
 
   async function initStore() {
@@ -96,88 +100,147 @@ Scope (this Pass)
     if (el) el.textContent = text;
   }
 
+  // ---------- DOM style helpers (Step 1 UX) ----------
+  function ensureStep1Style() {
+    if (document.getElementById("vtAddStep1Style")) return;
+    const css = `
+      /* Step 1 compact UX (js/add.js injected) */
+      #panelAdd .screenHeaderRight { display:none !important; } /* hide Home button header area (no Home) */
+
+      #addBody { padding-top: 10px; }
+      #addCard { padding-bottom: 12px; } /* float bottom border up */
+      .addWizTopRow { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+      .addWizX {
+        width:44px; height:44px; border-radius:999px;
+        display:flex; align-items:center; justify-content:center;
+        border:1px solid rgba(235,245,255,.16);
+        background:rgba(12,21,40,.35);
+        color:rgba(235,245,255,.86);
+      }
+      .addWizX:active { transform: scale(.985); }
+
+      .vtStep1Row {
+        display:flex;
+        gap:10px;
+        align-items:flex-end;
+        margin-top:10px;
+      }
+      .vtBox {
+        flex: 1 1 0;
+        min-width: 0;
+        text-align:center;
+      }
+      .vtBoxLabel {
+        font-weight: 800;
+        letter-spacing: .08em;
+        font-size: 13px;
+        margin-bottom: 6px;
+        color: rgba(235,245,255,.86);
+      }
+      .vtBox input.addInput{
+        text-align:center;
+        font-weight: 700;
+        font-size: 18px;
+        padding-top: 14px;
+        padding-bottom: 14px;
+      }
+      .vtContinueWrap {
+        flex: 0 0 140px;
+        min-width: 120px;
+      }
+      .vtContinueWrap .primaryBtn{
+        width:100%;
+        height: 52px;
+        font-weight: 800;
+      }
+
+      /* tighten vertical whitespace (remove footer hint) */
+      .addHint { display:none !important; }
+      .addSectionTitle { margin-bottom: 6px; }
+    `;
+    const styleEl = document.createElement("style");
+    styleEl.id = "vtAddStep1Style";
+    styleEl.textContent = css;
+    document.head.appendChild(styleEl);
+  }
+
   // ---------- DOM injection (wizard skeleton) ----------
   function injectWizardUI() {
     const bodyEl = $("addBody");
     if (!bodyEl) return;
+
+    ensureStep1Style();
 
     // Replace any placeholder content deterministically.
     bodyEl.innerHTML = `
       <div class="addCard" id="addCard">
         <div class="addWizTopRow">
           <div class="muted" id="vtWizStep">Step 1 of 4</div>
-          <button class="pillBtn" id="btnWizAbort" type="button">Close</button>
+          <button class="addWizX" id="btnWizAbortX" type="button" aria-label="Close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
         </div>
 
         <!-- STEP 1: Vitals -->
         <div class="wizStep" id="wizStep1">
           <div class="addSectionTitle">Vitals</div>
 
-          <div class="addGrid">
-            <div class="addField">
-              <label class="addLabel" for="inSys">Systolic</label>
-              <input class="addInput" id="inSys" inputmode="numeric" placeholder="e.g., 132" />
+          <div class="vtStep1Row">
+            <div class="vtBox">
+              <div class="vtBoxLabel">SYS</div>
+              <input class="addInput" id="inSys" inputmode="numeric" placeholder="132" aria-label="Systolic" />
             </div>
 
-            <div class="addField">
-              <label class="addLabel" for="inDia">Diastolic</label>
-              <input class="addInput" id="inDia" inputmode="numeric" placeholder="e.g., 84" />
+            <div class="vtBox">
+              <div class="vtBoxLabel">DIA</div>
+              <input class="addInput" id="inDia" inputmode="numeric" placeholder="84" aria-label="Diastolic" />
             </div>
 
-            <div class="addField">
-              <label class="addLabel" for="inHr">Heart Rate</label>
-              <input class="addInput" id="inHr" inputmode="numeric" placeholder="e.g., 72" />
+            <div class="vtBox">
+              <div class="vtBoxLabel">HR</div>
+              <input class="addInput" id="inHr" inputmode="numeric" placeholder="72" aria-label="Heart Rate" />
             </div>
-          </div>
 
-          <div class="addRow">
-            <button class="primaryBtn" id="btnStep1Save" type="button">Save & Next</button>
-          </div>
-
-          <div class="muted addHint">
-            You may save BP only, HR only, or both. If you enter BP, you must enter both numbers.
+            <div class="vtContinueWrap">
+              <button class="primaryBtn" id="btnStep1Continue" type="button">Continue</button>
+            </div>
           </div>
         </div>
 
-        <!-- STEP 2: Symptoms + Distress (scaffold; symptoms picker can be expanded later) -->
+        <!-- STEP 2: Symptoms + Distress (existing scaffold retained) -->
         <div class="wizStep" id="wizStep2" hidden>
           <div class="addSectionTitle">Symptoms</div>
-
           <div class="muted addHint">
             Symptom selection UI is wired for future expansion. You can still Save & Next to create a symptoms-only entry later.
           </div>
-
           <div class="addRow">
             <button class="primaryBtn" id="btnStep2Save" type="button">Save & Next</button>
           </div>
         </div>
 
-        <!-- STEP 3: Mood (scaffold; dropdown can be expanded later) -->
+        <!-- STEP 3: Mood (existing scaffold retained) -->
         <div class="wizStep" id="wizStep3" hidden>
           <div class="addSectionTitle">Mood</div>
-
           <div class="muted addHint">
             Mood UI is a placeholder in this pass (no invented defaults). When you add the dropdown, this step will persist mood-only records.
           </div>
-
           <div class="addRow">
             <button class="primaryBtn" id="btnStep3Save" type="button">Save & Next</button>
           </div>
         </div>
 
-        <!-- STEP 4: Meds + Notes -->
+        <!-- STEP 4: Meds + Notes (existing scaffold retained) -->
         <div class="wizStep" id="wizStep4" hidden>
           <div class="addSectionTitle">Meds & Notes</div>
-
           <div class="addField">
             <label class="addLabel" for="inNotes">Notes</label>
             <textarea class="addTextarea" id="inNotes" rows="4" placeholder="Optional notes…"></textarea>
           </div>
-
           <div class="muted addHint">
             Meds events will be added in a later pass. Notes are saved only when non-empty.
           </div>
-
           <div class="addRow">
             <button class="primaryBtn" id="btnStep4Save" type="button">Save & Finish</button>
           </div>
@@ -186,7 +249,6 @@ Scope (this Pass)
         <!-- STEP 5: Summary -->
         <div class="wizStep" id="wizStep5" hidden>
           <div class="addSectionTitle">Saved</div>
-
           <div class="summaryGrid">
             <div class="summaryLine"><span class="muted">BP</span> <span id="sumBP">—</span></div>
             <div class="summaryLine"><span class="muted">HR</span> <span id="sumHR">—</span></div>
@@ -196,7 +258,6 @@ Scope (this Pass)
             <div class="summaryLine"><span class="muted">Meds</span> <span id="sumMeds">Meds: —</span></div>
             <div class="summaryLine"><span class="muted">Notes</span> <span id="sumNotes">Notes: —</span></div>
           </div>
-
           <div class="addRow">
             <button class="primaryBtn" id="btnSummaryClose" type="button">Close</button>
           </div>
@@ -206,14 +267,14 @@ Scope (this Pass)
   }
 
   // ---------- patch builders (module-owned only; omit empties) ----------
-  function patchVitals() {
-    const sys = readNum("inSys");
-    const dia = readNum("inDia");
-    const hr  = readNum("inHr");
+  function patchVitalsStep1() {
+    const sys = readNumNZ("inSys");
+    const dia = readNumNZ("inDia");
+    const hr  = readNumNZ("inHr");
 
     // If either BP value is provided, both are required.
     if ((sys != null && dia == null) || (sys == null && dia != null)) {
-      alert("Enter both systolic and diastolic (or leave both blank).");
+      alert("Enter both SYS and DIA (or leave both blank).");
       return { __invalid: true };
     }
 
@@ -224,24 +285,14 @@ Scope (this Pass)
   }
 
   function patchSymptoms() {
-    // In this pass, symptoms UI may be empty; do not invent data.
     const p = {};
 
     if (Array.isArray(UI.symptoms) && UI.symptoms.length) {
       p.symptoms = UI.symptoms.slice();
     }
-
-    // Only persist distress fields if explicitly set (non-null)
-    if (UI.distressComputed != null) {
-      p.distressComputed = clamp(UI.distressComputed, 0, 100);
-    }
-    if (UI.distressFinal != null) {
-      p.distressFinal = clamp(UI.distressFinal, 0, 100);
-    }
-
-    if (p.distressComputed != null && p.distressFinal != null) {
-      p.distressDelta = p.distressFinal - p.distressComputed;
-    }
+    if (UI.distressComputed != null) p.distressComputed = clamp(UI.distressComputed, 0, 100);
+    if (UI.distressFinal != null) p.distressFinal = clamp(UI.distressFinal, 0, 100);
+    if (p.distressComputed != null && p.distressFinal != null) p.distressDelta = p.distressFinal - p.distressComputed;
 
     return p;
   }
@@ -254,21 +305,14 @@ Scope (this Pass)
 
   function patchMedsNotes() {
     const p = {};
-
-    // Meds: only if non-empty (no overwriting with [])
-    if (Array.isArray(UI.meds) && UI.meds.length) {
-      p.meds = UI.meds.slice();
-    }
-
-    // Notes: only if non-empty (no overwriting with "")
+    if (Array.isArray(UI.meds) && UI.meds.length) p.meds = UI.meds.slice();
     const notes = readTxt("inNotes");
     if (notes) p.notes = notes;
-
     return p;
   }
 
   function buildPatch(step) {
-    if (step === 1) return patchVitals();
+    if (step === 1) return patchVitalsStep1();
     if (step === 2) return patchSymptoms();
     if (step === 3) return patchMood();
     if (step === 4) return patchMedsNotes();
@@ -282,9 +326,10 @@ Scope (this Pass)
   }
 
   // ---------- persistence ----------
-  async function saveStep(step) {
-    if (saving) return false;
-    if (!ensureStore()) return false;
+  async function savePatchIfAny(step) {
+    // Step 1 requirement: advance either way; save only if non-null and non-zero values exist.
+    if (saving) return { ok: true };
+    if (!ensureStore()) return { ok: true };
 
     saving = true;
     await initStore();
@@ -292,13 +337,12 @@ Scope (this Pass)
     try {
       const patch = buildPatch(step);
 
-      // Hard block on invalid step input (e.g., partial BP)
-      if (patch && patch.__invalid) return false;
+      if (patch && patch.__invalid) return { ok: false };
 
-      // If nothing to save, allow navigation (compliance: user can skip steps)
-      if (!hasMeaning(patch)) return true;
+      // If nothing to save, still allow navigation.
+      if (!hasMeaning(patch)) return { ok: true };
 
-      // First save → create record (ts anchor)
+      // First save → create record
       if (!WIZ.hasSaved) {
         const ts = nowTs();
         const rec = Object.assign({ ts }, patch);
@@ -309,17 +353,17 @@ Scope (this Pass)
         WIZ.createdTs = ts;
         WIZ.lastSaved = rec;
         WIZ.hasSaved = true;
-        return true;
+        return { ok: true };
       }
 
-      // Subsequent save → patch update (merge into lastSaved; preserve ts)
+      // Subsequent save → merge patch into lastSaved (preserve ts)
       const base = WIZ.lastSaved || {};
       const merged = Object.assign({}, base, patch, { ts: base.ts });
 
       await window.VTStore.update(WIZ.key, merged);
 
       WIZ.lastSaved = merged;
-      return true;
+      return { ok: true };
     } finally {
       saving = false;
     }
@@ -332,7 +376,6 @@ Scope (this Pass)
     for (let i = 1; i <= 5; i++) {
       const el = $("wizStep" + i);
       if (!el) continue;
-
       const on = (i === n);
       el.hidden = !on;
       if (on) el.classList.add("show");
@@ -357,7 +400,7 @@ Scope (this Pass)
     safeSetText("sumDistress", isNum(r.distressFinal) ? String(r.distressFinal) : "—");
     safeSetText("sumMood", r.mood ? ("Mood: " + r.mood) : "Mood: —");
     safeSetText("sumSymptoms", (r.symptoms && r.symptoms.length) ? ("Symptoms: " + r.symptoms.length) : "Symptoms: —");
-    safeSetText("sumMeds", (r.meds && r.meds.length) ? ("Meds: " + r.meds.map(m => m && m.name ? m.name : "").filter(Boolean).join(", ")) : "Meds: —");
+    safeSetText("sumMeds", (r.meds && r.meds.length) ? ("Meds: " + r.meds.map(m => (m && m.name) ? m.name : "").filter(Boolean).join(", ")) : "Meds: —");
     safeSetText("sumNotes", r.notes ? ("Notes: " + String(r.notes).slice(0, 120)) : "Notes: —");
   }
 
@@ -366,35 +409,40 @@ Scope (this Pass)
     if (bound) return;
     bound = true;
 
-    const b1 = $("btnStep1Save");
+    const bX = $("btnWizAbortX");
+    const b1 = $("btnStep1Continue");
     const b2 = $("btnStep2Save");
     const b3 = $("btnStep3Save");
     const b4 = $("btnStep4Save");
-
     const bClose = $("btnSummaryClose");
-    const bAbort = $("btnWizAbort");
 
+    if (bX) bX.addEventListener("click", closeWizard);
+
+    // Step 1: Continue saves only if any non-null/non-zero values exist; advances either way.
     if (b1) b1.addEventListener("click", async () => {
-      if (await saveStep(1)) showStep(2);
+      const res = await savePatchIfAny(1);
+      if (res && res.ok) showStep(2);
     });
 
     if (b2) b2.addEventListener("click", async () => {
-      if (await saveStep(2)) showStep(3);
+      const res = await savePatchIfAny(2);
+      if (res && res.ok) showStep(3);
     });
 
     if (b3) b3.addEventListener("click", async () => {
-      if (await saveStep(3)) showStep(4);
+      const res = await savePatchIfAny(3);
+      if (res && res.ok) showStep(4);
     });
 
     if (b4) b4.addEventListener("click", async () => {
-      if (await saveStep(4)) {
+      const res = await savePatchIfAny(4);
+      if (res && res.ok) {
         renderSummary();
         showStep(5);
       }
     });
 
     if (bClose) bClose.addEventListener("click", closeWizard);
-    if (bAbort) bAbort.addEventListener("click", closeWizard);
   }
 
   function resetSession() {
@@ -425,10 +473,9 @@ Scope (this Pass)
       try { window.VTPanels?.go?.("add", true); } catch (_) {}
     },
 
-    // Optional: allow panels/app to re-render wizard shell if Add panel is shown by navigation alone.
     ensureMounted() {
       // If wizard DOM isn't present, mount it (does not start a session).
-      if (!$("wizStep1") || !$("btnStep1Save")) {
+      if (!$("wizStep1") || !$("btnStep1Continue")) {
         injectWizardUI();
         resetSession();
         bind();
@@ -437,12 +484,18 @@ Scope (this Pass)
     }
   });
 
-  // Mount wizard UI on load so the Add panel is never blank.
   function boot() {
+    // Mount wizard UI on load so the Add panel is never blank.
     injectWizardUI();
     resetSession();
     bind();
     showStep(1);
+
+    // Hard-hide any Home button that may exist in the Add header (index-owned).
+    try {
+      const btnHome = document.getElementById("btnHomeFromAdd");
+      if (btnHome) btnHome.style.display = "none";
+    } catch (_) {}
   }
 
   if (document.readyState === "loading") {
@@ -454,20 +507,20 @@ Scope (this Pass)
 })();
 
 /* 
-Vitals Tracker — EOF (Wizard Add Pass Footer)
+Vitals Tracker — EOF (Jyles Method Pass Footer)
 Copyright © 2026 Wendell K. Jiles. All rights reserved.
 (Pen name: Keyth Jyles)
 
 File: js/add.js
 App Version Authority: js/version.js
-ImplementationId: ADD-20260122-001
-FileEditId: 10
+ImplementationId: JYLES-20260122-ADDSTEP1-001
+FileEditId: 11
 Edited: 2026-01-22
 
-Current file: js/add.js, File 1 of 3
+Current file: js/add.js, File 1 of 1
 
 
-Next file to fetch: js/store.js, File 2 of 3
+Next file to fetch: EOL, EOP, File 0 of 0
 
 
 
@@ -476,10 +529,12 @@ Beacon: update FileEditId by incrementing by one each time you generate a new fu
 Current file (pasted/edited in this step): js/add.js
 
 Acceptance checks
-- Wizard always starts fresh on Add.
-- Save-per-step commits patches only.
-- Empty inputs do not overwrite saved data.
-- Symptoms-only / Mood-only / Meds-only supported.
-- Summary appears only after at least one Save.
-- Close returns to Home; no resume behavior.
+- Step 1 button is “Continue”.
+- Continue saves ONLY if any new values are non-null and non-zero; advances either way.
+- SYS/DIA pair rule enforced; partial BP blocks advance.
+- Step 1: SYS/DIA/HR + Continue on one row; labels are SYS/DIA/HR bold centered.
+- No Close button; X exits. No Home button (hidden).
+- Bottom instructional commentary removed; card tightened; bottom border floats up.
+
+Test and regroup for next pass.
 */
