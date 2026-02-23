@@ -287,7 +287,6 @@
             color: #64748b;
         }
 
-        /* Reading (record) popup: click-only, closable */
         .reading-popup {
             position: absolute;
             background: rgba(15, 23, 42, 0.98);
@@ -410,6 +409,23 @@
             color: #3b82f6;
         }
 
+        .arm-btn {
+            padding: 8px 14px;
+            border-radius: 18px;
+            border: 2px solid rgba(148, 163, 184, 0.3);
+            background: rgba(15, 23, 42, 0.6);
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+        }
+
+        .arm-btn.active {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+
         .report-section {
             background: rgba(30, 41, 59, 0.6);
             border-radius: 12px;
@@ -443,25 +459,13 @@
     VITALS TRACKER
     Copyright (c) 2025-2026 Wendell Jiles. All Rights Reserved.
 
-    APP SUMMARY:
-    A comprehensive health tracking application designed for dysautonomia patients
-    and others requiring detailed vital sign monitoring. Features include:
-    - Blood pressure, heart rate, and distress level tracking
-    - Medication correlation with symptoms
-    - Interactive charting with zoom/pan capabilities
-    - Position-based readings (Standing, Sitting, Laying)
-    - Clinician-level PDF reporting
-    - Full data export/import capabilities
-    - Local-only data storage for privacy
-
     LICENSE: Proprietary - Unauthorized copying, distribution, or modification
     is strictly prohibited without written permission from Wendell Jiles.
 
-    VERSION: 2.028b
+    VERSION: 2.029b
     DEVELOPER: Keyth Jyles
     -->
 
-    <!-- Header -->
     <header class="glass-panel sticky top-0 z-50 px-4 py-3 flex items-center justify-between">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
@@ -473,13 +477,12 @@
         </div>
     </header>
 
-    <!-- Main Container -->
     <main class="p-4 max-w-md mx-auto pb-24">
 
         <!-- HOME SCREEN -->
         <div id="homeScreen" class="space-y-4">
             <div class="glass-panel rounded-3xl p-6 space-y-4">
-                <h2 class="text-3xl font-bold text-white mb-6">Home</h2>
+                <!-- Removed "Home" header to save space -->
 
                 <button onclick="showScreen('addScreen')" class="w-full btn-primary text-white font-semibold py-4 rounded-2xl text-lg transform active:scale-95 transition">
                     Add Reading
@@ -524,7 +527,7 @@
             </p>
 
             <div class="flex justify-between text-xs text-slate-600 px-2">
-                <span>v2.028b</span>
+                <span>v2.029b</span>
                 <span>© 2025-2026 Wendell Jiles</span>
             </div>
         </div>
@@ -544,13 +547,23 @@
                 <div class="text-center mb-6 text-blue-400 font-mono text-lg" id="currentTime"></div>
 
                 <!-- Position Selection -->
-                <div class="mb-6">
+                <div class="mb-4">
                     <label class="block text-sm text-slate-300 mb-3">Position</label>
                     <div class="flex gap-2 justify-center">
                         <button type="button" class="position-btn active" data-position="Laying" onclick="selectPosition(this)">Laying</button>
                         <button type="button" class="position-btn" data-position="Sitting" onclick="selectPosition(this)">Sitting</button>
                         <button type="button" class="position-btn" data-position="Standing" onclick="selectPosition(this)">Standing</button>
                     </div>
+                </div>
+
+                <!-- Arm Selection -->
+                <div class="mb-6">
+                    <label class="block text-sm text-slate-300 mb-3">Arm</label>
+                    <div class="flex gap-2 justify-center">
+                        <button type="button" class="arm-btn active" data-arm="Left" onclick="selectArm(this)">Left</button>
+                        <button type="button" class="arm-btn" data-arm="Right" onclick="selectArm(this)">Right</button>
+                    </div>
+                    <div class="text-xs text-slate-500 mt-2 text-center">Recorded arm is stored with the reading.</div>
                 </div>
 
                 <!-- Vitals Inputs -->
@@ -578,7 +591,7 @@
                 <!-- Distress Level -->
                 <div class="mb-6">
                     <label class="block text-sm text-slate-300 mb-2 flex justify-between">
-                        <span>Discomfort Level</span>
+                        <span>Distress</span>
                         <span id="distressValue" class="text-blue-400 font-bold">0</span>
                     </label>
                     <input type="range" id="distressLevel" min="0" max="10" value="0"
@@ -660,9 +673,7 @@
                             + Manage Meds
                         </button>
                     </div>
-                    <div id="medicationList" class="space-y-2 max-h-40 overflow-y-auto">
-                        <!-- Dynamic medication checkboxes -->
-                    </div>
+                    <div id="medicationList" class="space-y-2 max-h-40 overflow-y-auto"></div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
@@ -693,22 +704,16 @@
                     </div>
                 </div>
 
-                <!-- Date Range Display -->
-                <div class="text-center text-slate-400 text-sm mb-4 font-mono" id="chartDateRange">
-                    Loading...
-                </div>
+                <div class="text-center text-slate-400 text-sm mb-4 font-mono" id="chartDateRange">Loading...</div>
 
-                <!-- Medication Toggle -->
                 <div class="flex items-center justify-between mb-4 bg-slate-800/50 p-3 rounded-xl">
                     <span class="text-sm text-slate-300">Show Medications</span>
                     <div class="toggle-switch active" id="medToggle" onclick="toggleMedications()"></div>
                 </div>
 
-                <!-- Chart Container -->
                 <div class="chart-container mb-4" id="chartWrapper">
                     <canvas id="vitalsChart"></canvas>
 
-                    <!-- Medication Popup -->
                     <div id="medPopup" class="med-popup">
                         <div class="med-popup-header">
                             <span class="text-yellow-400 font-bold text-lg">💊 Medications</span>
@@ -720,7 +725,6 @@
                         <div class="med-popup-time" id="medPopupTime"></div>
                     </div>
 
-                    <!-- Reading Popup (click-only) -->
                     <div id="readingPopup" class="reading-popup">
                         <div class="reading-popup-header">
                             <span class="text-blue-200 font-bold text-base">📍 Reading</span>
@@ -731,7 +735,6 @@
                     </div>
                 </div>
 
-                <!-- Legend -->
                 <div class="space-y-2 mb-4">
                     <div class="text-sm font-semibold text-slate-300 mb-2">Blood Pressure Bands</div>
                     <div class="grid grid-cols-2 gap-2 text-xs">
@@ -758,7 +761,6 @@
                     </div>
                 </div>
 
-                <!-- Bands Opacity Slider -->
                 <div class="bg-slate-800/50 p-4 rounded-xl mb-4">
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-sm text-slate-300">Band Opacity</span>
@@ -796,9 +798,7 @@
                     </div>
                 </div>
 
-                <div id="logEntries" class="space-y-3 max-h-[60vh] overflow-y-auto">
-                    <!-- Dynamic log entries -->
-                </div>
+                <div id="logEntries" class="space-y-3 max-h-[60vh] overflow-y-auto"></div>
             </div>
         </div>
 
@@ -844,9 +844,7 @@
                     </button>
                 </div>
 
-                <div id="reportContent" class="space-y-4 max-h-[60vh] overflow-y-auto">
-                    <!-- Report content generated here -->
-                </div>
+                <div id="reportContent" class="space-y-4 max-h-[60vh] overflow-y-auto"></div>
 
                 <button onclick="generatePDF()" class="w-full btn-primary text-white font-semibold py-4 rounded-2xl text-lg mt-6">
                     Save as PDF
@@ -876,9 +874,7 @@
                     </div>
                 </div>
 
-                <div id="settingsMedList" class="space-y-2 max-h-64 overflow-y-auto mb-6">
-                    <!-- Dynamic medication list -->
-                </div>
+                <div id="settingsMedList" class="space-y-2 max-h-64 overflow-y-auto mb-6"></div>
 
                 <div class="border-t border-slate-700 pt-4">
                     <h3 class="text-lg font-semibold text-white mb-3">Data Management</h3>
@@ -898,7 +894,6 @@
         </div>
     </main>
 
-    <!-- Confirmation Dialog -->
     <div id="confirmDialog" class="confirm-dialog">
         <div class="confirm-box">
             <h3 class="text-lg font-bold text-white mb-2" id="confirmTitle">Confirm</h3>
@@ -911,16 +906,6 @@
     </div>
 
     <script>
-        /*
-         * VITALS TRACKER - CORE APPLICATION LOGIC
-         * Copyright (c) 2025-2026 Wendell Jiles. All Rights Reserved.
-         *
-         * This application is designed for comprehensive vital sign tracking
-         * with specific focus on dysautonomia and related conditions.
-         * All data processing occurs locally on the user's device.
-         */
-
-        // Data Store
         let readings = JSON.parse(localStorage.getItem('vitals_readings') || '[]');
         let medications = JSON.parse(localStorage.getItem('vitals_medications') || '["Lisinopril", "Metoprolol", "Gabapentin", "Propranolol", "Lamotrigine"]');
         let chartInstance = null;
@@ -933,18 +918,16 @@
         let currentReadingPopup = null;
         let confirmCallback = null;
         let currentPosition = 'Laying';
+        let currentArm = 'Left';
 
-        // Constants for zoom limits
         const ONE_HOUR = 60 * 60 * 1000;
         const ONE_MONTH = 30 * 24 * 60 * 60 * 1000;
 
-        // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             updateTime();
             setInterval(updateTime, 1000);
             loadMedicationList();
 
-            // Close popups on outside click (med + reading)
             document.addEventListener('click', (e) => {
                 const isInsideMed = e.target.closest('.med-popup');
                 const isInsideReading = e.target.closest('.reading-popup');
@@ -978,7 +961,7 @@
             document.querySelectorAll('main > div').forEach(div => div.classList.add('hidden'));
             document.getElementById(screenId).classList.remove('hidden');
 
-            if (screenId === 'chartScreen') setTimeout(initChart, 50);
+            if (screenId === 'chartScreen') setTimeout(initChart, 60);
             if (screenId === 'logScreen') renderLog();
             if (screenId === 'settingsScreen') renderSettingsMedList();
             if (screenId === 'reportScreen') generateReport();
@@ -995,7 +978,12 @@
             currentPosition = btn.dataset.position;
         }
 
-        // Data Import from Text
+        function selectArm(btn) {
+            document.querySelectorAll('.arm-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentArm = btn.dataset.arm;
+        }
+
         function parseAndImport() {
             const text = document.getElementById('importData').value;
             const statusEl = document.getElementById('importStatus');
@@ -1012,7 +1000,6 @@
             for (let i = 0; i < lines.length; i++) {
                 const line = lines[i].trim();
 
-                // Match date line: 02/22/2026, 12:55:32 PM
                 const dateMatch = line.match(/^(\d{2}\/\d{2}\/\d{4}),\s*(\d{1,2}:\d{2}:\d{2}\s*(?:AM|PM))$/i);
                 if (dateMatch) {
                     if (currentEntry) newReadings.push(currentEntry);
@@ -1030,6 +1017,7 @@
                         heartRate: null,
                         distress: 0,
                         position: 'Unknown',
+                        arm: 'Unknown',
                         notes: '',
                         symptoms: [],
                         medications: []
@@ -1037,7 +1025,6 @@
                     continue;
                 }
 
-                // Match BP/HR: BP 129/89 • HR 77
                 const bpMatch = line.match(/BP\s+(\d+)\/(\d+)(?:\s*•\s*HR\s+(\d+))?/i);
                 if (bpMatch && currentEntry) {
                     currentEntry.systolic = parseInt(bpMatch[1]);
@@ -1046,7 +1033,6 @@
                     continue;
                 }
 
-                // Match Symptoms: Symptoms: Sweaty, Panic, Headache
                 const symptomsMatch = line.match(/^Symptoms:\s*(.+)$/i);
                 if (symptomsMatch && currentEntry) {
                     const symptomsList = symptomsMatch[1].split(',').map(s => s.trim()).filter(s => s && s !== 'None');
@@ -1054,17 +1040,18 @@
                     continue;
                 }
 
-                // Match Notes: Notes: ...
                 const notesMatch = line.match(/^Notes:\s*(.+)$/i);
                 if (notesMatch && currentEntry) {
                     currentEntry.notes = notesMatch[1];
 
-                    // Extract position from notes
+                    // crude arm inference (if present in notes)
+                    if (currentEntry.notes.match(/\b(?:LA|Left Arm|L\. Arm)\b/i)) currentEntry.arm = 'Left';
+                    else if (currentEntry.notes.match(/\b(?:RA|Right Arm|R\. Arm)\b/i)) currentEntry.arm = 'Right';
+
                     if (currentEntry.notes.match(/\b(?:SLA|Standing)\b/i)) currentEntry.position = 'Standing';
                     else if (currentEntry.notes.match(/\b(?:Sitting)\b/i)) currentEntry.position = 'Sitting';
                     else if (currentEntry.notes.match(/\b(?:Laying|Supine)\b/i)) currentEntry.position = 'Laying';
 
-                    // Extract medications from notes
                     const medPatterns = ['Gab', 'Li', 'Pr', 'La', 'Kk', 'Riz', 'Hyo'];
                     const foundMeds = [];
                     medPatterns.forEach(med => {
@@ -1078,14 +1065,11 @@
                                 'Riz': 'Rizatriptan',
                                 'Hyo': 'Hyoscyamine'
                             };
-                            if (fullNames[med] && !foundMeds.includes(fullNames[med])) {
-                                foundMeds.push(fullNames[med]);
-                            }
+                            if (fullNames[med] && !foundMeds.includes(fullNames[med])) foundMeds.push(fullNames[med]);
                         }
                     });
                     if (foundMeds.length) currentEntry.medications = foundMeds;
 
-                    // Extract distress level
                     const distressMatch = currentEntry.notes.match(/(\d+)\s*\/\s*10/);
                     if (distressMatch) currentEntry.distress = parseInt(distressMatch[1]);
                 }
@@ -1103,115 +1087,181 @@
             }
         }
 
-        // Report Generation
+        // Clinician-facing: what they typically want:
+        // - recent timeline (last 10 readings)
+        // - peaks/outliers (highest SYS/DIA, lowest)
+        // - frequency of hypertensive ranges
+        // - symptom correlation (e.g., panic/sweaty with BP spikes)
+        // - medication context (what was taken around spikes)
+        // - position/arm context (standing vs supine; left vs right)
         function generateReport() {
             const container = document.getElementById('reportContent');
             const now = new Date();
             const sixtyDaysAgo = new Date(now - 60 * 24 * 60 * 60 * 1000);
 
-            const recentReadings = readings.filter(r => new Date(r.timestamp) >= sixtyDaysAgo);
+            const recentReadings = readings
+                .filter(r => new Date(r.timestamp) >= sixtyDaysAgo)
+                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
             if (recentReadings.length === 0) {
                 container.innerHTML = '<div class="text-slate-500 text-center py-8">No data available for the last 60 days</div>';
                 return;
             }
 
-            // Calculate statistics
-            const systolics = recentReadings.map(r => r.systolic).filter(v => v);
-            const diastolics = recentReadings.map(r => r.diastolic).filter(v => v);
-            const heartRates = recentReadings.map(r => r.heartRate).filter(v => v);
-            const distressLevels = recentReadings.map(r => r.distress).filter(v => v > 0);
+            const systolics = recentReadings.map(r => r.systolic).filter(v => v || v === 0).filter(v => v !== null);
+            const diastolics = recentReadings.map(r => r.diastolic).filter(v => v || v === 0).filter(v => v !== null);
+            const heartRates = recentReadings.map(r => r.heartRate).filter(v => v || v === 0).filter(v => v !== null);
+            const distressLevels = recentReadings.map(r => r.distress).filter(v => v !== null && v !== undefined);
 
-            const avgSys = systolics.length ? Math.round(systolics.reduce((a, b) => a + b, 0) / systolics.length) : 0;
-            const avgDia = diastolics.length ? Math.round(diastolics.reduce((a, b) => a + b, 0) / diastolics.length) : 0;
-            const avgHR = heartRates.length ? Math.round(heartRates.reduce((a, b) => a + b, 0) / heartRates.length) : 0;
-            const avgDistress = distressLevels.length ? (distressLevels.reduce((a, b) => a + b, 0) / distressLevels.length).toFixed(1) : 0;
+            const avg = (arr) => arr.length ? (arr.reduce((a,b)=>a+b,0)/arr.length) : 0;
+            const round = (n) => Math.round(n);
+
+            const avgSys = round(avg(systolics));
+            const avgDia = round(avg(diastolics));
+            const avgHR = round(avg(heartRates));
+            const avgDistress = distressLevels.length ? avg(distressLevels).toFixed(1) : '0.0';
 
             const maxSys = systolics.length ? Math.max(...systolics) : 0;
             const minSys = systolics.length ? Math.min(...systolics) : 0;
+            const maxDia = diastolics.length ? Math.max(...diastolics) : 0;
+            const minDia = diastolics.length ? Math.min(...diastolics) : 0;
 
-            // Count symptoms
+            const stageCounts = { normal: 0, elevated: 0, stage1: 0, stage2: 0, crisis: 0 };
+            recentReadings.forEach(r => {
+                const s = r.systolic;
+                if (!s) return;
+                if (s >= 180) stageCounts.crisis++;
+                else if (s >= 140) stageCounts.stage2++;
+                else if (s >= 130) stageCounts.stage1++;
+                else if (s >= 120) stageCounts.elevated++;
+                else stageCounts.normal++;
+            });
+
             const symptomCounts = {};
-            recentReadings.forEach(r => {
-                r.symptoms?.forEach(s => {
-                    symptomCounts[s] = (symptomCounts[s] || 0) + 1;
-                });
-            });
+            recentReadings.forEach(r => (r.symptoms || []).forEach(s => symptomCounts[s] = (symptomCounts[s] || 0) + 1));
 
-            // Count medications
             const medCounts = {};
-            recentReadings.forEach(r => {
-                r.medications?.forEach(m => {
-                    medCounts[m] = (medCounts[m] || 0) + 1;
-                });
-            });
+            recentReadings.forEach(r => (r.medications || []).forEach(m => medCounts[m] = (medCounts[m] || 0) + 1));
+
+            const flags = recentReadings
+                .filter(r => (r.systolic && r.systolic >= 140) || (r.diastolic && r.diastolic >= 90) || (r.distress && r.distress >= 7) || (r.symptoms || []).includes('Panic'))
+                .slice(0, 8);
+
+            const lastN = recentReadings.slice(0, 10);
+
+            const pct = (n) => recentReadings.length ? Math.round((n / recentReadings.length) * 100) : 0;
 
             container.innerHTML = `
                 <div class="report-section">
-                    <h3 class="text-lg font-bold text-white mb-3">Report Summary</h3>
-                    <p class="text-slate-400 text-sm mb-2">Generated: ${now.toLocaleString('en-US')}</p>
-                    <p class="text-slate-400 text-sm mb-2">Period: Last 60 days (${recentReadings.length} readings)</p>
-                    <p class="text-slate-400 text-sm">© 2025-2026 Wendell Jiles</p>
+                    <h3 class="text-lg font-bold text-white mb-2">Clinical Summary (Last 60 Days)</h3>
+                    <p class="text-slate-400 text-sm mb-1">Generated: ${now.toLocaleString('en-US')}</p>
+                    <p class="text-slate-400 text-sm mb-1">Readings: ${recentReadings.length}</p>
+                    <p class="text-slate-500 text-xs">Local-only patient-entered data (no cloud sync). © 2025-2026 Wendell Jiles</p>
                 </div>
 
                 <div class="report-section">
-                    <h3 class="text-lg font-bold text-white mb-3">Vital Statistics</h3>
+                    <h3 class="text-lg font-bold text-white mb-3">Vitals Overview</h3>
                     <div class="grid grid-cols-2 gap-3">
                         <div class="stat-card">
                             <div class="text-2xl font-bold text-blue-400">${avgSys}/${avgDia}</div>
-                            <div class="text-xs text-slate-400">Avg BP</div>
+                            <div class="text-xs text-slate-400">Average BP</div>
                         </div>
                         <div class="stat-card">
                             <div class="text-2xl font-bold text-green-400">${avgHR}</div>
-                            <div class="text-xs text-slate-400">Avg HR</div>
+                            <div class="text-xs text-slate-400">Average HR</div>
                         </div>
                         <div class="stat-card">
                             <div class="text-2xl font-bold text-pink-400">${avgDistress}</div>
-                            <div class="text-xs text-slate-400">Avg Discomfort</div>
+                            <div class="text-xs text-slate-400">Average Distress</div>
                         </div>
                         <div class="stat-card">
-                            <div class="text-2xl font-bold text-yellow-400">${maxSys}/${minSys}</div>
-                            <div class="text-xs text-slate-400">Max/Min Sys</div>
+                            <div class="text-xs text-slate-400">BP Range</div>
+                            <div class="text-sm font-semibold text-slate-200 mt-1">SYS ${minSys}–${maxSys}</div>
+                            <div class="text-sm font-semibold text-slate-200">DIA ${minDia}–${maxDia}</div>
                         </div>
                     </div>
                 </div>
 
                 <div class="report-section">
+                    <h3 class="text-lg font-bold text-white mb-3">Hypertension Burden (Systolic)</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between"><span class="text-slate-300">Normal (&lt;120)</span><span class="text-blue-300 font-semibold">${stageCounts.normal} (${pct(stageCounts.normal)}%)</span></div>
+                        <div class="flex justify-between"><span class="text-slate-300">Elevated (120–129)</span><span class="text-purple-300 font-semibold">${stageCounts.elevated} (${pct(stageCounts.elevated)}%)</span></div>
+                        <div class="flex justify-between"><span class="text-slate-300">Stage 1 (130–139)</span><span class="text-yellow-300 font-semibold">${stageCounts.stage1} (${pct(stageCounts.stage1)}%)</span></div>
+                        <div class="flex justify-between"><span class="text-slate-300">Stage 2 (140–179)</span><span class="text-red-300 font-semibold">${stageCounts.stage2} (${pct(stageCounts.stage2)}%)</span></div>
+                        <div class="flex justify-between"><span class="text-slate-300">Crisis (≥180)</span><span class="text-red-400 font-semibold">${stageCounts.crisis} (${pct(stageCounts.crisis)}%)</span></div>
+                    </div>
+                    <div class="text-xs text-slate-500 mt-2">Counts are based on systolic entries present in this 60-day window.</div>
+                </div>
+
+                <div class="report-section">
                     <h3 class="text-lg font-bold text-white mb-3">Most Common Symptoms</h3>
-                    ${Object.entries(symptomCounts)
-                        .sort((a, b) => b[1] - a[1])
-                        .slice(0, 5)
-                        .map(([symptom, count]) => `
-                            <div class="flex justify-between items-center py-2 border-b border-slate-700 last:border-0">
-                                <span class="text-slate-300">${symptom}</span>
-                                <span class="text-blue-400 font-bold">${count} times</span>
-                            </div>
-                        `).join('') || '<p class="text-slate-500">No symptoms recorded</p>'}
+                    ${
+                        Object.keys(symptomCounts).length
+                            ? Object.entries(symptomCounts).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([s,c])=>`
+                                <div class="flex justify-between items-center py-2 border-b border-slate-700 last:border-0">
+                                    <span class="text-slate-300">${s}</span>
+                                    <span class="text-blue-400 font-bold">${c}</span>
+                                </div>
+                              `).join('')
+                            : '<p class="text-slate-500">No symptoms recorded</p>'
+                    }
                 </div>
 
                 <div class="report-section">
-                    <h3 class="text-lg font-bold text-white mb-3">Medication Usage</h3>
-                    ${Object.entries(medCounts)
-                        .sort((a, b) => b[1] - a[1])
-                        .map(([med, count]) => `
-                            <div class="flex justify-between items-center py-2 border-b border-slate-700 last:border-0">
-                                <span class="text-slate-300">${med}</span>
-                                <span class="text-yellow-400 font-bold">${count} doses</span>
-                            </div>
-                        `).join('') || '<p class="text-slate-500">No medications recorded</p>'}
+                    <h3 class="text-lg font-bold text-white mb-3">Medication Mentions (within readings)</h3>
+                    ${
+                        Object.keys(medCounts).length
+                            ? Object.entries(medCounts).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([m,c])=>`
+                                <div class="flex justify-between items-center py-2 border-b border-slate-700 last:border-0">
+                                    <span class="text-slate-300">${m}</span>
+                                    <span class="text-yellow-400 font-bold">${c}</span>
+                                </div>
+                              `).join('')
+                            : '<p class="text-slate-500">No medications recorded</p>'
+                    }
+                    <div class="text-xs text-slate-500 mt-2">This reflects meds checked during entry (not a pharmacy record).</div>
                 </div>
 
                 <div class="report-section">
-                    <h3 class="text-lg font-bold text-white mb-3">Position Analysis</h3>
-                    ${['Standing', 'Sitting', 'Laying'].map(pos => {
-                        const posReadings = recentReadings.filter(r => r.position === pos);
-                        if (posReadings.length === 0) return '';
-                        const posSys = posReadings.map(r => r.systolic).filter(v => v);
-                        const avgPosSys = posSys.length ? Math.round(posSys.reduce((a, b) => a + b, 0) / posSys.length) : 0;
+                    <h3 class="text-lg font-bold text-white mb-3">Flagged Episodes (Top 8)</h3>
+                    ${
+                        flags.length
+                            ? flags.map(r => {
+                                const d = new Date(r.timestamp);
+                                const ds = d.toLocaleDateString('en-US');
+                                const ts = d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+                                const sx = r.systolic ?? '--';
+                                const dx = r.diastolic ?? '--';
+                                const hr = r.heartRate ?? '--';
+                                const dist = (r.distress ?? 0);
+                                const sym = (r.symptoms || []).slice(0,4).join(', ');
+                                const arm = r.arm || 'Unknown';
+                                return `
+                                    <div class="py-2 border-b border-slate-700 last:border-0 text-sm">
+                                        <div class="text-slate-200 font-semibold">${ds} ${ts}</div>
+                                        <div class="text-slate-300">BP ${sx}/${dx} • HR ${hr} • Distress ${dist}/10 • ${r.position || 'Unknown'} • Arm: ${arm}</div>
+                                        ${sym ? `<div class="text-xs text-slate-400">Symptoms: ${sym}</div>` : ''}
+                                        ${r.medications?.length ? `<div class="text-xs text-yellow-300">Meds: ${r.medications.join(', ')}</div>` : ''}
+                                        ${r.notes ? `<div class="text-xs text-slate-500">${escapeHtml(r.notes).slice(0,140)}${r.notes.length>140?'…':''}</div>` : ''}
+                                    </div>
+                                `;
+                              }).join('')
+                            : '<p class="text-slate-500">No flagged episodes</p>'
+                    }
+                </div>
+
+                <div class="report-section">
+                    <h3 class="text-lg font-bold text-white mb-3">Most Recent Readings (Last 10)</h3>
+                    ${lastN.map(r => {
+                        const d = new Date(r.timestamp);
+                        const ds = d.toLocaleDateString('en-US');
+                        const ts = d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
                         return `
-                            <div class="flex justify-between items-center py-2 border-b border-slate-700 last:border-0">
-                                <span class="text-slate-300">${pos}</span>
-                                <span class="text-blue-400 font-bold">${posReadings.length} readings, Avg SYS ${avgPosSys}</span>
+                            <div class="py-2 border-b border-slate-700 last:border-0 text-sm">
+                                <div class="text-slate-200 font-semibold">${ds} ${ts}</div>
+                                <div class="text-slate-300">BP ${r.systolic ?? '--'}/${r.diastolic ?? '--'} • HR ${r.heartRate ?? '--'} • Distress ${r.distress ?? 0}/10 • ${r.position || 'Unknown'} • Arm: ${r.arm || 'Unknown'}</div>
+                                ${(r.symptoms && r.symptoms.length) ? `<div class="text-xs text-slate-400">Symptoms: ${r.symptoms.join(', ')}</div>` : ''}
                             </div>
                         `;
                     }).join('')}
@@ -1220,10 +1270,7 @@
                 <div class="report-section">
                     <h3 class="text-lg font-bold text-white mb-3">Clinical Notes</h3>
                     <p class="text-slate-400 text-sm leading-relaxed">
-                        This report summarizes vital sign data collected over the last 60 days.
-                        Blood pressure variability, heart rate trends, symptom correlation, and
-                        medication timing are included for clinical review. All data was collected
-                        using the Vitals Tracker application with manual entry by the patient.
+                        This report prioritizes recent readings, outliers, symptom clusters, medication context, and position/arm details. It is intended to support clinical review of episodic BP/HR variability and associated distress/symptoms.
                     </p>
                     <p class="text-slate-500 text-xs mt-4">
                         CONFIDENTIAL MEDICAL INFORMATION - Copyright Wendell Jiles 2025-2026
@@ -1236,95 +1283,69 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
 
-            // Header
-            doc.setFontSize(20);
-            doc.text('Vitals Tracker - Clinical Report', 20, 20);
+            doc.setFontSize(18);
+            doc.text('Vitals Tracker - Clinical Report', 14, 18);
 
             doc.setFontSize(10);
-            doc.text(`Generated: ${new Date().toLocaleString('en-US')}`, 20, 30);
-            doc.text('© 2025-2026 Wendell Jiles - All Rights Reserved', 20, 35);
-            doc.text('CONFIDENTIAL MEDICAL INFORMATION', 20, 40);
+            doc.text(`Generated: ${new Date().toLocaleString('en-US')}`, 14, 26);
+            doc.text('© 2025-2026 Wendell Jiles - All Rights Reserved', 14, 31);
+            doc.text('CONFIDENTIAL MEDICAL INFORMATION', 14, 36);
 
-            // Get report data
             const now = new Date();
             const sixtyDaysAgo = new Date(now - 60 * 24 * 60 * 60 * 1000);
-            const recentReadings = readings.filter(r => new Date(r.timestamp) >= sixtyDaysAgo);
+            const recentReadings = readings
+                .filter(r => new Date(r.timestamp) >= sixtyDaysAgo)
+                .sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
 
-            let y = 55;
+            let y = 46;
 
-            // Summary
-            doc.setFontSize(14);
-            doc.text('Summary Statistics', 20, y);
-            y += 10;
+            const lastN = recentReadings.slice(0, 12);
 
-            doc.setFontSize(10);
-            doc.text(`Total Readings (60 days): ${recentReadings.length}`, 20, y);
-            y += 7;
+            doc.setFontSize(12);
+            doc.text(`Readings in last 60 days: ${recentReadings.length}`, 14, y);
+            y += 8;
 
-            // Calculate and add stats
-            const systolics = recentReadings.map(r => r.systolic).filter(v => v);
-            const avgSys = systolics.length ? Math.round(systolics.reduce((a, b) => a + b, 0) / systolics.length) : 0;
-            const maxSys = systolics.length ? Math.max(...systolics) : 0;
-            const minSys = systolics.length ? Math.min(...systolics) : 0;
+            doc.setFontSize(12);
+            doc.text('Most Recent Readings', 14, y);
+            y += 6;
 
-            doc.text(`Average Systolic: ${avgSys} mmHg`, 20, y);
-            y += 7;
-            doc.text(`Systolic Range: ${minSys} - ${maxSys} mmHg`, 20, y);
-            y += 15;
-
-            // Recent readings table
-            if (y > 250) {
-                doc.addPage();
-                y = 20;
-            }
-
-            doc.setFontSize(14);
-            doc.text('Recent Readings (Last 30 Days)', 20, y);
-            y += 10;
-
-            doc.setFontSize(8);
-            const last30 = recentReadings.slice(0, 30);
-            last30.forEach(r => {
-                if (y > 280) {
-                    doc.addPage();
-                    y = 20;
-                }
-                const date = new Date(r.timestamp).toLocaleDateString('en-US');
-                const time = new Date(r.timestamp).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'});
-                const line = `${date} ${time} | BP ${r.systolic || '--'}/${r.diastolic || '--'} | HR ${r.heartRate || '--'} | ${r.position || 'Unknown'} | Discomfort: ${r.distress}/10`;
-                doc.text(line, 20, y);
+            doc.setFontSize(9);
+            lastN.forEach(r => {
+                if (y > 280) { doc.addPage(); y = 18; }
+                const d = new Date(r.timestamp);
+                const ds = d.toLocaleDateString('en-US');
+                const ts = d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+                const line = `${ds} ${ts} | BP ${r.systolic ?? '--'}/${r.diastolic ?? '--'} | HR ${r.heartRate ?? '--'} | Distress ${r.distress ?? 0}/10 | ${r.position || 'Unknown'} | Arm ${r.arm || 'Unknown'}`;
+                doc.text(line, 14, y);
                 y += 5;
             });
 
-            doc.save(`Vitals_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+            y += 4;
+            doc.setFontSize(10);
+            doc.text('Notes: Patient-entered readings; intended for clinical correlation with symptoms, position, medications, and episodes.', 14, y);
+
+            doc.save(`Vitals_Clinical_Report_${new Date().toISOString().split('T')[0]}.pdf`);
         }
 
-        // Medication Management
         function loadMedicationList() {
             const container = document.getElementById('medicationList');
-
             const html = medications.map((med, idx) => `
                 <label class="flex items-center gap-3 p-2 rounded-lg bg-slate-800/50 cursor-pointer hover:bg-slate-800 transition">
                     <input type="checkbox" class="symptom-checkbox med-checkbox" value="${med}" data-idx="${idx}">
                     <span class="text-slate-300 text-sm flex-1">${med}</span>
                 </label>
             `).join('');
-
             if (container) container.innerHTML = html;
         }
 
         function renderSettingsMedList() {
             const container = document.getElementById('settingsMedList');
-
             const html = medications.map((med, idx) => `
                 <div class="flex items-center justify-between p-3 rounded-lg bg-slate-800/50">
                     <span class="text-slate-300 text-sm">${med}</span>
-                    <button onclick="confirmDeleteMedication(${idx})" class="delete-btn">
-                        Delete
-                    </button>
+                    <button onclick="confirmDeleteMedication(${idx})" class="delete-btn">Delete</button>
                 </div>
             `).join('');
-
             if (container) container.innerHTML = html;
         }
 
@@ -1336,7 +1357,6 @@
                 loadMedicationList();
                 closeConfirmDialog();
             };
-
             document.getElementById('confirmTitle').textContent = 'Delete Medication';
             document.getElementById('confirmMessage').textContent = `Are you sure you want to delete "${medications[idx]}"? This will not affect existing records.`;
             document.getElementById('confirmDialog').classList.add('active');
@@ -1363,15 +1383,9 @@
             }
         }
 
-        function showMedicationManager() {
-            showScreen('settingsScreen');
-        }
+        function showMedicationManager() { showScreen('settingsScreen'); }
+        function backFromSettings() { showScreen('addScreen'); }
 
-        function backFromSettings() {
-            showScreen('addScreen');
-        }
-
-        // Form Handling
         function handleEnter(e, nextId) {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -1389,18 +1403,21 @@
             document.getElementById('distressValue').textContent = '0';
             document.querySelectorAll('.symptom-checkbox:not(.med-checkbox)').forEach(cb => cb.checked = false);
             document.querySelectorAll('.med-checkbox').forEach(cb => cb.checked = false);
+
             document.querySelectorAll('.position-btn').forEach(b => b.classList.remove('active'));
             document.querySelector('[data-position="Laying"]').classList.add('active');
             currentPosition = 'Laying';
+
+            document.querySelectorAll('.arm-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('[data-arm="Left"]').classList.add('active');
+            currentArm = 'Left';
+
             unsavedChanges = false;
         }
 
         function cancelAdd() {
             if (unsavedChanges) {
-                if (confirm('You have unsaved changes. Save them?')) {
-                    saveReading();
-                    return;
-                }
+                if (confirm('You have unsaved changes. Save them?')) { saveReading(); return; }
             }
             showScreen('homeScreen');
         }
@@ -1412,10 +1429,8 @@
             const notes = document.getElementById('notes').value;
             const distress = document.getElementById('distressLevel').value;
 
-            const symptoms = Array.from(document.querySelectorAll('.symptom-checkbox:not(.med-checkbox):checked'))
-                .map(cb => cb.value);
-            const medsTaken = Array.from(document.querySelectorAll('.med-checkbox:checked'))
-                .map(cb => cb.value);
+            const symptoms = Array.from(document.querySelectorAll('.symptom-checkbox:not(.med-checkbox):checked')).map(cb => cb.value);
+            const medsTaken = Array.from(document.querySelectorAll('.med-checkbox:checked')).map(cb => cb.value);
 
             const reading = {
                 id: currentEditId || Date.now(),
@@ -1425,6 +1440,7 @@
                 heartRate: heartRate ? parseInt(heartRate) : null,
                 distress: parseInt(distress) || 0,
                 position: currentPosition,
+                arm: currentArm,
                 notes: notes || '',
                 symptoms: symptoms,
                 medications: medsTaken
@@ -1442,7 +1458,6 @@
             showScreen('homeScreen');
         }
 
-        // Log Screen with Inline Editing
         function getBPColorClass(systolic) {
             if (!systolic) return 'text-slate-400';
             if (systolic >= 180) return 'bp-crisis';
@@ -1475,9 +1490,7 @@
                 const distressClass = getDistressClass(r.distress);
                 const isEditing = editingLogId === r.id;
 
-                if (isEditing) {
-                    return renderEditForm(r, dateStr, timeStr);
-                }
+                if (isEditing) return renderEditForm(r, dateStr, timeStr);
 
                 return `
                     <div class="log-entry rounded-2xl p-4" id="log-${r.id}">
@@ -1499,7 +1512,7 @@
                             </div>
                         </div>
                         <div class="text-slate-400 text-sm mb-1 cursor-pointer" onclick="enableInlineEdit(${r.id})">
-                            ${dateStr}, ${timeStr} • ${r.position || 'Unknown'}
+                            ${dateStr}, ${timeStr} • ${r.position || 'Unknown'} • Arm: ${r.arm || 'Unknown'}
                         </div>
                         ${r.medications?.length ? `
                             <div class="flex flex-wrap gap-1 mb-2 cursor-pointer" onclick="enableInlineEdit(${r.id})">
@@ -1526,8 +1539,20 @@
                         <div class="flex gap-2">
                             ${['Laying', 'Sitting', 'Standing'].map(pos => `
                                 <button type="button" class="position-btn ${r.position === pos ? 'active' : ''}"
-                                    onclick="this.classList.toggle('active'); document.querySelectorAll('.position-btn').forEach(b => { if(b !== this) b.classList.remove('active'); }); this.dataset.selected = '${pos}'">
+                                    onclick="document.querySelectorAll('#log-edit-${r.id} .position-btn').forEach(b => b.classList.remove('active')); this.classList.add('active'); this.dataset.selected='${pos}'">
                                     ${pos}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="text-xs text-slate-500 block mb-2">Arm</label>
+                        <div class="flex gap-2">
+                            ${['Left', 'Right'].map(a => `
+                                <button type="button" class="arm-btn ${r.arm === a ? 'active' : ''}"
+                                    onclick="document.querySelectorAll('#log-edit-${r.id} .arm-btn').forEach(b => b.classList.remove('active')); this.classList.add('active'); this.dataset.selected='${a}'">
+                                    ${a}
                                 </button>
                             `).join('')}
                         </div>
@@ -1549,7 +1574,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="text-xs text-slate-500 block mb-1">Discomfort (0-10)</label>
+                        <label class="text-xs text-slate-500 block mb-1">Distress (0-10)</label>
                         <input type="number" id="edit-distress-${r.id}" value="${r.distress || 0}" min="0" max="10" class="inline-input">
                     </div>
 
@@ -1578,9 +1603,7 @@
         }
 
         function enableInlineEdit(id, field) {
-            if (editingLogId && editingLogId !== id) {
-                cancelInlineEdit(editingLogId);
-            }
+            if (editingLogId && editingLogId !== id) cancelInlineEdit(editingLogId);
             editingLogId = id;
             renderLog();
 
@@ -1607,13 +1630,13 @@
             const distress = document.getElementById(`edit-distress-${id}`).value;
             const notes = document.getElementById(`edit-notes-${id}`).value;
 
-            // Get selected position
             const posBtn = document.querySelector(`#log-edit-${id} .position-btn.active`);
             if (posBtn) reading.position = posBtn.dataset.selected || posBtn.textContent.trim();
 
-            const medsTaken = medications.filter(med =>
-                document.getElementById(`edit-med-${id}-${med}`)?.checked
-            );
+            const armBtn = document.querySelector(`#log-edit-${id} .arm-btn.active`);
+            if (armBtn) reading.arm = armBtn.dataset.selected || armBtn.textContent.trim();
+
+            const medsTaken = medications.filter(med => document.getElementById(`edit-med-${id}-${med}`)?.checked);
 
             reading.systolic = sys ? parseInt(sys) : null;
             reading.diastolic = dia ? parseInt(dia) : null;
@@ -1627,39 +1650,10 @@
             renderLog();
         }
 
-        // Chart Implementation
         function updateBandOpacity(value) {
             bandOpacity = value / 100;
             document.getElementById('bandOpacityValue').textContent = value + '%';
             if (chartInstance) chartInstance.update('none');
-        }
-
-        function calculateYAxisRange(sortedReadings) {
-            // Collect all valid values (exclude null, undefined, and 0)
-            const validValues = [];
-
-            sortedReadings.forEach(r => {
-                if (r.systolic && r.systolic > 0) validValues.push(r.systolic);
-                if (r.diastolic && r.diastolic > 0) validValues.push(r.diastolic);
-                // HR is tracked but should not force BP Y-axis to jump; keep it out of BP range calc.
-            });
-
-            if (validValues.length === 0) return { min: 0, max: 200 };
-
-            const min = Math.min(...validValues);
-            const max = Math.max(...validValues);
-
-            // Add padding (10% below and above)
-            const range = max - min;
-            const paddedMin = Math.max(0, Math.floor(min - range * 0.1));
-            const paddedMax = Math.ceil(max + range * 0.1);
-
-            // Ensure minimum range of 60 points for visibility
-            if (paddedMax - paddedMin < 60) {
-                return { min: paddedMin, max: paddedMin + 60 };
-            }
-
-            return { min: paddedMin, max: paddedMax };
         }
 
         function initChart() {
@@ -1668,22 +1662,21 @@
 
             const ctx = canvas.getContext('2d');
 
-            if (chartInstance) {
-                chartInstance.destroy();
-            }
-
+            if (chartInstance) chartInstance.destroy();
             closeMedPopup();
             closeReadingPopup();
 
             const sortedReadings = [...readings].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-
             if (sortedReadings.length === 0) {
                 document.getElementById('chartDateRange').textContent = 'No data available';
                 return;
             }
 
-            // Calculate Y axis range based on BP (stable, prevents jumpiness)
-            const yRange = calculateYAxisRange(sortedReadings);
+            // Stable Y: fixed baseline at 0 to satisfy "start at zero" and prevent any range-jitter.
+            // Use a generous fixed max so BP and HR don’t clip. (Chart does not auto-resize the plot area.)
+            // This is the simplest "no-jitter" model.
+            const Y_MIN = 0;
+            const Y_MAX = 220;
 
             const data = {
                 labels: sortedReadings.map(r => new Date(r.timestamp)),
@@ -1697,7 +1690,8 @@
                         pointRadius: 5,
                         pointHoverRadius: 8,
                         pointBackgroundColor: '#60a5fa',
-                        spanGaps: true
+                        spanGaps: true,
+                        yAxisID: 'y'
                     },
                     {
                         label: 'DIA',
@@ -1708,13 +1702,15 @@
                         pointRadius: 5,
                         pointHoverRadius: 8,
                         pointBackgroundColor: '#e2e8f0',
-                        spanGaps: true
+                        spanGaps: true,
+                        yAxisID: 'y'
                     },
                     {
+                        // HR stays trendable but no visible right axis.
                         label: 'HR',
                         data: sortedReadings.map(r => r.heartRate),
                         borderColor: '#4ade80',
-                        backgroundColor: 'rgba(74, 222, 128, 0.1)',
+                        backgroundColor: 'rgba(74, 222, 128, 0.08)',
                         tension: 0.3,
                         pointRadius: 4,
                         pointHoverRadius: 6,
@@ -1723,22 +1719,22 @@
                         spanGaps: true
                     },
                     {
-                        label: 'Discomfort',
-                        data: sortedReadings.map(r => r.distress * 10), // 0-10 -> 0-100 scale for visibility
+                        // Distress is true 0-10 values (no scaling), plotted against y2 (0-10), axis hidden.
+                        label: 'Distress',
+                        data: sortedReadings.map(r => r.distress),
                         borderColor: '#f472b6',
-                        backgroundColor: 'rgba(244, 114, 182, 0.1)',
+                        backgroundColor: 'rgba(244, 114, 182, 0.08)',
                         tension: 0.3,
                         pointRadius: 3,
                         pointHoverRadius: 5,
                         pointBackgroundColor: '#f472b6',
                         borderDash: [5, 5],
-                        yAxisID: 'y',
+                        yAxisID: 'y2',
                         spanGaps: true
                     }
                 ]
             };
 
-            // Plugin for background bands
             const backgroundBandsPlugin = {
                 id: 'backgroundBands',
                 beforeDraw: (chart) => {
@@ -1760,14 +1756,12 @@
                         const clampedMax = Math.min(band.max, yAxis.max);
                         const yTop = yAxis.getPixelForValue(clampedMax);
                         const yBottom = yAxis.getPixelForValue(clampedMin);
-
                         ctx.fillStyle = band.color;
                         ctx.fillRect(xAxis.left, yTop, xAxis.width, yBottom - yTop);
                     });
                 }
             };
 
-            // Plugin for medication lines
             const medLinesPlugin = {
                 id: 'medicationLines',
                 afterDatasetsDraw: (chart) => {
@@ -1782,9 +1776,7 @@
                     sortedReadings.forEach(r => {
                         if (r.medications && r.medications.length > 0) {
                             const x = xAxis.getPixelForValue(new Date(r.timestamp));
-
                             if (x >= xAxis.left - 10 && x <= xAxis.right + 10) {
-                                // Draw vertical line
                                 ctx.strokeStyle = '#fbbf24';
                                 ctx.lineWidth = 3;
                                 ctx.setLineDash([8, 4]);
@@ -1793,7 +1785,6 @@
                                 ctx.lineTo(x, yAxis.bottom);
                                 ctx.stroke();
 
-                                // Draw diamond at top
                                 ctx.fillStyle = '#fbbf24';
                                 ctx.setLineDash([]);
                                 ctx.beginPath();
@@ -1804,7 +1795,6 @@
                                 ctx.closePath();
                                 ctx.fill();
 
-                                // Draw count badge
                                 if (r.medications.length > 1) {
                                     ctx.fillStyle = '#f59e0b';
                                     ctx.beginPath();
@@ -1824,11 +1814,20 @@
                 }
             };
 
+            // FIX JITTER:
+            // - lock the left axis width so the chartArea never shifts
+            // - use mono-like formatting for time ticks (fixed width)
+            const lockAxesPlugin = {
+                id: 'lockAxes',
+                afterFit: (scale) => {
+                    // This hook exists on scales, but Chart.js doesn't call plugin.afterFit per scale.
+                    // We'll lock widths via scale.afterFit below in options.scales.* initialization.
+                }
+            };
+
             const now = new Date();
             const oneDayAgo = new Date(now - 86400000);
-            const minTime = sortedReadings.length > 0 ?
-                Math.max(oneDayAgo.getTime(), new Date(sortedReadings[0].timestamp).getTime()) :
-                oneDayAgo.getTime();
+            const minTime = Math.max(oneDayAgo.getTime(), new Date(sortedReadings[0].timestamp).getTime());
 
             chartInstance = new Chart(ctx, {
                 type: 'line',
@@ -1836,10 +1835,13 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    animation: false, // prevents visual "jumping" during pan/zoom updates
-                    interaction: {
-                        mode: 'nearest',
-                        intersect: true
+                    animation: false,
+                    normalized: true,
+                    parsing: false,
+                    interaction: { mode: 'nearest', intersect: true },
+                    layout: {
+                        // extra padding prevents any perceived "shrinking"
+                        padding: { left: 6, right: 6, top: 6, bottom: 6 }
                     },
                     plugins: {
                         legend: {
@@ -1848,9 +1850,7 @@
                                 font: { size: 12, family: 'Inter' }
                             }
                         },
-                        tooltip: {
-                            enabled: false // IMPORTANT: no hover tooltips; click-only popup handled below
-                        },
+                        tooltip: { enabled: false },
                         zoom: {
                             pan: {
                                 enabled: true,
@@ -1875,47 +1875,79 @@
                     scales: {
                         x: {
                             type: 'time',
+                            min: minTime,
+                            max: now.getTime(),
                             time: {
+                                // Force a stable, fixed-length tick label (HH:MM) to reduce jitter
                                 displayFormats: {
-                                    hour: 'MMM dd HH:mm',
-                                    day: 'MMM dd',
-                                    week: 'MMM dd'
+                                    minute: 'HH:mm',
+                                    hour: 'HH:mm',
+                                    day: 'MMM dd'
                                 },
                                 tooltipFormat: 'MMM dd, yyyy HH:mm'
                             },
-                            min: minTime,
-                            max: now.getTime(),
                             ticks: {
                                 color: '#94a3b8',
-                                maxRotation: 45,
+                                maxRotation: 0,
+                                minRotation: 0,
+                                autoSkip: true,
                                 maxTicksLimit: 6,
-                                font: { family: 'Inter' }
+                                font: { family: 'Inter' },
+                                callback: (val, idx, ticks) => {
+                                    // Format to always "HH:MM" or "MMM DD" depending on unit the adapter gives us
+                                    // date-fns adapter typically returns a string; we keep it stable by truncating.
+                                    const s = String(val);
+                                    // If it looks like a time, normalize to last 5 chars when possible.
+                                    // Otherwise return as-is.
+                                    const m = s.match(/\b(\d{1,2}:\d{2})\b/);
+                                    if (m) {
+                                        const [hh, mm] = m[1].split(':');
+                                        const hh2 = hh.padStart(2,'0');
+                                        return `${hh2}:${mm}`;
+                                    }
+                                    return s;
+                                }
                             },
                             grid: { color: 'rgba(148, 163, 184, 0.1)' }
                         },
                         y: {
-                            min: yRange.min,
-                            max: yRange.max,
-                            ticks: { color: '#94a3b8', font: { family: 'Inter' } },
+                            min: Y_MIN,
+                            max: Y_MAX,
+                            ticks: {
+                                color: '#94a3b8',
+                                font: { family: 'Inter' },
+                                // Keep numeric width stable (3 chars min) to reduce jitter
+                                callback: (v) => String(v).padStart(3, ' ')
+                            },
                             grid: { color: 'rgba(148, 163, 184, 0.1)' },
-                            title: { display: true, text: 'BP / Discomfort (scaled)', color: '#64748b', font: { family: 'Inter' } }
+                            title: { display: true, text: 'BP (mmHg)', color: '#64748b', font: { family: 'Inter' } },
+                            // HARD LOCK LEFT AXIS WIDTH (prevents plot-area shifting on tick changes)
+                            afterFit: (scale) => { scale.width = 52; }
                         },
                         y1: {
                             type: 'linear',
-                            display: false, // REMOVE right-side HR axis completely
+                            display: false,           // no right-side HR shown
                             position: 'right',
                             min: 0,
                             max: 140,
-                            grid: { drawOnChartArea: false }
+                            grid: { drawOnChartArea: false },
+                            afterFit: (scale) => { scale.width = 0; }
+                        },
+                        y2: {
+                            type: 'linear',
+                            display: false,           // distress axis hidden (still true 0-10)
+                            position: 'right',
+                            min: 0,
+                            max: 10,
+                            grid: { drawOnChartArea: false },
+                            afterFit: (scale) => { scale.width = 0; }
                         }
                     }
                 },
-                plugins: [backgroundBandsPlugin, medLinesPlugin]
+                plugins: [backgroundBandsPlugin, medLinesPlugin, lockAxesPlugin]
             });
 
-            // Click handler:
-            // 1) meds (yellow vertical lines) open med popup
-            // 2) points open reading popup (click-only)
+            // Click handler: meds lines -> med popup; points -> reading popup
             canvas.onclick = (e) => {
                 const rect = canvas.getBoundingClientRect();
                 const x = e.clientX - rect.left;
@@ -1938,7 +1970,6 @@
 
                 if (clickedMed) return;
 
-                // If clicked on a chart point: open reading popup
                 const elements = chartInstance.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
                 if (elements && elements.length) {
                     const idx = elements[0].index;
@@ -1948,7 +1979,6 @@
                     return;
                 }
 
-                // click blank space closes popups
                 closeMedPopup();
                 closeReadingPopup();
             };
@@ -1968,13 +1998,7 @@
             ).join('');
 
             const date = new Date(reading.timestamp);
-            timeEl.textContent = date.toLocaleString('en-US', {
-                weekday: 'short',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
+            timeEl.textContent = date.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
             const chartRect = document.getElementById('chartWrapper').getBoundingClientRect();
             let popupX = x - chartRect.left - 110;
@@ -2032,10 +2056,13 @@
                         <span class="text-green-300 font-bold">${reading.heartRate ?? '--'}</span>
                     </div>
                     <div class="flex items-center justify-between text-sm">
-                        <span class="text-slate-300">Discomfort</span>
+                        <span class="text-slate-300">Distress</span>
                         <span class="text-pink-300 font-bold">${reading.distress ?? 0}/10</span>
                     </div>
-                    <div class="text-xs text-slate-500">Position: <span class="text-slate-300">${reading.position || 'Unknown'}</span></div>
+                    <div class="text-xs text-slate-500">
+                        Position: <span class="text-slate-300">${reading.position || 'Unknown'}</span>
+                        • Arm: <span class="text-slate-300">${reading.arm || 'Unknown'}</span>
+                    </div>
                     ${symptomsLine}
                     ${medsLine}
                     ${notesLine}
@@ -2086,7 +2113,6 @@
                 min.toLocaleDateString('en-US') + ' → ' + max.toLocaleDateString('en-US');
         }
 
-        // Data Management
         function clearAllData() {
             if (confirm('WARNING: This will delete ALL readings. This cannot be undone. Continue?')) {
                 readings = [];
@@ -2133,15 +2159,9 @@
             reader.readAsText(file);
         }
 
-        function installApp() {
-            alert('To install: Use your browser menu → Add to Home Screen');
-        }
-
         function exitApp() {
             if (unsavedChanges) {
-                if (confirm('Save current reading before exiting?')) {
-                    saveReading();
-                }
+                if (confirm('Save current reading before exiting?')) saveReading();
             }
             window.close();
             document.body.innerHTML = '<div class="flex items-center justify-center min-h-screen text-slate-500">App closed. You can close this tab.</div>';
@@ -2161,4 +2181,4 @@
         }
     </script>
 </body>
-</html>
+                                    </html>
