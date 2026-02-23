@@ -1,2184 +1,1821 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Vitals Tracker</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Vitals Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 
-        * {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
+  <!-- Chart.js stack (stable pairing) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1"></script>
 
-        body {
-            background: #0f172a;
-            color: #e2e8f0;
-            overflow-x: hidden;
-        }
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-        .glass-panel {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(148, 163, 184, 0.1);
-        }
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background: #0f172a; color: #e2e8f0; overflow-x: hidden; }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-        }
+    .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(148, 163, 184, 0.1); }
+    .btn-primary { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); }
+    .btn-secondary { background: rgba(51, 65, 85, 0.8); border: 1px solid rgba(148, 163, 184, 0.2); }
+    .btn-danger { background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); }
 
-        .btn-secondary {
-            background: rgba(51, 65, 85, 0.8);
-            border: 1px solid rgba(148, 163, 184, 0.2);
-        }
+    .input-field { background: rgba(15, 23, 42, 0.6); border: 2px solid rgba(148, 163, 184, 0.2); transition: all 0.2s ease; }
+    .input-field:focus { border-color: #3b82f6; outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12); }
 
-        .btn-danger {
-            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
-        }
+    .symptom-checkbox {
+      appearance: none; width: 24px; height: 24px;
+      border: 2px solid rgba(148, 163, 184, 0.4);
+      border-radius: 6px;
+      background: rgba(15, 23, 42, 0.4);
+      cursor: pointer;
+      position: relative;
+      transition: all 0.15s;
+    }
+    .symptom-checkbox:checked { background: #3b82f6; border-color: #3b82f6; }
+    .symptom-checkbox:checked::after {
+      content: '✓';
+      position: absolute; color: white; font-size: 14px;
+      top: 50%; left: 50%; transform: translate(-50%, -50%);
+    }
 
-        .input-field {
-            background: rgba(15, 23, 42, 0.6);
-            border: 2px solid rgba(148, 163, 184, 0.2);
-            transition: all 0.3s ease;
-        }
+    .chart-container {
+      position: relative;
+      height: 350px;
+      background: rgba(15, 23, 42, 0.4);
+      border-radius: 12px;
+      overflow: hidden;
+      touch-action: none;
+    }
 
-        .input-field:focus {
-            border-color: #3b82f6;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
+    .distress-slider {
+      -webkit-appearance: none;
+      height: 8px;
+      border-radius: 4px;
+      background: linear-gradient(to right, #22c55e 0%, #eab308 50%, #dc2626 100%);
+    }
+    .distress-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px; height: 24px; border-radius: 50%;
+      background: white; border: 3px solid #3b82f6;
+      cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
 
-        .symptom-checkbox {
-            appearance: none;
-            width: 24px;
-            height: 24px;
-            border: 2px solid rgba(148, 163, 184, 0.4);
-            border-radius: 6px;
-            background: rgba(15, 23, 42, 0.4);
-            cursor: pointer;
-            position: relative;
-            transition: all 0.2s;
-        }
+    .log-entry { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(148, 163, 184, 0.1); transition: all 0.15s; }
+    .log-entry:hover { background: rgba(51, 65, 85, 0.8); }
+    .log-entry.editing { background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.4); }
 
-        .symptom-checkbox:checked {
-            background: #3b82f6;
-            border-color: #3b82f6;
-        }
+    .inline-input { background: rgba(15, 23, 42, 0.9); border: 2px solid #3b82f6; border-radius: 6px; padding: 4px 8px; color: white; font-size: inherit; width: 60px; text-align: center; }
+    .inline-textarea { background: rgba(15, 23, 42, 0.9); border: 2px solid #3b82f6; border-radius: 6px; padding: 8px; color: white; width: 100%; resize: vertical; min-height: 60px; }
 
-        .symptom-checkbox:checked::after {
-            content: '✓';
-            position: absolute;
-            color: white;
-            font-size: 14px;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
+    .position-btn, .arm-btn {
+      padding: 8px 16px; border-radius: 999px;
+      border: 2px solid rgba(148, 163, 184, 0.3);
+      background: rgba(15, 23, 42, 0.6);
+      color: #94a3b8;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+    .arm-btn { padding: 8px 14px; font-size: 13px; }
+    .position-btn.active, .arm-btn.active {
+      border-color: #3b82f6;
+      background: rgba(59, 130, 246, 0.2);
+      color: #3b82f6;
+    }
 
-        .log-entry {
-            background: rgba(30, 41, 59, 0.6);
-            border: 1px solid rgba(148, 163, 184, 0.1);
-            transition: all 0.2s;
-        }
+    .bp-normal { color: #60a5fa; }
+    .bp-elevated { color: #a78bfa; }
+    .bp-stage1 { color: #fbbf24; }
+    .bp-stage2 { color: #f87171; }
+    .bp-crisis { color: #dc2626; }
 
-        .log-entry:hover {
-            background: rgba(51, 65, 85, 0.8);
-        }
+    .editable-field { cursor: pointer; padding: 2px 6px; border-radius: 4px; transition: all 0.15s; border: 1px solid transparent; }
+    .editable-field:hover { background: rgba(59, 130, 246, 0.2); border-color: rgba(59, 130, 246, 0.4); }
 
-        .log-entry.editing {
-            background: rgba(59, 130, 246, 0.1);
-            border-color: rgba(59, 130, 246, 0.4);
-        }
+    .med-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      background: rgba(251, 191, 36, 0.2);
+      border: 1px solid rgba(251, 191, 36, 0.4);
+      border-radius: 12px;
+      font-size: 11px;
+      color: #fbbf24;
+      margin: 2px;
+    }
 
-        .inline-input {
-            background: rgba(15, 23, 42, 0.9);
-            border: 2px solid #3b82f6;
-            border-radius: 6px;
-            padding: 4px 8px;
-            color: white;
-            font-size: inherit;
-            width: 60px;
-            text-align: center;
-        }
+    .distress-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+    .distress-low { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+    .distress-med { background: rgba(234, 179, 8, 0.2); color: #fbbf24; }
+    .distress-high { background: rgba(220, 38, 38, 0.2); color: #f87171; }
 
-        .inline-textarea {
-            background: rgba(15, 23, 42, 0.9);
-            border: 2px solid #3b82f6;
-            border-radius: 6px;
-            padding: 8px;
-            color: white;
-            width: 100%;
-            resize: vertical;
-            min-height: 60px;
-        }
+    .save-btn-inline { background: #22c55e; color: white; padding: 6px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; margin-top: 8px; width: 100%; }
 
-        .chart-container {
-            position: relative;
-            height: 350px;
-            background: rgba(15, 23, 42, 0.4);
-            border-radius: 12px;
-            overflow: hidden;
-            touch-action: none;
-        }
+    .reading-popup {
+      position: absolute;
+      background: rgba(15, 23, 42, 0.98);
+      border: 2px solid rgba(96, 165, 250, 0.8);
+      border-radius: 14px;
+      padding: 0;
+      z-index: 1100;
+      min-width: 240px;
+      max-width: 320px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.85);
+      display: none;
+    }
+    .reading-popup-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(96, 165, 250, 0.25);
+      background: rgba(59, 130, 246, 0.12);
+      border-radius: 12px 12px 0 0;
+    }
+    .reading-popup-close {
+      background: rgba(96, 165, 250, 0.18);
+      border: 1px solid rgba(96, 165, 250, 0.35);
+      color: #93c5fd;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 20px; line-height: 1;
+      transition: all 0.15s;
+      font-weight: bold;
+    }
+    .reading-popup-close:hover { background: rgba(96, 165, 250, 0.32); }
+    .reading-popup-content { padding: 14px; }
+    .reading-popup-time { padding: 8px 14px; border-top: 1px solid rgba(148, 163, 184, 0.2); font-size: 12px; color: #64748b; }
 
-        .distress-slider {
-            -webkit-appearance: none;
-            height: 8px;
-            border-radius: 4px;
-            background: linear-gradient(to right, #22c55e 0%, #eab308 50%, #dc2626 100%);
-        }
+    .confirm-dialog {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8);
+      display: none; align-items: center; justify-content: center;
+      z-index: 2000;
+      padding: 20px;
+    }
+    .confirm-dialog.active { display: flex; }
+    .confirm-box {
+      background: rgba(30, 41, 59, 0.95);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 360px;
+      width: 100%;
+    }
 
-        .distress-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: white;
-            border: 3px solid #3b82f6;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        }
+    .delete-btn {
+      background: rgba(220, 38, 38, 0.2);
+      color: #f87171;
+      border: 1px solid rgba(220, 38, 38, 0.3);
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .delete-btn:hover { background: rgba(220, 38, 38, 0.4); }
 
-        .toggle-switch {
-            position: relative;
-            width: 50px;
-            height: 28px;
-            background: rgba(148, 163, 184, 0.2);
-            border-radius: 14px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
+    .report-section { background: rgba(30, 41, 59, 0.6); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+    .stat-card { background: rgba(15, 23, 42, 0.6); border-radius: 8px; padding: 12px; text-align: center; }
 
-        .toggle-switch.active {
-            background: #3b82f6;
-        }
-
-        .toggle-switch::after {
-            content: '';
-            position: absolute;
-            width: 24px;
-            height: 24px;
-            background: white;
-            border-radius: 50%;
-            top: 2px;
-            left: 2px;
-            transition: transform 0.3s;
-        }
-
-        .toggle-switch.active::after {
-            transform: translateX(22px);
-        }
-
-        .bp-normal { color: #60a5fa; }
-        .bp-elevated { color: #a78bfa; }
-        .bp-stage1 { color: #fbbf24; }
-        .bp-stage2 { color: #f87171; }
-        .bp-crisis { color: #dc2626; }
-
-        .editable-field {
-            cursor: pointer;
-            padding: 2px 6px;
-            border-radius: 4px;
-            transition: all 0.2s;
-            border: 1px solid transparent;
-        }
-
-        .editable-field:hover {
-            background: rgba(59, 130, 246, 0.2);
-            border-color: rgba(59, 130, 246, 0.4);
-        }
-
-        .med-tag {
-            display: inline-block;
-            padding: 2px 8px;
-            background: rgba(251, 191, 36, 0.2);
-            border: 1px solid rgba(251, 191, 36, 0.4);
-            border-radius: 12px;
-            font-size: 11px;
-            color: #fbbf24;
-            margin: 2px;
-        }
-
-        .distress-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .distress-low { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
-        .distress-med { background: rgba(234, 179, 8, 0.2); color: #fbbf24; }
-        .distress-high { background: rgba(220, 38, 38, 0.2); color: #f87171; }
-
-        .save-btn-inline {
-            background: #22c55e;
-            color: white;
-            padding: 6px 16px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            margin-top: 8px;
-            width: 100%;
-        }
-
-        .med-popup {
-            position: absolute;
-            background: rgba(15, 23, 42, 0.98);
-            border: 2px solid #fbbf24;
-            border-radius: 12px;
-            padding: 0;
-            z-index: 1000;
-            min-width: 220px;
-            max-width: 300px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
-            display: none;
-        }
-
-        .med-popup-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 16px;
-            border-bottom: 1px solid rgba(251, 191, 36, 0.3);
-            background: rgba(251, 191, 36, 0.1);
-            border-radius: 10px 10px 0 0;
-        }
-
-        .med-popup-close {
-            background: rgba(251, 191, 36, 0.2);
-            border: 1px solid rgba(251, 191, 36, 0.4);
-            color: #fbbf24;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 20px;
-            line-height: 1;
-            transition: all 0.2s;
-            font-weight: bold;
-        }
-
-        .med-popup-close:hover {
-            background: rgba(251, 191, 36, 0.4);
-        }
-
-        .med-popup-content {
-            padding: 16px;
-        }
-
-        .med-popup-time {
-            padding: 8px 16px;
-            border-top: 1px solid rgba(148, 163, 184, 0.2);
-            font-size: 12px;
-            color: #64748b;
-        }
-
-        .reading-popup {
-            position: absolute;
-            background: rgba(15, 23, 42, 0.98);
-            border: 2px solid rgba(96, 165, 250, 0.8);
-            border-radius: 14px;
-            padding: 0;
-            z-index: 1100;
-            min-width: 240px;
-            max-width: 320px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.85);
-            display: none;
-        }
-        .reading-popup-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 14px;
-            border-bottom: 1px solid rgba(96, 165, 250, 0.25);
-            background: rgba(59, 130, 246, 0.12);
-            border-radius: 12px 12px 0 0;
-        }
-        .reading-popup-close {
-            background: rgba(96, 165, 250, 0.18);
-            border: 1px solid rgba(96, 165, 250, 0.35);
-            color: #93c5fd;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 20px;
-            line-height: 1;
-            transition: all 0.2s;
-            font-weight: bold;
-        }
-        .reading-popup-close:hover { background: rgba(96, 165, 250, 0.32); }
-        .reading-popup-content { padding: 14px; }
-        .reading-popup-time {
-            padding: 8px 14px;
-            border-top: 1px solid rgba(148, 163, 184, 0.2);
-            font-size: 12px;
-            color: #64748b;
-        }
-
-        .band-opacity-slider {
-            -webkit-appearance: none;
-            height: 6px;
-            border-radius: 3px;
-            background: rgba(148, 163, 184, 0.3);
-        }
-
-        .band-opacity-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #3b82f6;
-            cursor: pointer;
-            box-shadow: 0 2px 6px rgba(59, 130, 246, 0.4);
-        }
-
-        .delete-btn {
-            background: rgba(220, 38, 38, 0.2);
-            color: #f87171;
-            border: 1px solid rgba(220, 38, 38, 0.3);
-            padding: 4px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .delete-btn:hover {
-            background: rgba(220, 38, 38, 0.4);
-        }
-
-        .confirm-dialog {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.8);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            padding: 20px;
-        }
-
-        .confirm-dialog.active {
-            display: flex;
-        }
-
-        .confirm-box {
-            background: rgba(30, 41, 59, 0.95);
-            border: 1px solid rgba(148, 163, 184, 0.2);
-            border-radius: 16px;
-            padding: 24px;
-            max-width: 320px;
-            width: 100%;
-        }
-
-        .position-btn {
-            padding: 8px 16px;
-            border-radius: 20px;
-            border: 2px solid rgba(148, 163, 184, 0.3);
-            background: rgba(15, 23, 42, 0.6);
-            color: #94a3b8;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 14px;
-        }
-
-        .position-btn.active {
-            border-color: #3b82f6;
-            background: rgba(59, 130, 246, 0.2);
-            color: #3b82f6;
-        }
-
-        .arm-btn {
-            padding: 8px 14px;
-            border-radius: 18px;
-            border: 2px solid rgba(148, 163, 184, 0.3);
-            background: rgba(15, 23, 42, 0.6);
-            color: #94a3b8;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 13px;
-        }
-
-        .arm-btn.active {
-            border-color: #3b82f6;
-            background: rgba(59, 130, 246, 0.2);
-            color: #3b82f6;
-        }
-
-        .report-section {
-            background: rgba(30, 41, 59, 0.6);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 16px;
-        }
-
-        .stat-card {
-            background: rgba(15, 23, 42, 0.6);
-            border-radius: 8px;
-            padding: 12px;
-            text-align: center;
-        }
-
-        .import-textarea {
-            width: 100%;
-            min-height: 200px;
-            background: rgba(15, 23, 42, 0.6);
-            border: 2px solid rgba(148, 163, 184, 0.2);
-            border-radius: 12px;
-            padding: 12px;
-            color: white;
-            font-family: monospace;
-            font-size: 12px;
-            resize: vertical;
-        }
-    </style>
+    .import-textarea {
+      width: 100%;
+      min-height: 220px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 2px solid rgba(148, 163, 184, 0.2);
+      border-radius: 12px;
+      padding: 12px;
+      color: white;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12px;
+      resize: vertical;
+    }
+  </style>
 </head>
+
 <body class="min-h-screen bg-slate-900">
-    <!--
-    VITALS TRACKER
-    Copyright (c) 2025-2026 Wendell Jiles. All Rights Reserved.
+  <!--
+  VITALS TRACKER
+  Copyright (c) 2025-2026 Wendell Jiles. All Rights Reserved.
 
-    LICENSE: Proprietary - Unauthorized copying, distribution, or modification
-    is strictly prohibited without written permission from Wendell Jiles.
+  LICENSE: Proprietary - Unauthorized copying, distribution, or modification
+  is strictly prohibited without written permission from Wendell Jiles.
 
-    VERSION: 2.029b
-    DEVELOPER: Keyth Jyles
-    -->
+  VERSION: 2.031b
+  DEVELOPER: Keyth Jyles
+  -->
 
-    <header class="glass-panel sticky top-0 z-50 px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                </svg>
-            </div>
-            <h1 class="text-xl font-bold text-white">Vitals Tracker</h1>
-        </div>
-    </header>
+  <header class="glass-panel sticky top-0 z-50 px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+        </svg>
+      </div>
+      <h1 class="text-xl font-bold text-white">Vitals Tracker</h1>
+    </div>
+  </header>
 
-    <main class="p-4 max-w-md mx-auto pb-24">
+  <main class="p-4 max-w-md mx-auto pb-24">
 
-        <!-- HOME SCREEN -->
-        <div id="homeScreen" class="space-y-4">
-            <div class="glass-panel rounded-3xl p-6 space-y-4">
-                <!-- Removed "Home" header to save space -->
+    <!-- HOME SCREEN -->
+    <div id="homeScreen" class="space-y-4">
+      <div class="glass-panel rounded-3xl p-6 space-y-4">
+        <button onclick="showScreen('addScreen')" class="w-full btn-primary text-white font-semibold py-4 rounded-2xl text-lg transform active:scale-95 transition">
+          Add Reading
+        </button>
 
-                <button onclick="showScreen('addScreen')" class="w-full btn-primary text-white font-semibold py-4 rounded-2xl text-lg transform active:scale-95 transition">
-                    Add Reading
-                </button>
+        <button onclick="showScreen('chartScreen')" class="w-full btn-secondary text-white font-semibold py-4 rounded-2xl text-lg transform active:scale-95 transition">
+          Charts
+        </button>
 
-                <button onclick="showScreen('chartScreen')" class="w-full btn-secondary text-white font-semibold py-4 rounded-2xl text-lg transform active:scale-95 transition">
-                    Charts
-                </button>
+        <button onclick="showScreen('logScreen')" class="w-full btn-secondary text-white font-semibold py-4 rounded-2xl text-lg transform active:scale-95 transition">
+          Log
+        </button>
 
-                <button onclick="showScreen('logScreen')" class="w-full btn-secondary text-white font-semibold py-4 rounded-2xl text-lg transform active:scale-95 transition">
-                    Log
-                </button>
+        <button onclick="showScreen('reportScreen')" class="w-full btn-secondary text-white font-semibold py-4 rounded-2xl text-lg transform active:scale-95 transition">
+          Clinician Report
+        </button>
 
-                <button onclick="showScreen('reportScreen')" class="w-full btn-secondary text-white font-semibold py-4 rounded-2xl text-lg transform active:scale-95 transition">
-                    Clinician Report
-                </button>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <button onclick="showScreen('importScreen')" class="btn-secondary text-white font-semibold py-3 rounded-2xl text-base">
-                        Import Data
-                    </button>
-                    <button onclick="clearAllData()" class="btn-secondary text-white font-semibold py-3 rounded-2xl text-base">
-                        Clear Data
-                    </button>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <button onclick="exitApp()" class="btn-danger text-white font-semibold py-3 rounded-2xl text-base">
-                        Exit
-                    </button>
-                    <button onclick="showScreen('settingsScreen')" class="btn-secondary text-white font-semibold py-3 rounded-2xl text-base flex items-center justify-center">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <p class="text-slate-500 text-sm text-center px-4">
-                Data stays on your phone (local only). Pull down on Home to refresh (release).
-            </p>
-
-            <div class="flex justify-between text-xs text-slate-600 px-2">
-                <span>v2.029b</span>
-                <span>© 2025-2026 Wendell Jiles</span>
-            </div>
+        <div class="grid grid-cols-2 gap-3">
+          <button onclick="showScreen('importScreen')" class="btn-secondary text-white font-semibold py-3 rounded-2xl text-base">
+            Import Data
+          </button>
+          <button onclick="clearAllData()" class="btn-secondary text-white font-semibold py-3 rounded-2xl text-base">
+            Clear Data
+          </button>
         </div>
 
-        <!-- ADD READING SCREEN -->
-        <div id="addScreen" class="hidden space-y-4">
-            <div class="glass-panel rounded-3xl p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-white" id="addTitle">Add Reading</h2>
-                    <button onclick="cancelAdd()" class="text-slate-400 hover:text-white">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                </div>
-
-                <div class="text-center mb-6 text-blue-400 font-mono text-lg" id="currentTime"></div>
-
-                <!-- Position Selection -->
-                <div class="mb-4">
-                    <label class="block text-sm text-slate-300 mb-3">Position</label>
-                    <div class="flex gap-2 justify-center">
-                        <button type="button" class="position-btn active" data-position="Laying" onclick="selectPosition(this)">Laying</button>
-                        <button type="button" class="position-btn" data-position="Sitting" onclick="selectPosition(this)">Sitting</button>
-                        <button type="button" class="position-btn" data-position="Standing" onclick="selectPosition(this)">Standing</button>
-                    </div>
-                </div>
-
-                <!-- Arm Selection -->
-                <div class="mb-6">
-                    <label class="block text-sm text-slate-300 mb-3">Arm</label>
-                    <div class="flex gap-2 justify-center">
-                        <button type="button" class="arm-btn active" data-arm="Left" onclick="selectArm(this)">Left</button>
-                        <button type="button" class="arm-btn" data-arm="Right" onclick="selectArm(this)">Right</button>
-                    </div>
-                    <div class="text-xs text-slate-500 mt-2 text-center">Recorded arm is stored with the reading.</div>
-                </div>
-
-                <!-- Vitals Inputs -->
-                <div class="grid grid-cols-3 gap-3 mb-6">
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1 text-center">SYS</label>
-                        <input type="number" id="systolic" placeholder="132"
-                               class="input-field w-full px-3 py-3 rounded-xl text-center text-white text-lg font-semibold"
-                               onkeydown="handleEnter(event, 'diastolic')">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1 text-center">DIA</label>
-                        <input type="number" id="diastolic" placeholder="91"
-                               class="input-field w-full px-3 py-3 rounded-xl text-center text-white text-lg font-semibold"
-                               onkeydown="handleEnter(event, 'heartRate')">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1 text-center">HR</label>
-                        <input type="number" id="heartRate" placeholder="72"
-                               class="input-field w-full px-3 py-3 rounded-xl text-center text-white text-lg font-semibold"
-                               onkeydown="handleEnter(event, 'notes')">
-                    </div>
-                </div>
-
-                <!-- Distress Level -->
-                <div class="mb-6">
-                    <label class="block text-sm text-slate-300 mb-2 flex justify-between">
-                        <span>Distress</span>
-                        <span id="distressValue" class="text-blue-400 font-bold">0</span>
-                    </label>
-                    <input type="range" id="distressLevel" min="0" max="10" value="0"
-                           class="distress-slider w-full"
-                           oninput="document.getElementById('distressValue').textContent = this.value">
-                    <div class="flex justify-between text-xs text-slate-500 mt-1">
-                        <span>None</span>
-                        <span>Severe</span>
-                    </div>
-                </div>
-
-                <!-- Notes -->
-                <div class="mb-6">
-                    <label class="block text-sm text-slate-300 mb-2">Notes (optional)</label>
-                    <textarea id="notes" rows="3" placeholder="How are you feeling?"
-                              class="input-field w-full px-4 py-3 rounded-xl text-white resize-none"></textarea>
-                </div>
-
-                <!-- Symptoms -->
-                <div class="mb-6">
-                    <label class="block text-sm text-slate-300 mb-3">Symptoms</label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <label class="flex items-center gap-3 cursor-pointer">
-                            <input type="checkbox" class="symptom-checkbox" value="Sweaty">
-                            <span class="text-slate-300 text-sm">Sweaty</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer">
-                            <input type="checkbox" class="symptom-checkbox" value="Dizzy">
-                            <span class="text-slate-300 text-sm">Dizzy</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer">
-                            <input type="checkbox" class="symptom-checkbox" value="Panic">
-                            <span class="text-slate-300 text-sm">Panic</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer">
-                            <input type="checkbox" class="symptom-checkbox" value="Brain fog">
-                            <span class="text-slate-300 text-sm">Brain fog</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer">
-                            <input type="checkbox" class="symptom-checkbox" value="Chest tight">
-                            <span class="text-slate-300 text-sm">Chest tight</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer">
-                            <input type="checkbox" class="symptom-checkbox" value="Headache">
-                            <span class="text-slate-300 text-sm">Headache</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer">
-                            <input type="checkbox" class="symptom-checkbox" value="Nausea">
-                            <span class="text-slate-300 text-sm">Nausea</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer">
-                            <input type="checkbox" class="symptom-checkbox" value="Short breath">
-                            <span class="text-slate-300 text-sm">Short breath</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer">
-                            <input type="checkbox" class="symptom-checkbox" value="Hot ears">
-                            <span class="text-slate-300 text-sm">Hot ears</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer">
-                            <input type="checkbox" class="symptom-checkbox" value="Shaky">
-                            <span class="text-slate-300 text-sm">Shaky</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer">
-                            <input type="checkbox" class="symptom-checkbox" value="Blurred vision">
-                            <span class="text-slate-300 text-sm">Blurred vision</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer">
-                            <input type="checkbox" class="symptom-checkbox" value="Weakness">
-                            <span class="text-slate-300 text-sm">Weakness</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Medications Taken -->
-                <div class="mb-6">
-                    <div class="flex justify-between items-center mb-3">
-                        <label class="block text-sm text-slate-300">Medications Taken</label>
-                        <button onclick="showMedicationManager()" class="text-xs text-blue-400 hover:text-blue-300">
-                            + Manage Meds
-                        </button>
-                    </div>
-                    <div id="medicationList" class="space-y-2 max-h-40 overflow-y-auto"></div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <button onclick="saveReading()" class="btn-primary text-white font-semibold py-4 rounded-2xl text-lg">
-                        Save
-                    </button>
-                    <button onclick="cancelAdd()" class="btn-secondary text-white font-semibold py-4 rounded-2xl text-lg">
-                        Back
-                    </button>
-                </div>
-            </div>
+        <div class="grid grid-cols-2 gap-3">
+          <button onclick="exitApp()" class="btn-danger text-white font-semibold py-3 rounded-2xl text-base">
+            Exit
+          </button>
+          <button onclick="showScreen('settingsScreen')" class="btn-secondary text-white font-semibold py-3 rounded-2xl text-base flex items-center justify-center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+          </button>
         </div>
+      </div>
 
-        <!-- CHART SCREEN -->
-        <div id="chartScreen" class="hidden space-y-4">
-            <div class="glass-panel rounded-3xl p-4">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-bold text-white">Charts</h2>
-                    <div class="flex gap-2">
-                        <button onclick="showScreen('addScreen')" class="btn-secondary px-4 py-2 rounded-full text-sm">Add</button>
-                        <button onclick="showScreen('homeScreen')" class="btn-secondary px-4 py-2 rounded-full text-sm">Home</button>
-                        <button onclick="showScreen('settingsScreen')" class="btn-secondary p-2 rounded-full">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
+      <p class="text-slate-500 text-sm text-center px-4">
+        Data stays on your phone (local only).
+      </p>
 
-                <div class="text-center text-slate-400 text-sm mb-4 font-mono" id="chartDateRange">Loading...</div>
-
-                <div class="flex items-center justify-between mb-4 bg-slate-800/50 p-3 rounded-xl">
-                    <span class="text-sm text-slate-300">Show Medications</span>
-                    <div class="toggle-switch active" id="medToggle" onclick="toggleMedications()"></div>
-                </div>
-
-                <div class="chart-container mb-4" id="chartWrapper">
-                    <canvas id="vitalsChart"></canvas>
-
-                    <div id="medPopup" class="med-popup">
-                        <div class="med-popup-header">
-                            <span class="text-yellow-400 font-bold text-lg">💊 Medications</span>
-                            <button class="med-popup-close" onclick="closeMedPopup()">×</button>
-                        </div>
-                        <div class="med-popup-content">
-                            <div id="medPopupContent" class="text-slate-300 space-y-2"></div>
-                        </div>
-                        <div class="med-popup-time" id="medPopupTime"></div>
-                    </div>
-
-                    <div id="readingPopup" class="reading-popup">
-                        <div class="reading-popup-header">
-                            <span class="text-blue-200 font-bold text-base">📍 Reading</span>
-                            <button class="reading-popup-close" onclick="closeReadingPopup()">×</button>
-                        </div>
-                        <div class="reading-popup-content" id="readingPopupContent"></div>
-                        <div class="reading-popup-time" id="readingPopupTime"></div>
-                    </div>
-                </div>
-
-                <div class="space-y-2 mb-4">
-                    <div class="text-sm font-semibold text-slate-300 mb-2">Blood Pressure Bands</div>
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded-full bg-red-700"></div>
-                            <span class="text-slate-300">Crisis ≥180</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                            <span class="text-slate-300">Stage 2 HTN 140-179</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
-                            <span class="text-slate-300">Stage 1 HTN 130-139</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded-full bg-purple-500"></div>
-                            <span class="text-slate-300">Elevated 120-129</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded-full bg-blue-500"></div>
-                            <span class="text-slate-300">Normal &lt;120</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-slate-800/50 p-4 rounded-xl mb-4">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-sm text-slate-300">Band Opacity</span>
-                        <span class="text-sm text-blue-400 font-bold" id="bandOpacityValue">60%</span>
-                    </div>
-                    <input type="range" id="bandOpacitySlider" min="0" max="100" value="60"
-                           class="band-opacity-slider w-full"
-                           oninput="updateBandOpacity(this.value)">
-                    <div class="flex justify-between text-xs text-slate-500 mt-1">
-                        <span>Clear</span>
-                        <span>Solid</span>
-                    </div>
-                </div>
-
-                <div class="text-xs text-slate-500 text-center">
-                    👌 Pinch to zoom • 👈 Drag to pan • 👆 Tap a point to open the record • 👆 Tap yellow lines for meds
-                </div>
-            </div>
-        </div>
-
-        <!-- LOG SCREEN -->
-        <div id="logScreen" class="hidden space-y-4">
-            <div class="glass-panel rounded-3xl p-4">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-bold text-white">Log</h2>
-                    <div class="flex gap-2">
-                        <button onclick="showScreen('addScreen')" class="btn-secondary px-4 py-2 rounded-full text-sm">Add</button>
-                        <button onclick="showScreen('homeScreen')" class="btn-secondary px-4 py-2 rounded-full text-sm">Home</button>
-                        <button onclick="showScreen('settingsScreen')" class="btn-secondary p-2 rounded-full">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-
-                <div id="logEntries" class="space-y-3 max-h-[60vh] overflow-y-auto"></div>
-            </div>
-        </div>
-
-        <!-- IMPORT SCREEN -->
-        <div id="importScreen" class="hidden space-y-4">
-            <div class="glass-panel rounded-3xl p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-white">Import Data</h2>
-                    <button onclick="showScreen('homeScreen')" class="text-slate-400 hover:text-white">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                </div>
-
-                <div class="mb-4">
-                    <p class="text-slate-300 text-sm mb-4">Paste your exported Vitals Tracker report below. The app will parse dates, BP readings, heart rate, symptoms, and notes.</p>
-                    <textarea id="importData" class="import-textarea" placeholder="Paste report data here..."></textarea>
-                </div>
-
-                <div class="flex gap-3">
-                    <button onclick="parseAndImport()" class="flex-1 btn-primary text-white font-semibold py-3 rounded-xl">
-                        Import
-                    </button>
-                    <button onclick="showScreen('homeScreen')" class="flex-1 btn-secondary text-white font-semibold py-3 rounded-xl">
-                        Cancel
-                    </button>
-                </div>
-
-                <div id="importStatus" class="mt-4 text-sm"></div>
-            </div>
-        </div>
-
-        <!-- REPORT SCREEN -->
-        <div id="reportScreen" class="hidden space-y-4">
-            <div class="glass-panel rounded-3xl p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-white">Clinician Report</h2>
-                    <button onclick="showScreen('homeScreen')" class="text-slate-400 hover:text-white">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                </div>
-
-                <div id="reportContent" class="space-y-4 max-h-[60vh] overflow-y-auto"></div>
-
-                <button onclick="generatePDF()" class="w-full btn-primary text-white font-semibold py-4 rounded-2xl text-lg mt-6">
-                    Save as PDF
-                </button>
-            </div>
-        </div>
-
-        <!-- SETTINGS/MEDICATION MANAGER -->
-        <div id="settingsScreen" class="hidden space-y-4">
-            <div class="glass-panel rounded-3xl p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-white">Medications</h2>
-                    <button onclick="backFromSettings()" class="text-slate-400 hover:text-white p-2">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                </div>
-
-                <div class="mb-4">
-                    <div class="flex gap-2">
-                        <input type="text" id="newMedName" placeholder="Medication name"
-                               class="input-field flex-1 px-4 py-3 rounded-xl text-white text-sm">
-                        <button onclick="addMedication()" class="btn-primary px-4 py-3 rounded-xl text-white font-semibold">
-                            Add
-                        </button>
-                    </div>
-                </div>
-
-                <div id="settingsMedList" class="space-y-2 max-h-64 overflow-y-auto mb-6"></div>
-
-                <div class="border-t border-slate-700 pt-4">
-                    <h3 class="text-lg font-semibold text-white mb-3">Data Management</h3>
-                    <button onclick="exportData()" class="w-full btn-secondary text-white py-3 rounded-xl mb-2 text-sm">
-                        Export Data (JSON)
-                    </button>
-                    <button onclick="document.getElementById('importFile').click()" class="w-full btn-secondary text-white py-3 rounded-xl text-sm">
-                        Import JSON
-                    </button>
-                    <input type="file" id="importFile" accept=".json" class="hidden" onchange="importData(this)">
-                </div>
-
-                <button onclick="backFromSettings()" class="w-full btn-secondary text-white py-4 rounded-2xl text-lg mt-4">
-                    Back
-                </button>
-            </div>
-        </div>
-    </main>
-
-    <div id="confirmDialog" class="confirm-dialog">
-        <div class="confirm-box">
-            <h3 class="text-lg font-bold text-white mb-2" id="confirmTitle">Confirm</h3>
-            <p class="text-slate-300 mb-4" id="confirmMessage">Are you sure?</p>
-            <div class="flex gap-3">
-                <button onclick="confirmAction()" class="flex-1 btn-danger py-3 rounded-xl text-white font-semibold">Delete</button>
-                <button onclick="closeConfirmDialog()" class="flex-1 btn-secondary py-3 rounded-xl text-white font-semibold">Cancel</button>
-            </div>
-        </div>
+      <div class="flex justify-between text-xs text-slate-600 px-2">
+        <span>v2.031b</span>
+        <span>© 2025-2026 Wendell Jiles</span>
+      </div>
     </div>
 
-    <script>
-        let readings = JSON.parse(localStorage.getItem('vitals_readings') || '[]');
-        let medications = JSON.parse(localStorage.getItem('vitals_medications') || '["Lisinopril", "Metoprolol", "Gabapentin", "Propranolol", "Lamotrigine"]');
-        let chartInstance = null;
-        let currentEditId = null;
-        let showMedsOnChart = true;
-        let unsavedChanges = false;
-        let editingLogId = null;
-        let bandOpacity = 0.6;
-        let currentMedPopup = null;
-        let currentReadingPopup = null;
-        let confirmCallback = null;
-        let currentPosition = 'Laying';
-        let currentArm = 'Left';
+    <!-- ADD READING SCREEN -->
+    <div id="addScreen" class="hidden space-y-4">
+      <div class="glass-panel rounded-3xl p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold text-white" id="addTitle">Add Reading</h2>
+          <button onclick="cancelAdd()" class="text-slate-400 hover:text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
 
-        const ONE_HOUR = 60 * 60 * 1000;
-        const ONE_MONTH = 30 * 24 * 60 * 60 * 1000;
+        <div class="text-center mb-6 text-blue-400 font-mono text-lg" id="currentTime"></div>
 
-        document.addEventListener('DOMContentLoaded', () => {
-            updateTime();
-            setInterval(updateTime, 1000);
-            loadMedicationList();
+        <div class="mb-4">
+          <label class="block text-sm text-slate-300 mb-3">Position</label>
+          <div class="flex gap-2 justify-center">
+            <button type="button" class="position-btn active" data-position="Laying" onclick="selectPosition(this)">Laying</button>
+            <button type="button" class="position-btn" data-position="Sitting" onclick="selectPosition(this)">Sitting</button>
+            <button type="button" class="position-btn" data-position="Standing" onclick="selectPosition(this)">Standing</button>
+          </div>
+        </div>
 
-            document.addEventListener('click', (e) => {
-                const isInsideMed = e.target.closest('.med-popup');
-                const isInsideReading = e.target.closest('.reading-popup');
-                const isChart = e.target.closest('#vitalsChart');
-                if (!isInsideMed && !isInsideReading && !isChart) {
-                    closeMedPopup();
-                    closeReadingPopup();
-                }
-            });
-        });
+        <div class="mb-6">
+          <label class="block text-sm text-slate-300 mb-3">Arm</label>
+          <div class="flex gap-2 justify-center">
+            <button type="button" class="arm-btn active" data-arm="Left" onclick="selectArm(this)">Left</button>
+            <button type="button" class="arm-btn" data-arm="Right" onclick="selectArm(this)">Right</button>
+          </div>
+          <div class="text-xs text-slate-500 mt-2 text-center">Saved with the reading for accuracy (left/right arm).</div>
+        </div>
 
-        function updateTime() {
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString('en-US', { hour12: true }) + ', ' + now.toLocaleDateString('en-US');
-            const el = document.getElementById('currentTime');
-            if (el) el.textContent = timeStr;
+        <div class="grid grid-cols-3 gap-3 mb-6">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1 text-center">SYS</label>
+            <input type="number" id="systolic" placeholder="132" class="input-field w-full px-3 py-3 rounded-xl text-center text-white text-lg font-semibold" onkeydown="handleEnter(event, 'diastolic')">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1 text-center">DIA</label>
+            <input type="number" id="diastolic" placeholder="91" class="input-field w-full px-3 py-3 rounded-xl text-center text-white text-lg font-semibold" onkeydown="handleEnter(event, 'heartRate')">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1 text-center">HR</label>
+            <input type="number" id="heartRate" placeholder="72" class="input-field w-full px-3 py-3 rounded-xl text-center text-white text-lg font-semibold" onkeydown="handleEnter(event, 'notes')">
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <label class="block text-sm text-slate-300 mb-2 flex justify-between">
+            <span>Distress</span>
+            <span id="distressValue" class="text-blue-400 font-bold">0</span>
+          </label>
+          <input type="range" id="distressLevel" min="0" max="10" value="0" class="distress-slider w-full"
+                 oninput="document.getElementById('distressValue').textContent = this.value">
+          <div class="flex justify-between text-xs text-slate-500 mt-1">
+            <span>None</span><span>Severe</span>
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <label class="block text-sm text-slate-300 mb-2">Notes (optional)</label>
+          <textarea id="notes" rows="3" placeholder="How are you feeling?" class="input-field w-full px-4 py-3 rounded-xl text-white resize-none"></textarea>
+        </div>
+
+        <div class="mb-6">
+          <label class="block text-sm text-slate-300 mb-3">Symptoms</label>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" class="symptom-checkbox" value="Sweaty"><span class="text-slate-300 text-sm">Sweaty</span></label>
+            <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" class="symptom-checkbox" value="Dizzy"><span class="text-slate-300 text-sm">Dizzy</span></label>
+            <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" class="symptom-checkbox" value="Panic"><span class="text-slate-300 text-sm">Panic</span></label>
+            <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" class="symptom-checkbox" value="Brain fog"><span class="text-slate-300 text-sm">Brain fog</span></label>
+            <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" class="symptom-checkbox" value="Chest tight"><span class="text-slate-300 text-sm">Chest tight</span></label>
+            <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" class="symptom-checkbox" value="Headache"><span class="text-slate-300 text-sm">Headache</span></label>
+            <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" class="symptom-checkbox" value="Nausea"><span class="text-slate-300 text-sm">Nausea</span></label>
+            <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" class="symptom-checkbox" value="Short breath"><span class="text-slate-300 text-sm">Short breath</span></label>
+            <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" class="symptom-checkbox" value="Hot ears"><span class="text-slate-300 text-sm">Hot ears</span></label>
+            <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" class="symptom-checkbox" value="Shaky"><span class="text-slate-300 text-sm">Shaky</span></label>
+            <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" class="symptom-checkbox" value="Blurred vision"><span class="text-slate-300 text-sm">Blurred vision</span></label>
+            <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" class="symptom-checkbox" value="Weakness"><span class="text-slate-300 text-sm">Weakness</span></label>
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <div class="flex justify-between items-center mb-3">
+            <label class="block text-sm text-slate-300">Medications Taken</label>
+            <button onclick="showMedicationManager()" class="text-xs text-blue-400 hover:text-blue-300">+ Manage Meds</button>
+          </div>
+          <div id="medicationList" class="space-y-2 max-h-40 overflow-y-auto"></div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <button onclick="saveReading()" class="btn-primary text-white font-semibold py-4 rounded-2xl text-lg">Save</button>
+          <button onclick="cancelAdd()" class="btn-secondary text-white font-semibold py-4 rounded-2xl text-lg">Back</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHART SCREEN -->
+    <div id="chartScreen" class="hidden space-y-4">
+      <div class="glass-panel rounded-3xl p-4">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-2xl font-bold text-white">Charts</h2>
+          <div class="flex gap-2">
+            <button onclick="showScreen('addScreen')" class="btn-secondary px-4 py-2 rounded-full text-sm">Add</button>
+            <button onclick="showScreen('homeScreen')" class="btn-secondary px-4 py-2 rounded-full text-sm">Home</button>
+            <button onclick="showScreen('settingsScreen')" class="btn-secondary p-2 rounded-full">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="text-center text-slate-400 text-sm mb-4 font-mono" id="chartDateRange">Loading...</div>
+
+        <div class="chart-container mb-4" id="chartWrapper">
+          <canvas id="vitalsChart"></canvas>
+
+          <div id="readingPopup" class="reading-popup">
+            <div class="reading-popup-header">
+              <span class="text-blue-200 font-bold text-base">📍 Reading</span>
+              <button class="reading-popup-close" onclick="closeReadingPopup()">×</button>
+            </div>
+            <div class="reading-popup-content" id="readingPopupContent"></div>
+            <div class="reading-popup-time" id="readingPopupTime"></div>
+          </div>
+        </div>
+
+        <div class="space-y-2 mb-4">
+          <div class="text-sm font-semibold text-slate-300 mb-2">Blood Pressure Bands (constant 60%)</div>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-red-700"></div><span class="text-slate-300">Crisis ≥180</span></div>
+            <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-red-500"></div><span class="text-slate-300">Stage 2 HTN 140-179</span></div>
+            <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-yellow-500"></div><span class="text-slate-300">Stage 1 HTN 130-139</span></div>
+            <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-purple-500"></div><span class="text-slate-300">Elevated 120-129</span></div>
+            <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-blue-500"></div><span class="text-slate-300">Normal &lt;120</span></div>
+          </div>
+        </div>
+
+        <div class="text-xs text-slate-500 text-center">
+          👌 Pinch to zoom • 👈 Drag to pan • 👆 Tap a point to open the record
+        </div>
+      </div>
+    </div>
+
+    <!-- LOG SCREEN -->
+    <div id="logScreen" class="hidden space-y-4">
+      <div class="glass-panel rounded-3xl p-4">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-2xl font-bold text-white">Log</h2>
+          <div class="flex gap-2">
+            <button onclick="showScreen('addScreen')" class="btn-secondary px-4 py-2 rounded-full text-sm">Add</button>
+            <button onclick="showScreen('homeScreen')" class="btn-secondary px-4 py-2 rounded-full text-sm">Home</button>
+            <button onclick="showScreen('settingsScreen')" class="btn-secondary p-2 rounded-full">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div id="logEntries" class="space-y-3 max-h-[60vh] overflow-y-auto"></div>
+      </div>
+    </div>
+
+    <!-- IMPORT SCREEN -->
+    <div id="importScreen" class="hidden space-y-4">
+      <div class="glass-panel rounded-3xl p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold text-white">Import Data</h2>
+          <button onclick="showScreen('homeScreen')" class="text-slate-400 hover:text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="mb-4">
+          <p class="text-slate-300 text-sm mb-4">
+            Paste your exported Vitals Tracker report below. This import does NOT cap records. It will import everything it finds.
+          </p>
+          <textarea id="importData" class="import-textarea" placeholder="Paste report data here..."></textarea>
+        </div>
+
+        <div class="flex gap-3">
+          <button onclick="parseAndImport()" class="flex-1 btn-primary text-white font-semibold py-3 rounded-xl">Import</button>
+          <button onclick="showScreen('homeScreen')" class="flex-1 btn-secondary text-white font-semibold py-3 rounded-xl">Cancel</button>
+        </div>
+
+        <div id="importStatus" class="mt-4 text-sm"></div>
+      </div>
+    </div>
+
+    <!-- REPORT SCREEN -->
+    <div id="reportScreen" class="hidden space-y-4">
+      <div class="glass-panel rounded-3xl p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold text-white">Clinician Report</h2>
+          <button onclick="showScreen('homeScreen')" class="text-slate-400 hover:text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <div id="reportContent" class="space-y-4 max-h-[60vh] overflow-y-auto"></div>
+
+        <button onclick="generatePDF()" class="w-full btn-primary text-white font-semibold py-4 rounded-2xl text-lg mt-6">
+          Save as PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- SETTINGS SCREEN -->
+    <div id="settingsScreen" class="hidden space-y-4">
+      <div class="glass-panel rounded-3xl p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold text-white">Settings</h2>
+          <button onclick="backFromSettings()" class="text-slate-400 hover:text-white p-2">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="mb-6">
+          <h3 class="text-lg font-semibold text-white mb-3">Profile (optional)</h3>
+
+          <label class="block text-xs text-slate-400 mb-1">Your name</label>
+          <input id="profileName" type="text" class="input-field w-full px-4 py-3 rounded-xl text-white text-sm mb-3" placeholder="e.g., Wendell Jiles">
+
+          <label class="block text-xs text-slate-400 mb-1">Doctor/Provider</label>
+          <input id="profileDoctor" type="text" class="input-field w-full px-4 py-3 rounded-xl text-white text-sm mb-3" placeholder="e.g., Dr. Katz">
+
+          <label class="block text-xs text-slate-400 mb-1">Clinic</label>
+          <input id="profileClinic" type="text" class="input-field w-full px-4 py-3 rounded-xl text-white text-sm mb-3" placeholder="e.g., Pensacola VA Clinic">
+
+          <label class="block text-xs text-slate-400 mb-1">Diagnosed conditions (one per line)</label>
+          <textarea id="profileConditions" rows="5" class="input-field w-full px-4 py-3 rounded-xl text-white text-sm resize-none" placeholder="e.g., Hypertension&#10;POTS&#10;Migraine"></textarea>
+
+          <button onclick="saveProfile()" class="w-full btn-primary text-white font-semibold py-3 rounded-xl text-sm mt-4">
+            Save Profile
+          </button>
+          <p class="text-xs text-slate-500 mt-2">If set, these fields populate exports and clinician reports.</p>
+        </div>
+
+        <div class="border-t border-slate-700 pt-6">
+          <h3 class="text-lg font-semibold text-white mb-3">Medications List</h3>
+          <div class="mb-4">
+            <div class="flex gap-2">
+              <input type="text" id="newMedName" placeholder="Medication name" class="input-field flex-1 px-4 py-3 rounded-xl text-white text-sm">
+              <button onclick="addMedication()" class="btn-primary px-4 py-3 rounded-xl text-white font-semibold">Add</button>
+            </div>
+          </div>
+          <div id="settingsMedList" class="space-y-2 max-h-56 overflow-y-auto mb-6"></div>
+        </div>
+
+        <div class="border-t border-slate-700 pt-4">
+          <h3 class="text-lg font-semibold text-white mb-3">Data Management</h3>
+          <button onclick="exportData()" class="w-full btn-secondary text-white py-3 rounded-xl mb-2 text-sm">
+            Export Data (JSON)
+          </button>
+          <button onclick="document.getElementById('importFile').click()" class="w-full btn-secondary text-white py-3 rounded-xl text-sm">
+            Import JSON
+          </button>
+          <input type="file" id="importFile" accept=".json" class="hidden" onchange="importData(this)">
+        </div>
+
+        <button onclick="backFromSettings()" class="w-full btn-secondary text-white py-4 rounded-2xl text-lg mt-4">
+          Back
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <div id="confirmDialog" class="confirm-dialog">
+    <div class="confirm-box">
+      <h3 class="text-lg font-bold text-white mb-2" id="confirmTitle">Confirm</h3>
+      <p class="text-slate-300 mb-4" id="confirmMessage">Are you sure?</p>
+      <div class="flex gap-3">
+        <button onclick="confirmAction()" class="flex-1 btn-danger py-3 rounded-xl text-white font-semibold">Delete</button>
+        <button onclick="closeConfirmDialog()" class="flex-1 btn-secondary py-3 rounded-xl text-white font-semibold">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Storage keys
+    const STORAGE_READINGS = 'vitals_readings';
+    const STORAGE_MEDS = 'vitals_medications';
+    const STORAGE_PROFILE = 'vitals_profile';
+
+    // Constant band opacity per request
+    const BAND_OPACITY = 0.60;
+
+    let readings = safeJsonParse(localStorage.getItem(STORAGE_READINGS), []);
+    let medications = safeJsonParse(localStorage.getItem(STORAGE_MEDS), ["Lisinopril","Metoprolol","Gabapentin","Propranolol","Lamotrigine"]);
+    let profile = safeJsonParse(localStorage.getItem(STORAGE_PROFILE), {
+      name: '',
+      doctor: '',
+      clinic: '',
+      conditions: []
+    });
+
+    let chartInstance = null;
+
+    let currentEditId = null;
+    let unsavedChanges = false;
+    let editingLogId = null;
+
+    let currentPosition = 'Laying';
+    let currentArm = 'Left';
+
+    let confirmCallback = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      updateTime();
+      setInterval(updateTime, 1000);
+
+      loadMedicationList();
+      renderSettingsMedList();
+      loadProfileIntoUI();
+
+      document.addEventListener('click', (e) => {
+        const isPopup = e.target.closest('.reading-popup');
+        const isChart = e.target.closest('#vitalsChart');
+        if (!isPopup && !isChart) closeReadingPopup();
+      });
+    });
+
+    function safeJsonParse(s, fallback) {
+      try { return s ? JSON.parse(s) : fallback; } catch { return fallback; }
+    }
+
+    function updateTime() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('en-US', { hour12: true }) + ', ' + now.toLocaleDateString('en-US');
+      const el = document.getElementById('currentTime');
+      if (el) el.textContent = timeStr;
+    }
+
+    function showScreen(screenId) {
+      if (editingLogId) cancelInlineEdit(editingLogId);
+
+      if (unsavedChanges && !document.getElementById('addScreen').classList.contains('hidden')) {
+        if (confirm('Save current reading before leaving?')) { saveReading(); return; }
+        unsavedChanges = false;
+      }
+
+      document.querySelectorAll('main > div').forEach(div => div.classList.add('hidden'));
+      document.getElementById(screenId).classList.remove('hidden');
+
+      if (screenId === 'chartScreen') setTimeout(initChart, 50);
+      if (screenId === 'logScreen') renderLog();
+      if (screenId === 'settingsScreen') { renderSettingsMedList(); loadProfileIntoUI(); }
+      if (screenId === 'reportScreen') generateReport();
+      if (screenId === 'addScreen') {
+        currentEditId = null;
+        resetAddForm();
+        document.getElementById('addTitle').textContent = 'Add Reading';
+      }
+    }
+
+    function selectPosition(btn) {
+      document.querySelectorAll('.position-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentPosition = btn.dataset.position;
+    }
+
+    function selectArm(btn) {
+      document.querySelectorAll('.arm-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentArm = btn.dataset.arm;
+    }
+
+    function handleEnter(e, nextId) {
+      if (e.key === 'Enter') { e.preventDefault(); document.getElementById(nextId)?.focus(); }
+      unsavedChanges = true;
+    }
+
+    function resetAddForm() {
+      document.getElementById('systolic').value = '';
+      document.getElementById('diastolic').value = '';
+      document.getElementById('heartRate').value = '';
+      document.getElementById('notes').value = '';
+      document.getElementById('distressLevel').value = 0;
+      document.getElementById('distressValue').textContent = '0';
+
+      document.querySelectorAll('.symptom-checkbox:not(.med-checkbox)').forEach(cb => cb.checked = false);
+      document.querySelectorAll('.med-checkbox').forEach(cb => cb.checked = false);
+
+      document.querySelectorAll('.position-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector('[data-position="Laying"]').classList.add('active');
+      currentPosition = 'Laying';
+
+      document.querySelectorAll('.arm-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector('[data-arm="Left"]').classList.add('active');
+      currentArm = 'Left';
+
+      unsavedChanges = false;
+    }
+
+    function cancelAdd() {
+      if (unsavedChanges) {
+        if (confirm('You have unsaved changes. Save them?')) { saveReading(); return; }
+      }
+      showScreen('homeScreen');
+    }
+
+    function saveReading() {
+      const systolic = document.getElementById('systolic').value;
+      const diastolic = document.getElementById('diastolic').value;
+      const heartRate = document.getElementById('heartRate').value;
+      const notes = document.getElementById('notes').value;
+      const distress = document.getElementById('distressLevel').value;
+
+      const symptoms = Array.from(document.querySelectorAll('.symptom-checkbox:not(.med-checkbox):checked')).map(cb => cb.value);
+      const medsTaken = Array.from(document.querySelectorAll('.med-checkbox:checked')).map(cb => cb.value);
+
+      const reading = {
+        id: currentEditId || Date.now(),
+        timestamp: currentEditId ? (readings.find(r => r.id === currentEditId)?.timestamp || new Date().toISOString()) : new Date().toISOString(),
+        systolic: systolic ? parseInt(systolic, 10) : null,
+        diastolic: diastolic ? parseInt(diastolic, 10) : null,
+        heartRate: heartRate ? parseInt(heartRate, 10) : null,
+        distress: parseInt(distress, 10) || 0,
+        position: currentPosition,
+        arm: currentArm,
+        notes: notes || '',
+        symptoms: symptoms,
+        medications: medsTaken
+      };
+
+      if (currentEditId) {
+        const idx = readings.findIndex(r => r.id === currentEditId);
+        if (idx !== -1) readings[idx] = reading;
+      } else {
+        readings.unshift(reading);
+      }
+
+      persistReadings();
+      unsavedChanges = false;
+      showScreen('homeScreen');
+    }
+
+    function persistReadings() {
+      localStorage.setItem(STORAGE_READINGS, JSON.stringify(readings));
+    }
+    function persistMeds() {
+      localStorage.setItem(STORAGE_MEDS, JSON.stringify(medications));
+    }
+    function persistProfile() {
+      localStorage.setItem(STORAGE_PROFILE, JSON.stringify(profile));
+    }
+
+    function loadMedicationList() {
+      const container = document.getElementById('medicationList');
+      if (!container) return;
+      container.innerHTML = medications.map((med, idx) => `
+        <label class="flex items-center gap-3 p-2 rounded-lg bg-slate-800/50 cursor-pointer hover:bg-slate-800 transition">
+          <input type="checkbox" class="symptom-checkbox med-checkbox" value="${escapeHtml(med)}" data-idx="${idx}">
+          <span class="text-slate-300 text-sm flex-1">${escapeHtml(med)}</span>
+        </label>
+      `).join('');
+    }
+
+    function renderSettingsMedList() {
+      const container = document.getElementById('settingsMedList');
+      if (!container) return;
+      container.innerHTML = medications.map((med, idx) => `
+        <div class="flex items-center justify-between p-3 rounded-lg bg-slate-800/50">
+          <span class="text-slate-300 text-sm">${escapeHtml(med)}</span>
+          <button onclick="confirmDeleteMedication(${idx})" class="delete-btn">Delete</button>
+        </div>
+      `).join('');
+    }
+
+    function addMedication() {
+      const input = document.getElementById('newMedName');
+      const name = (input.value || '').trim();
+      if (!name) return;
+      if (!medications.includes(name)) {
+        medications.push(name);
+        persistMeds();
+        input.value = '';
+        renderSettingsMedList();
+        loadMedicationList();
+      }
+    }
+
+    function confirmDeleteMedication(idx) {
+      confirmCallback = () => {
+        medications.splice(idx, 1);
+        persistMeds();
+        renderSettingsMedList();
+        loadMedicationList();
+        closeConfirmDialog();
+      };
+      document.getElementById('confirmTitle').textContent = 'Delete Medication';
+      document.getElementById('confirmMessage').textContent = `Are you sure you want to delete "${medications[idx]}"? This will not affect existing records.`;
+      document.getElementById('confirmDialog').classList.add('active');
+    }
+
+    function closeConfirmDialog() {
+      document.getElementById('confirmDialog').classList.remove('active');
+      confirmCallback = null;
+    }
+    function confirmAction() { if (confirmCallback) confirmCallback(); }
+
+    function showMedicationManager() { showScreen('settingsScreen'); }
+    function backFromSettings() { showScreen('homeScreen'); }
+
+    function loadProfileIntoUI() {
+      const nameEl = document.getElementById('profileName');
+      const docEl = document.getElementById('profileDoctor');
+      const clinicEl = document.getElementById('profileClinic');
+      const condEl = document.getElementById('profileConditions');
+      if (!nameEl || !docEl || !clinicEl || !condEl) return;
+
+      nameEl.value = profile?.name || '';
+      docEl.value = profile?.doctor || '';
+      clinicEl.value = profile?.clinic || '';
+      condEl.value = (profile?.conditions || []).join('\n');
+    }
+
+    function saveProfile() {
+      const nameEl = document.getElementById('profileName');
+      const docEl = document.getElementById('profileDoctor');
+      const clinicEl = document.getElementById('profileClinic');
+      const condEl = document.getElementById('profileConditions');
+
+      profile = {
+        name: (nameEl.value || '').trim(),
+        doctor: (docEl.value || '').trim(),
+        clinic: (clinicEl.value || '').trim(),
+        conditions: (condEl.value || '').split('\n').map(s => s.trim()).filter(Boolean)
+      };
+
+      persistProfile();
+      alert('Profile saved.');
+    }
+
+    function exportData() {
+      const data = {
+        profile,
+        readings,
+        medications,
+        exportDate: new Date().toISOString(),
+        copyright: '© 2025-2026 Wendell Jiles'
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `vitals_backup_${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+    }
+
+    function importData(input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data.profile) profile = data.profile;
+          if (Array.isArray(data.medications)) medications = data.medications;
+          if (Array.isArray(data.readings)) readings = data.readings;
+
+          persistProfile();
+          persistMeds();
+          persistReadings();
+
+          loadProfileIntoUI();
+          loadMedicationList();
+          renderSettingsMedList();
+          alert('JSON imported successfully');
+        } catch (err) {
+          alert('Error importing data: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // IMPORT FROM REPORT TEXT (NO CAP)
+    function parseAndImport() {
+      const text = document.getElementById('importData').value;
+      const statusEl = document.getElementById('importStatus');
+
+      if (!text.trim()) {
+        statusEl.innerHTML = '<span class="text-red-400">Please paste data to import</span>';
+        return;
+      }
+
+      const lines = text.split('\n');
+      const parsed = [];
+
+      let currentEntry = null;
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = (lines[i] || '').trim();
+        if (!line) continue;
+
+        // Format in exports: 02/16/2026, 03:05:04 AM
+        const dateMatch = line.match(/^(\d{2}\/\d{2}\/\d{4}),\s*(\d{1,2}:\d{2}:\d{2}\s*(?:AM|PM))$/i);
+        if (dateMatch) {
+          if (currentEntry) parsed.push(currentEntry);
+
+          const dateStr = dateMatch[1];
+          const timeStr = dateMatch[2];
+          const [month, day, year] = dateStr.split('/');
+          const dt = new Date(`${month}/${day}/${year} ${timeStr}`);
+
+          currentEntry = {
+            id: dt.getTime(),
+            timestamp: dt.toISOString(),
+            systolic: null,
+            diastolic: null,
+            heartRate: null,
+            distress: 0,
+            position: 'Unknown',
+            arm: 'Unknown',
+            notes: '',
+            symptoms: [],
+            medications: []
+          };
+          continue;
         }
 
-        function showScreen(screenId) {
-            if (editingLogId) cancelInlineEdit(editingLogId);
-
-            if (unsavedChanges && !document.getElementById('addScreen').classList.contains('hidden')) {
-                if (confirm('Save current reading before leaving?')) {
-                    saveReading();
-                    return;
-                } else {
-                    unsavedChanges = false;
-                }
-            }
-
-            document.querySelectorAll('main > div').forEach(div => div.classList.add('hidden'));
-            document.getElementById(screenId).classList.remove('hidden');
-
-            if (screenId === 'chartScreen') setTimeout(initChart, 60);
-            if (screenId === 'logScreen') renderLog();
-            if (screenId === 'settingsScreen') renderSettingsMedList();
-            if (screenId === 'reportScreen') generateReport();
-            if (screenId === 'addScreen') {
-                currentEditId = null;
-                resetAddForm();
-                document.getElementById('addTitle').textContent = 'Add Reading';
-            }
+        // BP line: BP 120/80 • HR 78
+        const bpMatch = line.match(/BP\s+(\d+)\/(\d+)(?:\s*•\s*HR\s+(\d+))?/i);
+        if (bpMatch && currentEntry) {
+          currentEntry.systolic = parseInt(bpMatch[1], 10);
+          currentEntry.diastolic = parseInt(bpMatch[2], 10);
+          if (bpMatch[3]) currentEntry.heartRate = parseInt(bpMatch[3], 10);
+          continue;
         }
 
-        function selectPosition(btn) {
-            document.querySelectorAll('.position-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentPosition = btn.dataset.position;
+        // Symptoms line: Symptoms: Sweaty, Panic
+        const symptomsMatch = line.match(/^Symptoms:\s*(.+)$/i);
+        if (symptomsMatch && currentEntry) {
+          const symptomsList = symptomsMatch[1].split(',').map(s => s.trim()).filter(s => s && s !== 'None');
+          currentEntry.symptoms = symptomsList;
+          continue;
         }
 
-        function selectArm(btn) {
-            document.querySelectorAll('.arm-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentArm = btn.dataset.arm;
+        // Notes line: Notes: Sla. ...
+        const notesMatch = line.match(/^Notes:\s*(.+)$/i);
+        if (notesMatch && currentEntry) {
+          currentEntry.notes = notesMatch[1];
+
+          // Arm inference
+          if (/\b(?:LA|Left Arm|L\.?\s*Arm|Si\/LA|Supine\s+left\s+arm)\b/i.test(currentEntry.notes)) currentEntry.arm = 'Left';
+          else if (/\b(?:RA|Right Arm|R\.?\s*Arm)\b/i.test(currentEntry.notes)) currentEntry.arm = 'Right';
+
+          // Position inference
+          if (/\b(?:Standing)\b/i.test(currentEntry.notes)) currentEntry.position = 'Standing';
+          else if (/\b(?:Sitting)\b/i.test(currentEntry.notes)) currentEntry.position = 'Sitting';
+          else if (/\b(?:Laying|Supine)\b/i.test(currentEntry.notes)) currentEntry.position = 'Laying';
+
+          // meds tokens inference (kept basic; user also can check meds in app)
+          const medPatterns = ['Gab','Li','Pr','La','Riz','Hyo','Clon','Clonidine'];
+          const found = [];
+          medPatterns.forEach(tok => {
+            if (new RegExp(`\\b${tok}\\b`, 'i').test(currentEntry.notes)) found.push(tok);
+          });
+          if (found.length) {
+            const map = {
+              Gab:'Gabapentin', Li:'Lisinopril', Pr:'Propranolol', La:'Lamotrigine',
+              Riz:'Rizatriptan', Hyo:'Hyoscyamine', Clon:'Clonidine', Clonidine:'Clonidine'
+            };
+            currentEntry.medications = Array.from(new Set(found.map(t => map[t] || t)));
+          }
+
+          // distress token "x/10" if present
+          const distressMatch = currentEntry.notes.match(/(\d+)\s*\/\s*10/);
+          if (distressMatch) {
+            const v = parseInt(distressMatch[1], 10);
+            if (!Number.isNaN(v)) currentEntry.distress = Math.max(0, Math.min(10, v));
+          }
         }
+      }
+      if (currentEntry) parsed.push(currentEntry);
 
-        function parseAndImport() {
-            const text = document.getElementById('importData').value;
-            const statusEl = document.getElementById('importStatus');
+      // Merge: keep existing + parsed; de-duplicate by timestamp+bp+hr hash
+      const existing = readings.slice();
+      const seen = new Set(existing.map(r => recordKey(r)));
+      let added = 0;
 
-            if (!text.trim()) {
-                statusEl.innerHTML = '<span class="text-red-400">Please paste data to import</span>';
-                return;
-            }
-
-            const newReadings = [];
-            const lines = text.split('\n');
-            let currentEntry = null;
-
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i].trim();
-
-                const dateMatch = line.match(/^(\d{2}\/\d{2}\/\d{4}),\s*(\d{1,2}:\d{2}:\d{2}\s*(?:AM|PM))$/i);
-                if (dateMatch) {
-                    if (currentEntry) newReadings.push(currentEntry);
-
-                    const dateStr = dateMatch[1];
-                    const timeStr = dateMatch[2];
-                    const [month, day, year] = dateStr.split('/');
-                    const date = new Date(`${month}/${day}/${year} ${timeStr}`);
-
-                    currentEntry = {
-                        id: date.getTime(),
-                        timestamp: date.toISOString(),
-                        systolic: null,
-                        diastolic: null,
-                        heartRate: null,
-                        distress: 0,
-                        position: 'Unknown',
-                        arm: 'Unknown',
-                        notes: '',
-                        symptoms: [],
-                        medications: []
-                    };
-                    continue;
-                }
-
-                const bpMatch = line.match(/BP\s+(\d+)\/(\d+)(?:\s*•\s*HR\s+(\d+))?/i);
-                if (bpMatch && currentEntry) {
-                    currentEntry.systolic = parseInt(bpMatch[1]);
-                    currentEntry.diastolic = parseInt(bpMatch[2]);
-                    if (bpMatch[3]) currentEntry.heartRate = parseInt(bpMatch[3]);
-                    continue;
-                }
-
-                const symptomsMatch = line.match(/^Symptoms:\s*(.+)$/i);
-                if (symptomsMatch && currentEntry) {
-                    const symptomsList = symptomsMatch[1].split(',').map(s => s.trim()).filter(s => s && s !== 'None');
-                    currentEntry.symptoms = symptomsList;
-                    continue;
-                }
-
-                const notesMatch = line.match(/^Notes:\s*(.+)$/i);
-                if (notesMatch && currentEntry) {
-                    currentEntry.notes = notesMatch[1];
-
-                    // crude arm inference (if present in notes)
-                    if (currentEntry.notes.match(/\b(?:LA|Left Arm|L\. Arm)\b/i)) currentEntry.arm = 'Left';
-                    else if (currentEntry.notes.match(/\b(?:RA|Right Arm|R\. Arm)\b/i)) currentEntry.arm = 'Right';
-
-                    if (currentEntry.notes.match(/\b(?:SLA|Standing)\b/i)) currentEntry.position = 'Standing';
-                    else if (currentEntry.notes.match(/\b(?:Sitting)\b/i)) currentEntry.position = 'Sitting';
-                    else if (currentEntry.notes.match(/\b(?:Laying|Supine)\b/i)) currentEntry.position = 'Laying';
-
-                    const medPatterns = ['Gab', 'Li', 'Pr', 'La', 'Kk', 'Riz', 'Hyo'];
-                    const foundMeds = [];
-                    medPatterns.forEach(med => {
-                        if (currentEntry.notes.match(new RegExp(`\\b${med}\\b`, 'i'))) {
-                            const fullNames = {
-                                'Gab': 'Gabapentin',
-                                'Li': 'Lisinopril',
-                                'Pr': 'Propranolol',
-                                'La': 'Lamotrigine',
-                                'Kk': 'Klonopin',
-                                'Riz': 'Rizatriptan',
-                                'Hyo': 'Hyoscyamine'
-                            };
-                            if (fullNames[med] && !foundMeds.includes(fullNames[med])) foundMeds.push(fullNames[med]);
-                        }
-                    });
-                    if (foundMeds.length) currentEntry.medications = foundMeds;
-
-                    const distressMatch = currentEntry.notes.match(/(\d+)\s*\/\s*10/);
-                    if (distressMatch) currentEntry.distress = parseInt(distressMatch[1]);
-                }
-            }
-
-            if (currentEntry) newReadings.push(currentEntry);
-
-            if (newReadings.length > 0) {
-                readings = [...newReadings, ...readings];
-                localStorage.setItem('vitals_readings', JSON.stringify(readings));
-                statusEl.innerHTML = `<span class="text-green-400">Successfully imported ${newReadings.length} readings</span>`;
-                document.getElementById('importData').value = '';
-            } else {
-                statusEl.innerHTML = '<span class="text-red-400">No valid readings found in pasted data</span>';
-            }
+      parsed.forEach(r => {
+        const k = recordKey(r);
+        if (!seen.has(k)) {
+          existing.push(r);
+          seen.add(k);
+          added++;
         }
+      });
 
-        // Clinician-facing: what they typically want:
-        // - recent timeline (last 10 readings)
-        // - peaks/outliers (highest SYS/DIA, lowest)
-        // - frequency of hypertensive ranges
-        // - symptom correlation (e.g., panic/sweaty with BP spikes)
-        // - medication context (what was taken around spikes)
-        // - position/arm context (standing vs supine; left vs right)
-        function generateReport() {
-            const container = document.getElementById('reportContent');
-            const now = new Date();
-            const sixtyDaysAgo = new Date(now - 60 * 24 * 60 * 60 * 1000);
+      // Sort newest-first for UI consistency
+      existing.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+      readings = existing;
+      persistReadings();
 
-            const recentReadings = readings
-                .filter(r => new Date(r.timestamp) >= sixtyDaysAgo)
-                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      statusEl.innerHTML = `<span class="text-green-400">Imported ${added} new record(s). Total: ${readings.length}</span>`;
+      document.getElementById('importData').value = '';
+    }
 
-            if (recentReadings.length === 0) {
-                container.innerHTML = '<div class="text-slate-500 text-center py-8">No data available for the last 60 days</div>';
-                return;
-            }
+    function recordKey(r) {
+      const t = r?.timestamp || '';
+      const s = r?.systolic ?? '';
+      const d = r?.diastolic ?? '';
+      const h = r?.heartRate ?? '';
+      return `${t}|${s}|${d}|${h}`;
+    }
 
-            const systolics = recentReadings.map(r => r.systolic).filter(v => v || v === 0).filter(v => v !== null);
-            const diastolics = recentReadings.map(r => r.diastolic).filter(v => v || v === 0).filter(v => v !== null);
-            const heartRates = recentReadings.map(r => r.heartRate).filter(v => v || v === 0).filter(v => v !== null);
-            const distressLevels = recentReadings.map(r => r.distress).filter(v => v !== null && v !== undefined);
+    // LOG UI
+    function getBPColorClass(systolic) {
+      if (!systolic) return 'text-slate-400';
+      if (systolic >= 180) return 'bp-crisis';
+      if (systolic >= 140) return 'bp-stage2';
+      if (systolic >= 130) return 'bp-stage1';
+      if (systolic >= 120) return 'bp-elevated';
+      return 'bp-normal';
+    }
 
-            const avg = (arr) => arr.length ? (arr.reduce((a,b)=>a+b,0)/arr.length) : 0;
-            const round = (n) => Math.round(n);
+    function getDistressClass(level) {
+      if (level >= 7) return 'distress-high';
+      if (level >= 4) return 'distress-med';
+      return 'distress-low';
+    }
 
-            const avgSys = round(avg(systolics));
-            const avgDia = round(avg(diastolics));
-            const avgHR = round(avg(heartRates));
-            const avgDistress = distressLevels.length ? avg(distressLevels).toFixed(1) : '0.0';
+    function renderLog() {
+      const container = document.getElementById('logEntries');
+      if (!container) return;
 
-            const maxSys = systolics.length ? Math.max(...systolics) : 0;
-            const minSys = systolics.length ? Math.min(...systolics) : 0;
-            const maxDia = diastolics.length ? Math.max(...diastolics) : 0;
-            const minDia = diastolics.length ? Math.min(...diastolics) : 0;
+      if (readings.length === 0) {
+        container.innerHTML = '<div class="text-center text-slate-500 py-8">No readings yet</div>';
+        return;
+      }
 
-            const stageCounts = { normal: 0, elevated: 0, stage1: 0, stage2: 0, crisis: 0 };
-            recentReadings.forEach(r => {
-                const s = r.systolic;
-                if (!s) return;
-                if (s >= 180) stageCounts.crisis++;
-                else if (s >= 140) stageCounts.stage2++;
-                else if (s >= 130) stageCounts.stage1++;
-                else if (s >= 120) stageCounts.elevated++;
-                else stageCounts.normal++;
-            });
+      const sorted = [...readings].sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-            const symptomCounts = {};
-            recentReadings.forEach(r => (r.symptoms || []).forEach(s => symptomCounts[s] = (symptomCounts[s] || 0) + 1));
+      container.innerHTML = sorted.map(r => {
+        const date = new Date(r.timestamp);
+        const dateStr = date.toLocaleDateString('en-US');
+        const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
-            const medCounts = {};
-            recentReadings.forEach(r => (r.medications || []).forEach(m => medCounts[m] = (medCounts[m] || 0) + 1));
+        const bpColor = getBPColorClass(r.systolic);
+        const distressClass = getDistressClass(r.distress || 0);
+        const isEditing = (editingLogId === r.id);
 
-            const flags = recentReadings
-                .filter(r => (r.systolic && r.systolic >= 140) || (r.diastolic && r.diastolic >= 90) || (r.distress && r.distress >= 7) || (r.symptoms || []).includes('Panic'))
-                .slice(0, 8);
+        if (isEditing) return renderEditForm(r, dateStr, timeStr);
 
-            const lastN = recentReadings.slice(0, 10);
+        return `
+          <div class="log-entry rounded-2xl p-4" id="log-${r.id}">
+            <div class="flex justify-between items-start mb-2">
+              <div class="font-bold ${bpColor} text-lg cursor-pointer" onclick="enableInlineEdit(${r.id})">
+                <span class="editable-field" onclick="event.stopPropagation(); enableInlineEdit(${r.id}, 'systolic')">BP ${r.systolic ?? '--'}/${r.diastolic ?? '--'}</span>
+                <span class="text-slate-400 text-base mx-1">•</span>
+                <span class="editable-field" onclick="event.stopPropagation(); enableInlineEdit(${r.id}, 'heartRate')">HR ${r.heartRate ?? '--'}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="${distressClass} distress-badge">
+                  ${(r.distress||0) >= 7 ? '🔴' : (r.distress||0) >= 4 ? '🟡' : (r.distress||0) > 0 ? '🟢' : '⚪'} ${(r.distress||0)}/10
+                </span>
+                <span class="text-blue-400 text-sm font-semibold cursor-pointer" onclick="enableInlineEdit(${r.id})">Edit</span>
+              </div>
+            </div>
 
-            const pct = (n) => recentReadings.length ? Math.round((n / recentReadings.length) * 100) : 0;
+            <div class="text-slate-400 text-sm mb-1 cursor-pointer" onclick="enableInlineEdit(${r.id})">
+              ${dateStr}, ${timeStr} • ${r.position || 'Unknown'} • Arm: ${r.arm || 'Unknown'}
+            </div>
 
-            container.innerHTML = `
-                <div class="report-section">
-                    <h3 class="text-lg font-bold text-white mb-2">Clinical Summary (Last 60 Days)</h3>
-                    <p class="text-slate-400 text-sm mb-1">Generated: ${now.toLocaleString('en-US')}</p>
-                    <p class="text-slate-400 text-sm mb-1">Readings: ${recentReadings.length}</p>
-                    <p class="text-slate-500 text-xs">Local-only patient-entered data (no cloud sync). © 2025-2026 Wendell Jiles</p>
-                </div>
+            ${r.medications?.length ? `
+              <div class="flex flex-wrap gap-1 mb-2 cursor-pointer" onclick="enableInlineEdit(${r.id})">
+                <span class="text-xs text-slate-400 mr-1">Meds:</span>
+                ${r.medications.map(m => `<span class="med-tag">${escapeHtml(m)}</span>`).join('')}
+              </div>
+            ` : ''}
 
-                <div class="report-section">
-                    <h3 class="text-lg font-bold text-white mb-3">Vitals Overview</h3>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="stat-card">
-                            <div class="text-2xl font-bold text-blue-400">${avgSys}/${avgDia}</div>
-                            <div class="text-xs text-slate-400">Average BP</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="text-2xl font-bold text-green-400">${avgHR}</div>
-                            <div class="text-xs text-slate-400">Average HR</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="text-2xl font-bold text-pink-400">${avgDistress}</div>
-                            <div class="text-xs text-slate-400">Average Distress</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="text-xs text-slate-400">BP Range</div>
-                            <div class="text-sm font-semibold text-slate-200 mt-1">SYS ${minSys}–${maxSys}</div>
-                            <div class="text-sm font-semibold text-slate-200">DIA ${minDia}–${maxDia}</div>
-                        </div>
-                    </div>
-                </div>
+            <div class="text-slate-300 text-sm mb-2 cursor-pointer editable-field" onclick="enableInlineEdit(${r.id}, 'notes')">
+              ${r.notes ? escapeHtml(r.notes) : 'No notes'}
+            </div>
 
-                <div class="report-section">
-                    <h3 class="text-lg font-bold text-white mb-3">Hypertension Burden (Systolic)</h3>
-                    <div class="space-y-2 text-sm">
-                        <div class="flex justify-between"><span class="text-slate-300">Normal (&lt;120)</span><span class="text-blue-300 font-semibold">${stageCounts.normal} (${pct(stageCounts.normal)}%)</span></div>
-                        <div class="flex justify-between"><span class="text-slate-300">Elevated (120–129)</span><span class="text-purple-300 font-semibold">${stageCounts.elevated} (${pct(stageCounts.elevated)}%)</span></div>
-                        <div class="flex justify-between"><span class="text-slate-300">Stage 1 (130–139)</span><span class="text-yellow-300 font-semibold">${stageCounts.stage1} (${pct(stageCounts.stage1)}%)</span></div>
-                        <div class="flex justify-between"><span class="text-slate-300">Stage 2 (140–179)</span><span class="text-red-300 font-semibold">${stageCounts.stage2} (${pct(stageCounts.stage2)}%)</span></div>
-                        <div class="flex justify-between"><span class="text-slate-300">Crisis (≥180)</span><span class="text-red-400 font-semibold">${stageCounts.crisis} (${pct(stageCounts.crisis)}%)</span></div>
-                    </div>
-                    <div class="text-xs text-slate-500 mt-2">Counts are based on systolic entries present in this 60-day window.</div>
-                </div>
+            ${r.symptoms?.length ? `<div class="text-xs text-slate-400 cursor-pointer" onclick="enableInlineEdit(${r.id})">⚠️ ${r.symptoms.map(escapeHtml).join(', ')}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
 
-                <div class="report-section">
-                    <h3 class="text-lg font-bold text-white mb-3">Most Common Symptoms</h3>
-                    ${
-                        Object.keys(symptomCounts).length
-                            ? Object.entries(symptomCounts).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([s,c])=>`
-                                <div class="flex justify-between items-center py-2 border-b border-slate-700 last:border-0">
-                                    <span class="text-slate-300">${s}</span>
-                                    <span class="text-blue-400 font-bold">${c}</span>
-                                </div>
-                              `).join('')
-                            : '<p class="text-slate-500">No symptoms recorded</p>'
-                    }
-                </div>
+    function renderEditForm(r, dateStr, timeStr) {
+      return `
+        <div class="log-entry editing rounded-2xl p-4" id="log-edit-${r.id}">
+          <div class="text-slate-400 text-sm mb-3">${dateStr}, ${timeStr}</div>
 
-                <div class="report-section">
-                    <h3 class="text-lg font-bold text-white mb-3">Medication Mentions (within readings)</h3>
-                    ${
-                        Object.keys(medCounts).length
-                            ? Object.entries(medCounts).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([m,c])=>`
-                                <div class="flex justify-between items-center py-2 border-b border-slate-700 last:border-0">
-                                    <span class="text-slate-300">${m}</span>
-                                    <span class="text-yellow-400 font-bold">${c}</span>
-                                </div>
-                              `).join('')
-                            : '<p class="text-slate-500">No medications recorded</p>'
-                    }
-                    <div class="text-xs text-slate-500 mt-2">This reflects meds checked during entry (not a pharmacy record).</div>
-                </div>
+          <div class="mb-3">
+            <label class="text-xs text-slate-500 block mb-2">Position</label>
+            <div class="flex gap-2 flex-wrap">
+              ${['Laying','Sitting','Standing'].map(pos => `
+                <button type="button" class="position-btn ${r.position === pos ? 'active' : ''}"
+                  onclick="document.querySelectorAll('#log-edit-${r.id} .position-btn').forEach(b => b.classList.remove('active')); this.classList.add('active'); this.dataset.selected='${pos}'">
+                  ${pos}
+                </button>
+              `).join('')}
+            </div>
+          </div>
 
-                <div class="report-section">
-                    <h3 class="text-lg font-bold text-white mb-3">Flagged Episodes (Top 8)</h3>
-                    ${
-                        flags.length
-                            ? flags.map(r => {
-                                const d = new Date(r.timestamp);
-                                const ds = d.toLocaleDateString('en-US');
-                                const ts = d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-                                const sx = r.systolic ?? '--';
-                                const dx = r.diastolic ?? '--';
-                                const hr = r.heartRate ?? '--';
-                                const dist = (r.distress ?? 0);
-                                const sym = (r.symptoms || []).slice(0,4).join(', ');
-                                const arm = r.arm || 'Unknown';
-                                return `
-                                    <div class="py-2 border-b border-slate-700 last:border-0 text-sm">
-                                        <div class="text-slate-200 font-semibold">${ds} ${ts}</div>
-                                        <div class="text-slate-300">BP ${sx}/${dx} • HR ${hr} • Distress ${dist}/10 • ${r.position || 'Unknown'} • Arm: ${arm}</div>
-                                        ${sym ? `<div class="text-xs text-slate-400">Symptoms: ${sym}</div>` : ''}
-                                        ${r.medications?.length ? `<div class="text-xs text-yellow-300">Meds: ${r.medications.join(', ')}</div>` : ''}
-                                        ${r.notes ? `<div class="text-xs text-slate-500">${escapeHtml(r.notes).slice(0,140)}${r.notes.length>140?'…':''}</div>` : ''}
-                                    </div>
-                                `;
-                              }).join('')
-                            : '<p class="text-slate-500">No flagged episodes</p>'
-                    }
-                </div>
+          <div class="mb-3">
+            <label class="text-xs text-slate-500 block mb-2">Arm</label>
+            <div class="flex gap-2">
+              ${['Left','Right'].map(a => `
+                <button type="button" class="arm-btn ${r.arm === a ? 'active' : ''}"
+                  onclick="document.querySelectorAll('#log-edit-${r.id} .arm-btn').forEach(b => b.classList.remove('active')); this.classList.add('active'); this.dataset.selected='${a}'">
+                  ${a}
+                </button>
+              `).join('')}
+            </div>
+          </div>
 
-                <div class="report-section">
-                    <h3 class="text-lg font-bold text-white mb-3">Most Recent Readings (Last 10)</h3>
-                    ${lastN.map(r => {
-                        const d = new Date(r.timestamp);
-                        const ds = d.toLocaleDateString('en-US');
-                        const ts = d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-                        return `
-                            <div class="py-2 border-b border-slate-700 last:border-0 text-sm">
-                                <div class="text-slate-200 font-semibold">${ds} ${ts}</div>
-                                <div class="text-slate-300">BP ${r.systolic ?? '--'}/${r.diastolic ?? '--'} • HR ${r.heartRate ?? '--'} • Distress ${r.distress ?? 0}/10 • ${r.position || 'Unknown'} • Arm: ${r.arm || 'Unknown'}</div>
-                                ${(r.symptoms && r.symptoms.length) ? `<div class="text-xs text-slate-400">Symptoms: ${r.symptoms.join(', ')}</div>` : ''}
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
+          <div class="grid grid-cols-3 gap-2 mb-3">
+            <div><label class="text-xs text-slate-500 block mb-1">SYS</label><input type="number" id="edit-sys-${r.id}" value="${r.systolic ?? ''}" class="inline-input w-full"></div>
+            <div><label class="text-xs text-slate-500 block mb-1">DIA</label><input type="number" id="edit-dia-${r.id}" value="${r.diastolic ?? ''}" class="inline-input w-full"></div>
+            <div><label class="text-xs text-slate-500 block mb-1">HR</label><input type="number" id="edit-hr-${r.id}" value="${r.heartRate ?? ''}" class="inline-input w-full"></div>
+          </div>
 
-                <div class="report-section">
-                    <h3 class="text-lg font-bold text-white mb-3">Clinical Notes</h3>
-                    <p class="text-slate-400 text-sm leading-relaxed">
-                        This report prioritizes recent readings, outliers, symptom clusters, medication context, and position/arm details. It is intended to support clinical review of episodic BP/HR variability and associated distress/symptoms.
-                    </p>
-                    <p class="text-slate-500 text-xs mt-4">
-                        CONFIDENTIAL MEDICAL INFORMATION - Copyright Wendell Jiles 2025-2026
-                    </p>
-                </div>
-            `;
+          <div class="mb-3">
+            <label class="text-xs text-slate-500 block mb-1">Distress (0-10)</label>
+            <input type="number" id="edit-distress-${r.id}" value="${r.distress ?? 0}" min="0" max="10" class="inline-input">
+          </div>
+
+          <div class="mb-3">
+            <label class="text-xs text-slate-500 block mb-1">Notes</label>
+            <textarea id="edit-notes-${r.id}" class="inline-textarea text-sm">${escapeHtml(r.notes || '')}</textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="text-xs text-slate-500 block mb-2">Medications</label>
+            <div class="flex flex-wrap gap-2">
+              ${medications.map(med => `
+                <label class="flex items-center gap-1 text-xs text-slate-300 cursor-pointer">
+                  <input type="checkbox" class="symptom-checkbox" style="width: 16px; height: 16px;"
+                    ${r.medications?.includes(med) ? 'checked' : ''} value="${escapeHtml(med)}" id="edit-med-${r.id}-${cssSafeId(med)}">
+                  ${escapeHtml(med)}
+                </label>
+              `).join('')}
+            </div>
+          </div>
+
+          <button onclick="saveInlineEdit(${r.id})" class="save-btn-inline">Save Changes</button>
+          <button onclick="cancelInlineEdit(${r.id})" class="w-full mt-2 py-2 text-slate-400 text-sm">Cancel</button>
+        </div>
+      `;
+    }
+
+    function cssSafeId(s) {
+      return String(s).replace(/[^a-zA-Z0-9_-]/g,'_');
+    }
+
+    function enableInlineEdit(id, field) {
+      if (editingLogId && editingLogId !== id) cancelInlineEdit(editingLogId);
+      editingLogId = id;
+      renderLog();
+
+      if (field) {
+        setTimeout(() => {
+          const map = { systolic: 'sys', heartRate:'hr', notes:'notes' };
+          const suffix = map[field] || field;
+          const el = document.getElementById(`edit-${suffix}-${id}`);
+          if (el) el.focus();
+        }, 50);
+      }
+    }
+
+    function cancelInlineEdit(id) {
+      editingLogId = null;
+      renderLog();
+    }
+
+    function saveInlineEdit(id) {
+      const r = readings.find(x => x.id === id);
+      if (!r) return;
+
+      const sys = document.getElementById(`edit-sys-${id}`).value;
+      const dia = document.getElementById(`edit-dia-${id}`).value;
+      const hr = document.getElementById(`edit-hr-${id}`).value;
+      const distress = document.getElementById(`edit-distress-${id}`).value;
+      const notes = document.getElementById(`edit-notes-${id}`).value;
+
+      const posBtn = document.querySelector(`#log-edit-${id} .position-btn.active`);
+      if (posBtn) r.position = posBtn.dataset.selected || posBtn.textContent.trim();
+
+      const armBtn = document.querySelector(`#log-edit-${id} .arm-btn.active`);
+      if (armBtn) r.arm = armBtn.dataset.selected || armBtn.textContent.trim();
+
+      const medsTaken = medications.filter(med => {
+        const cb = document.getElementById(`edit-med-${id}-${cssSafeId(med)}`);
+        return cb && cb.checked;
+      });
+
+      r.systolic = sys ? parseInt(sys, 10) : null;
+      r.diastolic = dia ? parseInt(dia, 10) : null;
+      r.heartRate = hr ? parseInt(hr, 10) : null;
+      r.distress = Math.max(0, Math.min(10, parseInt(distress, 10) || 0));
+      r.notes = notes || '';
+      r.medications = medsTaken;
+
+      persistReadings();
+      editingLogId = null;
+      renderLog();
+    }
+
+    // CHART (NO RIGHT HR AXIS DISPLAY, NO TOGGLES, NO SLIDER)
+    function initChart() {
+      const canvas = document.getElementById('vitalsChart');
+      if (!canvas) return;
+
+      // Always close popup on re-init
+      closeReadingPopup();
+
+      // Destroy old
+      if (chartInstance) {
+        chartInstance.destroy();
+        chartInstance = null;
+      }
+
+      const sorted = [...readings].sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
+      if (!sorted.length) {
+        document.getElementById('chartDateRange').textContent = 'No data available';
+        return;
+      }
+
+      // Build XY points (prevents Chart.js parsing issues and fixes "chart not showing")
+      const sysPts = [];
+      const diaPts = [];
+      const hrPts  = [];
+      const disPts = [];
+      const medEvents = [];
+
+      for (const r of sorted) {
+        const x = new Date(r.timestamp).getTime();
+        if (r.systolic != null) sysPts.push({ x, y: r.systolic, _id: r.id });
+        if (r.diastolic != null) diaPts.push({ x, y: r.diastolic, _id: r.id });
+        if (r.heartRate != null) hrPts.push({ x, y: r.heartRate, _id: r.id });
+        disPts.push({ x, y: (r.distress ?? 0), _id: r.id });
+        if (r.medications && r.medications.length) medEvents.push({ x, meds: r.medications, id: r.id });
+      }
+
+      // Stable Y scales to eliminate jitter:
+      // - BP/HR share stable fixed 0..220 range
+      // - Distress scale 0..10 (hidden)
+      const BP_MIN = 0;
+      const BP_MAX = 220;
+
+      const minX = Math.min(...sorted.map(r => new Date(r.timestamp).getTime()));
+      const maxX = Math.max(...sorted.map(r => new Date(r.timestamp).getTime()));
+      const pad = 60 * 60 * 1000; // 1 hour padding
+      const initMin = minX - pad;
+      const initMax = maxX + pad;
+
+      const backgroundBandsPlugin = {
+        id: 'backgroundBands',
+        beforeDraw(chart) {
+          const { ctx, chartArea, scales } = chart;
+          if (!chartArea) return;
+
+          const y = scales.y;
+          const x = scales.x;
+
+          const bands = [
+            { min: 180, max: y.max, color: `rgba(185, 28, 28, ${BAND_OPACITY})` },
+            { min: 140, max: 180, color: `rgba(239, 68, 68, ${BAND_OPACITY})` },
+            { min: 130, max: 140, color: `rgba(234, 179, 8, ${BAND_OPACITY})` },
+            { min: 120, max: 130, color: `rgba(168, 85, 247, ${BAND_OPACITY})` },
+            { min: y.min, max: 120, color: `rgba(59, 130, 246, ${BAND_OPACITY * 0.50})` }
+          ];
+
+          ctx.save();
+          for (const b of bands) {
+            if (b.min >= y.max || b.max <= y.min) continue;
+            const clampedMin = Math.max(b.min, y.min);
+            const clampedMax = Math.min(b.max, y.max);
+            const yTop = y.getPixelForValue(clampedMax);
+            const yBottom = y.getPixelForValue(clampedMin);
+            ctx.fillStyle = b.color;
+            ctx.fillRect(x.left, yTop, x.width, yBottom - yTop);
+          }
+          ctx.restore();
         }
+      };
 
-        function generatePDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+      const medsPlugin = {
+        id: 'medLines',
+        afterDatasetsDraw(chart) {
+          if (!medEvents.length) return;
+          const { ctx, scales } = chart;
+          const x = scales.x;
+          const y = scales.y;
 
-            doc.setFontSize(18);
-            doc.text('Vitals Tracker - Clinical Report', 14, 18);
+          ctx.save();
+          for (const ev of medEvents) {
+            const px = x.getPixelForValue(ev.x);
+            if (px < x.left - 10 || px > x.right + 10) continue;
 
-            doc.setFontSize(10);
-            doc.text(`Generated: ${new Date().toLocaleString('en-US')}`, 14, 26);
-            doc.text('© 2025-2026 Wendell Jiles - All Rights Reserved', 14, 31);
-            doc.text('CONFIDENTIAL MEDICAL INFORMATION', 14, 36);
+            ctx.strokeStyle = '#fbbf24';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([8,4]);
+            ctx.beginPath();
+            ctx.moveTo(px, y.top);
+            ctx.lineTo(px, y.bottom);
+            ctx.stroke();
 
-            const now = new Date();
-            const sixtyDaysAgo = new Date(now - 60 * 24 * 60 * 60 * 1000);
-            const recentReadings = readings
-                .filter(r => new Date(r.timestamp) >= sixtyDaysAgo)
-                .sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
+            ctx.setLineDash([]);
+            ctx.fillStyle = '#fbbf24';
+            ctx.beginPath();
+            ctx.moveTo(px, y.top + 8);
+            ctx.lineTo(px + 6, y.top + 14);
+            ctx.lineTo(px, y.top + 20);
+            ctx.lineTo(px - 6, y.top + 14);
+            ctx.closePath();
+            ctx.fill();
 
-            let y = 46;
+            if (ev.meds.length > 1) {
+              ctx.fillStyle = '#f59e0b';
+              ctx.beginPath();
+              ctx.arc(px, y.top + 35, 10, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.fillStyle = '#0f172a';
+              ctx.font = 'bold 11px Inter';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText(String(ev.meds.length), px, y.top + 35);
+            }
+          }
+          ctx.restore();
+        }
+      };
 
-            const lastN = recentReadings.slice(0, 12);
+      // NOTE: lock left axis width prevents chartArea shifting when tick text changes
+      const LOCK_LEFT_AXIS_WIDTH = 52;
 
-            doc.setFontSize(12);
-            doc.text(`Readings in last 60 days: ${recentReadings.length}`, 14, y);
-            y += 8;
+      const ctx = canvas.getContext('2d');
 
-            doc.setFontSize(12);
-            doc.text('Most Recent Readings', 14, y);
-            y += 6;
+      chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          datasets: [
+            {
+              label: 'SYS',
+              data: sysPts,
+              parsing: false,
+              borderColor: '#60a5fa',
+              backgroundColor: 'rgba(96, 165, 250, 0.10)',
+              tension: 0.3,
+              pointRadius: 5,
+              pointHoverRadius: 8,
+              pointBackgroundColor: '#60a5fa',
+              spanGaps: true,
+              yAxisID: 'y'
+            },
+            {
+              label: 'DIA',
+              data: diaPts,
+              parsing: false,
+              borderColor: '#e2e8f0',
+              backgroundColor: 'rgba(226, 232, 240, 0.10)',
+              tension: 0.3,
+              pointRadius: 5,
+              pointHoverRadius: 8,
+              pointBackgroundColor: '#e2e8f0',
+              spanGaps: true,
+              yAxisID: 'y'
+            },
+            {
+              label: 'HR',
+              data: hrPts,
+              parsing: false,
+              borderColor: '#4ade80',
+              backgroundColor: 'rgba(74, 222, 128, 0.08)',
+              tension: 0.3,
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              pointBackgroundColor: '#4ade80',
+              spanGaps: true,
+              yAxisID: 'y' // tied to main axis; no right axis displayed
+            },
+            {
+              label: 'Distress',
+              data: disPts,
+              parsing: false,
+              borderColor: '#f472b6',
+              backgroundColor: 'rgba(244, 114, 182, 0.08)',
+              tension: 0.3,
+              pointRadius: 3,
+              pointHoverRadius: 5,
+              pointBackgroundColor: '#f472b6',
+              borderDash: [6,4],
+              spanGaps: true,
+              yAxisID: 'y2'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: false,
+          normalized: true,
+          interaction: { mode: 'nearest', intersect: true },
+          layout: { padding: { left: 6, right: 6, top: 6, bottom: 6 } },
+          plugins: {
+            legend: {
+              labels: { color: '#94a3b8', font: { size: 12, family: 'Inter' } }
+            },
+            tooltip: { enabled: false },
+            zoom: {
+              pan: { enabled: true, mode: 'x', onPanComplete: () => updateDateRange() },
+              zoom: { pinch: { enabled: true }, mode: 'x', onZoomComplete: () => updateDateRange() },
+              limits: {
+                x: {
+                  min: initMin,
+                  max: initMax,
+                  minRange: 60 * 60 * 1000,
+                  maxRange: 30 * 24 * 60 * 60 * 1000
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              type: 'time',
+              min: initMin,
+              max: initMax,
+              time: { tooltipFormat: 'MMM dd, yyyy HH:mm' },
+              ticks: {
+                color: '#94a3b8',
+                maxRotation: 0,
+                minRotation: 0,
+                autoSkip: true,
+                maxTicksLimit: 6,
+                font: { family: 'Inter' },
+                callback: (value) => {
+                  const s = String(value);
+                  const m = s.match(/\b(\d{1,2}:\d{2})\b/);
+                  if (m) {
+                    const [hh, mm] = m[1].split(':');
+                    return `${String(hh).padStart(2,'0')}:${mm}`;
+                  }
+                  return s;
+                }
+              },
+              grid: { color: 'rgba(148, 163, 184, 0.10)' }
+            },
+            y: {
+              min: BP_MIN,
+              max: BP_MAX,
+              ticks: {
+                color: '#94a3b8',
+                font: { family: 'Inter' },
+                callback: v => String(v).padStart(3,' ')
+              },
+              grid: { color: 'rgba(148, 163, 184, 0.10)' },
+              title: { display: true, text: 'BP / HR (mmHg & bpm)', color: '#64748b', font: { family: 'Inter' } },
+              afterFit: (scale) => { scale.width = LOCK_LEFT_AXIS_WIDTH; }
+            },
+            y2: {
+              min: 0,
+              max: 10,
+              display: false,
+              grid: { drawOnChartArea: false }
+            }
+          }
+        },
+        plugins: [backgroundBandsPlugin, medsPlugin]
+      });
 
-            doc.setFontSize(9);
-            lastN.forEach(r => {
-                if (y > 280) { doc.addPage(); y = 18; }
+      // Click behavior: open reading popup on tap of point (nearest)
+      canvas.onclick = (e) => {
+        const elements = chartInstance.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
+        if (elements && elements.length) {
+          const el = elements[0];
+          const ds = chartInstance.data.datasets[el.datasetIndex];
+          const pt = ds.data[el.index];
+          const rec = sorted.find(r => r.id === pt._id) || findReadingByTimestampX(pt.x) || null;
+          if (rec) {
+            showReadingPopup(e.clientX, e.clientY, rec);
+            return;
+          }
+        }
+        closeReadingPopup();
+      };
+
+      updateDateRange();
+    }
+
+    function findReadingByTimestampX(x) {
+      const iso = new Date(x).toISOString();
+      return readings.find(r => r.timestamp === iso) || null;
+    }
+
+    function updateDateRange() {
+      if (!chartInstance) return;
+      const min = new Date(chartInstance.scales.x.min);
+      const max = new Date(chartInstance.scales.x.max);
+      document.getElementById('chartDateRange').textContent =
+        min.toLocaleDateString('en-US') + ' → ' + max.toLocaleDateString('en-US');
+    }
+
+    function showReadingPopup(clientX, clientY, reading) {
+      const popup = document.getElementById('readingPopup');
+      const content = document.getElementById('readingPopupContent');
+      const timeEl = document.getElementById('readingPopupTime');
+
+      const date = new Date(reading.timestamp);
+
+      const symptomsLine = (reading.symptoms && reading.symptoms.length)
+        ? `<div class="mt-2 text-xs text-slate-300"><span class="text-yellow-300">⚠️</span> ${reading.symptoms.map(escapeHtml).join(', ')}</div>`
+        : '';
+
+      const medsLine = (reading.medications && reading.medications.length)
+        ? `<div class="mt-2 text-xs text-slate-300"><span class="text-yellow-300">💊</span> ${reading.medications.map(escapeHtml).join(', ')}</div>`
+        : '';
+
+      const notesLine = (reading.notes && reading.notes.trim().length)
+        ? `<div class="mt-2 text-xs text-slate-400 leading-snug">${escapeHtml(reading.notes)}</div>`
+        : '';
+
+      content.innerHTML = `
+        <div class="space-y-2">
+          <div class="flex items-center justify-between text-sm"><span class="text-slate-300">SYS</span><span class="text-blue-300 font-bold">${reading.systolic ?? '--'}</span></div>
+          <div class="flex items-center justify-between text-sm"><span class="text-slate-300">DIA</span><span class="text-slate-200 font-bold">${reading.diastolic ?? '--'}</span></div>
+          <div class="flex items-center justify-between text-sm"><span class="text-slate-300">HR</span><span class="text-green-300 font-bold">${reading.heartRate ?? '--'}</span></div>
+          <div class="flex items-center justify-between text-sm"><span class="text-slate-300">Distress</span><span class="text-pink-300 font-bold">${reading.distress ?? 0}/10</span></div>
+          <div class="text-xs text-slate-500">
+            Position: <span class="text-slate-300">${escapeHtml(reading.position || 'Unknown')}</span>
+            • Arm: <span class="text-slate-300">${escapeHtml(reading.arm || 'Unknown')}</span>
+          </div>
+          ${symptomsLine}
+          ${medsLine}
+          ${notesLine}
+        </div>
+      `;
+
+      timeEl.textContent = date.toLocaleString('en-US', {
+        weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+
+      const chartRect = document.getElementById('chartWrapper').getBoundingClientRect();
+      let popupX = clientX - chartRect.left - 120;
+      let popupY = clientY - chartRect.top - 10;
+
+      popupX = Math.max(10, Math.min(popupX, chartRect.width - 260));
+      popupY = Math.max(10, Math.min(popupY, chartRect.height - 240));
+
+      popup.style.left = popupX + 'px';
+      popup.style.top = popupY + 'px';
+      popup.style.display = 'block';
+    }
+
+    function closeReadingPopup() {
+      const popup = document.getElementById('readingPopup');
+      if (popup) popup.style.display = 'none';
+    }
+
+    // REPORTING (includes profile if present)
+    function generateReport() {
+      const container = document.getElementById('reportContent');
+      const now = new Date();
+      const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+
+      const recent = readings
+        .filter(r => new Date(r.timestamp) >= sixtyDaysAgo)
+        .sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+      if (!recent.length) {
+        container.innerHTML = '<div class="text-slate-500 text-center py-8">No data available for the last 60 days</div>';
+        return;
+      }
+
+      const systolics = recent.map(r => r.systolic).filter(v => v !== null && v !== undefined);
+      const diastolics = recent.map(r => r.diastolic).filter(v => v !== null && v !== undefined);
+      const heartRates = recent.map(r => r.heartRate).filter(v => v !== null && v !== undefined);
+      const distressLevels = recent.map(r => r.distress).filter(v => v !== null && v !== undefined);
+
+      const avg = arr => arr.length ? (arr.reduce((a,b)=>a+b,0)/arr.length) : 0;
+      const round = n => Math.round(n);
+
+      const avgSys = round(avg(systolics));
+      const avgDia = round(avg(diastolics));
+      const avgHR = round(avg(heartRates));
+      const avgDistress = distressLevels.length ? avg(distressLevels).toFixed(1) : '0.0';
+
+      const maxSys = systolics.length ? Math.max(...systolics) : 0;
+      const minSys = systolics.length ? Math.min(...systolics) : 0;
+      const maxDia = diastolics.length ? Math.max(...diastolics) : 0;
+      const minDia = diastolics.length ? Math.min(...diastolics) : 0;
+
+      const stageCounts = { normal: 0, elevated: 0, stage1: 0, stage2: 0, crisis: 0 };
+      recent.forEach(r => {
+        const s = r.systolic;
+        if (s == null) return;
+        if (s >= 180) stageCounts.crisis++;
+        else if (s >= 140) stageCounts.stage2++;
+        else if (s >= 130) stageCounts.stage1++;
+        else if (s >= 120) stageCounts.elevated++;
+        else stageCounts.normal++;
+      });
+
+      const symptomCounts = {};
+      recent.forEach(r => (r.symptoms || []).forEach(s => symptomCounts[s] = (symptomCounts[s] || 0) + 1));
+
+      const medCounts = {};
+      recent.forEach(r => (r.medications || []).forEach(m => medCounts[m] = (medCounts[m] || 0) + 1));
+
+      const pct = n => recent.length ? Math.round((n / recent.length) * 100) : 0;
+
+      const flags = recent
+        .filter(r => (r.systolic && r.systolic >= 140) || (r.diastolic && r.diastolic >= 90) || (r.distress && r.distress >= 7) || (r.symptoms || []).includes('Panic'))
+        .slice(0, 8);
+
+      const lastN = recent.slice(0, 10);
+
+      const profLines = [];
+      if ((profile?.name || '').trim()) profLines.push(`<div class="text-slate-300 text-sm"><span class="text-slate-500">Patient:</span> ${escapeHtml(profile.name)}</div>`);
+      if ((profile?.doctor || '').trim()) profLines.push(`<div class="text-slate-300 text-sm"><span class="text-slate-500">Provider:</span> ${escapeHtml(profile.doctor)}</div>`);
+      if ((profile?.clinic || '').trim()) profLines.push(`<div class="text-slate-300 text-sm"><span class="text-slate-500">Clinic:</span> ${escapeHtml(profile.clinic)}</div>`);
+      if (profile?.conditions?.length) profLines.push(`<div class="text-slate-300 text-sm"><span class="text-slate-500">Dx:</span> ${profile.conditions.map(escapeHtml).join('; ')}</div>`);
+
+      container.innerHTML = `
+        <div class="report-section">
+          <h3 class="text-lg font-bold text-white mb-2">Clinical Summary (Last 60 Days)</h3>
+          <p class="text-slate-400 text-sm mb-1">Generated: ${now.toLocaleString('en-US')}</p>
+          <p class="text-slate-400 text-sm mb-3">Readings: ${recent.length}</p>
+          ${profLines.length ? `<div class="space-y-1 mb-2">${profLines.join('')}</div>` : ''}
+          <p class="text-slate-500 text-xs">Local-only patient-entered data (no cloud sync). © 2025-2026 Wendell Jiles</p>
+        </div>
+
+        <div class="report-section">
+          <h3 class="text-lg font-bold text-white mb-3">Vitals Overview</h3>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="stat-card">
+              <div class="text-2xl font-bold text-blue-400">${avgSys}/${avgDia}</div>
+              <div class="text-xs text-slate-400">Average BP</div>
+            </div>
+            <div class="stat-card">
+              <div class="text-2xl font-bold text-green-400">${avgHR}</div>
+              <div class="text-xs text-slate-400">Average HR</div>
+            </div>
+            <div class="stat-card">
+              <div class="text-2xl font-bold text-pink-400">${avgDistress}</div>
+              <div class="text-xs text-slate-400">Average Distress</div>
+            </div>
+            <div class="stat-card">
+              <div class="text-xs text-slate-400">BP Range</div>
+              <div class="text-sm font-semibold text-slate-200 mt-1">SYS ${minSys}–${maxSys}</div>
+              <div class="text-sm font-semibold text-slate-200">DIA ${minDia}–${maxDia}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="report-section">
+          <h3 class="text-lg font-bold text-white mb-3">Hypertension Burden (Systolic)</h3>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between"><span class="text-slate-300">Normal (&lt;120)</span><span class="text-blue-300 font-semibold">${stageCounts.normal} (${pct(stageCounts.normal)}%)</span></div>
+            <div class="flex justify-between"><span class="text-slate-300">Elevated (120–129)</span><span class="text-purple-300 font-semibold">${stageCounts.elevated} (${pct(stageCounts.elevated)}%)</span></div>
+            <div class="flex justify-between"><span class="text-slate-300">Stage 1 (130–139)</span><span class="text-yellow-300 font-semibold">${stageCounts.stage1} (${pct(stageCounts.stage1)}%)</span></div>
+            <div class="flex justify-between"><span class="text-slate-300">Stage 2 (140–179)</span><span class="text-red-300 font-semibold">${stageCounts.stage2} (${pct(stageCounts.stage2)}%)</span></div>
+            <div class="flex justify-between"><span class="text-slate-300">Crisis (≥180)</span><span class="text-red-400 font-semibold">${stageCounts.crisis} (${pct(stageCounts.crisis)}%)</span></div>
+          </div>
+          <div class="text-xs text-slate-500 mt-2">Counts are based on systolic entries present in this 60-day window.</div>
+        </div>
+
+        <div class="report-section">
+          <h3 class="text-lg font-bold text-white mb-3">Most Common Symptoms</h3>
+          ${
+            Object.keys(symptomCounts).length
+              ? Object.entries(symptomCounts).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([s,c])=>`
+                <div class="flex justify-between items-center py-2 border-b border-slate-700 last:border-0">
+                  <span class="text-slate-300">${escapeHtml(s)}</span>
+                  <span class="text-blue-400 font-bold">${c}</span>
+                </div>
+              `).join('')
+              : '<p class="text-slate-500">No symptoms recorded</p>'
+          }
+        </div>
+
+        <div class="report-section">
+          <h3 class="text-lg font-bold text-white mb-3">Medication Mentions (within readings)</h3>
+          ${
+            Object.keys(medCounts).length
+              ? Object.entries(medCounts).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([m,c])=>`
+                <div class="flex justify-between items-center py-2 border-b border-slate-700 last:border-0">
+                  <span class="text-slate-300">${escapeHtml(m)}</span>
+                  <span class="text-yellow-400 font-bold">${c}</span>
+                </div>
+              `).join('')
+              : '<p class="text-slate-500">No medications recorded</p>'
+          }
+          <div class="text-xs text-slate-500 mt-2">This reflects meds checked during entry (not a pharmacy record).</div>
+        </div>
+
+        <div class="report-section">
+          <h3 class="text-lg font-bold text-white mb-3">Flagged Episodes (Top 8)</h3>
+          ${
+            flags.length
+              ? flags.map(r => {
                 const d = new Date(r.timestamp);
                 const ds = d.toLocaleDateString('en-US');
-                const ts = d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
-                const line = `${ds} ${ts} | BP ${r.systolic ?? '--'}/${r.diastolic ?? '--'} | HR ${r.heartRate ?? '--'} | Distress ${r.distress ?? 0}/10 | ${r.position || 'Unknown'} | Arm ${r.arm || 'Unknown'}`;
-                doc.text(line, 14, y);
-                y += 5;
-            });
-
-            y += 4;
-            doc.setFontSize(10);
-            doc.text('Notes: Patient-entered readings; intended for clinical correlation with symptoms, position, medications, and episodes.', 14, y);
-
-            doc.save(`Vitals_Clinical_Report_${new Date().toISOString().split('T')[0]}.pdf`);
-        }
-
-        function loadMedicationList() {
-            const container = document.getElementById('medicationList');
-            const html = medications.map((med, idx) => `
-                <label class="flex items-center gap-3 p-2 rounded-lg bg-slate-800/50 cursor-pointer hover:bg-slate-800 transition">
-                    <input type="checkbox" class="symptom-checkbox med-checkbox" value="${med}" data-idx="${idx}">
-                    <span class="text-slate-300 text-sm flex-1">${med}</span>
-                </label>
-            `).join('');
-            if (container) container.innerHTML = html;
-        }
-
-        function renderSettingsMedList() {
-            const container = document.getElementById('settingsMedList');
-            const html = medications.map((med, idx) => `
-                <div class="flex items-center justify-between p-3 rounded-lg bg-slate-800/50">
-                    <span class="text-slate-300 text-sm">${med}</span>
-                    <button onclick="confirmDeleteMedication(${idx})" class="delete-btn">Delete</button>
-                </div>
-            `).join('');
-            if (container) container.innerHTML = html;
-        }
-
-        function confirmDeleteMedication(idx) {
-            confirmCallback = () => {
-                medications.splice(idx, 1);
-                localStorage.setItem('vitals_medications', JSON.stringify(medications));
-                renderSettingsMedList();
-                loadMedicationList();
-                closeConfirmDialog();
-            };
-            document.getElementById('confirmTitle').textContent = 'Delete Medication';
-            document.getElementById('confirmMessage').textContent = `Are you sure you want to delete "${medications[idx]}"? This will not affect existing records.`;
-            document.getElementById('confirmDialog').classList.add('active');
-        }
-
-        function closeConfirmDialog() {
-            document.getElementById('confirmDialog').classList.remove('active');
-            confirmCallback = null;
-        }
-
-        function confirmAction() {
-            if (confirmCallback) confirmCallback();
-        }
-
-        function addMedication() {
-            const input = document.getElementById('newMedName');
-            const name = input.value.trim();
-            if (name && !medications.includes(name)) {
-                medications.push(name);
-                localStorage.setItem('vitals_medications', JSON.stringify(medications));
-                input.value = '';
-                renderSettingsMedList();
-                loadMedicationList();
-            }
-        }
-
-        function showMedicationManager() { showScreen('settingsScreen'); }
-        function backFromSettings() { showScreen('addScreen'); }
-
-        function handleEnter(e, nextId) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                document.getElementById(nextId)?.focus();
-            }
-            unsavedChanges = true;
-        }
-
-        function resetAddForm() {
-            document.getElementById('systolic').value = '';
-            document.getElementById('diastolic').value = '';
-            document.getElementById('heartRate').value = '';
-            document.getElementById('notes').value = '';
-            document.getElementById('distressLevel').value = 0;
-            document.getElementById('distressValue').textContent = '0';
-            document.querySelectorAll('.symptom-checkbox:not(.med-checkbox)').forEach(cb => cb.checked = false);
-            document.querySelectorAll('.med-checkbox').forEach(cb => cb.checked = false);
-
-            document.querySelectorAll('.position-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector('[data-position="Laying"]').classList.add('active');
-            currentPosition = 'Laying';
-
-            document.querySelectorAll('.arm-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector('[data-arm="Left"]').classList.add('active');
-            currentArm = 'Left';
-
-            unsavedChanges = false;
-        }
-
-        function cancelAdd() {
-            if (unsavedChanges) {
-                if (confirm('You have unsaved changes. Save them?')) { saveReading(); return; }
-            }
-            showScreen('homeScreen');
-        }
-
-        function saveReading() {
-            const systolic = document.getElementById('systolic').value;
-            const diastolic = document.getElementById('diastolic').value;
-            const heartRate = document.getElementById('heartRate').value;
-            const notes = document.getElementById('notes').value;
-            const distress = document.getElementById('distressLevel').value;
-
-            const symptoms = Array.from(document.querySelectorAll('.symptom-checkbox:not(.med-checkbox):checked')).map(cb => cb.value);
-            const medsTaken = Array.from(document.querySelectorAll('.med-checkbox:checked')).map(cb => cb.value);
-
-            const reading = {
-                id: currentEditId || Date.now(),
-                timestamp: currentEditId ? readings.find(r => r.id === currentEditId)?.timestamp || new Date().toISOString() : new Date().toISOString(),
-                systolic: systolic ? parseInt(systolic) : null,
-                diastolic: diastolic ? parseInt(diastolic) : null,
-                heartRate: heartRate ? parseInt(heartRate) : null,
-                distress: parseInt(distress) || 0,
-                position: currentPosition,
-                arm: currentArm,
-                notes: notes || '',
-                symptoms: symptoms,
-                medications: medsTaken
-            };
-
-            if (currentEditId) {
-                const idx = readings.findIndex(r => r.id === currentEditId);
-                if (idx !== -1) readings[idx] = reading;
-            } else {
-                readings.unshift(reading);
-            }
-
-            localStorage.setItem('vitals_readings', JSON.stringify(readings));
-            unsavedChanges = false;
-            showScreen('homeScreen');
-        }
-
-        function getBPColorClass(systolic) {
-            if (!systolic) return 'text-slate-400';
-            if (systolic >= 180) return 'bp-crisis';
-            if (systolic >= 140) return 'bp-stage2';
-            if (systolic >= 130) return 'bp-stage1';
-            if (systolic >= 120) return 'bp-elevated';
-            return 'bp-normal';
-        }
-
-        function getDistressClass(level) {
-            if (level >= 7) return 'distress-high';
-            if (level >= 4) return 'distress-med';
-            return 'distress-low';
-        }
-
-        function renderLog() {
-            const container = document.getElementById('logEntries');
-            if (readings.length === 0) {
-                container.innerHTML = '<div class="text-center text-slate-500 py-8">No readings yet</div>';
-                return;
-            }
-
-            const sortedReadings = [...readings].sort((a, b) => b.id - a.id);
-
-            container.innerHTML = sortedReadings.map(r => {
-                const date = new Date(r.timestamp);
-                const dateStr = date.toLocaleDateString('en-US');
-                const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-                const bpColor = getBPColorClass(r.systolic);
-                const distressClass = getDistressClass(r.distress);
-                const isEditing = editingLogId === r.id;
-
-                if (isEditing) return renderEditForm(r, dateStr, timeStr);
-
+                const ts = d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+                const sx = r.systolic ?? '--';
+                const dx = r.diastolic ?? '--';
+                const hr = r.heartRate ?? '--';
+                const dist = (r.distress ?? 0);
+                const sym = (r.symptoms || []).slice(0,6).map(escapeHtml).join(', ');
+                const arm = r.arm || 'Unknown';
+                const meds = (r.medications || []).map(escapeHtml).join(', ');
                 return `
-                    <div class="log-entry rounded-2xl p-4" id="log-${r.id}">
-                        <div class="flex justify-between items-start mb-2">
-                            <div class="font-bold ${bpColor} text-lg cursor-pointer" onclick="enableInlineEdit(${r.id})">
-                                <span class="editable-field" onclick="event.stopPropagation(); enableInlineEdit(${r.id}, 'systolic')">
-                                    BP ${r.systolic || '--'}/${r.diastolic || '--'}
-                                </span>
-                                <span class="text-slate-400 text-base mx-1">•</span>
-                                <span class="editable-field" onclick="event.stopPropagation(); enableInlineEdit(${r.id}, 'heartRate')">
-                                    HR ${r.heartRate || '--'}
-                                </span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="${distressClass} distress-badge">
-                                    ${r.distress > 7 ? '🔴' : r.distress > 4 ? '🟡' : r.distress > 0 ? '🟢' : '⚪'} ${r.distress}/10
-                                </span>
-                                <span class="text-blue-400 text-sm font-semibold cursor-pointer" onclick="enableInlineEdit(${r.id})">Edit</span>
-                            </div>
-                        </div>
-                        <div class="text-slate-400 text-sm mb-1 cursor-pointer" onclick="enableInlineEdit(${r.id})">
-                            ${dateStr}, ${timeStr} • ${r.position || 'Unknown'} • Arm: ${r.arm || 'Unknown'}
-                        </div>
-                        ${r.medications?.length ? `
-                            <div class="flex flex-wrap gap-1 mb-2 cursor-pointer" onclick="enableInlineEdit(${r.id})">
-                                <span class="text-xs text-slate-400 mr-1">Meds:</span>
-                                ${r.medications.map(m => `<span class="med-tag">${m}</span>`).join('')}
-                            </div>
-                        ` : ''}
-                        <div class="text-slate-300 text-sm mb-2 cursor-pointer editable-field" onclick="enableInlineEdit(${r.id}, 'notes')">
-                            ${r.notes || 'No notes'}
-                        </div>
-                        ${r.symptoms?.length ? `<div class="text-xs text-slate-400 cursor-pointer" onclick="enableInlineEdit(${r.id})">⚠️ ${r.symptoms.join(', ')}</div>` : ''}
-                    </div>
+                  <div class="py-2 border-b border-slate-700 last:border-0 text-sm">
+                    <div class="text-slate-200 font-semibold">${ds} ${ts}</div>
+                    <div class="text-slate-300">BP ${sx}/${dx} • HR ${hr} • Distress ${dist}/10 • ${escapeHtml(r.position || 'Unknown')} • Arm: ${escapeHtml(arm)}</div>
+                    ${sym ? `<div class="text-xs text-slate-400">Symptoms: ${sym}</div>` : ''}
+                    ${meds ? `<div class="text-xs text-yellow-300">Meds: ${meds}</div>` : ''}
+                    ${r.notes ? `<div class="text-xs text-slate-500">${escapeHtml(r.notes).slice(0,160)}${r.notes.length>160?'…':''}</div>` : ''}
+                  </div>
                 `;
-            }).join('');
-        }
+              }).join('')
+              : '<p class="text-slate-500">No flagged episodes</p>'
+          }
+        </div>
 
-        function renderEditForm(r, dateStr, timeStr) {
+        <div class="report-section">
+          <h3 class="text-lg font-bold text-white mb-3">Most Recent Readings (Last 10)</h3>
+          ${lastN.map(r => {
+            const d = new Date(r.timestamp);
+            const ds = d.toLocaleDateString('en-US');
+            const ts = d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+            const sym = (r.symptoms && r.symptoms.length) ? r.symptoms.map(escapeHtml).join(', ') : '';
             return `
-                <div class="log-entry editing rounded-2xl p-4" id="log-edit-${r.id}">
-                    <div class="text-slate-400 text-sm mb-3">${dateStr}, ${timeStr}</div>
-
-                    <div class="mb-3">
-                        <label class="text-xs text-slate-500 block mb-2">Position</label>
-                        <div class="flex gap-2">
-                            ${['Laying', 'Sitting', 'Standing'].map(pos => `
-                                <button type="button" class="position-btn ${r.position === pos ? 'active' : ''}"
-                                    onclick="document.querySelectorAll('#log-edit-${r.id} .position-btn').forEach(b => b.classList.remove('active')); this.classList.add('active'); this.dataset.selected='${pos}'">
-                                    ${pos}
-                                </button>
-                            `).join('')}
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="text-xs text-slate-500 block mb-2">Arm</label>
-                        <div class="flex gap-2">
-                            ${['Left', 'Right'].map(a => `
-                                <button type="button" class="arm-btn ${r.arm === a ? 'active' : ''}"
-                                    onclick="document.querySelectorAll('#log-edit-${r.id} .arm-btn').forEach(b => b.classList.remove('active')); this.classList.add('active'); this.dataset.selected='${a}'">
-                                    ${a}
-                                </button>
-                            `).join('')}
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-2 mb-3">
-                        <div>
-                            <label class="text-xs text-slate-500 block mb-1">SYS</label>
-                            <input type="number" id="edit-sys-${r.id}" value="${r.systolic || ''}" class="inline-input w-full">
-                        </div>
-                        <div>
-                            <label class="text-xs text-slate-500 block mb-1">DIA</label>
-                            <input type="number" id="edit-dia-${r.id}" value="${r.diastolic || ''}" class="inline-input w-full">
-                        </div>
-                        <div>
-                            <label class="text-xs text-slate-500 block mb-1">HR</label>
-                            <input type="number" id="edit-hr-${r.id}" value="${r.heartRate || ''}" class="inline-input w-full">
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="text-xs text-slate-500 block mb-1">Distress (0-10)</label>
-                        <input type="number" id="edit-distress-${r.id}" value="${r.distress || 0}" min="0" max="10" class="inline-input">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="text-xs text-slate-500 block mb-1">Notes</label>
-                        <textarea id="edit-notes-${r.id}" class="inline-textarea text-sm">${r.notes || ''}</textarea>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="text-xs text-slate-500 block mb-2">Medications</label>
-                        <div class="flex flex-wrap gap-2">
-                            ${medications.map(med => `
-                                <label class="flex items-center gap-1 text-xs text-slate-300 cursor-pointer">
-                                    <input type="checkbox" class="symptom-checkbox" style="width: 16px; height: 16px;"
-                                        ${r.medications?.includes(med) ? 'checked' : ''} value="${med}" id="edit-med-${r.id}-${med}">
-                                    ${med}
-                                </label>
-                            `).join('')}
-                        </div>
-                    </div>
-
-                    <button onclick="saveInlineEdit(${r.id})" class="save-btn-inline">Save Changes</button>
-                    <button onclick="cancelInlineEdit(${r.id})" class="w-full mt-2 py-2 text-slate-400 text-sm">Cancel</button>
-                </div>
+              <div class="py-2 border-b border-slate-700 last:border-0 text-sm">
+                <div class="text-slate-200 font-semibold">${ds} ${ts}</div>
+                <div class="text-slate-300">BP ${r.systolic ?? '--'}/${r.diastolic ?? '--'} • HR ${r.heartRate ?? '--'} • Distress ${r.distress ?? 0}/10 • ${escapeHtml(r.position || 'Unknown')} • Arm: ${escapeHtml(r.arm || 'Unknown')}</div>
+                ${sym ? `<div class="text-xs text-slate-400">Symptoms: ${sym}</div>` : ''}
+              </div>
             `;
-        }
-
-        function enableInlineEdit(id, field) {
-            if (editingLogId && editingLogId !== id) cancelInlineEdit(editingLogId);
-            editingLogId = id;
-            renderLog();
-
-            if (field) {
-                setTimeout(() => {
-                    const el = document.getElementById(`edit-${field === 'systolic' ? 'sys' : field === 'heartRate' ? 'hr' : field}-${id}`);
-                    if (el) el.focus();
-                }, 50);
-            }
-        }
-
-        function cancelInlineEdit(id) {
-            editingLogId = null;
-            renderLog();
-        }
-
-        function saveInlineEdit(id) {
-            const reading = readings.find(r => r.id === id);
-            if (!reading) return;
-
-            const sys = document.getElementById(`edit-sys-${id}`).value;
-            const dia = document.getElementById(`edit-dia-${id}`).value;
-            const hr = document.getElementById(`edit-hr-${id}`).value;
-            const distress = document.getElementById(`edit-distress-${id}`).value;
-            const notes = document.getElementById(`edit-notes-${id}`).value;
-
-            const posBtn = document.querySelector(`#log-edit-${id} .position-btn.active`);
-            if (posBtn) reading.position = posBtn.dataset.selected || posBtn.textContent.trim();
-
-            const armBtn = document.querySelector(`#log-edit-${id} .arm-btn.active`);
-            if (armBtn) reading.arm = armBtn.dataset.selected || armBtn.textContent.trim();
-
-            const medsTaken = medications.filter(med => document.getElementById(`edit-med-${id}-${med}`)?.checked);
-
-            reading.systolic = sys ? parseInt(sys) : null;
-            reading.diastolic = dia ? parseInt(dia) : null;
-            reading.heartRate = hr ? parseInt(hr) : null;
-            reading.distress = parseInt(distress) || 0;
-            reading.notes = notes;
-            reading.medications = medsTaken;
-
-            localStorage.setItem('vitals_readings', JSON.stringify(readings));
-            editingLogId = null;
-            renderLog();
-        }
-
-        function updateBandOpacity(value) {
-            bandOpacity = value / 100;
-            document.getElementById('bandOpacityValue').textContent = value + '%';
-            if (chartInstance) chartInstance.update('none');
-        }
-
-        function initChart() {
-            const canvas = document.getElementById('vitalsChart');
-            if (!canvas) return;
-
-            const ctx = canvas.getContext('2d');
-
-            if (chartInstance) chartInstance.destroy();
-            closeMedPopup();
-            closeReadingPopup();
-
-            const sortedReadings = [...readings].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-            if (sortedReadings.length === 0) {
-                document.getElementById('chartDateRange').textContent = 'No data available';
-                return;
-            }
-
-            // Stable Y: fixed baseline at 0 to satisfy "start at zero" and prevent any range-jitter.
-            // Use a generous fixed max so BP and HR don’t clip. (Chart does not auto-resize the plot area.)
-            // This is the simplest "no-jitter" model.
-            const Y_MIN = 0;
-            const Y_MAX = 220;
-
-            const data = {
-                labels: sortedReadings.map(r => new Date(r.timestamp)),
-                datasets: [
-                    {
-                        label: 'SYS',
-                        data: sortedReadings.map(r => r.systolic),
-                        borderColor: '#60a5fa',
-                        backgroundColor: 'rgba(96, 165, 250, 0.1)',
-                        tension: 0.3,
-                        pointRadius: 5,
-                        pointHoverRadius: 8,
-                        pointBackgroundColor: '#60a5fa',
-                        spanGaps: true,
-                        yAxisID: 'y'
-                    },
-                    {
-                        label: 'DIA',
-                        data: sortedReadings.map(r => r.diastolic),
-                        borderColor: '#e2e8f0',
-                        backgroundColor: 'rgba(226, 232, 240, 0.1)',
-                        tension: 0.3,
-                        pointRadius: 5,
-                        pointHoverRadius: 8,
-                        pointBackgroundColor: '#e2e8f0',
-                        spanGaps: true,
-                        yAxisID: 'y'
-                    },
-                    {
-                        // HR stays trendable but no visible right axis.
-                        label: 'HR',
-                        data: sortedReadings.map(r => r.heartRate),
-                        borderColor: '#4ade80',
-                        backgroundColor: 'rgba(74, 222, 128, 0.08)',
-                        tension: 0.3,
-                        pointRadius: 4,
-                        pointHoverRadius: 6,
-                        pointBackgroundColor: '#4ade80',
-                        yAxisID: 'y1',
-                        spanGaps: true
-                    },
-                    {
-                        // Distress is true 0-10 values (no scaling), plotted against y2 (0-10), axis hidden.
-                        label: 'Distress',
-                        data: sortedReadings.map(r => r.distress),
-                        borderColor: '#f472b6',
-                        backgroundColor: 'rgba(244, 114, 182, 0.08)',
-                        tension: 0.3,
-                        pointRadius: 3,
-                        pointHoverRadius: 5,
-                        pointBackgroundColor: '#f472b6',
-                        borderDash: [5, 5],
-                        yAxisID: 'y2',
-                        spanGaps: true
-                    }
-                ]
-            };
-
-            const backgroundBandsPlugin = {
-                id: 'backgroundBands',
-                beforeDraw: (chart) => {
-                    const ctx = chart.ctx;
-                    const yAxis = chart.scales.y;
-                    const xAxis = chart.scales.x;
-
-                    const bands = [
-                        { min: 180, max: yAxis.max, color: `rgba(185, 28, 28, ${bandOpacity})` },
-                        { min: 140, max: 180, color: `rgba(239, 68, 68, ${bandOpacity})` },
-                        { min: 130, max: 140, color: `rgba(234, 179, 8, ${bandOpacity})` },
-                        { min: 120, max: 130, color: `rgba(168, 85, 247, ${bandOpacity})` },
-                        { min: yAxis.min, max: 120, color: `rgba(59, 130, 246, ${bandOpacity * 0.5})` }
-                    ];
-
-                    bands.forEach(band => {
-                        if (band.min >= yAxis.max || band.max <= yAxis.min) return;
-                        const clampedMin = Math.max(band.min, yAxis.min);
-                        const clampedMax = Math.min(band.max, yAxis.max);
-                        const yTop = yAxis.getPixelForValue(clampedMax);
-                        const yBottom = yAxis.getPixelForValue(clampedMin);
-                        ctx.fillStyle = band.color;
-                        ctx.fillRect(xAxis.left, yTop, xAxis.width, yBottom - yTop);
-                    });
-                }
-            };
-
-            const medLinesPlugin = {
-                id: 'medicationLines',
-                afterDatasetsDraw: (chart) => {
-                    if (!showMedsOnChart) return;
-
-                    const ctx = chart.ctx;
-                    const xAxis = chart.scales.x;
-                    const yAxis = chart.scales.y;
-
-                    ctx.save();
-
-                    sortedReadings.forEach(r => {
-                        if (r.medications && r.medications.length > 0) {
-                            const x = xAxis.getPixelForValue(new Date(r.timestamp));
-                            if (x >= xAxis.left - 10 && x <= xAxis.right + 10) {
-                                ctx.strokeStyle = '#fbbf24';
-                                ctx.lineWidth = 3;
-                                ctx.setLineDash([8, 4]);
-                                ctx.beginPath();
-                                ctx.moveTo(x, yAxis.top);
-                                ctx.lineTo(x, yAxis.bottom);
-                                ctx.stroke();
-
-                                ctx.fillStyle = '#fbbf24';
-                                ctx.setLineDash([]);
-                                ctx.beginPath();
-                                ctx.moveTo(x, yAxis.top + 8);
-                                ctx.lineTo(x + 6, yAxis.top + 14);
-                                ctx.lineTo(x, yAxis.top + 20);
-                                ctx.lineTo(x - 6, yAxis.top + 14);
-                                ctx.closePath();
-                                ctx.fill();
-
-                                if (r.medications.length > 1) {
-                                    ctx.fillStyle = '#f59e0b';
-                                    ctx.beginPath();
-                                    ctx.arc(x, yAxis.top + 35, 10, 0, Math.PI * 2);
-                                    ctx.fill();
-                                    ctx.fillStyle = '#0f172a';
-                                    ctx.font = 'bold 11px Inter';
-                                    ctx.textAlign = 'center';
-                                    ctx.textBaseline = 'middle';
-                                    ctx.fillText(r.medications.length.toString(), x, yAxis.top + 35);
-                                }
-                            }
-                        }
-                    });
-
-                    ctx.restore();
-                }
-            };
-
-            // FIX JITTER:
-            // - lock the left axis width so the chartArea never shifts
-            // - use mono-like formatting for time ticks (fixed width)
-            const lockAxesPlugin = {
-                id: 'lockAxes',
-                afterFit: (scale) => {
-                    // This hook exists on scales, but Chart.js doesn't call plugin.afterFit per scale.
-                    // We'll lock widths via scale.afterFit below in options.scales.* initialization.
-                }
-            };
-
-            const now = new Date();
-            const oneDayAgo = new Date(now - 86400000);
-            const minTime = Math.max(oneDayAgo.getTime(), new Date(sortedReadings[0].timestamp).getTime());
-
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: data,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: false,
-                    normalized: true,
-                    parsing: false,
-                    interaction: { mode: 'nearest', intersect: true },
-                    layout: {
-                        // extra padding prevents any perceived "shrinking"
-                        padding: { left: 6, right: 6, top: 6, bottom: 6 }
-                    },
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: '#94a3b8',
-                                font: { size: 12, family: 'Inter' }
-                            }
-                        },
-                        tooltip: { enabled: false },
-                        zoom: {
-                            pan: {
-                                enabled: true,
-                                mode: 'x',
-                                onPanComplete: () => updateDateRange()
-                            },
-                            zoom: {
-                                pinch: { enabled: true },
-                                mode: 'x',
-                                onZoomComplete: () => updateDateRange()
-                            },
-                            limits: {
-                                x: {
-                                    min: new Date(sortedReadings[0].timestamp).getTime() - ONE_HOUR,
-                                    max: new Date(sortedReadings[sortedReadings.length - 1].timestamp).getTime() + ONE_HOUR,
-                                    minRange: ONE_HOUR,
-                                    maxRange: ONE_MONTH
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            type: 'time',
-                            min: minTime,
-                            max: now.getTime(),
-                            time: {
-                                // Force a stable, fixed-length tick label (HH:MM) to reduce jitter
-                                displayFormats: {
-                                    minute: 'HH:mm',
-                                    hour: 'HH:mm',
-                                    day: 'MMM dd'
-                                },
-                                tooltipFormat: 'MMM dd, yyyy HH:mm'
-                            },
-                            ticks: {
-                                color: '#94a3b8',
-                                maxRotation: 0,
-                                minRotation: 0,
-                                autoSkip: true,
-                                maxTicksLimit: 6,
-                                font: { family: 'Inter' },
-                                callback: (val, idx, ticks) => {
-                                    // Format to always "HH:MM" or "MMM DD" depending on unit the adapter gives us
-                                    // date-fns adapter typically returns a string; we keep it stable by truncating.
-                                    const s = String(val);
-                                    // If it looks like a time, normalize to last 5 chars when possible.
-                                    // Otherwise return as-is.
-                                    const m = s.match(/\b(\d{1,2}:\d{2})\b/);
-                                    if (m) {
-                                        const [hh, mm] = m[1].split(':');
-                                        const hh2 = hh.padStart(2,'0');
-                                        return `${hh2}:${mm}`;
-                                    }
-                                    return s;
-                                }
-                            },
-                            grid: { color: 'rgba(148, 163, 184, 0.1)' }
-                        },
-                        y: {
-                            min: Y_MIN,
-                            max: Y_MAX,
-                            ticks: {
-                                color: '#94a3b8',
-                                font: { family: 'Inter' },
-                                // Keep numeric width stable (3 chars min) to reduce jitter
-                                callback: (v) => String(v).padStart(3, ' ')
-                            },
-                            grid: { color: 'rgba(148, 163, 184, 0.1)' },
-                            title: { display: true, text: 'BP (mmHg)', color: '#64748b', font: { family: 'Inter' } },
-                            // HARD LOCK LEFT AXIS WIDTH (prevents plot-area shifting on tick changes)
-                            afterFit: (scale) => { scale.width = 52; }
-                        },
-                        y1: {
-                            type: 'linear',
-                            display: false,           // no right-side HR shown
-                            position: 'right',
-                            min: 0,
-                            max: 140,
-                            grid: { drawOnChartArea: false },
-                            afterFit: (scale) => { scale.width = 0; }
-                        },
-                        y2: {
-                            type: 'linear',
-                            display: false,           // distress axis hidden (still true 0-10)
-                            position: 'right',
-                            min: 0,
-                            max: 10,
-                            grid: { drawOnChartArea: false },
-                            afterFit: (scale) => { scale.width = 0; }
-                        }
-                    }
-                },
-                plugins: [backgroundBandsPlugin, medLinesPlugin, lockAxesPlugin]
-            });
-
-            // Click handler: meds lines -> med popup; points -> reading popup
-            canvas.onclick = (e) => {
-                const rect = canvas.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const xAxis = chartInstance.scales.x;
-
-                let clickedMed = false;
-
-                if (showMedsOnChart) {
-                    sortedReadings.forEach(r => {
-                        if (r.medications?.length) {
-                            const medX = xAxis.getPixelForValue(new Date(r.timestamp));
-                            if (Math.abs(x - medX) < 15) {
-                                closeReadingPopup();
-                                showMedPopup(e.clientX, e.clientY, r);
-                                clickedMed = true;
-                            }
-                        }
-                    });
-                }
-
-                if (clickedMed) return;
-
-                const elements = chartInstance.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
-                if (elements && elements.length) {
-                    const idx = elements[0].index;
-                    const r = sortedReadings[idx];
-                    closeMedPopup();
-                    showReadingPopup(e.clientX, e.clientY, r);
-                    return;
-                }
-
-                closeMedPopup();
-                closeReadingPopup();
-            };
-
-            updateDateRange();
-        }
-
-        function showMedPopup(x, y, reading) {
-            closeMedPopup();
-
-            const popup = document.getElementById('medPopup');
-            const content = document.getElementById('medPopupContent');
-            const timeEl = document.getElementById('medPopupTime');
-
-            content.innerHTML = reading.medications.map(m =>
-                `<div class="flex items-center gap-2 py-1"><span class="text-yellow-400 text-lg">•</span> <span class="text-white">${m}</span></div>`
-            ).join('');
-
-            const date = new Date(reading.timestamp);
-            timeEl.textContent = date.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-
-            const chartRect = document.getElementById('chartWrapper').getBoundingClientRect();
-            let popupX = x - chartRect.left - 110;
-            let popupY = y - chartRect.top + 10;
-
-            popupX = Math.max(10, Math.min(popupX, chartRect.width - 240));
-            popupY = Math.max(10, Math.min(popupY, chartRect.height - 200));
-
-            popup.style.left = popupX + 'px';
-            popup.style.top = popupY + 'px';
-            popup.style.display = 'block';
-
-            currentMedPopup = popup;
-        }
-
-        function closeMedPopup() {
-            const popup = document.getElementById('medPopup');
-            if (popup) popup.style.display = 'none';
-            currentMedPopup = null;
-        }
-
-        function showReadingPopup(x, y, reading) {
-            closeReadingPopup();
-
-            const popup = document.getElementById('readingPopup');
-            const content = document.getElementById('readingPopupContent');
-            const timeEl = document.getElementById('readingPopupTime');
-
-            const date = new Date(reading.timestamp);
-
-            const symptomsLine = (reading.symptoms && reading.symptoms.length)
-                ? `<div class="mt-2 text-xs text-slate-300"><span class="text-yellow-300">⚠️</span> ${reading.symptoms.join(', ')}</div>`
-                : '';
-
-            const medsLine = (reading.medications && reading.medications.length)
-                ? `<div class="mt-2 text-xs text-slate-300"><span class="text-yellow-300">💊</span> ${reading.medications.join(', ')}</div>`
-                : '';
-
-            const notesLine = (reading.notes && reading.notes.trim().length)
-                ? `<div class="mt-2 text-xs text-slate-400 leading-snug">${escapeHtml(reading.notes)}</div>`
-                : '';
-
-            content.innerHTML = `
-                <div class="space-y-2">
-                    <div class="flex items-center justify-between text-sm">
-                        <span class="text-slate-300">SYS</span>
-                        <span class="text-blue-300 font-bold">${reading.systolic ?? '--'}</span>
-                    </div>
-                    <div class="flex items-center justify-between text-sm">
-                        <span class="text-slate-300">DIA</span>
-                        <span class="text-slate-200 font-bold">${reading.diastolic ?? '--'}</span>
-                    </div>
-                    <div class="flex items-center justify-between text-sm">
-                        <span class="text-slate-300">HR</span>
-                        <span class="text-green-300 font-bold">${reading.heartRate ?? '--'}</span>
-                    </div>
-                    <div class="flex items-center justify-between text-sm">
-                        <span class="text-slate-300">Distress</span>
-                        <span class="text-pink-300 font-bold">${reading.distress ?? 0}/10</span>
-                    </div>
-                    <div class="text-xs text-slate-500">
-                        Position: <span class="text-slate-300">${reading.position || 'Unknown'}</span>
-                        • Arm: <span class="text-slate-300">${reading.arm || 'Unknown'}</span>
-                    </div>
-                    ${symptomsLine}
-                    ${medsLine}
-                    ${notesLine}
-                </div>
-            `;
-
-            timeEl.textContent = date.toLocaleString('en-US', {
-                weekday: 'short',
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-
-            const chartRect = document.getElementById('chartWrapper').getBoundingClientRect();
-            let popupX = x - chartRect.left - 120;
-            let popupY = y - chartRect.top - 10;
-
-            popupX = Math.max(10, Math.min(popupX, chartRect.width - 260));
-            popupY = Math.max(10, Math.min(popupY, chartRect.height - 240));
-
-            popup.style.left = popupX + 'px';
-            popup.style.top = popupY + 'px';
-            popup.style.display = 'block';
-
-            currentReadingPopup = popup;
-        }
-
-        function closeReadingPopup() {
-            const popup = document.getElementById('readingPopup');
-            if (popup) popup.style.display = 'none';
-            currentReadingPopup = null;
-        }
-
-        function toggleMedications() {
-            showMedsOnChart = !showMedsOnChart;
-            document.getElementById('medToggle').classList.toggle('active');
-            closeMedPopup();
-            if (chartInstance) chartInstance.update('none');
-        }
-
-        function updateDateRange() {
-            if (!chartInstance) return;
-            const min = new Date(chartInstance.scales.x.min);
-            const max = new Date(chartInstance.scales.x.max);
-            document.getElementById('chartDateRange').textContent =
-                min.toLocaleDateString('en-US') + ' → ' + max.toLocaleDateString('en-US');
-        }
-
-        function clearAllData() {
-            if (confirm('WARNING: This will delete ALL readings. This cannot be undone. Continue?')) {
-                readings = [];
-                localStorage.removeItem('vitals_readings');
-                alert('All data cleared');
-                renderLog();
-            }
-        }
-
-        function exportData() {
-            const data = {
-                readings: readings,
-                medications: medications,
-                exportDate: new Date().toISOString(),
-                copyright: '© 2025-2026 Wendell Jiles'
-            };
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `vitals_backup_${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-        }
-
-        function importData(input) {
-            const file = input.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (data.readings) readings = data.readings;
-                    if (data.medications) medications = data.medications;
-                    localStorage.setItem('vitals_readings', JSON.stringify(readings));
-                    localStorage.setItem('vitals_medications', JSON.stringify(medications));
-                    alert('Data imported successfully');
-                    loadMedicationList();
-                    renderSettingsMedList();
-                } catch (err) {
-                    alert('Error importing data: ' + err.message);
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        function exitApp() {
-            if (unsavedChanges) {
-                if (confirm('Save current reading before exiting?')) saveReading();
-            }
-            window.close();
-            document.body.innerHTML = '<div class="flex items-center justify-center min-h-screen text-slate-500">App closed. You can close this tab.</div>';
-        }
-
-        document.addEventListener('input', (e) => {
-            if (e.target.closest('#addScreen')) unsavedChanges = true;
-        });
-
-        function escapeHtml(str) {
-            return String(str)
-                .replaceAll('&', '&amp;')
-                .replaceAll('<', '&lt;')
-                .replaceAll('>', '&gt;')
-                .replaceAll('"', '&quot;')
-                .replaceAll("'", '&#039;');
-        }
-    </script>
+          }).join('')}
+        </div>
+
+        <div class="report-section">
+          <h3 class="text-lg font-bold text-white mb-3">Clinical Notes</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">
+            This report emphasizes recent readings, outliers, symptom clusters, medication context, and position/arm details to support clinical review of episodic BP/HR variability and associated distress/symptoms.
+          </p>
+          <p class="text-slate-500 text-xs mt-4">CONFIDENTIAL MEDICAL INFORMATION - Copyright Wendell Jiles 2025-2026</p>
+        </div>
+      `;
+    }
+
+    function generatePDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      const now = new Date();
+      doc.setFontSize(18);
+      doc.text('Vitals Tracker - Clinical Report', 14, 18);
+
+      doc.setFontSize(10);
+      doc.text(`Generated: ${now.toLocaleString('en-US')}`, 14, 26);
+
+      let y = 34;
+
+      if ((profile?.name || '').trim()) { doc.text(`Patient: ${profile.name}`, 14, y); y += 5; }
+      if ((profile?.doctor || '').trim()) { doc.text(`Provider: ${profile.doctor}`, 14, y); y += 5; }
+      if ((profile?.clinic || '').trim()) { doc.text(`Clinic: ${profile.clinic}`, 14, y); y += 5; }
+      if (profile?.conditions?.length) {
+        const dx = `Dx: ${profile.conditions.join('; ')}`;
+        const lines = doc.splitTextToSize(dx, 180);
+        doc.text(lines, 14, y);
+        y += lines.length * 5;
+      }
+
+      doc.text('© 2025-2026 Wendell Jiles - All Rights Reserved', 14, y); y += 5;
+      doc.text('CONFIDENTIAL MEDICAL INFORMATION', 14, y); y += 8;
+
+      const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+      const recent = readings
+        .filter(r => new Date(r.timestamp) >= sixtyDaysAgo)
+        .sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+      doc.setFontSize(12);
+      doc.text(`Readings in last 60 days: ${recent.length}`, 14, y); y += 8;
+
+      doc.setFontSize(12);
+      doc.text('Most Recent Readings', 14, y); y += 6;
+
+      doc.setFontSize(9);
+      recent.slice(0, 14).forEach(r => {
+        if (y > 280) { doc.addPage(); y = 18; }
+        const d = new Date(r.timestamp);
+        const ds = d.toLocaleDateString('en-US');
+        const ts = d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+        const line = `${ds} ${ts} | BP ${r.systolic ?? '--'}/${r.diastolic ?? '--'} | HR ${r.heartRate ?? '--'} | Distress ${r.distress ?? 0}/10 | ${r.position || 'Unknown'} | Arm ${r.arm || 'Unknown'}`;
+        doc.text(line, 14, y);
+        y += 5;
+      });
+
+      y += 6;
+      doc.setFontSize(10);
+      doc.text('Notes: Patient-entered readings; intended for clinical correlation with symptoms, position, medications, and episodes.', 14, y);
+
+      doc.save(`Vitals_Clinical_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+    }
+
+    function clearAllData() {
+      if (confirm('WARNING: This will delete ALL readings. This cannot be undone. Continue?')) {
+        readings = [];
+        localStorage.removeItem(STORAGE_READINGS);
+        alert('All data cleared');
+        renderLog();
+      }
+    }
+
+    function exitApp() {
+      if (unsavedChanges) {
+        if (confirm('Save current reading before exiting?')) saveReading();
+      }
+      window.close();
+      document.body.innerHTML = '<div class="flex items-center justify-center min-h-screen text-slate-500">App closed. You can close this tab.</div>';
+    }
+
+    document.addEventListener('input', (e) => {
+      if (e.target.closest('#addScreen')) unsavedChanges = true;
+    });
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+  </script>
 </body>
-                                    </html>
+</html>
