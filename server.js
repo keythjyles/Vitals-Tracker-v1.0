@@ -21,7 +21,7 @@ app.post("/api/analyze", async (req, res) => {
   try {
 
     const msg = await anthropic.messages.create({
-      model: "claude-3-haiku-20240307",
+      model: "claude-3-haiku",
       max_tokens: 1000,
       messages: [
         {
