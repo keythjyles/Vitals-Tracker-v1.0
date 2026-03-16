@@ -1,13 +1,12 @@
-// Claim deCoder — Lex Backend Proxy
-// Version: B1.0
-// © 2026 Wendell K. Jiles — The Thicket Method
-// Holds the API key privately. Veterans never see it.
-
 const express = require('express');
 const cors = require('cors');
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type']
+}));
 app.use(express.json({ limit: '10mb' }));
 
 const PORT = process.env.PORT || 3000;
@@ -28,7 +27,7 @@ function checkRate(ip) {
 }
 
 app.get('/', (req, res) => {
-  res.json({ status: 'Lex is online', version: 'B1.0' });
+  res.json({ status: 'Lex is online', version: 'B1.1' });
 });
 
 app.post('/lex', async (req, res) => {
@@ -57,5 +56,5 @@ app.post('/lex', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Lex backend B1.0 running on port ${PORT}`);
+  console.log(`Lex backend B1.1 running on port ${PORT}`);
 });
