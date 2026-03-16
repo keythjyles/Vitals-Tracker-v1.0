@@ -1,12 +1,13 @@
+// Claim deCoder — Lex Backend Proxy
+// Version: B2.0
+// © 2026 Wendell K. Jiles — The Thicket Method
+
 const express = require('express');
 const cors = require('cors');
+const https = require('https');
 
 const app = express();
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type']
-}));
+app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
 const PORT = process.env.PORT || 3000;
@@ -26,35 +27,51 @@ function checkRate(ip) {
   return requestCounts[ip].count <= RATE_LIMIT;
 }
 
+function callAnthropic(body) {
+  return new Promise((resolve, reject) => {
+    const data = JSON.stringify(body);
+    const options = {
+      hostname: 'api.anthropic.com',
+      path: '/v1/messages',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(data),
+        'x-api-key': API_KEY,
+        'anthropic-version': '2023-06-01'
+      }
+    };
+    const req = https.request(options, (res) => {
+      let body = '';
+      res.on('data', chunk => body += chunk);
+      res.on('end', () => {
+        try { resolve({ status: res.statusCode, data: JSON.parse(body) }); }
+        catch(e) { reject(e); }
+      });
+    });
+    req.on('error', reject);
+    req.write(data);
+    req.end();
+  });
+}
+
 app.get('/', (req, res) => {
-  res.json({ status: 'Lex is online', version: 'B1.1' });
+  res.json({ status: 'Lex is online', version: 'B2.0', key: API_KEY ? 'set' : 'missing' });
 });
 
 app.post('/lex', async (req, res) => {
   const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-  if (!checkRate(ip)) {
-    return res.status(429).json({ error: 'Too many requests. Please wait a moment.' });
-  }
-  if (!API_KEY) {
-    return res.status(500).json({ error: 'Server not configured.' });
-  }
+  if (!checkRate(ip)) return res.status(429).json({ error: 'Too many requests.' });
+  if (!API_KEY) return res.status(500).json({ error: 'Server not configured — API key missing.' });
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': API_KEY,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify(req.body)
-    });
-    const data = await response.json();
-    res.status(response.status).json(data);
+    const result = await callAnthropic(req.body);
+    res.status(result.status).json(result.data);
   } catch (err) {
-    res.status(500).json({ error: 'Connection error. Please try again.' });
+    res.status(500).json({ error: 'Anthropic connection failed: ' + err.message });
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`Lex backend B1.1 running on port ${PORT}`);
+  console.log(`Lex backend B2.0 running on port ${PORT}`);
+  console.log(`API key: ${API_KEY ? 'SET (' + API_KEY.slice(0,10) + '...)' : 'MISSING'}`);
 });
