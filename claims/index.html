@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-<title>Claim deCoder v2.1 — Powered by Claude</title>
+<title>Claim deCoder v2.4 — Powered by Claude</title>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inconsolata:wght@400;500;600&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
@@ -263,10 +263,10 @@ input[type=range]{width:100%;accent-color:#4a7a5a;cursor:pointer}
 .td{width:6px;height:6px;background:var(--border2);border-radius:50%;animation:bounce 1.2s ease-in-out infinite}
 .td:nth-child(2){animation-delay:.15s}.td:nth-child(3){animation-delay:.3s}
 #input-row{display:flex;gap:9px;align-items:flex-end;padding:9px 14px 18px;border-top:1px solid var(--border);flex-shrink:0;background:var(--bg)}
-#user-input{flex:1;background:var(--input);border:1.5px solid var(--inputborder);border-radius:10px;color:var(--text);font-family:'EB Garamond',Georgia,serif;padding:10px 13px;resize:none;outline:none;min-height:44px;max-height:130px;line-height:1.5;transition:border-color .2s}
+#user-input{flex:1;background:var(--input);border:1.5px solid var(--inputborder);border-radius:10px;color:var(--text);font-family:'EB Garamond',Georgia,serif;font-size:inherit;padding:12px 14px;resize:none;outline:none;min-height:52px;max-height:140px;line-height:1.5;transition:border-color .2s}
 #user-input:focus{border-color:var(--border2)}
 #user-input::placeholder{color:var(--dim)}
-#send-btn{background:var(--bg4);border:1.5px solid var(--border2);color:var(--green);width:44px;height:44px;border-radius:10px;cursor:pointer;font-size:1.15rem;flex-shrink:0}
+#send-btn{background:var(--bg4);border:1.5px solid var(--border2);color:var(--green);width:52px;height:52px;border-radius:10px;cursor:pointer;font-size:1.3rem;flex-shrink:0}
 #send-btn:active{filter:brightness(1.2)}
 #send-btn:disabled{opacity:.3;cursor:not-allowed}
 
@@ -288,7 +288,7 @@ input[type=range]{width:100%;accent-color:#4a7a5a;cursor:pointer}
 <div class="screen active" id="screen-wizard-1">
   <div style="padding:14px 20px 0;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
     <div class="powered">Powered by <span>Claude</span></div>
-    <div style="font-family:'Inconsolata',monospace;font-size:.78rem;color:var(--dim)">v2.1 &nbsp;·&nbsp; Step 1 of 4</div>
+    <div style="font-family:'Inconsolata',monospace;font-size:.78rem;color:var(--dim)">v2.4 &nbsp;·&nbsp; Step 1 of 4</div>
   </div>
   <div style="padding:10px 20px 12px;flex-shrink:0;background:var(--bg2);border-bottom:1px solid var(--border);margin-top:10px">
     <div style="font-family:'Inconsolata',monospace;font-size:.8rem;color:var(--text);margin-bottom:7px;display:flex;justify-content:space-between;align-items:center">
@@ -480,7 +480,7 @@ input[type=range]{width:100%;accent-color:#4a7a5a;cursor:pointer}
     </div>
     <button class="icon-btn" onclick="goTo('screen-settings')" title="Settings">⚙️</button>
   </div>
-  <div style="text-align:center;font-family:'Inconsolata',monospace;font-size:.72rem;color:var(--dim);padding:4px 0 0;letter-spacing:.06em" id="version-display">v2.1</div>
+  <div style="text-align:center;font-family:'Inconsolata',monospace;font-size:.72rem;color:var(--dim);padding:4px 0 0;letter-spacing:.06em" id="version-display">v2.4</div>
   <div class="home-body">
     <div class="home-medal emoji-dim">🎖️</div>
     <div class="home-title">You deserve what you earned.</div>
@@ -496,7 +496,7 @@ input[type=range]{width:100%;accent-color:#4a7a5a;cursor:pointer}
     <button class="btn btn-blue" onclick="startChat(false)"><span class="bi">💬</span> Talk to Lex</button>
 
     <button class="btn btn-ghost" onclick="goTo('screen-notes')"><span class="bi">📌</span> Notes &amp; Steps</button>
-    <div class="home-footer">Claim deCoder <span style="color:var(--dim)">v2.1</span> · Powered by <span>Claude</span> · © 2026 Wendell K. Jiles · Not Legal Advice</div>
+    <div class="home-footer">Claim deCoder <span style="color:var(--dim)">v2.4</span> · Powered by <span>Claude</span> · © 2026 Wendell K. Jiles · Not Legal Advice</div>
   </div>
 </div>
 
@@ -535,7 +535,7 @@ input[type=range]{width:100%;accent-color:#4a7a5a;cursor:pointer}
       <div class="s-label">Data</div>
       <button class="btn btn-ghost" onclick="clearAllData()"><span>⚠️</span> Clear All App Data</button>
     </div>
-    <div style="text-align:center;font-family:'Inconsolata',monospace;font-size:.62rem;color:var(--dim);padding:8px 0">Claim deCoder v2.1 · Powered by Claude · © 2026 Wendell K. Jiles</div>
+    <div style="text-align:center;font-family:'Inconsolata',monospace;font-size:.62rem;color:var(--dim);padding:8px 0">Claim deCoder v2.4 · Powered by Claude · © 2026 Wendell K. Jiles</div>
   </div>
 </div>
 
@@ -642,7 +642,7 @@ input[type=range]{width:100%;accent-color:#4a7a5a;cursor:pointer}
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-const APP_VERSION='2.1';
+const APP_VERSION='2.4';
 let docIndex=[],pendingFiles=[],conversation=[],isLoading=false,notes=[],pendingSteps=[],prevScreen='screen-home',profile={};
 
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
@@ -1010,6 +1010,17 @@ function completeNote(i){const active=notes.filter(n=>n.status==='active');notes
 function deleteNote(i){const active=notes.filter(n=>n.status==='active');notes[notes.indexOf(active[i])].status='deleted';save('cd_notes',notes);renderNotes();updateStats();}
 
 
+
+// ── KEEP BACKEND ALIVE ──
+function keepAlive(){
+  fetch('https://lex-backend-y0bm.onrender.com')
+    .then(()=>console.log('Lex backend pinged'))
+    .catch(()=>{});
+}
+// Ping immediately on load then every 10 minutes
+keepAlive();
+setInterval(keepAlive, 10 * 60 * 1000);
+
 // ── PROMPT VERSION CHECK ──
 async function checkPromptVersion(){
   try{
@@ -1119,13 +1130,13 @@ async function callLex(){
   const sys=basePrompt+(docIndex.length?`\n\nINDEXED DOCUMENTS (${docIndex.length}):\n`+docIndex.map(d=>`=== ${d.name} ===\n${d.text.slice(0,3500)}`).join('\n\n'):'')+profileContext();
   try{
     const data=await apiCall(conversation,sys,1000);
-    const reply=(data.content||[]).map(b=>b.text||'').join('\n')||'I am here. One breath at a time.';
+    const reply=(data.content||[]).map(b=>b.text||'').join('\n')||'I am here. One breath at a time. (If you are seeing this repeatedly, Lex may still be waking up — please wait 60 seconds and try again.)';
     conversation.push({role:'assistant',content:reply});
     typing.remove();
     addMessage('assistant',reply);
   }catch(e){
     typing.remove();
-    addMessage('assistant','Connection error. Please check your internet and try again.');
+    addMessage('assistant','Lex is waking up — this can take up to 60 seconds on first use. Please wait a moment and try again. If it keeps failing, check your internet connection.');
   }
   isLoading=false;updateSendBtn();
 }
