@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lex Starter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #0b0f0c;
+      color: #f2f2ea;
+    }
+
+    h1 {
+      margin-bottom: 8px;
+    }
+
+    p {
+      color: #c8c8bf;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 220px;
+      padding: 14px;
+      margin-top: 12px;
+      margin-bottom: 12px;
+      border: 1px solid #35513b;
+      border-radius: 10px;
+      background: #111712;
+      color: #f2f2ea;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    button {
+      padding: 14px 18px;
+      border: 1px solid #4e8a5d;
+      border-radius: 10px;
+      background: #17301d;
+      color: #9af0b2;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .card {
+      background: #101612;
+      border: 1px solid #243328;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 18px;
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+
+    .muted {
+      color: #96a091;
+      font-size: 14px;
+    }
+
+    label {
+      display: block;
+      margin-top: 16px;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Lex Starter</h1>
+  <p>Paste extracted medical or claim text below, then tap Analyze.</p>
+
+  <label for="docText">Document text</label>
+  <textarea
+    id="docText"
+    placeholder="Paste claim evidence, DBQ text, medical notes, lay statements, or timeline text here..."
+  ></textarea>
+
+  <button id="analyzeBtn">Analyze</button>
+
+  <div class="card muted" id="status">Ready.</div>
+  <div class="card" id="output">No analysis yet.</div>
+
+  <script>
+    const API_BASE = "https://lex-backend-y0bm.onrender.com";
+
+    const analyzeBtn = document.getElementById("analyzeBtn");
+    const docText = document.getElementById("docText");
+    const output = document.getElementById("output");
+    const statusBox = document.getElementById("status");
+
+    analyzeBtn.addEventListener("click", async () => {
+      const text = docText.value.trim();
+
+      if (!text) {
+        statusBox.textContent = "Paste some text first.";
+        return;
+      }
+
+      analyzeBtn.disabled = true;
+      statusBox.textContent = "Sending text to your Render server...";
+      output.textContent = "Working...";
+
+      try {
+        const res = await fetch(`${API_BASE}/api/analyze`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ text })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || `HTTP ${res.status}`);
+        }
+
+        statusBox.textContent = "Analysis complete.";
+        output.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        statusBox.textContent = "Request failed.";
+        output.textContent = err.message;
+        console.error(err);
+      } finally {
+        analyzeBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
