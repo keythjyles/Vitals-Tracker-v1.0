@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-<title>Claim deCoder v1.0 — Powered by Claude</title>
+<title>Claim deCoder v1.1 — Powered by Claude</title>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inconsolata:wght@400;500;600&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
@@ -13,7 +13,7 @@ body.theme-dark{--bg:#0a0e0b;--bg2:#0d1410;--bg3:#111a13;--bg4:#162d1e;--border:
 body.theme-warm{--bg:#0f0c08;--bg2:#161008;--bg3:#1e1a10;--bg4:#2a2010;--border:#2e2410;--border2:#8a6820;--text:#ede4c8;--dim:#b0a080;--bright:#f8f2e0;--green:#a8c870;--gold:#a07838;--red:#e07070;--blue:#88a8c8;--card:#161008;--input:#0e0c06;--inputborder:#2e2410}
 body.theme-light{--bg:#e0dbd0;--bg2:#ebe6dc;--bg3:#d4cfc4;--bg4:#cce0d4;--border:#a8a098;--border2:#2d5c38;--text:#1e1c18;--dim:#48443c;--bright:#0e0c08;--green:#1e5428;--gold:#6a4818;--red:#882020;--blue:#1a3a58;--card:#ebe6dc;--input:#dedad0;--inputborder:#a8a098}
 body.theme-contrast{--bg:#000000;--bg2:#0a0a0a;--bg3:#111111;--bg4:#001a08;--border:#333333;--border2:#00ff44;--text:#ffffff;--dim:#aaaaaa;--bright:#ffffff;--green:#00ff44;--gold:#c89a50;--red:#ff4444;--blue:#44aaff;--card:#0a0a0a;--input:#050505;--inputborder:#333333}
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:'EB Garamond',Georgia,serif;-webkit-tap-highlight-color:transparent;transition:background .3s,color .3s}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'EB Garamond',Georgia,serif;font-size:24px;-webkit-tap-highlight-color:transparent;transition:background .3s,color .3s}
 
 /* ── SCREENS ── */
 .screen{display:none;flex-direction:column;height:100vh;max-width:640px;margin:0 auto;position:relative;overflow:hidden}
@@ -45,7 +45,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'EB Gar
 .logo-block{display:flex;align-items:center;gap:11px}
 .logo-text .logo-name{font-size:1.1rem;font-weight:600;color:var(--bright);line-height:1.1}
 .logo-text .logo-name span{color:var(--gold)}
-.logo-text .logo-tag{font-size:.65rem;color:var(--dim);font-style:italic}
+.logo-text .logo-tag{font-size:.65rem;color:var(--dim)}
 .powered{font-family:'Inconsolata',monospace;font-size:.78rem;color:var(--text);letter-spacing:.04em}
 .powered span{color:#88b8d8;font-weight:600}
 
@@ -58,27 +58,27 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'EB Gar
 .wp-dot.done{background:var(--green)}
 .wp-dot.active{background:var(--border2)}
 .wizard-icon{font-size:2.6rem;text-align:center;margin-bottom:4px}
-.wizard-title{font-size:1.7rem;font-weight:400;color:var(--bright);line-height:1.25;text-align:center}
+.wizard-title{font-size:2rem;font-weight:400;color:var(--bright);line-height:1.25;text-align:center}
 .wizard-title span{color:var(--gold)}
-.wizard-sub{font-size:1rem;color:var(--dim);line-height:1.75;font-style:italic;text-align:center}
+.wizard-sub{font-size:1.1rem;color:var(--dim);line-height:1.75;text-align:center}
 .wizard-body{display:flex;flex-direction:column;gap:14px}
 .wizard-footer{padding:16px 24px 24px;display:flex;flex-direction:column;gap:10px;flex-shrink:0;border-top:1px solid var(--border)}
 
 /* stake card */
 .stake-card{background:var(--bg4);border:1px solid var(--border2);border-radius:12px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start}
 .stake-icon{font-size:1.4rem;flex-shrink:0;margin-top:2px}
-.stake-text{font-size:.92rem;line-height:1.65;color:var(--text)}
+.stake-text{font-size:1rem;line-height:1.65;color:var(--text)}
 .stake-text strong{color:var(--green)}
 
 /* ITF block */
 .itf-number{font-family:'Inconsolata',monospace;font-size:1.6rem;font-weight:700;color:var(--green);background:var(--bg4);border:1.5px solid var(--border2);border-radius:10px;padding:14px;text-align:center;letter-spacing:.06em;margin:4px 0}
-.itf-script{background:var(--bg3);border:1.5px dashed var(--border2);border-radius:10px;padding:14px 16px;font-style:italic;color:var(--text);font-size:.97rem;line-height:1.7}
+.itf-script{background:var(--bg3);border:1.5px dashed var(--border2);border-radius:10px;padding:14px 16px;color:var(--text);font-size:.97rem;line-height:1.7}
 .itf-script .label{font-family:'Inconsolata',monospace;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:6px;font-style:normal;display:block}
 .check-row{display:flex;align-items:center;gap:12px;background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;transition:border-color .2s}
 .check-row.checked{border-color:var(--border2);background:var(--bg4)}
 .check-box{width:24px;height:24px;border-radius:6px;border:2px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s}
 .check-row.checked .check-box{background:var(--border2);color:#000}
-.check-label{font-size:.95rem;color:var(--text);line-height:1.4}
+.check-label{font-size:1.05rem;color:var(--text);line-height:1.4}
 
 /* key setup */
 .step-row{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border)}
@@ -87,7 +87,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'EB Gar
 .step-content{flex:1}
 .step-content p{font-size:.92rem;line-height:1.65;color:var(--text)}
 .step-content a{color:var(--gold);text-decoration:none}
-.step-content .step-note{font-size:.78rem;color:var(--dim);font-style:italic;margin-top:4px}
+.step-content .step-note{font-size:.78rem;color:var(--dim);margin-top:4px}
 .key-field{display:flex;flex-direction:column;gap:6px;margin-top:6px}
 .key-field label{font-family:'Inconsolata',monospace;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
 .key-field input{background:var(--input);border:1.5px solid var(--inputborder);border-radius:10px;color:var(--text);font-family:'Inconsolata',monospace;font-size:.85rem;padding:12px 14px;outline:none;transition:border-color .2s;letter-spacing:.04em;width:100%}
@@ -99,7 +99,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'EB Gar
 /* bridge */
 .bridge-card{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px}
 .bridge-card p{font-size:.92rem;line-height:1.7;color:var(--text);margin-bottom:10px}
-.copy-prompt-box{background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:12px 14px;font-size:.82rem;color:var(--dim);line-height:1.6;font-style:italic;margin-bottom:10px;word-break:break-word}
+.copy-prompt-box{background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:12px 14px;font-size:.82rem;color:var(--dim);line-height:1.6;margin-bottom:10px;word-break:break-word}
 .copy-btn{font-family:'Inconsolata',monospace;font-size:.7rem;color:var(--green);background:var(--bg4);border:1px solid var(--border2);border-radius:6px;padding:7px 14px;cursor:pointer;text-transform:uppercase;letter-spacing:.06em;display:inline-block}
 
 /* ready */
@@ -117,7 +117,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'EB Gar
 .home-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;gap:12px}
 .home-medal{font-size:2.8rem}
 .home-title{font-size:1.85rem;font-weight:400;color:var(--bright);line-height:1.25;max-width:300px}
-.home-sub{font-size:.93rem;color:var(--dim);line-height:1.7;font-style:italic;max-width:280px}
+.home-sub{font-size:.93rem;color:var(--dim);line-height:1.7;max-width:280px}
 .home-actions{padding:14px 20px 20px;display:flex;flex-direction:column;gap:10px}
 .home-stats{display:flex;gap:8px;margin-bottom:4px}
 .stat-pill{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px;text-align:center}
@@ -137,7 +137,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'EB Gar
 .theme-btn{padding:11px;border-radius:8px;border:2px solid var(--border);cursor:pointer;text-align:center;font-size:.8rem;background:var(--bg2);color:var(--text);transition:all .2s}
 .theme-btn.active{border-color:var(--border2);color:var(--green)}
 input[type=range]{width:100%;accent-color:#4a7a5a;cursor:pointer}
-.font-label{font-size:.78rem;color:var(--dim);font-style:italic}
+.font-label{font-size:.78rem;color:var(--dim)}
 .p-field{display:flex;flex-direction:column;gap:5px}
 .p-field label{font-family:'Inconsolata',monospace;font-size:.67rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
 .p-field input,.p-field textarea{background:var(--input);border:1.5px solid var(--inputborder);border-radius:8px;color:var(--text);font-family:'EB Garamond',Georgia,serif;font-size:.95rem;padding:10px 12px;outline:none;width:100%;transition:border-color .2s}
@@ -154,7 +154,7 @@ input[type=range]{width:100%;accent-color:#4a7a5a;cursor:pointer}
 .drop-zone:active{filter:brightness(1.2)}
 .drop-zone-icon{font-size:2.2rem}
 .drop-zone-title{font-size:1rem;color:var(--bright);font-weight:500}
-.drop-zone-sub{font-size:.82rem;color:var(--dim);font-style:italic;line-height:1.5}
+.drop-zone-sub{font-size:.82rem;color:var(--dim);line-height:1.5}
 .drop-zone-types{font-family:'Inconsolata',monospace;font-size:.63rem;color:var(--dim);background:var(--bg);padding:5px 10px;border-radius:4px;letter-spacing:.04em}
 #file-input{display:none}
 .doc-list-header{display:flex;align-items:center;justify-content:space-between}
@@ -176,7 +176,7 @@ input[type=range]{width:100%;accent-color:#4a7a5a;cursor:pointer}
 #screen-processing{align-items:center;justify-content:center;gap:16px;padding:40px;text-align:center}
 .spinner{width:44px;height:44px;border:2px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin 1s linear infinite}
 #proc-title{font-family:'Inconsolata',monospace;font-size:.8rem;color:var(--green);letter-spacing:.08em}
-#proc-sub{font-size:.9rem;color:var(--dim);font-style:italic;max-width:260px;line-height:1.6}
+#proc-sub{font-size:.9rem;color:var(--dim);max-width:260px;line-height:1.6}
 
 /* ══════════════════════════
    ANALYSIS
@@ -189,7 +189,7 @@ input[type=range]{width:100%;accent-color:#4a7a5a;cursor:pointer}
 .acard-big span{color:var(--green)}
 .strength-bar{height:7px;background:var(--bg3);border-radius:4px;margin:8px 0;overflow:hidden}
 .strength-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--border2),var(--green));transition:width 1.2s ease}
-.acard p,.acard li{line-height:1.72;color:var(--text)}
+.acard p,.acard li{line-height:1.75;color:var(--text);font-size:1rem}
 .acard ul{padding-left:16px;margin-top:4px}
 .acard li{margin-bottom:4px}
 .tag{display:inline-block;font-family:'Inconsolata',monospace;font-size:.6rem;padding:3px 7px;border-radius:3px;margin:2px;letter-spacing:.04em}
@@ -205,9 +205,9 @@ input[type=range]{width:100%;accent-color:#4a7a5a;cursor:pointer}
 .notes-body{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:10px}
 .note-input-area{background:var(--card);border:1.5px solid var(--inputborder);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
 .note-input-area textarea{background:transparent;border:none;outline:none;color:var(--text);font-family:'EB Garamond',Georgia,serif;resize:none;min-height:80px;line-height:1.6;width:100%}
-.note-input-area textarea::placeholder{color:var(--dim);font-style:italic}
+.note-input-area textarea::placeholder{color:var(--dim)}
 .note-input-footer{display:flex;align-items:center;justify-content:space-between}
-.note-hint{font-size:.73rem;color:var(--dim);font-style:italic}
+.note-hint{font-size:.73rem;color:var(--dim)}
 .note-submit-btn{background:var(--bg4);border:1px solid var(--border2);color:var(--green);font-family:'Inconsolata',monospace;font-size:.7rem;letter-spacing:.08em;padding:7px 14px;border-radius:8px;cursor:pointer;text-transform:uppercase}
 .notes-list-header{font-family:'Inconsolata',monospace;font-size:.67rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
 .sticky{background:#1a1a08;border:1px solid #3a3a10;border-radius:10px;padding:12px 14px}
@@ -229,7 +229,7 @@ input[type=range]{width:100%;accent-color:#4a7a5a;cursor:pointer}
 .steps-body{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:10px}
 .step-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
 .step-num-label{font-family:'Inconsolata',monospace;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--green);margin-bottom:8px;font-weight:600}
-.step-text{font-size:1.05rem;line-height:1.75;color:var(--bright);margin-bottom:14px}
+.step-text{font-size:1.1rem;line-height:1.75;color:var(--bright);margin-bottom:14px}
 .step-actions{display:flex;gap:8px;flex-wrap:wrap}
 .step-btn{font-family:'Inconsolata',monospace;font-size:.72rem;padding:10px 14px;border-radius:8px;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;border:1.5px solid;background:none}
 .step-btn.act{border-color:var(--border2);color:var(--green)}
@@ -245,27 +245,27 @@ input[type=range]{width:100%;accent-color:#4a7a5a;cursor:pointer}
 .chat-av{width:30px;height:30px;flex-shrink:0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;background:var(--bg4);border:1px solid var(--border2);color:var(--green)}
 .chat-info{flex:1;min-width:0}
 .chat-name{font-size:.92rem;color:var(--bright);font-weight:500;line-height:1.2}
-.chat-sub{font-size:.65rem;color:var(--dim);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-sub{font-size:.65rem;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #messages{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:12px;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
 .msg{display:flex;gap:9px;animation:fadeUp .25s ease}
 .msg.user{flex-direction:row-reverse}
 .av{width:28px;height:28px;flex-shrink:0;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;margin-top:2px}
 .msg.assistant .av{background:var(--bg4);border:1px solid var(--border2);color:var(--green)}
 .msg.user .av{background:#0e1020;border:1px solid #1e2a4a;color:var(--blue)}
-.bubble{max-width:87%;padding:10px 13px;border-radius:10px;line-height:1.75}
+.bubble{max-width:87%;padding:10px 13px;border-radius:10px;line-height:1.8;font-size:1.05rem}
 .msg.assistant .bubble{background:var(--card);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:3px}
 .msg.user .bubble{background:#0c1018;border:1px solid #18202e;color:#aabac8;border-bottom-right-radius:3px}
 .bubble p{margin-bottom:6px}.bubble p:last-child{margin-bottom:0}
 .phone-line{font-family:'Inconsolata',monospace;font-weight:700;color:var(--green);background:var(--bg4);border:1px solid var(--border2);border-radius:6px;padding:7px 14px;margin:8px 0;display:block;text-align:center;letter-spacing:.04em}
 .crisis-line{border-left:3px solid var(--gold);padding:6px 12px;margin:7px 0;color:var(--gold)}
-.script-text{font-style:italic;background:var(--bg3);border:1px dashed var(--border2);border-radius:6px;padding:9px 13px;margin:6px 0;color:var(--green);display:block}
+.script-text{background:var(--bg3);border:1px dashed var(--border2);border-radius:6px;padding:9px 13px;margin:6px 0;color:var(--green);display:block}
 .typing-bubble{display:flex;gap:5px;align-items:center;padding:11px 15px;background:var(--card);border:1px solid var(--border);border-radius:10px;border-bottom-left-radius:3px;width:fit-content}
 .td{width:6px;height:6px;background:var(--border2);border-radius:50%;animation:bounce 1.2s ease-in-out infinite}
 .td:nth-child(2){animation-delay:.15s}.td:nth-child(3){animation-delay:.3s}
 #input-row{display:flex;gap:9px;align-items:flex-end;padding:9px 14px 18px;border-top:1px solid var(--border);flex-shrink:0;background:var(--bg)}
 #user-input{flex:1;background:var(--input);border:1.5px solid var(--inputborder);border-radius:10px;color:var(--text);font-family:'EB Garamond',Georgia,serif;padding:10px 13px;resize:none;outline:none;min-height:44px;max-height:130px;line-height:1.5;transition:border-color .2s}
 #user-input:focus{border-color:var(--border2)}
-#user-input::placeholder{color:var(--dim);font-style:italic}
+#user-input::placeholder{color:var(--dim)}
 #send-btn{background:var(--bg4);border:1.5px solid var(--border2);color:var(--green);width:44px;height:44px;border-radius:10px;cursor:pointer;font-size:1.15rem;flex-shrink:0}
 #send-btn:active{filter:brightness(1.2)}
 #send-btn:disabled{opacity:.3;cursor:not-allowed}
@@ -294,7 +294,7 @@ input[type=range]{width:100%;accent-color:#4a7a5a;cursor:pointer}
     <div style="font-family:'Inconsolata',monospace;font-size:.8rem;color:var(--text);margin-bottom:7px;display:flex;justify-content:space-between;align-items:center">
       <span>📖 Text Size</span><span id="wiz-font-label" style="color:var(--green);font-weight:600">Large</span>
     </div>
-    <input type="range" id="wiz-font-slider" min="16" max="26" value="22" oninput="wizSetFont(this.value)" style="width:100%;accent-color:#4a7a5a;cursor:pointer;height:6px"/>
+    <input type="range" id="wiz-font-slider" min="16" max="26" value="24" oninput="wizSetFont(this.value)" style="width:100%;accent-color:#4a7a5a;cursor:pointer;height:6px"/>
     <div style="display:flex;justify-content:space-between;font-family:'Inconsolata',monospace;color:var(--dim);margin-top:4px"><span style="font-size:.75rem">A smaller</span><span style="font-size:1rem">A larger</span></div>
   </div>
   <div style="padding:0 24px;margin-top:10px;flex-shrink:0">
@@ -352,7 +352,7 @@ input[type=range]{width:100%;accent-color:#4a7a5a;cursor:pointer}
         <span class="label">Say exactly this:</span>
         "Hello, I would like to submit an Intent to File for compensation, and I need to note on my record that I am currently experiencing a hardship."
       </div>
-      <div style="font-size:.82rem;color:var(--dim);font-style:italic;line-height:1.6;padding:4px 0">The agent will be professional and helpful. They only need your name and Social Security number. This call locks in your start date immediately.</div>
+      <div style="font-size:.82rem;color:var(--dim);line-height:1.6;padding:4px 0">The agent will be professional and helpful. They only need your name and Social Security number. This call locks in your start date immediately.</div>
       <div class="check-row" id="itf-check" onclick="toggleITF()">
         <div class="check-box" id="itf-box"></div>
         <div class="check-label">I made the call and submitted my Intent to File</div>
@@ -408,7 +408,7 @@ input[type=range]{width:100%;accent-color:#4a7a5a;cursor:pointer}
         </div>
       </div>
       <button class="btn btn-green" onclick="saveWizKey()"><span class="bi emoji-dim">🔐</span> Save Key &amp; Continue</button>
-      <div style="text-align:center;font-size:.82rem;color:var(--dim);font-style:italic;line-height:1.6;padding:4px 0">Having trouble? Don't stop here.</div>
+      <div style="text-align:center;font-size:.82rem;color:var(--dim);line-height:1.6;padding:4px 0">Having trouble? Don't stop here.</div>
       <button class="btn btn-ghost btn-sm" onclick="goTo('screen-wizard-bridge')">I need help with this step</button>
     </div>
   </div>
@@ -431,7 +431,7 @@ input[type=range]{width:100%;accent-color:#4a7a5a;cursor:pointer}
       </div>
       <div class="bridge-card">
         <p>In the meantime, you can use Lex for free through Claude.ai. Open the link below, then copy and paste the message into Claude to activate the full Lex experience:</p>
-        <div class="copy-prompt-box" id="bridge-prompt">You are Lex, a VA claims specialist powered by the Thicket Method. Please read my full methodology and system instructions at this link before we begin: https://keythjyles.github.io/Vitals-Tracker-v1.0/claims/lex-prompt.txt — Once you have read it, greet me as Lex and ask how you can help me with my VA claim today.</div>
+        <div class="copy-prompt-box" id="bridge-prompt">You are Lex, a VA claims specialist powered by the Thicket Method. Please read my full methodology and system instructions at this link before we begin: https://keythjyles.github.io/Vitals-Tracker-v1.1/claims/lex-prompt.txt — Once you have read it, greet me as Lex and ask how you can help me with my VA claim today.</div>
         <button class="copy-btn" onclick="copyBridgePrompt()">📋 Copy This Message</button>
       </div>
       <a href="https://claude.ai" target="_blank" class="btn btn-blue" style="text-decoration:none"><span class="bi">↗</span> Open Claude.ai</a>
@@ -511,7 +511,7 @@ input[type=range]{width:100%;accent-color:#4a7a5a;cursor:pointer}
     <button class="btn btn-green" onclick="goTo('screen-docs')"><span class="bi emoji-dim">📁</span> Load VA Documents</button>
     <button class="btn btn-blue" onclick="startChat(false)"><span class="bi">💬</span> Talk to Lex</button>
     <button class="btn btn-ghost" onclick="goTo('screen-notes')"><span class="bi">📌</span> Notes &amp; Steps</button>
-    <div class="home-footer">Claim deCoder <span style="color:var(--dim)">v1.0</span> · Powered by <span>Claude</span> · © 2026 Wendell K. Jiles · Not Legal Advice</div>
+    <div class="home-footer">Claim deCoder <span style="color:var(--dim)">v1.1</span> · Powered by <span>Claude</span> · © 2026 Wendell K. Jiles · Not Legal Advice</div>
   </div>
 </div>
 
@@ -537,7 +537,7 @@ input[type=range]{width:100%;accent-color:#4a7a5a;cursor:pointer}
     <div class="s-section">
       <div class="s-label">Appearance</div>
       <div class="font-label" id="font-size-label">Font Size: Medium</div>
-      <input type="range" id="font-slider" min="14" max="24" value="22" oninput="setFontSize(this.value)"/>
+      <input type="range" id="font-slider" min="14" max="24" value="24" oninput="setFontSize(this.value)"/>
       <div class="theme-grid">
         <button class="theme-btn" onclick="setTheme('dark',this)">🌑 Dark</button>
         <button class="theme-btn active" onclick="setTheme('warm',this)">🌅 Warm</button>
@@ -554,7 +554,7 @@ input[type=range]{width:100%;accent-color:#4a7a5a;cursor:pointer}
       <div class="s-label">Data</div>
       <button class="btn btn-ghost" onclick="clearAllData()"><span>⚠️</span> Clear All App Data</button>
     </div>
-    <div style="text-align:center;font-family:'Inconsolata',monospace;font-size:.62rem;color:var(--dim);padding:8px 0">Claim deCoder v1.0 · Powered by Claude · © 2026 Wendell K. Jiles</div>
+    <div style="text-align:center;font-family:'Inconsolata',monospace;font-size:.62rem;color:var(--dim);padding:8px 0">Claim deCoder v1.1 · Powered by Claude · © 2026 Wendell K. Jiles</div>
   </div>
 </div>
 
@@ -660,7 +660,7 @@ input[type=range]{width:100%;accent-color:#4a7a5a;cursor:pointer}
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-const APP_VERSION='1.0';
+const APP_VERSION='1.1';
 let docIndex=[],pendingFiles=[],conversation=[],isLoading=false,notes=[],pendingSteps=[],prevScreen='screen-home',profile={};
 
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
@@ -756,7 +756,7 @@ function goBack(){goTo(prevScreen);}
 // ── SETTINGS ──
 function loadSettings(){
   const theme=load('cd_theme','warm');
-  const fontSize=load('cd_fontsize',22);
+  const fontSize=load('cd_fontsize',24);
   document.body.className='theme-'+theme;
   document.documentElement.style.fontSize=fontSize+'px';
   document.body.style.fontSize=fontSize+'px';
