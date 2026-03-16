@@ -31,6 +31,7 @@ app.post("/api/analyze", async (req, res) => {
       ]
     });
 
+    
     res.json({
       result: msg.content[0].text
     });
