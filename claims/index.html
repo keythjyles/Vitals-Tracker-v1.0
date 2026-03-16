@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-<title>Claim deCoder — Powered by Claude</title>
+<title>Claim deCoder v1.0 — Powered by Claude</title>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inconsolata:wght@400;500;600&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body.theme-dark{--bg:#0a0e0b;--bg2:#0d1410;--bg3:#111a13;--bg4:#162d1e;--border:#1e2a20;--border2:#2d5c38;--text:#dedad2;--dim:#8a9a8c;--bright:#f2ede6;--green:#5cb87c;--gold:#a07838;--red:#e07070;--blue:#7ab0cc;--card:#0d1410;--input:#0a100c;--inputborder:#1e3020}
-body.theme-warm{--bg:#0f0c08;--bg2:#161008;--bg3:#1e1a10;--bg4:#2a2010;--border:#2e2410;--border2:#8a6820;--text:#e8dfc0;--dim:#aa9a78;--bright:#f8f0d8;--green:#a8c870;--gold:#a07838;--red:#e07070;--blue:#88a8c8;--card:#161008;--input:#0e0c06;--inputborder:#2e2410}
-body.theme-light{--bg:#f4f0e8;--bg2:#ffffff;--bg3:#e8e4d8;--bg4:#d4f0e0;--border:#c8c0a8;--border2:#2d5c38;--text:#2a2418;--dim:#6a6050;--bright:#1a1408;--green:#1a5c30;--gold:#7a4a18;--red:#a03030;--blue:#1a4a6a;--card:#ffffff;--input:#f8f4ec;--inputborder:#c8c0a8}
+body.theme-dark{--bg:#0a0e0b;--bg2:#0d1410;--bg3:#111a13;--bg4:#162d1e;--border:#1e2a20;--border2:#2d5c38;--text:#e4e0d8;--dim:#909e92;--bright:#f4f0e8;--green:#5cb87c;--gold:#a07838;--red:#e07070;--blue:#7ab0cc;--card:#0d1410;--input:#0a100c;--inputborder:#1e3020}
+body.theme-warm{--bg:#0f0c08;--bg2:#161008;--bg3:#1e1a10;--bg4:#2a2010;--border:#2e2410;--border2:#8a6820;--text:#ede4c8;--dim:#b0a080;--bright:#f8f2e0;--green:#a8c870;--gold:#a07838;--red:#e07070;--blue:#88a8c8;--card:#161008;--input:#0e0c06;--inputborder:#2e2410}
+body.theme-light{--bg:#e0dbd0;--bg2:#ebe6dc;--bg3:#d4cfc4;--bg4:#cce0d4;--border:#a8a098;--border2:#2d5c38;--text:#1e1c18;--dim:#48443c;--bright:#0e0c08;--green:#1e5428;--gold:#6a4818;--red:#882020;--blue:#1a3a58;--card:#ebe6dc;--input:#dedad0;--inputborder:#a8a098}
 body.theme-contrast{--bg:#000000;--bg2:#0a0a0a;--bg3:#111111;--bg4:#001a08;--border:#333333;--border2:#00ff44;--text:#ffffff;--dim:#aaaaaa;--bright:#ffffff;--green:#00ff44;--gold:#c89a50;--red:#ff4444;--blue:#44aaff;--card:#0a0a0a;--input:#050505;--inputborder:#333333}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:'EB Garamond',Georgia,serif;-webkit-tap-highlight-color:transparent;transition:background .3s,color .3s}
 
@@ -136,7 +136,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'EB Gar
 .theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .theme-btn{padding:11px;border-radius:8px;border:2px solid var(--border);cursor:pointer;text-align:center;font-size:.8rem;background:var(--bg2);color:var(--text);transition:all .2s}
 .theme-btn.active{border-color:var(--border2);color:var(--green)}
-input[type=range]{width:100%;accent-color:var(--green);cursor:pointer}
+input[type=range]{width:100%;accent-color:#4a7a5a;cursor:pointer}
 .font-label{font-size:.78rem;color:var(--dim);font-style:italic}
 .p-field{display:flex;flex-direction:column;gap:5px}
 .p-field label{font-family:'Inconsolata',monospace;font-size:.67rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
@@ -294,7 +294,7 @@ input[type=range]{width:100%;accent-color:var(--green);cursor:pointer}
     <div style="font-family:'Inconsolata',monospace;font-size:.8rem;color:var(--text);margin-bottom:7px;display:flex;justify-content:space-between;align-items:center">
       <span>📖 Text Size</span><span id="wiz-font-label" style="color:var(--green);font-weight:600">Large</span>
     </div>
-    <input type="range" id="wiz-font-slider" min="16" max="26" value="22" oninput="wizSetFont(this.value)" style="width:100%;accent-color:var(--green);cursor:pointer;height:6px"/>
+    <input type="range" id="wiz-font-slider" min="16" max="26" value="22" oninput="wizSetFont(this.value)" style="width:100%;accent-color:#4a7a5a;cursor:pointer;height:6px"/>
     <div style="display:flex;justify-content:space-between;font-family:'Inconsolata',monospace;color:var(--dim);margin-top:4px"><span style="font-size:.75rem">A smaller</span><span style="font-size:1rem">A larger</span></div>
   </div>
   <div style="padding:0 24px;margin-top:10px;flex-shrink:0">
@@ -511,7 +511,7 @@ input[type=range]{width:100%;accent-color:var(--green);cursor:pointer}
     <button class="btn btn-green" onclick="goTo('screen-docs')"><span class="bi emoji-dim">📁</span> Load VA Documents</button>
     <button class="btn btn-blue" onclick="startChat(false)"><span class="bi">💬</span> Talk to Lex</button>
     <button class="btn btn-ghost" onclick="goTo('screen-notes')"><span class="bi">📌</span> Notes &amp; Steps</button>
-    <div class="home-footer">Claim deCoder · Powered by <span>Claude</span> · © 2026 Wendell K. Jiles · Not Legal Advice</div>
+    <div class="home-footer">Claim deCoder <span style="color:var(--dim)">v1.0</span> · Powered by <span>Claude</span> · © 2026 Wendell K. Jiles · Not Legal Advice</div>
   </div>
 </div>
 
@@ -554,7 +554,7 @@ input[type=range]{width:100%;accent-color:var(--green);cursor:pointer}
       <div class="s-label">Data</div>
       <button class="btn btn-ghost" onclick="clearAllData()"><span>⚠️</span> Clear All App Data</button>
     </div>
-    <div style="text-align:center;font-family:'Inconsolata',monospace;font-size:.62rem;color:var(--dim);padding:8px 0">Claim deCoder · Powered by Claude · © 2026 Wendell K. Jiles</div>
+    <div style="text-align:center;font-family:'Inconsolata',monospace;font-size:.62rem;color:var(--dim);padding:8px 0">Claim deCoder v1.0 · Powered by Claude · © 2026 Wendell K. Jiles</div>
   </div>
 </div>
 
@@ -660,6 +660,7 @@ input[type=range]{width:100%;accent-color:var(--green);cursor:pointer}
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
+const APP_VERSION='1.0';
 let docIndex=[],pendingFiles=[],conversation=[],isLoading=false,notes=[],pendingSteps=[],prevScreen='screen-home',profile={};
 
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
@@ -757,7 +758,9 @@ function loadSettings(){
   const theme=load('cd_theme','warm');
   const fontSize=load('cd_fontsize',22);
   document.body.className='theme-'+theme;
+  document.documentElement.style.fontSize=fontSize+'px';
   document.body.style.fontSize=fontSize+'px';
+  document.documentElement.style.fontSize=fontSize+'px';
   const sl=document.getElementById('font-slider');
   if(sl)sl.value=fontSize;
   updateFontLabel(fontSize);
@@ -772,8 +775,10 @@ function setTheme(t,btn){
   btn.classList.add('active');
 }
 function setFontSize(v){
+  v=parseInt(v);
+  document.documentElement.style.fontSize=v+'px';
   document.body.style.fontSize=v+'px';
-  save('cd_fontsize',parseInt(v));
+  save('cd_fontsize',v);
   updateFontLabel(v);
 }
 function updateFontLabel(v){
@@ -1166,13 +1171,17 @@ function updateSendBtn(){document.getElementById('send-btn').disabled=!document.
 function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}}
 function esc(s=''){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function wizSetFont(v){
+  v=parseInt(v);
   document.body.style.fontSize=v+"px";
-  save("cd_fontsize",parseInt(v));
-  const labels={"16":"Small","17":"Small","18":"Medium","19":"Medium","20":"Medium","21":"Large","22":"Large","23":"X-Large","24":"X-Large","25":"XX-Large","26":"XX-Large"};
+  document.documentElement.style.fontSize=v+"px";
+  save("cd_fontsize",v);
+  const labels={16:"Small",17:"Small",18:"Medium",19:"Medium",20:"Medium",21:"Large",22:"Large",23:"X-Large",24:"X-Large",25:"XX-Large",26:"XX-Large"};
   const el=document.getElementById("wiz-font-label");
-  if(el)el.textContent=labels[String(v)]||"Custom";
+  if(el)el.textContent=labels[v]||"Custom";
   const sl=document.getElementById("font-slider");
   if(sl)sl.value=v;
+  const sl2=document.getElementById("wiz-font-slider");
+  if(sl2)sl2.value=v;
   updateFontLabel(v);
 }
 function clearAllData(){if(confirm('Clear ALL app data? This cannot be undone.')){localStorage.clear();location.reload();}}
