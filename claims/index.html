@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>Claim deCoder — Powered by Claude</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inconsolata:wght@400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body.theme-dark{--bg:#0a0e0b;--bg2:#0d1410;--bg3:#111a13;--bg4:#162d1e;--border:#1e2a20;--border2:#2d5c38;--text:#dedad2;--dim:#8a9a8c;--bright:#f2ede6;--green:#5cb87c;--gold:#a07838;--red:#e07070;--blue:#7ab0cc;--card:#0d1410;--input:#0a100c;--inputborder:#1e3020}
+body.theme-warm{--bg:#0f0c08;--bg2:#161008;--bg3:#1e1a10;--bg4:#2a2010;--border:#2e2410;--border2:#8a6820;--text:#e8dfc0;--dim:#aa9a78;--bright:#f8f0d8;--green:#a8c870;--gold:#a07838;--red:#e07070;--blue:#88a8c8;--card:#161008;--input:#0e0c06;--inputborder:#2e2410}
+body.theme-light{--bg:#f4f0e8;--bg2:#ffffff;--bg3:#e8e4d8;--bg4:#d4f0e0;--border:#c8c0a8;--border2:#2d5c38;--text:#2a2418;--dim:#6a6050;--bright:#1a1408;--green:#1a5c30;--gold:#7a4a18;--red:#a03030;--blue:#1a4a6a;--card:#ffffff;--input:#f8f4ec;--inputborder:#c8c0a8}
+body.theme-contrast{--bg:#000000;--bg2:#0a0a0a;--bg3:#111111;--bg4:#001a08;--border:#333333;--border2:#00ff44;--text:#ffffff;--dim:#aaaaaa;--bright:#ffffff;--green:#00ff44;--gold:#c89a50;--red:#ff4444;--blue:#44aaff;--card:#0a0a0a;--input:#050505;--inputborder:#333333}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'EB Garamond',Georgia,serif;-webkit-tap-highlight-color:transparent;transition:background .3s,color .3s}
+
+/* ── SCREENS ── */
+.screen{display:none;flex-direction:column;height:100vh;max-width:640px;margin:0 auto;position:relative;overflow:hidden}
+.screen.active{display:flex}
+
+/* ── SHARED ── */
+.screen-header{display:flex;align-items:center;gap:12px;padding:13px 18px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg)}
+.back-btn{background:none;border:none;color:var(--dim);font-size:1.6rem;cursor:pointer;padding:0 10px 0 0;line-height:1;flex-shrink:0}
+.screen-title{font-size:1.05rem;color:var(--bright);font-weight:500;flex:1}
+.header-actions{display:flex;gap:8px}
+.icon-btn{background:none;border:1px solid var(--border);color:var(--dim);width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center}
+.icon-btn:active{background:var(--bg3)}
+.scrollable{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+
+/* ── BUTTONS ── */
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:17px 20px;border-radius:12px;cursor:pointer;font-family:'Inconsolata',monospace;font-size:.88rem;letter-spacing:.07em;text-transform:uppercase;transition:all .2s;border:1.5px solid;-webkit-appearance:none;line-height:1}
+.btn-green{background:var(--bg4);border-color:var(--border2);color:var(--green)}
+.btn-green:active{filter:brightness(1.2)}
+.btn-blue{background:#0e1a20;border-color:#1e3a5a;color:var(--blue)}
+.btn-blue:active{filter:brightness(1.2)}
+.btn-gold{background:#1a1208;border-color:#8a6820;color:var(--gold)}
+.btn-gold:active{filter:brightness(1.2)}
+.btn-ghost{background:transparent;border-color:var(--border);color:var(--dim)}
+.btn-ghost:active{background:var(--bg3)}
+.btn-sm{padding:10px 16px;font-size:.78rem}
+.bi{font-size:1.1rem}
+
+/* ── LOGO ── */
+.logo-block{display:flex;align-items:center;gap:11px}
+.logo-text .logo-name{font-size:1.1rem;font-weight:600;color:var(--bright);line-height:1.1}
+.logo-text .logo-name span{color:var(--gold)}
+.logo-text .logo-tag{font-size:.65rem;color:var(--dim);font-style:italic}
+.powered{font-family:'Inconsolata',monospace;font-size:.78rem;color:var(--text);letter-spacing:.04em}
+.powered span{color:#88b8d8;font-weight:600}
+
+/* ══════════════════════════
+   WIZARD SCREENS
+══════════════════════════ */
+.wizard-wrap{flex:1;overflow-y:auto;padding:28px 24px 20px;display:flex;flex-direction:column;gap:20px}
+.wizard-progress{display:flex;gap:6px;padding:0 24px;flex-shrink:0;margin-top:14px}
+.wp-dot{flex:1;height:4px;border-radius:2px;background:var(--border);transition:background .4s}
+.wp-dot.done{background:var(--green)}
+.wp-dot.active{background:var(--border2)}
+.wizard-icon{font-size:2.6rem;text-align:center;margin-bottom:4px}
+.wizard-title{font-size:1.7rem;font-weight:400;color:var(--bright);line-height:1.25;text-align:center}
+.wizard-title span{color:var(--gold)}
+.wizard-sub{font-size:1rem;color:var(--dim);line-height:1.75;font-style:italic;text-align:center}
+.wizard-body{display:flex;flex-direction:column;gap:14px}
+.wizard-footer{padding:16px 24px 24px;display:flex;flex-direction:column;gap:10px;flex-shrink:0;border-top:1px solid var(--border)}
+
+/* stake card */
+.stake-card{background:var(--bg4);border:1px solid var(--border2);border-radius:12px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start}
+.stake-icon{font-size:1.4rem;flex-shrink:0;margin-top:2px}
+.stake-text{font-size:.92rem;line-height:1.65;color:var(--text)}
+.stake-text strong{color:var(--green)}
+
+/* ITF block */
+.itf-number{font-family:'Inconsolata',monospace;font-size:1.6rem;font-weight:700;color:var(--green);background:var(--bg4);border:1.5px solid var(--border2);border-radius:10px;padding:14px;text-align:center;letter-spacing:.06em;margin:4px 0}
+.itf-script{background:var(--bg3);border:1.5px dashed var(--border2);border-radius:10px;padding:14px 16px;font-style:italic;color:var(--text);font-size:.97rem;line-height:1.7}
+.itf-script .label{font-family:'Inconsolata',monospace;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:6px;font-style:normal;display:block}
+.check-row{display:flex;align-items:center;gap:12px;background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;transition:border-color .2s}
+.check-row.checked{border-color:var(--border2);background:var(--bg4)}
+.check-box{width:24px;height:24px;border-radius:6px;border:2px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s}
+.check-row.checked .check-box{background:var(--border2);color:#000}
+.check-label{font-size:.95rem;color:var(--text);line-height:1.4}
+
+/* key setup */
+.step-row{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border)}
+.step-row:last-child{border-bottom:none}
+.step-num{font-family:'Inconsolata',monospace;font-size:.75rem;font-weight:600;color:var(--green);background:var(--bg4);border:1px solid var(--border2);border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.step-content{flex:1}
+.step-content p{font-size:.92rem;line-height:1.65;color:var(--text)}
+.step-content a{color:var(--gold);text-decoration:none}
+.step-content .step-note{font-size:.78rem;color:var(--dim);font-style:italic;margin-top:4px}
+.key-field{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.key-field label{font-family:'Inconsolata',monospace;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.key-field input{background:var(--input);border:1.5px solid var(--inputborder);border-radius:10px;color:var(--text);font-family:'Inconsolata',monospace;font-size:.85rem;padding:12px 14px;outline:none;transition:border-color .2s;letter-spacing:.04em;width:100%}
+.key-field input:focus{border-color:var(--border2)}
+.expand-toggle{font-family:'Inconsolata',monospace;font-size:.68rem;color:var(--blue);cursor:pointer;letter-spacing:.05em;text-transform:uppercase;padding:4px 0;display:block;margin-top:4px}
+.expand-body{display:none;background:var(--bg3);border-radius:8px;padding:12px 14px;font-size:.85rem;color:var(--dim);line-height:1.65;margin-top:6px}
+.expand-body.open{display:block}
+
+/* bridge */
+.bridge-card{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px}
+.bridge-card p{font-size:.92rem;line-height:1.7;color:var(--text);margin-bottom:10px}
+.copy-prompt-box{background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:12px 14px;font-size:.82rem;color:var(--dim);line-height:1.6;font-style:italic;margin-bottom:10px;word-break:break-word}
+.copy-btn{font-family:'Inconsolata',monospace;font-size:.7rem;color:var(--green);background:var(--bg4);border:1px solid var(--border2);border-radius:6px;padding:7px 14px;cursor:pointer;text-transform:uppercase;letter-spacing:.06em;display:inline-block}
+
+/* ready */
+.ready-stat{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--card);border:1px solid var(--border);border-radius:10px}
+.ready-stat.done{border-color:var(--border2);background:var(--bg4)}
+.ready-stat-icon{font-size:1.2rem;flex-shrink:0}
+.ready-stat-text{font-size:.92rem;color:var(--text);line-height:1.3}
+.ready-stat-text span{font-size:.75rem;color:var(--dim);display:block;margin-top:2px}
+
+/* ══════════════════════════
+   HOME
+══════════════════════════ */
+#screen-home{padding:0;justify-content:space-between}
+.home-header{padding:18px 20px 0;display:flex;justify-content:space-between;align-items:flex-start}
+.home-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;gap:12px}
+.home-medal{font-size:2.8rem}
+.home-title{font-size:1.85rem;font-weight:400;color:var(--bright);line-height:1.25;max-width:300px}
+.home-sub{font-size:.93rem;color:var(--dim);line-height:1.7;font-style:italic;max-width:280px}
+.home-actions{padding:14px 20px 20px;display:flex;flex-direction:column;gap:10px}
+.home-stats{display:flex;gap:8px;margin-bottom:4px}
+.stat-pill{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px;text-align:center}
+.stat-num{font-family:'Inconsolata',monospace;font-size:1.1rem;color:var(--green);font-weight:600}
+.stat-label{font-size:.68rem;color:var(--dim);margin-top:1px}
+.home-footer{text-align:center;padding:10px 0 0;font-family:'Inconsolata',monospace;font-size:.75rem;color:var(--text);letter-spacing:.03em}
+.home-footer span{color:#88b8d8;font-weight:600}
+
+/* ══════════════════════════
+   SETTINGS
+══════════════════════════ */
+#screen-settings{padding:0}
+.settings-body{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:20px}
+.s-section{display:flex;flex-direction:column;gap:10px}
+.s-label{font-family:'Inconsolata',monospace;font-size:.67rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);padding-bottom:4px;border-bottom:1px solid var(--border)}
+.theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.theme-btn{padding:11px;border-radius:8px;border:2px solid var(--border);cursor:pointer;text-align:center;font-size:.8rem;background:var(--bg2);color:var(--text);transition:all .2s}
+.theme-btn.active{border-color:var(--border2);color:var(--green)}
+input[type=range]{width:100%;accent-color:var(--green);cursor:pointer}
+.font-label{font-size:.78rem;color:var(--dim);font-style:italic}
+.p-field{display:flex;flex-direction:column;gap:5px}
+.p-field label{font-family:'Inconsolata',monospace;font-size:.67rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.p-field input,.p-field textarea{background:var(--input);border:1.5px solid var(--inputborder);border-radius:8px;color:var(--text);font-family:'EB Garamond',Georgia,serif;font-size:.95rem;padding:10px 12px;outline:none;width:100%;transition:border-color .2s}
+.p-field input:focus,.p-field textarea:focus{border-color:var(--border2)}
+.p-field textarea{resize:none;min-height:70px}
+.key-display{font-family:'Inconsolata',monospace;font-size:.7rem;color:var(--dim);background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 12px;word-break:break-all}
+
+/* ══════════════════════════
+   DOCUMENTS
+══════════════════════════ */
+#screen-docs{padding:0}
+.docs-body{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:12px}
+.drop-zone{border:2px dashed var(--border2);border-radius:12px;background:var(--bg4);padding:26px 20px;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;text-align:center}
+.drop-zone:active{filter:brightness(1.2)}
+.drop-zone-icon{font-size:2.2rem}
+.drop-zone-title{font-size:1rem;color:var(--bright);font-weight:500}
+.drop-zone-sub{font-size:.82rem;color:var(--dim);font-style:italic;line-height:1.5}
+.drop-zone-types{font-family:'Inconsolata',monospace;font-size:.63rem;color:var(--dim);background:var(--bg);padding:5px 10px;border-radius:4px;letter-spacing:.04em}
+#file-input{display:none}
+.doc-list-header{display:flex;align-items:center;justify-content:space-between}
+.doc-list-title{font-family:'Inconsolata',monospace;font-size:.67rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.clear-all-btn{font-family:'Inconsolata',monospace;font-size:.63rem;color:var(--red);background:none;border:none;cursor:pointer;letter-spacing:.06em;text-transform:uppercase}
+.file-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 13px;display:flex;align-items:center;gap:10px}
+.file-card.ready{border-color:#1e4a22}
+.fc-icon{font-size:1.1rem;flex-shrink:0}
+.fc-body{flex:1;min-width:0}
+.fc-name{font-size:.84rem;color:var(--bright);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fc-status{font-family:'Inconsolata',monospace;font-size:.6rem;color:var(--green);margin-top:2px}
+.fc-remove{background:none;border:none;color:var(--dim);font-size:1rem;cursor:pointer;padding:4px;flex-shrink:0;line-height:1}
+.fc-remove:active{color:var(--red)}
+.docs-footer{padding:12px 18px 18px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px;flex-shrink:0}
+
+/* ══════════════════════════
+   PROCESSING
+══════════════════════════ */
+#screen-processing{align-items:center;justify-content:center;gap:16px;padding:40px;text-align:center}
+.spinner{width:44px;height:44px;border:2px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin 1s linear infinite}
+#proc-title{font-family:'Inconsolata',monospace;font-size:.8rem;color:var(--green);letter-spacing:.08em}
+#proc-sub{font-size:.9rem;color:var(--dim);font-style:italic;max-width:260px;line-height:1.6}
+
+/* ══════════════════════════
+   ANALYSIS
+══════════════════════════ */
+#screen-analysis{padding:0}
+.analysis-body{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:10px}
+.acard{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.acard-title{font-family:'Inconsolata',monospace;font-size:.67rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+.acard-big{font-size:1.5rem;font-weight:500;color:var(--bright);line-height:1.2}
+.acard-big span{color:var(--green)}
+.strength-bar{height:7px;background:var(--bg3);border-radius:4px;margin:8px 0;overflow:hidden}
+.strength-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--border2),var(--green));transition:width 1.2s ease}
+.acard p,.acard li{line-height:1.72;color:var(--text)}
+.acard ul{padding-left:16px;margin-top:4px}
+.acard li{margin-bottom:4px}
+.tag{display:inline-block;font-family:'Inconsolata',monospace;font-size:.6rem;padding:3px 7px;border-radius:3px;margin:2px;letter-spacing:.04em}
+.tag.g{background:var(--bg4);color:var(--green);border:1px solid var(--border2)}
+.tag.y{background:#1a1208;color:var(--gold);border:1px solid #5a3a10}
+.tag.r{background:#1a0808;color:var(--red);border:1px solid #5a1a1a}
+.analysis-footer{padding:12px 18px 16px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px;flex-shrink:0}
+
+/* ══════════════════════════
+   NOTES
+══════════════════════════ */
+#screen-notes{padding:0}
+.notes-body{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:10px}
+.note-input-area{background:var(--card);border:1.5px solid var(--inputborder);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.note-input-area textarea{background:transparent;border:none;outline:none;color:var(--text);font-family:'EB Garamond',Georgia,serif;resize:none;min-height:80px;line-height:1.6;width:100%}
+.note-input-area textarea::placeholder{color:var(--dim);font-style:italic}
+.note-input-footer{display:flex;align-items:center;justify-content:space-between}
+.note-hint{font-size:.73rem;color:var(--dim);font-style:italic}
+.note-submit-btn{background:var(--bg4);border:1px solid var(--border2);color:var(--green);font-family:'Inconsolata',monospace;font-size:.7rem;letter-spacing:.08em;padding:7px 14px;border-radius:8px;cursor:pointer;text-transform:uppercase}
+.notes-list-header{font-family:'Inconsolata',monospace;font-size:.67rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.sticky{background:#1a1a08;border:1px solid #3a3a10;border-radius:10px;padding:12px 14px}
+.sticky.todo{background:var(--bg4);border-color:var(--border2)}
+.sticky-text{font-size:.93rem;line-height:1.65;color:var(--text);margin-bottom:8px}
+.sticky-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sticky-date{font-family:'Inconsolata',monospace;font-size:.6rem;color:var(--dim)}
+.sticky-tag{font-family:'Inconsolata',monospace;font-size:.58rem;padding:2px 6px;border-radius:3px;background:var(--bg3);color:var(--dim);border:1px solid var(--border)}
+.sticky-tag.action{background:var(--bg4);color:var(--green);border-color:var(--border2)}
+.sticky-actions{display:flex;gap:6px;margin-top:8px}
+.sticky-btn{font-family:'Inconsolata',monospace;font-size:.6rem;padding:5px 10px;border-radius:6px;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--border);background:none;color:var(--dim)}
+.sticky-btn.complete{border-color:var(--border2);color:var(--green)}
+.sticky-btn.delete{border-color:#5a1a1a;color:var(--red)}
+
+/* ══════════════════════════
+   STEPS
+══════════════════════════ */
+#screen-steps{padding:0}
+.steps-body{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:10px}
+.step-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.step-num-label{font-family:'Inconsolata',monospace;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--green);margin-bottom:8px;font-weight:600}
+.step-text{font-size:1.05rem;line-height:1.75;color:var(--bright);margin-bottom:14px}
+.step-actions{display:flex;gap:8px;flex-wrap:wrap}
+.step-btn{font-family:'Inconsolata',monospace;font-size:.72rem;padding:10px 14px;border-radius:8px;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;border:1.5px solid;background:none}
+.step-btn.act{border-color:var(--border2);color:var(--green)}
+.step-btn.save{border-color:#5a3a10;color:var(--gold)}
+.step-btn.info{border-color:#1e3a5a;color:var(--blue)}
+.step-btn.del{border-color:#5a1a1a;color:var(--red)}
+
+/* ══════════════════════════
+   CHAT
+══════════════════════════ */
+#screen-chat{padding:0}
+.chat-header{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg)}
+.chat-av{width:30px;height:30px;flex-shrink:0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;background:var(--bg4);border:1px solid var(--border2);color:var(--green)}
+.chat-info{flex:1;min-width:0}
+.chat-name{font-size:.92rem;color:var(--bright);font-weight:500;line-height:1.2}
+.chat-sub{font-size:.65rem;color:var(--dim);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#messages{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:12px;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.msg{display:flex;gap:9px;animation:fadeUp .25s ease}
+.msg.user{flex-direction:row-reverse}
+.av{width:28px;height:28px;flex-shrink:0;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;margin-top:2px}
+.msg.assistant .av{background:var(--bg4);border:1px solid var(--border2);color:var(--green)}
+.msg.user .av{background:#0e1020;border:1px solid #1e2a4a;color:var(--blue)}
+.bubble{max-width:87%;padding:10px 13px;border-radius:10px;line-height:1.75}
+.msg.assistant .bubble{background:var(--card);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:3px}
+.msg.user .bubble{background:#0c1018;border:1px solid #18202e;color:#aabac8;border-bottom-right-radius:3px}
+.bubble p{margin-bottom:6px}.bubble p:last-child{margin-bottom:0}
+.phone-line{font-family:'Inconsolata',monospace;font-weight:700;color:var(--green);background:var(--bg4);border:1px solid var(--border2);border-radius:6px;padding:7px 14px;margin:8px 0;display:block;text-align:center;letter-spacing:.04em}
+.crisis-line{border-left:3px solid var(--gold);padding:6px 12px;margin:7px 0;color:var(--gold)}
+.script-text{font-style:italic;background:var(--bg3);border:1px dashed var(--border2);border-radius:6px;padding:9px 13px;margin:6px 0;color:var(--green);display:block}
+.typing-bubble{display:flex;gap:5px;align-items:center;padding:11px 15px;background:var(--card);border:1px solid var(--border);border-radius:10px;border-bottom-left-radius:3px;width:fit-content}
+.td{width:6px;height:6px;background:var(--border2);border-radius:50%;animation:bounce 1.2s ease-in-out infinite}
+.td:nth-child(2){animation-delay:.15s}.td:nth-child(3){animation-delay:.3s}
+#input-row{display:flex;gap:9px;align-items:flex-end;padding:9px 14px 18px;border-top:1px solid var(--border);flex-shrink:0;background:var(--bg)}
+#user-input{flex:1;background:var(--input);border:1.5px solid var(--inputborder);border-radius:10px;color:var(--text);font-family:'EB Garamond',Georgia,serif;padding:10px 13px;resize:none;outline:none;min-height:44px;max-height:130px;line-height:1.5;transition:border-color .2s}
+#user-input:focus{border-color:var(--border2)}
+#user-input::placeholder{color:var(--dim);font-style:italic}
+#send-btn{background:var(--bg4);border:1.5px solid var(--border2);color:var(--green);width:44px;height:44px;border-radius:10px;cursor:pointer;font-size:1.15rem;flex-shrink:0}
+#send-btn:active{filter:brightness(1.2)}
+#send-btn:disabled{opacity:.3;cursor:not-allowed}
+
+/* ── PRINT ── */
+@media print{body{background:#fff!important;color:#000!important;font-size:12pt}.no-print{display:none!important}.print-only{display:block!important}.acard{border:1px solid #ccc!important;background:#fff!important;break-inside:avoid;margin-bottom:12pt}.acard-title,.acard p,.acard li{color:#000!important}.screen{height:auto!important;display:block!important}#screen-analysis{display:block!important}#screen-chat,#screen-home,#screen-docs,#screen-settings,#screen-notes,#screen-steps,#screen-wizard-1,#screen-wizard-2,#screen-wizard-3,#screen-wizard-4,#screen-processing{display:none!important}}
+.print-only{display:none}
+
+/* ── YELLOW WAVELENGTH FILTER ── */
+.emoji-dim{display:inline-block;filter:saturate(0.4) brightness(0.75) hue-rotate(15deg)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-5px);opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body class="theme-warm">
+
+<!-- ══ WIZARD 1: WELCOME ══ -->
+<div class="screen active" id="screen-wizard-1">
+  <div style="padding:16px 24px 0;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+    <div class="powered">Powered by <span>Claude</span></div>
+    <div style="font-family:'Inconsolata',monospace;font-size:.65rem;color:var(--dim)">Step 1 of 4</div>
+  </div>
+  <div style="padding:0 24px;margin-top:10px;flex-shrink:0">
+    <div style="display:flex;gap:6px">
+      <div class="wp-dot active"></div><div class="wp-dot"></div><div class="wp-dot"></div><div class="wp-dot"></div>
+    </div>
+  </div>
+  <div class="wizard-wrap">
+    <div class="wizard-icon">🛡️</div>
+    <div class="wizard-title">Welcome to<br/>Claim <span>de</span>Coder</div>
+    <div class="wizard-sub">Your VA benefits — decoded, organized, and fought for. Built by a veteran. For every veteran.</div>
+    <div class="wizard-body">
+      <div class="stake-card">
+        <div class="stake-icon emoji-dim">💰</div>
+        <div class="stake-text">Veterans leave an estimated <strong>$30 billion</strong> in unclaimed benefits on the table every year — not because they don't deserve them, but because nobody showed them how to build their case. That ends here.</div>
+      </div>
+      <div class="stake-card" style="background:var(--bg2);border-color:var(--border)">
+        <div class="stake-icon">⚖️</div>
+        <div class="stake-text">Lex is your AI claims specialist — powered by Claude, guided by 30 years of hard-won veteran experience. Every step you take here protects your backpay and your future.</div>
+      </div>
+      <div class="stake-card" style="background:var(--bg2);border-color:var(--border)">
+        <div class="stake-icon">🔒</div>
+        <div class="stake-text">Everything stays on your device. No servers. No accounts. No one sees your documents but you and Lex.</div>
+      </div>
+    </div>
+  </div>
+  <div class="wizard-footer">
+    <button class="btn btn-green" onclick="goTo('screen-wizard-2')"><span class="bi">→</span> Let's Begin</button>
+    <div style="text-align:center;font-family:'Inconsolata',monospace;font-size:.65rem;color:var(--gold);padding-top:4px">Veterans Crisis Line · 988 Press 1 · Text 838255</div>
+  </div>
+</div>
+
+<!-- ══ WIZARD 2: ITF ══ -->
+<div class="screen" id="screen-wizard-2">
+  <div style="padding:16px 24px 0;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+    <div class="powered">Powered by <span>Claude</span></div>
+    <div style="font-family:'Inconsolata',monospace;font-size:.65rem;color:var(--dim)">Step 2 of 4</div>
+  </div>
+  <div style="padding:0 24px;margin-top:10px;flex-shrink:0">
+    <div style="display:flex;gap:6px">
+      <div class="wp-dot done"></div><div class="wp-dot active"></div><div class="wp-dot"></div><div class="wp-dot"></div>
+    </div>
+  </div>
+  <div class="wizard-wrap">
+    <div class="wizard-icon">📞</div>
+    <div class="wizard-title">Do This <span>First</span></div>
+    <div class="wizard-sub">Before anything else — before uploading documents, before filling out forms — make this one phone call. It takes 3 minutes and protects every dollar you're about to earn.</div>
+    <div class="wizard-body">
+      <div class="stake-card">
+        <div class="stake-icon">⏰</div>
+        <div class="stake-text">This is called an <strong>Intent to File (ITF)</strong>. Once you make this call, the VA locks in today's date as the start of your compensation. Every day you wait is a day of backpay you can never recover.</div>
+      </div>
+      <div class="itf-number">1-800-827-1000</div>
+      <div class="itf-script">
+        <span class="label">Say exactly this:</span>
+        "Hello, I would like to submit an Intent to File for compensation, and I need to note on my record that I am currently experiencing a hardship."
+      </div>
+      <div style="font-size:.82rem;color:var(--dim);font-style:italic;line-height:1.6;padding:4px 0">The agent will be professional and helpful. They only need your name and Social Security number. This call locks in your start date immediately.</div>
+      <div class="check-row" id="itf-check" onclick="toggleITF()">
+        <div class="check-box" id="itf-box"></div>
+        <div class="check-label">I made the call and submitted my Intent to File</div>
+      </div>
+    </div>
+  </div>
+  <div class="wizard-footer">
+    <button class="btn btn-green" id="itf-next-btn" onclick="goTo('screen-wizard-3')"><span class="bi">→</span> I Made the Call — Continue</button>
+    <button class="btn btn-ghost" onclick="goTo('screen-wizard-3')" style="font-size:.75rem;padding:12px">I'll do this later — remind me</button>
+    <div style="text-align:center;font-family:'Inconsolata',monospace;font-size:.63rem;color:var(--dim);padding-top:2px">Every day without an ITF is unrecoverable backpay.</div>
+  </div>
+</div>
+
+<!-- ══ WIZARD 3: API KEY ══ -->
+<div class="screen" id="screen-wizard-3">
+  <div style="padding:16px 24px 0;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+    <div class="powered">Powered by <span>Claude</span></div>
+    <div style="font-family:'Inconsolata',monospace;font-size:.65rem;color:var(--dim)">Step 3 of 4</div>
+  </div>
+  <div style="padding:0 24px;margin-top:10px;flex-shrink:0">
+    <div style="display:flex;gap:6px">
+      <div class="wp-dot done"></div><div class="wp-dot done"></div><div class="wp-dot active"></div><div class="wp-dot"></div>
+    </div>
+  </div>
+  <div class="wizard-wrap">
+    <div class="wizard-icon emoji-dim">🔑</div>
+    <div class="wizard-title">Power Up <span>Lex</span></div>
+    <div class="wizard-sub">Lex needs a free connection key to work. This takes about 2 minutes. Your key stays on your device only — never shared, never stored anywhere else.</div>
+    <div class="wizard-body">
+      <div class="step-row">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <p>Open <a href="https://platform.anthropic.com" target="_blank">platform.anthropic.com</a> in a new tab and create a free account.</p>
+          <p class="step-note">Need help? Ask a family member, caregiver, or advocate to do this one step with you.</p>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <p>Once logged in, tap <strong>API Keys</strong> in the left menu, then tap <strong>Create Key</strong>.</p>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <p>Copy the key — it starts with <strong>sk-ant-</strong> — and paste it below.</p>
+          <div class="key-field">
+            <label>Your API Key</label>
+            <input type="password" id="wiz-api-key" placeholder="sk-ant-..." autocomplete="off" autocorrect="off" spellcheck="false"/>
+          </div>
+          <span class="expand-toggle" onclick="toggleExpand('what-is-key')">What is an API key?</span>
+          <div class="expand-body" id="what-is-key">An API key is like a password that lets Claim deCoder connect to Claude's AI brain on your behalf. It's free to get and the first few months of use cost nothing. Your key lives only on your phone — nobody else can see or use it.</div>
+        </div>
+      </div>
+      <button class="btn btn-green" onclick="saveWizKey()"><span class="bi emoji-dim">🔐</span> Save Key &amp; Continue</button>
+      <div style="text-align:center;font-size:.82rem;color:var(--dim);font-style:italic;line-height:1.6;padding:4px 0">Having trouble? Don't stop here.</div>
+      <button class="btn btn-ghost btn-sm" onclick="goTo('screen-wizard-bridge')">I need help with this step</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ WIZARD BRIDGE: NO KEY ══ -->
+<div class="screen" id="screen-wizard-bridge">
+  <div style="padding:16px 24px 0;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+    <div class="powered">Powered by <span>Claude</span></div>
+    <button class="btn-ghost" style="font-family:'Inconsolata',monospace;font-size:.7rem;border:none;background:none;color:var(--dim);cursor:pointer" onclick="goTo('screen-wizard-3')">← Back</button>
+  </div>
+  <div class="wizard-wrap">
+    <div class="wizard-icon">💬</div>
+    <div class="wizard-title">Don't Stop <span>Here</span></div>
+    <div class="wizard-sub">A missing key doesn't mean missing out. You can still get help from Lex right now — and we recommend setting up the key as soon as you can, because the full app experience is significantly more powerful.</div>
+    <div class="wizard-body">
+      <div class="stake-card">
+        <div class="stake-icon">⚠️</div>
+        <div class="stake-text">The app with a key remembers your documents, tracks your steps, and builds your case over time. <strong>Don't leave that on the table.</strong> Come back to Step 3 whenever you're ready — your progress is saved.</div>
+      </div>
+      <div class="bridge-card">
+        <p>In the meantime, you can use Lex for free through Claude.ai. Open the link below, then copy and paste the message into Claude to activate the full Lex experience:</p>
+        <div class="copy-prompt-box" id="bridge-prompt">You are Lex, a VA claims specialist powered by the Thicket Method. Please read my full methodology and system instructions at this link before we begin: https://keythjyles.github.io/Vitals-Tracker-v1.0/claims/lex-prompt.txt — Once you have read it, greet me as Lex and ask how you can help me with my VA claim today.</div>
+        <button class="copy-btn" onclick="copyBridgePrompt()">📋 Copy This Message</button>
+      </div>
+      <a href="https://claude.ai" target="_blank" class="btn btn-blue" style="text-decoration:none"><span class="bi">↗</span> Open Claude.ai</a>
+    </div>
+  </div>
+  <div class="wizard-footer">
+    <button class="btn btn-ghost" onclick="enterAppNoKey()"><span class="bi">→</span> Enter App Without Key</button>
+  </div>
+</div>
+
+<!-- ══ WIZARD 4: READY ══ -->
+<div class="screen" id="screen-wizard-4">
+  <div style="padding:16px 24px 0;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+    <div class="powered">Powered by <span>Claude</span></div>
+    <div style="font-family:'Inconsolata',monospace;font-size:.65rem;color:var(--dim)">Step 4 of 4</div>
+  </div>
+  <div style="padding:0 24px;margin-top:10px;flex-shrink:0">
+    <div style="display:flex;gap:6px">
+      <div class="wp-dot done"></div><div class="wp-dot done"></div><div class="wp-dot done"></div><div class="wp-dot active"></div>
+    </div>
+  </div>
+  <div class="wizard-wrap">
+    <div class="wizard-icon emoji-dim">🎖️</div>
+    <div class="wizard-title">You're <span>Ready</span></div>
+    <div class="wizard-sub">Lex is armed and ready. Here's what you've set up so far:</div>
+    <div class="wizard-body">
+      <div class="ready-stat done" id="ready-itf">
+        <div class="ready-stat-icon">✅</div>
+        <div class="ready-stat-text">Intent to File<span>Your effective date is protected</span></div>
+      </div>
+      <div class="ready-stat done" id="ready-key">
+        <div class="ready-stat-icon">✅</div>
+        <div class="ready-stat-text">Lex is powered up<span>Full AI capability enabled</span></div>
+      </div>
+      <div class="ready-stat" id="ready-docs">
+        <div class="ready-stat-icon">📁</div>
+        <div class="ready-stat-text">VA Documents<span>Load your documents to unlock analysis</span></div>
+      </div>
+      <div class="ready-stat" id="ready-profile">
+        <div class="ready-stat-icon">👤</div>
+        <div class="ready-stat-text">Veteran Profile<span>Add your info in Settings to personalize</span></div>
+      </div>
+      <div class="stake-card" style="margin-top:4px">
+        <div class="stake-icon">💡</div>
+        <div class="stake-text">Every step you take in Claim deCoder builds your case. <strong>Don't leave money on the table.</strong> Lex is here any time — day or night.</div>
+      </div>
+    </div>
+  </div>
+  <div class="wizard-footer">
+    <button class="btn btn-green" onclick="enterApp()"><span class="bi">⚖️</span> Enter Claim deCoder</button>
+  </div>
+</div>
+
+<!-- ══ HOME ══ -->
+<div class="screen" id="screen-home">
+  <div class="home-header">
+    <div class="logo-block">
+      <div style="font-size:1.8rem;line-height:1">🛡️</div>
+      <div class="logo-text">
+        <div class="logo-name">Claim <span>de</span>Coder</div>
+        <div class="logo-tag">Decoded &amp; Secure</div>
+      </div>
+    </div>
+    <button class="icon-btn" onclick="goTo('screen-settings')" title="Settings">⚙️</button>
+  </div>
+  <div class="home-body">
+    <div class="home-medal emoji-dim">🎖️</div>
+    <div class="home-title">You deserve what you earned.</div>
+    <div class="home-sub">Every step you take here protects your future. One breath at a time.</div>
+  </div>
+  <div class="home-actions">
+    <div class="home-stats" id="home-stats" style="display:none">
+      <div class="stat-pill"><div class="stat-num" id="stat-docs">0</div><div class="stat-label">Docs</div></div>
+      <div class="stat-pill"><div class="stat-num" id="stat-notes">0</div><div class="stat-label">Notes</div></div>
+      <div class="stat-pill"><div class="stat-num" id="stat-steps">0</div><div class="stat-label">Steps</div></div>
+    </div>
+    <button class="btn btn-green" onclick="goTo('screen-docs')"><span class="bi emoji-dim">📁</span> Load VA Documents</button>
+    <button class="btn btn-blue" onclick="startChat(false)"><span class="bi">💬</span> Talk to Lex</button>
+    <button class="btn btn-ghost" onclick="goTo('screen-notes')"><span class="bi">📌</span> Notes &amp; Steps</button>
+    <div class="home-footer">Claim deCoder · Powered by <span>Claude</span> · © 2026 Wendell K. Jiles · Not Legal Advice</div>
+  </div>
+</div>
+
+<!-- ══ SETTINGS ══ -->
+<div class="screen" id="screen-settings">
+  <div class="screen-header">
+    <button class="back-btn" onclick="goTo('screen-home')">‹</button>
+    <div class="screen-title">Settings</div>
+    <div class="header-actions"><button class="icon-btn" onclick="printSummary()" title="Print">🖨️</button></div>
+  </div>
+  <div class="settings-body">
+    <div class="s-section">
+      <div class="s-label">Veteran Profile</div>
+      <div class="p-field"><label>Full Name</label><input type="text" id="p-name" placeholder="First Last"/></div>
+      <div class="p-field"><label>Address</label><textarea id="p-address" placeholder="Street, City, State, ZIP" rows="2"></textarea></div>
+      <div class="p-field"><label>Last 4 SSN</label><input type="text" id="p-ssn" placeholder="XXXX" maxlength="4"/></div>
+      <div class="p-field"><label>Branch of Service</label><input type="text" id="p-branch" placeholder="Army, Navy, Marines…"/></div>
+      <div class="p-field"><label>Service Dates</label><input type="text" id="p-dates" placeholder="e.g. 1990–1994"/></div>
+      <div class="p-field"><label>VA File / Claim Number</label><input type="text" id="p-claim" placeholder="VA File Number"/></div>
+      <div class="p-field"><label>Primary Conditions</label><textarea id="p-conditions" placeholder="Conditions you are claiming or considering" rows="3"></textarea></div>
+      <button class="btn btn-green" onclick="saveProfile()"><span class="emoji-dim">💾</span> Save Profile</button>
+    </div>
+    <div class="s-section">
+      <div class="s-label">Appearance</div>
+      <div class="font-label" id="font-size-label">Font Size: Medium</div>
+      <input type="range" id="font-slider" min="14" max="24" value="20" oninput="setFontSize(this.value)"/>
+      <div class="theme-grid">
+        <button class="theme-btn" onclick="setTheme('dark',this)">🌑 Dark</button>
+        <button class="theme-btn active" onclick="setTheme('warm',this)">🌅 Warm</button>
+        <button class="theme-btn" onclick="setTheme('light',this)">☀️ Light</button>
+        <button class="theme-btn" onclick="setTheme('contrast',this)">⚡ Contrast</button>
+      </div>
+    </div>
+    <div class="s-section">
+      <div class="s-label">API Key</div>
+      <div class="key-display" id="key-display">No key stored</div>
+      <button class="btn btn-ghost" style="margin-top:6px" onclick="clearKey()"><span>🗑️</span> Remove Key</button>
+    </div>
+    <div class="s-section">
+      <div class="s-label">Data</div>
+      <button class="btn btn-ghost" onclick="clearAllData()"><span>⚠️</span> Clear All App Data</button>
+    </div>
+    <div style="text-align:center;font-family:'Inconsolata',monospace;font-size:.62rem;color:var(--dim);padding:8px 0">Claim deCoder · Powered by Claude · © 2026 Wendell K. Jiles</div>
+  </div>
+</div>
+
+<!-- ══ DOCUMENTS ══ -->
+<div class="screen" id="screen-docs">
+  <div class="screen-header">
+    <button class="back-btn" onclick="goTo('screen-home')">‹</button>
+    <div class="screen-title">VA Documents</div>
+  </div>
+  <div class="docs-body">
+    <div class="drop-zone" onclick="document.getElementById('file-input').click()">
+      <div class="drop-zone-icon emoji-dim">📂</div>
+      <div class="drop-zone-title">Tap to Select Your Files</div>
+      <div class="drop-zone-sub">Select as many files as you want at once. Everything stays on your device.</div>
+      <div class="drop-zone-types">PDF · JPG / PNG · DOC / DOCX · TXT</div>
+    </div>
+    <input type="file" id="file-input" multiple accept=".pdf,.txt,.doc,.docx,.png,.jpg,.jpeg,.tiff,.bmp" onchange="filesSelected(this.files)"/>
+    <div id="doc-list-wrap" style="display:none;flex-direction:column;gap:8px">
+      <div class="doc-list-header">
+        <div class="doc-list-title" id="doc-list-count">0 documents</div>
+        <button class="clear-all-btn" onclick="clearAllDocs()">Clear All</button>
+      </div>
+      <div id="file-cards"></div>
+    </div>
+  </div>
+  <div class="docs-footer">
+    <button class="btn btn-green" id="analyze-btn" onclick="runLoad()" style="opacity:.4;pointer-events:none"><span class="bi">⚖️</span> Analyze My Documents</button>
+    <button class="btn btn-ghost" onclick="startChat(true)" id="chat-with-docs-btn" style="display:none"><span class="bi">💬</span> Chat with Documents</button>
+  </div>
+</div>
+
+<!-- ══ PROCESSING ══ -->
+<div class="screen" id="screen-processing">
+  <div style="font-size:2.2rem;margin-bottom:8px">⚖️</div>
+  <div class="spinner"></div>
+  <div id="proc-title">READING DOCUMENTS</div>
+  <div id="proc-sub">Lex is indexing your files.</div>
+</div>
+
+<!-- ══ ANALYSIS ══ -->
+<div class="screen" id="screen-analysis">
+  <div class="screen-header no-print">
+    <button class="back-btn" onclick="goTo('screen-home')">‹</button>
+    <div class="screen-title">Claim Analysis</div>
+    <div class="header-actions"><button class="icon-btn" onclick="window.print()" title="Print">🖨️</button></div>
+  </div>
+  <div class="analysis-body" id="analysis-body"></div>
+  <div class="analysis-footer no-print">
+    <button class="btn btn-green" onclick="startChat(true)"><span class="bi">💬</span> Talk to Lex About This</button>
+    <button class="btn btn-ghost" onclick="goTo('screen-steps')"><span class="bi">→</span> View My Steps</button>
+  </div>
+</div>
+
+<!-- ══ NOTES ══ -->
+<div class="screen" id="screen-notes">
+  <div class="screen-header">
+    <button class="back-btn" onclick="goTo('screen-home')">‹</button>
+    <div class="screen-title">Notes &amp; Steps</div>
+  </div>
+  <div class="notes-body">
+    <div class="note-input-area">
+      <textarea id="note-input" placeholder="Write anything on your mind — a question, a concern, something Lex told you, something you need to do. Lex will help you organize it."></textarea>
+      <div class="note-input-footer">
+        <div class="note-hint">Lex will parse this into an action if needed</div>
+        <button class="note-submit-btn" onclick="submitNote()">Save</button>
+      </div>
+    </div>
+    <div id="notes-list-header" style="display:none" class="notes-list-header">Saved Notes &amp; Actions</div>
+    <div id="notes-container"></div>
+  </div>
+</div>
+
+<!-- ══ STEPS ══ -->
+<div class="screen" id="screen-steps">
+  <div class="screen-header">
+    <button class="back-btn" onclick="goBack()">‹</button>
+    <div class="screen-title">Next Steps</div>
+  </div>
+  <div class="steps-body" id="steps-body"></div>
+</div>
+
+<!-- ══ CHAT ══ -->
+<div class="screen" id="screen-chat">
+  <div class="chat-header no-print">
+    <div class="chat-av">⚖</div>
+    <div class="chat-info">
+      <div class="chat-name">Lex · Claim deCoder</div>
+      <div class="chat-sub" id="chat-doc-label">Powered by Claude</div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="goTo('screen-docs')" title="Docs">📁</button>
+      <button class="icon-btn" onclick="goTo('screen-notes')" title="Notes">📌</button>
+      <button class="icon-btn" onclick="goTo('screen-settings')" title="Settings">⚙️</button>
+    </div>
+  </div>
+  <div id="messages"></div>
+  <div id="input-row" class="no-print">
+    <textarea id="user-input" placeholder="Ask Lex anything…" rows="1" oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
+    <button id="send-btn" onclick="sendMessage()" disabled>↑</button>
+  </div>
+</div>
+
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+let docIndex=[],pendingFiles=[],conversation=[],isLoading=false,notes=[],pendingSteps=[],prevScreen='screen-home',profile={};
+
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function load(k,def=null){try{const v=localStorage.getItem(k);return v?JSON.parse(v):def;}catch(e){return def;}}
+
+window.addEventListener('DOMContentLoaded',()=>{
+  const key=load('cd_api_key');
+  const wizDone=load('cd_wiz_done');
+  if(wizDone){goTo('screen-home');}
+  loadProfile();loadNotes();loadDocs();loadSettings();updateStats();
+  document.getElementById('user-input').addEventListener('input',updateSendBtn);
+  updateReadyScreen();
+});
+
+// ── WIZARD ──
+function toggleITF(){
+  const row=document.getElementById('itf-check');
+  const box=document.getElementById('itf-box');
+  const isChecked=row.classList.toggle('checked');
+  box.textContent=isChecked?'✓':'';
+  save('cd_itf_done',isChecked);
+}
+
+function saveWizKey(){
+  const k=document.getElementById('wiz-api-key').value.trim();
+  if(!k||!k.startsWith('sk-')){alert('Please enter a valid API key starting with sk-ant-');return;}
+  save('cd_api_key',k);
+  updateKeyDisplay();
+  updateReadyScreen();
+  goTo('screen-wizard-4');
+}
+
+function updateReadyScreen(){
+  const itf=load('cd_itf_done',false);
+  const key=getKey();
+  const itfEl=document.getElementById('ready-itf');
+  const keyEl=document.getElementById('ready-key');
+  if(itfEl){
+    itfEl.className='ready-stat'+(itf?' done':'');
+    itfEl.querySelector('.ready-stat-icon').textContent=itf?'✅':'📞';
+    if(!itf)itfEl.querySelector('span').textContent='Call 1-800-827-1000 to lock in your start date';
+  }
+  if(keyEl){
+    keyEl.className='ready-stat'+(key?' done':'');
+    keyEl.querySelector('.ready-stat-icon').textContent=key?'✅':'🔑';
+    if(!key)keyEl.querySelector('span').textContent='Add your key in Settings to enable full Lex';
+  }
+}
+
+function enterApp(){
+  save('cd_wiz_done',true);
+  goTo('screen-home');
+}
+
+function enterAppNoKey(){
+  save('cd_wiz_done',true);
+  goTo('screen-home');
+}
+
+function copyBridgePrompt(){
+  const text=document.getElementById('bridge-prompt').textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn=document.querySelector('.copy-btn');
+    btn.textContent='✓ Copied!';
+    setTimeout(()=>btn.textContent='📋 Copy This Message',2000);
+  }).catch(()=>{
+    const el=document.getElementById('bridge-prompt');
+    const range=document.createRange();
+    range.selectNodeContents(el);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+  });
+}
+
+function toggleExpand(id){
+  const el=document.getElementById(id);
+  el.classList.toggle('open');
+}
+
+// ── NAVIGATION ──
+function goTo(id){
+  prevScreen=document.querySelector('.screen.active')?.id||'screen-home';
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+  if(id==='screen-settings'){loadProfile();updateKeyDisplay();}
+  if(id==='screen-notes'){renderNotes();}
+  if(id==='screen-home'){updateStats();}
+  if(id==='screen-steps'){renderSteps();}
+}
+function goBack(){goTo(prevScreen);}
+
+// ── SETTINGS ──
+function loadSettings(){
+  const theme=load('cd_theme','warm');
+  const fontSize=load('cd_fontsize',17);
+  document.body.className='theme-'+theme;
+  document.body.style.fontSize=fontSize+'px';
+  const sl=document.getElementById('font-slider');
+  if(sl)sl.value=fontSize;
+  updateFontLabel(fontSize);
+  document.querySelectorAll('.theme-btn').forEach(b=>{
+    b.classList.toggle('active',b.textContent.toLowerCase().includes(theme));
+  });
+}
+function setTheme(t,btn){
+  document.body.className='theme-'+t;
+  save('cd_theme',t);
+  document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function setFontSize(v){
+  document.body.style.fontSize=v+'px';
+  save('cd_fontsize',parseInt(v));
+  updateFontLabel(v);
+}
+function updateFontLabel(v){
+  const map={14:'Small',15:'Small',16:'Medium',17:'Medium',18:'Large',19:'Large',20:'X-Large',21:'X-Large',22:'XX-Large',23:'XX-Large',24:'XX-Large'};
+  const el=document.getElementById('font-size-label');
+  if(el)el.textContent='Font Size: '+(map[v]||'Custom');
+}
+
+// ── API KEY ──
+function getKey(){return load('cd_api_key','');}
+function clearKey(){
+  if(confirm('Remove your API key? You will need to enter it again to use Lex.')){
+    localStorage.removeItem('cd_api_key');
+    updateKeyDisplay();
+  }
+}
+function updateKeyDisplay(){
+  const k=getKey();
+  const el=document.getElementById('key-display');
+  if(el)el.textContent=k?k.slice(0,14)+'••••••••••••••••••••••••••':'No key stored';
+}
+
+// ── PROFILE ──
+function saveProfile(){
+  profile={
+    name:document.getElementById('p-name').value,
+    address:document.getElementById('p-address').value,
+    ssn:document.getElementById('p-ssn').value,
+    branch:document.getElementById('p-branch').value,
+    dates:document.getElementById('p-dates').value,
+    claim:document.getElementById('p-claim').value,
+    conditions:document.getElementById('p-conditions').value
+  };
+  save('cd_profile',profile);
+  alert('Profile saved.');
+}
+function loadProfile(){
+  profile=load('cd_profile',{});
+  ['name','address','ssn','branch','dates','claim','conditions'].forEach(f=>{
+    const el=document.getElementById('p-'+f);
+    if(el&&profile[f])el.value=profile[f];
+  });
+}
+function profileContext(){
+  if(!profile||!profile.name)return'';
+  return`\n\nVETERAN PROFILE:\nName: ${profile.name}\nBranch: ${profile.branch||'Unknown'}\nService: ${profile.dates||'Unknown'}\nClaim#: ${profile.claim||'Unknown'}\nConditions: ${profile.conditions||'Not specified'}`;
+}
+
+// ── DOCUMENTS ──
+function filesSelected(files){
+  Array.from(files).forEach(f=>{
+    if(!pendingFiles.find(p=>p.name===f.name))pendingFiles.push(f);
+  });
+  renderFileCards();
+  document.getElementById('analyze-btn').style.cssText='opacity:1;pointer-events:auto';
+  document.getElementById('doc-list-wrap').style.display='flex';
+  document.getElementById('doc-list-count').textContent=pendingFiles.length+' document'+(pendingFiles.length!==1?'s':'');
+  document.getElementById('file-input').value='';
+}
+function renderFileCards(){
+  const c=document.getElementById('file-cards');
+  c.innerHTML='';
+  pendingFiles.forEach((f,i)=>{
+    const ext=f.name.split('.').pop().toLowerCase();
+    const icon=ext==='pdf'?'📄':['jpg','jpeg','png','tiff','bmp'].includes(ext)?'🖼️':'📝';
+    const loaded=docIndex.find(d=>d.name===f.name);
+    const d=document.createElement('div');
+    d.className='file-card'+(loaded?' ready':'');
+    d.innerHTML=`<span class="fc-icon">${icon}</span><div class="fc-body"><div class="fc-name">${esc(f.name)}</div><div class="fc-status">${loaded?'indexed':'ready to load'}</div></div><button class="fc-remove" onclick="removeFile(${i})">✕</button>`;
+    c.appendChild(d);
+  });
+  document.getElementById('chat-with-docs-btn').style.display=docIndex.length?'flex':'none';
+}
+function removeFile(i){
+  const name=pendingFiles[i].name;
+  pendingFiles.splice(i,1);
+  docIndex=docIndex.filter(d=>d.name!==name);
+  saveDocs();renderFileCards();
+  document.getElementById('doc-list-count').textContent=pendingFiles.length+' document'+(pendingFiles.length!==1?'s':'');
+  if(!pendingFiles.length){
+    document.getElementById('doc-list-wrap').style.display='none';
+    document.getElementById('analyze-btn').style.cssText='opacity:.4;pointer-events:none';
+    document.getElementById('chat-with-docs-btn').style.display='none';
+  }
+  updateStats();
+}
+function clearAllDocs(){
+  if(confirm('Remove all documents?')){
+    pendingFiles=[];docIndex=[];saveDocs();renderFileCards();
+    document.getElementById('doc-list-wrap').style.display='none';
+    document.getElementById('analyze-btn').style.cssText='opacity:.4;pointer-events:none';
+    document.getElementById('chat-with-docs-btn').style.display='none';
+    updateStats();
+  }
+}
+function saveDocs(){save('cd_docs',docIndex.map(d=>({name:d.name,text:d.text})));}
+function loadDocs(){
+  docIndex=load('cd_docs',[]);
+  if(docIndex.length){
+    pendingFiles=docIndex.map(d=>({name:d.name}));
+    renderFileCards();
+    document.getElementById('doc-list-wrap').style.display='flex';
+    document.getElementById('doc-list-count').textContent=docIndex.length+' document'+(docIndex.length!==1?'s':'');
+    document.getElementById('chat-with-docs-btn').style.display='flex';
+    document.getElementById('analyze-btn').style.cssText='opacity:1;pointer-events:auto';
+  }
+}
+
+// ── EXTRACTION ──
+async function runLoad(){
+  const toLoad=pendingFiles.filter(f=>f.arrayBuffer&&!docIndex.find(d=>d.name===f.name));
+  if(!toLoad.length){startChat(true);return;}
+  goTo('screen-processing');
+  for(let i=0;i<toLoad.length;i++){
+    setProc(`FILE ${i+1} OF ${toLoad.length}`,toLoad[i].name);
+    const f=toLoad[i];let text='';
+    try{
+      const ext=f.name.split('.').pop().toLowerCase();
+      if(ext==='pdf')text=await extractPDF(f);
+      else if(ext==='docx'||ext==='doc')text=await extractDOCX(f);
+      else if(['png','jpg','jpeg','tiff','bmp'].includes(ext))text=`[Image: ${f.name}]`;
+      else text=await extractTXT(f);
+    }catch(e){text=`[Could not read: ${f.name}]`;}
+    docIndex.push({name:f.name,text:text.slice(0,12000)});
+  }
+  saveDocs();updateStats();
+  setProc('BUILDING ANALYSIS','Lex is evaluating your claim…');
+  await runAnalysis();
+}
+async function extractPDF(file){
+  const ab=await file.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:ab}).promise;
+  let out='';
+  for(let p=1;p<=Math.min(pdf.numPages,40);p++){
+    const page=await pdf.getPage(p);
+    const content=await page.getTextContent();
+    out+=content.items.map(i=>i.str).join(' ')+'\n';
+  }
+  return out;
+}
+async function extractDOCX(file){const ab=await file.arrayBuffer();const r=await mammoth.extractRawText({arrayBuffer:ab});return r.value;}
+async function extractTXT(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=rej;r.readAsText(file);});}
+
+// ── ANALYSIS ──
+async function runAnalysis(){
+  const docContext=docIndex.map(d=>`=== ${d.name} ===\n${d.text}`).join('\n\n').slice(0,36000);
+  const prof=profileContext();
+  const prompt=`Analyze these VA documents for a veteran's compensation claim. Return ONLY valid JSON, no markdown.\n${prof}\n\nDocuments:\n${docContext}\n\nReturn exactly:\n{"claimStrength":<0-100>,"label":"<Weak|Fair|Moderate|Strong|Very Strong>","summary":"<2-3 sentences>","veteranName":"<name or unknown>","effectiveDate":"<date or unknown>","conditions":[{"name":"<>","status":"<service-connected|claimed|mentioned>","rating":"<% or unknown>"}],"findings":["<>"],"strengths":["<>"],"gaps":["<>"],"nextSteps":["<>","<>","<>","<>","<>"]}`;
+  let analysis=null;
+  try{
+    const res=await apiCall([{role:'user',content:prompt}],null,1500);
+    let raw=(res.content||[]).map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
+    analysis=JSON.parse(raw);
+  }catch(e){}
+  renderAnalysis(analysis);
+  updateDocLabel();
+  goTo('screen-analysis');
+}
+function renderAnalysis(a){
+  const body=document.getElementById('analysis-body');
+  const prof=load('cd_profile',{});
+  const printHeader=`<div class="print-only" style="margin-bottom:16pt;border-bottom:2pt solid #000;padding-bottom:8pt"><h2 style="font-size:16pt;margin-bottom:4pt">Claim deCoder — Claim Analysis</h2><p style="font-size:10pt">Veteran: ${prof.name||'—'} · Branch: ${prof.branch||'—'} · Service: ${prof.dates||'—'} · File#: ${prof.claim||'—'}</p><p style="font-size:9pt;color:#666">Generated ${new Date().toLocaleDateString()} · Powered by Claude · Not legal advice · The Thicket Method © 2026 Wendell K. Jiles</p></div>`;
+  if(!a){body.innerHTML=printHeader+`<div class="acard"><div class="acard-title">Analysis Unavailable</div><p>Tap "Talk to Lex" to discuss your documents directly.</p></div>`;return;}
+  const condTags=(a.conditions||[]).map(c=>{const cls=c.status==='service-connected'?'g':c.status==='claimed'?'y':'r';return`<span class="tag ${cls}">${esc(c.name)}${c.rating&&c.rating!=='unknown'?' — '+esc(c.rating):''}</span>`;}).join('')||'<p style="color:var(--dim)">No conditions clearly identified.</p>';
+  if(a.nextSteps?.length){pendingSteps=a.nextSteps.map(s=>({text:s,status:'pending'}));save('cd_steps',pendingSteps);}
+  body.innerHTML=printHeader+`
+    <div class="acard"><div class="acard-title">Claim Strength</div><div class="acard-big">${a.claimStrength}/100 — <span>${esc(a.label)}</span></div><div class="strength-bar"><div class="strength-fill" style="width:${a.claimStrength}%"></div></div><p style="margin-top:10px">${esc(a.summary)}</p>${a.veteranName&&a.veteranName!=='unknown'?`<p style="margin-top:6px;font-family:'Inconsolata',monospace;font-size:.7rem;color:var(--dim)">VETERAN: ${esc(a.veteranName)}</p>`:''}</div>
+    <div class="acard"><div class="acard-title">Identified Conditions</div>${condTags}</div>
+    <div class="acard"><div class="acard-title">Key Findings</div><ul>${(a.findings||[]).map(f=>`<li>${esc(f)}</li>`).join('')||'<li style="color:var(--dim)">None identified</li>'}</ul></div>
+    <div class="acard"><div class="acard-title">Claim Strengths</div><ul>${(a.strengths||[]).map(s=>`<li>${esc(s)}</li>`).join('')||'<li style="color:var(--dim)">None yet</li>'}</ul></div>
+    <div class="acard"><div class="acard-title">Evidence Gaps</div><ul>${(a.gaps||[]).map(g=>`<li>${esc(g)}</li>`).join('')||'<li style="color:var(--dim)">No major gaps</li>'}</ul></div>
+    <div class="acard"><div class="acard-title">Next Steps</div><p style="font-size:.82rem;color:var(--dim);margin-bottom:8px">Lex identified ${(a.nextSteps||[]).length} steps. Work through them one at a time — don't leave any on the table.</p><button class="btn btn-green" onclick="goTo('screen-steps')"><span>→</span> View Steps</button></div>
+  `;
+  updateStats();
+}
+
+// ── STEPS ──
+function loadSteps(){pendingSteps=load('cd_steps',[]);}
+function renderSteps(){
+  loadSteps();
+  const body=document.getElementById('steps-body');
+  const active=pendingSteps.filter(s=>s.status==='pending');
+  if(!active.length){body.innerHTML='<div class="acard"><div class="acard-title">All Steps Complete</div><p>No pending steps. Talk to Lex to generate more based on your current situation.</p></div>';return;}
+  const s=active[0];
+  const idx=pendingSteps.indexOf(s);
+  const remaining=active.length;
+  body.innerHTML=`
+    <div class="acard"><div class="step-num-label">Next Step — ${remaining} remaining</div><div class="step-text">${esc(s.text)}</div><div class="step-actions"><button class="step-btn act" onclick="actOnStep(${idx})">✓ Done</button><button class="step-btn save" onclick="saveStepAsNote(${idx})">📌 Later</button><button class="step-btn info" onclick="askLexAboutStep(${idx})">? Ask Lex</button><button class="step-btn del" onclick="deleteStep(${idx})">✕ Skip</button></div></div>
+    ${remaining>1?`<div class="acard" style="opacity:.5"><div class="step-num-label">${remaining-1} more step${remaining-1!==1?'s':''} waiting</div><p style="font-size:.88rem;color:var(--dim)">Each step builds your case. Don't leave them on the table.</p></div>`:''}
+  `;
+}
+function actOnStep(i){pendingSteps[i].status='done';save('cd_steps',pendingSteps);renderSteps();updateStats();}
+function deleteStep(i){pendingSteps[i].status='deleted';save('cd_steps',pendingSteps);renderSteps();updateStats();}
+function saveStepAsNote(i){addNote(pendingSteps[i].text,'action');pendingSteps[i].status='saved';save('cd_steps',pendingSteps);renderSteps();updateStats();}
+function askLexAboutStep(i){conversation.push({role:'user',content:`I need more help understanding this step: ${pendingSteps[i].text}`});startChat(true);}
+
+// ── NOTES ──
+function addNote(text,type='note'){const n={id:Date.now(),text,type,date:new Date().toLocaleDateString(),status:'active'};notes.unshift(n);save('cd_notes',notes);updateStats();return n;}
+function loadNotes(){notes=load('cd_notes',[]);}
+function submitNote(){
+  const input=document.getElementById('note-input');
+  const text=input.value.trim();
+  if(!text)return;
+  addNote(text,'note');input.value='';
+  renderNotes();
+  if(getKey())parseNoteWithLex(text);
+}
+async function parseNoteWithLex(text){
+  try{
+    const res=await apiCall([{role:'user',content:`A veteran wrote: "${text}"\n\nReply ONLY with JSON: {"type":"action|question|thought","summary":"<one sentence>","urgent":<true|false>}`}],null,200);
+    const raw=(res.content||[]).map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
+    const parsed=JSON.parse(raw);
+    const idx=notes.findIndex(n=>n.text===text&&n.status==='active');
+    if(idx>=0){notes[idx].parsed=parsed;save('cd_notes',notes);renderNotes();}
+  }catch(e){}
+}
+function renderNotes(){
+  const container=document.getElementById('notes-container');
+  const header=document.getElementById('notes-list-header');
+  const active=notes.filter(n=>n.status==='active');
+  header.style.display=active.length?'block':'none';
+  container.innerHTML='';
+  active.forEach((n,i)=>{
+    const isTodo=n.parsed?.type==='action';
+    const div=document.createElement('div');
+    div.className='sticky'+(isTodo?' todo':'');
+    const typeTag=n.parsed?`<span class="sticky-tag ${isTodo?'action':''}">${n.parsed.type}</span>`:'';
+    div.innerHTML=`<div class="sticky-text">${esc(n.parsed?.summary||n.text)}</div><div class="sticky-meta"><span class="sticky-date">${n.date}</span>${typeTag}</div><div class="sticky-actions">${isTodo?`<button class="sticky-btn complete" onclick="completeNote(${i})">✓ Done</button>`:''}<button class="sticky-btn delete" onclick="deleteNote(${i})">✕ Delete</button></div>`;
+    container.appendChild(div);
+  });
+}
+function completeNote(i){const active=notes.filter(n=>n.status==='active');notes[notes.indexOf(active[i])].status='done';save('cd_notes',notes);renderNotes();updateStats();}
+function deleteNote(i){const active=notes.filter(n=>n.status==='active');notes[notes.indexOf(active[i])].status='deleted';save('cd_notes',notes);renderNotes();updateStats();}
+
+// ── STATS ──
+function updateStats(){
+  loadNotes();loadSteps();
+  const dc=docIndex.length;
+  const nc=notes.filter(n=>n.status==='active').length;
+  const sc=(pendingSteps.length?pendingSteps:load('cd_steps',[])).filter(s=>s.status==='pending').length;
+  document.getElementById('stat-docs').textContent=dc;
+  document.getElementById('stat-notes').textContent=nc;
+  document.getElementById('stat-steps').textContent=sc;
+  const el=document.getElementById('home-stats');
+  if(el)el.style.display=(dc||nc||sc)?'flex':'none';
+}
+
+// ── CHAT ──
+const SYSTEM_PROMPT=`CLAIM DECODER — LEX — POWERED BY CLAUDE
+(c) 2026 Wendell K. Jiles. All Rights Reserved. Not legal advice. No attorney-client relationship.
+
+ROLE: You are Lex, the AI claims specialist inside Claim deCoder — powered by Claude, built on the Thicket Method. You are warm, direct, tireless — acting exclusively in the veteran's best interest. Never overwhelming. Always one breath at a time.
+
+CORE PHILOSOPHY:
+- The VA is a non-adversarial data-processing machine that only responds to objective, black-and-white evidence.
+- The VHA speaks in subjective narrative. The VBA speaks in law. You bridge that gap.
+- The burden of proof sits entirely on the veteran. Your job is to help them build that proof.
+- Allow medical language to grow organically — never force clinical buzzwords.
+- This is a pro se tool. The veteran is the subject matter expert on their own claim. You are their extension.
+- Every step a veteran takes has real financial value. Every step they skip may cost them money they can never recover.
+
+COMMUNICATION RULES:
+- One Breath Rule: Direct, simple, never overwhelming.
+- Educational Holding Pattern: If veteran needs to rest or wait, teach rather than demand action.
+- Guided Choice: When multiple steps exist, tell the veteran how many and ask: all at once, or one at a time?
+- Never dump a list unprompted. Offer to save steps as notes.
+- EMERGENCY OVERRIDE: Suicidal ideation, homelessness, crisis — stop everything, provide 988 Press 1 immediately.
+- Submission: Self-filing at va.gov is the fastest path. VSO/attorney is an option but may delay significantly. Respect the veteran's choice — never push either direction.
+
+WELCOME (no documents loaded): Ask the veteran their name. Then ask if they have completed their Intent to File. If not, explain it urgently: call 1-800-827-1000 and say exactly: 'Hello, I would like to submit an Intent to File for compensation, and I need to note on my record that I am currently experiencing a hardship.' Explain that every day without an ITF is unrecoverable backpay. Then ask how you can help them today.
+
+WELCOME (documents loaded): Greet the veteran by name if known. Briefly summarize what you found. Note the single most important finding. Ask how they'd like to proceed.
+
+DISPATCH: ThicketMaster@gmail.com
+
+PHASES:
+1. Intent to File — lock effective date today, always first
+2. Document ingestion and gap analysis
+3. Evidence recording, medical link establishment
+4. Buddy statements VA Form 21-10210 and photo-log records
+5. The Crucible: draft FDC, then red-team as strict VA Rater/C&P Examiner
+6. Rating alignment to 38 C.F.R. Schedule, C&P exam preparation
+
+THICKET FILTER before every response:
+1. One clear step OR Educational Holding Pattern?
+2. Direct, simple, not overwhelming?
+3. No forced buzzwords?
+4. Does this protect the veteran's backpay and future?
+5. Would the Architect approve?`;
+
+function updateDocLabel(){
+  const label=docIndex.length?`${docIndex.length} doc${docIndex.length!==1?'s':''} loaded · Powered by Claude`:'Powered by Claude';
+  document.getElementById('chat-doc-label').textContent=label;
+}
+
+function startChat(withDocs){
+  updateDocLabel();
+  goTo('screen-chat');
+  if(conversation.length===0){
+    const prof=profileContext();
+    const ctx=withDocs&&docIndex.length
+      ?`I have loaded ${docIndex.length} VA document(s).${prof}\n\nDocument content:\n${docIndex.map(d=>`=== ${d.name} ===\n${d.text.slice(0,3000)}`).join('\n\n---\n\n')}\n\nPlease greet me, briefly summarize what you found, and ask how I'd like to proceed.`
+      :`Hello${prof}`;
+    conversation=[{role:'user',content:ctx}];
+    if(getKey()){callLex();}
+    else{addMessage('assistant',`Hello. I am Lex.\n\nI can see you haven't set up your API key yet — that's the connection that powers my full capabilities.\n\nYou can add your key anytime in Settings ⚙️\n\nIn the meantime, you can use Lex for free at claude.ai — open it and paste a message to get started. Or ask me anything here and I'll do my best to help you navigate.\n\nThe most important thing right now: have you called 1-800-827-1000 to submit your Intent to File? Every day without it is backpay you can't recover.`);}
+  }
+}
+
+async function callLex(){
+  isLoading=true;updateSendBtn();
+  const typing=addTyping();
+  const sys=SYSTEM_PROMPT+(docIndex.length?`\n\nINDEXED DOCUMENTS (${docIndex.length}):\n`+docIndex.map(d=>`=== ${d.name} ===\n${d.text.slice(0,3500)}`).join('\n\n'):'')+profileContext();
+  try{
+    const data=await apiCall(conversation,sys,1000);
+    const reply=(data.content||[]).map(b=>b.text||'').join('\n')||'I am here. One breath at a time.';
+    conversation.push({role:'assistant',content:reply});
+    typing.remove();
+    addMessage('assistant',reply);
+  }catch(e){
+    typing.remove();
+    addMessage('assistant','Connection error. Please check your internet. If your API key has expired, go to Settings ⚙️ to update it.');
+  }
+  isLoading=false;updateSendBtn();
+}
+
+function sendMessage(){
+  const input=document.getElementById('user-input');
+  const text=input.value.trim();
+  if(!text||isLoading)return;
+  input.value='';input.style.height='auto';updateSendBtn();
+  addMessage('user',text);
+  conversation.push({role:'user',content:text});
+  if(getKey()){callLex();}
+  else{addMessage('assistant','To get a full response from Lex, add your API key in Settings ⚙️. Or visit claude.ai for free access.');}
+}
+
+async function apiCall(messages,system,maxTokens=1000){
+  const key=getKey();
+  if(!key)throw new Error('No key');
+  const body={model:'claude-sonnet-4-20250514',max_tokens:maxTokens,messages};
+  if(system)body.system=system;
+  const res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-allow-browser':'true'},
+    body:JSON.stringify(body)
+  });
+  return await res.json();
+}
+
+function addMessage(role,text){
+  const msgs=document.getElementById('messages');
+  const wrap=document.createElement('div');wrap.className='msg '+role;
+  const av=document.createElement('div');av.className='av';av.textContent=role==='assistant'?'⚖':'◈';
+  const bubble=document.createElement('div');bubble.className='bubble';
+  if(role==='assistant')bubble.innerHTML=fmt(text);
+  else{const p=document.createElement('p');p.textContent=text;bubble.appendChild(p);}
+  wrap.appendChild(av);wrap.appendChild(bubble);
+  msgs.appendChild(wrap);msgs.scrollTop=msgs.scrollHeight;
+}
+function fmt(text){
+  return text.split('\n').map(line=>{
+    if(!line.trim())return'';
+    if(/^1-800/.test(line))return`<div class="phone-line">${esc(line)}</div>`;
+    if(/988/.test(line)&&/crisis/i.test(line))return`<div class="crisis-line">${esc(line)}</div>`;
+    if(line.startsWith("'")&&line.endsWith("'"))return`<div class="script-text">${esc(line)}</div>`;
+    return`<p>${esc(line)}</p>`;
+  }).join('');
+}
+function addTyping(){
+  const msgs=document.getElementById('messages');
+  const wrap=document.createElement('div');wrap.className='msg assistant';
+  const av=document.createElement('div');av.className='av';av.textContent='⚖';
+  const b=document.createElement('div');b.className='typing-bubble';
+  b.innerHTML='<span class="td"></span><span class="td"></span><span class="td"></span>';
+  wrap.appendChild(av);wrap.appendChild(b);msgs.appendChild(wrap);msgs.scrollTop=msgs.scrollHeight;
+  return wrap;
+}
+
+function printSummary(){
+  const prev=document.querySelector('.screen.active')?.id;
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-analysis').classList.add('active');
+  setTimeout(()=>{window.print();setTimeout(()=>{document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));if(prev)document.getElementById(prev).classList.add('active');},500);},200);
+}
+
+function setProc(t,s){document.getElementById('proc-title').textContent=t;document.getElementById('proc-sub').textContent=s;}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,130)+'px';}
+function updateSendBtn(){document.getElementById('send-btn').disabled=!document.getElementById('user-input').value.trim()||isLoading;}
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}}
+function esc(s=''){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function clearAllData(){if(confirm('Clear ALL app data? This cannot be undone.')){localStorage.clear();location.reload();}}
+</script>
+</body>
+</html>
