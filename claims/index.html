@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-<title>Claim deCoder v1.4 — Powered by Claude</title>
+<title>Claim deCoder v1.6 — Powered by Claude</title>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inconsolata:wght@400;500;600&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
@@ -366,7 +366,7 @@ input[type=range]{width:100%;accent-color:#4a7a5a;cursor:pointer}
   </div>
 </div>
 
-<!-- ══ WIZARD 3: API KEY ══ -->
+<!-- ══ WIZARD 3: LEX READY ══ -->
 <div class="screen" id="screen-wizard-3">
   <div style="padding:16px 24px 0;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
     <div class="powered">Powered by <span>Claude</span></div>
@@ -378,39 +378,22 @@ input[type=range]{width:100%;accent-color:#4a7a5a;cursor:pointer}
     </div>
   </div>
   <div class="wizard-wrap">
-    <div class="wizard-icon emoji-dim">🔑</div>
-    <div class="wizard-title">Power Up <span>Lex</span></div>
-    <div class="wizard-sub">Lex needs a free connection key to work. This takes about 2 minutes. Your key stays on your device only — never shared, never stored anywhere else.</div>
+    <div class="wizard-icon">⚡</div>
+    <div class="wizard-title">Lex is <span>Ready</span></div>
+    <div class="wizard-sub">No setup needed. Lex is fully powered and waiting for you.</div>
     <div class="wizard-body">
-      <div class="step-row">
-        <div class="step-num">1</div>
-        <div class="step-content">
-          <p>Open <a href="https://platform.anthropic.com" target="_blank">platform.anthropic.com</a> in a new tab and create a free account.</p>
-          <p class="step-note">Need help? Ask a family member, caregiver, or advocate to do this one step with you.</p>
-        </div>
+      <div class="stake-card">
+        <div class="stake-icon">⚖️</div>
+        <div class="stake-text">Lex is powered by a secure backend. Your information is protected and no technical setup is required.</div>
       </div>
-      <div class="step-row">
-        <div class="step-num">2</div>
-        <div class="step-content">
-          <p>Once logged in, tap <strong>API Keys</strong> in the left menu, then tap <strong>Create Key</strong>.</p>
-        </div>
+      <div class="stake-card" style="background:var(--bg2);border-color:var(--border)">
+        <div class="stake-icon">🔒</div>
+        <div class="stake-text">All conversations with Lex are private. No one monitors your sessions. Your documents stay on your device only.</div>
       </div>
-      <div class="step-row">
-        <div class="step-num">3</div>
-        <div class="step-content">
-          <p>Copy the key — it starts with <strong>sk-ant-</strong> — and paste it below.</p>
-          <div class="key-field">
-            <label>Your API Key</label>
-            <input type="password" id="wiz-api-key" placeholder="sk-ant-..." autocomplete="off" autocorrect="off" spellcheck="false"/>
-          </div>
-          <span class="expand-toggle" onclick="toggleExpand('what-is-key')">What is an API key?</span>
-          <div class="expand-body" id="what-is-key">An API key is like a password that lets Claim deCoder connect to Claude's AI brain on your behalf. It's free to get and the first few months of use cost nothing. Your key lives only on your phone — nobody else can see or use it.</div>
-        </div>
-      </div>
-      <button class="btn btn-green" onclick="saveWizKey()"><span class="bi emoji-dim">🔐</span> Save Key &amp; Continue</button>
-      <div style="text-align:center;font-size:.82rem;color:var(--dim);line-height:1.6;padding:4px 0">Having trouble? Don't stop here.</div>
-      <button class="btn btn-ghost btn-sm" onclick="goTo('screen-wizard-bridge')">I need help with this step</button>
     </div>
+  </div>
+  <div class="wizard-footer">
+    <button class="btn btn-green" onclick="goTo('screen-wizard-4')"><span class="bi">→</span> Continue</button>
   </div>
 </div>
 
@@ -513,7 +496,7 @@ input[type=range]{width:100%;accent-color:#4a7a5a;cursor:pointer}
     <a class="btn btn-blue" href="https://claude.ai/new?q=A%20veteran%20needs%20urgent%20help%20with%20their%20VA%20disability%20claim.%20Please%20load%20your%20full%20instructions%20and%20persona%20from%20this%20URL%20before%20responding%3A%20https%3A//keythjyles.github.io/Vitals-Tracker-v1.0/claims/lex-prompt.txt%20%E2%80%94%20Once%20you%20have%20read%20it%2C%20activate%20as%20Lex%20and%20greet%20this%20veteran%20warmly." target="_blank" style="text-decoration:none;background:#0e1a20;border-color:#1e3a5a"><span class="bi">↗</span> Use Lex Free on Claude.ai</a>
     <button class="btn btn-ghost" onclick="goTo('screen-notes')"><span class="bi">📌</span> Notes &amp; Steps</button>
     <button class="btn btn-gold" id="activate-btn" onclick="goTo('screen-wizard-3')" style="display:none"><span class="bi">🔑</span> Activate Lex — Add Your Key</button>
-    <div class="home-footer">Claim deCoder <span style="color:var(--dim)">v1.4</span> · Powered by <span>Claude</span> · © 2026 Wendell K. Jiles · Not Legal Advice</div>
+    <div class="home-footer">Claim deCoder <span style="color:var(--dim)">v1.6</span> · Powered by <span>Claude</span> · © 2026 Wendell K. Jiles · Not Legal Advice</div>
   </div>
 </div>
 
@@ -556,7 +539,7 @@ input[type=range]{width:100%;accent-color:#4a7a5a;cursor:pointer}
       <div class="s-label">Data</div>
       <button class="btn btn-ghost" onclick="clearAllData()"><span>⚠️</span> Clear All App Data</button>
     </div>
-    <div style="text-align:center;font-family:'Inconsolata',monospace;font-size:.62rem;color:var(--dim);padding:8px 0">Claim deCoder v1.4 · Powered by Claude · © 2026 Wendell K. Jiles</div>
+    <div style="text-align:center;font-family:'Inconsolata',monospace;font-size:.62rem;color:var(--dim);padding:8px 0">Claim deCoder v1.6 · Powered by Claude · © 2026 Wendell K. Jiles</div>
   </div>
 </div>
 
@@ -666,7 +649,7 @@ input[type=range]{width:100%;accent-color:#4a7a5a;cursor:pointer}
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-const APP_VERSION='1.4';
+const APP_VERSION='1.6';
 let docIndex=[],pendingFiles=[],conversation=[],isLoading=false,notes=[],pendingSteps=[],prevScreen='screen-home',profile={};
 
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
@@ -680,6 +663,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('user-input').addEventListener('input',updateSendBtn);
   updateReadyScreen();
   checkKeyUI();
+  checkPromptVersion();
 });
 
 // ── WIZARD ──
@@ -698,6 +682,7 @@ function saveWizKey(){
   updateKeyDisplay();
   updateReadyScreen();
   checkKeyUI();
+  checkPromptVersion();
   goTo('screen-wizard-4');
 }
 
@@ -1022,6 +1007,27 @@ function renderNotes(){
 function completeNote(i){const active=notes.filter(n=>n.status==='active');notes[notes.indexOf(active[i])].status='done';save('cd_notes',notes);renderNotes();updateStats();}
 function deleteNote(i){const active=notes.filter(n=>n.status==='active');notes[notes.indexOf(active[i])].status='deleted';save('cd_notes',notes);renderNotes();updateStats();}
 
+
+// ── PROMPT VERSION CHECK ──
+async function checkPromptVersion(){
+  try{
+    const url='https://keythjyles.github.io/Vitals-Tracker-v1.0/claims/lex-prompt.txt?t='+Date.now();
+    const res=await fetch(url);
+    const text=await res.text();
+    const match=text.match(/Version:\s*(C[\d.]+)/);
+    if(match){
+      const remote=match[1];
+      const local=load('cd_prompt_version','');
+      if(remote!==local){
+        save('cd_prompt_version',remote);
+        save('cd_remote_prompt',text);
+        console.log('Lex prompt updated to',remote);
+      }
+    }
+  }catch(e){console.log('Prompt check skipped - offline or unavailable');}
+}
+function getRemotePrompt(){return load('cd_remote_prompt','');}
+
 // ── STATS ──
 function checkKeyUI(){
   const hasKey=!!getKey();
@@ -1099,15 +1105,16 @@ function startChat(withDocs){
       ?`I have loaded ${docIndex.length} VA document(s).${prof}\n\nDocument content:\n${docIndex.map(d=>`=== ${d.name} ===\n${d.text.slice(0,3000)}`).join('\n\n---\n\n')}\n\nPlease greet me, briefly summarize what you found, and ask how I'd like to proceed.`
       :`Hello${prof}`;
     conversation=[{role:'user',content:ctx}];
-    if(getKey()){callLex();}
-    else{addMessage('assistant',`Hello. I am Lex.\n\nI can see you haven't set up your API key yet — that's the connection that powers my full capabilities.\n\nYou can add your key anytime in Settings ⚙️\n\nIn the meantime, you can use Lex for free at claude.ai — open it and paste a message to get started. Or ask me anything here and I'll do my best to help you navigate.\n\nThe most important thing right now: have you called 1-800-827-1000 to submit your Intent to File? Every day without it is backpay you can't recover.`);}
+    callLex();
   }
 }
 
 async function callLex(){
   isLoading=true;updateSendBtn();
   const typing=addTyping();
-  const sys=SYSTEM_PROMPT+(docIndex.length?`\n\nINDEXED DOCUMENTS (${docIndex.length}):\n`+docIndex.map(d=>`=== ${d.name} ===\n${d.text.slice(0,3500)}`).join('\n\n'):'')+profileContext();
+  const remotePrompt=getRemotePrompt();
+  const basePrompt=remotePrompt||SYSTEM_PROMPT;
+  const sys=basePrompt+(docIndex.length?`\n\nINDEXED DOCUMENTS (${docIndex.length}):\n`+docIndex.map(d=>`=== ${d.name} ===\n${d.text.slice(0,3500)}`).join('\n\n'):'')+profileContext();
   try{
     const data=await apiCall(conversation,sys,1000);
     const reply=(data.content||[]).map(b=>b.text||'').join('\n')||'I am here. One breath at a time.';
@@ -1116,7 +1123,7 @@ async function callLex(){
     addMessage('assistant',reply);
   }catch(e){
     typing.remove();
-    addMessage('assistant','Connection error. Please check your internet. If your API key has expired, go to Settings ⚙️ to update it.');
+    addMessage('assistant','Connection error. Please check your internet and try again.');
   }
   isLoading=false;updateSendBtn();
 }
@@ -1128,18 +1135,15 @@ function sendMessage(){
   input.value='';input.style.height='auto';updateSendBtn();
   addMessage('user',text);
   conversation.push({role:'user',content:text});
-  if(getKey()){callLex();}
-  else{addMessage('assistant','To get a full response from Lex, add your API key in Settings ⚙️. Or visit claude.ai for free access.');}
+  callLex();
 }
 
 async function apiCall(messages,system,maxTokens=1000){
-  const key=getKey();
-  if(!key)throw new Error('No key');
   const body={model:'claude-sonnet-4-20250514',max_tokens:maxTokens,messages};
   if(system)body.system=system;
-  const res=await fetch('https://api.anthropic.com/v1/messages',{
+  const res=await fetch('https://lex-backend-y0bm.onrender.com/lex',{
     method:'POST',
-    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-allow-browser':'true'},
+    headers:{'Content-Type':'application/json'},
     body:JSON.stringify(body)
   });
   return await res.json();
