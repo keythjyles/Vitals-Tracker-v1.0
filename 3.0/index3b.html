@@ -142,13 +142,13 @@ body{margin:0;background:#0b0f19;color:#e2e8f0;overflow-x:hidden;line-height:1.4
         </div>
       </div>
 
-      <div>
-        <label class="block text-sm text-slate-300 compact-label font-medium">Administered By</label>
-        
-          <button type="button" class="actor-btn" data-actor="self" onclick="selectActor(this)">Self</button>
-          <button type="button" class="actor-btn" data-actor="caregiver" onclick="selectActor(this)">Caregiver</button>
-      
-      </div>
+      <div class="compact-block">
+  <div class="flex items-center gap-2">
+    <span class="text-sm text-slate-300 font-medium whitespace-nowrap">Administered By:</span>
+    <button type="button" class="actor-btn" data-actor="self" onclick="selectActor(this)">Self</button>
+    <button type="button" class="actor-btn" data-actor="caregiver" onclick="selectActor(this)">Caregiver</button>
+  </div>
+</div>
 
       <div class="grid grid-cols-3 gap-3 mb-4">
         <div><label class="block text-xs text-slate-400 mb-1 text-center font-medium">SYS</label><input type="number" id="systolic" placeholder="---" class="input-field bp-field w-full px-3 py-3 rounded-xl text-center text-white text-xl font-bold" onkeydown="handleEnter(event, 'diastolic')" oninput="handleDraftInput(event)"></div>
