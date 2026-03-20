@@ -182,11 +182,22 @@ body{margin:0;background:#0b0f19;color:#e2e8f0;overflow-x:hidden;line-height:1.4
       </div>
 
       <div class="compact-block">
-        <label class="block text-sm text-slate-300 mb-2 font-medium">Medications</label>
-        <input id="medicineInput" type="text" autocomplete="off" placeholder="Type medicine and press Enter" class="input-field w-full px-4 py-3 rounded-xl text-sm" onkeydown="handleMedicineKeydown(event)" oninput="handleMedicineTyping(event)" />
-        <div id="medicineSuggestions" class="suggestion-list"></div>
-        <div id="selectedMedicines" class="selected-meds"></div>
-      </div>
+<div class="compact-block">
+  <label class="block text-sm text-slate-300 mb-2 font-medium">Medications</label>
+  <div class="flex gap-2 items-center">
+    <input id="medicineInput" type="text" autocomplete="off" 
+      placeholder="Type medication name..." 
+      class="input-field flex-1 px-4 py-3 rounded-xl text-sm"
+      onkeydown="handleMedicineKeydown(event)" 
+      oninput="handleMedicineTyping(event)" />
+    <button type="button" onclick="commitMedicineFromInput()" 
+      class="btn-primary text-white font-semibold px-4 py-3 rounded-xl text-sm whitespace-nowrap">
+      + Add
+    </button>
+  </div>
+  <div id="medicineSuggestions" class="suggestion-list"></div>
+  <div id="selectedMedicines" class="selected-meds"></div>
+</div>
 
       <div class="grid grid-cols-2 gap-3">
         <button onclick="finalizeCurrentDraft()" class="btn-primary text-white font-semibold py-4 rounded-2xl text-lg">Add</button>
