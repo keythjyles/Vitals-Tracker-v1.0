@@ -1,0 +1,348 @@
+<!--
+APP: Vitals Tracker
+VERSION: v3.3A1
+AUTHOR: Wendell Jiles
+COPYRIGHT: © Wendell Jiles 2026. All rights reserved.
+
+DESCRIPTION:
+A timestamped physiological and functional event ledger for capturing:
+- vitals (BP/HR)
+- distress levels
+- symptoms
+- medicine (user-defined)
+- caregiving context (self/caregiver-administered)
+
+CORE RULES (LOCKED):
+1. Record is created on first interaction (>=1 character or input)
+2. Auto-save on any change and on exit
+3. Null values are valid (no required fields)
+4. Records are never deleted (hidden only)
+5. Medicine is user-defined and starts blank
+6. Default position = Sitting
+7. Default takenBy = self
+8. No system popups (only styled UI feedback)
+9. Medicine = vertical chart marker only
+10. App does not interpret meaning — user defines all inputs
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<title>Vitals Tracker v3.3A1</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+*{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;-webkit-tap-highlight-color:transparent;box-sizing:border-box}
+body{margin:0;background:#0b0f19;color:#e2e8f0;overflow-x:hidden;line-height:1.45}
+.mono{font-family:'JetBrains Mono',monospace}
+.glass-panel{background:rgba(30,41,59,.62);backdrop-filter:blur(12px);border:1px solid rgba(148,163,184,.14);box-shadow:0 4px 6px -1px rgba(0,0,0,.3)}
+.btn-primary{background:linear-gradient(135deg,#3b82f6 0%,#2563eb 100%);box-shadow:0 4px 15px rgba(59,130,246,.3);transition:all .18s ease}.btn-primary:active{transform:scale(.985)}
+.btn-secondary{background:rgba(51,65,85,.82);border:1px solid rgba(148,163,184,.2);transition:all .18s ease}.btn-secondary:active{transform:scale(.985)}
+.btn-danger{background:linear-gradient(135deg,#dc2626 0%,#991b1b 100%);transition:all .18s ease}.btn-danger:active{transform:scale(.985)}
+.input-field{background:rgba(15,23,42,.74);border:2px solid rgba(148,163,184,.18);transition:all .18s ease;color:#fff}.input-field:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.14);background:rgba(15,23,42,.92)}.input-field::placeholder{color:#64748b}
+.screen-transition{animation:fadeIn .18s ease-out}@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.symptom-checkbox{appearance:none;width:22px;height:22px;border:2px solid rgba(148,163,184,.38);border-radius:6px;background:rgba(15,23,42,.45);cursor:pointer;position:relative;transition:all .15s;flex:0 0 auto}.symptom-checkbox:checked{background:#3b82f6;border-color:#3b82f6}.symptom-checkbox:checked::after{content:'✓';position:absolute;color:#fff;font-size:13px;font-weight:700;top:50%;left:50%;transform:translate(-50%,-50%)}
+.position-btn,.arm-btn,.actor-btn{padding:6px 12px;border-radius:999px;border:2px solid rgba(148,163,184,.28);background:rgba(15,23,42,.58);color:#94a3b8;cursor:pointer;transition:all .15s;font-size:12px;font-weight:500;white-space:nowrap;user-select:none}.position-btn.active,.arm-btn.active,.actor-btn.active{border-color:#3b82f6;background:rgba(59,130,246,.16);color:#60a5fa;font-weight:600}
+.header-logo{width:34px;height:34px;flex:0 0 auto}.selected-meds{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.selected-med-chip{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border-radius:999px;background:rgba(59,130,246,.14);border:1px solid rgba(59,130,246,.28);color:#bfdbfe;font-size:12px}.selected-med-chip-x{cursor:pointer;font-weight:700;color:#93c5fd}.bp-field{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif !important;letter-spacing:0;font-variant-numeric:normal}.compact-block{margin-bottom:14px}.compact-label{margin-bottom:8px}.header-sub{font-size:10px;color:#64748b;line-height:1.1}
+.home-section{border:1px solid rgba(96,165,250,.18);box-shadow:0 0 0 1px rgba(96,165,250,.05) inset}
+.log-entry{border:1px solid rgba(96,165,250,.16)!important;box-shadow:0 0 0 1px rgba(96,165,250,.04) inset}
+.group-box{border:1px solid rgba(148,163,184,.18);border-radius:12px;padding:8px 10px;background:rgba(15,23,42,.35);flex:1;min-width:0}
+.group-label{font-size:11px;color:#94a3b8;margin-bottom:6px;text-align:center}
+.distress-slider{-webkit-appearance:none;height:10px;border-radius:5px;background:linear-gradient(to right,#22c55e 0%,#eab308 50%,#dc2626 100%);outline:none}.distress-slider::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:#fff;border:3px solid #3b82f6;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.35)}
+.medicine-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.34);border-radius:14px;font-size:12px;color:#fbbf24;margin:4px 6px 0 0;max-width:100%}.medicine-chip-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.medicine-chip-x{color:#fca5a5;font-weight:700;cursor:pointer;line-height:1;font-size:16px;padding-left:2px;user-select:none}
+.suggestion-list{margin-top:8px;display:flex;flex-wrap:wrap;gap:8px}.suggestion-item{padding:8px 12px;border-radius:999px;background:rgba(15,23,42,.7);border:1px solid rgba(148,163,184,.22);color:#cbd5e1;font-size:12px;cursor:pointer;transition:all .15s;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.suggestion-item:active{transform:scale(.98);border-color:rgba(59,130,246,.44);color:#60a5fa}
+.chart-container{position:relative;height:360px;background:rgba(15,23,42,.4);border-radius:12px;overflow:hidden;touch-action:none;border:1px solid rgba(148,163,184,.1)}
+.legendRow{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:10px;user-select:none}.legendBox{display:flex;align-items:center;justify-content:center;min-width:70px;padding:0 12px;height:24px;border-radius:999px;font-weight:600;font-size:11px;letter-spacing:.4px;color:#08111e;border:2px solid rgba(255,255,255,.18);text-transform:uppercase}.legendSys{background:rgba(96,165,250,.95)}.legendDia{background:rgba(226,232,240,.95)}.legendHr{background:rgba(74,222,128,.95)}.legendDistress{background:rgba(244,114,182,.95)}
+.reading-popup{position:absolute;background:rgba(15,23,42,.98);border:2px solid rgba(96,165,250,.56);border-radius:14px;padding:0;z-index:1100;min-width:250px;max-width:340px;box-shadow:0 20px 50px rgba(0,0,0,.9);display:none}.reading-popup-header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid rgba(96,165,250,.2);background:rgba(59,130,246,.1);border-radius:12px 12px 0 0}.reading-popup-close{background:rgba(96,165,250,.15);border:1px solid rgba(96,165,250,.3);color:#93c5fd;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;line-height:1;font-weight:700}.reading-popup-content{padding:14px}.reading-popup-time{padding:9px 14px;border-top:1px solid rgba(148,163,184,.15);font-size:12px;color:#64748b;background:rgba(15,23,42,.45);border-radius:0 0 12px 12px}
+.inline-banner{border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.35;display:none}.inline-banner.visible{display:block}.inline-banner-success{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.28);color:#86efac}.inline-banner-danger{background:rgba(220,38,38,.12);border:1px solid rgba(220,38,38,.28);color:#fca5a5}.inline-banner-info{background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.28);color:#93c5fd}
+.confirm-dialog{position:fixed;inset:0;background:rgba(0,0,0,.84);display:none;align-items:center;justify-content:center;z-index:2000;padding:18px;backdrop-filter:blur(4px)}.confirm-dialog.active{display:flex}.confirm-box{background:rgba(30,41,59,.98);border:1px solid rgba(148,163,184,.2);border-radius:18px;padding:24px;max-width:360px;width:100%;box-shadow:0 25px 50px rgba(0,0,0,.55)}
+.log-entry{background:rgba(30,41,59,.52);border:1px solid rgba(148,163,184,.1);transition:all .18s;border-radius:14px}
+.record-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:999px;font-size:11px;font-weight:600}.pill-incomplete{background:rgba(148,163,184,.12);border:1px solid rgba(148,163,184,.22);color:#94a3b8}.pill-caregiver{background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.24);color:#93c5fd}
+.day-block-label{position:sticky;top:0;z-index:5;background:rgba(11,15,25,.94);backdrop-filter:blur(6px);padding:7px 10px;border-radius:10px;border:1px solid rgba(148,163,184,.1);color:#94a3b8;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px}
+.toast-wrap{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:3000;display:flex;flex-direction:column;gap:8px;width:min(92vw,420px);pointer-events:none}.toast{background:rgba(15,23,42,.96);border:1px solid rgba(148,163,184,.18);color:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 12px 32px rgba(0,0,0,.45);font-size:13px;opacity:0;transform:translateY(10px);animation:toastIn .18s ease forwards}.toast.success{border-color:rgba(34,197,94,.25);color:#bbf7d0}.toast.info{border-color:rgba(59,130,246,.25);color:#bfdbfe}.toast.danger{border-color:rgba(220,38,38,.25);color:#fecaca}@keyframes toastIn{to{opacity:1;transform:translateY(0)}}
+.report-section{background:rgba(30,41,59,.52);border-radius:14px;padding:18px;margin-bottom:16px;border:1px solid rgba(148,163,184,.1)}.stat-card{background:rgba(15,23,42,.62);border-radius:10px;padding:14px;text-align:center;border:1px solid rgba(148,163,184,.1)}
+.import-textarea{width:100%;min-height:220px;background:rgba(15,23,42,.72);border:2px solid rgba(148,163,184,.2);border-radius:12px;padding:14px;color:#fff;font-family:'JetBrains Mono',monospace;font-size:12px;resize:vertical;line-height:1.55}.import-textarea:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.14)}
+</style>
+</head>
+<body class="min-h-screen bg-slate-900">
+<header class="glass-panel sticky top-0 z-50 px-3 py-2">
+  <div class="flex items-center justify-between gap-3">
+    <div class="flex items-center gap-3 min-w-0">
+      <svg class="header-logo" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs><linearGradient id="vtg" x1="6" y1="6" x2="42" y2="42"><stop stop-color="#60A5FA"/><stop offset="1" stop-color="#2563EB"/></linearGradient></defs>
+        <circle cx="24" cy="24" r="22" fill="url(#vtg)"/>
+        <rect x="12" y="24" width="6" height="12" rx="2" stroke="white" stroke-width="3"/>
+        <rect x="21" y="18" width="6" height="18" rx="2" stroke="white" stroke-width="3"/>
+        <rect x="30" y="11" width="6" height="25" rx="2" stroke="white" stroke-width="3"/>
+      </svg>
+      <div class="min-w-0">
+        <div class="text-white font-bold text-xl leading-tight truncate">Vitals Tracker</div>
+        <div class="header-sub truncate">© Wendell Jiles 2026. All rights reserved.</div>
+      </div>
+    </div>
+    <div class="text-right flex-shrink-0">
+      <div id="headerTime" class="text-base text-blue-300"></div>
+      <div id="readingCount" class="text-[10px] text-slate-500">v3.2A4</div>
+    </div>
+  </div>
+</header>
+
+<main class="p-4 max-w-md mx-auto pb-28">
+  <div id="homeScreen" class="screen-transition space-y-4">
+    <div class="glass-panel home-section rounded-3xl p-6 space-y-4">
+      <button onclick="showScreen('addScreen')" class="w-full btn-primary text-white font-semibold py-6 rounded-2xl text-2xl flex items-center justify-center gap-2">Add Reading</button>
+      <div class="grid grid-cols-2 gap-4">
+        <button onclick="showScreen('chartScreen')" class="btn-secondary text-white font-semibold py-6 rounded-2xl text-xl">Charts</button>
+        <button onclick="showScreen('logScreen')" class="btn-secondary text-white font-semibold py-6 rounded-2xl text-xl">Log</button>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <button onclick="showScreen('reportScreen')" class="btn-secondary text-white font-semibold py-6 rounded-2xl text-xl">Report</button>
+        <button onclick="showScreen('settingsScreen')" class="btn-secondary text-white font-semibold py-6 rounded-2xl text-xl">Settings</button>
+      </div>
+    </div>
+    <div class="glass-panel home-section rounded-2xl p-4">
+      <h3 class="text-sm font-semibold text-slate-300 mb-3">Quick Stats (7 Days)</h3>
+      <div class="grid grid-cols-3 gap-3 text-center">
+        <div class="bg-slate-800/50 rounded-lg p-3"><div class="text-xs text-slate-500 mb-1">Avg BP</div><div id="quickAvgBP" class="text-lg font-bold text-blue-400">--</div></div>
+        <div class="bg-slate-800/50 rounded-lg p-3"><div class="text-xs text-slate-500 mb-1">Avg HR</div><div id="quickAvgHR" class="text-lg font-bold text-green-400">--</div></div>
+        <div class="bg-slate-800/50 rounded-lg p-3"><div class="text-xs text-slate-500 mb-1">Readings</div><div id="quickCount" class="text-lg font-bold text-purple-400">--</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="addScreen" class="hidden screen-transition space-y-4">
+    <div class="glass-panel rounded-3xl p-5">
+      <div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold text-white" id="addTitle">Add Reading</h2><button onclick="finishDraftAndGoHome()" class="text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-800 transition">✕</button></div>
+      <div id="addBanner" class="inline-banner inline-banner-info mb-3"></div>
+      <div class="text-center mb-4 text-blue-400 text-lg bg-slate-800/40 py-2 rounded-xl" id="currentTime"></div>
+
+      <div class="compact-block">
+        <div class="flex gap-3 justify-center items-start">
+          <div class="group-box">
+            <div class="group-label">Position</div>
+            <div class="flex gap-2 justify-center flex-wrap">
+              <button type="button" class="position-btn" data-position="Laying" onclick="selectPosition(this)">Laying</button>
+              <button type="button" class="position-btn" data-position="Sitting" onclick="selectPosition(this)">Sitting</button>
+              <button type="button" class="position-btn" data-position="Standing" onclick="selectPosition(this)">Standing</button>
+            </div>
+          </div>
+          <div class="group-box">
+            <div class="group-label">Arm</div>
+            <div class="flex gap-2 justify-center flex-wrap">
+              <button type="button" class="arm-btn" data-arm="Left" onclick="selectArm(this)">Left</button>
+              <button type="button" class="arm-btn" data-arm="Right" onclick="selectArm(this)">Right</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="compact-block">
+        <label class="block text-sm text-slate-300 compact-label font-medium">Administered By</label>
+        <div class="flex gap-2 justify-center">
+          <button type="button" class="actor-btn" data-actor="self" onclick="selectActor(this)">Self</button>
+          <button type="button" class="actor-btn" data-actor="caregiver" onclick="selectActor(this)">Caregiver</button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-3 mb-4">
+        <div><label class="block text-xs text-slate-400 mb-1 text-center font-medium">SYS</label><input type="number" id="systolic" placeholder="---" class="input-field bp-field w-full px-3 py-3 rounded-xl text-center text-white text-xl font-bold" onkeydown="handleEnter(event, 'diastolic')" oninput="handleDraftInput(event)"></div>
+        <div><label class="block text-xs text-slate-400 mb-1 text-center font-medium">DIA</label><input type="number" id="diastolic" placeholder="---" class="input-field bp-field w-full px-3 py-3 rounded-xl text-center text-white text-xl font-bold" onkeydown="handleEnter(event, 'heartRate')" oninput="handleDraftInput(event)"></div>
+        <div><label class="block text-xs text-slate-400 mb-1 text-center font-medium">HR</label><input type="number" id="heartRate" placeholder="---" class="input-field bp-field w-full px-3 py-3 rounded-xl text-center text-white text-xl font-bold" onkeydown="handleEnter(event, 'notes')" oninput="handleDraftInput(event)"></div>
+      </div>
+
+      <div class="compact-block">
+        <label class="block text-sm text-slate-300 compact-label font-medium flex justify-between"><span>Distress</span><span id="distressValue" class="text-blue-400 font-bold text-lg">0</span></label>
+        <input type="range" id="distressLevel" min="0" max="5" value="0" class="distress-slider w-full" oninput="onDistressInput(this.value)">
+      </div>
+
+      <div class="compact-block"><label class="block text-sm text-slate-300 mb-2 font-medium">Notes</label><textarea id="notes" rows="2" placeholder="Symptoms, triggers, context..." class="input-field w-full px-4 py-3 rounded-xl resize-none text-sm" oninput="handleDraftInput(event)"></textarea></div>
+
+      <div class="compact-block">
+        <label class="block text-sm text-slate-300 mb-2 font-medium">Symptoms</label>
+        <div class="grid grid-cols-2 gap-1">
+          <label class="flex items-center gap-3 cursor-pointer p-1 rounded-lg"><input type="checkbox" class="symptom-checkbox symptom-item" value="Sweaty" onclick="event.stopPropagation();" onchange="markDraftDirty()"><span class="text-slate-300 text-sm">Sweaty</span></label>
+          <label class="flex items-center gap-3 cursor-pointer p-1 rounded-lg"><input type="checkbox" class="symptom-checkbox symptom-item" value="Dizzy" onclick="event.stopPropagation();" onchange="markDraftDirty()"><span class="text-slate-300 text-sm">Dizzy</span></label>
+          <label class="flex items-center gap-3 cursor-pointer p-1 rounded-lg"><input type="checkbox" class="symptom-checkbox symptom-item" value="Panic" onclick="event.stopPropagation();" onchange="markDraftDirty()"><span class="text-slate-300 text-sm">Panic</span></label>
+          <label class="flex items-center gap-3 cursor-pointer p-1 rounded-lg"><input type="checkbox" class="symptom-checkbox symptom-item" value="Brain fog" onclick="event.stopPropagation();" onchange="markDraftDirty()"><span class="text-slate-300 text-sm">Brain fog</span></label>
+          <label class="flex items-center gap-3 cursor-pointer p-1 rounded-lg"><input type="checkbox" class="symptom-checkbox symptom-item" value="Chest tight" onclick="event.stopPropagation();" onchange="markDraftDirty()"><span class="text-slate-300 text-sm">Chest tight</span></label>
+          <label class="flex items-center gap-3 cursor-pointer p-1 rounded-lg"><input type="checkbox" class="symptom-checkbox symptom-item" value="Headache" onclick="event.stopPropagation();" onchange="markDraftDirty()"><span class="text-slate-300 text-sm">Headache</span></label>
+          <label class="flex items-center gap-3 cursor-pointer p-1 rounded-lg"><input type="checkbox" class="symptom-checkbox symptom-item" value="Nausea" onclick="event.stopPropagation();" onchange="markDraftDirty()"><span class="text-slate-300 text-sm">Nausea</span></label>
+          <label class="flex items-center gap-3 cursor-pointer p-1 rounded-lg"><input type="checkbox" class="symptom-checkbox symptom-item" value="Short breath" onclick="event.stopPropagation();" onchange="markDraftDirty()"><span class="text-slate-300 text-sm">Short breath</span></label>
+          <label class="flex items-center gap-3 cursor-pointer p-1 rounded-lg"><input type="checkbox" class="symptom-checkbox symptom-item" value="Hot ears" onclick="event.stopPropagation();" onchange="markDraftDirty()"><span class="text-slate-300 text-sm">Hot ears</span></label>
+          <label class="flex items-center gap-3 cursor-pointer p-1 rounded-lg"><input type="checkbox" class="symptom-checkbox symptom-item" value="Shaky" onclick="event.stopPropagation();" onchange="markDraftDirty()"><span class="text-slate-300 text-sm">Shaky</span></label>
+          <label class="flex items-center gap-3 cursor-pointer p-1 rounded-lg"><input type="checkbox" class="symptom-checkbox symptom-item" value="Blurred vision" onclick="event.stopPropagation();" onchange="markDraftDirty()"><span class="text-slate-300 text-sm">Blurred vision</span></label>
+          <label class="flex items-center gap-3 cursor-pointer p-1 rounded-lg"><input type="checkbox" class="symptom-checkbox symptom-item" value="Weakness" onclick="event.stopPropagation();" onchange="markDraftDirty()"><span class="text-slate-300 text-sm">Weakness</span></label>
+        </div>
+      </div>
+
+      <div class="compact-block">
+        <label class="block text-sm text-slate-300 mb-2 font-medium">Medications</label>
+        <input id="medicineInput" type="text" autocomplete="off" placeholder="Type medicine and press Enter" class="input-field w-full px-4 py-3 rounded-xl text-sm" onkeydown="handleMedicineKeydown(event)" oninput="handleMedicineTyping(event)" />
+        <div id="medicineSuggestions" class="suggestion-list"></div>
+        <div id="selectedMedicines" class="selected-meds"></div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <button onclick="finalizeCurrentDraft()" class="btn-primary text-white font-semibold py-4 rounded-2xl text-lg">Add</button>
+        <button onclick="finishDraftAndGoHome()" class="btn-secondary text-white font-semibold py-4 rounded-2xl text-lg">Back</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="chartScreen" class="hidden screen-transition space-y-4">
+    <div class="glass-panel rounded-3xl p-4">
+      <div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold text-white">Charts</h2><div class="flex gap-2"><button onclick="showScreen('addScreen')" class="btn-secondary px-4 py-2 rounded-full text-sm">Add</button><button onclick="showScreen('logScreen')" class="btn-secondary px-4 py-2 rounded-full text-sm">Log</button><button onclick="showScreen('homeScreen')" class="btn-secondary px-4 py-2 rounded-full text-sm">Home</button></div></div>
+      <div class="text-center text-slate-400 text-sm mb-3 mono bg-slate-800/30 py-2 rounded-lg" id="chartDateRange">Loading...</div>
+      <div class="legendRow"><div class="legendBox legendSys">SYS</div><div class="legendBox legendDia">DIA</div><div class="legendBox legendHr">HR</div><div class="legendBox legendDistress">DISTRESS</div></div>
+      <div class="chart-container mb-4" id="chartWrapper"><canvas id="vitalsChart"></canvas><div id="readingPopup" class="reading-popup"><div class="reading-popup-header"><span class="text-blue-200 font-bold text-base">📍 Reading</span><button class="reading-popup-close" onclick="closeReadingPopup()">×</button></div><div class="reading-popup-content" id="readingPopupContent"></div><div class="reading-popup-time" id="readingPopupTime"></div></div></div>
+    </div>
+  </div>
+
+  <div id="logScreen" class="hidden screen-transition space-y-4">
+    <div class="glass-panel rounded-3xl p-4">
+      <div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold text-white">Log</h2><div class="flex gap-2"><button onclick="showScreen('addScreen')" class="btn-secondary px-4 py-2 rounded-full text-sm">Add</button><button onclick="showScreen('chartScreen')" class="btn-secondary px-4 py-2 rounded-full text-sm">Charts</button><button onclick="showScreen('homeScreen')" class="btn-secondary px-4 py-2 rounded-full text-sm">Home</button></div></div>
+      <div id="logBanner" class="inline-banner inline-banner-success mb-4"></div>
+      <div class="text-xs text-slate-500 mb-3">Chronological log in 30-day sections.</div>
+      <div id="logEntries" class="space-y-4 max-h-[66vh] overflow-y-auto pr-1"></div>
+    </div>
+  </div>
+<div id="chartScreen" class="hidden screen-transition space-y-4">
+    <div class="glass-panel rounded-3xl p-4">
+      <div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold text-white">Charts</h2><div class="flex gap-2"><button onclick="showScreen('addScreen')" class="btn-secondary px-4 py-2 rounded-full text-sm">Add</button><button onclick="showScreen('homeScreen')" class="btn-secondary px-4 py-2 rounded-full text-sm">Home</button></div></div>
+      <div class="text-center text-slate-400 text-sm mb-3 mono bg-slate-800/30 py-2 rounded-lg" id="chartDateRange">Loading...</div>
+      <div class="legendRow"><div class="legendBox legendSys">SYS</div><div class="legendBox legendDia">DIA</div><div class="legendBox legendHr">HR</div><div class="legendBox legendDistress">DISTRESS</div></div>
+      <div class="chart-container mb-4" id="chartWrapper"><canvas id="vitalsChart"></canvas><div id="readingPopup" class="reading-popup"><div class="reading-popup-header"><span class="text-blue-200 font-bold text-base">📍 Reading</span><button class="reading-popup-close" onclick="closeReadingPopup()">×</button></div><div class="reading-popup-content" id="readingPopupContent"></div><div class="reading-popup-time" id="readingPopupTime"></div></div></div>
+    </div>
+  </div>
+
+  <div id="logScreen" class="hidden screen-transition space-y-4">
+    <div class="glass-panel rounded-3xl p-4">
+      <div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold text-white">Log</h2><div class="flex gap-2"><button onclick="showScreen('addScreen')" class="btn-secondary px-4 py-2 rounded-full text-sm">Add</button><button onclick="showScreen('homeScreen')" class="btn-secondary px-4 py-2 rounded-full text-sm">Home</button></div></div>
+      <div id="logBanner" class="inline-banner inline-banner-success mb-4"></div>
+      <div class="text-xs text-slate-500 mb-3">Chronological log in 30-day sections.</div>
+      <div id="logEntries" class="space-y-4 max-h-[66vh] overflow-y-auto pr-1"></div>
+    </div>
+  </div>
+
+  <div id="importScreen" class="hidden screen-transition space-y-4">
+    <div class="glass-panel rounded-3xl p-6">
+      <div class="flex justify-between items-center mb-6"><h2 class="text-2xl font-bold text-white">Import Data</h2><button onclick="showScreen('homeScreen')" class="text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-800 transition">✕</button></div>
+      <div id="importBanner" class="inline-banner inline-banner-info mb-4"></div>
+      <textarea id="importData" class="import-textarea" placeholder="Paste data here..."></textarea>
+      <div class="flex gap-3 mt-4"><button onclick="parseAndImport()" class="flex-1 btn-primary text-white font-semibold py-3 rounded-xl">Import</button><button onclick="showScreen('homeScreen')" class="flex-1 btn-secondary text-white font-semibold py-3 rounded-xl">Cancel</button></div>
+    </div>
+  </div>
+
+  <div id="reportScreen" class="hidden screen-transition space-y-4">
+    <div class="glass-panel rounded-3xl p-6">
+      <div class="flex justify-between items-center mb-6"><h2 class="text-2xl font-bold text-white">Clinical Report</h2><button onclick="showScreen('homeScreen')" class="text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-800 transition">✕</button></div>
+      <div id="reportContent" class="space-y-4 max-h-[60vh] overflow-y-auto pr-1"></div>
+      <button onclick="generatePDF()" class="w-full btn-primary text-white font-semibold py-4 rounded-2xl text-lg mt-6">Save as PDF</button>
+    </div>
+  </div>
+
+  <div id="settingsScreen" class="hidden screen-transition space-y-4">
+    <div class="glass-panel rounded-3xl p-6">
+      <div class="flex justify-between items-center mb-6"><h2 class="text-2xl font-bold text-white">Settings</h2><button onclick="showScreen('homeScreen')" class="text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-800 transition">✕</button></div>
+      <div id="settingsBanner" class="inline-banner inline-banner-success mb-4"></div>
+      <div class="mb-8">
+        <h3 class="text-lg font-semibold text-white mb-4">Profile</h3>
+        <label class="block text-xs text-slate-400 mb-1 uppercase tracking-wider font-semibold">Patient Name</label><input id="profileName" type="text" class="input-field w-full px-4 py-3 rounded-xl text-sm mb-4">
+        <label class="block text-xs text-slate-400 mb-1 uppercase tracking-wider font-semibold">Primary Provider</label><input id="profileDoctor" type="text" class="input-field w-full px-4 py-3 rounded-xl text-sm mb-4">
+        <label class="block text-xs text-slate-400 mb-1 uppercase tracking-wider font-semibold">Clinic/Facility</label><input id="profileClinic" type="text" class="input-field w-full px-4 py-3 rounded-xl text-sm mb-4">
+        <label class="block text-xs text-slate-400 mb-1 uppercase tracking-wider font-semibold">Diagnosed Conditions</label><textarea id="profileConditions" rows="4" class="input-field w-full px-4 py-3 rounded-xl text-sm resize-none mb-4"></textarea>
+        <button onclick="saveProfile()" class="w-full btn-primary text-white font-semibold py-3 rounded-xl text-sm">Save Profile</button>
+      </div>
+      <div class="border-t border-slate-700 pt-6"><h3 class="text-lg font-semibold text-white mb-4">Medicine List</h3><div id="settingsMedicineList" class="min-h-[20px]"></div></div>
+      <div class="border-t border-slate-700 pt-6 mt-6">
+        <h3 class="text-lg font-semibold text-white mb-4">Data Management</h3>
+        <div class="grid grid-cols-1 gap-3">
+          <button onclick="showScreen('importScreen')" class="w-full btn-secondary text-white py-3 rounded-xl text-sm">Import Data</button>
+          <button onclick="confirmClearVisible()" class="w-full btn-danger text-white py-3 rounded-xl text-sm">Delete all data</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="confirmDialog" class="confirm-dialog"><div class="confirm-box"><h3 class="text-lg font-bold text-white mb-2" id="confirmTitle">Confirm</h3><p class="text-slate-300 mb-6 leading-relaxed" id="confirmMessage">Are you sure?</p><div class="flex gap-3"><button onclick="confirmAction()" class="flex-1 btn-danger py-3 rounded-xl text-white font-semibold" id="confirmBtn">Confirm</button><button onclick="closeConfirmDialog()" class="flex-1 btn-secondary py-3 rounded-xl text-white font-semibold">Cancel</button></div></div></div>
+<div id="toastWrap" class="toast-wrap"></div>
+
+<script>
+const STORAGE_KEYS={READINGS:'vitals_readings_v3_2A3',MEDICINES:'vitals_medicines_v3_2A3',PROFILE:'vitals_profile_v3_2A3'};
+const BAND_OPACITY=.55; const MAX_READINGS=2000;
+let readings=[]; let medicines=[]; let profile={name:'',doctor:'',clinic:'',conditions:[]}; let chartInstance=null; let currentEditId=null; let currentScreenId='homeScreen'; let currentDraftId=null; let currentDraftMedicines=[]; let medicineDirtyValue=''; let confirmCallback=null; let autoSaveTimer=null;
+
+document.addEventListener('DOMContentLoaded',()=>{loadAllData(); updateTime(); setInterval(updateTime,1000); renderSettingsMedicineList(); updateQuickStats(); document.addEventListener('click',e=>{const popup=document.getElementById('readingPopup'); const chart=document.getElementById('chartWrapper'); if(popup&&chart&&!popup.contains(e.target)&&!chart.contains(e.target)) closeReadingPopup();}); document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden') autoSaveActiveDraft();}); window.addEventListener('beforeunload',()=>autoSaveActiveDraft(true)); loadProfileIntoUI(); renderMedicineSuggestions();});
+function safeJsonParse(str,fallback){try{return str?JSON.parse(str):fallback}catch{return fallback}}
+function loadAllData(){readings=safeJsonParse(localStorage.getItem(STORAGE_KEYS.READINGS),[]).map(normalizeReading); medicines=safeJsonParse(localStorage.getItem(STORAGE_KEYS.MEDICINES),[]).filter(Boolean); profile=safeJsonParse(localStorage.getItem(STORAGE_KEYS.PROFILE),{name:'',doctor:'',clinic:'',conditions:[]}); updateReadingCount();}
+function normalizeReading(r){const meds=Array.isArray(r?.medicines)?r.medicines.filter(Boolean):(typeof r?.medicine==='string'&&r.medicine.trim()?[r.medicine.trim()]:[]);return{id:r?.id||(Date.now()+Math.random()),timestamp:r?.timestamp||new Date().toISOString(),systolic:numericOrNull(r?.systolic),diastolic:numericOrNull(r?.diastolic),heartRate:numericOrNull(r?.heartRate),distress:Number.isFinite(Number(r?.distress))?Number(r.distress):0,symptoms:Array.isArray(r?.symptoms)?r.symptoms.filter(Boolean):[],medicines:meds,notes:typeof r?.notes==='string'?r.notes:'',position:r?.position??null,arm:r?.arm??null,takenBy:(r?.takenBy==='caregiver'||r?.takenBy==='self')?r.takenBy:null,hidden:Boolean(r?.hidden),complete:Boolean(r?.complete)}}
+function numericOrNull(v){if(v===''||v===undefined||v===null) return null; const n=Number(v); return Number.isFinite(n)?n:null}
+function persistAll(){localStorage.setItem(STORAGE_KEYS.READINGS,JSON.stringify(readings)); localStorage.setItem(STORAGE_KEYS.MEDICINES,JSON.stringify(medicines)); localStorage.setItem(STORAGE_KEYS.PROFILE,JSON.stringify(profile)); updateReadingCount(); updateQuickStats();}
+function updateReadingCount(){document.getElementById('readingCount').textContent='v3.3A1';}
+function updateTime(){const now=new Date(); const timeStr=now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true}); const dateStr=now.toLocaleDateString('en-US',{month:'short',day:'numeric'}); const currentEl=document.getElementById('currentTime'); const headerEl=document.getElementById('headerTime'); if(currentEl) currentEl.textContent=`${timeStr} • ${dateStr}`; if(headerEl) headerEl.textContent=timeStr;}
+function showScreen(screenId){autoSaveActiveDraft(); document.querySelectorAll('main > div').forEach(div=>div.classList.add('hidden')); const target=document.getElementById(screenId); if(target){target.classList.remove('hidden'); target.classList.add('screen-transition')} currentScreenId=screenId; if(screenId==='addScreen') openAddScreen(); else if(screenId==='chartScreen') setTimeout(initChart,50); else if(screenId==='logScreen') renderLog(); else if(screenId==='reportScreen') generateReport(); else if(screenId==='settingsScreen'){loadProfileIntoUI(); renderSettingsMedicineList();}}
+function openAddScreen(){if(currentEditId){const rec=readings.find(r=>r.id===currentEditId); if(rec){currentDraftId=rec.id; fillAddFormFromReading(rec); document.getElementById('addTitle').textContent='Edit Reading'; showInlineBanner('addBanner','Editing existing record.','info'); renderMedicineSuggestions(); renderSelectedMedicines(); return;}} currentEditId=null; currentDraftId=null; medicineDirtyValue=''; document.getElementById('addTitle').textContent='Add Reading'; resetAddForm(); renderMedicineSuggestions(); renderSelectedMedicines(); hideInlineBanner('addBanner');}
+function resetAddForm(){document.getElementById('systolic').value=''; document.getElementById('diastolic').value=''; document.getElementById('heartRate').value=''; document.getElementById('notes').value=''; document.getElementById('distressLevel').value=0; document.getElementById('distressValue').textContent='0'; document.getElementById('medicineInput').value=''; document.querySelectorAll('.symptom-item').forEach(cb=>cb.checked=false); document.querySelectorAll('.position-btn,.arm-btn,.actor-btn').forEach(b=>b.classList.remove('active')); medicineDirtyValue=''; currentDraftMedicines=[]; currentDraftId=null; renderSelectedMedicines();}
+function fillAddFormFromReading(rec){document.getElementById('systolic').value=rec.systolic??''; document.getElementById('diastolic').value=rec.diastolic??''; document.getElementById('heartRate').value=rec.heartRate??''; document.getElementById('notes').value=rec.notes||''; document.getElementById('distressLevel').value=rec.distress??0; document.getElementById('distressValue').textContent=String(rec.distress??0); document.getElementById('medicineInput').value=''; document.querySelectorAll('.symptom-item').forEach(cb=>cb.checked=(rec.symptoms||[]).includes(cb.value)); document.querySelectorAll('.position-btn').forEach(b=>b.classList.toggle('active',rec.position&&b.dataset.position===rec.position)); document.querySelectorAll('.arm-btn').forEach(b=>b.classList.toggle('active',rec.arm&&b.dataset.arm===rec.arm)); document.querySelectorAll('.actor-btn').forEach(b=>b.classList.toggle('active',rec.takenBy&&b.dataset.actor===rec.takenBy)); currentDraftMedicines=[...(rec.medicines||[])]; medicineDirtyValue=''; renderSelectedMedicines();}
+function handleEnter(e,nextId){if(e.key==='Enter'){e.preventDefault(); const next=document.getElementById(nextId); if(next) next.focus();}}
+function selectPosition(btn){const active=btn.classList.contains('active'); document.querySelectorAll('.position-btn').forEach(b=>b.classList.remove('active')); if(!active) btn.classList.add('active'); ensureDraftExists(); scheduleDraftSave();}
+function selectArm(btn){const active=btn.classList.contains('active'); document.querySelectorAll('.arm-btn').forEach(b=>b.classList.remove('active')); if(!active) btn.classList.add('active'); ensureDraftExists(); scheduleDraftSave();}
+function selectActor(btn){const active=btn.classList.contains('active'); document.querySelectorAll('.actor-btn').forEach(b=>b.classList.remove('active')); if(!active) btn.classList.add('active'); ensureDraftExists(); scheduleDraftSave();}
+function onDistressInput(value){document.getElementById('distressValue').textContent=value; ensureDraftExists(); scheduleDraftSave();}
+function handleDraftInput(e){const value=e.target.value??''; if(String(value).length>=1||e.target.type==='number'){ensureDraftExists(); scheduleDraftSave();}}
+function markDraftDirty(){const y=window.scrollY; ensureDraftExists(); scheduleDraftSave(); requestAnimationFrame(()=>window.scrollTo(0,y));}
+function ensureDraftExists(){if(currentDraftId) return currentDraftId; if(readings.length>=MAX_READINGS){showToast('Maximum reading limit reached.','danger'); return null;} const rec=normalizeReading({id:currentEditId||Date.now(),timestamp:new Date().toISOString(),hidden:false,complete:false}); currentDraftId=rec.id; if(!readings.some(r=>r.id===rec.id)){readings.unshift(rec); persistAll();} return currentDraftId;}
+function buildReadingFromForm(existingTimestamp){const hasBP=document.getElementById('systolic').value!==''||document.getElementById('diastolic').value!==''; const position=document.querySelector('.position-btn.active')?.dataset.position||null; const arm=document.querySelector('.arm-btn.active')?.dataset.arm||null; const takenBy=document.querySelector('.actor-btn.active')?.dataset.actor||null; const rec=normalizeReading({id:currentDraftId||currentEditId||Date.now(),timestamp:existingTimestamp||new Date().toISOString(),systolic:document.getElementById('systolic').value,diastolic:document.getElementById('diastolic').value,heartRate:document.getElementById('heartRate').value,distress:Number(document.getElementById('distressLevel').value||0),notes:document.getElementById('notes').value||'',medicines:[...currentDraftMedicines],position:hasBP?position:null,arm:hasBP?arm:null,takenBy:hasBP?takenBy:null,symptoms:Array.from(document.querySelectorAll('.symptom-item:checked')).map(cb=>cb.value)}); rec.complete=isRecordCompleteEnough(rec); return rec;}
+function isRecordCompleteEnough(rec){return Boolean(rec.systolic!==null||rec.diastolic!==null||rec.heartRate!==null||(rec.notes||'').trim()||(rec.medicines||[]).length||(rec.symptoms||[]).length||Number(rec.distress||0)>0||rec.takenBy==='caregiver');}
+function scheduleDraftSave(){clearTimeout(autoSaveTimer); autoSaveTimer=setTimeout(()=>autoSaveActiveDraft(),220)}
+function autoSaveActiveDraft(force=false){if(currentScreenId!=='addScreen') return; if(!currentDraftId&&!currentEditId&&!force) return; const existing=readings.find(r=>r.id===(currentDraftId||currentEditId)); const timestamp=existing?.timestamp||new Date().toISOString(); const rec=buildReadingFromForm(timestamp); const idx=readings.findIndex(r=>r.id===rec.id); if(idx>=0) readings[idx]=rec; else readings.unshift(rec); currentDraftId=rec.id; currentEditId=rec.id; persistAll(); renderMedicineSuggestions();}
+function finalizeCurrentDraft(){if(!currentDraftId&&!currentEditId) ensureDraftExists(); autoSaveActiveDraft(true); showToast('Record kept.','success'); finishDraftAndGoHome();}
+function finishDraftAndGoHome(){autoSaveActiveDraft(true); currentEditId=null; currentDraftId=null; medicineDirtyValue=''; showScreen('homeScreen');}
+function handleMedicineTyping(e){medicineDirtyValue=e.target.value||''; renderMedicineSuggestions(medicineDirtyValue);}
+function handleMedicineKeydown(e){if(e.key==='Enter'){e.preventDefault(); commitMedicineFromInput();}}
+function commitMedicineFromInput(){const input=document.getElementById('medicineInput'); const value=(input.value||'').trim(); if(!value) return; addMedicineToList(value); if(!currentDraftMedicines.some(m=>m.toLowerCase()===value.toLowerCase())) currentDraftMedicines.push(value); ensureDraftExists(); input.value=''; medicineDirtyValue=''; renderMedicineSuggestions(''); renderSelectedMedicines(); scheduleDraftSave(); input.focus();}
+function addMedicineToList(value){const clean=String(value).trim(); if(!clean) return; const exists=medicines.some(m=>m.toLowerCase()===clean.toLowerCase()); if(!exists){medicines.unshift(clean); localStorage.setItem(STORAGE_KEYS.MEDICINES,JSON.stringify(medicines)); renderSettingsMedicineList();}}
+function renderMedicineSuggestions(filter=''){const container=document.getElementById('medicineSuggestions'); if(!container) return; const q=(filter||'').trim().toLowerCase(); const items=medicines.filter(m=>!q||m.toLowerCase().includes(q)).slice(0,12); container.innerHTML=items.map(m=>`<div class="suggestion-item" onclick="selectMedicineSuggestion('${escapeJs(m)}')">${escapeHtml(m)}</div>`).join('');}
+function selectMedicineSuggestion(value){addMedicineToList(value); if(!currentDraftMedicines.some(m=>m.toLowerCase()===value.toLowerCase())) currentDraftMedicines.push(value); ensureDraftExists(); const input=document.getElementById('medicineInput'); input.value=''; medicineDirtyValue=''; renderMedicineSuggestions(''); renderSelectedMedicines(); scheduleDraftSave(); input.focus();}
+function renderSelectedMedicines(){const el=document.getElementById('selectedMedicines'); if(!el) return; el.innerHTML=currentDraftMedicines.map((m,i)=>`<div class="selected-med-chip"><span>${escapeHtml(m)}</span><span class="selected-med-chip-x" onclick="removeSelectedMedicine(${i})">×</span></div>`).join('');}
+function removeSelectedMedicine(idx){currentDraftMedicines.splice(idx,1); renderSelectedMedicines(); ensureDraftExists(); scheduleDraftSave(); document.getElementById('medicineInput')?.focus();}
+function removeMedicineItem(value){medicines=medicines.filter(m=>m.toLowerCase()!==String(value).toLowerCase()); localStorage.setItem(STORAGE_KEYS.MEDICINES,JSON.stringify(medicines)); renderSettingsMedicineList(); renderMedicineSuggestions(document.getElementById('medicineInput')?.value||''); document.getElementById('medicineInput')?.focus();}
+function renderSettingsMedicineList(){const container=document.getElementById('settingsMedicineList'); if(!container) return; if(!medicines.length){container.innerHTML='<div class="text-sm text-slate-500">No medicine items saved yet.</div>'; return;} container.innerHTML=medicines.map(m=>`<div class="medicine-chip"><span class="medicine-chip-text">${escapeHtml(m)}</span><span class="medicine-chip-x" onclick="removeMedicineItem('${escapeJs(m)}')">×</span></div>`).join('');}
+function updateQuickStats(){const sevenDaysAgo=new Date(Date.now()-7*24*60*60*1000); const recent=visibleReadings().filter(r=>new Date(r.timestamp)>=sevenDaysAgo); const sysValues=recent.map(r=>r.systolic).filter(v=>v!==null); const diaValues=recent.map(r=>r.diastolic).filter(v=>v!==null); const hrValues=recent.map(r=>r.heartRate).filter(v=>v!==null); const avgSys=sysValues.length?Math.round(sysValues.reduce((a,b)=>a+b,0)/sysValues.length):'--'; const avgDia=diaValues.length?Math.round(diaValues.reduce((a,b)=>a+b,0)/diaValues.length):'--'; const avgHR=hrValues.length?Math.round(hrValues.reduce((a,b)=>a+b,0)/hrValues.length):'--'; document.getElementById('quickAvgBP').textContent=avgSys!=='--'?`${avgSys}/${avgDia}`:'--'; document.getElementById('quickAvgHR').textContent=avgHR; document.getElementById('quickCount').textContent=recent.length;}
+function visibleReadings(){return readings.filter(r=>!r.hidden).sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));}
+function confirmHideRecord(id){confirmCallback=()=>{hideRecord(id); closeConfirmDialog();}; document.getElementById('confirmTitle').textContent='Delete Record'; document.getElementById('confirmMessage').textContent='Delete this record from the visible app views? It remains recoverable on our side.'; document.getElementById('confirmBtn').textContent='Delete'; document.getElementById('confirmDialog').classList.add('active');}
+function hideRecord(id){const idx=readings.findIndex(r=>r.id===id); if(idx>=0){readings[idx].hidden=true; persistAll(); renderLog(); if(currentScreenId==='chartScreen') initChart(); showToast('Record deleted from visible view.','info');}}
+function editRecord(id){currentEditId=id; showScreen('addScreen');}
+function renderLog(){const container=document.getElementById('logEntries'); const data=visibleReadings(); if(!data.length){container.innerHTML='<div class="text-slate-500 text-center py-10">No visible records.</div>'; return;} const groups=groupReadingsInto30DayBlocks(data); container.innerHTML=groups.map(group=>`<div class="space-y-3"><div class="day-block-label">${escapeHtml(group.label)}</div>${group.items.map(r=>renderLogEntry(r)).join('')}</div>`).join('');}
+function groupReadingsInto30DayBlocks(sortedDescReadings){const groups=[]; let cursor=null; let currentItems=[]; sortedDescReadings.forEach(rec=>{const d=new Date(rec.timestamp); const keyStart=startOf30DayWindow(d).toISOString(); if(cursor===null) cursor=keyStart; if(keyStart!==cursor){const start=new Date(cursor); const end=new Date(start.getTime()+29*24*60*60*1000); groups.push({label:`${start.toLocaleDateString('en-US')} → ${end.toLocaleDateString('en-US')}`,items:currentItems}); currentItems=[]; cursor=keyStart;} currentItems.push(rec);}); if(currentItems.length){const start=new Date(cursor); const end=new Date(start.getTime()+29*24*60*60*1000); groups.push({label:`${start.toLocaleDateString('en-US')} → ${end.toLocaleDateString('en-US')}`,items:currentItems});} return groups;}
+function startOf30DayWindow(d){const date=new Date(d.getFullYear(),d.getMonth(),d.getDate()); const epoch=new Date(2026,0,1); const diffDays=Math.floor((date-epoch)/(24*60*60*1000)); const bucketStart=Math.floor(diffDays/30)*30; return new Date(epoch.getTime()+bucketStart*24*60*60*1000);}
+function renderLogEntry(r){const dt=new Date(r.timestamp); const bpDisplay=`${r.systolic??'--'}/${r.diastolic??'--'}`; const hrDisplay=`${r.heartRate??'--'}`; const medicinesLine=(r.medicines||[]).length?`<div class="text-xs text-yellow-300 mt-2">Medications: ${r.medicines.map(escapeHtml).join(', ')}</div>`:`<div class="text-xs text-slate-500 mt-2">Medications: --</div>`; const notesLine=`<div class="text-xs text-slate-400 mt-2 whitespace-pre-wrap">Notes: ${escapeHtml((r.notes&&r.notes.trim())?r.notes:'--')}</div>`; const symptomsLine=(r.symptoms||[]).length?`<div class="text-xs text-slate-400 mt-2">Symptoms: ${r.symptoms.map(escapeHtml).join(', ')}</div>`:`<div class="text-xs text-slate-500 mt-2">Symptoms: --</div>`; const contextLine=`Position: ${r.position?escapeHtml(r.position):'--'} • Arm: ${r.arm?escapeHtml(r.arm):'--'} • Administered by: ${r.takenBy==='caregiver'?'Caregiver':(r.takenBy==='self'?'Self':'--')}`; return `<div class="log-entry p-4"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="text-sm font-semibold text-white">${dt.toLocaleDateString('en-US')} ${dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}</div><div class="text-xs text-slate-500 mt-1">${contextLine}</div></div></div><div class="grid grid-cols-3 gap-2 mt-4 text-center"><div class="bg-slate-800/50 rounded-lg p-2"><div class="text-[10px] text-slate-500">SYS/DIA</div><div class="text-sm font-bold text-blue-300">${bpDisplay}</div></div><div class="bg-slate-800/50 rounded-lg p-2"><div class="text-[10px] text-slate-500">HR</div><div class="text-sm font-bold text-green-300">${hrDisplay}</div></div><div class="bg-slate-800/50 rounded-lg p-2"><div class="text-[10px] text-slate-500">Distress</div><div class="text-sm font-bold text-pink-300">${r.distress??0}</div></div></div>${medicinesLine}${symptomsLine}${notesLine}<div class="grid grid-cols-2 gap-3 mt-4"><button onclick="editRecord(${JSON.stringify(r.id)})" class="btn-secondary text-white py-2 rounded-xl text-sm font-semibold">Edit</button><button onclick="confirmHideRecord(${JSON.stringify(r.id)})" class="btn-danger text-white py-2 rounded-xl text-sm font-semibold">Delete</button></div></div>`;}
+function copyVisibleLogToClipboard(){const data=visibleReadings(); if(!data.length){showInlineBanner('logBanner','No visible records to copy.','info'); return;} const text=data.map(r=>{const dt=new Date(r.timestamp); const lines=[`${dt.toLocaleDateString('en-US')}, ${dt.toLocaleTimeString('en-US')}`,`BP ${r.systolic??'--'}/${r.diastolic??'--'} • HR ${r.heartRate??'--'}`,`Distress ${r.distress??0}`]; if(r.position||r.arm||r.takenBy) lines.push(`Context ${r.position||'--'} • ${r.arm||'--'} • ${r.takenBy||'--'}`); if((r.medicines||[]).length) lines.push(`Medicine: ${r.medicines.join(', ')}`); if((r.symptoms||[]).length) lines.push(`Symptoms: ${r.symptoms.join(', ')}`); if(r.notes) lines.push(`Notes: ${r.notes}`); return lines.join('\n');}).join('\n\n'); navigator.clipboard.writeText(text).then(()=>{showInlineBanner('logBanner','Visible log copied to clipboard.','success'); showToast('Copied to clipboard.','success');}).catch(()=>showInlineBanner('logBanner','Clipboard copy failed on this device/browser.','danger'));}
+function initChart(){const canvas=document.getElementById('vitalsChart'); if(!canvas) return; closeReadingPopup(); if(chartInstance){chartInstance.destroy(); chartInstance=null;} const sortedAsc=[...visibleReadings()].sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp)); if(!sortedAsc.length){document.getElementById('chartDateRange').textContent='No visible data'; return;} const sysPts=[],diaPts=[],hrPts=[],disPts=[],medEvents=[]; sortedAsc.forEach(r=>{const x=new Date(r.timestamp).getTime(); if(r.systolic!=null) sysPts.push({x,y:r.systolic,_id:r.id}); if(r.diastolic!=null) diaPts.push({x,y:r.diastolic,_id:r.id}); if(r.heartRate!=null) hrPts.push({x,y:r.heartRate,_id:r.id}); disPts.push({x,y:Number(r.distress??0),_id:r.id}); if((r.medicines||[]).length) medEvents.push({x,medicines:r.medicines,id:r.id});}); const minXAll=Math.min(...sortedAsc.map(r=>new Date(r.timestamp).getTime())); const maxXAll=Math.max(...sortedAsc.map(r=>new Date(r.timestamp).getTime())); const FIVE_DAYS=5*24*60*60*1000; const pad=60*60*1000; const initMax=maxXAll+pad; const initMin=Math.max(minXAll-pad,initMax-FIVE_DAYS); function xTickLabel(ts){const scale=chartInstance?.scales?.x; const range=scale?(scale.max-scale.min):FIVE_DAYS; const d=new Date(ts); if(range<=2*24*60*60*1000) return d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}); if(range<=10*24*60*60*1000) return d.toLocaleDateString('en-US',{weekday:'short',month:'numeric',day:'numeric'}); return d.toLocaleDateString('en-US',{month:'numeric',day:'numeric'});} const backgroundBandsPlugin={id:'backgroundBands',beforeDraw(chart){const{ctx,chartArea,scales}=chart; if(!chartArea) return; const y=scales.y; const x=scales.x; const bands=[{min:180,max:y.max,color:`rgba(185, 28, 28, ${BAND_OPACITY})`},{min:140,max:180,color:`rgba(239, 68, 68, ${BAND_OPACITY})`},{min:130,max:140,color:`rgba(234, 179, 8, ${BAND_OPACITY})`},{min:120,max:130,color:`rgba(168, 85, 247, ${BAND_OPACITY})`},{min:y.min,max:120,color:`rgba(59, 130, 246, ${BAND_OPACITY*.5})`}]; ctx.save(); for(const b of bands){if(b.min>=y.max||b.max<=y.min) continue; const clampedMin=Math.max(b.min,y.min); const clampedMax=Math.min(b.max,y.max); const yTop=y.getPixelForValue(clampedMax); const yBottom=y.getPixelForValue(clampedMin); ctx.fillStyle=b.color; ctx.fillRect(x.left,yTop,x.width,yBottom-yTop);} ctx.restore();}}; const medicinePlugin={id:'medicineLines',afterDatasetsDraw(chart){if(!medEvents.length) return; const{ctx,scales}=chart; const x=scales.x; const y=scales.y; ctx.save(); medEvents.forEach(ev=>{const px=x.getPixelForValue(ev.x); if(px<x.left-10||px>x.right+10) return; ctx.strokeStyle='#fbbf24'; ctx.lineWidth=3; ctx.setLineDash([8,4]); ctx.beginPath(); ctx.moveTo(px,y.top); ctx.lineTo(px,y.bottom); ctx.stroke(); ctx.setLineDash([]);}); ctx.restore();}}; chartInstance=new Chart(canvas.getContext('2d'),{type:'line',data:{datasets:[{label:'SYS',data:sysPts,parsing:false,borderColor:'#60a5fa',backgroundColor:'rgba(96,165,250,0.10)',tension:.3,pointRadius:5,pointHoverRadius:8,pointBackgroundColor:'#60a5fa',spanGaps:true,yAxisID:'y'},{label:'DIA',data:diaPts,parsing:false,borderColor:'#e2e8f0',backgroundColor:'rgba(226,232,240,0.10)',tension:.3,pointRadius:5,pointHoverRadius:8,pointBackgroundColor:'#e2e8f0',spanGaps:true,yAxisID:'y'},{label:'HR',data:hrPts,parsing:false,borderColor:'#4ade80',backgroundColor:'rgba(74,222,128,0.08)',tension:.3,pointRadius:4,pointHoverRadius:6,pointBackgroundColor:'#4ade80',spanGaps:true,yAxisID:'y'},{label:'Distress',data:disPts,parsing:false,borderColor:'#f472b6',backgroundColor:'rgba(244,114,182,0.08)',tension:.3,pointRadius:3,pointHoverRadius:5,pointBackgroundColor:'#f472b6',borderDash:[6,4],spanGaps:true,yAxisID:'y2'}]},options:{responsive:true,maintainAspectRatio:false,animation:false,normalized:true,interaction:{mode:'nearest',intersect:true},layout:{padding:{left:8,right:10,top:6,bottom:6}},plugins:{legend:{display:false},tooltip:{enabled:false},zoom:{pan:{enabled:true,mode:'x',onPanComplete:()=>updateDateRange()},zoom:{pinch:{enabled:true},mode:'x',onZoomComplete:()=>updateDateRange()},limits:{x:{min:minXAll,max:maxXAll,minRange:60*60*1000,maxRange:45*24*60*60*1000}}}},scales:{x:{type:'time',min:initMin,max:initMax,ticks:{color:'#94a3b8',maxRotation:0,minRotation:0,autoSkip:true,maxTicksLimit:6,callback:val=>xTickLabel(val)},grid:{color:'rgba(148, 163, 184, 0.10)'}},y:{min:0,max:220,ticks:{color:'#94a3b8',callback:v=>String(v).padStart(3,' ')},grid:{color:'rgba(148, 163, 184, 0.10)'},title:{display:true,text:'BP / HR',color:'#64748b'}},y2:{min:0,max:5,display:false,grid:{drawOnChartArea:false}}}},plugins:[backgroundBandsPlugin,medicinePlugin]}); canvas.onclick=(e)=>{const elements=chartInstance.getElementsAtEventForMode(e,'nearest',{intersect:true},true); if(elements&&elements.length){const el=elements[0]; const ds=chartInstance.data.datasets[el.datasetIndex]; const pt=ds.data[el.index]; const rec=readings.find(r=>r.id===pt._id)||null; if(rec){showReadingPopup(e.clientX,e.clientY,rec); return;}} closeReadingPopup();}; updateDateRange();}
+function updateDateRange(){if(!chartInstance) return; const min=new Date(chartInstance.scales.x.min); const max=new Date(chartInstance.scales.x.max); document.getElementById('chartDateRange').textContent=`${min.toLocaleDateString('en-US')} → ${max.toLocaleDateString('en-US')}`; chartInstance.update('none');}
+function showReadingPopup(clientX,clientY,reading){const popup=document.getElementById('readingPopup'); const content=document.getElementById('readingPopupContent'); const timeEl=document.getElementById('readingPopupTime'); const date=new Date(reading.timestamp); content.innerHTML=`<div class="space-y-2"><div class="flex items-center justify-between text-sm"><span class="text-slate-300">SYS</span><span class="text-blue-300 font-bold">${reading.systolic??'--'}</span></div><div class="flex items-center justify-between text-sm"><span class="text-slate-300">DIA</span><span class="text-slate-200 font-bold">${reading.diastolic??'--'}</span></div><div class="flex items-center justify-between text-sm"><span class="text-slate-300">HR</span><span class="text-green-300 font-bold">${reading.heartRate??'--'}</span></div><div class="flex items-center justify-between text-sm"><span class="text-slate-300">Distress</span><span class="text-pink-300 font-bold">${reading.distress??0}</span></div>${(reading.position||reading.arm||reading.takenBy)?`<div class="text-xs text-slate-500">Position: <span class="text-slate-300">${escapeHtml(reading.position||'--')}</span> • Arm: <span class="text-slate-300">${escapeHtml(reading.arm||'--')}</span> • Administered by: <span class="text-slate-300">${reading.takenBy==='caregiver'?'Caregiver':(reading.takenBy==='self'?'Self':'--')}</span></div>`:''}${(reading.medicines||[]).length?`<div class="mt-2 text-xs text-yellow-300">Medicine: ${reading.medicines.map(escapeHtml).join(', ')}</div>`:''}${(reading.symptoms||[]).length?`<div class="mt-2 text-xs text-slate-300">Symptoms: ${reading.symptoms.map(escapeHtml).join(', ')}</div>`:''}${reading.notes?`<div class="mt-2 text-xs text-slate-400 whitespace-pre-wrap">${escapeHtml(reading.notes)}</div>`:''}</div>`; timeEl.textContent=date.toLocaleString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}); const chartRect=document.getElementById('chartWrapper').getBoundingClientRect(); let popupX=clientX-chartRect.left-120; let popupY=clientY-chartRect.top-10; popupX=Math.max(10,Math.min(popupX,chartRect.width-260)); popupY=Math.max(10,Math.min(popupY,chartRect.height-220)); popup.style.left=popupX+'px'; popup.style.top=popupY+'px'; popup.style.display='block';}
+function closeReadingPopup(){const popup=document.getElementById('readingPopup'); if(popup) popup.style.display='none';}
+function saveProfile(){profile={name:(document.getElementById('profileName').value||'').trim(),doctor:(document.getElementById('profileDoctor').value||'').trim(),clinic:(document.getElementById('profileClinic').value||'').trim(),conditions:(document.getElementById('profileConditions').value||'').split('\n').map(s=>s.trim()).filter(Boolean)}; persistAll(); showInlineBanner('settingsBanner','Profile saved.','success'); showToast('Profile saved.','success');}
+function loadProfileIntoUI(){document.getElementById('profileName').value=profile?.name||''; document.getElementById('profileDoctor').value=profile?.doctor||''; document.getElementById('profileClinic').value=profile?.clinic||''; document.getElementById('profileConditions').value=(profile?.conditions||[]).join('\n');}
+function parseAndImport(){showInlineBanner('importBanner','Import parser not expanded in this build yet.','info');}
+function generateReport(){const container=document.getElementById('reportContent'); const now=new Date(); const recent=visibleReadings().slice(0,20); if(!recent.length){container.innerHTML='<div class="text-slate-500 text-center py-8">No visible data.</div>'; return;} container.innerHTML=`<div class="report-section"><h3 class="text-lg font-bold text-white mb-2">Clinical Summary</h3><p class="text-slate-400 text-sm mb-1">Generated: ${now.toLocaleString('en-US')}</p><p class="text-slate-400 text-sm mb-3">Visible readings: ${recent.length}</p></div>${recent.map(r=>`<div class="report-section"><div class="text-slate-200 font-semibold">${new Date(r.timestamp).toLocaleString('en-US')}</div><div class="text-slate-300 text-sm">BP ${r.systolic??'--'}/${r.diastolic??'--'} • HR ${r.heartRate??'--'} • Distress ${r.distress??0}</div>${(r.medicines||[]).length?`<div class="text-xs text-yellow-300 mt-2">Medications: ${r.medicines.map(escapeHtml).join(', ')}</div>`:''}${r.notes?`<div class="text-xs text-slate-500 mt-2">${escapeHtml(r.notes)}</div>`:''}</div>`).join('')}`;}
+function generatePDF(){const{jsPDF}=window.jspdf; const doc=new jsPDF(); doc.setFontSize(18); doc.text('Vitals Tracker - Clinical Report',14,18); doc.setFontSize(10); doc.text('VERSION: v3.3A1
+function confirmClearVisible(){confirmCallback=()=>{clearVisibleData(); closeConfirmDialog();}; document.getElementById('confirmTitle').textContent='Clear Visible Records'; document.getElementById('confirmMessage').textContent='This will remove all currently visible records. Hidden records remain untouched.'; document.getElementById('confirmBtn').textContent='Clear'; document.getElementById('confirmDialog').classList.add('active');}
+function clearVisibleData(){readings=readings.filter(r=>r.hidden); persistAll(); renderLog(); if(currentScreenId==='chartScreen') initChart(); showToast('Visible records cleared.','danger');}
+function closeConfirmDialog(){document.getElementById('confirmDialog').classList.remove('active'); confirmCallback=null;}
+function confirmAction(){if(confirmCallback) confirmCallback();}
+function showInlineBanner(id,message,type='info'){const el=document.getElementById(id); if(!el) return; el.className='inline-banner visible'; el.classList.add(type==='success'?'inline-banner-success':type==='danger'?'inline-banner-danger':'inline-banner-info'); el.textContent=message;}
+function hideInlineBanner(id){const el=document.getElementById(id); if(!el) return; el.className='inline-banner'; el.textContent='';}
+function showToast(message,type='info'){const wrap=document.getElementById('toastWrap'); const el=document.createElement('div'); el.className=`toast ${type}`; el.textContent=message; wrap.appendChild(el); setTimeout(()=>{el.style.opacity='0'; el.style.transform='translateY(10px)'; setTimeout(()=>el.remove(),180)},1800)}
+function escapeHtml(str){return String(str).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');}
+function escapeJs(str){return String(str).replaceAll('\\','\\\\').replaceAll("'","\\'").replaceAll('"','\\"').replaceAll('\n','\\n').replaceAll('\r','');}
+</script>
+</body>
+</html>
