@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vitals Tracker v1.1B</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-slate-50">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const STORAGE_KEY = "ad_ble_vitals_v1_1B";
+    const BP_SERVICE = 0x1810;
+    const BP_MEASUREMENT = 0x2A35;
+
+    function parseSfloatLE(view, offset) {
+      const raw = view.getUint16(offset, true);
+      let mantissa = raw & 0x0fff;
+      let exponent = raw >> 12;
+      if (mantissa >= 0x0800) mantissa = -(0x1000 - mantissa);
+      if (exponent >= 0x0008) exponent = -(0x0010 - exponent);
+      return mantissa * Math.pow(10, exponent);
+    }
+
+    function mmhgFromKpa(kpa) {
+      return kpa * 7.50062;
+    }
+
+    function parseBP(value) {
+      const flags = value.getUint8(0);
+      const isKpa = (flags & 0x01) === 0x01;
+      const hasTimestamp = (flags & 0x02) === 0x02;
+      const hasPulse = (flags & 0x04) === 0x04;
+
+      let offset = 1;
+      let systolic = parseSfloatLE(value, offset); offset += 2;
+      let diastolic = parseSfloatLE(value, offset); offset += 2;
+      let map = parseSfloatLE(value, offset); offset += 2;
+
+      if (isKpa) {
+        systolic = mmhgFromKpa(systolic);
+        diastolic = mmhgFromKpa(diastolic);
+        map = mmhgFromKpa(map);
+      }
+
+      let measuredAt = new Date();
+      if (hasTimestamp) {
+        const year = value.getUint16(offset, true);
+        const month = value.getUint8(offset + 2);
+        const day = value.getUint8(offset + 3);
+        const hour = value.getUint8(offset + 4);
+        const minute = value.getUint8(offset + 5);
+        const second = value.getUint8(offset + 6);
+        measuredAt = new Date(year, month - 1, day, hour, minute, second);
+        offset += 7;
+      }
+
+      let pulse = null;
+      if (hasPulse && value.byteLength >= offset + 2) {
+        pulse = parseSfloatLE(value, offset);
+      }
+
+      return {
+        systolic: Math.round(systolic),
+        diastolic: Math.round(diastolic),
+        pulse: pulse == null ? null : Math.round(pulse),
+        map: Math.round(map),
+        measuredAt: measuredAt.toLocaleString(),
+      };
+    }
+
+    function load() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return { readings: [] };
+        return JSON.parse(raw);
+      } catch {
+        return { readings: [] };
+      }
+    }
+
+    function save(state) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function App() {
+      const [state, setState] = React.useState(load);
+      const [status, setStatus] = React.useState("Disconnected");
+      const [error, setError] = React.useState("");
+      const [deviceName, setDeviceName] = React.useState("");
+      const [symptoms, setSymptoms] = React.useState("");
+      const [distress, setDistress] = React.useState(0);
+      const [meds, setMeds] = React.useState("");
+      const deviceRef = React.useRef(null);
+      const characteristicRef = React.useRef(null);
+
+      React.useEffect(() => save(state), [state]);
+
+      async function connect() {
+        setError("");
+        try {
+          if (!navigator.bluetooth) {
+            throw new Error("Web Bluetooth is not available in this browser.");
+          }
+
+          setStatus("Requesting device...");
+          const device = await navigator.bluetooth.requestDevice({
+            filters: [
+              { services: [BP_SERVICE] },
+              { namePrefix: "A&D_" },
+              { namePrefix: "UA-" }
+            ],
+            optionalServices: [BP_SERVICE]
+          });
+
+          deviceRef.current = device;
+          setDeviceName(device.name || "Unknown device");
+
+          device.addEventListener("gattserverdisconnected", () => {
+            setStatus("Disconnected");
+          });
+
+          setStatus("Connecting...");
+          const server = await device.gatt.connect();
+          const service = await server.getPrimaryService(BP_SERVICE);
+          const characteristic = await service.getCharacteristic(BP_MEASUREMENT);
+          characteristicRef.current = characteristic;
+
+          await characteristic.startNotifications();
+          characteristic.addEventListener("characteristicvaluechanged", (event) => {
+            try {
+              const parsed = parseBP(event.target.value);
+              const entry = {
+                id: crypto.randomUUID(),
+                ...parsed,
+                symptoms,
+                distress,
+                meds,
+                source: "bluetooth"
+              };
+              setState(prev => ({ readings: [entry, ...prev.readings] }));
+              setStatus("Connected - reading received");
+            } catch (e) {
+              setError("Parse error: " + (e.message || String(e)));
+            }
+          });
+
+          setStatus("Connected - take a cuff reading now");
+        } catch (e) {
+          setStatus("Error");
+          setError((e && e.name ? e.name + ": " : "") + (e && e.message ? e.message : String(e)));
+        }
+      }
+
+      async function disconnect() {
+        try {
+          if (deviceRef.current && deviceRef.current.gatt && deviceRef.current.gatt.connected) {
+            deviceRef.current.gatt.disconnect();
+          }
+          setStatus("Disconnected");
+        } catch (e) {
+          setError((e && e.message) ? e.message : String(e));
+        }
+      }
+
+      return (
+        <div className="max-w-3xl mx-auto p-5">
+          <h1 className="text-4xl font-bold mb-4">Vitals Tracker v1.1B</h1>
+
+          <div className="flex flex-wrap gap-3 mb-4">
+            <button onClick={connect} className="border rounded-xl px-4 py-2 bg-white shadow-sm">
+              Connect Bluetooth
+            </button>
+            <button onClick={disconnect} className="border rounded-xl px-4 py-2 bg-white shadow-sm">
+              Disconnect
+            </button>
+          </div>
+
+          <div className="mb-2 text-lg">Status: {status}</div>
+          {deviceName ? <div className="mb-2 text-sm text-slate-600">Device: {deviceName}</div> : null}
+          {error ? <div className="mb-4 p-3 rounded-xl border border-red-300 bg-red-50 text-red-700 text-sm">{error}</div> : null}
+
+          <div className="grid gap-4 mb-6">
+            <input
+              value={symptoms}
+              onChange={(e) => setSymptoms(e.target.value)}
+              placeholder="Symptoms"
+              className="border rounded-xl p-3 bg-white"
+            />
+            <div>
+              <div className="mb-2">Distress: {distress}</div>
+              <input
+                type="range"
+                min="0"
+                max="5"
+                value={distress}
+                onChange={(e) => setDistress(Number(e.target.value))}
+                className="w-full"
+              />
+            </div>
+            <input
+              value={meds}
+              onChange={(e) => setMeds(e.target.value)}
+              placeholder="Medications"
+              className="border rounded-xl p-3 bg-white"
+            />
+          </div>
+
+          <div className="space-y-3">
+            {state.readings.length === 0 ? (
+              <div className="border rounded-xl p-4 bg-white text-slate-500">No readings yet.</div>
+            ) : (
+              state.readings.map((r) => (
+                <div key={r.id} className="border rounded-xl p-4 bg-white shadow-sm">
+                  <div className="text-xl font-semibold">
+                    {r.systolic}/{r.diastolic}{r.pulse != null ? ` • ${r.pulse} bpm` : ""}
+                  </div>
+                  <div className="text-sm text-slate-600">{r.measuredAt}</div>
+                  <div className="text-sm mt-2">Distress: {r.distress}</div>
+                  <div className="text-sm">Meds: {r.meds || "—"}</div>
+                  <div className="text-sm">Symptoms: {r.symptoms || "—"}</div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
