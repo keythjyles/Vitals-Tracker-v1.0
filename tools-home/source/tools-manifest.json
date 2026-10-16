@@ -1,0 +1,38 @@
+{
+  "version": "1.0",
+  "tools": [
+    {
+      "tool": "framelock",
+      "source_file": "FrameLock_v1.3.12_CLEAN_MANUAL_25FPS.html",
+      "source_version": "1.3.12",
+      "source_sha256": "ca182c8155d6dd650ecb5dee3e7d1af288b8f667a61b618464e7183224b999f0",
+      "hub_revision": "hub.1",
+      "source_preserved": "tool-sources/FrameLock_v1.3.12_CLEAN_MANUAL_25FPS.html",
+      "hosted_path": "tools/framelock/index.html",
+      "changes": "Added common home, handoff-note import and Export to ChatGPT controls; tool editing logic retained.",
+      "verification": "Syntax and build checks; no phone browser/media render test."
+    },
+    {
+      "tool": "motionlock",
+      "source_file": "v0.1.5_MotionLock.html",
+      "source_version": "0.1.5",
+      "source_sha256": "660703a6916804f38926b7f098d825ffca0a5d6321502bcf4e5bc3abfa3d97c5",
+      "hub_revision": "hub.1",
+      "source_preserved": "tool-sources/v0.1.5_MotionLock.html",
+      "hosted_path": "tools/motionlock/index.html",
+      "changes": "Added common home, handoff-note import and Export to ChatGPT controls; tool editing logic retained.",
+      "verification": "Syntax and build checks; no phone browser/media render test."
+    },
+    {
+      "tool": "mixer",
+      "source_file": "GS_FIRESIDE_WOLF_CUE_MIXER_v2.3_LIGHTWEIGHT.html",
+      "source_version": "2.3",
+      "source_sha256": "509a521f133eb36112419bca7ae20616124f41448f12de865daf1e0a3a8ad6a3",
+      "hub_revision": "hub.1",
+      "source_preserved": "tool-sources/GS_FIRESIDE_WOLF_CUE_MIXER_v2.3_LIGHTWEIGHT.html",
+      "hosted_path": "tools/mixer/index.html",
+      "changes": "Added common home, handoff-note import and Export to ChatGPT controls; tool editing logic retained.",
+      "verification": "Syntax and build checks; no phone browser/media render test."
+    }
+  ]
+}
