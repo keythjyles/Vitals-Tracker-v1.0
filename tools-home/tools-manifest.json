@@ -33,6 +33,19 @@
       "hosted_path": "tools/mixer/index.html",
       "changes": "Added common home, handoff-note import and Export to ChatGPT controls; tool editing logic retained.",
       "verification": "Syntax and build checks; no phone browser/media render test."
+    },
+    {
+      "tool": "wavlock",
+      "source_version": "1.0",
+      "hosted_path": "tools/wavlock/index.html",
+      "description": "Local audio cutter and WAV export."
+    },
+    {
+      "tool": "sxlock",
+      "source_version": "1.0",
+      "hosted_path": "tools/sxlock/index.html",
+      "description": "Phone-first overlapping one-shot effects, 32 synthesized starter sounds, recording imports, persistent scribe, copy/handoff, portable projects, video/WAV export and file sharing.",
+      "verification": "JavaScript syntax; all synthesized samples finite; PCM WAV header and length. Device video export and Android sharing require user-device validation."
     }
   ]
 }
