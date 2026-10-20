@@ -42,11 +42,11 @@
     },
     {
       "tool": "sxlock",
-      "source_version": "1.3",
+      "source_version": "1.4",
       "hosted_path": "tools/sxlock/index.html",
       "description": "93 hosted CC0 recorded effects, compact categorized video-hold placement, frame stepping, loops, scribe/copy, project recovery, video/WAV export and native file sharing. Bounded audio caches and chunked WAV rendering.",
-      "verification": "Syntax and microphone lifecycle tests: start/stop, source position/frame, portable audio/metadata, permission denial, video-end stop and track cleanup. Physical phone microphone check pending.",
-      "changes": "Live microphone recording with compact left-of-viewer Rec/Stop/Take controls, flashing red recording state, editable independent voice insertions, embedded portable takes and capture metadata. Existing 93-sound library and exports preserved."
+      "verification": "Syntax, mixer amplitude and project round-trip checks; live-site layout checks. Physical phone recording check pending.",
+      "changes": "Collapsible work areas and alphabetized category library; seek directly under viewer; information dialog; three-group post-record mixer; confirmed permanent deletion of custom recordings and their current-project insertions."
     }
   ]
 }
