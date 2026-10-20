@@ -42,10 +42,11 @@
     },
     {
       "tool": "sxlock",
-      "source_version": "1.2",
+      "source_version": "1.3",
       "hosted_path": "tools/sxlock/index.html",
       "description": "93 hosted CC0 recorded effects, compact categorized video-hold placement, frame stepping, loops, scribe/copy, project recovery, video/WAV export and native file sharing. Bounded audio caches and chunked WAV rendering.",
-      "verification": "93 file hashes checked; 62 additions decode below full scale. Chunked vs full 20-second audio render matched exactly, including loop seams. Cache and export-concurrency regression checks passed. Original Android crash not reproduced; memory/concurrency risks addressed."
+      "verification": "Syntax and microphone lifecycle tests: start/stop, source position/frame, portable audio/metadata, permission denial, video-end stop and track cleanup. Physical phone microphone check pending.",
+      "changes": "Live microphone recording with compact left-of-viewer Rec/Stop/Take controls, flashing red recording state, editable independent voice insertions, embedded portable takes and capture metadata. Existing 93-sound library and exports preserved."
     }
   ]
 }
