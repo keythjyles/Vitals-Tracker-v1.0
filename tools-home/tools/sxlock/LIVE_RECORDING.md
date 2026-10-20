@@ -1,4 +1,4 @@
-# Live voice recording — SxLock 1.4
+# Live voice recording — SxLock 1.5
 
 Load your video, seek to the desired starting frame, then tap **Rec** at the left of the viewer. Microphone permission is requested on that tap only. Recording starts video playback at normal speed from the current position. The red Rec control and RECORDING banner flash while microphone capture is active; reduced-motion users see a steady indicator. Elapsed recording time remains visible.
 
@@ -21,3 +21,9 @@ Mixer faders independently scale video soundtrack, effects/imports, and micropho
 Manage my recordings offers permanent deletion of imported and microphone audio after a named warning that states the number of affected insertions. It removes the IndexedDB copy, current-project placements, and current local recovery snapshot metadata, and clears the latest raw take if matching. Built-in sounds cannot be deleted. Original source files and previously downloaded or Drive backups are unaffected; deliberately loading an older portable backup may restore its embedded recording.
 
 Validation: syntax/HTML nesting, mixer gain for effects and voice, portable round-trip, legacy defaults, deletion cancellation, confirmed database removal and built-in protection; original mocked microphone lifecycle rechecked. Physical phone layout/microphone behavior still requires the device check.
+
+## Sticky viewer and standalone audio (1.5)
+
+The viewer, Rec/Stop/Take controls, seek and frame buttons share a sticky dock immediately beneath the transport bar. Its top offset tracks the transport height through ResizeObserver and resize events, including wrapped text. The dock is a direct main child so the upload section does not constrain it. The Video section still collapses the viewer dock.
+
+Rec works with no video, a video still loading, or at video EOF. These standalone takes save to My sounds and portable project JSON, without inserting into or changing an existing timeline. Raw Take download remains available. Capture provenance marks standalone mode, duration and null video/frame references. A ready video before EOF retains synchronized playback/insertion behavior. Video pause/end affects only synchronized capture. All modes stop on explicit Stop, hidden page, size/time limits or microphone disconnection.
