@@ -42,10 +42,10 @@
     },
     {
       "tool": "sxlock",
-      "source_version": "1.0",
+      "source_version": "1.1",
       "hosted_path": "tools/sxlock/index.html",
-      "description": "Phone-first overlapping one-shot effects, 32 synthesized starter sounds, recording imports, persistent scribe, copy/handoff, portable projects, video/WAV export and file sharing.",
-      "verification": "JavaScript syntax; all synthesized samples finite; PCM WAV header and length. Device video export and Android sharing require user-device validation."
+      "description": "31 hosted CC0 recorded effects plus retained whistles/crickets. Compact library, tap-to-pause, frame stepping, video hold/right-click categorized effects sheet, volume, source trim and timed loops. Persistent scribe, copy/handoff, portable projects, video/WAV export and file sharing.",
+      "verification": "All 31 recordings decoded and level-matched below full scale; loop trim/seek/gain/video-end cutoff checks. Live browser UI/export validation pending."
     }
   ]
 }
