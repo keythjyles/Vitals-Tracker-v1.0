@@ -19,7 +19,7 @@ const num=(v,min=0,max=Infinity)=>Math.max(min,Math.min(max,Number(v)||0));
 const stamp=t=>`${Math.floor(t/60)}:${(t%60).toFixed(3).padStart(6,'0')}`;
 const message=t=>$('status').textContent=t;
 const uid=()=>crypto.randomUUID?.()||Date.now().toString(36)+Math.random().toString(36).slice(2);
-async function audioContext(){if(!ctx){ctx=new(window.AudioContext||window.webkitAudioContext)({sampleRate:SR});master=ctx.createGain();analyser=ctx.createAnalyser();analyser.fftSize=512;master.connect(analyser);master.connect(ctx.destination);bedGain=ctx.createGain();bedGain.connect(master);sourceNode=ctx.createMediaElementSource(video);sourceNode.connect(bedGain)}await ctx.resume();return ctx}
+async function audioContext(){if(!ctx){ctx=new(window.AudioContext||window.webkitAudioContext)({sampleRate:SR});master=ctx.createGain();analyser=ctx.createAnalyser();analyser.fftSize=512;master.connect(analyser);master.connect(ctx.destination);bedGain=ctx.createGain();bedGain.connect(master);sourceNode=ctx.createMediaElementSource(video);sourceNode.connect(bedGain);updateBed()}await ctx.resume();return ctx}
 function releaseNode(n){n.onended=null;try{n.disconnect()}catch{}try{n._gain?.disconnect()}catch{}try{n.buffer=null}catch{}n._gain=null;n._clip=null;for(const list of [active,auditions]){const i=list.indexOf(n);if(i>=0)list.splice(i,1)}}
 function stopNodes(list){for(const n of [...list]){try{n.stop()}catch{}releaseNode(n)}list.length=0}
 function stopAuditions(){auditionToken++;stopNodes(auditions);auditionGain=null}
