@@ -42,11 +42,11 @@
     },
     {
       "tool": "sxlock",
-      "source_version": "1.5",
+      "source_version": "1.6",
       "hosted_path": "tools/sxlock/index.html",
       "description": "93 hosted CC0 recorded effects, compact categorized video-hold placement, frame stepping, loops, scribe/copy, project recovery, video/WAV export and native file sharing. Bounded audio caches and chunked WAV rendering.",
-      "verification": "Syntax and mocked standalone/synced recording lifecycle; sticky live-page geometry and layout checks. Physical phone microphone testing pending.",
-      "changes": "Viewer and seek stick below dynamically measured transport controls. Microphone can record without video; standalone takes persist in My sounds and portable projects, with raw Take download and standalone provenance. Video-synced recording retained."
+      "verification": "Syntax, recovery persistence/reload, missing-media and storage-failure checks; existing recording/mixer behavior rechecked. Physical phone retention still subject to browser storage.",
+      "changes": "Full browser project recovery retains original video Blob, imported/live audio, used effects, placements, mixer levels, notes, layout and playhead. Immediate metadata saves plus serialized atomic asset/project commits; visible save status, incomplete-recovery warnings and blocked-storage handling."
     }
   ]
 }

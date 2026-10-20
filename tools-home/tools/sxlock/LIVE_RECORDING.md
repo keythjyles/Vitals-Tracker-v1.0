@@ -1,4 +1,4 @@
-# Live voice recording — SxLock 1.5
+# Live voice recording — SxLock 1.6
 
 Load your video, seek to the desired starting frame, then tap **Rec** at the left of the viewer. Microphone permission is requested on that tap only. Recording starts video playback at normal speed from the current position. The red Rec control and RECORDING banner flash while microphone capture is active; reduced-motion users see a steady indicator. Elapsed recording time remains visible.
 
@@ -27,3 +27,11 @@ Validation: syntax/HTML nesting, mixer gain for effects and voice, portable roun
 The viewer, Rec/Stop/Take controls, seek and frame buttons share a sticky dock immediately beneath the transport bar. Its top offset tracks the transport height through ResizeObserver and resize events, including wrapped text. The dock is a direct main child so the upload section does not constrain it. The Video section still collapses the viewer dock.
 
 Rec works with no video, a video still loading, or at video EOF. These standalone takes save to My sounds and portable project JSON, without inserting into or changing an existing timeline. Raw Take download remains available. Capture provenance marks standalone mode, duration and null video/frame references. A ready video before EOF retains synchronized playback/insertion behavior. Video pause/end affects only synchronized capture. All modes stop on explicit Stop, hidden page, size/time limits or microphone disconnection.
+
+## Complete local recovery (1.6)
+
+IndexedDB version 3 adds videos and projects stores. A source File/Blob is retained once under a unique video reference. Every committed edit immediately checkpoints settings into localStorage and queues a serialized IndexedDB transaction containing the project state and any newly required assets. The asset/project transaction is atomic; video and audio bytes are not repeatedly rewritten after successful storage. Used recorded effects are retained for offline recovery as well. Pending saves warn on navigation, and a visible status distinguishes complete saved/restored state from missing media or quota failures. Older tabs are asked to close their database on version changes; blocked upgrades show a close-older-tabs message.
+
+Startup chooses the most recent metadata checkpoint, hydrates custom audio and the matching retained video, and restores the playhead without autoplay. Edits are disabled during startup. Missing assets produce an explicit incomplete-recovery message; metadata is preserved. Previous releases did not retain the video, so the first upgrade requires selecting that source once. Original video files are never modified.
+
+Portable JSON keeps embedded custom audio and the local video reference, not base64 copies of large video files. On this same browser it loads the retained source automatically; another device needs the original video. Browser recovery is not a Drive backup and may be cleared/evicted by the browser. Keep exported project JSON and original media in Drive.
