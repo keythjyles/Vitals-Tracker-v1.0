@@ -42,10 +42,10 @@
     },
     {
       "tool": "sxlock",
-      "source_version": "1.1",
+      "source_version": "1.1.3",
       "hosted_path": "tools/sxlock/index.html",
       "description": "31 hosted CC0 recorded effects plus retained whistles/crickets. Compact library, tap-to-pause, frame stepping, video hold/right-click categorized effects sheet, volume, source trim and timed loops. Persistent scribe, copy/handoff, portable projects, video/WAV export and file sharing.",
-      "verification": "All 31 recordings decoded and level-matched below full scale; loop trim/seek/gain/video-end cutoff checks. Live browser UI/export validation pending."
+      "verification": "31 recordings decoded, non-silent and level-matched below full scale. Live Chrome: video hold/right-click menu, tap pause, one-frame stepping, preselected library buttons, timed loop and volume persistence, project restore, WAV and finished MP4 export. Export checked with ffprobe: 82 video frames over 3.193s, VP9/Opus in MP4, full audio duration 3.137s for a 3s fixture with recorder flush padding. Frame rate is a target, not guaranteed CFR. Native Android sharing not tested."
     }
   ]
 }
