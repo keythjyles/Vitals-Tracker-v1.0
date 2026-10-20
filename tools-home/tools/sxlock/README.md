@@ -1,4 +1,4 @@
-# SxLock 1.1.3
+# SxLock 1.2
 
 Phone-first sound-effect placement. Open `index.html` over HTTP(S).
 
@@ -13,7 +13,7 @@ Phone-first sound-effect placement. Open `index.html` over HTTP(S).
 
 ## Audio and preservation
 
-31 CC0 recorded library effects are hosted in `sounds/`; source URLs, licenses, processing, hashes and decode measurements are in `library.json` and `CREDITS.md`. Ba-dum-tss uses recorded snare and cymbal samples. Original synthesized slide whistles and crickets remain available. Other old synthesized presets are hidden but retained for existing project cues; no silent replacement of saved decisions.
+93 CC0 recorded library effects are hosted in `sounds/`; source URLs, licenses, processing, hashes and decode measurements are in `library.json` and `CREDITS.md`. Ba-dum-tss uses recorded snare and cymbal samples. Original synthesized slide whistles and crickets remain available. Other old synthesized presets are hidden but retained for existing project cues; no silent replacement of saved decisions.
 
 Recordings are cached in IndexedDB after use. Projects pin metadata for used library recordings. Notes and placements autosave locally. Original files are never overwritten. Original soundtrack volume starts at 100%; existing music and ambience in the source video remain in that soundtrack. No ambient layer is added automatically.
 
@@ -25,7 +25,7 @@ Video is encoded locally in real time with the browser's available codecs. The c
 
 Share invokes the native file share sheet only when supported; otherwise Download remains available. Desktop Chrome integration checks passed; physical Android file sharing remains device-dependent.
 
-## Verification (2026-10-20)
+## Earlier integration verification (1.1.3, 2026-10-20)
 
 - All 31 recorded assets decoded to finite, non-silent PCM. Measured post-encode peaks were below full scale.
 - Core checks cover looping seek offsets, Source IN bounds, one-shot end, video end cutoff and gain scheduling.
@@ -33,3 +33,15 @@ Share invokes the native file share sheet only when supported; otherwise Downloa
 - Effects WAV: exactly 3.000s; audible signal persisted after the one-shot ended, confirming the loop continued.
 - Final 3s fixture video export: 360×640, 82 frames, 3.192567s, VP9/Opus MP4. Audio lasted 3.137271s including recorder flush padding.
 - No supplied user media was modified by these tests.
+
+## Stability and library update (1.2)
+
+62 additional CC0 recordings bring the library to 93. The original 31 MP3 hashes are unchanged, and old project IDs, positions, trims, loop flags and levels remain compatible.
+
+Decoded sound buffers use a 24 MiB LRU target; compressed audio uses an 8 MiB target. A single imported file larger than a budget may temporarily exceed that target while it is in use. Playback prepares an eight-second window instead of decoding the entire timeline. Completed/stopped audio sources release their gain and buffer references; late audition requests are cancelled. Meter storage is reused, and paused views redraw only after changes at no more than ten updates per second.
+
+An export locks immediately, including preparation, so repeated taps cannot start overlapping encoders or renders. Video cleanup releases capture tracks, timers, audio connections, and canvas backing memory on success, cancel or failure. WAV renders use eight-second PCM chunks rather than a full-length stereo floating-point output buffer. Mixed-WAV original soundtrack decoding is separately guarded against large phone memory allocations; file imports are capped at 64 MiB.
+
+Autosave keeps the previous project as recovery fallback and flushes on page hide. Export-interruption markers survive a tab crash; the next open restores saved placements and prompts to reselect the source video. Copy troubleshooting provides local error/stage information. No telemetry is sent.
+
+Checks: all 62 new files decoded to finite non-silent PCM below full scale; 93 total files match their recorded SHA-256. The chunked renderer matched a full 20-second loop/one-shot reference exactly at PCM16 precision, including both eight-second boundaries. A 93-sound cache stress check remained below its target; overlapping exports were rejected, and failing jobs released their lock. The specific physical-phone crash reported by the user has not been reproduced, so these changes address identified memory and concurrency risks without asserting a confirmed root cause.
