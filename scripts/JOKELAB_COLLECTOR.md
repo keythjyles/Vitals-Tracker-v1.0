@@ -2,13 +2,15 @@
 
 [Launch collector on GitHub](https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/workflows/collect-dad-jokes.yml)
 
-Tap **Run workflow**, leave **main** selected, then tap **Run workflow** again. No API key, AI model, or paid joke service is used. Only manual launches are enabled.
+For everyday use, open [JokeLab](https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/jokelab/). The library opens first. Search, choose **Open in JokeLab**, or tap **Find more jokes** to check the connected sources without leaving the page. Collection autosaves in browser IndexedDB. **Save / share library** exports the library, collection report and captured source responses; on a phone choose Drive from the share sheet. The page does not contain GitHub credentials or silently push browser changes into the repository.
+
+The GitHub workflow remains an optional maintenance route: tap **Run workflow**, leave **main** selected, then tap **Run workflow** again. No API key, AI model, or paid joke service is used. Only manual launches are enabled.
 
 The collector reads the documented icanhazdadjoke search API (all pages, 30 jokes per page) and the Official Joke API public dataset. It does not scrape arbitrary websites, bypass login/paywalls, or endlessly request random jokes. It identifies itself, spaces requests, retries temporary failures, caps requests, and reports partial source failures.
 
 ## Outputs
 
-- `tools-home/data/jokelab/library.json`: durable versioned application seed database, updated in GitHub on every successful run. This is a new bulk seed dataset, not a replacement for human-created JokeLab clusters. The current workbench's existing five-candidate paste box is NOT its bulk-import route; loading/browsing this seed dataset in the workbench is a separate integration.
+- `tools-home/data/jokelab/library.json`: durable versioned application seed database, updated in GitHub on every successful run. This is a new bulk seed dataset, not a replacement for human-created JokeLab clusters. JokeLab loads and browses this seed dataset through its joke-library screen. Its five-candidate report paste box remains a separate tool.
 - Run artifact: raw source snapshots, JSON library, SQLite database (`jokelab.sqlite3`), and collection report. GitHub artifacts expire after 30 days; they are a transfer copy, not the permanent archive.
 - Optional automatic Drive backup: create repository secret `JOKELAB_DRIVE_OAUTH_JSON` containing your authorized OAuth `client_id`, `client_secret`, and `refresh_token`, and repository variable `JOKELAB_DRIVE_FOLDER_ID` identifying the existing archive folder. Keep credentials out of source code. The Google account must have write access to that folder. When configured, every run uploads a new harvest ZIP to Drive. The script does not create credentials or share/change folder permissions. The initial collection is also archived separately through our connected Drive.
 
