@@ -1,0 +1,60 @@
+name: Collect dad jokes for JokeLab
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: jokelab-collection
+  cancel-in-progress: false
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test collector protections
+        run: python -m unittest discover -s scripts/tests -p 'test_dad_jokes.py' -v
+      - name: Collect public joke feeds
+        run: python scripts/collect_dad_jokes.py
+      - name: Save updated application seed database
+        run: |
+          git config user.name 'JokeLab collector'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tools-home/data/jokelab/library.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Refresh collected dad-joke seed library'
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+      - name: Archive complete collection
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jokelab-harvest-${{ github.run_id }}
+          path: jokelab-harvest/
+          retention-days: 30
+          if-no-files-found: warn
+      - name: Back up collection to Google Drive when configured
+        env:
+          JOKELAB_DRIVE_OAUTH_JSON: ${{ secrets.JOKELAB_DRIVE_OAUTH_JSON }}
+          JOKELAB_DRIVE_FOLDER_ID: ${{ vars.JOKELAB_DRIVE_FOLDER_ID }}
+        run: |
+          if test -n "$JOKELAB_DRIVE_OAUTH_JSON" && test -n "$JOKELAB_DRIVE_FOLDER_ID"; then
+            python -m zipfile -c "jokelab-harvest-${GITHUB_RUN_ID}.zip" jokelab-harvest
+            python scripts/archive_jokelab_to_drive.py "jokelab-harvest-${GITHUB_RUN_ID}.zip"
+          else
+            echo '::notice::Drive backup is not configured. The seed database is versioned in GitHub; download the harvest artifact for source archives.'
+          fi
+      - name: Show collection report
+        if: always()
+        run: |
+          if test -f jokelab-harvest/report.json; then
+            printf '## JokeLab collection\n```json\n' >> "$GITHUB_STEP_SUMMARY"
+            cat jokelab-harvest/report.json >> "$GITHUB_STEP_SUMMARY"
+            printf '\n```\n' >> "$GITHUB_STEP_SUMMARY"
+          fi
