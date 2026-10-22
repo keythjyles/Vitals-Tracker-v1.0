@@ -1,0 +1,102 @@
+{
+  "sources": [
+    {
+      "videoId": "32ea65780e3440b2b43edc211cab43ad",
+      "title": "Create a single continuous 10-second SILENT reaction shot using ",
+      "sourceSha256": "bce3d8effda164d24462be09b6a95bb4983fdd89912bbf4475a93ca359a54ee0",
+      "existingAssetIds": [],
+      "reviewStatus": "Inspected"
+    },
+    {
+      "videoId": "057db102ea134e349b78fc353d29d5d7",
+      "title": "Corny Joke Reaction",
+      "sourceSha256": "14683dda480382c1a9dfd5f6f84db1fb29f18af1fdc2fedd74e34c8ce124208d",
+      "existingAssetIds": [],
+      "reviewStatus": "Inspected"
+    },
+    {
+      "videoId": "b3bba882a65c4010906ecbb40a4330e6",
+      "title": "Corny Joke Reaction",
+      "sourceSha256": "3789912fc91f05542f1cbb7fb4e76a348a06ce9195e4a4b9969232cbb59a9d47",
+      "existingAssetIds": [],
+      "reviewStatus": "Inspected"
+    },
+    {
+      "videoId": "73e63665c85e47dab42aa298a5eb9f4b",
+      "title": "Create a FIVE SECOND COMPLETELY SILENT reaction insert, using th",
+      "sourceSha256": "b43be6c6d968ac54eb3e6e0f435fe1f1fa8022ab1afcecefaabe63ea4d71147d",
+      "existingAssetIds": [
+        "reaction-drive-perplexed-1"
+      ],
+      "reviewStatus": "Inspected"
+    },
+    {
+      "videoId": "05cc7d67bcfa47de86263ec8c131cf1d",
+      "title": "Crowded Elevator Reaction",
+      "sourceSha256": "b651f25c92ca455d0fcc838a248907395190a16e871cd56a636af6c38d343a50",
+      "existingAssetIds": [],
+      "reviewStatus": "Inspected"
+    },
+    {
+      "videoId": "3f7ad60464df46388fa0f3b873c57a33",
+      "title": "Crowded Elevator Reaction",
+      "sourceSha256": "76b2c20add67c9f585aafec040cdb54ded2364fff41de0ce8e0d189404ed47d7",
+      "existingAssetIds": [],
+      "reviewStatus": "Inspected"
+    },
+    {
+      "videoId": "f24da12d4ee342be8b2dd058f0a9d5f0",
+      "title": "Silent comedy reaction insert. Match exactly the Grill Sergeant ",
+      "sourceSha256": "8a1dee44c0efede9ea56d567c10946f7f1695bb4ab9ec2a71acdb11dbeb16795",
+      "existingAssetIds": [
+        "asset-8a1dee44c0efede9"
+      ],
+      "reviewStatus": "Inspected"
+    },
+    {
+      "videoId": "d59f8436fa914fd5901b49161f58ae53",
+      "title": "Create a photorealistic silent reaction insert featuring exactly",
+      "sourceSha256": "0358587cd5e4560b3473eaf488d2223eb39b574806e95a7f918b0bcdcc29f913",
+      "existingAssetIds": [
+        "asset-0358587cd5e4560b"
+      ],
+      "reviewStatus": "Inspected"
+    },
+    {
+      "videoId": "a87b30f40b494237917cc84b2d830bb1",
+      "title": "Create a photorealistic silent reaction insert featuring exactly",
+      "sourceSha256": "31c2beb89cf3d4075c6d462ea22464fe3f93ab8d0c7935733f7e378d6833ba19",
+      "existingAssetIds": [
+        "asset-31c2beb89cf3d407"
+      ],
+      "reviewStatus": "Inspected"
+    },
+    {
+      "videoId": "86058e8901144464a46210e65a1295ac",
+      "title": "Knowing smile before broad grin",
+      "sourceSha256": "cda2e015c402e102ac7c7d3088191e61490a346513bffcc4c4763930f6fe4025",
+      "reviewStatus": "Inspected and trimmed"
+    },
+    {
+      "videoId": "e7ea8a1a7e0742b5b268c136e0df5db0",
+      "title": "Grilling look-up and steady hold",
+      "sourceSha256": "c438316a7eceb6819e8b5b84529fdaacb81a0954a990115a7ef1457b14b2a7d2",
+      "reviewStatus": "Inspected and trimmed"
+    },
+    {
+      "videoId": "782c1577f30247bb9f266c346d94071b",
+      "title": "Open-palm deadpan at the grill",
+      "sourceSha256": "796203c579f514a51fbf645d037273f92822a11933116b4d166dbee59fad051a",
+      "reviewStatus": "Inspected and trimmed"
+    },
+    {
+      "videoId": "e56b31db44964b6abd62da168d846e98",
+      "title": "Night fireside · seated with cup",
+      "sourceSha256": "816f714fb79de133e979cdc7a2826bf4954d578288a6328189fe40903a669038",
+      "reviewStatus": "Inspected and trimmed"
+    }
+  ],
+  "cutsCreated": 9,
+  "generationRunsStarted": 0,
+  "brollCutsCreated": 1
+}
