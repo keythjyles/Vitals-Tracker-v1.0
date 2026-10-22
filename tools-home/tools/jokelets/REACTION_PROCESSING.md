@@ -24,3 +24,11 @@ This checkpoint does not certify an exhaustive Drive inventory. The main archive
 Some older source reactions contain visible mouth movement despite having no audio. Those entries are flagged for editing. The phone screen recording needs a clean source or crop. The two Corny Joke Reaction productions contain burned captions/title cards and are source material rather than clean reaction inserts. The elevator shot needs character/setting continuity review.
 
 Device imports and edits persist in that browser. Save / share project exports a portable JSON with imported bytes; it is not automatic Drive synchronization. Existing bundled media is served from GitHub.
+
+## Next production gate — 2026-10-22
+
+1. Reconcile remaining Drive source folders against SHA-256 and source IDs before creating any duplicate catalog entry.
+2. Keep categorized but unreviewed clips in Review; approval requires complete playback, including mouth motion and scene continuity.
+3. Test Android Files picker, Google Drive provider picker, Save/share JSON, reaction audio checkbox, render, and download on a physical Galaxy device.
+4. Preserve silent-reaction post-punchline holds, and do not burn publication thumbnails into clean jokelets.
+5. Treat browser-local imports as unsynced until a portable project backup has been saved; never describe local edits as automatically uploaded to GitHub or Drive.
