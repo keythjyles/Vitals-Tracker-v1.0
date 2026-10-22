@@ -1,0 +1,34 @@
+{
+  "assets": [
+    {
+      "title": "3.60s Side Glance to Front Stare Silent",
+      "src": "GS_Reaction_3.60s_Side_Glance_to_Front_Stare_Silent.mp4",
+      "poster": "GS_Reaction_3.60s_Side_Glance_to_Front_Stare_Silent.jpg",
+      "kind": "reaction",
+      "role": "reaction",
+      "duration": 3.6,
+      "fps": 25,
+      "sha256": "d5aef4a5daf799f97f08250dfde8fa7342f45ac88d4f958a413dc7cbfe69eec4"
+    },
+    {
+      "title": "4.28s Straight Stare Silent",
+      "src": "GS_Reaction_4.28s_Straight_Stare_Silent.mp4",
+      "poster": "GS_Reaction_4.28s_Straight_Stare_Silent.jpg",
+      "kind": "reaction",
+      "role": "reaction",
+      "duration": 4.28,
+      "fps": 25,
+      "sha256": "eb17770dee3518129f8d903864a5e91472fa65d163e329465b597ac0eee0b4b0"
+    },
+    {
+      "title": "6.00s Did You Hear That Spoken",
+      "src": "GS_Reaction_6.00s_Did_You_Hear_That_Spoken.mp4",
+      "poster": "GS_Reaction_6.00s_Did_You_Hear_That_Spoken.jpg",
+      "kind": "reaction",
+      "role": "reaction",
+      "duration": 6.0,
+      "fps": 25,
+      "sha256": "38f7b09ae43de8f1604cb93cc4cb3b1b71d81ca190572dc0a9edde1fd4d696b4"
+    }
+  ]
+}
