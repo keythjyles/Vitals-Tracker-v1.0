@@ -32,3 +32,7 @@ Device imports and edits persist in that browser. Save / share project exports a
 3. Test Android Files picker, Google Drive provider picker, Save/share JSON, reaction audio checkbox, render, and download on a physical Galaxy device.
 4. Preserve silent-reaction post-punchline holds, and do not burn publication thumbnails into clean jokelets.
 5. Treat browser-local imports as unsynced until a portable project backup has been saved; never describe local edits as automatically uploaded to GitHub or Drive.
+
+## Drive discovery verification — 2026-10-22
+
+Connected Drive search verified Grill Sergeant folder ID `1XoaLyR8AqV0RhbcH13GCuV7uvvE3IeS-`, containing Dad Jokes, Hurricane psa, Auditions for elevenlabs audio, and Audio folders. Dad Jokes folder `1xvvS6Lh-R1qNtP1Bg0t2ljb76FhNfQFC` currently returns Ep 2 folder `1-Y1o-1bo0pm7oWuf_hexSHxOqTkxhwcH` as its direct child. The separate HeyGenVideos folder `1Er1uRrybddT1hmYNt4Yb3SLlmZn0NSdj` returned no direct children in this connector search. These results do not prove that other production folders or assets are absent; continue targeted discovery and hash reconciliation. Do not import unrelated search matches from medical or claims records.
