@@ -257,7 +257,7 @@
     },
     {
       "canonicalId": "catalog-leftovers",
-      "title": "Leftovers \u00b7 Dinner Surprise",
+      "title": "Leftovers · Dinner Surprise",
       "sourceJokeIds": [],
       "state": "existing_jokelet_files",
       "productionAction": "Reuse or review existing outputs; do not regenerate by default.",
@@ -313,7 +313,7 @@
     },
     {
       "canonicalId": "catalog-ep1-01",
-      "title": "Guts \u00b7 EP1 #1",
+      "title": "Guts · EP1 #1",
       "sourceJokeIds": [],
       "state": "existing_jokelet_files",
       "productionAction": "Reuse or review existing outputs; do not regenerate by default.",
@@ -341,7 +341,7 @@
     },
     {
       "canonicalId": "catalog-ep1-02",
-      "title": "Soap \u00b7 EP1 #2",
+      "title": "Soap · EP1 #2",
       "sourceJokeIds": [],
       "state": "existing_jokelet_files",
       "productionAction": "Reuse or review existing outputs; do not regenerate by default.",
@@ -369,7 +369,7 @@
     },
     {
       "canonicalId": "catalog-ep1-03",
-      "title": "Impasta \u00b7 EP1 #3",
+      "title": "Impasta · EP1 #3",
       "sourceJokeIds": [],
       "state": "existing_jokelet_files",
       "productionAction": "Reuse or review existing outputs; do not regenerate by default.",
@@ -399,7 +399,7 @@
     },
     {
       "canonicalId": "catalog-ep1-04",
-      "title": "Scarecrow \u00b7 EP1 #4",
+      "title": "Scarecrow · EP1 #4",
       "sourceJokeIds": [],
       "state": "existing_jokelet_files",
       "productionAction": "Reuse or review existing outputs; do not regenerate by default.",
@@ -429,7 +429,7 @@
     },
     {
       "canonicalId": "catalog-ep1-05",
-      "title": "Hug \u00b7 EP1 #5",
+      "title": "Hug · EP1 #5",
       "sourceJokeIds": [],
       "state": "existing_jokelet_files",
       "productionAction": "Reuse or review existing outputs; do not regenerate by default.",
@@ -470,7 +470,9 @@
     {
       "sourceJokeId": "dad-00bda89167b4f15850aa1c91",
       "canonicalId": "dad-00bda89167b4f15850aa1c91",
-      "state": "not_started_unverified"
+      "state": "preparing_script_unapproved",
+      "runId": "JL-20261023-COACHED-01",
+      "queueJobId": "94a49ac4-4778-4796-bd2d-2dd9f0a45de7"
     },
     {
       "sourceJokeId": "dad-00c8169b19744be3deb5869d",
@@ -4969,6 +4971,19 @@
       "canonicalMappingNote": "Native UI sourceId is derived from modified wording; this ledger maps that queue item to the original canonical bicycle identity and its aliases.",
       "withdrawalReason": "Follow normal library order; research is optional.",
       "paidRequests": 0
+    },
+    {
+      "runId": "JL-20261023-COACHED-01",
+      "canonicalId": "dad-00bda89167b4f15850aa1c91",
+      "state": "script_prepared_unapproved",
+      "queueJobId": "94a49ac4-4778-4796-bd2d-2dd9f0a45de7",
+      "nativeProject": "runs/JL-20261023-COACHED-01-stage5-project.json",
+      "companionRecord": "runs/JL-20261023-COACHED-01-J02.json",
+      "reservationScope": "Unpaid script preparation only; do not start a second preparation job for this canonical joke.",
+      "duplicateCheck": "No matching catalog/Drive text/HeyGen title production found; 70 unnamed render content gap remains. Not certified unproduced.",
+      "paidProductionClearance": false,
+      "providerGenerationRequests": 0,
+      "scriptApproved": false
     }
   ]
 }

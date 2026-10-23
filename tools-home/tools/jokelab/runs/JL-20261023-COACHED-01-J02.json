@@ -1,0 +1,100 @@
+{
+  "schema": "JokeletPreparation-1.0",
+  "runId": "JL-20261023-COACHED-01",
+  "item": "J02",
+  "date": "2026-10-23",
+  "stage": "script_prepared",
+  "canonicalJokeId": "dad-00bda89167b4f15850aa1c91",
+  "queueJobId": "94a49ac4-4778-4796-bd2d-2dd9f0a45de7",
+  "libraryPosition": 3,
+  "selectionMethod": "Follow library order; first two entries already have produced outputs.",
+  "skipped": [
+    {
+      "position": 1,
+      "id": "dad-00973713ec4464e9b6408cb8",
+      "title": "Lifesavers",
+      "output": "media/lifesavers.mp4"
+    },
+    {
+      "position": 2,
+      "id": "dad-00af812554de8eb448c3ec7d",
+      "title": "Moon",
+      "outputs": [
+        "media/moon-1.mp4",
+        "media/moon-2.mp4"
+      ]
+    }
+  ],
+  "source": {
+    "originalText": "What did the shy pebble wish for? That she was a little boulder.",
+    "collection": "tools-home/data/jokelab/library.json",
+    "collectionBlobSha": "1d9dd64c99cf51233aba2d5eb6c1bc22978fa69b",
+    "records": [
+      {
+        "provider": "official-joke-api",
+        "sourceId": "00bda89167b4f15850aa1c91f49a894232c845601592957c8dcbe7b6c1b95b1f",
+        "url": "https://raw.githubusercontent.com/15Dkatz/official_joke_api/master/jokes/index.json"
+      },
+      {
+        "provider": "icanhazdadjoke",
+        "sourceId": "qjV8EIRfVnb",
+        "url": "https://icanhazdadjoke.com/j/qjV8EIRfVnb"
+      }
+    ],
+    "authorship": "Not established by the collection record."
+  },
+  "duplicateCheck": {
+    "result": "No matching production found in checked metadata; archive gap remains.",
+    "checked": [
+      "900-record library exact/semantic terms: pebble, boulder, bolder, shy rock/stone",
+      "16 finished catalog entries and associated production ledger",
+      "Bundled asset/source metadata",
+      "Both connected Drive accounts: fullText boulder or pebble, no results",
+      "HeyGen title searches: pebble, boulder, bolder, no results"
+    ],
+    "gap": "70 generically named Drive render files have not been fully reconciled by speech/content. Title/text searches alone cannot exclude a prior production inside them.",
+    "paidProductionClearance": false
+  },
+  "script": {
+    "spokenText": "What did the shy pebble wish for? That she was a little boulder.",
+    "cuedDraft": "[firm] What did the shy pebble wish for?\n\nThat she was a little boulder.",
+    "approval": "Awaiting script approval",
+    "cueStatus": "[firm] follows recorded delivery preference; confirm active provider/model handling before submission.",
+    "direction": {
+      "setup": "Firm, natural conversational deadpan.",
+      "pause": "Deliberate setup-to-answer pause. Blank line is a draft cue, not a measured or guaranteed pause duration.",
+      "payoff": "Restrained delivery; slight stress on boulder, naturally pronounced as bolder. No spelling explanation or extra words.",
+      "stop": "Stop speaking after boulder.",
+      "reaction": "Silent hold to be supplied by a reviewed reaction; no reaction selected at this stage."
+    }
+  },
+  "sourceTrail": {
+    "elevenLabs": {
+      "state": "not yet generated",
+      "takeId": null,
+      "model": null,
+      "voiceId": null,
+      "originalFile": null,
+      "sha256": null
+    },
+    "heygen": {
+      "state": "not yet generated",
+      "renderId": null,
+      "originalFile": null,
+      "sha256": null
+    },
+    "ambient": [],
+    "music": [],
+    "soundEffects": [],
+    "captions": [],
+    "cleanSourceRule": "No pre-mixed ambient/music/effects or burned captions in automatic production source."
+  },
+  "nativeProject": "JL-20261023-COACHED-01-stage5-project.json",
+  "nativeProjectSha256": "0d44fe0c3f9c88178c92fbd0957ba725b68d400c65fcab1430595838cd0eee06",
+  "nativeProjectBytes": 1015,
+  "implementationGaps": [
+    "Native queue source/settings and notes do not contain the full rebuild trail; preserve this companion record with the native project.",
+    "Script approval, provider cue validation, final duplicate clearance and financial boundary remain pending."
+  ],
+  "providerGenerationRequests": 0
+}

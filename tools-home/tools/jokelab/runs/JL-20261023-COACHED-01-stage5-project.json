@@ -1,0 +1,34 @@
+{
+  "schema": "JokeLabProduction-1.0",
+  "decisions": {
+    "dad-00bda89167b4f15850aa1c91": {
+      "status": "production",
+      "updatedAt": "2026-10-23T17:54:27.280Z"
+    }
+  },
+  "queue": [
+    {
+      "id": "94a49ac4-4778-4796-bd2d-2dd9f0a45de7",
+      "sourceId": "dad-00bda89167b4f15850aa1c91",
+      "text": "What did the shy pebble wish for? That she was a little boulder.",
+      "settings": {
+        "tense": "Keep source tense",
+        "tones": [],
+        "customTone": "",
+        "qualifiers": "",
+        "count": 1,
+        "stage": "script",
+        "performer": "Grill Sergeant: unassuming, restrained, conversational dad-type deadpan. No forced Army language.",
+        "toneNotes": "",
+        "source": "",
+        "locked": true
+      },
+      "notes": "",
+      "createdAt": "2026-10-23T17:54:27.279Z",
+      "script": "[firm] What did the shy pebble wish for?\n\nThat she was a little boulder.",
+      "stage": "script"
+    }
+  ],
+  "runs": [],
+  "updatedAt": "2026-10-23T17:54:50.572Z"
+}
