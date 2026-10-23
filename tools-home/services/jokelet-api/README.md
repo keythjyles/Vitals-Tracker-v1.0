@@ -1,26 +1,20 @@
-# Jokelet Engine API (isolated scaffold)
+# Jokelet Engine API
 
-This service is independent of the repository-root `server.js` (a different application).
+Independent of the repository-root server.js, which belongs to another app.
 
-## Status
-- Implemented: minimal localhost-only health service and private, read-only ElevenLabs authentication check.
-- Not implemented: deployed backend, secret installation, browser authentication, voice selection, generation, job persistence, spending enforcement, HeyGen, or GitHub/Drive delivery.
-- No ElevenLabs requests are made merely by starting the server.
-- No production credits are spent by the account check.
+## Current capability
+- Authenticated paid ElevenLabs text-to-speech endpoint: `POST /api/voice/generate`
+- Private key: `ELEVENLABS_API_KEY` (server environment only)
+- Separate operator bearer token: `JOKELET_OPERATOR_TOKEN` (server environment only)
+- Request length limit: `JOKELET_MAX_CHARS` (default 1000)
+- Per-process request cap: `JOKELET_MAX_REQUESTS_PER_PROCESS` (default 3)
+- No automatic retries; no audio generation on startup or in health checks.
+- Not deployed, no provider credentials installed, no paid calls made.
 
-## Setup (on a trusted private backend)
-Use Node.js 20+. Store `ELEVENLABS_API_KEY` in the hosting provider's private environment/secret manager. Never commit or expose it to browser code.
+## Run
+Node.js 20 or newer. Configure secrets privately in the chosen hosting environment, never in GitHub Pages or client JavaScript. Run `npm test` and `npm start` from this directory. Server binds to localhost by default. For external access, deploy behind an authenticated HTTPS reverse proxy.
 
-From this directory:
-```sh
-node --check server.js
-node server.js
-```
-In a separate backend terminal, with the secret already configured:
-```sh
-node check-elevenlabs.js
-```
-This performs a read-only request to `GET /v1/user` and reports success/failure without printing the credential or account details.
+## Paid request
+Send JSON to `POST /api/voice/generate` with bearer authorization and `text`, `voiceId`, optional `modelId` and `voiceSettings`. The response is audio/mpeg. This endpoint incurs ElevenLabs charges/credits when invoked with valid provider credentials.
 
-## Security / next stage
-The server binds to localhost and has no paid-generation endpoints. Before exposing an API to the browser, add strong authentication, origin protections, input limits, rate limits, durable job and cost records, and server-side spending authorization. Store the ElevenLabs key only in a private server secret store. Never put it in GitHub Pages, GitHub Actions unless Actions is actually the chosen runtime, or the public repository.
+The process request cap resets on restart and is **not** a monetary spending cap. Do not expose it as an unlimited production service. Production requires durable authorization, accounting, and rate controls before broad use. Do not use this API from a public browser client with the operator token embedded in JavaScript.
