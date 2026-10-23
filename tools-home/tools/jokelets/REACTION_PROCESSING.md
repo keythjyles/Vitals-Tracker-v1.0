@@ -36,3 +36,14 @@ Device imports and edits persist in that browser. Save / share project exports a
 ## Drive discovery verification — 2026-10-22
 
 Connected Drive search verified Grill Sergeant folder ID `1XoaLyR8AqV0RhbcH13GCuV7uvvE3IeS-`, containing Dad Jokes, Hurricane psa, Auditions for elevenlabs audio, and Audio folders. Dad Jokes folder `1xvvS6Lh-R1qNtP1Bg0t2ljb76FhNfQFC` currently returns Ep 2 folder `1-Y1o-1bo0pm7oWuf_hexSHxOqTkxhwcH` as its direct child. The separate HeyGenVideos folder `1Er1uRrybddT1hmYNt4Yb3SLlmZn0NSdj` returned no direct children in this connector search. These results do not prove that other production folders or assets are absent; continue targeted discovery and hash reconciliation. Do not import unrelated search matches from medical or claims records.
+
+
+## Follow-up workflow verification — 2026-10-22
+
+Live GitHub Pages shows 42 categorized reactions, and the four processed-reaction ZIP backup parts were verified in the production Dad Jokes Drive folder.
+
+Fixed two workflow defects: reaction selection/insertion now defaults to the complete reaction duration instead of truncating it to three seconds; SxLock's trusted handoff uses its internal loading route while controls are busy, avoiding a self-blocked video load. Versioned script links refresh cached code.
+
+Cloud-browser verification used already approved Lifesavers audio/performance, the Straight stare reaction, and the approved Fireside CTA. A clean jokelet and MP4 publication assembly rendered successfully. The actual 18.561-second test assembly transferred to SxLock, was retained with its video bytes, and restored successfully after reloading SxLock. A separate selection check confirmed the full 4.280-second Straight stare and a 10.17-second planned clean jokelet. The test assembly was created before the duration-default fix; its transfer/recovery test is separate from that duration check.
+
+No new paid HeyGen or ElevenLabs generation was started. This verifies the manual browser workflow. Physical Galaxy file/Drive pickers, Android sharing and phone-specific render/export behavior remain unverified here. Remaining source discovery and 36 review approvals are still outstanding; this follow-up does not certify every scattered Drive source has been collected.
