@@ -1,6 +1,6 @@
 {
   "schema": "GS-RecoveryRecord-1",
-  "summary": "Six complete site recovery ZIPs saved in Production Drive. All archived file checksums passed locally; Drive file sizes and destination verified. Download all six ZIPs and extract into the same empty folder.",
+  "summary": "Six full site recovery ZIPs plus the Tools Update are saved in Production Drive. Extract the six numbered ZIPs into the same empty folder, then extract Tools Update last. The Uploaded Sources ZIP holds two separate original uploads. Local file checksums passed; Drive sizes and destinations verified.",
   "inboxSummary": "Inventory: 200 unique file records across 21 known production folders. 70 HeyGen renders await inspection. 76 of 87 bundled assets have recorded source IDs; 11 need linking.",
   "backups": [
     {
@@ -56,6 +56,23 @@
       "sha256": "39801542139344b04629ae6753e825120a787a8f77332a05f234b19c7070ca87",
       "fileCount": 110,
       "verification": "Archive contents verified locally; uploaded file size and destination verified by Drive metadata."
+    },
+    {
+      "name": "GS_Production_Tools_Update_2026-10-22.zip",
+      "bytes": 84585,
+      "sha256": "0a5afb8d374a0e3c9a070a5465eea07529d9de179ca8d1aa8dcdfe4a757ea2ec",
+      "id": "1oYeagSSshWxBb_cK_Ic8mXR2VvIXkSYB",
+      "url": "https://drive.google.com/file/d/1oYeagSSshWxBb_cK_Ic8mXR2VvIXkSYB/view?usp=drivesdk",
+      "verification": "Drive file size and destination read back; checksum recorded from local archive."
+    },
+    {
+      "name": "GS_Uploaded_Sources_2026-10-22.zip",
+      "bytes": 75098214,
+      "sha256": "0face1de86ab1afc8bcaa7cd49cff946f12c36e66eba4d0db4421462984b3782",
+      "id": "1xTQqe-wFPox2rWfQ15kiIvk_AG8q0YE_",
+      "url": "https://drive.google.com/file/d/1xTQqe-wFPox2rWfQ15kiIvk_AG8q0YE_/view?usp=drivesdk",
+      "verification": "Drive file size and destination read back; checksum recorded from local archive."
     }
-  ]
+  ],
+  "releaseCommit": "e7296a9e8320ab0cb05f48eb73b40744a447de6d"
 }
