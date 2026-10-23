@@ -4799,8 +4799,11 @@
     {
       "runId": "JL-20261023-COACHED-01",
       "canonicalId": "dad-3d80ae9a86b39f7cb7974491",
-      "state": "selected_not_reserved",
-      "note": "Selected bicycle joke; no paid generation. Existing catalog does not link a bicycle output, but full archive reconciliation is incomplete."
+      "state": "queued_for_script_preparation",
+      "note": "One browser-local queue item; script field empty and awaiting preparation/approval. No paid job requested; full archive reconciliation still incomplete.",
+      "queueJobId": "300b3ef1-e6ad-4df1-9b4f-529c3a9b433b",
+      "nativeProject": "runs/JL-20261023-COACHED-01-stage3-project.json",
+      "canonicalMappingNote": "Native UI sourceId is derived from modified wording; this ledger maps that queue item to the original canonical bicycle identity and its aliases."
     }
   ]
 }
