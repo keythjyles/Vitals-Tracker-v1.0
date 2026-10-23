@@ -1,0 +1,54 @@
+{
+  "schema": "JokeLab-Coached-Specimen-1",
+  "runId": "JL-20261023-COACHED-01",
+  "specimenId": "JL-20261023-COACHED-01-J01",
+  "stage": 2,
+  "state": "Source selected; paused before tone/development configuration",
+  "source": {
+    "text": "Why couldn't the bicycle stand up by itself? It was two-tired.",
+    "setup": "Why couldn't the bicycle stand up by itself?",
+    "punchline": "It was two-tired.",
+    "creditedByApp": "official-joke-api",
+    "collectionURLAdvertisedByApp": "https://raw.githubusercontent.com/15Dkatz/official_joke_api/master/jokes/index.json",
+    "originalAuthor": "Not established",
+    "sourceItemId": "Not exposed by inspected source-details UI"
+  },
+  "approvedProductionReference": {
+    "text": "Why couldn’t the bicycle stand up by itself? It was obviously two-tired.",
+    "authority": "Existing user-approved wording recorded in PRODUCTION_METHOD.md v1.1",
+    "appliedToLiveBaseJoke": false
+  },
+  "analysis": {
+    "premise": "A bicycle cannot stand unaided.",
+    "hinge": "two-tired / too tired",
+    "loadBearingTerms": [
+      "bicycle",
+      "stand up by itself",
+      "two-tired"
+    ],
+    "intendedPerformance": "Restrained GS deadpan; final spoken stop followed by nonverbal reaction/hold.",
+    "selectionReason": "Existing episode-plan inclusion and approved wording provide a known reference for the coached process; no finished jokelet substituted."
+  },
+  "uiObservedDefaults": {
+    "tones": [
+      "Mock certainty",
+      "Dismissive uncertainty",
+      "Reported doubt"
+    ],
+    "tense": "Keep source tense",
+    "variations": 3,
+    "developmentMode": "Short joke variants",
+    "customTone": "",
+    "scribeNotes": "",
+    "promptBuilt": false,
+    "savedVersions": 0,
+    "productionQueue": 0,
+    "deliberatelySelectedForThisRun": false
+  },
+  "financialState": {
+    "paidProviderRequests": 0,
+    "spendingCap": "Not yet set"
+  },
+  "coachingQuestion": "For existing approved wording, should we use Script Lab with wording locked instead of reopening wording exploration?",
+  "nextStage": "Await user coaching before changing development mode, wording or generating candidates"
+}
