@@ -65,4 +65,4 @@ const server = http.createServer(async (req, res) => {
     res.end();
   }
 });
-server.listen(port, '127.0.0.1', () => console.log('Jokelet API listening on localhost:' + port));
+server.listen(port, '0.0.0.0', () => console.log('Jokelet API listening on port ' + port));
