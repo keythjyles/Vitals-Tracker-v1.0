@@ -225,3 +225,16 @@ The user does not consider this workflow ready for effective end-to-end automati
 ## Open items
 
 Confirm the eventual engine name; complete the reaction review/source reconciliation; verify physical Android operation; run and record the episode proof batch; document any engine settings or transforms not yet captured by the current tools. Preserve these gaps until evidence closes them.
+
+
+## Clean sources, produced identity and rebuilding — October 23 correction
+
+Follow the existing source-library order. Inspect the next canonical joke, its aliases, existing outputs and outstanding work before reserving it. Skip jokes already produced or reserved. Do not search for a familiar joke to shortcut the path. Study, tone research and variants are optional. An unresolved identity is not proof that a joke is unproduced; reconcile it before a paid request.
+
+A finished jokelet still counts as produced even when it contains ambient sound, music, effects or burned captions, or has been rejected. Do not reset its underlying joke to unproduced because its export is unsuitable for automation. Repair/rebuild that existing jokelet as a versioned job, not a new joke. Keep old sources and outputs.
+
+Editorial approval, automation eligibility and rebuild completeness are separate. Automatic reuse requires explicit content approval and a clean-source review: voice-only sound for spoken units, clean picture without burned captions, no pre-mixed music, ambient sound or effects. A silent reaction is allowed when reviewed as such. Unknown legacy metadata fails closed. A manually usable mixed/captioned publication can remain approved while excluded from automatic source selection.
+
+Every production must retain a documented path to the exact cued script, ElevenLabs original voice take, provider IDs/settings, HeyGen original render, picture transforms/reaction trims, and separate original ambient/music/effect files with edit/mix settings. A finished MP4 is not a rebuild project. See [rebuild recipe contract](REBUILD_RECIPE.md). Missing links must be explicit, never invented. Replacing one sound, music track or video creates a new version of the same underlying joke; preserve the previous recipe and output.
+
+Implemented in Factory: Disapprove, editable Content approval, separate automation review with mixed-source validation, and editable source-trail/rebuild-project references. Future manual-wizard manifests retain snapshots of selected source records. Existing source trails remain to be reconciled. This is not a universal recipe importer or a verified rebuild of legacy productions, and not an app-wide automatic production/duplicate guard.

@@ -15,7 +15,10 @@
     "A failure is a resumable attempt, not a new joke. Check outstanding jobs/charges before retrying.",
     "Changed wording, tone or reaction does not by itself make a new underlying joke.",
     "Reusing a completed jokelet in an episode is allowed; manufacturing its source again is a separate, explicit regeneration.",
-    "No numeric batch budget is set by the eventual whole-library goal."
+    "No numeric batch budget is set by the eventual whole-library goal.",
+    "Follow existing source-library order, resolving canonical identity before reservation; no familiar-joke shortcut.",
+    "A mixed, captioned, rejected or automation-ineligible finished output still counts as produced. Rebuild as a version of the existing joke, never as a new joke.",
+    "Editorial approval, clean-source automation eligibility and rebuild completeness are independent checks. Missing source links must remain explicit."
   ],
   "aliases": {
     "dad-9638d60f11addd45b4b5291a": "dad-3d80ae9a86b39f7cb7974491",
@@ -39,14 +42,34 @@
           "src": "media/moon-1.mp4",
           "sha256": "314720c14e380c5906907398a913d384049f5bdd21ca212d4e9334a40e6e4c51",
           "status": "Approved",
-          "version": "v01"
+          "version": "v01",
+          "automationReview": {
+            "status": "Review",
+            "audio": "unknown",
+            "burnedCaptions": false,
+            "ambient": false,
+            "music": false,
+            "soundEffects": false,
+            "note": "Legacy approval does not certify voice-only audio and clean picture. Check full source before automated reuse."
+          },
+          "rebuildStatus": "Needs source reconciliation"
         },
         {
           "id": "moon-2",
           "src": "media/moon-2.mp4",
           "sha256": "37dc623b78298397c57aac62275cb91e94aa733e98929430a73fbd927f6d8871",
           "status": "Approved",
-          "version": "v01"
+          "version": "v01",
+          "automationReview": {
+            "status": "Review",
+            "audio": "unknown",
+            "burnedCaptions": false,
+            "ambient": false,
+            "music": false,
+            "soundEffects": false,
+            "note": "Legacy approval does not certify voice-only audio and clean picture. Check full source before automated reuse."
+          },
+          "rebuildStatus": "Needs source reconciliation"
         }
       ],
       "possibleSourceMatches": []
@@ -67,21 +90,51 @@
           "src": "media/playground-side-eye.mp4",
           "sha256": "e2a66617fcf6972bca98624fb398b3fb855aac126cee93c384d6290a3f74b389",
           "status": "Approved",
-          "version": "v01"
+          "version": "v01",
+          "automationReview": {
+            "status": "Review",
+            "audio": "unknown",
+            "burnedCaptions": false,
+            "ambient": false,
+            "music": false,
+            "soundEffects": false,
+            "note": "Legacy approval does not certify voice-only audio and clean picture. Check full source before automated reuse."
+          },
+          "rebuildStatus": "Needs source reconciliation"
         },
         {
           "id": "playground-surprise",
           "src": "media/playground-surprise.mp4",
           "sha256": "4a2ecee11d6eb96f126fbd0b67a461164e70af665fd7b0839a67da879a4ceab1",
           "status": "Approved",
-          "version": "v01"
+          "version": "v01",
+          "automationReview": {
+            "status": "Review",
+            "audio": "unknown",
+            "burnedCaptions": false,
+            "ambient": false,
+            "music": false,
+            "soundEffects": false,
+            "note": "Legacy approval does not certify voice-only audio and clean picture. Check full source before automated reuse."
+          },
+          "rebuildStatus": "Needs source reconciliation"
         },
         {
           "id": "playground-skeptical",
           "src": "media/playground-skeptical.mp4",
           "sha256": "86c75842bd06287010df7b3cf15ed1c5c9f5bb6825a3a8ed6dad0acdccf85079",
           "status": "Approved",
-          "version": "v01"
+          "version": "v01",
+          "automationReview": {
+            "status": "Review",
+            "audio": "unknown",
+            "burnedCaptions": false,
+            "ambient": false,
+            "music": false,
+            "soundEffects": false,
+            "note": "Legacy approval does not certify voice-only audio and clean picture. Check full source before automated reuse."
+          },
+          "rebuildStatus": "Needs source reconciliation"
         }
       ],
       "possibleSourceMatches": []
@@ -101,7 +154,17 @@
           "src": "media/lifesavers.mp4",
           "sha256": "c2fe32c938d2ba452bd389edbdd63776f2911b3846a0047102ef8ecaeb51be03",
           "status": "Ready",
-          "version": "v01"
+          "version": "v01",
+          "automationReview": {
+            "status": "Review",
+            "audio": "unknown",
+            "burnedCaptions": false,
+            "ambient": false,
+            "music": false,
+            "soundEffects": false,
+            "note": "Legacy approval does not certify voice-only audio and clean picture. Check full source before automated reuse."
+          },
+          "rebuildStatus": "Needs source reconciliation"
         }
       ],
       "possibleSourceMatches": []
@@ -119,7 +182,17 @@
           "src": "media/smart-grill.mp4",
           "sha256": "9227087d202451dcf62b60606669915f6f8ca3f6a6ca78d321647ca19442236f",
           "status": "Approved",
-          "version": "v02"
+          "version": "v02",
+          "automationReview": {
+            "status": "Review",
+            "audio": "unknown",
+            "burnedCaptions": false,
+            "ambient": false,
+            "music": false,
+            "soundEffects": false,
+            "note": "Legacy approval does not certify voice-only audio and clean picture. Check full source before automated reuse."
+          },
+          "rebuildStatus": "Needs source reconciliation"
         }
       ],
       "possibleSourceMatches": []
@@ -137,7 +210,17 @@
           "src": "media/eyebrows.mp4",
           "sha256": "7d07d9ed36ba0a3d4a7d120fa88a70c2adf2241f9fd19ecc68705fb8ad6427d5",
           "status": "Approved",
-          "version": "v01"
+          "version": "v01",
+          "automationReview": {
+            "status": "Review",
+            "audio": "unknown",
+            "burnedCaptions": false,
+            "ambient": false,
+            "music": false,
+            "soundEffects": false,
+            "note": "Legacy approval does not certify voice-only audio and clean picture. Check full source before automated reuse."
+          },
+          "rebuildStatus": "Needs source reconciliation"
         }
       ],
       "possibleSourceMatches": []
@@ -155,7 +238,17 @@
           "src": "media/spider.mp4",
           "sha256": "db2940f8262e3d9a98e5c5be62afcf584a81446c6a6724d233f80237dae65f60",
           "status": "Approved",
-          "version": "v02"
+          "version": "v02",
+          "automationReview": {
+            "status": "Review",
+            "audio": "unknown",
+            "burnedCaptions": false,
+            "ambient": false,
+            "music": false,
+            "soundEffects": false,
+            "note": "Legacy approval does not certify voice-only audio and clean picture. Check full source before automated reuse."
+          },
+          "rebuildStatus": "Needs source reconciliation"
         }
       ],
       "possibleSourceMatches": [
@@ -164,7 +257,7 @@
     },
     {
       "canonicalId": "catalog-leftovers",
-      "title": "Leftovers · Dinner Surprise",
+      "title": "Leftovers \u00b7 Dinner Surprise",
       "sourceJokeIds": [],
       "state": "existing_jokelet_files",
       "productionAction": "Reuse or review existing outputs; do not regenerate by default.",
@@ -175,7 +268,17 @@
           "src": "media/leftovers.mp4",
           "sha256": "62d41707a691cf217d7e77cdaf968a3d7aeb25bb7a8e7dd2abf9c7f7c97bfd7e",
           "status": "Approved",
-          "version": "v02"
+          "version": "v02",
+          "automationReview": {
+            "status": "Review",
+            "audio": "unknown",
+            "burnedCaptions": false,
+            "ambient": false,
+            "music": false,
+            "soundEffects": false,
+            "note": "Legacy approval does not certify voice-only audio and clean picture. Check full source before automated reuse."
+          },
+          "rebuildStatus": "Needs source reconciliation"
         }
       ],
       "possibleSourceMatches": []
@@ -193,14 +296,24 @@
           "src": "media/listener.mp4",
           "sha256": "68648e01d36914b73b35e8cfc02ba642addde109bc8621f5c208d5bddc8887e5",
           "status": "Review",
-          "version": "v01"
+          "version": "v01",
+          "automationReview": {
+            "status": "Review",
+            "audio": "unknown",
+            "burnedCaptions": false,
+            "ambient": false,
+            "music": false,
+            "soundEffects": false,
+            "note": "Legacy approval does not certify voice-only audio and clean picture. Check full source before automated reuse."
+          },
+          "rebuildStatus": "Needs source reconciliation"
         }
       ],
       "possibleSourceMatches": []
     },
     {
       "canonicalId": "catalog-ep1-01",
-      "title": "Guts · EP1 #1",
+      "title": "Guts \u00b7 EP1 #1",
       "sourceJokeIds": [],
       "state": "existing_jokelet_files",
       "productionAction": "Reuse or review existing outputs; do not regenerate by default.",
@@ -211,14 +324,24 @@
           "src": "media/ep1-01.mp4",
           "sha256": "998c6c0739e0fe775c7fba73f68610429c67ada4907f2f5a35e16880f7e262ea",
           "status": "Approved",
-          "version": "v03"
+          "version": "v03",
+          "automationReview": {
+            "status": "Blocked",
+            "audio": "unknown",
+            "burnedCaptions": true,
+            "ambient": false,
+            "music": false,
+            "soundEffects": false,
+            "note": "Catalog records original burned captions/soundtrack; preserve for manual use, exclude from automatic clean assembly."
+          },
+          "rebuildStatus": "Needs source reconciliation"
         }
       ],
       "possibleSourceMatches": []
     },
     {
       "canonicalId": "catalog-ep1-02",
-      "title": "Soap · EP1 #2",
+      "title": "Soap \u00b7 EP1 #2",
       "sourceJokeIds": [],
       "state": "existing_jokelet_files",
       "productionAction": "Reuse or review existing outputs; do not regenerate by default.",
@@ -229,14 +352,24 @@
           "src": "media/ep1-02.mp4",
           "sha256": "c6e41307e7b45ba902f5ab01d0a9d1abe5143189dc158501e4e7da94ad8f8146",
           "status": "Approved",
-          "version": "v03"
+          "version": "v03",
+          "automationReview": {
+            "status": "Blocked",
+            "audio": "unknown",
+            "burnedCaptions": true,
+            "ambient": false,
+            "music": false,
+            "soundEffects": false,
+            "note": "Catalog records original burned captions/soundtrack; preserve for manual use, exclude from automatic clean assembly."
+          },
+          "rebuildStatus": "Needs source reconciliation"
         }
       ],
       "possibleSourceMatches": []
     },
     {
       "canonicalId": "catalog-ep1-03",
-      "title": "Impasta · EP1 #3",
+      "title": "Impasta \u00b7 EP1 #3",
       "sourceJokeIds": [],
       "state": "existing_jokelet_files",
       "productionAction": "Reuse or review existing outputs; do not regenerate by default.",
@@ -247,7 +380,17 @@
           "src": "media/ep1-03.mp4",
           "sha256": "f78f86ffbe4023c01545b5c0238ba04036e809fc851998d1691c2ba572294577",
           "status": "Approved",
-          "version": "v03"
+          "version": "v03",
+          "automationReview": {
+            "status": "Blocked",
+            "audio": "unknown",
+            "burnedCaptions": true,
+            "ambient": false,
+            "music": false,
+            "soundEffects": false,
+            "note": "Catalog records original burned captions/soundtrack; preserve for manual use, exclude from automatic clean assembly."
+          },
+          "rebuildStatus": "Needs source reconciliation"
         }
       ],
       "possibleSourceMatches": [
@@ -256,7 +399,7 @@
     },
     {
       "canonicalId": "catalog-ep1-04",
-      "title": "Scarecrow · EP1 #4",
+      "title": "Scarecrow \u00b7 EP1 #4",
       "sourceJokeIds": [],
       "state": "existing_jokelet_files",
       "productionAction": "Reuse or review existing outputs; do not regenerate by default.",
@@ -267,7 +410,17 @@
           "src": "media/ep1-04.mp4",
           "sha256": "c149fe620125260bb310937d4b1d1f50f05079de911daa759f9580eadd8df33f",
           "status": "Approved",
-          "version": "v03"
+          "version": "v03",
+          "automationReview": {
+            "status": "Blocked",
+            "audio": "unknown",
+            "burnedCaptions": true,
+            "ambient": false,
+            "music": false,
+            "soundEffects": false,
+            "note": "Catalog records original burned captions/soundtrack; preserve for manual use, exclude from automatic clean assembly."
+          },
+          "rebuildStatus": "Needs source reconciliation"
         }
       ],
       "possibleSourceMatches": [
@@ -276,7 +429,7 @@
     },
     {
       "canonicalId": "catalog-ep1-05",
-      "title": "Hug · EP1 #5",
+      "title": "Hug \u00b7 EP1 #5",
       "sourceJokeIds": [],
       "state": "existing_jokelet_files",
       "productionAction": "Reuse or review existing outputs; do not regenerate by default.",
@@ -287,7 +440,17 @@
           "src": "media/ep1-05.mp4",
           "sha256": "ca448097d49271b68112a18e8c1152ce1a898d2ea1ab15767b35efcf0bb57bc3",
           "status": "Approved",
-          "version": "v03"
+          "version": "v03",
+          "automationReview": {
+            "status": "Blocked",
+            "audio": "unknown",
+            "burnedCaptions": true,
+            "ambient": false,
+            "music": false,
+            "soundEffects": false,
+            "note": "Catalog records original burned captions/soundtrack; preserve for manual use, exclude from automatic clean assembly."
+          },
+          "rebuildStatus": "Needs source reconciliation"
         }
       ],
       "possibleSourceMatches": []
@@ -4799,11 +4962,13 @@
     {
       "runId": "JL-20261023-COACHED-01",
       "canonicalId": "dad-3d80ae9a86b39f7cb7974491",
-      "state": "queued_for_script_preparation",
-      "note": "One browser-local queue item; script field empty and awaiting preparation/approval. No paid job requested; full archive reconciliation still incomplete.",
+      "state": "selection_withdrawn",
+      "note": "Returned to the source library after user rejected familiar-joke shortcut. Live queue confirmed empty. Historic stage3-project.json remains an earlier queue-one checkpoint; do not restore it as the current selection.",
       "queueJobId": "300b3ef1-e6ad-4df1-9b4f-529c3a9b433b",
       "nativeProject": "runs/JL-20261023-COACHED-01-stage3-project.json",
-      "canonicalMappingNote": "Native UI sourceId is derived from modified wording; this ledger maps that queue item to the original canonical bicycle identity and its aliases."
+      "canonicalMappingNote": "Native UI sourceId is derived from modified wording; this ledger maps that queue item to the original canonical bicycle identity and its aliases.",
+      "withdrawalReason": "Follow normal library order; research is optional.",
+      "paidRequests": 0
     }
   ]
 }

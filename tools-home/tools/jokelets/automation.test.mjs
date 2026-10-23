@@ -1,0 +1,14 @@
+import {readFile} from 'node:fs/promises';
+import assert from 'node:assert/strict';
+const code=await readFile(new URL('./automation.js',import.meta.url),'utf8');
+const {automationAssessment:check}=await import('data:text/javascript;base64,'+Buffer.from(code).toString('base64'));
+const clean={kind:'jokelet',status:'Approved',automationReview:{status:'Allowed',audio:'voice-only'}};
+assert.equal(check(clean).eligible,true);
+assert.equal(check({kind:'jokelet',status:'Approved'}).eligible,false,'legacy approval is not a clean-source review');
+for(const flag of ['ambient','music','soundEffects','burnedCaptions'])assert.equal(check({...clean,automationReview:{...clean.automationReview,[flag]:true}}).eligible,false,flag+' must block automatic reuse');
+assert.equal(check({...clean,status:'Rejected'}).eligible,false);
+assert.equal(check({...clean,automationReview:{status:'Blocked',audio:'voice-only'}}).eligible,false);
+assert.equal(check({...clean,automationReview:{status:'Allowed',audio:'silent'}}).eligible,false,'silent finished jokelet loses the spoken performance');
+assert.equal(check({...clean,kind:'reaction',automationReview:{status:'Allowed',audio:'silent'}}).eligible,true);
+assert.equal(check({...clean,kind:'other'}).eligible,false);
+console.log('11 clean-source safety cases passed.');

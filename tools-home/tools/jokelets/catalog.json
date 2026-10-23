@@ -5,7 +5,7 @@
       "family": "moon",
       "number": 1,
       "title": "Moon 1",
-      "reaction": "Your delivery · Smart Grill reaction",
+      "reaction": "Your delivery \u00b7 Smart Grill reaction",
       "category": "Dad jokes",
       "tags": [
         "moon",
@@ -22,14 +22,26 @@
       "width": 1080,
       "height": 1920,
       "version": "v01",
-      "sha256": "314720c14e380c5906907398a913d384049f5bdd21ca212d4e9334a40e6e4c51"
+      "sha256": "314720c14e380c5906907398a913d384049f5bdd21ca212d4e9334a40e6e4c51",
+      "automationReview": {
+        "status": "Review",
+        "audio": "unknown",
+        "burnedCaptions": false,
+        "ambient": false,
+        "music": false,
+        "soundEffects": false,
+        "note": "Legacy approval does not certify voice-only audio and clean picture. Check full source before automated reuse."
+      },
+      "sourceTrail": {
+        "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
+      }
     },
     {
       "id": "moon-2",
       "family": "moon",
       "number": 1,
       "title": "Moon 2",
-      "reaction": "Alternate delivery · Leftovers reaction",
+      "reaction": "Alternate delivery \u00b7 Leftovers reaction",
       "category": "Dad jokes",
       "tags": [
         "moon",
@@ -46,14 +58,26 @@
       "width": 1080,
       "height": 1920,
       "version": "v01",
-      "sha256": "37dc623b78298397c57aac62275cb91e94aa733e98929430a73fbd927f6d8871"
+      "sha256": "37dc623b78298397c57aac62275cb91e94aa733e98929430a73fbd927f6d8871",
+      "automationReview": {
+        "status": "Review",
+        "audio": "unknown",
+        "burnedCaptions": false,
+        "ambient": false,
+        "music": false,
+        "soundEffects": false,
+        "note": "Legacy approval does not certify voice-only audio and clean picture. Check full source before automated reuse."
+      },
+      "sourceTrail": {
+        "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
+      }
     },
     {
       "id": "playground-side-eye",
       "family": "playground",
       "number": 2,
       "title": "Playground",
-      "reaction": "Side-eye → return",
+      "reaction": "Side-eye \u2192 return",
       "category": "Dad jokes",
       "tags": [
         "playground",
@@ -70,14 +94,26 @@
       "width": 1080,
       "height": 1920,
       "version": "v01",
-      "sha256": "e2a66617fcf6972bca98624fb398b3fb855aac126cee93c384d6290a3f74b389"
+      "sha256": "e2a66617fcf6972bca98624fb398b3fb855aac126cee93c384d6290a3f74b389",
+      "automationReview": {
+        "status": "Review",
+        "audio": "unknown",
+        "burnedCaptions": false,
+        "ambient": false,
+        "music": false,
+        "soundEffects": false,
+        "note": "Legacy approval does not certify voice-only audio and clean picture. Check full source before automated reuse."
+      },
+      "sourceTrail": {
+        "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
+      }
     },
     {
       "id": "playground-surprise",
       "family": "playground",
       "number": 2,
       "title": "Playground",
-      "reaction": "Surprise → weary",
+      "reaction": "Surprise \u2192 weary",
       "category": "Dad jokes",
       "tags": [
         "playground",
@@ -94,7 +130,19 @@
       "width": 1080,
       "height": 1920,
       "version": "v01",
-      "sha256": "4a2ecee11d6eb96f126fbd0b67a461164e70af665fd7b0839a67da879a4ceab1"
+      "sha256": "4a2ecee11d6eb96f126fbd0b67a461164e70af665fd7b0839a67da879a4ceab1",
+      "automationReview": {
+        "status": "Review",
+        "audio": "unknown",
+        "burnedCaptions": false,
+        "ambient": false,
+        "music": false,
+        "soundEffects": false,
+        "note": "Legacy approval does not certify voice-only audio and clean picture. Check full source before automated reuse."
+      },
+      "sourceTrail": {
+        "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
+      }
     },
     {
       "id": "playground-skeptical",
@@ -118,14 +166,26 @@
       "width": 1080,
       "height": 1920,
       "version": "v01",
-      "sha256": "86c75842bd06287010df7b3cf15ed1c5c9f5bb6825a3a8ed6dad0acdccf85079"
+      "sha256": "86c75842bd06287010df7b3cf15ed1c5c9f5bb6825a3a8ed6dad0acdccf85079",
+      "automationReview": {
+        "status": "Review",
+        "audio": "unknown",
+        "burnedCaptions": false,
+        "ambient": false,
+        "music": false,
+        "soundEffects": false,
+        "note": "Legacy approval does not certify voice-only audio and clean picture. Check full source before automated reuse."
+      },
+      "sourceTrail": {
+        "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
+      }
     },
     {
       "id": "lifesavers",
       "family": "lifesavers",
       "number": 3,
       "title": "Lifesavers",
-      "reaction": "Take 1 · Skeptical hold",
+      "reaction": "Take 1 \u00b7 Skeptical hold",
       "category": "Dad jokes",
       "tags": [
         "lifesavers",
@@ -142,7 +202,19 @@
       "width": 1080,
       "height": 1920,
       "version": "v01",
-      "sha256": "c2fe32c938d2ba452bd389edbdd63776f2911b3846a0047102ef8ecaeb51be03"
+      "sha256": "c2fe32c938d2ba452bd389edbdd63776f2911b3846a0047102ef8ecaeb51be03",
+      "automationReview": {
+        "status": "Review",
+        "audio": "unknown",
+        "burnedCaptions": false,
+        "ambient": false,
+        "music": false,
+        "soundEffects": false,
+        "note": "Legacy approval does not certify voice-only audio and clean picture. Check full source before automated reuse."
+      },
+      "sourceTrail": {
+        "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
+      }
     },
     {
       "id": "smart-grill",
@@ -150,12 +222,12 @@
       "number": 4,
       "title": "Smart Grill",
       "reaction": "Original approved reaction",
-      "category": "Dad Joke Duty · Episode 3",
+      "category": "Dad Joke Duty \u00b7 Episode 3",
       "tags": [
         "Smart Grill",
         "earlier videos"
       ],
-      "text": "I bought a smart grill. Now two things in this house tell me I’m doing it wrong.",
+      "text": "I bought a smart grill. Now two things in this house tell me I\u2019m doing it wrong.",
       "status": "Approved",
       "sourceLibraryId": "libfile_0e3f87e0e7308191b3546bdf1009eff1",
       "version": "v02",
@@ -167,7 +239,19 @@
       "width": 1080,
       "height": 1920,
       "sourceRange": null,
-      "sha256": "9227087d202451dcf62b60606669915f6f8ca3f6a6ca78d321647ca19442236f"
+      "sha256": "9227087d202451dcf62b60606669915f6f8ca3f6a6ca78d321647ca19442236f",
+      "automationReview": {
+        "status": "Review",
+        "audio": "unknown",
+        "burnedCaptions": false,
+        "ambient": false,
+        "music": false,
+        "soundEffects": false,
+        "note": "Legacy approval does not certify voice-only audio and clean picture. Check full source before automated reuse."
+      },
+      "sourceTrail": {
+        "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
+      }
     },
     {
       "id": "eyebrows",
@@ -175,7 +259,7 @@
       "number": 5,
       "title": "Eyebrows",
       "reaction": "Original approved reaction",
-      "category": "Dad Joke Duty · Episode 3",
+      "category": "Dad Joke Duty \u00b7 Episode 3",
       "tags": [
         "Eyebrows",
         "earlier videos"
@@ -192,7 +276,19 @@
       "width": 1080,
       "height": 1920,
       "sourceRange": null,
-      "sha256": "7d07d9ed36ba0a3d4a7d120fa88a70c2adf2241f9fd19ecc68705fb8ad6427d5"
+      "sha256": "7d07d9ed36ba0a3d4a7d120fa88a70c2adf2241f9fd19ecc68705fb8ad6427d5",
+      "automationReview": {
+        "status": "Review",
+        "audio": "unknown",
+        "burnedCaptions": false,
+        "ambient": false,
+        "music": false,
+        "soundEffects": false,
+        "note": "Legacy approval does not certify voice-only audio and clean picture. Check full source before automated reuse."
+      },
+      "sourceTrail": {
+        "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
+      }
     },
     {
       "id": "spider",
@@ -200,7 +296,7 @@
       "number": 6,
       "title": "Spider",
       "reaction": "Original approved reaction",
-      "category": "Dad Joke Duty · Episode 3",
+      "category": "Dad Joke Duty \u00b7 Episode 3",
       "tags": [
         "Spider",
         "earlier videos"
@@ -217,17 +313,29 @@
       "width": 1080,
       "height": 1920,
       "sourceRange": null,
-      "sha256": "db2940f8262e3d9a98e5c5be62afcf584a81446c6a6724d233f80237dae65f60"
+      "sha256": "db2940f8262e3d9a98e5c5be62afcf584a81446c6a6724d233f80237dae65f60",
+      "automationReview": {
+        "status": "Review",
+        "audio": "unknown",
+        "burnedCaptions": false,
+        "ambient": false,
+        "music": false,
+        "soundEffects": false,
+        "note": "Legacy approval does not certify voice-only audio and clean picture. Check full source before automated reuse."
+      },
+      "sourceTrail": {
+        "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
+      }
     },
     {
       "id": "leftovers",
       "family": "leftovers",
       "number": 7,
-      "title": "Leftovers · Dinner Surprise",
+      "title": "Leftovers \u00b7 Dinner Surprise",
       "reaction": "Original approved reaction",
-      "category": "Dad Joke Duty · Episode 3",
+      "category": "Dad Joke Duty \u00b7 Episode 3",
       "tags": [
-        "Leftovers · Dinner Surprise",
+        "Leftovers \u00b7 Dinner Surprise",
         "earlier videos"
       ],
       "text": "Preserved joke and complete reaction.",
@@ -242,7 +350,19 @@
       "width": 1080,
       "height": 1920,
       "sourceRange": null,
-      "sha256": "62d41707a691cf217d7e77cdaf968a3d7aeb25bb7a8e7dd2abf9c7f7c97bfd7e"
+      "sha256": "62d41707a691cf217d7e77cdaf968a3d7aeb25bb7a8e7dd2abf9c7f7c97bfd7e",
+      "automationReview": {
+        "status": "Review",
+        "audio": "unknown",
+        "burnedCaptions": false,
+        "ambient": false,
+        "music": false,
+        "soundEffects": false,
+        "note": "Legacy approval does not certify voice-only audio and clean picture. Check full source before automated reuse."
+      },
+      "sourceTrail": {
+        "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
+      }
     },
     {
       "id": "listener",
@@ -250,7 +370,7 @@
       "number": 8,
       "title": "The Listener",
       "reaction": "Pending review",
-      "category": "Dad Joke Duty · Episode 3",
+      "category": "Dad Joke Duty \u00b7 Episode 3",
       "tags": [
         "The Listener",
         "earlier videos"
@@ -267,20 +387,32 @@
       "width": 1080,
       "height": 1920,
       "sourceRange": null,
-      "sha256": "68648e01d36914b73b35e8cfc02ba642addde109bc8621f5c208d5bddc8887e5"
+      "sha256": "68648e01d36914b73b35e8cfc02ba642addde109bc8621f5c208d5bddc8887e5",
+      "automationReview": {
+        "status": "Review",
+        "audio": "unknown",
+        "burnedCaptions": false,
+        "ambient": false,
+        "music": false,
+        "soundEffects": false,
+        "note": "Legacy approval does not certify voice-only audio and clean picture. Check full source before automated reuse."
+      },
+      "sourceTrail": {
+        "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
+      }
     },
     {
       "id": "ep1-01",
       "family": "ep1-01",
       "number": 9,
-      "title": "Guts · EP1 #1",
+      "title": "Guts \u00b7 EP1 #1",
       "reaction": "Original approved reaction",
-      "category": "Dad Joke Duty · Episode 1",
+      "category": "Dad Joke Duty \u00b7 Episode 1",
       "tags": [
-        "Guts · EP1 #1",
+        "Guts \u00b7 EP1 #1",
         "earlier videos"
       ],
-      "text": "Episode 1 · original captions, soundtrack and complete reaction.",
+      "text": "Episode 1 \u00b7 original captions, soundtrack and complete reaction.",
       "status": "Approved",
       "sourceLibraryId": "libfile_ce9e2e11a18881919875f3c3eab4b2d6",
       "version": "v03",
@@ -296,20 +428,32 @@
         "outFrameInclusive": 329,
         "fps": 30
       },
-      "sha256": "998c6c0739e0fe775c7fba73f68610429c67ada4907f2f5a35e16880f7e262ea"
+      "sha256": "998c6c0739e0fe775c7fba73f68610429c67ada4907f2f5a35e16880f7e262ea",
+      "automationReview": {
+        "status": "Blocked",
+        "audio": "unknown",
+        "burnedCaptions": true,
+        "ambient": false,
+        "music": false,
+        "soundEffects": false,
+        "note": "Catalog records original burned captions/soundtrack; preserve for manual use, exclude from automatic clean assembly."
+      },
+      "sourceTrail": {
+        "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
+      }
     },
     {
       "id": "ep1-02",
       "family": "ep1-02",
       "number": 10,
-      "title": "Soap · EP1 #2",
+      "title": "Soap \u00b7 EP1 #2",
       "reaction": "Original approved reaction",
-      "category": "Dad Joke Duty · Episode 1",
+      "category": "Dad Joke Duty \u00b7 Episode 1",
       "tags": [
-        "Soap · EP1 #2",
+        "Soap \u00b7 EP1 #2",
         "earlier videos"
       ],
-      "text": "Episode 1 · original captions, soundtrack and complete reaction.",
+      "text": "Episode 1 \u00b7 original captions, soundtrack and complete reaction.",
       "status": "Approved",
       "sourceLibraryId": "libfile_ce9e2e11a18881919875f3c3eab4b2d6",
       "version": "v03",
@@ -325,20 +469,32 @@
         "outFrameInclusive": 585,
         "fps": 30
       },
-      "sha256": "c6e41307e7b45ba902f5ab01d0a9d1abe5143189dc158501e4e7da94ad8f8146"
+      "sha256": "c6e41307e7b45ba902f5ab01d0a9d1abe5143189dc158501e4e7da94ad8f8146",
+      "automationReview": {
+        "status": "Blocked",
+        "audio": "unknown",
+        "burnedCaptions": true,
+        "ambient": false,
+        "music": false,
+        "soundEffects": false,
+        "note": "Catalog records original burned captions/soundtrack; preserve for manual use, exclude from automatic clean assembly."
+      },
+      "sourceTrail": {
+        "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
+      }
     },
     {
       "id": "ep1-03",
       "family": "ep1-03",
       "number": 11,
-      "title": "Impasta · EP1 #3",
+      "title": "Impasta \u00b7 EP1 #3",
       "reaction": "Original approved reaction",
-      "category": "Dad Joke Duty · Episode 1",
+      "category": "Dad Joke Duty \u00b7 Episode 1",
       "tags": [
-        "Impasta · EP1 #3",
+        "Impasta \u00b7 EP1 #3",
         "earlier videos"
       ],
-      "text": "Episode 1 · original captions, soundtrack and complete reaction.",
+      "text": "Episode 1 \u00b7 original captions, soundtrack and complete reaction.",
       "status": "Approved",
       "sourceLibraryId": "libfile_ce9e2e11a18881919875f3c3eab4b2d6",
       "version": "v03",
@@ -354,20 +510,32 @@
         "outFrameInclusive": 824,
         "fps": 30
       },
-      "sha256": "f78f86ffbe4023c01545b5c0238ba04036e809fc851998d1691c2ba572294577"
+      "sha256": "f78f86ffbe4023c01545b5c0238ba04036e809fc851998d1691c2ba572294577",
+      "automationReview": {
+        "status": "Blocked",
+        "audio": "unknown",
+        "burnedCaptions": true,
+        "ambient": false,
+        "music": false,
+        "soundEffects": false,
+        "note": "Catalog records original burned captions/soundtrack; preserve for manual use, exclude from automatic clean assembly."
+      },
+      "sourceTrail": {
+        "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
+      }
     },
     {
       "id": "ep1-04",
       "family": "ep1-04",
       "number": 12,
-      "title": "Scarecrow · EP1 #4",
+      "title": "Scarecrow \u00b7 EP1 #4",
       "reaction": "Original approved reaction",
-      "category": "Dad Joke Duty · Episode 1",
+      "category": "Dad Joke Duty \u00b7 Episode 1",
       "tags": [
-        "Scarecrow · EP1 #4",
+        "Scarecrow \u00b7 EP1 #4",
         "earlier videos"
       ],
-      "text": "Episode 1 · original captions, soundtrack and complete reaction.",
+      "text": "Episode 1 \u00b7 original captions, soundtrack and complete reaction.",
       "status": "Approved",
       "sourceLibraryId": "libfile_ce9e2e11a18881919875f3c3eab4b2d6",
       "version": "v03",
@@ -383,20 +551,32 @@
         "outFrameInclusive": 1067,
         "fps": 30
       },
-      "sha256": "c149fe620125260bb310937d4b1d1f50f05079de911daa759f9580eadd8df33f"
+      "sha256": "c149fe620125260bb310937d4b1d1f50f05079de911daa759f9580eadd8df33f",
+      "automationReview": {
+        "status": "Blocked",
+        "audio": "unknown",
+        "burnedCaptions": true,
+        "ambient": false,
+        "music": false,
+        "soundEffects": false,
+        "note": "Catalog records original burned captions/soundtrack; preserve for manual use, exclude from automatic clean assembly."
+      },
+      "sourceTrail": {
+        "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
+      }
     },
     {
       "id": "ep1-05",
       "family": "ep1-05",
       "number": 13,
-      "title": "Hug · EP1 #5",
+      "title": "Hug \u00b7 EP1 #5",
       "reaction": "Original approved reaction",
-      "category": "Dad Joke Duty · Episode 1",
+      "category": "Dad Joke Duty \u00b7 Episode 1",
       "tags": [
-        "Hug · EP1 #5",
+        "Hug \u00b7 EP1 #5",
         "earlier videos"
       ],
-      "text": "Episode 1 · original captions, soundtrack and complete reaction.",
+      "text": "Episode 1 \u00b7 original captions, soundtrack and complete reaction.",
       "status": "Approved",
       "sourceLibraryId": "libfile_ce9e2e11a18881919875f3c3eab4b2d6",
       "version": "v03",
@@ -412,7 +592,19 @@
         "outFrameInclusive": 1357,
         "fps": 30
       },
-      "sha256": "ca448097d49271b68112a18e8c1152ce1a898d2ea1ab15767b35efcf0bb57bc3"
+      "sha256": "ca448097d49271b68112a18e8c1152ce1a898d2ea1ab15767b35efcf0bb57bc3",
+      "automationReview": {
+        "status": "Blocked",
+        "audio": "unknown",
+        "burnedCaptions": true,
+        "ambient": false,
+        "music": false,
+        "soundEffects": false,
+        "note": "Catalog records original burned captions/soundtrack; preserve for manual use, exclude from automatic clean assembly."
+      },
+      "sourceTrail": {
+        "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
+      }
     }
   ],
   "assets": [
@@ -435,7 +627,7 @@
     },
     {
       "id": "reaction-side-eye",
-      "title": "Side glance and return · 3.6s",
+      "title": "Side glance and return \u00b7 3.6s",
       "role": "reaction",
       "category": "Reaction inserts",
       "status": "Approved",
@@ -450,7 +642,7 @@
       "sha256": "912c633e9d7710ba5eef99486e2415f852f698231462717541a8dbdb8d66ee71",
       "kind": "reaction",
       "folderId": "folder-reaction",
-      "originalTitle": "Side-eye → return",
+      "originalTitle": "Side-eye \u2192 return",
       "reactionProfile": {
         "startPose": "Eyes lowered",
         "endPose": "Front stare",
@@ -482,7 +674,7 @@
     },
     {
       "id": "reaction-surprise",
-      "title": "Surprise to weary eye closure · 3.6s",
+      "title": "Surprise to weary eye closure \u00b7 3.6s",
       "role": "reaction",
       "category": "Reaction inserts",
       "status": "Approved",
@@ -497,7 +689,7 @@
       "sha256": "4f00329dda9cb411771d03c22b096106c5bded5d6afe882ef2319eaf8d2238f5",
       "kind": "reaction",
       "folderId": "folder-reaction",
-      "originalTitle": "Surprise → weary",
+      "originalTitle": "Surprise \u2192 weary",
       "reactionProfile": {
         "startPose": "Wide eyes forward",
         "endPose": "Eyes closed",
@@ -529,7 +721,7 @@
     },
     {
       "id": "reaction-skeptical",
-      "title": "Skeptical tilted stare · 3.0s",
+      "title": "Skeptical tilted stare \u00b7 3.0s",
       "role": "reaction",
       "category": "Reaction inserts",
       "status": "Approved",
