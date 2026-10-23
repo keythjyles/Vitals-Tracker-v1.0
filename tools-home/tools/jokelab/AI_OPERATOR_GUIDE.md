@@ -165,3 +165,8 @@ Implemented in Factory: Disapprove, editable Content approval, separate automati
 ## Embedded instruction locations — v3.3.0
 
 The public JokeLab entry exposes a collapsed AI operator instruction panel. Generated handoff prompts include the same operator policy. Source: tools-home/source/app/jokelab.ts (OPERATOR_INSTRUCTIONS and buildPrompt); portable browser bundle: tools-home/assets/jokelab.js. Direct production defaults to one wording-locked Script Lab item; optional study retains the research mode. Backend instruction source imports that policy, but this update has not redeployed or exercised the private generation service. Run scripts/check-production-policy.mjs to verify shared-source/portable-prompt behavior. Do not treat a prompt instruction as an implemented canonical-identity lock or a verified source rebuild.
+
+
+## Video-generation audio input — WAV required
+
+User instruction, October 23, 2026: supply WAV, not MP3, to video-generation services. Preserve the provider original unchanged. Prefer an original WAV when available; otherwise decode the approved recording to PCM WAV without changing timing, gain, speed or content. Converting a lossy source to WAV does not restore lost quality. Record parent/source hash, conversion, WAV hash, sample rate, channels and duration. Verify that the service recognizes the uploaded asset as audio before submitting a render. Do not repeat the known MP3 upload path: in the coached run it was classified as application/octet-stream and failed; the PCM WAV was accepted. This is an operator workflow requirement; app-wide format enforcement is not implemented by this documentation change.
