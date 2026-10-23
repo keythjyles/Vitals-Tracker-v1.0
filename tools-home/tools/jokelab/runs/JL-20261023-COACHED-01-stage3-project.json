@@ -1,0 +1,38 @@
+{
+  "schema": "JokeLabProduction-1.0",
+  "decisions": {
+    "source:Why couldn’t the bicycle stand up by itself? It was obviously two-tired.": {
+      "status": "production",
+      "updatedAt": "2026-10-23T15:38:28.979Z"
+    }
+  },
+  "queue": [
+    {
+      "id": "300b3ef1-e6ad-4df1-9b4f-529c3a9b433b",
+      "sourceId": "source:Why couldn’t the bicycle stand up by itself? It was obviously two-tired.",
+      "text": "Why couldn’t the bicycle stand up by itself? It was obviously two-tired.",
+      "settings": {
+        "tense": "Keep source tense",
+        "tones": [
+          "Mock certainty",
+          "Dismissive uncertainty",
+          "Reported doubt"
+        ],
+        "customTone": "",
+        "qualifiers": "",
+        "count": 3,
+        "stage": "script",
+        "performer": "Grill Sergeant: unassuming, restrained, conversational dad-type deadpan. No forced Army language.",
+        "toneNotes": "",
+        "source": "official-joke-api https://raw.githubusercontent.com/15Dkatz/official_joke_api/master/jokes/index.json",
+        "locked": true
+      },
+      "notes": "Research run: source",
+      "createdAt": "2026-10-23T15:38:28.979Z",
+      "script": "",
+      "stage": "script"
+    }
+  ],
+  "runs": [],
+  "updatedAt": "2026-10-23T15:38:28.979Z"
+}
