@@ -3,7 +3,7 @@
   "date": "2026-10-23",
   "runId": "JL-20261023-COACHED-01",
   "canonicalJokeId": "dad-00bda89167b4f15850aa1c91",
-  "state": "authorized_ready_to_submit",
+  "state": "render_submitted_processing",
   "sourceTake": {
     "fileName": "GS_Pebble_Voice_v02_Generation1.mp3",
     "generationId": "pqILh6dY0D1CO7Ckhplb",
@@ -54,5 +54,8 @@
     "actualCredits": null,
     "approvalEvidence": "User replied Yes to max3 existing HeyGen credits for one render with no automatic retry."
   },
-  "renderId": null
+  "renderId": "f07f96d9cf326a63a33671b77c576c14",
+  "providerStatus": "waiting",
+  "generationRequests": 1,
+  "automaticRetries": 0
 }
