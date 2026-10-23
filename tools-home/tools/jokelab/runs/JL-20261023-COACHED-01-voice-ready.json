@@ -4,7 +4,7 @@
   "runId": "JL-20261023-COACHED-01",
   "canonicalJokeId": "dad-00bda89167b4f15850aa1c91",
   "queueJobId": "94a49ac4-4778-4796-bd2d-2dd9f0a45de7",
-  "stage": "blocked_duplicate_check_auto_review",
+  "stage": "voice_generated_awaiting_coached_review",
   "userFeedback": "No correction requested at the script checkpoint ('Nope').",
   "scriptApproval": {
     "approvedAt": "2026-10-23T18:04:45.655Z",
@@ -38,28 +38,63 @@
     "inputCharacters": 72,
     "cueValidation": {
       "syntax": "Provider UI rendered [firm] as an audio tag; official docs support bracketed natural-language delivery direction for v4.",
-      "performance": "Pause, stress, pronunciation and final stop still require full take playback; no audio has been generated."
+      "performance": "Human listening review pending. Browser playback completed, but this assistant runtime cannot hear the downloaded audio; no auditory quality approval claimed."
     },
     "quote": {
       "status": "estimate, not an account-specific dollar quote",
       "estimatedCredits": 72,
       "rule": "Official website documentation: one text character consumes one credit; voice multipliers can apply to some shared voices.",
       "characterCountObserved": 72,
-      "actualCredits": null,
+      "actualCredits": 72,
       "usdEquivalent": null,
       "usdReason": "Actual subscription allocation or account dollar price not established; no unsupported dollar conversion.",
       "documentation": "https://elevenlabs.io/docs/help-center/account/general/have-characters-changed"
     },
-    "takeId": null,
-    "originalAudio": null,
-    "actualCharge": null
+    "takeId": "4KBURho2UF2Rzj0BXV2k",
+    "originalAudio": [
+      {
+        "fileName": "GS_Pebble_Voice_v01_Generation1.mp3",
+        "driveFileId": "1o8mM5ft1MsSLfTTk5y78JvPM3BJHfm5v",
+        "sha256": "399aada95e6f005ea1b861103aab5e865befb43b9ba0250d548bb05794c0346a"
+      },
+      {
+        "fileName": "GS_Pebble_Voice_v01_Generation2.mp3",
+        "driveFileId": "1xPI0Z8HK9ZV3Tbz3YPsUDvHon9_Joo3X",
+        "sha256": "13c9757e0b7842ed345dc4cc49a2ef8c37f5d1aec7506896c0220b8a8ac53a6a"
+      }
+    ],
+    "actualCharge": {
+      "unit": "ElevenLabs credits",
+      "amount": 72,
+      "evidence": "Generation details: 72 credits used for 4KBURho2UF2Rzj0BXV2k; 0 credits used for NbBB0ct0DIbfrDBPOvvN.",
+      "usdEquivalent": null
+    },
+    "takes": [
+      {
+        "fileName": "GS_Pebble_Voice_v01_Generation1.mp3",
+        "generationId": "4KBURho2UF2Rzj0BXV2k",
+        "credits": 72,
+        "durationSeconds": 3.78775,
+        "bytes": 107843,
+        "sha256": "399aada95e6f005ea1b861103aab5e865befb43b9ba0250d548bb05794c0346a",
+        "driveFileId": "1o8mM5ft1MsSLfTTk5y78JvPM3BJHfm5v"
+      },
+      {
+        "fileName": "GS_Pebble_Voice_v01_Generation2.mp3",
+        "generationId": "NbBB0ct0DIbfrDBPOvvN",
+        "credits": 0,
+        "durationSeconds": 4.048958,
+        "bytes": 114112,
+        "sha256": "13c9757e0b7842ed345dc4cc49a2ef8c37f5d1aec7506896c0220b8a8ac53a6a",
+        "driveFileId": "1xPI0Z8HK9ZV3Tbz3YPsUDvHon9_Joo3X"
+      }
+    ]
   },
   "beforePaidRequest": [
-    "Enforce the approved maximum of 100 existing ElevenLabs credits for one take and zero automatic retries; no purchase or upgrade.",
-    "Keep the unnamed-render contents gap explicit; do not claim that a metadata-only check resolved it. Resolve candidate duplicate uncertainty before paid submission.",
-    "Verify selected voice/model/input/settings are unchanged immediately before submission, then record actual usage and the original downloaded take."
+    "No further generation authorized by this completed one-request allowance. No automatic retry.",
+    "Complete coached listening review before downstream performance production; retain original bytes."
   ],
-  "providerGenerationRequests": 0,
+  "providerGenerationRequests": 1,
   "nativeProject": "JL-20261023-COACHED-01-stage6-project.json",
   "nativeProjectBytes": 1068,
   "nativeProjectSha256": "31af552c48ee06b316a2b2ec5e8583b3278c3cd3a4c4ac3ecbd74c8b7533c510",
@@ -69,10 +104,15 @@
     "providerRecords": 100,
     "titleMatches": 0,
     "result": "No matching production found in catalog, connected Drive text searches, library aliases or returned provider title records.",
-    "remainingGap": "The 70 generic Drive media contents were not transcribed/reconciled. Provider metadata is not proof that those files contain no matching spoken joke."
+    "remainingGap": "The 70 generic Drive media contents were not transcribed/reconciled. Provider metadata is not proof that those files contain no matching spoken joke.",
+    "userException": {
+      "date": "2026-10-23",
+      "response": "Proceed",
+      "scope": "One capped voice request accepting remaining duplicate risk from unchecked archive videos; not a certification of complete archive reconciliation."
+    }
   },
   "spending": {
-    "state": "authorized_for_one_take_within_cap",
+    "state": "completed_within_cap",
     "proposedCap": {
       "unit": "existing ElevenLabs credits",
       "amount": 100,
@@ -88,18 +128,17 @@
       "approvedDate": "2026-10-23",
       "approvalEvidence": "User replied 'Ok' to the explicit 100-credit, one-take, no-automatic-retry proposal.",
       "purchaseOrUpgrade": false
-    }
+    },
+    "actualCredits": 72
   },
   "environment": {
     "state": "shared_browser_restored",
-    "authenticationNote": "Fresh authenticated editor observed with unchanged exact script, selected Grill Sargent Jokes / Eleven v4, stability 0.5, similarity 0.75, no audio effects and MP3 44.1 kHz 192 kbps.",
-    "generationSubmitted": false
+    "generationSubmitted": true
   },
   "actionReview": {
-    "action": "Click Generate speech for one authorized take",
-    "outcome": "rejected_before_execution",
-    "reason": "Required duplicate-content reconciliation remains unresolved; numeric cap authorization does not waive that prerequisite.",
-    "workaroundAttempted": false,
-    "creditsSpent": 0
+    "previousRejectionRetained": "Stage 9 run log",
+    "currentAuthorization": "User explicitly replied Proceed to the duplicate-risk exception.",
+    "outcome": "executed_once",
+    "automaticRetries": 0
   }
 }
