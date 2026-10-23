@@ -47,3 +47,10 @@ Fixed two workflow defects: reaction selection/insertion now defaults to the com
 Cloud-browser verification used already approved Lifesavers audio/performance, the Straight stare reaction, and the approved Fireside CTA. A clean jokelet and MP4 publication assembly rendered successfully. The actual 18.561-second test assembly transferred to SxLock, was retained with its video bytes, and restored successfully after reloading SxLock. A separate selection check confirmed the full 4.280-second Straight stare and a 10.17-second planned clean jokelet. The test assembly was created before the duration-default fix; its transfer/recovery test is separate from that duration check.
 
 No new paid HeyGen or ElevenLabs generation was started. This verifies the manual browser workflow. Physical Galaxy file/Drive pickers, Android sharing and phone-specific render/export behavior remain unverified here. Remaining source discovery and 36 review approvals are still outstanding; this follow-up does not certify every scattered Drive source has been collected.
+
+
+## Source and recovery audit — October 22, 2026
+
+Direct folder fetching found 70 MP4s in HeyGenVideos despite the earlier search returning no files. They are an unreviewed queue; equal file sizes do not prove duplicates. The scoped Drive inventory covers 21 known production folders and 200 unique non-folder records, not every file in both accounts.
+
+All 87 bundled assets and referenced working files, preserved originalSrc files and posters passed checksum verification. Source IDs are recorded for 76 assets; 11 still need an original source ID. Six full recovery ZIPs were uploaded and verified by Drive file size and parent folder. Archived contents passed local SHA-256 verification. These cover tools-home, not later browser-only projects. Export now reports cancelled sharing and records an export request; confirm the file in Drive separately. Sources & recovery documents restoration, provenance and the render queue. SxLock projects must be separately exported.

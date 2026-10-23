@@ -1,4 +1,4 @@
-import {workspaceFetch as fetch,resolveMedia,saveProject,restoreProject} from './storage.js';
+import {workspaceFetch as fetch,resolveMedia,saveProject,restoreProject} from './storage.js?v=20261023-recovery';
 export const uid=()=>crypto.randomUUID?.()||'10000000-1000-4000-8000-100000000000'.replace(/[018]/g,c=>(Number(c)^crypto.getRandomValues(new Uint8Array(1))[0]&15>>Number(c)/4).toString(16));
 export const KEY='GS-jokelet-library-v1';
 export const TYPES={audio:'Joke audio',performance:'Performance video',reaction:'Reactions',broll:'B-roll',outro:'Outros',jokelet:'Finished jokelets',photo:'Photos',other:'Unsorted'};

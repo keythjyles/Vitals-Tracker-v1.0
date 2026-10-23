@@ -1,0 +1,2803 @@
+{
+  "schema": "GS-SourceRegistry-1",
+  "checkedAt": "2026-10-23T00:00:00Z",
+  "snapshotCommit": "ae1c492a167f5d225017fd66e3d7b9e6a86018e9",
+  "scope": "87 bundled assets. Device-only projects require their own portable JSON export. New Drive renders remain unreviewed.",
+  "assets": [
+    {
+      "id": "moon-1",
+      "title": "Moon 1",
+      "type": "jokelet",
+      "status": "Approved",
+      "files": {
+        "src": {
+          "path": "media/moon-1.mp4",
+          "bytes": 7317999,
+          "sha256": "314720c14e380c5906907398a913d384049f5bdd21ca212d4e9334a40e6e4c51"
+        },
+        "poster": {
+          "path": "media/moon-1.jpg",
+          "bytes": 41266,
+          "sha256": "07d95846de5edd4de7cc274664d0ff84f135c0a00b6902e9c98f0e5a3372c500"
+        }
+      },
+      "driveId": "1N2_jQfnTwJlV8spE_-TJKxkHN_e_sqJq",
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded"
+    },
+    {
+      "id": "moon-2",
+      "title": "Moon 2",
+      "type": "jokelet",
+      "status": "Approved",
+      "files": {
+        "src": {
+          "path": "media/moon-2.mp4",
+          "bytes": 4743556,
+          "sha256": "37dc623b78298397c57aac62275cb91e94aa733e98929430a73fbd927f6d8871"
+        },
+        "poster": {
+          "path": "media/moon-2.jpg",
+          "bytes": 41004,
+          "sha256": "c45e1b7f14e308577ee2d5e9308fc4cb56a437ef1a65461cf77d28338facd638"
+        }
+      },
+      "driveId": "1qpLrw9Ulq6z3XGvI36-jPq5lkhFEGtDX",
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded"
+    },
+    {
+      "id": "playground-side-eye",
+      "title": "Playground",
+      "type": "jokelet",
+      "status": "Approved",
+      "files": {
+        "src": {
+          "path": "media/playground-side-eye.mp4",
+          "bytes": 11923733,
+          "sha256": "e2a66617fcf6972bca98624fb398b3fb855aac126cee93c384d6290a3f74b389"
+        },
+        "poster": {
+          "path": "media/playground-side-eye.jpg",
+          "bytes": 41587,
+          "sha256": "48ac32fa226912c4b287189ff6f4879c07f867632b1b11c37c8281f790488cf6"
+        }
+      },
+      "driveId": "1Wy35pP631BO1Zvdp5pJ6Zn2edshYJa7a",
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded"
+    },
+    {
+      "id": "playground-surprise",
+      "title": "Playground",
+      "type": "jokelet",
+      "status": "Approved",
+      "files": {
+        "src": {
+          "path": "media/playground-surprise.mp4",
+          "bytes": 10943047,
+          "sha256": "4a2ecee11d6eb96f126fbd0b67a461164e70af665fd7b0839a67da879a4ceab1"
+        },
+        "poster": {
+          "path": "media/playground-surprise.jpg",
+          "bytes": 41587,
+          "sha256": "48ac32fa226912c4b287189ff6f4879c07f867632b1b11c37c8281f790488cf6"
+        }
+      },
+      "driveId": "1nM-QG3F9_4vVltw1rtwQ_ZUQWOzjBRpw",
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded"
+    },
+    {
+      "id": "playground-skeptical",
+      "title": "Playground",
+      "type": "jokelet",
+      "status": "Approved",
+      "files": {
+        "src": {
+          "path": "media/playground-skeptical.mp4",
+          "bytes": 9890919,
+          "sha256": "86c75842bd06287010df7b3cf15ed1c5c9f5bb6825a3a8ed6dad0acdccf85079"
+        },
+        "poster": {
+          "path": "media/playground-skeptical.jpg",
+          "bytes": 41587,
+          "sha256": "48ac32fa226912c4b287189ff6f4879c07f867632b1b11c37c8281f790488cf6"
+        }
+      },
+      "driveId": "1WVbHhlHNyeD7rYdD5yldNHX5_B_-4PhV",
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded"
+    },
+    {
+      "id": "lifesavers",
+      "title": "Lifesavers",
+      "type": "jokelet",
+      "status": "Ready",
+      "files": {
+        "src": {
+          "path": "media/lifesavers.mp4",
+          "bytes": 7913569,
+          "sha256": "c2fe32c938d2ba452bd389edbdd63776f2911b3846a0047102ef8ecaeb51be03"
+        },
+        "poster": {
+          "path": "media/lifesavers.jpg",
+          "bytes": 40843,
+          "sha256": "626dc6312136214b8d3a15354ec5e84fc608240182b42b7abf014befc681b019"
+        }
+      },
+      "driveId": "1tfKf7zFEYnWKtkYBrh8J3NAJUDUacmAv",
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded"
+    },
+    {
+      "id": "smart-grill",
+      "title": "Smart Grill",
+      "type": "jokelet",
+      "status": "Approved",
+      "files": {
+        "src": {
+          "path": "media/smart-grill.mp4",
+          "bytes": 8951503,
+          "sha256": "9227087d202451dcf62b60606669915f6f8ca3f6a6ca78d321647ca19442236f"
+        },
+        "poster": {
+          "path": "media/smart-grill.jpg",
+          "bytes": 40791,
+          "sha256": "c036ef69268f54d9e4a483e9f95b83411321b5c1ede818747c8308774192b821"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "sourceLibraryId": "libfile_0e3f87e0e7308191b3546bdf1009eff1"
+    },
+    {
+      "id": "eyebrows",
+      "title": "Eyebrows",
+      "type": "jokelet",
+      "status": "Approved",
+      "files": {
+        "src": {
+          "path": "media/eyebrows.mp4",
+          "bytes": 6175781,
+          "sha256": "7d07d9ed36ba0a3d4a7d120fa88a70c2adf2241f9fd19ecc68705fb8ad6427d5"
+        },
+        "poster": {
+          "path": "media/eyebrows.jpg",
+          "bytes": 39300,
+          "sha256": "02994de22cee5218e79e6fd80916b10abc567e75ef90fc454793f1c59d9611df"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "sourceLibraryId": "libfile_f11556380dac8191a7016c989f617a58"
+    },
+    {
+      "id": "spider",
+      "title": "Spider",
+      "type": "jokelet",
+      "status": "Approved",
+      "files": {
+        "src": {
+          "path": "media/spider.mp4",
+          "bytes": 11532430,
+          "sha256": "db2940f8262e3d9a98e5c5be62afcf584a81446c6a6724d233f80237dae65f60"
+        },
+        "poster": {
+          "path": "media/spider.jpg",
+          "bytes": 39926,
+          "sha256": "4fd49bf4d4fab6efcc0ec44d9b8bf7bbc0d6adf0cf68871f9bc03908d7c9e9b2"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "sourceLibraryId": "libfile_1a69eafc608c8191a1af6dbe2e425149"
+    },
+    {
+      "id": "leftovers",
+      "title": "Leftovers \u00b7 Dinner Surprise",
+      "type": "jokelet",
+      "status": "Approved",
+      "files": {
+        "src": {
+          "path": "media/leftovers.mp4",
+          "bytes": 5590696,
+          "sha256": "62d41707a691cf217d7e77cdaf968a3d7aeb25bb7a8e7dd2abf9c7f7c97bfd7e"
+        },
+        "poster": {
+          "path": "media/leftovers.jpg",
+          "bytes": 41330,
+          "sha256": "18ec15043f93001e12b594d8ccd0e5cd2d4c54080e48dd3baf35ebc6d15e8c95"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "sourceLibraryId": "libfile_343a4ff57ad8819183f83a4fbf23abe7"
+    },
+    {
+      "id": "listener",
+      "title": "The Listener",
+      "type": "jokelet",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/listener.mp4",
+          "bytes": 6400459,
+          "sha256": "68648e01d36914b73b35e8cfc02ba642addde109bc8621f5c208d5bddc8887e5"
+        },
+        "poster": {
+          "path": "media/listener.jpg",
+          "bytes": 41448,
+          "sha256": "df57fa81ac77f93c6c5c31e3f23ed4d0bc7ba5cbc2a4c14b0dd0bbb0ea72a378"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "sourceLibraryId": "libfile_d7955eaf132081919324190a6de8d7c8"
+    },
+    {
+      "id": "ep1-01",
+      "title": "Guts \u00b7 EP1 #1",
+      "type": "jokelet",
+      "status": "Approved",
+      "files": {
+        "src": {
+          "path": "media/ep1-01.mp4",
+          "bytes": 4373725,
+          "sha256": "998c6c0739e0fe775c7fba73f68610429c67ada4907f2f5a35e16880f7e262ea"
+        },
+        "poster": {
+          "path": "media/ep1-01.jpg",
+          "bytes": 37628,
+          "sha256": "2d457f3d404765081aeb6e3232490de482b146c7d4a7f77214fca13fe22e66d3"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": {
+        "inFrame": 0,
+        "outFrameInclusive": 329,
+        "fps": 30
+      },
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "sourceLibraryId": "libfile_ce9e2e11a18881919875f3c3eab4b2d6"
+    },
+    {
+      "id": "ep1-02",
+      "title": "Soap \u00b7 EP1 #2",
+      "type": "jokelet",
+      "status": "Approved",
+      "files": {
+        "src": {
+          "path": "media/ep1-02.mp4",
+          "bytes": 3092758,
+          "sha256": "c6e41307e7b45ba902f5ab01d0a9d1abe5143189dc158501e4e7da94ad8f8146"
+        },
+        "poster": {
+          "path": "media/ep1-02.jpg",
+          "bytes": 39050,
+          "sha256": "00e27a4b77cb5c4a1c616992d22ad05434de51e9adb07bc3cdb2f535b1064c24"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": {
+        "inFrame": 333,
+        "outFrameInclusive": 585,
+        "fps": 30
+      },
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "sourceLibraryId": "libfile_ce9e2e11a18881919875f3c3eab4b2d6"
+    },
+    {
+      "id": "ep1-03",
+      "title": "Impasta \u00b7 EP1 #3",
+      "type": "jokelet",
+      "status": "Approved",
+      "files": {
+        "src": {
+          "path": "media/ep1-03.mp4",
+          "bytes": 2721035,
+          "sha256": "f78f86ffbe4023c01545b5c0238ba04036e809fc851998d1691c2ba572294577"
+        },
+        "poster": {
+          "path": "media/ep1-03.jpg",
+          "bytes": 41365,
+          "sha256": "9b2d26eca72f027903a955e7ce8d3b323aee91cd715cf656e65ab2ae667d8591"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": {
+        "inFrame": 586,
+        "outFrameInclusive": 824,
+        "fps": 30
+      },
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "sourceLibraryId": "libfile_ce9e2e11a18881919875f3c3eab4b2d6"
+    },
+    {
+      "id": "ep1-04",
+      "title": "Scarecrow \u00b7 EP1 #4",
+      "type": "jokelet",
+      "status": "Approved",
+      "files": {
+        "src": {
+          "path": "media/ep1-04.mp4",
+          "bytes": 3696987,
+          "sha256": "c149fe620125260bb310937d4b1d1f50f05079de911daa759f9580eadd8df33f"
+        },
+        "poster": {
+          "path": "media/ep1-04.jpg",
+          "bytes": 39694,
+          "sha256": "335a7cc82042c4a759648c3b15fe611f7abdc0fb349f502e75d11d37c23f78e6"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": {
+        "inFrame": 825,
+        "outFrameInclusive": 1067,
+        "fps": 30
+      },
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "sourceLibraryId": "libfile_ce9e2e11a18881919875f3c3eab4b2d6"
+    },
+    {
+      "id": "ep1-05",
+      "title": "Hug \u00b7 EP1 #5",
+      "type": "jokelet",
+      "status": "Approved",
+      "files": {
+        "src": {
+          "path": "media/ep1-05.mp4",
+          "bytes": 3491412,
+          "sha256": "ca448097d49271b68112a18e8c1152ce1a898d2ea1ab15767b35efcf0bb57bc3"
+        },
+        "poster": {
+          "path": "media/ep1-05.jpg",
+          "bytes": 41977,
+          "sha256": "4db278d0b31c4ed4524c348a7326e69e96adbf579cd91ee18ea81e698915a8da"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": {
+        "inFrame": 1068,
+        "outFrameInclusive": 1357,
+        "fps": 30
+      },
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "sourceLibraryId": "libfile_ce9e2e11a18881919875f3c3eab4b2d6"
+    },
+    {
+      "id": "fireside-cta",
+      "title": "Fireside CTA",
+      "type": "outro",
+      "status": "Approved",
+      "files": {
+        "src": {
+          "path": "media/fireside-cta.mp4",
+          "bytes": 8202888,
+          "sha256": "835a83abcfc3bf1b4baab45967c77b76b714bf0bfae02b3e1808f587c3f36659"
+        },
+        "poster": {
+          "path": "media/fireside-cta.jpg",
+          "bytes": 45232,
+          "sha256": "c41a85d198287c1e2a7fd778a45aac93b3d0a0bf1888a1e89437712f879f46fc"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "sourceLibraryId": "libfile_2f84036c375c81919cd282f63057e5a5"
+    },
+    {
+      "id": "reaction-side-eye",
+      "title": "Side glance and return \u00b7 3.6s",
+      "type": "reaction",
+      "status": "Approved",
+      "files": {
+        "src": {
+          "path": "media/reaction-side-eye-silent-v02.mp4",
+          "bytes": 4272153,
+          "sha256": "912c633e9d7710ba5eef99486e2415f852f698231462717541a8dbdb8d66ee71"
+        },
+        "poster": {
+          "path": "media/reaction-side-eye.jpg",
+          "bytes": 39601,
+          "sha256": "a4100900add292b4e245b086dbbebe6a313377ba42574aa2abf4620f31f6889f"
+        },
+        "originalSrc": {
+          "path": "media/reaction-side-eye.mp4",
+          "bytes": 4272153,
+          "sha256": "912c633e9d7710ba5eef99486e2415f852f698231462717541a8dbdb8d66ee71"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Eyes lowered",
+        "endPose": "Front stare",
+        "movement": "Head turn and return",
+        "expression": "Skeptical",
+        "framing": "Close-up",
+        "scene": "Lake daytime",
+        "mouthMotion": "Closed",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy",
+        "reviewedAt": "2026-10-22"
+      },
+      "sourceStatus": "Original source needs linking; bundled working copy preserved"
+    },
+    {
+      "id": "reaction-surprise",
+      "title": "Surprise to weary eye closure \u00b7 3.6s",
+      "type": "reaction",
+      "status": "Approved",
+      "files": {
+        "src": {
+          "path": "media/reaction-surprise-silent-v02.mp4",
+          "bytes": 3186283,
+          "sha256": "4f00329dda9cb411771d03c22b096106c5bded5d6afe882ef2319eaf8d2238f5"
+        },
+        "poster": {
+          "path": "media/reaction-surprise.jpg",
+          "bytes": 40072,
+          "sha256": "f4fb895694c02a5c4acb2fed167c06dec89d2c7505442dde828099147e4c5a9c"
+        },
+        "originalSrc": {
+          "path": "media/reaction-surprise.mp4",
+          "bytes": 3186283,
+          "sha256": "4f00329dda9cb411771d03c22b096106c5bded5d6afe882ef2319eaf8d2238f5"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Wide eyes forward",
+        "endPose": "Eyes closed",
+        "movement": "Eye closure",
+        "expression": "Surprised to weary",
+        "framing": "Close-up",
+        "scene": "Lake daytime",
+        "mouthMotion": "Open then closed",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy",
+        "reviewedAt": "2026-10-22"
+      },
+      "sourceStatus": "Original source needs linking; bundled working copy preserved"
+    },
+    {
+      "id": "reaction-skeptical",
+      "title": "Skeptical tilted stare \u00b7 3.0s",
+      "type": "reaction",
+      "status": "Approved",
+      "files": {
+        "src": {
+          "path": "media/reaction-skeptical-silent-v02.mp4",
+          "bytes": 1920839,
+          "sha256": "9cb3246cffaea63858de86090a2f00ad37e79c748b106fece1ddaa0131355616"
+        },
+        "poster": {
+          "path": "media/reaction-skeptical.jpg",
+          "bytes": 38782,
+          "sha256": "2587d1b9a39af4e18dc96b0797d5b93a2eaad7fa13a94db8698744d98d32df19"
+        },
+        "originalSrc": {
+          "path": "media/reaction-skeptical.mp4",
+          "bytes": 1920839,
+          "sha256": "9cb3246cffaea63858de86090a2f00ad37e79c748b106fece1ddaa0131355616"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Tilted front stare",
+        "endPose": "Tilted front stare",
+        "movement": "Restrained hold",
+        "expression": "Skeptical",
+        "framing": "Close-up",
+        "scene": "Lake daytime",
+        "mouthMotion": "Closed",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy",
+        "reviewedAt": "2026-10-22"
+      },
+      "sourceStatus": "Original source needs linking; bundled working copy preserved"
+    },
+    {
+      "id": "asset-09120cab3daf8ad7",
+      "title": "Standing open-palm gesture \u00b7 10.33s",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-09120cab3daf8ad7-web-v01-silent-v02.mp4",
+          "bytes": 4023368,
+          "sha256": "ec6f0f54beff36d3910322466eee602889c4de754de072c8d8737099cb0d182b"
+        },
+        "poster": {
+          "path": "media/asset-09120cab3daf8ad7.jpg",
+          "bytes": 33566,
+          "sha256": "6fe828fa6c4dbb5fa2d7d229929d76ec33f747c9e21268c68f42cdaaf2e60350"
+        },
+        "originalSrc": {
+          "path": "media/asset-09120cab3daf8ad7-web-v01.mp4",
+          "bytes": 4273580,
+          "sha256": "0bcf11bd4dab359b054f6ace91122ee7bca27083b38577fb631e0ed3ef199b23"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": "09120cab3daf8ad714ed9162c0e30ed6ad9a5fb112a0afce31597190087db22d",
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Standing at grill",
+        "endPose": "Palm extended",
+        "movement": "Hand gestures",
+        "expression": "Questioning",
+        "framing": "Standing medium",
+        "scene": "Grill sunset",
+        "mouthMotion": "Mouth movement",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy",
+        "reviewedAt": "2026-10-22"
+      },
+      "sourceStatus": "Source ID recorded",
+      "originalName": "16421.mp4",
+      "sourceLibraryId": "libfile_04db9c3627d881918932127c14099251"
+    },
+    {
+      "id": "asset-19cf5f3a8b337f58",
+      "title": "Turn away and return \u00b7 phone recording \u00b7 8.04s",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-19cf5f3a8b337f58-web-v01-silent-v02.mp4",
+          "bytes": 2159682,
+          "sha256": "dfa10f7e9d168b5a5964de7e2bc2a07828f250e938134dddbca0ed0aad9c22b3"
+        },
+        "poster": {
+          "path": "media/asset-19cf5f3a8b337f58.jpg",
+          "bytes": 32571,
+          "sha256": "cab1b9ed91c157031bc13263e94d5527570f9bee08e415a569377e962acf9236"
+        },
+        "originalSrc": {
+          "path": "media/asset-19cf5f3a8b337f58-web-v01.mp4",
+          "bytes": 2293812,
+          "sha256": "4ccc12979f534f35ea5ddad0dc244aa1d4abec6d2baa64ecbd4b9e92b238f82a"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": "19cf5f3a8b337f581dea387f7f890c5121d08bbc9c381119e52dc1216bf060e8",
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Front stare",
+        "endPose": "Front stare",
+        "movement": "Head turn and return",
+        "expression": "Skeptical",
+        "framing": "Screen recording",
+        "scene": "Lake daytime",
+        "mouthMotion": "Mouth movement",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy",
+        "reviewedAt": "2026-10-22"
+      },
+      "sourceStatus": "Source ID recorded",
+      "originalName": "16423.mp4",
+      "sourceLibraryId": "libfile_347ddc40737c8191a32489859997361e"
+    },
+    {
+      "id": "asset-59acd21b5b7948fe",
+      "title": "Side-eye with head turn \u00b7 6.04s",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-59acd21b5b7948fe-web-v01-silent-v02.mp4",
+          "bytes": 3089548,
+          "sha256": "2e5aa36d45ec41ab0f4835ee4608349d11ca46be64c53c5287ba6a8eaf3bbdab"
+        },
+        "poster": {
+          "path": "media/asset-59acd21b5b7948fe.jpg",
+          "bytes": 29331,
+          "sha256": "b97434a620801f318613a855f4e3ff83b7d6728aa0bde1b7ad5572092563c257"
+        },
+        "originalSrc": {
+          "path": "media/asset-59acd21b5b7948fe-web-v01.mp4",
+          "bytes": 3190669,
+          "sha256": "272e948d3182f455c81f666bb845c985a8af36734a92bcea6f043a30a7952567"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": "59acd21b5b7948fea2dcddfe3d71f035f00e5a1f4288dce8498c3c3c3b8b5f7f",
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Eyes screen-left",
+        "endPose": "Eyes screen-left",
+        "movement": "Head turn screen-right",
+        "expression": "Disbelieving",
+        "framing": "Close-up",
+        "scene": "Lake daytime",
+        "mouthMotion": "Mouth movement",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy",
+        "reviewedAt": "2026-10-22"
+      },
+      "sourceStatus": "Source ID recorded",
+      "originalName": "16424.mp4",
+      "sourceLibraryId": "libfile_beec8915457c8191b16fe778a7d1b0b8"
+    },
+    {
+      "id": "asset-f4376becea306968",
+      "title": "Side-eye to lowered eyes \u00b7 6.04s",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-f4376becea306968-web-v01-silent-v02.mp4",
+          "bytes": 1582529,
+          "sha256": "804ee18815f6ed1014ab83ed322752325c8edf2ec67d0ec9c50b475b67ef22a5"
+        },
+        "poster": {
+          "path": "media/asset-f4376becea306968.jpg",
+          "bytes": 29254,
+          "sha256": "c55a8536c2eb19776d38d3a91f459c303aa6fe2f12c53045fbdfdf42c0073bda"
+        },
+        "originalSrc": {
+          "path": "media/asset-f4376becea306968-web-v01.mp4",
+          "bytes": 1683682,
+          "sha256": "74376ff5d52bb1213301e9bfad45e96b13e2509f6cfb759e1979be26217a8625"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": "f4376becea306968fd830de11ce527ddcb6e6edfc1d47688d3e5c7c281278781",
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Eyes screen-left",
+        "endPose": "Eyes lowered",
+        "movement": "Eye closure",
+        "expression": "Weary",
+        "framing": "Close-up",
+        "scene": "Lake daytime",
+        "mouthMotion": "Closed",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy",
+        "reviewedAt": "2026-10-22"
+      },
+      "sourceStatus": "Source ID recorded",
+      "originalName": "16425.mp4",
+      "sourceLibraryId": "libfile_4ad16cdc52e88191b9288ac38ec6e4bc"
+    },
+    {
+      "id": "asset-f67f8bfc0a63fbe4",
+      "title": "Front stare with raised brows \u00b7 6.04s",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-f67f8bfc0a63fbe4-web-v01-silent-v02.mp4",
+          "bytes": 1818271,
+          "sha256": "801004453b1524951399823575643d8c97a5ee9a11c49fd0bd161ef9713c70e7"
+        },
+        "poster": {
+          "path": "media/asset-f67f8bfc0a63fbe4.jpg",
+          "bytes": 33570,
+          "sha256": "b175087a9a266a0177ddc6780e36a3d55f6ef54502ae6530180b87707128e2e4"
+        },
+        "originalSrc": {
+          "path": "media/asset-f67f8bfc0a63fbe4-web-v01.mp4",
+          "bytes": 1818271,
+          "sha256": "801004453b1524951399823575643d8c97a5ee9a11c49fd0bd161ef9713c70e7"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": "f67f8bfc0a63fbe4f978697033c25f0b261c88c0159a0cf657b16dbfe2ec82d9",
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Front stare",
+        "endPose": "Front stare",
+        "movement": "Raised brows",
+        "expression": "Questioning",
+        "framing": "Close-up",
+        "scene": "Lake daytime",
+        "mouthMotion": "Mouth movement",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy",
+        "reviewedAt": "2026-10-22"
+      },
+      "sourceStatus": "Source ID recorded",
+      "originalName": "16426.mp4",
+      "sourceLibraryId": "libfile_62af740de6e481919f90e1255cacbf1d"
+    },
+    {
+      "id": "asset-911b0b65dbe1ab40",
+      "title": "Side glance and return \u00b7 take 2 \u00b7 6.04s",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-911b0b65dbe1ab40-web-v01-silent-v02.mp4",
+          "bytes": 2695959,
+          "sha256": "d12a5aea30019035475df7cfdb048ec04c0f95d8053179799962b950047934b8"
+        },
+        "poster": {
+          "path": "media/asset-911b0b65dbe1ab40.jpg",
+          "bytes": 33414,
+          "sha256": "46ba764c22ad9fff9924a921f642d1615c2872a42ea2e8eb644218ab137f16c2"
+        },
+        "originalSrc": {
+          "path": "media/asset-911b0b65dbe1ab40-web-v01.mp4",
+          "bytes": 2695959,
+          "sha256": "d12a5aea30019035475df7cfdb048ec04c0f95d8053179799962b950047934b8"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": "911b0b65dbe1ab4023e256f14d75f4baa978d704bf6c61d66043e5d194b30dbb",
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Front stare",
+        "endPose": "Front stare",
+        "movement": "Head turn and return",
+        "expression": "Skeptical",
+        "framing": "Close-up",
+        "scene": "Lake daytime",
+        "mouthMotion": "Mouth movement",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy",
+        "reviewedAt": "2026-10-22"
+      },
+      "sourceStatus": "Source ID recorded",
+      "originalName": "16427.mp4",
+      "sourceLibraryId": "libfile_03684bb00ff881918bb6016c981327c8"
+    },
+    {
+      "id": "asset-81531587e0d47234",
+      "title": "Turn screen-right and return \u00b7 6.04s",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-81531587e0d47234-web-v01-silent-v02.mp4",
+          "bytes": 2321500,
+          "sha256": "494ef6b8cd6704a16efe9163309091fd369b250755102d21480d0807003db548"
+        },
+        "poster": {
+          "path": "media/asset-81531587e0d47234.jpg",
+          "bytes": 33283,
+          "sha256": "8f51f85ef94190d4e6ad64fc201c66ef78d07ad25a99d51611d223889d9a2093"
+        },
+        "originalSrc": {
+          "path": "media/asset-81531587e0d47234-web-v01.mp4",
+          "bytes": 2321500,
+          "sha256": "494ef6b8cd6704a16efe9163309091fd369b250755102d21480d0807003db548"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": "81531587e0d472346c32d8905b8467fe465c6fac5c8d1a9766032bc9d96231c5",
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Front stare",
+        "endPose": "Front stare",
+        "movement": "Head turn and return",
+        "expression": "Skeptical",
+        "framing": "Close-up",
+        "scene": "Lake daytime",
+        "mouthMotion": "Mouth movement",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy",
+        "reviewedAt": "2026-10-22"
+      },
+      "sourceStatus": "Source ID recorded",
+      "originalName": "16428.mp4",
+      "sourceLibraryId": "libfile_88e2b48cf4988191b114f695b9e57926"
+    },
+    {
+      "id": "asset-c9be446113c8c28a",
+      "title": "Forward skeptical hold \u00b7 take 2 \u00b7 6.04s",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-c9be446113c8c28a-web-v01-silent-v02.mp4",
+          "bytes": 2518550,
+          "sha256": "e2525c81d8640dbe3acf86d531c51e960d9735e3d017887205d33a03dba56daf"
+        },
+        "poster": {
+          "path": "media/asset-c9be446113c8c28a.jpg",
+          "bytes": 33415,
+          "sha256": "cfd7d118940628351c16b028c86d0212a207db3efa3895d749fed2cc34642226"
+        },
+        "originalSrc": {
+          "path": "media/asset-c9be446113c8c28a-web-v01.mp4",
+          "bytes": 2619520,
+          "sha256": "8e4b9be503655de03424aa3a7d6e7d065b1ebbadab4d0215c7dfff5788103a40"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": "c9be446113c8c28ab852d51f9d811831a059471495ea70d1c326cd5e6f40e2c8",
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Tilted front stare",
+        "endPose": "Front stare",
+        "movement": "Restrained hold",
+        "expression": "Skeptical",
+        "framing": "Close-up",
+        "scene": "Lake daytime",
+        "mouthMotion": "Slight mouth movement",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy",
+        "reviewedAt": "2026-10-22"
+      },
+      "sourceStatus": "Source ID recorded",
+      "originalName": "16429.mp4",
+      "sourceLibraryId": "libfile_53a97652391c819190b6e604f9ed6655"
+    },
+    {
+      "id": "asset-eecbf307656836d5",
+      "title": "Blink into direct stare \u00b7 6.04s",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-eecbf307656836d5-web-v01-silent-v02.mp4",
+          "bytes": 2176619,
+          "sha256": "edf6f6b5d1fadb90dd81af76a4d0c5cb853d9598c66617eea55b71a2fa3c213e"
+        },
+        "poster": {
+          "path": "media/asset-eecbf307656836d5.jpg",
+          "bytes": 33362,
+          "sha256": "5e53c8ee1e100c4fb684b8f2a6dd5db96ac74ea8eeefd78bb1e82ae419e11fad"
+        },
+        "originalSrc": {
+          "path": "media/asset-eecbf307656836d5-web-v01.mp4",
+          "bytes": 2277670,
+          "sha256": "5950350ae0198f7afe733a8d929532c7120d446abd58695d6b68af23b8d0984d"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": "eecbf307656836d57c4c499b1ab31b01ec35b09b4dd35f307fd7d2d051595c5f",
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Tilted front stare",
+        "endPose": "Front stare",
+        "movement": "Eye closure",
+        "expression": "Skeptical",
+        "framing": "Close-up",
+        "scene": "Lake daytime",
+        "mouthMotion": "Closed",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy",
+        "reviewedAt": "2026-10-22"
+      },
+      "sourceStatus": "Source ID recorded",
+      "originalName": "16430.mp4",
+      "sourceLibraryId": "libfile_35528c54fed48191acb1dc2c13058dbb"
+    },
+    {
+      "id": "asset-035fa25e25dfaccd",
+      "title": "Slow blink into direct stare \u00b7 6.04s",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-035fa25e25dfaccd-web-v01-silent-v02.mp4",
+          "bytes": 2178687,
+          "sha256": "7ebc4a1f72b48c8c932dbdbdae18058520d8393fc17c2db52827b855706496ae"
+        },
+        "poster": {
+          "path": "media/asset-035fa25e25dfaccd.jpg",
+          "bytes": 33290,
+          "sha256": "4647c4aa2ff250074de38b3b339a7f4804d1a629a5e07ec39b05ed85fd955c81"
+        },
+        "originalSrc": {
+          "path": "media/asset-035fa25e25dfaccd-web-v01.mp4",
+          "bytes": 2279666,
+          "sha256": "8d13cf1ec199a5f592e2f273f879b0529dfdc946e26ac1c96dd2b644ade5e20c"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": "035fa25e25dfaccd4b9ecf41df1ff79c93f0aa0f278c84f0203e58cdfb2f9522",
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Tilted front stare",
+        "endPose": "Front stare",
+        "movement": "Eye closure",
+        "expression": "Weary",
+        "framing": "Close-up",
+        "scene": "Lake daytime",
+        "mouthMotion": "Closed",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy",
+        "reviewedAt": "2026-10-22"
+      },
+      "sourceStatus": "Source ID recorded",
+      "originalName": "16431.mp4",
+      "sourceLibraryId": "libfile_9c05d90711288191bf3db260aad431b0"
+    },
+    {
+      "id": "asset-d067af68c563203e",
+      "title": "Long side glance and return \u00b7 10.04s",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-d067af68c563203e-web-v01-silent-v02.mp4",
+          "bytes": 3745445,
+          "sha256": "afe36f02ed374ca004b193f72745dc8d371e752188b22d4897e8290dcbf807b4"
+        },
+        "poster": {
+          "path": "media/asset-d067af68c563203e.jpg",
+          "bytes": 34196,
+          "sha256": "58e9a4522310cc14e8060c9f6cd570693885f441f8ac22387a36bc490705c492"
+        },
+        "originalSrc": {
+          "path": "media/asset-d067af68c563203e-web-v01.mp4",
+          "bytes": 3745445,
+          "sha256": "afe36f02ed374ca004b193f72745dc8d371e752188b22d4897e8290dcbf807b4"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": "d067af68c563203e921e73315422c48108e42b5de711cb7921da08d40be5ae4d",
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Eyes lowered",
+        "endPose": "Front stare",
+        "movement": "Head turn and return",
+        "expression": "Skeptical",
+        "framing": "Close-up",
+        "scene": "Lake daytime",
+        "mouthMotion": "Closed",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy",
+        "reviewedAt": "2026-10-22"
+      },
+      "sourceStatus": "Source ID recorded",
+      "originalName": "16598.mp4",
+      "sourceLibraryId": "libfile_6cbb631a37e4819191d220290df14446"
+    },
+    {
+      "id": "asset-80e08685bf6d90d9",
+      "title": "Long surprise to weary closure \u00b7 10.04s",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-80e08685bf6d90d9-web-v01-silent-v02.mp4",
+          "bytes": 3330872,
+          "sha256": "a20134ca7d90b2e1f57e625dcef64a051ea371c7a414941093e706d7e878578a"
+        },
+        "poster": {
+          "path": "media/asset-80e08685bf6d90d9.jpg",
+          "bytes": 32911,
+          "sha256": "d18d30fe62e6a12272b6a25cac6f0a403b917230d25a5f14ca0d9457941c3568"
+        },
+        "originalSrc": {
+          "path": "media/asset-80e08685bf6d90d9-web-v01.mp4",
+          "bytes": 3330872,
+          "sha256": "a20134ca7d90b2e1f57e625dcef64a051ea371c7a414941093e706d7e878578a"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": "80e08685bf6d90d98cbc24abce436a347618905f881bc2779ba015ec9dfaf559",
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Wide eyes forward",
+        "endPose": "Eyes closed",
+        "movement": "Eye closure",
+        "expression": "Surprised to weary",
+        "framing": "Close-up",
+        "scene": "Lake daytime",
+        "mouthMotion": "Open then closed",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy",
+        "reviewedAt": "2026-10-22"
+      },
+      "sourceStatus": "Source ID recorded",
+      "originalName": "16599.mp4",
+      "sourceLibraryId": "libfile_5ebb9d3bd45c8191ac06a06888a5ae87"
+    },
+    {
+      "id": "asset-42a525668e70b4a2",
+      "title": "Long skeptical tilted stare \u00b7 10.04s",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-42a525668e70b4a2-web-v01-silent-v02.mp4",
+          "bytes": 2002341,
+          "sha256": "a4480f67c9818dfbc7c78e8c39335ef50224c2aea0125334dae8983120fcfa3a"
+        },
+        "poster": {
+          "path": "media/asset-42a525668e70b4a2.jpg",
+          "bytes": 33418,
+          "sha256": "4a6a5a691cf001729bbab0d4d50f800d374c90b7bb8e8f74b9a679f3d2501f23"
+        },
+        "originalSrc": {
+          "path": "media/asset-42a525668e70b4a2-web-v01.mp4",
+          "bytes": 2169203,
+          "sha256": "97491acef4a8a868d359d0f0fbd903366aa71fc1ceb93844753c9ff07f9c38bc"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": "42a525668e70b4a2a8f42c9967631474058fe77bdea1c802b7ccb5bc163eb573",
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Tilted front stare",
+        "endPose": "Tilted front stare",
+        "movement": "Restrained hold",
+        "expression": "Skeptical",
+        "framing": "Close-up",
+        "scene": "Lake daytime",
+        "mouthMotion": "Closed",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy",
+        "reviewedAt": "2026-10-22"
+      },
+      "sourceStatus": "Source ID recorded",
+      "originalName": "16600.mp4",
+      "sourceLibraryId": "libfile_04e59d488da8819195ebc40b1208fe94"
+    },
+    {
+      "id": "asset-31c2beb89cf3d407",
+      "title": "Side-eye to restrained smile \u00b7 6.58s",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-31c2beb89cf3d407-web-v01-silent-v02.mp4",
+          "bytes": 1916044,
+          "sha256": "ae8e0ba4915281911abb014999feefc1084fe261b5b3b1749b81e4d65b778cad"
+        },
+        "poster": {
+          "path": "media/asset-31c2beb89cf3d407.jpg",
+          "bytes": 34591,
+          "sha256": "f32144aba429e593461cf7fc6770777ae7023ffa292d18b751ab0a0e7c54b88e"
+        },
+        "originalSrc": {
+          "path": "media/asset-31c2beb89cf3d407-web-v01.mp4",
+          "bytes": 2025777,
+          "sha256": "27c3f11ebf3d10d654105441cb8d818cdee21dddfc24d97e2735a338458ab10a"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": "a87b30f40b494237917cc84b2d830bb1",
+      "sourceSha256": "31c2beb89cf3d4075c6d462ea22464fe3f93ab8d0c7935733f7e378d6833ba19",
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Front stare",
+        "endPose": "Front slight smile",
+        "movement": "Side glance",
+        "expression": "Skeptical to amused",
+        "framing": "Close-up",
+        "scene": "Lake daytime",
+        "mouthMotion": "Closed",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy",
+        "reviewedAt": "2026-10-22"
+      },
+      "sourceStatus": "Source ID recorded",
+      "originalName": "Create a photorealistic silent reaction insert featuring exactly (1).mp4",
+      "sourceLibraryId": "libfile_4c90ca281dd081918c489a5d854cda0d"
+    },
+    {
+      "id": "asset-0358587cd5e4560b",
+      "title": "Front stare with mouth movement \u00b7 6.58s",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-0358587cd5e4560b-web-v01-silent-v02.mp4",
+          "bytes": 2051832,
+          "sha256": "1d6e7c467df3d94a4490f36f1c4d68f59da6e21e2004f51014907d770aeaee55"
+        },
+        "poster": {
+          "path": "media/asset-0358587cd5e4560b.jpg",
+          "bytes": 33295,
+          "sha256": "c6dcf4731b26b14058bcba61504d043efee36717bc6c4f5c42ec681cc32fbb16"
+        },
+        "originalSrc": {
+          "path": "media/asset-0358587cd5e4560b-web-v01.mp4",
+          "bytes": 2161275,
+          "sha256": "aff8b8e7e855e60ba2eba23fb2c76102e90b3c2bc15dec003e41f75daafa371b"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": "d59f8436fa914fd5901b49161f58ae53",
+      "sourceSha256": "0358587cd5e4560b3473eaf488d2223eb39b574806e95a7f918b0bcdcc29f913",
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Front stare",
+        "endPose": "Front stare",
+        "movement": "Eye closure",
+        "expression": "Questioning",
+        "framing": "Close-up",
+        "scene": "Lake daytime",
+        "mouthMotion": "Mouth movement",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy",
+        "reviewedAt": "2026-10-22"
+      },
+      "sourceStatus": "Source ID recorded",
+      "originalName": "Create a photorealistic silent reaction insert featuring exactly.mp4",
+      "sourceLibraryId": "libfile_8bc257dd86d8819197cfb6f2c3d07a7a"
+    },
+    {
+      "id": "asset-77db67db8d7f54ee",
+      "title": "DAD JOKE DUTY BROLL BEE INCIDENT v1 SOURCE",
+      "type": "broll",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-77db67db8d7f54ee.mp4",
+          "bytes": 2740356,
+          "sha256": "77db67db8d7f54eeb85b210ec593de97b7949ae3d15e892aecae9c89012a0b02"
+        },
+        "poster": {
+          "path": "media/asset-77db67db8d7f54ee.jpg",
+          "bytes": 31044,
+          "sha256": "7c3634726e5deba039d4881cbe771407109fceafcc51d1c29586a41f0a7e81aa"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "originalName": "GS_DAD_JOKE_DUTY_BROLL_BEE_INCIDENT_v1_SOURCE.mp4",
+      "sourceLibraryId": "libfile_09dd50100dcc81919c0fc7908e596c44"
+    },
+    {
+      "id": "asset-9878b73384bf1cf1",
+      "title": "DAD JOKE DUTY BROLL FLAREUP v1 PORTRAIT CROP",
+      "type": "broll",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-9878b73384bf1cf1-web-v01.mp4",
+          "bytes": 4708934,
+          "sha256": "7e2eb330491b3becad922e73d0c35f0171869b0b4e12ea6fce6563197ab4967f"
+        },
+        "poster": {
+          "path": "media/asset-9878b73384bf1cf1.jpg",
+          "bytes": 10078,
+          "sha256": "76865f4fedf4d68c48d7ef359bf74ca40922d3cf3673349c06a303b305333180"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": "9878b73384bf1cf1a5278367fd73a88dc7ce8a60704f80b15c8a7cbe3b6c2edb",
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "originalName": "GS_DAD_JOKE_DUTY_BROLL_FLAREUP_v1_PORTRAIT_CROP.mp4",
+      "sourceLibraryId": "libfile_49b6c1b12a808191af73689003afe5da"
+    },
+    {
+      "id": "asset-2a5de9df69401bb0",
+      "title": "DJ3 SMART GRILL VOICE v01",
+      "type": "audio",
+      "status": "Imported",
+      "files": {
+        "src": {
+          "path": "media/asset-2a5de9df69401bb0.mp3",
+          "bytes": 91751,
+          "sha256": "2a5de9df69401bb0529700a9a1df350dfc5dfc83a09f7802fca5b5e106bc1822"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "originalName": "GS_DJ3_SMART_GRILL_VOICE_v01.mp3",
+      "sourceLibraryId": "libfile_53746c6a7998819197a83ab216161831"
+    },
+    {
+      "id": "asset-9bcdecfaf88a6943",
+      "title": "Restrained side glance and return \u00b7 3.0s",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-9bcdecfaf88a6943-silent-v02.mp4",
+          "bytes": 2841762,
+          "sha256": "247fe42dc3d56bdd8a1e994422845f56756ced6d865754d662ae0f9abc062e30"
+        },
+        "poster": {
+          "path": "media/asset-9bcdecfaf88a6943.jpg",
+          "bytes": 34178,
+          "sha256": "37f7107b8d8acfb45f5174ad082b73bdbbd9f47707f6e70edc260cd36331458c"
+        },
+        "originalSrc": {
+          "path": "media/asset-9bcdecfaf88a6943.mp4",
+          "bytes": 2841761,
+          "sha256": "9bcdecfaf88a6943d09f5b2094ae667d2eac70264ed3b3e8e92e9a031060dfd2"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Front stare",
+        "endPose": "Front stare",
+        "movement": "Eye glance and return",
+        "expression": "Skeptical",
+        "framing": "Close-up",
+        "scene": "Lake daytime",
+        "mouthMotion": "Closed",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy",
+        "reviewedAt": "2026-10-22"
+      },
+      "sourceStatus": "Source ID recorded",
+      "originalName": "GS_DJD_EP02_BREAK03_RESTRAINED_REACTION_14789_3SEC_v1.mp4",
+      "sourceLibraryId": "libfile_da356b9619788191b32b0264186a4bbc"
+    },
+    {
+      "id": "asset-d143571ee0fd7759",
+      "title": "EP02 BROLL SOURCE SILENT v1",
+      "type": "broll",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-d143571ee0fd7759-web-v01.mp4",
+          "bytes": 4695968,
+          "sha256": "89a4f585f3da95d7d7c0166ddf88a7fdca76ffc78734b20315dacaa0b12cb9ee"
+        },
+        "poster": {
+          "path": "media/asset-d143571ee0fd7759.jpg",
+          "bytes": 27871,
+          "sha256": "6e08a3a31d7530c43ae2a70cc07d8bc40967d7b085c8404cd77b74ed949a5372"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": "d143571ee0fd7759e27bafc2df698b7def2ac47b4467b1a33dd85e167fc38001",
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "originalName": "GS_DJD_EP02_BROLL_SOURCE_SILENT_v1.mp4",
+      "sourceLibraryId": "libfile_2c6e240e0e7081918d49680ee9976bbe"
+    },
+    {
+      "id": "asset-6d2210345c9f0bca",
+      "title": "Grilling look-up with tongs \u00b7 2.52s",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-6d2210345c9f0bca-silent-v02.mp4",
+          "bytes": 2007621,
+          "sha256": "0728ff7220df945ccb5f082582c78f47f41e34fc6a3755114f9031cbd229b902"
+        },
+        "poster": {
+          "path": "media/asset-6d2210345c9f0bca.jpg",
+          "bytes": 27738,
+          "sha256": "ddeb7c955267ebabbc4422eebd6a54a314fa812302bfb9736887df4e697ddc16"
+        },
+        "originalSrc": {
+          "path": "media/asset-6d2210345c9f0bca.mp4",
+          "bytes": 2007620,
+          "sha256": "6d2210345c9f0bca728ad475d87510edbcc97077755fc7f2a23bbe71a946a321"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Looking down at grill",
+        "endPose": "Front stare with tongs",
+        "movement": "Look up",
+        "expression": "Questioning",
+        "framing": "Standing medium",
+        "scene": "Grill sunset",
+        "mouthMotion": "Closed",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy",
+        "reviewedAt": "2026-10-22"
+      },
+      "sourceStatus": "Source ID recorded",
+      "originalName": "GS_DJD_EP02_REACTION_CASUAL_HEARD_DIDNT_UNDERSTAND_00-02.5s_v1.mp4",
+      "sourceLibraryId": "libfile_ceb14f4b9a608191bb2fe77ef174c153"
+    },
+    {
+      "id": "asset-f7295829c0023218",
+      "title": "Quick CTA \u00b7 Episode 2",
+      "type": "outro",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-f7295829c0023218.mp4",
+          "bytes": 949595,
+          "sha256": "f7295829c0023218041784481b256a1b1831ccb458f38d48bac465aeaa2c2931"
+        },
+        "poster": {
+          "path": "media/asset-f7295829c0023218.jpg",
+          "bytes": 39959,
+          "sha256": "7d9a88345b470f9afbf009ad6a1d0e5a1d3ec6460f42d6a85e1df298ae4bcda9"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "originalName": "GS_DJD_EP2_QUICK_CTA_OUTRO_v01.mp4",
+      "sourceLibraryId": "libfile_cfd24531afa48191831f2b8aedf89f39"
+    },
+    {
+      "id": "asset-c1cabb18af46917a",
+      "title": "Facepalm \u00b7 wide \u00b7 3.84s",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-c1cabb18af46917a-silent-v02.mp4",
+          "bytes": 2294830,
+          "sha256": "8b574e6f7bab9cfb270e8ec4b26602bd269af71f6d4becd366e0714ba702244f"
+        },
+        "poster": {
+          "path": "media/asset-c1cabb18af46917a.jpg",
+          "bytes": 29606,
+          "sha256": "59270a706d2b84f76934504d6142bf89bb7ba5f1a0b4f935e068650da06f7792"
+        },
+        "originalSrc": {
+          "path": "media/asset-c1cabb18af46917a.mp4",
+          "bytes": 2294829,
+          "sha256": "c1cabb18af46917a4f58b0dbf8f63b3c2cbfc5edc070316b5a82e115975515a9"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Standing front",
+        "endPose": "Head bowed in hand",
+        "movement": "Facepalm",
+        "expression": "Exasperated",
+        "framing": "Standing medium",
+        "scene": "Grill sunset",
+        "mouthMotion": "Open then covered",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy",
+        "reviewedAt": "2026-10-22"
+      },
+      "sourceStatus": "Source ID recorded",
+      "originalName": "GS_DJD_QUICK_REACTION_FACEPALM_F150-F245_96FR_3.84SEC_25FPS_v1.mp4",
+      "sourceLibraryId": "libfile_cd9d93bab5188191978f5fa09e6a39e1"
+    },
+    {
+      "id": "asset-f184ec976ab6f0c0",
+      "title": "Facepalm \u00b7 25 percent crop \u00b7 3.64s",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-f184ec976ab6f0c0-silent-v02.mp4",
+          "bytes": 2008588,
+          "sha256": "38e5cdd7684172c93f6b42a44cd64aa02fe438d83639478beba0854a5ccfa46f"
+        },
+        "poster": {
+          "path": "media/asset-f184ec976ab6f0c0.jpg",
+          "bytes": 24016,
+          "sha256": "0930c3a225ff223cd3bdd0c4b3088418ffb79e72eb1cb2a7342e9c31b1ddde0d"
+        },
+        "originalSrc": {
+          "path": "media/asset-f184ec976ab6f0c0.mp4",
+          "bytes": 2008587,
+          "sha256": "f184ec976ab6f0c0232a1777fbcb642d735aac1ac8dc4aa91de9b10b0dbced27"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Standing front",
+        "endPose": "Head bowed in hand",
+        "movement": "Facepalm",
+        "expression": "Exasperated",
+        "framing": "Standing close",
+        "scene": "Grill sunset",
+        "mouthMotion": "Open then covered",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy",
+        "reviewedAt": "2026-10-22"
+      },
+      "sourceStatus": "Source ID recorded",
+      "originalName": "GS_DJD_QUICK_REACTION_FACEPALM_F155-F245_91FR_3.64SEC_25FPS_ZOOM25PCT_TOPANCHORED_v3.mp4",
+      "sourceLibraryId": "libfile_f8c72edc3b888191abf6f6f1a0ac5cb2"
+    },
+    {
+      "id": "asset-fdcb1e26bc2e3257",
+      "title": "Facepalm \u00b7 35 percent crop \u00b7 3.64s",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-fdcb1e26bc2e3257-silent-v02.mp4",
+          "bytes": 1994580,
+          "sha256": "12aabc0e549c01ce9f7a1ded1a51349b447a3215055cda29e9a3f83fc1810090"
+        },
+        "poster": {
+          "path": "media/asset-fdcb1e26bc2e3257.jpg",
+          "bytes": 22785,
+          "sha256": "2a6de4ad7130e9eb149dc9f45c62651da7d04b38c5b0307cf9e24932c5d06044"
+        },
+        "originalSrc": {
+          "path": "media/asset-fdcb1e26bc2e3257.mp4",
+          "bytes": 1994579,
+          "sha256": "fdcb1e26bc2e3257fe9ea6577391e938a3a3a775f7354aad1f65147063e38697"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Standing front",
+        "endPose": "Head bowed in hand",
+        "movement": "Facepalm",
+        "expression": "Exasperated",
+        "framing": "Standing close",
+        "scene": "Grill sunset",
+        "mouthMotion": "Open then covered",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy",
+        "reviewedAt": "2026-10-22"
+      },
+      "sourceStatus": "Source ID recorded",
+      "originalName": "GS_DJD_QUICK_REACTION_FACEPALM_F155-F245_91FR_3.64SEC_25FPS_ZOOM35PCT_v2.mp4",
+      "sourceLibraryId": "libfile_6d4d8c60b3b48191a86ae5f23966ec1c"
+    },
+    {
+      "id": "asset-3b7140dfdc6a7c80",
+      "title": "Facepalm \u00b7 alternate start \u00b7 3.64s",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-3b7140dfdc6a7c80-silent-v02.mp4",
+          "bytes": 2114796,
+          "sha256": "71fb9c22ab9c7637d9dc41594e09f670e0e311df19232eefe43cd39cf934ce90"
+        },
+        "poster": {
+          "path": "media/asset-3b7140dfdc6a7c80.jpg",
+          "bytes": 29220,
+          "sha256": "48b51a5a55061769d1d01ad56c6ca839ef9898d4f8a44edc4de78ebbd959bad3"
+        },
+        "originalSrc": {
+          "path": "media/asset-3b7140dfdc6a7c80.mp4",
+          "bytes": 2114795,
+          "sha256": "3b7140dfdc6a7c8075ffb9a9b5edd8431f5cca9e04fbdf9fad9162d7f473544c"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Standing front",
+        "endPose": "Head bowed in hand",
+        "movement": "Facepalm",
+        "expression": "Exasperated",
+        "framing": "Standing medium",
+        "scene": "Grill sunset",
+        "mouthMotion": "Open then covered",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy",
+        "reviewedAt": "2026-10-22"
+      },
+      "sourceStatus": "Source ID recorded",
+      "originalName": "GS_DJD_QUICK_REACTION_FACEPALM_F155-F245_91FR_3.64SEC_25FPS_v2.mp4",
+      "sourceLibraryId": "libfile_82ed8d80c3808191b94f1b8530575a04"
+    },
+    {
+      "id": "asset-93a7dc2b8dc428ed",
+      "title": "Flabbergasted grilling gesture \u00b7 2.48s",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-93a7dc2b8dc428ed-silent-v02.mp4",
+          "bytes": 2106142,
+          "sha256": "687b06d88d2dafc046b979baf15d9560e6f93905c9ea6475e6dccca085da6aea"
+        },
+        "poster": {
+          "path": "media/asset-93a7dc2b8dc428ed.jpg",
+          "bytes": 27948,
+          "sha256": "8377f056b1cb6f5517f6e64ef9d3a80d50283c320d98c89a196d091d307ba3e4"
+        },
+        "originalSrc": {
+          "path": "media/asset-93a7dc2b8dc428ed.mp4",
+          "bytes": 2106141,
+          "sha256": "93a7dc2b8dc428edf99a742bbc506c0d8cfe6399ea1f56a38f16d7084ee7a7b9"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Hand raised",
+        "endPose": "Front stare with tongs",
+        "movement": "Hand gesture",
+        "expression": "Flabbergasted",
+        "framing": "Standing medium",
+        "scene": "Grill sunset",
+        "mouthMotion": "Mouth movement",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy",
+        "reviewedAt": "2026-10-22"
+      },
+      "sourceStatus": "Source ID recorded",
+      "originalName": "GS_DJD_QUICK_REACTION_FLABBERGASTED_F254-F315_62FR_2.48SEC_25FPS_v1.mp4",
+      "sourceLibraryId": "libfile_47f63db3cf3481919674c505dd721ae4"
+    },
+    {
+      "id": "asset-e5210f0715e48050",
+      "title": "Grilling glance up to front stare \u00b7 3.44s",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-e5210f0715e48050-silent-v02.mp4",
+          "bytes": 2477309,
+          "sha256": "7aa983331f0cc825d2616c2b9eb5a38322ae854b4868518c421aefc59a5f7794"
+        },
+        "poster": {
+          "path": "media/asset-e5210f0715e48050.jpg",
+          "bytes": 27738,
+          "sha256": "ddeb7c955267ebabbc4422eebd6a54a314fa812302bfb9736887df4e697ddc16"
+        },
+        "originalSrc": {
+          "path": "media/asset-e5210f0715e48050.mp4",
+          "bytes": 2477308,
+          "sha256": "e5210f0715e48050d5934b701d57a1f5ff70f2bfcac4c2b190a23ca84f207812"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Looking down at grill",
+        "endPose": "Front stare with tongs",
+        "movement": "Look up",
+        "expression": "Questioning",
+        "framing": "Standing medium",
+        "scene": "Grill sunset",
+        "mouthMotion": "Closed",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy",
+        "reviewedAt": "2026-10-22"
+      },
+      "sourceStatus": "Source ID recorded",
+      "originalName": "GS_DJD_QUICK_REACTION_USABLE_GLANCE_F000-F085_86FR_3.44SEC_25FPS_v1.mp4",
+      "sourceLibraryId": "libfile_1a9cda63e46481918ba5958ca07f7feb"
+    },
+    {
+      "id": "asset-d64a4c4cee08341d",
+      "title": "No-way side glance and turn \u00b7 6.04s",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-d64a4c4cee08341d-web-v01-silent-v02.mp4",
+          "bytes": 3091504,
+          "sha256": "3692cbc6665efb045b6d07b20f8406811a4131b750c57aa8ea0e7c03bc552768"
+        },
+        "poster": {
+          "path": "media/asset-d64a4c4cee08341d.jpg",
+          "bytes": 29331,
+          "sha256": "b97434a620801f318613a855f4e3ff83b7d6728aa0bde1b7ad5572092563c257"
+        },
+        "originalSrc": {
+          "path": "media/asset-d64a4c4cee08341d-web-v01.mp4",
+          "bytes": 3091504,
+          "sha256": "3692cbc6665efb045b6d07b20f8406811a4131b750c57aa8ea0e7c03bc552768"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": "d64a4c4cee08341d644b51e6c6cae1fdcf018514f56314800a8f19ddca6fb844",
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Eyes screen-left",
+        "endPose": "Eyes screen-left",
+        "movement": "Head turn screen-right",
+        "expression": "Disbelieving",
+        "framing": "Close-up",
+        "scene": "Lake daytime",
+        "mouthMotion": "Mouth movement",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy",
+        "reviewedAt": "2026-10-22"
+      },
+      "sourceStatus": "Source ID recorded",
+      "originalName": "GS_DJD_REACTION_NO_WAY_SILENT_v1.mp4",
+      "sourceLibraryId": "libfile_194ef7ab7f2c8191aaa51d190df5218e"
+    },
+    {
+      "id": "asset-2e9f03d0d5ce17a0",
+      "title": "FIRESIDE BROLL 15611 REVERSED v1",
+      "type": "broll",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-2e9f03d0d5ce17a0-web-v01.mp4",
+          "bytes": 4052933,
+          "sha256": "6aa32f0c72420ec0423919103af5cb0b5c367f6376955922d8375b4540321e38"
+        },
+        "poster": {
+          "path": "media/asset-2e9f03d0d5ce17a0.jpg",
+          "bytes": 35157,
+          "sha256": "843d40e16fd630e07300f749227910b84c3171368ec4dca8a2b729ed08e977f7"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": "2e9f03d0d5ce17a0fd4b14112b69bf3bcd158fd82fb04e8f891f7c4a993b0e23",
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "originalName": "GS_FIRESIDE_BROLL_15611_REVERSED_v1.mp4",
+      "sourceLibraryId": "libfile_7da5063db33c8191ad4273d6138eddd8"
+    },
+    {
+      "id": "asset-9e7b8d4af736eafa",
+      "title": "FIRESIDE BROLL 15612 REVERSED v1",
+      "type": "broll",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-9e7b8d4af736eafa-web-v01.mp4",
+          "bytes": 3238703,
+          "sha256": "394915d9e3c21da859e36a50be374e21384af1a4b61eefbf921db81181b1c19c"
+        },
+        "poster": {
+          "path": "media/asset-9e7b8d4af736eafa.jpg",
+          "bytes": 35598,
+          "sha256": "22acf490dad625f8daef04d465462a8865a887b9d9563732ebd25ea79ede906e"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": "9e7b8d4af736eafacfc8a0f5d76304e8538c44d9ed48f58af2b1c32bdf55ab42",
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "originalName": "GS_FIRESIDE_BROLL_15612_REVERSED_v1.mp4",
+      "sourceLibraryId": "libfile_1c550f2e24c081919e2a4f385a58fa1e"
+    },
+    {
+      "id": "asset-0cfa68be61c5ed6c",
+      "title": "Quick CTA \u00b7 Episode 3 \u00b7 2 seconds",
+      "type": "outro",
+      "status": "Approved",
+      "files": {
+        "src": {
+          "path": "media/asset-0cfa68be61c5ed6c.mp4",
+          "bytes": 1421585,
+          "sha256": "0cfa68be61c5ed6c86f8533fa074fbd668da0ff875ab0340b2c2f2838c26c407"
+        },
+        "poster": {
+          "path": "media/asset-0cfa68be61c5ed6c.jpg",
+          "bytes": 35330,
+          "sha256": "42abf2d4288cf7f17fe47655a9cd2be1a6838719b8ac6711e8fbdd50f134d076"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "originalName": "GS_GLOBAL_OUTRO_CTA_MEDIUM_REVIEW_v02.mp4",
+      "sourceLibraryId": "libfile_885bac730b3c8191beb9d56f50efd695"
+    },
+    {
+      "id": "asset-2594e41942ce8a0c",
+      "title": "Quick CTA \u00b7 original take",
+      "type": "outro",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-2594e41942ce8a0c.mp4",
+          "bytes": 1427389,
+          "sha256": "2594e41942ce8a0c20eb0fab982fd9dbbde20354efb9f5563ec95d85dd48ad3a"
+        },
+        "poster": {
+          "path": "media/asset-2594e41942ce8a0c.jpg",
+          "bytes": 35348,
+          "sha256": "18acafc802d6f9eb2886a41a64a1458ea3e15085a7dfe1cd2e152dbb23ef8b54"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "originalName": "GS_GLOBAL_OUTRO_CTA_REVIEW_v01.mp4",
+      "sourceLibraryId": "libfile_b4d8a22b32ac8191a79d5aeb44fc2b92"
+    },
+    {
+      "id": "asset-e7ed2b376cbaa3bc",
+      "title": "JOKELET 01 Flamingo VOICE CLEAN v1",
+      "type": "audio",
+      "status": "Imported",
+      "files": {
+        "src": {
+          "path": "media/asset-e7ed2b376cbaa3bc.mp3",
+          "bytes": 131073,
+          "sha256": "e7ed2b376cbaa3bcfa4d0ec3598f44b93e79f85c048972d931eae71d9844c09d"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "originalName": "GS_JOKELET_01_Flamingo_VOICE_CLEAN_v1.mp3",
+      "sourceLibraryId": "libfile_1f7883aed0cc8191ab00d1697b104188"
+    },
+    {
+      "id": "asset-d014665a1a17cbbd",
+      "title": "JOKELET 03 Listener VOICE CLEAN v1",
+      "type": "audio",
+      "status": "Imported",
+      "files": {
+        "src": {
+          "path": "media/asset-d014665a1a17cbbd.mp3",
+          "bytes": 125430,
+          "sha256": "d014665a1a17cbbd95f0a826c3e6a26dd9048d34ca2edea28bbfb0e6d002ace1"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "originalName": "GS_JOKELET_03_Listener_VOICE_CLEAN_v1.mp3",
+      "sourceLibraryId": "libfile_40a8be8008308191ade8b40a92d74448"
+    },
+    {
+      "id": "asset-bb2e5850f8ccc9da",
+      "title": "JOKELET 04 Spider VOICE CLEAN v1",
+      "type": "audio",
+      "status": "Imported",
+      "files": {
+        "src": {
+          "path": "media/asset-bb2e5850f8ccc9da.mp3",
+          "bytes": 274015,
+          "sha256": "bb2e5850f8ccc9da20d7b8164f1001df71091d792d3f65087749e4bb3a0d4054"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "originalName": "GS_JOKELET_04_Spider_VOICE_CLEAN_v1.mp3",
+      "sourceLibraryId": "libfile_9848f2d352ac8191aab92cdda65796e3"
+    },
+    {
+      "id": "asset-3559bb01368692f6",
+      "title": "JOKELET 05 Dinner Surprise VOICE CLEAN v1",
+      "type": "audio",
+      "status": "Imported",
+      "files": {
+        "src": {
+          "path": "media/asset-3559bb01368692f6.mp3",
+          "bytes": 77156,
+          "sha256": "3559bb01368692f6cd85edfb5c79fc9cf93bdcfedcf17ca8f7be89b1723df036"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "originalName": "GS_JOKELET_05_Dinner_Surprise_VOICE_CLEAN_v1.mp3",
+      "sourceLibraryId": "libfile_95bac10f694c8191b8a69f746b3c7dbe"
+    },
+    {
+      "id": "asset-c468b0bf5475f1f3",
+      "title": "CTA \u00b7 medium speed \u00b7 3 seconds",
+      "type": "outro",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-c468b0bf5475f1f3.mp4",
+          "bytes": 1330726,
+          "sha256": "c468b0bf5475f1f323935ee1f8cdfde368f2002c96451c76f867606470722a62"
+        },
+        "poster": {
+          "path": "media/asset-c468b0bf5475f1f3.jpg",
+          "bytes": 35045,
+          "sha256": "d355a3c63d725e59a421d708380026727fcc9d26b58005fbfd048fe78dc48fa9"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "originalName": "GS_OUTRO_MED_SPEED_3S_v01.mp4",
+      "sourceLibraryId": "libfile_1c8c069b7bd081919855feb93daef76a"
+    },
+    {
+      "id": "asset-6f43da6924f3f48b",
+      "title": "DJ3 SMART GRILL INTERPRETIVE AUDIO v01",
+      "type": "audio",
+      "status": "Imported",
+      "files": {
+        "src": {
+          "path": "media/asset-6f43da6924f3f48b.mp3",
+          "bytes": 93655,
+          "sha256": "6f43da6924f3f48b76048428e674a1cda5d8aaa3efdc4d12a882fc79eb383078"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "originalName": "GS_DJ3_SMART_GRILL_INTERPRETIVE_AUDIO_v01.mp3",
+      "sourceLibraryId": "libfile_4d72120448c08191b705e3c1041ef052"
+    },
+    {
+      "id": "asset-8fc61afb41fe3574",
+      "title": "Global outro \u00b7 silent video",
+      "type": "outro",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-8fc61afb41fe3574.mp4",
+          "bytes": 6603276,
+          "sha256": "8fc61afb41fe3574c718f6498cdd491b2da8157450bbbb169ae0b5248a7bb0ad"
+        },
+        "poster": {
+          "path": "media/asset-8fc61afb41fe3574.jpg",
+          "bytes": 35927,
+          "sha256": "5169dccab027c8b5a7c21bd86e337b290752eb97fe1c93291fbeef5dee2d5ac7"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "originalName": "GS_GLOBAL_OUTRO_SILENT_v1.mp4",
+      "sourceLibraryId": "libfile_4b976d1bb4c88191a8bc2ac4da37c866"
+    },
+    {
+      "id": "asset-05820c8e6da9fba1",
+      "title": "JOKELET 02 Eyebrows VOICE CLEAN v1",
+      "type": "audio",
+      "status": "Imported",
+      "files": {
+        "src": {
+          "path": "media/asset-05820c8e6da9fba1.mp3",
+          "bytes": 119161,
+          "sha256": "05820c8e6da9fba16a13526ed54c5b555735f2add0250cc30aa5372e2b9be723"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "originalName": "GS_JOKELET_02_Eyebrows_VOICE_CLEAN_v1.mp3",
+      "sourceLibraryId": "libfile_17fab6ef6ebc8191ba99009680fb6b30"
+    },
+    {
+      "id": "asset-8a1dee44c0efede9",
+      "title": "Surprise blink and return \u00b7 8.0s",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/asset-8a1dee44c0efede9-web-v01-silent-v02.mp4",
+          "bytes": 2673564,
+          "sha256": "2a1d14bb6113a0bb50e2dfd7052e7c9aaebaca4425cf5157674e9c22710b1838"
+        },
+        "poster": {
+          "path": "media/asset-8a1dee44c0efede9.jpg",
+          "bytes": 32231,
+          "sha256": "5fc0457c017b8b307e12ae4f54c2e66f38e848b8d4c481f64e331dca64b4ee3a"
+        },
+        "originalSrc": {
+          "path": "media/asset-8a1dee44c0efede9-web-v01.mp4",
+          "bytes": 2806439,
+          "sha256": "24560b3e4196d40dd6bc7ec9fd56a43975748322c107198e86784df26de9d525"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": "f24da12d4ee342be8b2dd058f0a9d5f0",
+      "sourceSha256": "8a1dee44c0efede9ea56d567c10946f7f1695bb4ab9ec2a71acdb11dbeb16795",
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Front stare",
+        "endPose": "Front stare",
+        "movement": "Raised brows and head turn",
+        "expression": "Surprised",
+        "framing": "Close-up",
+        "scene": "Lake daytime",
+        "mouthMotion": "Mouth movement",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy",
+        "reviewedAt": "2026-10-22"
+      },
+      "sourceStatus": "Source ID recorded",
+      "originalName": "Silent comedy reaction insert. Match exactly the Grill Sergeant.mp4",
+      "sourceLibraryId": "libfile_6cad3c574fe88191ba7c3b191619ac18"
+    },
+    {
+      "id": "asset-5a0ce686eadc93dd",
+      "title": "eclipseit 1",
+      "type": "audio",
+      "status": "Imported",
+      "files": {
+        "src": {
+          "path": "media/asset-5a0ce686eadc93dd.mp3",
+          "bytes": 97846,
+          "sha256": "5a0ce686eadc93dd1b1791d00c2bc0f005156e8044593b2bdb2d39c4149b921d"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "originalName": "eclipseit 1.mp3",
+      "sourceLibraryId": "libfile_584a1226181c8191b36272527a3340b1"
+    },
+    {
+      "id": "asset-1432c22d4183be85",
+      "title": "outro medium cta",
+      "type": "audio",
+      "status": "Imported",
+      "files": {
+        "src": {
+          "path": "media/asset-1432c22d4183be85.mp3",
+          "bytes": 31390,
+          "sha256": "1432c22d4183be85684b919b634541abafacb9490267e65a0a47eef70a4f0250"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "originalName": "outro medium cta.mp3",
+      "sourceLibraryId": "libfile_2f68363759d48191a7924fdec06189be"
+    },
+    {
+      "id": "asset-e0a9b853f12f4e72",
+      "title": "quick cta outro",
+      "type": "audio",
+      "status": "Imported",
+      "files": {
+        "src": {
+          "path": "media/asset-e0a9b853f12f4e72.mp3",
+          "bytes": 26375,
+          "sha256": "e0a9b853f12f4e72110e319662bdc02a25ba0040f84426d8f06f7caad328e5cf"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded",
+      "originalName": "quick cta outro.mp3",
+      "sourceLibraryId": "libfile_76046194c54481919546c939339168d3"
+    },
+    {
+      "id": "asset-5d2f68278a00684b",
+      "title": "Lifesavers \u00b7 Take 1",
+      "type": "audio",
+      "status": "Approved",
+      "files": {
+        "src": {
+          "path": "media/asset-5d2f68278a00684b.mp3",
+          "bytes": 110977,
+          "sha256": "5d2f68278a00684bd1a18c938b7a25437576595c2a119153b671c7d87a327489"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Original source needs linking; bundled working copy preserved",
+      "originalName": "GS_LIFESAVERS_AUDIO_v01_TAKE_1.mp3"
+    },
+    {
+      "id": "asset-19d65212d3541a86",
+      "title": "Lifesavers \u00b7 Take 2",
+      "type": "audio",
+      "status": "Approved",
+      "files": {
+        "src": {
+          "path": "media/asset-19d65212d3541a86.mp3",
+          "bytes": 104708,
+          "sha256": "19d65212d3541a867ff8b6314772ff47b71cde736ee77da27281e128f93148d5"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Original source needs linking; bundled working copy preserved",
+      "originalName": "GS_LIFESAVERS_AUDIO_v01_TAKE_2.mp3"
+    },
+    {
+      "id": "asset-0a666c9583e8bb8c",
+      "title": "Lifesavers \u00b7 approved performance",
+      "type": "performance",
+      "status": "Approved",
+      "files": {
+        "src": {
+          "path": "media/asset-0a666c9583e8bb8c.mp4",
+          "bytes": 6501986,
+          "sha256": "0a666c9583e8bb8c7765dc926db16be26e1513d6cfdbb96851362471055b2578"
+        },
+        "poster": {
+          "path": "media/asset-0a666c9583e8bb8c.jpg",
+          "bytes": 34376,
+          "sha256": "fd0aa46e1c29fa90ceb03d3bdaa4c0d84790ec7a6057ca534ba4ffd9867ee046"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Original source needs linking; bundled working copy preserved",
+      "originalName": "GS_LIFESAVERS_DELIVERY_ORIGINAL_v01.mp4"
+    },
+    {
+      "id": "asset-f09d3540954c4cb2",
+      "title": "Playground \u00b7 approved performance",
+      "type": "performance",
+      "status": "Approved",
+      "files": {
+        "src": {
+          "path": "media/asset-f09d3540954c4cb2.mp4",
+          "bytes": 7977258,
+          "sha256": "f09d3540954c4cb2c1975bdf5a0f52f02eed792f2edb653ac4c3d00cd3d8e6e0"
+        },
+        "poster": {
+          "path": "media/asset-f09d3540954c4cb2.jpg",
+          "bytes": 34991,
+          "sha256": "a96249443f5d97159658c3bf04fedee4ca7cc101f2b25c938a42acaa55824754"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Original source needs linking; bundled working copy preserved",
+      "originalName": "GS_PLAYGROUND_DELIVERY_ORIGINAL_v01_ANCHORLOCK.mp4"
+    },
+    {
+      "id": "asset-e31b6f53870c5ee5",
+      "title": "Playground \u00b7 Take 1",
+      "type": "audio",
+      "status": "Approved",
+      "files": {
+        "src": {
+          "path": "media/asset-e31b6f53870c5ee5.wav",
+          "bytes": 1536078,
+          "sha256": "e31b6f53870c5ee53c2213f8284811c43121c8015975fbf37fca60d7e926715e"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Original source needs linking; bundled working copy preserved",
+      "originalName": "GS_PLAYGROUND_DELIVERY_AUDIO_v01.wav"
+    },
+    {
+      "id": "reaction-20261022-0",
+      "title": "Side glance to front stare",
+      "type": "reaction",
+      "status": "Approved",
+      "files": {
+        "src": {
+          "path": "media/GS_Reaction_3.60s_Side_Glance_to_Front_Stare_Silent.mp4",
+          "bytes": 3278362,
+          "sha256": "d5aef4a5daf799f97f08250dfde8fa7342f45ac88d4f958a413dc7cbfe69eec4"
+        },
+        "poster": {
+          "path": "media/GS_Reaction_3.60s_Side_Glance_to_Front_Stare_Silent.jpg",
+          "bytes": 26114,
+          "sha256": "702bf7fd5fd76595840b7de49ddf45617a27e78316a475e1504b931fc9d1156e"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Eyes screen-left",
+        "endPose": "Front stare",
+        "movement": "Eye glance and return",
+        "expression": "Skeptical",
+        "framing": "Close-up",
+        "scene": "Lake daytime",
+        "mouthMotion": "Closed",
+        "sound": "Silent",
+        "analysisMethod": "User-selected cut; frame review"
+      },
+      "sourceStatus": "Original source needs linking; bundled working copy preserved",
+      "originalName": "16673.mp4",
+      "sourceNote": "User-provided 9.375 second source; original file still needs a durable source link."
+    },
+    {
+      "id": "reaction-20261022-1",
+      "title": "Straight stare",
+      "type": "reaction",
+      "status": "Approved",
+      "files": {
+        "src": {
+          "path": "media/GS_Reaction_4.28s_Straight_Stare_Silent.mp4",
+          "bytes": 3778922,
+          "sha256": "eb17770dee3518129f8d903864a5e91472fa65d163e329465b597ac0eee0b4b0"
+        },
+        "poster": {
+          "path": "media/GS_Reaction_4.28s_Straight_Stare_Silent.jpg",
+          "bytes": 26302,
+          "sha256": "bed970c60ce25421bda77a6846807ee08a807605d7dd44490a719a4c2bb018b2"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Front stare",
+        "endPose": "Front stare",
+        "movement": "Restrained hold",
+        "expression": "Skeptical",
+        "framing": "Close-up",
+        "scene": "Lake daytime",
+        "mouthMotion": "Closed",
+        "sound": "Silent",
+        "analysisMethod": "User-selected cut; frame review"
+      },
+      "sourceStatus": "Original source needs linking; bundled working copy preserved",
+      "originalName": "16673.mp4",
+      "sourceNote": "User-provided 9.375 second source; original file still needs a durable source link."
+    },
+    {
+      "id": "reaction-20261022-2",
+      "title": "Did you hear that?",
+      "type": "reaction",
+      "status": "Approved",
+      "files": {
+        "src": {
+          "path": "media/GS_Reaction_6.00s_Did_You_Hear_That_Spoken.mp4",
+          "bytes": 5833267,
+          "sha256": "38f7b09ae43de8f1604cb93cc4cb3b1b71d81ca190572dc0a9edde1fd4d696b4"
+        },
+        "poster": {
+          "path": "media/GS_Reaction_6.00s_Did_You_Hear_That_Spoken.jpg",
+          "bytes": 26565,
+          "sha256": "d3803d9533e48eb1ba3244c5055a2b1119f42235164246f1694074cf18fbb8c3"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Front stare",
+        "endPose": "Front stare",
+        "movement": "Spoken reaction",
+        "expression": "Questioning",
+        "framing": "Close-up",
+        "scene": "Lake daytime",
+        "mouthMotion": "Mouth movement",
+        "sound": "Spoken",
+        "analysisMethod": "User-selected cut; frame review"
+      },
+      "sourceStatus": "Original source needs linking; bundled working copy preserved",
+      "originalName": "16673.mp4",
+      "sourceNote": "User-provided 9.375 second source; original file still needs a durable source link."
+    },
+    {
+      "id": "reaction-drive-perplexed-0",
+      "title": "Perplexed side-eye and return",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/GS_PERPLEXED_FACE_REACTION_v01-silent-v02.mp4",
+          "bytes": 2973968,
+          "sha256": "c3d7f71b5cf5fd6b7054db6c195cbeba61810dd16c8050df45f86a09545c3219"
+        },
+        "poster": {
+          "path": "media/GS_PERPLEXED_FACE_REACTION_v01-silent-v02.jpg",
+          "bytes": 20182,
+          "sha256": "1daff375bac27c986a4e71a94b07a1ae94d735c1d3874dc77469e83535f4aff7"
+        }
+      },
+      "driveId": "15L7_fDqBHae9yWZVTR_-qmlfazdc-L27",
+      "heygenVideoId": null,
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Front stare",
+        "endPose": "Front stare",
+        "movement": "Eye glance and return",
+        "expression": "Perplexed",
+        "framing": "Close-up",
+        "scene": "Lake sunset",
+        "mouthMotion": "Closed",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy"
+      },
+      "sourceStatus": "Source ID recorded",
+      "originalName": "GS_PERPLEXED_FACE_REACTION_v01.mp4"
+    },
+    {
+      "id": "reaction-drive-perplexed-1",
+      "title": "Perplexed to knowing smile",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/GS_PERPLEXED_CLOSEUP_REACTION_ORIGINAL_v01-silent-v02.mp4",
+          "bytes": 6006198,
+          "sha256": "0b5a1551dc4b92a335ac5c587173a3fff498d334abb3c3c7b65dbeb3b6455ec1"
+        },
+        "poster": {
+          "path": "media/GS_PERPLEXED_CLOSEUP_REACTION_ORIGINAL_v01-silent-v02.jpg",
+          "bytes": 21272,
+          "sha256": "7b6ec796171deee6cc009c8b1a7106fb6afc3b72263bfbc75908e34f1bc51d13"
+        }
+      },
+      "driveId": "1azlV4c5NebGgAXi5kYOwO_YlXQzh_d1z",
+      "heygenVideoId": "73e63665c85e47dab42aa298a5eb9f4b",
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": {
+        "startPose": "Eyes screen-left",
+        "endPose": "Front smile",
+        "movement": "Eye glance and return",
+        "expression": "Perplexed to amused",
+        "framing": "Close-up",
+        "scene": "Lake sunset",
+        "mouthMotion": "Mouth movement",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; original audio removed from working copy"
+      },
+      "sourceStatus": "Source ID recorded",
+      "originalName": "GS_PERPLEXED_CLOSEUP_REACTION_ORIGINAL_v01.mp4"
+    },
+    {
+      "id": "heygen-trim-0",
+      "title": "Side glance to skeptical center",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/heygen-32ea6578-F0000-F0090-silent-v01.mp4",
+          "bytes": 2940102,
+          "sha256": "48488af12e8c8318dd282b06a9f5358dbbfbb4bcd12e9d3c0dc022713079dea1"
+        },
+        "poster": {
+          "path": "media/heygen-32ea6578-F0000-F0090-silent-v01.jpg",
+          "bytes": 25111,
+          "sha256": "e439f1d1e1a0515e48b932e769dc5bed99eef5ed400f5a6e4d204bfa10cda5a8"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": "32ea65780e3440b2b43edc211cab43ad",
+      "sourceSha256": "bce3d8effda164d24462be09b6a95bb4983fdd89912bbf4475a93ca359a54ee0",
+      "sourceRange": {
+        "startSeconds": 0,
+        "endSecondsExclusive": 3.6,
+        "referenceFps": 25
+      },
+      "reactionProfile": {
+        "startPose": "Eyes screen-left",
+        "endPose": "Front stare",
+        "movement": "Eye glance and return",
+        "expression": "Skeptical",
+        "framing": "Close-up",
+        "scene": "Lake daytime",
+        "mouthMotion": "Closed",
+        "sound": "Silent",
+        "analysisMethod": "Sampled frame review and source trim; pending playback approval"
+      },
+      "sourceStatus": "Source ID recorded"
+    },
+    {
+      "id": "heygen-trim-1",
+      "title": "Quiet skeptical stare and blink",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/heygen-32ea6578-F0140-F0250-silent-v01.mp4",
+          "bytes": 3555639,
+          "sha256": "6c841432bfad433470eebe9b52cdaedf4ff01d3ef6fd3bd1cdc5814c3027bd59"
+        },
+        "poster": {
+          "path": "media/heygen-32ea6578-F0140-F0250-silent-v01.jpg",
+          "bytes": 26175,
+          "sha256": "1b1c40cb3a442c8f68ea3f34b022b6a422e429d7be3395ba4fd72929e33040e5"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": "32ea65780e3440b2b43edc211cab43ad",
+      "sourceSha256": "bce3d8effda164d24462be09b6a95bb4983fdd89912bbf4475a93ca359a54ee0",
+      "sourceRange": {
+        "startSeconds": 5.6,
+        "endSecondsExclusive": 10,
+        "referenceFps": 25
+      },
+      "reactionProfile": {
+        "startPose": "Front stare",
+        "endPose": "Front stare",
+        "movement": "Restrained hold",
+        "expression": "Skeptical",
+        "framing": "Close-up",
+        "scene": "Lake daytime",
+        "mouthMotion": "Closed",
+        "sound": "Silent",
+        "analysisMethod": "Sampled frame review and source trim; pending playback approval"
+      },
+      "sourceStatus": "Source ID recorded"
+    },
+    {
+      "id": "heygen-trim-2",
+      "title": "Knowing smile with eye closure",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/heygen-73e63665-F0082-F0129-silent-v01.mp4",
+          "bytes": 1672323,
+          "sha256": "ece42f282d289e4b5636d0ff6bfa47e2f05e0905737490d6a6ebdc868c42ed99"
+        },
+        "poster": {
+          "path": "media/heygen-73e63665-F0082-F0129-silent-v01.jpg",
+          "bytes": 22383,
+          "sha256": "d35fa91281a218acc229ce82d791dc7f2a938d776a79ce0d6d313ecee266be10"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": "73e63665c85e47dab42aa298a5eb9f4b",
+      "sourceSha256": "b43be6c6d968ac54eb3e6e0f435fe1f1fa8022ab1afcecefaabe63ea4d71147d",
+      "sourceRange": {
+        "startSeconds": 3.3,
+        "endSecondsExclusive": 5.16,
+        "referenceFps": 25
+      },
+      "reactionProfile": {
+        "startPose": "Front stare",
+        "endPose": "Front smile",
+        "movement": "Eye closure",
+        "expression": "Amused",
+        "framing": "Close-up",
+        "scene": "Lake sunset",
+        "mouthMotion": "Closed",
+        "sound": "Silent",
+        "analysisMethod": "Sampled frame review and source trim; pending playback approval"
+      },
+      "sourceStatus": "Source ID recorded"
+    },
+    {
+      "id": "heygen-trim-3",
+      "title": "Short skeptical tail hold",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/heygen-d59f8436-F0136-F0164-silent-v01.mp4",
+          "bytes": 628063,
+          "sha256": "ffe5571fd86815a8a1e16e1c618787d7f2c6ad5cd35d7b7671c893160adc5035"
+        },
+        "poster": {
+          "path": "media/heygen-d59f8436-F0136-F0164-silent-v01.jpg",
+          "bytes": 22529,
+          "sha256": "16fc07f80acf6bcad53b1387af61eeaefd728a3362569fb6ea1338e41b50754a"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": "d59f8436fa914fd5901b49161f58ae53",
+      "sourceSha256": "0358587cd5e4560b3473eaf488d2223eb39b574806e95a7f918b0bcdcc29f913",
+      "sourceRange": {
+        "startSeconds": 5.44,
+        "endSecondsExclusive": 6.56,
+        "referenceFps": 25
+      },
+      "reactionProfile": {
+        "startPose": "Front stare",
+        "endPose": "Front stare",
+        "movement": "Restrained hold",
+        "expression": "Skeptical",
+        "framing": "Close-up",
+        "scene": "Lake daytime",
+        "mouthMotion": "Closed",
+        "sound": "Silent",
+        "analysisMethod": "Sampled frame review and source trim; pending playback approval"
+      },
+      "sourceStatus": "Source ID recorded"
+    },
+    {
+      "id": "heygen-trim-4",
+      "title": "Surprised look to broad grin",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/heygen-05cc7d67-F0035-F0140-silent-v01.mp4",
+          "bytes": 3413829,
+          "sha256": "b3e08252715eb80edb63cacb6a8a21e713e4c26470cdeb7ac8b0263c2857092a"
+        },
+        "poster": {
+          "path": "media/heygen-05cc7d67-F0035-F0140-silent-v01.jpg",
+          "bytes": 21929,
+          "sha256": "68c8d09e07d0f25ce3619141a6b48326702ba63601ce18149336100b57b44cf1"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": "05cc7d67bcfa47de86263ec8c131cf1d",
+      "sourceSha256": "b651f25c92ca455d0fcc838a248907395190a16e871cd56a636af6c38d343a50",
+      "sourceRange": {
+        "startSeconds": 1.4,
+        "endSecondsExclusive": 5.6,
+        "referenceFps": 25
+      },
+      "reactionProfile": {
+        "startPose": "Wide eyes forward",
+        "endPose": "Front smile",
+        "movement": "Expression change",
+        "expression": "Surprised to amused",
+        "framing": "Close-up",
+        "scene": "Grill daytime",
+        "mouthMotion": "Closed",
+        "sound": "Silent",
+        "analysisMethod": "Sampled frame review and source trim; pending playback approval"
+      },
+      "sourceStatus": "Source ID recorded"
+    },
+    {
+      "id": "heygen-trim-5",
+      "title": "Elevator weary blink and stare",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/heygen-3f7ad604-F0035-F0140-silent-v01.mp4",
+          "bytes": 1997969,
+          "sha256": "ff711f651e2bfbb373b59e067b22d126c2c60044b9f81795ad4e4c418d5283a3"
+        },
+        "poster": {
+          "path": "media/heygen-3f7ad604-F0035-F0140-silent-v01.jpg",
+          "bytes": 14256,
+          "sha256": "aa9851800909a9dd8ca33669eec742ea0dec56bc160f50575720d278c1d81f4f"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": "3f7ad60464df46388fa0f3b873c57a33",
+      "sourceSha256": "76b2c20add67c9f585aafec040cdb54ded2364fff41de0ce8e0d189404ed47d7",
+      "sourceRange": {
+        "startSeconds": 1.4,
+        "endSecondsExclusive": 5.6,
+        "referenceFps": 25
+      },
+      "reactionProfile": {
+        "startPose": "Front stare",
+        "endPose": "Front stare",
+        "movement": "Eye closure",
+        "expression": "Weary",
+        "framing": "Close-up",
+        "scene": "Elevator",
+        "mouthMotion": "Closed",
+        "sound": "Silent",
+        "analysisMethod": "Sampled frame review and source trim; pending playback approval"
+      },
+      "sourceStatus": "Source ID recorded"
+    },
+    {
+      "id": "heygen-source-057db102ea134e349b78fc353d29d5d7",
+      "title": "Corny joke reaction \u00b7 close-up",
+      "type": "performance",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/heygen-057db102ea134e349b78fc353d29d5d7-source.mp4",
+          "bytes": 2991393,
+          "sha256": "14683dda480382c1a9dfd5f6f84db1fb29f18af1fdc2fedd74e34c8ce124208d"
+        },
+        "poster": {
+          "path": "media/heygen-057db102ea134e349b78fc353d29d5d7-source.jpg",
+          "bytes": 24119,
+          "sha256": "2c33a9fca1b8f745ca83780b100b9c08803865eaeb3d57e4b93d49d7e57bcc7f"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": "057db102ea134e349b78fc353d29d5d7",
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded"
+    },
+    {
+      "id": "heygen-source-b3bba882a65c4010906ecbb40a4330e6",
+      "title": "Corny joke reaction \u00b7 standing",
+      "type": "performance",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/heygen-b3bba882a65c4010906ecbb40a4330e6-source.mp4",
+          "bytes": 630991,
+          "sha256": "3789912fc91f05542f1cbb7fb4e76a348a06ce9195e4a4b9969232cbb59a9d47"
+        },
+        "poster": {
+          "path": "media/heygen-b3bba882a65c4010906ecbb40a4330e6-source.jpg",
+          "bytes": 25504,
+          "sha256": "787d2adee23e421b37050765f11b01836e77a3aa9134f6a8d64c269879091658"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": "b3bba882a65c4010906ecbb40a4330e6",
+      "sourceSha256": null,
+      "sourceRange": null,
+      "reactionProfile": null,
+      "sourceStatus": "Source ID recorded"
+    },
+    {
+      "id": "heygen-extra-86058e8901144464a46210e65a1295ac",
+      "title": "Knowing smile before broad grin",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/heygen-86058e89-trim-silent-v01.mp4",
+          "bytes": 1411551,
+          "sha256": "2351dbf7f726750922a391fefd03e7412dd028bc731240b1226055f7abfd68bc"
+        },
+        "poster": {
+          "path": "media/heygen-86058e89-trim-silent-v01.jpg",
+          "bytes": 22636,
+          "sha256": "2ba2f40b19017ed1f442f366c478dcfa8057c5a51d72916e03f5e2c26c1fb3a9"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": "86058e8901144464a46210e65a1295ac",
+      "sourceSha256": "cda2e015c402e102ac7c7d3088191e61490a346513bffcc4c4763930f6fe4025",
+      "sourceRange": {
+        "startSeconds": 3,
+        "endSecondsExclusive": 4.8,
+        "referenceFps": 25
+      },
+      "reactionProfile": {
+        "startPose": "Front stare",
+        "endPose": "Front smile",
+        "movement": "Expression change",
+        "expression": "Amused",
+        "framing": "Close-up",
+        "scene": "Lake sunset",
+        "mouthMotion": "Closed",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; trimmed existing HeyGen render"
+      },
+      "sourceStatus": "Source ID recorded"
+    },
+    {
+      "id": "heygen-extra-e7ea8a1a7e0742b5b268c136e0df5db0",
+      "title": "Grilling look-up and steady hold",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/heygen-e7ea8a1a-trim-silent-v01.mp4",
+          "bytes": 3267101,
+          "sha256": "2ec56e7e5d09199909a8a8808e8afeba4bc69e4620008b8a657916fc562209ca"
+        },
+        "poster": {
+          "path": "media/heygen-e7ea8a1a-trim-silent-v01.jpg",
+          "bytes": 21074,
+          "sha256": "1f8e412b022f3d2f9f362fd8020b7a4a276b8ddc52db55af38bfa72953fffc44"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": "e7ea8a1a7e0742b5b268c136e0df5db0",
+      "sourceSha256": "c438316a7eceb6819e8b5b84529fdaacb81a0954a990115a7ef1457b14b2a7d2",
+      "sourceRange": {
+        "startSeconds": 3.4,
+        "endSecondsExclusive": 8.6,
+        "referenceFps": 25
+      },
+      "reactionProfile": {
+        "startPose": "Looking down at grill",
+        "endPose": "Front stare with tongs",
+        "movement": "Look up",
+        "expression": "Skeptical",
+        "framing": "Standing medium",
+        "scene": "Grill sunset",
+        "mouthMotion": "Closed",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; trimmed existing HeyGen render"
+      },
+      "sourceStatus": "Source ID recorded"
+    },
+    {
+      "id": "heygen-extra-782c1577f30247bb9f266c346d94071b",
+      "title": "Open-palm deadpan at the grill",
+      "type": "reaction",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/heygen-782c1577-trim-silent-v01.mp4",
+          "bytes": 367167,
+          "sha256": "26307640781f086bd52e5616d789a2b21261022f0961faeea8936a0ebce19dd9"
+        },
+        "poster": {
+          "path": "media/heygen-782c1577-trim-silent-v01.jpg",
+          "bytes": 25652,
+          "sha256": "6472b318d2791f153381e4b91a8ba1aebf203c26499a3bb520f0772ed28a5340"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": "782c1577f30247bb9f266c346d94071b",
+      "sourceSha256": "796203c579f514a51fbf645d037273f92822a11933116b4d166dbee59fad051a",
+      "sourceRange": {
+        "startSeconds": 0,
+        "endSecondsExclusive": 3.6,
+        "referenceFps": 25
+      },
+      "reactionProfile": {
+        "startPose": "Palm extended",
+        "endPose": "Palm extended",
+        "movement": "Restrained hold",
+        "expression": "Questioning",
+        "framing": "Standing medium",
+        "scene": "Grill sunset",
+        "mouthMotion": "Closed",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; trimmed existing HeyGen render"
+      },
+      "sourceStatus": "Source ID recorded"
+    },
+    {
+      "id": "heygen-extra-e56b31db44964b6abd62da168d846e98",
+      "title": "Night fireside \u00b7 seated with cup",
+      "type": "broll",
+      "status": "Review",
+      "files": {
+        "src": {
+          "path": "media/heygen-e56b31db-trim-silent-v01.mp4",
+          "bytes": 6417112,
+          "sha256": "e263aa228d466de743ae25959572981d0fb9a5ffd9e3b0eb86aa3439172d4d84"
+        },
+        "poster": {
+          "path": "media/heygen-e56b31db-trim-silent-v01.jpg",
+          "bytes": 23587,
+          "sha256": "5a99282f08f845b0bc7789f9263e0b78d6bfd8882ec40581216d13ca8a944d4f"
+        }
+      },
+      "driveId": null,
+      "heygenVideoId": "e56b31db44964b6abd62da168d846e98",
+      "sourceSha256": "816f714fb79de133e979cdc7a2826bf4954d578288a6328189fe40903a669038",
+      "sourceRange": {
+        "startSeconds": 0,
+        "endSecondsExclusive": 8,
+        "referenceFps": 25
+      },
+      "reactionProfile": {
+        "startPose": "Seated rear view",
+        "endPose": "Seated rear view",
+        "movement": "Restrained hold",
+        "expression": "Reflective",
+        "framing": "Wide rear view",
+        "scene": "Fireside night",
+        "mouthMotion": "Not visible",
+        "sound": "Silent",
+        "analysisMethod": "Five sampled frames; trimmed existing HeyGen render"
+      },
+      "sourceStatus": "Source ID recorded"
+    }
+  ]
+}

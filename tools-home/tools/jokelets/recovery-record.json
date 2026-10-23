@@ -1,0 +1,61 @@
+{
+  "schema": "GS-RecoveryRecord-1",
+  "summary": "Six complete site recovery ZIPs saved in Production Drive. All archived file checksums passed locally; Drive file sizes and destination verified. Download all six ZIPs and extract into the same empty folder.",
+  "inboxSummary": "Inventory: 200 unique file records across 21 known production folders. 70 HeyGen renders await inspection. 76 of 87 bundled assets have recorded source IDs; 11 need linking.",
+  "backups": [
+    {
+      "name": "GS_Production_Recovery_2026-10-22_part-01-of-06.zip",
+      "id": "1dangZc59KYE4vXMrHT0OfDv4C1qgs1Ee",
+      "url": "https://drive.google.com/file/d/1dangZc59KYE4vXMrHT0OfDv4C1qgs1Ee/view?usp=drivesdk",
+      "bytes": 79534097,
+      "sha256": "2faaa1a969feed86596c4877fe69f7842a80f28d0d6241a9e3df94cffb723952",
+      "fileCount": 92,
+      "verification": "Archive contents verified locally; uploaded file size and destination verified by Drive metadata."
+    },
+    {
+      "name": "GS_Production_Recovery_2026-10-22_part-02-of-06.zip",
+      "id": "1msSGv9868CysChzdxoA6f-UvKDJvKyID",
+      "url": "https://drive.google.com/file/d/1msSGv9868CysChzdxoA6f-UvKDJvKyID/view?usp=drivesdk",
+      "bytes": 79778871,
+      "sha256": "6845a866153c738e51d96a3e6d5700689b5418c1a4db7ee13bccb8381fb1539f",
+      "fileCount": 49,
+      "verification": "Archive contents verified locally; uploaded file size and destination verified by Drive metadata."
+    },
+    {
+      "name": "GS_Production_Recovery_2026-10-22_part-03-of-06.zip",
+      "id": "1-4xq5M1Ez7WAczU3ON1_YZOkO_R56LsE",
+      "url": "https://drive.google.com/file/d/1-4xq5M1Ez7WAczU3ON1_YZOkO_R56LsE/view?usp=drivesdk",
+      "bytes": 72886972,
+      "sha256": "30b2dba1bc48f4acf4bfe1ebdf724467bfde2af82cb4f72d1f75029589ca4d55",
+      "fileCount": 45,
+      "verification": "Archive contents verified locally; uploaded file size and destination verified by Drive metadata."
+    },
+    {
+      "name": "GS_Production_Recovery_2026-10-22_part-04-of-06.zip",
+      "id": "1MUaXVdp_JwYBeidus3Sj11UJQnFLgU0V",
+      "url": "https://drive.google.com/file/d/1MUaXVdp_JwYBeidus3Sj11UJQnFLgU0V/view?usp=drivesdk",
+      "bytes": 69943986,
+      "sha256": "e25b7cee14f597dd378ad2e779215e096cd49c9fd44c35f05605ff6e2ee2ed1f",
+      "fileCount": 36,
+      "verification": "Archive contents verified locally; uploaded file size and destination verified by Drive metadata."
+    },
+    {
+      "name": "GS_Production_Recovery_2026-10-22_part-05-of-06.zip",
+      "id": "1__iFx9JLjYnAa24mQgJTgCcoogMU7ood",
+      "url": "https://drive.google.com/file/d/1__iFx9JLjYnAa24mQgJTgCcoogMU7ood/view?usp=drivesdk",
+      "bytes": 79444671,
+      "sha256": "aababb56a7d1ec670e1a91704b2cbd7610ebd809ceb9944fa34376683e487be4",
+      "fileCount": 29,
+      "verification": "Archive contents verified locally; uploaded file size and destination verified by Drive metadata."
+    },
+    {
+      "name": "GS_Production_Recovery_2026-10-22_part-06-of-06.zip",
+      "id": "1YJQQ6x3b_4Hw5PIrWOp0coPErSBoCDdJ",
+      "url": "https://drive.google.com/file/d/1YJQQ6x3b_4Hw5PIrWOp0coPErSBoCDdJ/view?usp=drivesdk",
+      "bytes": 11535504,
+      "sha256": "39801542139344b04629ae6753e825120a787a8f77332a05f234b19c7070ca87",
+      "fileCount": 110,
+      "verification": "Archive contents verified locally; uploaded file size and destination verified by Drive metadata."
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-import {workspaceFetch as fetch,resolveMedia,saveProject,restoreProject} from './storage.js';
+import {workspaceFetch as fetch,resolveMedia,saveProject,restoreProject,backupMessage,updateBackupStatus} from './storage.js?v=20261023-recovery';
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
@@ -110,7 +110,7 @@ window.addEventListener('message',event=>{
  if(event.data.type==='SXLOCK_JOKELET_LOADED'){clearHandoff();$('exportInfo').textContent='Video opened in SxLock: '+event.data.name+'. Ready for sound treatment.';toast('Rendered video opened in SxLock.');}
  if(event.data.type==='SXLOCK_JOKELET_ERROR'){clearHandoff();$('exportInfo').textContent='SxLock: '+event.data.error;}
 });
-$('backup').onclick=async()=>{try{await saveProject(state,filename()+'_project.json');}catch(e){toast(e.message);}};$('importProject').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;state=hydrate(await restoreProject(JSON.parse(await file.text())));state.selected=state.selected.filter(id=>state.catalog.some(i=>i.id===id&&i.status!=='Review'&&!isDeleted(i)));$('assemblyName').value=state.name;$('useOutro').checked=state.useOutro;$('sxURL').value=state.sxURL;changed();toast('Project imported.');}catch(err){toast(err.message);}e.target.value='';};
+$('backup').onclick=async()=>{try{toast(backupMessage(await saveProject(state,filename()+'_project.json')));updateBackupStatus();}catch(e){toast(e.message);}};$('importProject').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;state=hydrate(await restoreProject(JSON.parse(await file.text())));state.selected=state.selected.filter(id=>state.catalog.some(i=>i.id===id&&i.status!=='Review'&&!isDeleted(i)));$('assemblyName').value=state.name;$('useOutro').checked=state.useOutro;$('sxURL').value=state.sxURL;changed();toast('Project imported.');}catch(err){toast(err.message);}e.target.value='';};
 window.addEventListener('beforeunload',e=>{if(rendering){e.preventDefault();e.returnValue='Rendering';}});
 // A plan can be exported without a browser render, for finishing elsewhere.
 const planButton=document.createElement('button');planButton.textContent='Download assembly plan';planButton.className='full';planButton.onclick=downloadPlan;$('render').after(planButton);
