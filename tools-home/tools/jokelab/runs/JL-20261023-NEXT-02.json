@@ -1,15 +1,21 @@
 {
   "schema": "JokeLabRun-1.0",
   "runId": "JL-20261023-NEXT-02",
-  "state": "voice_request_prepared_authorized",
+  "state": "video_render_submitted",
   "canonicalJokeId": "dad-00d6dea00e3a33805c7b5007",
   "sourceLibraryPosition": 5,
   "source": "tools-home/data/jokelab/library.json",
   "spokenText": "How do robots eat guacamole? With computer chips.",
   "cuedScript": "[deadpan joke delivery] How do robots eat guacamole?\n\n[long pause] With COMPUTER CHIPS.",
   "mode": "User delegates creative choices and permits deviations for product quality; preserve source trail and financial limits.",
-  "providerGenerationRequests": 0,
-  "actualCredits": 0,
+  "providerGenerationRequests": {
+    "elevenLabs": 1,
+    "heygen": 1
+  },
+  "actualCredits": {
+    "elevenLabs": 87,
+    "heygen": null
+  },
   "budget": {
     "authorized": true,
     "approvalEvidence": "User replied Yes to explicit 120 ElevenLabs credits and3 HeyGen credits for one new jokelet, no automatic retries.",
@@ -26,5 +32,19 @@
     "relevantMixerCheck": "Retrieved actual Dad Jokes1 music AB mixer; no guacamole/computer chips/robots textual match, only two embedded MP3 music beds. No matching finished production identified in checked catalog/library/provider records. Remaining unnamed archive gap is not certified resolved.",
     "scopeDecision": "Canonical source identity reconciled and no concrete matching production identified. Proceed with bounded one-joke production per user's delegated request; retain global archive uncertainty without claiming exhaustive transcript audit."
   },
-  "next": "Resolve any relevant duplicate candidate, confirm one combined ElevenLabs/HeyGen spending authorization, then generate; preserve originals, use PCM WAV for video, GS4, approved silent reaction, clean jokelet and durable backups."
+  "next": "Resolve any relevant duplicate candidate, confirm one combined ElevenLabs/HeyGen spending authorization, then generate; preserve originals, use PCM WAV for video, GS4, approved silent reaction, clean jokelet and durable backups.",
+  "voice": {
+    "selectedGenerationId": "Skm8tBWna0yQNOuU99J6",
+    "alternateGenerationId": "Mak45mwtWrcSWbgkC1Ux",
+    "duration": 4.989375,
+    "originalSha256": "7907a3151eb5dc34e5042d9c3fdbddde44df8876a8a24dd9640520d12d745591",
+    "originalDriveId": "1MeRuG9nt1a7vpkk0hCOdFm0W4B1a5hE1",
+    "wavSha256": "074ce746058187775bafc04ceed069c020c6e0cb57198c208e2df65b356eab6e",
+    "wavDriveId": "1NrmQunuTBDrqNcIMrOsKzw0a2UylrY2y",
+    "heygenAssetId": "c2cd8c42096849c2bf81a483a13bacc6",
+    "agentSelected": true,
+    "userApproved": false,
+    "qualityLimit": "This runtime cannot hear audio; no false auditory approval. User delegated selection; final jokelet review pending."
+  },
+  "videoId": "aa93100f33eba0befb6c91b2fe716af7"
 }
