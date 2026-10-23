@@ -4,7 +4,7 @@
   "runId": "JL-20261023-COACHED-01",
   "canonicalJokeId": "dad-00bda89167b4f15850aa1c91",
   "queueJobId": "94a49ac4-4778-4796-bd2d-2dd9f0a45de7",
-  "stage": "authenticated_prepared_awaiting_spending_cap",
+  "stage": "blocked_shared_browser_unavailable",
   "userFeedback": "No correction requested at the script checkpoint ('Nope').",
   "scriptApproval": {
     "approvedAt": "2026-10-23T18:04:45.655Z",
@@ -55,7 +55,8 @@
     "actualCharge": null
   },
   "beforePaidRequest": [
-    "Obtain a numeric spending limit for the proposed voice take.",
+    "Restore shared-browser access; do not bypass the established workflow or automate sign-in.",
+    "Enforce the approved maximum of 100 existing ElevenLabs credits for one take and zero automatic retries; no purchase or upgrade.",
     "Keep the unnamed-render contents gap explicit; do not claim that a metadata-only check resolved it. Resolve candidate duplicate uncertainty before paid submission.",
     "Verify selected voice/model/input/settings are unchanged immediately before submission, then record actual usage and the original downloaded take."
   ],
@@ -72,13 +73,28 @@
     "remainingGap": "The 70 generic Drive media contents were not transcribed/reconciled. Provider metadata is not proof that those files contain no matching spoken joke."
   },
   "spending": {
-    "state": "not authorized by a numeric cap yet",
+    "state": "authorized_for_one_take_within_cap",
     "proposedCap": {
       "unit": "existing ElevenLabs credits",
       "amount": 100,
       "scope": "One voice take",
       "automaticRetries": 0
     },
-    "purchaseOrUpgrade": false
+    "purchaseOrUpgrade": false,
+    "approvedCap": {
+      "unit": "existing ElevenLabs credits",
+      "amount": 100,
+      "scope": "One voice take for dad-00bda89167b4f15850aa1c91",
+      "automaticRetries": 0,
+      "approvedDate": "2026-10-23",
+      "approvalEvidence": "User replied 'Ok' to the explicit 100-credit, one-take, no-automatic-retry proposal.",
+      "purchaseOrUpgrade": false
+    }
+  },
+  "environment": {
+    "state": "shared_browser_unavailable",
+    "generationSubmitted": false,
+    "authenticationNote": "Signed-in access was positively verified before environment loss; unavailability is not evidence of sign-out.",
+    "resume": "Restore shared-browser access, inspect current provider state and settings, and retain this authorization without asking for the same cap again."
   }
 }

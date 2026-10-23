@@ -470,9 +470,18 @@
     {
       "sourceJokeId": "dad-00bda89167b4f15850aa1c91",
       "canonicalId": "dad-00bda89167b4f15850aa1c91",
-      "state": "voice_preflight_prepared_awaiting_spending_cap",
+      "state": "blocked_shared_browser_unavailable",
       "runId": "JL-20261023-COACHED-01",
-      "queueJobId": "94a49ac4-4778-4796-bd2d-2dd9f0a45de7"
+      "queueJobId": "94a49ac4-4778-4796-bd2d-2dd9f0a45de7",
+      "spendingAuthorization": {
+        "unit": "existing ElevenLabs credits",
+        "amount": 100,
+        "scope": "One voice take for dad-00bda89167b4f15850aa1c91",
+        "automaticRetries": 0,
+        "approvedDate": "2026-10-23",
+        "approvalEvidence": "User replied 'Ok' to the explicit 100-credit, one-take, no-automatic-retry proposal.",
+        "purchaseOrUpgrade": false
+      }
     },
     {
       "sourceJokeId": "dad-00c8169b19744be3deb5869d",
@@ -4975,7 +4984,7 @@
     {
       "runId": "JL-20261023-COACHED-01",
       "canonicalId": "dad-00bda89167b4f15850aa1c91",
-      "state": "voice_preflight_prepared_awaiting_spending_cap",
+      "state": "blocked_shared_browser_unavailable",
       "queueJobId": "94a49ac4-4778-4796-bd2d-2dd9f0a45de7",
       "nativeProject": "runs/JL-20261023-COACHED-01-stage6-project.json",
       "companionRecord": "runs/JL-20261023-COACHED-01-J02.json",
@@ -4985,7 +4994,20 @@
       "providerGenerationRequests": 0,
       "scriptApproved": true,
       "scriptApprovedAt": "2026-10-23T18:04:45.655Z",
-      "voicePreflight": "runs/JL-20261023-COACHED-01-voice-ready.json"
+      "voicePreflight": "runs/JL-20261023-COACHED-01-voice-ready.json",
+      "spendingAuthorization": {
+        "unit": "existing ElevenLabs credits",
+        "amount": 100,
+        "scope": "One voice take for dad-00bda89167b4f15850aa1c91",
+        "automaticRetries": 0,
+        "approvedDate": "2026-10-23",
+        "approvalEvidence": "User replied 'Ok' to the explicit 100-credit, one-take, no-automatic-retry proposal.",
+        "purchaseOrUpgrade": false
+      },
+      "blockers": [
+        "Shared browser unavailable.",
+        "70 generic Drive render contents remain unreconciled; metadata alone does not close the duplicate-content gap."
+      ]
     }
   ]
 }
