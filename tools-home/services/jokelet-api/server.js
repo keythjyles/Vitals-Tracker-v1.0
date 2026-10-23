@@ -25,10 +25,11 @@ const server = http.createServer(async (req, res) => {
   const pathname = new URL(req.url || '/', 'http://localhost').pathname.replace(/\/+$/, '') || '/';
   // Log only method and path, never headers, credentials, queries or request bodies.
   console.log('Request', req.method, pathname);
-  if (req.method === 'GET' && pathname === '/operator') {
+  if (req.method === 'GET' && ['/operator','/operator.js','/performance.js'].includes(pathname)) {
     try {
-      const html = await readFile(new URL('./operator.html', import.meta.url));
-      res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store', 'content-security-policy': "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; media-src blob:; img-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'", 'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer' });
+      const file = pathname === '/operator' ? 'operator.html' : pathname.slice(1);
+      const html = await readFile(new URL('./' + file, import.meta.url));
+      res.writeHead(200, { 'content-type': pathname === '/operator' ? 'text/html; charset=utf-8' : 'text/javascript; charset=utf-8', 'cache-control': 'no-store', 'content-security-policy': "default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; connect-src 'self'; media-src blob:; img-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'", 'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer' });
       return res.end(html);
     } catch { return send(res, 500, { error: 'Operator page unavailable' }); }
   }
@@ -72,6 +73,7 @@ const server = http.createServer(async (req, res) => {
       return send(res, 400, { error: 'Invalid modelId' });
     if (voiceSettings !== undefined && (typeof voiceSettings !== 'object' || !voiceSettings || Array.isArray(voiceSettings)))
       return send(res, 400, { error: 'Invalid voiceSettings' });
+    if (/\[\[|\]\]/.test(text)) return send(res, 400, { error: 'Engine markers must be assembled locally, never submitted to speech generation' });
     requestsMade++; // Reserve a request before contacting the paid provider; no automatic retry.
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 60000);
@@ -94,3 +96,4 @@ const server = http.createServer(async (req, res) => {
   }
 });
 server.listen(port, '0.0.0.0', () => console.log('Jokelet API listening on port ' + port));
+

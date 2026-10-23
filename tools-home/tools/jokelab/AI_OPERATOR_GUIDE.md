@@ -187,3 +187,10 @@ The public JokeLab entry exposes a collapsed AI operator instruction panel. Gene
 ## Video-generation audio input — WAV required
 
 User instruction, October 23, 2026: supply WAV, not MP3, to video-generation services. Preserve the provider original unchanged. Prefer an original WAV when available; otherwise decode the approved recording to PCM WAV without changing timing, gain, speed or content. Converting a lossy source to WAV does not restore lost quality. Record parent/source hash, conversion, WAV hash, sample rate, channels and duration. Verify that the service recognizes the uploaded asset as audio before submitting a render. Do not repeat the known MP3 upload path: in the coached run it was classified as application/octet-stream and failed; the PCM WAV was accepted. This is an operator workflow requirement; app-wide format enforcement is not implemented by this documentation change.
+
+
+## Performance editor update — October 23, 2026
+
+The dedicated operator now has categorized cues, selected-text emphasis, frame-based silence planning/PCM WAV assembly, separate take previews/downloads and device-local tested combinations. Read [performance editor implementation and limitations](../../services/jokelet-api/PERFORMANCE_EDITOR.md) before operating. Markers `[[silence:25f]]` belong to the shared engine, never the speech provider. Segmented speech incurs one paid request per speech segment; no automatic retries. Preserve every original MP3, PCM WAV and JSON job record. Browser takes and presets are not durable archives. Secure AI execution and durable budget/production storage remain unimplemented. Configuration/static-page health does not prove authenticated provider generation.
+
+`JL-20261023-NEXT-02` (robots/guacamole) is already produced, ready for final review; do not regenerate it as a new candidate.

@@ -6,7 +6,7 @@ test('localhost health endpoint works without an ElevenLabs key or paid API call
   const port = 32000 + Math.floor(Math.random() * 20000);
   const child = spawn(process.execPath, ['server.js'], {
     cwd: new URL('.', import.meta.url),
-    env: { ...process.env, PORT: String(port), ELEVENLABS_API_KEY: '' },
+    env: { ...process.env, PORT: String(port), ELEVENLABS_API_KEY: '', JOKELET_OPERATOR_TOKEN: 'test-only-token' },
     stdio: 'ignore'
   });
   try {
@@ -18,9 +18,21 @@ test('localhost health endpoint works without an ElevenLabs key or paid API call
     assert.ok(response, 'server did not start');
     assert.equal(response.status, 200);
     assert.deepEqual(await response.json(), {
-      service: 'jokelet-api', status: 'ok', elevenLabsConfigured: false
+      service: 'jokelet-api', status: 'ok', elevenLabsConfigured: false, generationEnabled: false
     });
+    for (const path of ['/operator','/operator.js','/performance.js']) {
+      const asset=await fetch('http://127.0.0.1:'+port+path);
+      assert.equal(asset.status,200);
+      assert.match(asset.headers.get('content-security-policy'), /script-src 'self'/);
+    }
+    for (const path of ['/api/voices','/api/voice/generate']) {
+      const denied=await fetch('http://127.0.0.1:'+port+path,{method:path.endsWith('generate')?'POST':'GET'});
+      assert.equal(denied.status,401);
+      const configured=await fetch('http://127.0.0.1:'+port+path,{method:path.endsWith('generate')?'POST':'GET',headers:{Authorization:'Bearer test-only-token'}});
+      assert.equal(configured.status,503);
+    }
     const missing = await fetch('http://127.0.0.1:' + port + '/generate', { method: 'POST' });
     assert.equal(missing.status, 404);
   } finally { child.kill(); }
 });
+
