@@ -26,6 +26,23 @@ const server = http.createServer(async (req, res) => {
   console.log('Request', req.method, pathname);
   if (req.method === 'GET' && (pathname === '/health' || pathname === '/'))
     return send(res, 200, { service: 'jokelet-api', status: 'ok', elevenLabsConfigured: Boolean(elevenKey), generationEnabled: Boolean(elevenKey && operatorToken) });
+  if (req.method === 'GET' && pathname === '/api/voices') {
+    if (!authorized(req)) return send(res, 401, { error: 'Unauthorized' });
+    if (!elevenKey) return send(res, 503, { error: 'ElevenLabs is not configured' });
+    try {
+      const response = await fetch('https://api.elevenlabs.io/v2/voices?page_size=100', {
+        headers: { 'xi-api-key': elevenKey, 'accept': 'application/json' },
+        signal: AbortSignal.timeout(12000)
+      });
+      if (!response.ok) return send(res, 502, { error: 'ElevenLabs voice lookup failed', upstreamStatus: response.status });
+      const data = await response.json();
+      return send(res, 200, { voices: (data.voices || []).map(v => ({
+        voiceId: v.voice_id, name: v.name, category: v.category
+      })) });
+    } catch {
+      return send(res, 502, { error: 'ElevenLabs voice lookup unavailable' });
+    }
+  }
   if (req.method !== 'POST' || pathname !== '/api/voice/generate')
     return send(res, 404, { error: 'Not found' });
   if (!authorized(req)) return send(res, 401, { error: 'Unauthorized' });
