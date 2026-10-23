@@ -470,7 +470,7 @@
     {
       "sourceJokeId": "dad-00bda89167b4f15850aa1c91",
       "canonicalId": "dad-00bda89167b4f15850aa1c91",
-      "state": "voice_generated_awaiting_coached_review",
+      "state": "generated_awaiting_coached_listening_review",
       "runId": "JL-20261023-COACHED-01",
       "queueJobId": "94a49ac4-4778-4796-bd2d-2dd9f0a45de7",
       "spendingAuthorization": {
@@ -482,17 +482,20 @@
         "approvalEvidence": "User replied 'Ok' to the explicit 100-credit, one-take, no-automatic-retry proposal.",
         "purchaseOrUpgrade": false
       },
-      "providerGenerationRequests": 1,
+      "providerGenerationRequests": 2,
       "voiceGenerationIds": [
         "4KBURho2UF2Rzj0BXV2k",
-        "NbBB0ct0DIbfrDBPOvvN"
+        "NbBB0ct0DIbfrDBPOvvN",
+        "pqILh6dY0D1CO7Ckhplb",
+        "ZpGkM0wFRVcj0Hp1bC5N"
       ],
-      "actualVoiceCredits": 72,
+      "actualVoiceCredits": 174,
       "duplicateRiskException": {
         "date": "2026-10-23",
         "response": "Proceed",
         "scope": "One capped voice request accepting remaining duplicate risk from unchecked archive videos; not a certification of complete archive reconciliation."
-      }
+      },
+      "voiceCorrection": "runs/JL-20261023-COACHED-01-voice-correction-v02.json"
     },
     {
       "sourceJokeId": "dad-00c8169b19744be3deb5869d",
@@ -4995,14 +4998,14 @@
     {
       "runId": "JL-20261023-COACHED-01",
       "canonicalId": "dad-00bda89167b4f15850aa1c91",
-      "state": "voice_generated_awaiting_coached_review",
+      "state": "generated_awaiting_coached_listening_review",
       "queueJobId": "94a49ac4-4778-4796-bd2d-2dd9f0a45de7",
       "nativeProject": "runs/JL-20261023-COACHED-01-stage6-project.json",
       "companionRecord": "runs/JL-20261023-COACHED-01-J02.json",
       "reservationScope": "Voice generated; resume this job and reuse its originals. Do not generate again as a new joke.",
       "duplicateCheck": "No matching catalog/Drive text/HeyGen title production found; 70 unnamed render content gap remains. Not certified unproduced.",
       "paidProductionClearance": false,
-      "providerGenerationRequests": 1,
+      "providerGenerationRequests": 2,
       "scriptApproved": true,
       "scriptApprovedAt": "2026-10-23T18:04:45.655Z",
       "voicePreflight": "runs/JL-20261023-COACHED-01-voice-ready.json",
@@ -5020,14 +5023,17 @@
       ],
       "voiceGenerationIds": [
         "4KBURho2UF2Rzj0BXV2k",
-        "NbBB0ct0DIbfrDBPOvvN"
+        "NbBB0ct0DIbfrDBPOvvN",
+        "pqILh6dY0D1CO7Ckhplb",
+        "ZpGkM0wFRVcj0Hp1bC5N"
       ],
-      "actualVoiceCredits": 72,
+      "actualVoiceCredits": 174,
       "duplicateRiskException": {
         "date": "2026-10-23",
         "response": "Proceed",
         "scope": "One capped voice request accepting remaining duplicate risk from unchecked archive videos; not a certification of complete archive reconciliation."
-      }
+      },
+      "voiceCorrection": "runs/JL-20261023-COACHED-01-voice-correction-v02.json"
     }
   ]
 }

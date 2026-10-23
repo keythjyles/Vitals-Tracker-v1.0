@@ -23,7 +23,8 @@
     "unit": "existing ElevenLabs credits",
     "requests": 1,
     "automaticRetries": 0,
-    "state": "not yet numerically authorized"
+    "state": "authorized_and_completed",
+    "approvalEvidence": "User replied Yes to explicit max120-credit replacement request, one request, no automatic retry."
   },
   "alreadySpentCredits": 72,
   "heygenPreparation": {
@@ -44,5 +45,39 @@
     "renderSubmitted": false,
     "scope": "Identity lookup only; no paid video operation."
   },
-  "limits": "Audio tags are directions, not guaranteed performance. Full listening review pending; this runtime cannot certify auditory quality."
+  "limits": "Audio tags are directions, not guaranteed performance. Full listening review pending; this runtime cannot certify auditory quality.",
+  "state": "generated_awaiting_coached_listening_review",
+  "providerGenerationRequests": 1,
+  "actualCredits": 102,
+  "cumulativeRunCredits": 174,
+  "takes": [
+    {
+      "fileName": "GS_Pebble_Voice_v02_Generation1.mp3",
+      "generationId": "pqILh6dY0D1CO7Ckhplb",
+      "credits": 102,
+      "bytes": 144832,
+      "durationSeconds": 5.328958,
+      "sha256": "9e23786b01bf62868714171b997b9ec3296f3543858011ad68e8939282ced18b",
+      "driveFileId": "1nvhhD8q9dtX0IbxSlsAfcU7_8ByVAbqv",
+      "reviewStatus": "Unapproved"
+    },
+    {
+      "fileName": "GS_Pebble_Voice_v02_Generation2.mp3",
+      "generationId": "ZpGkM0wFRVcj0Hp1bC5N",
+      "credits": 0,
+      "bytes": 150475,
+      "durationSeconds": 5.564083,
+      "sha256": "0fda1d7dbf69d0a0b3ba45b165198c3d77fd49d8171a2af3f08743aaf783c4b3",
+      "driveFileId": "1wQ59XBcwr791Zq8FTYDlkkHTJbPkT1qU",
+      "reviewStatus": "Unapproved"
+    }
+  ],
+  "mediaFormat": {
+    "codec": "MP3",
+    "sampleRate": 44100,
+    "channels": 1,
+    "streamBitrate": 192000
+  },
+  "automaticRetries": 0,
+  "usdEquivalent": null
 }

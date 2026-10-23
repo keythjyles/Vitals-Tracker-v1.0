@@ -4,7 +4,7 @@
   "runId": "JL-20261023-COACHED-01",
   "canonicalJokeId": "dad-00bda89167b4f15850aa1c91",
   "queueJobId": "94a49ac4-4778-4796-bd2d-2dd9f0a45de7",
-  "stage": "corrected_voice_script_prepared_awaiting_replacement_budget",
+  "stage": "generated_awaiting_coached_listening_review",
   "userFeedback": "No correction requested at the script checkpoint ('Nope').",
   "scriptApproval": {
     "approvedAt": "2026-10-23T18:04:45.655Z",
@@ -95,10 +95,10 @@
     ]
   },
   "beforePaidRequest": [
-    "No further generation authorized by this completed one-request allowance. No automatic retry.",
-    "Complete coached listening review before downstream performance production; retain original bytes."
+    "Complete coached listening review before video generation. Replacement one-request allowance is completed; no automatic retry.",
+    "Retain original v01 and v02 bytes and obtain applicable downstream financial authorization."
   ],
-  "providerGenerationRequests": 1,
+  "providerGenerationRequests": 2,
   "nativeProject": "JL-20261023-COACHED-01-stage6-project.json",
   "nativeProjectBytes": 1068,
   "nativeProjectSha256": "31af552c48ee06b316a2b2ec5e8583b3278c3cd3a4c4ac3ecbd74c8b7533c510",
@@ -145,5 +145,32 @@
     "outcome": "executed_once",
     "automaticRetries": 0
   },
-  "replacementPreparation": "JL-20261023-COACHED-01-voice-correction-v02.json"
+  "replacementPreparation": "JL-20261023-COACHED-01-voice-correction-v02.json",
+  "replacementResult": {
+    "record": "JL-20261023-COACHED-01-voice-correction-v02.json",
+    "actualCredits": 102,
+    "takes": [
+      {
+        "fileName": "GS_Pebble_Voice_v02_Generation1.mp3",
+        "generationId": "pqILh6dY0D1CO7Ckhplb",
+        "credits": 102,
+        "bytes": 144832,
+        "durationSeconds": 5.328958,
+        "sha256": "9e23786b01bf62868714171b997b9ec3296f3543858011ad68e8939282ced18b",
+        "driveFileId": "1nvhhD8q9dtX0IbxSlsAfcU7_8ByVAbqv",
+        "reviewStatus": "Unapproved"
+      },
+      {
+        "fileName": "GS_Pebble_Voice_v02_Generation2.mp3",
+        "generationId": "ZpGkM0wFRVcj0Hp1bC5N",
+        "credits": 0,
+        "bytes": 150475,
+        "durationSeconds": 5.564083,
+        "sha256": "0fda1d7dbf69d0a0b3ba45b165198c3d77fd49d8171a2af3f08743aaf783c4b3",
+        "driveFileId": "1wQ59XBcwr791Zq8FTYDlkkHTJbPkT1qU",
+        "reviewStatus": "Unapproved"
+      }
+    ]
+  },
+  "cumulativeRunCredits": 174
 }
