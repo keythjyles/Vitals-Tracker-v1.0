@@ -1,5 +1,5 @@
 # Jokelet Engine — production method
-Version: 1.1 · Updated October 23, 2026
+Version: 1.2 · Updated October 23, 2026
 Status: working engine name; established recipe documented; repeatability validation pending.
 
 ## Purpose and boundary
@@ -91,9 +91,15 @@ Record a known limitation before starting dependent work. Record newly discovere
 
 This update documents the dependency and the correction. It does not establish a signed-in session, start paid generation, or mark any episode complete.
 
-## Step 1 — approve the joke specification
+## Default path and optional study — October 23 clarification
 
-Record joke ID, exact approved text, source/provenance, premise, setup, hinge/payoff and final spoken stop. Check that the joke works for GS and the audience without explanatory additions.
+Produce usable jokes in small batches through the established recipe. Studying known jokes, analyzing their mechanism, researching tone and developing wording variants are optional learning/development tools. Do not require that work for every production item.
+
+The long-term goal is a reusable library of produced jokelets, built incrementally while observing cost, operational consistency and audience response. An aspiration to produce the library is not authorization to spend the full library cost now. Track the underlying joke in [PRODUCTION_LEDGER.json](../jokelab/PRODUCTION_LEDGER.json) so paraphrases and source duplicates do not trigger repeated production. Existing finished outputs should be reused or repaired instead of routinely generated again. The ledger is an initial operator record, not implemented app enforcement or a claim of complete archive reconciliation.
+
+## Step 1 — choose an unproduced joke and prepare delivery
+
+Record the canonical joke ID, selected spoken text, source/provenance, duplicate check and final spoken stop. Choose usable material that fits GS and the audience. Detailed premise/setup/hinge analysis belongs to optional study or resolving a concrete delivery problem, not a mandatory production examination.
 
 Record delivery separately from spoken text: pace, intended setup/punchline pause, emphasis and final silence. Do not accidentally voice a direction or cue. Established voice preferences include a Firm baseline, Deliberate for slower delivery, Emphatic for written yelling, Forceful only for a short yelp and Quietly where suitable. Periods and capitalization can guide stress; these are preferences, not guaranteed synthesis controls.
 
