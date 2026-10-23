@@ -1,0 +1,4806 @@
+{
+  "schema": "JokeLab-ProductionLedger-1",
+  "updated": "2026-10-23",
+  "purpose": "Prevent paying to produce the same underlying joke again. This initial operator ledger is not yet enforced by the app.",
+  "scope": {
+    "libraryRecords": 900,
+    "existingCatalogEntries": 16,
+    "globalArchiveReconciliation": "Incomplete; other episode/source archives and remaining semantic aliases need checking.",
+    "semanticDedupe": "Initial manually identified alias groups only; no claim of exhaustive deduplication."
+  },
+  "rules": [
+    "Check canonical identity and all aliases before generating.",
+    "Existing jokelet files block routine regeneration regardless of review/approval status. Review or repair the existing output first.",
+    "Reserve the canonical joke for the batch before any paid request; record run and provider job IDs. This file is an operator record, not an atomic multi-worker lock.",
+    "A failure is a resumable attempt, not a new joke. Check outstanding jobs/charges before retrying.",
+    "Changed wording, tone or reaction does not by itself make a new underlying joke.",
+    "Reusing a completed jokelet in an episode is allowed; manufacturing its source again is a separate, explicit regeneration.",
+    "No numeric batch budget is set by the eventual whole-library goal."
+  ],
+  "aliases": {
+    "dad-9638d60f11addd45b4b5291a": "dad-3d80ae9a86b39f7cb7974491",
+    "dad-d81b14b018f3a30ad1482a17": "dad-3d80ae9a86b39f7cb7974491",
+    "dad-9bdf01c775d6dabf074dee6e": "dad-00c8169b19744be3deb5869d",
+    "dad-aff1e43307d75c12f5b295aa": "dad-171aa00d3855559fa96e12bc"
+  },
+  "existingGroups": [
+    {
+      "canonicalId": "dad-00af812554de8eb448c3ec7d",
+      "title": "Moon 1",
+      "sourceJokeIds": [
+        "dad-00af812554de8eb448c3ec7d"
+      ],
+      "state": "existing_jokelet_files",
+      "productionAction": "Reuse or review existing outputs; do not regenerate by default.",
+      "identityEvidence": "Catalog text matches the source joke/pun; wording and reaction variants grouped.",
+      "assets": [
+        {
+          "id": "moon-1",
+          "src": "media/moon-1.mp4",
+          "sha256": "314720c14e380c5906907398a913d384049f5bdd21ca212d4e9334a40e6e4c51",
+          "status": "Approved",
+          "version": "v01"
+        },
+        {
+          "id": "moon-2",
+          "src": "media/moon-2.mp4",
+          "sha256": "37dc623b78298397c57aac62275cb91e94aa733e98929430a73fbd927f6d8871",
+          "status": "Approved",
+          "version": "v01"
+        }
+      ],
+      "possibleSourceMatches": []
+    },
+    {
+      "canonicalId": "dad-00c8169b19744be3deb5869d",
+      "title": "Playground",
+      "sourceJokeIds": [
+        "dad-00c8169b19744be3deb5869d",
+        "dad-9bdf01c775d6dabf074dee6e"
+      ],
+      "state": "existing_jokelet_files",
+      "productionAction": "Reuse or review existing outputs; do not regenerate by default.",
+      "identityEvidence": "Catalog text matches the source joke/pun; wording and reaction variants grouped.",
+      "assets": [
+        {
+          "id": "playground-side-eye",
+          "src": "media/playground-side-eye.mp4",
+          "sha256": "e2a66617fcf6972bca98624fb398b3fb855aac126cee93c384d6290a3f74b389",
+          "status": "Approved",
+          "version": "v01"
+        },
+        {
+          "id": "playground-surprise",
+          "src": "media/playground-surprise.mp4",
+          "sha256": "4a2ecee11d6eb96f126fbd0b67a461164e70af665fd7b0839a67da879a4ceab1",
+          "status": "Approved",
+          "version": "v01"
+        },
+        {
+          "id": "playground-skeptical",
+          "src": "media/playground-skeptical.mp4",
+          "sha256": "86c75842bd06287010df7b3cf15ed1c5c9f5bb6825a3a8ed6dad0acdccf85079",
+          "status": "Approved",
+          "version": "v01"
+        }
+      ],
+      "possibleSourceMatches": []
+    },
+    {
+      "canonicalId": "dad-00973713ec4464e9b6408cb8",
+      "title": "Lifesavers",
+      "sourceJokeIds": [
+        "dad-00973713ec4464e9b6408cb8"
+      ],
+      "state": "existing_jokelet_files",
+      "productionAction": "Reuse or review existing outputs; do not regenerate by default.",
+      "identityEvidence": "Catalog text matches the source joke/pun; wording and reaction variants grouped.",
+      "assets": [
+        {
+          "id": "lifesavers",
+          "src": "media/lifesavers.mp4",
+          "sha256": "c2fe32c938d2ba452bd389edbdd63776f2911b3846a0047102ef8ecaeb51be03",
+          "status": "Ready",
+          "version": "v01"
+        }
+      ],
+      "possibleSourceMatches": []
+    },
+    {
+      "canonicalId": "catalog-smart-grill",
+      "title": "Smart Grill",
+      "sourceJokeIds": [],
+      "state": "existing_jokelet_files",
+      "productionAction": "Reuse or review existing outputs; do not regenerate by default.",
+      "identityEvidence": "Catalog title/source asset grouping only; source-text reconciliation still required.",
+      "assets": [
+        {
+          "id": "smart-grill",
+          "src": "media/smart-grill.mp4",
+          "sha256": "9227087d202451dcf62b60606669915f6f8ca3f6a6ca78d321647ca19442236f",
+          "status": "Approved",
+          "version": "v02"
+        }
+      ],
+      "possibleSourceMatches": []
+    },
+    {
+      "canonicalId": "catalog-eyebrows",
+      "title": "Eyebrows",
+      "sourceJokeIds": [],
+      "state": "existing_jokelet_files",
+      "productionAction": "Reuse or review existing outputs; do not regenerate by default.",
+      "identityEvidence": "Catalog title/source asset grouping only; source-text reconciliation still required.",
+      "assets": [
+        {
+          "id": "eyebrows",
+          "src": "media/eyebrows.mp4",
+          "sha256": "7d07d9ed36ba0a3d4a7d120fa88a70c2adf2241f9fd19ecc68705fb8ad6427d5",
+          "status": "Approved",
+          "version": "v01"
+        }
+      ],
+      "possibleSourceMatches": []
+    },
+    {
+      "canonicalId": "catalog-spider",
+      "title": "Spider",
+      "sourceJokeIds": [],
+      "state": "existing_jokelet_files",
+      "productionAction": "Reuse or review existing outputs; do not regenerate by default.",
+      "identityEvidence": "Catalog title/source asset grouping only; source-text reconciliation still required.",
+      "assets": [
+        {
+          "id": "spider",
+          "src": "media/spider.mp4",
+          "sha256": "db2940f8262e3d9a98e5c5be62afcf584a81446c6a6724d233f80237dae65f60",
+          "status": "Approved",
+          "version": "v02"
+        }
+      ],
+      "possibleSourceMatches": [
+        "dad-23ac6b25b47d17ac0d342f9d"
+      ]
+    },
+    {
+      "canonicalId": "catalog-leftovers",
+      "title": "Leftovers · Dinner Surprise",
+      "sourceJokeIds": [],
+      "state": "existing_jokelet_files",
+      "productionAction": "Reuse or review existing outputs; do not regenerate by default.",
+      "identityEvidence": "Catalog title/source asset grouping only; source-text reconciliation still required.",
+      "assets": [
+        {
+          "id": "leftovers",
+          "src": "media/leftovers.mp4",
+          "sha256": "62d41707a691cf217d7e77cdaf968a3d7aeb25bb7a8e7dd2abf9c7f7c97bfd7e",
+          "status": "Approved",
+          "version": "v02"
+        }
+      ],
+      "possibleSourceMatches": []
+    },
+    {
+      "canonicalId": "catalog-listener",
+      "title": "The Listener",
+      "sourceJokeIds": [],
+      "state": "existing_jokelet_files",
+      "productionAction": "Reuse or review existing outputs; do not regenerate by default.",
+      "identityEvidence": "Catalog title/source asset grouping only; source-text reconciliation still required.",
+      "assets": [
+        {
+          "id": "listener",
+          "src": "media/listener.mp4",
+          "sha256": "68648e01d36914b73b35e8cfc02ba642addde109bc8621f5c208d5bddc8887e5",
+          "status": "Review",
+          "version": "v01"
+        }
+      ],
+      "possibleSourceMatches": []
+    },
+    {
+      "canonicalId": "catalog-ep1-01",
+      "title": "Guts · EP1 #1",
+      "sourceJokeIds": [],
+      "state": "existing_jokelet_files",
+      "productionAction": "Reuse or review existing outputs; do not regenerate by default.",
+      "identityEvidence": "Catalog title/source asset grouping only; source-text reconciliation still required.",
+      "assets": [
+        {
+          "id": "ep1-01",
+          "src": "media/ep1-01.mp4",
+          "sha256": "998c6c0739e0fe775c7fba73f68610429c67ada4907f2f5a35e16880f7e262ea",
+          "status": "Approved",
+          "version": "v03"
+        }
+      ],
+      "possibleSourceMatches": []
+    },
+    {
+      "canonicalId": "catalog-ep1-02",
+      "title": "Soap · EP1 #2",
+      "sourceJokeIds": [],
+      "state": "existing_jokelet_files",
+      "productionAction": "Reuse or review existing outputs; do not regenerate by default.",
+      "identityEvidence": "Catalog title/source asset grouping only; source-text reconciliation still required.",
+      "assets": [
+        {
+          "id": "ep1-02",
+          "src": "media/ep1-02.mp4",
+          "sha256": "c6e41307e7b45ba902f5ab01d0a9d1abe5143189dc158501e4e7da94ad8f8146",
+          "status": "Approved",
+          "version": "v03"
+        }
+      ],
+      "possibleSourceMatches": []
+    },
+    {
+      "canonicalId": "catalog-ep1-03",
+      "title": "Impasta · EP1 #3",
+      "sourceJokeIds": [],
+      "state": "existing_jokelet_files",
+      "productionAction": "Reuse or review existing outputs; do not regenerate by default.",
+      "identityEvidence": "Catalog title/source asset grouping only; source-text reconciliation still required.",
+      "assets": [
+        {
+          "id": "ep1-03",
+          "src": "media/ep1-03.mp4",
+          "sha256": "f78f86ffbe4023c01545b5c0238ba04036e809fc851998d1691c2ba572294577",
+          "status": "Approved",
+          "version": "v03"
+        }
+      ],
+      "possibleSourceMatches": [
+        "dad-171aa00d3855559fa96e12bc"
+      ]
+    },
+    {
+      "canonicalId": "catalog-ep1-04",
+      "title": "Scarecrow · EP1 #4",
+      "sourceJokeIds": [],
+      "state": "existing_jokelet_files",
+      "productionAction": "Reuse or review existing outputs; do not regenerate by default.",
+      "identityEvidence": "Catalog title/source asset grouping only; source-text reconciliation still required.",
+      "assets": [
+        {
+          "id": "ep1-04",
+          "src": "media/ep1-04.mp4",
+          "sha256": "c149fe620125260bb310937d4b1d1f50f05079de911daa759f9580eadd8df33f",
+          "status": "Approved",
+          "version": "v03"
+        }
+      ],
+      "possibleSourceMatches": [
+        "dad-05553e89b63e838394624068"
+      ]
+    },
+    {
+      "canonicalId": "catalog-ep1-05",
+      "title": "Hug · EP1 #5",
+      "sourceJokeIds": [],
+      "state": "existing_jokelet_files",
+      "productionAction": "Reuse or review existing outputs; do not regenerate by default.",
+      "identityEvidence": "Catalog title/source asset grouping only; source-text reconciliation still required.",
+      "assets": [
+        {
+          "id": "ep1-05",
+          "src": "media/ep1-05.mp4",
+          "sha256": "ca448097d49271b68112a18e8c1152ce1a898d2ea1ab15767b35efcf0bb57bc3",
+          "status": "Approved",
+          "version": "v03"
+        }
+      ],
+      "possibleSourceMatches": []
+    }
+  ],
+  "sourceBacklog": [
+    {
+      "sourceJokeId": "dad-00973713ec4464e9b6408cb8",
+      "canonicalId": "dad-00973713ec4464e9b6408cb8",
+      "state": "existing_output_linked"
+    },
+    {
+      "sourceJokeId": "dad-00af812554de8eb448c3ec7d",
+      "canonicalId": "dad-00af812554de8eb448c3ec7d",
+      "state": "existing_output_linked"
+    },
+    {
+      "sourceJokeId": "dad-00bda89167b4f15850aa1c91",
+      "canonicalId": "dad-00bda89167b4f15850aa1c91",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-00c8169b19744be3deb5869d",
+      "canonicalId": "dad-00c8169b19744be3deb5869d",
+      "state": "existing_output_linked"
+    },
+    {
+      "sourceJokeId": "dad-00d6dea00e3a33805c7b5007",
+      "canonicalId": "dad-00d6dea00e3a33805c7b5007",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-01390bc83ffc16630ae3d503",
+      "canonicalId": "dad-01390bc83ffc16630ae3d503",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0174a70763ab66a8ea6e0e5e",
+      "canonicalId": "dad-0174a70763ab66a8ea6e0e5e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-01e2b3b699efb51afa7d744a",
+      "canonicalId": "dad-01e2b3b699efb51afa7d744a",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0277cbfd76c52737cfc57e7e",
+      "canonicalId": "dad-0277cbfd76c52737cfc57e7e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-037628e93a588142bc32086f",
+      "canonicalId": "dad-037628e93a588142bc32086f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-03e4e107e7c10b11ad11d90a",
+      "canonicalId": "dad-03e4e107e7c10b11ad11d90a",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0406422d7daa55ac5be73e4e",
+      "canonicalId": "dad-0406422d7daa55ac5be73e4e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0540ab2dae73b3a5ff664a7f",
+      "canonicalId": "dad-0540ab2dae73b3a5ff664a7f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-05553e89b63e838394624068",
+      "canonicalId": "dad-05553e89b63e838394624068",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-058c9496299bc1f2c821fc08",
+      "canonicalId": "dad-058c9496299bc1f2c821fc08",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-05c9d035960626289ba3acff",
+      "canonicalId": "dad-05c9d035960626289ba3acff",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-05e96bbe680f9f15721272ea",
+      "canonicalId": "dad-05e96bbe680f9f15721272ea",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-05fcf176c8c837e7390cc845",
+      "canonicalId": "dad-05fcf176c8c837e7390cc845",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-060fad65db704801ad54238f",
+      "canonicalId": "dad-060fad65db704801ad54238f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-067639b794ea9dc43a9c8484",
+      "canonicalId": "dad-067639b794ea9dc43a9c8484",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-06c2855fdbe64cdc6d1aa84c",
+      "canonicalId": "dad-06c2855fdbe64cdc6d1aa84c",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-07029955dfd8838974e54538",
+      "canonicalId": "dad-07029955dfd8838974e54538",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0798242301e6705a9c18e447",
+      "canonicalId": "dad-0798242301e6705a9c18e447",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-07f9375c8147d7691a3e7fc6",
+      "canonicalId": "dad-07f9375c8147d7691a3e7fc6",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-08234d17cd45f3cad7e3e11e",
+      "canonicalId": "dad-08234d17cd45f3cad7e3e11e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-089e110262b5045c8334ebcb",
+      "canonicalId": "dad-089e110262b5045c8334ebcb",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-09057148805756f3f389c6c5",
+      "canonicalId": "dad-09057148805756f3f389c6c5",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-090b26b4101e0a3629291979",
+      "canonicalId": "dad-090b26b4101e0a3629291979",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-091612b83c3549df7c26be86",
+      "canonicalId": "dad-091612b83c3549df7c26be86",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-094b9a9ad41556e12b19cbc7",
+      "canonicalId": "dad-094b9a9ad41556e12b19cbc7",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0986496af568f12886e702c6",
+      "canonicalId": "dad-0986496af568f12886e702c6",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0a3a781e7372db2d9e79a081",
+      "canonicalId": "dad-0a3a781e7372db2d9e79a081",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0a3f335aa507d5d0169dc847",
+      "canonicalId": "dad-0a3f335aa507d5d0169dc847",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0a5bdc2ddcd8a0f561db2be6",
+      "canonicalId": "dad-0a5bdc2ddcd8a0f561db2be6",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0a5eea83b5784730eb428b07",
+      "canonicalId": "dad-0a5eea83b5784730eb428b07",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0ae06aba9361fd27b0c00072",
+      "canonicalId": "dad-0ae06aba9361fd27b0c00072",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0b0f1af5b776fdbdcc2d8dcd",
+      "canonicalId": "dad-0b0f1af5b776fdbdcc2d8dcd",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0ba292397456f19c08e8775b",
+      "canonicalId": "dad-0ba292397456f19c08e8775b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0c0f7e179732302b8a1d205d",
+      "canonicalId": "dad-0c0f7e179732302b8a1d205d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0c3c3ae1ac7933dcf43ba8ec",
+      "canonicalId": "dad-0c3c3ae1ac7933dcf43ba8ec",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0cc518e7f40a24ca1108caa4",
+      "canonicalId": "dad-0cc518e7f40a24ca1108caa4",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0d29ee48e95785aa4f835ce7",
+      "canonicalId": "dad-0d29ee48e95785aa4f835ce7",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0d448fe2d1f5fc1772a6be0e",
+      "canonicalId": "dad-0d448fe2d1f5fc1772a6be0e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0d4f60115c105a74af58b512",
+      "canonicalId": "dad-0d4f60115c105a74af58b512",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0d62399eeb14488c46ed69d5",
+      "canonicalId": "dad-0d62399eeb14488c46ed69d5",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0d71dbbb06eca76c1b79e95d",
+      "canonicalId": "dad-0d71dbbb06eca76c1b79e95d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0d8a6602eb599f023c1d1df3",
+      "canonicalId": "dad-0d8a6602eb599f023c1d1df3",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0d8e34da30276a4e42add2f9",
+      "canonicalId": "dad-0d8e34da30276a4e42add2f9",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0db42add15eaa29a8a237096",
+      "canonicalId": "dad-0db42add15eaa29a8a237096",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0e3e73f41d1990975cde032e",
+      "canonicalId": "dad-0e3e73f41d1990975cde032e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0e3eb40b0bec4ebb9122bd86",
+      "canonicalId": "dad-0e3eb40b0bec4ebb9122bd86",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0e8a29bdb1307600cf269536",
+      "canonicalId": "dad-0e8a29bdb1307600cf269536",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0ef0780fcd7bd4cc18f8ce68",
+      "canonicalId": "dad-0ef0780fcd7bd4cc18f8ce68",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0f243db3a1c9266fb8e9d7e3",
+      "canonicalId": "dad-0f243db3a1c9266fb8e9d7e3",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0f930e2d2cacc64fe089f50d",
+      "canonicalId": "dad-0f930e2d2cacc64fe089f50d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0fa6df33a675b77aa4c99e06",
+      "canonicalId": "dad-0fa6df33a675b77aa4c99e06",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0fb3d29f3f75fe43b9f53f25",
+      "canonicalId": "dad-0fb3d29f3f75fe43b9f53f25",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-0ffe01b807098ba1bbf34b94",
+      "canonicalId": "dad-0ffe01b807098ba1bbf34b94",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-101ba483ebf75652a50c690e",
+      "canonicalId": "dad-101ba483ebf75652a50c690e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-1025f51752bc00388f821530",
+      "canonicalId": "dad-1025f51752bc00388f821530",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-107e2f2f4d30c38a0aafb825",
+      "canonicalId": "dad-107e2f2f4d30c38a0aafb825",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-108ffe9adb9137826a8b0a16",
+      "canonicalId": "dad-108ffe9adb9137826a8b0a16",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-10a2e7dd29b8ecc386e9e0fe",
+      "canonicalId": "dad-10a2e7dd29b8ecc386e9e0fe",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-11181bbb88d14ab1203ee701",
+      "canonicalId": "dad-11181bbb88d14ab1203ee701",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-112e914f3d0ee0602a8a62c1",
+      "canonicalId": "dad-112e914f3d0ee0602a8a62c1",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-113f9bc1fc8fea9efae03a8f",
+      "canonicalId": "dad-113f9bc1fc8fea9efae03a8f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-1174ab1923b4e03c21c06b4f",
+      "canonicalId": "dad-1174ab1923b4e03c21c06b4f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-11bc18feb26957e3de7c14bd",
+      "canonicalId": "dad-11bc18feb26957e3de7c14bd",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-12c2cfcec3f6c7d8b58d8644",
+      "canonicalId": "dad-12c2cfcec3f6c7d8b58d8644",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-12df0fb871feb5b57847966b",
+      "canonicalId": "dad-12df0fb871feb5b57847966b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-12ec6c095ed34ff5799086f5",
+      "canonicalId": "dad-12ec6c095ed34ff5799086f5",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-130d4865a1bdf547702c89bc",
+      "canonicalId": "dad-130d4865a1bdf547702c89bc",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-13458744b03d460629f8faaf",
+      "canonicalId": "dad-13458744b03d460629f8faaf",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-135b28aa33236e390ab8fc0d",
+      "canonicalId": "dad-135b28aa33236e390ab8fc0d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-139c43fde8c22379993800e4",
+      "canonicalId": "dad-139c43fde8c22379993800e4",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-13c4625ee2520605863fc552",
+      "canonicalId": "dad-13c4625ee2520605863fc552",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-1430e465b95911731a9a139e",
+      "canonicalId": "dad-1430e465b95911731a9a139e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-14ad938d3d8d6bfdbe5bd059",
+      "canonicalId": "dad-14ad938d3d8d6bfdbe5bd059",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-151d1ad3e49756a083fccb67",
+      "canonicalId": "dad-151d1ad3e49756a083fccb67",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-154c1f03bd30818bd404e9a8",
+      "canonicalId": "dad-154c1f03bd30818bd404e9a8",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-15cbcab78182ddb7a0960cf4",
+      "canonicalId": "dad-15cbcab78182ddb7a0960cf4",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-15da03a2979b25b78689772b",
+      "canonicalId": "dad-15da03a2979b25b78689772b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-161e2012965fd07f8345daca",
+      "canonicalId": "dad-161e2012965fd07f8345daca",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-1662ab484055132bf19961d8",
+      "canonicalId": "dad-1662ab484055132bf19961d8",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-16a0047666094cd282ee6bcc",
+      "canonicalId": "dad-16a0047666094cd282ee6bcc",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-16ef68afd0615d835645db09",
+      "canonicalId": "dad-16ef68afd0615d835645db09",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-16f4418dfbf7859568d66b62",
+      "canonicalId": "dad-16f4418dfbf7859568d66b62",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-170b27ebe2951c08b1de8849",
+      "canonicalId": "dad-170b27ebe2951c08b1de8849",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-171aa00d3855559fa96e12bc",
+      "canonicalId": "dad-171aa00d3855559fa96e12bc",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-174de498f7b100a1b3d4442c",
+      "canonicalId": "dad-174de498f7b100a1b3d4442c",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-1750452fe31946097bda087c",
+      "canonicalId": "dad-1750452fe31946097bda087c",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-1797cd949f3b722b021067dc",
+      "canonicalId": "dad-1797cd949f3b722b021067dc",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-179b8ba229b723821432599f",
+      "canonicalId": "dad-179b8ba229b723821432599f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-180f97aa44f692f89e9b14a1",
+      "canonicalId": "dad-180f97aa44f692f89e9b14a1",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-1840aad2919b22fa8ba4ac96",
+      "canonicalId": "dad-1840aad2919b22fa8ba4ac96",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-18496219d1c12d75857e79f9",
+      "canonicalId": "dad-18496219d1c12d75857e79f9",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-1872d4ab0968b1ffc46bca00",
+      "canonicalId": "dad-1872d4ab0968b1ffc46bca00",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-18774d2be2d90249df3bb58e",
+      "canonicalId": "dad-18774d2be2d90249df3bb58e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-187f00f8c9efa5f4a15dba7b",
+      "canonicalId": "dad-187f00f8c9efa5f4a15dba7b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-190022c09165d4ab2d1d2b31",
+      "canonicalId": "dad-190022c09165d4ab2d1d2b31",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-194ccc718efdfb06b021ba92",
+      "canonicalId": "dad-194ccc718efdfb06b021ba92",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-195c5a08912a69432eee34e8",
+      "canonicalId": "dad-195c5a08912a69432eee34e8",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-197577d15a97c021b2d51816",
+      "canonicalId": "dad-197577d15a97c021b2d51816",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-19b935ffd102460e82ae0d75",
+      "canonicalId": "dad-19b935ffd102460e82ae0d75",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-19cb553f869266743a05faa9",
+      "canonicalId": "dad-19cb553f869266743a05faa9",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-1a39b42a843efc0d1667dc06",
+      "canonicalId": "dad-1a39b42a843efc0d1667dc06",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-1ab9e35d75b30777eaf6bbab",
+      "canonicalId": "dad-1ab9e35d75b30777eaf6bbab",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-1aee9618019cdc2a027e5fdd",
+      "canonicalId": "dad-1aee9618019cdc2a027e5fdd",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-1af6d35e584acc6239b5c7c5",
+      "canonicalId": "dad-1af6d35e584acc6239b5c7c5",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-1b2b0b71c4bda4973676b9be",
+      "canonicalId": "dad-1b2b0b71c4bda4973676b9be",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-1c3b197b77834541135a96f8",
+      "canonicalId": "dad-1c3b197b77834541135a96f8",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-1c7486bebc25e3b7f5b5aeb1",
+      "canonicalId": "dad-1c7486bebc25e3b7f5b5aeb1",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-1cf1479c3d5bdaf904a273e6",
+      "canonicalId": "dad-1cf1479c3d5bdaf904a273e6",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-1cfc35a42e4ea5827a3f5f5d",
+      "canonicalId": "dad-1cfc35a42e4ea5827a3f5f5d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-1d6a16da6c8754fe7267dddf",
+      "canonicalId": "dad-1d6a16da6c8754fe7267dddf",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-1d88fd4b1d6953952adbc7e7",
+      "canonicalId": "dad-1d88fd4b1d6953952adbc7e7",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-1e4d086a05e3c48763d65a8d",
+      "canonicalId": "dad-1e4d086a05e3c48763d65a8d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-1e54f16aa3c6a2ff52592575",
+      "canonicalId": "dad-1e54f16aa3c6a2ff52592575",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-1e57f70dde98e99ec52af029",
+      "canonicalId": "dad-1e57f70dde98e99ec52af029",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-1e7c20643753e4471c511a8a",
+      "canonicalId": "dad-1e7c20643753e4471c511a8a",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-1eeda9e8e54849b334650036",
+      "canonicalId": "dad-1eeda9e8e54849b334650036",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-1f9dd2607a5722739de88844",
+      "canonicalId": "dad-1f9dd2607a5722739de88844",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-1fe58441e0fc8bee7dad6e56",
+      "canonicalId": "dad-1fe58441e0fc8bee7dad6e56",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-21e6110265d433701bb6e51e",
+      "canonicalId": "dad-21e6110265d433701bb6e51e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-22089a20443e839b2fe18006",
+      "canonicalId": "dad-22089a20443e839b2fe18006",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-221d395e42b428f6096e168c",
+      "canonicalId": "dad-221d395e42b428f6096e168c",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-2265018ffa36344979a5bff9",
+      "canonicalId": "dad-2265018ffa36344979a5bff9",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-22d834a8a7aa9cbd196910ed",
+      "canonicalId": "dad-22d834a8a7aa9cbd196910ed",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-23030c4fa4fb61461eb98ab9",
+      "canonicalId": "dad-23030c4fa4fb61461eb98ab9",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-2372c52e0731bd3c1b74ad72",
+      "canonicalId": "dad-2372c52e0731bd3c1b74ad72",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-23a0ab8bcc16393f5eee808d",
+      "canonicalId": "dad-23a0ab8bcc16393f5eee808d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-23ac6b25b47d17ac0d342f9d",
+      "canonicalId": "dad-23ac6b25b47d17ac0d342f9d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-2430b66f8a948ebe3e3cc2c0",
+      "canonicalId": "dad-2430b66f8a948ebe3e3cc2c0",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-2436cf5f20aa82a0469d521b",
+      "canonicalId": "dad-2436cf5f20aa82a0469d521b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-24d25054622d54485dc971b8",
+      "canonicalId": "dad-24d25054622d54485dc971b8",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-253cc8341982820589ad0991",
+      "canonicalId": "dad-253cc8341982820589ad0991",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-2555c21520be716176ebe6d7",
+      "canonicalId": "dad-2555c21520be716176ebe6d7",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-259616a35fa1f9886b9df0d5",
+      "canonicalId": "dad-259616a35fa1f9886b9df0d5",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-25a4a7cf2eac6cea7f33c5d0",
+      "canonicalId": "dad-25a4a7cf2eac6cea7f33c5d0",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-25de746e42f35268d78ba5a1",
+      "canonicalId": "dad-25de746e42f35268d78ba5a1",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-2647ba4cc3053969b97d6f7a",
+      "canonicalId": "dad-2647ba4cc3053969b97d6f7a",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-27521a3386a83d8266d68864",
+      "canonicalId": "dad-27521a3386a83d8266d68864",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-27c20c052d8ad05971788da2",
+      "canonicalId": "dad-27c20c052d8ad05971788da2",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-28246ef8374d04cf73707d78",
+      "canonicalId": "dad-28246ef8374d04cf73707d78",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-282570e82a73d8ea3624a8d2",
+      "canonicalId": "dad-282570e82a73d8ea3624a8d2",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-2892660eeabac20df9cc7e93",
+      "canonicalId": "dad-2892660eeabac20df9cc7e93",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-289907f5d190250b36cf97c1",
+      "canonicalId": "dad-289907f5d190250b36cf97c1",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-2903d3310ebf08cfd6b3cbf4",
+      "canonicalId": "dad-2903d3310ebf08cfd6b3cbf4",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-291a79643f917c27c61789c9",
+      "canonicalId": "dad-291a79643f917c27c61789c9",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-29a1c5e1c985375ee687401a",
+      "canonicalId": "dad-29a1c5e1c985375ee687401a",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-29d845aa16abc126553209cf",
+      "canonicalId": "dad-29d845aa16abc126553209cf",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-2a1524d4d8237cb941533cad",
+      "canonicalId": "dad-2a1524d4d8237cb941533cad",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-2ab73d5f66bad7aba22125c7",
+      "canonicalId": "dad-2ab73d5f66bad7aba22125c7",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-2af444c73e41ab91b0316300",
+      "canonicalId": "dad-2af444c73e41ab91b0316300",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-2b2a5c2a6a8d4d40e0954e55",
+      "canonicalId": "dad-2b2a5c2a6a8d4d40e0954e55",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-2b70e2667162db521addb24d",
+      "canonicalId": "dad-2b70e2667162db521addb24d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-2c0df5801ea5d7d4e03d86e2",
+      "canonicalId": "dad-2c0df5801ea5d7d4e03d86e2",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-2c297dc7d77552f5872381d1",
+      "canonicalId": "dad-2c297dc7d77552f5872381d1",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-2c78b3d039489e217c174e86",
+      "canonicalId": "dad-2c78b3d039489e217c174e86",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-2d94aca6a637c01f118d983b",
+      "canonicalId": "dad-2d94aca6a637c01f118d983b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-2e0006d7809e6b75795e5cde",
+      "canonicalId": "dad-2e0006d7809e6b75795e5cde",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-2e390e746c8194ea40ebb71b",
+      "canonicalId": "dad-2e390e746c8194ea40ebb71b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-2eab3abaae308f41cf33eb42",
+      "canonicalId": "dad-2eab3abaae308f41cf33eb42",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-2eb125867da590dbf64f6d6b",
+      "canonicalId": "dad-2eb125867da590dbf64f6d6b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-2eca9a945d5d176124570cf3",
+      "canonicalId": "dad-2eca9a945d5d176124570cf3",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-2f01316e48cc7eb968b78ec5",
+      "canonicalId": "dad-2f01316e48cc7eb968b78ec5",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-2fa1be17daa953631fae96fe",
+      "canonicalId": "dad-2fa1be17daa953631fae96fe",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-2fde16666063de23432379ca",
+      "canonicalId": "dad-2fde16666063de23432379ca",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-30166d5121035ac8536e4708",
+      "canonicalId": "dad-30166d5121035ac8536e4708",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-30544e48228cab2ea5f01ece",
+      "canonicalId": "dad-30544e48228cab2ea5f01ece",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-307a0d6e5737b983c453be10",
+      "canonicalId": "dad-307a0d6e5737b983c453be10",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-30c08524689eb939f8537a5e",
+      "canonicalId": "dad-30c08524689eb939f8537a5e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-30ca7c89b7921fbd0b52dc26",
+      "canonicalId": "dad-30ca7c89b7921fbd0b52dc26",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-30f63b8968bc1c5e5eaed678",
+      "canonicalId": "dad-30f63b8968bc1c5e5eaed678",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-312e83c012d1f27bba2399b6",
+      "canonicalId": "dad-312e83c012d1f27bba2399b6",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3165bde5fcb3e65169601831",
+      "canonicalId": "dad-3165bde5fcb3e65169601831",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3198bc2e9d98b10ba1b91ff7",
+      "canonicalId": "dad-3198bc2e9d98b10ba1b91ff7",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-31b402a1fb09d0e946444bcb",
+      "canonicalId": "dad-31b402a1fb09d0e946444bcb",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-31c46c4b78e95d79719d8c65",
+      "canonicalId": "dad-31c46c4b78e95d79719d8c65",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-326e3196d60a680339ff3a75",
+      "canonicalId": "dad-326e3196d60a680339ff3a75",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-32917ece5fecca3dd0a3fd65",
+      "canonicalId": "dad-32917ece5fecca3dd0a3fd65",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3323e37ff60be3bcb93c21cf",
+      "canonicalId": "dad-3323e37ff60be3bcb93c21cf",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3401a676079dd774a134d213",
+      "canonicalId": "dad-3401a676079dd774a134d213",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3404d59e87325bd5d066bdec",
+      "canonicalId": "dad-3404d59e87325bd5d066bdec",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-340502be7af2da60719a20f5",
+      "canonicalId": "dad-340502be7af2da60719a20f5",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-34cb019ac457c829a2dff516",
+      "canonicalId": "dad-34cb019ac457c829a2dff516",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-34e91a7fd4810e96543357e3",
+      "canonicalId": "dad-34e91a7fd4810e96543357e3",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-354c346491689ce79e0a41d9",
+      "canonicalId": "dad-354c346491689ce79e0a41d9",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-35a367e50f3ff055dd798608",
+      "canonicalId": "dad-35a367e50f3ff055dd798608",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-35d6f1e129b084e59c4a6e34",
+      "canonicalId": "dad-35d6f1e129b084e59c4a6e34",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3600bdb045284f5d030c58cc",
+      "canonicalId": "dad-3600bdb045284f5d030c58cc",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-36c21403b108af37d28d0c19",
+      "canonicalId": "dad-36c21403b108af37d28d0c19",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3771b3a6b2fb79f05dd1e85f",
+      "canonicalId": "dad-3771b3a6b2fb79f05dd1e85f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-37943190fdaf0a8230bd6643",
+      "canonicalId": "dad-37943190fdaf0a8230bd6643",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-37b468261c41aca79868f852",
+      "canonicalId": "dad-37b468261c41aca79868f852",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-37c03a8c9b1c25afa8226c72",
+      "canonicalId": "dad-37c03a8c9b1c25afa8226c72",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-382b610e3021f993e345e371",
+      "canonicalId": "dad-382b610e3021f993e345e371",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-38628145ca9c052709f6627b",
+      "canonicalId": "dad-38628145ca9c052709f6627b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-38a21d277046b7aa4d4395fa",
+      "canonicalId": "dad-38a21d277046b7aa4d4395fa",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-38c80eb82f0130e025acd4b3",
+      "canonicalId": "dad-38c80eb82f0130e025acd4b3",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-38ef148d3f8a74490884f6e8",
+      "canonicalId": "dad-38ef148d3f8a74490884f6e8",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-390b7c8964cc341644f13e73",
+      "canonicalId": "dad-390b7c8964cc341644f13e73",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-39781c62d425d04c1ab53eef",
+      "canonicalId": "dad-39781c62d425d04c1ab53eef",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3978e57ff788da7d31de35e2",
+      "canonicalId": "dad-3978e57ff788da7d31de35e2",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-39bda1582384fc17e315aa05",
+      "canonicalId": "dad-39bda1582384fc17e315aa05",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-39cdaec3a327fdde4ab8d8cb",
+      "canonicalId": "dad-39cdaec3a327fdde4ab8d8cb",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-39f06bd3757116980b464231",
+      "canonicalId": "dad-39f06bd3757116980b464231",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3a9030d26b9ecb6290eb8592",
+      "canonicalId": "dad-3a9030d26b9ecb6290eb8592",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3aa2ace0ef852a080081a232",
+      "canonicalId": "dad-3aa2ace0ef852a080081a232",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3abb51bdf5623f4676878e00",
+      "canonicalId": "dad-3abb51bdf5623f4676878e00",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3b0450fa76228cafcbbd7ae3",
+      "canonicalId": "dad-3b0450fa76228cafcbbd7ae3",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3b0ceacb296d94b46be816bf",
+      "canonicalId": "dad-3b0ceacb296d94b46be816bf",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3b1640868c19289ab8a9d300",
+      "canonicalId": "dad-3b1640868c19289ab8a9d300",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3b3cf4fe44a7ee3d501a703a",
+      "canonicalId": "dad-3b3cf4fe44a7ee3d501a703a",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3b8de2a5998740ca441d7639",
+      "canonicalId": "dad-3b8de2a5998740ca441d7639",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3ba855c19cb28b425361f0d0",
+      "canonicalId": "dad-3ba855c19cb28b425361f0d0",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3bdec0e884d8538ce5f8b168",
+      "canonicalId": "dad-3bdec0e884d8538ce5f8b168",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3bfffce9a5690efbf7b522c2",
+      "canonicalId": "dad-3bfffce9a5690efbf7b522c2",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3c444573f8db826c0ea25b06",
+      "canonicalId": "dad-3c444573f8db826c0ea25b06",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3ccbd5fc9bb3a251dfc0259d",
+      "canonicalId": "dad-3ccbd5fc9bb3a251dfc0259d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3ce9cc01e785179f917614b0",
+      "canonicalId": "dad-3ce9cc01e785179f917614b0",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3cebffdfaaef06d207209493",
+      "canonicalId": "dad-3cebffdfaaef06d207209493",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3cf69dd3dc1e400353c5794b",
+      "canonicalId": "dad-3cf69dd3dc1e400353c5794b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3cfdd3c95e0647e0f650aab8",
+      "canonicalId": "dad-3cfdd3c95e0647e0f650aab8",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3d13cb85ff72c9fd91485176",
+      "canonicalId": "dad-3d13cb85ff72c9fd91485176",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3d152ab6625c3d153848a53f",
+      "canonicalId": "dad-3d152ab6625c3d153848a53f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3d80ae9a86b39f7cb7974491",
+      "canonicalId": "dad-3d80ae9a86b39f7cb7974491",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3e7e02f55e32a332f657fdfc",
+      "canonicalId": "dad-3e7e02f55e32a332f657fdfc",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3e8f807e33a273ce087fa649",
+      "canonicalId": "dad-3e8f807e33a273ce087fa649",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3ee55ee45c7b965130c1b2f1",
+      "canonicalId": "dad-3ee55ee45c7b965130c1b2f1",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3f5b445c88b3266f45a1fcf3",
+      "canonicalId": "dad-3f5b445c88b3266f45a1fcf3",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-3fb78450fc6f4cfc0e627368",
+      "canonicalId": "dad-3fb78450fc6f4cfc0e627368",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-400f40b702bdb4acd36e6a0b",
+      "canonicalId": "dad-400f40b702bdb4acd36e6a0b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-403d23c946c4924af5ca51f4",
+      "canonicalId": "dad-403d23c946c4924af5ca51f4",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-40e1ad635b6df2b22a0cc894",
+      "canonicalId": "dad-40e1ad635b6df2b22a0cc894",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-40f9dfaeb5f86046c6b7b310",
+      "canonicalId": "dad-40f9dfaeb5f86046c6b7b310",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-417f8977732863534fe86d40",
+      "canonicalId": "dad-417f8977732863534fe86d40",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-418e012598b3372f1a4cc7bc",
+      "canonicalId": "dad-418e012598b3372f1a4cc7bc",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-41e7ef87ff87e4af7fb09b93",
+      "canonicalId": "dad-41e7ef87ff87e4af7fb09b93",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-42108a5739dade2e6b5ebc35",
+      "canonicalId": "dad-42108a5739dade2e6b5ebc35",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-4268ad8c702cf570668d67b9",
+      "canonicalId": "dad-4268ad8c702cf570668d67b9",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-42957c1e4935920453725118",
+      "canonicalId": "dad-42957c1e4935920453725118",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-4318e18a715d59411f30c758",
+      "canonicalId": "dad-4318e18a715d59411f30c758",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-434cc64f2c85d47f6c79d2ff",
+      "canonicalId": "dad-434cc64f2c85d47f6c79d2ff",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-436cd8ce2e26c092985ef3d3",
+      "canonicalId": "dad-436cd8ce2e26c092985ef3d3",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-4393026ff148127b2687f0b1",
+      "canonicalId": "dad-4393026ff148127b2687f0b1",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-442a4911d681c0bf68a9d9b6",
+      "canonicalId": "dad-442a4911d681c0bf68a9d9b6",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-4480cee9a31a0da39b610aab",
+      "canonicalId": "dad-4480cee9a31a0da39b610aab",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-44a5bf511040630458cfb383",
+      "canonicalId": "dad-44a5bf511040630458cfb383",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-44f7964aac8b7e707cece6ae",
+      "canonicalId": "dad-44f7964aac8b7e707cece6ae",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-451f90dcf924ef5235d362f9",
+      "canonicalId": "dad-451f90dcf924ef5235d362f9",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-454830869446261628ba4194",
+      "canonicalId": "dad-454830869446261628ba4194",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-457e080d7a11adef56f78ca2",
+      "canonicalId": "dad-457e080d7a11adef56f78ca2",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-459a58038ae640a8ef8fe827",
+      "canonicalId": "dad-459a58038ae640a8ef8fe827",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-46023e5c52a778ccae040be3",
+      "canonicalId": "dad-46023e5c52a778ccae040be3",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-4616eecc9877bef722df16bb",
+      "canonicalId": "dad-4616eecc9877bef722df16bb",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-469092546ce0fe1bf5310808",
+      "canonicalId": "dad-469092546ce0fe1bf5310808",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-470b2e90036493a624ff7b8d",
+      "canonicalId": "dad-470b2e90036493a624ff7b8d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-47421bcde4ae646784b91a00",
+      "canonicalId": "dad-47421bcde4ae646784b91a00",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-47514179300e1797c1534d24",
+      "canonicalId": "dad-47514179300e1797c1534d24",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-477700065bef2caaaae74cf1",
+      "canonicalId": "dad-477700065bef2caaaae74cf1",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-47c38dac44ec8822786c4eb4",
+      "canonicalId": "dad-47c38dac44ec8822786c4eb4",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-481ad0619addcea768c3c468",
+      "canonicalId": "dad-481ad0619addcea768c3c468",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-48c7da42f549000ff9cb9b48",
+      "canonicalId": "dad-48c7da42f549000ff9cb9b48",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-48dfc2e1002437ecfbaea273",
+      "canonicalId": "dad-48dfc2e1002437ecfbaea273",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-491eea8e8814af4795ab5d27",
+      "canonicalId": "dad-491eea8e8814af4795ab5d27",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-49991c8b0ad1f04b9075d4c7",
+      "canonicalId": "dad-49991c8b0ad1f04b9075d4c7",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-49a77ee05f6f71046f6d3081",
+      "canonicalId": "dad-49a77ee05f6f71046f6d3081",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-49c38ca8e286ebdc199a1229",
+      "canonicalId": "dad-49c38ca8e286ebdc199a1229",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-4a20c2e4648998a876908f48",
+      "canonicalId": "dad-4a20c2e4648998a876908f48",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-4abcd27c644299c7a16d6d21",
+      "canonicalId": "dad-4abcd27c644299c7a16d6d21",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-4ae8d623008d23eb744256c9",
+      "canonicalId": "dad-4ae8d623008d23eb744256c9",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-4b16c4321d915bb282c452d7",
+      "canonicalId": "dad-4b16c4321d915bb282c452d7",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-4bef74a896bdd5bf63fe369f",
+      "canonicalId": "dad-4bef74a896bdd5bf63fe369f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-4c18ce976812a92d02576be4",
+      "canonicalId": "dad-4c18ce976812a92d02576be4",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-4ca549ba4270a4e9d37a7d15",
+      "canonicalId": "dad-4ca549ba4270a4e9d37a7d15",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-4cb5aaf765211d002e258609",
+      "canonicalId": "dad-4cb5aaf765211d002e258609",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-4d117a247b0044d7281b3733",
+      "canonicalId": "dad-4d117a247b0044d7281b3733",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-4d46656c6c2daf1cf46743d3",
+      "canonicalId": "dad-4d46656c6c2daf1cf46743d3",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-4d6db913769c48cbace855d3",
+      "canonicalId": "dad-4d6db913769c48cbace855d3",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-4d89c5d447bbc2b5f0f41091",
+      "canonicalId": "dad-4d89c5d447bbc2b5f0f41091",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-4e5650edb2113b5cd4484501",
+      "canonicalId": "dad-4e5650edb2113b5cd4484501",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-4f0bcf1b0aba25aceb9efa66",
+      "canonicalId": "dad-4f0bcf1b0aba25aceb9efa66",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-5021952cda68f79806f0cb97",
+      "canonicalId": "dad-5021952cda68f79806f0cb97",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-5052cdea277bcc0de7b2f497",
+      "canonicalId": "dad-5052cdea277bcc0de7b2f497",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-50b4444876c7e67b6d437008",
+      "canonicalId": "dad-50b4444876c7e67b6d437008",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-50fb750748023156a296b84a",
+      "canonicalId": "dad-50fb750748023156a296b84a",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-510c8402a05d8d4feca60f89",
+      "canonicalId": "dad-510c8402a05d8d4feca60f89",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-511ee822b97aec31a4e0932c",
+      "canonicalId": "dad-511ee822b97aec31a4e0932c",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-516a6dc85b90d6e8699d22b5",
+      "canonicalId": "dad-516a6dc85b90d6e8699d22b5",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-51896e0df143cc380f46a05c",
+      "canonicalId": "dad-51896e0df143cc380f46a05c",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-527d18b8a6f4fe086bb53805",
+      "canonicalId": "dad-527d18b8a6f4fe086bb53805",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-532157339c0d6457bf96fc79",
+      "canonicalId": "dad-532157339c0d6457bf96fc79",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-53467f0822b5e6be72a2ebc3",
+      "canonicalId": "dad-53467f0822b5e6be72a2ebc3",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-5358e6a0d4f3e15e7252b3ef",
+      "canonicalId": "dad-5358e6a0d4f3e15e7252b3ef",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-53b455e4b8c1bb3f47488d8e",
+      "canonicalId": "dad-53b455e4b8c1bb3f47488d8e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-54116d0803cd1f1ce7e29897",
+      "canonicalId": "dad-54116d0803cd1f1ce7e29897",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-54d1e74295da1a6fe7d5fdd8",
+      "canonicalId": "dad-54d1e74295da1a6fe7d5fdd8",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-551e3cf36c93ff4f913bfad3",
+      "canonicalId": "dad-551e3cf36c93ff4f913bfad3",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-55358d92359729961c817707",
+      "canonicalId": "dad-55358d92359729961c817707",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-554ddc03d654f0449f6222a1",
+      "canonicalId": "dad-554ddc03d654f0449f6222a1",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-555470efc18ef07f54e4e016",
+      "canonicalId": "dad-555470efc18ef07f54e4e016",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-55c5240a319e6a87d754a72a",
+      "canonicalId": "dad-55c5240a319e6a87d754a72a",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-5600672b1070b0a61847e4e1",
+      "canonicalId": "dad-5600672b1070b0a61847e4e1",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-560540fe428f037c7da586e7",
+      "canonicalId": "dad-560540fe428f037c7da586e7",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-56387326cf256f1aa21df701",
+      "canonicalId": "dad-56387326cf256f1aa21df701",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-5791b5e08a6c83e5279b182d",
+      "canonicalId": "dad-5791b5e08a6c83e5279b182d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-57ce09df017229f62c1a763f",
+      "canonicalId": "dad-57ce09df017229f62c1a763f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-5800ca51a71b2ef844c89678",
+      "canonicalId": "dad-5800ca51a71b2ef844c89678",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-581d65776cce5dc3dcfe31e7",
+      "canonicalId": "dad-581d65776cce5dc3dcfe31e7",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-58273a427da5169e10a28dec",
+      "canonicalId": "dad-58273a427da5169e10a28dec",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-583a5900b60a3a19a417a504",
+      "canonicalId": "dad-583a5900b60a3a19a417a504",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-5862bafa856e32b83a961684",
+      "canonicalId": "dad-5862bafa856e32b83a961684",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-58e55573a38becb3202542a6",
+      "canonicalId": "dad-58e55573a38becb3202542a6",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-597b98a8c933d47a02d7a5e1",
+      "canonicalId": "dad-597b98a8c933d47a02d7a5e1",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-59d0fbd77c78614759bb03dc",
+      "canonicalId": "dad-59d0fbd77c78614759bb03dc",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-59d509d8925ae817c615cad5",
+      "canonicalId": "dad-59d509d8925ae817c615cad5",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-5a76d4c9f6d3ef342dc276e0",
+      "canonicalId": "dad-5a76d4c9f6d3ef342dc276e0",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-5ac72b0d46cc0710a80953ec",
+      "canonicalId": "dad-5ac72b0d46cc0710a80953ec",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-5ad01b01d2ab3f206acc633a",
+      "canonicalId": "dad-5ad01b01d2ab3f206acc633a",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-5afd9e3289586e3bf741d3ea",
+      "canonicalId": "dad-5afd9e3289586e3bf741d3ea",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-5b44e3c93445bb3f5fbf9c56",
+      "canonicalId": "dad-5b44e3c93445bb3f5fbf9c56",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-5b7924e2777cc141400a8a8d",
+      "canonicalId": "dad-5b7924e2777cc141400a8a8d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-5bc19690cdecc07be3aca9f2",
+      "canonicalId": "dad-5bc19690cdecc07be3aca9f2",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-5cbb211f6421a46ff76db2af",
+      "canonicalId": "dad-5cbb211f6421a46ff76db2af",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-5d0ba6ab71ce9eef63cdb825",
+      "canonicalId": "dad-5d0ba6ab71ce9eef63cdb825",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-5e4938c4788bca38e3009d30",
+      "canonicalId": "dad-5e4938c4788bca38e3009d30",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-5ebabe7fab0e23bb135f7e9b",
+      "canonicalId": "dad-5ebabe7fab0e23bb135f7e9b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-5ec705be06d87638682a191a",
+      "canonicalId": "dad-5ec705be06d87638682a191a",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-5ee354e075c49fdfe235d059",
+      "canonicalId": "dad-5ee354e075c49fdfe235d059",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-5ef99d934822cda6ba173ae4",
+      "canonicalId": "dad-5ef99d934822cda6ba173ae4",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-5f5dfbb23d7872d8eb4a1242",
+      "canonicalId": "dad-5f5dfbb23d7872d8eb4a1242",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-5f620c7ff486b598006acdbb",
+      "canonicalId": "dad-5f620c7ff486b598006acdbb",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-5f96935b1787651bdadc3669",
+      "canonicalId": "dad-5f96935b1787651bdadc3669",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-5fcdb8ee0a2a316148f53f8b",
+      "canonicalId": "dad-5fcdb8ee0a2a316148f53f8b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-5fd1500bc5007f27e0badfca",
+      "canonicalId": "dad-5fd1500bc5007f27e0badfca",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-602e333b22abe1134742cd5b",
+      "canonicalId": "dad-602e333b22abe1134742cd5b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6038f8b5a8d2c0c3b946db54",
+      "canonicalId": "dad-6038f8b5a8d2c0c3b946db54",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-604d4ca52fb6721a96fa742c",
+      "canonicalId": "dad-604d4ca52fb6721a96fa742c",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-60584c28bba81cfcffbb84ca",
+      "canonicalId": "dad-60584c28bba81cfcffbb84ca",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-605c5ce6556d3cc0c3fcafb6",
+      "canonicalId": "dad-605c5ce6556d3cc0c3fcafb6",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-608151e09404cd0c1a7ba79f",
+      "canonicalId": "dad-608151e09404cd0c1a7ba79f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6095ebd30f901880eb68e312",
+      "canonicalId": "dad-6095ebd30f901880eb68e312",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-619ff8ef4ffc427df7ee5f2c",
+      "canonicalId": "dad-619ff8ef4ffc427df7ee5f2c",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-61a6e5d2691550906ef67806",
+      "canonicalId": "dad-61a6e5d2691550906ef67806",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-61af96a12e264231646acae9",
+      "canonicalId": "dad-61af96a12e264231646acae9",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-62026a536b12cb107da1cd46",
+      "canonicalId": "dad-62026a536b12cb107da1cd46",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-62261f399027589c8aa8c210",
+      "canonicalId": "dad-62261f399027589c8aa8c210",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-62408fc7c931834d46a341a2",
+      "canonicalId": "dad-62408fc7c931834d46a341a2",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-62a4f4c3b0e34e59c0cd8ce5",
+      "canonicalId": "dad-62a4f4c3b0e34e59c0cd8ce5",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-62f872194740106ab9bda6ca",
+      "canonicalId": "dad-62f872194740106ab9bda6ca",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6320a387106d4d5b67128794",
+      "canonicalId": "dad-6320a387106d4d5b67128794",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6399139c58ee1fff966dc8f0",
+      "canonicalId": "dad-6399139c58ee1fff966dc8f0",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6405a75caeef48f58cba3139",
+      "canonicalId": "dad-6405a75caeef48f58cba3139",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-64692101ea4161d5bfe6bd97",
+      "canonicalId": "dad-64692101ea4161d5bfe6bd97",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-64c77968bf1753f593184166",
+      "canonicalId": "dad-64c77968bf1753f593184166",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-64ddb38db7060dc83501d74d",
+      "canonicalId": "dad-64ddb38db7060dc83501d74d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-64deb60f350a52bf7c2d7a9e",
+      "canonicalId": "dad-64deb60f350a52bf7c2d7a9e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-64e77cf9703b149c50d364ea",
+      "canonicalId": "dad-64e77cf9703b149c50d364ea",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-65a8d6ca7b4998e065837e1b",
+      "canonicalId": "dad-65a8d6ca7b4998e065837e1b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-65f5ad85632d410cd90fae0b",
+      "canonicalId": "dad-65f5ad85632d410cd90fae0b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-661866920f291665c8c9f75e",
+      "canonicalId": "dad-661866920f291665c8c9f75e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6696c2eaba09863e2b746236",
+      "canonicalId": "dad-6696c2eaba09863e2b746236",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-66adcee72399f2b776d64543",
+      "canonicalId": "dad-66adcee72399f2b776d64543",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-675616cc50dd24ac1a92f79f",
+      "canonicalId": "dad-675616cc50dd24ac1a92f79f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-682101c342393d8f5baddf04",
+      "canonicalId": "dad-682101c342393d8f5baddf04",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-682f87c24334ff28d8246f3a",
+      "canonicalId": "dad-682f87c24334ff28d8246f3a",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6871cd40224484ff4783d0aa",
+      "canonicalId": "dad-6871cd40224484ff4783d0aa",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-690da68e39a3c878a7c7a2be",
+      "canonicalId": "dad-690da68e39a3c878a7c7a2be",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-69978b052242b6880b5db3c9",
+      "canonicalId": "dad-69978b052242b6880b5db3c9",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6a0ef6c3a1d6c5210aebae20",
+      "canonicalId": "dad-6a0ef6c3a1d6c5210aebae20",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6a35d95605b0c105c25c5b60",
+      "canonicalId": "dad-6a35d95605b0c105c25c5b60",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6a485800f9ca48d8c158fcef",
+      "canonicalId": "dad-6a485800f9ca48d8c158fcef",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6a6d8028744a7a44f94a7540",
+      "canonicalId": "dad-6a6d8028744a7a44f94a7540",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6a7ce6959b8038e6e4249aa6",
+      "canonicalId": "dad-6a7ce6959b8038e6e4249aa6",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6a860795512c6ca731120a79",
+      "canonicalId": "dad-6a860795512c6ca731120a79",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6af9607dc39dbfb8e9f3c541",
+      "canonicalId": "dad-6af9607dc39dbfb8e9f3c541",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6b854a4859dbd6aeef2cbc78",
+      "canonicalId": "dad-6b854a4859dbd6aeef2cbc78",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6bbf3193ae3b45e1a4047ae5",
+      "canonicalId": "dad-6bbf3193ae3b45e1a4047ae5",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6cd633658c5bd7ec62e98cd6",
+      "canonicalId": "dad-6cd633658c5bd7ec62e98cd6",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6d209d2b5c95f492283a97aa",
+      "canonicalId": "dad-6d209d2b5c95f492283a97aa",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6d6306be2a88daced3583f5f",
+      "canonicalId": "dad-6d6306be2a88daced3583f5f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6d88bc711c4abc9309c0c49d",
+      "canonicalId": "dad-6d88bc711c4abc9309c0c49d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6dbde38afe98555dceaa45f8",
+      "canonicalId": "dad-6dbde38afe98555dceaa45f8",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6dffe3f046dbfc43354de078",
+      "canonicalId": "dad-6dffe3f046dbfc43354de078",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6e887b0b932b5665792ddc8c",
+      "canonicalId": "dad-6e887b0b932b5665792ddc8c",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6eb73943c3cda42983947158",
+      "canonicalId": "dad-6eb73943c3cda42983947158",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6ef8737f86b1ff98d96c5d27",
+      "canonicalId": "dad-6ef8737f86b1ff98d96c5d27",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6f23f1948fb75215d66fd079",
+      "canonicalId": "dad-6f23f1948fb75215d66fd079",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6f455f7baf9de89015ec3c8a",
+      "canonicalId": "dad-6f455f7baf9de89015ec3c8a",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6f4807cc8ba2fd4010aba5aa",
+      "canonicalId": "dad-6f4807cc8ba2fd4010aba5aa",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6fa95322ca85fadfae632c8c",
+      "canonicalId": "dad-6fa95322ca85fadfae632c8c",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6fc42d10c6c0b1873c78b929",
+      "canonicalId": "dad-6fc42d10c6c0b1873c78b929",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-6fe51e35685ace9dbfec4ccf",
+      "canonicalId": "dad-6fe51e35685ace9dbfec4ccf",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-7020acb0a1de8253e4a34be6",
+      "canonicalId": "dad-7020acb0a1de8253e4a34be6",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-704ba39d94ebcac4891afdb4",
+      "canonicalId": "dad-704ba39d94ebcac4891afdb4",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-711998bf676fa4765bd8b5cc",
+      "canonicalId": "dad-711998bf676fa4765bd8b5cc",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-716807c89036444592b0da17",
+      "canonicalId": "dad-716807c89036444592b0da17",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-716a960cb32c59f5795fa5cb",
+      "canonicalId": "dad-716a960cb32c59f5795fa5cb",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-718436db6e7b65cc66e8d95e",
+      "canonicalId": "dad-718436db6e7b65cc66e8d95e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-72300ac0d56240c523f85b03",
+      "canonicalId": "dad-72300ac0d56240c523f85b03",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-7250f68df0dbb192196ee13b",
+      "canonicalId": "dad-7250f68df0dbb192196ee13b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-729a62a1759e9876ee3f23f8",
+      "canonicalId": "dad-729a62a1759e9876ee3f23f8",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-72feee917850381a5d0e017b",
+      "canonicalId": "dad-72feee917850381a5d0e017b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-73112329e1c0ad48068da394",
+      "canonicalId": "dad-73112329e1c0ad48068da394",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-7337bf749b2e65eedb000ec1",
+      "canonicalId": "dad-7337bf749b2e65eedb000ec1",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-733edc2a81ae7c1a7f03795a",
+      "canonicalId": "dad-733edc2a81ae7c1a7f03795a",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-734fc15993936d434d380c8e",
+      "canonicalId": "dad-734fc15993936d434d380c8e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-736c11c076629e8c77ce6063",
+      "canonicalId": "dad-736c11c076629e8c77ce6063",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-73788d1f033b0f7e49d6c248",
+      "canonicalId": "dad-73788d1f033b0f7e49d6c248",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-73d48fc3ef40938a2b8546dc",
+      "canonicalId": "dad-73d48fc3ef40938a2b8546dc",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-73e5806ed42a9d40a346f0db",
+      "canonicalId": "dad-73e5806ed42a9d40a346f0db",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-742ac25adfdfdaab729030c0",
+      "canonicalId": "dad-742ac25adfdfdaab729030c0",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-743a525025f64c53512a0969",
+      "canonicalId": "dad-743a525025f64c53512a0969",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-746f4592aa8bb4b6a447c5e8",
+      "canonicalId": "dad-746f4592aa8bb4b6a447c5e8",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-7485139b78c32b7082f05a14",
+      "canonicalId": "dad-7485139b78c32b7082f05a14",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-749d440de94021cf39bd94e5",
+      "canonicalId": "dad-749d440de94021cf39bd94e5",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-74abc70cd9f162479f828e14",
+      "canonicalId": "dad-74abc70cd9f162479f828e14",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-751e15eb2a1fc1b010cd1146",
+      "canonicalId": "dad-751e15eb2a1fc1b010cd1146",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-756260cb353f78bd5f55e562",
+      "canonicalId": "dad-756260cb353f78bd5f55e562",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-75baa7548d86de08f99d9368",
+      "canonicalId": "dad-75baa7548d86de08f99d9368",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-75bdccfead001969031b719d",
+      "canonicalId": "dad-75bdccfead001969031b719d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-76269f6ce748e683937bd291",
+      "canonicalId": "dad-76269f6ce748e683937bd291",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-7654e9cde6880b4387dce9a3",
+      "canonicalId": "dad-7654e9cde6880b4387dce9a3",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-7683c8d69e73b2c2646cccbc",
+      "canonicalId": "dad-7683c8d69e73b2c2646cccbc",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-76abe90d11f7d70ce2ddf23c",
+      "canonicalId": "dad-76abe90d11f7d70ce2ddf23c",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-76acf1b0a797cfd7d97ec612",
+      "canonicalId": "dad-76acf1b0a797cfd7d97ec612",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-774c23dd863469f3cd671520",
+      "canonicalId": "dad-774c23dd863469f3cd671520",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-7753740f9e29a900c7338fb3",
+      "canonicalId": "dad-7753740f9e29a900c7338fb3",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-7776f9b9f54ef23a78a8fc73",
+      "canonicalId": "dad-7776f9b9f54ef23a78a8fc73",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-778874fe916aaf39e7100318",
+      "canonicalId": "dad-778874fe916aaf39e7100318",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-779d1aa8265385b5913989cb",
+      "canonicalId": "dad-779d1aa8265385b5913989cb",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-77b6a72698d16253512c1867",
+      "canonicalId": "dad-77b6a72698d16253512c1867",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-77e5b782e013ded20d0fcb16",
+      "canonicalId": "dad-77e5b782e013ded20d0fcb16",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-784bd698e7110f8902790cbe",
+      "canonicalId": "dad-784bd698e7110f8902790cbe",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-787907b255b87e29ad4393da",
+      "canonicalId": "dad-787907b255b87e29ad4393da",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-78d753ec408397bc8bd8506d",
+      "canonicalId": "dad-78d753ec408397bc8bd8506d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-797a30223c97e2ad50e6edf3",
+      "canonicalId": "dad-797a30223c97e2ad50e6edf3",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-797fa4c0a9308460f8934355",
+      "canonicalId": "dad-797fa4c0a9308460f8934355",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-7989982c40a6172507efedcc",
+      "canonicalId": "dad-7989982c40a6172507efedcc",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-79d46c60a0e0cf57c1ad8e0b",
+      "canonicalId": "dad-79d46c60a0e0cf57c1ad8e0b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-79e9ddbde8f7dd77ff8d0013",
+      "canonicalId": "dad-79e9ddbde8f7dd77ff8d0013",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-7a15768862125a64257244c6",
+      "canonicalId": "dad-7a15768862125a64257244c6",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-7a8eae81eda65ac00dc4041d",
+      "canonicalId": "dad-7a8eae81eda65ac00dc4041d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-7a95ad1da8a31a27592247e8",
+      "canonicalId": "dad-7a95ad1da8a31a27592247e8",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-7aef93c045eab805b7ad9f39",
+      "canonicalId": "dad-7aef93c045eab805b7ad9f39",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-7b3db1cd55e021da4d9fbae0",
+      "canonicalId": "dad-7b3db1cd55e021da4d9fbae0",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-7b74bd1d701fb5fa3a4a15d9",
+      "canonicalId": "dad-7b74bd1d701fb5fa3a4a15d9",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-7b990b6e07b9ce9582e30bba",
+      "canonicalId": "dad-7b990b6e07b9ce9582e30bba",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-7c06c4cc65923b2691c04072",
+      "canonicalId": "dad-7c06c4cc65923b2691c04072",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-7c1ae4e455de59f4087b9ca3",
+      "canonicalId": "dad-7c1ae4e455de59f4087b9ca3",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-7c611236bc24aaf9261613ef",
+      "canonicalId": "dad-7c611236bc24aaf9261613ef",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-7ca9ca63aa51f3395e76e5e3",
+      "canonicalId": "dad-7ca9ca63aa51f3395e76e5e3",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-7ce221af432fd03b18c3c604",
+      "canonicalId": "dad-7ce221af432fd03b18c3c604",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-7dabf056a42b4523eebad838",
+      "canonicalId": "dad-7dabf056a42b4523eebad838",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-7e03e0379dba54b620781618",
+      "canonicalId": "dad-7e03e0379dba54b620781618",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-7e1dcc65bfedc89f9e0d3de3",
+      "canonicalId": "dad-7e1dcc65bfedc89f9e0d3de3",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-7f43b70d3866aa63b8911929",
+      "canonicalId": "dad-7f43b70d3866aa63b8911929",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-7facb254fda00837c5d14f43",
+      "canonicalId": "dad-7facb254fda00837c5d14f43",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-7fd6d000b760894104c34f7f",
+      "canonicalId": "dad-7fd6d000b760894104c34f7f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-8036d2d3b2a9d5e2a1a1ef72",
+      "canonicalId": "dad-8036d2d3b2a9d5e2a1a1ef72",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-80fd5a77a8dd2870dfa6a8e1",
+      "canonicalId": "dad-80fd5a77a8dd2870dfa6a8e1",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-811ab9b3e59b95410a4edcd6",
+      "canonicalId": "dad-811ab9b3e59b95410a4edcd6",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-8160acf07ae766ef8d1b220c",
+      "canonicalId": "dad-8160acf07ae766ef8d1b220c",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-81844cbb01903f398c6f6232",
+      "canonicalId": "dad-81844cbb01903f398c6f6232",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-81c13e27c0d0681b033c1a0c",
+      "canonicalId": "dad-81c13e27c0d0681b033c1a0c",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-824f66e6ff9a7d13751a0cc6",
+      "canonicalId": "dad-824f66e6ff9a7d13751a0cc6",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-825d457d1c3f0236aa4fe930",
+      "canonicalId": "dad-825d457d1c3f0236aa4fe930",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-82926696e9d6f32f9989f25e",
+      "canonicalId": "dad-82926696e9d6f32f9989f25e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-82995c0711f3daeef9250e88",
+      "canonicalId": "dad-82995c0711f3daeef9250e88",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-83a5dd536591b33c5e00ca47",
+      "canonicalId": "dad-83a5dd536591b33c5e00ca47",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-83af9727eca7111524c0bb7b",
+      "canonicalId": "dad-83af9727eca7111524c0bb7b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-83e3d4e9eabc7249f5f99b7e",
+      "canonicalId": "dad-83e3d4e9eabc7249f5f99b7e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-83f6263a7b9df2c290cc63b1",
+      "canonicalId": "dad-83f6263a7b9df2c290cc63b1",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-840aea5b91f977a86a991048",
+      "canonicalId": "dad-840aea5b91f977a86a991048",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-84460f58f0167c2ad78e3bb2",
+      "canonicalId": "dad-84460f58f0167c2ad78e3bb2",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-84911a1a58612f59f6178bcd",
+      "canonicalId": "dad-84911a1a58612f59f6178bcd",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-849db6b54d3ea8c4ac3a1c34",
+      "canonicalId": "dad-849db6b54d3ea8c4ac3a1c34",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-851d9dcd0883c05acd259297",
+      "canonicalId": "dad-851d9dcd0883c05acd259297",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-854d763bbf96356b8bf1af9b",
+      "canonicalId": "dad-854d763bbf96356b8bf1af9b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-8556e4570475f6b6f692bcb7",
+      "canonicalId": "dad-8556e4570475f6b6f692bcb7",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-857f0829dc0a1e239b6b8bf7",
+      "canonicalId": "dad-857f0829dc0a1e239b6b8bf7",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-8586c88087c2ffbd8ea7264f",
+      "canonicalId": "dad-8586c88087c2ffbd8ea7264f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-859526ab2f8218a028bf8ece",
+      "canonicalId": "dad-859526ab2f8218a028bf8ece",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-85d43989a9626676175b8d81",
+      "canonicalId": "dad-85d43989a9626676175b8d81",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-8615f3eb8ef83e4836888860",
+      "canonicalId": "dad-8615f3eb8ef83e4836888860",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-863c4219cb4003576010af8c",
+      "canonicalId": "dad-863c4219cb4003576010af8c",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-86f786d38278306d50b9be6a",
+      "canonicalId": "dad-86f786d38278306d50b9be6a",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-871af0bfb7fd441581ea7125",
+      "canonicalId": "dad-871af0bfb7fd441581ea7125",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-87811f35faefe931a9bd1155",
+      "canonicalId": "dad-87811f35faefe931a9bd1155",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-878b11804a833ffd1f8a39ba",
+      "canonicalId": "dad-878b11804a833ffd1f8a39ba",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-878e3fb7c2831f576c31c6e6",
+      "canonicalId": "dad-878e3fb7c2831f576c31c6e6",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-87fd6191963121b9f460ca1e",
+      "canonicalId": "dad-87fd6191963121b9f460ca1e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-886e6cacca5a14d58ee67938",
+      "canonicalId": "dad-886e6cacca5a14d58ee67938",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-88fde65a1d63b314390e2069",
+      "canonicalId": "dad-88fde65a1d63b314390e2069",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-896c996e170663dc281b3540",
+      "canonicalId": "dad-896c996e170663dc281b3540",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-897301dc5fb93ccf6f3d087a",
+      "canonicalId": "dad-897301dc5fb93ccf6f3d087a",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-899e7d3b4105bd26894196f8",
+      "canonicalId": "dad-899e7d3b4105bd26894196f8",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-8a8b849e0b0f51fb99e0f87c",
+      "canonicalId": "dad-8a8b849e0b0f51fb99e0f87c",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-8b96c50749f7334b38cf8d3d",
+      "canonicalId": "dad-8b96c50749f7334b38cf8d3d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-8ba4c263063703a7f47eca7b",
+      "canonicalId": "dad-8ba4c263063703a7f47eca7b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-8c5e0380929227c6ed4c9a4e",
+      "canonicalId": "dad-8c5e0380929227c6ed4c9a4e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-8cd2d8f51c6148cac9a9cc92",
+      "canonicalId": "dad-8cd2d8f51c6148cac9a9cc92",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-8db7f675b5f41932cd0ee85c",
+      "canonicalId": "dad-8db7f675b5f41932cd0ee85c",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-8dbd7285ec86380535894bc6",
+      "canonicalId": "dad-8dbd7285ec86380535894bc6",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-8e4a6a971705be28e7200b50",
+      "canonicalId": "dad-8e4a6a971705be28e7200b50",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-8ec6f874a1640ba3d2958087",
+      "canonicalId": "dad-8ec6f874a1640ba3d2958087",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-8f54951951aa6bf02b837010",
+      "canonicalId": "dad-8f54951951aa6bf02b837010",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-8f59902c2df4dfd7a7f456d8",
+      "canonicalId": "dad-8f59902c2df4dfd7a7f456d8",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-8f7e0b053aa62651ee0eaf10",
+      "canonicalId": "dad-8f7e0b053aa62651ee0eaf10",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-8ffc8467aa9f0f16abc6ac5f",
+      "canonicalId": "dad-8ffc8467aa9f0f16abc6ac5f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-90b19f61b111c0fd110fcbdd",
+      "canonicalId": "dad-90b19f61b111c0fd110fcbdd",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-915600275e048d6fc1006ed1",
+      "canonicalId": "dad-915600275e048d6fc1006ed1",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-916d8fbdc9edff6b662944b0",
+      "canonicalId": "dad-916d8fbdc9edff6b662944b0",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-922b352f76ef97c942733756",
+      "canonicalId": "dad-922b352f76ef97c942733756",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-926feadc2724599268ae45e6",
+      "canonicalId": "dad-926feadc2724599268ae45e6",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-92c8b41f473a7a8ecfd97a40",
+      "canonicalId": "dad-92c8b41f473a7a8ecfd97a40",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-92ff7b0e1ca88d1058c0e407",
+      "canonicalId": "dad-92ff7b0e1ca88d1058c0e407",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-935eae91af57c6568f7cb278",
+      "canonicalId": "dad-935eae91af57c6568f7cb278",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-93de665c78865bef0e4aeeeb",
+      "canonicalId": "dad-93de665c78865bef0e4aeeeb",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-9447a87dd1cf87ea252608aa",
+      "canonicalId": "dad-9447a87dd1cf87ea252608aa",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-9479c1f93156304bc30e3903",
+      "canonicalId": "dad-9479c1f93156304bc30e3903",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-94bad37eaf9dc6853b05e877",
+      "canonicalId": "dad-94bad37eaf9dc6853b05e877",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-94d722e02004eb1ea81fd7ca",
+      "canonicalId": "dad-94d722e02004eb1ea81fd7ca",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-953eb10f9457536cfb93317e",
+      "canonicalId": "dad-953eb10f9457536cfb93317e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-9570703a4e334a3a97e10f79",
+      "canonicalId": "dad-9570703a4e334a3a97e10f79",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-9608b7a208534b3d0f5a220e",
+      "canonicalId": "dad-9608b7a208534b3d0f5a220e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-9638d60f11addd45b4b5291a",
+      "canonicalId": "dad-3d80ae9a86b39f7cb7974491",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-96721a90bf6b91232e0bd4d9",
+      "canonicalId": "dad-96721a90bf6b91232e0bd4d9",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-96738bb38d1707c5794552f5",
+      "canonicalId": "dad-96738bb38d1707c5794552f5",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-9678ccb588762ba3ae05489d",
+      "canonicalId": "dad-9678ccb588762ba3ae05489d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-96b432faecd3cc82e3fff296",
+      "canonicalId": "dad-96b432faecd3cc82e3fff296",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-970fe11f17b8226d704939c8",
+      "canonicalId": "dad-970fe11f17b8226d704939c8",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-97240fa9935d8b5048a95822",
+      "canonicalId": "dad-97240fa9935d8b5048a95822",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-972cda186ed86ae8d076e09f",
+      "canonicalId": "dad-972cda186ed86ae8d076e09f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-979787c46d395ba984c10f6b",
+      "canonicalId": "dad-979787c46d395ba984c10f6b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-979dbe29c2fd02b4b0f42710",
+      "canonicalId": "dad-979dbe29c2fd02b4b0f42710",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-9801362009b7f84828cebbd9",
+      "canonicalId": "dad-9801362009b7f84828cebbd9",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-98c63ce503ee526aaa2c39d6",
+      "canonicalId": "dad-98c63ce503ee526aaa2c39d6",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-99b176084cea14bfc7e12024",
+      "canonicalId": "dad-99b176084cea14bfc7e12024",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-99b5876d626088bb9d65143c",
+      "canonicalId": "dad-99b5876d626088bb9d65143c",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-99caaab9b118e7c945327b02",
+      "canonicalId": "dad-99caaab9b118e7c945327b02",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-99e359a6a158bb22484f8f87",
+      "canonicalId": "dad-99e359a6a158bb22484f8f87",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-9a1ae892d0c8513d31de7be8",
+      "canonicalId": "dad-9a1ae892d0c8513d31de7be8",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-9a47527c7025bdc9f0fd5b1a",
+      "canonicalId": "dad-9a47527c7025bdc9f0fd5b1a",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-9ac801b9118d8281653d35e9",
+      "canonicalId": "dad-9ac801b9118d8281653d35e9",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-9ae7f3b09a83ceda579c3868",
+      "canonicalId": "dad-9ae7f3b09a83ceda579c3868",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-9bc7de3a0a6008ab4cf4652f",
+      "canonicalId": "dad-9bc7de3a0a6008ab4cf4652f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-9bdf01c775d6dabf074dee6e",
+      "canonicalId": "dad-00c8169b19744be3deb5869d",
+      "state": "existing_output_linked"
+    },
+    {
+      "sourceJokeId": "dad-9cee5beb84a7c17865c83743",
+      "canonicalId": "dad-9cee5beb84a7c17865c83743",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-9dcfcc864c1479e267948a33",
+      "canonicalId": "dad-9dcfcc864c1479e267948a33",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-9de595c7f86d221c2948e4fb",
+      "canonicalId": "dad-9de595c7f86d221c2948e4fb",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-9e4494d0d7a164ec536efb40",
+      "canonicalId": "dad-9e4494d0d7a164ec536efb40",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-9e952af3180222dd84ce02d5",
+      "canonicalId": "dad-9e952af3180222dd84ce02d5",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-9f28c94a3236b1b5a26598f4",
+      "canonicalId": "dad-9f28c94a3236b1b5a26598f4",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-9f448627fc97d9f2fe2e934b",
+      "canonicalId": "dad-9f448627fc97d9f2fe2e934b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-9f575a840e43e5ffc810c1eb",
+      "canonicalId": "dad-9f575a840e43e5ffc810c1eb",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-9f6ef470f9d237000acdb6b8",
+      "canonicalId": "dad-9f6ef470f9d237000acdb6b8",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a02c4babb7a3393ec0d0dd3c",
+      "canonicalId": "dad-a02c4babb7a3393ec0d0dd3c",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a036bc6170812ccd7b060912",
+      "canonicalId": "dad-a036bc6170812ccd7b060912",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a05db1f62412f793218a8388",
+      "canonicalId": "dad-a05db1f62412f793218a8388",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a0ddd7f78a4e837f2fb1885d",
+      "canonicalId": "dad-a0ddd7f78a4e837f2fb1885d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a0e80739c4301d53ca3e822c",
+      "canonicalId": "dad-a0e80739c4301d53ca3e822c",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a10a5f6140b826b16dc7c5ac",
+      "canonicalId": "dad-a10a5f6140b826b16dc7c5ac",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a157cb80dfb34e86cdb84937",
+      "canonicalId": "dad-a157cb80dfb34e86cdb84937",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a21b6c3d4b5d7f89d7d69a2c",
+      "canonicalId": "dad-a21b6c3d4b5d7f89d7d69a2c",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a28c6e4ebfe497c05bb470ba",
+      "canonicalId": "dad-a28c6e4ebfe497c05bb470ba",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a295c94fe9ff5e2079d04c49",
+      "canonicalId": "dad-a295c94fe9ff5e2079d04c49",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a29fdab8cd3b750fd299e78f",
+      "canonicalId": "dad-a29fdab8cd3b750fd299e78f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a2b45b6049ac92389ac04952",
+      "canonicalId": "dad-a2b45b6049ac92389ac04952",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a2d4321ae48810c2e9761175",
+      "canonicalId": "dad-a2d4321ae48810c2e9761175",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a2fae564d1a7e8b43aa25c99",
+      "canonicalId": "dad-a2fae564d1a7e8b43aa25c99",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a33064a9b3b638f1bd1197d4",
+      "canonicalId": "dad-a33064a9b3b638f1bd1197d4",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a37c976ab799de6e1409c28a",
+      "canonicalId": "dad-a37c976ab799de6e1409c28a",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a3f18b6688f686b5d70972e0",
+      "canonicalId": "dad-a3f18b6688f686b5d70972e0",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a433dbb600611de55a52fdd9",
+      "canonicalId": "dad-a433dbb600611de55a52fdd9",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a4f57ee8887d2477f2e2f52e",
+      "canonicalId": "dad-a4f57ee8887d2477f2e2f52e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a60e719889ee29bc8636cdd6",
+      "canonicalId": "dad-a60e719889ee29bc8636cdd6",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a623c0c1e66192c0012f0d7a",
+      "canonicalId": "dad-a623c0c1e66192c0012f0d7a",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a62911217baf90fa60ee395e",
+      "canonicalId": "dad-a62911217baf90fa60ee395e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a646b56e13d942baeff34d07",
+      "canonicalId": "dad-a646b56e13d942baeff34d07",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a6ddb061a3bed1f1cfac75c4",
+      "canonicalId": "dad-a6ddb061a3bed1f1cfac75c4",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a74b17899991dbc650d23a0f",
+      "canonicalId": "dad-a74b17899991dbc650d23a0f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a8136e13a6b8ea84507476d2",
+      "canonicalId": "dad-a8136e13a6b8ea84507476d2",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a81d5ee9743722f79c20fb59",
+      "canonicalId": "dad-a81d5ee9743722f79c20fb59",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a89390ea56dd07efeed0f568",
+      "canonicalId": "dad-a89390ea56dd07efeed0f568",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a90ad3f0d4922581e5547caf",
+      "canonicalId": "dad-a90ad3f0d4922581e5547caf",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a985bba0546975b030b3e0f7",
+      "canonicalId": "dad-a985bba0546975b030b3e0f7",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a9e1877049fb7b0586db9c53",
+      "canonicalId": "dad-a9e1877049fb7b0586db9c53",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-a9f95d124c4d8a4a21656e57",
+      "canonicalId": "dad-a9f95d124c4d8a4a21656e57",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-aab85079b7ea00e43ca97487",
+      "canonicalId": "dad-aab85079b7ea00e43ca97487",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ab27e2d9b6474f7db2a9ac4f",
+      "canonicalId": "dad-ab27e2d9b6474f7db2a9ac4f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-abc2a5202a8ab086f8197568",
+      "canonicalId": "dad-abc2a5202a8ab086f8197568",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-abe6b5215a9b619f22ff0f56",
+      "canonicalId": "dad-abe6b5215a9b619f22ff0f56",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ac1c5d70d0dd1bbcdb9f7242",
+      "canonicalId": "dad-ac1c5d70d0dd1bbcdb9f7242",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ac4fc553f9e638abe7039a9d",
+      "canonicalId": "dad-ac4fc553f9e638abe7039a9d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-acdc4ecb81a110e83e874025",
+      "canonicalId": "dad-acdc4ecb81a110e83e874025",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ace9e9b73586464cf78f397c",
+      "canonicalId": "dad-ace9e9b73586464cf78f397c",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-acffc4be805eff93952c75f0",
+      "canonicalId": "dad-acffc4be805eff93952c75f0",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ad2ae04aaaf718ff3a66c0f2",
+      "canonicalId": "dad-ad2ae04aaaf718ff3a66c0f2",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ad501912a1c3fd792e6da25a",
+      "canonicalId": "dad-ad501912a1c3fd792e6da25a",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ad7009bba5411a54b65c4150",
+      "canonicalId": "dad-ad7009bba5411a54b65c4150",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ad7214f8af8f4ffba2630c3e",
+      "canonicalId": "dad-ad7214f8af8f4ffba2630c3e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-adab613c0da7a632a8c843cd",
+      "canonicalId": "dad-adab613c0da7a632a8c843cd",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-adb0ff958b84f9869c2e4d06",
+      "canonicalId": "dad-adb0ff958b84f9869c2e4d06",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-adcd9153f378ccb205036708",
+      "canonicalId": "dad-adcd9153f378ccb205036708",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-adcf5304cafe322d6b2a6e3e",
+      "canonicalId": "dad-adcf5304cafe322d6b2a6e3e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ae644e9a51b4bca299fd9865",
+      "canonicalId": "dad-ae644e9a51b4bca299fd9865",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ae9a82957556dab306df81af",
+      "canonicalId": "dad-ae9a82957556dab306df81af",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-aea3b855b946428057b7615a",
+      "canonicalId": "dad-aea3b855b946428057b7615a",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-af9640e036381122071d1967",
+      "canonicalId": "dad-af9640e036381122071d1967",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-aff1e43307d75c12f5b295aa",
+      "canonicalId": "dad-171aa00d3855559fa96e12bc",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b06fa8eaddc953b8a4eefcc9",
+      "canonicalId": "dad-b06fa8eaddc953b8a4eefcc9",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b088bb14690a292819f98ab1",
+      "canonicalId": "dad-b088bb14690a292819f98ab1",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b0f367965b183c96d6d92428",
+      "canonicalId": "dad-b0f367965b183c96d6d92428",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b211f67aa92a9ec24aec8371",
+      "canonicalId": "dad-b211f67aa92a9ec24aec8371",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b229c8f05effa7d28bacf323",
+      "canonicalId": "dad-b229c8f05effa7d28bacf323",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b271c0fd3cffab80bbe5972e",
+      "canonicalId": "dad-b271c0fd3cffab80bbe5972e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b2fed8e544fad8aaaa65135d",
+      "canonicalId": "dad-b2fed8e544fad8aaaa65135d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b310fc083464a0c4d5c8393e",
+      "canonicalId": "dad-b310fc083464a0c4d5c8393e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b3190396e924d8630b7e6a46",
+      "canonicalId": "dad-b3190396e924d8630b7e6a46",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b33bfd3c726f7a5c1c82f3f5",
+      "canonicalId": "dad-b33bfd3c726f7a5c1c82f3f5",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b3b17a99b71f0397d29aa8d6",
+      "canonicalId": "dad-b3b17a99b71f0397d29aa8d6",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b3d23099b416b1c8673009bf",
+      "canonicalId": "dad-b3d23099b416b1c8673009bf",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b3e63465b52b29ef35dd9bae",
+      "canonicalId": "dad-b3e63465b52b29ef35dd9bae",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b4b4c3e38767504457536ad4",
+      "canonicalId": "dad-b4b4c3e38767504457536ad4",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b4c6cd76870fa64951e024f8",
+      "canonicalId": "dad-b4c6cd76870fa64951e024f8",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b4d8a56b48be89444afffbd7",
+      "canonicalId": "dad-b4d8a56b48be89444afffbd7",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b4dec6ac13d38debd79ed751",
+      "canonicalId": "dad-b4dec6ac13d38debd79ed751",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b5af8c889c3a60bcf8ea4fe0",
+      "canonicalId": "dad-b5af8c889c3a60bcf8ea4fe0",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b5dae72782a7fcdd9ad89711",
+      "canonicalId": "dad-b5dae72782a7fcdd9ad89711",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b638cc001876b1a770f3aad2",
+      "canonicalId": "dad-b638cc001876b1a770f3aad2",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b6fd066389011b64b6e02330",
+      "canonicalId": "dad-b6fd066389011b64b6e02330",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b7bf363453741af66477144a",
+      "canonicalId": "dad-b7bf363453741af66477144a",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b7d063ca86b23d93ceff797a",
+      "canonicalId": "dad-b7d063ca86b23d93ceff797a",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b7d38bd1e5fabd552c965ad8",
+      "canonicalId": "dad-b7d38bd1e5fabd552c965ad8",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b843588cff0617e08a9064ae",
+      "canonicalId": "dad-b843588cff0617e08a9064ae",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b8622333d6e281b4be425e8e",
+      "canonicalId": "dad-b8622333d6e281b4be425e8e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b88be6ac55d1b865873aebff",
+      "canonicalId": "dad-b88be6ac55d1b865873aebff",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b8915080c2b8a9e8caaf3822",
+      "canonicalId": "dad-b8915080c2b8a9e8caaf3822",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b89ee0d74beebcd61a5c019f",
+      "canonicalId": "dad-b89ee0d74beebcd61a5c019f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b8e63d585e8cb42d7ac172de",
+      "canonicalId": "dad-b8e63d585e8cb42d7ac172de",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-b96cef3b66c04e83bdad74a0",
+      "canonicalId": "dad-b96cef3b66c04e83bdad74a0",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ba51e94046e2bc5f0cb1aa31",
+      "canonicalId": "dad-ba51e94046e2bc5f0cb1aa31",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ba5482f07008da26d5b5249b",
+      "canonicalId": "dad-ba5482f07008da26d5b5249b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-babbd82701cc3f3dcf18b592",
+      "canonicalId": "dad-babbd82701cc3f3dcf18b592",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-bafbd4f00a1230875397a765",
+      "canonicalId": "dad-bafbd4f00a1230875397a765",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-bbc66408eb88e90b0e28bd46",
+      "canonicalId": "dad-bbc66408eb88e90b0e28bd46",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-bbc9f23ef8e25347ff506fb0",
+      "canonicalId": "dad-bbc9f23ef8e25347ff506fb0",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-bc19524adabb1fe5b1f6c5e7",
+      "canonicalId": "dad-bc19524adabb1fe5b1f6c5e7",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-bc3b8bbbf78b4a7dd8b9d658",
+      "canonicalId": "dad-bc3b8bbbf78b4a7dd8b9d658",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-bd25edc2fe5751b2ce3992a0",
+      "canonicalId": "dad-bd25edc2fe5751b2ce3992a0",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-bef333ef82fceb1d094037b7",
+      "canonicalId": "dad-bef333ef82fceb1d094037b7",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-bf8e865f88a93620ef3bba41",
+      "canonicalId": "dad-bf8e865f88a93620ef3bba41",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-bfd65d5ccb8baebce570de58",
+      "canonicalId": "dad-bfd65d5ccb8baebce570de58",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-bfd850c9d901e3e1fee72a88",
+      "canonicalId": "dad-bfd850c9d901e3e1fee72a88",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c015c0b2a02d4fbc6b5c1e20",
+      "canonicalId": "dad-c015c0b2a02d4fbc6b5c1e20",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c01674d9d83834640533da03",
+      "canonicalId": "dad-c01674d9d83834640533da03",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c08b0d91660bee7e4ad2d245",
+      "canonicalId": "dad-c08b0d91660bee7e4ad2d245",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c0d17bceff67b91d6f4b1827",
+      "canonicalId": "dad-c0d17bceff67b91d6f4b1827",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c0dcbc6665a92deda5319f27",
+      "canonicalId": "dad-c0dcbc6665a92deda5319f27",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c153114cead712b913eb072f",
+      "canonicalId": "dad-c153114cead712b913eb072f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c15aba2641180c7920e3fa66",
+      "canonicalId": "dad-c15aba2641180c7920e3fa66",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c15ce9039e593675dcc4a834",
+      "canonicalId": "dad-c15ce9039e593675dcc4a834",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c1ebef207c0c5e7c29c9dd83",
+      "canonicalId": "dad-c1ebef207c0c5e7c29c9dd83",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c2e9f3864c5b441b35001e10",
+      "canonicalId": "dad-c2e9f3864c5b441b35001e10",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c31d6832330121e64adaf3d0",
+      "canonicalId": "dad-c31d6832330121e64adaf3d0",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c3ac9a0216f4392e6663e1c5",
+      "canonicalId": "dad-c3ac9a0216f4392e6663e1c5",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c449ac5d731487425ed85cb7",
+      "canonicalId": "dad-c449ac5d731487425ed85cb7",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c4c42108d93ba8d15e104207",
+      "canonicalId": "dad-c4c42108d93ba8d15e104207",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c562b714c293ab947f8d0e03",
+      "canonicalId": "dad-c562b714c293ab947f8d0e03",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c5c317890479a0d957e0bd3b",
+      "canonicalId": "dad-c5c317890479a0d957e0bd3b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c60a142721a0081715eb9f73",
+      "canonicalId": "dad-c60a142721a0081715eb9f73",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c6baba5b5a793c4f6687b1bb",
+      "canonicalId": "dad-c6baba5b5a793c4f6687b1bb",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c6c6ab27d355b90ee64c9feb",
+      "canonicalId": "dad-c6c6ab27d355b90ee64c9feb",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c6d69f9dd0ce250f55204fb0",
+      "canonicalId": "dad-c6d69f9dd0ce250f55204fb0",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c77a0d91e26695442203ef4d",
+      "canonicalId": "dad-c77a0d91e26695442203ef4d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c7c660ce4bda7c44a0fb7e6f",
+      "canonicalId": "dad-c7c660ce4bda7c44a0fb7e6f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c7c740141d4d83159b0d3000",
+      "canonicalId": "dad-c7c740141d4d83159b0d3000",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c7c978e1e1eb613832901e5f",
+      "canonicalId": "dad-c7c978e1e1eb613832901e5f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c7d29a2fe898779a2239e14c",
+      "canonicalId": "dad-c7d29a2fe898779a2239e14c",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c7fb7476e34887b83c15222b",
+      "canonicalId": "dad-c7fb7476e34887b83c15222b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c838e0b5f69f782e2d800bc5",
+      "canonicalId": "dad-c838e0b5f69f782e2d800bc5",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c8953a9d33ba261bf3fc8d15",
+      "canonicalId": "dad-c8953a9d33ba261bf3fc8d15",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c90888658786aef99b1db74e",
+      "canonicalId": "dad-c90888658786aef99b1db74e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c980ef3feee26b17dd894743",
+      "canonicalId": "dad-c980ef3feee26b17dd894743",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-c9d9bed35bef418ac471bad0",
+      "canonicalId": "dad-c9d9bed35bef418ac471bad0",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ca01410f42851fb1167ad9ed",
+      "canonicalId": "dad-ca01410f42851fb1167ad9ed",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ca22071bafd5a57a82a138e0",
+      "canonicalId": "dad-ca22071bafd5a57a82a138e0",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ca402f2d2258239e7fe7d854",
+      "canonicalId": "dad-ca402f2d2258239e7fe7d854",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ca8bdda901955f65b9db3949",
+      "canonicalId": "dad-ca8bdda901955f65b9db3949",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ca90dba5befdc103e2c11a44",
+      "canonicalId": "dad-ca90dba5befdc103e2c11a44",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-cabb29e7f4856259d63ba63e",
+      "canonicalId": "dad-cabb29e7f4856259d63ba63e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-caf7898942324f748437eb50",
+      "canonicalId": "dad-caf7898942324f748437eb50",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-cb01121f361b50e36eccc6a8",
+      "canonicalId": "dad-cb01121f361b50e36eccc6a8",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-cb128a5baec5987bf0c63056",
+      "canonicalId": "dad-cb128a5baec5987bf0c63056",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-cb3e3182147df30e33db60df",
+      "canonicalId": "dad-cb3e3182147df30e33db60df",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-cb506e19a4060a3ff6e018b4",
+      "canonicalId": "dad-cb506e19a4060a3ff6e018b4",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-cbb35503433b86d63522c42d",
+      "canonicalId": "dad-cbb35503433b86d63522c42d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-cbd052e44995b5d000197c9e",
+      "canonicalId": "dad-cbd052e44995b5d000197c9e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-cc1e9775a5ea82298fc93c4a",
+      "canonicalId": "dad-cc1e9775a5ea82298fc93c4a",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-cc8c8867bcba66519b3a77ef",
+      "canonicalId": "dad-cc8c8867bcba66519b3a77ef",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-cd045e53987c41b18570ee92",
+      "canonicalId": "dad-cd045e53987c41b18570ee92",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-cd3513e5b4b611b791830659",
+      "canonicalId": "dad-cd3513e5b4b611b791830659",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-cd673ab1bb698f89cfaff1e5",
+      "canonicalId": "dad-cd673ab1bb698f89cfaff1e5",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-cdea783e6c2bc47f7302d7da",
+      "canonicalId": "dad-cdea783e6c2bc47f7302d7da",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-cdf9e1badfc7dd85ed52adc2",
+      "canonicalId": "dad-cdf9e1badfc7dd85ed52adc2",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ce5d606e5af93697b1524872",
+      "canonicalId": "dad-ce5d606e5af93697b1524872",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-cf4fb4f19061baa52f6a961e",
+      "canonicalId": "dad-cf4fb4f19061baa52f6a961e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-cf5a582c97c555b5c069522a",
+      "canonicalId": "dad-cf5a582c97c555b5c069522a",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-cfb341d1f7cc9ac5a02c62ff",
+      "canonicalId": "dad-cfb341d1f7cc9ac5a02c62ff",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-cfb9c77c1c1d879f2a22b475",
+      "canonicalId": "dad-cfb9c77c1c1d879f2a22b475",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d01487e3e8968d4d98941fc2",
+      "canonicalId": "dad-d01487e3e8968d4d98941fc2",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d0156fc3cd6f3cbd3eddf341",
+      "canonicalId": "dad-d0156fc3cd6f3cbd3eddf341",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d057491b2a2d8ebed2781945",
+      "canonicalId": "dad-d057491b2a2d8ebed2781945",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d095207b5be5ae0d55395c08",
+      "canonicalId": "dad-d095207b5be5ae0d55395c08",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d0bc7984887a27b0c339a362",
+      "canonicalId": "dad-d0bc7984887a27b0c339a362",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d0c4f233efc34a4255059d14",
+      "canonicalId": "dad-d0c4f233efc34a4255059d14",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d15d6e22fb3147c747ac7a6d",
+      "canonicalId": "dad-d15d6e22fb3147c747ac7a6d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d1610664598b98fd396e744a",
+      "canonicalId": "dad-d1610664598b98fd396e744a",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d16c788e4c8d004826a799ce",
+      "canonicalId": "dad-d16c788e4c8d004826a799ce",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d2241b01ce23ac32a4dfcdc3",
+      "canonicalId": "dad-d2241b01ce23ac32a4dfcdc3",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d266624f933b1428487ceef1",
+      "canonicalId": "dad-d266624f933b1428487ceef1",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d295e6b998e0f24191e89a06",
+      "canonicalId": "dad-d295e6b998e0f24191e89a06",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d2a9bd4088db8763dedec9f2",
+      "canonicalId": "dad-d2a9bd4088db8763dedec9f2",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d2ddcccf7db66185c688781c",
+      "canonicalId": "dad-d2ddcccf7db66185c688781c",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d384b902fa75f241e8dc28f8",
+      "canonicalId": "dad-d384b902fa75f241e8dc28f8",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d3b0bb6c01e3dc53f02d30f8",
+      "canonicalId": "dad-d3b0bb6c01e3dc53f02d30f8",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d42d0494152ab9883d7fb77b",
+      "canonicalId": "dad-d42d0494152ab9883d7fb77b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d489d66a85c2b166ded74575",
+      "canonicalId": "dad-d489d66a85c2b166ded74575",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d4b2a7b1323ee9d15561a652",
+      "canonicalId": "dad-d4b2a7b1323ee9d15561a652",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d4d3cc0a9ca346c26a06a1f5",
+      "canonicalId": "dad-d4d3cc0a9ca346c26a06a1f5",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d4f8d3451acc0788462d0b76",
+      "canonicalId": "dad-d4f8d3451acc0788462d0b76",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d54d00a80a604246c3106e1c",
+      "canonicalId": "dad-d54d00a80a604246c3106e1c",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d5e4a559aee5dfe347d43801",
+      "canonicalId": "dad-d5e4a559aee5dfe347d43801",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d5e5b46b2e7ad0dbcb3f238b",
+      "canonicalId": "dad-d5e5b46b2e7ad0dbcb3f238b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d63fb837608a064c70bac81f",
+      "canonicalId": "dad-d63fb837608a064c70bac81f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d6f90da753ae98147b4624bf",
+      "canonicalId": "dad-d6f90da753ae98147b4624bf",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d6fffbd9db6b36ec36e8c19f",
+      "canonicalId": "dad-d6fffbd9db6b36ec36e8c19f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d81b14b018f3a30ad1482a17",
+      "canonicalId": "dad-3d80ae9a86b39f7cb7974491",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d86ec8c21a30c17fdae106ff",
+      "canonicalId": "dad-d86ec8c21a30c17fdae106ff",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d8977448630d623b502538e4",
+      "canonicalId": "dad-d8977448630d623b502538e4",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d898589e0593af882ba15b80",
+      "canonicalId": "dad-d898589e0593af882ba15b80",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d89afc4c0facad3c8310c817",
+      "canonicalId": "dad-d89afc4c0facad3c8310c817",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d89ec5e58405d206f44877a1",
+      "canonicalId": "dad-d89ec5e58405d206f44877a1",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d8a9912496237dca9ebbe8c1",
+      "canonicalId": "dad-d8a9912496237dca9ebbe8c1",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d8aa295c14dbbdfe027be293",
+      "canonicalId": "dad-d8aa295c14dbbdfe027be293",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d8aa963a76723397e547d5f6",
+      "canonicalId": "dad-d8aa963a76723397e547d5f6",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d8e458824d8c8716b6d0f1b3",
+      "canonicalId": "dad-d8e458824d8c8716b6d0f1b3",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d9307e8d040ba01b1a51c9ca",
+      "canonicalId": "dad-d9307e8d040ba01b1a51c9ca",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d94c44a12ddf13d310c88db2",
+      "canonicalId": "dad-d94c44a12ddf13d310c88db2",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d9630cc2d8506eed5203f28c",
+      "canonicalId": "dad-d9630cc2d8506eed5203f28c",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d9bb56b658223eaef5c7740e",
+      "canonicalId": "dad-d9bb56b658223eaef5c7740e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-d9e458751386b23793f8488c",
+      "canonicalId": "dad-d9e458751386b23793f8488c",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-da0d799e4cd30d3a8c89d442",
+      "canonicalId": "dad-da0d799e4cd30d3a8c89d442",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-da4149deb7b1040f3ef17be3",
+      "canonicalId": "dad-da4149deb7b1040f3ef17be3",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-dacb64a6de24193e9036afa0",
+      "canonicalId": "dad-dacb64a6de24193e9036afa0",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-db067cb537adf2754d386ece",
+      "canonicalId": "dad-db067cb537adf2754d386ece",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-db0e0a990ba3deeffad3df32",
+      "canonicalId": "dad-db0e0a990ba3deeffad3df32",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-dc4397be940e632fd97ad8aa",
+      "canonicalId": "dad-dc4397be940e632fd97ad8aa",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-dc44402d0d7f70870f832667",
+      "canonicalId": "dad-dc44402d0d7f70870f832667",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-dc8df710e876dd3d1868648f",
+      "canonicalId": "dad-dc8df710e876dd3d1868648f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-dcea5689a4c02457064dc338",
+      "canonicalId": "dad-dcea5689a4c02457064dc338",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-dd0f07572b1c5440faee3676",
+      "canonicalId": "dad-dd0f07572b1c5440faee3676",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-dd14fc80394529158f53ae4a",
+      "canonicalId": "dad-dd14fc80394529158f53ae4a",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-dd387123d863c039c10b4610",
+      "canonicalId": "dad-dd387123d863c039c10b4610",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-dd3af5b68c8914c9af222ac3",
+      "canonicalId": "dad-dd3af5b68c8914c9af222ac3",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-dd7c78485d82538ba07b7383",
+      "canonicalId": "dad-dd7c78485d82538ba07b7383",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-dd9a5f384bf630fdd4e78187",
+      "canonicalId": "dad-dd9a5f384bf630fdd4e78187",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-de0caf09a88611b23a606ddf",
+      "canonicalId": "dad-de0caf09a88611b23a606ddf",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-de4cd13d9e4fba4e54cb03ea",
+      "canonicalId": "dad-de4cd13d9e4fba4e54cb03ea",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-de618f74414a715d35f3be3f",
+      "canonicalId": "dad-de618f74414a715d35f3be3f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-de6afadcad61566c99e7c038",
+      "canonicalId": "dad-de6afadcad61566c99e7c038",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-deffbf4a658fa9d4fd7e1cb5",
+      "canonicalId": "dad-deffbf4a658fa9d4fd7e1cb5",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-df3250f98b575da0f059e670",
+      "canonicalId": "dad-df3250f98b575da0f059e670",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-df40317f551c4e6d940caed1",
+      "canonicalId": "dad-df40317f551c4e6d940caed1",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e04a0ae79a83fa9def3cc2e8",
+      "canonicalId": "dad-e04a0ae79a83fa9def3cc2e8",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e0bcbb525f99e1c447c79fe9",
+      "canonicalId": "dad-e0bcbb525f99e1c447c79fe9",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e11a6c867c6f99341af3243c",
+      "canonicalId": "dad-e11a6c867c6f99341af3243c",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e1a815e7add5761cf154db7d",
+      "canonicalId": "dad-e1a815e7add5761cf154db7d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e1ad8a28721c0ad91f926d6f",
+      "canonicalId": "dad-e1ad8a28721c0ad91f926d6f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e1c4a31e2b954f74432481c9",
+      "canonicalId": "dad-e1c4a31e2b954f74432481c9",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e211bf2458aba61bcd67ce2c",
+      "canonicalId": "dad-e211bf2458aba61bcd67ce2c",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e2d7a1765c50ec006bebf141",
+      "canonicalId": "dad-e2d7a1765c50ec006bebf141",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e2f8c12d357a8dd6010ee6b1",
+      "canonicalId": "dad-e2f8c12d357a8dd6010ee6b1",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e32c769068ac98306afd2a03",
+      "canonicalId": "dad-e32c769068ac98306afd2a03",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e33111b43a76e73732e74184",
+      "canonicalId": "dad-e33111b43a76e73732e74184",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e3c815321bb426f73af6ae43",
+      "canonicalId": "dad-e3c815321bb426f73af6ae43",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e4244301a9f3c5d191fdeb41",
+      "canonicalId": "dad-e4244301a9f3c5d191fdeb41",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e45d8749853b8f7fcf67109d",
+      "canonicalId": "dad-e45d8749853b8f7fcf67109d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e47d1414c5a471bca1c23acd",
+      "canonicalId": "dad-e47d1414c5a471bca1c23acd",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e4acd36858a5a152c9c09fd0",
+      "canonicalId": "dad-e4acd36858a5a152c9c09fd0",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e4adb99f5b4c1acd82460683",
+      "canonicalId": "dad-e4adb99f5b4c1acd82460683",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e4bd2589ed2aff974039a007",
+      "canonicalId": "dad-e4bd2589ed2aff974039a007",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e550b7ddb0e5f8a535d1a114",
+      "canonicalId": "dad-e550b7ddb0e5f8a535d1a114",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e5c7890f8fc424e032d447a7",
+      "canonicalId": "dad-e5c7890f8fc424e032d447a7",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e5ca17f18a0e132933018078",
+      "canonicalId": "dad-e5ca17f18a0e132933018078",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e6419bd903b938fa7af4caf4",
+      "canonicalId": "dad-e6419bd903b938fa7af4caf4",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e65a7cfff3774337ab6da4bd",
+      "canonicalId": "dad-e65a7cfff3774337ab6da4bd",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e661b3aa2334cb0dec69eeb6",
+      "canonicalId": "dad-e661b3aa2334cb0dec69eeb6",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e6c6950713377129cb4eddab",
+      "canonicalId": "dad-e6c6950713377129cb4eddab",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e6f04ce53ebfb1255c7e17bb",
+      "canonicalId": "dad-e6f04ce53ebfb1255c7e17bb",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e701f04a93d1f72e76b74e43",
+      "canonicalId": "dad-e701f04a93d1f72e76b74e43",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e70cca39ff6de38bbe9e943e",
+      "canonicalId": "dad-e70cca39ff6de38bbe9e943e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e7a8169ed074c669b70414be",
+      "canonicalId": "dad-e7a8169ed074c669b70414be",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e7dd38d7889fa59d3161f113",
+      "canonicalId": "dad-e7dd38d7889fa59d3161f113",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e7ee3ca76dc3b2df7be0343a",
+      "canonicalId": "dad-e7ee3ca76dc3b2df7be0343a",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e84a45d607e84f7827b39697",
+      "canonicalId": "dad-e84a45d607e84f7827b39697",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e84b8084a72dbb01fdeae89e",
+      "canonicalId": "dad-e84b8084a72dbb01fdeae89e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e85495238bc582884e56b805",
+      "canonicalId": "dad-e85495238bc582884e56b805",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e919a25f1ebab6ff2dad2870",
+      "canonicalId": "dad-e919a25f1ebab6ff2dad2870",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e9bca44dd6e4b54715cf759d",
+      "canonicalId": "dad-e9bca44dd6e4b54715cf759d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-e9d951f68dd7d52f60a7dd26",
+      "canonicalId": "dad-e9d951f68dd7d52f60a7dd26",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ea44979d198a988143f5ff41",
+      "canonicalId": "dad-ea44979d198a988143f5ff41",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ea72804de1e80887bba56fe0",
+      "canonicalId": "dad-ea72804de1e80887bba56fe0",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ea7ac8473dd8ffef06966763",
+      "canonicalId": "dad-ea7ac8473dd8ffef06966763",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ea85b034a35c09b46402288e",
+      "canonicalId": "dad-ea85b034a35c09b46402288e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-eaf9940a23cf3cc373da0f2c",
+      "canonicalId": "dad-eaf9940a23cf3cc373da0f2c",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-eb17294ef3c1c3ceef49f111",
+      "canonicalId": "dad-eb17294ef3c1c3ceef49f111",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-eb3d650dc17becce5b74fca0",
+      "canonicalId": "dad-eb3d650dc17becce5b74fca0",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-eb518ecc3ae1fe1d207c6ab6",
+      "canonicalId": "dad-eb518ecc3ae1fe1d207c6ab6",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ebaf76839214a82262fbac6e",
+      "canonicalId": "dad-ebaf76839214a82262fbac6e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ebced7bb907917d19735c519",
+      "canonicalId": "dad-ebced7bb907917d19735c519",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ebe87042d5ed1ba5c1ff6fb7",
+      "canonicalId": "dad-ebe87042d5ed1ba5c1ff6fb7",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ec0bd926967f07f2b0325c9a",
+      "canonicalId": "dad-ec0bd926967f07f2b0325c9a",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-eca092735ff9834bc3acf2da",
+      "canonicalId": "dad-eca092735ff9834bc3acf2da",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ecf3a5829fd728ea970c5caf",
+      "canonicalId": "dad-ecf3a5829fd728ea970c5caf",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ecfefdca1a07300bb7f91349",
+      "canonicalId": "dad-ecfefdca1a07300bb7f91349",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ed41ec450bbb847fa5c47e01",
+      "canonicalId": "dad-ed41ec450bbb847fa5c47e01",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ed5a38d98dceb6daac7b55c1",
+      "canonicalId": "dad-ed5a38d98dceb6daac7b55c1",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ededdde885b792dcd0bbed41",
+      "canonicalId": "dad-ededdde885b792dcd0bbed41",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ee284bfc3d7be4742fa45de4",
+      "canonicalId": "dad-ee284bfc3d7be4742fa45de4",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ee4731a06ecc971d30322f86",
+      "canonicalId": "dad-ee4731a06ecc971d30322f86",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ee5873a63126640ef1d36ac1",
+      "canonicalId": "dad-ee5873a63126640ef1d36ac1",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-eecfca9763f71de6d41fbca1",
+      "canonicalId": "dad-eecfca9763f71de6d41fbca1",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-eef59af49ce2a42e61c76539",
+      "canonicalId": "dad-eef59af49ce2a42e61c76539",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-eff06f9f880d8d782471720f",
+      "canonicalId": "dad-eff06f9f880d8d782471720f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f00338bfd93259ff5dd9a4f7",
+      "canonicalId": "dad-f00338bfd93259ff5dd9a4f7",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f05b906afc20b6985ea6cabb",
+      "canonicalId": "dad-f05b906afc20b6985ea6cabb",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f05c4b68b48da8ea3003b4e8",
+      "canonicalId": "dad-f05c4b68b48da8ea3003b4e8",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f08c493cb3a1b4dd5f759748",
+      "canonicalId": "dad-f08c493cb3a1b4dd5f759748",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f1470263c38c132317cd48c1",
+      "canonicalId": "dad-f1470263c38c132317cd48c1",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f1a58425c1009c8ba13c6b92",
+      "canonicalId": "dad-f1a58425c1009c8ba13c6b92",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f1a84d9ea1dd9abd4cd85cab",
+      "canonicalId": "dad-f1a84d9ea1dd9abd4cd85cab",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f1f7f9595f0bfe4de73e5156",
+      "canonicalId": "dad-f1f7f9595f0bfe4de73e5156",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f27088efe897e99ca23d281e",
+      "canonicalId": "dad-f27088efe897e99ca23d281e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f2acd5b44cc47cd6b2b4567b",
+      "canonicalId": "dad-f2acd5b44cc47cd6b2b4567b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f2ead777d770d83ca6f32c74",
+      "canonicalId": "dad-f2ead777d770d83ca6f32c74",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f31b0fd1eb9d192b1f52f167",
+      "canonicalId": "dad-f31b0fd1eb9d192b1f52f167",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f375ddb722fa32fc207d89b0",
+      "canonicalId": "dad-f375ddb722fa32fc207d89b0",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f39a46199c05e322de342b83",
+      "canonicalId": "dad-f39a46199c05e322de342b83",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f3a81a6e5da21a4f0cee5b5d",
+      "canonicalId": "dad-f3a81a6e5da21a4f0cee5b5d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f3c1739b807a44f6b140c0e9",
+      "canonicalId": "dad-f3c1739b807a44f6b140c0e9",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f3fc53e815a381efa7af7915",
+      "canonicalId": "dad-f3fc53e815a381efa7af7915",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f4576893ed0bc8e1d12b042e",
+      "canonicalId": "dad-f4576893ed0bc8e1d12b042e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f48e7935eea652d3f1c455ea",
+      "canonicalId": "dad-f48e7935eea652d3f1c455ea",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f4cdf510d205fab87bef1286",
+      "canonicalId": "dad-f4cdf510d205fab87bef1286",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f575b7649ab1b312a166b21d",
+      "canonicalId": "dad-f575b7649ab1b312a166b21d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f57618975731d2c230a3adbc",
+      "canonicalId": "dad-f57618975731d2c230a3adbc",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f5868a97c25867dd7adee08d",
+      "canonicalId": "dad-f5868a97c25867dd7adee08d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f5873c92ec5296064c617fa5",
+      "canonicalId": "dad-f5873c92ec5296064c617fa5",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f5cad0abb38082cd9c937e3b",
+      "canonicalId": "dad-f5cad0abb38082cd9c937e3b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f680ae47b5550bc994e404b0",
+      "canonicalId": "dad-f680ae47b5550bc994e404b0",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f6b93086d955219b961b55e2",
+      "canonicalId": "dad-f6b93086d955219b961b55e2",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f6bde0b8830e374a38c726d7",
+      "canonicalId": "dad-f6bde0b8830e374a38c726d7",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f6cf08c7056e5255b3ee3a8d",
+      "canonicalId": "dad-f6cf08c7056e5255b3ee3a8d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f6d3724882340b3634af3b91",
+      "canonicalId": "dad-f6d3724882340b3634af3b91",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f755571ba8cc07d5bae4ea73",
+      "canonicalId": "dad-f755571ba8cc07d5bae4ea73",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f79936f783991af364c5ec93",
+      "canonicalId": "dad-f79936f783991af364c5ec93",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f7a73c88c8c8316e05b46e74",
+      "canonicalId": "dad-f7a73c88c8c8316e05b46e74",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f8d8d17b8a655058e7ca2005",
+      "canonicalId": "dad-f8d8d17b8a655058e7ca2005",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f95cc2a83eb61ed31c4a4dc2",
+      "canonicalId": "dad-f95cc2a83eb61ed31c4a4dc2",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f9641af61db0711f46975f27",
+      "canonicalId": "dad-f9641af61db0711f46975f27",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f97a86344ba6cf35595ccd30",
+      "canonicalId": "dad-f97a86344ba6cf35595ccd30",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f9b7706437746ce2e1234773",
+      "canonicalId": "dad-f9b7706437746ce2e1234773",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f9d6b8731a65cb1a65f41cbb",
+      "canonicalId": "dad-f9d6b8731a65cb1a65f41cbb",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-f9fe4adc39e25217a0e96d00",
+      "canonicalId": "dad-f9fe4adc39e25217a0e96d00",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-fa366f3d0193d7f24f2c43ef",
+      "canonicalId": "dad-fa366f3d0193d7f24f2c43ef",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-fae01ad2d2b9443822fddcc6",
+      "canonicalId": "dad-fae01ad2d2b9443822fddcc6",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-fae73872ee7867d7068efeac",
+      "canonicalId": "dad-fae73872ee7867d7068efeac",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-fb695e935ec522f5bb87ba5e",
+      "canonicalId": "dad-fb695e935ec522f5bb87ba5e",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-fbb2785fa5687702b54fbfdd",
+      "canonicalId": "dad-fbb2785fa5687702b54fbfdd",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-fbcc83dd59ec34528b842dd8",
+      "canonicalId": "dad-fbcc83dd59ec34528b842dd8",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-fc11bc60db60805c4447397b",
+      "canonicalId": "dad-fc11bc60db60805c4447397b",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-fc5aa381ced42f0ed3bd2214",
+      "canonicalId": "dad-fc5aa381ced42f0ed3bd2214",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-fc9e23aa653a7ce50c9c91e4",
+      "canonicalId": "dad-fc9e23aa653a7ce50c9c91e4",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-fce8cb782f7fccab0894d4ed",
+      "canonicalId": "dad-fce8cb782f7fccab0894d4ed",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-fd2478510a7cbd268416cd79",
+      "canonicalId": "dad-fd2478510a7cbd268416cd79",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-fdffc7d475c0f24502f922b8",
+      "canonicalId": "dad-fdffc7d475c0f24502f922b8",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-fe2057afdfe47fd38cde5598",
+      "canonicalId": "dad-fe2057afdfe47fd38cde5598",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-fe593f68bf3e8efdbd0577e7",
+      "canonicalId": "dad-fe593f68bf3e8efdbd0577e7",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-fe862aef4111e715e46bd431",
+      "canonicalId": "dad-fe862aef4111e715e46bd431",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-fee9e76b4c3d9cca775c116d",
+      "canonicalId": "dad-fee9e76b4c3d9cca775c116d",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-fef1729cea905aaef7bfb626",
+      "canonicalId": "dad-fef1729cea905aaef7bfb626",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ff1c3fc81daa9b7c6c958c38",
+      "canonicalId": "dad-ff1c3fc81daa9b7c6c958c38",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ff2ebaeafe0781cde9f8cb8f",
+      "canonicalId": "dad-ff2ebaeafe0781cde9f8cb8f",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ff873b3f247365173f618166",
+      "canonicalId": "dad-ff873b3f247365173f618166",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ffcc23247a01a90bd69cccde",
+      "canonicalId": "dad-ffcc23247a01a90bd69cccde",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-ffd200184dd7718145147b8a",
+      "canonicalId": "dad-ffd200184dd7718145147b8a",
+      "state": "not_started_unverified"
+    },
+    {
+      "sourceJokeId": "dad-fffe4d3bc132ed310c33dcf5",
+      "canonicalId": "dad-fffe4d3bc132ed310c33dcf5",
+      "state": "not_started_unverified"
+    }
+  ],
+  "selectedBatch": [
+    {
+      "runId": "JL-20261023-COACHED-01",
+      "canonicalId": "dad-3d80ae9a86b39f7cb7974491",
+      "state": "selected_not_reserved",
+      "note": "Selected bicycle joke; no paid generation. Existing catalog does not link a bicycle output, but full archive reconciliation is incomplete."
+    }
+  ]
+}
