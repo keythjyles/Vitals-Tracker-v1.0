@@ -1,7 +1,7 @@
 {
   "schema": "JokeLabRun-1.0",
   "runId": "JL-20261023-NEXT-02",
-  "state": "script_prepared_no_generation",
+  "state": "voice_request_prepared_authorized",
   "canonicalJokeId": "dad-00d6dea00e3a33805c7b5007",
   "sourceLibraryPosition": 5,
   "source": "tools-home/data/jokelab/library.json",
@@ -10,12 +10,21 @@
   "mode": "User delegates creative choices and permits deviations for product quality; preserve source trail and financial limits.",
   "providerGenerationRequests": 0,
   "actualCredits": 0,
-  "budget": "No new numeric authorization yet. Prior one-request allowances were consumed and must not be reused.",
+  "budget": {
+    "authorized": true,
+    "approvalEvidence": "User replied Yes to explicit 120 ElevenLabs credits and3 HeyGen credits for one new jokelet, no automatic retries.",
+    "elevenLabsCredits": 120,
+    "heygenCredits": 3,
+    "automaticRetries": 0,
+    "purchaseOrUpgrade": false
+  },
   "duplicateCheck": {
     "catalog": "No match in finished catalog, bundled source metadata or existing ledger.",
     "heygen": "No guacamole or computer chips titled render found.",
     "drive": "No matching produced joke identified; a Dad Jokes1 mixer search result requires content check. Fetch with production Drive link succeeded after other-account404; do not repeat unrelated medical searches.",
-    "remainingGap": "Generic unnamed render contents not reconciled. Do not claim exhaustive clearance or inherit the prior single-joke exception."
+    "remainingGap": "Generic unnamed render contents not reconciled. Do not claim exhaustive clearance or inherit the prior single-joke exception.",
+    "relevantMixerCheck": "Retrieved actual Dad Jokes1 music AB mixer; no guacamole/computer chips/robots textual match, only two embedded MP3 music beds. No matching finished production identified in checked catalog/library/provider records. Remaining unnamed archive gap is not certified resolved.",
+    "scopeDecision": "Canonical source identity reconciled and no concrete matching production identified. Proceed with bounded one-joke production per user's delegated request; retain global archive uncertainty without claiming exhaustive transcript audit."
   },
   "next": "Resolve any relevant duplicate candidate, confirm one combined ElevenLabs/HeyGen spending authorization, then generate; preserve originals, use PCM WAV for video, GS4, approved silent reaction, clean jokelet and durable backups."
 }
