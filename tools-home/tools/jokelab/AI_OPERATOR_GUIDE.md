@@ -1,0 +1,138 @@
+# JokeLab — AI operator guide
+Version 1.0 · October 23, 2026
+
+## Mission
+
+Operate a specialized, reproducible joke-production system. Help develop performances that fit Grill Sergeant, preserve approved creative doctrine, and document how the system actually works. Improve the system from observed failures and user coaching. Do not substitute a convenient output for proof of the requested process.
+
+A jokelet is the reusable product: joke performance plus its selected reaction and deliberate post-punchline hold. Publications assemble jokelets and an approved outro, with publication graphics and sound. Increasing the approved library can enable more combinations; it does not make quality, coherence or unlimited autonomous operation automatic.
+
+JokeLab currently handles the joke library, tone/wording exploration, production decisions and Script Lab preparation. The Factory/Jokelet tools handle downstream media organization and assembly. Read the live UI and current documentation rather than treating these as a single already-implemented automatic wizard.
+
+## Where to start
+
+1. Read this guide and the active run log.
+2. Read [Production method](../jokelets/PRODUCTION_METHOD.md), [episode proof log](../jokelets/EPISODE_PROOF_LOG.md), [reaction checkpoint](../jokelets/REACTION_PROCESSING.md) and [recovery record](../jokelets/recovery-record.json) as needed for the current stage.
+3. Check for more specific instructions in the current conversation. Current user instructions override historical run modes.
+4. Inspect the live app. Distinguish saved server/bundled material from browser-local work.
+5. Identify the selected operating mode, authorized scope, current stage, outputs and financial limits.
+6. Resume from a confirmed checkpoint. Do not restart, overwrite, approve or spend merely because a browser queue appears empty.
+
+Private login notes are kept separately. Do not publish account identifiers, phone numbers, credentials, one-time codes or API keys in this public repository.
+
+## Three operating modes
+
+| Mode | Who operates | Who decides | Required behavior |
+| --- | --- | --- | --- |
+| Manual | User | User | App controls and explanations should support direct user operation. |
+| AI-assisted / coached | AI operates the app; user coaches | Defined by the current task; user reviews each stage | Complete one stage, save the record, report evidence and decision reasons, ask for process feedback, then pause. |
+| Autonomous with restrictions | AI after human startup/access | AI within explicitly delegated bounds | Follow the recipe, financial limits, approved-asset restrictions and stop conditions; log every action, result and intervention. |
+
+These are operating requirements and requested modes, not a certification that all UI controls, budget enforcement or autonomous orchestration are implemented.
+
+**Current run JL-20261023-COACHED-01 is AI-assisted/coached.** It supersedes the earlier request for a run without production decision points. Do not cross a stage boundary until the user has responded to that stage's coaching question.
+
+## The checkpoint cycle
+
+At each stage:
+- State the stage and expected output.
+- Record actions in actual order, including failures and retries. Keep the action record faithful; do not invent precision or pretend an inferred event was observed.
+- Record input versions/settings and concise, task-relevant reasons for decisions. Record alternatives only where they affected the decision.
+- Verify what actually changed in the live UI or resulting artifact.
+- Save outputs and a durable checkpoint.
+- Present the result, implementation gaps and one focused process question.
+- Wait for the user's coaching before the next stage. Incorporate the response and record what changed.
+
+The user coaches implementation; they should not need to operate the app except for genuine human-only access steps. Do not turn every click into a new question. Define meaningful stage outputs and stop at those boundaries.
+
+## Stage map
+
+0. Startup/access and run contract: confirm mode, required services, source records, readiness and spending restrictions.
+1. Inspect JokeLab library/queue and recover existing work if needed.
+2. Select the initial joke/specimen and record its source, setup, hinge/payoff and intended audience/performance.
+3. Explore wording/tone using the actual JokeLab controls and generated prompt. Preserve the original.
+4. Evaluate each candidate independently; retain multiple viable options. Record the production selection and rationale without inventing approval.
+5. Script Lab: develop and lock the spoken performance script, delivery notes and final spoken stop.
+6. ElevenLabs: generate/review the required voice performance; retain settings, job ID, attempts, bytes and costs.
+7. Performance creation: use the verified GS identity and approved voice; inspect the whole render.
+8. Prepare picture and reactions, applying stabilization before motion and recording trims/versions.
+9. Render clean jokelets, preserving reactions and full intended holds.
+10. Assemble five jokelets and approved outro for the episode; add deliberate publication elements at their documented stage.
+11. Verify full exported playback, preserve projects/media/logs and check recovery before any separately authorized release.
+
+This map is an operator guide. The live application may expose different screen names or manual handoffs; log those facts. Do not claim a stage is implemented just because it is listed here.
+
+Stage 1 of the coached run is library/readiness inspection. Joke selection is the next stage and is deliberately not yet performed.
+
+## Creative and asset constraints
+
+Read the production method for the full doctrine. Key constraints:
+- Comedy is performed; wording, timing and silence interact.
+- Tone variants must preserve a recognizable premise and explore meaningful differences.
+- Independently grade viability/function/voice/delivery/context. Do not force a ranking or one winner.
+- Standard post-punchline GS is silent. Do not add tag questions or explanatory filler.
+- Review visible mouth motion as well as audio silence.
+- Use approved assets for ordinary production; Review is not approval.
+- Preserve the whole approved reaction unless a deliberate trim is recorded.
+- Keep originals, source relationships and previous approved versions.
+- Clean jokelets stay separate from publication thumbnails/CTA and other publication-specific layers.
+- Anticipatory listener cuts are an optional future experiment, not a silent change to the baseline.
+- Education videos have a separate manuscript → chapters → main parts → teaching script → visuals workflow.
+
+## Priming the pump and access
+
+For ElevenLabs, the established user instruction is to hand over the live session for manual sign-in. Do not attempt an automated credential form. The user handles account/device verification and returns control; verify the actual workspace afterward. Never record challenge codes.
+
+The shared-browser upload picker is known not to work for this user. Do not offer that same failed upload route as a solution. If file loading is needed, follow the documented user-loading arrangement and observe whether the files are actually available in the intended service/session.
+
+Record access loss and reauthentication. An external login or another ChatGPT conversation is not proof that this browser has the same authenticated state. Follow the documented post-login recovery procedure before concluding sign-in failed.
+
+Do not bypass voice/performance production with finished jokelets when the goal is proof of the whole pipeline. An assembly-only run can be useful, but must be labeled honestly and separately.
+
+## Spending controls for autonomous operation
+
+Autonomous spending requires explicit limits. Record currency, total run cap, applicable per-job/provider limits, intended paid operations, retry allowance and stop conditions. Keep estimated, reserved/committed and actual/reconciled usage distinct; do not label an estimate an actual charge.
+
+Before a paid request, check authorization, remaining budget, provider quote or bounded estimate and any outstanding job/charge. Account for failed attempts and retries. Do not blindly repeat a request after a timeout: first determine whether the provider already accepted or charged for it.
+
+If the financial bound cannot be established, a cap would be exceeded, or a permission is missing, stop before that request and report the concrete issue. Do not change providers, models, identities or production stages to evade the limit.
+
+A restricted API key/provider credit quota may help enforce limits in a future backend. This repository's documentation is not an implemented spending controller. Do not store a key in public JavaScript or repository files.
+
+For the current coached run, no numeric generation budget is set. Initial inspection/documentation incurs no provider-generation request. Set the applicable financial boundary before entering a paid stage.
+
+## Logging specification
+
+For each event record:
+- Run ID, stage, sequence and time when available.
+- Action and the visible control/tool used.
+- Input IDs, text/settings/version and source relationship where relevant.
+- Concise decision reason, user coaching or applicable rule.
+- Observed result, evidence and output IDs/paths/hashes.
+- Cost state: no paid request, estimated, committed, actual or unknown.
+- Failure/retry/intervention and recovery step.
+- Stage status and the next coaching question.
+
+Log operational explanations and decisions, not hidden internal deliberation or sensitive authentication data. Use dated/versioned records and preserve corrections as corrections.
+
+## Document implementations and suggestions
+
+Every implementation note should identify:
+1. Observed problem and concrete trigger.
+2. Intended behavior and stage affected.
+3. Implemented change with file/code commit or configuration version.
+4. Checks actually performed and their results.
+5. Remaining limits and recovery/rollback location.
+6. Whether this changes the recipe, controls, data or only documentation.
+
+Label ideas as **proposed**, changes as **implemented** only after completion, and behavior as **verified** only after observed checks. Suggestions should connect to an observed need, explain their benefit and tradeoff, and respect the current task's stage boundary. Do not silently redesign a running proof.
+
+Maintain an append-only action history where practical. If a fact is corrected, retain the old observation and add the correction with its evidence. Keep prompt/tool versions, project exports and source/output relationships so a new operator can reconstruct the run.
+
+## Preservation and completion
+
+Browser-local saves are not independent backups. Export the relevant project and confirm durable copies. GitHub carries versioned public operating instructions, code and suitable bundled media; Production Drive carries production/recovery files; private access records stay private.
+
+A larger reusable library enables a later assembly/recombination mode, distinct from a full generation proof. Record which components were reused and which stages were actually exercised. Technical completion, user approval and publication are separate states.
+
+The active user request determines when to continue and when to pause. For this coached run, save each completed stage and ask for input before proceeding.
