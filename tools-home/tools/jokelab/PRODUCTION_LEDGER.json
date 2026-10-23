@@ -470,7 +470,7 @@
     {
       "sourceJokeId": "dad-00bda89167b4f15850aa1c91",
       "canonicalId": "dad-00bda89167b4f15850aa1c91",
-      "state": "preparing_script_unapproved",
+      "state": "audio_queued_waiting_authentication",
       "runId": "JL-20261023-COACHED-01",
       "queueJobId": "94a49ac4-4778-4796-bd2d-2dd9f0a45de7"
     },
@@ -4975,15 +4975,17 @@
     {
       "runId": "JL-20261023-COACHED-01",
       "canonicalId": "dad-00bda89167b4f15850aa1c91",
-      "state": "script_prepared_unapproved",
+      "state": "audio_queued_waiting_authentication",
       "queueJobId": "94a49ac4-4778-4796-bd2d-2dd9f0a45de7",
-      "nativeProject": "runs/JL-20261023-COACHED-01-stage5-project.json",
+      "nativeProject": "runs/JL-20261023-COACHED-01-stage6-project.json",
       "companionRecord": "runs/JL-20261023-COACHED-01-J02.json",
       "reservationScope": "Unpaid script preparation only; do not start a second preparation job for this canonical joke.",
       "duplicateCheck": "No matching catalog/Drive text/HeyGen title production found; 70 unnamed render content gap remains. Not certified unproduced.",
       "paidProductionClearance": false,
       "providerGenerationRequests": 0,
-      "scriptApproved": false
+      "scriptApproved": true,
+      "scriptApprovedAt": "2026-10-23T18:04:45.655Z",
+      "voicePreflight": "runs/JL-20261023-COACHED-01-voice-preflight.json"
     }
   ]
 }

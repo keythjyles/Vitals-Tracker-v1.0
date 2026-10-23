@@ -1,0 +1,38 @@
+{
+  "schema": "JokeLabVoicePreflight-1.0",
+  "date": "2026-10-23",
+  "runId": "JL-20261023-COACHED-01",
+  "canonicalJokeId": "dad-00bda89167b4f15850aa1c91",
+  "queueJobId": "94a49ac4-4778-4796-bd2d-2dd9f0a45de7",
+  "stage": "awaiting_manual_authentication",
+  "userFeedback": "No correction requested at the script checkpoint ('Nope').",
+  "scriptApproval": {
+    "approvedAt": "2026-10-23T18:04:45.655Z",
+    "method": "AI operated Approve script → audio queue after user's no-correction response.",
+    "spokenText": "What did the shy pebble wish for? That she was a little boulder.",
+    "cuedScript": "[firm] What did the shy pebble wish for?\n\nThat she was a little boulder."
+  },
+  "elevenLabs": {
+    "target": "https://elevenlabs.io/app/home",
+    "observed": "Redirected to ElevenLabs sign-in. No authenticated workspace visible.",
+    "authentication": "Live manual handover requested by the user; no credential entry automated.",
+    "voice": null,
+    "model": null,
+    "settings": null,
+    "quote": null,
+    "takeId": null,
+    "originalAudio": null,
+    "actualCharge": null
+  },
+  "beforePaidRequest": [
+    "Verify signed-in production workspace, intended GS jokes voice and active model.",
+    "Validate delivery cue handling and record final exact provider input/settings.",
+    "Resolve outstanding duplicate archive gap recorded in J02.",
+    "Establish applicable spending boundary and inspect quote/usage before submission."
+  ],
+  "providerGenerationRequests": 0,
+  "nativeProject": "JL-20261023-COACHED-01-stage6-project.json",
+  "nativeProjectBytes": 1068,
+  "nativeProjectSha256": "31af552c48ee06b316a2b2ec5e8583b3278c3cd3a4c4ac3ecbd74c8b7533c510",
+  "sourceRecord": "JL-20261023-COACHED-01-J02.json"
+}
