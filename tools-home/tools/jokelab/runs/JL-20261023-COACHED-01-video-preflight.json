@@ -1,0 +1,57 @@
+{
+  "schema": "JokeLabVideoPreflight-1.0",
+  "date": "2026-10-23",
+  "runId": "JL-20261023-COACHED-01",
+  "canonicalJokeId": "dad-00bda89167b4f15850aa1c91",
+  "state": "prepared_awaiting_video_credit_cap",
+  "sourceTake": {
+    "fileName": "GS_Pebble_Voice_v02_Generation1.mp3",
+    "generationId": "pqILh6dY0D1CO7Ckhplb",
+    "credits": 102,
+    "bytes": 144832,
+    "durationSeconds": 5.328958,
+    "sha256": "9e23786b01bf62868714171b997b9ec3296f3543858011ad68e8939282ced18b",
+    "driveFileId": "1nvhhD8q9dtX0IbxSlsAfcU7_8ByVAbqv",
+    "reviewStatus": "Approved",
+    "reviewEvidence": "User: Both perfect",
+    "reviewDate": "2026-10-23"
+  },
+  "approvalEvidence": "User: Both perfect",
+  "audioDerivative": {
+    "fileName": "GS_Pebble_Voice_v02_Generation1_HeyGen.wav",
+    "conversion": "Decode approved MP3 to PCM s16le WAV; no trimming, gain or speed change.",
+    "bytes": 470094,
+    "durationSeconds": 5.32898,
+    "sha256": "09519972b493e2ec472b4114972c116905fc21204bf1d6c748b09230439f9879",
+    "driveFileId": "1-HrnqhQvBc-IZXmXLXnZCMBOhGvIoDPY",
+    "heygenAssetId": "a033e7fd440d43a38f7601a7ebebb827",
+    "heygenReadbackVerified": true
+  },
+  "request": {
+    "avatarId": "85cc768c260a40359212b92f738de459",
+    "audioAssetId": "a033e7fd440d43a38f7601a7ebebb827",
+    "engine": {
+      "type": "avatar_iv"
+    },
+    "aspectRatio": "9:16",
+    "resolution": "1080p",
+    "outputFormat": "mp4",
+    "expressiveness": "low",
+    "fit": "contain",
+    "title": "GS Pebble — approved voice v02 — performance v01"
+  },
+  "cleanSource": "Use approved external audio exactly; no new TTS, captions, music, ambient, SFX, custom motion add-on or upscale request.",
+  "cost": {
+    "estimateCredits": 1.4210613333333333,
+    "rateCreditsPerMinute": 16,
+    "estimateEvidence": "https://help.heygen.com/en/articles/15126059-how-to-use-credits-on-heygen",
+    "status": "Published estimate, not an account-specific binding quote.",
+    "proposedCapCredits": 3,
+    "requests": 1,
+    "automaticRetries": 0,
+    "authorized": false,
+    "purchaseOrUpgrade": false,
+    "actualCredits": null
+  },
+  "renderId": null
+}

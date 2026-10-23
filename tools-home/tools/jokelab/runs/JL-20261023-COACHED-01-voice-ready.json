@@ -4,7 +4,7 @@
   "runId": "JL-20261023-COACHED-01",
   "canonicalJokeId": "dad-00bda89167b4f15850aa1c91",
   "queueJobId": "94a49ac4-4778-4796-bd2d-2dd9f0a45de7",
-  "stage": "generated_awaiting_coached_listening_review",
+  "stage": "voice_approved_video_prepared",
   "userFeedback": "No correction requested at the script checkpoint ('Nope').",
   "scriptApproval": {
     "approvedAt": "2026-10-23T18:04:45.655Z",
@@ -158,7 +158,9 @@
         "durationSeconds": 5.328958,
         "sha256": "9e23786b01bf62868714171b997b9ec3296f3543858011ad68e8939282ced18b",
         "driveFileId": "1nvhhD8q9dtX0IbxSlsAfcU7_8ByVAbqv",
-        "reviewStatus": "Unapproved"
+        "reviewStatus": "Approved",
+        "reviewEvidence": "User: Both perfect",
+        "reviewDate": "2026-10-23"
       },
       {
         "fileName": "GS_Pebble_Voice_v02_Generation2.mp3",
@@ -168,9 +170,13 @@
         "durationSeconds": 5.564083,
         "sha256": "0fda1d7dbf69d0a0b3ba45b165198c3d77fd49d8171a2af3f08743aaf783c4b3",
         "driveFileId": "1wQ59XBcwr791Zq8FTYDlkkHTJbPkT1qU",
-        "reviewStatus": "Unapproved"
+        "reviewStatus": "Approved",
+        "reviewEvidence": "User: Both perfect",
+        "reviewDate": "2026-10-23"
       }
-    ]
+    ],
+    "userApproval": "Both perfect"
   },
-  "cumulativeRunCredits": 174
+  "cumulativeRunCredits": 174,
+  "videoPreflight": "JL-20261023-COACHED-01-video-preflight.json"
 }

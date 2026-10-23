@@ -46,7 +46,7 @@
     "scope": "Identity lookup only; no paid video operation."
   },
   "limits": "Audio tags are directions, not guaranteed performance. Full listening review pending; this runtime cannot certify auditory quality.",
-  "state": "generated_awaiting_coached_listening_review",
+  "state": "voice_approved_video_prepared",
   "providerGenerationRequests": 1,
   "actualCredits": 102,
   "cumulativeRunCredits": 174,
@@ -59,7 +59,9 @@
       "durationSeconds": 5.328958,
       "sha256": "9e23786b01bf62868714171b997b9ec3296f3543858011ad68e8939282ced18b",
       "driveFileId": "1nvhhD8q9dtX0IbxSlsAfcU7_8ByVAbqv",
-      "reviewStatus": "Unapproved"
+      "reviewStatus": "Approved",
+      "reviewEvidence": "User: Both perfect",
+      "reviewDate": "2026-10-23"
     },
     {
       "fileName": "GS_Pebble_Voice_v02_Generation2.mp3",
@@ -69,7 +71,9 @@
       "durationSeconds": 5.564083,
       "sha256": "0fda1d7dbf69d0a0b3ba45b165198c3d77fd49d8171a2af3f08743aaf783c4b3",
       "driveFileId": "1wQ59XBcwr791Zq8FTYDlkkHTJbPkT1qU",
-      "reviewStatus": "Unapproved"
+      "reviewStatus": "Approved",
+      "reviewEvidence": "User: Both perfect",
+      "reviewDate": "2026-10-23"
     }
   ],
   "mediaFormat": {
@@ -79,5 +83,6 @@
     "streamBitrate": 192000
   },
   "automaticRetries": 0,
-  "usdEquivalent": null
+  "usdEquivalent": null,
+  "selectedTakeId": "pqILh6dY0D1CO7Ckhplb"
 }

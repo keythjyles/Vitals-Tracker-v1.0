@@ -470,7 +470,7 @@
     {
       "sourceJokeId": "dad-00bda89167b4f15850aa1c91",
       "canonicalId": "dad-00bda89167b4f15850aa1c91",
-      "state": "generated_awaiting_coached_listening_review",
+      "state": "voice_approved_video_prepared",
       "runId": "JL-20261023-COACHED-01",
       "queueJobId": "94a49ac4-4778-4796-bd2d-2dd9f0a45de7",
       "spendingAuthorization": {
@@ -495,7 +495,13 @@
         "response": "Proceed",
         "scope": "One capped voice request accepting remaining duplicate risk from unchecked archive videos; not a certification of complete archive reconciliation."
       },
-      "voiceCorrection": "runs/JL-20261023-COACHED-01-voice-correction-v02.json"
+      "voiceCorrection": "runs/JL-20261023-COACHED-01-voice-correction-v02.json",
+      "approvedVoiceGenerationIds": [
+        "pqILh6dY0D1CO7Ckhplb",
+        "ZpGkM0wFRVcj0Hp1bC5N"
+      ],
+      "selectedVoiceGenerationId": "pqILh6dY0D1CO7Ckhplb",
+      "videoPreflight": "JL-20261023-COACHED-01-video-preflight.json"
     },
     {
       "sourceJokeId": "dad-00c8169b19744be3deb5869d",
@@ -4998,7 +5004,7 @@
     {
       "runId": "JL-20261023-COACHED-01",
       "canonicalId": "dad-00bda89167b4f15850aa1c91",
-      "state": "generated_awaiting_coached_listening_review",
+      "state": "voice_approved_video_prepared",
       "queueJobId": "94a49ac4-4778-4796-bd2d-2dd9f0a45de7",
       "nativeProject": "runs/JL-20261023-COACHED-01-stage6-project.json",
       "companionRecord": "runs/JL-20261023-COACHED-01-J02.json",
@@ -5033,7 +5039,13 @@
         "response": "Proceed",
         "scope": "One capped voice request accepting remaining duplicate risk from unchecked archive videos; not a certification of complete archive reconciliation."
       },
-      "voiceCorrection": "runs/JL-20261023-COACHED-01-voice-correction-v02.json"
+      "voiceCorrection": "runs/JL-20261023-COACHED-01-voice-correction-v02.json",
+      "approvedVoiceGenerationIds": [
+        "pqILh6dY0D1CO7Ckhplb",
+        "ZpGkM0wFRVcj0Hp1bC5N"
+      ],
+      "selectedVoiceGenerationId": "pqILh6dY0D1CO7Ckhplb",
+      "videoPreflight": "JL-20261023-COACHED-01-video-preflight.json"
     }
   ]
 }
