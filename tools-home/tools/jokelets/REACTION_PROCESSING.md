@@ -54,3 +54,8 @@ No new paid HeyGen or ElevenLabs generation was started. This verifies the manua
 Direct folder fetching found 70 MP4s in HeyGenVideos despite the earlier search returning no files. They are an unreviewed queue; equal file sizes do not prove duplicates. The scoped Drive inventory covers 21 known production folders and 200 unique non-folder records, not every file in both accounts.
 
 All 87 bundled assets and referenced working files, preserved originalSrc files and posters passed checksum verification. Source IDs are recorded for 76 assets; 11 still need an original source ID. Six full recovery ZIPs were uploaded and verified by Drive file size and parent folder. Archived contents passed local SHA-256 verification. These cover tools-home, not later browser-only projects. Export now reports cancelled sharing and records an export request; confirm the file in Drive separately. Sources & recovery documents restoration, provenance and the render queue. SxLock projects must be separately exported.
+
+
+## Operating method — October 23, 2026
+
+[PRODUCTION_METHOD.md](PRODUCTION_METHOD.md) documents the Jokelet Engine working name, established creative doctrine, source-to-release recipe, approval and recovery requirements, optional anticipatory-listener cut, and the separate manuscript-led education workflow. [EPISODE_PROOF_LOG.md](EPISODE_PROOF_LOG.md) opens a proposed initial three-episode validation batch. All new proof slots are Not run; the earlier manual flow test remains separate evidence. No paid generation, episode release or new automation is implied by this documentation.
