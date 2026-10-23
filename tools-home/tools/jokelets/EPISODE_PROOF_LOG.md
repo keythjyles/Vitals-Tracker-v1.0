@@ -1,18 +1,35 @@
 # Jokelet Engine — episode proof log
-Version 1.0 · Opened October 23, 2026
+Version 1.1 · Updated October 23, 2026
 
 Companion: [Production method](PRODUCTION_METHOD.md).
 Initial proposal: follow the next three actual completed episodes. IDs and dates remain unassigned until production is selected. No new episode, generation, charge or publication is implied by this log.
 
 | Proof slot | Actual episode ID | Method version | Result | Output/recovery evidence |
 | --- | --- | --- | --- | --- |
-| A | Unassigned | 1.0 baseline | Not run | None yet |
-| B | Unassigned | 1.0 baseline | Not run | None yet |
-| C | Unassigned | 1.0 baseline | Not run | None yet |
+| A | Unassigned | 1.1 baseline | Not run | None yet |
+| B | Unassigned | 1.1 baseline | Not run | None yet |
+| C | Unassigned | 1.1 baseline | Not run | None yet |
 
 ## Existing evidence, outside the proof batch
 
 The October 22 manual Lifesavers flow test produced a clean jokelet and an 18.561-second test publication, transferred its actual bytes into SxLock and restored on reload. A separate duration check confirmed the full 4.280-second Straight stare selection. That is an implementation test, not three-episode proof or a claim of autonomous generation. See REACTION_PROCESSING.md for the qualifications.
+
+## Preflight clarification — October 23, 2026
+
+Requested product: five jokelets and an outro, produced through the documented process, with production choices delegated to the agent.
+
+The agent proposed using finished jokelets to avoid the ElevenLabs access dependency. The user rejected that approach before any new episode was produced. Record this as a planning error and corrected boundary, not a completed proof run.
+
+The user identified manual ElevenLabs sign-in as a startup task they can perform before agent production: “priming the pump.” Session availability and persistence have not been established by this discussion. No signed-in state is claimed.
+
+Current state: understanding/documenting dependencies; no new proof episode complete. The earlier source-recovery/read activity does not count as voice generation or end-to-end production.
+
+| Startup condition | State | Observation |
+| --- | --- | --- |
+| Correct agent production session authenticated to ElevenLabs | Not verified | Manual sign-in dependency reported by user |
+| Access lasts for the full run | Not tested | Observe during production |
+| Required voice-generation stage completed | Not run in this proof | Cannot replace with finished jokelets |
+| Five jokelets and outro produced through required stages | Not run | No assembly shortcut counted as full-process proof |
 
 ## Copy this record for each actual episode
 
@@ -23,6 +40,9 @@ The October 22 manual Lifesavers flow test produced a clean jokelet and an 18.56
 - Baseline recipe or explicitly named experiment:
 - Input authorization / publication authorization where applicable:
 - Objective and source script:
+- Startup conditions, operator-supplied access and observed authentication state:
+- Required stages actually exercised versus pre-existing inputs reused:
+- Session expiry or human access interruptions:
 
 ### Per-jokelet bill of materials
 | Jokelet ID | Approved text/version | Voice file/hash | Performance ID/version/hash | Reaction ID/version/hash | Approval evidence |
