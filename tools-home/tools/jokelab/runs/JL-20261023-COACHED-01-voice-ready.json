@@ -4,7 +4,7 @@
   "runId": "JL-20261023-COACHED-01",
   "canonicalJokeId": "dad-00bda89167b4f15850aa1c91",
   "queueJobId": "94a49ac4-4778-4796-bd2d-2dd9f0a45de7",
-  "stage": "blocked_shared_browser_unavailable",
+  "stage": "blocked_duplicate_check_auto_review",
   "userFeedback": "No correction requested at the script checkpoint ('Nope').",
   "scriptApproval": {
     "approvedAt": "2026-10-23T18:04:45.655Z",
@@ -55,7 +55,6 @@
     "actualCharge": null
   },
   "beforePaidRequest": [
-    "Restore shared-browser access; do not bypass the established workflow or automate sign-in.",
     "Enforce the approved maximum of 100 existing ElevenLabs credits for one take and zero automatic retries; no purchase or upgrade.",
     "Keep the unnamed-render contents gap explicit; do not claim that a metadata-only check resolved it. Resolve candidate duplicate uncertainty before paid submission.",
     "Verify selected voice/model/input/settings are unchanged immediately before submission, then record actual usage and the original downloaded take."
@@ -92,9 +91,15 @@
     }
   },
   "environment": {
-    "state": "shared_browser_unavailable",
-    "generationSubmitted": false,
-    "authenticationNote": "Signed-in access was positively verified before environment loss; unavailability is not evidence of sign-out.",
-    "resume": "Restore shared-browser access, inspect current provider state and settings, and retain this authorization without asking for the same cap again."
+    "state": "shared_browser_restored",
+    "authenticationNote": "Fresh authenticated editor observed with unchanged exact script, selected Grill Sargent Jokes / Eleven v4, stability 0.5, similarity 0.75, no audio effects and MP3 44.1 kHz 192 kbps.",
+    "generationSubmitted": false
+  },
+  "actionReview": {
+    "action": "Click Generate speech for one authorized take",
+    "outcome": "rejected_before_execution",
+    "reason": "Required duplicate-content reconciliation remains unresolved; numeric cap authorization does not waive that prerequisite.",
+    "workaroundAttempted": false,
+    "creditsSpent": 0
   }
 }
