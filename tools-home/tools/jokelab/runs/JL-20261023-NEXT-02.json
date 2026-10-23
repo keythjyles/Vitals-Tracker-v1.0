@@ -1,7 +1,7 @@
 {
   "schema": "JokeLabRun-1.0",
   "runId": "JL-20261023-NEXT-02",
-  "state": "video_render_submitted",
+  "state": "jokelet_produced_ready_for_final_review",
   "canonicalJokeId": "dad-00d6dea00e3a33805c7b5007",
   "sourceLibraryPosition": 5,
   "source": "tools-home/data/jokelab/library.json",
@@ -46,5 +46,49 @@
     "userApproved": false,
     "qualityLimit": "This runtime cannot hear audio; no false auditory approval. User delegated selection; final jokelet review pending."
   },
-  "videoId": "aa93100f33eba0befb6c91b2fe716af7"
+  "videoId": "aa93100f33eba0befb6c91b2fe716af7",
+  "output": {
+    "id": "robots-guacamole",
+    "filename": "GS_Jokelet_Robots_Guacamole_v01.mp4",
+    "duration": 8.6,
+    "fps": 25,
+    "frames": 215,
+    "width": 1080,
+    "height": 1920,
+    "bytes": 6221686,
+    "sha256": "e1ab67af84c1d3a3f4cdaa3acfcb237ccc111cb30d7767f9ae38d29e4733ae61",
+    "driveFileId": "1-3BkClqVjbXLOC0QLbcV4swMvMrg6tFf",
+    "repositoryPath": "tools-home/tools/jokelets/media/GS_Jokelet_Robots_Guacamole_v01.mp4"
+  },
+  "videoOriginal": {
+    "heygenVideoId": "aa93100f33eba0befb6c91b2fe716af7",
+    "driveFileId": "1GGk8YcjLCIIhn8Ukmm3LiZmQPJIJ1SSv",
+    "sha256": "d542db254407f4c0b387daf63ab7d1375d534d521c8331df64393e9977d0b1e1",
+    "bytes": 5901658,
+    "duration": 5,
+    "frames": 125
+  },
+  "reaction": {
+    "id": "reaction-side-eye",
+    "duration": 3.6,
+    "frames": 90,
+    "timelineStart": 5,
+    "sourceIn": 0,
+    "sourceOutExclusive": 3.6,
+    "sourcePath": "tools-home/tools/jokelets/media/reaction-side-eye-silent-v02.mp4",
+    "sha256": "912c633e9d7710ba5eef99486e2415f852f698231462717541a8dbdb8d66ee71",
+    "audio": "No stream; silent hold."
+  },
+  "recipe": "tools-home/tools/jokelab/runs/JL-20261023-NEXT-02-recipe-v01.json",
+  "retries": 0,
+  "latestFeedback": "User: That is excellent Norman! Great job! Positive render feedback; whole assembled jokelet final review pending.",
+  "actions": [
+    "One87-character ElevenLabs request returned87-credit Generation1 and0-credit Generation2; IDs recorded, originals and PCM WAV saved to Drive.",
+    "Recognized WAV asset c2cd8c42096849c2bf81a483a13bacc6 supplied to one GS4 AvatarIV1080p9:16low-expressiveness render.",
+    "Completed original render saved to Drive. Fixed-background integer translation up to4x3pixels detected over125frames and corrected toward first-frame reference, with edge replication and no resizing.",
+    "Full5-second picture plus full3.6-second approved reaction assembled using original WAV padded with silence; no publication layers.215frames25fps8.6s.",
+    "Metricool range exceeded response size; recovered by daily reads October16–20 and October21–24. Draft-only individual Shorts distinguished from previously published full episodes.",
+    "Initial final upload lacked structured result; exact-name search found none before final stabilized upload succeeded. Earlier unstabilized local draft retained.",
+    "Final video, poster, recipe, stabilization offsets and script saved to GitHub. Usage report groups five underlying jokes/eight versions."
+  ]
 }

@@ -508,6 +508,65 @@
           }
         }
       ]
+    },
+    {
+      "canonicalId": "dad-00d6dea00e3a33805c7b5007",
+      "title": "Robots · Guacamole",
+      "sourceJokeIds": [
+        "dad-00d6dea00e3a33805c7b5007"
+      ],
+      "state": "existing_jokelet_files",
+      "productionAction": "Review existing output; do not regenerate this underlying joke by default.",
+      "assets": [
+        {
+          "id": "robots-guacamole",
+          "family": "robots-guacamole",
+          "number": 18,
+          "title": "Robots · Guacamole",
+          "reaction": "Side glance and return · full3.60s",
+          "category": "Dad jokes",
+          "tags": [
+            "robots",
+            "guacamole",
+            "computer chips"
+          ],
+          "text": "How do robots eat guacamole? With computer chips.",
+          "status": "Ready",
+          "driveId": "1-3BkClqVjbXLOC0QLbcV4swMvMrg6tFf",
+          "src": "media/GS_Jokelet_Robots_Guacamole_v01.mp4",
+          "poster": "media/GS_Jokelet_Robots_Guacamole_v01.jpg",
+          "duration": 8.6,
+          "fps": 25,
+          "frames": 215,
+          "width": 1080,
+          "height": 1920,
+          "version": "v01",
+          "sha256": "e1ab67af84c1d3a3f4cdaa3acfcb237ccc111cb30d7767f9ae38d29e4733ae61",
+          "canonicalJokeId": "dad-00d6dea00e3a33805c7b5007",
+          "automationReview": {
+            "status": "Review",
+            "audio": "voice-only",
+            "burnedCaptions": false,
+            "ambient": false,
+            "music": false,
+            "soundEffects": false,
+            "note": "Technical clean assembly; final whole-jokelet approval pending."
+          },
+          "sourceTrail": {
+            "cuedScript": "[deadpan joke delivery] How do robots eat guacamole?\n\n[long pause] With COMPUTER CHIPS.",
+            "elevenLabsTake": "Skm8tBWna0yQNOuU99J6",
+            "voiceFile": "Drive 1NrmQunuTBDrqNcIMrOsKzw0a2UylrY2y",
+            "heygenRender": "aa93100f33eba0befb6c91b2fe716af7; Drive 1GGk8YcjLCIIhn8Ukmm3LiZmQPJIJ1SSv",
+            "rebuildProject": "tools-home/tools/jokelab/runs/JL-20261023-NEXT-02-recipe-v01.json",
+            "gaps": "Legacy reaction original master ID unresolved; approved working bytes retained. Actual HeyGen charge not returned; published estimate about1.33credits,cap3. Not labeled actual. Full restore/rebuild test and whole-final playback approval pending."
+          },
+          "usage": {
+            "status": "No recorded publication",
+            "checkedDate": "2026-10-23",
+            "scope": "Metricool Oct16–24; manual external posts not exhaustively audited."
+          }
+        }
+      ]
     }
   ],
   "sourceBacklog": [
@@ -579,8 +638,18 @@
     {
       "sourceJokeId": "dad-00d6dea00e3a33805c7b5007",
       "canonicalId": "dad-00d6dea00e3a33805c7b5007",
-      "state": "script_prepared_awaiting_budget",
-      "runId": "JL-20261023-NEXT-02"
+      "state": "produced_ready_for_review",
+      "runId": "JL-20261023-NEXT-02",
+      "outputId": "robots-guacamole",
+      "outputDriveId": "1-3BkClqVjbXLOC0QLbcV4swMvMrg6tFf",
+      "outputSha256": "e1ab67af84c1d3a3f4cdaa3acfcb237ccc111cb30d7767f9ae38d29e4733ae61",
+      "providerGenerationRequests": {
+        "elevenLabs": 1,
+        "heygen": 1
+      },
+      "actualVoiceCredits": 87,
+      "videoId": "aa93100f33eba0befb6c91b2fe716af7",
+      "paidProductionClearance": false
     },
     {
       "sourceJokeId": "dad-01390bc83ffc16630ae3d503",
@@ -5132,9 +5201,17 @@
     {
       "runId": "JL-20261023-NEXT-02",
       "canonicalId": "dad-00d6dea00e3a33805c7b5007",
-      "state": "script_prepared_no_generation",
-      "providerGenerationRequests": 0,
-      "paidProductionClearance": false
+      "state": "produced_ready_for_review",
+      "providerGenerationRequests": {
+        "elevenLabs": 1,
+        "heygen": 1
+      },
+      "paidProductionClearance": false,
+      "outputId": "robots-guacamole",
+      "outputDriveId": "1-3BkClqVjbXLOC0QLbcV4swMvMrg6tFf",
+      "outputSha256": "e1ab67af84c1d3a3f4cdaa3acfcb237ccc111cb30d7767f9ae38d29e4733ae61",
+      "actualVoiceCredits": 87,
+      "videoId": "aa93100f33eba0befb6c91b2fe716af7"
     }
   ]
 }
