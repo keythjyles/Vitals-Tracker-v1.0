@@ -1,0 +1,58 @@
+{
+  "schema": "GS-EngineeringVerification-1",
+  "scope": "Performance editor; no paid production",
+  "implementationCommit": "fda6fc4c2c8279dad70ebb2cb5688fa269e73064",
+  "render": {
+    "serviceId": "srv-dbdui3vb9u1s73bir8kg",
+    "deployId": "dep-dbdv618473hc73bjas30",
+    "status": "live",
+    "finishedAt": "2026-10-23T23:52:38.726968Z",
+    "errorLogsAfterDeployment": 0
+  },
+  "checks": {
+    "nodeSyntax": "passed",
+    "nodeTests": {
+      "passed": 3,
+      "failed": 0
+    },
+    "http": {
+      "/health": "200; configured only",
+      "/operator": "200",
+      "/operator.js": "200",
+      "/performance.js": "200",
+      "/api/voices": "401 without token"
+    },
+    "browser": [
+      "Categorized options rendered",
+      "Preset [joking] inserted at cursor",
+      "One-second silence inserted as [[silence:25f]]",
+      "Selected emphasis became EMPHASIS",
+      "Custom [deadpan] normalized without double brackets",
+      "Test script and custom cue cleared afterward"
+    ]
+  },
+  "paidCalls": 0,
+  "creditsSpent": 0,
+  "productionAssetsChanged": false,
+  "remaining": [
+    "Authenticated provider lookup and generation not verified",
+    "Audio assembly verified with synthetic PCM; paid MP3 decode/assembly not tested",
+    "No downstream frame-accurate video synchronization proof",
+    "No durable budget ledger, shared preset/media persistence or secure AI HTTP credential path",
+    "Physical Android interaction and downloads not verified"
+  ],
+  "actions": [
+    {
+      "action": "Read existing production and rebuild records; confirmed robots run already produced",
+      "reason": "Avoid duplicate paid production"
+    },
+    {
+      "action": "Deployed implementation after passing local tests",
+      "reason": "Keep source, served UI and verification distinct"
+    },
+    {
+      "action": "Verified exact Render commit live, browser controls, HTTP modules and protected API rejection",
+      "reason": "Do not equate commit or public health with paid provider success"
+    }
+  ]
+}
