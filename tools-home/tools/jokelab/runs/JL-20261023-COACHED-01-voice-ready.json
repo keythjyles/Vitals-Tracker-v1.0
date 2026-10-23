@@ -4,7 +4,7 @@
   "runId": "JL-20261023-COACHED-01",
   "canonicalJokeId": "dad-00bda89167b4f15850aa1c91",
   "queueJobId": "94a49ac4-4778-4796-bd2d-2dd9f0a45de7",
-  "stage": "voice_generated_awaiting_coached_review",
+  "stage": "corrected_voice_script_prepared_awaiting_replacement_budget",
   "userFeedback": "No correction requested at the script checkpoint ('Nope').",
   "scriptApproval": {
     "approvedAt": "2026-10-23T18:04:45.655Z",
@@ -77,7 +77,9 @@
         "durationSeconds": 3.78775,
         "bytes": 107843,
         "sha256": "399aada95e6f005ea1b861103aab5e865befb43b9ba0250d548bb05794c0346a",
-        "driveFileId": "1o8mM5ft1MsSLfTTk5y78JvPM3BJHfm5v"
+        "driveFileId": "1o8mM5ft1MsSLfTTk5y78JvPM3BJHfm5v",
+        "reviewStatus": "Unapproved",
+        "reviewNote": "User challenged insufficient joke/performance direction. Preserve originals; do not pass to video."
       },
       {
         "fileName": "GS_Pebble_Voice_v01_Generation2.mp3",
@@ -86,7 +88,9 @@
         "durationSeconds": 4.048958,
         "bytes": 114112,
         "sha256": "13c9757e0b7842ed345dc4cc49a2ef8c37f5d1aec7506896c0220b8a8ac53a6a",
-        "driveFileId": "1xPI0Z8HK9ZV3Tbz3YPsUDvHon9_Joo3X"
+        "driveFileId": "1xPI0Z8HK9ZV3Tbz3YPsUDvHon9_Joo3X",
+        "reviewStatus": "Unapproved",
+        "reviewNote": "User challenged insufficient joke/performance direction. Preserve originals; do not pass to video."
       }
     ]
   },
@@ -140,5 +144,6 @@
     "currentAuthorization": "User explicitly replied Proceed to the duplicate-risk exception.",
     "outcome": "executed_once",
     "automaticRetries": 0
-  }
+  },
+  "replacementPreparation": "JL-20261023-COACHED-01-voice-correction-v02.json"
 }

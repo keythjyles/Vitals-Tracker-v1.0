@@ -1,0 +1,48 @@
+{
+  "schema": "JokeLabVoiceCorrection-1.0",
+  "date": "2026-10-23",
+  "runId": "JL-20261023-COACHED-01",
+  "canonicalJokeId": "dad-00bda89167b4f15850aa1c91",
+  "cuedScript": "[deadpan joke delivery] What did the shy pebble wish for?\n\n[long pause] That she was a little BOULDER.",
+  "characters": 102,
+  "spokenWordsChanged": false,
+  "direction": {
+    "setup": "Natural conversational question in restrained deadpan joke delivery.",
+    "pause": "Deliberate long pause before payoff; duration still requires playback verification.",
+    "punchline": "Stress BOULDER, preserving boulder/bolder pun.",
+    "finalStop": "No added spoken tag, explanation, chuckle or reaction."
+  },
+  "documentation": [
+    "https://elevenlabs.io/docs/help-center/product/core-capabilities/text-to-speech/how-do-audio-tags-work-with-eleven-v3-and-v4",
+    "https://elevenlabs.io/docs/help-center/product/core-capabilities/text-to-speech/how-can-i-add-pauses"
+  ],
+  "uiVerification": "102-character exact script appears once in original GS voice block; no generation pressed.",
+  "oldOutputs": "Retain both v01 outputs unapproved.",
+  "proposedReplacementCap": {
+    "amount": 120,
+    "unit": "existing ElevenLabs credits",
+    "requests": 1,
+    "automaticRetries": 0,
+    "state": "not yet numerically authorized"
+  },
+  "alreadySpentCredits": 72,
+  "heygenPreparation": {
+    "groupName": "GS 4",
+    "groupId": "85cc768c260a40359212b92f738de459",
+    "lookId": "85cc768c260a40359212b92f738de459",
+    "lookName": "White-Bearded Grill Sergeant at Sunset by the Lake",
+    "nativeDimensions": [
+      941,
+      1672
+    ],
+    "orientation": "portrait",
+    "supportedEngines": [
+      "avatar_v",
+      "avatar_iv",
+      "avatar_iii"
+    ],
+    "renderSubmitted": false,
+    "scope": "Identity lookup only; no paid video operation."
+  },
+  "limits": "Audio tags are directions, not guaranteed performance. Full listening review pending; this runtime cannot certify auditory quality."
+}
