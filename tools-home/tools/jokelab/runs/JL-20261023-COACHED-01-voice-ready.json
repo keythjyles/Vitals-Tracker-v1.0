@@ -1,0 +1,84 @@
+{
+  "schema": "JokeLabVoicePreflight-1.0",
+  "date": "2026-10-23",
+  "runId": "JL-20261023-COACHED-01",
+  "canonicalJokeId": "dad-00bda89167b4f15850aa1c91",
+  "queueJobId": "94a49ac4-4778-4796-bd2d-2dd9f0a45de7",
+  "stage": "authenticated_prepared_awaiting_spending_cap",
+  "userFeedback": "No correction requested at the script checkpoint ('Nope').",
+  "scriptApproval": {
+    "approvedAt": "2026-10-23T18:04:45.655Z",
+    "method": "AI operated Approve script → audio queue after user's no-correction response.",
+    "spokenText": "What did the shy pebble wish for? That she was a little boulder.",
+    "cuedScript": "[firm] What did the shy pebble wish for?\n\nThat she was a little boulder."
+  },
+  "elevenLabs": {
+    "target": "https://elevenlabs.io/app/speech-synthesis/text-to-speech",
+    "observed": "Signed-in workspace positively verified; selected voice and exact cued input visible in TTS editor.",
+    "authentication": "User completed live manual sign-in. Promotional dialogs dismissed; no credential entry automated.",
+    "voice": {
+      "name": "Grill Sargent Jokes",
+      "id": "RBNpu6jPzAoaxZKl9noJ",
+      "idEvidence": "Copied using visible Copy voice ID control and browser clipboard."
+    },
+    "model": {
+      "name": "Eleven v4",
+      "documentedId": "eleven_v4"
+    },
+    "settings": {
+      "stability": 0.5,
+      "similarity": 0.75,
+      "language": "Auto",
+      "audioEffects": [],
+      "outputFormat": "MP3 44.1 kHz (192kbps)",
+      "losslessAvailability": "All displayed WAV choices disabled; no upgrade/purchase attempted.",
+      "speed": "No separate speed control verified in this model view."
+    },
+    "input": "[firm] What did the shy pebble wish for?\n\nThat she was a little boulder.",
+    "inputCharacters": 72,
+    "cueValidation": {
+      "syntax": "Provider UI rendered [firm] as an audio tag; official docs support bracketed natural-language delivery direction for v4.",
+      "performance": "Pause, stress, pronunciation and final stop still require full take playback; no audio has been generated."
+    },
+    "quote": {
+      "status": "estimate, not an account-specific dollar quote",
+      "estimatedCredits": 72,
+      "rule": "Official website documentation: one text character consumes one credit; voice multipliers can apply to some shared voices.",
+      "characterCountObserved": 72,
+      "actualCredits": null,
+      "usdEquivalent": null,
+      "usdReason": "Actual subscription allocation or account dollar price not established; no unsupported dollar conversion.",
+      "documentation": "https://elevenlabs.io/docs/help-center/account/general/have-characters-changed"
+    },
+    "takeId": null,
+    "originalAudio": null,
+    "actualCharge": null
+  },
+  "beforePaidRequest": [
+    "Obtain a numeric spending limit for the proposed voice take.",
+    "Keep the unnamed-render contents gap explicit; do not claim that a metadata-only check resolved it. Resolve candidate duplicate uncertainty before paid submission.",
+    "Verify selected voice/model/input/settings are unchanged immediately before submission, then record actual usage and the original downloaded take."
+  ],
+  "providerGenerationRequests": 0,
+  "nativeProject": "JL-20261023-COACHED-01-stage6-project.json",
+  "nativeProjectBytes": 1068,
+  "nativeProjectSha256": "31af552c48ee06b316a2b2ec5e8583b3278c3cd3a4c4ac3ecbd74c8b7533c510",
+  "sourceRecord": "JL-20261023-COACHED-01-J02.json",
+  "duplicateCheck": {
+    "providerInventory": "JL-20261023-COACHED-01-provider-inventory.json",
+    "providerRecords": 100,
+    "titleMatches": 0,
+    "result": "No matching production found in catalog, connected Drive text searches, library aliases or returned provider title records.",
+    "remainingGap": "The 70 generic Drive media contents were not transcribed/reconciled. Provider metadata is not proof that those files contain no matching spoken joke."
+  },
+  "spending": {
+    "state": "not authorized by a numeric cap yet",
+    "proposedCap": {
+      "unit": "existing ElevenLabs credits",
+      "amount": 100,
+      "scope": "One voice take",
+      "automaticRetries": 0
+    },
+    "purchaseOrUpgrade": false
+  }
+}

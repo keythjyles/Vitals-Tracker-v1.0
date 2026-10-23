@@ -1,0 +1,812 @@
+{
+  "schema": "HeyGenProductionInventory-1.0",
+  "date": "2026-10-23",
+  "scope": "All pages returned by the current HeyGen list_videos collection; 100 unique records. Metadata only, not a transcript/contents audit.",
+  "hasMore": false,
+  "candidateCanonicalId": "dad-00bda89167b4f15850aa1c91",
+  "candidateTerms": [
+    "pebble",
+    "boulder",
+    "bolder"
+  ],
+  "candidateTitleMatches": [],
+  "items": [
+    {
+      "id": "32ea65780e3440b2b43edc211cab43ad",
+      "title": "Create a single continuous 10-second SILENT reaction shot using ",
+      "status": "completed",
+      "duration": 10,
+      "createdAt": 1792691797,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "057db102ea134e349b78fc353d29d5d7",
+      "title": "Corny Joke Reaction",
+      "status": "completed",
+      "duration": 8,
+      "createdAt": 1792686403,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "b3bba882a65c4010906ecbb40a4330e6",
+      "title": "Corny Joke Reaction",
+      "status": "completed",
+      "duration": 5,
+      "createdAt": 1792686193,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "591acaca972832cb0bc21724b4ba17ca",
+      "title": "GS Lifesavers — Take 1 Delivery v01",
+      "status": "completed",
+      "duration": 5.87755,
+      "createdAt": 1792635082,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "86058e8901144464a46210e65a1295ac",
+      "title": "A single uninterrupted 7-second silent acting shot of the exact ",
+      "status": "completed",
+      "duration": 7,
+      "createdAt": 1792616556,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "73e63665c85e47dab42aa298a5eb9f4b",
+      "title": "Create a FIVE SECOND COMPLETELY SILENT reaction insert, using th",
+      "status": "completed",
+      "duration": 5,
+      "createdAt": 1792615922,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "96e925d4706bc594c9413b6ed1ad47a1",
+      "title": "GS Playground Slide — Take 1 Delivery v01",
+      "status": "completed",
+      "duration": 7.96735,
+      "createdAt": 1792615494,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "f0be17f3b1b8aca09e4ec485e0a17a07",
+      "title": "GS JOKELET MOON — Keyth supplied audio comparison v02",
+      "status": "completed",
+      "duration": 6.11263,
+      "createdAt": 1792609410,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "f3ddb0943436edd7a55c79893e6f3c26",
+      "title": "GS JOKELET MOON — spoken delivery v01",
+      "status": "completed",
+      "duration": 3.31755,
+      "createdAt": 1792606712,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "7e2674e72e05131beaa50e9ad23e2b51",
+      "title": "GS_JOKELET_05_LEFTOVERS_SPOKEN_v01",
+      "status": "completed",
+      "duration": 5.85102,
+      "createdAt": 1792468006,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "354e9888f6754774d0992826ca91991f",
+      "title": "GS_JOKELET_04_SPIDER_SPOKEN_v01",
+      "status": "completed",
+      "duration": 10.3249,
+      "createdAt": 1792464865,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "05cc7d67bcfa47de86263ec8c131cf1d",
+      "title": "Crowded Elevator Reaction",
+      "status": "completed",
+      "duration": 7,
+      "createdAt": 1792464526,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "9cb68c3ee8166096f89284f6f3458845",
+      "title": "GS_JOKELET_03_LISTENER_SPOKEN_v01",
+      "status": "completed",
+      "duration": 6.13494,
+      "createdAt": 1792464412,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "3f7ad60464df46388fa0f3b873c57a33",
+      "title": "Crowded Elevator Reaction",
+      "status": "completed",
+      "duration": 7,
+      "createdAt": 1792463866,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "889a12c56309df3c168187fc219911d0",
+      "title": "GS_JOKELET_02_EYEBROWS_SPOKEN_v01",
+      "status": "completed",
+      "duration": 4.88494,
+      "createdAt": 1792462523,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "b7e7a8ac3a624da4ac2fb74784972f2e",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 6.68731,
+      "createdAt": 1792460861,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "87ec88d09f2c412299f5d1e8925ad962",
+      "title": "Quick Avatar Video",
+      "status": "completed",
+      "duration": 5.37494,
+      "createdAt": 1792460147,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "4dd43e65b0d077ab734d0ac86f5c8c14",
+      "title": "GS_SMART_GRILL_JOKELET_v03",
+      "status": "completed",
+      "duration": 6.68731,
+      "createdAt": 1792459730,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "f32210a5c8317edcc56093f4ebe7368d",
+      "title": "v01 GS CH01 Second Closeup Frames 1289-1523",
+      "status": "completed",
+      "duration": 9.4,
+      "createdAt": 1792383569,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "fcd4bef855dcd37d4831ad25dbdb6b0d",
+      "title": "v01 GS CH01 Opening Closeup Frames 0000-0182",
+      "status": "completed",
+      "duration": 7.32,
+      "createdAt": 1792383288,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "2b200f00377f40128525ef44e7026679",
+      "title": "Photorealistic documentary caregiver B-roll. Vertical 9:16, eigh",
+      "status": "completed",
+      "duration": 8,
+      "createdAt": 1792378836,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "62b4c0e48df04c1e8e739beca2896f19",
+      "title": "Photorealistic documentary B-roll for a practical veteran and ca",
+      "status": "completed",
+      "duration": 8,
+      "createdAt": 1792378591,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "85039e4ac2b74d14948fba3a7ebea83b",
+      "title": "Photorealistic documentary B-roll, vertical 9:16, six seconds, o",
+      "status": "completed",
+      "duration": 6,
+      "createdAt": 1792378576,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "4ac26c552c9c48f59fe10099aedb26c4",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 65.8024,
+      "createdAt": 1792377692,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "f24da12d4ee342be8b2dd058f0a9d5f0",
+      "title": "Silent comedy reaction insert. Match exactly the Grill Sergeant ",
+      "status": "completed",
+      "duration": 8,
+      "createdAt": 1792270017,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "d59f8436fa914fd5901b49161f58ae53",
+      "title": "Create a photorealistic silent reaction insert featuring exactly",
+      "status": "completed",
+      "duration": 6,
+      "createdAt": 1792269820,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "a87b30f40b494237917cc84b2d830bb1",
+      "title": "Create a photorealistic silent reaction insert featuring exactly",
+      "status": "completed",
+      "duration": 6,
+      "createdAt": 1792269809,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "1c64f7b0c3d443e6a4f394532d4cd66a",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 83.3306,
+      "createdAt": 1792030694,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "6dea6bd000094163ac5f6cc2cf569dc6",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 10.8897,
+      "createdAt": 1791908787,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "bcb3266a82174e148a6acc2a41c2754d",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 2.89959,
+      "createdAt": 1791908420,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "09b7b60110f046628fce1361721a88a7",
+      "title": "Quick Avatar Video",
+      "status": "completed",
+      "duration": 34.8473,
+      "createdAt": 1791858877,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "a9b09307097c4dedab7730096a898dc9",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 12.6311,
+      "createdAt": 1791814775,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "db0354ccdffb42489af8a86d2978789f",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 255.66,
+      "createdAt": 1791809404,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "e7ea8a1a7e0742b5b268c136e0df5db0",
+      "title": "Grill Sergeant: Deadpan at the Grill",
+      "status": "completed",
+      "duration": 10,
+      "createdAt": 1791806932,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "782c1577f30247bb9f266c346d94071b",
+      "title": "Grill Sergeant: Deadpan",
+      "status": "completed",
+      "duration": 6,
+      "createdAt": 1791771538,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "e56b31db44964b6abd62da168d846e98",
+      "title": "Grill Sergeant — Night Fireside",
+      "status": "completed",
+      "duration": 8,
+      "createdAt": 1791690913,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "9cee2ab991474b858899e66c090b3b19",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 197.068,
+      "createdAt": 1791617658,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "8e93fafd060b4572984f4f4d995050d0",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 31.791,
+      "createdAt": 1791583948,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "d844b57e2c0943bf8c4b005656a57705",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 31.791,
+      "createdAt": 1791583143,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "e631911da69840c5a68ced80d49d86f7",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 197.068,
+      "createdAt": 1791532082,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "bd454b95e6ed449bab0422cb4aabe978",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 17.0427,
+      "createdAt": 1791529929,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "364c7fbfa0284966a56ad093268c406f",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 14.9749,
+      "createdAt": 1791529873,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "b6694bd3c88441b98e14c164e5a0c8da",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 19.98,
+      "createdAt": 1791529815,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "379ef0beb74842ada04d14c2cdbf01d0",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 19.98,
+      "createdAt": 1791529008,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "bc82ae5e6ff94be4ba0d986bc9f94266",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 22.18,
+      "createdAt": 1791528557,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "86c644f8e8f44dbeb0e3522fbd1eaac3",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 22.98,
+      "createdAt": 1791528414,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "1b40a8e46db94ae68396cebd3f2f3e08",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 15.4249,
+      "createdAt": 1791528213,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "0f81047f1bed405091dfbe3d67e2e987",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 23.9749,
+      "createdAt": 1791527890,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "5bb764522bfb4ba49d1122bc2aec6a90",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 20.4549,
+      "createdAt": 1791526067,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "4538cf6683be489cadde544712af20d4",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 11.5449,
+      "createdAt": 1791525876,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "9111faef1d8047fc8a85f3257283fa7a",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 18.4249,
+      "createdAt": 1791524586,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "c351cf58ffea475f87e34f2ec1bd9b43",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 9.82494,
+      "createdAt": 1791523809,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "74ab741f917d441a8b259f4914979009",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 121.731,
+      "createdAt": 1791431947,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "cdc52e31e32b4b1c95486f24ee32573e",
+      "title": "Grill Sergeant — Build Your Record",
+      "status": "completed",
+      "duration": 30.2,
+      "createdAt": 1791390458,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "ba9527f2c80c40a68f3e427919069cbe",
+      "title": "Grill Sergeant — Build Your Record",
+      "status": "completed",
+      "duration": 30.2,
+      "createdAt": 1791388271,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "eead2e1d0d4f4df191cefc5ec8eb7501",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 30.1975,
+      "createdAt": 1791350753,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "76f044f0c7154e77ab63b8e87f981f09",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 224.287,
+      "createdAt": 1791349600,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "820216904ae647888abb1757d50c28b8",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 207.804,
+      "createdAt": 1791154325,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "ebdf5d394e444f8dbc8ff506da16d96e",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 207.804,
+      "createdAt": 1791152973,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "d8b9a9f5718f42e0b3eae77a7e9886aa",
+      "title": "Evidence to Thicket",
+      "status": "completed",
+      "duration": 19.2,
+      "createdAt": 1791056915,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "5e6b20e2b2874d7398ee78a7e2c59121",
+      "title": "Grill Sergeant — Episode 2: Seed Your Record → Thicket",
+      "status": "completed",
+      "duration": 19.2,
+      "createdAt": 1791055006,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "c1d751b393314f3ea3ab844a0278e085",
+      "title": "Evidence to Thicket",
+      "status": "completed",
+      "duration": 19.2,
+      "createdAt": 1791052757,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "0cf1c2263cc242d1b62fe628fe0f764b",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 145.554,
+      "createdAt": 1791049857,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "36832df82b884e999800ef28ff2c4b0f",
+      "title": "Grill Sergeant — Episode 2: The Thicket Method",
+      "status": "completed",
+      "duration": 19,
+      "createdAt": 1791017001,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "e2e32fddb2ad4d148b8c8d58882e75dd",
+      "title": "One Questionnaire, Thirty Years",
+      "status": "completed",
+      "duration": 7,
+      "createdAt": 1791015715,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "f157755788504effb9c11683089e5490",
+      "title": "One Questionnaire, Thirty Years",
+      "status": "completed",
+      "duration": 7,
+      "createdAt": 1791007048,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "15e357a8e74a4ed8afe0920c76f11ae3",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 31.7126,
+      "createdAt": 1790709909,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "dd85a06b1c104e98808c950ce015b020",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 21.6294,
+      "createdAt": 1790693754,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "dc8f0c11f6b94a9f806e3f63a2060e17",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 31.7126,
+      "createdAt": 1790651602,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "d38acc6c6be24293a619992ed442b6d0",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 39.5494,
+      "createdAt": 1790651435,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "b0c3cae67fa542809c1fc80bb614c5e4",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 39.7061,
+      "createdAt": 1790651362,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "383234bbe3254f6aa3cc361be6a0fed2",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 20.8457,
+      "createdAt": 1790651232,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "3065dd20b71043dd97ca8a99c857228d",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 87.6939,
+      "createdAt": 1790631415,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "ff2dc3e1d40c4879942c76c0bbdd5501",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 118.715,
+      "createdAt": 1790628378,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "474d21ad48974a07bf9ac7f82959f7f6",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 125.466,
+      "createdAt": 1790620944,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "e9eedf628a0a472faf970a39fe71a11f",
+      "title": "Avatar IV Video",
+      "status": "completed",
+      "duration": 79.4906,
+      "createdAt": 1790618247,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "ab98cc75d7614cc798a485cff285eec3",
+      "title": "Avatar V Video",
+      "status": "completed",
+      "duration": 8.1502,
+      "createdAt": 1790610438,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "7d92f18de37d47be88e6f41c5f556a28",
+      "title": "Quick Avatar Video",
+      "status": "completed",
+      "duration": 250.968,
+      "createdAt": 1790609783,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "b987e3a111f648ec90f3bc54d9bfa4c8",
+      "title": "Quick Avatar Video",
+      "status": "failed",
+      "createdAt": 1790609402,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "f45f71ad74aa4367aaaaaf0c73878dcc",
+      "title": "VA C&P Exam Prep with Wendell the Grill Sergeant Masterclass",
+      "status": "completed",
+      "duration": 297.927,
+      "createdAt": 1790608290,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "2658d80372ba4dd8b5c0b7df9afc739b",
+      "title": "Quick Avatar Video",
+      "status": "failed",
+      "createdAt": 1790607317,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "a807761637a84d14a0a37ac3c390ca34",
+      "title": "Quick Avatar Video",
+      "status": "failed",
+      "createdAt": 1790606907,
+      "videoType": "avatar_video"
+    },
+    {
+      "id": "49a809f77ade4c7e8ff6354cc330f831",
+      "title": "Grill Sergeant: The VA Back Pay Secret (38 C.F.R. 3.156(c))",
+      "status": "completed",
+      "duration": 234.397,
+      "createdAt": 1790573520,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "d93deff3f82e42ee897f4f1b23c95c03",
+      "title": "Wendell, The Grill Sergeant: A Sincere Introduction",
+      "status": "completed",
+      "duration": 95.5297,
+      "createdAt": 1790573422,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "576c88ed84904058b253feff9795db26",
+      "title": "VA C&P Exam Prep with Wendell the Grill Sergeant",
+      "status": "completed",
+      "duration": 201.649,
+      "createdAt": 1790573265,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "04f2d9281ebe41f1ad7987af8d70db6e",
+      "title": "Wendell, The Grill Sergeant: A Sincere Introduction",
+      "status": "completed",
+      "duration": 97.6456,
+      "createdAt": 1790571438,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "d00c977eb6ee43bdac26206ef191b3bd",
+      "title": "VA C&P Exam Prep with Wendell the Grill Sergeant",
+      "status": "completed",
+      "duration": 191.439,
+      "createdAt": 1790570966,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "0ac28454609542b6a4afb648a063dac2",
+      "title": "VA C&P Exam Prep with Wendell the Grill Sergeant",
+      "status": "completed",
+      "duration": 177.003,
+      "createdAt": 1790570205,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "c30dfa77ec904a688dfc6f96c3dd6025",
+      "title": "VA C&P Exam Prep with Wendell the Grill Sergeant",
+      "status": "completed",
+      "duration": 250.305,
+      "createdAt": 1790568079,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "78a1802766cd49c69724e5f11b9c89b8",
+      "title": "Wendell, The Grill Sergeant: A Sincere Introduction",
+      "status": "completed",
+      "duration": 86.4168,
+      "createdAt": 1790567005,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "5825a6709bda47c1b768428b815198fd",
+      "title": "Wendell, The Grill Sergeant: A Sincere Introduction",
+      "status": "completed",
+      "duration": 184.524,
+      "createdAt": 1790565908,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "f894b3fec9854600ad9058a4521b89d9",
+      "title": "Grill Sergeant: Elite Company (V2)",
+      "status": "completed",
+      "duration": 54.0794,
+      "createdAt": 1790565313,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "10b777dcd8d1414e8d924852f48c1c33",
+      "title": "Grill Sergeant: Elite Company",
+      "status": "completed",
+      "duration": 47.1584,
+      "createdAt": 1790564436,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "68ee7f2664e14f38ac95707e71ad3819",
+      "title": "Wendell, The Grill Sergeant: A Sincere Introduction",
+      "status": "completed",
+      "duration": 176.531,
+      "createdAt": 1790563009,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "b1517e663c2a4be1abf5eebc475443c4",
+      "title": "VA C&P Exam Prep with Wendell the Grill Sergeant",
+      "status": "completed",
+      "duration": 206.733,
+      "createdAt": 1790558611,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "cc1b5d6bcf8d4dc2a0befc0307cf1c25",
+      "title": "VA Disability: The Downstream Chain",
+      "status": "completed",
+      "duration": 61.6751,
+      "createdAt": 1790555437,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "06417a34363c4d74b1b90697bcf797e2",
+      "title": "The Grill Sergeant's Guide to VA Documentation",
+      "status": "completed",
+      "duration": 86.2775,
+      "createdAt": 1790554226,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "0de84e63be624251aee9e663c3647ae5",
+      "title": "Wendell's Fieldcraft: Tactical VA Prep",
+      "status": "completed",
+      "duration": 48.3004,
+      "createdAt": 1790538948,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "63773cba2a2b4f22b2b0678409378025",
+      "title": "Wendell's Field Guide: Reframing VA Denials",
+      "status": "completed",
+      "duration": 94.3281,
+      "createdAt": 1790537786,
+      "videoType": "video_agent"
+    },
+    {
+      "id": "0b741dd50d974799b26ef49c813bdbf8",
+      "title": "Quick Avatar Video",
+      "status": "completed",
+      "duration": 36.6759,
+      "createdAt": 1790535456,
+      "videoType": "avatar_video"
+    }
+  ]
+}
