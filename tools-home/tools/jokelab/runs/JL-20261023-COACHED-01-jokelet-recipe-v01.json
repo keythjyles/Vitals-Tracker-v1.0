@@ -1,0 +1,70 @@
+{
+  "schema": "GS-Jokelet-Rebuild-1.0",
+  "runId": "JL-20261023-COACHED-01",
+  "canonicalJokeId": "dad-00bda89167b4f15850aa1c91",
+  "id": "pebble-straight-stare",
+  "version": "v01",
+  "status": "Approved",
+  "approvalEvidence": "User: Yes, it is good.",
+  "duration": 9.64,
+  "fps": 25,
+  "frames": 241,
+  "width": 1080,
+  "height": 1920,
+  "assemblyEngine": "FFmpeg libx264 CRF21 preset fast; AAC192k mono48kHz; faststart",
+  "performance": {
+    "heygenVideoId": "f07f96d9cf326a63a33671b77c576c14",
+    "driveFileId": "1A_ATMpV0sUVBlTXP1lAWeRANuadreRrv",
+    "sha256": "f8325234185e05b040a1ea5e05449cd7ba31c8cc64da0e0630ce756521882a63",
+    "inSeconds": 0,
+    "outSecondsExclusive": 5.36,
+    "frames": 134,
+    "videoAudioMuted": true,
+    "stability": "Fixed background integer-pixel phase correlation over all134frames: ROI[20,40,280,380],max shift0px. No stabilization transform or added motion applied."
+  },
+  "voice": {
+    "takeId": "pqILh6dY0D1CO7Ckhplb",
+    "wavDriveFileId": "1-HrnqhQvBc-IZXmXLXnZCMBOhGvIoDPY",
+    "sha256": "09519972b493e2ec472b4114972c116905fc21204bf1d6c748b09230439f9879",
+    "duration": 5.32898,
+    "gainDb": 0,
+    "rate": 1,
+    "start": 0,
+    "processing": "Resample to48kHz; AAC192k; pad with silence to9.64s."
+  },
+  "reaction": {
+    "id": "reaction-20261022-1",
+    "repositoryPath": "tools-home/tools/jokelets/media/GS_Reaction_4.28s_Straight_Stare_Silent.mp4",
+    "sha256": "eb17770dee3518129f8d903864a5e91472fa65d163e329465b597ac0eee0b4b0",
+    "timelineStart": 5.36,
+    "inSeconds": 0,
+    "outSecondsExclusive": 4.28,
+    "frames": 107,
+    "picture": "1080x1890 padded top/bottom15px black to1080x1920; no crop or stretch.",
+    "audio": "No source audio stream; silent hold.",
+    "sourceGap": "Original reaction master source ID remains unresolved; exact approved working bytes preserved in repository."
+  },
+  "cuedScript": "[deadpan joke delivery] What did the shy pebble wish for?\n\n[long pause] That she was a little BOULDER.",
+  "layers": {
+    "ambient": [],
+    "music": [],
+    "soundEffects": [],
+    "captions": [],
+    "graphics": [],
+    "outro": []
+  },
+  "output": {
+    "repositoryPath": "tools-home/tools/jokelets/media/GS_Jokelet_Pebble_Straight_Stare_v01.mp4",
+    "driveFileId": "1Q70Fx4ZYQfoH--OzOpwsaUNnjQ_XRct1",
+    "bytes": 6398154,
+    "sha256": "8d85a1af2e7885e26d54476a5d888f01f108eae22abbff84e02fc2a7efd8647e"
+  },
+  "verification": {
+    "fullDecode": true,
+    "duration": 9.64,
+    "frames": 241,
+    "reactionAudioPeakDb": -91,
+    "userPlaybackApproval": true,
+    "restoreRebuildTest": "Not run; recipe preserved; do not claim byte-identical rebuild verification."
+  }
+}

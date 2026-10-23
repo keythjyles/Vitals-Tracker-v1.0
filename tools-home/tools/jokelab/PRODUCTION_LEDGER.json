@@ -454,6 +454,60 @@
         }
       ],
       "possibleSourceMatches": []
+    },
+    {
+      "canonicalId": "dad-00bda89167b4f15850aa1c91",
+      "title": "Pebble · Straight stare",
+      "sourceJokeIds": [
+        "dad-00bda89167b4f15850aa1c91"
+      ],
+      "state": "existing_jokelet_files",
+      "productionAction": "Reuse approved existing jokelet; do not regenerate by default.",
+      "assets": [
+        {
+          "id": "pebble-straight-stare",
+          "family": "pebble",
+          "number": 17,
+          "title": "Pebble · Straight stare",
+          "reaction": "Straight stare · full 4.28s silent hold",
+          "category": "Dad jokes",
+          "tags": [
+            "pebble",
+            "boulder",
+            "wordplay"
+          ],
+          "text": "What did the shy pebble wish for? That she was a little boulder.",
+          "status": "Approved",
+          "driveId": "1Q70Fx4ZYQfoH--OzOpwsaUNnjQ_XRct1",
+          "src": "media/GS_Jokelet_Pebble_Straight_Stare_v01.mp4",
+          "poster": "media/GS_Jokelet_Pebble_Straight_Stare_v01.jpg",
+          "duration": 9.64,
+          "fps": 25,
+          "frames": 241,
+          "width": 1080,
+          "height": 1920,
+          "version": "v01",
+          "sha256": "8d85a1af2e7885e26d54476a5d888f01f108eae22abbff84e02fc2a7efd8647e",
+          "canonicalJokeId": "dad-00bda89167b4f15850aa1c91",
+          "automationReview": {
+            "status": "Allowed",
+            "audio": "voice-only",
+            "burnedCaptions": false,
+            "ambient": false,
+            "music": false,
+            "soundEffects": false,
+            "note": "Approved voice and performance; exact approved silent reaction; output assembled without publication layers. User approved whole jokelet."
+          },
+          "sourceTrail": {
+            "cuedScript": "[deadpan joke delivery] What did the shy pebble wish for?\n\n[long pause] That she was a little BOULDER.",
+            "elevenLabsTake": "pqILh6dY0D1CO7Ckhplb",
+            "voiceFile": "Drive 1-HrnqhQvBc-IZXmXLXnZCMBOhGvIoDPY",
+            "heygenRender": "f07f96d9cf326a63a33671b77c576c14; Drive 1A_ATMpV0sUVBlTXP1lAWeRANuadreRrv",
+            "rebuildProject": "tools-home/tools/jokelab/runs/JL-20261023-COACHED-01-jokelet-recipe-v01.json",
+            "gaps": "Original reaction master source ID remains unresolved; exact approved working bytes preserved in repository. Restore/rebuild execution not yet tested."
+          }
+        }
+      ]
     }
   ],
   "sourceBacklog": [
@@ -470,7 +524,7 @@
     {
       "sourceJokeId": "dad-00bda89167b4f15850aa1c91",
       "canonicalId": "dad-00bda89167b4f15850aa1c91",
-      "state": "performance_render_processing",
+      "state": "produced_approved",
       "runId": "JL-20261023-COACHED-01",
       "queueJobId": "94a49ac4-4778-4796-bd2d-2dd9f0a45de7",
       "spendingAuthorization": {
@@ -510,7 +564,12 @@
         "requests": 1,
         "automaticRetries": 0,
         "approved": true
-      }
+      },
+      "outputId": "pebble-straight-stare",
+      "outputSha256": "8d85a1af2e7885e26d54476a5d888f01f108eae22abbff84e02fc2a7efd8647e",
+      "outputDriveId": "1Q70Fx4ZYQfoH--OzOpwsaUNnjQ_XRct1",
+      "rebuildRecipe": "tools-home/tools/jokelab/runs/JL-20261023-COACHED-01-jokelet-recipe-v01.json",
+      "paidProductionClearance": false
     },
     {
       "sourceJokeId": "dad-00c8169b19744be3deb5869d",
@@ -520,7 +579,8 @@
     {
       "sourceJokeId": "dad-00d6dea00e3a33805c7b5007",
       "canonicalId": "dad-00d6dea00e3a33805c7b5007",
-      "state": "not_started_unverified"
+      "state": "script_prepared_awaiting_budget",
+      "runId": "JL-20261023-NEXT-02"
     },
     {
       "sourceJokeId": "dad-01390bc83ffc16630ae3d503",
@@ -5013,7 +5073,7 @@
     {
       "runId": "JL-20261023-COACHED-01",
       "canonicalId": "dad-00bda89167b4f15850aa1c91",
-      "state": "performance_render_processing",
+      "state": "produced_approved",
       "queueJobId": "94a49ac4-4778-4796-bd2d-2dd9f0a45de7",
       "nativeProject": "runs/JL-20261023-COACHED-01-stage6-project.json",
       "companionRecord": "runs/JL-20261023-COACHED-01-J02.json",
@@ -5063,7 +5123,18 @@
         "requests": 1,
         "automaticRetries": 0,
         "approved": true
-      }
+      },
+      "outputId": "pebble-straight-stare",
+      "outputSha256": "8d85a1af2e7885e26d54476a5d888f01f108eae22abbff84e02fc2a7efd8647e",
+      "outputDriveId": "1Q70Fx4ZYQfoH--OzOpwsaUNnjQ_XRct1",
+      "rebuildRecipe": "tools-home/tools/jokelab/runs/JL-20261023-COACHED-01-jokelet-recipe-v01.json"
+    },
+    {
+      "runId": "JL-20261023-NEXT-02",
+      "canonicalId": "dad-00d6dea00e3a33805c7b5007",
+      "state": "script_prepared_no_generation",
+      "providerGenerationRequests": 0,
+      "paidProductionClearance": false
     }
   ]
 }

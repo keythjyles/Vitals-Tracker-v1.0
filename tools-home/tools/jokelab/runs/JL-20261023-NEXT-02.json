@@ -1,0 +1,21 @@
+{
+  "schema": "JokeLabRun-1.0",
+  "runId": "JL-20261023-NEXT-02",
+  "state": "script_prepared_no_generation",
+  "canonicalJokeId": "dad-00d6dea00e3a33805c7b5007",
+  "sourceLibraryPosition": 5,
+  "source": "tools-home/data/jokelab/library.json",
+  "spokenText": "How do robots eat guacamole? With computer chips.",
+  "cuedScript": "[deadpan joke delivery] How do robots eat guacamole?\n\n[long pause] With COMPUTER CHIPS.",
+  "mode": "User delegates creative choices and permits deviations for product quality; preserve source trail and financial limits.",
+  "providerGenerationRequests": 0,
+  "actualCredits": 0,
+  "budget": "No new numeric authorization yet. Prior one-request allowances were consumed and must not be reused.",
+  "duplicateCheck": {
+    "catalog": "No match in finished catalog, bundled source metadata or existing ledger.",
+    "heygen": "No guacamole or computer chips titled render found.",
+    "drive": "No matching produced joke identified; a Dad Jokes1 mixer search result requires content check. Fetch with production Drive link succeeded after other-account404; do not repeat unrelated medical searches.",
+    "remainingGap": "Generic unnamed render contents not reconciled. Do not claim exhaustive clearance or inherit the prior single-joke exception."
+  },
+  "next": "Resolve any relevant duplicate candidate, confirm one combined ElevenLabs/HeyGen spending authorization, then generate; preserve originals, use PCM WAV for video, GS4, approved silent reaction, clean jokelet and durable backups."
+}
