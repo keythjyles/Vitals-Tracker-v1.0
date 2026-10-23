@@ -1,5 +1,5 @@
 # JokeLab — AI operator guide
-Version 1.0 · October 23, 2026
+Version 1.1 · October 23, 2026
 
 ## Mission
 
@@ -45,13 +45,25 @@ At each stage:
 
 The user coaches implementation; they should not need to operate the app except for genuine human-only access steps. Do not turn every click into a new question. Define meaningful stage outputs and stop at those boundaries.
 
+## Default production path — October 23 clarification
+
+**Choose an unproduced joke → prepare its spoken delivery → create voice/performance → add an approved reaction → save the jokelet → mark produced.**
+
+The known-joke study, linguistic breakdown, tone exploration, research and independent candidate grading are an optional craft/study mode. They are valuable for learning or a specific problem; do not impose them on a user trying to produce consistent content. Ordinary production does not require rewriting every collected joke or proving its comic mechanism again.
+
+The long-term aim is to produce the usable joke library over time, in manageable batches, and observe cost, reliability and audience response. Do not launch a whole-library paid run from that aspiration. No assumption that 900 source records means 900 distinct jokes.
+
+Before paid production, read [PRODUCTION_LEDGER.json](PRODUCTION_LEDGER.json). Match the underlying joke as well as exact wording. Check existing outputs and aliases; reserve the selected canonical joke for the batch; record completion, failures and retries. A new reaction or wording variant is not automatically a new joke to produce. Recombining existing jokelets into episodes does not require generating those jokelets again.
+
+The ledger is initially an operator-maintained record. UI enforcement, automatic semantic reconciliation and atomic concurrency controls have not been implemented or tested. It seeds the known catalog and all source records without claiming the full archive is reconciled. Do not label unmatched entries confirmed unproduced until that check is made. Keep paid batches small and within their explicit limits.
+
 ## Stage map
 
 0. Startup/access and run contract: confirm mode, required services, source records, readiness and spending restrictions.
 1. Inspect JokeLab library/queue and recover existing work if needed.
 2. Select the initial joke/specimen and record its source, setup, hinge/payoff and intended audience/performance.
-3. Explore wording/tone using the actual JokeLab controls and generated prompt. Preserve the original.
-4. Evaluate each candidate independently; retain multiple viable options. Record the production selection and rationale without inventing approval.
+3. Optional study branch only when requested or needed: explore wording/tone using the actual JokeLab controls and generated prompt. Preserve the original.
+4. If study produced candidates, evaluate independently and retain viable options. Otherwise continue from the selected usable joke to spoken-delivery preparation. Do not force a tone contest.
 5. Script Lab: develop and lock the spoken performance script, delivery notes and final spoken stop.
 6. ElevenLabs: generate/review the required voice performance; retain settings, job ID, attempts, bytes and costs.
 7. Performance creation: use the verified GS identity and approved voice; inspect the whole render.
