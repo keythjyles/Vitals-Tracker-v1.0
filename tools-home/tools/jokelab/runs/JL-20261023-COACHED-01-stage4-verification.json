@@ -1,0 +1,44 @@
+{
+  "schema": "JokeLabVerification-1.0",
+  "runId": "JL-20261023-COACHED-01",
+  "date": "2026-10-23",
+  "sourceReviewCommit": "8d81f0fc7961df13ea81c35dc3cdb3c9d19d023a",
+  "embeddedPolicyCommit": "04eda1e5daf02d23cbc35de9aa6a3b19dc1430e4",
+  "policyVersion": "3.3.0",
+  "checks": {
+    "cleanSourceCases": 11,
+    "promptSourceBundleParity": "passed",
+    "previewDirectPrompt": "passed",
+    "previewReviewSaveReload": "passed",
+    "liveSourceTrailForm": "verified",
+    "liveEmbeddedPolicy": "verified v3.3.0 expanded policy and linked references in deployed JokeLab; library loaded 900 records; queue 0"
+  },
+  "queue": 0,
+  "providerGenerationRequests": 0,
+  "privateBackend": "Instruction source updated; private service not redeployed or exercised.",
+  "legacySourceReconciliation": "incomplete",
+  "universalRebuildImporter": "not implemented",
+  "backupRecords": [
+    {
+      "id": "1aXfl30ipwakz6MhEbKI3GtnsDmkxTrlZ",
+      "bytes": 69484,
+      "sha256": "0eccba318b96301cd702aca9aa6a412e51d69f6b2c8225fbc9e575434833e78f"
+    },
+    {
+      "id": "1PVq7OPhGzPwxO1fm5NZIXBDnDxmXCu4S",
+      "bytes": 153165,
+      "sha256": "0b93a31e77bcafbe349885a440ae7d7f06663721ae1f7c2e162589779538f016"
+    }
+  ],
+  "deployment": {
+    "runId": 39985696525,
+    "commit": "04eda1e5daf02d23cbc35de9aa6a3b19dc1430e4",
+    "build": "success",
+    "deploy": "success",
+    "reportBuildStatus": "success"
+  },
+  "liveScreenshots": [
+    "jokelet-source-trail-1792771775519.jpg",
+    "jokelab-instructions-proof-1792772498112.jpg"
+  ]
+}
