@@ -21,9 +21,12 @@ function authorized(req) {
   return actual.length === expected.length && timingSafeEqual(actual, expected);
 }
 const server = http.createServer(async (req, res) => {
-  if (req.method === 'GET' && req.url === '/health')
+  const pathname = new URL(req.url || '/', 'http://localhost').pathname.replace(/\/+$/, '') || '/';
+  // Log only method and path, never headers, credentials, queries or request bodies.
+  console.log('Request', req.method, pathname);
+  if (req.method === 'GET' && (pathname === '/health' || pathname === '/'))
     return send(res, 200, { service: 'jokelet-api', status: 'ok', elevenLabsConfigured: Boolean(elevenKey), generationEnabled: Boolean(elevenKey && operatorToken) });
-  if (req.method !== 'POST' || req.url !== '/api/voice/generate')
+  if (req.method !== 'POST' || pathname !== '/api/voice/generate')
     return send(res, 404, { error: 'Not found' });
   if (!authorized(req)) return send(res, 401, { error: 'Unauthorized' });
   if (!elevenKey) return send(res, 503, { error: 'ElevenLabs is not configured' });
