@@ -1,5 +1,5 @@
 # Jokelet Engine — production method
-Version: 1.0 · Recorded October 23, 2026
+Version: 1.1 · Updated October 23, 2026
 Status: working engine name; established recipe documented; repeatability validation pending.
 
 ## Purpose and boundary
@@ -56,6 +56,41 @@ Observed optional format: teller setup → listener anticipation → teller punc
 
 Record anticipatory versus post-punchline use as a future classification distinction. Existing pose metadata does not prove that an anticipation-role field, extra cut or corresponding automation is implemented. Keep that four-shot structure experimental until deliberately tested. It does not replace the baseline.
 
+## Startup conditions and known dependencies — October 23, 2026
+
+The immediate goal is to understand and document the process, make dependencies visible, and engineer improvements where evidence supports them. Do not hide a blocked stage behind an easier substitute.
+
+### Human startup, then agent production
+
+The user describes ElevenLabs sign-in as “priming the pump” or “turning on the switch.” It is a startup access task the user can perform before the production run. It is not a request to choose jokes, voice takes, reactions or editing decisions during the run.
+
+For the requested proof: the agent makes the production choices and follows the documented process to create five jokelets and an outro. Account access may still need the user's action. Record any other unavoidable human dependency when it is actually encountered.
+
+| Dependency | Current knowledge | Evidence still needed |
+| --- | --- | --- |
+| ElevenLabs sign-in | User reports manual sign-in is required for agent access. Treat it as the identified startup dependency. | Verify access in the actual agent-controlled production session after sign-in. |
+| Session persistence | Unknown for a complete five-jokelet production run. | Record whether access survives the whole run, expiry, and any reauthentication interruption. |
+| Voice generation and download | A required stage of this full-process proof. | Record the actual inputs, settings, job IDs, outputs and costs once executed. |
+| Later production stages | Prior individual steps have some implementation evidence; full-process repeatability is pending. | Observe each stage in the actual run and record failures and interventions. |
+
+A sign-in on a separate device or unrelated browser must not be assumed to authenticate the agent's session. Use the supported authentication/handoff route when access is actually being established; never put passwords or one-time codes into the production record.
+
+### What counts as proof
+
+Reassembling five finished jokelets only tests assembly. It does not prove joke preparation, ElevenLabs voice generation, performance creation or the other upstream stages. The user explicitly rejected that substitution on October 23.
+
+Reusable reactions and the approved outro remain deliberate components of the recipe. Reusing those components is different from substituting finished jokelets for the stages being tested. Any stage using a pre-existing input must be identified as reused and cannot be reported as newly exercised.
+
+When a required stage is blocked, record its exact point, observed reason, work already completed and what would unblock it. Stop dependent production there. Do not route around the stage and label the resulting product proof of the complete engine.
+
+### Observations before engineering
+
+For each dependency record: required starting state; who supplies it; what is observed versus reported or assumed; failure behavior; recovery action; output/evidence; and whether the condition was tested in this run.
+
+Record a known limitation before starting dependent work. Record newly discovered limitations when encountered rather than promising there will never be surprises. Keep unknowns visible. Propose or implement changes to the actual cause within the authorized task; do not quietly alter the recipe.
+
+This update documents the dependency and the correction. It does not establish a signed-in session, start paid generation, or mark any episode complete.
+
 ## Step 1 — approve the joke specification
 
 Record joke ID, exact approved text, source/provenance, premise, setup, hinge/payoff and final spoken stop. Check that the joke works for GS and the audience without explanatory additions.
@@ -66,7 +101,7 @@ Retain previous wording and the reason for any revision. Existing episode canon 
 
 ## Step 2 — produce and approve the voice
 
-Prefer an existing approved recording when available. Otherwise use the established ElevenLabs voice workflow under the applicable generation authorization.
+For ordinary production, an existing approved recording may be reused when the task permits it. For the full-process proof requested October 23, exercise the ElevenLabs voice stage after startup access is ready. A reused voice take cannot count as proof of new voice generation. Keep authorization and actual usage/cost visible.
 
 Keep original generation/download, exact input text, voice/model identity and settings, provider job ID, generation time, actual duration and audio hash. Record credits and actual charge when available, including failed attempts; distinguish currency conversion or estimates from provider-reported charges.
 
