@@ -10,7 +10,7 @@ const js=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES20
 const {buildPrompt,defaults,validateRecord,PROMPT_VERSION}=await import('data:text/javascript;base64,'+Buffer.from(js).toString('base64'));
 const joke='Why couldn’t it stand?\n“It’s obviously too tired.”';
 const notes='Try “allegedly” at the END.\nNo extra line after the payoff.';
-const settings={...defaults,tense:'Past tense',customTone:'quietly skeptical',count:5};
+const settings={...defaults,stage:'joke',tones:['Mock certainty'],count:5,tense:'Past tense',customTone:'quietly skeptical',count:5};
 const prompt=buildPrompt(joke,notes,settings,null,'test-run');
 assert(prompt.includes(JSON.stringify(joke)),'Exact source preserved, including newlines and curly punctuation');
 assert(prompt.includes(notes),'Scribe included verbatim');
@@ -40,3 +40,4 @@ assert.deepEqual(validateRecord({...r,report}).report,report,'Named cluster reta
 const longform=buildPrompt(joke,notes,{...settings,stage:'longform'});
 assert(longform.includes('Develop 5 long-form jokes')&&!longform.includes('WORDING LOCK:'),'Long-form can expand the seed');
 console.log('PASS: Unicode and compressed report handoff, variant validation, report retention, long-form request.');
+

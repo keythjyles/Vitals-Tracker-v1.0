@@ -1,6 +1,6 @@
 import {automationAssessment} from './automation.js?v=20261023-clean-review';
 import {resolveMedia,saveProject,restoreProject,backupMessage,updateBackupStatus} from './storage.js?v=20261023-recovery';
-import {LibraryStore,mergeState,uid,TYPES,DEFAULT_FOLDERS,kind,all,descendants,moveFolder,moveItems,duplicateItem,classify,mediaURL,uploadBlob,hashBlob,inspectMedia,mimeFor,thumbnailFor} from './factory-data.js?v=20261023-recovery';
+import {LibraryStore,mergeState,uid,TYPES,DEFAULT_FOLDERS,kind,all,descendants,moveFolder,moveItems,duplicateItem,classify,mediaURL,uploadBlob,hashBlob,inspectMedia,mimeFor,thumbnailFor} from './factory-data.js?v=20261023-clean-review';
 import {renderClips} from './factory-render.js';
 const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),fmt=s=>`${Number(s).toFixed(2)}s`;
 let store=new LibraryStore(t=>$('sync').textContent=t),state,view=new URLSearchParams(location.search).get('view')||'all',folderId=null,selected=new Set(),visible=[],dragged=[],editId,folderEditId,pending=[],isImporting=false,isRendering=false,rendered,renderURL,renderManifest,cancelRender,playing=false,previewIndex=-1,previewClips=[];
