@@ -1,5 +1,6 @@
 // Isolated Jokelet Engine ElevenLabs API. Never expose the key to browser code.
 import http from 'node:http';
+import { readFile } from 'node:fs/promises';
 import { timingSafeEqual } from 'node:crypto';
 
 const port = Number(process.env.PORT || 3100);
@@ -24,6 +25,13 @@ const server = http.createServer(async (req, res) => {
   const pathname = new URL(req.url || '/', 'http://localhost').pathname.replace(/\/+$/, '') || '/';
   // Log only method and path, never headers, credentials, queries or request bodies.
   console.log('Request', req.method, pathname);
+  if (req.method === 'GET' && pathname === '/operator') {
+    try {
+      const html = await readFile(new URL('./operator.html', import.meta.url));
+      res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store', 'content-security-policy': "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; media-src blob:; img-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'", 'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer' });
+      return res.end(html);
+    } catch { return send(res, 500, { error: 'Operator page unavailable' }); }
+  }
   if (req.method === 'GET' && (pathname === '/health' || pathname === '/'))
     return send(res, 200, { service: 'jokelet-api', status: 'ok', elevenLabsConfigured: Boolean(elevenKey), generationEnabled: Boolean(elevenKey && operatorToken) });
   if (req.method === 'GET' && pathname === '/api/voices') {
