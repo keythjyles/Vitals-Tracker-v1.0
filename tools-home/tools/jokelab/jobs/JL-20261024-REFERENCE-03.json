@@ -1,6 +1,7 @@
 {
   "events": [
-    "reserved_before_provider_lookup"
+    "reserved_before_provider_lookup",
+    "read_only_lookup_started"
   ],
   "jobId": "JL-20261024-REFERENCE-03",
   "paidRequests": 0,
@@ -25,5 +26,5 @@
     "status": "existing_approved_source_verified_unchanged"
   },
   "sourceCommit": "9c7b9233f23a457057e4d165023c6f0ed1e87a45",
-  "status": "reserved"
+  "status": "submitted"
 }
