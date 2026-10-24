@@ -1,0 +1,17 @@
+{
+  "date": "2026-10-24",
+  "scope": "SxLock MP4 duration only",
+  "problem": "User export 16852.mp4 displayed approximately 4s despite 66.6s encoded media. Fragmented recorder headers had mvhd duration zero and short tkhd/mdhd duration values.",
+  "change": "Finalize fragmented MP4 duration headers from track tfdt/trun timing. Preserve encoded media, fragment offsets and box lengths. Await finalization before enabling download. Cache-bust script.",
+  "verification": [
+    "3 node tests pass: v0/v1 duration fields and truncated input",
+    "Applied helper to user's 71,207,545-byte export: size unchanged; duration 66.595767s",
+    "Video and audio encoded stream SHA256 identical before/after helper and lossless remux",
+    "Corrected user download is nonfragmented faststart MP4, 66.582467s; no re-encoding"
+  ],
+  "limits": [
+    "Android duration display of next browser-generated export requires user confirmation",
+    "Separate one-frame issue and requested music/end-frame improvements remain outside this focused repair"
+  ],
+  "workflow": "Prepared whole video -> SxLock music and sound effects -> graphics. Give user direct tool links; do not launch shared browser as normal handoff."
+}
