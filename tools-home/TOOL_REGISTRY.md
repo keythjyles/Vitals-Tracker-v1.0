@@ -18,6 +18,12 @@ Tools home: https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/
 - Version: v1.6 at registry update
 - Function: place and mix sound effects with video; import audio; adjust insertion timing, volume and trim. Not a substitute for WavLock's source-cut workflow.
 
+## AnchorLock — established stabilization method
+- AnchorLock is the fixed-anchor stabilization component/method within FrameLock, not an unrelated replacement tool.
+- Purpose: remove frame-to-frame positional shimmy using a stable visual anchor, preserving original framing and audio; apply stabilization **before** MotionLock camera movement.
+- Production doctrine: FrameLock includes AnchorLock (\"naming one names them all\"). Maintain distinct module/method documentation while keeping their relationship explicit.
+- Source/deployment of any standalone AnchorLock interface: not independently verified in this registry update.
+
 ## FrameLock — established production tool
 - Live: https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/framelock/
 - Function: stabilization / AnchorLock in video production. Verify source version before edits.
