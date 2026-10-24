@@ -42,3 +42,9 @@ test('ordinary ephemeral directories are never reported as mounted durable stora
  assert.equal(openMountedStore(dir).store,null);assert.equal(existsSync(join(dir,'jokelet.sqlite')),false);
  const line=`1 0 8:1 / ${dir} rw - ext4 /dev/disk rw`;assert.equal(storageReadiness(dir,line).ready,true);
 });
+
+test('unknown or larger-than-reserved actual charges cannot free spending capacity',t=>{
+ const {path}=fixture(t);const s=new ProductionStore(path);s.createBudget(budget());s.reserve(request());s.claimSubmission('job');s.complete('job',Buffer.from([1]),{providerId:'take'});
+ assert.throws(()=>s.reserve(request('next')),/reconciled/);s.close();
+ const other=new ProductionStore(path+'.other');other.createBudget(budget());other.reserve(request());other.claimSubmission('job');other.complete('job',Buffer.from([1]),{providerId:'take',actualCredits:80});assert.throws(()=>other.reserve(request('next')),/Budget limit/);other.close();
+});

@@ -3,14 +3,15 @@
   "runId": "JL-20261023-STORAGE-01",
   "status": "adapter_implemented_and_locally_tested; persistent activation not purchased",
   "tests": {
-    "passed": 11,
+    "passed": 12,
     "failed": 0,
     "checks": [
       "restart replay retains original bytes and hash",
       "consistent database backup/restore",
       "two independent processes contend for one budget slot",
       "unknown charges stop new work",
-      "ordinary directories fail mount check"
+      "ordinary directories fail mount check",
+      "unknown completed usage blocks a new attempt; excess actual charge remains consumed"
     ]
   },
   "paidGenerationRequests": 0,

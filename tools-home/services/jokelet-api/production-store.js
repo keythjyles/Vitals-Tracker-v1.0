@@ -52,7 +52,7 @@ export class ProductionStore {
       if(previous){if(previous.request_hash!==hash)throw Error('Job ID conflicts with a different request');return {replay:true,job:this.getJob(jobId)};}
       const row=this.db.prepare('SELECT policy FROM budgets WHERE id=?').get(budgetId);if(!row)throw Error('Budget not approved');const b=JSON.parse(row.policy);
       if(Date.parse(b.expiresAt)<=Date.now()||b.voiceId!==voiceId||!b.models.includes(modelId))throw Error('Budget expired or voice/model not authorized');
-      if(this.db.prepare("SELECT 1 FROM jobs WHERE budget_id=? AND state='uncertain'").get(budgetId))throw Error('Uncertain provider charge must be reconciled first');
+      if(this.db.prepare("SELECT 1 FROM jobs WHERE budget_id=? AND (state='uncertain' OR (state='completed' AND actual_credits IS NULL))").get(budgetId))throw Error('Uncertain provider charge must be reconciled first');
       const used=this.db.prepare('SELECT COUNT(*) AS requests,COALESCE(SUM(characters),0) AS characters,COALESCE(SUM(MAX(reservation,COALESCE(actual_credits,0))),0) AS credits FROM jobs WHERE budget_id=?').get(budgetId);
       if(used.requests+1>b.maxRequests||used.characters+script.length>b.maxCharacters||used.credits+reserveCredits>b.maxCredits)throw Error('Budget limit reached');
       const canonical=this.db.prepare('SELECT * FROM canonical WHERE id=?').get(canonicalId);

@@ -8,7 +8,7 @@ Private `GET /api/storage` and authenticated AI preflight report mount readiness
 
 ## Implemented adapter
 
-- Immutable approved budget records specify permitted voice/models, expiry, maximum attempts, characters and reserved credit units. Price evidence is mandatory; a reservation is not an actual provider charge or a guaranteed currency cap. Actual provider charges must be reconciled before stronger financial claims.
+- Immutable approved budget records specify permitted voice/models, expiry, maximum attempts, characters and reserved credit units. Price evidence is mandatory; a reservation is not an actual provider charge or a guaranteed currency cap. Actual provider charges must be reconciled before another job when usage is unknown; reservation evidence alone is not a guaranteed financial cap.
 - A transaction reserves capacity before an attempt. Independent processes cannot both take the last slot. Failed/unknown usage is not automatically refunded. Actual charges above reservations remain charged against the budget.
 - A stable job ID binds the exact cued script, voice, model, voice settings and reservation. Reusing the ID returns its stored record; changing input under that ID is rejected. Submission can be claimed once only.
 - Canonical IDs can be seeded as already produced. Another production run cannot claim a reserved or produced ID. Multiple authorized takes within the same budget remain possible. Seed data must be reconciled from the existing ledger; there is no automatic semantic deduplication or completed-archive import yet.
@@ -35,4 +35,4 @@ A disk-backed service is single-instance and has a short interruption during dep
 
 ## Validation
 
-Eleven tests passed locally: OIDC identity guards, audio timing, API authentication, job restart/replay, native backup/restore with original-byte equality, canonical blocks, uncertain charge stop, budget/voice/model validation, multi-process contention and rejection of ephemeral paths. No paid provider call was used.
+Twelve tests passed locally: OIDC identity guards, audio timing, API authentication, job restart/replay, native backup/restore with original-byte equality, canonical blocks, uncertain charge stop, budget/voice/model validation, multi-process contention and rejection of ephemeral paths. No paid provider call was used.

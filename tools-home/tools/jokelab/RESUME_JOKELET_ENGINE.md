@@ -1,6 +1,6 @@
 # Shared storage checkpoint
 
-SQLite production adapter is implemented and tested (11 passing tests), with restart/idempotency, atomic budget reservations, uncertain-charge blocks and original-audio backup/restore. It is NOT integrated with paid generation. See ../../services/jokelet-api/STORAGE.md and runs/JL-20261023-STORAGE-01.json. Persistent disk/Starter activation is only proposed ($7.25/month base); no billing change is approved or made. Do not mark storage live or paid routes ledger-protected. Next requires recurring-cost approval, actual mount/restart/backup verification, then shared provider-route integration. AI identity remains read-only.
+SQLite production adapter is implemented and tested (12 passing tests), with restart/idempotency, atomic budget reservations, uncertain-charge blocks and original-audio backup/restore. It is NOT integrated with paid generation. See ../../services/jokelet-api/STORAGE.md and runs/JL-20261023-STORAGE-01.json. Persistent disk/Starter activation is only proposed ($7.25/month base); no billing change is approved or made. Do not mark storage live or paid routes ledger-protected. Next requires recurring-cost approval, actual mount/restart/backup verification, then shared provider-route integration. AI identity remains read-only.
 
 # Live AI access verified
 
