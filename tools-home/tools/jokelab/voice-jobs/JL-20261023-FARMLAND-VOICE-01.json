@@ -75,8 +75,18 @@
       "verification": "Upload succeeded; Drive metadata byte sizes match. Connector did not return checksums."
     },
     "review": {
-      "status": "pending_user_listening",
+      "status": "Rejected",
+      "evidence": "User: Its terrible. That engine distorts his voice.",
+      "reason": "User reports GS voice distortion",
+      "downstreamAllowed": false,
       "aiListeningVerified": false
     }
+  },
+  "review": {
+    "status": "Rejected",
+    "evidence": "User: Its terrible. That engine distorts his voice.",
+    "reason": "User reports GS voice distortion",
+    "downstreamAllowed": false,
+    "aiListeningVerified": false
   }
 }

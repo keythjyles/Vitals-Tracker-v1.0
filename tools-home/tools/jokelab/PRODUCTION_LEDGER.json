@@ -654,7 +654,7 @@
     {
       "sourceJokeId": "dad-01390bc83ffc16630ae3d503",
       "canonicalId": "dad-01390bc83ffc16630ae3d503",
-      "state": "voice_generated_pending_review",
+      "state": "voice_rejected_procedure_mismatch",
       "runId": "JL-20261023-NEXT-03",
       "voiceJobId": "JL-20261023-FARMLAND-VOICE-01"
     },
@@ -5218,7 +5218,7 @@
     {
       "runId": "JL-20261023-NEXT-03",
       "canonicalId": "dad-01390bc83ffc16630ae3d503",
-      "state": "voice_generated_pending_review",
+      "state": "voice_rejected_procedure_mismatch",
       "voiceJobId": "JL-20261023-FARMLAND-VOICE-01",
       "providerGenerationRequests": {
         "elevenLabs": 1,
@@ -5227,8 +5227,8 @@
       "actualVoiceCredits": 48,
       "voiceReceipt": "tools-home/tools/jokelab/voice-jobs/JL-20261023-FARMLAND-VOICE-01.json",
       "paidProductionClearance": false,
-      "reservationScope": "Existing voice take must be reused; HeyGen not yet authorized.",
-      "reviewStatus": "pending_user_listening"
+      "reservationScope": "Retain rejected take and canonical claim. Do not send to HeyGen or regenerate without confirmed approved procedure and separate authorization.",
+      "reviewStatus": "Rejected"
     }
   ]
 }

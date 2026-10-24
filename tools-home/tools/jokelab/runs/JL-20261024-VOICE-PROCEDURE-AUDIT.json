@@ -1,0 +1,103 @@
+{
+  "schema": "GS-VoiceProcedureAudit-1",
+  "date": "2026-10-24",
+  "runId": "JL-20261023-NEXT-03",
+  "voiceJobId": "JL-20261023-FARMLAND-VOICE-01",
+  "outcome": "confirmed_procedure_mismatch_root_cause_not_isolated",
+  "approvedReference": {
+    "canonicalId": "dad-00bda89167b4f15850aa1c91",
+    "generationId": "pqILh6dY0D1CO7Ckhplb",
+    "approvalEvidence": "User: Both perfect",
+    "voiceId": "RBNpu6jPzAoaxZKl9noJ",
+    "browserModelLabel": "Eleven v4",
+    "recordedModelId": "eleven_v4",
+    "modelIdQualification": "Recorded in prior procedure; not independently confirmed here against provider generation-history metadata or current API availability.",
+    "stability": 0.5,
+    "similarity": 0.75,
+    "language": "Auto",
+    "audioEffects": [],
+    "output": "MP3 mono44100Hz192kbps",
+    "cuedScript": "[deadpan joke delivery] What did the shy pebble wish for?\n\n[long pause] That she was a little BOULDER.",
+    "sources": [
+      "runs/JL-20261023-COACHED-01-voice-ready.json",
+      "runs/JL-20261023-COACHED-01-voice-correction-v02.json",
+      "runs/JL-20261023-COACHED-01.md"
+    ]
+  },
+  "rejectedRequest": {
+    "approved": true,
+    "automaticRetries": 0,
+    "budget": {
+      "approvalEvidence": "User replied 'Ok' to one request for the108-character farmland script, maximum150existing ElevenLabs credits, no retries.",
+      "approved": true,
+      "expiresAt": "2026-10-25T01:25:21Z",
+      "maxCharacters": 108,
+      "maxCredits": 150,
+      "maxRequests": 1
+    },
+    "canonicalId": "dad-01390bc83ffc16630ae3d503",
+    "duplicateReview": {
+      "cleared": true,
+      "evidence": "Current ledger and canonical claim checked; no existing job or produced group. Known D1/D3 content and all five D2 caption topics differ; no concrete match in catalog, Drive text or HeyGen title searches. Unnamed archive gap remains; not certified exhaustive."
+    },
+    "jobId": "JL-20261023-FARMLAND-VOICE-01",
+    "modelId": "eleven_v3",
+    "operation": "voice_generate",
+    "schema": "GS-BoundedVoiceRequest-1",
+    "script": "[joking] I tried taking some high resolution photos of local farmland, but they all turned out a bit GRAINY.",
+    "voiceId": "RBNpu6jPzAoaxZKl9noJ",
+    "voiceSettings": {
+      "similarity_boost": 0.75,
+      "stability": 0.5
+    }
+  },
+  "differences": [
+    {
+      "field": "model",
+      "reference": "Recorded browser Eleven v4",
+      "rejected": "eleven_v3 hardcoded by API route"
+    },
+    {
+      "field": "deliveryCue",
+      "reference": "[deadpan joke delivery], then [long pause] before payoff",
+      "rejected": "[joking] only"
+    },
+    {
+      "field": "originalMp3Bitrate",
+      "reference": "192kbps",
+      "rejected": "128kbps hardcoded output_format=mp3_44100_128"
+    }
+  ],
+  "matches": [
+    "Voice ID",
+    "stability0.5",
+    "similarity0.75"
+  ],
+  "conversionCheck": {
+    "method": "Decode archived original MP3 with ffmpeg to s16le and compare all samples with archived PCM WAV payload",
+    "exactMatch": true,
+    "pcmPayloadSha256": "806e0b847de8bb8bfeb546ae143962b55b50d1d8f6a97b5a028b1e39e4cdc301",
+    "meaning": "WAV conversion added no sample changes beyond decoding the original MP3. This does not certify auditory quality or isolate synthesis/encoding cause."
+  },
+  "rejection": {
+    "status": "Rejected",
+    "evidence": "User: Its terrible. That engine distorts his voice.",
+    "reason": "User reports GS voice distortion",
+    "downstreamAllowed": false,
+    "aiListeningVerified": false
+  },
+  "actualCreditsAlreadySpent": 48,
+  "newPaidRequests": 0,
+  "implementationIssue": {
+    "path": "tools-home/services/jokelet-api/github-voice.js",
+    "finding": "Validates only eleven_v3 and hardcodes128kbps rather than referencing an approved GS procedure. Funding/authentication/byte preservation success did not establish voice-quality parity.",
+    "codeChangedInThisAudit": false
+  },
+  "requiredBeforeReplacement": [
+    "Recover authoritative provider history/model settings for approved reference; do not silently substitute an API model",
+    "Bind effective request to a versioned approved voice procedure and compare model, voice, settings, output format and delivery pattern",
+    "Confirm API support read-only; unavailable capability is a reported blocker, not permission for substitution",
+    "Obtain separate bounded replacement authorization after exact request is reviewable; earlier one-request authorization is consumed"
+  ],
+  "limits": "No new paid generation or HeyGen request. No AI auditory approval. Attached unrelated/unnamed videos were not used to infer synthesis settings."
+}

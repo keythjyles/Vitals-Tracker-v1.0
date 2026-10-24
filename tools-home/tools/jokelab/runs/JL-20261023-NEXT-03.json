@@ -1,7 +1,7 @@
 {
   "schema": "JokeLabRun-1.0",
   "runId": "JL-20261023-NEXT-03",
-  "state": "voice_generated_pending_review",
+  "state": "voice_rejected_procedure_mismatch",
   "canonicalJokeId": "dad-01390bc83ffc16630ae3d503",
   "sourceLibraryPosition": 6,
   "source": "tools-home/data/jokelab/library.json",
@@ -74,7 +74,7 @@
     "remaining": "Unnamed historical render content not exhaustively reconciled. Do not inherit another joke's duplicate-risk exception."
   },
   "providerGenerationRequests": 1,
-  "next": "Present saved voice for user listening review; no HeyGen generation authorized. Reuse this take; do not regenerate automatically.",
+  "next": "Hold paid generation and HeyGen. Recover exact approved provider model/settings/history and verify API parity before proposing a separately authorized replacement. Keep this canonical reservation and all rejected originals.",
   "voiceJobId": "JL-20261023-FARMLAND-VOICE-01",
   "actualVoiceCredits": 48,
   "voiceReceipt": "tools-home/tools/jokelab/voice-jobs/JL-20261023-FARMLAND-VOICE-01.json",
@@ -110,7 +110,10 @@
       "verification": "Upload succeeded; Drive metadata byte sizes match. Connector did not return checksums."
     },
     "review": {
-      "status": "pending_user_listening",
+      "status": "Rejected",
+      "evidence": "User: Its terrible. That engine distorts his voice.",
+      "reason": "User reports GS voice distortion",
+      "downstreamAllowed": false,
       "aiListeningVerified": false
     }
   },
@@ -143,6 +146,21 @@
       "action": "Verified original and WAV SHA256 against durable receipt and saved both to production Drive",
       "result": "Both Drive metadata byte sizes match; no Drive checksum returned",
       "aiListeningVerified": false
+    },
+    {
+      "sequence": 5,
+      "action": "Recorded user rejection and compared saved successful procedure with API request",
+      "result": "Recorded v4 browser procedure versus hardcoded v3 API route; cue and bitrate also differ. WAV sample payload matches local decode of provider original.",
+      "additionalProviderGenerationRequests": 0,
+      "additionalCredits": 0,
+      "comparisonRecord": "runs/JL-20261024-VOICE-PROCEDURE-AUDIT.json"
     }
-  ]
+  ],
+  "review": {
+    "status": "Rejected",
+    "evidence": "User: Its terrible. That engine distorts his voice.",
+    "reason": "User reports GS voice distortion",
+    "downstreamAllowed": false,
+    "aiListeningVerified": false
+  }
 }
