@@ -1,0 +1,22 @@
+name: Preserve verified jokelet media
+on:
+  push:
+    branches: [main]
+    paths: ['tools-home/tools/jokelab/requests/media-save.json']
+permissions: {}
+concurrency:
+  group: jokelet-media-preservation
+  cancel-in-progress: false
+jobs:
+  preserve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - name: Verify and preserve exact production artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl --fail --silent --show-error --max-time 30 "https://raw.githubusercontent.com/keythjyles/Vitals-Tracker-v1.0/${GITHUB_SHA}/tools-home/services/jokelet-api/github-media-save.py" -o github-media-save.py
+          python3 github-media-save.py
