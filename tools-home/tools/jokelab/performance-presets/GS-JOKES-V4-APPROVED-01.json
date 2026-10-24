@@ -1,0 +1,18 @@
+{
+  "schema": "GS-ApprovedVoiceProcedure-1",
+  "id": "GS-JOKES-V4-APPROVED-01",
+  "referenceTakeId": "pqILh6dY0D1CO7Ckhplb",
+  "referenceApproval": "User: Both perfect",
+  "verifiedByProviderHistory": true,
+  "voiceId": "RBNpu6jPzAoaxZKl9noJ",
+  "modelId": "eleven_v4",
+  "outputFormat": "mp3_44100_192",
+  "effectiveSettings": {
+    "stability": 0.5
+  },
+  "referenceScript": "[deadpan joke delivery] What did the shy pebble wish for?\n\n[long pause] That she was a little BOULDER.",
+  "deliveryPattern": "Deadpan joke delivery; deliberate setup/payoff pause; uppercase payoff emphasis; stop speaking after punchline",
+  "proof": "results/JL-20261024-REFERENCE-03.json",
+  "settingsClarification": "Prior UI record showed similarity0.75. Provider generation history reports only stability0.5 for this v4 take. Match those effective recorded settings; do not add unsupported or unverified overrides.",
+  "newTakeApproval": "Every new voice output still requires listening review; matching parameters does not guarantee identical delivery."
+}

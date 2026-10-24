@@ -1,7 +1,7 @@
 {
   "schema": "JokeLabRun-1.0",
   "runId": "JL-20261023-NEXT-03",
-  "state": "voice_rejected_procedure_mismatch",
+  "state": "replacement_prepared_awaiting_bounded_approval",
   "canonicalJokeId": "dad-01390bc83ffc16630ae3d503",
   "sourceLibraryPosition": 6,
   "source": "tools-home/data/jokelab/library.json",
@@ -74,7 +74,7 @@
     "remaining": "Unnamed historical render content not exhaustively reconciled. Do not inherit another joke's duplicate-risk exception."
   },
   "providerGenerationRequests": 1,
-  "next": "Hold paid generation and HeyGen. Recover exact approved provider model/settings/history and verify API parity before proposing a separately authorized replacement. Keep this canonical reservation and all rejected originals.",
+  "next": "One explicit replacement voice approval up to150existingcredits. Proposal job JL-20261024-FARMLAND-VOICE-02; quote133; no automatic retries; HeyGen not authorized.",
   "voiceJobId": "JL-20261023-FARMLAND-VOICE-01",
   "actualVoiceCredits": 48,
   "voiceReceipt": "tools-home/tools/jokelab/voice-jobs/JL-20261023-FARMLAND-VOICE-01.json",
@@ -154,6 +154,16 @@
       "additionalProviderGenerationRequests": 0,
       "additionalCredits": 0,
       "comparisonRecord": "runs/JL-20261024-VOICE-PROCEDURE-AUDIT.json"
+    },
+    {
+      "sequence": 6,
+      "action": "Recovered provider reference metadata, implemented approved-procedure gate and versioned rejected-take correction, deployed and verified unpaid quote",
+      "result": "History matches approved script/voice,v4,192kbps,stability0.5. Quote133; approval gate403. No paid requests.",
+      "referenceRun": 40100663681,
+      "quoteRun": 40100663693,
+      "codeCommit": "c850f76359bac70614c6f35c2be918e0f865ae82",
+      "testsPassed": 18,
+      "newPaidRequests": 0
     }
   ],
   "review": {
@@ -162,5 +172,20 @@
     "reason": "User reports GS voice distortion",
     "downstreamAllowed": false,
     "aiListeningVerified": false
+  },
+  "replacementProposal": {
+    "jobId": "JL-20261024-FARMLAND-VOICE-02",
+    "approved": false,
+    "script": "[deadpan joke delivery] I tried taking some high resolution photos of local farmland.\n\n[long pause] They all turned out a bit GRAINY.",
+    "modelId": "eleven_v4",
+    "outputFormat": "mp3_44100_192",
+    "voiceSettings": {
+      "stability": 0.5
+    },
+    "expectedCredits": 133,
+    "maxCredits": 150,
+    "quoteProof": "results/JL-20261024-FARMLAND-VOICE-02.json",
+    "referenceProof": "results/JL-20261024-REFERENCE-03.json",
+    "assemblyPlan": "runs/JL-20261024-FARMLAND-PREPARED.json"
   }
 }
