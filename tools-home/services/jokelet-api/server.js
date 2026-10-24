@@ -3,6 +3,7 @@ import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { timingSafeEqual } from 'node:crypto';
 import {verifyGithubIdentity} from './github-identity.js';
+import {storageReadiness} from './production-store.js';
 
 const port = Number(process.env.PORT || 3100);
 const elevenKey = process.env.ELEVENLABS_API_KEY;
@@ -36,6 +37,10 @@ const server = http.createServer(async (req, res) => {
   }
   if (req.method === 'GET' && (pathname === '/health' || pathname === '/'))
     return send(res, 200, { service: 'jokelet-api', status: 'ok', elevenLabsConfigured: Boolean(elevenKey), generationEnabled: Boolean(elevenKey && operatorToken) });
+  if(req.method==='GET' && pathname==='/api/storage') {
+    if(!authorized(req))return send(res,401,{error:'Unauthorized'});
+    return send(res,200,{storage:storageReadiness(process.env.JOKELET_DATA_DIR),generationLedgerIntegrated:false});
+  }
   if (req.method === 'GET' && pathname === '/api/ai/preflight') {
     let identity;
     try { identity=await verifyGithubIdentity(req.headers.authorization); }
@@ -47,7 +52,7 @@ const server = http.createServer(async (req, res) => {
       });
       if(!response.ok)return send(res,502,{error:'ElevenLabs authenticated lookup failed',upstreamStatus:response.status});
       const data=await response.json();
-      return send(res,200,{schema:'GS-AIPreflight-1',identity,authenticatedVoiceLookup:true,paidGeneration:false,
+      return send(res,200,{schema:'GS-AIPreflight-1',identity,authenticatedVoiceLookup:true,paidGeneration:false,storage:storageReadiness(process.env.JOKELET_DATA_DIR),generationLedgerIntegrated:false,
         voices:(data.voices||[]).filter(v=>/grill|sargent|sergeant|gs4/i.test(v.name||'')).map(v=>({voiceId:v.voice_id,name:v.name,category:v.category})),
         next:'Paid AI execution remains disabled; establish durable spending and job storage first.'});
     } catch {return send(res,502,{error:'ElevenLabs authenticated lookup unavailable'});}

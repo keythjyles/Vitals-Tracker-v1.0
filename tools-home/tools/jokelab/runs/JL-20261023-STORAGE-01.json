@@ -1,0 +1,40 @@
+{
+  "schema": "GS-StorageEngineering-1",
+  "runId": "JL-20261023-STORAGE-01",
+  "status": "adapter_implemented_and_locally_tested; persistent activation not purchased",
+  "tests": {
+    "passed": 11,
+    "failed": 0,
+    "checks": [
+      "restart replay retains original bytes and hash",
+      "consistent database backup/restore",
+      "two independent processes contend for one budget slot",
+      "unknown charges stop new work",
+      "ordinary directories fail mount check"
+    ]
+  },
+  "paidGenerationRequests": 0,
+  "billingChanges": 0,
+  "liveStorage": false,
+  "generationLedgerIntegrated": false,
+  "proposal": {
+    "serviceId": "srv-dbdui3vb9u1s73bir8kg",
+    "plan": "starter",
+    "diskGB": 1,
+    "mountPath": "/var/data",
+    "monthlyBaseUSD": 7.25,
+    "excludes": [
+      "tax",
+      "provider-generation usage",
+      "usage beyond included limits"
+    ],
+    "approval": false
+  },
+  "remaining": [
+    "approve recurring infrastructure cost",
+    "attach actual disk and prove cross-deploy persistence",
+    "integrate paid routes with ledger",
+    "provider reconciliation UI and offsite backups",
+    "media library and downstream rebuild workflow"
+  ]
+}

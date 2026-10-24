@@ -6,7 +6,7 @@ test('localhost health endpoint works without an ElevenLabs key or paid API call
   const port = 32000 + Math.floor(Math.random() * 20000);
   const child = spawn(process.execPath, ['server.js'], {
     cwd: new URL('.', import.meta.url),
-    env: { ...process.env, PORT: String(port), ELEVENLABS_API_KEY: '', JOKELET_OPERATOR_TOKEN: 'test-only-token' },
+    env: { ...process.env, PORT: String(port), ELEVENLABS_API_KEY: '', JOKELET_OPERATOR_TOKEN: 'test-only-token', JOKELET_DATA_DIR: '' },
     stdio: 'ignore'
   });
   try {
@@ -25,11 +25,11 @@ test('localhost health endpoint works without an ElevenLabs key or paid API call
       assert.equal(asset.status,200);
       assert.match(asset.headers.get('content-security-policy'), /script-src 'self'/);
     }
-    for (const path of ['/api/voices','/api/voice/generate','/api/ai/preflight']) {
+    for (const path of ['/api/voices','/api/voice/generate','/api/ai/preflight','/api/storage']) {
       const denied=await fetch('http://127.0.0.1:'+port+path,{method:path.endsWith('generate')?'POST':'GET'});
       assert.equal(denied.status,401);
       const configured=await fetch('http://127.0.0.1:'+port+path,{method:path.endsWith('generate')?'POST':'GET',headers:{Authorization:'Bearer test-only-token'}});
-      assert.equal(configured.status,path === '/api/ai/preflight' ? 401 : 503);
+      assert.equal(configured.status,path === '/api/ai/preflight' ? 401 : path === '/api/storage' ? 200 : 503);
     }
     const missing = await fetch('http://127.0.0.1:' + port + '/generate', { method: 'POST' });
     assert.equal(missing.status, 404);
