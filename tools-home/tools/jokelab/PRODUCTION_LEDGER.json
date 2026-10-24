@@ -1,6 +1,6 @@
 {
   "schema": "JokeLab-ProductionLedger-1",
-  "updated": "2026-10-23",
+  "updated": "2026-10-24",
   "purpose": "Prevent paying to produce the same underlying joke again. This initial operator ledger is not yet enforced by the app.",
   "scope": {
     "libraryRecords": 900,
@@ -654,7 +654,9 @@
     {
       "sourceJokeId": "dad-01390bc83ffc16630ae3d503",
       "canonicalId": "dad-01390bc83ffc16630ae3d503",
-      "state": "not_started_unverified"
+      "state": "voice_generated_pending_review",
+      "runId": "JL-20261023-NEXT-03",
+      "voiceJobId": "JL-20261023-FARMLAND-VOICE-01"
     },
     {
       "sourceJokeId": "dad-0174a70763ab66a8ea6e0e5e",
@@ -5212,6 +5214,21 @@
       "outputSha256": "e1ab67af84c1d3a3f4cdaa3acfcb237ccc111cb30d7767f9ae38d29e4733ae61",
       "actualVoiceCredits": 87,
       "videoId": "aa93100f33eba0befb6c91b2fe716af7"
+    },
+    {
+      "runId": "JL-20261023-NEXT-03",
+      "canonicalId": "dad-01390bc83ffc16630ae3d503",
+      "state": "voice_generated_pending_review",
+      "voiceJobId": "JL-20261023-FARMLAND-VOICE-01",
+      "providerGenerationRequests": {
+        "elevenLabs": 1,
+        "heygen": 0
+      },
+      "actualVoiceCredits": 48,
+      "voiceReceipt": "tools-home/tools/jokelab/voice-jobs/JL-20261023-FARMLAND-VOICE-01.json",
+      "paidProductionClearance": false,
+      "reservationScope": "Existing voice take must be reused; HeyGen not yet authorized.",
+      "reviewStatus": "pending_user_listening"
     }
   ]
 }

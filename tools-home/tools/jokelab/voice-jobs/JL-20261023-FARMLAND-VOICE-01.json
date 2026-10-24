@@ -59,5 +59,24 @@
     "path": "tools-home/tools/jokelab/voice-wav/JL-20261023-FARMLAND-VOICE-01.wav",
     "sampleRate": 44100,
     "sha256": "e0bd435cdb32cdeee518d25e6962f537412c94186e8180199bb5cf19a7168a10"
+  },
+  "archive": {
+    "drive": {
+      "original": {
+        "id": "1Wzyiz0s3twHq3OZixzRawR7ZBBdT4sjG",
+        "url": "https://drive.google.com/file/d/1Wzyiz0s3twHq3OZixzRawR7ZBBdT4sjG/view?usp=drivesdk",
+        "bytes": 82798
+      },
+      "wav": {
+        "id": "18vucJw7dYGc44ATidTPFxjQxvlYFqIbC",
+        "url": "https://drive.google.com/file/d/18vucJw7dYGc44ATidTPFxjQxvlYFqIbC/view?usp=drivesdk",
+        "bytes": 451662
+      },
+      "verification": "Upload succeeded; Drive metadata byte sizes match. Connector did not return checksums."
+    },
+    "review": {
+      "status": "pending_user_listening",
+      "aiListeningVerified": false
+    }
   }
 }

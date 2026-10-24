@@ -1,11 +1,11 @@
-# Current stage: first bounded voice API take awaits authorization
+# Current stage: farmland voice generated; listening review pending
 
-The signed voice job route is deployed. Live gate/quote test passed: missing approval was rejected, while the108-character farmland script quoted108credits and had sufficient existing quota for the proposed150-credit reserve. No TTS generation was performed. Evidence: runs/JL-20261023-VOICE-WIRING-01.json and results/JL-20261023-VOICE-GATE-01.json. Read ../../services/jokelet-api/BOUNDED_VOICE.md.
+## Verified voice checkpoint — October 24, 2026
 
-Next candidate: library position6, dad-01390bc83ffc16630ae3d503. Exact script and duplicate-check evidence are in runs/JL-20261023-NEXT-03.json. User has NOT yet approved this150-credit, one-request test. On approval, save that evidence and a fresh expiry before dispatch. No automatic retry, upgrade or overage purchase. No HeyGen spending is included yet. Do not claim TTS/WAV end-to-end success from gate/quote or unit tests.
+First bounded ElevenLabs API voice generation succeeded in workflow40050049943. Run JL-20261023-NEXT-03, canonical dad-01390bc83ffc16630ae3d503, job JL-20261023-FARMLAND-VOICE-01: one provider request,48 provider-reported credits under150 approved existing credits, zero retries. Original MP3 and5.12-second44.1kHz mono PCM16 WAV are preserved in GitHub and Production Drive. Receipt: voice-jobs/JL-20261023-FARMLAND-VOICE-01.json. Hashes verified locally; Drive metadata byte sizes match, checksums were not returned. User listening approval remains pending; no AI auditory verification is claimed. No HeyGen spend is authorized yet. Resume from this recording; do not generate it again. Earlier awaiting-authorization/no-TTS notes are historical and superseded by this checkpoint.
 
-Use existing GitHub/Drive. Job save and separate-runner recovery were already verified in runs/JL-20261023-GITSTORE-01.json. A Render disk/compute upgrade is not approved or required by the current path. The legacy manual endpoint remains process-capped; manual Wizard submission and aggregate budgets remain unfinished.
+The first runner40049788128 failed before any paid request because Ubuntu26.04 lacked audio tools. Workflow now pins Ubuntu24.04 and verifies/installs ffmpeg/ffprobe before paid execution. This was infrastructure recovery, not a paid retry. Existing GitHub/Drive path remains in use; no paid Render upgrade. Per-job controls are proven for this take; aggregate budgets and legacy manual endpoint integration remain unfinished.
 
-Pebble is approved and saved; robots/guacamole is already produced, pending whole-final review. Never regenerate them as new jokes. Keep GS4, PCM WAV for video, originals, full approved silent reactions and exact rebuild records.
+Preserve the Publication stage correction in AI_OPERATOR_GUIDE.md. Clean production jokelets are never finished releases. This voice take has no publication approval. Do not touch other chat's posting repair or existing scheduled Reels.
 
-Preserve the separate verified42 Story placements October23–29 and existing Reels. Production goals October24/26 joke episodes and October28 VA video remain goals, not automatic spending authorization.
+Pebble is approved and saved; robots/guacamole is already produced, pending whole-final review. Preserve GS4, WAV for video, originals, approved full silent reactions and exact rebuild records.

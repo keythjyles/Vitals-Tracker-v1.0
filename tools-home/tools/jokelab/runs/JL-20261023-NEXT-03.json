@@ -1,7 +1,7 @@
 {
   "schema": "JokeLabRun-1.0",
   "runId": "JL-20261023-NEXT-03",
-  "state": "voice_authorized_dispatching",
+  "state": "voice_generated_pending_review",
   "canonicalJokeId": "dad-01390bc83ffc16630ae3d503",
   "sourceLibraryPosition": 6,
   "source": "tools-home/data/jokelab/library.json",
@@ -73,7 +73,76 @@
     "episode3": "Known Smart Grill, Eyebrows, Listener, Spider and Dinner Surprise differ.",
     "remaining": "Unnamed historical render content not exhaustively reconciled. Do not inherit another joke's duplicate-risk exception."
   },
-  "providerGenerationRequests": 0,
-  "next": "Await this workflow and inspect durable receipt; do not dispatch another request. Save actual cost and original MP3/WAV. HeyGen is not yet authorized.",
-  "voiceJobId": "JL-20261023-FARMLAND-VOICE-01"
+  "providerGenerationRequests": 1,
+  "next": "Present saved voice for user listening review; no HeyGen generation authorized. Reuse this take; do not regenerate automatically.",
+  "voiceJobId": "JL-20261023-FARMLAND-VOICE-01",
+  "actualVoiceCredits": 48,
+  "voiceReceipt": "tools-home/tools/jokelab/voice-jobs/JL-20261023-FARMLAND-VOICE-01.json",
+  "original": {
+    "bytes": 82798,
+    "format": "audio/mpeg",
+    "path": "tools-home/tools/jokelab/voice-originals/JL-20261023-FARMLAND-VOICE-01.mp3",
+    "sha256": "9d7a68b6ff8d174b91e28e63ccbd070771802df7422f8d5c3a87530a71f97aeb"
+  },
+  "wav": {
+    "bytes": 451662,
+    "channels": 1,
+    "conversion": "ffmpeg decode to PCM16; no gain, speed, trim or resampling options",
+    "duration": 5.12,
+    "encoding": "pcm_s16le",
+    "parentSha256": "9d7a68b6ff8d174b91e28e63ccbd070771802df7422f8d5c3a87530a71f97aeb",
+    "path": "tools-home/tools/jokelab/voice-wav/JL-20261023-FARMLAND-VOICE-01.wav",
+    "sampleRate": 44100,
+    "sha256": "e0bd435cdb32cdeee518d25e6962f537412c94186e8180199bb5cf19a7168a10"
+  },
+  "archive": {
+    "drive": {
+      "original": {
+        "id": "1Wzyiz0s3twHq3OZixzRawR7ZBBdT4sjG",
+        "url": "https://drive.google.com/file/d/1Wzyiz0s3twHq3OZixzRawR7ZBBdT4sjG/view?usp=drivesdk",
+        "bytes": 82798
+      },
+      "wav": {
+        "id": "18vucJw7dYGc44ATidTPFxjQxvlYFqIbC",
+        "url": "https://drive.google.com/file/d/18vucJw7dYGc44ATidTPFxjQxvlYFqIbC/view?usp=drivesdk",
+        "bytes": 451662
+      },
+      "verification": "Upload succeeded; Drive metadata byte sizes match. Connector did not return checksums."
+    },
+    "review": {
+      "status": "pending_user_listening",
+      "aiListeningVerified": false
+    }
+  },
+  "actions": [
+    {
+      "sequence": 1,
+      "action": "Dispatched first runner",
+      "runId": 40049788128,
+      "result": "Failed at ffmpeg/ffprobe prerequisite before queued receipt or provider request",
+      "providerGenerationRequests": 0,
+      "credits": 0
+    },
+    {
+      "sequence": 2,
+      "action": "Pinned Ubuntu24.04 and verified/installed ffmpeg before worker",
+      "commit": "dc0f5cb60a3d5d2553916155122cc0830d31d58e",
+      "reason": "Provide reliable PCM WAV tools before paid work"
+    },
+    {
+      "sequence": 3,
+      "action": "Executed original one-request authorization",
+      "runId": 40050049943,
+      "result": "Completed",
+      "providerGenerationRequests": 1,
+      "actualCredits": 48,
+      "automaticRetries": 0
+    },
+    {
+      "sequence": 4,
+      "action": "Verified original and WAV SHA256 against durable receipt and saved both to production Drive",
+      "result": "Both Drive metadata byte sizes match; no Drive checksum returned",
+      "aiListeningVerified": false
+    }
+  ]
 }
