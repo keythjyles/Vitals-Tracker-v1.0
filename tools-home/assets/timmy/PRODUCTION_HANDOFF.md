@@ -49,3 +49,8 @@ Next: create clean transparent FRONT_WAVE and stationary FRONT_BODY, plus separa
 
 ## Persistence contract
 Do not lose user decisions across chats. Update this handoff whenever timing, pose, animation, filenames, approvals or next steps change. Record exact repository paths, commit identifiers, media provenance, version and what remains incomplete. If tool lacks binary GitHub upload, report limitation; do not pretend assets are saved.
+
+
+## Current resumption checkpoint — October 24
+
+Read the recovery section of MANIFEST.md and ASSET_AUDIT_20261024.json. The six original PNGs and legacy walk animation are recovered into the canonical folder. New separated body/head artwork has been created; the registered head module passes150-frame static-body/connected-silhouette checks and has a saved isolated review. A175-frame27–34s scene review now includes right-side entrance F675, full figure F700, turnaround, chin dip and head movement starting F730, hard alpha cutoff F843. No full66s master has been rendered in this session. Complete and verify remaining binary uploads, inspect the short review with the user, then correct feedback before considering a full master. Preserve all source bee footage and original AAC. Do not call these review assets Approved.

@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-24",
+  "canonical": "tools-home/assets/timmy/",
+  "legacy": "tools-home/assets/mascots/timmy/v01/",
+  "finding": "Canonical documents incorrectly marked original art not uploaded; actual six PNGs and a legacy animation were already committed in the older folder. Canonical copy will reference identical existing Git blobs, preserving history.",
+  "assets": [
+    {
+      "name": "Timmy_Profile_Right_Passing_Step_v01.png",
+      "bytes": 1281989,
+      "sha256": "4490e1dfd5792a9f74e68475ccfa5cae6f65c098f14df471292714a4c3a67704",
+      "origin": "Verified GitHub legacy binary; original illustrated references preserved"
+    },
+    {
+      "name": "Timmy_Profile_Right_Stride_B_v01.png",
+      "bytes": 1381914,
+      "sha256": "e09f91d6a14f3ccd2155f0ff2b2844764b51fecbbb1782796ae5e0e58ace903b",
+      "origin": "Verified GitHub legacy binary; original illustrated references preserved"
+    },
+    {
+      "name": "Timmy_Front_Neutral_v01.png",
+      "bytes": 1347644,
+      "sha256": "2458af788449065793a3399cff0532ba0a8fa59cd56ad331a6c31cf0fb406c3e",
+      "origin": "Verified GitHub legacy binary; original illustrated references preserved"
+    },
+    {
+      "name": "Timmy_Profile_Left_Walk_v01.png",
+      "bytes": 1397222,
+      "sha256": "b5143c622c37b1bc483e605c3657e54ee49b6b1fa7e8d0a8801683887cfc8cb5",
+      "origin": "Verified GitHub legacy binary; original illustrated references preserved"
+    },
+    {
+      "name": "Timmy_Profile_Right_Turn_Wave_v01.png",
+      "bytes": 1393025,
+      "sha256": "50ea82128bb205c90144c9082133f4dbc5f09fa8980d82ac7cc2f56b04fad581",
+      "origin": "Verified GitHub legacy binary; original illustrated references preserved"
+    },
+    {
+      "name": "Timmy_Profile_Right_Stride_A_v01.png",
+      "bytes": 1423701,
+      "sha256": "0ee97ff0439bd65ad6b41d6717114b78d4275b9e4121ff2b8c8f3aa8fa3510e0",
+      "origin": "Verified GitHub legacy binary; original illustrated references preserved"
+    },
+    {
+      "name": "GS_TIMMY_FRONT_TURN_REVIEW_v06.mp4",
+      "bytes": 13301467,
+      "sha256": "61de67eb1af64aa306995330e24c3b4b0cfa65bbbd1a90881c74da56f0f91d34",
+      "origin": "Recovered ChatGPT Library binary",
+      "role": "rejected review, never clean plate"
+    },
+    {
+      "name": "GS_BEE_THREE_PASS_FULL_VIDEO_v01.mp4",
+      "bytes": 114265355,
+      "sha256": "196846202d339664ef49276312b02ab14aa2c62e390ffb3c7e43876b925d5bf8",
+      "origin": "Recovered ChatGPT Library binary",
+      "role": "clean bee master without failed return overlay"
+    }
+  ],
+  "rig": "In progress, isolated head/body review first; no full-video render authorized before rig inspection.",
+  "source_timing_note": "Clean master is nominal25fps with variable timestamps:1650 video frames/66.483334 video seconds; audio/container66.58. Do not confuse elapsed25fps clock labels with decoded frame indices. Preserve original audio and bee timestamps. Scene cutoff target is33.72 seconds/F843."
+}

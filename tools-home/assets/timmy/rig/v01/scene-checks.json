@@ -1,0 +1,1703 @@
+{
+  "start_frame": 675,
+  "end_frame_exclusive": 850,
+  "fps": 25,
+  "actor_end_frame_exclusive": 843,
+  "source_time_range": [
+    27,
+    34
+  ],
+  "stopped_center_x": 930,
+  "feet_baseline_y": 1810,
+  "visible_height": 360,
+  "stationary_body_verified_from": 715,
+  "headshake_starts": 730,
+  "hard_cutoff": 843,
+  "results": [
+    {
+      "frame": 675,
+      "stage": "walk-in",
+      "bounds": null
+    },
+    {
+      "frame": 676,
+      "stage": "walk-in",
+      "bounds": null
+    },
+    {
+      "frame": 677,
+      "stage": "walk-in",
+      "bounds": null
+    },
+    {
+      "frame": 678,
+      "stage": "walk-in",
+      "bounds": null
+    },
+    {
+      "frame": 679,
+      "stage": "walk-in",
+      "bounds": null
+    },
+    {
+      "frame": 680,
+      "stage": "walk-in",
+      "bounds": null
+    },
+    {
+      "frame": 681,
+      "stage": "walk-in",
+      "bounds": [
+        1069,
+        1750,
+        1080,
+        1780
+      ]
+    },
+    {
+      "frame": 682,
+      "stage": "walk-in",
+      "bounds": [
+        1056,
+        1659,
+        1080,
+        1791
+      ]
+    },
+    {
+      "frame": 683,
+      "stage": "walk-in",
+      "bounds": [
+        1041,
+        1527,
+        1080,
+        1797
+      ]
+    },
+    {
+      "frame": 684,
+      "stage": "walk-in",
+      "bounds": [
+        1053,
+        1473,
+        1080,
+        1804
+      ]
+    },
+    {
+      "frame": 685,
+      "stage": "walk-in",
+      "bounds": [
+        1036,
+        1458,
+        1080,
+        1808
+      ]
+    },
+    {
+      "frame": 686,
+      "stage": "walk-in",
+      "bounds": [
+        1020,
+        1458,
+        1080,
+        1808
+      ]
+    },
+    {
+      "frame": 687,
+      "stage": "walk-in",
+      "bounds": [
+        984,
+        1456,
+        1080,
+        1810
+      ]
+    },
+    {
+      "frame": 688,
+      "stage": "walk-in",
+      "bounds": [
+        966,
+        1456,
+        1080,
+        1810
+      ]
+    },
+    {
+      "frame": 689,
+      "stage": "walk-in",
+      "bounds": [
+        949,
+        1450,
+        1080,
+        1810
+      ]
+    },
+    {
+      "frame": 690,
+      "stage": "walk-in",
+      "bounds": [
+        951,
+        1450,
+        1080,
+        1810
+      ]
+    },
+    {
+      "frame": 691,
+      "stage": "walk-in",
+      "bounds": [
+        934,
+        1450,
+        1080,
+        1810
+      ]
+    },
+    {
+      "frame": 692,
+      "stage": "walk-in",
+      "bounds": [
+        919,
+        1450,
+        1080,
+        1810
+      ]
+    },
+    {
+      "frame": 693,
+      "stage": "walk-in",
+      "bounds": [
+        877,
+        1450,
+        1080,
+        1810
+      ]
+    },
+    {
+      "frame": 694,
+      "stage": "walk-in",
+      "bounds": [
+        863,
+        1450,
+        1080,
+        1810
+      ]
+    },
+    {
+      "frame": 695,
+      "stage": "walk-in",
+      "bounds": [
+        851,
+        1450,
+        1068,
+        1810
+      ]
+    },
+    {
+      "frame": 696,
+      "stage": "walk-in",
+      "bounds": [
+        868,
+        1450,
+        1031,
+        1810
+      ]
+    },
+    {
+      "frame": 697,
+      "stage": "walk-in",
+      "bounds": [
+        860,
+        1450,
+        1023,
+        1810
+      ]
+    },
+    {
+      "frame": 698,
+      "stage": "walk-in",
+      "bounds": [
+        854,
+        1450,
+        1017,
+        1810
+      ]
+    },
+    {
+      "frame": 699,
+      "stage": "walk-in",
+      "bounds": [
+        831,
+        1450,
+        1031,
+        1810
+      ]
+    },
+    {
+      "frame": 700,
+      "stage": "turn-threequarter",
+      "bounds": [
+        853,
+        1450,
+        1007,
+        1809
+      ]
+    },
+    {
+      "frame": 701,
+      "stage": "turn-threequarter",
+      "bounds": [
+        853,
+        1450,
+        1007,
+        1809
+      ]
+    },
+    {
+      "frame": 702,
+      "stage": "turn-threequarter",
+      "bounds": [
+        853,
+        1450,
+        1007,
+        1809
+      ]
+    },
+    {
+      "frame": 703,
+      "stage": "turn-threequarter",
+      "bounds": [
+        853,
+        1450,
+        1007,
+        1809
+      ]
+    },
+    {
+      "frame": 704,
+      "stage": "turn-threequarter",
+      "bounds": [
+        853,
+        1450,
+        1007,
+        1809
+      ]
+    },
+    {
+      "frame": 705,
+      "stage": "turn-threequarter",
+      "bounds": [
+        853,
+        1450,
+        1007,
+        1809
+      ]
+    },
+    {
+      "frame": 706,
+      "stage": "turn-threequarter",
+      "bounds": [
+        853,
+        1450,
+        1007,
+        1809
+      ]
+    },
+    {
+      "frame": 707,
+      "stage": "turn-threequarter",
+      "bounds": [
+        853,
+        1450,
+        1007,
+        1809
+      ]
+    },
+    {
+      "frame": 708,
+      "stage": "turn-front",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 709,
+      "stage": "turn-front",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 710,
+      "stage": "turn-front",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 711,
+      "stage": "turn-front",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 712,
+      "stage": "turn-front",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 713,
+      "stage": "turn-front",
+      "bounds": [
+        854,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 714,
+      "stage": "turn-front",
+      "bounds": [
+        854,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 715,
+      "stage": "chin-dip",
+      "bounds": [
+        854,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 716,
+      "stage": "chin-dip",
+      "bounds": [
+        854,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 717,
+      "stage": "chin-dip",
+      "bounds": [
+        854,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 718,
+      "stage": "chin-dip",
+      "bounds": [
+        854,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 719,
+      "stage": "chin-dip",
+      "bounds": [
+        854,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 720,
+      "stage": "chin-dip",
+      "bounds": [
+        854,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 721,
+      "stage": "chin-dip",
+      "bounds": [
+        854,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 722,
+      "stage": "chin-dip",
+      "bounds": [
+        854,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 723,
+      "stage": "chin-dip",
+      "bounds": [
+        854,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 724,
+      "stage": "chin-dip",
+      "bounds": [
+        854,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 725,
+      "stage": "chin-dip",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 726,
+      "stage": "chin-dip",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 727,
+      "stage": "chin-dip",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 728,
+      "stage": "chin-dip",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 729,
+      "stage": "chin-dip",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 730,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 731,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 732,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 733,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 734,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 735,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 736,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 737,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 738,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 739,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 740,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 741,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 742,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 743,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 744,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 745,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 746,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 747,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 748,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 749,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 750,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 751,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 752,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 753,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 754,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 755,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 756,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 757,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 758,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 759,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 760,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 761,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 762,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 763,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 764,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 765,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 766,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 767,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 768,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 769,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 770,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 771,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 772,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 773,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 774,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 775,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 776,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 777,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 778,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 779,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 780,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 781,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 782,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 783,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 784,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 785,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 786,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 787,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 788,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 789,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 790,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 791,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 792,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 793,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 794,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 795,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 796,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 797,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 798,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 799,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 800,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 801,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 802,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 803,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 804,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 805,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 806,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 807,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 808,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 809,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 810,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 811,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 812,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 813,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 814,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 815,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 816,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 817,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 818,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 819,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 820,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 821,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 822,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 823,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 824,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 825,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 826,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 827,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1452,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 828,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 829,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 830,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 831,
+      "stage": "head-shake",
+      "bounds": [
+        854,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 832,
+      "stage": "head-shake",
+      "bounds": [
+        853,
+        1451,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 833,
+      "stage": "settle",
+      "bounds": [
+        853,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 834,
+      "stage": "settle",
+      "bounds": [
+        853,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 835,
+      "stage": "settle",
+      "bounds": [
+        853,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 836,
+      "stage": "settle",
+      "bounds": [
+        853,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 837,
+      "stage": "settle",
+      "bounds": [
+        853,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 838,
+      "stage": "settle",
+      "bounds": [
+        853,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 839,
+      "stage": "settle",
+      "bounds": [
+        854,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 840,
+      "stage": "settle",
+      "bounds": [
+        854,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 841,
+      "stage": "settle",
+      "bounds": [
+        854,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 842,
+      "stage": "settle",
+      "bounds": [
+        854,
+        1450,
+        1005,
+        1810
+      ]
+    },
+    {
+      "frame": 843,
+      "stage": "absent",
+      "bounds": null
+    },
+    {
+      "frame": 844,
+      "stage": "absent",
+      "bounds": null
+    },
+    {
+      "frame": 845,
+      "stage": "absent",
+      "bounds": null
+    },
+    {
+      "frame": 846,
+      "stage": "absent",
+      "bounds": null
+    },
+    {
+      "frame": 847,
+      "stage": "absent",
+      "bounds": null
+    },
+    {
+      "frame": 848,
+      "stage": "absent",
+      "bounds": null
+    },
+    {
+      "frame": 849,
+      "stage": "absent",
+      "bounds": null
+    }
+  ]
+}

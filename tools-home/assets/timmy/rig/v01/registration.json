@@ -1,0 +1,84 @@
+{
+  "canvas": [
+    900,
+    1800
+  ],
+  "neck_anchor": [
+    450,
+    862
+  ],
+  "body_source_anchor": [
+    512,
+    530
+  ],
+  "body_scale": 0.9523809523809523,
+  "body_translation": [
+    -38,
+    357
+  ],
+  "head_scale": 0.58,
+  "layers": [
+    "body",
+    "one articulated head",
+    "foreground collar"
+  ],
+  "head_sources": {
+    "FRONT": {
+      "anchor": [
+        662.0,
+        1162
+      ],
+      "translation": [
+        66,
+        188
+      ],
+      "source_size": [
+        1328,
+        1184
+      ]
+    },
+    "LEFT": {
+      "anchor": [
+        659.0,
+        1134
+      ],
+      "translation": [
+        68,
+        204
+      ],
+      "source_size": [
+        1328,
+        1184
+      ]
+    },
+    "RIGHT": {
+      "anchor": [
+        675.0,
+        1157
+      ],
+      "translation": [
+        58,
+        191
+      ],
+      "source_size": [
+        1328,
+        1184
+      ]
+    },
+    "DOWN": {
+      "anchor": [
+        661.0,
+        1150
+      ],
+      "translation": [
+        67,
+        195
+      ],
+      "source_size": [
+        1328,
+        1184
+      ]
+    }
+  },
+  "registration_rule": "All head neck-stem bottoms map to the one collar pivot. No head pixels are retained in the body. Collar fabric and bordering ink are foreground occluders."
+}

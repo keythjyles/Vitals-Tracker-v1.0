@@ -1,0 +1,760 @@
+{
+  "frames": 150,
+  "fps": 25,
+  "duration": 6,
+  "body_pixels_static": true,
+  "major_alpha_components_each_frame": 1,
+  "method": "Single-texture piecewise-affine head deformation guided by illustrated poses; one common neck pivot; no image crossfade or whole-body movement; collar foreground occlusion.",
+  "frames_checked": [
+    {
+      "frame": 0,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 1,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 2,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 3,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 4,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 5,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 6,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 7,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 8,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 9,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 10,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 11,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 12,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 13,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 14,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 15,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 16,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 17,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 18,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 19,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 20,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 21,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 22,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 23,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 24,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 25,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 26,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 27,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 28,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 29,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 30,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 31,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 32,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 33,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 34,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 35,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 36,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 37,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 38,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 39,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 40,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 41,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 42,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 43,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 44,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 45,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 46,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 47,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 48,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 49,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 50,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 51,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 52,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 53,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 54,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 55,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 56,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 57,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 58,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 59,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 60,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 61,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 62,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 63,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 64,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 65,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 66,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 67,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 68,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 69,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 70,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 71,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 72,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 73,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 74,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 75,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 76,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 77,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 78,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 79,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 80,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 81,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 82,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 83,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 84,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 85,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 86,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 87,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 88,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 89,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 90,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 91,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 92,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 93,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 94,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 95,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 96,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 97,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 98,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 99,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 100,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 101,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 102,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 103,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 104,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 105,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 106,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 107,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 108,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 109,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 110,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 111,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 112,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 113,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 114,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 115,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 116,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 117,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 118,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 119,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 120,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 121,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 122,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 123,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 124,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 125,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 126,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 127,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 128,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 129,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 130,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 131,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 132,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 133,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 134,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 135,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 136,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 137,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 138,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 139,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 140,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 141,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 142,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 143,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 144,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 145,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 146,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 147,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 148,
+      "head_components": 1,
+      "stationary_body": true
+    },
+    {
+      "frame": 149,
+      "head_components": 1,
+      "stationary_body": true
+    }
+  ]
+}
