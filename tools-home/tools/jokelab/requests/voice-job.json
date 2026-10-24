@@ -1,12 +1,11 @@
 {
   "schema": "GS-BoundedVoiceRequest-1",
-  "jobId": "JL-20261024-FARMLAND-VOICE-02",
+  "jobId": "JL-20261024-BOOKMARK-VOICE-01",
   "operation": "voice_generate",
   "executionMode": "generate",
-  "canonicalId": "dad-01390bc83ffc16630ae3d503",
-  "replacesJobId": "JL-20261023-FARMLAND-VOICE-01",
+  "canonicalId": "dad-01e2b3b699efb51afa7d744a",
   "approvedReferenceId": "pqILh6dY0D1CO7Ckhplb",
-  "script": "[deadpan joke delivery] I tried taking some high resolution photos of local farmland.\n\n[long pause] They all turned out a bit GRAINY.",
+  "script": "[deadpan joke delivery] My son asked, \"Can I have a bookmark?\"\n\n[long pause] He's eleven, and he still doesn't know my name is BRIAN.",
   "voiceId": "RBNpu6jPzAoaxZKl9noJ",
   "modelId": "eleven_v4",
   "outputFormat": "mp3_44100_192",
@@ -16,16 +15,16 @@
   "approved": true,
   "budget": {
     "approved": true,
-    "approvalEvidence": "User reaffirmed 'I asked for a jokelet' immediately after the explicit one-take maximum150existingcredits/no-retries proposal. Current instruction authorizes completing the requested jokelet within that presented voice ceiling; no automatic retries or purchases.",
+    "approvalEvidence": "User: 'Now, create a jokelet.' Current request delegates one new complete jokelet using established one-take150existingcredits ceiling, one GS4 render and existing reaction. No automatic retries or purchases.",
     "maxRequests": 1,
     "maxCharacters": 133,
     "maxCredits": 150,
-    "expiresAt": "2026-10-25T14:10:00Z"
+    "expiresAt": "2026-10-25T14:40:00Z"
   },
   "automaticRetries": 0,
   "duplicateReview": {
     "cleared": true,
-    "evidence": "Versioned correction of the same reserved farmland joke; predecessor completed and user-Rejected. Preserve its48-credit cost and originals; no new joke identity or duplicate-clearance claim."
+    "evidence": "Source position8; no canonical aliases/produced group or in-progress job, no catalog bookmark/Brian match, no HeyGen bookmark title. Known D1/D2/D3 topics differ. Drive text searches returned no relevant production; unnamed archive content remains unreconciled, not certified exhaustive."
   },
-  "invocation": "user-reaffirmed-complete-jokelet-one-v4-take"
+  "invocation": "user-requested-next-jokelet-mirrored-reaction-only"
 }

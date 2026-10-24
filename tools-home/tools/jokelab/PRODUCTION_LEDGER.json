@@ -685,7 +685,8 @@
     {
       "sourceJokeId": "dad-0174a70763ab66a8ea6e0e5e",
       "canonicalId": "dad-0174a70763ab66a8ea6e0e5e",
-      "state": "not_started_unverified"
+      "state": "editorial_hold_incomplete_punchline",
+      "note": "Incomplete nonverbal programming placeholder '[...💘]' is not a performable GS spoken joke; no paid operation."
     },
     {
       "sourceJokeId": "dad-01e2b3b699efb51afa7d744a",

@@ -1,0 +1,44 @@
+{
+  "schema": "JokeLabRun-1.0",
+  "runId": "JL-20261024-NEXT-04",
+  "state": "voice_dispatching",
+  "canonicalJokeId": "dad-01e2b3b699efb51afa7d744a",
+  "sourceLibraryPosition": 8,
+  "sourceLibraryGitBlob": "1d9dd64c99cf51233aba2d5eb6c1bc22978fa69b",
+  "source": "tools-home/data/jokelab/library.json",
+  "cuedScript": "[deadpan joke delivery] My son asked, \"Can I have a bookmark?\"\n\n[long pause] He's eleven, and he still doesn't know my name is BRIAN.",
+  "sourceAdaptation": "Condensed setup and omitted crying narration; retained bookmark/Mark versus Brian payoff.",
+  "skippedSource": {
+    "position": 7,
+    "id": "dad-0174a70763ab66a8ea6e0e5e",
+    "reason": "Incomplete nonverbal programming placeholder '[...💘]' is not a performable GS spoken joke; no paid operation."
+  },
+  "voiceJobId": "JL-20261024-BOOKMARK-VOICE-01",
+  "budget": {
+    "approved": true,
+    "approvalEvidence": "User: 'Now, create a jokelet.' Current request delegates one new complete jokelet using established one-take150existingcredits ceiling, one GS4 render and existing reaction. No automatic retries or purchases.",
+    "maxRequests": 1,
+    "maxCharacters": 133,
+    "maxCredits": 150,
+    "expiresAt": "2026-10-25T14:40:00Z"
+  },
+  "duplicateReview": {
+    "cleared": true,
+    "evidence": "Source position8; no canonical aliases/produced group or in-progress job, no catalog bookmark/Brian match, no HeyGen bookmark title. Known D1/D2/D3 topics differ. Drive text searches returned no relevant production; unnamed archive content remains unreconciled, not certified exhaustive."
+  },
+  "providerGenerationRequests": {
+    "elevenLabs": 0,
+    "heygen": 0
+  },
+  "reaction": {
+    "id": "reaction-skeptical",
+    "sourcePath": "tools-home/tools/jokelets/media/reaction-skeptical-silent-v02.mp4",
+    "sourceSha256": "9cb3246cffaea63858de86090a2f00ad37e79c748b106fece1ddaa0131355616",
+    "duration": 3,
+    "frames": 75,
+    "mirror": true,
+    "transform": "hflip for reaction only; speaking performance unchanged",
+    "approval": "Existing Approved reaction; inspect all sampled positions for visible lettering before applying mirror"
+  },
+  "next": "Observe single voice workflow receipt, do not re-dispatch. Continue GS4 with saved WAV, stabilize performance, append full75-frame mirrored reaction, preserve sources/recipe/output."
+}
