@@ -1,0 +1,37 @@
+{
+  "date": "2026-10-23",
+  "timezone": "America/Chicago",
+  "status": "19 Story slots restored and verified as active; publication not yet verified",
+  "placements": 38,
+  "firstSlot": "2026-10-23T20:40:00-05:00",
+  "sources": [
+    {
+      "episode": 1,
+      "postId": 398333569,
+      "media": "https://static.metricool.com/video/5798875/202610/0669debc107c44fa.mp4"
+    },
+    {
+      "episode": 2,
+      "postId": 400274126,
+      "media": "https://static.metricool.com/video/5798875/202610/ecc17416e6a041a4.mp4"
+    },
+    {
+      "episode": 3,
+      "postId": 401469551,
+      "media": "https://static.metricool.com/planner/202610/7457339-file-9304015029158812919.mp4"
+    }
+  ],
+  "scope": "Existing 19 pending Stories; both Facebook and Instagram. Existing Reels unchanged. Three published cuts rotated; further variety/performance reconciliation remains.",
+  "libraryRepair": {
+    "movedIds": [
+      "ep1-01",
+      "ep1-02",
+      "ep1-03",
+      "ep1-04",
+      "ep1-05"
+    ],
+    "bytesChanged": false,
+    "stage": "release",
+    "rawJokelets": "publication.ready false"
+  }
+}

@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {separateReleases,isFinishedRelease} from './release-policy.js';
+const fixed=JSON.parse(readFileSync(new URL('./catalog.json',import.meta.url)));
+const release=fixed.assets.find(i=>i.id==='ep1-01');
+assert.ok(isFinishedRelease(release));
+assert.equal(fixed.assets.filter(isFinishedRelease).length,5);
+assert.ok(fixed.catalog.every(i=>i.publication.ready===false));
+const stale={...release,kind:'jokelet',role:'jokelet',folderId:'folder-jokelet',publication:{ready:false,stage:'clean-jokelet'}};
+const state=separateReleases({catalog:[stale,fixed.catalog[0]],assets:[],selected:[stale.id,fixed.catalog[0].id],folders:[]},fixed);
+assert.equal(state.catalog.length,1);
+assert.equal(state.assets[0].kind,'release');
+assert.equal(state.assets[0].sha256,release.sha256);
+assert.deepEqual(state.selected,[fixed.catalog[0].id]);
+assert.equal(state.assets[0].publication.ready,true);
+assert.deepEqual(separateReleases(state,fixed),state);
+console.log('Passed: release separation, stale-project migration, preserved source hash, source selection, idempotence.');

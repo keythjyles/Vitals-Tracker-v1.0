@@ -1,3 +1,4 @@
+import {separateReleases} from './release-policy.js?v=20261023-release-stage';
 import {workspaceFetch as fetch,resolveMedia,saveProject,restoreProject,backupMessage,updateBackupStatus} from './storage.js?v=20261023-recovery';
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -12,10 +13,10 @@ function validMedia(i){return i&&typeof i.id==='string'&&typeof i.title==='strin
 function hydrate(data){
  if(!data||data.schema!=='JokeletLibrary-1.0'||!Array.isArray(data.catalog)||!Array.isArray(data.assets)||!Array.isArray(data.selected))throw Error('That file is not a Jokelet Library project.');
  const merged=(fixed,more)=>[...fixed.map(x=>({...x,...more.find(y=>y.id===x.id)})),...more.filter(x=>!fixed.some(y=>y.id===x.id))].filter(validMedia);
- return {...data,schema:'JokeletLibrary-1.0',catalog:merged(seed.catalog,data.catalog),assets:merged(seed.assets,data.assets),selected:[...new Set(data.selected)].filter(id=>typeof id==='string'),placements:data.placements&&typeof data.placements==='object'?data.placements:{},outro:typeof data.outro==='string'?data.outro:'fireside-cta',useOutro:!!data.useOutro,name:String(data.name||'Dad Joke Duty · New cut').slice(0,120),sxURL:data.sxURL||'https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/sxlock/',lastExport:data.lastExport&&typeof data.lastExport.url==='string'&&/^\/api\/jokelets\/media\?id=[a-f0-9-]{36}$/.test(data.lastExport.url)?data.lastExport:null,updatedAt:Number(data.updatedAt)||0};
+ return separateReleases({...data,schema:'JokeletLibrary-1.0',catalog:merged(seed.catalog,data.catalog),assets:merged(seed.assets,data.assets),selected:[...new Set(data.selected)].filter(id=>typeof id==='string'),placements:data.placements&&typeof data.placements==='object'?data.placements:{},outro:typeof data.outro==='string'?data.outro:'fireside-cta',useOutro:!!data.useOutro,name:String(data.name||'Dad Joke Duty · New cut').slice(0,120),sxURL:data.sxURL||'https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/sxlock/',lastExport:data.lastExport&&typeof data.lastExport.url==='string'&&/^\/api\/jokelets\/media\?id=[a-f0-9-]{36}$/.test(data.lastExport.url)?data.lastExport:null,updatedAt:Number(data.updatedAt)||0},seed);
 }
 async function init(){try{
- seed=await (await fetch('catalog.json')).json();const extra=await (await fetch('factory-seed.json')).json();seed.assets.push(...extra.assets);state=hydrate({schema:'JokeletLibrary-1.0',catalog:[],assets:[],selected:[],useOutro:true});
+ seed=await (await fetch('catalog.json?v=20261023-release-stage')).json();const extra=await (await fetch('factory-seed.json')).json();seed.assets.push(...extra.assets);state=hydrate({schema:'JokeletLibrary-1.0',catalog:[],assets:[],selected:[],useOutro:true});
  let local;try{local=JSON.parse(localStorage.getItem(key)||'null');}catch{}
  try{const r=await fetch('/api/jokelets/state');if(!r.ok)throw Error();const data=await r.json();if(data.state&&(!local||data.state.updatedAt>=local.updatedAt))state=hydrate(data.state);else if(local){state=hydrate(local);queueSave();}$('sync').textContent='Saved on this device · back up to Drive';}catch{if(local)state=hydrate(local);$('sync').textContent='Local storage unavailable · keep a project backup';}
  $('assemblyName').value=state.name;$('sxURL').value=state.sxURL;$('useOutro').checked=state.useOutro;

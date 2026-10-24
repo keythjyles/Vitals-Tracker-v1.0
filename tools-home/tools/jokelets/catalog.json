@@ -39,6 +39,11 @@
         "status": "No recorded publication",
         "checkedDate": "2026-10-23",
         "scope": "Metricool Oct16–24; manual external posts not exhaustively audited."
+      },
+      "publication": {
+        "stage": "clean-jokelet",
+        "ready": false,
+        "note": "Production asset. Must complete ambient/effects/captions and final export review before publication."
       }
     },
     {
@@ -80,6 +85,11 @@
         "status": "No recorded publication",
         "checkedDate": "2026-10-23",
         "scope": "Metricool Oct16–24; manual external posts not exhaustively audited."
+      },
+      "publication": {
+        "stage": "clean-jokelet",
+        "ready": false,
+        "note": "Production asset. Must complete ambient/effects/captions and final export review before publication."
       }
     },
     {
@@ -121,6 +131,11 @@
         "status": "No recorded publication",
         "checkedDate": "2026-10-23",
         "scope": "Metricool Oct16–24; manual external posts not exhaustively audited."
+      },
+      "publication": {
+        "stage": "clean-jokelet",
+        "ready": false,
+        "note": "Production asset. Must complete ambient/effects/captions and final export review before publication."
       }
     },
     {
@@ -162,6 +177,11 @@
         "status": "No recorded publication",
         "checkedDate": "2026-10-23",
         "scope": "Metricool Oct16–24; manual external posts not exhaustively audited."
+      },
+      "publication": {
+        "stage": "clean-jokelet",
+        "ready": false,
+        "note": "Production asset. Must complete ambient/effects/captions and final export review before publication."
       }
     },
     {
@@ -203,6 +223,11 @@
         "status": "No recorded publication",
         "checkedDate": "2026-10-23",
         "scope": "Metricool Oct16–24; manual external posts not exhaustively audited."
+      },
+      "publication": {
+        "stage": "clean-jokelet",
+        "ready": false,
+        "note": "Production asset. Must complete ambient/effects/captions and final export review before publication."
       }
     },
     {
@@ -244,6 +269,11 @@
         "status": "No recorded publication",
         "checkedDate": "2026-10-23",
         "scope": "Metricool Oct16–24; manual external posts not exhaustively audited."
+      },
+      "publication": {
+        "stage": "clean-jokelet",
+        "ready": false,
+        "note": "Production asset. Must complete ambient/effects/captions and final export review before publication."
       }
     },
     {
@@ -281,6 +311,11 @@
       },
       "sourceTrail": {
         "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
+      },
+      "publication": {
+        "stage": "clean-jokelet",
+        "ready": false,
+        "note": "Production asset. Must complete ambient/effects/captions and final export review before publication."
       }
     },
     {
@@ -318,6 +353,11 @@
       },
       "sourceTrail": {
         "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
+      },
+      "publication": {
+        "stage": "clean-jokelet",
+        "ready": false,
+        "note": "Production asset. Must complete ambient/effects/captions and final export review before publication."
       }
     },
     {
@@ -355,6 +395,11 @@
       },
       "sourceTrail": {
         "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
+      },
+      "publication": {
+        "stage": "clean-jokelet",
+        "ready": false,
+        "note": "Production asset. Must complete ambient/effects/captions and final export review before publication."
       }
     },
     {
@@ -392,6 +437,11 @@
       },
       "sourceTrail": {
         "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
+      },
+      "publication": {
+        "stage": "clean-jokelet",
+        "ready": false,
+        "note": "Production asset. Must complete ambient/effects/captions and final export review before publication."
       }
     },
     {
@@ -429,211 +479,11 @@
       },
       "sourceTrail": {
         "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
-      }
-    },
-    {
-      "id": "ep1-01",
-      "family": "ep1-01",
-      "number": 9,
-      "title": "Guts · EP1 #1",
-      "reaction": "Original approved reaction",
-      "category": "Dad Joke Duty · Episode 1",
-      "tags": [
-        "Guts · EP1 #1",
-        "earlier videos"
-      ],
-      "text": "Episode 1 · original captions, soundtrack and complete reaction.",
-      "status": "Approved",
-      "sourceLibraryId": "libfile_ce9e2e11a18881919875f3c3eab4b2d6",
-      "version": "v03",
-      "src": "media/ep1-01.mp4",
-      "poster": "media/ep1-01.jpg",
-      "duration": 11,
-      "fps": 30,
-      "frames": 330,
-      "width": 720,
-      "height": 1280,
-      "sourceRange": {
-        "inFrame": 0,
-        "outFrameInclusive": 329,
-        "fps": 30
       },
-      "sha256": "998c6c0739e0fe775c7fba73f68610429c67ada4907f2f5a35e16880f7e262ea",
-      "automationReview": {
-        "status": "Blocked",
-        "audio": "unknown",
-        "burnedCaptions": true,
-        "ambient": false,
-        "music": false,
-        "soundEffects": false,
-        "note": "Catalog records original burned captions/soundtrack; preserve for manual use, exclude from automatic clean assembly."
-      },
-      "sourceTrail": {
-        "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
-      }
-    },
-    {
-      "id": "ep1-02",
-      "family": "ep1-02",
-      "number": 10,
-      "title": "Soap · EP1 #2",
-      "reaction": "Original approved reaction",
-      "category": "Dad Joke Duty · Episode 1",
-      "tags": [
-        "Soap · EP1 #2",
-        "earlier videos"
-      ],
-      "text": "Episode 1 · original captions, soundtrack and complete reaction.",
-      "status": "Approved",
-      "sourceLibraryId": "libfile_ce9e2e11a18881919875f3c3eab4b2d6",
-      "version": "v03",
-      "src": "media/ep1-02.mp4",
-      "poster": "media/ep1-02.jpg",
-      "duration": 8.433333,
-      "fps": 30,
-      "frames": 253,
-      "width": 720,
-      "height": 1280,
-      "sourceRange": {
-        "inFrame": 333,
-        "outFrameInclusive": 585,
-        "fps": 30
-      },
-      "sha256": "c6e41307e7b45ba902f5ab01d0a9d1abe5143189dc158501e4e7da94ad8f8146",
-      "automationReview": {
-        "status": "Blocked",
-        "audio": "unknown",
-        "burnedCaptions": true,
-        "ambient": false,
-        "music": false,
-        "soundEffects": false,
-        "note": "Catalog records original burned captions/soundtrack; preserve for manual use, exclude from automatic clean assembly."
-      },
-      "sourceTrail": {
-        "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
-      }
-    },
-    {
-      "id": "ep1-03",
-      "family": "ep1-03",
-      "number": 11,
-      "title": "Impasta · EP1 #3",
-      "reaction": "Original approved reaction",
-      "category": "Dad Joke Duty · Episode 1",
-      "tags": [
-        "Impasta · EP1 #3",
-        "earlier videos"
-      ],
-      "text": "Episode 1 · original captions, soundtrack and complete reaction.",
-      "status": "Approved",
-      "sourceLibraryId": "libfile_ce9e2e11a18881919875f3c3eab4b2d6",
-      "version": "v03",
-      "src": "media/ep1-03.mp4",
-      "poster": "media/ep1-03.jpg",
-      "duration": 7.966667,
-      "fps": 30,
-      "frames": 239,
-      "width": 720,
-      "height": 1280,
-      "sourceRange": {
-        "inFrame": 586,
-        "outFrameInclusive": 824,
-        "fps": 30
-      },
-      "sha256": "f78f86ffbe4023c01545b5c0238ba04036e809fc851998d1691c2ba572294577",
-      "automationReview": {
-        "status": "Blocked",
-        "audio": "unknown",
-        "burnedCaptions": true,
-        "ambient": false,
-        "music": false,
-        "soundEffects": false,
-        "note": "Catalog records original burned captions/soundtrack; preserve for manual use, exclude from automatic clean assembly."
-      },
-      "sourceTrail": {
-        "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
-      }
-    },
-    {
-      "id": "ep1-04",
-      "family": "ep1-04",
-      "number": 12,
-      "title": "Scarecrow · EP1 #4",
-      "reaction": "Original approved reaction",
-      "category": "Dad Joke Duty · Episode 1",
-      "tags": [
-        "Scarecrow · EP1 #4",
-        "earlier videos"
-      ],
-      "text": "Episode 1 · original captions, soundtrack and complete reaction.",
-      "status": "Approved",
-      "sourceLibraryId": "libfile_ce9e2e11a18881919875f3c3eab4b2d6",
-      "version": "v03",
-      "src": "media/ep1-04.mp4",
-      "poster": "media/ep1-04.jpg",
-      "duration": 8.1,
-      "fps": 30,
-      "frames": 243,
-      "width": 720,
-      "height": 1280,
-      "sourceRange": {
-        "inFrame": 825,
-        "outFrameInclusive": 1067,
-        "fps": 30
-      },
-      "sha256": "c149fe620125260bb310937d4b1d1f50f05079de911daa759f9580eadd8df33f",
-      "automationReview": {
-        "status": "Blocked",
-        "audio": "unknown",
-        "burnedCaptions": true,
-        "ambient": false,
-        "music": false,
-        "soundEffects": false,
-        "note": "Catalog records original burned captions/soundtrack; preserve for manual use, exclude from automatic clean assembly."
-      },
-      "sourceTrail": {
-        "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
-      }
-    },
-    {
-      "id": "ep1-05",
-      "family": "ep1-05",
-      "number": 13,
-      "title": "Hug · EP1 #5",
-      "reaction": "Original approved reaction",
-      "category": "Dad Joke Duty · Episode 1",
-      "tags": [
-        "Hug · EP1 #5",
-        "earlier videos"
-      ],
-      "text": "Episode 1 · original captions, soundtrack and complete reaction.",
-      "status": "Approved",
-      "sourceLibraryId": "libfile_ce9e2e11a18881919875f3c3eab4b2d6",
-      "version": "v03",
-      "src": "media/ep1-05.mp4",
-      "poster": "media/ep1-05.jpg",
-      "duration": 9.666667,
-      "fps": 30,
-      "frames": 290,
-      "width": 720,
-      "height": 1280,
-      "sourceRange": {
-        "inFrame": 1068,
-        "outFrameInclusive": 1357,
-        "fps": 30
-      },
-      "sha256": "ca448097d49271b68112a18e8c1152ce1a898d2ea1ab15767b35efcf0bb57bc3",
-      "automationReview": {
-        "status": "Blocked",
-        "audio": "unknown",
-        "burnedCaptions": true,
-        "ambient": false,
-        "music": false,
-        "soundEffects": false,
-        "note": "Catalog records original burned captions/soundtrack; preserve for manual use, exclude from automatic clean assembly."
-      },
-      "sourceTrail": {
-        "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
+      "publication": {
+        "stage": "clean-jokelet",
+        "ready": false,
+        "note": "Production asset. Must complete ambient/effects/captions and final export review before publication."
       }
     },
     {
@@ -682,6 +532,11 @@
         "status": "No recorded publication",
         "checkedDate": "2026-10-23",
         "scope": "Metricool Oct16–24; manual external posts not exhaustively audited."
+      },
+      "publication": {
+        "stage": "clean-jokelet",
+        "ready": false,
+        "note": "Production asset. Must complete ambient/effects/captions and final export review before publication."
       }
     },
     {
@@ -730,6 +585,11 @@
         "status": "No recorded publication",
         "checkedDate": "2026-10-23",
         "scope": "Metricool Oct16–24; manual external posts not exhaustively audited."
+      },
+      "publication": {
+        "stage": "clean-jokelet",
+        "ready": false,
+        "note": "Production asset. Must complete ambient/effects/captions and final export review before publication."
       }
     }
   ],
@@ -889,6 +749,256 @@
       "workingCopy": {
         "audio": "removed",
         "originalPreserved": true
+      }
+    },
+    {
+      "id": "ep1-01",
+      "family": "ep1-01",
+      "number": 9,
+      "title": "Guts · EP1 #1",
+      "reaction": "Original approved reaction",
+      "category": "Dad Joke Duty · Episode 1",
+      "tags": [
+        "Guts · EP1 #1",
+        "earlier videos"
+      ],
+      "text": "Episode 1 · original captions, soundtrack and complete reaction.",
+      "status": "Approved",
+      "sourceLibraryId": "libfile_ce9e2e11a18881919875f3c3eab4b2d6",
+      "version": "v03",
+      "src": "media/ep1-01.mp4",
+      "poster": "media/ep1-01.jpg",
+      "duration": 11,
+      "fps": 30,
+      "frames": 330,
+      "width": 720,
+      "height": 1280,
+      "sourceRange": {
+        "inFrame": 0,
+        "outFrameInclusive": 329,
+        "fps": 30
+      },
+      "sha256": "998c6c0739e0fe775c7fba73f68610429c67ada4907f2f5a35e16880f7e262ea",
+      "automationReview": {
+        "status": "Blocked",
+        "audio": "unknown",
+        "burnedCaptions": true,
+        "ambient": false,
+        "music": false,
+        "soundEffects": false,
+        "note": "Catalog records original burned captions/soundtrack; preserve for manual use, exclude from automatic clean assembly."
+      },
+      "sourceTrail": {
+        "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
+      },
+      "kind": "release",
+      "role": "release",
+      "folderId": "folder-release",
+      "publication": {
+        "stage": "release",
+        "ready": true,
+        "origin": "Finished individual cut from released Episode 1",
+        "note": "Retain original captions, soundtrack and full reaction. Approval for clean source reuse is a separate decision."
+      }
+    },
+    {
+      "id": "ep1-02",
+      "family": "ep1-02",
+      "number": 10,
+      "title": "Soap · EP1 #2",
+      "reaction": "Original approved reaction",
+      "category": "Dad Joke Duty · Episode 1",
+      "tags": [
+        "Soap · EP1 #2",
+        "earlier videos"
+      ],
+      "text": "Episode 1 · original captions, soundtrack and complete reaction.",
+      "status": "Approved",
+      "sourceLibraryId": "libfile_ce9e2e11a18881919875f3c3eab4b2d6",
+      "version": "v03",
+      "src": "media/ep1-02.mp4",
+      "poster": "media/ep1-02.jpg",
+      "duration": 8.433333,
+      "fps": 30,
+      "frames": 253,
+      "width": 720,
+      "height": 1280,
+      "sourceRange": {
+        "inFrame": 333,
+        "outFrameInclusive": 585,
+        "fps": 30
+      },
+      "sha256": "c6e41307e7b45ba902f5ab01d0a9d1abe5143189dc158501e4e7da94ad8f8146",
+      "automationReview": {
+        "status": "Blocked",
+        "audio": "unknown",
+        "burnedCaptions": true,
+        "ambient": false,
+        "music": false,
+        "soundEffects": false,
+        "note": "Catalog records original burned captions/soundtrack; preserve for manual use, exclude from automatic clean assembly."
+      },
+      "sourceTrail": {
+        "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
+      },
+      "kind": "release",
+      "role": "release",
+      "folderId": "folder-release",
+      "publication": {
+        "stage": "release",
+        "ready": true,
+        "origin": "Finished individual cut from released Episode 1",
+        "note": "Retain original captions, soundtrack and full reaction. Approval for clean source reuse is a separate decision."
+      }
+    },
+    {
+      "id": "ep1-03",
+      "family": "ep1-03",
+      "number": 11,
+      "title": "Impasta · EP1 #3",
+      "reaction": "Original approved reaction",
+      "category": "Dad Joke Duty · Episode 1",
+      "tags": [
+        "Impasta · EP1 #3",
+        "earlier videos"
+      ],
+      "text": "Episode 1 · original captions, soundtrack and complete reaction.",
+      "status": "Approved",
+      "sourceLibraryId": "libfile_ce9e2e11a18881919875f3c3eab4b2d6",
+      "version": "v03",
+      "src": "media/ep1-03.mp4",
+      "poster": "media/ep1-03.jpg",
+      "duration": 7.966667,
+      "fps": 30,
+      "frames": 239,
+      "width": 720,
+      "height": 1280,
+      "sourceRange": {
+        "inFrame": 586,
+        "outFrameInclusive": 824,
+        "fps": 30
+      },
+      "sha256": "f78f86ffbe4023c01545b5c0238ba04036e809fc851998d1691c2ba572294577",
+      "automationReview": {
+        "status": "Blocked",
+        "audio": "unknown",
+        "burnedCaptions": true,
+        "ambient": false,
+        "music": false,
+        "soundEffects": false,
+        "note": "Catalog records original burned captions/soundtrack; preserve for manual use, exclude from automatic clean assembly."
+      },
+      "sourceTrail": {
+        "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
+      },
+      "kind": "release",
+      "role": "release",
+      "folderId": "folder-release",
+      "publication": {
+        "stage": "release",
+        "ready": true,
+        "origin": "Finished individual cut from released Episode 1",
+        "note": "Retain original captions, soundtrack and full reaction. Approval for clean source reuse is a separate decision."
+      }
+    },
+    {
+      "id": "ep1-04",
+      "family": "ep1-04",
+      "number": 12,
+      "title": "Scarecrow · EP1 #4",
+      "reaction": "Original approved reaction",
+      "category": "Dad Joke Duty · Episode 1",
+      "tags": [
+        "Scarecrow · EP1 #4",
+        "earlier videos"
+      ],
+      "text": "Episode 1 · original captions, soundtrack and complete reaction.",
+      "status": "Approved",
+      "sourceLibraryId": "libfile_ce9e2e11a18881919875f3c3eab4b2d6",
+      "version": "v03",
+      "src": "media/ep1-04.mp4",
+      "poster": "media/ep1-04.jpg",
+      "duration": 8.1,
+      "fps": 30,
+      "frames": 243,
+      "width": 720,
+      "height": 1280,
+      "sourceRange": {
+        "inFrame": 825,
+        "outFrameInclusive": 1067,
+        "fps": 30
+      },
+      "sha256": "c149fe620125260bb310937d4b1d1f50f05079de911daa759f9580eadd8df33f",
+      "automationReview": {
+        "status": "Blocked",
+        "audio": "unknown",
+        "burnedCaptions": true,
+        "ambient": false,
+        "music": false,
+        "soundEffects": false,
+        "note": "Catalog records original burned captions/soundtrack; preserve for manual use, exclude from automatic clean assembly."
+      },
+      "sourceTrail": {
+        "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
+      },
+      "kind": "release",
+      "role": "release",
+      "folderId": "folder-release",
+      "publication": {
+        "stage": "release",
+        "ready": true,
+        "origin": "Finished individual cut from released Episode 1",
+        "note": "Retain original captions, soundtrack and full reaction. Approval for clean source reuse is a separate decision."
+      }
+    },
+    {
+      "id": "ep1-05",
+      "family": "ep1-05",
+      "number": 13,
+      "title": "Hug · EP1 #5",
+      "reaction": "Original approved reaction",
+      "category": "Dad Joke Duty · Episode 1",
+      "tags": [
+        "Hug · EP1 #5",
+        "earlier videos"
+      ],
+      "text": "Episode 1 · original captions, soundtrack and complete reaction.",
+      "status": "Approved",
+      "sourceLibraryId": "libfile_ce9e2e11a18881919875f3c3eab4b2d6",
+      "version": "v03",
+      "src": "media/ep1-05.mp4",
+      "poster": "media/ep1-05.jpg",
+      "duration": 9.666667,
+      "fps": 30,
+      "frames": 290,
+      "width": 720,
+      "height": 1280,
+      "sourceRange": {
+        "inFrame": 1068,
+        "outFrameInclusive": 1357,
+        "fps": 30
+      },
+      "sha256": "ca448097d49271b68112a18e8c1152ce1a898d2ea1ab15767b35efcf0bb57bc3",
+      "automationReview": {
+        "status": "Blocked",
+        "audio": "unknown",
+        "burnedCaptions": true,
+        "ambient": false,
+        "music": false,
+        "soundEffects": false,
+        "note": "Catalog records original burned captions/soundtrack; preserve for manual use, exclude from automatic clean assembly."
+      },
+      "sourceTrail": {
+        "gaps": "Full rebuild chain not reconciled: verify exact cued script, original ElevenLabs take, HeyGen render and separate sound-layer project. Existing archive/source metadata remains available; do not infer the chain from this finished export."
+      },
+      "kind": "release",
+      "role": "release",
+      "folderId": "folder-release",
+      "publication": {
+        "stage": "release",
+        "ready": true,
+        "origin": "Finished individual cut from released Episode 1",
+        "note": "Retain original captions, soundtrack and full reaction. Approval for clean source reuse is a separate decision."
       }
     }
   ]

@@ -219,3 +219,12 @@ Use a stable job ID and one request at a time. Completed replay must verify save
 Read ../../services/jokelet-api/BOUNDED_VOICE.md and runs/JL-20261023-VOICE-WIRING-01.json. The distinct signed jokelet-voice workflow now has a GitHub-backed one-attempt route, pricing/quota preflight, atomic canonical/job claim, original MP3 preservation and PCM WAV conversion code. Existing preflight identity still cannot invoke it. The legacy manual endpoint is not yet integrated with this ledger; do not imply global spending protection.
 
 Live gate run40049155845 passed: unapproved generation returned403 approval_required, and a read-only funding quote returned108expected credits for108characters under a proposed150-credit ceiling. No paid TTS was made. Actual TTS permission/audio/WAV preservation still await a bounded paid test. Current next source is library position6 farmland/grainy, in runs/JL-20261023-NEXT-03.json. Its proposed credit cap is not approved; earlier joke budgets do not carry forward. Do not generate robots or pebble again. No new disk, subscription or paid infrastructure is authorized.
+
+
+## Publication stage correction — October 23, 2026
+
+Clean jokelets are production assets, even when their performance and reaction are Approved or automation-eligible. Never schedule them directly. Complete the publication stage: continuous ambient, deliberate effects where intended, captions/graphics, final export and full playback review. Content approval and clean-source automation eligibility do not establish release readiness.
+
+Finished individual jokes cut from completed episodes are finished releases. Preserve their mixed soundtrack, captions and reactions. Keep them in Finished releases, separate from clean jokelet assembly inputs. They may be reposted unchanged under the user's publishing authorization; a clean-source Blocked label does not block reposting a finished release. Do not strip layers or recreate a finished cut to reuse it.
+
+For the current posting repair, replace the unfinished media in existing Story slots with verified media from prior published posts; retain automatic publishing. Do not halt the schedule as a substitute for replacing the media. Read tools-home/tools/jokelets/PUBLISHING_REPAIR_20261023.json for the verified source post IDs and media mapping. Future new releases need an explicit release record tied to the exact export; unknown readiness is not approval.
