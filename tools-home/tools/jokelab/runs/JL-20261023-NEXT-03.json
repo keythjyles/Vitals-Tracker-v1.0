@@ -1,7 +1,7 @@
 {
   "schema": "JokeLabRun-1.0",
   "runId": "JL-20261023-NEXT-03",
-  "state": "replacement_prepared_awaiting_bounded_approval",
+  "state": "video_rendering",
   "canonicalJokeId": "dad-01390bc83ffc16630ae3d503",
   "sourceLibraryPosition": 6,
   "source": "tools-home/data/jokelab/library.json",
@@ -73,10 +73,13 @@
     "episode3": "Known Smart Grill, Eyebrows, Listener, Spider and Dinner Surprise differ.",
     "remaining": "Unnamed historical render content not exhaustively reconciled. Do not inherit another joke's duplicate-risk exception."
   },
-  "providerGenerationRequests": 1,
-  "next": "One explicit replacement voice approval up to150existingcredits. Proposal job JL-20261024-FARMLAND-VOICE-02; quote133; no automatic retries; HeyGen not authorized.",
+  "providerGenerationRequests": {
+    "elevenLabs": 2,
+    "heygen": 1
+  },
+  "next": "Resume video3ff1166a9548ae37d961b650e6723042. Do not regenerate voice/video. Stabilize then append full90-frame side-glance reaction, save clean jokelet and exact rebuild recipe.",
   "voiceJobId": "JL-20261023-FARMLAND-VOICE-01",
-  "actualVoiceCredits": 48,
+  "actualVoiceCredits": 107,
   "voiceReceipt": "tools-home/tools/jokelab/voice-jobs/JL-20261023-FARMLAND-VOICE-01.json",
   "original": {
     "bytes": 82798,
@@ -187,5 +190,63 @@
     "quoteProof": "results/JL-20261024-FARMLAND-VOICE-02.json",
     "referenceProof": "results/JL-20261024-REFERENCE-03.json",
     "assemblyPlan": "runs/JL-20261024-FARMLAND-PREPARED.json"
+  },
+  "currentVoiceJobId": "JL-20261024-FARMLAND-VOICE-02",
+  "selectedVoiceGenerationId": "WwqA33ZDoHL6XPiRBSDk",
+  "voiceAttempts": [
+    {
+      "jobId": "JL-20261023-FARMLAND-VOICE-01",
+      "credits": 48,
+      "status": "Rejected"
+    },
+    {
+      "jobId": "JL-20261024-FARMLAND-VOICE-02",
+      "credits": 59,
+      "status": "selected_by_agent_pending_final_review",
+      "historyItemId": "WwqA33ZDoHL6XPiRBSDk",
+      "aiListeningVerified": false
+    }
+  ],
+  "videoId": "3ff1166a9548ae37d961b650e6723042",
+  "videoRequest": {
+    "avatarId": "85cc768c260a40359212b92f738de459",
+    "audioAssetId": "c5ba89988a8f464cba4bc791436768df",
+    "engine": {
+      "type": "avatar_iv"
+    },
+    "expressiveness": "low",
+    "aspectRatio": "9:16",
+    "resolution": "1080p",
+    "fit": "contain",
+    "outputFormat": "mp4",
+    "title": "GS Farmland Grainy v02 — clean joke performance"
+  },
+  "latestAuthorization": {
+    "evidence": "User reaffirmed 'I asked for a jokelet' after exact150-credit one-take proposal and requests completion. Proceed through one corrected take, one GS4 animation, existing approved reaction, no publication, no automatic retries.",
+    "voiceCreditCeiling": 150,
+    "videoRequests": 1,
+    "purchaseOrUpgrade": false,
+    "mode": "AI executes full jokelet; final output pending user review"
+  },
+  "voiceOriginal": {
+    "bytes": 159285,
+    "format": "audio/mpeg",
+    "path": "tools-home/tools/jokelab/voice-originals/JL-20261024-FARMLAND-VOICE-02.mp3",
+    "sha256": "fad588ab0da045970a99136569cc2c001afa1dc0c905edf45189194c0e63994b"
+  },
+  "selectedWav": {
+    "bytes": 578670,
+    "channels": 1,
+    "conversion": "ffmpeg decode to PCM16; no gain, speed, trim or resampling options",
+    "duration": 6.56,
+    "encoding": "pcm_s16le",
+    "parentSha256": "fad588ab0da045970a99136569cc2c001afa1dc0c905edf45189194c0e63994b",
+    "path": "tools-home/tools/jokelab/voice-wav/JL-20261024-FARMLAND-VOICE-02.wav",
+    "sampleRate": 44100,
+    "sha256": "a35ef0264183dd9b7d69ee9f82b91ae5671682a5d0e9940c97610d895e386695"
+  },
+  "driveAudio": {
+    "original": "1NT8p5HuwuzoFYgK0ckRt6eAejB6kFzEI",
+    "wav": "1o6ziF7iDVrd3hJa44_ELvw3atTOowh1d"
   }
 }

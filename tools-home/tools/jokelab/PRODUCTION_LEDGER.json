@@ -654,9 +654,9 @@
     {
       "sourceJokeId": "dad-01390bc83ffc16630ae3d503",
       "canonicalId": "dad-01390bc83ffc16630ae3d503",
-      "state": "voice_rejected_procedure_mismatch",
+      "state": "video_rendering",
       "runId": "JL-20261023-NEXT-03",
-      "voiceJobId": "JL-20261023-FARMLAND-VOICE-01"
+      "voiceJobId": "JL-20261024-FARMLAND-VOICE-02"
     },
     {
       "sourceJokeId": "dad-0174a70763ab66a8ea6e0e5e",
@@ -5218,17 +5218,19 @@
     {
       "runId": "JL-20261023-NEXT-03",
       "canonicalId": "dad-01390bc83ffc16630ae3d503",
-      "state": "voice_rejected_procedure_mismatch",
-      "voiceJobId": "JL-20261023-FARMLAND-VOICE-01",
+      "state": "video_rendering",
+      "voiceJobId": "JL-20261024-FARMLAND-VOICE-02",
       "providerGenerationRequests": {
-        "elevenLabs": 1,
-        "heygen": 0
+        "elevenLabs": 2,
+        "heygen": 1
       },
-      "actualVoiceCredits": 48,
+      "actualVoiceCredits": 107,
       "voiceReceipt": "tools-home/tools/jokelab/voice-jobs/JL-20261023-FARMLAND-VOICE-01.json",
       "paidProductionClearance": false,
-      "reservationScope": "Retain rejected take and canonical claim. Do not send to HeyGen or regenerate without confirmed approved procedure and separate authorization.",
-      "reviewStatus": "Rejected"
+      "reservationScope": "Both voice attempts preserved; second voice and one GS4 render submitted. Reuse returned artifacts; no retries.",
+      "reviewStatus": "pending_final_review",
+      "rejectedVoiceJobId": "JL-20261023-FARMLAND-VOICE-01",
+      "videoId": "3ff1166a9548ae37d961b650e6723042"
     }
   ]
 }
