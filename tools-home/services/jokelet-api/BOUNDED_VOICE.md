@@ -27,3 +27,12 @@ This is a per-job, one-attempt gate, not an aggregate episode/month spending con
 The unapproved candidate is library position6, dad-01390bc83ffc16630ae3d503: farmland/grainy photos. Exact library bytes matched GitHub blob1d9dd64c99cf51233aba2d5eb6c1bc22978fa69b. No matching finished catalog/ledger entry, Drive text result or HeyGen 'grainy' title was identified; unnamed archive contents remain unverified. No familiar-joke shortcut was taken. Proposed script is108characters, one [joking] cue and no post-punchline dialogue.
 
 Official references: https://elevenlabs.io/docs/api-reference/introduction/ (character-cost/request-id headers); https://elevenlabs.io/docs/api-reference/user/subscription/get ; https://elevenlabs.io/docs/api-reference/text-to-speech/convert .
+
+
+## October24 voice-quality correction
+
+The previous v3/128kbps take was rejected by the user; technical completion is not voice approval. New paid requests require v4,192kbps, the pinned approved pebble reference and exact effective settings from provider history. The funding check reads that reference and refuses mismatches before claiming or spending; no model/format fallback is permitted. Historical completed v3 receipts remain recoverable with zero provider calls.
+
+An explicit replacement may reference a completed Rejected take of the same canonical joke. The current canonical claim must still belong to that rejected predecessor; approved/uncertain/other-owner attempts cannot be replaced through this route. The atomic claim transfers the existing reservation to the new version, keeping predecessor IDs and source records. This does not reset the joke to unproduced or authorize a replacement by itself. Current one-request user budget approval remains mandatory. No retry, purchase, upgrade or HeyGen permission is implied.
+
+Provider history may have null top-level text/voice fields for dialogue-based generations; inspect the dialogue entries rather than treating this as a different voice. Read-only reference audits retain only selected production fields, never balances/credentials. Unit tests cover parity, replacement guards, replay and one-attempt behavior; verify deployment and live quote separately before paid production.

@@ -17,3 +17,7 @@ test('mismatched reference retains safe diagnostic metadata without certifying i
  const r=await approvedVoiceReference('test',async url=>({ok:true,json:async()=>url.endsWith('/models')?[]:{history_item_id:'wrong',voice_id:'other',model_id:'eleven_v4'}}));
  assert.equal(r.identityMatches,false);assert.equal(r.history.voiceId,'other');
 });
+test('dialogue history resolves the approved speaker when top-level voice is null',async()=>{
+ const r=await approvedVoiceReference('test',async url=>({ok:true,json:async()=>url.endsWith('/models')?[]:{history_item_id:'pqILh6dY0D1CO7Ckhplb',voice_id:null,model_id:'eleven_v4',dialogue:[{voice_id:'RBNpu6jPzAoaxZKl9noJ',text:'approved joke'}]}}));
+ assert.equal(r.identityMatches,true);assert.equal(r.history.dialogue[0].text,'approved joke');
+});
