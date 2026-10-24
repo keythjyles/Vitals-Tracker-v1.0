@@ -10,41 +10,23 @@ concurrency:
 jobs:
   preflight:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 5
     permissions:
-      contents: read
+      contents: write
       id-token: write
     steps:
-      - name: Authenticate to read-only Jokelet preflight
+      - name: Run and preserve read-only production job
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          python3 - <<'PY'
-          import os,json,urllib.request,urllib.error
-          audience='https://jokelet-api.onrender.com/ai-preflight'
-          result={'schema':'GS-AIPreflightResult-1','commit':os.environ['GITHUB_SHA'],'runId':os.environ['GITHUB_RUN_ID'],'paidRequests':0}
-          success=False
-          try:
-              import urllib.parse
-              url=os.environ['ACTIONS_ID_TOKEN_REQUEST_URL']+'&audience='+urllib.parse.quote(audience,safe='')
-              req=urllib.request.Request(url,headers={'Authorization':'Bearer '+os.environ['ACTIONS_ID_TOKEN_REQUEST_TOKEN']})
-              with urllib.request.urlopen(req,timeout=20) as r: token=json.load(r)['value']
-              print('::add-mask::'+token)
-              req=urllib.request.Request('https://jokelet-api.onrender.com/api/ai/preflight',headers={'Authorization':'Bearer '+token})
-              with urllib.request.urlopen(req,timeout=60) as r: result['preflight']=json.load(r)
-              success=result['preflight'].get('authenticatedVoiceLookup') is True
-          except urllib.error.HTTPError as e:
-              result['error']='HTTP '+str(e.code)
-          except Exception:
-              result['error']='Preflight transport or identity request failed; no automatic retries'
-          with open('jokelet-preflight.json','w') as f: json.dump(result,f,indent=2)
-          print('Authenticated voice preflight:', 'passed' if success else 'failed', '; paid generation requests: 0')
-          raise SystemExit(0 if success else 1)
-          PY
-      - name: Preserve credential-free result
+          curl --fail --silent --show-error --max-time 30 "https://raw.githubusercontent.com/keythjyles/Vitals-Tracker-v1.0/${GITHUB_SHA}/tools-home/services/jokelet-api/github-job.py" -o github-job.py
+          python3 github-job.py
+      - name: Preserve credential-free recovery artifacts
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: jokelet-preflight
-          path: jokelet-preflight.json
+          path: jokelet-*.json
           retention-days: 30
           if-no-files-found: error

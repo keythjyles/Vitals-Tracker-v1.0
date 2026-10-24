@@ -1,3 +1,7 @@
+# Status correction — existing storage first
+
+The user did not approve this disk proposal. Use GitHub/Drive first; see GITHUB_STORE.md. The SQLite adapter below is retained as an inactive tested alternative. Recurring-cost approval is not the current next task.
+
 # Shared production storage — prepared, not activated
 
 ## Scope and status
