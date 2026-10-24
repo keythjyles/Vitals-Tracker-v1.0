@@ -1,7 +1,7 @@
 {
   "schema": "JokeLabRun-1.0",
   "runId": "JL-20261024-NEXT-04",
-  "state": "voice_dispatching",
+  "state": "video_rendering",
   "canonicalJokeId": "dad-01e2b3b699efb51afa7d744a",
   "sourceLibraryPosition": 8,
   "sourceLibraryGitBlob": "1d9dd64c99cf51233aba2d5eb6c1bc22978fa69b",
@@ -27,8 +27,8 @@
     "evidence": "Source position8; no canonical aliases/produced group or in-progress job, no catalog bookmark/Brian match, no HeyGen bookmark title. Known D1/D2/D3 topics differ. Drive text searches returned no relevant production; unnamed archive content remains unreconciled, not certified exhaustive."
   },
   "providerGenerationRequests": {
-    "elevenLabs": 0,
-    "heygen": 0
+    "elevenLabs": 1,
+    "heygen": 1
   },
   "reaction": {
     "id": "reaction-skeptical",
@@ -38,7 +38,51 @@
     "frames": 75,
     "mirror": true,
     "transform": "hflip for reaction only; speaking performance unchanged",
-    "approval": "Existing Approved reaction; inspect all sampled positions for visible lettering before applying mirror"
+    "approval": "Existing Approved reaction; inspect all sampled positions for visible lettering before applying mirror",
+    "mirrorInspection": "Three sampled frames at0/1/2s show no visible lettering; fixed close-up contains flame icon only.",
+    "mirroredSha256": "30efa8b271c8f8c6de5c44aa9e9c36231f47d76e0c9203d14e61919e1f9a81bb"
   },
-  "next": "Observe single voice workflow receipt, do not re-dispatch. Continue GS4 with saved WAV, stabilize performance, append full75-frame mirrored reaction, preserve sources/recipe/output."
+  "next": "Resume existing HeyGen render; no new generation. Apply fixed-background stabilization before assembly. Speaking shot must not be mirrored. Append full75-frame mirrored reaction, save originals/final/recipe.",
+  "actualVoiceCredits": 59,
+  "voiceReceipt": "tools-home/tools/jokelab/voice-jobs/JL-20261024-BOOKMARK-VOICE-01.json",
+  "voice": {
+    "selectedGenerationId": "X4Y2MYtNCzdXrPkSIVYG",
+    "requestId": "ZxlZ2S55VjtP5wW2pR4M",
+    "original": {
+      "bytes": 178093,
+      "format": "audio/mpeg",
+      "path": "tools-home/tools/jokelab/voice-originals/JL-20261024-BOOKMARK-VOICE-01.mp3",
+      "sha256": "991bb4eb2f4f92f41be6f7914806237f0d4d7fb8ce8c9fdd61271cc695756ea5"
+    },
+    "wav": {
+      "bytes": 649230,
+      "channels": 1,
+      "conversion": "ffmpeg decode to PCM16; no gain, speed, trim or resampling options",
+      "duration": 7.36,
+      "encoding": "pcm_s16le",
+      "parentSha256": "991bb4eb2f4f92f41be6f7914806237f0d4d7fb8ce8c9fdd61271cc695756ea5",
+      "path": "tools-home/tools/jokelab/voice-wav/JL-20261024-BOOKMARK-VOICE-01.wav",
+      "sampleRate": 44100,
+      "sha256": "6c570cf52d9216da746216ab2d2052a4704eb7d2d074c48c1dd44a57b625fb07"
+    },
+    "originalDriveId": "1hQOH5AC5TL5zl_FlZ9j4YWLZP0N8hiy5",
+    "wavDriveId": "1UfeQPQ_7D_f56nRASry7L_P8hiSLkBjF",
+    "userApproved": false,
+    "selection": "Agent selected under complete-jokelet delegation; final listening review pending",
+    "aiListeningVerified": false
+  },
+  "videoId": "d1ffb82407eed94a76cf8e742b3f597a",
+  "videoRequest": {
+    "avatarId": "85cc768c260a40359212b92f738de459",
+    "audioAssetId": "6f23a126804b40a3a446b87ff89c2766",
+    "engine": {
+      "type": "avatar_iv"
+    },
+    "expressiveness": "low",
+    "aspectRatio": "9:16",
+    "resolution": "1080p",
+    "fit": "contain",
+    "outputFormat": "mp4",
+    "title": "GS Bookmark Brian v01 — clean joke performance"
+  }
 }

@@ -691,7 +691,9 @@
     {
       "sourceJokeId": "dad-01e2b3b699efb51afa7d744a",
       "canonicalId": "dad-01e2b3b699efb51afa7d744a",
-      "state": "not_started_unverified"
+      "state": "video_rendering",
+      "runId": "JL-20261024-NEXT-04",
+      "voiceJobId": "JL-20261024-BOOKMARK-VOICE-01"
     },
     {
       "sourceJokeId": "dad-0277cbfd76c52737cfc57e7e",
@@ -5261,6 +5263,21 @@
       "outputSha256": "4406bebc0462331cc3c4495e8e0e220cc35e0bb524e1879af6b1d75cc81092ab",
       "rebuildRecipe": "tools-home/tools/jokelab/runs/JL-20261024-FARMLAND-recipe-v02.json",
       "heygenObservedCreditDelta": 3
+    },
+    {
+      "runId": "JL-20261024-NEXT-04",
+      "canonicalId": "dad-01e2b3b699efb51afa7d744a",
+      "state": "video_rendering",
+      "voiceJobId": "JL-20261024-BOOKMARK-VOICE-01",
+      "actualVoiceCredits": 59,
+      "providerGenerationRequests": {
+        "elevenLabs": 1,
+        "heygen": 1
+      },
+      "videoId": "d1ffb82407eed94a76cf8e742b3f597a",
+      "paidProductionClearance": false,
+      "reviewStatus": "pending_final_review",
+      "reservationScope": "One voice and one GS4 render submitted; resume these artifacts, no retries."
     }
   ]
 }
