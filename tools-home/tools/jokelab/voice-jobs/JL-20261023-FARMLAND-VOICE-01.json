@@ -1,0 +1,34 @@
+{
+  "jobId": "JL-20261023-FARMLAND-VOICE-01",
+  "request": {
+    "approved": true,
+    "automaticRetries": 0,
+    "budget": {
+      "approvalEvidence": "User replied 'Ok' to one request for the108-character farmland script, maximum150existing ElevenLabs credits, no retries.",
+      "approved": true,
+      "expiresAt": "2026-10-25T01:25:21Z",
+      "maxCharacters": 108,
+      "maxCredits": 150,
+      "maxRequests": 1
+    },
+    "canonicalId": "dad-01390bc83ffc16630ae3d503",
+    "duplicateReview": {
+      "cleared": true,
+      "evidence": "Current ledger and canonical claim checked; no existing job or produced group. Known D1/D3 content and all five D2 caption topics differ; no concrete match in catalog, Drive text or HeyGen title searches. Unnamed archive gap remains; not certified exhaustive."
+    },
+    "jobId": "JL-20261023-FARMLAND-VOICE-01",
+    "modelId": "eleven_v3",
+    "operation": "voice_generate",
+    "schema": "GS-BoundedVoiceRequest-1",
+    "script": "[joking] I tried taking some high resolution photos of local farmland, but they all turned out a bit GRAINY.",
+    "voiceId": "RBNpu6jPzAoaxZKl9noJ",
+    "voiceSettings": {
+      "similarity_boost": 0.75,
+      "stability": 0.5
+    }
+  },
+  "runId": "40050049943",
+  "schema": "GS-VoiceJob-2",
+  "sourceCommit": "dc0f5cb60a3d5d2553916155122cc0830d31d58e",
+  "status": "queued"
+}
