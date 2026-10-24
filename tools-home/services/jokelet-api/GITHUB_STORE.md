@@ -2,7 +2,7 @@
 
 User correction: use existing GitHub and Google Drive first. No Render upgrade or disk activation is approved. The SQLite adapter is an inactive alternative, not a prerequisite.
 
-## Working path under verification
+## Verified working path
 
 The AI writes `tools-home/tools/jokelab/requests/voice-preflight.json` through the connected GitHub tool. The dedicated preflight workflow reads the exact request commit, creates a durable job receipt before provider access, performs one authenticated read-only ElevenLabs voice lookup and verifies an existing approved source MP4 by its recorded SHA256. It commits the job and result together in GitHub. Original media stays unchanged in its existing repository/Drive locations.
 
@@ -17,7 +17,7 @@ The workflow uses its short-lived GitHub token for repository writes and OIDC fo
 
 Only zero-paid-request voice preflight is accepted. This does not enable paid AI TTS, a persistent money budget, media uploads, a complete queue or the phone Wizard's authenticated job submission. GitHub workflow concurrency is not a FIFO queue; operate one request at a time and verify completion. Drive still holds the existing media archives through the established connector; the backend has not gained Drive credentials. Adding generated media to Drive and connecting both operator modes to paid reservations remain work to prove.
 
-The live save/restore test is documented in `runs/JL-20261023-GITSTORE-01.json`. Never substitute the old disk approval request for this current path.
+The live save/restore test passed: workflow runs40046402358 and40046534560. The first preserved the real result and verified source bytes; the second restored it with zero provider lookups. It is documented in `runs/JL-20261023-GITSTORE-01.json`. Never substitute the old disk approval request for this current path.
 
 ## Local checks
 

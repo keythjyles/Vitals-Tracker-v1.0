@@ -205,3 +205,10 @@ Use the connected Metricool create/update operations. Read/analytics success is 
 Repost approved immutable publications with their original soundtrack/captions; automatic clean-source assembly eligibility is a separate matter. Do not publish a staging draft or Review reaction. Match approved source bytes and direct media URLs, not social-page URLs. Performance weights are evidence, not guarantees. Keep publication graphics separate from new clean jokelet masters.
 
 Upcoming user goals: next Dad Joke Duty episode October24, another October26, VA video October28. Integrate only once completed and approved. Update existing future Story slots deliberately, preserving the three-per-network daily total, canonical source trail and existing Reels; do not stack duplicate slots or manufacture the unfinished content as a publishing shortcut.
+
+
+## Existing-storage proof — current path
+
+User instruction: GitHub and Drive first; no new recurring infrastructure charge is approved. GitHub durable job save and separate-runner recovery have now passed. See runs/JL-20261023-GITSTORE-01.json and ../../services/jokelet-api/GITHUB_STORE.md. A real read-only job verified an approved unchanged source MP4 and saved its ElevenLabs voice-discovery result in GitHub; the next runner restored that result with zero provider calls. Existing Drive source references are preserved, not newly revalidated by this test.
+
+Use a stable job ID and one request at a time. Completed replay must verify saved hashes and must not call the provider again. Changed input under the same ID, altered/missing results or unfinished provider outcomes must stop for reconciliation. The current workflow deliberately rejects paid requests. Paid budget reservation and Manual Wizard submission still need integration; do not claim a completed factory or an active currency cap. Do not revive the unapproved Render disk proposal as a prerequisite.

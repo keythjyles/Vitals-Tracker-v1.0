@@ -1,0 +1,65 @@
+{
+  "schema": "GS-ExistingStorageVerification-1",
+  "runId": "JL-20261023-GITSTORE-01",
+  "status": "live_save_and_separate_runner_restore_passed",
+  "codeCommit": "406938b94e7c3a1fa37da82ea3d4c7fc4b853c39",
+  "save": {
+    "commit": "55ff5a60466047dc52b6c2baf77605db065c8938",
+    "workflowRunId": 40046402358,
+    "jobId": 120729016927,
+    "status": "success",
+    "providerLookups": 1,
+    "paidRequests": 0
+  },
+  "restore": {
+    "commit": "78ba0c461d1bf3acbe58ea3ae7349883cb2f66da",
+    "workflowRunId": 40046534560,
+    "jobId": 120729432368,
+    "status": "success",
+    "restored": true,
+    "providerLookups": 0,
+    "paidRequests": 0,
+    "originalJobUnchanged": true
+  },
+  "resultSha256": "647c72886a56ab279b04e8b36cd648030108dd514d8c8fd41184c2a6a7292773",
+  "sourceAsset": {
+    "bytes": 6398154,
+    "canonicalId": "dad-00bda89167b4f15850aa1c91",
+    "catalogId": "pebble-straight-stare",
+    "driveId": "1Q70Fx4ZYQfoH--OzOpwsaUNnjQ_XRct1",
+    "path": "tools-home/tools/jokelets/media/GS_Jokelet_Pebble_Straight_Stare_v01.mp4",
+    "sha256": "8d85a1af2e7885e26d54476a5d888f01f108eae22abbff84e02fc2a7efd8647e",
+    "status": "existing_approved_source_verified_unchanged"
+  },
+  "paths": {
+    "job": "tools-home/tools/jokelab/jobs/JL-20261023-GITSTORE-01.json",
+    "result": "tools-home/tools/jokelab/results/JL-20261023-GITSTORE-01.json"
+  },
+  "localTests": {
+    "pythonPassed": 6,
+    "failed": 0
+  },
+  "constraints": {
+    "noRenderUpgrade": true,
+    "noDiskPurchase": true,
+    "noProviderGeneration": true,
+    "noOriginalMediaModification": true,
+    "noSecretsCopied": true,
+    "driveReferenceRetainedButNotRevalidatedThisTest": true
+  },
+  "remaining": [
+    "Paid generation budget reservations are not integrated",
+    "Manual Wizard submission is not connected to the GitHub job path",
+    "New generated media transfer to Drive remains to be wired and proved",
+    "No full unattended production/rebuild claim"
+  ],
+  "actions": [
+    "Implemented persistent receipt before lookup and atomic job/result completion in GitHub.",
+    "Validated approved clean source and original SHA256 before provider access.",
+    "Created a real request using the existing OIDC bridge and GitHub workflow token.",
+    "Fetched completed job/result independently through the GitHub connector.",
+    "Triggered a separate runner using the same job ID; it restored the hash-checked result with zero provider lookups.",
+    "Confirmed original completed job was unchanged.",
+    "Superseded the disk-approval checkpoint while preserving historical records."
+  ]
+}
