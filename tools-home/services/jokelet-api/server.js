@@ -5,6 +5,7 @@ import { timingSafeEqual } from 'node:crypto';
 import {verifyGithubIdentity} from './github-identity.js';
 import {storageReadiness} from './production-store.js';
 import {executeVoice,elevenProvider,GitHubVoiceRepository,VoiceGateError,validateVoiceRequest} from './github-voice.js';
+import {approvedVoiceReference} from './voice-reference.js';
 
 const port = Number(process.env.PORT || 3100);
 const elevenKey = process.env.ELEVENLABS_API_KEY;
@@ -73,8 +74,11 @@ const server = http.createServer(async (req, res) => {
       });
       if(!response.ok)return send(res,502,{error:'ElevenLabs authenticated lookup failed',upstreamStatus:response.status});
       const data=await response.json();
+      let referenceAudit;
+      try { referenceAudit=await approvedVoiceReference(elevenKey); }
+      catch(e) { referenceAudit={paidRequests:0,status:'unavailable',error:/^reference_lookup_http_\d+$/.test(e.message)?e.message:'reference_verification_failed'}; }
       return send(res,200,{schema:'GS-AIPreflight-1',identity,authenticatedVoiceLookup:true,paidGeneration:false,storage:storageReadiness(process.env.JOKELET_DATA_DIR),generationLedgerIntegrated:false,
-        voices:(data.voices||[]).filter(v=>/grill|sargent|sergeant|gs4/i.test(v.name||'')).map(v=>({voiceId:v.voice_id,name:v.name,category:v.category})),
+        referenceAudit,voices:(data.voices||[]).filter(v=>/grill|sargent|sergeant|gs4/i.test(v.name||'')).map(v=>({voiceId:v.voice_id,name:v.name,category:v.category})),
         next:'Voice generation requires its own signed workflow and an explicitly approved one-attempt GitHub job. Existing GitHub/Drive storage is the intended path; no disk purchase is required.'});
     } catch {return send(res,502,{error:'ElevenLabs authenticated lookup unavailable'});}
   }
@@ -139,4 +143,5 @@ const server = http.createServer(async (req, res) => {
   }
 });
 server.listen(port, '0.0.0.0', () => console.log('Jokelet API listening on port ' + port));
+
 
