@@ -194,3 +194,14 @@ User instruction, October 23, 2026: supply WAV, not MP3, to video-generation ser
 The dedicated operator now has categorized cues, selected-text emphasis, frame-based silence planning/PCM WAV assembly, separate take previews/downloads and device-local tested combinations. Read [performance editor implementation and limitations](../../services/jokelet-api/PERFORMANCE_EDITOR.md) before operating. Markers `[[silence:25f]]` belong to the shared engine, never the speech provider. Segmented speech incurs one paid request per speech segment; no automatic retries. Preserve every original MP3, PCM WAV and JSON job record. Browser takes and presets are not durable archives. Secure AI execution and durable budget/production storage remain unimplemented. Configuration/static-page health does not prove authenticated provider generation.
 
 `JL-20261023-NEXT-02` (robots/guacamole) is already produced, ready for final review; do not regenerate it as a new candidate.
+
+
+## Story publishing cadence — October 23, 2026
+
+The authorized baseline is three Instagram Stories plus three Facebook Stories daily, rotating approved Dad Joke Duty D1/D2/D3 content. The October23–29 queue is verified: 21 combined records /42 placements. See [publishing execution record](runs/JL-20261023-STORIES-01.json) for source hashes, performance evidence, dates, UUIDs and planner URLs. Existing Reels and internal drafts were left unchanged. This is a finite seven-day queue; never imply indefinite replenishment is running.
+
+Use the connected Metricool create/update operations. Read/analytics success is not write success; saved autoPublish=true/draft=false is scheduled, not published. Verify provider status. Earlier safety-check rejection was not reproduced in this Work session and its root cause remains unknown. Do not broaden permissions or use review tools/browser as a safety bypass. Review tools are only for an actual user-requested review workflow. When updating, preserve all applicable original fields; the GET response injects twitterData even without Twitter as a provider, and the write validator rejects that extraneous field. Normalize only that unsupported default when Twitter is not selected.
+
+Repost approved immutable publications with their original soundtrack/captions; automatic clean-source assembly eligibility is a separate matter. Do not publish a staging draft or Review reaction. Match approved source bytes and direct media URLs, not social-page URLs. Performance weights are evidence, not guarantees. Keep publication graphics separate from new clean jokelet masters.
+
+Upcoming user goals: next Dad Joke Duty episode October24, another October26, VA video October28. Integrate only once completed and approved. Update existing future Story slots deliberately, preserving the three-per-network daily total, canonical source trail and existing Reels; do not stack duplicate slots or manufacture the unfinished content as a publishing shortcut.

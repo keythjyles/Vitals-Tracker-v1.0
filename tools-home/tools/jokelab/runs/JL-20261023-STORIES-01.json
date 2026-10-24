@@ -1,0 +1,796 @@
+{
+  "schema": "GS-StoryPublishingRun-1",
+  "runId": "JL-20261023-STORIES-01",
+  "timezone": "America/Chicago",
+  "brandId": "7457339",
+  "authorization": "User requests automatic three Instagram and three Facebook Stories per day using approved D1/D2/D3 content; immediate first release authorized.",
+  "window": {
+    "from": "2026-10-23",
+    "to": "2026-10-29"
+  },
+  "verified": {
+    "found": 21,
+    "byDay": {
+      "2026-10-23": {
+        "instagram": 3,
+        "facebook": 3
+      },
+      "2026-10-24": {
+        "instagram": 3,
+        "facebook": 3
+      },
+      "2026-10-25": {
+        "instagram": 3,
+        "facebook": 3
+      },
+      "2026-10-26": {
+        "instagram": 3,
+        "facebook": 3
+      },
+      "2026-10-27": {
+        "instagram": 3,
+        "facebook": 3
+      },
+      "2026-10-28": {
+        "instagram": 3,
+        "facebook": 3
+      },
+      "2026-10-29": {
+        "instagram": 3,
+        "facebook": 3
+      }
+    },
+    "baselineEntriesUnchanged": true
+  },
+  "diagnosis": {
+    "prior": "Previous chat reported OpenAI safety-check blocks; not reproduced here. Exact earlier cause remains unknown.",
+    "permissions": "Inherited Allow read actions; no setting changes made.",
+    "success": "Connected createScheduledPost succeeded for one Instagram Story. updateScheduledPost added Facebook. Twenty combined automatic Story records then created.",
+    "technicalFinding": "updateScheduledPost rejected full GET object because GET injects twitterData even without twitter provider. Removed only extraneous twitterData and the corrected update succeeded. Preserve all relevant fields; do not repeat identical failed payloads.",
+    "reviewOperations": "Inspected tool contracts only. ForReview requires user-requested review flow and team plan; not used to evade restrictions.",
+    "paidGenerationCalls": 0,
+    "adsSpend": 0
+  },
+  "sourcePolicy": {
+    "approved": "Original D1/D2 finished publication clips match production-ledger hashes. D3 source catalog Approved; exclude listener Review and unfinished robots. Direct media URLs verified HTTP200 and SHA256.",
+    "cleanSourceDistinction": "Reposting approved completed publications is separate from automatic clean-source jokelet assembly. Existing soundtracks/captions preserved unchanged; no source eligibility promoted.",
+    "staging": "Internal drafts unchanged. Finished shorts in staging were resolved to approved immutable originals using publication ledger/order and hashes; staging records themselves were never published.",
+    "metrics": "Instagram Reel organic interactions and views Oct16–23. Prioritize strongest known clips within each episode; unmeasured D3 clips rotate for variety, without fabricated statistics. No claim these predict Story performance.",
+    "timing": "First at19:06, then20:00 and21:00 Oct23. Oct24–29:09:00,14:00,19:00 Central. One clip per episode per day."
+  },
+  "assets": {
+    "d1hug": {
+      "episode": 1,
+      "label": "Hug · EP1 #5",
+      "url": "https://static.metricool.com/video/5798875/202610/71ef9b7580e6433a.mp4",
+      "sha256": "ca448097d49271b68112a18e8c1152ce1a898d2ea1ab15767b35efcf0bb57bc3",
+      "interactions": 20,
+      "views": 189
+    },
+    "d1scarecrow": {
+      "episode": 1,
+      "label": "Scarecrow · EP1 #4",
+      "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/jokelets/media/ep1-04.mp4",
+      "sha256": "c149fe620125260bb310937d4b1d1f50f05079de911daa759f9580eadd8df33f",
+      "interactions": 14,
+      "views": 180
+    },
+    "d1impasta": {
+      "episode": 1,
+      "label": "Impasta · EP1 #3",
+      "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/jokelets/media/ep1-03.mp4",
+      "sha256": "f78f86ffbe4023c01545b5c0238ba04036e809fc851998d1691c2ba572294577",
+      "interactions": 12,
+      "views": 202
+    },
+    "d2s2": {
+      "episode": 2,
+      "label": "EP2 Short 2",
+      "url": "https://static.metricool.com/video/5798875/202610/ded1f20e2d1a4c75.mp4",
+      "sha256": "56e1eb0c8132fe02b0bca552ea9103935dad40ba0dc38bb7e0ac2334ce13778b",
+      "interactions": 27,
+      "views": 152
+    },
+    "d2s1": {
+      "episode": 2,
+      "label": "EP2 Short 1",
+      "url": "https://static.metricool.com/video/5798875/202610/7ee429f64726450a.mp4",
+      "sha256": "bd01267ec9cb331f9601ddfebce29cc594815842150fb9d29ab2df70ed6004cd",
+      "interactions": 22,
+      "views": 241
+    },
+    "d2s4": {
+      "episode": 2,
+      "label": "EP2 Short 4",
+      "url": "https://static.metricool.com/video/5798875/202610/b8d04f306e234e1b.mp4",
+      "sha256": "2d777222944daa1ccaae50cc74b5fd05ff8acba3d8fd49c40d82443cb2bfd59a",
+      "interactions": 19,
+      "views": 224
+    },
+    "d2s3": {
+      "episode": 2,
+      "label": "EP2 Short 3",
+      "url": "https://static.metricool.com/video/5798875/202610/ecc17416e6a041a4.mp4",
+      "sha256": "4a23f7567787fdc32cca631fa56307feff6b3306c5a0db32a563c04f27383dd6",
+      "interactions": 18,
+      "views": 239
+    },
+    "d3smart": {
+      "episode": 3,
+      "label": "Smart Grill",
+      "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/jokelets/media/smart-grill.mp4",
+      "sha256": "9227087d202451dcf62b60606669915f6f8ca3f6a6ca78d321647ca19442236f",
+      "interactions": 13,
+      "views": 195
+    },
+    "d3eyebrows": {
+      "episode": 3,
+      "label": "Eyebrows",
+      "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/jokelets/media/eyebrows.mp4",
+      "sha256": "7d07d9ed36ba0a3d4a7d120fa88a70c2adf2241f9fd19ecc68705fb8ad6427d5",
+      "interactions": null,
+      "views": null
+    },
+    "d3spider": {
+      "episode": 3,
+      "label": "Spider",
+      "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/jokelets/media/spider.mp4",
+      "sha256": "db2940f8262e3d9a98e5c5be62afcf584a81446c6a6724d233f80237dae65f60",
+      "interactions": null,
+      "views": null
+    },
+    "d3leftovers": {
+      "episode": 3,
+      "label": "Leftovers · Dinner Surprise",
+      "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/jokelets/media/leftovers.mp4",
+      "sha256": "62d41707a691cf217d7e77cdaf968a3d7aeb25bb7a8e7dd2abf9c7f7c97bfd7e",
+      "interactions": null,
+      "views": null
+    }
+  },
+  "immediate": {
+    "asset": "d3smart",
+    "id": 404666363,
+    "uuid": "6254240626657542431",
+    "date": "2026-10-23T19:06:00",
+    "plannerUrl": "https://app.metricool.com/planner/calendar?blogId=7457339&openWithPostUuid=6254240626657542431",
+    "latestStatus": {
+      "facebook": "PUBLISHED",
+      "instagram": "PUBLISHED"
+    },
+    "facebookPublicUrl": "https://facebook.com/122102670717509622/posts/3045279775810986",
+    "providers": [
+      {
+        "network": "facebook",
+        "id": "3045279775810986",
+        "status": "PUBLISHED",
+        "publicUrl": "https://facebook.com/122102670717509622/posts/3045279775810986",
+        "detailedStatus": "Published"
+      },
+      {
+        "network": "instagram",
+        "id": "https://www.instagram.com/stories/sergeant_grill/4014623374617688219",
+        "status": "PUBLISHED",
+        "publicUrl": "https://www.instagram.com/stories/sergeant_grill/4014623374617688219",
+        "detailedStatus": "Published"
+      }
+    ]
+  },
+  "scheduled": [
+    {
+      "date": "2026-10-23T20:00:00",
+      "asset": "d2s2",
+      "assetInfo": {
+        "episode": 2,
+        "label": "EP2 Short 2",
+        "url": "https://static.metricool.com/video/5798875/202610/ded1f20e2d1a4c75.mp4",
+        "sha256": "56e1eb0c8132fe02b0bca552ea9103935dad40ba0dc38bb7e0ac2334ce13778b",
+        "interactions": 27,
+        "views": 152
+      },
+      "id": 404667531,
+      "uuid": "5390612888128995520",
+      "plannerUrl": "https://app.metricool.com/planner/calendar?blogId=7457339&openWithPostUuid=5390612888128995520",
+      "media": [
+        "https://static.metricool.com/video/5798875/202610/ded1f20e2d1a4c75.mp4"
+      ],
+      "providers": [
+        {
+          "network": "facebook",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        },
+        {
+          "network": "instagram",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-23T21:00:00",
+      "asset": "d1hug",
+      "assetInfo": {
+        "episode": 1,
+        "label": "Hug · EP1 #5",
+        "url": "https://static.metricool.com/video/5798875/202610/71ef9b7580e6433a.mp4",
+        "sha256": "ca448097d49271b68112a18e8c1152ce1a898d2ea1ab15767b35efcf0bb57bc3",
+        "interactions": 20,
+        "views": 189
+      },
+      "id": 404667541,
+      "uuid": "1614498307795734485",
+      "plannerUrl": "https://app.metricool.com/planner/calendar?blogId=7457339&openWithPostUuid=1614498307795734485",
+      "media": [
+        "https://static.metricool.com/video/5798875/202610/71ef9b7580e6433a.mp4"
+      ],
+      "providers": [
+        {
+          "network": "facebook",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        },
+        {
+          "network": "instagram",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-24T09:00:00",
+      "asset": "d1scarecrow",
+      "assetInfo": {
+        "episode": 1,
+        "label": "Scarecrow · EP1 #4",
+        "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/jokelets/media/ep1-04.mp4",
+        "sha256": "c149fe620125260bb310937d4b1d1f50f05079de911daa759f9580eadd8df33f",
+        "interactions": 14,
+        "views": 180
+      },
+      "id": 404667561,
+      "uuid": "-203154907447541705",
+      "plannerUrl": "https://app.metricool.com/planner/calendar?blogId=7457339&openWithPostUuid=-203154907447541705",
+      "media": [
+        "https://static.metricool.com/planner/202610/7457339-file-4730690026961375287.mp4"
+      ],
+      "providers": [
+        {
+          "network": "facebook",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        },
+        {
+          "network": "instagram",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-24T14:00:00",
+      "asset": "d2s1",
+      "assetInfo": {
+        "episode": 2,
+        "label": "EP2 Short 1",
+        "url": "https://static.metricool.com/video/5798875/202610/7ee429f64726450a.mp4",
+        "sha256": "bd01267ec9cb331f9601ddfebce29cc594815842150fb9d29ab2df70ed6004cd",
+        "interactions": 22,
+        "views": 241
+      },
+      "id": 404667576,
+      "uuid": "8460704964989567504",
+      "plannerUrl": "https://app.metricool.com/planner/calendar?blogId=7457339&openWithPostUuid=8460704964989567504",
+      "media": [
+        "https://static.metricool.com/video/5798875/202610/7ee429f64726450a.mp4"
+      ],
+      "providers": [
+        {
+          "network": "facebook",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        },
+        {
+          "network": "instagram",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-24T19:00:00",
+      "asset": "d3smart",
+      "assetInfo": {
+        "episode": 3,
+        "label": "Smart Grill",
+        "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/jokelets/media/smart-grill.mp4",
+        "sha256": "9227087d202451dcf62b60606669915f6f8ca3f6a6ca78d321647ca19442236f",
+        "interactions": 13,
+        "views": 195
+      },
+      "id": 404667594,
+      "uuid": "-6144504843685772482",
+      "plannerUrl": "https://app.metricool.com/planner/calendar?blogId=7457339&openWithPostUuid=-6144504843685772482",
+      "media": [
+        "https://static.metricool.com/planner/202610/7457339-file-13444537285771078313.mp4"
+      ],
+      "providers": [
+        {
+          "network": "facebook",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        },
+        {
+          "network": "instagram",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-25T09:00:00",
+      "asset": "d2s4",
+      "assetInfo": {
+        "episode": 2,
+        "label": "EP2 Short 4",
+        "url": "https://static.metricool.com/video/5798875/202610/b8d04f306e234e1b.mp4",
+        "sha256": "2d777222944daa1ccaae50cc74b5fd05ff8acba3d8fd49c40d82443cb2bfd59a",
+        "interactions": 19,
+        "views": 224
+      },
+      "id": 404667605,
+      "uuid": "-294081855753009771",
+      "plannerUrl": "https://app.metricool.com/planner/calendar?blogId=7457339&openWithPostUuid=-294081855753009771",
+      "media": [
+        "https://static.metricool.com/video/5798875/202610/b8d04f306e234e1b.mp4"
+      ],
+      "providers": [
+        {
+          "network": "facebook",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        },
+        {
+          "network": "instagram",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-25T14:00:00",
+      "asset": "d3eyebrows",
+      "assetInfo": {
+        "episode": 3,
+        "label": "Eyebrows",
+        "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/jokelets/media/eyebrows.mp4",
+        "sha256": "7d07d9ed36ba0a3d4a7d120fa88a70c2adf2241f9fd19ecc68705fb8ad6427d5",
+        "interactions": null,
+        "views": null
+      },
+      "id": 404667627,
+      "uuid": "7152389500876047327",
+      "plannerUrl": "https://app.metricool.com/planner/calendar?blogId=7457339&openWithPostUuid=7152389500876047327",
+      "media": [
+        "https://static.metricool.com/planner/202610/7457339-file-1711673882443424502.mp4"
+      ],
+      "providers": [
+        {
+          "network": "facebook",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        },
+        {
+          "network": "instagram",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-25T19:00:00",
+      "asset": "d1hug",
+      "assetInfo": {
+        "episode": 1,
+        "label": "Hug · EP1 #5",
+        "url": "https://static.metricool.com/video/5798875/202610/71ef9b7580e6433a.mp4",
+        "sha256": "ca448097d49271b68112a18e8c1152ce1a898d2ea1ab15767b35efcf0bb57bc3",
+        "interactions": 20,
+        "views": 189
+      },
+      "id": 404667635,
+      "uuid": "8605758480052536421",
+      "plannerUrl": "https://app.metricool.com/planner/calendar?blogId=7457339&openWithPostUuid=8605758480052536421",
+      "media": [
+        "https://static.metricool.com/video/5798875/202610/71ef9b7580e6433a.mp4"
+      ],
+      "providers": [
+        {
+          "network": "facebook",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        },
+        {
+          "network": "instagram",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-26T09:00:00",
+      "asset": "d3spider",
+      "assetInfo": {
+        "episode": 3,
+        "label": "Spider",
+        "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/jokelets/media/spider.mp4",
+        "sha256": "db2940f8262e3d9a98e5c5be62afcf584a81446c6a6724d233f80237dae65f60",
+        "interactions": null,
+        "views": null
+      },
+      "id": 404667659,
+      "uuid": "501529733735008637",
+      "plannerUrl": "https://app.metricool.com/planner/calendar?blogId=7457339&openWithPostUuid=501529733735008637",
+      "media": [
+        "https://static.metricool.com/planner/202610/7457339-file-9619426476351202487.mp4"
+      ],
+      "providers": [
+        {
+          "network": "facebook",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        },
+        {
+          "network": "instagram",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-26T14:00:00",
+      "asset": "d1impasta",
+      "assetInfo": {
+        "episode": 1,
+        "label": "Impasta · EP1 #3",
+        "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/jokelets/media/ep1-03.mp4",
+        "sha256": "f78f86ffbe4023c01545b5c0238ba04036e809fc851998d1691c2ba572294577",
+        "interactions": 12,
+        "views": 202
+      },
+      "id": 404667681,
+      "uuid": "-2633067093813343884",
+      "plannerUrl": "https://app.metricool.com/planner/calendar?blogId=7457339&openWithPostUuid=-2633067093813343884",
+      "media": [
+        "https://static.metricool.com/planner/202610/7457339-file-362627328011924606.mp4"
+      ],
+      "providers": [
+        {
+          "network": "facebook",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        },
+        {
+          "network": "instagram",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-26T19:00:00",
+      "asset": "d2s2",
+      "assetInfo": {
+        "episode": 2,
+        "label": "EP2 Short 2",
+        "url": "https://static.metricool.com/video/5798875/202610/ded1f20e2d1a4c75.mp4",
+        "sha256": "56e1eb0c8132fe02b0bca552ea9103935dad40ba0dc38bb7e0ac2334ce13778b",
+        "interactions": 27,
+        "views": 152
+      },
+      "id": 404667688,
+      "uuid": "-567866766062629975",
+      "plannerUrl": "https://app.metricool.com/planner/calendar?blogId=7457339&openWithPostUuid=-567866766062629975",
+      "media": [
+        "https://static.metricool.com/video/5798875/202610/ded1f20e2d1a4c75.mp4"
+      ],
+      "providers": [
+        {
+          "network": "facebook",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        },
+        {
+          "network": "instagram",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-27T09:00:00",
+      "asset": "d1hug",
+      "assetInfo": {
+        "episode": 1,
+        "label": "Hug · EP1 #5",
+        "url": "https://static.metricool.com/video/5798875/202610/71ef9b7580e6433a.mp4",
+        "sha256": "ca448097d49271b68112a18e8c1152ce1a898d2ea1ab15767b35efcf0bb57bc3",
+        "interactions": 20,
+        "views": 189
+      },
+      "id": 404667699,
+      "uuid": "-8262396122724613365",
+      "plannerUrl": "https://app.metricool.com/planner/calendar?blogId=7457339&openWithPostUuid=-8262396122724613365",
+      "media": [
+        "https://static.metricool.com/video/5798875/202610/71ef9b7580e6433a.mp4"
+      ],
+      "providers": [
+        {
+          "network": "facebook",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        },
+        {
+          "network": "instagram",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-27T14:00:00",
+      "asset": "d2s3",
+      "assetInfo": {
+        "episode": 2,
+        "label": "EP2 Short 3",
+        "url": "https://static.metricool.com/video/5798875/202610/ecc17416e6a041a4.mp4",
+        "sha256": "4a23f7567787fdc32cca631fa56307feff6b3306c5a0db32a563c04f27383dd6",
+        "interactions": 18,
+        "views": 239
+      },
+      "id": 404667707,
+      "uuid": "1383923651771187492",
+      "plannerUrl": "https://app.metricool.com/planner/calendar?blogId=7457339&openWithPostUuid=1383923651771187492",
+      "media": [
+        "https://static.metricool.com/video/5798875/202610/ecc17416e6a041a4.mp4"
+      ],
+      "providers": [
+        {
+          "network": "facebook",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        },
+        {
+          "network": "instagram",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-27T19:00:00",
+      "asset": "d3smart",
+      "assetInfo": {
+        "episode": 3,
+        "label": "Smart Grill",
+        "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/jokelets/media/smart-grill.mp4",
+        "sha256": "9227087d202451dcf62b60606669915f6f8ca3f6a6ca78d321647ca19442236f",
+        "interactions": 13,
+        "views": 195
+      },
+      "id": 404667720,
+      "uuid": "389168648127664058",
+      "plannerUrl": "https://app.metricool.com/planner/calendar?blogId=7457339&openWithPostUuid=389168648127664058",
+      "media": [
+        "https://static.metricool.com/planner/202610/7457339-file-8886770837132690681.mp4"
+      ],
+      "providers": [
+        {
+          "network": "facebook",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        },
+        {
+          "network": "instagram",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-28T09:00:00",
+      "asset": "d2s1",
+      "assetInfo": {
+        "episode": 2,
+        "label": "EP2 Short 1",
+        "url": "https://static.metricool.com/video/5798875/202610/7ee429f64726450a.mp4",
+        "sha256": "bd01267ec9cb331f9601ddfebce29cc594815842150fb9d29ab2df70ed6004cd",
+        "interactions": 22,
+        "views": 241
+      },
+      "id": 404667736,
+      "uuid": "-7070996655355049107",
+      "plannerUrl": "https://app.metricool.com/planner/calendar?blogId=7457339&openWithPostUuid=-7070996655355049107",
+      "media": [
+        "https://static.metricool.com/video/5798875/202610/7ee429f64726450a.mp4"
+      ],
+      "providers": [
+        {
+          "network": "facebook",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        },
+        {
+          "network": "instagram",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-28T14:00:00",
+      "asset": "d3leftovers",
+      "assetInfo": {
+        "episode": 3,
+        "label": "Leftovers · Dinner Surprise",
+        "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/jokelets/media/leftovers.mp4",
+        "sha256": "62d41707a691cf217d7e77cdaf968a3d7aeb25bb7a8e7dd2abf9c7f7c97bfd7e",
+        "interactions": null,
+        "views": null
+      },
+      "id": 404667751,
+      "uuid": "-1867943891007288140",
+      "plannerUrl": "https://app.metricool.com/planner/calendar?blogId=7457339&openWithPostUuid=-1867943891007288140",
+      "media": [
+        "https://static.metricool.com/planner/202610/7457339-file-17154110449884667962.mp4"
+      ],
+      "providers": [
+        {
+          "network": "facebook",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        },
+        {
+          "network": "instagram",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-28T19:00:00",
+      "asset": "d1scarecrow",
+      "assetInfo": {
+        "episode": 1,
+        "label": "Scarecrow · EP1 #4",
+        "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/jokelets/media/ep1-04.mp4",
+        "sha256": "c149fe620125260bb310937d4b1d1f50f05079de911daa759f9580eadd8df33f",
+        "interactions": 14,
+        "views": 180
+      },
+      "id": 404667768,
+      "uuid": "-6311851299244716946",
+      "plannerUrl": "https://app.metricool.com/planner/calendar?blogId=7457339&openWithPostUuid=-6311851299244716946",
+      "media": [
+        "https://static.metricool.com/planner/202610/7457339-file-11288406975507099444.mp4"
+      ],
+      "providers": [
+        {
+          "network": "facebook",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        },
+        {
+          "network": "instagram",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-29T09:00:00",
+      "asset": "d3smart",
+      "assetInfo": {
+        "episode": 3,
+        "label": "Smart Grill",
+        "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/jokelets/media/smart-grill.mp4",
+        "sha256": "9227087d202451dcf62b60606669915f6f8ca3f6a6ca78d321647ca19442236f",
+        "interactions": 13,
+        "views": 195
+      },
+      "id": 404667788,
+      "uuid": "-6717923612172138428",
+      "plannerUrl": "https://app.metricool.com/planner/calendar?blogId=7457339&openWithPostUuid=-6717923612172138428",
+      "media": [
+        "https://static.metricool.com/planner/202610/7457339-file-15912024094849799138.mp4"
+      ],
+      "providers": [
+        {
+          "network": "facebook",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        },
+        {
+          "network": "instagram",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-29T14:00:00",
+      "asset": "d1hug",
+      "assetInfo": {
+        "episode": 1,
+        "label": "Hug · EP1 #5",
+        "url": "https://static.metricool.com/video/5798875/202610/71ef9b7580e6433a.mp4",
+        "sha256": "ca448097d49271b68112a18e8c1152ce1a898d2ea1ab15767b35efcf0bb57bc3",
+        "interactions": 20,
+        "views": 189
+      },
+      "id": 404667811,
+      "uuid": "-1290076282062354778",
+      "plannerUrl": "https://app.metricool.com/planner/calendar?blogId=7457339&openWithPostUuid=-1290076282062354778",
+      "media": [
+        "https://static.metricool.com/video/5798875/202610/71ef9b7580e6433a.mp4"
+      ],
+      "providers": [
+        {
+          "network": "facebook",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        },
+        {
+          "network": "instagram",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-29T19:00:00",
+      "asset": "d2s2",
+      "assetInfo": {
+        "episode": 2,
+        "label": "EP2 Short 2",
+        "url": "https://static.metricool.com/video/5798875/202610/ded1f20e2d1a4c75.mp4",
+        "sha256": "56e1eb0c8132fe02b0bca552ea9103935dad40ba0dc38bb7e0ac2334ce13778b",
+        "interactions": 27,
+        "views": 152
+      },
+      "id": 404667830,
+      "uuid": "5541528472473259135",
+      "plannerUrl": "https://app.metricool.com/planner/calendar?blogId=7457339&openWithPostUuid=5541528472473259135",
+      "media": [
+        "https://static.metricool.com/video/5798875/202610/ded1f20e2d1a4c75.mp4"
+      ],
+      "providers": [
+        {
+          "network": "facebook",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        },
+        {
+          "network": "instagram",
+          "status": "PENDING",
+          "detailedStatus": "Pending"
+        }
+      ]
+    }
+  ],
+  "productionGoals": [
+    {
+      "date": "2026-10-24",
+      "content": "Next Dad Joke Duty episode"
+    },
+    {
+      "date": "2026-10-26",
+      "content": "Another Dad Joke Duty episode"
+    },
+    {
+      "date": "2026-10-28",
+      "content": "VA video"
+    }
+  ],
+  "goalPolicy": "User describes goals, not approved deliverables. Insert only after completion/approval; preserve existing Reels and avoid creating duplicate Story slots. The seven-day queue is finite, not a verified perpetual scheduler."
+}
