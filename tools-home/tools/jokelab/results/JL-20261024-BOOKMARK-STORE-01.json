@@ -1,0 +1,12 @@
+{
+  "schema": "GS-MediaArchive-1",
+  "jobId": "JL-20261024-BOOKMARK-STORE-01",
+  "status": "completed",
+  "paidRequests": 0,
+  "path": "tools-home/tools/jokelets/media/GS_Jokelet_Bookmark_Brian_v01.mp4",
+  "bytes": 7333353,
+  "sha256": "fdad52d0849fd903719dde9bf1d48dfbea285f72433c7cc927a422d296ca029c",
+  "blobSha": "839419f6d4ee54d460faf99380d39633d5e39955",
+  "sourceAssetId": "df7cd754954c42aba9d28e28df8e022d",
+  "runId": "40103601261"
+}
