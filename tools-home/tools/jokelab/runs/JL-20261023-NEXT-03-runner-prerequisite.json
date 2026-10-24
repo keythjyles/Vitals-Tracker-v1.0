@@ -1,0 +1,12 @@
+{
+  "schema": "GS-WorkflowPrerequisiteFailure-1",
+  "runId": 40049788128,
+  "jobId": 120739690167,
+  "conclusion": "stopped_before_voice_job_queued",
+  "runner": "ubuntu-26.04",
+  "problem": "FFmpeg/FFprobe availability prerequisite failed before the queued record and provider request; missing tools confirmed by unchanged/no job receipt and control-flow boundary.",
+  "providerGenerationRequests": 0,
+  "paidCredits": 0,
+  "recovery": "Pin ubuntu-24.04 and explicitly install/verify ffmpeg+ffprobe before running the existing worker. Same authorized one paid request; no prior paid attempt.",
+  "automaticPaidRetries": 0
+}

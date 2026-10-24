@@ -9,12 +9,22 @@ concurrency:
   cancel-in-progress: false
 jobs:
   voice:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 8
     permissions:
       contents: write
       id-token: write
     steps:
+      - name: Verify PCM WAV tools before any generation
+        shell: bash
+        run: |
+          if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install -y --no-install-recommends ffmpeg
+          fi
+          ffmpeg -version >/dev/null
+          ffprobe -version >/dev/null
+          echo "PCM WAV tooling ready; no provider request made."
       - name: Execute signed bounded voice request
         shell: bash
         env:
