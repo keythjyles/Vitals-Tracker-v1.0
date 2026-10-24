@@ -591,6 +591,30 @@
           }
         }
       ]
+    },
+    {
+      "canonicalId": "dad-01e2b3b699efb51afa7d744a",
+      "title": "Bookmark · Brian",
+      "sourceJokeIds": [
+        "dad-01e2b3b699efb51afa7d744a"
+      ],
+      "state": "existing_jokelet_files",
+      "productionAction": "Review/reuse saved jokelet; no routine regeneration.",
+      "assets": [
+        {
+          "id": "bookmark-brian",
+          "src": "media/GS_Jokelet_Bookmark_Brian_v01.mp4",
+          "sha256": "fdad52d0849fd903719dde9bf1d48dfbea285f72433c7cc927a422d296ca029c",
+          "status": "Ready",
+          "version": "v01",
+          "rebuildRecipe": "tools-home/tools/jokelab/runs/JL-20261024-BOOKMARK-recipe-v01.json",
+          "automationReview": {
+            "status": "Review",
+            "audio": "voice-only",
+            "note": "Whole-output user review pending; production asset, not a finished release."
+          }
+        }
+      ]
     }
   ],
   "sourceBacklog": [
@@ -691,7 +715,7 @@
     {
       "sourceJokeId": "dad-01e2b3b699efb51afa7d744a",
       "canonicalId": "dad-01e2b3b699efb51afa7d744a",
-      "state": "video_rendering",
+      "state": "jokelet_produced_ready_for_review",
       "runId": "JL-20261024-NEXT-04",
       "voiceJobId": "JL-20261024-BOOKMARK-VOICE-01"
     },
@@ -5267,7 +5291,7 @@
     {
       "runId": "JL-20261024-NEXT-04",
       "canonicalId": "dad-01e2b3b699efb51afa7d744a",
-      "state": "video_rendering",
+      "state": "jokelet_produced_ready_for_review",
       "voiceJobId": "JL-20261024-BOOKMARK-VOICE-01",
       "actualVoiceCredits": 59,
       "providerGenerationRequests": {
@@ -5277,7 +5301,12 @@
       "videoId": "d1ffb82407eed94a76cf8e742b3f597a",
       "paidProductionClearance": false,
       "reviewStatus": "pending_final_review",
-      "reservationScope": "One voice and one GS4 render submitted; resume these artifacts, no retries."
+      "reservationScope": "Jokelet produced; review/reuse saved output, do not generate as a new joke.",
+      "outputId": "bookmark-brian",
+      "outputDriveId": "1P4UXVmLC-NkcjLdzEyIWxvKysoDP5Ph8",
+      "outputSha256": "fdad52d0849fd903719dde9bf1d48dfbea285f72433c7cc927a422d296ca029c",
+      "rebuildRecipe": "tools-home/tools/jokelab/runs/JL-20261024-BOOKMARK-recipe-v01.json",
+      "heygenObservedCreditDelta": 3
     }
   ]
 }

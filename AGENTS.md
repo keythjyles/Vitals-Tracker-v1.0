@@ -88,3 +88,12 @@ The user reaffirmed 'I asked for a jokelet' after the quoted one-take ceiling. T
 ## Mirroring rule — user clarification October24
 
 Only reaction videos may be mirrored. Keep speaking joke performances unchanged to avoid reversing GS lettering. Inspect a selected reaction for visible text before horizontal mirroring; retain its original and record hflip in the rebuild recipe. Mirroring a reaction creates a derivative of the same source, not a new joke or paid render.
+
+
+## Bookmark jokelet completed — October24
+
+Run JL-20261024-NEXT-04, canonical dad-01e2b3b699efb51afa7d744a, source position8 is produced_ready_for_review. Position7 has an incomplete emoji punchline and remains an editorial hold, not a paid production. Final bookmark-brian v01 is10.36s/259frames/25fps1080x1920. Saved one v4/192kbps voice take X4Y2MYtNCzdXrPkSIVYG (59credits), one GS4 render d1ffb82407eed94a76cf8e742b3f597a (observed HeyGen balance delta3, not itemized), and full3s/75-frame mirrored approved skeptical reaction. No retries or purchases. Speaking footage is not mirrored; GS lettering stays readable. Mirror-only-reactions is the user's explicit rule and is recorded in the recipe.
+
+Final, sources and rebuild trail are saved. Recipe: runs/JL-20261024-BOOKMARK-recipe-v01.json. Media proof: results/JL-20261024-BOOKMARK-STORE-01.json. Final path: tools-home/tools/jokelets/media/GS_Jokelet_Bookmark_Brian_v01.mp4. Whole-file decode, frame/duration and silent-ending checks passed. No AI auditory approval is claimed; final user review pending. Catalog Ready/Review, publication.ready=false: this is a clean jokelet, not a finished release. Do not schedule it directly. Previous farmland output remains preserved; never regenerate either as a new joke.
+
+Supply a working direct MP4 download link with the completed artifact. Resume from saved files, not another generation. Next source position9 needs its own current selection/duplicate check; this one-jokelet request does not authorize an automatic batch.

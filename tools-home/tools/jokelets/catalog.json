@@ -644,6 +644,61 @@
         "ready": false,
         "note": "Reusable production asset; not a finished release and not scheduled."
       }
+    },
+    {
+      "id": "bookmark-brian",
+      "family": "bookmark-brian",
+      "number": 20,
+      "title": "Bookmark · Brian",
+      "reaction": "Mirrored skeptical stare · full3.00s",
+      "category": "Dad jokes",
+      "tags": [
+        "bookmark",
+        "Brian",
+        "Mark",
+        "mirrored reaction"
+      ],
+      "text": "My son asked, \"Can I have a bookmark?\" He's eleven, and he still doesn't know my name is BRIAN.",
+      "status": "Ready",
+      "driveId": "1P4UXVmLC-NkcjLdzEyIWxvKysoDP5Ph8",
+      "src": "media/GS_Jokelet_Bookmark_Brian_v01.mp4",
+      "poster": "media/GS_Jokelet_Bookmark_Brian_v01.jpg",
+      "duration": 10.36,
+      "fps": 25,
+      "frames": 259,
+      "width": 1080,
+      "height": 1920,
+      "version": "v01",
+      "sha256": "fdad52d0849fd903719dde9bf1d48dfbea285f72433c7cc927a422d296ca029c",
+      "canonicalJokeId": "dad-01e2b3b699efb51afa7d744a",
+      "automationReview": {
+        "status": "Review",
+        "audio": "voice-only",
+        "burnedCaptions": false,
+        "ambient": false,
+        "music": false,
+        "soundEffects": false,
+        "note": "Clean technical export; whole-jokelet approval pending."
+      },
+      "sourceTrail": {
+        "cuedScript": "[deadpan joke delivery] My son asked, \"Can I have a bookmark?\"\n\n[long pause] He's eleven, and he still doesn't know my name is BRIAN.",
+        "elevenLabsTake": "X4Y2MYtNCzdXrPkSIVYG",
+        "voiceFile": "tools-home/tools/jokelab/voice-wav/JL-20261024-BOOKMARK-VOICE-01.wav; Drive 1UfeQPQ_7D_f56nRASry7L_P8hiSLkBjF",
+        "heygenRender": "d1ffb82407eed94a76cf8e742b3f597a; Drive 17XQqbdruiI5Fw4c5E-fPVdb95y3Xc8wO",
+        "rebuildProject": "tools-home/tools/jokelab/runs/JL-20261024-BOOKMARK-recipe-v01.json",
+        "reactionTransform": "hflip applied to reaction only; speaking performance unchanged",
+        "gaps": "Legacy reaction original master ID unresolved; exact approved working bytes remain in repository. Global unnamed historical archive not exhaustively reconciled; no matching production identified in checked sources. Whole-output listening review and independent restore/rebuild remain pending."
+      },
+      "usage": {
+        "status": "No recorded publication",
+        "checkedDate": "2026-10-24",
+        "scope": "New clean production asset; not scheduled."
+      },
+      "publication": {
+        "stage": "clean-jokelet",
+        "ready": false,
+        "note": "Reusable production asset; not a finished release and not scheduled."
+      }
     }
   ],
   "assets": [

@@ -1,0 +1,172 @@
+{
+  "schema": "GS-JokeletRecipe-1",
+  "id": "bookmark-brian",
+  "version": "v01",
+  "runId": "JL-20261024-NEXT-04",
+  "canonicalJokeId": "dad-01e2b3b699efb51afa7d744a",
+  "state": "produced_ready_for_review",
+  "sourceLibraryPosition": 8,
+  "sourceLibraryGitBlob": "1d9dd64c99cf51233aba2d5eb6c1bc22978fa69b",
+  "cuedScript": "[deadpan joke delivery] My son asked, \"Can I have a bookmark?\"\n\n[long pause] He's eleven, and he still doesn't know my name is BRIAN.",
+  "providerSettings": {
+    "voiceId": "RBNpu6jPzAoaxZKl9noJ",
+    "model": "eleven_v4",
+    "outputFormat": "mp3_44100_192",
+    "voiceSettings": {
+      "stability": 0.5
+    },
+    "approvedReferenceId": "pqILh6dY0D1CO7Ckhplb"
+  },
+  "voice": {
+    "jobId": "JL-20261024-BOOKMARK-VOICE-01",
+    "takeId": "X4Y2MYtNCzdXrPkSIVYG",
+    "requestId": "ZxlZ2S55VjtP5wW2pR4M",
+    "original": {
+      "bytes": 178093,
+      "format": "audio/mpeg",
+      "path": "tools-home/tools/jokelab/voice-originals/JL-20261024-BOOKMARK-VOICE-01.mp3",
+      "sha256": "991bb4eb2f4f92f41be6f7914806237f0d4d7fb8ce8c9fdd61271cc695756ea5",
+      "driveId": "1hQOH5AC5TL5zl_FlZ9j4YWLZP0N8hiy5"
+    },
+    "wav": {
+      "bytes": 649230,
+      "channels": 1,
+      "conversion": "ffmpeg decode to PCM16; no gain, speed, trim or resampling options",
+      "duration": 7.36,
+      "encoding": "pcm_s16le",
+      "parentSha256": "991bb4eb2f4f92f41be6f7914806237f0d4d7fb8ce8c9fdd61271cc695756ea5",
+      "path": "tools-home/tools/jokelab/voice-wav/JL-20261024-BOOKMARK-VOICE-01.wav",
+      "sampleRate": 44100,
+      "sha256": "6c570cf52d9216da746216ab2d2052a4704eb7d2d074c48c1dd44a57b625fb07",
+      "driveId": "1UfeQPQ_7D_f56nRASry7L_P8hiSLkBjF"
+    },
+    "userApproved": false,
+    "aiListeningVerified": false,
+    "selection": "Agent selected under user's one-jokelet production instruction; final listening review pending"
+  },
+  "performance": {
+    "videoId": "d1ffb82407eed94a76cf8e742b3f597a",
+    "originalDriveId": "17XQqbdruiI5Fw4c5E-fPVdb95y3Xc8wO",
+    "sha256": "e1f9105c741c2fc64555a9347d8aff4b806893db243dc44afcbe6af268ef5608",
+    "bytes": 8606892,
+    "frames": 184,
+    "duration": 7.36,
+    "mirror": false,
+    "avatarId": "85cc768c260a40359212b92f738de459",
+    "audioAssetId": "6f23a126804b40a3a446b87ff89c2766",
+    "engine": {
+      "type": "avatar_iv"
+    },
+    "expressiveness": "low",
+    "aspectRatio": "9:16",
+    "resolution": "1080p",
+    "fit": "contain",
+    "outputFormat": "mp4",
+    "title": "GS Bookmark Brian v01 — clean joke performance"
+  },
+  "stabilization": {
+    "method": "Median normalized cross-correlation across three fixed background patches, integer translation, edge replication, no resizing",
+    "referenceFrame": 0,
+    "maxCorrectionPixels": {
+      "x": 2,
+      "y": 1
+    },
+    "offsets": "tools-home/tools/jokelab/runs/JL-20261024-BOOKMARK-anchorlock-offsets-v01.json",
+    "script": "tools-home/tools/jokelab/runs/JL-20261024-BOOKMARK-anchorlock-v01.py",
+    "resize": false,
+    "deliberateMotion": false
+  },
+  "reaction": {
+    "id": "reaction-skeptical",
+    "sourcePath": "tools-home/tools/jokelets/media/reaction-skeptical-silent-v02.mp4",
+    "sourceSha256": "9cb3246cffaea63858de86090a2f00ad37e79c748b106fece1ddaa0131355616",
+    "duration": 3,
+    "frames": 75,
+    "start": 7.36,
+    "sourceIn": 0,
+    "sourceOutExclusive": 3,
+    "mirror": true,
+    "transform": "hflip",
+    "mirroredSha256": "30efa8b271c8f8c6de5c44aa9e9c36231f47d76e0c9203d14e61919e1f9a81bb",
+    "inspection": "Three sampled frames at0/1/2s show no visible lettering; fixed close-up contains flame icon only.",
+    "audio": "No source audio stream; silent full hold",
+    "approval": "Existing Approved reaction; derivative applies only authorized horizontal mirroring"
+  },
+  "timeline": [
+    {
+      "kind": "performance",
+      "startFrame": 0,
+      "frames": 184,
+      "mirror": false
+    },
+    {
+      "kind": "reaction",
+      "startFrame": 184,
+      "frames": 75,
+      "mirror": true
+    }
+  ],
+  "audio": {
+    "source": "Original PCM WAV",
+    "gainDb": 0,
+    "rate": 1,
+    "padSilenceTo": 10.36,
+    "output": "AAC192kbps mono48000Hz",
+    "addedVocalization": false
+  },
+  "layers": {
+    "ambient": [],
+    "music": [],
+    "soundEffects": [],
+    "captions": [],
+    "outro": [],
+    "publicationGraphics": []
+  },
+  "export": {
+    "fps": 25,
+    "frames": 259,
+    "width": 1080,
+    "height": 1920,
+    "duration": 10.36,
+    "video": "libx264 fast CRF20 yuv420p CFR25 faststart"
+  },
+  "reactionDerivativeCommand": "ffmpeg -i reaction-skeptical-silent-v02.mp4 -vf hflip -an -c:v libx264 -preset fast -crf 18 -pix_fmt yuv420p -r 25 reaction-skeptical-mirrored-v01.mp4",
+  "assemblyCommand": "ffmpeg -i GS_Bookmark_AnchorLock_v01.mp4 -i reaction-skeptical-mirrored-v01.mp4 -i GS_Bookmark_Voice_v01_PCM.wav -filter_complex '[0:v]setpts=PTS-STARTPTS,setsar=1[v0];[1:v]setpts=PTS-STARTPTS,setsar=1[v1];[v0][v1]concat=n=2:v=1:a=0[v];[2:a]apad=whole_dur=10.36,atrim=duration=10.36,aresample=48000[a]' -map '[v]' -map '[a]' -c:v libx264 -preset fast -crf 20 -pix_fmt yuv420p -r 25 -fps_mode cfr -frames:v 259 -c:a aac -b:a 192k -ac 1 -movflags +faststart GS_Jokelet_Bookmark_Brian_v01.mp4",
+  "output": {
+    "path": "tools-home/tools/jokelets/media/GS_Jokelet_Bookmark_Brian_v01.mp4",
+    "sha256": "fdad52d0849fd903719dde9bf1d48dfbea285f72433c7cc927a422d296ca029c",
+    "bytes": 7333353,
+    "driveFileId": "1P4UXVmLC-NkcjLdzEyIWxvKysoDP5Ph8",
+    "libraryFileId": "libfile_4d800fd885448191bbaab2ddea69d0f9"
+  },
+  "costs": {
+    "elevenLabsCredits": 59,
+    "heygenObservedCreditDelta": 3,
+    "heygenCostQualification": "Account balance change for one render, not an itemized transaction receipt",
+    "voiceRequests": 1,
+    "videoRequests": 1,
+    "automaticRetries": 0,
+    "purchases": 0
+  },
+  "verification": {
+    "fullFileDecoded": true,
+    "frames": 259,
+    "fps": 25,
+    "reactionFrames": 75,
+    "reactionAudioAfter7_40secondsMaxDb": -91,
+    "representativeFramesInspected": true,
+    "aiListeningVerified": false,
+    "userApproval": "pending",
+    "independentRestoreRebuild": "not performed"
+  },
+  "publication": {
+    "stage": "clean-jokelet",
+    "ready": false,
+    "note": "Reusable production asset; not a finished release and not scheduled."
+  },
+  "sourceGaps": [
+    "Legacy reaction original master ID unresolved; exact approved working bytes remain in repository.",
+    "Global unnamed historical archive not exhaustively reconciled; no matching production identified in checked sources.",
+    "Whole-output listening review and independent restore/rebuild remain pending."
+  ]
+}

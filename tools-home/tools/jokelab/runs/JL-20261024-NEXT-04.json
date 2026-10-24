@@ -1,7 +1,7 @@
 {
   "schema": "JokeLabRun-1.0",
   "runId": "JL-20261024-NEXT-04",
-  "state": "video_rendering",
+  "state": "jokelet_produced_ready_for_review",
   "canonicalJokeId": "dad-01e2b3b699efb51afa7d744a",
   "sourceLibraryPosition": 8,
   "sourceLibraryGitBlob": "1d9dd64c99cf51233aba2d5eb6c1bc22978fa69b",
@@ -42,7 +42,7 @@
     "mirrorInspection": "Three sampled frames at0/1/2s show no visible lettering; fixed close-up contains flame icon only.",
     "mirroredSha256": "30efa8b271c8f8c6de5c44aa9e9c36231f47d76e0c9203d14e61919e1f9a81bb"
   },
-  "next": "Resume existing HeyGen render; no new generation. Apply fixed-background stabilization before assembly. Speaking shot must not be mirrored. Append full75-frame mirrored reaction, save originals/final/recipe.",
+  "next": "Present completed jokelet and direct download link. Await feedback; do not regenerate or publish. Next source position9 requires duplicate/eligibility check before any future paid production.",
   "actualVoiceCredits": 59,
   "voiceReceipt": "tools-home/tools/jokelab/voice-jobs/JL-20261024-BOOKMARK-VOICE-01.json",
   "voice": {
@@ -84,5 +84,87 @@
     "fit": "contain",
     "outputFormat": "mp4",
     "title": "GS Bookmark Brian v01 — clean joke performance"
-  }
+  },
+  "output": {
+    "id": "bookmark-brian",
+    "path": "tools-home/tools/jokelets/media/GS_Jokelet_Bookmark_Brian_v01.mp4",
+    "duration": 10.36,
+    "fps": 25,
+    "frames": 259,
+    "width": 1080,
+    "height": 1920,
+    "bytes": 7333353,
+    "sha256": "fdad52d0849fd903719dde9bf1d48dfbea285f72433c7cc927a422d296ca029c",
+    "driveFileId": "1P4UXVmLC-NkcjLdzEyIWxvKysoDP5Ph8",
+    "libraryFileId": "libfile_4d800fd885448191bbaab2ddea69d0f9"
+  },
+  "rebuildRecipe": "tools-home/tools/jokelab/runs/JL-20261024-BOOKMARK-recipe-v01.json",
+  "recipeDriveId": "18MGK-p79VJqf13uQVkKluFD-I9x_dEWt",
+  "videoOriginal": {
+    "videoId": "d1ffb82407eed94a76cf8e742b3f597a",
+    "originalDriveId": "17XQqbdruiI5Fw4c5E-fPVdb95y3Xc8wO",
+    "sha256": "e1f9105c741c2fc64555a9347d8aff4b806893db243dc44afcbe6af268ef5608",
+    "bytes": 8606892,
+    "frames": 184,
+    "duration": 7.36,
+    "mirror": false,
+    "avatarId": "85cc768c260a40359212b92f738de459",
+    "audioAssetId": "6f23a126804b40a3a446b87ff89c2766",
+    "engine": {
+      "type": "avatar_iv"
+    },
+    "expressiveness": "low",
+    "aspectRatio": "9:16",
+    "resolution": "1080p",
+    "fit": "contain",
+    "outputFormat": "mp4",
+    "title": "GS Bookmark Brian v01 — clean joke performance"
+  },
+  "heygenCredits": {
+    "observedBalanceDelta": 3,
+    "qualification": "Account balance change, not an itemized provider transaction receipt."
+  },
+  "publication": {
+    "stage": "clean-jokelet",
+    "ready": false,
+    "note": "Reusable production asset; not a finished release and not scheduled."
+  },
+  "verification": {
+    "fullFileDecoded": true,
+    "frames": 259,
+    "fps": 25,
+    "reactionFrames": 75,
+    "reactionAudioAfter7_40secondsMaxDb": -91,
+    "representativeFramesInspected": true,
+    "aiListeningVerified": false,
+    "userApproval": "pending",
+    "independentRestoreRebuild": "not performed"
+  },
+  "actions": [
+    {
+      "sequence": 1,
+      "action": "Verified previous farmland final in Drive and retained GitHub proof/recipe",
+      "result": "Previous work remains saved."
+    },
+    {
+      "sequence": 2,
+      "action": "Followed source order; held source7 with incomplete emoji punchline and selected source8",
+      "result": "Bookmark/Brian canonical checked against known outputs/claims/catalog; no concrete duplicate found. Unnamed archive gap remains."
+    },
+    {
+      "sequence": 3,
+      "action": "Generated one v4/192kbps voice take through dedicated signed engine, then one GS4 AvatarIV render from verified PCM WAV",
+      "result": "59ElevenLabs credits; observed HeyGen balance delta3; no retries or purchases."
+    },
+    {
+      "sequence": 4,
+      "action": "Applied saved AnchorLock method, retained full performance, mirrored only approved skeptical reaction",
+      "result": "Max2px horizontal/1px vertical stabilization; full75-frame3s reaction; speaking shot not mirrored; no visible reaction lettering in sampled frames."
+    },
+    {
+      "sequence": 5,
+      "action": "Exported and decoded entire file, checked frames/silence, preserved final and source trail",
+      "result": "259frames,25fps,1080x1920,10.36s; reaction audio max-91dB after7.4s. Final in GitHub/Drive/Library; originals and recipe retained; final user review pending."
+    }
+  ]
 }
