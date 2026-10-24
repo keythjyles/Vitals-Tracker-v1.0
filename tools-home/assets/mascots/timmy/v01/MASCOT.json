@@ -1,0 +1,154 @@
+{
+  "name": "Timmy",
+  "alias": "GS Cartoon Boy Mascot",
+  "version": "v01",
+  "driveFolder": "https://drive.google.com/drive/folders/1NFeKx1N2bn-Wa1SMcfQuZ1teWcs9EeLs",
+  "identity": "Brown-haired rounded comic-strip boy; yellow collared shirt with broad dark chest stripe, dark shorts, white socks, brown shoes.",
+  "assets": [
+    {
+      "id": "Timmy_Profile_Right_Stride_A_v01",
+      "file": "Timmy_Profile_Right_Stride_A_v01.png",
+      "kind": "mascot-pose",
+      "character": "Timmy",
+      "size": [
+        1024,
+        1536
+      ],
+      "alpha": true,
+      "approval": "Approved",
+      "sha256": "0ee97ff0439bd65ad6b41d6717114b78d4275b9e4121ff2b8c8f3aa8fa3510e0",
+      "source": "exec-85fde5c3-445b-400f-9dcf-1918f2982e86.png",
+      "githubBlob": "d33e03f00f9e4e97f3837aabd7fc5b4a392ef580",
+      "drive": {
+        "id": "1oq4RYRyQ8hLOlJL_rZtmY3W4939UR1dX",
+        "url": "https://drive.google.com/file/d/1oq4RYRyQ8hLOlJL_rZtmY3W4939UR1dX/view?usp=drivesdk"
+      },
+      "path": "tools-home/assets/mascots/timmy/v01/Timmy_Profile_Right_Stride_A_v01.png"
+    },
+    {
+      "id": "Timmy_Profile_Right_Turn_Wave_v01",
+      "file": "Timmy_Profile_Right_Turn_Wave_v01.png",
+      "kind": "mascot-pose",
+      "character": "Timmy",
+      "size": [
+        1024,
+        1536
+      ],
+      "alpha": true,
+      "approval": "Approved",
+      "sha256": "50ea82128bb205c90144c9082133f4dbc5f09fa8980d82ac7cc2f56b04fad581",
+      "source": "exec-03e00a3e-66ff-4982-903e-ba3cd5313a88.png",
+      "githubBlob": "f088a6c74a074522486a20144090c2361872bed9",
+      "drive": {
+        "id": "1oDlo_sL2IpQZ_cY9ySgSEWMp3IgmuJb3",
+        "url": "https://drive.google.com/file/d/1oDlo_sL2IpQZ_cY9ySgSEWMp3IgmuJb3/view?usp=drivesdk"
+      },
+      "path": "tools-home/assets/mascots/timmy/v01/Timmy_Profile_Right_Turn_Wave_v01.png"
+    },
+    {
+      "id": "Timmy_Profile_Right_Stride_B_v01",
+      "file": "Timmy_Profile_Right_Stride_B_v01.png",
+      "kind": "mascot-pose",
+      "character": "Timmy",
+      "size": [
+        1024,
+        1536
+      ],
+      "alpha": true,
+      "approval": "Review",
+      "sha256": "e09f91d6a14f3ccd2155f0ff2b2844764b51fecbbb1782796ae5e0e58ace903b",
+      "source": "exec-e18cfd06-8151-48a2-a48d-b9d0fa158360.png",
+      "githubBlob": "e64b33a586ac4a49cb031702c4d3d83fca57d940",
+      "drive": {
+        "id": "1MjZakHij1fsqjsg3XBEQ3WhoAsNt3-TI",
+        "url": "https://drive.google.com/file/d/1MjZakHij1fsqjsg3XBEQ3WhoAsNt3-TI/view?usp=drivesdk"
+      },
+      "path": "tools-home/assets/mascots/timmy/v01/Timmy_Profile_Right_Stride_B_v01.png"
+    },
+    {
+      "id": "Timmy_Profile_Right_Passing_Step_v01",
+      "file": "Timmy_Profile_Right_Passing_Step_v01.png",
+      "kind": "mascot-pose",
+      "character": "Timmy",
+      "size": [
+        1024,
+        1536
+      ],
+      "alpha": true,
+      "approval": "Review",
+      "sha256": "4490e1dfd5792a9f74e68475ccfa5cae6f65c098f14df471292714a4c3a67704",
+      "source": "exec-962492c9-144d-4122-bbb7-a6c83469111e.png",
+      "githubBlob": "bc5f3ef5d26d02c4f6a0a9d081eaeff807c17f3a",
+      "drive": {
+        "id": "1KOZ3P0eeuFw5_Ugg5dUnMEXPu3GZWziu",
+        "url": "https://drive.google.com/file/d/1KOZ3P0eeuFw5_Ugg5dUnMEXPu3GZWziu/view?usp=drivesdk"
+      },
+      "path": "tools-home/assets/mascots/timmy/v01/Timmy_Profile_Right_Passing_Step_v01.png"
+    },
+    {
+      "id": "Timmy_Front_Neutral_v01",
+      "file": "Timmy_Front_Neutral_v01.png",
+      "kind": "mascot-pose",
+      "character": "Timmy",
+      "size": [
+        1024,
+        1536
+      ],
+      "alpha": true,
+      "approval": "Review",
+      "sha256": "2458af788449065793a3399cff0532ba0a8fa59cd56ad331a6c31cf0fb406c3e",
+      "source": "exec-e1c4fc2c-0615-4b39-9d0b-bc4b0ee89295.png",
+      "githubBlob": "d4a6cec0fb576da5bc1979899c3f0f399daa5abd",
+      "drive": {
+        "id": "1ivclFfog3HqWzLG8pqBO4GcSDdQfbg7G",
+        "url": "https://drive.google.com/file/d/1ivclFfog3HqWzLG8pqBO4GcSDdQfbg7G/view?usp=drivesdk"
+      },
+      "path": "tools-home/assets/mascots/timmy/v01/Timmy_Front_Neutral_v01.png"
+    },
+    {
+      "id": "Timmy_Profile_Left_Walk_v01",
+      "file": "Timmy_Profile_Left_Walk_v01.png",
+      "kind": "mascot-pose",
+      "character": "Timmy",
+      "size": [
+        1024,
+        1536
+      ],
+      "alpha": true,
+      "approval": "Review",
+      "sha256": "b5143c622c37b1bc483e605c3657e54ee49b6b1fa7e8d0a8801683887cfc8cb5",
+      "source": "exec-ab95686e-01a0-44e4-b0ab-9d7d9511fac4.png",
+      "githubBlob": "ca31bc23732ccb973d7fa9f94f9daade107d2f50",
+      "drive": {
+        "id": "167jgivyVvGds2aEqFLxcjcrR8zWnIl9l",
+        "url": "https://drive.google.com/file/d/167jgivyVvGds2aEqFLxcjcrR8zWnIl9l/view?usp=drivesdk"
+      },
+      "path": "tools-home/assets/mascots/timmy/v01/Timmy_Profile_Left_Walk_v01.png"
+    }
+  ],
+  "animation": {
+    "file": "Timmy_Walk_Wave_10s_Transparent_v02.webm",
+    "githubBlob": "b29b6003db049947df181a236746540b13b8b694",
+    "duration": 10,
+    "fps": 25,
+    "frames": 250,
+    "alpha": true,
+    "originalDrive": {
+      "id": "1Hhr2E2uWnBINDj3ia5EFOS-THLb_FxqB",
+      "url": "https://drive.google.com/file/d/1Hhr2E2uWnBINDj3ia5EFOS-THLb_FxqB/view?usp=drivesdk"
+    },
+    "latestEpisodeCue": {
+      "startFrame": 50,
+      "endFrameExclusive": 300,
+      "startSeconds": 2,
+      "endSeconds": 12
+    },
+    "approval": "User approved episode through v09. Four new still poses require individual review."
+  },
+  "notes": [
+    "Reuse the original PNGs; do not replace identity with a rough redraw.",
+    "Poses marked Review are proposed assets; original two poses are Approved.",
+    "Keep transparent alpha. Do not flatten onto a background.",
+    "Timmy is a mascot graphics overlay, not a GS reaction clip or a publication-ready jokelet."
+  ]
+}
