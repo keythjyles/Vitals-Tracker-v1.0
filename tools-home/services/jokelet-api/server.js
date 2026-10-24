@@ -2,6 +2,7 @@
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { timingSafeEqual } from 'node:crypto';
+import {verifyGithubIdentity} from './github-identity.js';
 
 const port = Number(process.env.PORT || 3100);
 const elevenKey = process.env.ELEVENLABS_API_KEY;
@@ -35,6 +36,22 @@ const server = http.createServer(async (req, res) => {
   }
   if (req.method === 'GET' && (pathname === '/health' || pathname === '/'))
     return send(res, 200, { service: 'jokelet-api', status: 'ok', elevenLabsConfigured: Boolean(elevenKey), generationEnabled: Boolean(elevenKey && operatorToken) });
+  if (req.method === 'GET' && pathname === '/api/ai/preflight') {
+    let identity;
+    try { identity=await verifyGithubIdentity(req.headers.authorization); }
+    catch { return send(res,401,{error:'Unauthorized'}); }
+    if(!elevenKey)return send(res,503,{error:'ElevenLabs is not configured'});
+    try {
+      const response=await fetch('https://api.elevenlabs.io/v2/voices?page_size=100',{
+        headers:{'xi-api-key':elevenKey,accept:'application/json'},signal:AbortSignal.timeout(12000)
+      });
+      if(!response.ok)return send(res,502,{error:'ElevenLabs authenticated lookup failed',upstreamStatus:response.status});
+      const data=await response.json();
+      return send(res,200,{schema:'GS-AIPreflight-1',identity,authenticatedVoiceLookup:true,paidGeneration:false,
+        voices:(data.voices||[]).filter(v=>/grill|sargent|sergeant|gs4/i.test(v.name||'')).map(v=>({voiceId:v.voice_id,name:v.name,category:v.category})),
+        next:'Paid AI execution remains disabled; establish durable spending and job storage first.'});
+    } catch {return send(res,502,{error:'ElevenLabs authenticated lookup unavailable'});}
+  }
   if (req.method === 'GET' && pathname === '/api/voices') {
     if (!authorized(req)) return send(res, 401, { error: 'Unauthorized' });
     if (!elevenKey) return send(res, 503, { error: 'ElevenLabs is not configured' });

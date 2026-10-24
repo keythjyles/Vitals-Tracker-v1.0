@@ -1,3 +1,13 @@
+# Current checkpoint — October 23, 2026
+
+Performance editor deployed and UI verified; see runs/JL-20261023-EDITOR-VERIFICATION.json. Robots/guacamole is already produced, ready for final review, not the next unproduced joke. The earlier browser-login and pending-script text below is historical.
+
+Current engineering stage: secure AI read-only ElevenLabs preflight via GitHub Actions OIDC, documented in ../../services/jokelet-api/AI_AUTH.md. Implemented with local tests; consult the latest run verification before claiming live provider access. Paid AI execution remains disabled. No new spending authorization is inherited from previous jokes. Persistent budget/job/media storage and downstream video timing remain open.
+
+Story publishing is restored separately: three per network daily October23–29, immediate Story published on both networks; see runs/JL-20261023-STORIES-01.json. Do not disturb those releases while engineering production.
+
+---
+
 # Resume Jokelet Engine
 
 ## ElevenLabs API connection — authoritative update (October 23, 2026)
