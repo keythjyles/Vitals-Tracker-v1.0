@@ -1,7 +1,8 @@
 {
   "events": [
     "reserved_before_provider_lookup",
-    "read_only_lookup_started"
+    "read_only_lookup_started",
+    "result_and_source_hash_preserved"
   ],
   "jobId": "JL-20261024-REFERENCE-02",
   "paidRequests": 0,
@@ -14,6 +15,8 @@
     "paidRequests": 0
   },
   "requestSha256": "7bc02136cd2158779b9a3b969cef315f84202f16a29ef608d0b47788e131d792",
+  "resultPath": "tools-home/tools/jokelab/results/JL-20261024-REFERENCE-02.json",
+  "resultSha256": "489d02449c2c334a43c9bc2fd94b57896d06863a3c92a198ee3b24110c2dc34e",
   "runId": "40100278455",
   "schema": "GS-GitHubJob-1",
   "sourceAsset": {
@@ -26,5 +29,5 @@
     "status": "existing_approved_source_verified_unchanged"
   },
   "sourceCommit": "f5ed44ba6f2b5d2b3594904ffca70fd7874dfc9e",
-  "status": "submitted"
+  "status": "completed"
 }
