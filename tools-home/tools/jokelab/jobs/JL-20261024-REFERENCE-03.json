@@ -1,0 +1,29 @@
+{
+  "events": [
+    "reserved_before_provider_lookup"
+  ],
+  "jobId": "JL-20261024-REFERENCE-03",
+  "paidRequests": 0,
+  "request": {
+    "assetSha256": "8d85a1af2e7885e26d54476a5d888f01f108eae22abbff84e02fc2a7efd8647e",
+    "automaticRetries": 0,
+    "catalogId": "pebble-straight-stare",
+    "jobId": "JL-20261024-REFERENCE-03",
+    "operation": "authenticated_voice_discovery",
+    "paidRequests": 0
+  },
+  "requestSha256": "36c5082221185b3454e1265a0185ae70242d69477260ebf98a45d0628b08556c",
+  "runId": "40100663681",
+  "schema": "GS-GitHubJob-1",
+  "sourceAsset": {
+    "bytes": 6398154,
+    "canonicalId": "dad-00bda89167b4f15850aa1c91",
+    "catalogId": "pebble-straight-stare",
+    "driveId": "1Q70Fx4ZYQfoH--OzOpwsaUNnjQ_XRct1",
+    "path": "tools-home/tools/jokelets/media/GS_Jokelet_Pebble_Straight_Stare_v01.mp4",
+    "sha256": "8d85a1af2e7885e26d54476a5d888f01f108eae22abbff84e02fc2a7efd8647e",
+    "status": "existing_approved_source_verified_unchanged"
+  },
+  "sourceCommit": "9c7b9233f23a457057e4d165023c6f0ed1e87a45",
+  "status": "reserved"
+}
