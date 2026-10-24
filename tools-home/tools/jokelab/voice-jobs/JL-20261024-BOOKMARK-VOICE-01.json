@@ -1,0 +1,35 @@
+{
+  "jobId": "JL-20261024-BOOKMARK-VOICE-01",
+  "request": {
+    "approved": true,
+    "approvedReferenceId": "pqILh6dY0D1CO7Ckhplb",
+    "automaticRetries": 0,
+    "budget": {
+      "approvalEvidence": "User: 'Now, create a jokelet.' Current request delegates one new complete jokelet using established one-take150existingcredits ceiling, one GS4 render and existing reaction. No automatic retries or purchases.",
+      "approved": true,
+      "expiresAt": "2026-10-25T14:40:00Z",
+      "maxCharacters": 133,
+      "maxCredits": 150,
+      "maxRequests": 1
+    },
+    "canonicalId": "dad-01e2b3b699efb51afa7d744a",
+    "duplicateReview": {
+      "cleared": true,
+      "evidence": "Source position8; no canonical aliases/produced group or in-progress job, no catalog bookmark/Brian match, no HeyGen bookmark title. Known D1/D2/D3 topics differ. Drive text searches returned no relevant production; unnamed archive content remains unreconciled, not certified exhaustive."
+    },
+    "jobId": "JL-20261024-BOOKMARK-VOICE-01",
+    "modelId": "eleven_v4",
+    "operation": "voice_generate",
+    "outputFormat": "mp3_44100_192",
+    "schema": "GS-BoundedVoiceRequest-1",
+    "script": "[deadpan joke delivery] My son asked, \"Can I have a bookmark?\"\n\n[long pause] He's eleven, and he still doesn't know my name is BRIAN.",
+    "voiceId": "RBNpu6jPzAoaxZKl9noJ",
+    "voiceSettings": {
+      "stability": 0.5
+    }
+  },
+  "runId": "40102973558",
+  "schema": "GS-VoiceJob-2",
+  "sourceCommit": "b66fb73c369f8f5839061aaaefca9088c917d248",
+  "status": "queued"
+}
