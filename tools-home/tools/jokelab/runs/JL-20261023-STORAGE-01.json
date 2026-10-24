@@ -1,7 +1,7 @@
 {
   "schema": "GS-StorageEngineering-1",
   "runId": "JL-20261023-STORAGE-01",
-  "status": "adapter_implemented_and_locally_tested; persistent activation not purchased",
+  "status": "code_live_and_locally_tested; persistent activation awaits recurring-cost approval",
   "tests": {
     "passed": 12,
     "failed": 0,
@@ -37,5 +37,17 @@
     "integrate paid routes with ledger",
     "provider reconciliation UI and offsite backups",
     "media library and downstream rebuild workflow"
-  ]
+  ],
+  "codeDeployment": {
+    "commit": "0ba3070dda147bbdde5b5ed1d823115d05a2ca40",
+    "deployId": "dep-dbdvqb61egvs73fbs2b0",
+    "status": "live",
+    "finishedAt": "2026-10-24T00:35:58.106494Z",
+    "publicChecks": {
+      "health": 200,
+      "operator": 200,
+      "unauthenticatedStorage": 401
+    },
+    "errorLogs": 0
+  }
 }
