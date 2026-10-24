@@ -1,0 +1,75 @@
+{
+  "schema": "JokeLabRun-1.0",
+  "runId": "JL-20261023-NEXT-03",
+  "state": "voice_prepared_awaiting_specific_spending_authorization",
+  "canonicalJokeId": "dad-01390bc83ffc16630ae3d503",
+  "sourceLibraryPosition": 6,
+  "source": "tools-home/data/jokelab/library.json",
+  "sourceGitBlob": "1d9dd64c99cf51233aba2d5eb6c1bc22978fa69b",
+  "cuedScript": "[joking] I tried taking some high resolution photos of local farmland, but they all turned out a bit GRAINY.",
+  "scriptCharacters": 108,
+  "voice": {
+    "voiceId": "RBNpu6jPzAoaxZKl9noJ",
+    "modelId": "eleven_v3",
+    "settings": {
+      "stability": 0.5,
+      "similarity_boost": 0.75
+    }
+  },
+  "budget": {
+    "approved": false,
+    "proposedMaxExistingCredits": 150,
+    "quotedExpectedCredits": 108,
+    "quoteEvidence": "results/JL-20261023-VOICE-GATE-01.json",
+    "requests": 1,
+    "automaticRetries": 0,
+    "purchaseOrUpgrade": false,
+    "heygenAuthorized": false
+  },
+  "duplicateReview": {
+    "status": "No concrete matching production identified in checked sources; not a certified exhaustive archive audit",
+    "catalogAndLedger": "No matching canonical group, alias or finished catalog text.",
+    "drive": "No grainy/farmland text results across the two connected accounts; this search is not proof that unnamed videos lack the joke.",
+    "heygen": "No grainy-titled video returned.",
+    "episode1": "Known catalog Guts, Soap, Impasta, Scarecrow and Hug differ.",
+    "episode2": {
+      "checked": true,
+      "sourceClipHashesAndCaptionTopics": [
+        {
+          "clip": 1,
+          "sha256": "bd01267ec9cb331f9601ddfebce29cc594815842150fb9d29ab2df70ed6004cd",
+          "visibleTopic": "Dishwasher/doctor",
+          "method": "Caption frames sampled at1,3,5seconds; no claim of full audio transcription"
+        },
+        {
+          "clip": 2,
+          "sha256": "56e1eb0c8132fe02b0bca552ea9103935dad40ba0dc38bb7e0ac2334ce13778b",
+          "visibleTopic": "Repeating parrot",
+          "method": "Caption frames sampled at1,3,5seconds; no claim of full audio transcription"
+        },
+        {
+          "clip": 3,
+          "sha256": "4a23f7567787fdc32cca631fa56307feff6b3306c5a0db32a563c04f27383dd6",
+          "visibleTopic": "Calendar factory/days off",
+          "method": "Caption frames sampled at1,3,5seconds; no claim of full audio transcription"
+        },
+        {
+          "clip": 4,
+          "sha256": "2d777222944daa1ccaae50cc74b5fd05ff8acba3d8fd49c40d82443cb2bfd59a",
+          "visibleTopic": "Benchpress password",
+          "method": "Caption frames sampled at1,3,5seconds; no claim of full audio transcription"
+        },
+        {
+          "clip": 5,
+          "sha256": "6d5594483ada78ea42577f132ea2241605fc6e46eb7f259bf088f509f2eef35a",
+          "visibleTopic": "Hide-and-seek/good players hard to find",
+          "method": "Caption frames sampled at1,3,5seconds; no claim of full audio transcription"
+        }
+      ]
+    },
+    "episode3": "Known Smart Grill, Eyebrows, Listener, Spider and Dinner Surprise differ.",
+    "remaining": "Unnamed historical render content not exhaustively reconciled. Do not inherit another joke's duplicate-risk exception."
+  },
+  "providerGenerationRequests": 0,
+  "next": "On explicit user authorization, record approval and expiry, clear duplicate review for the bounded scope, create a unique approved one-attempt voice job and use the signed workflow. Preserve original MP3 and PCM WAV; stop before HeyGen until its own approval/cap exists."
+}

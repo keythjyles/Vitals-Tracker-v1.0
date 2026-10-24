@@ -36,3 +36,8 @@ test('provider usage comes from response headers and excludes credentials',async
  const p=elevenProvider('private-test-key',async()=>new Response(new Uint8Array([1,2,3]),{status:200,headers:{'content-type':'audio/mpeg','character-cost':'15','request-id':'provider-request'}}));
  const r=await p.generate(request());assert.equal(r.usage.actualCredits,15);assert.equal(r.usage.requestId,'provider-request');assert.ok(!JSON.stringify(r).includes('private-test-key'));
 });
+
+test('known aliases must be resolved before a new paid job can claim a joke',async()=>{
+ const f=fixtures();f.repo.read=async(path)=>path.endsWith('PRODUCTION_LEDGER.json')?{value:{aliases:{[request().canonicalId]:'dad-000000000000000000000000'}}}:{value:{status:'queued'}};
+ await assert.rejects(executeVoice({...f,identity:{},request:request(),dryRun:true}));assert.equal(f.calls,0);
+});
