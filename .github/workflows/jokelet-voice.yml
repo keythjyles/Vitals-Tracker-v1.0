@@ -1,0 +1,37 @@
+name: Jokelet bounded voice job
+on:
+  push:
+    branches: [main]
+    paths: ['tools-home/tools/jokelab/requests/voice-job.json']
+permissions: {}
+concurrency:
+  group: jokelet-bounded-voice
+  cancel-in-progress: false
+jobs:
+  voice:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - name: Execute signed bounded voice request
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for script in github-job.py github-voice-job.py; do
+            curl --fail --silent --show-error --max-time 30 "https://raw.githubusercontent.com/keythjyles/Vitals-Tracker-v1.0/${GITHUB_SHA}/tools-home/services/jokelet-api/${script}" -o "${script}"
+          done
+          python3 github-voice-job.py
+      - name: Preserve recovery evidence and audio
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: jokelet-voice-recovery
+          path: |
+            voice-*.json
+            voice-*.mp3
+            voice.wav
+          retention-days: 30
+          if-no-files-found: error

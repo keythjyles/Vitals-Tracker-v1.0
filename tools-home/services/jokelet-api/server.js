@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { timingSafeEqual } from 'node:crypto';
 import {verifyGithubIdentity} from './github-identity.js';
 import {storageReadiness} from './production-store.js';
+import {executeVoice,elevenProvider,GitHubVoiceRepository,VoiceGateError,validateVoiceRequest} from './github-voice.js';
 
 const port = Number(process.env.PORT || 3100);
 const elevenKey = process.env.ELEVENLABS_API_KEY;
@@ -37,6 +38,26 @@ const server = http.createServer(async (req, res) => {
   }
   if (req.method === 'GET' && (pathname === '/health' || pathname === '/'))
     return send(res, 200, { service: 'jokelet-api', status: 'ok', elevenLabsConfigured: Boolean(elevenKey), generationEnabled: Boolean(elevenKey && operatorToken) });
+  if(req.method==='POST' && pathname==='/api/ai/voice/generate') {
+    let identity;
+    try { identity=await verifyGithubIdentity(req.headers.authorization); }
+    catch { return send(res,401,{error:'Unauthorized'}); }
+    if(identity.workflowRef!=='keythjyles/Vitals-Tracker-v1.0/.github/workflows/jokelet-voice.yml@refs/heads/main')return send(res,403,{error:'voice_workflow_required'});
+    const jobToken=req.headers['x-github-job-token'];
+    if(typeof jobToken!=='string'||jobToken.length<20||jobToken.length>1000)return send(res,401,{error:'GitHub workflow credential required'});
+    if(!elevenKey)return send(res,503,{error:'ElevenLabs is not configured'});
+    try {
+      let body='';for await(const chunk of req){body+=chunk.toString();if(body.length>2000)return send(res,413,{error:'Request too large'});}
+      const input=JSON.parse(body);if(typeof input.jobId!=='string'||typeof input.dryRun!=='boolean')return send(res,400,{error:'Invalid job request'});
+      const repo=new GitHubVoiceRepository(jobToken);
+      const source=await repo.read('tools-home/tools/jokelab/requests/voice-job.json',identity.commit);
+      if(!source||source.value.jobId!==input.jobId)return send(res,409,{error:'Job does not match the signed workflow commit'});
+      const request={...source.value};delete request.invocation;delete request.executionMode;
+      if(input.quoteOnly===true){validateVoiceRequest(request,{quoteOnly:true});const quote=await elevenProvider(elevenKey).check(request);return send(res,200,{quoteOnly:true,paidRequests:0,scriptCharacters:request.script.length,voiceId:request.voiceId,modelId:request.modelId,proposedMaxCredits:request.budget.maxCredits,...quote});}
+      const result=await executeVoice({repo,request,identity,provider:elevenProvider(elevenKey),dryRun:input.dryRun});
+      return send(res,result.status||200,result);
+    } catch(e){return send(res,e instanceof VoiceGateError?e.status:502,{error:e instanceof VoiceGateError?e.code:'Voice job stopped; reconcile before retrying'});}
+  }
   if(req.method==='GET' && pathname==='/api/storage') {
     if(!authorized(req))return send(res,401,{error:'Unauthorized'});
     return send(res,200,{storage:storageReadiness(process.env.JOKELET_DATA_DIR),generationLedgerIntegrated:false});
@@ -54,7 +75,7 @@ const server = http.createServer(async (req, res) => {
       const data=await response.json();
       return send(res,200,{schema:'GS-AIPreflight-1',identity,authenticatedVoiceLookup:true,paidGeneration:false,storage:storageReadiness(process.env.JOKELET_DATA_DIR),generationLedgerIntegrated:false,
         voices:(data.voices||[]).filter(v=>/grill|sargent|sergeant|gs4/i.test(v.name||'')).map(v=>({voiceId:v.voice_id,name:v.name,category:v.category})),
-        next:'Paid AI execution remains disabled; establish durable spending and job storage first.'});
+        next:'Voice generation requires its own signed workflow and an explicitly approved one-attempt GitHub job. Existing GitHub/Drive storage is the intended path; no disk purchase is required.'});
     } catch {return send(res,502,{error:'ElevenLabs authenticated lookup unavailable'});}
   }
   if (req.method === 'GET' && pathname === '/api/voices') {

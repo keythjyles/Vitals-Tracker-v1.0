@@ -14,6 +14,8 @@ test('only signed, scoped repository workflow identity can run preflight',async(
  assert.equal((await verifyGithubIdentity(token(claims),options)).runId,'123');
  const immutable={...claims,sub:'repo:keythjyles@251250579/Vitals-Tracker-v1.0@1122008805:ref:refs/heads/main'};
  assert.equal((await verifyGithubIdentity(token(immutable),options)).commit,claims.sha);
+ const voice={...claims,workflow_ref:REPOSITORY+'/.github/workflows/jokelet-voice.yml@refs/heads/main'};
+ assert.equal((await verifyGithubIdentity(token(voice),options)).workflowRef,voice.workflow_ref);
 });
 test('reject wrong audience, fork, branch, event, workflow, owner, runner and expiry',async()=>{
  for(const [key,value] of Object.entries({aud:'other',sub:'wrong',repository_id:'999',repository:'fork/repo',repository_owner_id:'999',ref:'refs/heads/evil',event_name:'pull_request',workflow_ref:'other.yml',runner_environment:'self-hosted',exp:now-1,iat:now-601,nbf:now+60,workflow_sha:'b'.repeat(40)}))await assert.rejects(verifyGithubIdentity(token({...claims,[key]:value}),options));

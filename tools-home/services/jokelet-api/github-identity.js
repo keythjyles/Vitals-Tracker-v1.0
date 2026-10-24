@@ -2,7 +2,7 @@ import {createPublicKey,verify} from 'node:crypto';
 const issuer='https://token.actions.githubusercontent.com';
 export const AI_AUDIENCE='https://jokelet-api.onrender.com/ai-preflight';
 export const REPOSITORY='keythjyles/Vitals-Tracker-v1.0';
-const workflow=REPOSITORY+'/.github/workflows/jokelet-preflight.yml@refs/heads/main';
+const workflows=new Set(['jokelet-preflight.yml','jokelet-voice.yml'].map(name=>REPOSITORY+'/.github/workflows/'+name+'@refs/heads/main'));
 let cachedKeys,keysUntil=0;
 async function githubKeys(){
   if(cachedKeys&&Date.now()<keysUntil)return cachedKeys;
@@ -22,8 +22,8 @@ export async function verifyGithubIdentity(authorization,{getKeys=githubKeys,now
   if(!jwk||!verify('RSA-SHA256',Buffer.from(pieces[0]+'.'+pieces[1]),createPublicKey({key:jwk,format:'jwk'}),Buffer.from(pieces[2],'base64url')))throw Error('Unauthorized');
   const p=JSON.parse(Buffer.from(pieces[1],'base64url').toString());
   const subjects=[`repo:${REPOSITORY}:ref:refs/heads/main`,'repo:keythjyles@251250579/Vitals-Tracker-v1.0@1122008805:ref:refs/heads/main'];
-  if(p.iss!==issuer||p.aud!==AI_AUDIENCE||!subjects.includes(p.sub)||p.repository!==REPOSITORY||p.repository_id!=='1122008805'||p.repository_owner_id!=='251250579'||p.ref!=='refs/heads/main'||p.event_name!=='push'||p.workflow_ref!==workflow||p.runner_environment!=='github-hosted')throw Error('Unauthorized');
+  if(p.iss!==issuer||p.aud!==AI_AUDIENCE||!subjects.includes(p.sub)||p.repository!==REPOSITORY||p.repository_id!=='1122008805'||p.repository_owner_id!=='251250579'||p.ref!=='refs/heads/main'||p.event_name!=='push'||!workflows.has(p.workflow_ref)||p.runner_environment!=='github-hosted')throw Error('Unauthorized');
   if(!['exp','iat','nbf'].every(k=>Number.isSafeInteger(p[k]))||p.exp<=now||p.nbf>now+10||p.iat>now+10||p.iat<now-600||p.exp-p.iat>600||p.exp<=p.iat)throw Error('Unauthorized');
   if(typeof p.sha!=='string'||!/^[a-f0-9]{40}$/.test(p.sha)||p.workflow_sha!==p.sha||!/^\d+$/.test(p.run_id||'')||typeof p.jti!=='string'||!p.jti)throw Error('Unauthorized');
-  return {repository:REPOSITORY,commit:p.sha,runId:p.run_id};
+  return {repository:REPOSITORY,commit:p.sha,runId:p.run_id,workflowRef:p.workflow_ref};
 }
