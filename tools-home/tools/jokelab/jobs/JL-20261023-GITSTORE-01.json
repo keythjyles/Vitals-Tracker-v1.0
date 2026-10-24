@@ -1,6 +1,7 @@
 {
   "events": [
-    "reserved_before_provider_lookup"
+    "reserved_before_provider_lookup",
+    "read_only_lookup_started"
   ],
   "jobId": "JL-20261023-GITSTORE-01",
   "paidRequests": 0,
@@ -25,5 +26,5 @@
     "status": "existing_approved_source_verified_unchanged"
   },
   "sourceCommit": "55ff5a60466047dc52b6c2baf77605db065c8938",
-  "status": "reserved"
+  "status": "submitted"
 }
