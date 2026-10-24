@@ -1,0 +1,41 @@
+{
+  "jobId": "JL-20261023-GITSTORE-01",
+  "paidRequests": 0,
+  "preflight": {
+    "authenticatedVoiceLookup": true,
+    "generationLedgerIntegrated": false,
+    "identity": {
+      "commit": "55ff5a60466047dc52b6c2baf77605db065c8938",
+      "repository": "keythjyles/Vitals-Tracker-v1.0",
+      "runId": "40046402358"
+    },
+    "next": "Paid AI execution remains disabled; establish durable spending and job storage first.",
+    "paidGeneration": false,
+    "schema": "GS-AIPreflight-1",
+    "storage": {
+      "ready": false,
+      "reason": "persistent_mount_not_configured"
+    },
+    "voices": [
+      {
+        "category": "generated",
+        "name": "Grill Sargent Jokes",
+        "voiceId": "RBNpu6jPzAoaxZKl9noJ"
+      }
+    ]
+  },
+  "providerLookups": 1,
+  "requestSha256": "fd28f773f49647a59870264a08cfe4c6a061d8c111707d72606a7a9bc54b68e0",
+  "runId": "40046402358",
+  "schema": "GS-GitHubJobResult-1",
+  "sourceAsset": {
+    "bytes": 6398154,
+    "canonicalId": "dad-00bda89167b4f15850aa1c91",
+    "catalogId": "pebble-straight-stare",
+    "driveId": "1Q70Fx4ZYQfoH--OzOpwsaUNnjQ_XRct1",
+    "path": "tools-home/tools/jokelets/media/GS_Jokelet_Pebble_Straight_Stare_v01.mp4",
+    "sha256": "8d85a1af2e7885e26d54476a5d888f01f108eae22abbff84e02fc2a7efd8647e",
+    "status": "existing_approved_source_verified_unchanged"
+  },
+  "sourceCommit": "55ff5a60466047dc52b6c2baf77605db065c8938"
+}
