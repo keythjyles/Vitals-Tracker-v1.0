@@ -1,1 +1,65 @@
-{"attempt":1,"automaticRetries":0,"jobId":"JL-20261024-FARMLAND-VOICE-02","original":{"bytes":159285,"format":"audio/mpeg","path":"tools-home/tools/jokelab/voice-originals/JL-20261024-FARMLAND-VOICE-02.mp3","sha256":"fad588ab0da045970a99136569cc2c001afa1dc0c905edf45189194c0e63994b"},"request":{"approved":true,"approvedReferenceId":"pqILh6dY0D1CO7Ckhplb","automaticRetries":0,"budget":{"approvalEvidence":"User reaffirmed 'I asked for a jokelet' immediately after the explicit one-take maximum150existingcredits/no-retries proposal. Current instruction authorizes completing the requested jokelet within that presented voice ceiling; no automatic retries or purchases.","approved":true,"expiresAt":"2026-10-25T14:10:00Z","maxCharacters":133,"maxCredits":150,"maxRequests":1},"canonicalId":"dad-01390bc83ffc16630ae3d503","duplicateReview":{"cleared":true,"evidence":"Versioned correction of the same reserved farmland joke; predecessor completed and user-Rejected. Preserve its48-credit cost and originals; no new joke identity or duplicate-clearance claim."},"jobId":"JL-20261024-FARMLAND-VOICE-02","modelId":"eleven_v4","operation":"voice_generate","outputFormat":"mp3_44100_192","replacesJobId":"JL-20261023-FARMLAND-VOICE-01","schema":"GS-BoundedVoiceRequest-1","script":"[deadpan joke delivery] I tried taking some high resolution photos of local farmland.\n\n[long pause] They all turned out a bit GRAINY.","voiceId":"RBNpu6jPzAoaxZKl9noJ","voiceSettings":{"stability":0.5}},"requestSha256":"16229155181f753dbb70ad4ec77822fc4ace477dc96f7faba413145a559cf51a","reservedCredits":150,"runId":"40101071348","schema":"GS-VoiceJob-2","sourceCommit":"ceab78ef46086299c282820c3d9d422e38764638","status":"completed","usage":{"actualCredits":59,"budgetExceeded":false,"costStatus":"provider_reported","historyItemId":"WwqA33ZDoHL6XPiRBSDk","modelCostFactor":1,"requestId":"GTO9XBfPPs08HFrdIgM2"}}
+{
+  "attempt": 1,
+  "automaticRetries": 0,
+  "jobId": "JL-20261024-FARMLAND-VOICE-02",
+  "original": {
+    "bytes": 159285,
+    "format": "audio/mpeg",
+    "path": "tools-home/tools/jokelab/voice-originals/JL-20261024-FARMLAND-VOICE-02.mp3",
+    "sha256": "fad588ab0da045970a99136569cc2c001afa1dc0c905edf45189194c0e63994b"
+  },
+  "request": {
+    "approved": true,
+    "approvedReferenceId": "pqILh6dY0D1CO7Ckhplb",
+    "automaticRetries": 0,
+    "budget": {
+      "approvalEvidence": "User reaffirmed 'I asked for a jokelet' immediately after the explicit one-take maximum150existingcredits/no-retries proposal. Current instruction authorizes completing the requested jokelet within that presented voice ceiling; no automatic retries or purchases.",
+      "approved": true,
+      "expiresAt": "2026-10-25T14:10:00Z",
+      "maxCharacters": 133,
+      "maxCredits": 150,
+      "maxRequests": 1
+    },
+    "canonicalId": "dad-01390bc83ffc16630ae3d503",
+    "duplicateReview": {
+      "cleared": true,
+      "evidence": "Versioned correction of the same reserved farmland joke; predecessor completed and user-Rejected. Preserve its48-credit cost and originals; no new joke identity or duplicate-clearance claim."
+    },
+    "jobId": "JL-20261024-FARMLAND-VOICE-02",
+    "modelId": "eleven_v4",
+    "operation": "voice_generate",
+    "outputFormat": "mp3_44100_192",
+    "replacesJobId": "JL-20261023-FARMLAND-VOICE-01",
+    "schema": "GS-BoundedVoiceRequest-1",
+    "script": "[deadpan joke delivery] I tried taking some high resolution photos of local farmland.\n\n[long pause] They all turned out a bit GRAINY.",
+    "voiceId": "RBNpu6jPzAoaxZKl9noJ",
+    "voiceSettings": {
+      "stability": 0.5
+    }
+  },
+  "requestSha256": "16229155181f753dbb70ad4ec77822fc4ace477dc96f7faba413145a559cf51a",
+  "reservedCredits": 150,
+  "runId": "40101071348",
+  "schema": "GS-VoiceJob-2",
+  "sourceCommit": "ceab78ef46086299c282820c3d9d422e38764638",
+  "status": "completed",
+  "usage": {
+    "actualCredits": 59,
+    "budgetExceeded": false,
+    "costStatus": "provider_reported",
+    "historyItemId": "WwqA33ZDoHL6XPiRBSDk",
+    "modelCostFactor": 1,
+    "requestId": "GTO9XBfPPs08HFrdIgM2"
+  },
+  "wav": {
+    "bytes": 578670,
+    "channels": 1,
+    "conversion": "ffmpeg decode to PCM16; no gain, speed, trim or resampling options",
+    "duration": 6.56,
+    "encoding": "pcm_s16le",
+    "parentSha256": "fad588ab0da045970a99136569cc2c001afa1dc0c905edf45189194c0e63994b",
+    "path": "tools-home/tools/jokelab/voice-wav/JL-20261024-FARMLAND-VOICE-02.wav",
+    "sampleRate": 44100,
+    "sha256": "a35ef0264183dd9b7d69ee9f82b91ae5671682a5d0e9940c97610d895e386695"
+  }
+}
