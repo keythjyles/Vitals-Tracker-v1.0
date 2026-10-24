@@ -1,0 +1,8 @@
+{
+  "schema": "GS-ReadOnlyPreflightRequest-1",
+  "jobId": "JL-20261023-AUTH-01",
+  "operation": "authenticated_voice_discovery",
+  "paidRequests": 0,
+  "automaticRetries": 0,
+  "reason": "Verify AI identity and ElevenLabs configured credentials without exposing private keys or generating speech."
+}
