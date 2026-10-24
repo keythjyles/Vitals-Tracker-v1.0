@@ -1,10 +1,10 @@
 {
   "schema": "GS-MediaArchiveRequest-1",
-  "jobId": "JL-20261024-FARMLAND-STORE-01",
+  "jobId": "JL-20261024-BOOKMARK-STORE-01",
   "operation": "preserve_production_artifact",
-  "sourceUrl": "https://resource2.heygen.ai/video/34ec427d13f74516b0e5f258fdc52dce/original.mp4",
-  "sourceAssetId": "34ec427d13f74516b0e5f258fdc52dce",
-  "path": "tools-home/tools/jokelets/media/GS_Jokelet_Farmland_Grainy_v02.mp4",
-  "bytes": 7938684,
-  "sha256": "4406bebc0462331cc3c4495e8e0e220cc35e0bb524e1879af6b1d75cc81092ab"
+  "sourceUrl": "https://resource2.heygen.ai/video/df7cd754954c42aba9d28e28df8e022d/original.mp4",
+  "sourceAssetId": "df7cd754954c42aba9d28e28df8e022d",
+  "path": "tools-home/tools/jokelets/media/GS_Jokelet_Bookmark_Brian_v01.mp4",
+  "bytes": 7333353,
+  "sha256": "fdad52d0849fd903719dde9bf1d48dfbea285f72433c7cc927a422d296ca029c"
 }
