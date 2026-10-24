@@ -1,3 +1,7 @@
+# Live AI access verified
+
+Read-only ElevenLabs API authentication PASSED through the connected AI workflow: run40044909488. GS voice RBNpu6jPzAoaxZKl9noJ returned. No generation, private-key copying or browser login. Evidence: runs/JL-20261023-AUTH-01.json. The next engineering task is persistent shared budget/job/media storage and bounded paid execution; do not claim paid AI production ready.
+
 # Current checkpoint — October 23, 2026
 
 Performance editor deployed and UI verified; see runs/JL-20261023-EDITOR-VERIFICATION.json. Robots/guacamole is already produced, ready for final review, not the next unproduced joke. The earlier browser-login and pending-script text below is historical.

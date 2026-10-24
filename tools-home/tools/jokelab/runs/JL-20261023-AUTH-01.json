@@ -1,0 +1,57 @@
+{
+  "schema": "GS-AIAuthVerification-1",
+  "runId": "JL-20261023-AUTH-01",
+  "implementationCommit": "9953051d615244f734b550ae5201930352e02e6d",
+  "requestCommit": "4ae955f9afdc9f9801a7d6cb8cd6849cb91257f6",
+  "render": {
+    "deployId": "dep-dbdvlajm8hqs73d21750",
+    "status": "live",
+    "finishedAt": "2026-10-24T00:25:12.527983Z"
+  },
+  "github": {
+    "runId": 40044909488,
+    "jobId": 120724297311,
+    "conclusion": "success",
+    "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/40044909488",
+    "artifactId": 12540044122
+  },
+  "proof": {
+    "schema": "GS-AIPreflightResult-1",
+    "commit": "4ae955f9afdc9f9801a7d6cb8cd6849cb91257f6",
+    "runId": "40044909488",
+    "paidRequests": 0,
+    "preflight": {
+      "schema": "GS-AIPreflight-1",
+      "identity": {
+        "repository": "keythjyles/Vitals-Tracker-v1.0",
+        "commit": "4ae955f9afdc9f9801a7d6cb8cd6849cb91257f6",
+        "runId": "40044909488"
+      },
+      "authenticatedVoiceLookup": true,
+      "paidGeneration": false,
+      "voices": [
+        {
+          "voiceId": "RBNpu6jPzAoaxZKl9noJ",
+          "name": "Grill Sargent Jokes",
+          "category": "generated"
+        }
+      ],
+      "next": "Paid AI execution remains disabled; establish durable spending and job storage first."
+    }
+  },
+  "tests": {
+    "passed": 6,
+    "failed": 0,
+    "unauthenticatedEndpoint": 401,
+    "renderErrorLogs": 0
+  },
+  "credentials": "Never retrieved or copied. Existing Render secrets used only by server; short-lived GitHub identity minted inside workflow, masked and not saved.",
+  "paidGenerationRequests": 0,
+  "remaining": [
+    "TTS endpoint permission and paid generation not verified",
+    "AI identity grants read-only preflight only",
+    "Process-level request cap remains non-durable",
+    "Persistent shared job, budget, media storage and bounded AI generation remain unimplemented",
+    "Video synchronization for inserted silence not verified"
+  ]
+}
