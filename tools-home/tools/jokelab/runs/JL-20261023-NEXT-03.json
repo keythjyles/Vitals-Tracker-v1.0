@@ -1,7 +1,7 @@
 {
   "schema": "JokeLabRun-1.0",
   "runId": "JL-20261023-NEXT-03",
-  "state": "voice_prepared_awaiting_specific_spending_authorization",
+  "state": "voice_authorized_dispatching",
   "canonicalJokeId": "dad-01390bc83ffc16630ae3d503",
   "sourceLibraryPosition": 6,
   "source": "tools-home/data/jokelab/library.json",
@@ -17,14 +17,17 @@
     }
   },
   "budget": {
-    "approved": false,
+    "approved": true,
     "proposedMaxExistingCredits": 150,
     "quotedExpectedCredits": 108,
     "quoteEvidence": "results/JL-20261023-VOICE-GATE-01.json",
     "requests": 1,
     "automaticRetries": 0,
     "purchaseOrUpgrade": false,
-    "heygenAuthorized": false
+    "heygenAuthorized": false,
+    "maxExistingCredits": 150,
+    "approvalEvidence": "User replied 'Ok' to one request for the108-character farmland script, maximum150existing ElevenLabs credits, no retries.",
+    "expiresAt": "2026-10-25T01:25:21Z"
   },
   "duplicateReview": {
     "status": "No concrete matching production identified in checked sources; not a certified exhaustive archive audit",
@@ -71,5 +74,6 @@
     "remaining": "Unnamed historical render content not exhaustively reconciled. Do not inherit another joke's duplicate-risk exception."
   },
   "providerGenerationRequests": 0,
-  "next": "On explicit user authorization, record approval and expiry, clear duplicate review for the bounded scope, create a unique approved one-attempt voice job and use the signed workflow. Preserve original MP3 and PCM WAV; stop before HeyGen until its own approval/cap exists."
+  "next": "Await this workflow and inspect durable receipt; do not dispatch another request. Save actual cost and original MP3/WAV. HeyGen is not yet authorized.",
+  "voiceJobId": "JL-20261023-FARMLAND-VOICE-01"
 }

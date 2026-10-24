@@ -1,8 +1,8 @@
 {
   "schema": "GS-BoundedVoiceRequest-1",
-  "jobId": "JL-20261023-VOICE-GATE-01",
+  "jobId": "JL-20261023-FARMLAND-VOICE-01",
   "operation": "voice_generate",
-  "executionMode": "gate_rehearsal",
+  "executionMode": "generate",
   "canonicalId": "dad-01390bc83ffc16630ae3d503",
   "script": "[joking] I tried taking some high resolution photos of local farmland, but they all turned out a bit GRAINY.",
   "voiceId": "RBNpu6jPzAoaxZKl9noJ",
@@ -11,18 +11,19 @@
     "stability": 0.5,
     "similarity_boost": 0.75
   },
-  "approved": false,
+  "approved": true,
   "budget": {
-    "approved": false,
-    "approvalEvidence": "",
+    "approved": true,
+    "approvalEvidence": "User replied 'Ok' to one request for the108-character farmland script, maximum150existing ElevenLabs credits, no retries.",
     "maxRequests": 1,
     "maxCharacters": 108,
     "maxCredits": 150,
-    "expiresAt": "2026-10-26T04:59:59Z"
+    "expiresAt": "2026-10-25T01:25:21Z"
   },
   "automaticRetries": 0,
   "duplicateReview": {
-    "cleared": false,
-    "evidence": "Catalog and ledger checked; no named Drive/HeyGen match. Unnamed archive gap remains."
-  }
+    "cleared": true,
+    "evidence": "Current ledger and canonical claim checked; no existing job or produced group. Known D1/D3 content and all five D2 caption topics differ; no concrete match in catalog, Drive text or HeyGen title searches. Unnamed archive gap remains; not certified exhaustive."
+  },
+  "invocation": "approved-first-take"
 }
