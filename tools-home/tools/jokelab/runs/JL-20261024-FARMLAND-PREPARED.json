@@ -1,0 +1,40 @@
+{
+  "schema": "GS-JokeletPreparation-1",
+  "runId": "JL-20261023-NEXT-03",
+  "canonicalJokeId": "dad-01390bc83ffc16630ae3d503",
+  "state": "voice_reference_reconciliation",
+  "cuedScript": "[deadpan joke delivery] I tried taking some high resolution photos of local farmland.\n\n[long pause] They all turned out a bit GRAINY.",
+  "voice": {
+    "referenceTakeId": "pqILh6dY0D1CO7Ckhplb",
+    "settingsPolicy": "Match confirmed provider history; do not substitute models",
+    "approval": "No replacement paid request authorized yet"
+  },
+  "picture": {
+    "lookId": "85cc768c260a40359212b92f738de459",
+    "engine": "avatar_iv",
+    "expressiveness": "low",
+    "resolution": "1080p",
+    "aspectRatio": "9:16"
+  },
+  "reaction": {
+    "source": "tools-home/tools/jokelets/media/reaction-side-eye-silent-v02.mp4",
+    "sha256": "912c633e9d7710ba5eef99486e2415f852f698231462717541a8dbdb8d66ee71",
+    "duration": 3.6,
+    "frames": 90,
+    "trim": "full source",
+    "audio": "no audio stream",
+    "description": "Side glance resolving to front stare"
+  },
+  "assembly": {
+    "fps": 25,
+    "size": [
+      1080,
+      1920
+    ],
+    "stabilizeBeforeMotion": true,
+    "keepOriginals": true,
+    "videoAudioInput": "PCM WAV",
+    "publicationLayers": []
+  },
+  "review": "New voice must pass user listening review before animation. Clean jokelet is not a finished release."
+}
