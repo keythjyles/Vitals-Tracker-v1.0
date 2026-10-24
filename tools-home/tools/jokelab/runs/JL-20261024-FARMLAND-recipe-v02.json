@@ -1,0 +1,162 @@
+{
+  "schema": "GS-JokeletRecipe-1",
+  "id": "farmland-grainy",
+  "version": "v02",
+  "runId": "JL-20261023-NEXT-03",
+  "canonicalJokeId": "dad-01390bc83ffc16630ae3d503",
+  "state": "produced_ready_for_review",
+  "cuedScript": "[deadpan joke delivery] I tried taking some high resolution photos of local farmland.\n\n[long pause] They all turned out a bit GRAINY.",
+  "providerSettings": {
+    "voiceId": "RBNpu6jPzAoaxZKl9noJ",
+    "model": "eleven_v4",
+    "outputFormat": "mp3_44100_192",
+    "voiceSettings": {
+      "stability": 0.5
+    },
+    "approvedReferenceId": "pqILh6dY0D1CO7Ckhplb"
+  },
+  "voice": {
+    "takeId": "WwqA33ZDoHL6XPiRBSDk",
+    "requestId": "GTO9XBfPPs08HFrdIgM2",
+    "jobId": "JL-20261024-FARMLAND-VOICE-02",
+    "original": {
+      "bytes": 159285,
+      "format": "audio/mpeg",
+      "path": "tools-home/tools/jokelab/voice-originals/JL-20261024-FARMLAND-VOICE-02.mp3",
+      "sha256": "fad588ab0da045970a99136569cc2c001afa1dc0c905edf45189194c0e63994b",
+      "driveId": "1NT8p5HuwuzoFYgK0ckRt6eAejB6kFzEI"
+    },
+    "wav": {
+      "bytes": 578670,
+      "channels": 1,
+      "conversion": "ffmpeg decode to PCM16; no gain, speed, trim or resampling options",
+      "duration": 6.56,
+      "encoding": "pcm_s16le",
+      "parentSha256": "fad588ab0da045970a99136569cc2c001afa1dc0c905edf45189194c0e63994b",
+      "path": "tools-home/tools/jokelab/voice-wav/JL-20261024-FARMLAND-VOICE-02.wav",
+      "sampleRate": 44100,
+      "sha256": "a35ef0264183dd9b7d69ee9f82b91ae5671682a5d0e9940c97610d895e386695",
+      "driveId": "1o6ziF7iDVrd3hJa44_ELvw3atTOowh1d"
+    },
+    "selection": "Agent selected under user's instruction to complete the jokelet; no AI auditory approval claimed",
+    "userApproved": false
+  },
+  "performance": {
+    "videoId": "3ff1166a9548ae37d961b650e6723042",
+    "originalDriveId": "1ISPSwxhVHj7e398y10JhbrAvcsU4z71Z",
+    "sha256": "ca1cfe2b31ce44da93fb5bcd0a72e793087b95ac47a7f771b1b12445b19d1d36",
+    "bytes": 7229547,
+    "duration": 6.56,
+    "frames": 164,
+    "avatarId": "85cc768c260a40359212b92f738de459",
+    "audioAssetId": "c5ba89988a8f464cba4bc791436768df",
+    "engine": {
+      "type": "avatar_iv"
+    },
+    "expressiveness": "low",
+    "aspectRatio": "9:16",
+    "resolution": "1080p",
+    "fit": "contain",
+    "outputFormat": "mp4",
+    "title": "GS Farmland Grainy v02 — clean joke performance"
+  },
+  "stabilization": {
+    "method": "Three fixed background ROIs, median normalized cross-correlation, integer translation with replicated edges; no resizing",
+    "referenceFrame": 0,
+    "maxCorrectionPixels": {
+      "x": 1,
+      "y": 1
+    },
+    "offsets": "tools-home/tools/jokelab/runs/JL-20261024-FARMLAND-anchorlock-offsets-v02.json",
+    "script": "tools-home/tools/jokelab/runs/JL-20261024-FARMLAND-anchorlock-v02.py",
+    "deliberateMotionAdded": false
+  },
+  "reaction": {
+    "id": "reaction-side-eye",
+    "sourcePath": "tools-home/tools/jokelets/media/reaction-side-eye-silent-v02.mp4",
+    "sha256": "912c633e9d7710ba5eef99486e2415f852f698231462717541a8dbdb8d66ee71",
+    "start": 6.56,
+    "sourceIn": 0,
+    "sourceOutExclusive": 3.6,
+    "frames": 90,
+    "duration": 3.6,
+    "audio": "No audio stream; full source retained",
+    "approvalEvidence": "User approved frames0–90 as silent side glance resolving to front stare"
+  },
+  "timeline": [
+    {
+      "kind": "performance",
+      "startFrame": 0,
+      "frames": 164
+    },
+    {
+      "kind": "silent-reaction",
+      "startFrame": 164,
+      "frames": 90
+    }
+  ],
+  "audio": {
+    "source": "Original PCM WAV",
+    "gainDb": 0,
+    "rate": 1,
+    "padSilenceTo": 10.16,
+    "output": "AAC192kbps mono48000Hz",
+    "noAddedVocalization": true
+  },
+  "layers": {
+    "ambient": [],
+    "music": [],
+    "soundEffects": [],
+    "captions": [],
+    "outro": [],
+    "publicationGraphics": []
+  },
+  "export": {
+    "fps": 25,
+    "frames": 254,
+    "width": 1080,
+    "height": 1920,
+    "duration": 10.16,
+    "video": "libx264 fast CRF20 yuv420p CFR25 faststart"
+  },
+  "assemblyCommand": "ffmpeg -i GS_Farmland_AnchorLock_v02.mp4 -i reaction-side-eye-silent-v02.mp4 -i GS_Farmland_Voice_v02_PCM.wav -filter_complex '[0:v]setpts=PTS-STARTPTS,setsar=1[v0];[1:v]setpts=PTS-STARTPTS,setsar=1[v1];[v0][v1]concat=n=2:v=1:a=0[v];[2:a]apad=whole_dur=10.16,atrim=duration=10.16,aresample=48000[a]' -map '[v]' -map '[a]' -c:v libx264 -preset fast -crf 20 -pix_fmt yuv420p -r 25 -fps_mode cfr -frames:v 254 -c:a aac -b:a 192k -ac 1 -movflags +faststart GS_Jokelet_Farmland_Grainy_v02.mp4",
+  "output": {
+    "path": "tools-home/tools/jokelets/media/GS_Jokelet_Farmland_Grainy_v02.mp4",
+    "bytes": 7938684,
+    "sha256": "4406bebc0462331cc3c4495e8e0e220cc35e0bb524e1879af6b1d75cc81092ab",
+    "driveFileId": "19U4ptkhcxAj67U4y6W8JBH7PHbG1KRG8",
+    "libraryFileId": "libfile_f3a9281ac59481918a90f1bdf801dbc3"
+  },
+  "costs": {
+    "replacementVoiceCredits": 59,
+    "rejectedVoiceCredits": 48,
+    "cumulativeVoiceCredits": 107,
+    "heygenObservedCreditDelta": 3,
+    "heygenCostQualification": "Account balance difference before/after single render, not an itemized transaction receipt",
+    "voiceRequests": 2,
+    "videoRequests": 1,
+    "automaticRetries": 0,
+    "purchases": 0
+  },
+  "verification": {
+    "fullFileDecoded": true,
+    "frames": 254,
+    "fps": 25,
+    "reactionFrames": 90,
+    "reactionAudioAfter6_60secondsMaxDb": -91,
+    "representativeFramesInspected": true,
+    "aiListeningVerified": false,
+    "wholeOutputUserApproval": "pending",
+    "restoreAndRebuildTest": "not performed"
+  },
+  "publication": {
+    "stage": "clean-jokelet",
+    "ready": false,
+    "note": "Reusable production asset; not a finished release and not scheduled."
+  },
+  "sourceGaps": [
+    "Legacy reaction original master ID remains unresolved; approved working bytes and exact hash retained.",
+    "Full independent restore/rebuild and user listening review remain pending."
+  ],
+  "recipeDriveFileId": "1T8aRXnFJcUNOqSP2QuZHMamsKSn_2TpP"
+}

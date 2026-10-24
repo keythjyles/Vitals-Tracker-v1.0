@@ -591,6 +591,59 @@
         "ready": false,
         "note": "Production asset. Must complete ambient/effects/captions and final export review before publication."
       }
+    },
+    {
+      "id": "farmland-grainy",
+      "family": "farmland-grainy",
+      "number": 19,
+      "title": "Farmland · Grainy",
+      "reaction": "Side glance to front stare · full3.60s",
+      "category": "Dad jokes",
+      "tags": [
+        "farmland",
+        "grainy",
+        "photography"
+      ],
+      "text": "I tried taking some high resolution photos of local farmland. They all turned out a bit GRAINY.",
+      "status": "Ready",
+      "driveId": "19U4ptkhcxAj67U4y6W8JBH7PHbG1KRG8",
+      "src": "media/GS_Jokelet_Farmland_Grainy_v02.mp4",
+      "poster": "media/GS_Jokelet_Farmland_Grainy_v02.jpg",
+      "duration": 10.16,
+      "fps": 25,
+      "frames": 254,
+      "width": 1080,
+      "height": 1920,
+      "version": "v02",
+      "sha256": "4406bebc0462331cc3c4495e8e0e220cc35e0bb524e1879af6b1d75cc81092ab",
+      "canonicalJokeId": "dad-01390bc83ffc16630ae3d503",
+      "automationReview": {
+        "status": "Review",
+        "audio": "voice-only",
+        "burnedCaptions": false,
+        "ambient": false,
+        "music": false,
+        "soundEffects": false,
+        "note": "Technically verified clean production asset; whole-jokelet user review pending."
+      },
+      "sourceTrail": {
+        "cuedScript": "[deadpan joke delivery] I tried taking some high resolution photos of local farmland.\n\n[long pause] They all turned out a bit GRAINY.",
+        "elevenLabsTake": "WwqA33ZDoHL6XPiRBSDk",
+        "voiceFile": "tools-home/tools/jokelab/voice-wav/JL-20261024-FARMLAND-VOICE-02.wav; Drive 1o6ziF7iDVrd3hJa44_ELvw3atTOowh1d",
+        "heygenRender": "3ff1166a9548ae37d961b650e6723042; Drive 1ISPSwxhVHj7e398y10JhbrAvcsU4z71Z",
+        "rebuildProject": "tools-home/tools/jokelab/runs/JL-20261024-FARMLAND-recipe-v02.json",
+        "gaps": "Legacy reaction original master ID remains unresolved; approved working bytes and exact hash retained. Full independent restore/rebuild and user listening review remain pending."
+      },
+      "usage": {
+        "status": "No recorded publication",
+        "checkedDate": "2026-10-24",
+        "scope": "New clean production asset; never scheduled."
+      },
+      "publication": {
+        "stage": "clean-jokelet",
+        "ready": false,
+        "note": "Reusable production asset; not a finished release and not scheduled."
+      }
     }
   ],
   "assets": [

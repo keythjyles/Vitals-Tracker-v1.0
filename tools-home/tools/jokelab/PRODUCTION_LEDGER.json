@@ -567,6 +567,30 @@
           }
         }
       ]
+    },
+    {
+      "canonicalId": "dad-01390bc83ffc16630ae3d503",
+      "title": "Farmland · Grainy",
+      "sourceJokeIds": [
+        "dad-01390bc83ffc16630ae3d503"
+      ],
+      "state": "existing_jokelet_files",
+      "productionAction": "Review/reuse existing output; never regenerate as a new joke.",
+      "assets": [
+        {
+          "id": "farmland-grainy",
+          "src": "media/GS_Jokelet_Farmland_Grainy_v02.mp4",
+          "sha256": "4406bebc0462331cc3c4495e8e0e220cc35e0bb524e1879af6b1d75cc81092ab",
+          "status": "Ready",
+          "version": "v02",
+          "rebuildRecipe": "tools-home/tools/jokelab/runs/JL-20261024-FARMLAND-recipe-v02.json",
+          "automationReview": {
+            "status": "Review",
+            "audio": "voice-only",
+            "note": "Whole-output user approval pending; not a finished release."
+          }
+        }
+      ]
     }
   ],
   "sourceBacklog": [
@@ -654,7 +678,7 @@
     {
       "sourceJokeId": "dad-01390bc83ffc16630ae3d503",
       "canonicalId": "dad-01390bc83ffc16630ae3d503",
-      "state": "video_rendering",
+      "state": "jokelet_produced_ready_for_review",
       "runId": "JL-20261023-NEXT-03",
       "voiceJobId": "JL-20261024-FARMLAND-VOICE-02"
     },
@@ -5218,7 +5242,7 @@
     {
       "runId": "JL-20261023-NEXT-03",
       "canonicalId": "dad-01390bc83ffc16630ae3d503",
-      "state": "video_rendering",
+      "state": "jokelet_produced_ready_for_review",
       "voiceJobId": "JL-20261024-FARMLAND-VOICE-02",
       "providerGenerationRequests": {
         "elevenLabs": 2,
@@ -5230,7 +5254,12 @@
       "reservationScope": "Both voice attempts preserved; second voice and one GS4 render submitted. Reuse returned artifacts; no retries.",
       "reviewStatus": "pending_final_review",
       "rejectedVoiceJobId": "JL-20261023-FARMLAND-VOICE-01",
-      "videoId": "3ff1166a9548ae37d961b650e6723042"
+      "videoId": "3ff1166a9548ae37d961b650e6723042",
+      "outputId": "farmland-grainy",
+      "outputDriveId": "19U4ptkhcxAj67U4y6W8JBH7PHbG1KRG8",
+      "outputSha256": "4406bebc0462331cc3c4495e8e0e220cc35e0bb524e1879af6b1d75cc81092ab",
+      "rebuildRecipe": "tools-home/tools/jokelab/runs/JL-20261024-FARMLAND-recipe-v02.json",
+      "heygenObservedCreditDelta": 3
     }
   ]
 }
