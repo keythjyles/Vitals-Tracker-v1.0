@@ -8,8 +8,12 @@ test('reference audit is GET only, pinned and strips private history fields',asy
  assert.equal(calls.length,2);assert.ok(calls.every(c=>!c.options.method));assert.equal(r.history.modelId,'eleven_v4');assert.equal(r.models.length,1);
  assert.ok(!JSON.stringify(r).includes('test-secret'));assert.ok(!JSON.stringify(r).includes('99999'));assert.ok(!JSON.stringify(r).includes('private'));
 });
-test('wrong voice or item and upstream failure stop without any generation',async()=>{
- for(const bad of [{ok:false,status:403},{ok:true,json:async()=>({history_item_id:'wrong',voice_id:'other'})}]){
+test('upstream failure stops without any generation',async()=>{
+ for(const bad of [{ok:false,status:403}]){
   await assert.rejects(approvedVoiceReference('test',async url=>url.endsWith('/models')?{ok:true,json:async()=>[]}:bad));
  }
+});
+test('mismatched reference retains safe diagnostic metadata without certifying identity',async()=>{
+ const r=await approvedVoiceReference('test',async url=>({ok:true,json:async()=>url.endsWith('/models')?[]:{history_item_id:'wrong',voice_id:'other',model_id:'eleven_v4'}}));
+ assert.equal(r.identityMatches,false);assert.equal(r.history.voiceId,'other');
 });
