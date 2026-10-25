@@ -17,7 +17,14 @@ Finished video -> automatic transfer -> permanent Dropbox asset -> stable Androi
 - [ ] **10 Android end-to-end acceptance.** Test with TM-002 and a subsequent new asset, no manual download/upload.
 - [ ] **11 Document and release.** Update AGENTS.md, operator/runbook, then enable tools-page link only after pass.
 
-Step 02 design evidence: [PREVIEWLOCK_TRANSFER_CONTRACT.md](PREVIEWLOCK_TRANSFER_CONTRACT.md), commit d1dba0a3cf72c89825aa541daf01573ecc46a107. This is design approval only; no actual transfer, Render authorization, or Dropbox OAuth has been implemented.\n\n## TM-002 test identity
+Step 02 design evidence: [PREVIEWLOCK_TRANSFER_CONTRACT.md](PREVIEWLOCK_TRANSFER_CONTRACT.md), commit d1dba0a3cf72c89825aa541daf01573ecc46a107. This is design approval only; no actual transfer, Render authorization, or Dropbox OAuth has been implemented.\n\n## Step 03 deployment evidence (2026-10-25)
+- Created isolated source at `tools-home/services/previewlock-api/`: `package.json`, `server.js`, `README.md`. OAuth callback path `/oauth/dropbox/callback` exists but intentionally refuses token exchange until secure durable token storage is ready.
+- Created Render service `gs-previewlock-api`, ID `srv-dberk21srm7s73d4kqr0`, URL `https://gs-previewlock-api.onrender.com`, dashboard `https://dashboard.render.com/web/srv-dberk21srm7s73d4kqr0`.
+- Initial deploy `dep-dberk29srm7s73d4ks6g` was **build_in_progress** when checked; do not claim live or OAuth operational yet.
+- Expected redirect URI once deployment is verified: `https://gs-previewlock-api.onrender.com/oauth/dropbox/callback`. Do not authorize OAuth or share credentials until token store and secure setup are implemented.
+- Step 03 remains **IN PROGRESS**. No Dropbox credentials configured and no automatic video transfer tested.
+
+## TM-002 test identity
 Approved visual asset `GS_TM002_POINT_LAUGH_IN_L_OUT_R_POC_v01.mp4`, approximately 2.6 MB. User manually downloaded and reuploaded as `17078.mp4`; this does NOT constitute automated delivery. Gemini original `17075.mp4` is separate. No Dropbox upload of approved TM-002 has been verified.
 
 ## Change control
