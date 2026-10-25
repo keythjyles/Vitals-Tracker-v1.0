@@ -67,6 +67,19 @@ const server=http.createServer(async(req,res)=>{
     const d=await r.json();const m=await metadata(d.id,t);return send(res,201,{id:d.id,path:d.path_display,size:m.size,rev:m.rev,sha256:createHash('sha256').update(data).digest('hex'),dropbox_content_hash:m.content_hash});
    }
 
+   if(req.method==='POST'&&u.pathname==='/api/archive'){
+    let raw='';for await(const c of req){raw+=c.toString();if(raw.length>4096)return send(res,413,{error:'request_too_large'})}
+    let data;try{data=JSON.parse(raw)}catch{return send(res,400,{error:'invalid_json'})}
+    const from=String(data.path||'');
+    if(!from.startsWith('/Grill Sergeant/')||!from.toLowerCase().endsWith('.mp4')||from.includes('..')||from.startsWith('/Grill Sergeant/PreviewLock Archive/'))return send(res,400,{error:'invalid_source'});
+    const folder='/Grill Sergeant/PreviewLock Archive';
+    const mk=await fetch('https://api.dropboxapi.com/2/files/create_folder_v2',{method:'POST',headers:{authorization:'Bearer '+t,'content-type':'application/json'},body:JSON.stringify({path:folder,autorename:false})});
+    if(!mk.ok){const detail=await mk.text();if(!detail.includes('conflict'))return send(res,502,{error:'archive_folder_failed',detail:detail.slice(0,300)})}
+    const name=from.split('/').pop(),destination=folder+'/'+Date.now()+'_'+name;
+    const moved=await fetch('https://api.dropboxapi.com/2/files/move_v2',{method:'POST',headers:{authorization:'Bearer '+t,'content-type':'application/json'},body:JSON.stringify({from_path:from,to_path:destination,autorename:false})});
+    if(!moved.ok)return send(res,502,{error:'archive_failed',detail:(await moved.text()).slice(0,400)});
+    const result=await moved.json();return send(res,200,{archived:true,path:result.metadata.path_display});
+   }
    if(req.method==='POST'&&u.pathname==='/api/duplicate'){
     let raw='';for await(const c of req){raw+=c.toString();if(raw.length>4096)return send(res,413,{error:'request_too_large'})}
     let data;try{data=JSON.parse(raw)}catch{return send(res,400,{error:'invalid_json'})}
