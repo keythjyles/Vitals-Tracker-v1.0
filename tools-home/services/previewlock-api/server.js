@@ -1,33 +1,63 @@
-// PreviewLock isolated backend — OAuth scaffolding only; no upload endpoints yet.
-// No Dropbox secrets, refresh tokens, or user media are logged.
+// GS PreviewLock — practical Dropbox upload and playback service.
 import http from 'node:http';
 import {randomBytes,createHash,timingSafeEqual} from 'node:crypto';
-const port=Number(process.env.PORT||3101);
-const base=process.env.PUBLIC_BASE_URL||'';
-const clientId=process.env.DROPBOX_APP_KEY||'';
-const clientSecret=process.env.DROPBOX_APP_SECRET||'';
-const adminKey=process.env.PREVIEWLOCK_SETUP_KEY||'';
-const callbackPath='/oauth/dropbox/callback';
-const stateStore=new Map();
-function send(res,status,data){res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','referrer-policy':'no-referrer'});res.end(JSON.stringify(data));}
-function secureEquals(a,b){if(!a||!b)return false;const x=Buffer.from(a),y=Buffer.from(b);return x.length===y.length&&timingSafeEqual(x,y);}
-function origin(req){if(!base)return '';try{const u=new URL(base);if(u.protocol!=='https:')return '';return u.origin;}catch{return '';}}
+const PORT=Number(process.env.PORT||3101);
+const BASE='https://gs-previewlock-api.onrender.com';
+const KEY=process.env.DROPBOX_APP_KEY||'';
+const SECRET=process.env.DROPBOX_APP_SECRET||'';
+const REFRESH=process.env.DROPBOX_REFRESH_TOKEN||'';
+const ADMIN=process.env.PREVIEWLOCK_SETUP_KEY||'';
+const states=new Map();
+const send=(r,s,o)=>{r.writeHead(s,{'content-type':'application/json','cache-control':'no-store','access-control-allow-origin':'*'});r.end(JSON.stringify(o));};
+const eq=(a,b)=>{if(!a||!b)return false;let x=Buffer.from(a),y=Buffer.from(b);return x.length===y.length&&timingSafeEqual(x,y)};
+async function token(refresh=REFRESH){
+ const body=new URLSearchParams({grant_type:'refresh_token',refresh_token:refresh,client_id:KEY,client_secret:SECRET});
+ const r=await fetch('https://api.dropbox.com/oauth2/token',{method:'POST',body});if(!r.ok)throw Error('Dropbox authorization failed');return (await r.json()).access_token;
+}
+async function metadata(path,t){const r=await fetch('https://api.dropboxapi.com/2/files/get_metadata',{method:'POST',headers:{authorization:'Bearer '+t,'content-type':'application/json'},body:JSON.stringify({path})});if(!r.ok)throw Error('Dropbox metadata failed');return r.json()}
 const server=http.createServer(async(req,res)=>{
-  const u=new URL(req.url||'/', 'http://localhost');
-  if(req.method==='GET'&&(u.pathname==='/'||u.pathname==='/health'))return send(res,200,{service:'previewlock-api',status:'ok',phase:'oauth-setup',dropboxAppConfigured:Boolean(clientId&&clientSecret),oauthCallbackConfigured:Boolean(origin(req)),uploadEnabled:false});
-  if(req.method==='GET'&&u.pathname==='/oauth/dropbox/start'){
-    if(!secureEquals(req.headers['x-previewlock-setup-key'],adminKey))return send(res,401,{error:'unauthorized'});
-    if(!clientId||!clientSecret||!origin(req))return send(res,503,{error:'oauth_not_configured'});
-    const state=randomBytes(32).toString('hex');stateStore.set(createHash('sha256').update(state).digest('hex'),Date.now()+600000);
-    const q=new URLSearchParams({client_id:clientId,response_type:'code',token_access_type:'offline',redirect_uri:origin(req)+callbackPath,state,scope:'files.metadata.read files.metadata.write files.content.read files.content.write sharing.read sharing.write'});
-    return send(res,200,{authorization_url:'https://www.dropbox.com/oauth2/authorize?'+q.toString(),expires_in_seconds:600});
-  }
-  if(req.method==='GET'&&u.pathname===callbackPath){
-    const state=u.searchParams.get('state')||'';const hash=createHash('sha256').update(state).digest('hex');const expiry=stateStore.get(hash);stateStore.delete(hash);
-    if(!expiry||Date.now()>expiry||!u.searchParams.has('code'))return send(res,400,{error:'invalid_or_expired_oauth_state'});
-    // Intentionally do not exchange authorization codes until a secure, durable token store is configured.
-    return send(res,503,{error:'token_store_not_configured',message:'OAuth callback reached, but token exchange is disabled until durable secure credential storage is configured.'});
-  }
-  return send(res,404,{error:'not_found'});
-});
-server.listen(port,'0.0.0.0',()=>console.log('PreviewLock service listening'));
+ const u=new URL(req.url||'/',BASE);
+ if(req.method==='GET'&&['/','/health'].includes(u.pathname))return send(res,200,{service:'gs-previewlock-api',status:'ok',dropboxReady:Boolean(KEY&&SECRET&&REFRESH)});
+ if(req.method==='GET'&&u.pathname==='/oauth/dropbox/start'){
+  if(!eq(u.searchParams.get('setup'),ADMIN))return send(res,401,{error:'unauthorized'});
+  if(!KEY||!SECRET)return send(res,503,{error:'configure_dropbox_app_credentials'});
+  const state=randomBytes(24).toString('hex');states.set(state,Date.now()+600000);
+  const q=new URLSearchParams({client_id:KEY,response_type:'code',token_access_type:'offline',redirect_uri:BASE+'/oauth/dropbox/callback',state,scope:'files.metadata.read files.metadata.write files.content.read files.content.write sharing.read sharing.write'});
+  res.writeHead(302,{location:'https://www.dropbox.com/oauth2/authorize?'+q.toString()});return res.end();
+ }
+ if(req.method==='GET'&&u.pathname==='/oauth/dropbox/callback'){
+  const state=u.searchParams.get('state');const expiry=states.get(state);states.delete(state);
+  if(!expiry||expiry<Date.now()||!u.searchParams.get('code'))return send(res,400,{error:'invalid_authorization'});
+  const body=new URLSearchParams({code:u.searchParams.get('code'),grant_type:'authorization_code',client_id:KEY,client_secret:SECRET,redirect_uri:BASE+'/oauth/dropbox/callback'});
+  try{const r=await fetch('https://api.dropbox.com/oauth2/token',{method:'POST',body});if(!r.ok)throw Error('Dropbox authorization failed');const d=await r.json();
+   // Token displayed only once in private OAuth browser; user saves directly to Render environment.
+   res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-store','referrer-policy':'no-referrer'});
+   return res.end('<!doctype html><meta name="viewport" content="width=device-width"><title>GS PreviewLock</title><h2>Dropbox authorized</h2><p>Copy the refresh token below directly into Render environment variable DROPBOX_REFRESH_TOKEN. Do not send it in chat.</p><textarea style="width:95%;height:120px" readonly>'+d.refresh_token+'</textarea><p>After saving the Render environment variable, close this page.</p>');
+  }catch{return send(res,502,{error:'dropbox_authorization_failed'})}
+ }
+ if(req.method==='OPTIONS'){res.writeHead(204,{'access-control-allow-origin':'*','access-control-allow-headers':'authorization,content-type,x-asset-name','access-control-allow-methods':'GET,POST,OPTIONS'});return res.end()}
+ if(u.pathname.startsWith('/api/')){
+  if(!eq(req.headers.authorization?.replace(/^Bearer /,''),ADMIN))return send(res,401,{error:'unauthorized'});
+  if(!KEY||!SECRET||!REFRESH)return send(res,503,{error:'dropbox_not_configured'});
+  try{
+   const t=await token();
+   if(req.method==='GET'&&u.pathname==='/api/assets'){
+    const r=await fetch('https://api.dropboxapi.com/2/files/list_folder',{method:'POST',headers:{authorization:'Bearer '+t,'content-type':'application/json'},body:JSON.stringify({path:'/Grill Sergeant',recursive:true})});if(!r.ok)throw Error('list failed');return send(res,200,await r.json());
+   }
+   if(req.method==='POST'&&u.pathname==='/api/upload'){
+    const name=String(req.headers['x-asset-name']||'').trim();
+    if(!/^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,150}\.mp4$/i.test(name))return send(res,400,{error:'invalid_mp4_name'});
+    const chunks=[];let size=0;for await(const c of req){size+=c.length;if(size>140*1024*1024)return send(res,413,{error:'file_too_large'});chunks.push(c)}
+    const data=Buffer.concat(chunks);if(data.length<12||data.toString('ascii',4,8)!=='ftyp')return send(res,415,{error:'not_mp4'});
+    const path='/Grill Sergeant/Timmy Motion Library/'+name;
+    const r=await fetch('https://content.dropboxapi.com/2/files/upload',{method:'POST',headers:{authorization:'Bearer '+t,'content-type':'application/octet-stream','dropbox-api-arg':JSON.stringify({path,mode:'add',autorename:false,mute:true})},body:data});if(!r.ok)return send(res,502,{error:'dropbox_upload_failed',detail:(await r.text()).slice(0,400)});
+    const d=await r.json();const m=await metadata(d.id,t);return send(res,201,{id:d.id,path:d.path_display,size:m.size,rev:m.rev,sha256:createHash('sha256').update(data).digest('hex'),dropbox_content_hash:m.content_hash});
+   }
+   if(req.method==='GET'&&u.pathname==='/api/playback'){
+    const path=u.searchParams.get('path');if(!path?.startsWith('/Grill Sergeant/'))return send(res,400,{error:'invalid_path'});
+    const r=await fetch('https://api.dropboxapi.com/2/files/get_temporary_link',{method:'POST',headers:{authorization:'Bearer '+t,'content-type':'application/json'},body:JSON.stringify({path})});if(!r.ok)throw Error('link failed');return send(res,200,{url:(await r.json()).link,temporary:true});
+   }
+  }catch{return send(res,502,{error:'dropbox_operation_failed'})}
+ }
+ return send(res,404,{error:'not_found'});
+});server.listen(PORT,'0.0.0.0',()=>console.log('PreviewLock listening'));
