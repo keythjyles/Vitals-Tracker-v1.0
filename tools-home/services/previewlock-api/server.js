@@ -58,7 +58,7 @@ const server=http.createServer(async(req,res)=>{
   try{
    const t=await token();
    if(req.method==='GET'&&u.pathname==='/api/release-catalog'){
-    const r=await fetch('https://content.dropboxapi.com/2/files/download',{method:'POST',headers:{authorization:'Bearer '+t,'dropbox-api-arg':JSON.stringify({path:'/Grill Sergeant/Timmy Motion Library/GS_Release_Review_Catalog.json'})}});
+    const r=await fetch('https://content.dropboxapi.com/2/files/download',{method:'POST',headers:{authorization:'Bearer '+t,'dropbox-api-arg':JSON.stringify({path:'/Grill Sergeant/Timmy Motion Library/GS_Release_Review_Catalog_v02.json'})}});
     if(!r.ok)return send(res,502,{error:'private_catalog_unavailable'});
     return send(res,200,await r.json());
    }
