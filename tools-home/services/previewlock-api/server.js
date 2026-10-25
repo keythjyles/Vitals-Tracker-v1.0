@@ -17,7 +17,7 @@ async function token(refresh=REFRESH){
 async function metadata(path,t){const r=await fetch('https://api.dropboxapi.com/2/files/get_metadata',{method:'POST',headers:{authorization:'Bearer '+t,'content-type':'application/json'},body:JSON.stringify({path})});if(!r.ok)throw Error('Dropbox metadata failed');return r.json()}
 const server=http.createServer(async(req,res)=>{
  const u=new URL(req.url||'/',BASE);
- if(req.method==='GET'&&['/','/health'].includes(u.pathname))return send(res,200,{service:'gs-previewlock-api',status:'ok',dropboxReady:Boolean(KEY&&SECRET&&REFRESH)});
+ if(req.method==='GET'&&['/','/health'].includes(u.pathname))return send(res,200,{service:'gs-previewlock-api',status:'ok',contentReviewVersion:1,dropboxReady:Boolean(KEY&&SECRET&&REFRESH)});
  if(req.method==='GET'&&u.pathname==='/setup'){
   res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-store','referrer-policy':'no-referrer','x-content-type-options':'nosniff'});
   return res.end(`<!doctype html><html lang="en"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PreviewLock Dropbox setup</title><style>body{font:20px system-ui;background:#151515;color:white;max-width:560px;margin:40px auto;padding:16px}input,button{box-sizing:border-box;width:100%;font:20px system-ui;padding:16px;margin:12px 0;border-radius:8px}button{background:#fff;color:#111;font-weight:700}label{display:block;margin-top:20px}</style><h1>Connect Dropbox</h1><p>Paste the PreviewLock setup key from Render. It is submitted securely and will not be added to the address bar.</p><form action="/setup" method="post"><label for="key">Setup key</label><input id="key" name="key" type="password" required autocomplete="off"><button type="submit">Connect Dropbox</button></form></html>`);
@@ -54,6 +54,28 @@ const server=http.createServer(async(req,res)=>{
   if(!KEY||!SECRET||!REFRESH)return send(res,503,{error:'dropbox_not_configured'});
   try{
    const t=await token();
+   if(u.pathname==='/api/content-review'){
+    const assetId=u.searchParams.get('id')||'';
+    if(!/^[a-z0-9-]{8,80}$/.test(assetId))return send(res,400,{error:'invalid_asset_id'});
+    const reviewPath='/Grill Sergeant/Content Reviews/'+assetId+'.json';
+    const read=await fetch('https://content.dropboxapi.com/2/files/download',{method:'POST',headers:{authorization:'Bearer '+t,'dropbox-api-arg':JSON.stringify({path:reviewPath})}});
+    let prior=null,rev=null;
+    if(read.ok){rev=JSON.parse(read.headers.get('dropbox-api-result')||'{}').rev;prior=await read.json()}
+    else {const detail=await read.text();if(!detail.includes('not_found'))return send(res,502,{error:'review_read_failed'})}
+    if(req.method==='GET')return send(res,200,{review:prior,rev});
+    if(req.method!=='POST')return send(res,405,{error:'method_not_allowed'});
+    let raw='';for await(const c of req){raw+=c.toString();if(raw.length>16000)return send(res,413,{error:'request_too_large'})}
+    let data;try{data=JSON.parse(raw)}catch{return send(res,400,{error:'invalid_json'})}
+    if(!['KEEP','EDIT','PUBLISH','HOLD','REMOVE'].includes(data.decision)||typeof data.notes!=='string'||data.notes.length>8000||!/^[a-f0-9]{64}$/.test(data.sha256||''))return send(res,400,{error:'invalid_review'});
+    if((data.rev||null)!==(rev||null))return send(res,409,{error:'review_changed_reload'});
+    const event={decision:data.decision,notes:data.notes,sha256:data.sha256,at:new Date().toISOString()};
+    const review={assetId,...event,history:[...(prior?.history||[]),event]};
+    const mk=await fetch('https://api.dropboxapi.com/2/files/create_folder_v2',{method:'POST',headers:{authorization:'Bearer '+t,'content-type':'application/json'},body:JSON.stringify({path:'/Grill Sergeant/Content Reviews',autorename:false})});
+    if(!mk.ok&&!(await mk.text()).includes('conflict'))return send(res,502,{error:'review_folder_failed'});
+    const saved=await fetch('https://content.dropboxapi.com/2/files/upload',{method:'POST',headers:{authorization:'Bearer '+t,'content-type':'application/octet-stream','dropbox-api-arg':JSON.stringify({path:reviewPath,mode:rev?{'.tag':'update',update:rev}:{'.tag':'add'},autorename:false,strict_conflict:true,mute:true})},body:JSON.stringify(review)});
+    if(!saved.ok)return send(res,saved.status===409?409:502,{error:'review_save_failed_reload'});
+    const receipt=await saved.json();return send(res,200,{review,rev:receipt.rev,persisted:true});
+   }
    if(req.method==='GET'&&u.pathname==='/api/assets'){
     const r=await fetch('https://api.dropboxapi.com/2/files/list_folder',{method:'POST',headers:{authorization:'Bearer '+t,'content-type':'application/json'},body:JSON.stringify({path:'/Grill Sergeant',recursive:true})});if(!r.ok)throw Error('list failed');return send(res,200,await r.json());
    }
