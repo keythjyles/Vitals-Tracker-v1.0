@@ -72,7 +72,7 @@ Q('render').onclick=async()=>{
  drawBase();drawOverlay()};
  let tick,stopped=false;
  try{
- bv.currentTime=0;ov.currentTime=0;await Promise.all([new Promise(ok=>bv.addEventListener('seeked',ok,{once:true})),new Promise(ok=>ov.addEventListener('seeked',ok,{once:true}))].map((p,i)=>p));
+ bv.currentTime=0;ov.currentTime=0;await Promise.all([bv,ov].map(v=>v.seeking?new Promise(ok=>v.addEventListener('seeked',ok,{once:true})):Promise.resolve()));
  await ac.resume();renderFrame();recorder.start(1000);await Promise.all([bv.play(),ov.play()]);
  report('Rendering full source in real time. Keep this tab open.');
  tick=setInterval(()=>{renderFrame();report('Rendering '+bv.currentTime.toFixed(1)+' / '+duration.toFixed(1)+' seconds');if(bv.ended||bv.currentTime>=duration-.06){clearInterval(tick);stopped=true;recorder.stop()}},40);
