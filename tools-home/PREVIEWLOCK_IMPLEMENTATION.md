@@ -20,7 +20,7 @@ Finished video -> automatic transfer -> permanent Dropbox asset -> stable Androi
 Step 02 design evidence: [PREVIEWLOCK_TRANSFER_CONTRACT.md](PREVIEWLOCK_TRANSFER_CONTRACT.md), commit d1dba0a3cf72c89825aa541daf01573ecc46a107. This is design approval only; no actual transfer, Render authorization, or Dropbox OAuth has been implemented.\n\n## Step 03 deployment evidence (2026-10-25)
 - Created isolated source at `tools-home/services/previewlock-api/`: `package.json`, `server.js`, `README.md`. OAuth callback path `/oauth/dropbox/callback` exists but intentionally refuses token exchange until secure durable token storage is ready.
 - Created Render service `gs-previewlock-api`, ID `srv-dberk21srm7s73d4kqr0`, URL `https://gs-previewlock-api.onrender.com`, dashboard `https://dashboard.render.com/web/srv-dberk21srm7s73d4kqr0`.
-- Initial deploy `dep-dberk29srm7s73d4ks6g` was **build_in_progress** when checked; do not claim live or OAuth operational yet.
+- Initial deploy `dep-dberk29srm7s73d4ks6g` was verified **live** via Render on 2026-10-25. Subsequent deploy `dep-dberk6jsp5es73cappg0` was `update_in_progress` at last check. Backend health/OAuth remain untested; no credentials configured.
 - Expected redirect URI once deployment is verified: `https://gs-previewlock-api.onrender.com/oauth/dropbox/callback`. Do not authorize OAuth or share credentials until token store and secure setup are implemented.
 - Step 03 remains **IN PROGRESS**. No Dropbox credentials configured and no automatic video transfer tested.
 
