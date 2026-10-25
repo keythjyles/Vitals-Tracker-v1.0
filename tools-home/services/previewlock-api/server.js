@@ -10,9 +10,12 @@ const ADMIN=process.env.PREVIEWLOCK_SETUP_KEY||'';
 const states=new Map();
 const send=(r,s,o)=>{r.writeHead(s,{'content-type':'application/json','cache-control':'no-store','access-control-allow-origin':'*'});r.end(JSON.stringify(o));};
 const eq=(a,b)=>{if(!a||!b)return false;let x=Buffer.from(a),y=Buffer.from(b);return x.length===y.length&&timingSafeEqual(x,y)};
-async function token(refresh=REFRESH){
- const body=new URLSearchParams({grant_type:'refresh_token',refresh_token:refresh,client_id:KEY,client_secret:SECRET});
- const r=await fetch('https://api.dropbox.com/oauth2/token',{method:'POST',body});if(!r.ok)throw Error('Dropbox authorization failed');return (await r.json()).access_token;
+let tokenValue='',tokenExpiry=0,tokenPending=null;
+async function token(){
+ if(tokenValue&&tokenExpiry>Date.now()+30000)return tokenValue;
+ if(tokenPending)return tokenPending;
+ tokenPending=(async()=>{const body=new URLSearchParams({grant_type:'refresh_token',refresh_token:REFRESH,client_id:KEY,client_secret:SECRET});const r=await fetch('https://api.dropbox.com/oauth2/token',{method:'POST',body});if(!r.ok)throw Error('Dropbox authorization failed');const d=await r.json();tokenValue=d.access_token;tokenExpiry=Date.now()+Math.max(60,Number(d.expires_in)||3600)*1000;return tokenValue})();
+ try{return await tokenPending}finally{tokenPending=null}
 }
 async function metadata(path,t){const r=await fetch('https://api.dropboxapi.com/2/files/get_metadata',{method:'POST',headers:{authorization:'Bearer '+t,'content-type':'application/json'},body:JSON.stringify({path})});if(!r.ok)throw Error('Dropbox metadata failed');return r.json()}
 const server=http.createServer(async(req,res)=>{
