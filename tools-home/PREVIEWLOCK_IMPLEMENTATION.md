@@ -6,7 +6,7 @@ Finished video -> automatic transfer -> permanent Dropbox asset -> stable Androi
 
 ## Indexed steps
 - [x] **01 Audit infrastructure.** Verified Render workspace `tea-d6rno2aa214c73bjm3ag`: `jokelet-api` (`srv-dbdui3vb9u1s73bir8kg`, GitHub repo `keythjyles/Vitals-Tracker-v1.0`, root `tools-home/services/jokelet-api/`) and `lex-backend` (`srv-d6rnut4r85hc73ehc12g`, same repo, root `/`). Both currently on free plan. Existing GitHub Pages tools, SxLock, frame-review application, and PreviewLock prototype are not to be replaced. Dropbox connected; folders `/Grill Sergeant` (id:lnTiunUsDy8AAAAAAAAABQ) and `/Grill Sergeant/Timmy Motion Library` (id:lnTiunUsDy8AAAAAAAAABg) created. **No Render-Dropbox credential or automatic transfer has been verified.** Step 01 is an inventory, not a proof of cloud transfer.
-- [ ] **02 Define transfer contract.** Establish source file availability and permitted ingest path, identity, destination, checksum, authentication, status, errors, and idempotent retries; choose isolated service rather than changing jokelet-api unless justified.
+- [x] **02 Define transfer contract.** Establish source file availability and permitted ingest path, identity, destination, checksum, authentication, status, errors, and idempotent retries; choose isolated service rather than changing jokelet-api unless justified.
 - [ ] **03 Authorize Render-to-Dropbox access.** Secure server-side OAuth/token; never expose credentials in GitHub Pages, source control, logs, or chat.
 - [ ] **04 Build automatic transfer.** Server-controlled upload with no user phone handling.
 - [ ] **05 Verify integrity.** Dropbox returned file ID, byte size, revision, hash where available; readback and retry/failure handling.
@@ -17,7 +17,7 @@ Finished video -> automatic transfer -> permanent Dropbox asset -> stable Androi
 - [ ] **10 Android end-to-end acceptance.** Test with TM-002 and a subsequent new asset, no manual download/upload.
 - [ ] **11 Document and release.** Update AGENTS.md, operator/runbook, then enable tools-page link only after pass.
 
-## TM-002 test identity
+Step 02 design evidence: [PREVIEWLOCK_TRANSFER_CONTRACT.md](PREVIEWLOCK_TRANSFER_CONTRACT.md), commit d1dba0a3cf72c89825aa541daf01573ecc46a107. This is design approval only; no actual transfer, Render authorization, or Dropbox OAuth has been implemented.\n\n## TM-002 test identity
 Approved visual asset `GS_TM002_POINT_LAUGH_IN_L_OUT_R_POC_v01.mp4`, approximately 2.6 MB. User manually downloaded and reuploaded as `17078.mp4`; this does NOT constitute automated delivery. Gemini original `17075.mp4` is separate. No Dropbox upload of approved TM-002 has been verified.
 
 ## Change control
