@@ -66,6 +66,34 @@ const server=http.createServer(async(req,res)=>{
     const r=await fetch('https://content.dropboxapi.com/2/files/upload',{method:'POST',headers:{authorization:'Bearer '+t,'content-type':'application/octet-stream','dropbox-api-arg':JSON.stringify({path,mode:'add',autorename:false,mute:true})},body:data});if(!r.ok)return send(res,502,{error:'dropbox_upload_failed',detail:(await r.text()).slice(0,400)});
     const d=await r.json();const m=await metadata(d.id,t);return send(res,201,{id:d.id,path:d.path_display,size:m.size,rev:m.rev,sha256:createHash('sha256').update(data).digest('hex'),dropbox_content_hash:m.content_hash});
    }
+
+   if(req.method==='POST'&&u.pathname==='/api/duplicate'){
+    let raw='';for await(const c of req){raw+=c.toString();if(raw.length>4096)return send(res,413,{error:'request_too_large'})}
+    let data;try{data=JSON.parse(raw)}catch{return send(res,400,{error:'invalid_json'})}
+    const from=String(data.from||''),name=String(data.name||'').trim();
+    if(!from.startsWith('/Grill Sergeant/')||!from.toLowerCase().endsWith('.mp4')||from.includes('..'))return send(res,400,{error:'invalid_source'});
+    if(!/^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,150}\.mp4$/i.test(name))return send(res,400,{error:'invalid_mp4_name'});
+    const to=from.slice(0,from.lastIndexOf('/')+1)+name;
+    if(to.toLowerCase()===from.toLowerCase())return send(res,409,{error:'choose_a_different_name'});
+    const r=await fetch('https://api.dropboxapi.com/2/files/copy_v2',{method:'POST',headers:{authorization:'Bearer '+t,'content-type':'application/json'},body:JSON.stringify({from_path:from,to_path:to,autorename:false})});
+    if(!r.ok)return send(res,409,{error:'duplicate_failed',detail:(await r.text()).slice(0,500)});
+    const d=await r.json();return send(res,201,{path:d.metadata.path_display,name:d.metadata.name});
+   }
+   if(req.method==='POST'&&u.pathname==='/api/upload-chunk'){
+    const phase=u.searchParams.get('phase'),name=u.searchParams.get('name')||'',id=u.searchParams.get('id')||'',offset=Number(u.searchParams.get('offset')||0);
+    if(!['start','append','finish'].includes(phase))return send(res,400,{error:'invalid_phase'});
+    if(phase==='finish'&&!/^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,150}\.mp4$/i.test(name))return send(res,400,{error:'invalid_mp4_name'});
+    if(phase!=='start'&&(!/^[A-Za-z0-9_:-]{10,300}$/.test(id)||!Number.isSafeInteger(offset)||offset<0))return send(res,400,{error:'invalid_session'});
+    let size=0;const chunks=[];for await(const c of req){size+=c.length;if(size>8*1024*1024)return send(res,413,{error:'chunk_too_large'});chunks.push(c)}
+    const body=Buffer.concat(chunks);
+    if(phase==='start'&&(body.length<12||body.toString('ascii',4,8)!=='ftyp'))return send(res,415,{error:'not_mp4'});
+    const arg=phase==='start'?{close:false}:phase==='append'?{cursor:{session_id:id,offset},close:false}:{cursor:{session_id:id,offset},commit:{path:'/Grill Sergeant/Timmy Motion Library/'+name,mode:'add',autorename:false,mute:true}};
+    const endpoint=phase==='start'?'upload_session/start':phase==='append'?'upload_session/append_v2':'upload_session/finish';
+    const r=await fetch('https://content.dropboxapi.com/2/files/'+endpoint,{method:'POST',headers:{authorization:'Bearer '+t,'content-type':'application/octet-stream','dropbox-api-arg':JSON.stringify(arg)},body});
+    if(!r.ok)return send(res,502,{error:'chunk_upload_failed',detail:(await r.text()).slice(0,500)});
+    const d=await r.json().catch(()=>({}));
+    return send(res,phase==='finish'?201:200,phase==='start'?{id:d.session_id}:phase==='finish'?{path:d.path_display,name:d.name}: {ok:true});
+   }
    if(req.method==='POST'&&u.pathname==='/api/rename'){
     let raw='';for await(const c of req){raw+=c.toString();if(raw.length>4096)return send(res,413,{error:'request_too_large'})}
     let data;try{data=JSON.parse(raw)}catch{return send(res,400,{error:'invalid_json'})}
