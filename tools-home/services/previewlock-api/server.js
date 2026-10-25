@@ -71,7 +71,7 @@ const server=http.createServer(async(req,res)=>{
     let data;try{data=JSON.parse(raw)}catch{return send(res,400,{error:'invalid_json'})}
     const from=String(data.from||''),name=String(data.name||'').trim();
     if(!from.startsWith('/Grill Sergeant/')||!from.toLowerCase().endsWith('.mp4')||from.includes('..'))return send(res,400,{error:'invalid_source'});
-    if(!/^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,150}\\.mp4$/i.test(name))return send(res,400,{error:'invalid_mp4_name'});
+    if(!/^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,150}\.mp4$/i.test(name))return send(res,400,{error:'invalid_mp4_name'});
     const parent=from.slice(0,from.lastIndexOf('/'));const to=parent+'/'+name;
     if(to===from)return send(res,200,{path:from,unchanged:true});
     const r=await fetch('https://api.dropboxapi.com/2/files/move_v2',{method:'POST',headers:{authorization:'Bearer '+t,'content-type':'application/json'},body:JSON.stringify({from_path:from,to_path:to,autorename:false,allow_shared_folder:false})});
