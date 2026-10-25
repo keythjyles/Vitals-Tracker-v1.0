@@ -59,7 +59,7 @@ const server=http.createServer(async(req,res)=>{
    }
    if(req.method==='POST'&&u.pathname==='/api/upload'){
     const name=String(req.headers['x-asset-name']||'').trim();
-    if(!/^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,150}\.mp4$/i.test(name))return send(res,400,{error:'invalid_mp4_name'});
+    if(!/^[^\\/<>:\"|?*\\x00-\\x1f]{1,196}\.mp4$/i.test(name))return send(res,400,{error:'invalid_mp4_name'});
     const chunks=[];let size=0;for await(const c of req){size+=c.length;if(size>140*1024*1024)return send(res,413,{error:'file_too_large'});chunks.push(c)}
     const data=Buffer.concat(chunks);if(data.length<12||data.toString('ascii',4,8)!=='ftyp')return send(res,415,{error:'not_mp4'});
     const path='/Grill Sergeant/Timmy Motion Library/'+name;
@@ -72,7 +72,7 @@ const server=http.createServer(async(req,res)=>{
     let data;try{data=JSON.parse(raw)}catch{return send(res,400,{error:'invalid_json'})}
     const from=String(data.from||''),name=String(data.name||'').trim();
     if(!from.startsWith('/Grill Sergeant/')||!from.toLowerCase().endsWith('.mp4')||from.includes('..'))return send(res,400,{error:'invalid_source'});
-    if(!/^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,150}\.mp4$/i.test(name))return send(res,400,{error:'invalid_mp4_name'});
+    if(!/^[^\\/<>:\"|?*\\x00-\\x1f]{1,196}\.mp4$/i.test(name))return send(res,400,{error:'invalid_mp4_name'});
     const to=from.slice(0,from.lastIndexOf('/')+1)+name;
     if(to.toLowerCase()===from.toLowerCase())return send(res,409,{error:'choose_a_different_name'});
     const r=await fetch('https://api.dropboxapi.com/2/files/copy_v2',{method:'POST',headers:{authorization:'Bearer '+t,'content-type':'application/json'},body:JSON.stringify({from_path:from,to_path:to,autorename:false})});
@@ -82,7 +82,7 @@ const server=http.createServer(async(req,res)=>{
    if(req.method==='POST'&&u.pathname==='/api/upload-chunk'){
     const phase=u.searchParams.get('phase'),name=u.searchParams.get('name')||'',id=u.searchParams.get('id')||'',offset=Number(u.searchParams.get('offset')||0);
     if(!['start','append','finish'].includes(phase))return send(res,400,{error:'invalid_phase'});
-    if(phase==='finish'&&!/^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,150}\.mp4$/i.test(name))return send(res,400,{error:'invalid_mp4_name'});
+    if(phase==='finish'&&!/^[^\\/<>:\"|?*\\x00-\\x1f]{1,196}\.mp4$/i.test(name))return send(res,400,{error:'invalid_mp4_name'});
     if(phase!=='start'&&(!/^[A-Za-z0-9_:-]{10,300}$/.test(id)||!Number.isSafeInteger(offset)||offset<0))return send(res,400,{error:'invalid_session'});
     let size=0;const chunks=[];for await(const c of req){size+=c.length;if(size>8*1024*1024)return send(res,413,{error:'chunk_too_large'});chunks.push(c)}
     const body=Buffer.concat(chunks);
@@ -99,7 +99,7 @@ const server=http.createServer(async(req,res)=>{
     let data;try{data=JSON.parse(raw)}catch{return send(res,400,{error:'invalid_json'})}
     const from=String(data.from||''),name=String(data.name||'').trim();
     if(!from.startsWith('/Grill Sergeant/')||!from.toLowerCase().endsWith('.mp4')||from.includes('..'))return send(res,400,{error:'invalid_source'});
-    if(!/^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,150}\.mp4$/i.test(name))return send(res,400,{error:'invalid_mp4_name'});
+    if(!/^[^\\/<>:\"|?*\\x00-\\x1f]{1,196}\.mp4$/i.test(name))return send(res,400,{error:'invalid_mp4_name'});
     const parent=from.slice(0,from.lastIndexOf('/'));const to=parent+'/'+name;
     if(to===from)return send(res,200,{path:from,unchanged:true});
     const r=await fetch('https://api.dropboxapi.com/2/files/move_v2',{method:'POST',headers:{authorization:'Bearer '+t,'content-type':'application/json'},body:JSON.stringify({from_path:from,to_path:to,autorename:false,allow_shared_folder:false})});
