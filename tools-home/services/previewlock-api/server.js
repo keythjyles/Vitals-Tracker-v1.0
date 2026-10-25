@@ -18,6 +18,19 @@ async function metadata(path,t){const r=await fetch('https://api.dropboxapi.com/
 const server=http.createServer(async(req,res)=>{
  const u=new URL(req.url||'/',BASE);
  if(req.method==='GET'&&['/','/health'].includes(u.pathname))return send(res,200,{service:'gs-previewlock-api',status:'ok',dropboxReady:Boolean(KEY&&SECRET&&REFRESH)});
+ if(req.method==='GET'&&u.pathname==='/setup'){
+  res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-store','referrer-policy':'no-referrer','x-content-type-options':'nosniff'});
+  return res.end(`<!doctype html><html lang="en"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PreviewLock Dropbox setup</title><style>body{font:20px system-ui;background:#151515;color:white;max-width:560px;margin:40px auto;padding:16px}input,button{box-sizing:border-box;width:100%;font:20px system-ui;padding:16px;margin:12px 0;border-radius:8px}button{background:#fff;color:#111;font-weight:700}label{display:block;margin-top:20px}</style><h1>Connect Dropbox</h1><p>Paste the PreviewLock setup key from Render. It is submitted securely and will not be added to the address bar.</p><form action="/setup" method="post"><label for="key">Setup key</label><input id="key" name="key" type="password" required autocomplete="off"><button type="submit">Connect Dropbox</button></form></html>`);
+ }
+ if(req.method==='POST'&&u.pathname==='/setup'){
+  let data='';for await(const chunk of req){data+=chunk.toString();if(data.length>4096)return send(res,413,{error:'request_too_large'});}
+  const key=new URLSearchParams(data).get('key')||'';
+  if(!eq(key,ADMIN)){res.writeHead(401,{'content-type':'text/html; charset=utf-8','cache-control':'no-store'});return res.end('<h2>Setup key not accepted</h2><p>Check that you copied PREVIEWLOCK_SETUP_KEY from Render, then <a href="/setup">try again</a>.</p>');}
+  if(!KEY||!SECRET)return send(res,503,{error:'configure_dropbox_app_credentials'});
+  const state=randomBytes(24).toString('hex');states.set(state,Date.now()+600000);
+  const q=new URLSearchParams({client_id:KEY,response_type:'code',token_access_type:'offline',redirect_uri:BASE+'/oauth/dropbox/callback',state,scope:'files.metadata.read files.metadata.write files.content.read files.content.write sharing.read sharing.write'});
+  res.writeHead(303,{location:'https://www.dropbox.com/oauth2/authorize?'+q.toString(),'cache-control':'no-store','referrer-policy':'no-referrer'});return res.end();
+ }
  if(req.method==='GET'&&u.pathname==='/oauth/dropbox/start'){
   if(!eq(u.searchParams.get('setup'),ADMIN))return send(res,401,{error:'unauthorized'});
   if(!KEY||!SECRET)return send(res,503,{error:'configure_dropbox_app_credentials'});
