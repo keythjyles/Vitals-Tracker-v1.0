@@ -125,3 +125,14 @@ Timmy is the approved cartoon boy in a yellow collared shirt with a dark horizon
 ## PreviewLock delivery — mandatory operating procedure (October 25, 2026)
 
 Read [the PreviewLock delivery protocol](tools-home/tools/previewlock/README.md) before delivering any Grill Sergeant preview. The user verified the render → Dropbox upload (completed) → PreviewLock direct-open URL → video loaded in player workflow. **Deliver previews in PreviewLock, not as chat sandbox MP4 links.** The URL format is `https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/previewlock/cloud-test.html?v=CURRENT_BUILD&open=URL_ENCODED_FILENAME.mp4`. Wait for upload completion, preserve the exact stored filename, and never expose credentials. Frame-specific persistent notes and AI retrieval remain unfinished; do not claim them as functional.
+
+
+## Grill Sergeant animation source-of-truth — Gemini (October 25, 2026)
+
+**Gemini is the user's established animation-generation workflow.** The user explicitly identified the Timmy animation visible in the PreviewLock screenshot as **Gemini-rendered Timmy**. Do not misidentify it as an earlier assistant-made animation, an approved v10 head-turn composite, or a generic test asset. Do not default to recommending paid animation services or complicated external animation pipelines when Gemini is already producing the required animation.
+
+**Required procedure:** identify the exact Gemini-generated source and version that the user approved; inspect the actual file, not just its thumbnail; preserve the original; composite that exact animation into the clean video bed; render a versioned preview; upload it to the PreviewLock Dropbox library; share a direct-open PreviewLock URL; collect revisions. Never silently substitute a different Timmy clip or infer asset identity from similar-looking thumbnails. If the approved Gemini file is unavailable, locate it in connected libraries or ask for the exact file instead of guessing.
+
+**Distinguish tools:** Gemini = animation generation; PreviewLock = review/delivery; FrameLock/AnchorLock = stabilization; MotionLock = compositing motion; SxLock/WavLock = audio and sound tools. Use only the stages the actual deliverable requires. Avoid unnecessary paid services.
+
+**Known failure:** On October 25, an incorrect Timmy clip was composited and the user identified the intended Gemini-rendered Timmy in a screenshot. This is an asset-selection error, not a reason to replace Gemini with another service. Source identification must be verified before compositing.
