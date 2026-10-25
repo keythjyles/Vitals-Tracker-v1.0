@@ -66,6 +66,18 @@ const server=http.createServer(async(req,res)=>{
     const r=await fetch('https://content.dropboxapi.com/2/files/upload',{method:'POST',headers:{authorization:'Bearer '+t,'content-type':'application/octet-stream','dropbox-api-arg':JSON.stringify({path,mode:'add',autorename:false,mute:true})},body:data});if(!r.ok)return send(res,502,{error:'dropbox_upload_failed',detail:(await r.text()).slice(0,400)});
     const d=await r.json();const m=await metadata(d.id,t);return send(res,201,{id:d.id,path:d.path_display,size:m.size,rev:m.rev,sha256:createHash('sha256').update(data).digest('hex'),dropbox_content_hash:m.content_hash});
    }
+   if(req.method==='POST'&&u.pathname==='/api/rename'){
+    let raw='';for await(const c of req){raw+=c.toString();if(raw.length>4096)return send(res,413,{error:'request_too_large'})}
+    let data;try{data=JSON.parse(raw)}catch{return send(res,400,{error:'invalid_json'})}
+    const from=String(data.from||''),name=String(data.name||'').trim();
+    if(!from.startsWith('/Grill Sergeant/')||!from.toLowerCase().endsWith('.mp4')||from.includes('..'))return send(res,400,{error:'invalid_source'});
+    if(!/^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,150}\\.mp4$/i.test(name))return send(res,400,{error:'invalid_mp4_name'});
+    const parent=from.slice(0,from.lastIndexOf('/'));const to=parent+'/'+name;
+    if(to===from)return send(res,200,{path:from,unchanged:true});
+    const r=await fetch('https://api.dropboxapi.com/2/files/move_v2',{method:'POST',headers:{authorization:'Bearer '+t,'content-type':'application/json'},body:JSON.stringify({from_path:from,to_path:to,autorename:false,allow_shared_folder:false})});
+    if(!r.ok){const detail=await r.text();return send(res,409,{error:'rename_failed',detail:detail.slice(0,600)})}
+    const d=await r.json();return send(res,200,{path:d.metadata.path_display,name:d.metadata.name,id:d.metadata.id});
+   }
    if(req.method==='GET'&&u.pathname==='/api/playback'){
     const path=u.searchParams.get('path');if(!path?.startsWith('/Grill Sergeant/'))return send(res,400,{error:'invalid_path'});
     const r=await fetch('https://api.dropboxapi.com/2/files/get_temporary_link',{method:'POST',headers:{authorization:'Bearer '+t,'content-type':'application/json'},body:JSON.stringify({path})});if(!r.ok)throw Error('link failed');return send(res,200,{url:(await r.json()).link,temporary:true});
