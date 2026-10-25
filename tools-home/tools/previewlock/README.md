@@ -35,3 +35,14 @@ Dropbox path: `/Grill Sergeant/Timmy Motion Library/PreviewLock_Test_Timmy_Motio
 Result: upload returned completed; user opened PreviewLock, confirmed the intended render was playing in the reviewer, and said **“Success!!”**
 
 This test establishes the render → Dropbox → direct-open PreviewLock workflow. It does not establish automatic review-note transfer.
+
+
+## Grill Sergeant animation source-of-truth — Gemini (October 25, 2026)
+
+**Gemini is the user's established animation-generation workflow.** The user explicitly identified the Timmy animation visible in the PreviewLock screenshot as **Gemini-rendered Timmy**. Do not misidentify it as an earlier assistant-made animation, an approved v10 head-turn composite, or a generic test asset. Do not default to recommending paid animation services or complicated external animation pipelines when Gemini is already producing the required animation.
+
+**Required procedure:** identify the exact Gemini-generated source and version that the user approved; inspect the actual file, not just its thumbnail; preserve the original; composite that exact animation into the clean video bed; render a versioned preview; upload it to the PreviewLock Dropbox library; share a direct-open PreviewLock URL; collect revisions. Never silently substitute a different Timmy clip or infer asset identity from similar-looking thumbnails. If the approved Gemini file is unavailable, locate it in connected libraries or ask for the exact file instead of guessing.
+
+**Distinguish tools:** Gemini = animation generation; PreviewLock = review/delivery; FrameLock/AnchorLock = stabilization; MotionLock = compositing motion; SxLock/WavLock = audio and sound tools. Use only the stages the actual deliverable requires. Avoid unnecessary paid services.
+
+**Known failure:** On October 25, an incorrect Timmy clip was composited and the user identified the intended Gemini-rendered Timmy in a screenshot. This is an asset-selection error, not a reason to replace Gemini with another service. Source identification must be verified before compositing.
