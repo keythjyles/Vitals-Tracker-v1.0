@@ -1,3 +1,5 @@
+**Canonical procedure for all future animation passes:** [ANIMATION_LAB_RUNBOOK.md](./ANIMATION_LAB_RUNBOOK.md). Read before using AspectLock, PreviewLock, Gemini, or any other animation source.
+
 # AspectLock / Grill Sergeant EP4 SC02 — Production intent and engineering record
 **Recorded:** 2026-10-25 (America/Chicago; conversation date). **Status:** implementation committed, device QA pending.
 **Discovery tags:** AspectLock, PreviewLock, GS, EP4, Timmy, scissors, scene 02, green screen, blue screen, chroma key, alpha, ghost trails, R9, R16.
