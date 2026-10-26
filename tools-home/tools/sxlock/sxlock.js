@@ -14,7 +14,7 @@ let clips=[],ctx,master,bedGain,analyser,sourceNode,videoFile=null,videoURL=null
 const scheduled=new Set(),compressed=new Map(),PCM_BUDGET=24*1024*1024,COMPRESSED_BUDGET=8*1024*1024,LOOKAHEAD=8;
 let cleanupExport=null,exportPhase=null;
 const savedCustom=new Set(),savedVideos=new Set(),savedRecordings=new Set();let videoRef=null,recoveryQueue=Promise.resolve(),recoveryRevision=0,recoveryPending=0,restoredPlayhead=0;
-const health={version:"1.7",errors:[]};try{health.errors=JSON.parse(localStorage.getItem(KEY+"-health")||"null")?.errors?.slice(-12)||[]}catch{}
+const health={version:"1.8",errors:[]};try{health.errors=JSON.parse(localStorage.getItem(KEY+"-health")||"null")?.errors?.slice(-12)||[]}catch{}
 const num=(v,min=0,max=Infinity)=>Math.max(min,Math.min(max,Number(v)||0));
 const stamp=t=>`${Math.floor(t/60)}:${(t%60).toFixed(3).padStart(6,'0')}`;
 const message=t=>$('status').textContent=t;
@@ -93,7 +93,7 @@ async function audition(id,volume=65,loop=false){stopAuditions();const token=aud
 function clipWindow(c,b,at=0,end=Infinity){const region=b.duration-c.offset;if(region<=0)return null;const length=Math.min(c.duration,c.loop?Infinity:region,end-c.start),elapsed=Math.max(0,at-c.start);if(length<=elapsed||c.volume<=0)return null;return{when:Math.max(0,c.start-at),offset:c.offset+(c.loop?elapsed%region:elapsed),remaining:length-elapsed,loopStart:c.offset,loopEnd:b.duration}}
 function placeSource(ac,c,b,destination,at=0,anchor=0,end=Infinity){const w=clipWindow(c,b,at,end);if(!w)return null;const n=ac.createBufferSource(),g=ac.createGain();n.buffer=b;n._gain=g;n.loop=!!c.loop;if(c.loop){n.loopStart=w.loopStart;n.loopEnd=w.loopEnd}g.gain.value=c.volume/100*busLevel(c);n._clip=c;n.connect(g).connect(destination);n.onended=()=>releaseNode(n);n.start(anchor+w.when,w.offset);n.stop(anchor+w.when+w.remaining);return n}
 async function schedule(){stopEffects();const token=scheduleToken;if(!ctx||video.paused||video.seeking)return;async function pump(){if(token!==scheduleToken||video.paused||video.seeking)return;const at=video.currentTime,pending=clips.filter(c=>c.enabled&&c.volume>0&&!scheduled.has(c.id)&&c.start<=at+LOOKAHEAD&&c.start+c.duration>at).sort((a,b)=>a.start-b.start);for(const c of pending){const b=await buffer(c.soundId,ctx);if(token!==scheduleToken||video.paused||video.seeking)return;const n=placeSource(ctx,c,b,master,video.currentTime,ctx.currentTime,video.duration);scheduled.add(c.id);if(n)active.push(n)}if(token===scheduleToken&&!video.paused)audioPump=setTimeout(()=>pump().catch(e=>{recordIssue('playback',e);message(e.message);video.pause();if(exportBusy){cancelled=true;if(recorder?.state==='recording')recorder.stop()}}),1000)}await pump()}
-function snapshot(portable=false){return {schema:'SxLock-1.0',version:'1.7',sourceFps:num($('sourceFps').value,1,120),video:videoFile?.name||$('videoName').dataset.expected||null,videoRef,playheadSeconds:videoFile?video.currentTime:restoredPlayhead,videoVolume:num($('bed').value,0,100),mixer:{effects:num($('effectsBus').value,0,100),voice:num($('voiceBus').value,0,100)},layout:Object.fromEntries([...document.querySelectorAll('details[id]')].map(d=>[d.id,d.open])),filename:$('filename').value,recordings:[...sounds.values()].filter(s=>s.recording&&clips.some(c=>c.soundId===s.id)).map(({buffer,loading,_lastUse,...s})=>s),notes:$('notes').value,export:{fps:num($('fps').value,1,60),size:$('size').value},clips:clips.map(c=>({...c})),sounds:[...sounds.values()].filter(s=>!s.builtin).map(s=>({id:s.id,name:s.name,category:'My sounds',duration:s.duration,builtin:false,origin:s.origin||'import',mimeType:s.mimeType||null,capture:s.capture||null,...(portable?{data:s.data}:{})}))}}
+function snapshot(portable=false){return {schema:'SxLock-1.0',version:'1.8',sourceFps:num($('sourceFps').value,1,120),video:videoFile?.name||$('videoName').dataset.expected||null,videoRef,playheadSeconds:videoFile?video.currentTime:restoredPlayhead,videoVolume:num($('bed').value,0,100),mixer:{effects:num($('effectsBus').value,0,100),voice:num($('voiceBus').value,0,100)},layout:Object.fromEntries([...document.querySelectorAll('details[id]')].map(d=>[d.id,d.open])),filename:$('filename').value,recordings:[...sounds.values()].filter(s=>s.recording&&clips.some(c=>c.soundId===s.id)).map(({buffer,loading,_lastUse,...s})=>s),notes:$('notes').value,export:{fps:num($('fps').value,1,60),size:$('size').value},clips:clips.map(c=>({...c})),sounds:[...sounds.values()].filter(s=>!s.builtin).map(s=>({id:s.id,name:s.name,category:'My sounds',duration:s.duration,builtin:false,origin:s.origin||'import',mimeType:s.mimeType||null,capture:s.capture||null,...(portable?{data:s.data}:{})}))}}
 function recoveryStatus(text,failed=false){$('recoveryStatus').textContent=text;$('recoveryStatus').classList.toggle('save-warning',failed)}
 function flushProject(){clearTimeout(dirtySave);if(!projectReady)return recoveryQueue;const state=snapshot();state.savedAt=Date.now();const rev=++recoveryRevision,source=videoFile,sourceId=videoRef,custom=[...sounds.values()].filter(s=>!s.builtin).map(s=>({id:s.id,data:s.data}));try{const next=JSON.stringify(state),previous=localStorage.getItem(KEY);if(previous&&previous!==next)localStorage.setItem(KEY+'-previous',previous);localStorage.setItem(KEY,next)}catch(e){recordIssue('metadata-autosave',e)}recoveryPending++;recoveryStatus('Saving project and assets…');recoveryQueue=recoveryQueue.catch(()=>{}).then(()=>persistRecovery(state,source,sourceId,custom)).then(()=>{if(rev===recoveryRevision)recoveryStatus(state.video?'Saved locally · video and project assets':'Saved locally · audio and project assets')}).catch(e=>{recordIssue('asset-autosave',e);if(rev===recoveryRevision)recoveryStatus('Recovery incomplete: '+e.message+' Save a project backup and keep original media.',true)}).finally(()=>{recoveryPending--});return recoveryQueue}
 function saveLocal(){return flushProject()}
@@ -265,4 +265,39 @@ window.addEventListener('message',async event=>{
  finally{projectReady=true;handoffBusy=false;setBusy(false);}
 });
 
+async function openCloudSource(){
+ const params=new URLSearchParams(location.search),asset=params.get('asset');
+ if(!asset)return;
+ if(!/^[A-Za-z0-9_. ()-]+\.(mp4|webm|mov)$/i.test(asset))throw Error('Invalid source filename.');
+ const requestId=asset+'|'+(params.get('session')||'default');
+ if(localStorage.getItem(KEY+'-cloud-open')===requestId&&videoFile?.name===asset)return;
+ if(exportBusy||liveTake||recording)throw Error('Finish the current recording or export before opening a source.');
+ message('Loading source video…');
+ const key=localStorage.getItem('gs_previewlock_key')||'';
+ if(!key)throw Error('Open connected PreviewLock on this browser first, then reopen this SxLock link.');
+ const lookup=await fetch('https://gs-previewlock-api.onrender.com/api/playback?path='+encodeURIComponent('/Grill Sergeant/Animation Lab/GS_EP4/'+asset),{headers:{Authorization:'Bearer '+key}});
+ if(!lookup.ok)throw Error('Source lookup failed: '+lookup.status);
+ const media=await lookup.json(),response=await fetch(media.url);
+ if(!response.ok)throw Error('Source download failed: '+response.status);
+ const blob=await response.blob();
+ if(!blob.size)throw Error('Source video is empty.');
+ await flushProject();await recoveryQueue;
+ const previous=snapshot(true),database=await db(),backupId='before-cloud-'+uid();
+ try{await new Promise((resolve,reject)=>{const tx=database.transaction('projects','readwrite');tx.objectStore('projects').put({id:backupId,state:previous,savedAt:Date.now()});tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||Error('Backup failed.'));});}finally{database.close();}
+ setBusy(true);
+ try{
+  stopEffects();stopAuditions();restoredPlayhead=0;
+  await loadVideo(new File([blob],asset,{type:blob.type||'video/mp4'}));
+  await new Promise((resolve,reject)=>{if(video.readyState>=1)return resolve();const timer=setTimeout(()=>reject(Error('Source metadata did not load.')),30000);video.addEventListener('loadedmetadata',()=>{clearTimeout(timer);resolve()},{once:true});video.addEventListener('error',()=>{clearTimeout(timer);reject(Error('Source video cannot be decoded.'))},{once:true});});
+  clips=[];$('bed').value=100;$('effectsBus').value=100;$('voiceBus').value=100;updateBed();updateMixer();renderClips();
+  $('sourceFps').value='25';$('fps').value='25';video.currentTime=0;
+  $('notes').value='Clean source handoff. Source soundtrack at 100%; zero effect or voice insertions. Previous project backed up as '+backupId;
+  $('viewerSection').open=true;$('viewerDock').classList.remove('collapsed');$('viewerDock').hidden=false;
+  await flushProject();await recoveryQueue;
+  localStorage.setItem(KEY+'-cloud-open',requestId);updateViewerDock();
+  message('Clean source ready · original audio 100% · 0 effects · 0 voice insertions.');window.scrollTo({top:0,behavior:'instant'});
+ }catch(e){restore(previous);await restoreAssets(previous);throw e}
+ finally{setBusy(false)}
+}
+window.SxLock.cloudReady=libraryReady.then(openCloudSource).catch(e=>{recordIssue('cloud-source',e);message(e.message)});
 })();
