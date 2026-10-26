@@ -91,9 +91,48 @@ main{padding:0 6px 10px;display:flex;flex-direction:column}
   .clip-open{font-size:13px}
   .clip-action{font-size:12px;min-height:30px}
 }
+
+/* R1.9b: compact reference video, ALL transport controls right of picture.
+   Layout only. JS/audio/recording behavior remains functionally locked. */
+@media(max-width:600px){
+  #editorDock{display:grid;grid-template-columns:minmax(0,1fr) 86px;gap:4px;align-items:start}
+  #editorDock>#viewerDock{grid-column:1;grid-row:1;min-width:0}
+  #editorDock>.sticky{grid-column:2;grid-row:1;align-self:start}
+  #editorDock>.sticky>.row{gap:4px}
+  #editorDock>.sticky button{min-height:36px;font-size:11px}
+  #viewerDock .viewer{display:block}
+  #viewerDock video{max-height:24dvh;max-width:100%;object-fit:contain}
+  #viewerDock .record-tools{display:none!important}
+  #viewerDock .row{display:none}
+  #viewerDock .dock-heading{display:none}
+  #viewerDock .clock{font-size:12px}
+  #viewerDock #seek{height:18px}
+  #viewerDock{border-radius:5px;padding:2px}
+  #sxSideControls{display:flex;flex-direction:column;gap:4px}
+  #sxSideControls button{width:100%;min-height:35px;padding:3px 1px;font-size:12px;line-height:1.05;border-radius:6px}
+  #sxSideControls #liveRecord{min-height:60px;font-size:22px;background:#72212e;color:white;border:2px solid #ef6777}
+  #sxSideControls #liveRecord span{display:block;font-size:12px}
+  #sxSideControls #addEffect{min-height:49px;background:#f2cc84;color:#17212c;font-size:15px;font-weight:800}
+  #sxSideControls .sx-frame{display:flex;gap:3px}
+  #sxSideControls .sx-frame button{min-height:35px;font-size:12px}
+  #sxSideControls #liveStop,#sxSideControls #saveTake{min-height:29px;font-size:11px}
+  #sxSideControls #liveStop span,#sxSideControls #saveTake span{display:none}
+  #viewerSection:not([open]){padding:3px 7px}
+  #viewerSection p.small{font-size:10px;line-height:1.1}
+  #soundSection{order:0}
+  #viewerSection{order:1}
+  #mixerSection{order:2}
+  #insertionSection{order:3}
+  #scribeBox{order:4}
+  #exportSection{order:5}
+  #status{order:6}
+  #copyFallback{order:7}
+  #renderCanvas{order:8}
+  #soundSection .sound-library-row{padding:3px 0}
+}
 </style></head><body><main>
 <a href="../../">← Thicket Tools</a><div class="title-row"><h1>SxLock <small>R1.9</small></h1><button id="infoButton" aria-label="Information and instructions" title="Information and instructions">ⓘ</button></div>
-<p class="small">GS-TOOL-SXLOCK · R1.9</p><button id="libraryOnly" aria-pressed="false">Library only</button><p id="recoveryStatus" class="small" role="status">Restoring project…</p><div id="editorDock"><div class="sticky"><div class="row"><button id="play" class="primary">▶ Play mix</button><button id="restart">↶ Start</button><button id="stop">■ Stop</button></div></div>
+<p class="small">GS-TOOL-SXLOCK · R1.9</p><button id="libraryOnly" aria-pressed="false">Library only</button><p id="recoveryStatus" class="small" role="status">Restoring project…</p><div id="editorDock"><div class="sticky"><div class="row" id="sxSideControls"><button id="play" class="primary">▶ Play mix</button><button id="restart">↶ Start</button><button id="stop">■ Stop</button></div></div>
 <div id="viewerDock"><div class="dock-heading"><button id="collapseViewer" type="button" aria-expanded="true" aria-controls="viewerContent">▾ Collapse player</button></div><div id="viewerContent"><div class="clock" id="clock" aria-live="off">0:00.000 / 0:00.000</div><div class="viewer"><div class="record-tools" aria-label="Live voice recording"><button id="liveRecord" aria-label="Record audio" title="Record audio">●<span>Rec</span></button><button id="liveStop" disabled aria-label="Stop voice recording" title="Stop voice recording">■<span>Stop</span></button><button id="saveTake" disabled aria-label="Save latest voice recording" title="Save latest voice recording">↓<span>Take</span></button></div><div id="audioOnly" class="audio-only">Audio recorder</div><video hidden id="video" playsinline preload="auto" tabindex="0" aria-label="Video preview. Tap to pause. Hold or right-click to add an effect."></video><div id="liveIndicator" hidden role="status" aria-live="polite"><span class="record-word">● RECORDING</span> <output id="liveElapsed">0:00</output></div></div><label>Seek<input id="seek" type="range" min="0" max="1" step="0.001" value="0"></label><div class="row"><button id="back">◀ 1 frame</button><button id="forward">1 frame ▶</button><button id="addEffect">＋ Effect</button></div><div id="peak" aria-live="off"></div></div></div></div><details id="viewerSection" class="work-area" open><summary>Video</summary><label>Original video · Files / Downloads / Drive<input id="videoFile" type="file"></label><p class="small">Choose Files in the system picker to open downloaded MP4 or WebM videos. You can also send a rendered video directly from the Jokelet Library.</p><p id="videoName" class="small">No video loaded.</p><details class="audio-settings"><summary>Frame rate</summary><label>Source frame rate (for frame stepping)<select id="sourceFps"><option>25</option><option>24</option><option>30</option><option value="29.97">29.97</option><option>50</option><option>60</option></select></label></details></details>
 <details id="mixerSection" class="work-area"><summary>Mixer</summary><div class="mix-grid"><label>Video audio <output id="bedValue">100%</output><input id="bed" type="range" min="0" max="100" value="100"></label><label>Effects <output id="effectsBusValue">100%</output><input id="effectsBus" type="range" min="0" max="100" value="100"></label><label>Live recordings <output id="voiceBusValue">100%</output><input id="voiceBus" type="range" min="0" max="100" value="100"></label></div></details><details id="scribeBox" class="work-area"><summary>✎ Scribe</summary><label for="notes">Notes, ideas, instructions</label><textarea id="notes" placeholder="Capture a thought here…"></textarea><div class="row"><button id="copyNotes">Copy notes</button><button id="copyProject">Copy full handoff</button><button id="chat">Export to ChatGPT ↗</button></div></details>
 <details id="soundSection" class="work-area" open><summary>Sound library · tap Play to listen</summary><div class="filters"><label>Category<select id="category"><option value="all">All sounds</option></select></label><label>Search<input id="search" type="search" placeholder="car, hover, fart, chuckle…"></label></div><p id="libraryInfo" class="small">Loading recorded sound library…</p><div class="library-actions"><button data-library-view="all" aria-pressed="true">All</button><button data-library-view="new" aria-pressed="false">New sounds</button><button data-library-view="favorites" aria-pressed="false">★ Favorites</button><button data-stop-preview>■ Stop preview</button></div><p id="libraryNowPlaying" role="status" aria-live="polite" class="small">Preview a sound, then tap Use to place it.</p><div id="library"></div><details id="manageSounds"><summary>Manage my recordings</summary><div id="recordingList"></div></details><details><summary>Import sounds</summary><label>WAV, MP3, M4A or supported audio<input id="audioFiles" type="file" accept="audio/*" multiple></label></details><details><summary>Sources &amp; credits</summary><div id="credits" class="small"></div><button id="copySoundCredits">Copy credits for placed sounds</button><p class="small">Sounds marked “credit required” need the copied credit in your published description.</p><a href="CREDITS.md" target="_blank" rel="noopener">Full source list</a></details></details>
@@ -104,5 +143,24 @@ main{padding:0 6px 10px;display:flex;flex-direction:column}
 <div id="sheetBrowse"><button data-stop-preview>■ Stop preview</button><div class="filters"><label>Category<select id="sheetCategory"></select></label><label>Search<input id="sheetSearch" type="search" placeholder="Find a sound"></label></div><div id="sheetLibrary" class="sound-buttons"></div></div>
 <p id="sheetStatus" class="small" role="status"></p><div id="sheetEditor" hidden><div class="selected-sound"><strong id="selectedName"></strong><button id="changeSound">Change</button></div><p id="selectedSource" class="small"></p><div class="row audition-row"><button id="hearSelected">▶ Hear</button><button id="stopAudition">■ Stop sound</button></div><label class="volume-label">Volume <output id="effectVolumeValue">65%</output><input id="effectVolume" type="range" min="0" max="100" value="65"></label><div class="fields"><label>Start (seconds)<input id="effectStart" type="number" min="0" step="0.001" value="0"></label><label>Play length (seconds)<input id="effectDuration" type="number" min="0.001" max="3600" step="0.001"></label></div><label class="loop-label"><input id="effectLoop" type="checkbox"> Loop until play length ends</label><details><summary>Trim source</summary><label>Source IN (seconds)<input id="effectOffset" type="number" min="0" step="0.001" value="0"></label></details><label class="loop-label"><input id="effectEnabled" type="checkbox" checked> Enable this insertion</label><button id="applyEffect" class="primary">Add at this time</button></div>
 </dialog><!-- FUNCTIONALITY LOCK: SxLock R1.9 engine, audio, timing, and media operations are owner-approval-only. Layout changes must not modify JS or event wiring. -->
+<script>
+/* Presentation-only relocation: preserve each original button and its JS handlers. */
+(function(){
+ const side=document.getElementById('sxSideControls');
+ const rec=document.querySelector('#viewerDock .record-tools');
+ const frames=document.querySelector('#viewerDock .row');
+ if(!side||!rec||!frames)return;
+ const record=document.getElementById('liveRecord');
+ const stop=document.getElementById('liveStop');
+ const take=document.getElementById('saveTake');
+ const back=document.getElementById('back');
+ const forward=document.getElementById('forward');
+ const fx=document.getElementById('addEffect');
+ const pair=document.createElement('div');pair.className='sx-frame';
+ pair.append(back,forward);
+ side.prepend(record,stop,take);
+ side.append(pair,fx);
+})();
+</script>
 <script src="mp4-duration.js?v=1"></script><script src="sxlock.js?v=1.8-clean-cloud"></script></body></html>
 
