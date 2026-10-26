@@ -188,12 +188,12 @@ $('copyNotes').onclick=()=>copy($('notes').value);$('copyProject').onclick=()=>c
 let liveTake=null,lastTake=null;
 function updateLiveControls(){if(liveTake)$('cancel').disabled=true;const hot=liveTake?.state==='recording';$('liveRecord').disabled=exportBusy||liveTake?.state==='requesting'||liveTake?.state==='saving';$('liveRecord').classList.toggle('hot',hot);$('liveRecord').setAttribute('aria-pressed',String(hot));$('liveStop').disabled=!liveTake||liveTake.state==='saving';$('saveTake').disabled=!lastTake||!!liveTake||exportBusy;$('liveIndicator').hidden=!hot;$('liveRecord').title=hot?'Pause microphone recording':liveTake?.state==='paused'?'Resume microphone recording':'Start microphone recording';$('liveRecord').setAttribute('aria-label',$('liveRecord').title)}
 function stopLiveTake(){const t=liveTake;if(!t)return;t.cancelled=true;if(t.recorder?.state==='recording'||t.recorder?.state==='paused')t.recorder.stop();else if(t.state==='requesting')message('Cancelling microphone request…')}
-function releaseLiveTake(t){clearInterval(t.timer);t.stream?.getTracks().forEach(track=>track.stop());if(liveTake===t)liveTake=null;setBusy(false);updateLiveControls()}
+function releaseLiveTake(t){clearInterval(t.timer);t.stream?.getTracks().forEach(track=>track.stop());if(liveTake===t)liveTake=null;updateLiveControls()}
 async function startLiveTake(){
  if(liveTake||exportBusy)return;
  if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder)throw Error('Live recording needs a supported browser on HTTPS.');
  await libraryReady;flushProject();
- const t={state:'requesting',chunks:[],bytes:0,cancelled:false,withVideo:!!videoFile&&video.readyState>=2&&Number.isFinite(video.duration)&&video.currentTime<video.duration-.02};$('viewerSection').open=true;$('viewerDock').hidden=false;liveTake=t;setBusy(true);updateLiveControls();message('Allow microphone access to record your voice.');
+ const t={state:'requesting',chunks:[],bytes:0,cancelled:false,withVideo:!!videoFile&&video.readyState>=2&&Number.isFinite(video.duration)&&video.currentTime<video.duration-.02};$('viewerSection').open=true;$('viewerDock').hidden=false;liveTake=t;updateLiveControls();message('Allow microphone access to record your voice.');
  try{
   t.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:false});
   if(t.cancelled||document.hidden){releaseLiveTake(t);return message('Recording cancelled.');}
@@ -221,7 +221,7 @@ async function finishLiveTake(t){
  const ext=blob.type.includes('mp4')?'m4a':blob.type.includes('ogg')?'ogg':'webm',name='Voice_'+t.startedAt.replace(/[:.]/g,'-')+'.'+ext;
  lastTake=new File([blob],name,{type:blob.type});
  const data=new Uint8Array(await blob.arrayBuffer()),ac=await audioContext(),b=await ac.decodeAudioData(data.slice().buffer),id='custom-'+uid();
- const length=t.withVideo?Math.min(b.duration,Math.max(0,video.duration-t.start)):b.duration;
+ const length=b.duration;
  if(length<.05){releaseLiveTake(t);return message('Take was too short to place. Use ↓ Take to save its audio.');}
  sounds.set(id,{id,name,category:'My sounds',duration:b.duration,builtin:false,origin:'microphone',mimeType:blob.type,capture:{recordedAt:t.startedAt,mode:t.withVideo?'video-sync':'standalone',sourceVideo:t.withVideo?videoFile?.name:null,startSeconds:t.withVideo?t.start:null,endSeconds:t.withVideo?t.end:null,recordedDurationSeconds:b.duration,startFrame:t.withVideo?Math.round(t.start*t.fps):null,sourceFps:t.withVideo?t.fps:null,microphoneOnly:true},data:to64(data),buffer:b,_lastUse:++cacheClock});
  // Store audio before committing its placement metadata.
