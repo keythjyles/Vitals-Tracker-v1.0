@@ -42,11 +42,11 @@
     },
     {
       "tool": "sxlock",
-      "source_version": "1.6",
+      "source_version": "1.7",
       "hosted_path": "tools/sxlock/index.html",
-      "description": "93 hosted CC0 recorded effects, compact categorized video-hold placement, frame stepping, loops, scribe/copy, project recovery, video/WAV export and native file sharing. Bounded audio caches and chunked WAV rendering.",
-      "verification": "Syntax, recovery persistence/reload, missing-media and storage-failure checks; existing recording/mixer behavior rechecked. Physical phone retention still subject to browser storage.",
-      "changes": "Full browser project recovery retains original video Blob, imported/live audio, used effects, placements, mixer levels, notes, layout and playhead. Immediate metadata saves plus serialized atomic asset/project commits; visible save status, incomplete-recovery warnings and blocked-storage handling."
+      "description": "124 hosted sound entries plus connected bee recording. Searchable category lists with Play, Use, Favorites, New sounds and a library-only view. Existing editor, project recovery and exports retained.",
+      "verification": "JavaScript syntax and asset decode/hash checks; browser playback/search/favorites/placement review. Physical Android playback not independently tested.",
+      "changes": "31 additions with provenance and decode checks; credit-required entries explicitly marked; large playable rows and synonym/tag search."
     }
   ]
 }

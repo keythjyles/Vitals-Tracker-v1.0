@@ -1,0 +1,1764 @@
+{
+  "release": "1.7",
+  "sources": [
+    {
+      "@context": "https://schema.org",
+      "@type": "AudioObject",
+      "@id": "https://bigsoundbank.com/car-starting-and-departure-s0189.html",
+      "url": "https://bigsoundbank.com/car-starting-and-departure-s0189.html",
+      "mainEntityOfPage": "https://bigsoundbank.com/car-starting-and-departure-s0189.html",
+      "name": "Car, Starting and Departure \u2014 Free Download WAV & MP3 | BigSoundBank",
+      "description": "Starting a car and start thereof. Car: Citroen Saxo 1.1.",
+      "inLanguage": "en-US",
+      "isAccessibleForFree": true,
+      "duration": "PT25S",
+      "uploadDate": "2007-01-26T08:00:00+01:00",
+      "datePublished": "2007-01-26T08:00:00+01:00",
+      "dateModified": "2007-01-26T08:00:00+01:00",
+      "encoding": [
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/wav",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/bwf-en/0189.wav",
+          "contentSize": "2149294"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aiff",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aiff/0189.aiff",
+          "contentSize": "2148218"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mpeg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/mp3/0189.mp3",
+          "contentSize": "491849"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/ogg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/ogg/0189.ogg",
+          "contentSize": "664471"
+        }
+      ],
+      "license": "https://bigsoundbank.com/licenses.html",
+      "keywords": "car,motor,engine,move,moving,moved,start,starting,vehicle",
+      "author": {
+        "@type": "Person",
+        "name": "Joseph Sardin"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "BigSoundBank"
+      },
+      "translationOfWork": {
+        "@id": "https://lasonotheque.org/voiture-demarrage-et-depart-s0189.html"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "6.1",
+        "bestRating": "10",
+        "worstRating": "0",
+        "ratingCount": 161,
+        "reviewCount": 161
+      },
+      "licenseEvidenceText": "CC0 (public domain): Free and royalty-free",
+      "sourcePageSha256": "318abc8ae71d8b79617867653bceb6b79590eb6414de75564e80458ab5102d08"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "AudioObject",
+      "@id": "https://bigsoundbank.com/drone-8-s3552.html",
+      "url": "https://bigsoundbank.com/drone-8-s3552.html",
+      "mainEntityOfPage": "https://bigsoundbank.com/drone-8-s3552.html",
+      "name": "Drone #8 \u2014 Free Sound Effect Download | BigSoundBank",
+      "description": "Sound of a small DJI quadrotor drone.",
+      "inLanguage": "en-US",
+      "isAccessibleForFree": true,
+      "duration": "PT56S",
+      "uploadDate": "2026-05-18T00:00:00+02:00",
+      "datePublished": "2026-05-18T00:00:00+02:00",
+      "dateModified": "2026-05-18T00:00:00+02:00",
+      "encoding": [
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/wav",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/bwf-en/3552.wav",
+          "contentSize": "8023344"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aiff",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aiff/3552.aiff",
+          "contentSize": "5348480"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mpeg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/mp3/3552.mp3",
+          "contentSize": "1785165"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/ogg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/ogg/3552.ogg",
+          "contentSize": "626695"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/flac",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/flac/3552.flac",
+          "contentSize": "3814087"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aac",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aac/3552.aac",
+          "contentSize": "929584"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mp4",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/m4a/3552.m4a",
+          "contentSize": "972726"
+        }
+      ],
+      "license": "https://bigsoundbank.com/licenses.html",
+      "keywords": "drone,quadrotor,dji,quadcopter,hum,whirr,propeller,rotor,flight,flyover,aerial,electric,motor,buzz",
+      "author": {
+        "@type": "Person",
+        "name": "Joseph Sardin"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "BigSoundBank"
+      },
+      "translationOfWork": {
+        "@id": "https://lasonotheque.org/drone-8-s3552.html"
+      },
+      "image": "https://bigsoundbank.com/UPLOAD/webp/3552.webp",
+      "licenseEvidenceText": "CC0 (public domain): Free and royalty-free",
+      "sourcePageSha256": "ff62172be181c14dff2999dad2b04b074c12260b210d6040bef0298a9ea54f48"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "AudioObject",
+      "@id": "https://bigsoundbank.com/drone-2-s3546.html",
+      "url": "https://bigsoundbank.com/drone-2-s3546.html",
+      "mainEntityOfPage": "https://bigsoundbank.com/drone-2-s3546.html",
+      "name": "Drone #2 \u2014 Free Sound Effect Download | BigSoundBank",
+      "description": "Sound of a small DJI quadrotor drone.",
+      "inLanguage": "en-US",
+      "isAccessibleForFree": true,
+      "duration": "PT36S",
+      "uploadDate": "2026-04-06T00:00:00+02:00",
+      "datePublished": "2026-04-06T00:00:00+02:00",
+      "dateModified": "2026-04-06T00:00:00+02:00",
+      "encoding": [
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/wav",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/bwf-en/3546.wav",
+          "contentSize": "5067360"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aiff",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aiff/3546.aiff",
+          "contentSize": "3377824"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mpeg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/mp3/3546.mp3",
+          "contentSize": "1127757"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/ogg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/ogg/3546.ogg",
+          "contentSize": "380413"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/flac",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/flac/3546.flac",
+          "contentSize": "2399344"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aac",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aac/3546.aac",
+          "contentSize": "571215"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mp4",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/m4a/3546.m4a",
+          "contentSize": "621091"
+        }
+      ],
+      "license": "https://bigsoundbank.com/licenses.html",
+      "keywords": "drone,quadrotor,dji,quadcopter,hum,whirr,propeller,rotor,flight,flyover,aerial,electric,motor,buzz",
+      "author": {
+        "@type": "Person",
+        "name": "Joseph Sardin"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "BigSoundBank"
+      },
+      "translationOfWork": {
+        "@id": "https://lasonotheque.org/drone-2-s3546.html"
+      },
+      "image": "https://bigsoundbank.com/UPLOAD/webp/3546.webp",
+      "licenseEvidenceText": "CC0 (public domain): Free and royalty-free",
+      "sourcePageSha256": "ed462039c5cbf5f8aa7a6e7b5d10e816e75553adbf077d469608f3ba8b308bb5"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "AudioObject",
+      "@id": "https://bigsoundbank.com/drone-4-s3548.html",
+      "url": "https://bigsoundbank.com/drone-4-s3548.html",
+      "mainEntityOfPage": "https://bigsoundbank.com/drone-4-s3548.html",
+      "name": "Drone #4 \u2014 Free Sound Effect Download | BigSoundBank",
+      "description": "Sound of a small DJI quadrotor drone.",
+      "inLanguage": "en-US",
+      "isAccessibleForFree": true,
+      "duration": "PT12S",
+      "uploadDate": "2026-04-20T00:00:00+02:00",
+      "datePublished": "2026-04-20T00:00:00+02:00",
+      "dateModified": "2026-04-20T00:00:00+02:00",
+      "encoding": [
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/wav",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/bwf-en/3548.wav",
+          "contentSize": "1670850"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aiff",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aiff/3548.aiff",
+          "contentSize": "1113484"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mpeg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/mp3/3548.mp3",
+          "contentSize": "373581"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/ogg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/ogg/3548.ogg",
+          "contentSize": "132304"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/flac",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/flac/3548.flac",
+          "contentSize": "843616"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aac",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aac/3548.aac",
+          "contentSize": "189086"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mp4",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/m4a/3548.m4a",
+          "contentSize": "246704"
+        }
+      ],
+      "license": "https://bigsoundbank.com/licenses.html",
+      "keywords": "drone,quadrotor,dji,quadcopter,hum,whirr,propeller,rotor,flight,flyover,aerial,electric,motor,buzz",
+      "author": {
+        "@type": "Person",
+        "name": "Joseph Sardin"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "BigSoundBank"
+      },
+      "translationOfWork": {
+        "@id": "https://lasonotheque.org/drone-4-s3548.html"
+      },
+      "image": "https://bigsoundbank.com/UPLOAD/webp/3548.webp",
+      "licenseEvidenceText": "CC0 (public domain): Free and royalty-free",
+      "sourcePageSha256": "fc0c5058dcc9ff7c41fbeb8ac0c6aff61720db8a75d309e81d692188d70506c8"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "AudioObject",
+      "@id": "https://bigsoundbank.com/flatulence-2-s0240.html",
+      "url": "https://bigsoundbank.com/flatulence-2-s0240.html",
+      "mainEntityOfPage": "https://bigsoundbank.com/flatulence-2-s0240.html",
+      "name": "Flatulence #2 \u2014 Free Sound Effect Download | BigSoundBank",
+      "description": "An unconvincing fart sound.",
+      "inLanguage": "en-US",
+      "isAccessibleForFree": true,
+      "duration": "PT1S",
+      "uploadDate": "2007-03-27T09:00:00+02:00",
+      "datePublished": "2007-03-27T09:00:00+02:00",
+      "dateModified": "2007-03-27T09:00:00+02:00",
+      "encoding": [
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/wav",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/bwf-en/0240.wav",
+          "contentSize": "31324"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aiff",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aiff/0240.aiff",
+          "contentSize": "30262"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mpeg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/mp3/0240.mp3",
+          "contentSize": "10986"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/ogg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/ogg/0240.ogg",
+          "contentSize": "18219"
+        }
+      ],
+      "license": "https://bigsoundbank.com/licenses.html",
+      "keywords": "flatulence,gas,fart,go,thumb,wallop,human,man,men,women,womanfarting,female",
+      "author": {
+        "@type": "Person",
+        "name": "Joseph Sardin"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "BigSoundBank"
+      },
+      "translationOfWork": {
+        "@id": "https://lasonotheque.org/pet-2-s0240.html"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "5.3",
+        "bestRating": "10",
+        "worstRating": "0",
+        "ratingCount": 25,
+        "reviewCount": 25
+      },
+      "licenseEvidenceText": "CC0 (public domain): Free and royalty-free",
+      "sourcePageSha256": "77664e1a632f6bd64946222be2f859200b5cab94c9b8579ebce93bf50be93da8"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "AudioObject",
+      "@id": "https://bigsoundbank.com/passage-of-small-propeller-plane-s2478.html",
+      "url": "https://bigsoundbank.com/passage-of-small-propeller-plane-s2478.html",
+      "mainEntityOfPage": "https://bigsoundbank.com/passage-of-small-propeller-plane-s2478.html",
+      "name": "Passage of Small Propeller Plane \u2014 Free Sound Effect Download | BigSoundBank",
+      "description": "Small propeller plane, passing from left to right. This is the processing of an existing mono sound: https://bigsoundbank.com/detail-0501.html",
+      "inLanguage": "en-US",
+      "isAccessibleForFree": true,
+      "duration": "PT16S",
+      "uploadDate": "2021-11-15T00:00:00+01:00",
+      "datePublished": "2021-11-15T00:00:00+01:00",
+      "dateModified": "2024-11-23T10:51:40+01:00",
+      "encoding": [
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/wav",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/bwf-en/2478.wav",
+          "contentSize": "4611150"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aiff",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aiff/2478.aiff",
+          "contentSize": "4608346"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mpeg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/mp3/2478.mp3",
+          "contentSize": "385677"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/ogg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/ogg/2478.ogg",
+          "contentSize": "161188"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/flac",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/flac/2478.flac",
+          "contentSize": "1495887"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aac",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aac/2478.aac",
+          "contentSize": "189739"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mp4",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/m4a/2478.m4a",
+          "contentSize": "245908"
+        }
+      ],
+      "license": "https://bigsoundbank.com/licenses.html",
+      "keywords": "plane,propeller,aerial,aerial,plane,fly,flying,airplane,passage,aeroplane,doppler,fizeau,effect",
+      "author": {
+        "@type": "Person",
+        "name": "Joseph Sardin"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "BigSoundBank"
+      },
+      "translationOfWork": {
+        "@id": "https://lasonotheque.org/passage-petit-avion-a-helice-s2478.html"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "7.4",
+        "bestRating": "10",
+        "worstRating": "0",
+        "ratingCount": 8,
+        "reviewCount": 8
+      },
+      "image": [
+        "https://bigsoundbank.com/UPLOAD/ondes/2478-16x9.webp",
+        "https://bigsoundbank.com/UPLOAD/ondes/2478-4x3.webp",
+        "https://bigsoundbank.com/UPLOAD/ondes/2478-1x1.webp"
+      ],
+      "licenseEvidenceText": "CC0 (public domain): Free and royalty-free",
+      "sourcePageSha256": "f5d6085f8e589c901b9716c08f759078c45f3698083f7c27296300a3fab9f9df"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "AudioObject",
+      "@id": "https://bigsoundbank.com/helicopter-1-s0263.html",
+      "url": "https://bigsoundbank.com/helicopter-1-s0263.html",
+      "mainEntityOfPage": "https://bigsoundbank.com/helicopter-1-s0263.html",
+      "name": "Helicopter #1 \u2014 Free Download WAV & MP3 | BigSoundBank",
+      "description": "Noise of a helicopter. Recording from inside. Wind noise in the paddles. Low and muffled. Sound is difficult loopable.",
+      "inLanguage": "en-US",
+      "isAccessibleForFree": true,
+      "duration": "PT7S",
+      "uploadDate": "2007-03-30T09:00:00+02:00",
+      "datePublished": "2007-03-30T09:00:00+02:00",
+      "dateModified": "2007-03-30T09:00:00+02:00",
+      "encoding": [
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/wav",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/bwf-en/0263.wav",
+          "contentSize": "1104766"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aiff",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aiff/0263.aiff",
+          "contentSize": "1103754"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mpeg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/mp3/0263.mp3",
+          "contentSize": "254996"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/ogg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/ogg/0263.ogg",
+          "contentSize": "203869"
+        }
+      ],
+      "license": "https://bigsoundbank.com/licenses.html",
+      "keywords": "aerial,propeller,helicopter,helico,blade,transport,fly,flying,engine,thermal",
+      "author": {
+        "@type": "Person",
+        "name": "Joseph Sardin"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "BigSoundBank"
+      },
+      "translationOfWork": {
+        "@id": "https://lasonotheque.org/helicoptere-1-s0263.html"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "8.0",
+        "bestRating": "10",
+        "worstRating": "0",
+        "ratingCount": 41,
+        "reviewCount": 41
+      },
+      "licenseEvidenceText": "CC0 (public domain): Free and royalty-free",
+      "sourcePageSha256": "03776ce6e28fd11dc702f6c2776caeeda054836e565c03e7344db1b47df028a1"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "AudioObject",
+      "@id": "https://bigsoundbank.com/acceleration-aston-martin-s0600.html",
+      "url": "https://bigsoundbank.com/acceleration-aston-martin-s0600.html",
+      "mainEntityOfPage": "https://bigsoundbank.com/acceleration-aston-martin-s0600.html",
+      "name": "Acceleration Aston Martin \u2014 Free Download WAV & MP3 | BigSoundBank",
+      "description": "Acceleration of an Aston Martin.",
+      "inLanguage": "en-US",
+      "isAccessibleForFree": true,
+      "duration": "PT7S",
+      "uploadDate": "2013-01-05T08:00:00+01:00",
+      "datePublished": "2013-01-05T08:00:00+01:00",
+      "dateModified": "2013-01-05T08:00:00+01:00",
+      "encoding": [
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/wav",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/bwf-en/0600.wav",
+          "contentSize": "624882"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aiff",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aiff/0600.aiff",
+          "contentSize": "623720"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mpeg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/mp3/0600.mp3",
+          "contentSize": "263168"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/ogg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/ogg/0600.ogg",
+          "contentSize": "173723"
+        }
+      ],
+      "license": "https://bigsoundbank.com/licenses.html",
+      "keywords": "car,car,sport,sport,motor,motor,acceleration,acceleration,engine,move,moving,moved,vehicle,accelerate",
+      "author": {
+        "@type": "Person",
+        "name": "Joseph Sardin"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "BigSoundBank"
+      },
+      "translationOfWork": {
+        "@id": "https://lasonotheque.org/acceleration-aston-martin-s0600.html"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "6.9",
+        "bestRating": "10",
+        "worstRating": "0",
+        "ratingCount": 70,
+        "reviewCount": 70
+      },
+      "licenseEvidenceText": "CC0 (public domain): Free and royalty-free",
+      "sourcePageSha256": "ef2c8a70bfe14040ba70c13766eefc4f1cdbfeff455854e24511919dbc32480b"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "AudioObject",
+      "@id": "https://bigsoundbank.com/drone-1-s3545.html",
+      "url": "https://bigsoundbank.com/drone-1-s3545.html",
+      "mainEntityOfPage": "https://bigsoundbank.com/drone-1-s3545.html",
+      "name": "Drone #1 \u2014 Free Sound Effect Download | BigSoundBank",
+      "description": "Sound of a small DJI quadrotor drone. Start-up, take-off, then flying away into the distance.",
+      "inLanguage": "en-US",
+      "isAccessibleForFree": true,
+      "duration": "PT18S",
+      "uploadDate": "2026-03-30T00:00:00+02:00",
+      "datePublished": "2026-03-30T00:00:00+02:00",
+      "dateModified": "2026-03-30T00:00:00+02:00",
+      "encoding": [
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/wav",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/bwf-en/3545.wav",
+          "contentSize": "2542596"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aiff",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aiff/3545.aiff",
+          "contentSize": "1694648"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mpeg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/mp3/3545.mp3",
+          "contentSize": "567117"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/ogg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/ogg/3545.ogg",
+          "contentSize": "191895"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/flac",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/flac/3545.flac",
+          "contentSize": "1032792"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aac",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aac/3545.aac",
+          "contentSize": "290594"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mp4",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/m4a/3545.m4a",
+          "contentSize": "346224"
+        }
+      ],
+      "license": "https://bigsoundbank.com/licenses.html",
+      "keywords": "drone,quadrotor,dji,quadcopter,hum,whirr,propeller,rotor,flight,flyover,aerial,electric,motor,buzz,start,up,take,off,flying",
+      "author": {
+        "@type": "Person",
+        "name": "Joseph Sardin"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "BigSoundBank"
+      },
+      "translationOfWork": {
+        "@id": "https://lasonotheque.org/drone-1-s3545.html"
+      },
+      "image": "https://bigsoundbank.com/UPLOAD/webp/3545.webp",
+      "licenseEvidenceText": "CC0 (public domain): Free and royalty-free",
+      "sourcePageSha256": "272478c894e72f420b4b1f0401d8629ffb0fe7f7796872b2d5cb86481fabef83"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "AudioObject",
+      "@id": "https://bigsoundbank.com/helicopter-2-s0264.html",
+      "url": "https://bigsoundbank.com/helicopter-2-s0264.html",
+      "mainEntityOfPage": "https://bigsoundbank.com/helicopter-2-s0264.html",
+      "name": "Helicopter #2 \u2014 Free Sound Effect Download | BigSoundBank",
+      "description": "Noise of a helicopter. Recording from outside. Wind noise in the paddles. Acute and powerful sound. Sound is difficult loopable.",
+      "inLanguage": "en-US",
+      "isAccessibleForFree": true,
+      "duration": "PT5S",
+      "uploadDate": "2007-03-30T09:00:00+02:00",
+      "datePublished": "2007-03-30T09:00:00+02:00",
+      "dateModified": "2007-03-30T09:00:00+02:00",
+      "encoding": [
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/wav",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/bwf-en/0264.wav",
+          "contentSize": "869312"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aiff",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aiff/0264.aiff",
+          "contentSize": "868310"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mpeg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/mp3/0264.mp3",
+          "contentSize": "201706"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/ogg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/ogg/0264.ogg",
+          "contentSize": "157304"
+        }
+      ],
+      "license": "https://bigsoundbank.com/licenses.html",
+      "keywords": "aerial,helicopter,fly,flying,engine",
+      "author": {
+        "@type": "Person",
+        "name": "Joseph Sardin"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "BigSoundBank"
+      },
+      "translationOfWork": {
+        "@id": "https://lasonotheque.org/helicoptere-2-s0264.html"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "6.2",
+        "bestRating": "10",
+        "worstRating": "0",
+        "ratingCount": 48,
+        "reviewCount": 48
+      },
+      "licenseEvidenceText": "CC0 (public domain): Free and royalty-free",
+      "sourcePageSha256": "4aa466cfe49eb8a2a8e43f6401b0755410072946a0580b2ad3cdba2dfe4e1e29"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "AudioObject",
+      "@id": "https://bigsoundbank.com/car-engine-2-s0291.html",
+      "url": "https://bigsoundbank.com/car-engine-2-s0291.html",
+      "mainEntityOfPage": "https://bigsoundbank.com/car-engine-2-s0291.html",
+      "name": "Car Engine #2 \u2014 Free Download WAV & MP3 | BigSoundBank",
+      "description": "Motor car: accelerations.",
+      "inLanguage": "en-US",
+      "isAccessibleForFree": true,
+      "duration": "PT7S",
+      "uploadDate": "2007-04-03T09:00:00+02:00",
+      "datePublished": "2007-04-03T09:00:00+02:00",
+      "dateModified": "2007-04-03T09:00:00+02:00",
+      "encoding": [
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/wav",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/bwf-en/0291.wav",
+          "contentSize": "1148682"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aiff",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aiff/0291.aiff",
+          "contentSize": "1147642"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mpeg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/mp3/0291.mp3",
+          "contentSize": "265432"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/ogg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/ogg/0291.ogg",
+          "contentSize": "241674"
+        }
+      ],
+      "license": "https://bigsoundbank.com/licenses.html",
+      "keywords": "acceleration,engine,car,old,vehicle,retro,accelerate",
+      "author": {
+        "@type": "Person",
+        "name": "Joseph Sardin"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "BigSoundBank"
+      },
+      "translationOfWork": {
+        "@id": "https://lasonotheque.org/moteur-de-voiture-2-s0291.html"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "7.1",
+        "bestRating": "10",
+        "worstRating": "0",
+        "ratingCount": 24,
+        "reviewCount": 24
+      },
+      "licenseEvidenceText": "CC0 (public domain): Free and royalty-free",
+      "sourcePageSha256": "dfebde68b0af01cab5d4b8a6d4e45139ce7d3209eefb13624ea3fca17b2148f8"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "AudioObject",
+      "@id": "https://bigsoundbank.com/ducks-s0276.html",
+      "url": "https://bigsoundbank.com/ducks-s0276.html",
+      "mainEntityOfPage": "https://bigsoundbank.com/ducks-s0276.html",
+      "name": "Ducks \u2014 Free Download WAV & MP3 | BigSoundBank",
+      "description": "Several cries of ducks.",
+      "inLanguage": "en-US",
+      "isAccessibleForFree": true,
+      "duration": "PT22S",
+      "uploadDate": "2007-04-02T09:00:00+02:00",
+      "datePublished": "2007-04-02T09:00:00+02:00",
+      "dateModified": "2007-04-02T09:00:00+02:00",
+      "encoding": [
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/wav",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/bwf-en/0276.wav",
+          "contentSize": "3832138"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aiff",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aiff/0276.aiff",
+          "contentSize": "3831070"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mpeg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/mp3/0276.mp3",
+          "contentSize": "873561"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/ogg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/ogg/0276.ogg",
+          "contentSize": "680652"
+        }
+      ],
+      "license": "https://bigsoundbank.com/licenses.html",
+      "keywords": "farm,bird,day,chirping,duck,sing,sing,oviparous,drake",
+      "author": {
+        "@type": "Person",
+        "name": "Joseph Sardin"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "BigSoundBank"
+      },
+      "translationOfWork": {
+        "@id": "https://lasonotheque.org/canards-s0276.html"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "5.4",
+        "bestRating": "10",
+        "worstRating": "0",
+        "ratingCount": 81,
+        "reviewCount": 81
+      },
+      "licenseEvidenceText": "CC0 (public domain): Free and royalty-free",
+      "sourcePageSha256": "b49f41d13d6b0df64a3243a5f100707d739941e6f4c6a6e9c4b131b54fd37663"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "AudioObject",
+      "@id": "https://bigsoundbank.com/helicopter-transition-s0113.html",
+      "url": "https://bigsoundbank.com/helicopter-transition-s0113.html",
+      "mainEntityOfPage": "https://bigsoundbank.com/helicopter-transition-s0113.html",
+      "name": "Helicopter (Transition) \u2014 Free Sound Effect Download | BigSoundBank",
+      "description": "Rapid transition from a helicopter.",
+      "inLanguage": "en-US",
+      "isAccessibleForFree": true,
+      "duration": "PT18S",
+      "uploadDate": "2006-09-07T09:00:00+02:00",
+      "datePublished": "2006-09-07T09:00:00+02:00",
+      "dateModified": "2006-09-07T09:00:00+02:00",
+      "encoding": [
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/wav",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/bwf-en/0113.wav",
+          "contentSize": "1504264"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aiff",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aiff/0113.aiff",
+          "contentSize": "1503190"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mpeg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/mp3/0113.mp3",
+          "contentSize": "346186"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/ogg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/ogg/0113.ogg",
+          "contentSize": "435877"
+        }
+      ],
+      "license": "https://bigsoundbank.com/licenses.html",
+      "keywords": "engine,motor,helicopter,fly,flying,flie,doppler,effect",
+      "author": {
+        "@type": "Person",
+        "name": "Joseph Sardin"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "BigSoundBank"
+      },
+      "translationOfWork": {
+        "@id": "https://lasonotheque.org/helicoptere-passage-s0113.html"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "8.7",
+        "bestRating": "10",
+        "worstRating": "0",
+        "ratingCount": 20,
+        "reviewCount": 20
+      },
+      "licenseEvidenceText": "CC0 (public domain): Free and royalty-free",
+      "sourcePageSha256": "5dba76963a4f9fa297db47eb2cc2465d977cf3e43519b7a3b53b4680a12cb9ea"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "AudioObject",
+      "@id": "https://bigsoundbank.com/flatulence-1-s0111.html",
+      "url": "https://bigsoundbank.com/flatulence-1-s0111.html",
+      "mainEntityOfPage": "https://bigsoundbank.com/flatulence-1-s0111.html",
+      "name": "Flatulence #1 \u2014 Free Sound Effect Download | BigSoundBank",
+      "description": "Flatulence.",
+      "inLanguage": "en-US",
+      "isAccessibleForFree": true,
+      "duration": "PT2S",
+      "uploadDate": "2006-09-02T09:00:00+02:00",
+      "datePublished": "2006-09-02T09:00:00+02:00",
+      "dateModified": "2006-09-02T09:00:00+02:00",
+      "encoding": [
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/wav",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/bwf-en/0111.wav",
+          "contentSize": "262214"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aiff",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aiff/0111.aiff",
+          "contentSize": "261126"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mpeg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/mp3/0111.mp3",
+          "contentSize": "63740"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/ogg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/ogg/0111.ogg",
+          "contentSize": "55374"
+        }
+      ],
+      "license": "https://bigsoundbank.com/licenses.html",
+      "keywords": "flatulence,gas,fart,go,phut,thumb,wallop,farting,female",
+      "author": {
+        "@type": "Person",
+        "name": "Joseph Sardin"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "BigSoundBank"
+      },
+      "translationOfWork": {
+        "@id": "https://lasonotheque.org/pet-1-s0111.html"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "7.3",
+        "bestRating": "10",
+        "worstRating": "0",
+        "ratingCount": 20,
+        "reviewCount": 20
+      },
+      "licenseEvidenceText": "CC0 (public domain): Free and royalty-free",
+      "sourcePageSha256": "275884be47df083f971a13268167164190b57017bff25a029e33921157797c16"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "AudioObject",
+      "@id": "https://bigsoundbank.com/man-sniffing-s1095.html",
+      "url": "https://bigsoundbank.com/man-sniffing-s1095.html",
+      "mainEntityOfPage": "https://bigsoundbank.com/man-sniffing-s1095.html",
+      "name": "Man sniffing \u2014 Free Sound Effect Download | BigSoundBank",
+      "description": "A man with a slight cold, who sniffs quickly through his nose.",
+      "inLanguage": "en-US",
+      "isAccessibleForFree": true,
+      "duration": "PT21S",
+      "uploadDate": "2018-10-07T09:43:10+02:00",
+      "datePublished": "2018-10-07T09:43:10+02:00",
+      "dateModified": "2024-03-07T08:54:13+01:00",
+      "encoding": [
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/wav",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/bwf-en/1095.wav",
+          "contentSize": "1979136"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aiff",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aiff/1095.aiff",
+          "contentSize": "1978424"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mpeg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/mp3/1095.mp3",
+          "contentSize": "827748"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/ogg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/ogg/1095.ogg",
+          "contentSize": "151482"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/flac",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/flac/1095.flac",
+          "contentSize": "326596"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aac",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aac/1095.aac",
+          "contentSize": "112751"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mp4",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/m4a/1095.m4a",
+          "contentSize": "112784"
+        }
+      ],
+      "license": "https://bigsoundbank.com/licenses.html",
+      "keywords": "sniffing,sniff,cold,sniffles,nose,human,sniffle",
+      "author": {
+        "@type": "Person",
+        "name": "Joseph Sardin"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "BigSoundBank"
+      },
+      "translationOfWork": {
+        "@id": "https://lasonotheque.org/reniflement-homme-s1095.html"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.0",
+        "bestRating": "10",
+        "worstRating": "0",
+        "ratingCount": 2,
+        "reviewCount": 2
+      },
+      "image": [
+        "https://bigsoundbank.com/UPLOAD/ondes/1095-16x9.webp",
+        "https://bigsoundbank.com/UPLOAD/ondes/1095-4x3.webp",
+        "https://bigsoundbank.com/UPLOAD/ondes/1095-1x1.webp"
+      ],
+      "licenseEvidenceText": "CC0 (public domain): Free and royalty-free",
+      "sourcePageSha256": "b7d60cab2c6709fc85d6e21436e2e9b98745766db01f73ba16cfe9cd39c94ea4"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "AudioObject",
+      "@id": "https://bigsoundbank.com/gong-sweet-s1482.html",
+      "url": "https://bigsoundbank.com/gong-sweet-s1482.html",
+      "mainEntityOfPage": "https://bigsoundbank.com/gong-sweet-s1482.html",
+      "name": "Gong, sweet \u2014 Free Sound Effect Download | BigSoundBank",
+      "description": "A soft shock of mallet on a small hanging gong.",
+      "inLanguage": "en-US",
+      "isAccessibleForFree": true,
+      "duration": "PT13S",
+      "uploadDate": "2019-07-31T12:24:42+02:00",
+      "datePublished": "2019-07-31T12:24:42+02:00",
+      "dateModified": "2025-02-10T13:08:17+01:00",
+      "encoding": [
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/wav",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/bwf-en/1482.wav",
+          "contentSize": "1835034"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aiff",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aiff/1482.aiff",
+          "contentSize": "1834324"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mpeg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/mp3/1482.mp3",
+          "contentSize": "512868"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/ogg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/ogg/1482.ogg",
+          "contentSize": "290927"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/flac",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/flac/1482.flac",
+          "contentSize": "928324"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aac",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aac/1482.aac",
+          "contentSize": "180212"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mp4",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/m4a/1482.m4a",
+          "contentSize": "181319"
+        }
+      ],
+      "license": "https://bigsoundbank.com/licenses.html",
+      "keywords": "gong,soft,mallet,instrument,music,percussion,cymbal,hanging",
+      "author": {
+        "@type": "Person",
+        "name": "Joseph Sardin"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "BigSoundBank"
+      },
+      "translationOfWork": {
+        "@id": "https://lasonotheque.org/gong-doux-s1482.html"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "7.1",
+        "bestRating": "10",
+        "worstRating": "0",
+        "ratingCount": 7,
+        "reviewCount": 7
+      },
+      "image": "https://bigsoundbank.com/UPLOAD/webp/1482.webp",
+      "licenseEvidenceText": "CC0 (public domain): Free and royalty-free",
+      "sourcePageSha256": "26d7d3ba4ed18df5c0c48610e25ede900d6b4cb5346a6f51cf7f5b3640d0581c"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "AudioObject",
+      "@id": "https://bigsoundbank.com/yawn-1-s1406.html",
+      "url": "https://bigsoundbank.com/yawn-1-s1406.html",
+      "mainEntityOfPage": "https://bigsoundbank.com/yawn-1-s1406.html",
+      "name": "Yawn #1 \u2014 Free Sound Effect Download | BigSoundBank",
+      "description": "A man who yawns.",
+      "inLanguage": "en-US",
+      "isAccessibleForFree": true,
+      "duration": "PT6S",
+      "uploadDate": "2019-05-03T00:04:03+02:00",
+      "datePublished": "2019-05-03T00:04:03+02:00",
+      "dateModified": "2024-12-15T09:45:24+01:00",
+      "encoding": [
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/wav",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/bwf-en/1406.wav",
+          "contentSize": "739208"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aiff",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aiff/1406.aiff",
+          "contentSize": "738406"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mpeg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/mp3/1406.mp3",
+          "contentSize": "208548"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/ogg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/ogg/1406.ogg",
+          "contentSize": "164053"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/flac",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/flac/1406.flac",
+          "contentSize": "545340"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aac",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aac/1406.aac",
+          "contentSize": "97050"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mp4",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/m4a/1406.m4a",
+          "contentSize": "99227"
+        }
+      ],
+      "license": "https://bigsoundbank.com/licenses.html",
+      "keywords": "mouth,breath,breathing,sigh,sighing,yawning,yawn,gaping,tired,sleepy",
+      "author": {
+        "@type": "Person",
+        "name": "Joseph Sardin"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "BigSoundBank"
+      },
+      "translationOfWork": {
+        "@id": "https://lasonotheque.org/baillement-1-s1406.html"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "3.8",
+        "bestRating": "10",
+        "worstRating": "0",
+        "ratingCount": 4,
+        "reviewCount": 4
+      },
+      "image": [
+        "https://bigsoundbank.com/UPLOAD/ondes/1406-16x9.webp",
+        "https://bigsoundbank.com/UPLOAD/ondes/1406-4x3.webp",
+        "https://bigsoundbank.com/UPLOAD/ondes/1406-1x1.webp"
+      ],
+      "licenseEvidenceText": "CC0 (public domain): Free and royalty-free",
+      "sourcePageSha256": "c92e5cc2933e24bd5f1d6e48fbe655fb69b9bef8993a7bbc0e3f1e703afa2ce0"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "AudioObject",
+      "@id": "https://bigsoundbank.com/gong-very-strong-s1485.html",
+      "url": "https://bigsoundbank.com/gong-very-strong-s1485.html",
+      "mainEntityOfPage": "https://bigsoundbank.com/gong-very-strong-s1485.html",
+      "name": "Gong, very strong \u2014 Free Sound Effect Download | BigSoundBank",
+      "description": "A very strong shock of mallet on a small hanging gong.",
+      "inLanguage": "en-US",
+      "isAccessibleForFree": true,
+      "duration": "PT14S",
+      "uploadDate": "2019-07-31T12:33:17+02:00",
+      "datePublished": "2019-07-31T12:33:17+02:00",
+      "dateModified": "2022-02-22T23:35:14+01:00",
+      "encoding": [
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/wav",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/bwf-en/1485.wav",
+          "contentSize": "1996076"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aiff",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aiff/1485.aiff",
+          "contentSize": "1995364"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mpeg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/mp3/1485.mp3",
+          "contentSize": "557028"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/ogg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/ogg/1485.ogg",
+          "contentSize": "192723"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/flac",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/flac/1485.flac",
+          "contentSize": "859641"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aac",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aac/1485.aac",
+          "contentSize": "174721"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mp4",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/m4a/1485.m4a",
+          "contentSize": "175679"
+        }
+      ],
+      "license": "https://bigsoundbank.com/licenses.html",
+      "keywords": "gong,strong,mallet,instrument,music,percussion,cymbal,hanging",
+      "author": {
+        "@type": "Person",
+        "name": "Joseph Sardin"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "BigSoundBank"
+      },
+      "translationOfWork": {
+        "@id": "https://lasonotheque.org/gong-tres-fort-s1485.html"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "5.3",
+        "bestRating": "10",
+        "worstRating": "0",
+        "ratingCount": 3,
+        "reviewCount": 3
+      },
+      "image": "https://bigsoundbank.com/UPLOAD/webp/1485.webp",
+      "licenseEvidenceText": "CC0 (public domain): Free and royalty-free",
+      "sourcePageSha256": "ff6dd66cc71cc71a1bf76d011728372e83187df75eddb1388dfaaed5165672a4"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "AudioObject",
+      "@id": "https://bigsoundbank.com/screeching-tires-1-s2368.html",
+      "url": "https://bigsoundbank.com/screeching-tires-1-s2368.html",
+      "mainEntityOfPage": "https://bigsoundbank.com/screeching-tires-1-s2368.html",
+      "name": "Screeching Tires #1 \u2014 Free Download WAV & MP3 | BigSoundBank",
+      "description": "Squealing of 4 car tires.",
+      "inLanguage": "en-US",
+      "isAccessibleForFree": true,
+      "duration": "PT3S",
+      "uploadDate": "2021-05-06T00:00:00+02:00",
+      "datePublished": "2021-05-06T00:00:00+02:00",
+      "dateModified": "2025-05-15T14:59:44+02:00",
+      "encoding": [
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/wav",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/bwf-en/2368.wav",
+          "contentSize": "313138"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aiff",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aiff/2368.aiff",
+          "contentSize": "310094"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mpeg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/mp3/2368.mp3",
+          "contentSize": "70880"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/ogg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/ogg/2368.ogg",
+          "contentSize": "22379"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/flac",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/flac/2368.flac",
+          "contentSize": "224778"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aac",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aac/2368.aac",
+          "contentSize": "17857"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mp4",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/m4a/2368.m4a",
+          "contentSize": "78643"
+        }
+      ],
+      "license": "https://bigsoundbank.com/licenses.html",
+      "keywords": "parking,slippage,screeching,car,drive,tire,squeals,braking,foley,vehicle,screech,wheel,motocycle",
+      "author": {
+        "@type": "Person",
+        "name": "Joseph Sardin"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "BigSoundBank"
+      },
+      "translationOfWork": {
+        "@id": "https://lasonotheque.org/crissement-de-pneus-1-s2368.html"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "8.5",
+        "bestRating": "10",
+        "worstRating": "0",
+        "ratingCount": 18,
+        "reviewCount": 18
+      },
+      "image": [
+        "https://bigsoundbank.com/UPLOAD/ondes/2368-16x9.webp",
+        "https://bigsoundbank.com/UPLOAD/ondes/2368-4x3.webp",
+        "https://bigsoundbank.com/UPLOAD/ondes/2368-1x1.webp"
+      ],
+      "licenseEvidenceText": "CC0 (public domain): Free and royalty-free",
+      "sourcePageSha256": "e45259b239788561204384563fad04940b36480df9579e7c3b6a99435d249b04"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "AudioObject",
+      "@id": "https://bigsoundbank.com/screeching-tires-4-s2371.html",
+      "url": "https://bigsoundbank.com/screeching-tires-4-s2371.html",
+      "mainEntityOfPage": "https://bigsoundbank.com/screeching-tires-4-s2371.html",
+      "name": "Screeching Tires #4 \u2014 Free Download WAV & MP3 | BigSoundBank",
+      "description": "Squealing of 4 car tires.",
+      "inLanguage": "en-US",
+      "isAccessibleForFree": true,
+      "duration": "PT7S",
+      "uploadDate": "2021-05-06T00:00:00+02:00",
+      "datePublished": "2021-05-06T00:00:00+02:00",
+      "dateModified": "2023-09-11T12:26:24+02:00",
+      "encoding": [
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/wav",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/bwf-en/2371.wav",
+          "contentSize": "976212"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aiff",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aiff/2371.aiff",
+          "contentSize": "973462"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mpeg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/mp3/2371.mp3",
+          "contentSize": "218336"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/ogg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/ogg/2371.ogg",
+          "contentSize": "57954"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/flac",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/flac/2371.flac",
+          "contentSize": "583830"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aac",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aac/2371.aac",
+          "contentSize": "56038"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mp4",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/m4a/2371.m4a",
+          "contentSize": "115312"
+        }
+      ],
+      "license": "https://bigsoundbank.com/licenses.html",
+      "keywords": "car,automobile,motorcycle,moped,parking,tire,brake,braking,skid,screech,wheel,squeal,foley,vehicle,accident,drifting,slip",
+      "author": {
+        "@type": "Person",
+        "name": "Joseph Sardin"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "BigSoundBank"
+      },
+      "translationOfWork": {
+        "@id": "https://lasonotheque.org/crissement-de-pneus-4-s2371.html"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "10.0",
+        "bestRating": "10",
+        "worstRating": "0",
+        "ratingCount": 2,
+        "reviewCount": 2
+      },
+      "image": [
+        "https://bigsoundbank.com/UPLOAD/ondes/2371-16x9.webp",
+        "https://bigsoundbank.com/UPLOAD/ondes/2371-4x3.webp",
+        "https://bigsoundbank.com/UPLOAD/ondes/2371-1x1.webp"
+      ],
+      "licenseEvidenceText": "CC0 (public domain): Free and royalty-free",
+      "sourcePageSha256": "c1d6aacc3b5b99b51459a3264c0d18f03c00218408363a02cf4c1fb0c1cd7ea4"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "AudioObject",
+      "@id": "https://bigsoundbank.com/car-arrival-stop-departure-s0187.html",
+      "url": "https://bigsoundbank.com/car-arrival-stop-departure-s0187.html",
+      "mainEntityOfPage": "https://bigsoundbank.com/car-arrival-stop-departure-s0187.html",
+      "name": "Car (Arrival, Stop, Departure) \u2014 Free Download WAV & MP3 | BigSoundBank",
+      "description": "Arrived from a car that brakes, neutral engine on, then restart and move away. Car: Citroen Saxo 1.1.",
+      "inLanguage": "en-US",
+      "isAccessibleForFree": true,
+      "duration": "PT42S",
+      "uploadDate": "2007-01-26T08:00:00+01:00",
+      "datePublished": "2007-01-26T08:00:00+01:00",
+      "dateModified": "2007-01-26T08:00:00+01:00",
+      "encoding": [
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/wav",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/bwf-en/0187.wav",
+          "contentSize": "3625206"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aiff",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aiff/0187.aiff",
+          "contentSize": "3624096"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mpeg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/mp3/0187.mp3",
+          "contentSize": "829256"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/ogg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/ogg/0187.ogg",
+          "contentSize": "1171831"
+        }
+      ],
+      "license": "https://bigsoundbank.com/licenses.html",
+      "keywords": "automobile,car,saxo,engine,brake,braking,start,speed,vehicle,citroen,car,engine,braking,move,moving,moved,start,starting,vehicle,drive,startup,arrive,arriving,braking,road,thermal",
+      "author": {
+        "@type": "Person",
+        "name": "Joseph Sardin"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "BigSoundBank"
+      },
+      "translationOfWork": {
+        "@id": "https://lasonotheque.org/voiture-arrivee-arret-depart-s0187.html"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "5.8",
+        "bestRating": "10",
+        "worstRating": "0",
+        "ratingCount": 45,
+        "reviewCount": 45
+      },
+      "licenseEvidenceText": "CC0 (public domain): Free and royalty-free",
+      "sourcePageSha256": "5d66c06f42c166c0d2e9cf2a8cd81a794d5d40776fc42aab03372ba72787a8ba"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "AudioObject",
+      "@id": "https://bigsoundbank.com/small-tractor-s0499.html",
+      "url": "https://bigsoundbank.com/small-tractor-s0499.html",
+      "mainEntityOfPage": "https://bigsoundbank.com/small-tractor-s0499.html",
+      "name": "Small Tractor \u2014 Free Sound Effect Download | BigSoundBank",
+      "description": "Engine sound of a small tractor driving toward the mic, making a U-turn, and driving away.",
+      "inLanguage": "en-US",
+      "isAccessibleForFree": true,
+      "duration": "PT23S",
+      "uploadDate": "2012-02-03T08:00:00+01:00",
+      "datePublished": "2012-02-03T08:00:00+01:00",
+      "dateModified": "2012-02-03T08:00:00+01:00",
+      "encoding": [
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/wav",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/bwf-en/0499.wav",
+          "contentSize": "2128492"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aiff",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aiff/0499.aiff",
+          "contentSize": "2127450"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mpeg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/mp3/0499.mp3",
+          "contentSize": "889088"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/ogg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/ogg/0499.ogg",
+          "contentSize": "685230"
+        }
+      ],
+      "license": "https://bigsoundbank.com/licenses.html",
+      "keywords": "engine,motor,tractor,thermal",
+      "author": {
+        "@type": "Person",
+        "name": "Joseph Sardin"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "BigSoundBank"
+      },
+      "translationOfWork": {
+        "@id": "https://lasonotheque.org/petit-tracteur-s0499.html"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "7.6",
+        "bestRating": "10",
+        "worstRating": "0",
+        "ratingCount": 13,
+        "reviewCount": 13
+      },
+      "licenseEvidenceText": "CC0 (public domain): Free and royalty-free",
+      "sourcePageSha256": "1bfcfd66f5ad37d26d68666119b9b95e4cbc17a55932ec56b2c68f72d7c4ef82"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "AudioObject",
+      "@id": "https://bigsoundbank.com/sniff-s0784.html",
+      "url": "https://bigsoundbank.com/sniff-s0784.html",
+      "mainEntityOfPage": "https://bigsoundbank.com/sniff-s0784.html",
+      "name": "Sniff \u2014 Free Sound Effect Download | BigSoundBank",
+      "description": "Stuffy nose.",
+      "inLanguage": "en-US",
+      "isAccessibleForFree": true,
+      "duration": "PT8S",
+      "uploadDate": "2013-12-27T11:00:49+01:00",
+      "datePublished": "2013-12-27T11:00:49+01:00",
+      "dateModified": "2013-12-27T11:00:49+01:00",
+      "encoding": [
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/wav",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/bwf-en/0784.wav",
+          "contentSize": "718340"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/aiff",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/aiff/0784.aiff",
+          "contentSize": "717282"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/mpeg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/mp3/0784.mp3",
+          "contentSize": "301568"
+        },
+        {
+          "@type": "MediaObject",
+          "encodingFormat": "audio/ogg",
+          "contentUrl": "https://bigsoundbank.com/UPLOAD/ogg/0784.ogg",
+          "contentSize": "247810"
+        }
+      ],
+      "license": "https://bigsoundbank.com/licenses.html",
+      "keywords": "stuffy,sniff,sniffing,sniffle",
+      "author": {
+        "@type": "Person",
+        "name": "Joseph Sardin"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "BigSoundBank"
+      },
+      "translationOfWork": {
+        "@id": "https://lasonotheque.org/renifler-s0784.html"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "3.5",
+        "bestRating": "10",
+        "worstRating": "0",
+        "ratingCount": 8,
+        "reviewCount": 8
+      },
+      "licenseEvidenceText": "CC0 (public domain): Free and royalty-free",
+      "sourcePageSha256": "717e2b3d9f1581175bdd45a34acf012c95c57442d916fce3ea8302f14daa6ae6"
+    }
+  ],
+  "newIDs": [
+    "rec-add-drone-takeoff",
+    "rec-add-drone-steady",
+    "rec-add-drone-pass-designed",
+    "rec-add-helicopter-rotor",
+    "rec-add-helicopter-pass",
+    "rec-add-helicopter-interior",
+    "rec-add-car-start-depart",
+    "rec-add-car-arrive-stop",
+    "rec-add-car-rev",
+    "rec-add-small-tractor",
+    "rec-add-sports-car-accelerate",
+    "rec-add-brake-hard",
+    "rec-add-brake-soft",
+    "rec-add-tire-squeal-long",
+    "rec-add-fart-short",
+    "rec-add-fart-comic",
+    "rec-add-yawn",
+    "rec-add-duck-quacks",
+    "rec-add-gong-soft",
+    "rec-add-gong-loud",
+    "rec-add-sniffles-man",
+    "rec-add-sniff-stuffy",
+    "rec-add-propeller-pass",
+    "rec-add-geese",
+    "rec-add-oops",
+    "rec-add-chuckle",
+    "rec-add-chuckle-quiet",
+    "rec-add-jet-pass",
+    "rec-add-jet-takeoff",
+    "rec-add-throat-clear",
+    "rec-add-car-squealing-takeoff"
+  ],
+  "humanListeningReview": false,
+  "additionalSources": [
+    {
+      "source": "https://directory.audio/sound-effects/animals/36926-canada-geese-honking-loudly",
+      "author": "freesman",
+      "download": "https://directory.audio/media/fc_local_media/audio_preview/canada-geese-honking-loudly.mp3",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "licenseEvidence": "https://directory.audio/sound-effects/animals/36926-canada-geese-honking-loudly",
+      "sourceSha256": "298ef996daa0acf384b86d4a668f40af10b15bb8b266681177ec8b59da5609c1"
+    },
+    {
+      "source": "https://www.partnersinrhyme.com/soundfx/PUBLIC-DOMAIN-SOUNDS/screams.shtml",
+      "author": "Partners in Rhyme public-domain collection",
+      "download": "https://www.partnersinrhyme.com/files/sounds1/MP3/PUBLIC-DOMAIN-SOUNDS/SCREAMS/Oops.mp3",
+      "license": "Public Domain",
+      "licenseURL": "https://www.partnersinrhyme.com/soundfx/PUBLIC-DOMAIN-SOUNDS/screams.shtml",
+      "licenseEvidence": "https://www.partnersinrhyme.com/soundfx/PUBLIC-DOMAIN-SOUNDS/screams.shtml",
+      "sourceSha256": "695bd5700d202330d0bb97cbd1d5584645bfe5885d2517f969a9b93020059d7e"
+    },
+    {
+      "source": "https://freesound.org/s/119450/",
+      "author": "lmbubec",
+      "download": "https://cdn.memesoundboards.org/sfx/chuckle-sound-effect.mp3",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "licenseEvidence": "https://memesoundboards.org/sound/chuckle-sound-effect/",
+      "sourceSha256": "20bf4160a14dcddd6ed3ff14025163d3431ca936438e4a83e05f06d78fd5298d"
+    },
+    {
+      "source": "https://freesound.org/s/670297/",
+      "author": "Kinoton",
+      "download": "https://cdn.memesoundboards.org/sfx/airplane-sound-effect.mp3",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "licenseEvidence": "https://memesoundboards.org/sound/airplane-sound-effect/",
+      "sourceSha256": "4e4038881c505896d185220dc66b61193e6d78154fc951895e920e662ae866d3"
+    },
+    {
+      "source": "https://github.com/ALEX11BR/AltSFX",
+      "author": "ALEX11BR; source recording by cliftonmcarlson",
+      "download": "https://raw.githubusercontent.com/ALEX11BR/AltSFX/master/src/wav/09.wav",
+      "license": "CC-BY-3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0/",
+      "licenseEvidence": "https://github.com/ALEX11BR/AltSFX/blob/master/readme.txt",
+      "sourceSha256": "94c4bb33ae0c0076f92137db34dc2fdc64d79ba99f465b0c695ae336425e16f8"
+    },
+    {
+      "source": "https://soundbible.com/782-Clearing-Throat-Male.html",
+      "author": "Mike Koenig",
+      "download": "https://soundbible.com/grab.php?id=782&type=mp3",
+      "license": "CC-BY-3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0/",
+      "licenseEvidence": "https://soundbible.com/782-Clearing-Throat-Male.html",
+      "sourceSha256": "fdd0d45bc76ac86463beff9dbaa3e25ce83d0e9805f150ce8ff0a23d3e8f7120"
+    }
+  ]
+}

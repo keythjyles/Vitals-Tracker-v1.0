@@ -1,7 +1,7 @@
 {
   "schema": "SxLock-library-1.0",
-  "version": "1.2",
-  "retrievedAt": "2026-10-20",
+  "version": "1.7",
+  "retrievedAt": "2026-10-26",
   "description": "CC0 recorded sound effects. Hosted copies with source, mirror, license and transformation provenance. Three original SxLock sounds retained separately.",
   "sounds": [
     {
@@ -1425,7 +1425,14 @@
         "rms": 0.09609
       },
       "builtin": true,
-      "recording": true
+      "recording": true,
+      "tags": [
+        "hen",
+        "hens",
+        "chicken",
+        "chickens",
+        "clucking"
+      ]
     },
     {
       "id": "rec-esc-engine",
@@ -1545,7 +1552,12 @@
         "rms": 0.071524
       },
       "builtin": true,
-      "recording": true
+      "recording": true,
+      "tags": [
+        "cough",
+        "coughs",
+        "coughing"
+      ]
     },
     {
       "id": "rec-esc-glass-breaking",
@@ -1689,7 +1701,12 @@
         "rms": 0.049221
       },
       "builtin": true,
-      "recording": true
+      "recording": true,
+      "tags": [
+        "sneeze",
+        "sneezes",
+        "sneezing"
+      ]
     },
     {
       "id": "rec-esc-rooster",
@@ -1713,7 +1730,13 @@
         "rms": 0.082513
       },
       "builtin": true,
-      "recording": true
+      "recording": true,
+      "tags": [
+        "rooster",
+        "roosters",
+        "cock",
+        "crowing"
+      ]
     },
     {
       "id": "rec-esc-sea-waves",
@@ -1832,7 +1855,13 @@
         "rms": 0.112375
       },
       "builtin": true,
-      "recording": true
+      "recording": true,
+      "tags": [
+        "burp",
+        "belch",
+        "belches",
+        "belching"
+      ]
     },
     {
       "id": "rec-perc-bell2",
@@ -2222,6 +2251,954 @@
         "decodedPeak": 0.672777,
         "rms": 0.132312
       },
+      "builtin": true,
+      "recording": true,
+      "tags": [
+        "awe",
+        "aww",
+        "aw",
+        "reaction"
+      ]
+    },
+    {
+      "id": "rec-add-drone-takeoff",
+      "name": "Drone \u00b7 start, takeoff and depart",
+      "category": "Aircraft",
+      "author": "Joseph Sardin",
+      "source": "https://bigsoundbank.com/drone-1-s3545.html",
+      "licenseEvidence": "https://bigsoundbank.com/drone-1-s3545.html",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "download": "https://bigsoundbank.com/UPLOAD/mp3/3545.mp3",
+      "url": "sounds/add-drone-takeoff.mp3",
+      "duration": 17.712086167800454,
+      "bytes": 284790,
+      "sha256": "ba017e98176274030107e90dbcd813fb991c570aaaa1a11630688047078d4d48",
+      "sourceSha256": "515a9a36a6981b90001a4d687aeb914e26f40ea15d2da535be390165e612265f",
+      "transformation": "Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.724281921; no timing or pitch change. No human auditory approval claimed.",
+      "verification": {
+        "decodedPeak": 0.6058868765830994,
+        "rms": 0.031478408724069595
+      },
+      "tags": [
+        "drone",
+        "quadcopter",
+        "take off",
+        "takeoff"
+      ],
+      "addedIn": "1.7",
+      "builtin": true,
+      "recording": true
+    },
+    {
+      "id": "rec-add-drone-steady",
+      "name": "Drone \u00b7 rotor / hover bed",
+      "category": "Aircraft",
+      "author": "Joseph Sardin",
+      "source": "https://bigsoundbank.com/drone-4-s3548.html",
+      "licenseEvidence": "https://bigsoundbank.com/drone-4-s3548.html",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "download": "https://bigsoundbank.com/UPLOAD/mp3/3548.mp3",
+      "url": "sounds/add-drone-steady.mp3",
+      "duration": 11.664013605442177,
+      "bytes": 187823,
+      "sha256": "6d5886e4daf804bcea45272a137c633ec11b08a5ceb172b2b7d711bfce95d8a5",
+      "sourceSha256": "ea94dcfced6ec75dff0a0c7bb0f994531efae78a83c4900c559e341e4e44d4c2",
+      "transformation": "Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.764237633; no timing or pitch change. No human auditory approval claimed.",
+      "verification": {
+        "decodedPeak": 0.601739227771759,
+        "rms": 0.07075574994087219
+      },
+      "tags": [
+        "drone",
+        "small engine",
+        "hover",
+        "hovering"
+      ],
+      "addedIn": "1.7",
+      "builtin": true,
+      "recording": true
+    },
+    {
+      "id": "rec-add-drone-pass-designed",
+      "name": "Drone \u00b7 pass-by (designed)",
+      "category": "Aircraft",
+      "author": "Joseph Sardin",
+      "source": "https://bigsoundbank.com/drone-4-s3548.html",
+      "licenseEvidence": "https://bigsoundbank.com/drone-4-s3548.html",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "download": "https://bigsoundbank.com/UPLOAD/mp3/3548.mp3",
+      "url": "sounds/add-drone-pass-designed.mp3",
+      "duration": 8.0,
+      "bytes": 129309,
+      "sha256": "fae2a3fb8ed3ea796a7c8cf900ab7148568fa417e2c949fccd539ba2d425124b",
+      "sourceSha256": "ea94dcfced6ec75dff0a0c7bb0f994531efae78a83c4900c559e341e4e44d4c2",
+      "transformation": "Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.764237633; additional filters: atrim=0:8,asetpts=PTS-STARTPTS,afade=t=in:d=2.5,afade=t=out:st=5.5:d=2.5 No human auditory approval claimed.",
+      "verification": {
+        "decodedPeak": 0.5092883110046387,
+        "rms": 0.04999454319477081
+      },
+      "tags": [
+        "drone",
+        "passing",
+        "flyby"
+      ],
+      "addedIn": "1.7",
+      "builtin": true,
+      "recording": true
+    },
+    {
+      "id": "rec-add-helicopter-rotor",
+      "name": "Helicopter \u00b7 rotor / hover bed",
+      "category": "Aircraft",
+      "author": "Joseph Sardin",
+      "source": "https://bigsoundbank.com/helicopter-2-s0264.html",
+      "licenseEvidence": "https://bigsoundbank.com/helicopter-2-s0264.html",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "download": "https://bigsoundbank.com/UPLOAD/mp3/0264.mp3",
+      "url": "sounds/add-helicopter-rotor.mp3",
+      "duration": 4.989387755102041,
+      "bytes": 81027,
+      "sha256": "760bdacbe4b4263f3f69e97266aa53567a3db70a016773b6964da17dea6b95bb",
+      "sourceSha256": "b96ae85d036c5d0c6977fa9665811c4ae0d2bad663e24dc19acb702547c22cec",
+      "transformation": "Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.542582006; no timing or pitch change. No human auditory approval claimed.",
+      "verification": {
+        "decodedPeak": 0.6024157404899597,
+        "rms": 0.12810233235359192
+      },
+      "tags": [
+        "helicopter",
+        "hover",
+        "hovering"
+      ],
+      "addedIn": "1.7",
+      "builtin": true,
+      "recording": true
+    },
+    {
+      "id": "rec-add-helicopter-pass",
+      "name": "Helicopter \u00b7 pass-by",
+      "category": "Aircraft",
+      "author": "Joseph Sardin",
+      "source": "https://bigsoundbank.com/helicopter-transition-s0113.html",
+      "licenseEvidence": "https://bigsoundbank.com/helicopter-transition-s0113.html",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "download": "https://bigsoundbank.com/UPLOAD/mp3/0113.mp3",
+      "url": "sounds/add-helicopter-pass.mp3",
+      "duration": 17.110204081632652,
+      "bytes": 274932,
+      "sha256": "a2c2770f5018ecb16759bb892efd91a106be585078893c335377911d00cca350",
+      "sourceSha256": "840e66fd7a27824db161927ddba32ac65ab5f1c509401bd57005f0fbc3b2e652",
+      "transformation": "Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.892675428; no timing or pitch change. No human auditory approval claimed.",
+      "verification": {
+        "decodedPeak": 0.5986471176147461,
+        "rms": 0.07640476524829865
+      },
+      "tags": [
+        "helicopter",
+        "passing",
+        "flyby"
+      ],
+      "addedIn": "1.7",
+      "builtin": true,
+      "recording": true
+    },
+    {
+      "id": "rec-add-helicopter-interior",
+      "name": "Helicopter \u00b7 interior rotor",
+      "category": "Aircraft",
+      "author": "Joseph Sardin",
+      "source": "https://bigsoundbank.com/helicopter-1-s0263.html",
+      "licenseEvidence": "https://bigsoundbank.com/helicopter-1-s0263.html",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "download": "https://bigsoundbank.com/UPLOAD/mp3/0263.mp3",
+      "url": "sounds/add-helicopter-interior.mp3",
+      "duration": 6.321632653061225,
+      "bytes": 102343,
+      "sha256": "1332388f2fdb0a1df407653ecc099f3af5cd229e120901c5dbf9dc66717f39ac",
+      "sourceSha256": "d921e8721cd352c2e78426aefc72b8bfef2d954abb106ddd0428a19bde3c6929",
+      "transformation": "Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.723383894; no timing or pitch change. No human auditory approval claimed.",
+      "verification": {
+        "decodedPeak": 0.6033538579940796,
+        "rms": 0.1799030900001526
+      },
+      "tags": [
+        "helicopter",
+        "hover",
+        "engine"
+      ],
+      "addedIn": "1.7",
+      "builtin": true,
+      "recording": true
+    },
+    {
+      "id": "rec-add-car-start-depart",
+      "name": "Car \u00b7 start and drive away",
+      "category": "Cars & engines",
+      "author": "Joseph Sardin",
+      "source": "https://bigsoundbank.com/car-starting-and-departure-s0189.html",
+      "licenseEvidence": "https://bigsoundbank.com/car-starting-and-departure-s0189.html",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "download": "https://bigsoundbank.com/UPLOAD/mp3/0189.mp3",
+      "url": "sounds/add-car-start-depart.mp3",
+      "duration": 24.42448979591837,
+      "bytes": 391982,
+      "sha256": "581bbab3891090bc63e1b930fb516730f12f015e708e3d79bfad01dd038dc8a1",
+      "sourceSha256": "5c2cb80e518c1757911f22f85ef0bc92e455478280b63ed7fa9fbe9db0c37a0a",
+      "transformation": "Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.633846623; no timing or pitch change. No human auditory approval claimed.",
+      "verification": {
+        "decodedPeak": 0.5888625383377075,
+        "rms": 0.02990085817873478
+      },
+      "tags": [
+        "car",
+        "engine",
+        "take off",
+        "takeoff"
+      ],
+      "addedIn": "1.7",
+      "builtin": true,
+      "recording": true
+    },
+    {
+      "id": "rec-add-car-arrive-stop",
+      "name": "Car \u00b7 arrive, brake, idle and depart",
+      "category": "Cars & engines",
+      "author": "Joseph Sardin",
+      "source": "https://bigsoundbank.com/car-arrival-stop-departure-s0187.html",
+      "licenseEvidence": "https://bigsoundbank.com/car-arrival-stop-departure-s0187.html",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "download": "https://bigsoundbank.com/UPLOAD/mp3/0187.mp3",
+      "url": "sounds/add-car-arrive-stop.mp3",
+      "duration": 41.142857142857146,
+      "bytes": 659476,
+      "sha256": "1a98ff9976b5053c1cc9d3ff9daf8d70e85ea7f3088dba4c9f4ee6f52e73ddf5",
+      "sourceSha256": "7d2284a9e942c860b3e652ba1e56223399482dc2aa0cdc30821e141cc5cd096f",
+      "transformation": "Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.636424639; no timing or pitch change. No human auditory approval claimed.",
+      "verification": {
+        "decodedPeak": 0.6004204750061035,
+        "rms": 0.031843941658735275
+      },
+      "tags": [
+        "car",
+        "braking",
+        "brakes",
+        "soft"
+      ],
+      "addedIn": "1.7",
+      "builtin": true,
+      "recording": true
+    },
+    {
+      "id": "rec-add-car-rev",
+      "name": "Car engine \u00b7 revs",
+      "category": "Cars & engines",
+      "author": "Joseph Sardin",
+      "source": "https://bigsoundbank.com/car-engine-2-s0291.html",
+      "licenseEvidence": "https://bigsoundbank.com/car-engine-2-s0291.html",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "download": "https://bigsoundbank.com/UPLOAD/mp3/0291.mp3",
+      "url": "sounds/add-car-rev.mp3",
+      "duration": 6.582857142857143,
+      "bytes": 106520,
+      "sha256": "4075e049aa3a7102e9c2cd53aad6cf9f75c209aab3ace73fc3e0fbe3f32448ab",
+      "sourceSha256": "b9c69ade2a488a9227f173641278e4fec1a59fc000ee41986281aba3a3998ed2",
+      "transformation": "Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.751135082; no timing or pitch change. No human auditory approval claimed.",
+      "verification": {
+        "decodedPeak": 0.606664776802063,
+        "rms": 0.1280798614025116
+      },
+      "tags": [
+        "car",
+        "engine",
+        "accelerate",
+        "acceleration"
+      ],
+      "addedIn": "1.7",
+      "builtin": true,
+      "recording": true
+    },
+    {
+      "id": "rec-add-small-tractor",
+      "name": "Small tractor \u00b7 engine pass-by",
+      "category": "Cars & engines",
+      "author": "Joseph Sardin",
+      "source": "https://bigsoundbank.com/small-tractor-s0499.html",
+      "licenseEvidence": "https://bigsoundbank.com/small-tractor-s0499.html",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "download": "https://bigsoundbank.com/UPLOAD/mp3/0499.mp3",
+      "url": "sounds/add-small-tractor.mp3",
+      "duration": 22.2,
+      "bytes": 356162,
+      "sha256": "263ba26b643b9e91ccacc3f95c0b3ad8912a7e6b5321b71c26f7f64941d834aa",
+      "sourceSha256": "bf9b28b1ea32e9b38ac8d681d27e07a8033374a8195d63590f5088ed5992c1e6",
+      "transformation": "Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.620446756; no timing or pitch change. No human auditory approval claimed.",
+      "verification": {
+        "decodedPeak": 0.6140969395637512,
+        "rms": 0.09771367907524109
+      },
+      "tags": [
+        "small engine",
+        "motor",
+        "tractor"
+      ],
+      "addedIn": "1.7",
+      "builtin": true,
+      "recording": true
+    },
+    {
+      "id": "rec-add-sports-car-accelerate",
+      "name": "Sports car \u00b7 acceleration",
+      "category": "Cars & engines",
+      "author": "Joseph Sardin",
+      "source": "https://bigsoundbank.com/acceleration-aston-martin-s0600.html",
+      "licenseEvidence": "https://bigsoundbank.com/acceleration-aston-martin-s0600.html",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "download": "https://bigsoundbank.com/UPLOAD/mp3/0600.mp3",
+      "url": "sounds/add-sports-car-accelerate.mp3",
+      "duration": 6.552018140589569,
+      "bytes": 105804,
+      "sha256": "2426a4adea2f4f1027b6f2d9e120171dc2fc4f522a022897df33e4934a9d8a65",
+      "sourceSha256": "1b36a329d373770b96af3182c0d5d2309e29cf32c506e99642f7b24ded58a824",
+      "transformation": "Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.636730388; no timing or pitch change. No human auditory approval claimed.",
+      "verification": {
+        "decodedPeak": 0.5988150835037231,
+        "rms": 0.056614119559526443
+      },
+      "tags": [
+        "car",
+        "engine",
+        "takeoff",
+        "take off"
+      ],
+      "addedIn": "1.7",
+      "builtin": true,
+      "recording": true
+    },
+    {
+      "id": "rec-add-brake-hard",
+      "name": "Braking \u00b7 hard tire squeal",
+      "category": "Cars & engines",
+      "author": "Joseph Sardin",
+      "source": "https://bigsoundbank.com/screeching-tires-1-s2368.html",
+      "licenseEvidence": "https://bigsoundbank.com/screeching-tires-1-s2368.html",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "download": "https://bigsoundbank.com/UPLOAD/mp3/2368.mp3",
+      "url": "sounds/add-brake-hard.mp3",
+      "duration": 2.2080045351473925,
+      "bytes": 36461,
+      "sha256": "cda60b93e4607f89ae789d9f7bb232d445cc1f6ad468a7c861463bae501989ac",
+      "sourceSha256": "27acdf2db9b9d28dd2ed21adba1f98bc62cb64eb3a23299154efdcf0d430e25f",
+      "transformation": "Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.626056872; no timing or pitch change. No human auditory approval claimed.",
+      "verification": {
+        "decodedPeak": 0.6063950657844543,
+        "rms": 0.13201752305030823
+      },
+      "tags": [
+        "car",
+        "brake",
+        "brakes",
+        "braking",
+        "hard",
+        "screech",
+        "skid"
+      ],
+      "addedIn": "1.7",
+      "builtin": true,
+      "recording": true
+    },
+    {
+      "id": "rec-add-brake-soft",
+      "name": "Braking \u00b7 soft squeal (designed)",
+      "category": "Cars & engines",
+      "author": "Joseph Sardin",
+      "source": "https://bigsoundbank.com/screeching-tires-1-s2368.html",
+      "licenseEvidence": "https://bigsoundbank.com/screeching-tires-1-s2368.html",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "download": "https://bigsoundbank.com/UPLOAD/mp3/2368.mp3",
+      "url": "sounds/add-brake-soft.mp3",
+      "duration": 1.8,
+      "bytes": 29774,
+      "sha256": "5a116ab474d95d4b72f5aa5a1b4bfa2d479adcf42ce8a0b2d02a53807e45d1be",
+      "sourceSha256": "27acdf2db9b9d28dd2ed21adba1f98bc62cb64eb3a23299154efdcf0d430e25f",
+      "transformation": "Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.626056872; additional filters: atrim=0:1.8,asetpts=PTS-STARTPTS,lowpass=f=2200,afade=t=out:st=1.3:d=0.5,volume=0.4 No human auditory approval claimed.",
+      "verification": {
+        "decodedPeak": 0.24553631246089935,
+        "rms": 0.05110787972807884
+      },
+      "tags": [
+        "car",
+        "brake",
+        "brakes",
+        "braking",
+        "soft",
+        "skid"
+      ],
+      "addedIn": "1.7",
+      "builtin": true,
+      "recording": true
+    },
+    {
+      "id": "rec-add-tire-squeal-long",
+      "name": "Tires \u00b7 long squeal",
+      "category": "Cars & engines",
+      "author": "Joseph Sardin",
+      "source": "https://bigsoundbank.com/screeching-tires-4-s2371.html",
+      "licenseEvidence": "https://bigsoundbank.com/screeching-tires-4-s2371.html",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "download": "https://bigsoundbank.com/UPLOAD/mp3/2371.mp3",
+      "url": "sounds/add-tire-squeal-long.mp3",
+      "duration": 6.815986394557823,
+      "bytes": 110022,
+      "sha256": "db02fc5145af859dbb890658988b71811273cd82b2948eb0867ad0a63403e567",
+      "sourceSha256": "8fd6c7ccb01a22a7991328dc9c334c96521e26186d81224ad681eff2a99942dd",
+      "transformation": "Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.677516683; no timing or pitch change. No human auditory approval claimed.",
+      "verification": {
+        "decodedPeak": 0.5989072322845459,
+        "rms": 0.07911617308855057
+      },
+      "tags": [
+        "car",
+        "tire",
+        "tyre",
+        "squealing",
+        "screeching",
+        "burnout"
+      ],
+      "addedIn": "1.7",
+      "builtin": true,
+      "recording": true
+    },
+    {
+      "id": "rec-add-fart-short",
+      "name": "Fart \u00b7 short",
+      "category": "Human reactions",
+      "author": "Joseph Sardin",
+      "source": "https://bigsoundbank.com/flatulence-1-s0111.html",
+      "licenseEvidence": "https://bigsoundbank.com/flatulence-1-s0111.html",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "download": "https://bigsoundbank.com/UPLOAD/mp3/0111.mp3",
+      "url": "sounds/add-fart-short.mp3",
+      "duration": 1.5412244897959184,
+      "bytes": 25828,
+      "sha256": "1982c1709833d90c2a6ebd622831863f7a8aafabf76b949d6a912661f2530003",
+      "sourceSha256": "af0bd18fa72d3b08f2c11cbc8ab973421db503e7b087e7249ef3143cb5ae4611",
+      "transformation": "Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 2.985136763; no timing or pitch change. No human auditory approval claimed.",
+      "verification": {
+        "decodedPeak": 0.6043119430541992,
+        "rms": 0.07455532252788544
+      },
+      "tags": [
+        "farts",
+        "flatulence"
+      ],
+      "addedIn": "1.7",
+      "builtin": true,
+      "recording": true
+    },
+    {
+      "id": "rec-add-fart-comic",
+      "name": "Fart \u00b7 comic imitation",
+      "category": "Human reactions",
+      "author": "Joseph Sardin",
+      "source": "https://bigsoundbank.com/flatulence-2-s0240.html",
+      "licenseEvidence": "https://bigsoundbank.com/flatulence-2-s0240.html",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "download": "https://bigsoundbank.com/UPLOAD/mp3/0240.mp3",
+      "url": "sounds/add-fart-comic.mp3",
+      "duration": 0.4179591836734694,
+      "bytes": 7878,
+      "sha256": "5f6f60142c8797e5e89063c52f3acad2716500ab2df4b9d6692636fdab7a8f2a",
+      "sourceSha256": "8a089456c1bb6280e80ecb9b9e4b88814166dedcf529676e9bffdf9f83097035",
+      "transformation": "Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.803404877; no timing or pitch change. No human auditory approval claimed.",
+      "verification": {
+        "decodedPeak": 0.6029396057128906,
+        "rms": 0.14235614240169525
+      },
+      "tags": [
+        "farts",
+        "flatulence"
+      ],
+      "addedIn": "1.7",
+      "builtin": true,
+      "recording": true
+    },
+    {
+      "id": "rec-add-yawn",
+      "name": "Yawn \u00b7 man",
+      "category": "Human reactions",
+      "author": "Joseph Sardin",
+      "source": "https://bigsoundbank.com/yawn-1-s1406.html",
+      "licenseEvidence": "https://bigsoundbank.com/yawn-1-s1406.html",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "download": "https://bigsoundbank.com/UPLOAD/mp3/1406.mp3",
+      "url": "sounds/add-yawn.mp3",
+      "duration": 5.124852607709751,
+      "bytes": 83273,
+      "sha256": "007d5d35b3b3270bac895041754fd0c43ed06e39c688f9dabbbb81a0cf8bdf6c",
+      "sourceSha256": "733906ac85c4f76074f6c7b40180532104df6eb55e1c23b68e9a88d9602994ed",
+      "transformation": "Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.624309393; no timing or pitch change. No human auditory approval claimed.",
+      "verification": {
+        "decodedPeak": 0.6184872984886169,
+        "rms": 0.0533335879445076
+      },
+      "tags": [
+        "yawns",
+        "sleepy",
+        "tired"
+      ],
+      "addedIn": "1.7",
+      "builtin": true,
+      "recording": true
+    },
+    {
+      "id": "rec-add-duck-quacks",
+      "name": "Ducks \u00b7 quacking",
+      "category": "Animals & nature",
+      "author": "Joseph Sardin",
+      "source": "https://bigsoundbank.com/ducks-s0276.html",
+      "licenseEvidence": "https://bigsoundbank.com/ducks-s0276.html",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "download": "https://bigsoundbank.com/UPLOAD/mp3/0276.mp3",
+      "url": "sounds/add-duck-quacks.mp3",
+      "duration": 21.78612244897959,
+      "bytes": 349771,
+      "sha256": "f1c9e7803d298f47d810f1c8e0527dd6172c69d93f673333be8c47a80fb4338b",
+      "sourceSha256": "903714a0b30891c0923ab25a72045450fe7a6112ba9f2cd9aab653222678a144",
+      "transformation": "Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 1.069344194; no timing or pitch change. No human auditory approval claimed.",
+      "verification": {
+        "decodedPeak": 0.6015911102294922,
+        "rms": 0.03785446658730507
+      },
+      "tags": [
+        "ducks",
+        "duck",
+        "quack"
+      ],
+      "addedIn": "1.7",
+      "builtin": true,
+      "recording": true
+    },
+    {
+      "id": "rec-add-gong-soft",
+      "name": "Gong \u00b7 soft strike",
+      "category": "Bells & gongs",
+      "author": "Joseph Sardin",
+      "source": "https://bigsoundbank.com/gong-sweet-s1482.html",
+      "licenseEvidence": "https://bigsoundbank.com/gong-sweet-s1482.html",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "download": "https://bigsoundbank.com/UPLOAD/mp3/1482.mp3",
+      "url": "sounds/add-gong-soft.mp3",
+      "duration": 12.735396825396826,
+      "bytes": 204900,
+      "sha256": "b115d244ebd9914589d048cf22d803d07d4b860a41178501e5474297059787ec",
+      "sourceSha256": "d893ca1f337cef0f4391d5e9fbddaf0c42a8d2a283e8d4ca8188e166f344e29e",
+      "transformation": "Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.627141835; no timing or pitch change. No human auditory approval claimed.",
+      "verification": {
+        "decodedPeak": 0.6016415953636169,
+        "rms": 0.10327703505754471
+      },
+      "tags": [
+        "gong",
+        "soft",
+        "gentle"
+      ],
+      "addedIn": "1.7",
+      "builtin": true,
+      "recording": true
+    },
+    {
+      "id": "rec-add-gong-loud",
+      "name": "Gong \u00b7 loud strike",
+      "category": "Bells & gongs",
+      "author": "Joseph Sardin",
+      "source": "https://bigsoundbank.com/gong-very-strong-s1485.html",
+      "licenseEvidence": "https://bigsoundbank.com/gong-very-strong-s1485.html",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "download": "https://bigsoundbank.com/UPLOAD/mp3/1485.mp3",
+      "url": "sounds/add-gong-loud.mp3",
+      "duration": 13.853718820861678,
+      "bytes": 222872,
+      "sha256": "1498c5a394d34a4378e5ee0513a22a3743ea033d8c606ecf16a21986a9ed9613",
+      "sourceSha256": "799968deef4f4fbdb78efe359fa475a9d9730ae6a61e2c4b1497947ad5c238f3",
+      "transformation": "Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.624173779; no timing or pitch change. No human auditory approval claimed.",
+      "verification": {
+        "decodedPeak": 0.6160878539085388,
+        "rms": 0.04850566014647484
+      },
+      "tags": [
+        "gong",
+        "hard",
+        "strong"
+      ],
+      "addedIn": "1.7",
+      "builtin": true,
+      "recording": true
+    },
+    {
+      "id": "rec-add-sniffles-man",
+      "name": "Sniffles \u00b7 quick nose sniffs",
+      "category": "Human reactions",
+      "author": "Joseph Sardin",
+      "source": "https://bigsoundbank.com/man-sniffing-s1095.html",
+      "licenseEvidence": "https://bigsoundbank.com/man-sniffing-s1095.html",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "download": "https://bigsoundbank.com/UPLOAD/mp3/1095.mp3",
+      "url": "sounds/add-sniffles-man.mp3",
+      "duration": 20.604104308390024,
+      "bytes": 330705,
+      "sha256": "206a4b9365eca14307078f5a3f51fb9f2b1fcb2be7dfdf4ce9b793a87a76d1ca",
+      "sourceSha256": "5506bd57a63ef11e1053b7d2e8b8f4dbe16ab025e65c8cd54d03f97feb9f7a17",
+      "transformation": "Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.652474854; no timing or pitch change. No human auditory approval claimed.",
+      "verification": {
+        "decodedPeak": 0.6083918213844299,
+        "rms": 0.016279658302664757
+      },
+      "tags": [
+        "sniffle",
+        "sniffles",
+        "sniff",
+        "nose"
+      ],
+      "addedIn": "1.7",
+      "builtin": true,
+      "recording": true
+    },
+    {
+      "id": "rec-add-sniff-stuffy",
+      "name": "Sniff \u00b7 stuffy nose",
+      "category": "Human reactions",
+      "author": "Joseph Sardin",
+      "source": "https://bigsoundbank.com/sniff-s0784.html",
+      "licenseEvidence": "https://bigsoundbank.com/sniff-s0784.html",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "download": "https://bigsoundbank.com/UPLOAD/mp3/0784.mp3",
+      "url": "sounds/add-sniff-stuffy.mp3",
+      "duration": 7.512018140589569,
+      "bytes": 121269,
+      "sha256": "ca8a4a29df8ae76a09b88cdb15b178cfb62a0b42a95bc7bf89de7cf2cdff21a5",
+      "sourceSha256": "cee1b0db78142baf3b8a14cd6a1dba7b13ecc2519e4dcf06e841a5e250698d59",
+      "transformation": "Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.741501317; no timing or pitch change. No human auditory approval claimed.",
+      "verification": {
+        "decodedPeak": 0.5706958770751953,
+        "rms": 0.025137364864349365
+      },
+      "tags": [
+        "sniffle",
+        "sniffles",
+        "sniff",
+        "nose"
+      ],
+      "addedIn": "1.7",
+      "builtin": true,
+      "recording": true
+    },
+    {
+      "id": "rec-add-propeller-pass",
+      "name": "Propeller plane \u00b7 pass-by",
+      "category": "Aircraft",
+      "author": "Joseph Sardin",
+      "source": "https://bigsoundbank.com/passage-of-small-propeller-plane-s2478.html",
+      "licenseEvidence": "https://bigsoundbank.com/passage-of-small-propeller-plane-s2478.html",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "download": "https://bigsoundbank.com/UPLOAD/mp3/2478.mp3",
+      "url": "sounds/add-propeller-pass.mp3",
+      "duration": 16.055986394557824,
+      "bytes": 258040,
+      "sha256": "f7f8ca1f88fa1ed6d385b355446190711559857955ab2adbfc32020e8ac6be67",
+      "sourceSha256": "b6dbb35ad90c8c5f3662f67ad3b175552ab3f9effdefae8c1be5f8721af16967",
+      "transformation": "Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.773293284; no timing or pitch change. No human auditory approval claimed.",
+      "verification": {
+        "decodedPeak": 0.5995924472808838,
+        "rms": 0.03520016372203827
+      },
+      "tags": [
+        "propeller",
+        "plane",
+        "airplane",
+        "passing",
+        "flyby"
+      ],
+      "addedIn": "1.7",
+      "builtin": true,
+      "recording": true
+    },
+    {
+      "id": "rec-add-geese",
+      "name": "Geese \u00b7 honking",
+      "category": "Animals & nature",
+      "author": "freesman",
+      "source": "https://directory.audio/sound-effects/animals/36926-canada-geese-honking-loudly",
+      "download": "https://directory.audio/media/fc_local_media/audio_preview/canada-geese-honking-loudly.mp3",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "licenseEvidence": "https://directory.audio/sound-effects/animals/36926-canada-geese-honking-loudly",
+      "url": "sounds/add-geese.mp3",
+      "duration": 16.0,
+      "bytes": 257181,
+      "sha256": "340507d4609b5ac276446a2d7da49e1f5e340d8373907c8b123b6e900d92f9b5",
+      "sourceSha256": "298ef996daa0acf384b86d4a668f40af10b15bb8b266681177ec8b59da5609c1",
+      "transformation": "Source decoded and converted to mono 44.1 kHz 128 kbps MP3 with linear gain 0.568724632. Additional filters: atrim=0:16,asetpts=PTS-STARTPTS",
+      "verification": {
+        "decodedPeak": 0.46431881189346313,
+        "rms": 0.03234174847602844
+      },
+      "addedIn": "1.7",
+      "tags": [
+        "geese",
+        "goose",
+        "honk"
+      ],
+      "builtin": true,
+      "recording": true
+    },
+    {
+      "id": "rec-add-oops",
+      "name": "Oops \u00b7 spoken reaction",
+      "category": "Human reactions",
+      "author": "Partners in Rhyme public-domain collection",
+      "source": "https://www.partnersinrhyme.com/soundfx/PUBLIC-DOMAIN-SOUNDS/screams.shtml",
+      "download": "https://www.partnersinrhyme.com/files/sounds1/MP3/PUBLIC-DOMAIN-SOUNDS/SCREAMS/Oops.mp3",
+      "license": "Public Domain",
+      "licenseURL": "https://www.partnersinrhyme.com/soundfx/PUBLIC-DOMAIN-SOUNDS/screams.shtml",
+      "licenseEvidence": "https://www.partnersinrhyme.com/soundfx/PUBLIC-DOMAIN-SOUNDS/screams.shtml",
+      "url": "sounds/add-oops.mp3",
+      "duration": 0.5163718820861678,
+      "bytes": 9381,
+      "sha256": "9fecc01f9713f92f42439ab0025a1696587ad7073b28f39a61464dc4316457b4",
+      "sourceSha256": "695bd5700d202330d0bb97cbd1d5584645bfe5885d2517f969a9b93020059d7e",
+      "transformation": "Source decoded and converted to mono 44.1 kHz 128 kbps MP3 with linear gain 0.665771544. No timing or pitch change.",
+      "verification": {
+        "decodedPeak": 0.5999007225036621,
+        "rms": 0.10894329845905304
+      },
+      "addedIn": "1.7",
+      "tags": [
+        "oops",
+        "whoops",
+        "mistake"
+      ],
+      "builtin": true,
+      "recording": true
+    },
+    {
+      "id": "rec-add-chuckle",
+      "name": "Laugh \u00b7 short chuckle",
+      "category": "Human reactions",
+      "author": "lmbubec",
+      "source": "https://freesound.org/s/119450/",
+      "download": "https://cdn.memesoundboards.org/sfx/chuckle-sound-effect.mp3",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "licenseEvidence": "https://memesoundboards.org/sound/chuckle-sound-effect/",
+      "url": "sounds/add-chuckle.mp3",
+      "duration": 1.1260997732426303,
+      "bytes": 19270,
+      "sha256": "3f166ee96cbc3869807b555f2154c0cef3eb1865746039f613ae69a87bf9729f",
+      "sourceSha256": "20bf4160a14dcddd6ed3ff14025163d3431ca936438e4a83e05f06d78fd5298d",
+      "transformation": "Source decoded and converted to mono 44.1 kHz 128 kbps MP3 with linear gain 0.597934902. No timing or pitch change.",
+      "verification": {
+        "decodedPeak": 0.5997070670127869,
+        "rms": 0.07013396918773651
+      },
+      "addedIn": "1.7",
+      "tags": [
+        "laugh",
+        "laughing",
+        "chuckle"
+      ],
+      "builtin": true,
+      "recording": true
+    },
+    {
+      "id": "rec-add-chuckle-quiet",
+      "name": "Laugh \u00b7 under breath (quiet edit)",
+      "category": "Human reactions",
+      "author": "lmbubec",
+      "source": "https://freesound.org/s/119450/",
+      "download": "https://cdn.memesoundboards.org/sfx/chuckle-sound-effect.mp3",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "licenseEvidence": "https://memesoundboards.org/sound/chuckle-sound-effect/",
+      "url": "sounds/add-chuckle-quiet.mp3",
+      "duration": 1.1260997732426303,
+      "bytes": 19270,
+      "sha256": "65aeb318d4a93aac39ae7d34c682eca886116872c7c05d136d7711924a46dbb7",
+      "sourceSha256": "20bf4160a14dcddd6ed3ff14025163d3431ca936438e4a83e05f06d78fd5298d",
+      "transformation": "Source decoded and converted to mono 44.1 kHz 128 kbps MP3 with linear gain 0.597934902. Additional filters: volume=0.25",
+      "verification": {
+        "decodedPeak": 0.14972911775112152,
+        "rms": 0.017526360228657722
+      },
+      "addedIn": "1.7",
+      "tags": [
+        "under breath",
+        "laugh",
+        "laughing",
+        "quiet",
+        "chuckle"
+      ],
+      "builtin": true,
+      "recording": true
+    },
+    {
+      "id": "rec-add-jet-pass",
+      "name": "Jet \u00b7 flyover",
+      "category": "Aircraft",
+      "author": "Kinoton",
+      "source": "https://freesound.org/s/670297/",
+      "download": "https://cdn.memesoundboards.org/sfx/airplane-sound-effect.mp3",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "licenseEvidence": "https://memesoundboards.org/sound/airplane-sound-effect/",
+      "url": "sounds/add-jet-pass.mp3",
+      "duration": 2.119047619047619,
+      "bytes": 35152,
+      "sha256": "aa72583599a48192f192fcf1aa5058d5bbe240e746d38bb76e4fb3f076f092d4",
+      "sourceSha256": "4e4038881c505896d185220dc66b61193e6d78154fc951895e920e662ae866d3",
+      "transformation": "Source decoded and converted to mono 44.1 kHz 128 kbps MP3 with linear gain 1.528638601. No timing or pitch change.",
+      "verification": {
+        "decodedPeak": 0.5993890762329102,
+        "rms": 0.21417047083377838
+      },
+      "addedIn": "1.7",
+      "tags": [
+        "jet",
+        "plane",
+        "airplane",
+        "passing",
+        "flyby"
+      ],
+      "builtin": true,
+      "recording": true
+    },
+    {
+      "id": "rec-add-jet-takeoff",
+      "name": "Jet \u00b7 distant takeoff [credit required]",
+      "category": "Aircraft",
+      "author": "ALEX11BR; source recording by cliftonmcarlson",
+      "source": "https://github.com/ALEX11BR/AltSFX",
+      "download": "https://raw.githubusercontent.com/ALEX11BR/AltSFX/master/src/wav/09.wav",
+      "license": "CC-BY-3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0/",
+      "licenseEvidence": "https://github.com/ALEX11BR/AltSFX/blob/master/readme.txt",
+      "url": "sounds/add-jet-takeoff.mp3",
+      "duration": 4.045056689342403,
+      "bytes": 65693,
+      "sha256": "4c5baa1cd1e5e4efb82e58f3f5102382aba8591dcc11f655cb9f2cfb838d116b",
+      "sourceSha256": "94c4bb33ae0c0076f92137db34dc2fdc64d79ba99f465b0c695ae336425e16f8",
+      "transformation": "Source decoded and converted to mono 44.1 kHz 128 kbps MP3 with linear gain 0.735380054. No timing or pitch change.",
+      "verification": {
+        "decodedPeak": 0.5989731550216675,
+        "rms": 0.08451316505670547
+      },
+      "addedIn": "1.7",
+      "tags": [
+        "jet",
+        "plane",
+        "airplane",
+        "takeoff",
+        "take off"
+      ],
+      "builtin": true,
+      "recording": true,
+      "attribution": "Jet \u00b7 distant takeoff by ALEX11BR; source recording by cliftonmcarlson, https://github.com/ALEX11BR/AltSFX, licensed CC BY 3.0 (https://creativecommons.org/licenses/by/3.0/). Converted and level-matched for SxLock."
+    },
+    {
+      "id": "rec-add-throat-clear",
+      "name": "Throat clearing \u00b7 male [credit required]",
+      "category": "Human reactions",
+      "author": "Mike Koenig",
+      "source": "https://soundbible.com/782-Clearing-Throat-Male.html",
+      "download": "https://soundbible.com/grab.php?id=782&type=mp3",
+      "license": "CC-BY-3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0/",
+      "licenseEvidence": "https://soundbible.com/782-Clearing-Throat-Male.html",
+      "url": "sounds/add-throat-clear.mp3",
+      "duration": 2.0,
+      "bytes": 33062,
+      "sha256": "9ab2b1a529f251df2fda7fa5a6d5861485a7e362df4882bb7f3fef20bd8dd289",
+      "sourceSha256": "fdd0d45bc76ac86463beff9dbaa3e25ce83d0e9805f150ce8ff0a23d3e8f7120",
+      "transformation": "Source decoded and converted to mono 44.1 kHz 128 kbps MP3 with linear gain 0.645715117. No timing or pitch change.",
+      "verification": {
+        "decodedPeak": 0.5978649854660034,
+        "rms": 0.06061309203505516
+      },
+      "addedIn": "1.7",
+      "tags": [
+        "throat clearing",
+        "ahem",
+        "cough"
+      ],
+      "builtin": true,
+      "recording": true,
+      "attribution": "Throat clearing \u00b7 male by Mike Koenig, https://soundbible.com/782-Clearing-Throat-Male.html, licensed CC BY 3.0 (https://creativecommons.org/licenses/by/3.0/). Converted and level-matched for SxLock."
+    },
+    {
+      "id": "rec-add-car-squealing-takeoff",
+      "name": "Car \u00b7 squealing takeoff (designed)",
+      "category": "Cars & engines",
+      "author": "Joseph Sardin; arrangement for SxLock",
+      "source": "https://bigsoundbank.com/acceleration-aston-martin-s0600.html",
+      "licenseEvidence": "https://bigsoundbank.com/acceleration-aston-martin-s0600.html",
+      "license": "CC0-1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "components": [
+        {
+          "id": "rec-add-sports-car-accelerate",
+          "source": "https://bigsoundbank.com/acceleration-aston-martin-s0600.html",
+          "license": "CC0-1.0",
+          "sha256": "2426a4adea2f4f1027b6f2d9e120171dc2fc4f522a022897df33e4934a9d8a65"
+        },
+        {
+          "id": "rec-add-brake-hard",
+          "source": "https://bigsoundbank.com/screeching-tires-1-s2368.html",
+          "license": "CC0-1.0",
+          "sha256": "cda60b93e4607f89ae789d9f7bb232d445cc1f6ad468a7c861463bae501989ac"
+        }
+      ],
+      "url": "sounds/add-car-squealing-takeoff.mp3",
+      "duration": 6.552018140589569,
+      "bytes": 105804,
+      "sha256": "ff729291c921beda3bf995c486284ab4dbb21dc95c4afc69657b2db6ebf08c37",
+      "transformation": "Designed composite: recorded Aston Martin acceleration plus tire squeal delayed 150 ms at 65%, summed without automatic normalization, limiter ceiling 0.8. Mono 44.1 kHz / 128 kbps MP3.",
+      "verification": {
+        "decodedPeak": 0.5738044381141663,
+        "rms": 0.0713210478425026
+      },
+      "addedIn": "1.7",
+      "tags": [
+        "car",
+        "takeoff",
+        "take off",
+        "burnout",
+        "squealing tires",
+        "tires",
+        "engine",
+        "acceleration"
+      ],
       "builtin": true,
       "recording": true
     }

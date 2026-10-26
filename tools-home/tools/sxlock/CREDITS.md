@@ -1,6 +1,6 @@
 # SxLock recorded sound library
 
-93 CC0 recorded effects. The original 31 library files are unchanged in version 1.2. Sources, individual license evidence, hashes, processing and decode checks are retained in [library.json](library.json). Existing slide whistles and cricket presets remain separately available. No sounds are inserted automatically.
+124 hosted recorded effects (including designed edits): 122 CC0/public-domain entries and two CC BY 3.0 entries marked “credit required.” The original 31 library files are unchanged in version 1.2. Sources, individual license evidence, hashes, processing and decode checks are retained in [library.json](library.json). Existing slide whistles and cricket presets remain separately available. No sounds are inserted automatically.
 
 ## Ba-dum-tss
 
@@ -933,3 +933,291 @@ vahdena · CC0 1.0
 - Processing: Individually documented CC0 recording; library copy converted to 128 kbps MP3 with linear gain 5.87663417, target -3 dBFS peak. Source download retained unchanged.
 
 Only individually documented CC0 source recordings from ESC are included, rather than the dataset as a whole. All library files decode to finite, non-silent PCM. Audio preferences remain subject to user audition.
+
+
+## R1.7 additions — October 26, 2026
+
+31 new entries. Source MP3 previews/downloads were converted to mono 44.1 kHz / 128 kbps MP3 and level-matched independently. Designed variants are labeled in the list. No paid generation or purchases. Full transformations and SHA-256 hashes are in library.json.
+
+### Drone · start, takeoff and depart
+
+- Author: Joseph Sardin
+- Source: https://bigsoundbank.com/drone-1-s3545.html
+- License: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+- Evidence: https://bigsoundbank.com/drone-1-s3545.html
+- File: `sounds/add-drone-takeoff.mp3`
+- Processing: Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.724281921; no timing or pitch change. No human auditory approval claimed.
+
+### Drone · rotor / hover bed
+
+- Author: Joseph Sardin
+- Source: https://bigsoundbank.com/drone-4-s3548.html
+- License: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+- Evidence: https://bigsoundbank.com/drone-4-s3548.html
+- File: `sounds/add-drone-steady.mp3`
+- Processing: Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.764237633; no timing or pitch change. No human auditory approval claimed.
+
+### Drone · pass-by (designed)
+
+- Author: Joseph Sardin
+- Source: https://bigsoundbank.com/drone-4-s3548.html
+- License: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+- Evidence: https://bigsoundbank.com/drone-4-s3548.html
+- File: `sounds/add-drone-pass-designed.mp3`
+- Processing: Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.764237633; additional filters: atrim=0:8,asetpts=PTS-STARTPTS,afade=t=in:d=2.5,afade=t=out:st=5.5:d=2.5 No human auditory approval claimed.
+
+### Helicopter · rotor / hover bed
+
+- Author: Joseph Sardin
+- Source: https://bigsoundbank.com/helicopter-2-s0264.html
+- License: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+- Evidence: https://bigsoundbank.com/helicopter-2-s0264.html
+- File: `sounds/add-helicopter-rotor.mp3`
+- Processing: Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.542582006; no timing or pitch change. No human auditory approval claimed.
+
+### Helicopter · pass-by
+
+- Author: Joseph Sardin
+- Source: https://bigsoundbank.com/helicopter-transition-s0113.html
+- License: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+- Evidence: https://bigsoundbank.com/helicopter-transition-s0113.html
+- File: `sounds/add-helicopter-pass.mp3`
+- Processing: Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.892675428; no timing or pitch change. No human auditory approval claimed.
+
+### Helicopter · interior rotor
+
+- Author: Joseph Sardin
+- Source: https://bigsoundbank.com/helicopter-1-s0263.html
+- License: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+- Evidence: https://bigsoundbank.com/helicopter-1-s0263.html
+- File: `sounds/add-helicopter-interior.mp3`
+- Processing: Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.723383894; no timing or pitch change. No human auditory approval claimed.
+
+### Car · start and drive away
+
+- Author: Joseph Sardin
+- Source: https://bigsoundbank.com/car-starting-and-departure-s0189.html
+- License: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+- Evidence: https://bigsoundbank.com/car-starting-and-departure-s0189.html
+- File: `sounds/add-car-start-depart.mp3`
+- Processing: Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.633846623; no timing or pitch change. No human auditory approval claimed.
+
+### Car · arrive, brake, idle and depart
+
+- Author: Joseph Sardin
+- Source: https://bigsoundbank.com/car-arrival-stop-departure-s0187.html
+- License: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+- Evidence: https://bigsoundbank.com/car-arrival-stop-departure-s0187.html
+- File: `sounds/add-car-arrive-stop.mp3`
+- Processing: Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.636424639; no timing or pitch change. No human auditory approval claimed.
+
+### Car engine · revs
+
+- Author: Joseph Sardin
+- Source: https://bigsoundbank.com/car-engine-2-s0291.html
+- License: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+- Evidence: https://bigsoundbank.com/car-engine-2-s0291.html
+- File: `sounds/add-car-rev.mp3`
+- Processing: Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.751135082; no timing or pitch change. No human auditory approval claimed.
+
+### Small tractor · engine pass-by
+
+- Author: Joseph Sardin
+- Source: https://bigsoundbank.com/small-tractor-s0499.html
+- License: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+- Evidence: https://bigsoundbank.com/small-tractor-s0499.html
+- File: `sounds/add-small-tractor.mp3`
+- Processing: Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.620446756; no timing or pitch change. No human auditory approval claimed.
+
+### Sports car · acceleration
+
+- Author: Joseph Sardin
+- Source: https://bigsoundbank.com/acceleration-aston-martin-s0600.html
+- License: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+- Evidence: https://bigsoundbank.com/acceleration-aston-martin-s0600.html
+- File: `sounds/add-sports-car-accelerate.mp3`
+- Processing: Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.636730388; no timing or pitch change. No human auditory approval claimed.
+
+### Braking · hard tire squeal
+
+- Author: Joseph Sardin
+- Source: https://bigsoundbank.com/screeching-tires-1-s2368.html
+- License: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+- Evidence: https://bigsoundbank.com/screeching-tires-1-s2368.html
+- File: `sounds/add-brake-hard.mp3`
+- Processing: Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.626056872; no timing or pitch change. No human auditory approval claimed.
+
+### Braking · soft squeal (designed)
+
+- Author: Joseph Sardin
+- Source: https://bigsoundbank.com/screeching-tires-1-s2368.html
+- License: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+- Evidence: https://bigsoundbank.com/screeching-tires-1-s2368.html
+- File: `sounds/add-brake-soft.mp3`
+- Processing: Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.626056872; additional filters: atrim=0:1.8,asetpts=PTS-STARTPTS,lowpass=f=2200,afade=t=out:st=1.3:d=0.5,volume=0.4 No human auditory approval claimed.
+
+### Tires · long squeal
+
+- Author: Joseph Sardin
+- Source: https://bigsoundbank.com/screeching-tires-4-s2371.html
+- License: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+- Evidence: https://bigsoundbank.com/screeching-tires-4-s2371.html
+- File: `sounds/add-tire-squeal-long.mp3`
+- Processing: Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.677516683; no timing or pitch change. No human auditory approval claimed.
+
+### Fart · short
+
+- Author: Joseph Sardin
+- Source: https://bigsoundbank.com/flatulence-1-s0111.html
+- License: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+- Evidence: https://bigsoundbank.com/flatulence-1-s0111.html
+- File: `sounds/add-fart-short.mp3`
+- Processing: Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 2.985136763; no timing or pitch change. No human auditory approval claimed.
+
+### Fart · comic imitation
+
+- Author: Joseph Sardin
+- Source: https://bigsoundbank.com/flatulence-2-s0240.html
+- License: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+- Evidence: https://bigsoundbank.com/flatulence-2-s0240.html
+- File: `sounds/add-fart-comic.mp3`
+- Processing: Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.803404877; no timing or pitch change. No human auditory approval claimed.
+
+### Yawn · man
+
+- Author: Joseph Sardin
+- Source: https://bigsoundbank.com/yawn-1-s1406.html
+- License: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+- Evidence: https://bigsoundbank.com/yawn-1-s1406.html
+- File: `sounds/add-yawn.mp3`
+- Processing: Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.624309393; no timing or pitch change. No human auditory approval claimed.
+
+### Ducks · quacking
+
+- Author: Joseph Sardin
+- Source: https://bigsoundbank.com/ducks-s0276.html
+- License: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+- Evidence: https://bigsoundbank.com/ducks-s0276.html
+- File: `sounds/add-duck-quacks.mp3`
+- Processing: Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 1.069344194; no timing or pitch change. No human auditory approval claimed.
+
+### Gong · soft strike
+
+- Author: Joseph Sardin
+- Source: https://bigsoundbank.com/gong-sweet-s1482.html
+- License: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+- Evidence: https://bigsoundbank.com/gong-sweet-s1482.html
+- File: `sounds/add-gong-soft.mp3`
+- Processing: Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.627141835; no timing or pitch change. No human auditory approval claimed.
+
+### Gong · loud strike
+
+- Author: Joseph Sardin
+- Source: https://bigsoundbank.com/gong-very-strong-s1485.html
+- License: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+- Evidence: https://bigsoundbank.com/gong-very-strong-s1485.html
+- File: `sounds/add-gong-loud.mp3`
+- Processing: Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.624173779; no timing or pitch change. No human auditory approval claimed.
+
+### Sniffles · quick nose sniffs
+
+- Author: Joseph Sardin
+- Source: https://bigsoundbank.com/man-sniffing-s1095.html
+- License: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+- Evidence: https://bigsoundbank.com/man-sniffing-s1095.html
+- File: `sounds/add-sniffles-man.mp3`
+- Processing: Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.652474854; no timing or pitch change. No human auditory approval claimed.
+
+### Sniff · stuffy nose
+
+- Author: Joseph Sardin
+- Source: https://bigsoundbank.com/sniff-s0784.html
+- License: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+- Evidence: https://bigsoundbank.com/sniff-s0784.html
+- File: `sounds/add-sniff-stuffy.mp3`
+- Processing: Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.741501317; no timing or pitch change. No human auditory approval claimed.
+
+### Propeller plane · pass-by
+
+- Author: Joseph Sardin
+- Source: https://bigsoundbank.com/passage-of-small-propeller-plane-s2478.html
+- License: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+- Evidence: https://bigsoundbank.com/passage-of-small-propeller-plane-s2478.html
+- File: `sounds/add-propeller-pass.mp3`
+- Processing: Downloaded source MP3 decoded, mono 44.1 kHz / 128 kbps MP3. Source linear gain 0.773293284; no timing or pitch change. No human auditory approval claimed.
+
+### Geese · honking
+
+- Author: freesman
+- Source: https://directory.audio/sound-effects/animals/36926-canada-geese-honking-loudly
+- License: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+- Evidence: https://directory.audio/sound-effects/animals/36926-canada-geese-honking-loudly
+- File: `sounds/add-geese.mp3`
+- Processing: Source decoded and converted to mono 44.1 kHz 128 kbps MP3 with linear gain 0.568724632. Additional filters: atrim=0:16,asetpts=PTS-STARTPTS
+
+### Oops · spoken reaction
+
+- Author: Partners in Rhyme public-domain collection
+- Source: https://www.partnersinrhyme.com/soundfx/PUBLIC-DOMAIN-SOUNDS/screams.shtml
+- License: Public Domain — https://www.partnersinrhyme.com/soundfx/PUBLIC-DOMAIN-SOUNDS/screams.shtml
+- Evidence: https://www.partnersinrhyme.com/soundfx/PUBLIC-DOMAIN-SOUNDS/screams.shtml
+- File: `sounds/add-oops.mp3`
+- Processing: Source decoded and converted to mono 44.1 kHz 128 kbps MP3 with linear gain 0.665771544. No timing or pitch change.
+
+### Laugh · short chuckle
+
+- Author: lmbubec
+- Source: https://freesound.org/s/119450/
+- License: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+- Evidence: https://memesoundboards.org/sound/chuckle-sound-effect/
+- File: `sounds/add-chuckle.mp3`
+- Processing: Source decoded and converted to mono 44.1 kHz 128 kbps MP3 with linear gain 0.597934902. No timing or pitch change.
+
+### Laugh · under breath (quiet edit)
+
+- Author: lmbubec
+- Source: https://freesound.org/s/119450/
+- License: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+- Evidence: https://memesoundboards.org/sound/chuckle-sound-effect/
+- File: `sounds/add-chuckle-quiet.mp3`
+- Processing: Source decoded and converted to mono 44.1 kHz 128 kbps MP3 with linear gain 0.597934902. Additional filters: volume=0.25
+
+### Jet · flyover
+
+- Author: Kinoton
+- Source: https://freesound.org/s/670297/
+- License: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+- Evidence: https://memesoundboards.org/sound/airplane-sound-effect/
+- File: `sounds/add-jet-pass.mp3`
+- Processing: Source decoded and converted to mono 44.1 kHz 128 kbps MP3 with linear gain 1.528638601. No timing or pitch change.
+
+### Jet · distant takeoff [credit required]
+
+- Author: ALEX11BR; source recording by cliftonmcarlson
+- Source: https://github.com/ALEX11BR/AltSFX
+- License: CC-BY-3.0 — https://creativecommons.org/licenses/by/3.0/
+- Evidence: https://github.com/ALEX11BR/AltSFX/blob/master/readme.txt
+- File: `sounds/add-jet-takeoff.mp3`
+- Processing: Source decoded and converted to mono 44.1 kHz 128 kbps MP3 with linear gain 0.735380054. No timing or pitch change.
+- Required credit: Jet · distant takeoff by ALEX11BR; source recording by cliftonmcarlson, https://github.com/ALEX11BR/AltSFX, licensed CC BY 3.0 (https://creativecommons.org/licenses/by/3.0/). Converted and level-matched for SxLock.
+
+### Throat clearing · male [credit required]
+
+- Author: Mike Koenig
+- Source: https://soundbible.com/782-Clearing-Throat-Male.html
+- License: CC-BY-3.0 — https://creativecommons.org/licenses/by/3.0/
+- Evidence: https://soundbible.com/782-Clearing-Throat-Male.html
+- File: `sounds/add-throat-clear.mp3`
+- Processing: Source decoded and converted to mono 44.1 kHz 128 kbps MP3 with linear gain 0.645715117. No timing or pitch change.
+- Required credit: Throat clearing · male by Mike Koenig, https://soundbible.com/782-Clearing-Throat-Male.html, licensed CC BY 3.0 (https://creativecommons.org/licenses/by/3.0/). Converted and level-matched for SxLock.
+
+### Car · squealing takeoff (designed)
+
+- Author: Joseph Sardin; arrangement for SxLock
+- Source: https://bigsoundbank.com/acceleration-aston-martin-s0600.html
+- License: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+- Evidence: https://bigsoundbank.com/acceleration-aston-martin-s0600.html
+- File: `sounds/add-car-squealing-takeoff.mp3`
+- Processing: Designed composite: recorded Aston Martin acceleration plus tire squeal delayed 150 ms at 65%, summed without automatic normalization, limiter ceiling 0.8. Mono 44.1 kHz / 128 kbps MP3.
+- Component source: https://bigsoundbank.com/acceleration-aston-martin-s0600.html (CC0-1.0)
+- Component source: https://bigsoundbank.com/screeching-tires-1-s2368.html (CC0-1.0)

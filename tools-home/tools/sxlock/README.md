@@ -1,4 +1,4 @@
-# SxLock 1.2
+# SxLock R1.7
 
 Phone-first sound-effect placement. Open `index.html` over HTTP(S).
 
@@ -45,3 +45,13 @@ An export locks immediately, including preparation, so repeated taps cannot star
 Autosave keeps the previous project as recovery fallback and flushes on page hide. Export-interruption markers survive a tab crash; the next open restores saved placements and prompts to reselect the source video. Copy troubleshooting provides local error/stage information. No telemetry is sent.
 
 Checks: all 62 new files decoded to finite non-silent PCM below full scale; 93 total files match their recorded SHA-256. The chunked renderer matched a full 20-second loop/one-shot reference exactly at PCM16 precision, including both eight-second boundaries. A 93-sound cache stress check remained below its target; overlapping exports were rejected, and failing jobs released their lock. The specific physical-phone crash reported by the user has not been reproduced, so these changes address identified memory and concurrency risks without asserting a confirmed root cause.
+
+## R1.7 — expanded playable library
+
+31 additions bring the hosted manifest to 124 entries; the existing connected bee recording remains separate. New engines, vehicle/aircraft beds and pass-bys, hard/soft braking, designed squealing takeoff, reactions, gongs, farts, yawns, ducks, geese, sniffles and chuckles supplement existing belches, sneezes, coughs, hens, roosters and aww. Designed motion/quiet variants are labeled. Hover beds are rotor recordings, not guaranteed seamless loops.
+
+Open `?library=1&v=1.7` for the uncluttered listening view. Each row has a duration, Play, Use and favorite star. Search matches all entered words across names, categories and tags (including belch/burp and awe/aww). All / New sounds / Favorites filters work in the main list and placement chooser. One preview plays at a time; Stop preview or leaving the tab stops it. Use opens the existing placement controls without inserting until Add is pressed. Favorites are browser preferences; sound assets are hosted in the repository.
+
+Two additions use CC BY 3.0 (male throat clearing and distant jet takeoff). They are labeled **credit required**. Copy credits for placed sounds under Sources & credits; include them in the published description. Project snapshots retain license metadata and Copy full handoff includes required credits. Other new entries are CC0/public domain.
+
+Tool identity: GS-TOOL-SXLOCK · R1.7. Original sounds and IDs remain unchanged. No paid APIs were used.

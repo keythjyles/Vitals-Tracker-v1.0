@@ -1,0 +1,180 @@
+{
+  "release": "1.7",
+  "manifestEntries": 124,
+  "added": 31,
+  "allManifestHashesPass": true,
+  "original93AssetsUnchanged": true,
+  "allRequestedSearchTermsCovered": true,
+  "newFilesDecodeFiniteNonSilentBelowFullScale": true,
+  "checks": [
+    {
+      "id": "rec-add-drone-takeoff",
+      "seconds": 17.712086167800454,
+      "peak": 0.6058868765830994
+    },
+    {
+      "id": "rec-add-drone-steady",
+      "seconds": 11.664013605442177,
+      "peak": 0.601739227771759
+    },
+    {
+      "id": "rec-add-drone-pass-designed",
+      "seconds": 8.0,
+      "peak": 0.5092883110046387
+    },
+    {
+      "id": "rec-add-helicopter-rotor",
+      "seconds": 4.989387755102041,
+      "peak": 0.6024157404899597
+    },
+    {
+      "id": "rec-add-helicopter-pass",
+      "seconds": 17.110204081632652,
+      "peak": 0.5986471176147461
+    },
+    {
+      "id": "rec-add-helicopter-interior",
+      "seconds": 6.321632653061225,
+      "peak": 0.6033538579940796
+    },
+    {
+      "id": "rec-add-car-start-depart",
+      "seconds": 24.42448979591837,
+      "peak": 0.5888625383377075
+    },
+    {
+      "id": "rec-add-car-arrive-stop",
+      "seconds": 41.142857142857146,
+      "peak": 0.6004204750061035
+    },
+    {
+      "id": "rec-add-car-rev",
+      "seconds": 6.582857142857143,
+      "peak": 0.606664776802063
+    },
+    {
+      "id": "rec-add-small-tractor",
+      "seconds": 22.2,
+      "peak": 0.6140969395637512
+    },
+    {
+      "id": "rec-add-sports-car-accelerate",
+      "seconds": 6.552018140589569,
+      "peak": 0.5988150835037231
+    },
+    {
+      "id": "rec-add-brake-hard",
+      "seconds": 2.2080045351473925,
+      "peak": 0.6063950657844543
+    },
+    {
+      "id": "rec-add-brake-soft",
+      "seconds": 1.8,
+      "peak": 0.24553631246089935
+    },
+    {
+      "id": "rec-add-tire-squeal-long",
+      "seconds": 6.815986394557823,
+      "peak": 0.5989072322845459
+    },
+    {
+      "id": "rec-add-fart-short",
+      "seconds": 1.5412244897959184,
+      "peak": 0.6043119430541992
+    },
+    {
+      "id": "rec-add-fart-comic",
+      "seconds": 0.4179591836734694,
+      "peak": 0.6029396057128906
+    },
+    {
+      "id": "rec-add-yawn",
+      "seconds": 5.124852607709751,
+      "peak": 0.6184872984886169
+    },
+    {
+      "id": "rec-add-duck-quacks",
+      "seconds": 21.78612244897959,
+      "peak": 0.6015911102294922
+    },
+    {
+      "id": "rec-add-gong-soft",
+      "seconds": 12.735396825396826,
+      "peak": 0.6016415953636169
+    },
+    {
+      "id": "rec-add-gong-loud",
+      "seconds": 13.853718820861678,
+      "peak": 0.6160878539085388
+    },
+    {
+      "id": "rec-add-sniffles-man",
+      "seconds": 20.604104308390024,
+      "peak": 0.6083918213844299
+    },
+    {
+      "id": "rec-add-sniff-stuffy",
+      "seconds": 7.512018140589569,
+      "peak": 0.5706958770751953
+    },
+    {
+      "id": "rec-add-propeller-pass",
+      "seconds": 16.055986394557824,
+      "peak": 0.5995924472808838
+    },
+    {
+      "id": "rec-add-geese",
+      "seconds": 16.0,
+      "peak": 0.46431881189346313
+    },
+    {
+      "id": "rec-add-oops",
+      "seconds": 0.5163718820861678,
+      "peak": 0.5999007225036621
+    },
+    {
+      "id": "rec-add-chuckle",
+      "seconds": 1.1260997732426303,
+      "peak": 0.5997070670127869
+    },
+    {
+      "id": "rec-add-chuckle-quiet",
+      "seconds": 1.1260997732426303,
+      "peak": 0.14972911775112152
+    },
+    {
+      "id": "rec-add-jet-pass",
+      "seconds": 2.119047619047619,
+      "peak": 0.5993890762329102
+    },
+    {
+      "id": "rec-add-jet-takeoff",
+      "seconds": 4.045056689342403,
+      "peak": 0.5989731550216675
+    },
+    {
+      "id": "rec-add-throat-clear",
+      "seconds": 2.0,
+      "peak": 0.5978649854660034
+    },
+    {
+      "id": "rec-add-car-squealing-takeoff",
+      "seconds": 6.552018140589569,
+      "peak": 0.5738044381141663
+    }
+  ],
+  "auditoryApproval": false,
+  "browserChecks": {
+    "environment": "Chrome via managed preview",
+    "releaseIdentityVisible": true,
+    "libraryOnlyViewHidesEditor": true,
+    "tagSearchUnderBreath": true,
+    "gongPreviewStarted": true,
+    "chucklePreviewStarted": true,
+    "previewEndedStatus": true,
+    "favoriteToggleAndFilter": true,
+    "useOpensPlacementWithoutInserting": true,
+    "creditRequiredRowVisible": true,
+    "physicalAndroidTested": false
+  }
+}
