@@ -28,3 +28,11 @@ Dropbox EP4 folder contains the base, trimmed overlay, and metadata-repaired pri
 5. Every functional change must include visible version bump and change rationale in the same commit, plus verification evidence before calling it production-ready.
 
 **Open issues:** Authenticate PreviewLock reliably; test live Dropbox picker; test AspectLock R17 full-length render; provide stable publishable MP4 export; automate output registration. No live end-to-end validation yet.
+
+
+## AspectLock R18 — Mint truck preloading and corrected EP4 bed (2026-10-26)
+**Source:** User supplied 17397.mp4 (approved mint truck v03) and 17361.mp4 (bed with incorrect playback-duration behavior).
+**Media repair:** Transcoded 17361.mp4 to constant 25 fps H.264/AAC with faststart, 1667 video frames, 66.68 s container/video duration and 66.624 s audio duration. The 4.40 s silent mint animation contains 110 frames at 25 fps.
+**Dropbox:** Both uploaded and confirmed completed in /Grill Sergeant/Animation Lab/GS_EP4/ as GS_EP4_MINT_TRUCK_F976_1085_BLUE_SILENT_v03.mp4 and GS_EP4_BED_CFR25_METADATA_FIXED_v02.mp4. Neither source file was overwritten.
+**Tool change:** AspectLock R18 now defaults to these two filenames, start frame 976 (39.04 s), and sorts its library by Dropbox server_modified first (rather than client_modified). Direct selection remains available. Commit 0b5616dcd5fe7ddb14123b5f42a43f510a994457.
+**Unverified:** Browser/API visibility of newly uploaded files, actual preloaded playback in the user's authenticated browser, and a new complete rendered composite. Do not mark approved or published.
