@@ -46,6 +46,51 @@ main{padding:0 6px 10px;display:flex;flex-direction:column}
 #viewerDock .row button{min-height:44px;font-size:13px}
 #liveIndicator{left:6px;right:6px}
 #viewerDock.collapsed #viewerContent{display:none}
+
+/* SXLOCK LAYOUT-ONLY R1.9a — FUNCTIONALITY LOCKED.
+   No engine, IDs, handlers, mixing, recording, export or library logic may change
+   without explicit owner approval. Android right-thumb layout: right/bottom only. */
+@media(max-width:600px){
+  main{padding:0 5px 8px}
+  .title-row{min-height:26px}
+  .title-row h1{font-size:17px;margin:2px 0}
+  .title-row button{min-height:27px;min-width:30px;padding:2px 5px;font-size:17px}
+  main>a,main>.small{font-size:10px;line-height:1.1;margin:1px 0}
+  #libraryOnly{align-self:flex-end;min-height:28px;font-size:12px;padding:2px 8px}
+  #editorDock{grid-template-columns:minmax(0,1fr) 64px;gap:3px}
+  #editorDock>.sticky{align-self:end}
+  #editorDock>.sticky>.row{gap:3px}
+  #editorDock>.sticky button{min-height:32px;padding:3px 1px;font-size:11px;line-height:1.05;border-radius:5px}
+  #viewerDock{padding:2px}
+  #viewerDock .clock{font-size:12px;min-height:18px;line-height:1.1}
+  #viewerDock video{max-height:35dvh}
+  #viewerDock .record-tools{gap:3px}
+  #viewerDock .record-tools button{min-width:36px;min-height:34px;font-size:16px;padding:1px}
+  #viewerDock .record-tools span{font-size:9px}
+  #viewerDock .row button{min-height:33px;padding:3px 2px;font-size:11px}
+  #collapseViewer{min-height:25px;padding:2px 5px;font-size:10px}
+  #viewerDock .dock-heading{margin-top:1px}
+  #seek{height:20px}
+  .work-area{margin:3px 0;padding:5px 7px;border-radius:7px}
+  .work-area>summary{font-size:15px;padding:1px}
+  .sound-group{padding:3px 5px;margin:3px 0}
+  .sound-group>summary{font-size:14px;padding:2px 0}
+  .sound-library-row{display:grid;grid-template-columns:minmax(0,1fr) repeat(3,auto);gap:3px;padding:3px 0;align-items:center}
+  .sound-label{grid-column:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .sound-label strong{font-size:13px}
+  .sound-label small{font-size:10px;line-height:1.1}
+  .sound-library-row button{min-height:30px;padding:3px 5px;font-size:12px}
+  .filters{grid-template-columns:1fr 1fr;gap:4px}
+  .filters label{font-size:11px;margin:2px 0}
+  .filters select,.filters input{min-height:32px;font-size:13px;padding:3px}
+  .library-actions{gap:3px;margin:3px 0}
+  .library-actions button{min-height:30px;font-size:11px;padding:3px 5px}
+  #libraryInfo,#libraryNowPlaying{font-size:10px;line-height:1.15;margin:2px 0}
+  #status{font-size:10px;line-height:1.2;padding:4px}
+  .clip-row{padding:3px 0}
+  .clip-open{font-size:13px}
+  .clip-action{font-size:12px;min-height:30px}
+}
 </style></head><body><main>
 <a href="../../">← Thicket Tools</a><div class="title-row"><h1>SxLock <small>R1.9</small></h1><button id="infoButton" aria-label="Information and instructions" title="Information and instructions">ⓘ</button></div>
 <p class="small">GS-TOOL-SXLOCK · R1.9</p><button id="libraryOnly" aria-pressed="false">Library only</button><p id="recoveryStatus" class="small" role="status">Restoring project…</p><div id="editorDock"><div class="sticky"><div class="row"><button id="play" class="primary">▶ Play mix</button><button id="restart">↶ Start</button><button id="stop">■ Stop</button></div></div>
@@ -58,5 +103,6 @@ main{padding:0 6px 10px;display:flex;flex-direction:column}
 <dialog id="infoSheet" aria-labelledby="infoTitle"><div class="sheet-head"><h2 id="infoTitle">SxLock information</h2><button id="closeInfo" aria-label="Close information">✕</button></div><h3>Live recording and mixing</h3><p>Tap Rec to start recording your microphone. No video is required. Without a video, the take is saved to My sounds for later placement. With a ready video before its end, playback starts from the current position and the take is also inserted there. The red button and RECORDING indicator flash during capture. Stop finishes the take; Take downloads its original audio.</p><p>Live audio stays separate. After recording, open Mixer to balance Video audio, Effects and Live recordings. Each insertion also has its own volume, timing, trim and loop controls. Mixer levels apply to playback and video/WAV exports; the raw Take download stays unchanged. Headphones prevent the soundtrack entering your microphone.</p><p>Video audio includes any music and ambience already baked into the source. Those parts cannot be separated by this mixer. Imported sounds use the Effects level; microphone takes use Live recordings.</p><h3>Recording library</h3><p>Manage my recordings lists imported audio and microphone takes alphabetically. Delete forever requires a warning confirmation and also removes that recording’s insertions in this project. It deletes this browser’s stored copy, not original files, downloads, Drive files or previously saved project backups. Built-in effects remain available.</p><h3>Working and saving</h3><p class="small">Rec starts microphone capture, with or without a video. Headphones prevent the soundtrack entering your microphone. Each take becomes an editable sound.</p><p class="small video-hint">Tap: pause · Hold: effects menu</p><p class="small">This includes any music and ambience already in your video.</p><p class="small">Every committed edit autosaves in this browser. The original video and your audio are retained for automatic recovery. Wait for Saved locally before closing. Storage failures are shown above the controls. Browser data can be cleared or evicted, so keep original media and project backups in Drive. Project JSON includes your audio and settings; its video reference restores on this browser. On another device, select the original video once.</p><p class="small">Recordings are kept in your browser and included in portable project saves.</p><p class="small">Tap an insertion to edit. One-shots and timed loops can overlap.</p><p class="small">Video export runs in real time. Keep this page visible and your phone awake until complete. MP4 is offered when this browser supports it; otherwise the available format is WebM.</p><p class="small">SxLock is a general-purpose sound-effects tool. Microphone access is requested only when you tap Rec. No account, upload, camera, generation API, or subscription is required.</p><p class="small">Loops repeat from Source IN to the end of this recording.</p><p>Video-synced takes stop when playback stops. All takes stop when the page is hidden. Finish and save your take before leaving. A take is limited to ten minutes or approximately 32 MB to protect phone memory. Browser support determines available recording formats.</p></dialog><dialog id="effectSheet" aria-labelledby="sheetTitle"><div class="sheet-head"><h2 id="sheetTitle">Add effect</h2><button id="closeSheet" aria-label="Close effects menu">✕</button></div><div class="sheet-framebar"><button id="sheetBack" aria-label="Previous frame">◀ Frame</button><output id="sheetClock"></output><button id="sheetForward" aria-label="Next frame">Frame ▶</button></div>
 <div id="sheetBrowse"><button data-stop-preview>■ Stop preview</button><div class="filters"><label>Category<select id="sheetCategory"></select></label><label>Search<input id="sheetSearch" type="search" placeholder="Find a sound"></label></div><div id="sheetLibrary" class="sound-buttons"></div></div>
 <p id="sheetStatus" class="small" role="status"></p><div id="sheetEditor" hidden><div class="selected-sound"><strong id="selectedName"></strong><button id="changeSound">Change</button></div><p id="selectedSource" class="small"></p><div class="row audition-row"><button id="hearSelected">▶ Hear</button><button id="stopAudition">■ Stop sound</button></div><label class="volume-label">Volume <output id="effectVolumeValue">65%</output><input id="effectVolume" type="range" min="0" max="100" value="65"></label><div class="fields"><label>Start (seconds)<input id="effectStart" type="number" min="0" step="0.001" value="0"></label><label>Play length (seconds)<input id="effectDuration" type="number" min="0.001" max="3600" step="0.001"></label></div><label class="loop-label"><input id="effectLoop" type="checkbox"> Loop until play length ends</label><details><summary>Trim source</summary><label>Source IN (seconds)<input id="effectOffset" type="number" min="0" step="0.001" value="0"></label></details><label class="loop-label"><input id="effectEnabled" type="checkbox" checked> Enable this insertion</label><button id="applyEffect" class="primary">Add at this time</button></div>
-</dialog><script src="mp4-duration.js?v=1"></script><script src="sxlock.js?v=1.8-clean-cloud"></script></body></html>
+</dialog><!-- FUNCTIONALITY LOCK: SxLock R1.9 engine, audio, timing, and media operations are owner-approval-only. Layout changes must not modify JS or event wiring. -->
+<script src="mp4-duration.js?v=1"></script><script src="sxlock.js?v=1.8-clean-cloud"></script></body></html>
 
