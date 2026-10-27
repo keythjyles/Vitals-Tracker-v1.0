@@ -125,7 +125,9 @@ async function approveInline(id,data){
  finally{approving.delete(id);refreshInlineLists()}
 }
 
+const deleting=new Set();
 async function deleteInline(id){
+ if(deleting.has(id))return;
  const v=reviewDB[id]||searchRows.get(id);
  // A canonical approved sound is never deleted by an intake rejection.
  if(v?.status==='approved'||v?.cloudAssetId||v?.cloudReceipts?.dropbox?.verified){
@@ -136,6 +138,8 @@ async function deleteInline(id){
   $('status').textContent='Approval/save is in progress. Wait for it to finish before deleting.';
   return;
  }
+ deleting.add(id);
+ refreshInlineLists();
  if(playingId===id){++playVersion;$('preview').pause();$('preview').removeAttribute('src');playingId=null;if(playingObjectURL){URL.revokeObjectURL(playingObjectURL);playingObjectURL=null}}
  // Delete the actual browser-managed audio before discarding its recovery record.
  // Externally hosted search results are not owned by this application.
@@ -149,9 +153,11 @@ async function deleteInline(id){
    tx.onabort=()=>reject(tx.error||Error('Browser audio deletion aborted'));
   });
  }catch(e){
+  deleting.delete(id);refreshInlineLists();
   $('status').textContent='Audio deletion failed; item retained for retry: '+e.message;
   return;
  }
+ deleting.delete(id);
  localFiles.delete(id);
  searchRows.delete(id);
  rejectSound(id);refreshInlineLists();
@@ -173,7 +179,7 @@ function soundRow(id,data){
  const actions=document.createElement('div');actions.className='actions';
  const play=document.createElement('button');play.textContent='▶';play.dataset.playId=id;play.dataset.soundName=v.name;play.setAttribute('aria-label','Play '+v.name);play.onclick=()=>playInline(id,rowState(id,v)).catch(e=>{$('status').textContent='Playback failed: '+e.message});
  const approve=document.createElement('button');approve.textContent=approving.has(id)?'…':v.status==='approved'&&!v.cloudReceipts?.dropbox?.verified?'↻':'✓';approve.title=v.status==='approved'?'Approved':'Approve';approve.className='approve-inline';approve.setAttribute('aria-label',(v.status==='approved'?'Approved ':'Approve ')+v.name);approve.disabled=approving.has(id)||v.cloudReceipts?.dropbox?.verified===true;approve.onclick=()=>approveInline(id,v);
- const remove=document.createElement('button');remove.textContent='✕';remove.setAttribute('aria-label','Delete '+v.name);remove.title='Delete from intake';remove.onclick=()=>deleteInline(id);
+ const remove=document.createElement('button');remove.textContent=deleting.has(id)?'…':'✕';remove.setAttribute('aria-label','Delete '+v.name);remove.title='Delete from intake';remove.disabled=deleting.has(id)||approving.has(id);remove.onclick=()=>deleteInline(id);
  actions.append(play,approve,remove);row.append(info,actions);
  if(v.saveError)approve.title=v.saveError;
  return row;
