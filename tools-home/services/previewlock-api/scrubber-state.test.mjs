@@ -8,7 +8,7 @@ function setup(initial={}){
  let failDelete=false;
  const storage=new Map([['sx-scrubber-review-v2',JSON.stringify(initial)],['gs_previewlock_key','test']]),blobs=new Map(),nodes=new Map(),events=[];
  const node=()=>({children:[],dataset:{},setAttribute(){},append(...v){this.children.push(...v)},prepend(...v){this.children.unshift(...v)},replaceChildren(){this.children=[]},querySelectorAll(){return []},contains(){return false},getBoundingClientRect(){return {top:0,bottom:44}},pause(){},removeAttribute(){},addEventListener(){},removeEventListener(){}});
- const context=vm.createContext({console,Blob,URL,setTimeout,clearTimeout,crypto:webcrypto,Promise,Map,Set,Date,Uint8Array,Number,Array,Error,JSON,encodeURIComponent,structuredClone,
+ const context=vm.createContext({console,Blob,URL,URLSearchParams,setTimeout,clearTimeout,crypto:webcrypto,Promise,Map,Set,Date,Uint8Array,Number,Array,Error,JSON,encodeURIComponent,structuredClone,
   document:{getElementById(id){if(!nodes.has(id))nodes.set(id,node());return nodes.get(id)},createElement:node,querySelectorAll(){return []},querySelector:node},
   window:{scrollY:0,scrollBy(){},scrollTo(){},GSApprovedEffects:{publish(){events.push(JSON.parse(storage.get('sx-scrubber-review-v2')))}}},
   localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},
@@ -146,10 +146,10 @@ test('search decisions disappear immediately and redo returns in that list witho
 });
 
 
-test('queued deletion stays out after reload; a definitive provider failure returns as Play/Delete without a circular pending control',async()=>{
+test('queued and failed deletion stay out after reload because neither offers approval',async()=>{
  const pending={...sound,status:'deleting',reviewState:'delete_pending',cloudAssetId:'commons-12',sha256:saved.sha256};const s=setup({'commons:12':pending});s.run('renderQueue()');assert.equal(s.nodes.get('queue').children.length,0);assert.equal(s.run("visibleDecision('commons:12',reviewDB['commons:12'])"),false);
  s.request(async()=>({persisted:true,assetId:'commons-12',requestId:'failed-delete',complete:false,destinations:{dropbox:{verified:false,error:'Unrecognized managed file'},drive:{verified:false,status:'pending'}}}));
- await s.run("deleteInline('commons:12')");assert.equal(s.state()['commons:12'].reviewState,'delete_failed');assert.equal(s.nodes.get('queue').children.length,1);const buttons=s.run("soundRow('commons:12',reviewDB['commons:12']).children[1].children.map(b=>b.textContent)");assert.deepEqual(Array.from(buttons),['▶','✕']);
+ await s.run("deleteInline('commons:12')");assert.equal(s.state()['commons:12'].reviewState,'delete_failed');assert.equal(s.nodes.get('queue').children.length,0);assert.equal(s.run("visibleDecision('commons:12',reviewDB['commons:12'])"),false);const buttons=s.run("soundRow('commons:12',reviewDB['commons:12']).children[1].children.map(b=>b.textContent)");assert.deepEqual(Array.from(buttons),['▶','✕']);
 });
 
 test('interrupted save stays hidden through an unknown lookup and disappears after verified receipt recovery',async()=>{
@@ -158,4 +158,13 @@ test('interrupted save stays hidden through an unknown lookup and disappears aft
 });
 test('interrupted save returns as redo only after confirmed no saved record exists',async()=>{
  const s=setup({'commons:12':{...sound,reviewState:'saving',cloudAssetId:'commons-12',sha256:saved.sha256,storedBytes:60}});s.request(async()=>{throw Object.assign(Error('not found'),{status:404})});await s.run('resumeUnverifiedSaves()');assert.equal(s.state()['commons:12'].reviewState,'failed');assert.equal(s.run("visibleDecision('commons:12',reviewDB['commons:12'])"),true);
+});
+
+
+test('every rendered decision offers Approve; even a stale pending record with a completed receipt stays hidden',()=>{
+ const s=setup({'commons:12':{...sound,status:'deleting',reviewState:'delete_failed'},'commons:13':{...sound,cloudReceipts:{dropbox:{verified:true}}},'commons:14':{...sound,name:'ready.wav'}});s.run('renderQueue()');assert.deepEqual(s.nodes.get('queue').children.map(r=>r.dataset.soundRow),['commons:14']);assert.equal(s.nodes.get('queueCount').textContent,1);assert.equal(s.run("soundRow('commons:14',reviewDB['commons:14']).children[1].children[1].disabled"),false);assert(s.state()['commons:12'].deleteError===undefined);assert.equal(s.state()['commons:12'].status,'deleting');
+});
+
+test('fresh search also suppresses records that cannot offer Approve',async()=>{
+ const s=setup({'commons:12':{...sound,cloudReceipts:{dropbox:{verified:true}}}});s.run("let offset=0,busy=false,last='',seen=new Set()");s.run(html.slice(html.indexOf('const esc='),html.indexOf("$('go').onclick")));s.run("$('q').value='cricket'");s.context.fetch=async()=>({ok:true,json:async()=>({query:{pages:{one:{pageid:12,title:'File:saved.wav',imageinfo:[{url:'https://example.invalid/a.wav',mime:'audio/wav'}]},two:{pageid:13,title:'File:pending.wav',imageinfo:[{url:'https://example.invalid/b.wav',mime:'audio/wav'}]}}}})});await s.run('search(true)');assert.deepEqual(s.nodes.get('results').children.map(r=>r.dataset.soundRow),['commons:13']);
 });
