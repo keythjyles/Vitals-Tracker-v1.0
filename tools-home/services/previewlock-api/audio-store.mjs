@@ -34,7 +34,7 @@ export async function saveAudio(db,{assetId,name,data,info={},sha256}){
  if(prior?.data.cloudReceipts?.dropbox?.id){meta=await db.meta(prior.data.cloudReceipts.dropbox.id);verify(meta,data);if(meta.path_display!==path){await db.move(meta.path_display,path);meta=await db.meta(meta.id)}}
  else{meta=await db.meta(path);if(!meta){try{await db.write(path,data)}catch(e){if(e.status!==409)throw e}meta=await db.meta(path)}}
  const receipt=verify(meta,data);
- const record={...(prior?.data||{}),schema:'SoundScrubberCloud-1',assetId,name,originalName:prior?.data.originalName||info.originalName||name,sha256:hash,bytes:data.length,status:'approved',approvedAt:prior?.data.approvedAt||info.approvedAt||new Date().toISOString(),metadata:info,renameHistory:[...(prior?.data.renameHistory||[]),...(prior&&prior.data.name!==name?[{from:prior.data.name,to:name,at:new Date().toISOString()}]:[])],cloudReceipts:{...(prior?.data.cloudReceipts||{}),dropbox:receipt,drive:prior?.data.cloudReceipts?.drive||{verified:false,status:'pending'}},updatedAt:new Date().toISOString()};
+ const record={...(prior?.data||{}),schema:'SoundScrubberCloud-1',assetId,name,originalName:prior?.data.originalName||info.originalName||name,sha256:hash,bytes:data.length,status:'approved',approvedAt:prior?.data.approvedAt||info.approvedAt||new Date().toISOString(),metadata:{...info,classification:prior?.data.metadata?.classification||info.classification||null},renameHistory:[...(prior?.data.renameHistory||[]),...(prior&&prior.data.name!==name?[{from:prior.data.name,to:name,at:new Date().toISOString()}]:[])],cloudReceipts:{...(prior?.data.cloudReceipts||{}),dropbox:receipt,drive:prior?.data.cloudReceipts?.drive||{verified:false,status:'pending'}},updatedAt:new Date().toISOString()};
  const bytes=Buffer.from(JSON.stringify(record));await db.write(recordPath,bytes,prior?.rev);const saved=await db.meta(recordPath);if(saved?.size!==bytes.length||saved?.content_hash!==contentHash(bytes))throw new AudioError(502,'Audio saved; metadata verification pending. Retry safely.');
  return {assetId,name,sha256:hash,cloudReceipts:record.cloudReceipts,recordPath,cloudSaveStatus:record.cloudReceipts.drive.verified?'verified':'partial',persisted:true};
 }
@@ -63,9 +63,31 @@ export async function getAudioRecord(db,assetId){
    drive={...r,receiptPath:entry.path_display};break;
   }
  }
+ let classification=record.metadata?.classification||null;
+ if(classification?.method!=='owner')for(const f of files.filter(f=>/^classification-\d{13}\.json$/.test(f.name)).sort((a,b)=>b.name.localeCompare(a.name))){
+  const r=(await db.read(f.path_display))?.data;
+  if(r?.schema==='SoundScrubberClassification-1'&&r.assetId===assetId&&r.sha256===record.sha256&&r.bytes===record.bytes&&validClassification(r.classification)&&r.classification.method==='ai-metadata-v1'){classification=r.classification;break}
+ }
  const receipt=record.cloudReceipts.dropbox,current=await db.meta(receipt.id);
  const dropbox={...receipt,verified:Boolean(current&&current.size===record.bytes&&current.content_hash===receipt.contentHash&&current.path_display===receipt.path)};
- return {assetId,name:record.name,sha256:record.sha256,bytes:record.bytes,cloudReceipts:{dropbox,drive},cloudSaveStatus:drive.verified&&dropbox.verified?'verified':'partial'};
+ return {assetId,name:record.name,sha256:record.sha256,bytes:record.bytes,classification,cloudReceipts:{dropbox,drive},cloudSaveStatus:drive.verified&&dropbox.verified?'verified':'partial'};
+}
+export function validClassification(c){
+ const text=(v,max)=>typeof v==='string'&&v.trim().length>0&&v.length<=max&&!/[\u0000-\u001f<>]/.test(v);
+ return Boolean(c&&c.schema===1&&['owner','ai-metadata-v1','metadata-rules-v1'].includes(c.method)&&text(c.category,80)&&typeof c.subcategory==='string'&&c.subcategory.length<=80&&!/[\u0000-\u001f<>]/.test(c.subcategory)&&[c.tags,c.aliases].every(a=>Array.isArray(a)&&a.length<=40&&a.every(t=>text(t,80))));
+}
+export async function classifyAudio(db,{assetId,sha256,classification}){
+ if(!ID.test(assetId)||!/^[a-f0-9]{64}$/.test(sha256||'')||!validClassification(classification)||classification.method!=='owner')throw new AudioError(400,'Invalid sound classification');
+ await requireNoDeletion(db,assetId);
+ const recordPath=AUDIO_ROOT+'/'+assetId+'/asset.json',prior=await db.read(recordPath);
+ if(!prior)throw new AudioError(404,'Saved audio record not found');
+ const record=prior.data;if(record.status!=='approved'||record.sha256!==sha256)throw new AudioError(409,'Sound identity changed; classification stopped');
+ const receipt=record.cloudReceipts?.dropbox,current=receipt?.id&&await db.meta(receipt.id);
+ if(!current||current.content_hash!==receipt.contentHash||current.size!==record.bytes)throw new AudioError(409,'Saved original changed; classification stopped');
+ const value={schema:1,method:'owner',category:classification.category.trim(),subcategory:classification.subcategory.trim(),tags:[...new Set(classification.tags)],aliases:[...new Set(classification.aliases)],updatedAt:new Date().toISOString()};
+ record.metadata={...record.metadata,classification:value};record.updatedAt=value.updatedAt;
+ await writeVerified(db,recordPath,record,prior.rev);
+ return {assetId,sha256,classification:value,persisted:true};
 }
 async function writeVerified(db,path,value,rev){
  const bytes=Buffer.from(JSON.stringify(value));await db.write(path,bytes,rev);
@@ -92,8 +114,9 @@ export async function deleteAudio(db,{assetId,sha256,name,contentHash:expectedCo
   if(entries.length&&!validName(originalName))throw new AudioError(409,'Original identity needs recovery before deletion');
   const receipts=record?.cloudReceipts?.drive?.verified?[record.cloudReceipts.drive]:[];
   for(const entry of entries){
-   if(entry['.tag']==='folder'||![originalName,'asset.json'].includes(entry.name)&&!/^drive-receipt-\d{13}\.json$/.test(entry.name))throw new AudioError(409,'Unrecognized managed file; deletion stopped');
+   if(entry['.tag']==='folder'||![originalName,'asset.json'].includes(entry.name)&&!/^drive-receipt-\d{13}\.json$/.test(entry.name)&&!/^classification-\d{13}\.json$/.test(entry.name))throw new AudioError(409,'Unrecognized managed file; deletion stopped');
    if(/^drive-receipt-\d{13}\.json$/.test(entry.name)){const r=(await db.read(entry.path_display))?.data;if(r?.assetId!==assetId||r.sha256!==sha256||r.rootFolderId!==DRIVE_LIBRARY_FOLDER)throw new AudioError(409,'Drive receipt identity differs; deletion stopped');receipts.push(r)}
+   if(/^classification-\d{13}\.json$/.test(entry.name)){const r=(await db.read(entry.path_display))?.data;if(r?.schema!=='SoundScrubberClassification-1'||r.assetId!==assetId||r.sha256!==sha256||r.bytes!==(record?.bytes??bytes)||!validClassification(r.classification))throw new AudioError(409,'Classification identity differs; deletion stopped')}
    if(entry.name===originalName){
     const receipt=record?.cloudReceipts?.dropbox;
     if(entry.size!==(record?.bytes??bytes)||entry.content_hash!==(receipt?.contentHash||expectedContentHash)||receipt?.id&&entry.id!==receipt.id)throw new AudioError(409,'Dropbox original differs; deletion stopped');
@@ -123,16 +146,16 @@ export async function deleteAudio(db,{assetId,sha256,name,contentHash:expectedCo
 }
 let active=false;
 export async function handleAudio(req,res,url,token){
- if(!['/api/audio-save','/api/audio-rename','/api/audio-record','/api/audio-delete'].includes(url.pathname))return false;
+ if(!['/api/audio-save','/api/audio-rename','/api/audio-record','/api/audio-delete','/api/audio-classify'].includes(url.pathname))return false;
  const send=(status,data)=>{res.writeHead(status,{'content-type':'application/json','cache-control':'no-store','access-control-allow-origin':'https://keythjyles.github.io'});res.end(JSON.stringify(data))};
  if(url.pathname==='/api/audio-record'&&req.method==='GET'){try{send(200,await getAudioRecord(dropboxClient(token),url.searchParams.get('assetId')||''))}catch(e){send(e.status||502,{error:e.message})}return true}
  if(req.method!=='POST'){send(405,{error:'method_not_allowed'});return true}
  if(req.headers.origin&&req.headers.origin!=='https://keythjyles.github.io'){send(403,{error:'origin_not_allowed'});return true}
  if(active){send(409,{error:'Another audio save is finishing. Retry this sound.'});return true}active=true;
  try{
-  const parts=[];let size=0;for await(const c of req){size+=c.length;if(size>(url.pathname.endsWith('save')?MAX:4096))throw new AudioError(413,'Audio request too large');parts.push(c)}
+  const parts=[];let size=0;for await(const c of req){size+=c.length;if(size>(url.pathname.endsWith('save')?MAX:url.pathname.endsWith('classify')?10000:4096))throw new AudioError(413,'Audio request too large');parts.push(c)}
   const data=Buffer.concat(parts),db=dropboxClient(token);let result;
-  if(!url.pathname.endsWith('save')){let input;try{input=JSON.parse(data.toString())}catch{throw new AudioError(400,'Invalid audio request JSON')}if(!input||typeof input!=='object'||Array.isArray(input))throw new AudioError(400,'Invalid audio request');result=url.pathname.endsWith('delete')?await deleteAudio(db,input):await renameAudio(db,input)}
+  if(!url.pathname.endsWith('save')){let input;try{input=JSON.parse(data.toString())}catch{throw new AudioError(400,'Invalid audio request JSON')}if(!input||typeof input!=='object'||Array.isArray(input))throw new AudioError(400,'Invalid audio request');result=url.pathname.endsWith('delete')?await deleteAudio(db,input):url.pathname.endsWith('classify')?await classifyAudio(db,input):await renameAudio(db,input)}
   else{let info={};try{info=JSON.parse(decodeURIComponent(String(req.headers['x-audio-info']||'%7B%7D')))}catch{throw new AudioError(400,'Invalid audio metadata')}
    if(!info||typeof info!=='object'||Array.isArray(info)||JSON.stringify(info).length>10000)throw new AudioError(400,'Invalid audio metadata');
    result=await saveAudio(db,{assetId:String(req.headers['x-audio-id']||''),name:decodeURIComponent(String(req.headers['x-audio-name']||'')),sha256:String(req.headers['x-audio-sha256']||''),info,data});
@@ -141,3 +164,4 @@ export async function handleAudio(req,res,url,token){
  }catch(e){send(e.status||502,{error:e instanceof AudioError?e.message:url.pathname.endsWith('delete')?'Audio deletion incomplete; retry to verify destinations.':'Audio save failed; original preserved. Retry safely.'})}finally{active=false}
  return true;
 }
+

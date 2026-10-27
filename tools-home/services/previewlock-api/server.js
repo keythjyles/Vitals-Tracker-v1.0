@@ -21,7 +21,7 @@ async function token(){
 async function metadata(path,t){const r=await fetch('https://api.dropboxapi.com/2/files/get_metadata',{method:'POST',headers:{authorization:'Bearer '+t,'content-type':'application/json'},body:JSON.stringify({path})});if(!r.ok)throw Error('Dropbox metadata failed');return r.json()}
 const server=http.createServer(async(req,res)=>{
  const u=new URL(req.url||'/',BASE);
- if(req.method==='GET'&&['/','/health'].includes(u.pathname))return send(res,200,{service:'gs-previewlock-api',status:'ok',contentReviewVersion:1,audioSaveVersion:1,audioDeleteVersion:1,dropboxReady:Boolean(KEY&&SECRET&&REFRESH)});
+ if(req.method==='GET'&&['/','/health'].includes(u.pathname))return send(res,200,{service:'gs-previewlock-api',status:'ok',contentReviewVersion:1,audioSaveVersion:1,audioDeleteVersion:1,audioClassificationVersion:1,dropboxReady:Boolean(KEY&&SECRET&&REFRESH)});
  if(req.method==='GET'&&u.pathname==='/setup'){
   res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-store','referrer-policy':'no-referrer','x-content-type-options':'nosniff'});
   return res.end(`<!doctype html><html lang="en"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PreviewLock Dropbox setup</title><style>body{font:20px system-ui;background:#151515;color:white;max-width:560px;margin:40px auto;padding:16px}input,button{box-sizing:border-box;width:100%;font:20px system-ui;padding:16px;margin:12px 0;border-radius:8px}button{background:#fff;color:#111;font-weight:700}label{display:block;margin-top:20px}</style><h1>Connect Dropbox</h1><p>Paste the PreviewLock setup key from Render. It is submitted securely and will not be added to the address bar.</p><form action="/setup" method="post"><label for="key">Setup key</label><input id="key" name="key" type="password" required autocomplete="off"><button type="submit">Connect Dropbox</button></form></html>`);
@@ -159,3 +159,4 @@ const server=http.createServer(async(req,res)=>{
  }
  return send(res,404,{error:'not_found'});
 });server.listen(PORT,'0.0.0.0',()=>console.log('PreviewLock listening'));
+
