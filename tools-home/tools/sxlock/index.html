@@ -214,6 +214,7 @@ main{padding:0 6px 10px;display:flex;flex-direction:column}
  #editorDock{order:-2!important;position:sticky;top:0;z-index:20;background:#101924;padding-bottom:2px}
  #insertionSection{order:-1!important}
  #insertionSection .clip-row{min-height:0}
+ #clips{display:flex;flex-direction:column-reverse}
  #soundSection{order:0!important}
  #mixerSection{order:1!important}
  #scribeBox{order:2!important}
@@ -275,12 +276,7 @@ main{padding:0 6px 10px;display:flex;flex-direction:column}
  if(!main||!picker||!dock||!insert)return;
  main.insertBefore(picker,dock);
  dock.after(insert);
- const list=document.getElementById('clips');
- if(list && !list.dataset.recentFirst){
-  const obs=new MutationObserver(()=>{if(list.dataset.sorting)return;list.dataset.sorting='1';const rows=[...list.children];rows.reverse().forEach(row=>list.appendChild(row));delete list.dataset.sorting});
-  obs.observe(list,{childList:true});
-  list.dataset.recentFirst='1';
- }
+
 })();
 </script>
 <script src="mp4-duration.js?v=21"></script></script><script src="sxlock.js?v=21"></script></body></html>
