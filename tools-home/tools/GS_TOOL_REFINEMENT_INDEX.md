@@ -57,3 +57,8 @@ This index is the authoritative live work status and reconciliation record. Deta
 - [SxLock README](sxlock/README.md) — points here; legacy operating instructions; its R1.7 heading is historical, NOT the R24 visual revision.
 - Source of truth for current behavior requires actual app code plus live testing; this index tracks what has been verified, not an assumption that docs equal implementation.
 - Registry updates committed on main: `9ba49538`, `fc4d441f`, `4c05697c`, `2e8acb1c`. No application code changed in these documentation commits.
+
+## Step 2 implementation log — 2026-10-27
+- Sound Scrubber queue viewport-anchor preservation committed to main: `16ed72a2b2104a71ed18e895a9d3dc4831c7f126`. Before replacing queue rows, record first visible sound row and its viewport position; after compaction, restore that anchor when still present. Falls back to previous scroll position when the anchor was removed.
+- Scope: `tools-home/tools/sound-scrubber/index.html` only. SxLock untouched. This is a code-level implementation, NOT verified Android browser behavior or completed Step 2.
+- Remaining Step 2: mobile test inline play/approve/delete and scroll, plus actual IndexedDB and authenticated cloud deletion for rejected recordings; current rejection remains intake-only. Do not claim deletion of cloud originals.
