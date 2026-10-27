@@ -112,7 +112,7 @@ const approving=new Set();
 async function approveInline(id,data){
  if(approving.has(id))return;
  if(!reviewDB[id])reviewDB[id]={...data,status:'pending',start:0,end:null,created:Date.now()};
- const v=reviewDB[id];approving.add(id);v.saveError='';v.reviewState='saving';saveDB();refreshInlineLists();
+ const v=reviewDB[id];approving.add(id);v.saveError='';v.reviewState='saving';v.heldAt=0;saveDB();refreshInlineLists();
  try{
   let blob=await audioOp(id).catch(()=>null)||localFiles.get(id);
   if(!blob){const response=await fetch(v.url);if(!response.ok)throw Error('Audio HTTP '+response.status);blob=await response.blob()}
@@ -194,7 +194,7 @@ function renderQueue(){
  const anchorTop=anchor?.getBoundingClientRect().top;
  const priorScroll=window.scrollY;
  host.replaceChildren();
- const entries=Object.entries(reviewDB).filter(([id,v])=>!rejected[id]&&v.reviewState!=='saving'&&v.reviewState!=='failed'&&(queueFilter==='all'||v.status===queueFilter));
+ const entries=Object.entries(reviewDB).filter(([id,v])=>!rejected[id]&&v.reviewState!=='saving'&&v.reviewState!=='failed'&&(queueFilter==='all'||v.status===queueFilter||(queueFilter==='pending'&&v.reviewState==='held'))).sort((a,b)=>((a[1].reviewState==='held')-(b[1].reviewState==='held'))||((a[1].heldAt||0)-(b[1].heldAt||0)));
  const failures=Object.entries(reviewDB).filter(([id,v])=>!rejected[id]&&v.reviewState==='failed').sort((a,b)=>(a[1].failedAt||0)-(b[1].failedAt||0));
  $('queueCount').textContent=Object.keys(reviewDB).filter(id=>!rejected[id]&&reviewDB[id].status==='pending'&&reviewDB[id].reviewState!=='saving').length;
  for(const [id,v]of entries)host.append(soundRow(id,v));
