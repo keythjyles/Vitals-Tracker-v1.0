@@ -1,5 +1,8 @@
 # SxLock R1.7
 
+**GS audio tools master work index:** [`GS_TOOL_REFINEMENT_INDEX.md`](../GS_TOOL_REFINEMENT_INDEX.md). This is the single authoritative record for current step status, release reconciliation, SxLock preservation lock, verification, and rollback. This document retains historical technical detail; do not infer that an old heading is the current release.
+
+
 Phone-first sound-effect placement. Open `index.html` over HTTP(S).
 
 ## Use
