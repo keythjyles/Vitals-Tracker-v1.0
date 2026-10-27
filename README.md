@@ -1,5 +1,8 @@
 # Vitals Tracker — Tools and AI operating procedures
 
+**Mandatory AI onboarding:** [AI MUST READ](AI_MUST_READ.md) — read before any changes. It lists universal and task-specific required documents; preserve source material and follow the master index.
+
+
 ## Grill Sergeant video review
 
 **PreviewLock is the required destination for video preview delivery.** Upload finished MP4 renders to the connected Dropbox library and share a direct-open PreviewLock link. Do not use chat file links as the normal review workflow.
