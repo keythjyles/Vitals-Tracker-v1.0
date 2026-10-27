@@ -14,6 +14,12 @@ await import('./server.js');
 const route='http://127.0.0.1:3199/api/content-review?id=gs-0123456789abcdef';const request=(opts={})=>realFetch(route,{...opts,headers:{authorization:'Bearer test-only',...opts.headers}});
 try{
  assert.equal((await realFetch(route)).status,401);
+ const deletion='http://127.0.0.1:3199/api/audio-delete';
+ assert.equal((await realFetch(deletion,{method:'POST',body:'{}'})).status,401);
+ assert.equal((await realFetch(deletion,{method:'POST',headers:{authorization:'Bearer test-only',origin:'https://foreign.invalid'},body:'{}'})).status,403);
+ assert.equal((await realFetch(deletion,{headers:{authorization:'Bearer test-only'}})).status,405);
+ assert.equal((await realFetch(deletion,{method:'POST',headers:{authorization:'Bearer test-only'},body:'invalid'})).status,400);
+ assert.equal((await realFetch(deletion,{method:'POST',headers:{authorization:'Bearer test-only'},body:'{}'})).status,400);
  let response=await request();assert.deepEqual(await response.json(),{review:null,rev:null});
  let rev=null;
  for(const decision of ['KEEP','EDIT','HOLD','REMOVE','PUBLISH']){response=await request({method:'POST',body:JSON.stringify({decision,notes:'Test '+decision,sha256:'a'.repeat(64),rev})});assert.equal(response.status,200);const saved=await response.json();assert.equal(saved.persisted,true);rev=saved.rev;const loaded=await(await request()).json();assert.equal(loaded.rev,rev);assert.equal(loaded.review.decision,decision)}

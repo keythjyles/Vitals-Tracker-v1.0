@@ -23,3 +23,10 @@ Deployed commit 1aabd891a9f18999fd4af7c43e347335c74e18fd. Browser test imported 
 
 ## Current owner-directed queue behavior (October 27, 2026)
 Approve removes the row immediately while the Dropbox save is in progress. Successful saves stay out of the pending queue. Failed saves reappear below pending entries with Retry, Hold and Delete; Retry hides the row again while saving, and Hold moves it to the end of pending. Delete removes the browser-owned audio and review entry even if previously approved. Rejected search candidates may be rediscovered later; no permanent rejection tombstone. Existing Dropbox/Drive cloud copies are **not** deleted by the current frontend; a verified authenticated server deletion path is still needed. Do not report cloud deletion as completed. Android UI verification remains outstanding. SxLock R24 editor is outside Scrubber modification scope.
+
+
+## R14.3 — managed deletion transactions
+
+The implemented `/api/audio-delete` route supersedes the browser-only limitation above. Delete immediately removes approval availability, persists a cloud deletion intent, deletes verified managed Dropbox files, and keeps Drive visibly pending until the existing daily connected-account executor supplies a verified deletion receipt. Pending/failed deletions appear below the review queue with one retry/refresh control and resume on reload. No completed-delete claim is made while either destination is pending. Delete inside the detail view uses the same transaction. See [AUDIO_DELETE.md](AUDIO_DELETE.md) for the exact worker protocol and remaining verification.
+
+This release changes Sound Scrubber and its existing backend only; SxLock R24, hosted library IDs, timelines, placed cues, and exports are untouched. Automated provider/state tests passed; live authenticated deletion and physical Android behavior remain unverified.
