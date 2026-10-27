@@ -55,3 +55,6 @@ Open `?library=1&v=1.7` for the uncluttered listening view. Each row has a durat
 Two additions use CC BY 3.0 (male throat clearing and distant jet takeoff). They are labeled **credit required**. Copy credits for placed sounds under Sources & credits; include them in the published description. Project snapshots retain license metadata and Copy full handoff includes required credits. Other new entries are CC0/public domain.
 
 Tool identity: GS-TOOL-SXLOCK · R1.7. Original sounds and IDs remain unchanged. No paid APIs were used.
+
+## R1.10 — Sound Scrubber navigation
+The compact right-aligned Audio tools strip launches Sound Scrubber and WavLock and returns to Tools. A normal tap reuses a live tool tab without reloading it; the current editor stays open. Sound Scrubber is acquisition and owner QC, WavLock is precise audio cutting, SxLock is approved sound placement. Navigation never auto-imports or inserts a sound. See ../sound-scrubber/README.md and AUDIO_SAVE.md for review and cloud-save rules. Audio, timing, recording and export scripts are unchanged.

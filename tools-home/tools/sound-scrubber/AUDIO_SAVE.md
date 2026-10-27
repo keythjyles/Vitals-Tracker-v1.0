@@ -53,3 +53,6 @@ The 500 intake entries are preliminary search candidates, not 500 approved SFX; 
 
 ## Current UI
 R12. Typical row measured 47 CSS px (previously 105 px), with 42 px Play / Approve / Delete buttons, 2 px gaps, zero right gap, and no metadata/Trim text within rows.
+
+## R13 navigation
+See [README.md](README.md) for reciprocal Sound Scrubber / SxLock / WavLock / Tools navigation. Save semantics and endpoints above are unchanged.

@@ -7,3 +7,5 @@ Tools: JokeLab 3.3, report reader 1.0, FrameLock 1.3.12+hub.1, MotionLock 0.1.5+
 Each Export to ChatGPT button copies the current handoff and opens ChatGPT; paste and submit there. No selected conversation can be guaranteed. Binary media is not attached by a text link.
 
 Vitals Tracker, Angel Code and Birthday Code are linked to their existing repository locations. Their files and original data paths are unchanged. CapLock still needs its actual tool source or address.
+
+Audio workflow: Sound Scrubber R13 (GS-TOOL-SOUND-SCRUBBER) discovers and reviews; WavLock R1.2 cuts components; SxLock R1.10 places approved sounds. All have reciprocal right-aligned navigation. Both tools-manifest.json copies register these roles. Sound Scrubber saves originals to Dropbox with verified daily Drive mirroring; see tools/sound-scrubber/README.md and AUDIO_SAVE.md. Navigation does not transfer media automatically.

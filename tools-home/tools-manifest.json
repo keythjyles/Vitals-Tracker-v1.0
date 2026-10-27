@@ -1,5 +1,5 @@
 {
-  "version": "1.0",
+  "version": "1.1",
   "tools": [
     {
       "tool": "framelock",
@@ -36,17 +36,54 @@
     },
     {
       "tool": "wavlock",
-      "source_version": "1.0",
+      "source_version": "R1.2",
       "hosted_path": "tools/wavlock/index.html",
-      "description": "Local audio cutter and WAV export."
+      "description": "Existing precision audio cutter and WAV export, with return links to Sound Scrubber, SxLock and Tools.",
+      "tool_id": "GS-TOOL-WAVLOCK",
+      "navigation": [
+        "sound-scrubber",
+        "sxlock",
+        "wavlock",
+        "tools"
+      ]
     },
     {
       "tool": "sxlock",
-      "source_version": "1.7",
+      "source_version": "R1.10",
       "hosted_path": "tools/sxlock/index.html",
-      "description": "124 hosted sound entries plus connected bee recording. Searchable category lists with Play, Use, Favorites, New sounds and a library-only view. Existing editor, project recovery and exports retained.",
+      "description": "Production sound placement, recording, mixing and export; Sound Scrubber launch preserves the live editor tab.",
       "verification": "JavaScript syntax and asset decode/hash checks; browser playback/search/favorites/placement review. Physical Android playback not independently tested.",
-      "changes": "31 additions with provenance and decode checks; credit-required entries explicitly marked; large playable rows and synonym/tag search."
+      "changes": "31 additions with provenance and decode checks; credit-required entries explicitly marked; large playable rows and synonym/tag search.",
+      "tool_id": "GS-TOOL-SXLOCK",
+      "navigation": [
+        "sound-scrubber",
+        "sxlock",
+        "wavlock",
+        "tools"
+      ]
+    },
+    {
+      "tool": "sound-scrubber",
+      "tool_id": "GS-TOOL-SOUND-SCRUBBER",
+      "source_version": "R13",
+      "hosted_path": "tools/sound-scrubber/index.html",
+      "description": "Sound acquisition and owner quality control: search, inline Play / Approve / Reject, filename-tap rename, pending/approved/held/culled review states.",
+      "workflow": "Sound Scrubber acquisition and approval \u2192 WavLock precision components \u2192 SxLock approved sound placement. Navigation does not transfer media or automatically import into SxLock.",
+      "navigation": {
+        "sxlock": "tools/sxlock/",
+        "wavlock": "tools/wavlock/",
+        "tools": "index.html",
+        "behavior": "Reuse a live named same-origin tool tab without reloading its editor; otherwise open that tool. Keep original tab open."
+      },
+      "storage": {
+        "originals": "Verified Dropbox audio-save through existing authenticated PreviewLock service.",
+        "drive": "Queued daily connected-Drive mirror; Saved requires matching verified receipts from both providers.",
+        "protocol": "tools/sound-scrubber/AUDIO_SAVE.md",
+        "review_cache": "Browser-local review and rejection ledger; cache is recovery only, not cloud backup."
+      },
+      "operator_guide": "tools/sound-scrubber/README.md",
+      "changes": "R13 adds compact right-aligned reciprocal tool navigation; existing review, audio and cloud-save logic unchanged.",
+      "verification": "Navigation links, JavaScript syntax and unchanged editor/review script checks; live browser navigation checked separately. Physical Android test not claimed."
     }
   ]
 }
