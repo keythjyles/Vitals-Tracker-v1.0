@@ -21,9 +21,9 @@ function setup(initial={}){
 }
 const sound={name:'crickets.wav',status:'pending',start:0,end:null};
 const saved={assetId:'commons-12',sha256:'a'.repeat(64),cloudReceipts:{dropbox:{verified:true,id:'id:12',path:'/Grill Sergeant/Sound Effects/commons-12/crickets.wav',rev:'1',bytes:60},drive:{verified:false}},cloudSaveStatus:'partial',recordPath:'asset.json'};
-test('approve keeps its row in place; failed redo offers the owner-requested recording fallback',async()=>{
+test('approve instantly hides its row; failed redo offers the recording fallback',async()=>{
  const s=setup({'commons:12':sound,'commons:13':{...sound,name:'next.wav'}});s.blobs.set('commons:12',new Blob([Buffer.alloc(60)]));let reject;
- s.request(()=>new Promise((_,bad)=>{reject=bad}));const first=s.run("approveInline('commons:12',reviewDB['commons:12'])");assert.equal(s.state()['commons:12'].reviewState,'saving');
+ s.request(()=>new Promise((_,bad)=>{reject=bad}));const first=s.run("approveInline('commons:12',reviewDB['commons:12'])");assert.equal(s.state()['commons:12'].reviewState,'saving');assert.equal(s.nodes.get('queue').children.length,1);assert.equal(s.nodes.get('queue').children[0].dataset.soundRow,'commons:13');assert.equal(s.run('playingId'),null);
  while(!reject)await new Promise(r=>setImmediate(r));reject(Error('network failed'));await first;assert.equal(s.state()['commons:12'].reviewState,'failed');assert.equal(s.state()['commons:12'].status,'pending');
  s.request(async()=>{throw Error('again')});await s.run("approveInline('commons:12',reviewDB['commons:12'])");assert.equal(s.state()['commons:12'].reviewState,'failed');
  const labels=s.run("soundRow('commons:12',reviewDB['commons:12']).children[1].children.map(b=>b.textContent)");assert.deepEqual(Array.from(labels),['▶','✓','●','✕']);
@@ -107,4 +107,40 @@ test('Delete cleans up both captured and prior managed copies and the original b
  const s=setup({'commons:12':{...sound,cloudAssetId:'local-'+'b'.repeat(64),sha256:'b'.repeat(64),managedPredecessors:[{assetId:'commons-12',sha256:'a'.repeat(64)}]}});s.blobs.set('commons:12',new Blob(['capture']));s.blobs.set('commons:12:capture-original',new Blob(['source']));const ids=[];
  s.request(async(_,options)=>{const body=JSON.parse(options.body);ids.push(body.assetId);return {persisted:true,assetId:body.assetId,requestId:'test-delete',complete:true,destinations:{dropbox:{verified:true},drive:{verified:true}}}});
  await s.run("deleteInline('commons:12')");assert.deepEqual(ids,['commons-12','local-'+'b'.repeat(64)]);assert.equal(s.blobs.size,0);assert.equal(s.state()['commons:12'],undefined);
+});
+
+
+test('decisions stay instant during slow saves; failure returns immediately before the current next sound',async()=>{
+ const s=setup({'commons:12':sound,'commons:13':{...sound,name:'second.wav'},'commons:14':{...sound,name:'third.wav'}});
+ for(const id of ['commons:12','commons:13'])s.blobs.set(id,new Blob([Buffer.alloc(60)]));const waiting=new Map();
+ s.request((_,options)=>new Promise((resolve,reject)=>waiting.set(options.headers['x-audio-id'],{resolve,reject})));
+ s.run("playingId='commons:12';$('preview').pause=()=>{$('preview').paused=true}");const first=s.run("approveInline('commons:12',reviewDB['commons:12'])");assert.equal(s.nodes.get('preview').paused,true);assert.equal(s.nodes.get('queue').children[0].dataset.soundRow,'commons:13');
+ assert.equal(s.run("soundRow('commons:13',reviewDB['commons:13']).children[1].children[1].disabled"),false);
+ const second=s.run("approveInline('commons:13',reviewDB['commons:13'])");assert.equal(s.nodes.get('queue').children[0].dataset.soundRow,'commons:14');
+ while(waiting.size<2)await new Promise(r=>setImmediate(r));waiting.get('commons-12').reject(Error('save failed'));await first;
+ assert.deepEqual(s.nodes.get('queue').children.map(r=>r.dataset.soundRow),['commons:12','commons:14']);
+ waiting.get('commons-13').reject(Error('also failed'));await second;
+ assert.deepEqual(s.nodes.get('queue').children.map(r=>r.dataset.soundRow),['commons:13','commons:12','commons:14']);
+});
+test('a background failure appears directly after the sound currently being auditioned without stopping it',async()=>{
+ const s=setup({'commons:12':sound,'commons:13':{...sound,name:'current.wav'},'commons:14':{...sound,name:'later.wav'}});s.blobs.set('commons:12',new Blob([Buffer.alloc(60)]));let fail;
+ s.request(()=>new Promise((_,reject)=>{fail=reject}));const pending=s.run("approveInline('commons:12',reviewDB['commons:12'])");while(!fail)await new Promise(r=>setImmediate(r));s.run("playingId='commons:13'");fail(Error('retry'));await pending;
+ assert.deepEqual(s.nodes.get('queue').children.map(r=>r.dataset.soundRow),['commons:13','commons:12','commons:14']);assert.equal(s.run('playingId'),'commons:13');
+});
+test('Delete hides and stops playback before its slow storage operation finishes',async()=>{
+ const s=setup({'commons:12':{...sound,cloudAssetId:'commons-12',sha256:saved.sha256},'commons:13':{...sound,name:'next.wav'}});let finish;
+ s.request(()=>new Promise(resolve=>{finish=resolve}));s.run("playingId='commons:12';$('preview').pause=()=>{$('preview').paused=true}");const pending=s.run("deleteInline('commons:12')");
+ assert.equal(s.nodes.get('preview').paused,true);assert.equal(s.nodes.get('queue').children.length,1);assert.equal(s.nodes.get('queue').children[0].dataset.soundRow,'commons:13');
+ finish({persisted:true,assetId:'commons-12',requestId:'delete',complete:true,destinations:{dropbox:{verified:true},drive:{verified:true}}});await pending;assert.equal(s.state()['commons:12'],undefined);
+});
+test('background cloud mutations serialize without blocking decisions or poisoning later requests',async()=>{
+ const s=setup();let release;let calls=0;s.context.fetch=async()=>{calls++;if(calls===1)return new Promise(resolve=>{release=()=>resolve({ok:false,status:502,json:async()=>({error:'first failed'})})});return {ok:true,status:200,json:async()=>({ok:true})}};
+ const first=s.run("audioRequest('/api/audio-save',{method:'POST'})").catch(e=>e.message),second=s.run("audioRequest('/api/audio-delete',{method:'POST'})");
+ while(!release)await new Promise(r=>setImmediate(r));assert.equal(calls,1);release();assert.equal(await first,'first failed');assert.equal((await second).ok,true);assert.equal(calls,2);
+});
+
+test('search decisions disappear immediately and redo returns in that list without a queue duplicate',async()=>{
+ const s=setup();s.run("searchRows.set('commons:12',{name:'first.wav',status:'pending'});searchRows.set('commons:13',{name:'next.wav',status:'pending'});refreshInlineLists()");s.blobs.set('commons:12',new Blob([Buffer.alloc(60)]));let fail;s.request(()=>new Promise((_,reject)=>{fail=reject}));const pending=s.run("approveInline('commons:12',searchRows.get('commons:12'))");
+ assert.deepEqual(s.nodes.get('results').children.map(r=>r.dataset.soundRow),['commons:13']);assert.equal(s.nodes.get('queue').children.length,0);
+ while(!fail)await new Promise(r=>setImmediate(r));fail(Error('redo'));await pending;assert.deepEqual(s.nodes.get('results').children.map(r=>r.dataset.soundRow),['commons:12','commons:13']);assert.equal(s.nodes.get('queue').children.length,0);
 });
