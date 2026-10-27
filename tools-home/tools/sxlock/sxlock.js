@@ -226,9 +226,9 @@ async function finishLiveTake(t){
  sounds.set(id,{id,name,category:'My sounds',duration:b.duration,builtin:false,origin:'microphone',mimeType:blob.type,capture:{recordedAt:t.startedAt,mode:t.withVideo?'video-sync':'standalone',sourceVideo:t.withVideo?videoFile?.name:null,startSeconds:t.withVideo?t.start:null,endSeconds:t.withVideo?t.end:null,recordedDurationSeconds:b.duration,startFrame:t.withVideo?Math.round(t.start*t.fps):null,sourceFps:t.withVideo?t.fps:null,microphoneOnly:true},data:to64(data),buffer:b,_lastUse:++cacheClock});
  // Store audio before committing its placement metadata.
  let saveError=null;try{await saveCustom()}catch(e){saveError=e;recordIssue('save-live-audio',e)}
- /* Recordings remain library assets until explicitly placed. */
+ if(t.withVideo)clips.push({id:uid(),soundId:id,start:t.start,offset:0,duration:Math.min(length,Math.max(0,video.duration-t.start)),volume:100,enabled:true,loop:false});
  releaseLiveTake(t);renderCategories();renderLibrary();renderClips();flushProject();trimDecoded(id);
- message(saveError?'Audio captured, but browser audio storage failed. Save project or ↓ Take now.':(t.error?t.error+' ':'')+'Audio saved to My sounds, not inserted. Select Use to place it later.');
+ message(saveError?'Audio captured, but browser audio storage failed. Save project or ↓ Take now.':(t.error?t.error+' ':'')+(t.withVideo?'Recording placed as an editable timeline insertion at '+stamp(t.start)+'. Select its insertion to trim, move, or change volume.':'Audio saved to My sounds; load a video to place it on the timeline.'));
 }
 $('liveRecord').onclick=guard(async()=>{if(!liveTake)return startLiveTake();const t=liveTake;if(t.state==='recording'&&t.recorder?.state==='recording'){t.recorder.pause();t.pauseAt=performance.now();t.state='paused';updateLiveControls();message('Microphone paused; video playback unchanged.')}else if(t.state==='paused'&&t.recorder?.state==='paused'){t.pausedMs+=performance.now()-t.pauseAt;t.pauseAt=null;t.recorder.resume();t.state='recording';updateLiveControls();message('Microphone resumed.')}});$('liveStop').onclick=stopLiveTake;$('saveTake').onclick=()=>lastTake&&download(lastTake,lastTake.name);
 /* Bed transport is independent of microphone recorder. */
