@@ -1,5 +1,8 @@
 # GS Audio Tools — Master Work Index v1.2
 
+**Mandatory AI onboarding:** [AI MUST READ](../../AI_MUST_READ.md) — read before any changes. It lists universal and task-specific required documents; preserve source material and follow the master index.
+
+
 Baseline: 2026-10-27. Original work branch: `gs-tools-refinement-baseline-20261027`. Step 1 was merged to production in PR #1; subsequent Sound Scrubber fixes were committed directly to main. Live GitHub Pages verification is still required.
 
 ## Operating rules
