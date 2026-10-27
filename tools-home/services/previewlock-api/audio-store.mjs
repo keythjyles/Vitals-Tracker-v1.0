@@ -58,7 +58,9 @@ export async function getAudioRecord(db,assetId){
    drive={...r,receiptPath:entry.path_display};break;
   }
  }
- return {assetId,name:record.name,sha256:record.sha256,bytes:record.bytes,cloudReceipts:{dropbox:record.cloudReceipts.dropbox,drive},cloudSaveStatus:drive.verified?'verified':'partial'};
+ const receipt=record.cloudReceipts.dropbox,current=await db.meta(receipt.id);
+ const dropbox={...receipt,verified:Boolean(current&&current.size===record.bytes&&current.content_hash===receipt.contentHash&&current.path_display===receipt.path)};
+ return {assetId,name:record.name,sha256:record.sha256,bytes:record.bytes,cloudReceipts:{dropbox,drive},cloudSaveStatus:drive.verified&&dropbox.verified?'verified':'partial'};
 }
 let active=false;
 export async function handleAudio(req,res,url,token){
