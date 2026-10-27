@@ -1,7 +1,7 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Sound Scrubber R14.6</title><style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Sound Scrubber R14.7</title><style>
 :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#101a27;color:#eef3f9;font:15px system-ui}main{max-width:700px;margin:auto;padding:10px 10px 80px}h1{font-size:20px;margin:0 0 6px}p{font-size:12px;color:#9fb2c7;margin:5px 0 10px}button,input,select{font:inherit;min-height:42px;border-radius:7px;border:1px solid #59738a;background:#24384e;color:#fff;padding:6px 10px}button{cursor:pointer}button:disabled{opacity:.4}.gold{background:#f0cc85;color:#1b2632;font-weight:700}input{min-width:0;width:100%}.search{display:grid;grid-template-columns:1fr auto;gap:6px}.controls{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0}.controls button{min-height:34px;font-size:12px;padding:5px 8px}.row{border-bottom:1px solid #354c63;padding:8px 0;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;align-items:center}.name{font-size:13px;overflow-wrap:anywhere}.meta{font-size:10px;color:#a5b7c9}.actions{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}.actions button,.actions a{min-height:34px;min-width:38px;font-size:12px;padding:7px;text-decoration:none;color:white;background:#29425b;border:1px solid #59738a;border-radius:6px}.source-links{grid-column:1/-1;display:flex;gap:8px;justify-content:flex-end}.source-links a,.source-links button{font-size:11px;min-height:28px;padding:4px 8px;background:#24384e;color:#d9e5f2;border:1px solid #59738a;border-radius:5px;text-decoration:none}.actions button{min-height:38px}.actions button:disabled{opacity:.65}details{border:1px solid #3a536d;border-radius:8px;margin:8px 0;padding:6px}summary{cursor:pointer;font-weight:700}#status{font-size:12px;color:#f0cc85;margin:9px 0}audio{width:100%;height:35px}a{color:#f0cc85}small{font-size:10px}#review{margin:10px 0;padding:10px;border:1px solid #55718d;border-radius:9px;background:#1b2b3e}#review[hidden]{display:none}#review .pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}#review label{font-size:12px}#review input[type=number]{width:100%}#review .controls button{flex:1}#queue .row{grid-template-columns:1fr auto}#queue button{font-size:12px}#queue details{margin:4px 0}#queue summary{font-size:13px}#local{width:100%;font-size:12px}#reviewTitle{font-size:13px;overflow-wrap:anywhere}#reviewAudio{width:100%}
 /* R9: dense rows, with one compact control strip at the far right. */
-main{padding-left:4px;padding-right:4px}
+main{padding-left:4px;padding-right:4px;overflow-anchor:none}
 #queue .row,#results .row{grid-template-columns:minmax(0,1fr) max-content;column-gap:4px;row-gap:0;padding:2px 0;min-height:46px;align-items:center}
 #queue .name,#results .name{min-width:0;line-height:1.1}
 .sound-name{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;border:0;background:transparent;min-height:22px;height:auto;max-height:36px;padding:0;color:#eef3f9;font-size:14px;text-align:left;line-height:18px;overflow-wrap:anywhere;width:100%;cursor:text}
@@ -28,13 +28,36 @@ main{padding-left:4px;padding-right:4px}
 #queue .sound-name,#results .sound-name{max-height:34px;line-height:17px;cursor:text}
 #queue .row .meta,#results .row .meta{font-size:10px}
 @media(max-width:420px){#queue .row,#results .row{column-gap:2px}#queue .actions,#results .actions{gap:2px}}
-</style></head><body><main><nav class="audio-tool-nav" aria-label="Audio tools" data-audio-tool="sound-scrubber"><a href="../sxlock/" target="gs-audio-sxlock">SxLock</a><a href="../wavlock/" target="gs-audio-wavlock">WavLock</a><a href="../../" target="gs-audio-tools">Tools</a></nav><script src="../../shared/audio-tool-nav.js?v=1" defer></script><h1>Sound Scrubber <small>GS-TOOL-SOUND-SCRUBBER · R14.6</small></h1><p>Separate research tool. SxLock remains locked. Search Wikimedia Commons for real freely licensed audio; audition, inspect source and download selected recordings.</p><div class="search"><input id="q" placeholder="Search real sounds, e.g. fart, car braking" aria-label="Search sounds"><button class="gold" id="go">Scrub</button></div><details id="soundTypes"><summary>Sound types</summary><select id="presets" aria-label="Sound type"><option value="">Choose a sound type</option></select></details><details><summary>Search scope &amp; licensing</summary><p>Results are sourced from Wikimedia Commons and checked against each file's declared license. Only audio formats are displayed. Commons metadata may be incomplete; License and attribution are informational fields; verify usage rights before publication. Approved sounds appear immediately in SxLock and WavLock under Approved effects. Nothing is inserted into a production timeline automatically.</p><label><input type="checkbox" id="restrict" style="width:auto;min-height:auto"> Optional search filter: CC0 / Public domain only</label><div class="controls"><button id="exportManifest">Export review manifest</button></div></details><details open><summary>Review queue · <span id="queueCount">0</span></summary><p>Play, Approve or Delete. Tap the name to rename.</p><label>Import audio or screen recording<input id="local" type="file" accept="audio/*,video/mp4,video/webm,video/quicktime" multiple></label><div id="queue"></div></details><section id="review" hidden><b id="reviewTitle">Review</b><p id="reviewLicense"></p><audio id="reviewAudio" controls preload="metadata"></audio><div class="pair"><label>In (seconds)<input id="trimIn" type="number" min="0" step=".01" value="0"></label><label>Out (seconds)<input id="trimOut" type="number" min="0" step=".01" value="0"></label></div><div class="controls"><button id="playTrim">▶ Play selection</button><button id="setIn">Set In</button><button id="setOut">Set Out</button><button id="saveTrim">Save trim</button></div><div class="controls"><button id="approve" class="gold">✓ Approve</button><button id="cull">Delete</button></div><div class="controls"><button id="downloadTrim">Export trimmed WAV</button><button id="closeReview">Close</button></div><p id="reviewStatus"></p></section><div id="status">Choose a category or enter a search.</div><div id="results"></div><button id="more" hidden class="gold">More results</button><audio id="preview" preload="none"></audio><p>Approval instantly adds sounds to both audio libraries in this browser. Dropbox and Drive backup status is tracked separately. Original files remain unchanged.</p></main><script src="../../shared/approved-effects.js?v=1"></script><script>
+</style></head><body><main><nav class="audio-tool-nav" aria-label="Audio tools" data-audio-tool="sound-scrubber"><a href="../sxlock/" target="gs-audio-sxlock">SxLock</a><a href="../wavlock/" target="gs-audio-wavlock">WavLock</a><a href="../../" target="gs-audio-tools">Tools</a></nav><script src="../../shared/audio-tool-nav.js?v=1" defer></script><h1>Sound Scrubber <small>GS-TOOL-SOUND-SCRUBBER · R14.7</small></h1><p>Separate research tool. SxLock remains locked. Search Wikimedia Commons for real freely licensed audio; audition, inspect source and download selected recordings.</p><div class="search"><input id="q" placeholder="Search real sounds, e.g. fart, car braking" aria-label="Search sounds"><button class="gold" id="go">Scrub</button></div><details id="soundTypes"><summary>Sound types</summary><select id="presets" aria-label="Sound type"><option value="">Choose a sound type</option></select></details><details><summary>Search scope &amp; licensing</summary><p>Results are sourced from Wikimedia Commons and checked against each file's declared license. Only audio formats are displayed. Commons metadata may be incomplete; License and attribution are informational fields; verify usage rights before publication. Approved sounds appear immediately in SxLock and WavLock under Approved effects. Nothing is inserted into a production timeline automatically.</p><label><input type="checkbox" id="restrict" style="width:auto;min-height:auto"> Optional search filter: CC0 / Public domain only</label><div class="controls"><button id="exportManifest">Export review manifest</button></div></details><details open><summary>Review queue · <span id="queueCount">0</span></summary><p>Play, Approve or Delete. Tap the name to rename.</p><label>Import audio or screen recording<input id="local" type="file" accept="audio/*,video/mp4,video/webm,video/quicktime" multiple></label><div id="queue"></div></details><section id="review" hidden><b id="reviewTitle">Review</b><p id="reviewLicense"></p><audio id="reviewAudio" controls preload="metadata"></audio><div class="pair"><label>In (seconds)<input id="trimIn" type="number" min="0" step=".01" value="0"></label><label>Out (seconds)<input id="trimOut" type="number" min="0" step=".01" value="0"></label></div><div class="controls"><button id="playTrim">▶ Play selection</button><button id="setIn">Set In</button><button id="setOut">Set Out</button><button id="saveTrim">Save trim</button></div><div class="controls"><button id="approve" class="gold">✓ Approve</button><button id="cull">Delete</button></div><div class="controls"><button id="downloadTrim">Export trimmed WAV</button><button id="closeReview">Close</button></div><p id="reviewStatus"></p></section><div id="status">Choose a category or enter a search.</div><div id="results"></div><button id="more" hidden class="gold">More results</button><audio id="preview" preload="none"></audio><p>Approval instantly adds sounds to both audio libraries in this browser. Dropbox and Drive backup status is tracked separately. Original files remain unchanged.</p></main><script src="../../shared/approved-effects.js?v=1"></script><script>
 const terms=['Farts','Burps','Sneezes','Coughs','Laughs','Sniffles','Yawns','Roosters','Ducks','Geese','Cats','Dogs','Cars','Tires squeal','Brakes','Engines','Motorcycles','Trucks','Jets','Propeller planes','Helicopters','Drones','Fire','Crickets','Gongs','Bells','Whooshes','Footsteps','Water','Wind','Rain','Thunder','Crowds','Doors','Kitchen'];
 const $=id=>document.getElementById(id);const audioStore=new Promise((ok,bad)=>{const q=indexedDB.open('scrubber-saved-audio',1);q.onupgradeneeded=()=>q.result.createObjectStore('sounds');q.onsuccess=()=>ok(q.result);q.onerror=()=>bad(q.error)});async function audioOp(id,blob){const db=await audioStore;return new Promise((ok,bad)=>{const tx=db.transaction('sounds',blob?'readwrite':'readonly');const req=blob?tx.objectStore('sounds').put(blob,id):tx.objectStore('sounds').get(id);let result;req.onsuccess=()=>{result=req.result};req.onerror=()=>bad(req.error);tx.oncomplete=()=>ok(result);tx.onerror=()=>bad(tx.error);tx.onabort=()=>bad(tx.error||Error('Audio cache transaction aborted'))})}const DBKEY='sx-scrubber-review-v2';const REJECTKEY='sx-scrubber-rejected-v1';let rejected={};try{localStorage.removeItem(REJECTKEY)}catch{}function rejectSound(id){delete rejected[id];try{localStorage.setItem(REJECTKEY,JSON.stringify(rejected))}catch{}delete reviewDB[id];saveDB();renderQueue();if(selected===id){$('reviewAudio').pause();$('review').hidden=true;selected=null}}function legacyRenameSound(id,fallback){const next=prompt('Sound name',reviewDB[id]?.name||fallback);if(next===null||!next.trim())return;if(!reviewDB[id])return;reviewDB[id].name=next.trim();saveDB();renderQueue();document.querySelectorAll('[data-sound-id]').forEach(el=>{if(el.dataset.soundId===id)el.firstChild.textContent=next.trim()})}let reviewDB={};try{reviewDB=JSON.parse(localStorage.getItem(DBKEY)||'{}')}catch{}for(const v of Object.values(reviewDB)){if(v.status==='held'||v.reviewState==='held'){v.status='pending';v.reviewState='pending';v.heldAt=0}if(v.reviewState==='saving'){v.reviewState='failed';v.failedAt=Date.now();v.saveError='Save interrupted by page close or reload. Retry to verify storage.';}}try{localStorage.setItem(DBKEY,JSON.stringify(reviewDB))}catch{}let selected=null,localFiles=new Map(),previewStop=null;function saveDB(){try{localStorage.setItem(DBKEY,JSON.stringify(reviewDB));window.GSApprovedEffects?.publish()}catch{$('reviewStatus').textContent='Browser storage full. Export manifest.'}}function enqueue(id,data){if(rejected[id])return;if(!reviewDB[id]){reviewDB[id]={...data,status:'pending',start:0,end:null,created:Date.now()};saveDB()}renderQueue()}
 /* R8: one inline review row; original recordings and owner decisions remain separate. */
 let playingId=null,playVersion=0,playingObjectURL=null,captureState=null;
 const searchRows=new Map();
-function needsReview(v){return !['approved','deleting','culled'].includes(v.status)&&v.reviewState!=='saved'}
+const decisionOrder={queue:[],results:[]};let decisionCursor={id:null,surface:'queue',index:0};
+function visibleDecision(id,v){return !approving.has(id)&&!deleting.has(id)&&(needsReview(v)||v.status==='deleting')}
+function orderedDecisions(entries,surface){
+ const map=new Map(entries),ids=[...decisionOrder[surface].filter(id=>map.has(id)),...entries.map(([id])=>id).filter(id=>!decisionOrder[surface].includes(id))];decisionOrder[surface]=ids;return ids.map(id=>[id,map.get(id)]);
+}
+function prepareDecision(id){
+ const surface=searchRows.has(id)?'results':'queue';
+ const entries=surface==='results'?Array.from(searchRows,([key,v])=>[key,rowState(key,v)]):Object.entries(reviewDB).filter(([key])=>!searchRows.has(key));
+ orderedDecisions(entries.filter(([key,v])=>visibleDecision(key,v)),surface);
+ const index=decisionOrder[surface].indexOf(id);decisionCursor={id:decisionOrder[surface][index+1]||null,surface,index:Math.max(0,index)};
+ ++playVersion;$('preview').pause();$('preview').removeAttribute('src');$('preview').ontimeupdate=null;playingId=null;if(playingObjectURL){URL.revokeObjectURL(playingObjectURL);playingObjectURL=null}
+ if(selected===id){$('reviewAudio').pause();$('review').hidden=true;selected=null}
+}
+function restoreRedo(id){
+ const surface=searchRows.has(id)?'results':'queue',order=decisionOrder[surface].filter(key=>key!==id);
+ const focus=playingId&&order.includes(playingId)?playingId:decisionCursor.surface===surface?decisionCursor.id:null;
+ let index=focus?order.indexOf(focus):-1;const afterPlaying=!!playingId&&focus===playingId;
+ if(index<0)index=decisionCursor.surface===surface?Math.min(decisionCursor.index,order.length):0;else if(afterPlaying)index++;
+ order.splice(index,0,id);decisionOrder[surface]=order;
+ refreshInlineLists(focus,afterPlaying?null:id);
+ if(!afterPlaying)decisionCursor={id,surface,index};
+}
+
+function needsReview(v){return !['approved','deleting','culled'].includes(v.status)&&!['saved','saving'].includes(v.reviewState)}
 function cloudSaved(v){return v.cloudReceipts?.dropbox?.verified===true&&v.cloudReceipts?.drive?.verified===true}
 function rowState(id,fallback){return reviewDB[id]||fallback}
 function syncPlayButtons(){
@@ -44,6 +67,7 @@ function syncPlayButtons(){
  }
 }
 async function playInline(id,data){
+ const surface=searchRows.has(id)?'results':'queue';decisionCursor={id,surface,index:Math.max(0,decisionOrder[surface].indexOf(id))};
  const audio=$('preview');
  if(playingId===id&&audio.src){if(audio.paused)await audio.play();else audio.pause();syncPlayButtons();return}
  const version=++playVersion;audio.pause();if(playingObjectURL){URL.revokeObjectURL(playingObjectURL);playingObjectURL=null}
@@ -75,7 +99,9 @@ async function renameInline(id,data){
 }
 
 const AUDIO_API='https://gs-previewlock-api.onrender.com';
-async function audioRequest(path,options={}){
+let cloudMutations=Promise.resolve();
+function audioRequest(path,options={}){const run=()=>performAudioRequest(path,options);if((options.method||'GET').toUpperCase()!=='POST')return run();const pending=cloudMutations.then(run,run);cloudMutations=pending.catch(()=>{});return pending}
+async function performAudioRequest(path,options={}){
  const key=localStorage.getItem('gs_previewlock_key')||'';
  if(!key)throw Error('The existing PreviewLock connection is not available in this browser. Audio remains queued.');
  const response=await fetch(AUDIO_API+path,{...options,headers:{authorization:'Bearer '+key,...options.headers}});
@@ -141,7 +167,7 @@ async function stagePlayback(id,v,blob){
 }
 async function recordPlayback(id,data){
  if(captureState){if(captureState.id===id)captureState.stop();return}
- if(approving.size||deleting.size)return;
+ if(approving.has(id)||deleting.has(id))return;
  if(!reviewDB[id])reviewDB[id]={...data,status:'pending',created:Date.now()};const v=reviewDB[id],audio=$('preview');
  const state={id,stop:()=>{}};captureState=state;refreshInlineLists(id);
  let stream,recorder,timer,ended,failed,started=false;
@@ -167,9 +193,9 @@ async function recordPlayback(id,data){
 
 const approving=new Set();
 async function approveInline(id,data){
- if(approving.size||captureState||deleting.has(id)||reviewDB[id]?.status==='deleting')return;
+ if(approving.has(id)||captureState||deleting.has(id)||reviewDB[id]?.status==='deleting')return;
  if(!reviewDB[id])reviewDB[id]={...data,status:'pending',start:0,end:null,created:Date.now()};
- const v=reviewDB[id];approving.add(id);v.saveError='';v.reviewState='saving';v.heldAt=0;saveDB();refreshInlineLists(id);
+ const v=reviewDB[id];prepareDecision(id);approving.add(id);v.saveError='';v.reviewState='saving';v.heldAt=0;saveDB();refreshInlineLists(id);
  try{
   let blob=await audioOp(id).catch(()=>null)||localFiles.get(id);
   if(!blob){const response=await fetch(v.url);if(!response.ok)throw Error('Audio HTTP '+response.status);blob=await response.blob()}
@@ -179,14 +205,14 @@ async function approveInline(id,data){
   await preserveDropbox(id,v,blob);v.status='approved';v.saveError='';v.reviewState='saved';saveDB();
   $('status').textContent=cloudSaved(v)?'Saved · Dropbox + Drive verified.':'Dropbox audio saved and verified. Drive backup queued for the daily calendar run.';
  }catch(e){v.saveError=e.message;v.reviewState='failed';v.failedAt=Date.now();v.cloudSaveStatus=v.cloudReceipts?.dropbox?.verified?'partial':'queued';saveDB();$('status').textContent='Redo this sound: Approve or Delete. '+e.message}
- finally{approving.delete(id);refreshInlineLists(id)}
+ finally{approving.delete(id);if(v.reviewState==='failed')restoreRedo(id);else refreshInlineLists(playingId||decisionCursor.id)}
 }
 
 const deleting=new Set();
 async function deleteInline(id){
- if(deleting.has(id)||approving.size||captureState)return;
+ if(deleting.has(id)||approving.has(id)||captureState)return;
  let v=reviewDB[id]||searchRows.get(id);if(!v)return;
- deleting.add(id);
+ prepareDecision(id);deleting.add(id);
  if(!reviewDB[id])reviewDB[id]={...v};v=reviewDB[id];
  v.status='deleting';v.reviewState='deleting';v.deleteError='';saveDB();refreshInlineLists();
  if(playingId===id){++playVersion;$('preview').pause();$('preview').removeAttribute('src');playingId=null;if(playingObjectURL){URL.revokeObjectURL(playingObjectURL);playingObjectURL=null}}
@@ -207,7 +233,7 @@ async function deleteInline(id){
   if(!result||result.complete===true&&result.destinations.dropbox?.verified===true&&result.destinations.drive?.verified===true){rejectSound(id);$('status').textContent=result?'Deleted · browser, Dropbox and Drive verified.':'Deleted browser audio and removed review entry.'}
   else{v.reviewState='delete_pending';v.deleteError=result.destinations.dropbox?.verified?'Drive deletion pending daily cleanup.':result.destinations.dropbox?.error||'Dropbox deletion needs retry';saveDB();$('status').textContent='Deletion pending · '+v.deleteError}
  }catch(e){v.reviewState='delete_failed';v.deleteError=e.message;saveDB();$('status').textContent='Deletion needs retry: '+e.message}
- finally{deleting.delete(id);refreshInlineLists()}
+ finally{deleting.delete(id);if(reviewDB[id]?.status==='deleting')restoreRedo(id);else refreshInlineLists(playingId||decisionCursor.id)}
 }
 function soundRow(id,data){
  const v=rowState(id,data),isDeletion=v.status==='deleting',row=document.createElement('div');row.className='row';row.dataset.soundRow=id;
@@ -224,10 +250,10 @@ function soundRow(id,data){
  info.append(name);
  const actions=document.createElement('div');actions.className='actions';
  const play=document.createElement('button');play.textContent='▶';play.disabled=!!captureState;play.dataset.playId=id;play.dataset.soundName=v.name;play.setAttribute('aria-label','Play '+v.name);play.onclick=()=>playInline(id,rowState(id,v)).catch(e=>{$('status').textContent='Playback failed: '+e.message});
- const approve=document.createElement('button');approve.textContent=approving.has(id)?'…':v.status==='approved'&&!v.cloudReceipts?.dropbox?.verified?'↻':'✓';approve.title=v.status==='approved'?'Approved':'Approve';approve.className='approve-inline';approve.setAttribute('aria-label',(v.status==='approved'?'Approved ':'Approve ')+v.name);approve.disabled=!!captureState||approving.size>0||(v.cloudReceipts?.dropbox?.verified===true&&v.reviewState!=='failed');approve.onclick=()=>approveInline(id,v);
- const remove=document.createElement('button');remove.textContent=deleting.has(id)?'…':'✕';remove.setAttribute('aria-label','Delete '+v.name);remove.title='Delete from intake';remove.disabled=!!captureState||deleting.has(id)||approving.size>0;remove.onclick=()=>deleteInline(id);
+ const approve=document.createElement('button');approve.textContent=approving.has(id)?'…':v.status==='approved'&&!v.cloudReceipts?.dropbox?.verified?'↻':'✓';approve.title=v.status==='approved'?'Approved':'Approve';approve.className='approve-inline';approve.setAttribute('aria-label',(v.status==='approved'?'Approved ':'Approve ')+v.name);approve.disabled=!!captureState||approving.has(id)||(v.cloudReceipts?.dropbox?.verified===true&&v.reviewState!=='failed');approve.onclick=()=>approveInline(id,v);
+ const remove=document.createElement('button');remove.textContent=deleting.has(id)?'…':'✕';remove.setAttribute('aria-label','Delete '+v.name);remove.title='Delete from intake';remove.disabled=!!captureState||deleting.has(id)||approving.has(id);remove.onclick=()=>deleteInline(id);
  if(isDeletion){const retry=document.createElement('button');retry.textContent=deleting.has(id)?'…':'↻';retry.disabled=deleting.has(id);retry.title=v.deleteError||'Retry or refresh managed deletion';retry.setAttribute('aria-label','Retry deletion '+v.name);retry.onclick=()=>deleteInline(id);actions.append(retry)}else actions.append(play,approve);
- if(!isDeletion&&(v.reviewState==='failed'||captureState?.id===id)){const record=document.createElement('button');record.textContent=captureState?.id===id?'■':'●';record.title=captureState?.id===id?'Stop recording':'Record playback';record.setAttribute('aria-label',(captureState?.id===id?'Stop recording ':'Record playback ')+v.name);record.disabled=approving.size>0||!!captureState&&captureState.id!==id;record.onclick=()=>recordPlayback(id,v);actions.append(record)}
+ if(!isDeletion&&(v.reviewState==='failed'||captureState?.id===id)){const record=document.createElement('button');record.textContent=captureState?.id===id?'■':'●';record.title=captureState?.id===id?'Stop recording':'Record playback';record.setAttribute('aria-label',(captureState?.id===id?'Stop recording ':'Record playback ')+v.name);record.disabled=approving.has(id)||!!captureState&&captureState.id!==id;record.onclick=()=>recordPlayback(id,v);actions.append(record)}
  if(!isDeletion)actions.append(remove);row.append(info,actions);
  if(v.saveError)approve.title=v.saveError;
  return row;
@@ -242,14 +268,10 @@ function renderQueue(){
  const anchorTop=anchor?.getBoundingClientRect().top;
  const priorScroll=window.scrollY;
  host.replaceChildren();
- const entries=Object.entries(reviewDB).filter(([id,v])=>!rejected[id]&&needsReview(v)&&!searchRows.has(id));
-
- $('queueCount').textContent=Object.keys(reviewDB).filter(id=>!rejected[id]&&needsReview(reviewDB[id])).length;
+ const entries=orderedDecisions(Object.entries(reviewDB).filter(([id,v])=>!rejected[id]&&visibleDecision(id,v)&&!searchRows.has(id)),'queue');
+ $('queueCount').textContent=Object.entries(reviewDB).filter(([id,v])=>!rejected[id]&&visibleDecision(id,v)).length;
  for(const [id,v]of entries)host.append(soundRow(id,v));
- const deletions=Object.entries(reviewDB).filter(([,v])=>v.status==='deleting');
- if(!entries.length&&!deletions.length)host.textContent='No sounds in this view.';
-
- if(deletions.length){const h=document.createElement('div');h.className='meta';h.textContent='PENDING DELETIONS · Retry / refresh';host.append(h);for(const [id,v]of deletions)host.append(soundRow(id,v));}
+ if(!entries.length)host.textContent='No sounds awaiting a decision.';
  if(anchorId){
   const same=Array.from(host.querySelectorAll('[data-sound-row]')).find(el=>el.dataset.soundRow===anchorId);
   if(same&&Number.isFinite(anchorTop))window.scrollBy(0,same.getBoundingClientRect().top-anchorTop);
@@ -257,16 +279,16 @@ function renderQueue(){
  }
  syncPlayButtons();
 }
-function refreshInlineLists(pinId){
+function refreshInlineLists(pinId,redoId){
  const rows=Array.from(document.querySelectorAll('[data-sound-row]'));
  const anchor=rows.find(el=>el.dataset.soundRow===pinId)||rows.find(el=>el.getBoundingClientRect().bottom>0);
  const index=rows.indexOf(anchor),top=anchor?.getBoundingClientRect().top;
  const candidates=anchor?[anchor,...rows.slice(index+1),...rows.slice(0,index).reverse()]:[];
  const scroll=window.scrollY;
  renderQueue();$('results').replaceChildren();
- for(const [id,v]of searchRows)if(!rejected[id]&&needsReview(rowState(id,v)))$('results').append(soundRow(id,v));
+ for(const [id,v]of orderedDecisions(Array.from(searchRows,([id,v])=>[id,rowState(id,v)]).filter(([id,v])=>!rejected[id]&&visibleDecision(id,v)),'results'))$('results').append(soundRow(id,v));
  syncPlayButtons();
- if(anchor){const current=Array.from(document.querySelectorAll('[data-sound-row]'));const target=candidates.map(old=>current.find(el=>el.dataset.soundRow===old.dataset.soundRow)).find(Boolean);if(target&&Number.isFinite(top))window.scrollBy(0,target.getBoundingClientRect().top-top);else window.scrollTo(0,scroll)}
+ if(anchor){const current=Array.from(document.querySelectorAll('[data-sound-row]'));const target=(redoId&&current.find(el=>el.dataset.soundRow===redoId))||candidates.map(old=>current.find(el=>el.dataset.soundRow===old.dataset.soundRow)).find(Boolean);if(target&&Number.isFinite(top))window.scrollBy(0,target.getBoundingClientRect().top-top);else window.scrollTo(0,scroll)}
 }
 $('preview').addEventListener('play',syncPlayButtons);$('preview').addEventListener('pause',syncPlayButtons);$('preview').addEventListener('ended',syncPlayButtons);
 
@@ -295,7 +317,7 @@ async function search(reset){
    const v={name:page.title.replace(/^File:/,''),url:f.url,source:f.descriptionurl||'',license,licenseURL:esc(m.LicenseUrl?.value),author:esc(m.Artist?.value),mime:f.mime,sha1:f.sha1,bytes:f.size,status:'pending',start:0,end:null};
    searchRows.set(id,v);$('results').append(soundRow(id,v));
   }
-  syncPlayButtons();offset+=50;$('status').textContent=seen.size+' recordings · Play, Approve or Delete inline. Tap a filename to rename.';
+  orderedDecisions(Array.from(searchRows),'results');syncPlayButtons();offset+=50;$('status').textContent=seen.size+' recordings · Play, Approve or Delete inline. Tap a filename to rename.';
   $('more').hidden=!data.continue||pages.length===0;
  }catch(e){$('status').textContent='Search failed: '+e.message}
  finally{busy=false;$('go').disabled=false}
@@ -327,4 +349,5 @@ async function loadIntakeBatch(){
 loadIntakeBatch().then(syncCloudReceipts).then(async()=>{for(const [id,v]of Object.entries(reviewDB))if(v.status==='deleting')await deleteInline(id)});
 
 </script></body></html>
+
 
