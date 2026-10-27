@@ -156,3 +156,11 @@ Owner screenshot identified circular-arrow deletion jobs appearing before cleanu
 Validation: 24 frontend/state/PCM checks passed, including hidden pending deletion after reload, successful completion remaining out, and confirmed provider failure returning as Play/Delete with no circular control, plus prior instant decision/redo/capture regressions. Full script parses. Physical Android acceptance and the underlying unrecognized-managed-file deletion conflict are still unverified/unresolved. No SxLock or backend changes. Baseline main `8dd01405ffaed78d56089933eea1e4606f293f66`.
 
 R14.8 interrupted-save follow-through: reload now keeps an in-flight approval hidden as `save_unverified` until the authenticated receipt lookup establishes success or a definite failure. Network/auth lookup errors keep it hidden; a matching verified Dropbox record completes approval, and confirmed 404/no upload started returns a normal redo. No pending row is manufactured on restart. 24 checks pass, including unknown-outcome hiding and verified/404 recovery.
+
+
+
+## R14.9 — no Approve means invisible
+
+Owner rule supersedes R14.8's failed-deletion-row exception: the working queue/search/count include only sounds eligible for an approval decision. All deletion records stay invisible, including confirmed failures. Deletion errors remain in recovery metadata; they do not reinsert a row, move the decision cursor, or emit a retry/footer instruction to the owner. A stale pending record already carrying a verified save receipt also stays out unless it is an actual failed save offering Approve again. Nothing is deleted or marked successful merely to hide it; background cleanup and its unresolved filename/storage conflict remain recorded.
+
+Validation: 26 frontend/state/PCM checks passed, including pending/failed deletion invisibility across reload, approval eligibility and count, original preservation, plus earlier instant decision/redo/capture regressions. Full script parses. Physical Android acceptance remains unverified. No backend or SxLock changes. Baseline `d7afb4ad8b5852e47b16cb8bc4a7350d88c4ea10`.
