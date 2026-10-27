@@ -56,3 +56,8 @@ R12. Typical row measured 47 CSS px (previously 105 px), with 42 px Play / Appro
 
 ## R13 navigation
 See [README.md](README.md) for reciprocal Sound Scrubber / SxLock / WavLock / Tools navigation. Save semantics and endpoints above are unchanged.
+
+## Instant approved-effects handoff — R14 / SxLock R1.11 / WavLock R1.3
+Owner directive: Approve must immediately populate the sound library. Both open and subsequently opened tools subscribe to the same browser/profile review ledger and cached original audio. SxLock exposes an Approved effects category (also included in New sounds); WavLock exposes a searchable Approved effects list with Preview/Use. No manual download or file picker is required for these approved sounds. Rename refreshes the library name; rejection removes library availability but preserves already-placed SxLock cues and their project audio. Approval never inserts on the timeline or replaces WavLock's loaded source; Use/Add are explicit.
+
+This live bridge uses existing cached originals for immediate availability, then the existing authenticated Dropbox playback route if cache is absent. Hash and byte checks apply when known. Queued cloud saves remain queued, and Drive backup remains daily; availability is distinct from verified dual-cloud preservation. Same browser/profile only: cross-device catalog discovery is not implemented by this change. Existing approval/metadata bytes and credentials are not copied into public manifests. No new paid services or timers.

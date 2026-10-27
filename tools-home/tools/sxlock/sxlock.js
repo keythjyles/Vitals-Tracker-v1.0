@@ -26,7 +26,7 @@ function stopAuditions(){auditionToken++;stopNodes(auditions);auditionGain=null;
 function stopEffects(){scheduleToken++;clearTimeout(audioPump);audioPump=null;scheduled.clear();stopNodes(active)}
 function trimDecoded(except){const entries=[...sounds.values()].filter(s=>s.buffer);let total=entries.reduce((n,s)=>n+s.buffer.length*s.buffer.numberOfChannels*4,0);for(const item of entries.sort((a,b)=>(a._lastUse||0)-(b._lastUse||0))){if(total<=PCM_BUDGET)break;if(item.id===except||item.loading)continue;total-=item.buffer.length*item.buffer.numberOfChannels*4;item.buffer=null}}
 function rememberBytes(key,bytes){compressed.delete(key);compressed.set(key,bytes);let total=[...compressed.values()].reduce((n,a)=>n+a.byteLength,0);for(const [id,b] of compressed){if(total<=COMPRESSED_BUDGET)break;if(id===key)continue;total-=b.byteLength;compressed.delete(id)}}
-async function recordedBytes(sound){const key=sound.sha256||sound.id;if(compressed.has(key)){const bytes=compressed.get(key);rememberBytes(key,bytes);return bytes.buffer.slice(0)}let cached;try{cached=await readRecording(sound)}catch{}let bytes;if(cached)bytes=from64(cached);else{let soundUrl=sound.url;if(soundUrl.startsWith('dropbox:')){const key=localStorage.getItem('gs_previewlock_key')||'';if(!key)throw Error('Connect PreviewLock on this browser to load this sound.');const lookup=await fetch('https://gs-previewlock-api.onrender.com/api/playback?path='+encodeURIComponent(soundUrl.slice(8)),{headers:{Authorization:'Bearer '+key}});if(!lookup.ok)throw Error('Bee sound lookup failed: '+lookup.status);soundUrl=(await lookup.json()).url}const response=await fetch(soundUrl);if(!response.ok)throw Error('Could not load '+sound.name+'. Check your connection.');bytes=new Uint8Array(await response.arrayBuffer());try{await cacheRecording(sound,to64(bytes))}catch{}}rememberBytes(key,bytes);return bytes.buffer.slice(0)}
+async function recordedBytes(sound){const key=sound.sha256||sound.id;if(compressed.has(key)){const bytes=compressed.get(key);rememberBytes(key,bytes);return bytes.buffer.slice(0)}let cached;try{cached=await readRecording(sound)}catch{}let bytes;if(!cached&&sound.origin==='scrubber'){const blob=await window.GSApprovedEffects.blob(sound);bytes=new Uint8Array(await blob.arrayBuffer());try{await cacheRecording(sound,to64(bytes))}catch{}rememberBytes(key,bytes);return bytes.buffer.slice(0)}if(cached)bytes=from64(cached);else{let soundUrl=sound.url;if(soundUrl.startsWith('dropbox:')){const key=localStorage.getItem('gs_previewlock_key')||'';if(!key)throw Error('Connect PreviewLock on this browser to load this sound.');const lookup=await fetch('https://gs-previewlock-api.onrender.com/api/playback?path='+encodeURIComponent(soundUrl.slice(8)),{headers:{Authorization:'Bearer '+key}});if(!lookup.ok)throw Error('Bee sound lookup failed: '+lookup.status);soundUrl=(await lookup.json()).url}const response=await fetch(soundUrl);if(!response.ok)throw Error('Could not load '+sound.name+'. Check your connection.');bytes=new Uint8Array(await response.arrayBuffer());try{await cacheRecording(sound,to64(bytes))}catch{}}rememberBytes(key,bytes);return bytes.buffer.slice(0)}
 async function prepareWindow(at=0){const ids=[...new Set(clips.filter(c=>c.enabled&&c.volume>0&&c.start<=at+LOOKAHEAD&&c.start+c.duration>at).map(c=>c.soundId))];for(const id of ids)await buffer(id,ctx)}
 async function prepareExportFiles(){for(const id of new Set(clips.filter(c=>c.enabled).map(c=>c.soundId))){if(cancelled)throw Error('Export cancelled.');const sound=sounds.get(id);if(sound?.recording)await recordedBytes(sound)}}
 function seedNoise(seed){let x=seed;return()=>{x=(1664525*x+1013904223)>>>0;return x/2147483648-1}}
@@ -121,7 +121,7 @@ function updateBed(){if(bedGain)bedGain.gain.value=num($('bed').value,0,100)/100
 function renderCategories(){for(const id of ['category','sheetCategory']){const sel=$(id),old=sel.value;sel.replaceChildren();for(const c of ['all',...[...new Set([...sounds.values()].filter(s=>!s.hidden).map(s=>s.category))].sort((a,b)=>a.localeCompare(b))])sel.add(new Option(c==='all'?'All sounds':c,c));if([...sel.options].some(o=>o.value===old))sel.value=old}}
 let libraryView='all';
 const favoriteSounds=new Set((()=>{try{return JSON.parse(localStorage.getItem('sxlock-favorites-v1')||'[]')}catch{return []}})());
-function matchesSound(s,cat,q){const text=[s.name,s.category,...(s.tags||[])].join(' ').toLowerCase();return !s.hidden&&(cat==='all'||s.category===cat)&&(!q||q.split(/\s+/).every(word=>text.includes(word)))&&(libraryView!=='favorites'||favoriteSounds.has(s.id))&&(libraryView!=='new'||s.addedIn==='1.7')}
+function matchesSound(s,cat,q){const text=[s.name,s.category,...(s.tags||[])].join(' ').toLowerCase();return !s.hidden&&(cat==='all'||s.category===cat)&&(!q||q.split(/\s+/).every(word=>text.includes(word)))&&(libraryView!=='favorites'||favoriteSounds.has(s.id))&&(libraryView!=='new'||s.addedIn==='1.7'||s.origin==='scrubber')}
 function soundButtons(div,cat,q,choose){
  div.replaceChildren();
  for(const s of [...sounds.values()].sort((a,b)=>a.name.localeCompare(b.name,undefined,{sensitivity:'base',numeric:true}))){
@@ -138,7 +138,7 @@ function soundButtons(div,cat,q,choose){
 function renderLibrary(){
  const host=$('library'),state=new Map([...host.querySelectorAll('details')].map(d=>[d.dataset.category,d.open])),cat=$('category').value,q=$('search').value.trim().toLowerCase();host.replaceChildren();
  const categories=[...new Set([...sounds.values()].filter(s=>matchesSound(s,cat,q)).map(s=>s.category))].sort((a,b)=>a.localeCompare(b));
- for(const category of categories){const group=document.createElement('details'),summary=document.createElement('summary'),list=document.createElement('div');group.className='sound-group';group.dataset.category=category;group.open=!!q||cat!=='all'||libraryView!=='all'||state.get(category)===true;summary.textContent=category+' · '+[...sounds.values()].filter(s=>matchesSound(s,category,q)).length;list.className='sound-buttons';soundButtons(list,category,q,id=>openSheet(id));const collapse=document.createElement('button');collapse.type='button';collapse.className='sx-collapse-category';collapse.textContent='▲ Collapse '+category;collapse.onclick=()=>{group.open=false;group.scrollIntoView({block:'nearest',behavior:'smooth'})};list.append(collapse);group.append(summary,list);host.append(group)}
+ for(const category of categories){const group=document.createElement('details'),summary=document.createElement('summary'),list=document.createElement('div');group.className='sound-group';group.dataset.category=category;group.open=!!q||cat!=='all'||libraryView!=='all'||state.get(category)===true||(!state.has(category)&&category==='Approved effects');summary.textContent=category+' · '+[...sounds.values()].filter(s=>matchesSound(s,category,q)).length;list.className='sound-buttons';soundButtons(list,category,q,id=>openSheet(id));const collapse=document.createElement('button');collapse.type='button';collapse.className='sx-collapse-category';collapse.textContent='▲ Collapse '+category;collapse.onclick=()=>{group.open=false;group.scrollIntoView({block:'nearest',behavior:'smooth'})};list.append(collapse);group.append(summary,list);host.append(group)}
  if(!categories.length)host.textContent=libraryView==='favorites'?'Tap ☆ beside any sound to keep it here.':'No matching sounds.';
  soundButtons($('sheetLibrary'),$('sheetCategory').value,$('sheetSearch').value.trim().toLowerCase(),id=>chooseSound(id));renderRecordingList();
  for(const button of document.querySelectorAll('[data-library-view]'))button.setAttribute('aria-pressed',String(button.dataset.libraryView===libraryView));
@@ -304,5 +304,23 @@ async function openCloudSource(){
  }catch(e){restore(previous);await restoreAssets(previous);throw e}
  finally{setBusy(false)}
 }
+
+// Owner-approved acquisition is a live library update, never a timeline insertion.
+function syncApprovedEffects(entries){
+ const ids=new Set(entries.map(v=>v.id));let changed=false;
+ for(const [id,sound]of sounds){if(sound.origin!=='scrubber'||ids.has(id))continue;if(clips.some(c=>c.soundId===id)){if(!sound.hidden){sound.hidden=true;changed=true}}else{sounds.delete(id);changed=true}}
+ for(const v of entries){
+  const old=sounds.get(v.id),sha=v.sha256||v.id;
+  const metadata={id:v.id,name:v.name,category:'Approved effects',origin:'scrubber',scrubberSourceId:v.sourceId,sourceId:v.sourceId,cloudAssetId:v.cloudAssetId||null,cloudPath:v.cloudReceipts?.dropbox?.path||null,cloudReceipts:v.cloudReceipts||{},storedBytes:v.storedBytes,sha256:sha,duration:Number(v.duration)||old?.duration||0,source:v.source||'',author:v.author||'',license:v.license||'User approved; source metadata retained',tags:[v.category||'','approved','scrubber'],builtin:true,recording:true,hidden:false,addedIn:'scrubber'};
+  const signature=JSON.stringify(metadata);
+  if(old?._approvalSignature===signature)continue;
+  const same=old&&old.sha256===sha;
+  sounds.set(v.id,{...old,...metadata,_approvalSignature:signature,...(!same?{buffer:null,loading:null}:{})});changed=true;
+ }
+ if(changed){renderCategories();renderLibrary();renderClips();}
+ const info=$('libraryInfo');if(info){info.dataset.baseInfo=info.dataset.baseInfo||info.textContent.replace(/ · \d+ approved effects$/,'');info.textContent=info.dataset.baseInfo+' · '+entries.length+' approved effects';}
+}
+libraryReady.then(()=>window.GSApprovedEffects?.subscribe(syncApprovedEffects));
+
 window.SxLock.cloudReady=libraryReady.then(openCloudSource).catch(e=>{recordIssue('cloud-source',e);message(e.message)});
 })();

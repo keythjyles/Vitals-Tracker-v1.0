@@ -1,5 +1,5 @@
 {
-  "version": "1.1",
+  "version": "1.2",
   "tools": [
     {
       "tool": "framelock",
@@ -37,9 +37,9 @@
     {
       "tool": "sxlock",
       "hosted_path": "tools/sxlock/index.html",
-      "source_version": "R1.10",
+      "source_version": "R1.11",
       "tool_id": "GS-TOOL-SXLOCK",
-      "description": "Production sound placement, recording, mixing and export; Sound Scrubber launch preserves the live editor tab.",
+      "description": "Approved Scrubber effects populate the live Approved effects category automatically; Play/Use use the saved original, Add alone inserts into the timeline.",
       "navigation": [
         "sound-scrubber",
         "sxlock",
@@ -50,9 +50,9 @@
     {
       "tool": "wavlock",
       "hosted_path": "tools/wavlock/index.html",
-      "source_version": "R1.2",
+      "source_version": "R1.3",
       "tool_id": "GS-TOOL-WAVLOCK",
-      "description": "Existing precision audio cutter and WAV export, with return links to Sound Scrubber, SxLock and Tools.",
+      "description": "Live searchable Approved effects list with Preview/Use, plus existing precision cutter, file import and WAV export.",
       "navigation": [
         "sound-scrubber",
         "sxlock",
@@ -63,10 +63,10 @@
     {
       "tool": "sound-scrubber",
       "tool_id": "GS-TOOL-SOUND-SCRUBBER",
-      "source_version": "R13",
+      "source_version": "R14",
       "hosted_path": "tools/sound-scrubber/index.html",
       "description": "Sound acquisition and owner quality control: search, inline Play / Approve / Reject, filename-tap rename, pending/approved/held/culled review states.",
-      "workflow": "Sound Scrubber acquisition and approval \u2192 WavLock precision components \u2192 SxLock approved sound placement. Navigation does not transfer media or automatically import into SxLock.",
+      "workflow": "Scrubber approval \u2192 instant shared Approved effects \u2192 WavLock Use or SxLock Play/Use/Add. Actual originals already cached for immediate use; verified Dropbox fallback when cache is unavailable. Drive backup remains queued.",
       "navigation": {
         "sxlock": "tools/sxlock/",
         "wavlock": "tools/wavlock/",
@@ -80,8 +80,9 @@
         "review_cache": "Browser-local review and rejection ledger; cache is recovery only, not cloud backup."
       },
       "operator_guide": "tools/sound-scrubber/README.md",
-      "changes": "R13 adds compact right-aligned reciprocal tool navigation; existing review, audio and cloud-save logic unchanged.",
-      "verification": "Navigation links, JavaScript syntax and unchanged editor/review script checks; live browser navigation checked separately. Physical Android test not claimed."
+      "changes": "Approval instantly populates SxLock and WavLock Approved effects in the same browser, including already-open sessions; rename/reject updates the library; timelines stay unchanged.",
+      "verification": "Navigation links, JavaScript syntax and unchanged editor/review script checks; live browser navigation checked separately. Physical Android test not claimed.",
+      "integration_scope": "Same-origin browser/profile. Shared review ledger + IndexedDB original, storage events/BroadcastChannel, initial/focus refresh; no reload or manual download/import. This is not a cross-device catalog synchronizer."
     }
   ]
 }
