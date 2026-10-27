@@ -1,4 +1,4 @@
-# GS Tool Refinement — Session Index v1.1
+# GS Audio Tools — Master Work Index v1.2
 
 Baseline: 2026-10-27. Original work branch: `gs-tools-refinement-baseline-20261027`. Step 1 was merged to production in PR #1; subsequent Sound Scrubber fixes were committed directly to main. Live GitHub Pages verification is still required.
 
@@ -45,3 +45,12 @@ Baseline: 2026-10-27. Original work branch: `gs-tools-refinement-baseline-202610
 - **Preservation lock:** Do not change SxLock HTML/CSS, JS, library, playback, recording, project recovery or exports during Scrubber work. Any future SxLock integration requires explicit scoped review and verified rollback. Keep existing user projects and source assets intact.
 - **Current next action:** verify live Scrubber R14.2 and Step 1 mobile layout; then implement Step 2 on an isolated branch, preserving approved canonical sounds. Rejection deletion must verify actual storage destinations; never claim cloud deletion from a browser-only tombstone.
 - **Release method:** create a separate branch for each substantive step; inspect code and backend, test, merge, check GitHub Pages deployment and live label, then log commit and test results. No release is called verified solely from a GitHub commit.
+
+## Documentation registry — master index linkage (2026-10-27)
+This index is the authoritative live work status and reconciliation record. Detailed manuals remain in place, preserving technical and historical material; do not erase or rewrite historical evidence simply because release headings are stale.
+- [Project AI operating manifest](../../AGENTS.md) — points here; production guardrails.
+- [Sound Scrubber README](sound-scrubber/README.md) — points here; discovery, queue and UI documentation.
+- [Sound Scrubber AUDIO_SAVE](sound-scrubber/AUDIO_SAVE.md) — points here; audio persistence architecture and historical verification details.
+- [SxLock README](sxlock/README.md) — points here; legacy operating instructions; its R1.7 heading is historical, NOT the R24 visual revision.
+- Source of truth for current behavior requires actual app code plus live testing; this index tracks what has been verified, not an assumption that docs equal implementation.
+- Registry updates committed on main: `9ba49538`, `fc4d441f`, `4c05697c`, `2e8acb1c`. No application code changed in these documentation commits.
