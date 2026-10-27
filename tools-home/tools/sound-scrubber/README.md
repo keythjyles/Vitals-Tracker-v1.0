@@ -5,7 +5,7 @@
 
 Canonical path: `tools-home/tools/sound-scrubber/`. This is the sound discovery and owner review tool. SxLock places approved sounds; WavLock cuts reusable audio components.
 
-Search a sound or use a preset, then Scrub. Each compact row has inline Play, Approve and Reject/Delete at the far right; tap its filename to rename. Preserve owner decisions and stable rejection IDs. Pending candidates are not approved library sounds. Do not auto-approve or auto-import.
+Search a sound or use a preset, then Scrub. Each compact row has inline Play, Approve and Reject/Delete at the far right; tap its filename to rename. Delete removes the selected browser recording and intake entry, including previously approved recordings. Deleted candidates may appear in future searches; deletion is not a permanent search ban. Pending candidates are not approved library sounds. Do not auto-approve or auto-import.
 
 Approve saves the actual original through the existing authenticated PreviewLock bridge to Dropbox. Google Drive is mirrored by the existing daily calendar executor. A queued/partial save is not a completed dual-cloud save. See [AUDIO_SAVE.md](AUDIO_SAVE.md) for exact receipts, paths, verification and retry rules. Keep original audio and trimmed derivatives separately.
 
@@ -20,3 +20,6 @@ This live bridge uses existing cached originals for immediate availability, then
 
 ## Live verification — October 26, 2026 (America/Chicago)
 Deployed commit 1aabd891a9f18999fd4af7c43e347335c74e18fd. Browser test imported a disposable 0.20-second WAV through Scrubber's real file chooser. Pending: zero entries in both editors. Approve: one entry appeared in both already-open editors without reloading; SxLock insertions remained zero and WavLock source stayed unchanged. SxLock Use decoded the original and showed 0.200-second duration without inserting; WavLock Use loaded the waveform directly from the shared original. Filename rename propagated to both lists. Intake rejection removed it from both libraries; the WavLock test editor was reset. Fixture was removed from intake and is not an approved production effect. The isolated browser lacked PreviewLock authentication, so cloud save stayed explicitly queued; this test did not claim a Dropbox/Drive write or physical Android verification. Existing cloud-save behavior was not changed.
+
+## Current owner-directed queue behavior (October 27, 2026)
+Approve removes the row immediately while the Dropbox save is in progress. Successful saves stay out of the pending queue. Failed saves reappear below pending entries with Retry, Hold and Delete; Retry hides the row again while saving, and Hold moves it to the end of pending. Delete removes the browser-owned audio and review entry even if previously approved. Rejected search candidates may be rediscovered later; no permanent rejection tombstone. Existing Dropbox/Drive cloud copies are **not** deleted by the current frontend; a verified authenticated server deletion path is still needed. Do not report cloud deletion as completed. Android UI verification remains outstanding. SxLock R24 editor is outside Scrubber modification scope.
