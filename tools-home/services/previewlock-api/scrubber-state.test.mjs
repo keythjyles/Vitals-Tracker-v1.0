@@ -49,7 +49,7 @@ test('local/search-only Delete removes bytes and ledger without cloud calls and 
  const s=setup();s.run("searchRows.set('commons:12',{name:'crickets.wav',status:'pending'})");s.blobs.set('commons:12',new Blob(['audio']));await s.run("deleteInline('commons:12')");assert.equal(s.state()['commons:12'],undefined);assert.equal(s.blobs.has('commons:12'),false);s.run("enqueue('commons:12',{name:'crickets.wav',status:'pending'})");assert(s.state()['commons:12']);
 });
 test('reload recovers interrupted approval and normal rows retain inline Play / Approve / Delete',()=>{
- const s=setup({'commons:12':{...sound,reviewState:'saving'}});assert.equal(s.state()['commons:12'].reviewState,'failed');const labels=s.run("soundRow('commons:12',reviewDB['commons:12']).children[1].children.map(b=>b.textContent)");assert.deepEqual(Array.from(labels),['●','▶','✓','✕']);
+ const s=setup({'commons:12':{...sound,reviewState:'saving'}});assert.equal(s.state()['commons:12'].reviewState,'save_unverified');assert.equal(s.run("visibleDecision('commons:12',reviewDB['commons:12'])"),false);s.run("reviewDB['commons:12'].reviewState='failed'");const labels=s.run("soundRow('commons:12',reviewDB['commons:12']).children[1].children.map(b=>b.textContent)");assert.deepEqual(Array.from(labels),['●','▶','✓','✕']);
 });
 test('historically interrupted save recovers cloud identity from cached original before deletion',async()=>{
  const s=setup({'commons:12':{...sound,approvedAt:'2026-10-27T00:00:00Z',cloudSaveStatus:'queued',reviewState:'failed'}});s.blobs.set('commons:12',new Blob([Buffer.alloc(60)]));let identity;
@@ -150,4 +150,12 @@ test('queued deletion stays out after reload; a definitive provider failure retu
  const pending={...sound,status:'deleting',reviewState:'delete_pending',cloudAssetId:'commons-12',sha256:saved.sha256};const s=setup({'commons:12':pending});s.run('renderQueue()');assert.equal(s.nodes.get('queue').children.length,0);assert.equal(s.run("visibleDecision('commons:12',reviewDB['commons:12'])"),false);
  s.request(async()=>({persisted:true,assetId:'commons-12',requestId:'failed-delete',complete:false,destinations:{dropbox:{verified:false,error:'Unrecognized managed file'},drive:{verified:false,status:'pending'}}}));
  await s.run("deleteInline('commons:12')");assert.equal(s.state()['commons:12'].reviewState,'delete_failed');assert.equal(s.nodes.get('queue').children.length,1);const buttons=s.run("soundRow('commons:12',reviewDB['commons:12']).children[1].children.map(b=>b.textContent)");assert.deepEqual(Array.from(buttons),['▶','✕']);
+});
+
+test('interrupted save stays hidden through an unknown lookup and disappears after verified receipt recovery',async()=>{
+ const s=setup({'commons:12':{...sound,reviewState:'saving',cloudAssetId:'commons-12',sha256:saved.sha256,storedBytes:60}});s.request(async()=>{throw Error('network unavailable')});await s.run('resumeUnverifiedSaves()');assert.equal(s.state()['commons:12'].reviewState,'save_unverified');assert.equal(s.run("visibleDecision('commons:12',reviewDB['commons:12'])"),false);
+ s.request(async()=>({...saved,name:sound.name,bytes:60}));await s.run('resumeUnverifiedSaves()');assert.equal(s.state()['commons:12'].status,'approved');assert.equal(s.state()['commons:12'].reviewState,'saved');
+});
+test('interrupted save returns as redo only after confirmed no saved record exists',async()=>{
+ const s=setup({'commons:12':{...sound,reviewState:'saving',cloudAssetId:'commons-12',sha256:saved.sha256,storedBytes:60}});s.request(async()=>{throw Object.assign(Error('not found'),{status:404})});await s.run('resumeUnverifiedSaves()');assert.equal(s.state()['commons:12'].reviewState,'failed');assert.equal(s.run("visibleDecision('commons:12',reviewDB['commons:12'])"),true);
 });
