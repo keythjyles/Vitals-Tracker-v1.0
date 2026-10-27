@@ -1,5 +1,8 @@
 # Instructions for AI operators
 
+**Mandatory AI onboarding:** [AI MUST READ](AI_MUST_READ.md) — read before any changes. It lists universal and task-specific required documents; preserve source material and follow the master index.
+
+
 **GS audio tools master work index:** [`GS_TOOL_REFINEMENT_INDEX.md`](tools-home/tools/GS_TOOL_REFINEMENT_INDEX.md). This is the single authoritative record for current step status, release reconciliation, SxLock preservation lock, verification, and rollback. This document retains historical technical detail; do not infer that an old heading is the current release.
 
 
