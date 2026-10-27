@@ -120,3 +120,8 @@ These are not live cloud or physical Android tests. A live authenticated disposa
 fixture is still required to claim end-to-end provider verification.
 
 Run: `node --test tools-home/services/previewlock-api/*.test.mjs`.
+
+
+## R14.10 — managed classification metadata
+Versioned `classification-<13-digit-ms>.json` files in a sound's existing asset folder are managed metadata. Validate SoundScrubberClassification-1 schema, exact assetId/SHA256/byte count and classification fields before including them in the selected sound's deletion inventory. A mismatched receipt stops deletion. The connected Drive worker likewise removes only matching classification provenance for the selected asset. Classification never approves sounds or permits resurrection of pending deletions. See CLASSIFICATION.md for the complete AI executor protocol.
+
