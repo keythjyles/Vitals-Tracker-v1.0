@@ -1,5 +1,8 @@
 # Sound Scrubber · GS-TOOL-SOUND-SCRUBBER · R14
 
+**GS audio tools master work index:** [`GS_TOOL_REFINEMENT_INDEX.md`](../GS_TOOL_REFINEMENT_INDEX.md). This is the single authoritative record for current step status, release reconciliation, SxLock preservation lock, verification, and rollback. This document retains historical technical detail; do not infer that an old heading is the current release.
+
+
 Canonical path: `tools-home/tools/sound-scrubber/`. This is the sound discovery and owner review tool. SxLock places approved sounds; WavLock cuts reusable audio components.
 
 Search a sound or use a preset, then Scrub. Each compact row has inline Play, Approve and Reject/Delete at the far right; tap its filename to rename. Preserve owner decisions and stable rejection IDs. Pending candidates are not approved library sounds. Do not auto-approve or auto-import.
