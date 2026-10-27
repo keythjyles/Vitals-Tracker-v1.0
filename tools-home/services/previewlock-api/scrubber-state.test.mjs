@@ -35,10 +35,10 @@ test('successful approval publishes only after a verified Dropbox response and p
  s.request(async()=>{const v=s.state()['commons:12'];assert.equal(v.status,'pending');assert.equal(v.cloudAssetId,'commons-12');assert.match(v.sha256,/^[a-f0-9]{64}$/);return {...saved,sha256:v.sha256}});
  await s.run("approveInline('commons:12',reviewDB['commons:12'])");assert.equal(s.state()['commons:12'].status,'approved');assert.equal(s.state()['commons:12'].reviewState,'saved');
 });
-test('pending deletion removes cached bytes and approval availability, retains recoverable status and one retry button',async()=>{
+test('pending deletion removes cached bytes and stays hidden while retaining recoverable status',async()=>{
  const s=setup({'commons:12':{...sound,status:'approved',cloudAssetId:'commons-12',sha256:saved.sha256,storedBytes:60}});s.blobs.set('commons:12',new Blob([Buffer.alloc(60)]));let calls=0;
  s.request(async()=>{calls++;return {persisted:true,assetId:'commons-12',requestId:'delete-1',complete:false,destinations:{dropbox:{verified:true,status:'deleted'},drive:{verified:false,status:'pending'}}}});
- await Promise.all([s.run("deleteInline('commons:12')"),s.run("deleteInline('commons:12')")]);assert.equal(calls,1);assert.equal(s.blobs.has('commons:12'),false);assert.equal(s.state()['commons:12'].status,'deleting');assert.equal(s.state()['commons:12'].reviewState,'delete_pending');assert.equal(s.run("soundRow('commons:12',reviewDB['commons:12']).children[1].children.length"),1);
+ await Promise.all([s.run("deleteInline('commons:12')"),s.run("deleteInline('commons:12')")]);assert.equal(calls,1);assert.equal(s.blobs.has('commons:12'),false);assert.equal(s.state()['commons:12'].status,'deleting');assert.equal(s.state()['commons:12'].reviewState,'delete_pending');assert.equal(s.run("visibleDecision('commons:12',reviewDB['commons:12'])"),false);assert.equal(s.nodes.get('queue').children.length,0);
  await s.run("approveInline('commons:12',reviewDB['commons:12'])");assert.equal(calls,1);
  s.request(async()=>({persisted:true,assetId:'commons-12',requestId:'delete-1',complete:true,destinations:{dropbox:{verified:true},drive:{verified:true}}}));await s.run("deleteInline('commons:12')");assert.equal(s.state()['commons:12'],undefined);
 });
@@ -143,4 +143,11 @@ test('search decisions disappear immediately and redo returns in that list witho
  const s=setup();s.run("searchRows.set('commons:12',{name:'first.wav',status:'pending'});searchRows.set('commons:13',{name:'next.wav',status:'pending'});refreshInlineLists()");s.blobs.set('commons:12',new Blob([Buffer.alloc(60)]));let fail;s.request(()=>new Promise((_,reject)=>{fail=reject}));const pending=s.run("approveInline('commons:12',searchRows.get('commons:12'))");
  assert.deepEqual(s.nodes.get('results').children.map(r=>r.dataset.soundRow),['commons:13']);assert.equal(s.nodes.get('queue').children.length,0);
  while(!fail)await new Promise(r=>setImmediate(r));fail(Error('redo'));await pending;assert.deepEqual(s.nodes.get('results').children.map(r=>r.dataset.soundRow),['commons:12','commons:13']);assert.equal(s.nodes.get('queue').children.length,0);
+});
+
+
+test('queued deletion stays out after reload; a definitive provider failure returns as Play/Delete without a circular pending control',async()=>{
+ const pending={...sound,status:'deleting',reviewState:'delete_pending',cloudAssetId:'commons-12',sha256:saved.sha256};const s=setup({'commons:12':pending});s.run('renderQueue()');assert.equal(s.nodes.get('queue').children.length,0);assert.equal(s.run("visibleDecision('commons:12',reviewDB['commons:12'])"),false);
+ s.request(async()=>({persisted:true,assetId:'commons-12',requestId:'failed-delete',complete:false,destinations:{dropbox:{verified:false,error:'Unrecognized managed file'},drive:{verified:false,status:'pending'}}}));
+ await s.run("deleteInline('commons:12')");assert.equal(s.state()['commons:12'].reviewState,'delete_failed');assert.equal(s.nodes.get('queue').children.length,1);const buttons=s.run("soundRow('commons:12',reviewDB['commons:12']).children[1].children.map(b=>b.textContent)");assert.deepEqual(Array.from(buttons),['▶','✕']);
 });

@@ -146,3 +146,11 @@ If a hidden save fails, restore that sound as the next decision at the current c
 Validation: 21 frontend/state/PCM checks passed, including immediate approve/delete disappearance and playback stop, two slow saves with continued decisions, failure reinsertion at the latest cursor, failure after the actively auditioned sound without interruption, search redo without duplicate queue rows, viewport anchor selection, serialized provider requests and recovery after a failed request, plus earlier capture/storage regressions. Full frontend script parses. These are deterministic DOM/storage/provider doubles; exact physical Android visual behavior remains unverified. Baseline main `9acf0d8a762fcb53066a7aae0090113d691739e4`; revert this UI stage for rollback.
 
 R14.7 right-thumb follow-through: the optional Record Playback control is inserted to the LEFT of Play, keeping Approve and Delete in the same rightmost positions on normal and failed rows. The 21 frontend checks still pass with that ordering asserted.
+
+
+
+## R14.8 — no pending-operation rows
+
+Owner screenshot identified circular-arrow deletion jobs appearing before cleanup had a final outcome. Waiting save/delete operations, including durable Drive-cleanup jobs, now stay hidden from queue/search/counts across refresh and reload. No saving/pending footer progress is emitted by those operations. Only a definitive failed deletion returns inline, with normal Play/Delete controls rather than a circular pending/retry control; a pending destination is not a failure. Known save failures retain the existing ordinary redo and recording fallback. Backend job receipts and recovery records are kept, so this does not discard unfinished cloud work or claim completion.
+
+Validation: 22 frontend/state/PCM checks passed, including hidden pending deletion after reload, successful completion remaining out, and confirmed provider failure returning as Play/Delete with no circular control, plus prior instant decision/redo/capture regressions. Full script parses. Physical Android acceptance and the underlying unrecognized-managed-file deletion conflict are still unverified/unresolved. No SxLock or backend changes. Baseline main `8dd01405ffaed78d56089933eea1e4606f293f66`.
