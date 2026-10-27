@@ -144,6 +144,30 @@ main{padding:0 6px 10px;display:flex;flex-direction:column}
  #viewerDock label:has(>#seek){margin-top:auto}
  #sxSideControls .sx-frame button{font-size:21px;font-weight:700;min-height:35px}
 }
+
+/* R1.9f: FIX regression — fixed compact Walkman transport, never stretched. */
+@media(max-width:600px){
+ #editorDock{align-items:start;grid-template-columns:minmax(0,1fr) 76px;gap:3px}
+ #editorDock>.sticky{align-self:start;display:block}
+ #editorDock>.sticky>#sxSideControls{flex:none}
+ #sxSideControls{display:flex;flex-direction:column;gap:3px}
+ #sxSideControls button,#editorDock>.sticky button{height:29px;min-height:29px;max-height:29px;padding:2px 2px;font-size:11px;line-height:1;border-radius:5px}
+ #sxSideControls #liveRecord{height:40px;min-height:40px;max-height:40px;font-size:18px;padding:2px}
+ #sxSideControls #liveRecord span{font-size:10px}
+ #sxSideControls #liveStop,#sxSideControls #saveTake{height:25px;min-height:25px;max-height:25px}
+ #sxSideControls #addEffect{height:42px;min-height:42px;max-height:42px;font-size:13px}
+ #sxSideControls .sx-frame{display:grid;grid-template-columns:1fr 1fr;gap:3px}
+ #sxSideControls .sx-frame button{height:29px;min-height:29px;max-height:29px;font-size:19px}
+ #editorDock>#viewerDock{height:auto;display:block;align-self:start}
+ #viewerDock #viewerContent{display:block;min-height:0}
+ #viewerDock .viewer{display:block;height:auto;min-height:0;background:#070c12}
+ #viewerDock .viewer video{display:block;width:100%;height:auto;max-height:205px;object-fit:contain}
+ #viewerDock .viewer #audioOnly{height:140px}
+ #viewerDock label:has(>#seek){margin-top:2px}
+ #viewerDock .clock{font-size:11px}
+ #viewerDock #seek{height:17px}
+ #soundSection{margin-top:3px}
+}
 </style></head><body><main>
 <a href="../../">← Thicket Tools</a><div class="title-row"><h1>SxLock <small>R1.9</small></h1><button id="infoButton" aria-label="Information and instructions" title="Information and instructions">ⓘ</button></div>
 <p class="small">GS-TOOL-SXLOCK · R1.9</p><button id="libraryOnly" aria-pressed="false">Library only</button><p id="recoveryStatus" class="small" role="status">Restoring project…</p><div id="editorDock"><div class="sticky"><div class="row" id="sxSideControls"><button id="play" class="primary">▶ Play mix</button><button id="restart">↶ Start</button><button id="stop">■ Stop</button></div></div>
