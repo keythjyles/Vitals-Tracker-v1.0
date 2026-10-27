@@ -1,5 +1,8 @@
 # Instructions for AI operators
 
+**GS audio tools master work index:** [`GS_TOOL_REFINEMENT_INDEX.md`](tools-home/tools/GS_TOOL_REFINEMENT_INDEX.md). This is the single authoritative record for current step status, release reconciliation, SxLock preservation lock, verification, and rollback. This document retains historical technical detail; do not infer that an old heading is the current release.
+
+
 ## ElevenLabs API connection — authoritative update (October 23, 2026)
 
 The prior shared-browser Google sign-in/number-matching and file-picker handoff are **legacy recovery procedures**, not the normal ElevenLabs production path. Supersede any instruction requiring the user to sign in to ElevenLabs for each AI-run job. Do not repeat the known-broken verification-screen workflow.
