@@ -112,16 +112,16 @@ const approving=new Set();
 async function approveInline(id,data){
  if(approving.has(id))return;
  if(!reviewDB[id])reviewDB[id]={...data,status:'pending',start:0,end:null,created:Date.now()};
- const v=reviewDB[id];approving.add(id);v.saveError='';refreshInlineLists();
+ const v=reviewDB[id];approving.add(id);v.saveError='';v.reviewState='saving';saveDB();refreshInlineLists();
  try{
   let blob=await audioOp(id).catch(()=>null)||localFiles.get(id);
   if(!blob){const response=await fetch(v.url);if(!response.ok)throw Error('Audio HTTP '+response.status);blob=await response.blob()}
   if(!blob.size)throw Error('Empty audio file');
   await audioOp(id,blob);v.status='approved';v.approvedAt=v.approvedAt||new Date().toISOString();v.storedBytes=blob.size;v.cloudSaveStatus='queued';saveDB();
   $('status').textContent='Saving original audio to Dropbox…';
-  await preserveDropbox(id,v,blob);v.saveError='';saveDB();
+  await preserveDropbox(id,v,blob);v.saveError='';v.reviewState='saved';saveDB();
   $('status').textContent=cloudSaved(v)?'Saved · Dropbox + Drive verified.':'Dropbox audio saved and verified. Drive backup queued for the daily calendar run.';
- }catch(e){v.saveError=e.message;v.cloudSaveStatus=v.cloudReceipts?.dropbox?.verified?'partial':'queued';saveDB();$('status').textContent='Save pending: '+e.message}
+ }catch(e){v.saveError=e.message;v.reviewState='failed';v.failedAt=Date.now();v.cloudSaveStatus=v.cloudReceipts?.dropbox?.verified?'partial':'queued';saveDB();$('status').textContent='Save failed. Item moved below queue for retry, hold, or delete: '+e.message}
  finally{approving.delete(id);refreshInlineLists()}
 }
 
@@ -130,7 +130,7 @@ async function deleteInline(id){
  if(deleting.has(id))return;
  const v=reviewDB[id]||searchRows.get(id);
  // A canonical approved sound is never deleted by an intake rejection.
- if(v?.status==='approved'||v?.cloudAssetId||v?.cloudReceipts?.dropbox?.verified){
+ if((v?.status==='approved'&&v?.reviewState!=='failed')||v?.cloudAssetId||v?.cloudReceipts?.dropbox?.verified){
   $('status').textContent='Protected approved sound: removal from intake cannot delete its master.';
   return;
  }
@@ -168,7 +168,7 @@ function soundRow(id,data){
  const info=document.createElement('div');info.className='name';
  const name=document.createElement('button');name.className='sound-name';name.textContent=v.name;name.title='Tap filename to rename';name.setAttribute('aria-label','Rename '+v.name);name.onclick=()=>renameInline(id,v);
  const meta=document.createElement('div');meta.className='meta';
- const status=cloudSaved(v)?'SAVED · Drive + Dropbox':v.status==='approved'?'APPROVED · cloud save pending':(v.status||'pending').toUpperCase();
+ const status=v.reviewState==='failed'?'FAILED SAVE · '+(v.saveError||'Retry available'):cloudSaved(v)?'SAVED · Drive + Dropbox':v.status==='approved'?'APPROVED · cloud save pending':(v.status||'pending').toUpperCase();
  meta.textContent=status+(v.category?' · '+v.category:'')+(v.duration?' · '+v.duration.toFixed(2)+'s':'');
  const detail=document.createElement('div');detail.className='meta';detail.textContent=v.license||'License metadata unavailable';
  const trim=document.createElement('button');trim.className='trim-link';trim.textContent='Trim / info';trim.onclick=()=>{
@@ -178,7 +178,7 @@ function soundRow(id,data){
  info.append(name);
  const actions=document.createElement('div');actions.className='actions';
  const play=document.createElement('button');play.textContent='▶';play.dataset.playId=id;play.dataset.soundName=v.name;play.setAttribute('aria-label','Play '+v.name);play.onclick=()=>playInline(id,rowState(id,v)).catch(e=>{$('status').textContent='Playback failed: '+e.message});
- const approve=document.createElement('button');approve.textContent=approving.has(id)?'…':v.status==='approved'&&!v.cloudReceipts?.dropbox?.verified?'↻':'✓';approve.title=v.status==='approved'?'Approved':'Approve';approve.className='approve-inline';approve.setAttribute('aria-label',(v.status==='approved'?'Approved ':'Approve ')+v.name);approve.disabled=approving.has(id)||v.cloudReceipts?.dropbox?.verified===true;approve.onclick=()=>approveInline(id,v);
+ const approve=document.createElement('button');approve.textContent=approving.has(id)?'…':v.reviewState==='failed'?'↻':v.status==='approved'&&!v.cloudReceipts?.dropbox?.verified?'↻':'✓';approve.title=v.status==='approved'?'Approved':'Approve';approve.className='approve-inline';approve.setAttribute('aria-label',(v.status==='approved'?'Approved ':'Approve ')+v.name);approve.disabled=approving.has(id)||v.cloudReceipts?.dropbox?.verified===true;approve.onclick=()=>approveInline(id,v);
  const remove=document.createElement('button');remove.textContent=deleting.has(id)?'…':'✕';remove.setAttribute('aria-label','Delete '+v.name);remove.title='Delete from intake';remove.disabled=deleting.has(id)||approving.has(id);remove.onclick=()=>deleteInline(id);
  actions.append(play,approve,remove);row.append(info,actions);
  if(v.saveError)approve.title=v.saveError;
@@ -194,10 +194,12 @@ function renderQueue(){
  const anchorTop=anchor?.getBoundingClientRect().top;
  const priorScroll=window.scrollY;
  host.replaceChildren();
- const entries=Object.entries(reviewDB).filter(([id,v])=>!rejected[id]&&(queueFilter==='all'||v.status===queueFilter));
- $('queueCount').textContent=Object.keys(reviewDB).filter(id=>!rejected[id]&&reviewDB[id].status==='pending').length;
+ const entries=Object.entries(reviewDB).filter(([id,v])=>!rejected[id]&&v.reviewState!=='saving'&&v.reviewState!=='failed'&&(queueFilter==='all'||v.status===queueFilter));
+ const failures=Object.entries(reviewDB).filter(([id,v])=>!rejected[id]&&v.reviewState==='failed').sort((a,b)=>(a[1].failedAt||0)-(b[1].failedAt||0));
+ $('queueCount').textContent=Object.keys(reviewDB).filter(id=>!rejected[id]&&reviewDB[id].status==='pending'&&reviewDB[id].reviewState!=='saving').length;
  for(const [id,v]of entries)host.append(soundRow(id,v));
- if(!entries.length)host.textContent='No sounds in this view.';
+ if(!entries.length&&!failures.length)host.textContent='No sounds in this view.';
+ if(failures.length){const heading=document.createElement('div');heading.className='meta';heading.textContent='FAILED SAVES · Retry, Hold, or Delete';host.append(heading);for(const [id,v]of failures)host.append(soundRow(id,v));}
  if(anchorId){
   const same=Array.from(host.querySelectorAll('[data-sound-row]')).find(el=>el.dataset.soundRow===anchorId);
   if(same&&Number.isFinite(anchorTop))window.scrollBy(0,same.getBoundingClientRect().top-anchorTop);
@@ -207,7 +209,7 @@ function renderQueue(){
 }
 function refreshInlineLists(){
  renderQueue();$('results').replaceChildren();
- for(const [id,v]of searchRows)if(!rejected[id])$('results').append(soundRow(id,v));
+ for(const [id,v]of searchRows)if(!rejected[id]&&!approving.has(id)&&reviewDB[id]?.reviewState!=='saved'&&reviewDB[id]?.reviewState!=='failed')$('results').append(soundRow(id,v));
  syncPlayButtons();
 }
 $('preview').addEventListener('play',syncPlayButtons);$('preview').addEventListener('pause',syncPlayButtons);$('preview').addEventListener('ended',syncPlayButtons);
