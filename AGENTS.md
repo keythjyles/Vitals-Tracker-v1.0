@@ -162,3 +162,10 @@ This section supplements the existing production, cloud-storage and AI-operator 
 **Automation:** The existing Google Calendar `ChatGPT To-Do List — Daily Task Queue` is the central daily action index. Add sub-actions there, not new ChatGPT scheduled tasks. The Sound Scrubber sourcing cycle targets 50 distinct new sound candidates daily, logs licenses as metadata, deduplicates sources/rejections and requires owner QC. Nothing is auto-approved.
 
 **Change control:** SxLock's working player, recording, mixing, timeline and export are locked to explicit user-authorized actions only. Android right-hand operation: controls right or bottom, compact. Sequential release IDs, unique cache identifiers, preserve source media and manifests, and distinguish code committed from Android/browser/cloud verification.
+
+
+## WavLock component workflow — verified 2026-10-26
+
+WavLock already exists at `tools-home/tools/wavlock/index.html` (currently v1.1). It loads original audio files, displays a waveform, supports precise IN/OUT marks, ±0.1-second seeking, selection preview, naming, and WAV export while preserving the original. It is the existing audio cutting and reusable-component export tool; do not invent another editor or replace WavLock.
+
+**Pipeline:** Sound Scrubber discovers, previews, rejects, renames and approves sound assets → WavLock performs precision trims and exports independently named reusable WAV components → both original and derived components must be stored with provenance, trim points, parent asset ID and verified Dropbox + Google Drive save receipts → SxLock consumes only approved assets/components. The exact integration handoff from Scrubber to WavLock and the dual-cloud storage bridge must be implemented and tested; WavLock currently exports to the device, not verified cloud storage. Preserve existing controls and original source files. Never claim export alone constitutes dual-cloud backup.
