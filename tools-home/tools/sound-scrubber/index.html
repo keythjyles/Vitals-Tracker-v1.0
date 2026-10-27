@@ -125,10 +125,37 @@ async function approveInline(id,data){
  finally{approving.delete(id);refreshInlineLists()}
 }
 
-function deleteInline(id){
+async function deleteInline(id){
+ const v=reviewDB[id]||searchRows.get(id);
+ // A canonical approved sound is never deleted by an intake rejection.
+ if(v?.status==='approved'||v?.cloudAssetId||v?.cloudReceipts?.dropbox?.verified){
+  $('status').textContent='Protected approved sound: removal from intake cannot delete its master.';
+  return;
+ }
+ if(approving.has(id)){
+  $('status').textContent='Approval/save is in progress. Wait for it to finish before deleting.';
+  return;
+ }
  if(playingId===id){++playVersion;$('preview').pause();$('preview').removeAttribute('src');playingId=null;if(playingObjectURL){URL.revokeObjectURL(playingObjectURL);playingObjectURL=null}}
- searchRows.delete(id);rejectSound(id);refreshInlineLists();
- $('status').textContent='Deleted from intake and excluded from future searches. Cloud originals, if any, preserved.';
+ // Delete the actual browser-managed audio before discarding its recovery record.
+ // Externally hosted search results are not owned by this application.
+ try{
+  const db=await audioStore;
+  await new Promise((resolve,reject)=>{
+   const tx=db.transaction('sounds','readwrite');
+   tx.objectStore('sounds').delete(id);
+   tx.oncomplete=()=>resolve();
+   tx.onerror=()=>reject(tx.error||Error('Browser audio deletion failed'));
+   tx.onabort=()=>reject(tx.error||Error('Browser audio deletion aborted'));
+  });
+ }catch(e){
+  $('status').textContent='Audio deletion failed; item retained for retry: '+e.message;
+  return;
+ }
+ localFiles.delete(id);
+ searchRows.delete(id);
+ rejectSound(id);refreshInlineLists();
+ $('status').textContent='Rejected: browser-managed audio deleted. External source files are not owned by Scrubber; no cloud deletion was performed.';
 }
 function soundRow(id,data){
  const v=rowState(id,data),row=document.createElement('div');row.className='row';row.dataset.soundRow=id;
