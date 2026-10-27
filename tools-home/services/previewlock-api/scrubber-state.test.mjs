@@ -17,16 +17,18 @@ function setup(initial={}){
  });
  vm.runInContext(code,context);
  const run=s=>vm.runInContext(s,context),request=fn=>{context.requestDouble=fn;run('audioRequest=requestDouble')};
- return {run,request,storage,blobs,nodes,events,failDeletion(value){failDelete=value},state:()=>JSON.parse(storage.get('sx-scrubber-review-v2'))};
+ return {context,run,request,storage,blobs,nodes,events,failDeletion(value){failDelete=value},state:()=>JSON.parse(storage.get('sx-scrubber-review-v2'))};
 }
 const sound={name:'crickets.wav',status:'pending',start:0,end:null};
 const saved={assetId:'commons-12',sha256:'a'.repeat(64),cloudReceipts:{dropbox:{verified:true,id:'id:12',path:'/Grill Sergeant/Sound Effects/commons-12/crickets.wav',rev:'1',bytes:60},drive:{verified:false}},cloudSaveStatus:'partial',recordPath:'asset.json'};
-test('approve dequeues synchronously; repeated failed retries return below pending; Hold moves to the end',async()=>{
+test('approve keeps its row in place; repeated failures retain only Approve and Delete',async()=>{
  const s=setup({'commons:12':sound,'commons:13':{...sound,name:'next.wav'}});s.blobs.set('commons:12',new Blob([Buffer.alloc(60)]));let reject;
  s.request(()=>new Promise((_,bad)=>{reject=bad}));const first=s.run("approveInline('commons:12',reviewDB['commons:12'])");assert.equal(s.state()['commons:12'].reviewState,'saving');
  while(!reject)await new Promise(r=>setImmediate(r));reject(Error('network failed'));await first;assert.equal(s.state()['commons:12'].reviewState,'failed');assert.equal(s.state()['commons:12'].status,'pending');
  s.request(async()=>{throw Error('again')});await s.run("approveInline('commons:12',reviewDB['commons:12'])");assert.equal(s.state()['commons:12'].reviewState,'failed');
- s.run("soundRow('commons:12',reviewDB['commons:12']).children[1].children.find(b=>b.textContent==='Hold').onclick()");assert.equal(s.state()['commons:12'].reviewState,'held');assert.equal(s.state()['commons:12'].status,'pending');
+ const labels=s.run("soundRow('commons:12',reviewDB['commons:12']).children[1].children.map(b=>b.textContent)");assert.deepEqual(Array.from(labels),['▶','✓','✕']);
+ assert(!html.includes('FAILED SAVES'));assert(!html.includes('id="hold"'));assert(!html.includes('id="filterHeld"'));
+
 });
 test('successful approval publishes only after a verified Dropbox response and pins identity before the request',async()=>{
  const s=setup({'commons:12':sound});s.blobs.set('commons:12',new Blob([Buffer.alloc(60)]));
@@ -47,7 +49,7 @@ test('local/search-only Delete removes bytes and ledger without cloud calls and 
  const s=setup();s.run("searchRows.set('commons:12',{name:'crickets.wav',status:'pending'})");s.blobs.set('commons:12',new Blob(['audio']));await s.run("deleteInline('commons:12')");assert.equal(s.state()['commons:12'],undefined);assert.equal(s.blobs.has('commons:12'),false);s.run("enqueue('commons:12',{name:'crickets.wav',status:'pending'})");assert(s.state()['commons:12']);
 });
 test('reload recovers interrupted approval and normal rows retain inline Play / Approve / Delete',()=>{
- const s=setup({'commons:12':{...sound,reviewState:'saving'}});assert.equal(s.state()['commons:12'].reviewState,'failed');const labels=s.run("soundRow('commons:12',reviewDB['commons:12']).children[1].children.map(b=>b.textContent)");assert.deepEqual(Array.from(labels),['▶','↻','Hold','✕']);
+ const s=setup({'commons:12':{...sound,reviewState:'saving'}});assert.equal(s.state()['commons:12'].reviewState,'failed');const labels=s.run("soundRow('commons:12',reviewDB['commons:12']).children[1].children.map(b=>b.textContent)");assert.deepEqual(Array.from(labels),['▶','✓','✕']);
 });
 test('historically interrupted save recovers cloud identity from cached original before deletion',async()=>{
  const s=setup({'commons:12':{...sound,approvedAt:'2026-10-27T00:00:00Z',cloudSaveStatus:'queued',reviewState:'failed'}});s.blobs.set('commons:12',new Blob([Buffer.alloc(60)]));let identity;
@@ -56,4 +58,19 @@ test('historically interrupted save recovers cloud identity from cached original
 });
 test('IndexedDB transaction failure retains the original and review entry for a successful retry',async()=>{
  const s=setup({'commons:12':sound});s.blobs.set('commons:12',new Blob(['original']));s.failDeletion(true);await s.run("deleteInline('commons:12')");assert(s.blobs.has('commons:12'));assert.equal(s.state()['commons:12'].reviewState,'delete_failed');s.failDeletion(false);await s.run("deleteInline('commons:12')");assert.equal(s.blobs.has('commons:12'),false);assert.equal(s.state()['commons:12'],undefined);
+});
+
+
+test('same-row redo and successor retain the decision position instead of jumping to a separate list',()=>{
+ const s=setup();s.run(`
+ const makeRow=(id,top)=>({dataset:{soundRow:id},getBoundingClientRect:()=>({top,bottom:top+44})});
+ let testRows=[makeRow('before',20),makeRow('decision',120),makeRow('next',164)];
+ let afterRows=[makeRow('before',20),makeRow('decision',120),makeRow('next',164)];
+ let moves=[];document.querySelectorAll=selector=>selector==='[data-sound-row]'?testRows:[];renderQueue=()=>{testRows=afterRows};window.scrollBy=(x,y)=>moves.push(y);
+ refreshInlineLists('decision');
+ `);assert.equal(s.run('moves.at(-1)'),0);
+ s.run("testRows=[makeRow('before',20),makeRow('decision',120),makeRow('next',164)];afterRows=[makeRow('before',20),makeRow('next',90)];refreshInlineLists('decision')");assert.equal(s.run('moves.at(-1)'),-30);
+});
+test('legacy Hold entries return to ordinary pending without losing sounds',()=>{
+ const s=setup({'commons:12':{...sound,status:'held',reviewState:'held'}});assert.equal(s.state()['commons:12'].status,'pending');assert.equal(s.state()['commons:12'].reviewState,'pending');
 });

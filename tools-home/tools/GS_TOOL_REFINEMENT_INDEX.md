@@ -109,3 +109,11 @@ This index is the authoritative live work status and reconciliation record. Deta
 - New PENDING-only batch: `tools-home/tools/sound-scrubber/intake/SoundScrubberIntake-20261027-am-01.json` (commit `feb0cc7d`), indexed in `tools-home/tools/sound-scrubber/intake/index.json` (commit `72638cd9`). This is a versioned discovery manifest, NOT a verified live queue import, approval, Dropbox/Drive audio save, or SxLock insertion. Source-ID/renamed-file deduplication remains unverified.
 - Existing connected Dropbox `/Grill Sergeant/Sound Effects` contains 131 asset-ID folders. Three sampled asset.json records were owner-approved with verified Dropbox receipts and Drive pending. The Drive Sound Effects root listing returned zero files. Deletion-intent root returned NOT_FOUND, which is not proof of completed deletions. No destructive operation or new Drive audio copy was claimed.
 - Next: reconcile existing approved audio with Drive using actual file-reference/byte-transfer support and per-asset hash/readback receipts; inspect live pending-deletion intents if the root appears; preserve SxLock R24 unchanged.
+
+
+
+## R14.4 — owner correction: redo is the next decision
+
+Failed approval is an in-place redo with the same Play / Approve / Delete controls. No separate Failed Saves list, no Hold control or Hold/Culled filters. During a save, the row remains in place with its decision buttons briefly disabled; on failure it becomes the next decision in that same position. Successful approval removes it and brings the next row into that position. Both queue and search refreshes preserve the decision's viewport anchor, and a search candidate is not duplicated into the queue. Existing held entries migrate to ordinary pending without deleting audio. Backend deletion/storage and SxLock are unchanged.
+
+Ten frontend state tests passed, including repeated redo failures, exactly three inline controls, decision/successor viewport anchoring, and legacy Hold migration. Physical Android scroll behavior remains unverified. Source baseline: main `5a01863953d3adea81120731d8a77b926c8c1bea`; rollback is a revert of this R14.4 UI correction. Latest owner instruction supersedes the earlier Failed Saves/Hold requirements retained above as history.
