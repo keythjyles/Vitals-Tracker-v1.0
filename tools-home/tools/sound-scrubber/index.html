@@ -129,11 +129,6 @@ const deleting=new Set();
 async function deleteInline(id){
  if(deleting.has(id))return;
  const v=reviewDB[id]||searchRows.get(id);
- // A canonical approved sound is never deleted by an intake rejection.
- if((v?.status==='approved'&&v?.reviewState!=='failed')||v?.cloudAssetId||v?.cloudReceipts?.dropbox?.verified){
-  $('status').textContent='Protected approved sound: removal from intake cannot delete its master.';
-  return;
- }
  if(approving.has(id)){
   $('status').textContent='Approval/save is in progress. Wait for it to finish before deleting.';
   return;
@@ -161,7 +156,7 @@ async function deleteInline(id){
  localFiles.delete(id);
  searchRows.delete(id);
  rejectSound(id);refreshInlineLists();
- $('status').textContent='Rejected: browser-managed audio deleted. External source files are not owned by Scrubber; no cloud deletion was performed.';
+ $('status').textContent=v?.cloudAssetId?'Deleted locally. Existing cloud copy still requires server deletion.':'Deleted browser audio and removed review entry.';
 }
 function soundRow(id,data){
  const v=rowState(id,data),row=document.createElement('div');row.className='row';row.dataset.soundRow=id;
@@ -180,7 +175,13 @@ function soundRow(id,data){
  const play=document.createElement('button');play.textContent='▶';play.dataset.playId=id;play.dataset.soundName=v.name;play.setAttribute('aria-label','Play '+v.name);play.onclick=()=>playInline(id,rowState(id,v)).catch(e=>{$('status').textContent='Playback failed: '+e.message});
  const approve=document.createElement('button');approve.textContent=approving.has(id)?'…':v.reviewState==='failed'?'↻':v.status==='approved'&&!v.cloudReceipts?.dropbox?.verified?'↻':'✓';approve.title=v.status==='approved'?'Approved':'Approve';approve.className='approve-inline';approve.setAttribute('aria-label',(v.status==='approved'?'Approved ':'Approve ')+v.name);approve.disabled=approving.has(id)||v.cloudReceipts?.dropbox?.verified===true;approve.onclick=()=>approveInline(id,v);
  const remove=document.createElement('button');remove.textContent=deleting.has(id)?'…':'✕';remove.setAttribute('aria-label','Delete '+v.name);remove.title='Delete from intake';remove.disabled=deleting.has(id)||approving.has(id);remove.onclick=()=>deleteInline(id);
- actions.append(play,approve,remove);row.append(info,actions);
+ actions.append(play,approve);
+ if(v.reviewState==='failed'){
+  const hold=document.createElement('button');hold.textContent='Hold';hold.title='Move to end of pending queue';hold.setAttribute('aria-label','Hold '+v.name);
+  hold.onclick=()=>{v.reviewState='held';v.status='pending';v.heldAt=Date.now();saveDB();refreshInlineLists()};
+  actions.append(hold);
+ }
+ actions.append(remove);row.append(info,actions);
  if(v.saveError)approve.title=v.saveError;
  return row;
 }
