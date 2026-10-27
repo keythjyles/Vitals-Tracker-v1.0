@@ -117,3 +117,11 @@ This index is the authoritative live work status and reconciliation record. Deta
 Failed approval is an in-place redo with the same Play / Approve / Delete controls. No separate Failed Saves list, no Hold control or Hold/Culled filters. During a save, the row remains in place with its decision buttons briefly disabled; on failure it becomes the next decision in that same position. Successful approval removes it and brings the next row into that position. Both queue and search refreshes preserve the decision's viewport anchor, and a search candidate is not duplicated into the queue. Existing held entries migrate to ordinary pending without deleting audio. Backend deletion/storage and SxLock are unchanged.
 
 Ten frontend state tests passed, including repeated redo failures, exactly three inline controls, decision/successor viewport anchoring, and legacy Hold migration. Physical Android scroll behavior remains unverified. Source baseline: main `5a01863953d3adea81120731d8a77b926c8c1bea`; rollback is a revert of this R14.4 UI correction. Latest owner instruction supersedes the earlier Failed Saves/Hold requirements retained above as history.
+
+
+
+## R14.5 — intake only, no completed-sound list
+
+Owner correction: Scrubber is the decision tool, not the approved library. Removed All/Pending/Approved view controls. Approved/completed sounds are excluded from the queue AND new search results, including legacy approved entries with stale failed-save flags. Approved ledger records, audio, cloud receipts, SxLock and WavLock availability are preserved. Redo remains in-place for unresolved decisions. Shortened the queue instructions and moved manifest export into the existing collapsed Search scope & licensing section.
+
+Eleven frontend state checks passed, including approved-record preservation and exclusion from both review surfaces. Screenshot's generic invalid audio identity/filename save rejection is not diagnosed by this visibility change; do not claim it is fixed. Physical Android acceptance remains open. Baseline main `da2796fe43b7f8ff1b5fdefb482976d3b1fa91e9`; rollback by reverting this UI-only stage.

@@ -74,3 +74,12 @@ test('same-row redo and successor retain the decision position instead of jumpin
 test('legacy Hold entries return to ordinary pending without losing sounds',()=>{
  const s=setup({'commons:12':{...sound,status:'held',reviewState:'held'}});assert.equal(s.state()['commons:12'].status,'pending');assert.equal(s.state()['commons:12'].reviewState,'pending');
 });
+
+
+test('Scrubber hides completed sounds in queue and search without deleting their approved library records',()=>{
+ const s=setup({'commons:12':{...sound,status:'approved',reviewState:'failed'},'commons:13':{...sound,status:'pending'}});
+ s.run("searchRows.set('commons:12',reviewDB['commons:12']);refreshInlineLists()");
+ assert.equal(s.nodes.get('results').children.length,0);assert.equal(s.nodes.get('queue').children.length,1);
+ assert.equal(s.state()['commons:12'].status,'approved');assert.equal(s.run("needsReview(reviewDB['commons:12'])"),false);
+ assert(!html.includes('id="filterApproved"'));assert(!html.includes('id="filterAll"'));assert(!html.includes('id="filterPending"'));assert(!html.includes('queueFilter'));
+});
