@@ -12,7 +12,7 @@ Baseline: 2026-10-27. Work branch: `gs-tools-refinement-baseline-20261027`. Prod
 
 ## Work index
 - [x] **0 — Baseline and version control.** Snapshot starting revisions, create isolated work branch and index; no live deployment.
-- [ ] **1 — Right-handed interface.** Compact rows, rightmost thumb controls, unobstructed center, rename by tapping name.
+- [ ] **1 — Right-handed interface (R14.1 review candidate committed; owner/mobile verification pending).** Compact rows, rightmost thumb controls, unobstructed center, rename by tapping name.
 - [ ] **2 — Playback and decisions.** Inline preview, approve/delete actions, immediate queue compaction, stable scroll; actual storage deletion for rejected sounds.
 - [ ] **3 — Unified sound index.** Search hosted library, recordings, approved effects from one catalog.
 - [ ] **4 — Search and classification.** Names, categories, tags, aliases; reclassify without reupload.
@@ -33,3 +33,5 @@ Baseline: 2026-10-27. Work branch: `gs-tools-refinement-baseline-20261027`. Prod
 
 ## Release log
 - v1.1 index: branch created; index committed on work branch. No production app modification or live verification implied.
+
+- Step 1 review candidate: Sound Scrubber R14.1 CSS-only right-thumb layout, commit `6a500d6a0ab2a50e9c6a7c874d74fed5c2e99ba2`. Existing queue actions and audio code unchanged. NOT deployed on production main. Requires owner mobile review; SxLock right-hand interface not modified.
