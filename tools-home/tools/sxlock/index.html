@@ -168,6 +168,9 @@ main{padding:0 6px 10px;display:flex;flex-direction:column}
  #viewerDock #seek{height:17px}
  #soundSection{margin-top:3px}
 }
+
+/* R1.9g: oversized glyphs, compact frame buttons; no behavior changes. */
+@media(max-width:600px){#sxSideControls .sx-frame button{font-size:30px!important;font-weight:900;line-height:1!important;padding:0 3px!important}}
 </style></head><body><main>
 <a href="../../">← Thicket Tools</a><div class="title-row"><h1>SxLock <small>R1.9</small></h1><button id="infoButton" aria-label="Information and instructions" title="Information and instructions">ⓘ</button></div>
 <p class="small">GS-TOOL-SXLOCK · R1.9</p><button id="libraryOnly" aria-pressed="false">Library only</button><p id="recoveryStatus" class="small" role="status">Restoring project…</p><div id="editorDock"><div class="sticky"><div class="row" id="sxSideControls"><button id="play" class="primary">▶ Play mix</button><button id="restart">↶ Start</button><button id="stop">■ Stop</button></div></div>
