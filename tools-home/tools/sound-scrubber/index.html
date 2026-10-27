@@ -153,11 +153,23 @@ function soundRow(id,data){
 }
 function renderQueue(){
  const editor=$('review');if(editor&&$('queue').contains(editor))document.querySelector('main').append(editor);
- const host=$('queue');host.replaceChildren();
+ const host=$('queue');
+ // Preserve the viewport anchor when a reviewed row disappears and the list compacts.
+ const before=Array.from(host.querySelectorAll('[data-sound-row]'));
+ const anchor=before.find(el=>el.getBoundingClientRect().bottom>0);
+ const anchorId=anchor?.dataset.soundRow;
+ const anchorTop=anchor?.getBoundingClientRect().top;
+ const priorScroll=window.scrollY;
+ host.replaceChildren();
  const entries=Object.entries(reviewDB).filter(([id,v])=>!rejected[id]&&(queueFilter==='all'||v.status===queueFilter));
  $('queueCount').textContent=Object.keys(reviewDB).filter(id=>!rejected[id]&&reviewDB[id].status==='pending').length;
  for(const [id,v]of entries)host.append(soundRow(id,v));
  if(!entries.length)host.textContent='No sounds in this view.';
+ if(anchorId){
+  const same=Array.from(host.querySelectorAll('[data-sound-row]')).find(el=>el.dataset.soundRow===anchorId);
+  if(same&&Number.isFinite(anchorTop))window.scrollBy(0,same.getBoundingClientRect().top-anchorTop);
+  else if(before.length&&entries.length)window.scrollTo(0,priorScroll);
+ }
  syncPlayButtons();
 }
 function refreshInlineLists(){
