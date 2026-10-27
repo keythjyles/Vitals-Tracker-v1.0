@@ -30,3 +30,11 @@ Approve removes the row immediately while the Dropbox save is in progress. Succe
 The implemented `/api/audio-delete` route supersedes the browser-only limitation above. Delete immediately removes approval availability, persists a cloud deletion intent, deletes verified managed Dropbox files, and keeps Drive visibly pending until the existing daily connected-account executor supplies a verified deletion receipt. Pending/failed deletions appear below the review queue with one retry/refresh control and resume on reload. No completed-delete claim is made while either destination is pending. Delete inside the detail view uses the same transaction. See [AUDIO_DELETE.md](AUDIO_DELETE.md) for the exact worker protocol and remaining verification.
 
 This release changes Sound Scrubber and its existing backend only; SxLock R24, hosted library IDs, timelines, placed cues, and exports are untouched. Automated provider/state tests passed; live authenticated deletion and physical Android behavior remain unverified.
+
+
+
+## R14.4 — owner correction: redo is the next decision
+
+Failed approval is an in-place redo with the same Play / Approve / Delete controls. No separate Failed Saves list, no Hold control or Hold/Culled filters. During a save, the row remains in place with its decision buttons briefly disabled; on failure it becomes the next decision in that same position. Successful approval removes it and brings the next row into that position. Both queue and search refreshes preserve the decision's viewport anchor, and a search candidate is not duplicated into the queue. Existing held entries migrate to ordinary pending without deleting audio. Backend deletion/storage and SxLock are unchanged.
+
+Ten frontend state tests passed, including repeated redo failures, exactly three inline controls, decision/successor viewport anchoring, and legacy Hold migration. Physical Android scroll behavior remains unverified. Source baseline: main `5a01863953d3adea81120731d8a77b926c8c1bea`; rollback is a revert of this R14.4 UI correction. Latest owner instruction supersedes the earlier Failed Saves/Hold requirements retained above as history.
