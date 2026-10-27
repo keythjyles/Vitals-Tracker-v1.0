@@ -1,4 +1,7 @@
 # Sound Scrubber audio preservation — R12
+
+**GS audio tools master work index:** [`GS_TOOL_REFINEMENT_INDEX.md`](../GS_TOOL_REFINEMENT_INDEX.md). This is the single authoritative record for current step status, release reconciliation, SxLock preservation lock, verification, and rollback. This document retains historical technical detail; do not infer that an old heading is the current release.
+
 Verified October 27, 2026 UTC (October 26 America/Chicago).
 
 The user requires name-only rows with inline Play / Approve / Delete at the far right and filename-tap rename. Do not replace this with a Review link or add metadata to every row. Preserve existing SxLock, its sources, sound IDs and owner decisions.
