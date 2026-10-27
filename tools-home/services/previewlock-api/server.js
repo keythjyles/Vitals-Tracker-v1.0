@@ -158,12 +158,4 @@ const server=http.createServer(async(req,res)=>{
   }catch{return send(res,502,{error:'dropbox_operation_failed'})}
  }
  return send(res,404,{error:'not_found'});
-});server.listen(PORT,'0.0.0.0',()=>{
- console.log('PreviewLock listening');
- // One bounded connection check for this repair; removed after the verified receipt.
- void(async()=>{try{
-  const data=Buffer.alloc(60);data.write('RIFF');data.writeUInt32LE(52,4);data.write('WAVE',8);data.write('fmt ',12);data.writeUInt32LE(16,16);data.writeUInt16LE(1,20);data.writeUInt16LE(1,22);data.writeUInt32LE(8000,24);data.writeUInt32LE(16000,28);data.writeUInt16LE(2,32);data.writeUInt16LE(16,34);data.write('data',36);data.writeUInt32LE(16,40);
-  const check=await fetch('http://127.0.0.1:'+PORT+'/api/audio-save',{method:'POST',headers:{authorization:'Bearer '+ADMIN,'content-type':'application/octet-stream','x-audio-id':'check-20261027cafe','x-audio-name':'SX_CONNECTION_CHECK_ONLY.wav','x-audio-sha256':createHash('sha256').update(data).digest('hex'),'x-audio-info':encodeURIComponent(JSON.stringify({purpose:'Disposable silent connection check; not a production sound',originalName:'SX_CONNECTION_CHECK_ONLY.wav',license:'Operator-created test fixture'}))},body:data});
-  const result=await check.json();console.log('AUDIO_CONNECTION_CHECK '+JSON.stringify({ok:check.ok,status:check.status,...result}));
- }catch(e){console.log('AUDIO_CONNECTION_CHECK '+JSON.stringify({ok:false,error:e.message}))}})();
-});
+});server.listen(PORT,'0.0.0.0',()=>console.log('PreviewLock listening'));
