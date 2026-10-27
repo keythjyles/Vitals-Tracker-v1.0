@@ -1,5 +1,6 @@
 import {createHash} from 'node:crypto';
 export const AUDIO_ROOT='/Grill Sergeant/Sound Effects';
+export const DRIVE_LIBRARY_FOLDER='1H269DHSY2hYwD7SKhmCmh2uAmBCh9LDy';
 const MAX=100*1024*1024;
 const ID=/^(commons-\d{1,14}|local-[a-f0-9]{64}|check-[a-f0-9]{8,64})$/;
 export function validName(name){return typeof name==='string'&&/^[^\\/<>:"|?*\x00-\x1f]{1,170}\.(ogg|oga|opus|wav|mp3|flac|m4a)$/i.test(name)}
@@ -11,6 +12,7 @@ export function dropboxClient(token,fetcher=fetch){
  return {
   async folder(path){try{return await call('create_folder_v2',{path,autorename:false})}catch(e){if(e.status!==409)throw e;const m=await call('get_metadata',{path});if(m?.['.tag']!=='folder')throw e;return m}},
   meta:path=>call('get_metadata',{path}),
+  list:path=>call('list_folder',{path,recursive:false,limit:2000}),
   move:(from,to)=>call('move_v2',{from_path:from,to_path:to,autorename:false}),
   async read(path){const r=await fetcher('https://content.dropboxapi.com/2/files/download',{method:'POST',headers:{authorization:'Bearer '+token,'dropbox-api-arg':JSON.stringify({path})}});if(!r.ok){const d=await r.json();if(d.error_summary?.startsWith('path/not_found'))return null;throw new AudioError(502,'Dropbox audio record read failed')}return {data:await r.json(),rev:JSON.parse(r.headers.get('dropbox-api-result')||'{}').rev}},
   async write(path,data,rev){const r=await fetcher('https://content.dropboxapi.com/2/files/upload',{method:'POST',headers:{authorization:'Bearer '+token,'content-type':'application/octet-stream','dropbox-api-arg':JSON.stringify({path,mode:rev?{'.tag':'update',update:rev}:{'.tag':'add'},strict_conflict:true,autorename:false,mute:true})},body:data});if(!r.ok)throw new AudioError(r.status===409?409:502,'Dropbox audio write failed');return r.json()}
@@ -37,15 +39,32 @@ export async function renameAudio(db,{assetId,name}){
  if(!ID.test(assetId)||!validName(name))throw new AudioError(400,'Invalid audio identity or filename');
  const folder=AUDIO_ROOT+'/'+assetId,recordPath=folder+'/asset.json',prior=await db.read(recordPath);if(!prior)throw new AudioError(404,'Saved audio record not found');
  const record=prior.data,receipt=record.cloudReceipts?.dropbox;if(!receipt?.id)throw new AudioError(409,'Dropbox audio not yet saved');
+ if(name.split('.').pop().toLowerCase()!==record.name.split('.').pop().toLowerCase())throw new AudioError(400,'Keep the original audio extension');
  let meta=await db.meta(receipt.id);if(!meta||meta.content_hash!==receipt.contentHash||meta.size!==receipt.bytes)throw new AudioError(409,'Dropbox original changed; rename stopped');
  if(meta.path_display!==folder+'/'+name){await db.move(meta.path_display,folder+'/'+name);meta=await db.meta(meta.id)}
- record.renameHistory=[...(record.renameHistory||[]),{from:record.name,to:name,at:new Date().toISOString()}];record.name=name;record.updatedAt=new Date().toISOString();record.cloudReceipts.dropbox={...receipt,path:meta.path_display,rev:meta.rev,verifiedAt:record.updatedAt};
+ record.renameHistory=[...(record.renameHistory||[]),{from:record.name,to:name,at:new Date().toISOString()}];record.name=name;record.updatedAt=new Date().toISOString();record.cloudReceipts.dropbox={...receipt,path:meta.path_display,rev:meta.rev,verifiedAt:record.updatedAt};record.cloudReceipts.drive={...(record.cloudReceipts.drive||{}),verified:false,status:'rename_pending'};
  const bytes=Buffer.from(JSON.stringify(record));await db.write(recordPath,bytes,prior.rev);const saved=await db.meta(recordPath);if(saved?.content_hash!==contentHash(bytes))throw new AudioError(502,'Rename metadata verification failed');return {name,cloudReceipts:record.cloudReceipts,recordPath};
+}
+export async function getAudioRecord(db,assetId){
+ if(!ID.test(assetId))throw new AudioError(400,'Invalid audio identity');
+ const folder=AUDIO_ROOT+'/'+assetId,prior=await db.read(folder+'/asset.json');if(!prior)throw new AudioError(404,'Audio record not found');
+ const record=prior.data;
+ const files=(await db.list(folder))?.entries||[];
+ const receipts=files.filter(f=>/^drive-receipt-\d{13}\.json$/.test(f.name)).sort((a,b)=>b.name.localeCompare(a.name));
+ let drive={verified:false,status:'pending'};
+ for(const entry of receipts){
+  const r=(await db.read(entry.path_display))?.data;
+  if(r?.schema==='SoundScrubberDriveReceipt-1'&&r.assetId===assetId&&r.sha256===record.sha256&&r.bytes===record.bytes&&r.name===record.name&&r.rootFolderId===DRIVE_LIBRARY_FOLDER&&r.verified===true&&r.method==='connected-drive-upload-and-readback'&&/^[A-Za-z0-9_-]{10,200}$/.test(r.fileId||'')){
+   drive={...r,receiptPath:entry.path_display};break;
+  }
+ }
+ return {assetId,name:record.name,sha256:record.sha256,bytes:record.bytes,cloudReceipts:{dropbox:record.cloudReceipts.dropbox,drive},cloudSaveStatus:drive.verified?'verified':'partial'};
 }
 let active=false;
 export async function handleAudio(req,res,url,token){
- if(!['/api/audio-save','/api/audio-rename'].includes(url.pathname))return false;
+ if(!['/api/audio-save','/api/audio-rename','/api/audio-record'].includes(url.pathname))return false;
  const send=(status,data)=>{res.writeHead(status,{'content-type':'application/json','cache-control':'no-store','access-control-allow-origin':'https://keythjyles.github.io'});res.end(JSON.stringify(data))};
+ if(url.pathname==='/api/audio-record'&&req.method==='GET'){try{send(200,await getAudioRecord(dropboxClient(token),url.searchParams.get('assetId')||''))}catch(e){send(e.status||502,{error:e.message})}return true}
  if(req.method!=='POST'){send(405,{error:'method_not_allowed'});return true}
  if(req.headers.origin&&req.headers.origin!=='https://keythjyles.github.io'){send(403,{error:'origin_not_allowed'});return true}
  if(active){send(409,{error:'Another audio save is finishing. Retry this sound.'});return true}active=true;
