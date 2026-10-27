@@ -7,8 +7,8 @@ const code=html.slice(html.indexOf('const terms='),html.indexOf("$('preview').ad
 function setup(initial={}){
  let failDelete=false;
  const storage=new Map([['sx-scrubber-review-v2',JSON.stringify(initial)],['gs_previewlock_key','test']]),blobs=new Map(),nodes=new Map(),events=[];
- const node=()=>({children:[],dataset:{},setAttribute(){},append(...v){this.children.push(...v)},replaceChildren(){this.children=[]},querySelectorAll(){return []},contains(){return false},getBoundingClientRect(){return {top:0,bottom:44}},pause(){},removeAttribute(){}});
- const context=vm.createContext({console,Blob,URL,crypto:webcrypto,Promise,Map,Set,Date,Uint8Array,Number,Array,Error,JSON,encodeURIComponent,structuredClone,
+ const node=()=>({children:[],dataset:{},setAttribute(){},append(...v){this.children.push(...v)},replaceChildren(){this.children=[]},querySelectorAll(){return []},contains(){return false},getBoundingClientRect(){return {top:0,bottom:44}},pause(){},removeAttribute(){},addEventListener(){},removeEventListener(){}});
+ const context=vm.createContext({console,Blob,URL,setTimeout,clearTimeout,crypto:webcrypto,Promise,Map,Set,Date,Uint8Array,Number,Array,Error,JSON,encodeURIComponent,structuredClone,
   document:{getElementById(id){if(!nodes.has(id))nodes.set(id,node());return nodes.get(id)},createElement:node,querySelectorAll(){return []},querySelector:node},
   window:{scrollY:0,scrollBy(){},scrollTo(){},GSApprovedEffects:{publish(){events.push(JSON.parse(storage.get('sx-scrubber-review-v2')))}}},
   localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},
@@ -21,12 +21,12 @@ function setup(initial={}){
 }
 const sound={name:'crickets.wav',status:'pending',start:0,end:null};
 const saved={assetId:'commons-12',sha256:'a'.repeat(64),cloudReceipts:{dropbox:{verified:true,id:'id:12',path:'/Grill Sergeant/Sound Effects/commons-12/crickets.wav',rev:'1',bytes:60},drive:{verified:false}},cloudSaveStatus:'partial',recordPath:'asset.json'};
-test('approve keeps its row in place; repeated failures retain only Approve and Delete',async()=>{
+test('approve keeps its row in place; failed redo offers the owner-requested recording fallback',async()=>{
  const s=setup({'commons:12':sound,'commons:13':{...sound,name:'next.wav'}});s.blobs.set('commons:12',new Blob([Buffer.alloc(60)]));let reject;
  s.request(()=>new Promise((_,bad)=>{reject=bad}));const first=s.run("approveInline('commons:12',reviewDB['commons:12'])");assert.equal(s.state()['commons:12'].reviewState,'saving');
  while(!reject)await new Promise(r=>setImmediate(r));reject(Error('network failed'));await first;assert.equal(s.state()['commons:12'].reviewState,'failed');assert.equal(s.state()['commons:12'].status,'pending');
  s.request(async()=>{throw Error('again')});await s.run("approveInline('commons:12',reviewDB['commons:12'])");assert.equal(s.state()['commons:12'].reviewState,'failed');
- const labels=s.run("soundRow('commons:12',reviewDB['commons:12']).children[1].children.map(b=>b.textContent)");assert.deepEqual(Array.from(labels),['▶','✓','✕']);
+ const labels=s.run("soundRow('commons:12',reviewDB['commons:12']).children[1].children.map(b=>b.textContent)");assert.deepEqual(Array.from(labels),['▶','✓','●','✕']);
  assert(!html.includes('FAILED SAVES'));assert(!html.includes('id="hold"'));assert(!html.includes('id="filterHeld"'));
 
 });
@@ -49,7 +49,7 @@ test('local/search-only Delete removes bytes and ledger without cloud calls and 
  const s=setup();s.run("searchRows.set('commons:12',{name:'crickets.wav',status:'pending'})");s.blobs.set('commons:12',new Blob(['audio']));await s.run("deleteInline('commons:12')");assert.equal(s.state()['commons:12'],undefined);assert.equal(s.blobs.has('commons:12'),false);s.run("enqueue('commons:12',{name:'crickets.wav',status:'pending'})");assert(s.state()['commons:12']);
 });
 test('reload recovers interrupted approval and normal rows retain inline Play / Approve / Delete',()=>{
- const s=setup({'commons:12':{...sound,reviewState:'saving'}});assert.equal(s.state()['commons:12'].reviewState,'failed');const labels=s.run("soundRow('commons:12',reviewDB['commons:12']).children[1].children.map(b=>b.textContent)");assert.deepEqual(Array.from(labels),['▶','✓','✕']);
+ const s=setup({'commons:12':{...sound,reviewState:'saving'}});assert.equal(s.state()['commons:12'].reviewState,'failed');const labels=s.run("soundRow('commons:12',reviewDB['commons:12']).children[1].children.map(b=>b.textContent)");assert.deepEqual(Array.from(labels),['▶','✓','●','✕']);
 });
 test('historically interrupted save recovers cloud identity from cached original before deletion',async()=>{
  const s=setup({'commons:12':{...sound,approvedAt:'2026-10-27T00:00:00Z',cloudSaveStatus:'queued',reviewState:'failed'}});s.blobs.set('commons:12',new Blob([Buffer.alloc(60)]));let identity;
@@ -73,4 +73,38 @@ test('same-row redo and successor retain the decision position instead of jumpin
 });
 test('legacy Hold entries return to ordinary pending without losing sounds',()=>{
  const s=setup({'commons:12':{...sound,status:'held',reviewState:'held'}});assert.equal(s.state()['commons:12'].status,'pending');assert.equal(s.state()['commons:12'].reviewState,'pending');
+});
+
+
+test('Scrubber hides completed sounds in queue and search without deleting their approved library records',()=>{
+ const s=setup({'commons:12':{...sound,status:'approved',reviewState:'failed'},'commons:13':{...sound,status:'pending'}});
+ s.run("searchRows.set('commons:12',reviewDB['commons:12']);refreshInlineLists()");
+ assert.equal(s.nodes.get('results').children.length,0);assert.equal(s.nodes.get('queue').children.length,1);
+ assert.equal(s.state()['commons:12'].status,'approved');assert.equal(s.run("needsReview(reviewDB['commons:12'])"),false);
+ assert(!html.includes('id="filterApproved"'));assert(!html.includes('id="filterAll"'));assert(!html.includes('id="filterPending"'));assert(!html.includes('queueFilter'));
+});
+
+test('sound categories are tucked in a collapsed selector, without preset pills',()=>{
+ assert(html.includes('<details id="soundTypes"><summary>Sound types</summary><select'));
+ assert(!html.includes('id="presets"></div>'));assert(!html.includes('id="soundTypes" open'));
+});
+test('playback WAV encoder preserves samples and rejects silent or invalid capture',async()=>{
+ const s=setup();s.context.sampleBuffer={numberOfChannels:1,length:4,sampleRate:8000,getChannelData:()=>Float32Array.from([0,.5,-.5,0])};
+ const wav=await s.run('recordingWav(sampleBuffer)');const bytes=Buffer.from(await wav.arrayBuffer());assert.equal(bytes.toString('ascii',0,4),'RIFF');assert.equal(bytes.length,52);assert.equal(bytes.readInt16LE(46),16383);
+ s.context.sampleBuffer.getChannelData=()=>new Float32Array(4);assert.throws(()=>s.run('recordingWav(sampleBuffer)'),/silent/);
+ s.context.sampleBuffer.getChannelData=()=>Float32Array.from([NaN,0,0,0]);assert.throws(()=>s.run('recordingWav(sampleBuffer)'),/invalid samples/);
+});
+test('a captured take stays pending, keeps its original and source identity, and uses a new stable audio ID',async()=>{
+ const s=setup({'commons:12':{...sound,reviewState:'failed',cloudAssetId:'commons-12',sha256:saved.sha256,storedBytes:60,saveError:'not saved'}});
+ const original=new Blob(['original']),capture=new Blob(['new captured take']);s.blobs.set('commons:12',original);s.context.captureBlob=capture;
+ await s.run("stagePlayback('commons:12',reviewDB['commons:12'],captureBlob)");
+ const v=s.state()['commons:12'];assert.equal(v.status,'pending');assert.equal(v.reviewState,'pending');assert.match(v.cloudAssetId,/^local-[a-f0-9]{64}$/);assert.equal(v.name,'crickets_recorded.wav');assert.equal(v.captureSource.sourceAssetId,'commons-12');assert.equal(v.managedPredecessors[0].assetId,'commons-12');assert.equal(await s.blobs.get('commons:12:capture-original').text(),'original');assert.equal(await s.blobs.get('commons:12').text(),'new captured take');
+});
+test('unavailable playback recording gives a screen-recorder path and leaves the sound unfinished',async()=>{
+ const s=setup({'commons:12':{...sound,reviewState:'failed'}});await s.run("recordPlayback('commons:12',reviewDB['commons:12'])");assert.equal(s.state()['commons:12'].reviewState,'failed');assert(s.nodes.get('status').textContent.includes('phone screen recorder'));assert.equal(s.run('captureState'),null);
+});
+test('Delete cleans up both captured and prior managed copies and the original browser cache',async()=>{
+ const s=setup({'commons:12':{...sound,cloudAssetId:'local-'+'b'.repeat(64),sha256:'b'.repeat(64),managedPredecessors:[{assetId:'commons-12',sha256:'a'.repeat(64)}]}});s.blobs.set('commons:12',new Blob(['capture']));s.blobs.set('commons:12:capture-original',new Blob(['source']));const ids=[];
+ s.request(async(_,options)=>{const body=JSON.parse(options.body);ids.push(body.assetId);return {persisted:true,assetId:body.assetId,requestId:'test-delete',complete:true,destinations:{dropbox:{verified:true},drive:{verified:true}}}});
+ await s.run("deleteInline('commons:12')");assert.deepEqual(ids,['commons-12','local-'+'b'.repeat(64)]);assert.equal(s.blobs.size,0);assert.equal(s.state()['commons:12'],undefined);
 });
