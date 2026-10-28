@@ -1,0 +1,14 @@
+{
+  "date": "2026-10-28",
+  "baselineCommit": "ebdd2eb04f9570a1d8a0d2a440beaade600476d6",
+  "release": "R2",
+  "branch": "feature/caplock-r2-gemini-layers-20261028",
+  "scope": "Transcript-first Gemini briefs, transparent layer preview, explicit 2D Rotate mode. Native captions optional/collapsed.",
+  "protected": [
+    "AspectLock engine",
+    "SxLock engine and media library",
+    "PreviewLock backend",
+    "original media and existing projects"
+  ],
+  "rollback": "Revert R2 app/metadata commits; retain original media and R1 browser recovery database."
+}
