@@ -1,40 +1,30 @@
 {
   "schema": "GS-BoundedVoiceRequest-1",
-  "jobId": "JL-20261027-BEE-SCENE-VOICE-01",
+  "jobId": "JL-20261028-CHICKEN-EGG-VOICE-01",
   "operation": "voice_generate",
-  "executionMode": "generate",
-  "canonicalId": "dad-8387d3b82e8bf2dd6e7a36b1",
+  "executionMode": "gate_rehearsal",
+  "canonicalId": "dad-ba51e94046e2bc5f0cb1aa31",
   "approvedReferenceId": "pqILh6dY0D1CO7Ckhplb",
-  "script": "[Dead pan dad joke] Why did the bee see the doctor? It had hives.\n[Dead pan dad joke] What do you call a bee that can’t make up its mind? A may-bee.",
+  "script": "[deadpan joke delivery] I ordered a chicken and an egg from Amazon.\n\n[long pause] I'll let you KNOW.",
   "voiceId": "RBNpu6jPzAoaxZKl9noJ",
   "modelId": "eleven_v4",
   "outputFormat": "mp3_44100_192",
   "voiceSettings": {
     "stability": 0.5
   },
-  "approved": true,
+  "approved": false,
   "budget": {
-    "approved": true,
-    "approvalEvidence": "User selected bee jokes 4 and 5, specified [Dead pan dad joke], no reaction hold between jokes, then explicitly instructed: Generate with the right gs voice that we always use. This authorizes this one combined voice take using the established one-take 150 existing-credit bound; no retries or purchases.",
+    "approved": false,
+    "approvalEvidence": "Read-only preflight for the user's current instruction to create one strong jokelet fitting exactly frames600–859 and deliver it in PreviewLock. Established one-take150 existing-credit bound, one GS4 render, existing bee-scene reaction; no retries or purchases.",
     "maxRequests": 1,
-    "maxCharacters": 148,
+    "maxCharacters": 100,
     "maxCredits": 150,
-    "expiresAt": "2026-10-28T03:27:56.941Z"
+    "expiresAt": "2026-10-28T18:49:43.314Z"
   },
   "automaticRetries": 0,
   "duplicateReview": {
     "cleared": true,
-    "evidence": "Reviewed current PRODUCTION_LEDGER existing groups/selected batches and current voice-jobs/original paths: no bee-doctor/hives or indecisive/maybe voice production recorded. This is one user-selected combined voiceover, not a whole jokelet or video. Historical unnamed archive remains incompletely reconciled."
+    "evidence": "Source library position644, canonical dad-ba51e94046e2bc5f0cb1aa31. No canonical/alias or text match in produced groups, selected batches or catalog; no HeyGen chicken title or Dropbox chicken filename found. Selected for exact260-frame gap, food setting, short delivery and independent ignored-joke reaction. Historical unnamed archive is not exhaustively certified."
   },
-  "componentJokes": [
-    {
-      "setup": "Why did the bee see the doctor?",
-      "punchline": "It had hives."
-    },
-    {
-      "setup": "What do you call a bee that can’t make up its mind?",
-      "punchline": "A may-bee."
-    }
-  ],
-  "invocation": "user-selected-bee-scene-voiceover-no-reaction"
+  "invocation": "one-frame-exact-260-frame-gap-jokelet"
 }
