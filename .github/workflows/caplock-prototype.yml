@@ -12,6 +12,21 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /tools-home/index.html
+            /tools-home/assets/hub.js
+            /tools-home/assets/style.css
+            /tools-home/shared/
+            /tools-home/tools/caplock/
+            /tools-home/tools/sxlock/*.html
+            /tools-home/tools/sxlock/*.js
+            /tools-home/tools/sxlock/*.mjs
+            /tools-home/tools/sxlock/*.json
+            /tools-home/tools/sxlock/vendor/
+            /tools-home/tools/aspectlock/index.html
+            /tools-home/tools/previewlock/*.html
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
