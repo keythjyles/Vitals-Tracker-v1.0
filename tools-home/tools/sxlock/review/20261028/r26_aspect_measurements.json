@@ -1,0 +1,41 @@
+{
+  "picture_encoding_identical_to_R25": false,
+  "audio": [
+    {
+      "seconds": 0.1,
+      "offset_samples": 0,
+      "offset_ms": 0.0,
+      "correlation": 0.999996956873237
+    },
+    {
+      "seconds": 16,
+      "offset_samples": 0,
+      "offset_ms": 0.0,
+      "correlation": 0.9999870893976172
+    },
+    {
+      "seconds": 33,
+      "offset_samples": 0,
+      "offset_ms": 0.0,
+      "correlation": 0.999985614323615
+    },
+    {
+      "seconds": 34.52,
+      "offset_samples": 0,
+      "offset_ms": 0.0,
+      "correlation": 0.9999969223419878
+    },
+    {
+      "seconds": 40,
+      "offset_samples": 0,
+      "offset_ms": 0.0,
+      "correlation": 0.9999623794998218
+    },
+    {
+      "seconds": 61,
+      "offset_samples": 0,
+      "offset_ms": 0.0,
+      "correlation": 0.9999873417753333
+    }
+  ]
+}

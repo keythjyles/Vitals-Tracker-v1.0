@@ -41,7 +41,7 @@ def main():
         report[name]={'encoded_video_identical':True,'frames':1000,'fps':25,'audio':measured}
     assert (d/'C.mp4').read_bytes()==source.read_bytes(),'No-op changed file bytes'
     assert (d/'H.mp4').read_bytes()==(d/'E.mp4').read_bytes(),'Repeat export introduced generation loss'
-    for name in ['fixture_44100','fixture_audio_offset']:
+    for name in ['fixture_44100','fixture_audio_offset','fixture_30fps_short_audio']:
         measured=offsets(d/(name+'.mp4'),d/(name+'_out.mp4'),[1.2,3.5,4.5])
         assert all(abs(m['offset_samples'])<=2 and m['correlation']>.98 for m in measured),(name,measured)
         report[name]={'audio':measured}

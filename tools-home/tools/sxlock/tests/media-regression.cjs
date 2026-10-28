@@ -60,6 +60,9 @@ async function main(){
    for(const name of ['fixture_44100','fixture_audio_offset','fixture_30fps','color_full709']){
     const source=await(await fetch('/fixtures/'+name+'.mp4')).blob();await render(name+'_out',source,[cue(2)]);
    }
+   const shortAudio=await(await fetch('/fixtures/fixture_30fps_short_audio.mp4')).blob();
+   await render('fixture_30fps_short_audio_out',shortAudio,[]);
+   if(results.fixture_30fps_short_audio_out.audio!=='packet-copy')throw Error('Short original audio was unnecessarily encoded');
    // Cancellation must not offer a partial file or alter the next job.
    let cancel=false;
    try{await engine.exportVideo({file,hasEffects:true,cancelled:()=>cancel,onProgress:()=>{cancel=true}});throw Error('Cancellation was ignored');}

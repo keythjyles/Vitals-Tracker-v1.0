@@ -14,7 +14,7 @@ let clips=[],ctx,master,bedGain,analyser,sourceNode,videoFile=null,videoURL=null
 const scheduled=new Set(),compressed=new Map(),PCM_BUDGET=24*1024*1024,COMPRESSED_BUDGET=8*1024*1024,LOOKAHEAD=8;
 let cleanupExport=null,exportPhase=null;
 const savedCustom=new Set(),savedVideos=new Set(),savedRecordings=new Set();let videoRef=null,recoveryQueue=Promise.resolve(),recoveryRevision=0,recoveryPending=0,restoredPlayhead=0;
-const health={version:"R25",errors:[]};try{health.errors=JSON.parse(localStorage.getItem(KEY+"-health")||"null")?.errors?.slice(-12)||[]}catch{}
+const health={version:"R26",errors:[]};try{health.errors=JSON.parse(localStorage.getItem(KEY+"-health")||"null")?.errors?.slice(-12)||[]}catch{}
 const num=(v,min=0,max=Infinity)=>Math.max(min,Math.min(max,Number(v)||0));
 const stamp=t=>`${Math.floor(t/60)}:${(t%60).toFixed(3).padStart(6,'0')}`;
 const message=t=>$('status').textContent=t;
@@ -181,7 +181,7 @@ async function videoExport(){
  if(!videoFile)throw Error('Load a video first.');
  video.pause();stopAuditions();stopEffects();
  await prepareExportFiles();
- const ac=await audioContext(),engine=await import('./export-engine.mjs?v=25');
+ const ac=await audioContext(),engine=await import('./export-engine.mjs?v=26');
  const selected=clips.filter(c=>c.enabled&&c.volume>0&&busLevel(c)>0).map(c=>({...c}));
  $('progress').hidden=false;$('progress').value=0;
  const result=await engine.exportVideo({file:videoFile,fps:num($('fps').value,1,60),size:$('size').value,

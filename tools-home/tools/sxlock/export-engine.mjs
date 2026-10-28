@@ -1,4 +1,4 @@
-// SxLock export engine R25. Media timestamps are the clock; preview playback is never recorded.
+// SxLock export engine R26. Media timestamps are the clock; preview playback is never recorded.
 import {
   Input, ALL_FORMATS, BlobSource, Output, BufferTarget, Mp4OutputFormat, WebMOutputFormat,
   EncodedPacketSink, EncodedVideoPacketSource, EncodedAudioPacketSource,
@@ -104,7 +104,7 @@ export async function exportVideo({ file, fps = 25, size = 'original', format = 
   if (!['original', '720'].includes(size) || !['mp4', 'webm'].includes(format)) throw new Error('Invalid export settings.');
   if (!Number.isFinite(soundtrackGain) || soundtrackGain < 0 || soundtrackGain > 1) throw new Error('Invalid soundtrack level.');
   const input = createInput(file);
-  let output, succeeded = false;
+  let output, videoFrames, succeeded = false;
   try {
     check(cancelled);
     onPhase('Checking original video');
@@ -120,7 +120,7 @@ export async function exportVideo({ file, fps = 25, size = 'original', format = 
       && Math.abs(timing.end - timing.count / fps) <= 0.000002;
     const copyAudio = !!audio && audio.codec === audioCodec && soundtrackGain === 1 && !hasEffects;
     const exactDuration = copyVideo ? timing.end : Math.ceil((timing.end - 0.000002) * fps) / fps;
-    const report = { engine: 'SxLock-R25', fps, width, height, sourceFrames: timing.count,
+    const report = { engine: 'SxLock-R26', fps, width, height, sourceFrames: timing.count,
       duration: exactDuration, video: copyVideo ? 'packet-copy' : 'offline-encode',
       audio: copyAudio ? 'packet-copy' : 'sample-mix', sampleRate: SAMPLE_RATE,
       colorSpace: await video.getColorSpace(), pictureResized: scale !== 1 };
@@ -163,11 +163,16 @@ export async function exportVideo({ file, fps = 25, size = 'original', format = 
     const videoPackets = copyVideo ? new EncodedPacketSink(video).packets() : null;
     const copyAudioPackets = copyAudio ? new EncodedPacketSink(audio).packets() : null;
     const audioConfig = copyAudio ? await audio.getDecoderConfig() : null;
+    const expectedAudioEnd = copyAudio ? await audio.computeDuration() : exactDuration;
     let v = videoPackets ? await videoPackets.next() : null;
     let a = copyAudioPackets ? await copyAudioPackets.next() : null;
     let firstVideo = true, firstAudio = true, renderedFrames = 0;
     const totalAudioFrames = Math.round(exactDuration * SAMPLE_RATE);
     const videoSink = copyVideo ? null : new VideoSampleSink(video);
+    if (videoSink) {
+      const times = Array.from({ length: Math.round(exactDuration * fps) }, (_, i) => Math.min(i / fps, timing.end - 0.000002));
+      videoFrames = videoSink.samplesAtTimestamps(times);
+    }
     let nextFrame = 0;
     onPhase(copyVideo ? 'Preserving video and mixing sound' : 'Encoding frames and mixing sound');
     // Interleave at fixed timeline boundaries. Work may run at any wall-clock speed.
@@ -185,7 +190,7 @@ export async function exportVideo({ file, fps = 25, size = 'original', format = 
         while (nextFrame < Math.round(exactDuration * fps) && nextFrame / fps < end - 0.000002) {
           check(cancelled);
           const timestamp = nextFrame / fps;
-          const sample = await videoSink.getSample(Math.min(timestamp, timing.end - 0.000002));
+          const sample = (await videoFrames.next()).value;
           if (!sample) throw new Error('Missing source frame at ' + timestamp.toFixed(3) + 's.');
           try { sample.setTimestamp(timestamp); sample.setDuration(1 / fps); await videoSource.add(sample); }
           finally { sample.close(); }
@@ -229,7 +234,7 @@ export async function exportVideo({ file, fps = 25, size = 'original', format = 
       if (actual.count !== renderedFrames || !isCfr(actual.timestamps, fps)
           || Math.abs(actual.end - exactDuration) > 0.0001) throw new Error('Export failed video timing validation.');
       const resultAudio = await verified.getPrimaryAudioTrack();
-      if (audioSource && (!resultAudio || Math.abs((await resultAudio.computeDuration()) - exactDuration) > 0.04)) {
+      if (audioSource && (!resultAudio || Math.abs((await resultAudio.computeDuration()) - expectedAudioEnd) > 0.04)) {
         throw new Error('Export failed audio duration validation.');
       }
       report.outputFrames = actual.count;
@@ -247,6 +252,7 @@ export async function exportVideo({ file, fps = 25, size = 'original', format = 
     succeeded = true; onProgress(1);
     return { blob, report };
   } finally {
+    try { await videoFrames?.return?.(); } catch {}
     if (output && !succeeded) await output.cancel().catch(() => {});
     input.dispose();
   }
