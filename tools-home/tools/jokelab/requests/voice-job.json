@@ -2,7 +2,7 @@
   "schema": "GS-BoundedVoiceRequest-1",
   "jobId": "JL-20261028-CHICKEN-EGG-VOICE-01",
   "operation": "voice_generate",
-  "executionMode": "gate_rehearsal",
+  "executionMode": "generate",
   "canonicalId": "dad-ba51e94046e2bc5f0cb1aa31",
   "approvedReferenceId": "pqILh6dY0D1CO7Ckhplb",
   "script": "[deadpan joke delivery] I ordered a chicken and an egg from Amazon.\n\n[long pause] I'll let you KNOW.",
@@ -12,14 +12,14 @@
   "voiceSettings": {
     "stability": 0.5
   },
-  "approved": false,
+  "approved": true,
   "budget": {
-    "approved": false,
-    "approvalEvidence": "Read-only preflight for the user's current instruction to create one strong jokelet fitting exactly frames600–859 and deliver it in PreviewLock. Established one-take150 existing-credit bound, one GS4 render, existing bee-scene reaction; no retries or purchases.",
+    "approved": true,
+    "approvalEvidence": "User: 'Create the jokelet and open in previewlock' and 'You need to fit it in by frames ... It has to exactly fit.' This delegates completion of one new jokelet for F600–F859. Reuse established GS v4 procedure; one voice request with verified100-credit quote under the established150-existing-credit ceiling, one GS4 AvatarIV render, existing bee/grilling reaction. No automatic retries, purchases or unrelated production.",
     "maxRequests": 1,
     "maxCharacters": 100,
     "maxCredits": 150,
-    "expiresAt": "2026-10-28T18:49:43.314Z"
+    "expiresAt": "2026-10-28T18:51:22.555Z"
   },
   "automaticRetries": 0,
   "duplicateReview": {
