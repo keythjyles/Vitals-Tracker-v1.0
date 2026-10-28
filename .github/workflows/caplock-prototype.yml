@@ -36,11 +36,11 @@ jobs:
       - run: sudo apt-get update -qq && sudo apt-get install -y ffmpeg
       - run: npm install --prefix /tmp/cap-browser --no-audit --no-fund playwright@1.62.1
       - run: node /tmp/cap-browser/node_modules/playwright/cli.js install --with-deps chromium
-      - run: node --test tools-home/tools/caplock/tests/core.test.mjs
+      - run: node --test tools-home/tools/caplock/tests/*.test.mjs
       - run: python tools-home/tools/caplock/tests/make-fixtures.py
       - run: |
-          python -m http.server 8765 --bind 0.0.0.0 > /tmp/cap-server.log 2>&1 &
-          curl --retry 20 --retry-connrefused --retry-delay 1 --fail --silent --show-error http://127.0.0.1:8765/tools-home/tools/caplock/ > /dev/null
+          python -m http.server 8766 --bind 0.0.0.0 > /tmp/cap-server.log 2>&1 &
+          curl --retry 20 --retry-connrefused --retry-delay 1 --fail --silent --show-error http://127.0.0.1:8766/tools-home/tools/caplock/ > /dev/null
           node tools-home/tools/caplock/tests/browser.cjs
         env:
           PLAYWRIGHT_MODULE: /tmp/cap-browser/node_modules/playwright
