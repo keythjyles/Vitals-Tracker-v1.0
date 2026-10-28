@@ -85,6 +85,19 @@
       "changes": "Approval instantly populates SxLock and WavLock Approved effects in the same browser, including already-open sessions; rename/reject updates the library; timelines stay unchanged.",
       "verification": "Navigation links, JavaScript syntax and unchanged editor/review script checks; live browser navigation checked separately. Physical Android test not claimed.",
       "integration_scope": "Same-origin browser/profile. Shared review ledger + IndexedDB original, storage events/BroadcastChannel, initial/focus refresh; no reload or manual download/import. This is not a cross-device catalog synchronizer."
+    },
+    {
+      "tool": "caplock",
+      "tool_id": "GS-TOOL-CAPLOCK",
+      "source_version": "R1",
+      "hosted_path": "tools/caplock/index.html",
+      "description": "Independent phone-first caption prototype; global styles, local overrides, 25 fps timing, JSON recovery, SRT/VTT. No video export yet.",
+      "navigation": [
+        "tools",
+        "aspectlock",
+        "sxlock",
+        "previewlock"
+      ]
     }
   ]
 }
