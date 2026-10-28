@@ -1,0 +1,30 @@
+name: CapLock prototype checks
+on:
+  pull_request:
+    paths: ['tools-home/tools/caplock/**', 'tools-home/shared/caplock-launch.js', '.github/workflows/caplock-prototype.yml']
+  push:
+    paths: ['tools-home/tools/caplock/**', 'tools-home/shared/caplock-launch.js', '.github/workflows/caplock-prototype.yml']
+permissions:
+  contents: read
+jobs:
+  prototype:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: sudo apt-get update -qq && sudo apt-get install -y ffmpeg
+      - run: npm install --prefix /tmp/cap-browser --no-audit --no-fund playwright@1.62.1
+      - run: node /tmp/cap-browser/node_modules/playwright/cli.js install --with-deps chromium
+      - run: node --test tools-home/tools/caplock/tests/core.test.mjs
+      - run: python tools-home/tools/caplock/tests/make-fixtures.py
+      - run: |
+          python -m http.server 8765 --bind 127.0.0.1 > /tmp/cap-server.log 2>&1 &
+          node tools-home/tools/caplock/tests/browser.cjs
+        env:
+          PLAYWRIGHT_MODULE: /tmp/cap-browser/node_modules/playwright
