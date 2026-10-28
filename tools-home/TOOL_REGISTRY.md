@@ -39,3 +39,8 @@ Tools home: https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/
 ## CapLock · GS-TOOL-CAPLOCK · R1
 
 Direct path: `tools/caplock/`. Independent phone-first caption prototype; global design, local refinement,25fps integer timing, project JSON, SRT/VTT and browser draft recovery. Load completed AspectLock/SxLock picture/audio. No ZLock integration; no video renderer/cloud project save in R1. See `tools/caplock/README.md` for actual validation and open gates. Launch entries in Tools, AspectLock, SxLock and PreviewLock; navigation changes preserve existing engines.
+
+
+### CapLock R2 revision
+
+CapLock is now transcript-first: selectable/movable words with Gemini directions, approved visual-protocol inheritance or independent segment prompts, then transparent animation/graphic/audio layers in the viewer. Native caption tools are collapsed. Rotate is explicitly enabled and Square resets exactly0°. Project version2 preserves layers/word metadata and imports R1. Finished-video export/cloud project saves remain pending. Existing production engines are unchanged.
