@@ -19,6 +19,7 @@ No separate AI API, paid generation service, automatic publishing or changes to 
  function launch(kind:'seeds'|'analysis'|'longform'){const p=prompt(kind);setDisplayPrompt(p);void copy(p).then(ok=>{if(ok)setMessage('Prompt copied. Paste in the ChatGPT tab to run it.');});window.open('https://chatgpt.com/','_blank','noopener,noreferrer');}
  function addLink(){try{const u=new URL(toolURL);if(u.protocol!=='https:')throw Error();const name=toolName.trim();if(!name)throw Error();const next={...custom,[name]:u.href};localStorage.setItem('toolsHub.links.v1',JSON.stringify(next));setCustom(next);setToolURL('');setMessage('Link added on this browser.');}catch{setMessage('Enter a tool name and a complete https:// address.');}}
  const tools=[
+  {name:'CapLock',version:'R1',desc:'Caption editor: global design, local refinement, 25 fps timing.',href:'./tools/caplock/',icon:Clapperboard},
   {name:'Sound Scrubber',version:'R14',desc:'Discover and review sounds: inline play, approve, reject and rename. Dropbox save with queued verified Drive mirror.',href:'./tools/sound-scrubber/',icon:Music2},
   {name:'SxLock',version:'R1.11',desc:'Frame-based sound placement and mixing.',href:'./tools/sxlock/',icon:Music2},
   {name:'WavLock',version:'R1.3',desc:'Precision audio cutting and reusable WAV export.',href:'./tools/wavlock/',icon:Scissors},

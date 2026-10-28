@@ -1,0 +1,46 @@
+name: CapLock prototype checks
+on:
+  pull_request:
+    paths: ['tools-home/tools/caplock/**', 'tools-home/shared/caplock-launch.js', '.github/workflows/caplock-prototype.yml']
+  push:
+    paths: ['tools-home/tools/caplock/**', 'tools-home/shared/caplock-launch.js', '.github/workflows/caplock-prototype.yml']
+permissions:
+  contents: read
+jobs:
+  prototype:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /tools-home/index.html
+            /tools-home/assets/hub.js
+            /tools-home/assets/style.css
+            /tools-home/shared/
+            /tools-home/tools/caplock/
+            /tools-home/tools/sxlock/*.html
+            /tools-home/tools/sxlock/*.js
+            /tools-home/tools/sxlock/*.mjs
+            /tools-home/tools/sxlock/*.json
+            /tools-home/tools/sxlock/vendor/
+            /tools-home/tools/aspectlock/index.html
+            /tools-home/tools/previewlock/*.html
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: sudo apt-get update -qq && sudo apt-get install -y ffmpeg
+      - run: npm install --prefix /tmp/cap-browser --no-audit --no-fund playwright@1.62.1
+      - run: node /tmp/cap-browser/node_modules/playwright/cli.js install --with-deps chromium
+      - run: node --test tools-home/tools/caplock/tests/core.test.mjs
+      - run: python tools-home/tools/caplock/tests/make-fixtures.py
+      - run: |
+          python -m http.server 8765 --bind 0.0.0.0 > /tmp/cap-server.log 2>&1 &
+          curl --retry 20 --retry-connrefused --retry-delay 1 --fail --silent --show-error http://127.0.0.1:8765/tools-home/tools/caplock/ > /dev/null
+          node tools-home/tools/caplock/tests/browser.cjs
+        env:
+          PLAYWRIGHT_MODULE: /tmp/cap-browser/node_modules/playwright

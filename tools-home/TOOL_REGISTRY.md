@@ -35,3 +35,7 @@ Tools home: https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/
 4. Preserve previous versions, source files, and original media. Distinguish verified GitHub/Drive assets from browser-local or conversation-only files.
 5. For each production handoff record source asset name, processing tool, exported artifact, approval state and next step.
 6. If an asset is not yet in the shared library, explicitly mark it NOT UPLOADED rather than implying it is saved.
+
+## CapLock · GS-TOOL-CAPLOCK · R1
+
+Direct path: `tools/caplock/`. Independent phone-first caption prototype; global design, local refinement,25fps integer timing, project JSON, SRT/VTT and browser draft recovery. Load completed AspectLock/SxLock picture/audio. No ZLock integration; no video renderer/cloud project save in R1. See `tools/caplock/README.md` for actual validation and open gates. Launch entries in Tools, AspectLock, SxLock and PreviewLock; navigation changes preserve existing engines.
