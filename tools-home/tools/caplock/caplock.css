@@ -6,3 +6,5 @@ h1{font-size:20px;margin:4px 0}#viewerPage{padding:0;border:0;background:none}#s
 #bedLoader.has-media>.actions{display:none}
 
 #layerRoot{z-index:10;isolation:isolate}
+
+#scene{overflow:hidden}
