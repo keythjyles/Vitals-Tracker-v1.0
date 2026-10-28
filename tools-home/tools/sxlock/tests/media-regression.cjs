@@ -6,6 +6,15 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
 async function main(){
  const server=http.createServer(async(q,s)=>{
   const url=new URL(q.url,'http://test');
+  if(q.method==='POST'&&url.pathname==='/tag-alpha'){
+   // Chromium versions differ in whether MediaRecorder writes WebM colour tags.
+   // Define an explicit full-range fixture so the alpha-merge test has one interpretation.
+   const chunks=[];for await(const b of q)chunks.push(b);
+   const src=path.join(data,'AlphaNative.webm'),dst=path.join(data,'AlphaTagged.webm');fs.writeFileSync(src,Buffer.concat(chunks));
+   const job=require('node:child_process').spawnSync('ffmpeg',['-v','error','-y','-i',src,'-map','0:v:0','-c','copy','-color_range','pc','-colorspace','bt709','-color_trc','iec61966-2-1','-color_primaries','bt709',dst]);
+   if(job.status!==0){s.writeHead(500);s.end(job.stderr);return;}
+   s.setHeader('Content-Type','video/webm');s.end(fs.readFileSync(dst));return;
+  }
   if(q.method==='POST'&&url.pathname.startsWith('/results/')){
    const chunks=[];for await(const b of q)chunks.push(b);
    fs.writeFileSync(path.join(data,path.basename(url.pathname)),Buffer.concat(chunks));s.end('saved');return;
@@ -72,7 +81,7 @@ async function main(){
    rec.ondataavailable=e=>{if(e.data.size)parts.push(e.data)};
    const stopped=new Promise((r,j)=>{rec.onstop=r;rec.onerror=j});rec.start(50);const clock=setInterval(paint,40);
    await new Promise(r=>setTimeout(r,640));clearInterval(clock);rec.stop();await stopped;stream.getTracks().forEach(t=>t.stop());
-   const alpha=new Blob(parts,{type:rec.mimeType});await fetch('/results/Alpha.webm',{method:'POST',body:alpha});
+   const nativeAlpha=new Blob(parts,{type:rec.mimeType}),tagged=await fetch('/tag-alpha',{method:'POST',body:nativeAlpha});if(!tagged.ok)throw Error('Alpha fixture tagging failed');const alpha=await tagged.blob();await fetch('/results/Alpha.webm',{method:'POST',body:alpha});
    const alphaOut=await render('Alpha',alpha,[cue(.2,.04)]);
    async function display(blob){
     const v=document.createElement('video');v.muted=true;v.src=URL.createObjectURL(blob);document.body.append(v);
