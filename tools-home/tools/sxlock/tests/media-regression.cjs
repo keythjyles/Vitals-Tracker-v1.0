@@ -108,7 +108,7 @@ async function main(){
   assert.equal(results.C.video,'file-copy');assert.equal(results.H.video,'file-copy');assert.equal(results.E.outputFrames,1000);
   // Exercise the actual UI export handler, file creation and native download.
   await page.locator('#videoFile').setInputFiles(path.join(data,'fixture_40s.mp4'));
-  await page.waitForFunction(()=>document.getElementById('video').readyState>=2);
+  await page.waitForFunction(()=>document.getElementById('video').readyState>=2&&!document.getElementById('play').disabled);
   const start=await page.evaluate(async()=>{const c=await SxLock.insert('regression-fx',{start:.101,volume:20});return c.start});
   assert.equal(start,.12);
   await page.locator('#exportSection').evaluate(el=>el.open=true);

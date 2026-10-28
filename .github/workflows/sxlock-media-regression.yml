@@ -28,4 +28,8 @@ jobs:
         env:
           DATA_DIR: /tmp/sx-media
           PLAYWRIGHT_MODULE: /tmp/sx-browser/node_modules/playwright
+      - run: node tools-home/tools/sxlock/tests/library-playhead.cjs
+        env:
+          DATA_DIR: /tmp/sx-media
+          PLAYWRIGHT_MODULE: /tmp/sx-browser/node_modules/playwright
       - run: python tools-home/tools/sxlock/tests/measure_regression.py /tmp/sx-media

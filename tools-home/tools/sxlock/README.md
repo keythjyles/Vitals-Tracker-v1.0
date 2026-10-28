@@ -5,6 +5,12 @@
 
 Phone-first sound-effect placement. Open `index.html` over HTTP(S).
 
+## R27 — recording-library recovery and first-play transport
+
+Starting with a clean timeline now reloads the independent imported/microphone library from the existing `SxLock-media` database. Older audio-only rows recover their filenames from retained current/previous/backup project metadata; audio without surviving metadata appears as a recovered recording. New imports and takes store their names beside their original audio and save even before a video is loaded. Opening another project retains the library. Explicitly deleted audio rows are not recreated from backup metadata. Existing approvals, original audio bytes, video masters and export encoding remain intact.
+
+The video duration is read from the original video track's packet timestamps before playback controls are enabled. First-play transport, stepping and effect cutoffs share that validated duration, avoiding the previous one-second fallback when the browser initially reports unknown/infinite duration. It requires no seek to the end and no restart. The incoming-repository filename filter also accepts the documented WAV/MP3/M4A files again. Release and verification evidence are in the master work index; historical export notes below describe earlier releases.
+
 ## Use
 
 1. Load the original video. Tap the picture to pause.
