@@ -5307,6 +5307,30 @@
       "outputSha256": "fdad52d0849fd903719dde9bf1d48dfbea285f72433c7cc927a422d296ca029c",
       "rebuildRecipe": "tools-home/tools/jokelab/runs/JL-20261024-BOOKMARK-recipe-v01.json",
       "heygenObservedCreditDelta": 3
+    },
+    {
+      "runId": "JL-20261027-BEE-SCENE-VOICE-01",
+      "canonicalId": "dad-8387d3b82e8bf2dd6e7a36b1",
+      "state": "voiceover_produced_pending_review",
+      "voiceJobId": "JL-20261027-BEE-SCENE-VOICE-01",
+      "componentJokes": [
+        {
+          "punchline": "It had hives.",
+          "setup": "Why did the bee see the doctor?"
+        },
+        {
+          "punchline": "A may-bee.",
+          "setup": "What do you call a bee that can’t make up its mind?"
+        }
+      ],
+      "actualVoiceCredits": 65,
+      "providerGenerationRequests": {
+        "elevenLabs": 1,
+        "heygen": 0
+      },
+      "paidProductionClearance": false,
+      "reservationScope": "One combined bee scene voiceover generated. Reuse this original; no retry or video generation authorized.",
+      "record": "runs/JL-20261027-BEE-SCENE-VOICE-01.json"
     }
   ]
 }
