@@ -1,0 +1,68 @@
+{
+  "recovered": {
+    "custom": [
+      {
+        "id": "custom-legacy",
+        "name": "Owner original bee.wav",
+        "data": true
+      },
+      {
+        "id": "custom-orphan",
+        "name": "Recovered recording · custom-orphan",
+        "data": true
+      },
+      {
+        "id": "custom-standalone",
+        "name": "Standalone voice.webm",
+        "data": true
+      }
+    ],
+    "directory": true,
+    "approved": true,
+    "clips": 0,
+    "source": null,
+    "project": {
+      "schema": "SxLock-1.0",
+      "sounds": [],
+      "clips": [],
+      "notes": "Current recovery project",
+      "savedAt": 2
+    }
+  },
+  "transport": [
+    {
+      "name": "fixture_40s.mp4",
+      "delayedMetadata": false,
+      "first": {
+        "time": 1.114667,
+        "mediaDuration": "40",
+        "max": 40,
+        "value": 1.024,
+        "clock": "0:01.024 / 0:40.000 · F26"
+      }
+    },
+    {
+      "name": "fixture_no_duration.webm",
+      "delayedMetadata": false,
+      "first": {
+        "time": 1.103386,
+        "mediaDuration": "2.96",
+        "max": 3,
+        "value": 1.101,
+        "clock": "0:01.101 / 0:03.000 · F28"
+      }
+    },
+    {
+      "name": "fixture_40s.mp4",
+      "delayedMetadata": true,
+      "first": {
+        "time": 1.104,
+        "mediaDuration": "Infinity",
+        "max": 40,
+        "value": 1.032,
+        "clock": "0:01.032 / 0:40.000 · F26"
+      }
+    }
+  ],
+  "pageErrors": []
+}
