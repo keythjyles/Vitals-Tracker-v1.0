@@ -1,3 +1,33 @@
+# CapLock · GS-TOOL-CAPLOCK · R2
+
+October28,2026 owner revision: **transcript first → Gemini animation production → import transparent media layers**. Rotate means flat2D rotation only. No third-axis behavior, ZLock integration or changes to AspectLock/SxLock engines.
+
+The entry page literally lists every segmented spoken phrase as selectable word buttons. Select words, move within/across neighboring phrases, create a new phrase, and attach Gemini effect directions. Stable word IDs carry directions through movement and JSON recovery. Text edits remap surviving words where possible. Word movement retains existing phrase timing and marks it for speech-timing review; new phrases remain untimed. Nothing fabricates word alignment.
+
+Project visual-protocol notes support draft/owner-approved state. Editing the protocol returns it to draft. Each phrase can inherit it, add its own direction, or opt out completely: the independent phrase prompt omits the global protocol. Copy a segment brief into the owner's Gemini project; generation/first-look approval remain with the owner. The Open Gemini link is ordinary navigation, not an authenticated API or automatic generation integration. A prompt requests actual alpha and tells Gemini to disclose unsupported transparency rather than label a colored background transparent.
+
+The viewer is the next page. Real local-source and existing PreviewLock-library load controls sit inside the bed before loading, then disappear to preserve an unobstructed picture; the right-side Load bed button reveals them. Transparent animation/graphic/audio clips use a reusable independent `layer-track.mjs` controller: per-clip integer IN/exclusive OUT, source trim, position, aspect-preserving width, opacity, volume for audio, visibility, explicit looping and array-based stacking. Video animations are silent by default. Underlying source picture/audio remain unchanged. Viewport pan/pinch never changes clip geometry.
+
+**Rotate is opt-in:** choosing Rotate unlocks the angle field for the selected clip. Default View, Move/size, ordinary dragging and pinch never rotate. Selecting another clip resets the mode to View. Square explicitly sets exactly0°. Rotation, placement and layer order survive project reopening. Undo/redo covers word/direction/protocol/clip edits and drag placement; media resources remain available for undo within the session.
+
+Built-in captions, styling and subtitle transport remain inside the closed **Built-in captions · optional** panel. Their preview is explicitly enabled by checkbox. R1 caption styling/timing is retained. Gemini-generated animations are the primary production path.
+
+Editable project **version2** includes words/effect directions, visual protocol/approval, independent segment direction, clip/media references and geometry. R2 reads R1 projects; older R1 code rejects version2 instead of silently dropping layers. No media bytes or temporary cloud URLs are embedded. Local files reconnect by original filename/size; cloud clips resolve their saved PreviewLock path. Browser drafts are temporary recovery, not cloud backup. Keep independent originals and download the JSON project.
+
+## R2 validation and remaining gates
+
+12 Node checks cover prior caption behavior plus stable word directions across movement/recovery, word ordering, independent protocols, legacy migration and clip boundary/rotation validation. Real Chromium153 at390×844: transcript-first entry, word edits/directions, approved/global versus independent prompt, in-bed loading, collapsed native tools, real VP9 alpha-WebM import, frame controls/play/pause/resume, opt-in Rotate, exact Square reset, position undo/redo, project download/reopen, local clip reconnect and remove/undo. Native alpha readback returned corner alpha0 and opaque-center alpha255. No page-script errors; 9:16 scene ratio0.562502; no horizontal page overflow. A complete test rerun is required after implementation changes; release receipts belong in the master index.
+
+Run: `python tools-home/tools/caplock/tests/make-fixtures.py`, `node --test tools-home/tools/caplock/tests/*.test.mjs`, then serve the repository on localhost8766 and run `node tools-home/tools/caplock/tests/browser.cjs`. Playwright/Chromium required; runtime overrides remain `PLAYWRIGHT_MODULE`, `BROWSER_EXECUTABLE`, `LIVE_URL`. The browser check generates an actual transparent WebM locally, never calling Gemini or paid providers.
+
+R2 remains a preview/editor prototype: no finished-video exporter, cloud project-save bridge or automatic Gemini asset exchange. Overlay playback/seeking uses native media presentation timestamps and can have browser scheduling/seek tolerance; the existing pinned GS1 decoder handles precise paused base sampling. No deterministic export, audio/color/frame-count parity or physical Android acceptance is claimed. Different source rates map seconds to25fps production frames, not one-to-one frame indices. Next: shared deterministic composite renderer/verified final export and durable production-project delivery, without modifying the locked legacy engines.
+
+Baseline/rollback: main `ebdd2eb04f9570a1d8a0d2a440beaade600476d6` (deployed R1). R2 is isolated in its own branch and CapLock directory. Existing AspectLock/SxLock/PreviewLock engines, libraries, projects and sources are untouched. Registry and CapLock workflow changes are scoped to R2 metadata/test coverage.
+
+---
+
+## Historical R1 record
+
 # CapLock · GS-TOOL-CAPLOCK · R1
 
 Functional prototype, October 28, 2026. Independent caption editor at `tools-home/tools/caplock/`.
