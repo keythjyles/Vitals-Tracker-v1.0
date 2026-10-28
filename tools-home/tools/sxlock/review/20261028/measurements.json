@@ -1,0 +1,565 @@
+{
+  "C": {
+    "encoded_video_identical": true,
+    "frames": 1000,
+    "fps": 25,
+    "audio": [
+      {
+        "seconds": 0.1,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 1.0
+      },
+      {
+        "seconds": 7.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 1.0
+      },
+      {
+        "seconds": 15.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 1.0
+      },
+      {
+        "seconds": 23.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 1.0
+      },
+      {
+        "seconds": 31.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 1.0
+      },
+      {
+        "seconds": 34.52,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 1.0
+      },
+      {
+        "seconds": 37.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 1.0
+      }
+    ]
+  },
+  "D": {
+    "encoded_video_identical": true,
+    "frames": 1000,
+    "fps": 25,
+    "audio": [
+      {
+        "seconds": 0.1,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999401919173413
+      },
+      {
+        "seconds": 7.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999905327221403
+      },
+      {
+        "seconds": 15.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999904318646419
+      },
+      {
+        "seconds": 23.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999880376501807
+      },
+      {
+        "seconds": 31.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999840372719861
+      },
+      {
+        "seconds": 34.52,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999896875448081
+      },
+      {
+        "seconds": 37.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999904943868523
+      }
+    ]
+  },
+  "E": {
+    "encoded_video_identical": true,
+    "frames": 1000,
+    "fps": 25,
+    "audio": [
+      {
+        "seconds": 0.1,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999401919173413
+      },
+      {
+        "seconds": 7.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999905327221403
+      },
+      {
+        "seconds": 15.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999878375022675
+      },
+      {
+        "seconds": 23.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999874106102068
+      },
+      {
+        "seconds": 31.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999835607981105
+      },
+      {
+        "seconds": 34.52,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999877314737383
+      },
+      {
+        "seconds": 37.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999906593435047
+      }
+    ]
+  },
+  "F": {
+    "encoded_video_identical": true,
+    "frames": 1000,
+    "fps": 25,
+    "audio": [
+      {
+        "seconds": 0.1,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999401919173413
+      },
+      {
+        "seconds": 7.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999905605046836
+      },
+      {
+        "seconds": 15.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999845395704368
+      },
+      {
+        "seconds": 23.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999880758065516
+      },
+      {
+        "seconds": 31.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999834553037366
+      },
+      {
+        "seconds": 34.52,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.999990407162685
+      },
+      {
+        "seconds": 37.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999911122165406
+      }
+    ]
+  },
+  "G": {
+    "encoded_video_identical": true,
+    "frames": 1000,
+    "fps": 25,
+    "audio": [
+      {
+        "seconds": 0.1,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999401919173413
+      },
+      {
+        "seconds": 7.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999905605046836
+      },
+      {
+        "seconds": 15.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999898789494976
+      },
+      {
+        "seconds": 23.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999877563842116
+      },
+      {
+        "seconds": 31.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999840649389208
+      },
+      {
+        "seconds": 34.52,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999835058857965
+      },
+      {
+        "seconds": 37.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999909637983915
+      }
+    ]
+  },
+  "Moved": {
+    "encoded_video_identical": true,
+    "frames": 1000,
+    "fps": 25,
+    "audio": [
+      {
+        "seconds": 0.1,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999401919173413
+      },
+      {
+        "seconds": 7.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999906178273288
+      },
+      {
+        "seconds": 15.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999897257192851
+      },
+      {
+        "seconds": 23.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999874106102068
+      },
+      {
+        "seconds": 31.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999846415191717
+      },
+      {
+        "seconds": 34.52,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999866731391294
+      },
+      {
+        "seconds": 37.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999910649563044
+      }
+    ]
+  },
+  "Deleted": {
+    "encoded_video_identical": true,
+    "frames": 1000,
+    "fps": 25,
+    "audio": [
+      {
+        "seconds": 0.1,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 1.0
+      },
+      {
+        "seconds": 7.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 1.0
+      },
+      {
+        "seconds": 15.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 1.0
+      },
+      {
+        "seconds": 23.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 1.0
+      },
+      {
+        "seconds": 31.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 1.0
+      },
+      {
+        "seconds": 34.52,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 1.0
+      },
+      {
+        "seconds": 37.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 1.0
+      }
+    ]
+  },
+  "H": {
+    "encoded_video_identical": true,
+    "frames": 1000,
+    "fps": 25,
+    "audio": [
+      {
+        "seconds": 0.1,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999401919173413
+      },
+      {
+        "seconds": 7.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999905327221403
+      },
+      {
+        "seconds": 15.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999878375022675
+      },
+      {
+        "seconds": 23.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999874106102068
+      },
+      {
+        "seconds": 31.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999835607981105
+      },
+      {
+        "seconds": 34.52,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999877314737383
+      },
+      {
+        "seconds": 37.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999906593435047
+      }
+    ]
+  },
+  "UI": {
+    "encoded_video_identical": true,
+    "frames": 1000,
+    "fps": 25,
+    "audio": [
+      {
+        "seconds": 0.1,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999872548497439
+      },
+      {
+        "seconds": 7.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999901753362179
+      },
+      {
+        "seconds": 15.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.999991000390113
+      },
+      {
+        "seconds": 23.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.999989790368872
+      },
+      {
+        "seconds": 31.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999834381984517
+      },
+      {
+        "seconds": 34.52,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999901993605429
+      },
+      {
+        "seconds": 37.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999924158909023
+      }
+    ]
+  },
+  "AfterCancel": {
+    "encoded_video_identical": true,
+    "frames": 1000,
+    "fps": 25,
+    "audio": [
+      {
+        "seconds": 0.1,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 1.0
+      },
+      {
+        "seconds": 7.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 1.0
+      },
+      {
+        "seconds": 15.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 1.0
+      },
+      {
+        "seconds": 23.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 1.0
+      },
+      {
+        "seconds": 31.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 1.0
+      },
+      {
+        "seconds": 34.52,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 1.0
+      },
+      {
+        "seconds": 37.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 1.0
+      }
+    ]
+  },
+  "fixture_44100": {
+    "audio": [
+      {
+        "seconds": 1.2,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999835809141208
+      },
+      {
+        "seconds": 3.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999803407780613
+      },
+      {
+        "seconds": 4.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999775785465002
+      }
+    ]
+  },
+  "fixture_audio_offset": {
+    "audio": [
+      {
+        "seconds": 1.2,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999791225895305
+      },
+      {
+        "seconds": 3.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.999963866571718
+      },
+      {
+        "seconds": 4.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999656796926691
+      }
+    ]
+  },
+  "colour": {
+    "encoded_video_identical": true,
+    "PSNR": "infinity",
+    "SSIM": 1.0
+  },
+  "30fps_conversion": {
+    "fps": 25,
+    "frames": 150,
+    "audio": [
+      {
+        "seconds": 0.1,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999401919173413
+      },
+      {
+        "seconds": 3,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999897731700856
+      },
+      {
+        "seconds": 4.5,
+        "offset_samples": 0,
+        "offset_ms": 0.0,
+        "correlation": 0.9999859387668828
+      }
+    ]
+  }
+}
