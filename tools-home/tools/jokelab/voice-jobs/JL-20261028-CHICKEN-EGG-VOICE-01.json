@@ -1,1 +1,64 @@
-{"attempt":1,"automaticRetries":0,"jobId":"JL-20261028-CHICKEN-EGG-VOICE-01","original":{"bytes":111011,"format":"audio/mpeg","path":"tools-home/tools/jokelab/voice-originals/JL-20261028-CHICKEN-EGG-VOICE-01.mp3","sha256":"c0a5c94962cd9cf34e6c1b34e4ce3c90af81cb51d338e98efc6823c1317616c7"},"request":{"approved":true,"approvedReferenceId":"pqILh6dY0D1CO7Ckhplb","automaticRetries":0,"budget":{"approvalEvidence":"User: 'Create the jokelet and open in previewlock' and 'You need to fit it in by frames ... It has to exactly fit.' This delegates completion of one new jokelet for F600–F859. Reuse established GS v4 procedure; one voice request with verified100-credit quote under the established150-existing-credit ceiling, one GS4 AvatarIV render, existing bee/grilling reaction. No automatic retries, purchases or unrelated production.","approved":true,"expiresAt":"2026-10-28T18:51:22.555Z","maxCharacters":100,"maxCredits":150,"maxRequests":1},"canonicalId":"dad-ba51e94046e2bc5f0cb1aa31","duplicateReview":{"cleared":true,"evidence":"Source library position644, canonical dad-ba51e94046e2bc5f0cb1aa31. No canonical/alias or text match in produced groups, selected batches or catalog; no HeyGen chicken title or Dropbox chicken filename found. Selected for exact260-frame gap, food setting, short delivery and independent ignored-joke reaction. Historical unnamed archive is not exhaustively certified."},"jobId":"JL-20261028-CHICKEN-EGG-VOICE-01","modelId":"eleven_v4","operation":"voice_generate","outputFormat":"mp3_44100_192","schema":"GS-BoundedVoiceRequest-1","script":"[deadpan joke delivery] I ordered a chicken and an egg from Amazon.\n\n[long pause] I'll let you KNOW.","voiceId":"RBNpu6jPzAoaxZKl9noJ","voiceSettings":{"stability":0.5}},"requestSha256":"0a7cdcac73c2ae18b0d24a01fe4bff99b3f839370f5ce82ac8ab5d9747c15965","reservedCredits":150,"runId":"40730064753","schema":"GS-VoiceJob-2","sourceCommit":"098684d73391ed50d3d2c105df87c7af883b2e26","status":"completed","usage":{"actualCredits":44,"budgetExceeded":false,"costStatus":"provider_reported","historyItemId":"Y67ikIrRwL6DJErScNSe","modelCostFactor":1,"requestId":"BT9nuhWotbb0xd4gouQC"}}
+{
+  "attempt": 1,
+  "automaticRetries": 0,
+  "jobId": "JL-20261028-CHICKEN-EGG-VOICE-01",
+  "original": {
+    "bytes": 111011,
+    "format": "audio/mpeg",
+    "path": "tools-home/tools/jokelab/voice-originals/JL-20261028-CHICKEN-EGG-VOICE-01.mp3",
+    "sha256": "c0a5c94962cd9cf34e6c1b34e4ce3c90af81cb51d338e98efc6823c1317616c7"
+  },
+  "request": {
+    "approved": true,
+    "approvedReferenceId": "pqILh6dY0D1CO7Ckhplb",
+    "automaticRetries": 0,
+    "budget": {
+      "approvalEvidence": "User: 'Create the jokelet and open in previewlock' and 'You need to fit it in by frames ... It has to exactly fit.' This delegates completion of one new jokelet for F600\u2013F859. Reuse established GS v4 procedure; one voice request with verified100-credit quote under the established150-existing-credit ceiling, one GS4 AvatarIV render, existing bee/grilling reaction. No automatic retries, purchases or unrelated production.",
+      "approved": true,
+      "expiresAt": "2026-10-28T18:51:22.555Z",
+      "maxCharacters": 100,
+      "maxCredits": 150,
+      "maxRequests": 1
+    },
+    "canonicalId": "dad-ba51e94046e2bc5f0cb1aa31",
+    "duplicateReview": {
+      "cleared": true,
+      "evidence": "Source library position644, canonical dad-ba51e94046e2bc5f0cb1aa31. No canonical/alias or text match in produced groups, selected batches or catalog; no HeyGen chicken title or Dropbox chicken filename found. Selected for exact260-frame gap, food setting, short delivery and independent ignored-joke reaction. Historical unnamed archive is not exhaustively certified."
+    },
+    "jobId": "JL-20261028-CHICKEN-EGG-VOICE-01",
+    "modelId": "eleven_v4",
+    "operation": "voice_generate",
+    "outputFormat": "mp3_44100_192",
+    "schema": "GS-BoundedVoiceRequest-1",
+    "script": "[deadpan joke delivery] I ordered a chicken and an egg from Amazon.\n\n[long pause] I'll let you KNOW.",
+    "voiceId": "RBNpu6jPzAoaxZKl9noJ",
+    "voiceSettings": {
+      "stability": 0.5
+    }
+  },
+  "requestSha256": "0a7cdcac73c2ae18b0d24a01fe4bff99b3f839370f5ce82ac8ab5d9747c15965",
+  "reservedCredits": 150,
+  "runId": "40730064753",
+  "schema": "GS-VoiceJob-2",
+  "sourceCommit": "098684d73391ed50d3d2c105df87c7af883b2e26",
+  "status": "completed",
+  "usage": {
+    "actualCredits": 44,
+    "budgetExceeded": false,
+    "costStatus": "provider_reported",
+    "historyItemId": "Y67ikIrRwL6DJErScNSe",
+    "modelCostFactor": 1,
+    "requestId": "BT9nuhWotbb0xd4gouQC"
+  },
+  "wav": {
+    "bytes": 402270,
+    "channels": 1,
+    "conversion": "ffmpeg decode to PCM16; no gain, speed, trim or resampling options",
+    "duration": 4.56,
+    "encoding": "pcm_s16le",
+    "parentSha256": "c0a5c94962cd9cf34e6c1b34e4ce3c90af81cb51d338e98efc6823c1317616c7",
+    "path": "tools-home/tools/jokelab/voice-wav/JL-20261028-CHICKEN-EGG-VOICE-01.wav",
+    "sampleRate": 44100,
+    "sha256": "d05a905620c995da772e980e2edc987b9d80fc641f013c40d53c3e94f726b4e3"
+  }
+}
