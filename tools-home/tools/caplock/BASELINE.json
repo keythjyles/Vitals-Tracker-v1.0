@@ -1,0 +1,10 @@
+{
+  "date": "2026-10-28",
+  "baselineCommit": "52984f0eaa1e47aba57b87931d753e0973ff751f",
+  "branch": "feature/caplock-r1-20261028",
+  "protected": ["tools-home/tools/sxlock/sxlock.js", "tools-home/tools/sxlock/export-engine.mjs", "tools-home/tools/sxlock/mp4-duration.js", "tools-home/tools/sxlock/library.json", "tools-home/tools/sxlock/vendor/", "all existing media"],
+  "scope": "Independent CapLock prototype and explicitly requested navigation only",
+  "ownerUpdate": "Abandon ZLock integration; AspectLock solves picture composition. No Z0-Z3 assignments or migration.",
+  "existingDefects": ["Physical Android verification remains outstanding", "Older PreviewLock index is a legacy browser catalog", "No CapLock deterministic caption export or cloud project bridge exists at baseline"],
+  "rollback": "Revert CapLock feature/navigation commits. Retain originals and existing browser project databases."
+}
