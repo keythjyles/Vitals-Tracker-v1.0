@@ -1,0 +1,145 @@
+{
+  "metadata": {
+    "GS_EP4_ASPECTLOCK_66S_METADATA_REPAIRED_v01.mp4": {
+      "programs": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "width": 540,
+          "height": 960,
+          "color_range": "pc",
+          "color_space": "bt709",
+          "color_transfer": "bt709",
+          "color_primaries": "bt709",
+          "avg_frame_rate": "4989000/200039",
+          "duration": "66.679667",
+          "nb_frames": "1663"
+        },
+        {
+          "codec_name": "aac",
+          "avg_frame_rate": "0/0",
+          "duration": "66.622792",
+          "nb_frames": "3123"
+        }
+      ]
+    },
+    "live_aspect_with_effect.mp4": {
+      "programs": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "width": 540,
+          "height": 960,
+          "color_range": "pc",
+          "color_space": "bt709",
+          "color_transfer": "bt709",
+          "color_primaries": "bt709",
+          "avg_frame_rate": "25/1",
+          "duration": "66.680000",
+          "nb_frames": "1667"
+        },
+        {
+          "codec_name": "aac",
+          "avg_frame_rate": "0/0",
+          "duration": "66.688000",
+          "nb_frames": "3127"
+        }
+      ]
+    }
+  },
+  "frames": [
+    {
+      "at": 0,
+      "source_frame": 0,
+      "mean_rgb_error": [
+        0.21377893518518518,
+        -0.00722608024691358,
+        0.26374807098765435
+      ],
+      "rgb_mae": 2.1343338477366256,
+      "PSNR": 38.73533312217161
+    },
+    {
+      "at": 2,
+      "source_frame": 50,
+      "mean_rgb_error": [
+        0.23998456790123457,
+        0.014369212962962962,
+        0.3157561728395062
+      ],
+      "rgb_mae": 1.8253131430041152,
+      "PSNR": 40.112914700261314
+    },
+    {
+      "at": 16,
+      "source_frame": 399,
+      "mean_rgb_error": [
+        0.20766203703703703,
+        0.005744598765432099,
+        0.2978395061728395
+      ],
+      "rgb_mae": 1.8464634773662552,
+      "PSNR": 39.98419735483819
+    },
+    {
+      "at": 34.52,
+      "source_frame": 863,
+      "mean_rgb_error": [
+        0.03650270061728395,
+        -0.0006385030864197531,
+        0.05835069444444444
+      ],
+      "rgb_mae": 0.7584612911522634,
+      "PSNR": 46.37245159326571
+    },
+    {
+      "at": 60,
+      "source_frame": 1497,
+      "mean_rgb_error": [
+        0.2157079475308642,
+        0.012040895061728394,
+        0.31515239197530864
+      ],
+      "rgb_mae": 1.9458423353909464,
+      "PSNR": 39.58100182592578
+    }
+  ],
+  "audio": [
+    {
+      "seconds": 0.1,
+      "offset_samples": 0,
+      "offset_ms": 0.0,
+      "correlation": 0.999996956873237
+    },
+    {
+      "seconds": 16,
+      "offset_samples": 0,
+      "offset_ms": 0.0,
+      "correlation": 0.9999870893976172
+    },
+    {
+      "seconds": 33,
+      "offset_samples": 0,
+      "offset_ms": 0.0,
+      "correlation": 0.999985614323615
+    },
+    {
+      "seconds": 34.52,
+      "offset_samples": 0,
+      "offset_ms": 0.0,
+      "correlation": 0.9999974675570517
+    },
+    {
+      "seconds": 40,
+      "offset_samples": 0,
+      "offset_ms": 0.0,
+      "correlation": 0.9999806985424076
+    },
+    {
+      "seconds": 61,
+      "offset_samples": 0,
+      "offset_ms": 0.0,
+      "correlation": 0.9999873389017232
+    }
+  ]
+}

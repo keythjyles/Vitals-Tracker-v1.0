@@ -6,6 +6,15 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
 async function main(){
  const server=http.createServer(async(q,s)=>{
   const url=new URL(q.url,'http://test');
+  if(q.method==='POST'&&url.pathname==='/tag-alpha'){
+   // Chromium versions differ in whether MediaRecorder writes WebM colour tags.
+   // Define an explicit full-range fixture so the alpha-merge test has one interpretation.
+   const chunks=[];for await(const b of q)chunks.push(b);
+   const src=path.join(data,'AlphaNative.webm'),dst=path.join(data,'AlphaTagged.webm');fs.writeFileSync(src,Buffer.concat(chunks));
+   const job=require('node:child_process').spawnSync('ffmpeg',['-v','error','-y','-i',src,'-map','0:v:0','-c','copy','-color_range','pc','-colorspace','bt709','-color_trc','iec61966-2-1','-color_primaries','bt709',dst]);
+   if(job.status!==0){s.writeHead(500);s.end(job.stderr);return;}
+   s.setHeader('Content-Type','video/webm');s.end(fs.readFileSync(dst));return;
+  }
   if(q.method==='POST'&&url.pathname.startsWith('/results/')){
    const chunks=[];for await(const b of q)chunks.push(b);
    fs.writeFileSync(path.join(data,path.basename(url.pathname)),Buffer.concat(chunks));s.end('saved');return;
@@ -60,6 +69,34 @@ async function main(){
    for(const name of ['fixture_44100','fixture_audio_offset','fixture_30fps','color_full709']){
     const source=await(await fetch('/fixtures/'+name+'.mp4')).blob();await render(name+'_out',source,[cue(2)]);
    }
+   const shortAudio=await(await fetch('/fixtures/fixture_30fps_short_audio.mp4')).blob();
+   await render('fixture_30fps_short_audio_out',shortAudio,[]);
+   if(results.fixture_30fps_short_audio_out.audio!=='packet-copy')throw Error('Short original audio was unnecessarily encoded');
+   // Real full-range alpha WebM, matching AspectLock's MediaRecorder export path.
+   const canvas=document.createElement('canvas');canvas.width=270;canvas.height=480;
+   const cg=canvas.getContext('2d',{alpha:true,colorSpace:'srgb'});
+   const colours=['#121a24','#ce8649','#f0d5a2','#1b5139','#922c20','#708cb8','#ffffff','#000000'];
+   const paint=()=>{for(let i=0;i<colours.length;i++){cg.fillStyle=colours[i];cg.fillRect(0,i*60,270,60)}};paint();
+   const stream=canvas.captureStream(25),rec=new MediaRecorder(stream,{mimeType:'video/webm;codecs=vp8',videoBitsPerSecond:2000000}),parts=[];
+   rec.ondataavailable=e=>{if(e.data.size)parts.push(e.data)};
+   const stopped=new Promise((r,j)=>{rec.onstop=r;rec.onerror=j});rec.start(50);const clock=setInterval(paint,40);
+   await new Promise(r=>setTimeout(r,640));clearInterval(clock);rec.stop();await stopped;stream.getTracks().forEach(t=>t.stop());
+   const nativeAlpha=new Blob(parts,{type:rec.mimeType}),tagged=await fetch('/tag-alpha',{method:'POST',body:nativeAlpha});if(!tagged.ok)throw Error('Alpha fixture tagging failed');const alpha=await tagged.blob();await fetch('/results/Alpha.webm',{method:'POST',body:alpha});
+   const alphaOut=await render('Alpha',alpha,[cue(.2,.04)]);
+   async function display(blob){
+    const v=document.createElement('video');v.muted=true;v.src=URL.createObjectURL(blob);document.body.append(v);
+    await new Promise((r,j)=>{v.onloadeddata=r;v.onerror=()=>j(Error('Colour test video failed'))});
+    await new Promise(r=>{v.onseeked=r;v.currentTime=.2});const c=document.createElement('canvas');c.width=270;c.height=480;const g=c.getContext('2d',{colorSpace:'srgb'});g.drawImage(v,0,0);const pixels=g.getImageData(0,0,270,480).data;v.remove();URL.revokeObjectURL(v.src);return pixels;
+   }
+   const ref=await display(alpha),encoded=await display(alphaOut),m=await import('./vendor/mediabunny-1.62.1-gs1.mjs');
+   const alphaInput=new m.Input({formats:m.ALL_FORMATS,source:new m.BlobSource(alpha)}),track=await alphaInput.getPrimaryVideoTrack();
+   const sample=await new m.VideoSampleSink(track).getSample(.2),frame=sample.toVideoFrame();
+   if(!frame.format.includes('A'))throw Error('Colour fixture lacks the alpha-merge path');
+   const c=document.createElement('canvas');c.width=270;c.height=480;const g=c.getContext('2d',{colorSpace:'srgb'});g.drawImage(frame,0,0);const decoded=g.getImageData(0,0,270,480).data;
+   function compare(p){let abs=0;const sum=[0,0,0];for(let i=0;i<p.length;i++){if(i%4===3)continue;const e=p[i]-ref[i];sum[i%4]+=e;abs+=Math.abs(e)}return {mae:abs/(270*480*3),meanRGB:sum.map(v=>v/(270*480))}}
+   results.AlphaColour={source:await track.getColorSpace(),decoded:compare(decoded),encoded:compare(encoded),format:frame.format};
+   frame.close();sample.close();alphaInput.dispose();
+   if(results.AlphaColour.decoded.mae>.1||results.AlphaColour.encoded.meanRGB.some(v=>Math.abs(v)>1.5)||results.AlphaColour.encoded.mae>4)throw Error('AspectLock alpha WebM colour changed: '+JSON.stringify(results.AlphaColour));
    // Cancellation must not offer a partial file or alter the next job.
    let cancel=false;
    try{await engine.exportVideo({file,hasEffects:true,cancelled:()=>cancel,onProgress:()=>{cancel=true}});throw Error('Cancellation was ignored');}

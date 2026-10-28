@@ -15,3 +15,7 @@ Checks: no-op C; single D; multiple E; overlapping F; F863 G; moved/deleted cues
 Optional `TEST_BASELINE=1` compares the original SxLock capture and unchanged AspectLock. Put the selected baseline SxLock HTML/JS under `<DATA_DIR>/baseline/tools-home/tools/sxlock/`; other unchanged dependencies fall back to the checkout. `BASELINE_ONLY=1` runs just this control. It disables the AspectLock overlay by moving its start beyond the test, preserving the same base frame. A desktop codec result is not an Android codec result.
 
 Physical Android playback/native AAC, sharing and the historical red cast still require owner-device verification. CI/browser emulation does not establish those facts.
+
+R26 adds a 30fps source with audio ending before video. A copied soundtrack is checked against its own source end and must remain packet-copied. Required video conversion uses one sequential timestamp iterator; this retains colour and timing while avoiding repeated GOP decoding.
+
+R26 also generates a real full-range alpha VP8 WebM with MediaRecorder, matching AspectLock's format. It asserts an alpha sample is present, compares the HTML-video preview to the decoded VideoFrame (MAE≤0.1), compares the finished H.264 display (mean channel bias≤1.5/255 and MAE≤4), and independently verifies colour range/matrix/transfer/primaries with FFprobe. This catches metadata lost while rebuilding alpha frames, before an encoder bakes in a red/contrast shift.

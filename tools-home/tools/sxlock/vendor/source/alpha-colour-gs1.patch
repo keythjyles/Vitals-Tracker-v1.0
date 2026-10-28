@@ -1,0 +1,18 @@
+--- mediabunny-1.62.1/src/media-sink.ts
++++ mediabunny-1.62.1-gs1/src/media-sink.ts
+@@ -1652,6 +1652,7 @@
+ 			codedHeight: height,
+ 			timestamp: color.timestamp,
+ 			duration: color.duration ?? undefined,
++			colorSpace: color.colorSpace,
+ 			transfer: [output.buffer],
+ 		};
+ 
+@@ -1699,6 +1700,7 @@
+ 			codedHeight: height,
+ 			timestamp: color.timestamp,
+ 			duration: color.duration ?? undefined,
++			colorSpace: color.colorSpace,
+ 			transfer: [output.buffer],
+ 		} as const;
+ 

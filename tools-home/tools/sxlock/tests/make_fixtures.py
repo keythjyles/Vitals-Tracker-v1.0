@@ -17,3 +17,5 @@ run(['-i',str(root/'fixture_40s.mp4'),'-t','6','-c:v','copy','-c:a','aac','-ar',
 run(['-i',str(root/'fixture_40s.mp4'),'-t','6','-r','30','-c:v','libx264','-threads','2','-crf','16','-c:a','copy',str(root/'fixture_30fps.mp4')])
 run(['-i',str(root/'fixture_40s.mp4'),'-i',str(root/'fixture_40s.mp4'),'-map','0:v:0','-map','1:a:0','-t','6','-af','atrim=start=0:end=5,asetpts=PTS-STARTPTS+1/TB','-c:v','copy','-c:a','aac','-b:a','192k',str(root/'fixture_audio_offset.mp4')])
 print('Created timing, colour, 44.1 kHz, 30 fps and offset fixtures.')
+
+run(['-i',str(root/'fixture_30fps.mp4'),'-af','atrim=end=5.88','-c:v','copy','-c:a','aac','-b:a','192k',str(root/'fixture_30fps_short_audio.mp4')])

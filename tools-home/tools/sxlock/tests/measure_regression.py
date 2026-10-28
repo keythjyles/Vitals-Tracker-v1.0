@@ -41,7 +41,7 @@ def main():
         report[name]={'encoded_video_identical':True,'frames':1000,'fps':25,'audio':measured}
     assert (d/'C.mp4').read_bytes()==source.read_bytes(),'No-op changed file bytes'
     assert (d/'H.mp4').read_bytes()==(d/'E.mp4').read_bytes(),'Repeat export introduced generation loss'
-    for name in ['fixture_44100','fixture_audio_offset']:
+    for name in ['fixture_44100','fixture_audio_offset','fixture_30fps_short_audio']:
         measured=offsets(d/(name+'.mp4'),d/(name+'_out.mp4'),[1.2,3.5,4.5])
         assert all(abs(m['offset_samples'])<=2 and m['correlation']>.98 for m in measured),(name,measured)
         report[name]={'audio':measured}
@@ -51,6 +51,10 @@ def main():
     assert v['avg_frame_rate']=='25/1' and int(v['nb_frames'])==150
     report['30fps_conversion']={'fps':25,'frames':150,'audio':offsets(d/'fixture_30fps.mp4',d/'fixture_30fps_out.mp4',[.1,3,4.5])}
     for m in report['30fps_conversion']['audio']:assert abs(m['offset_samples'])<=2,m
+    src_alpha=next(s for s in probe(d/'Alpha.webm')['streams'] if s['codec_type']=='video')
+    out_alpha=next(s for s in probe(d/'Alpha.mp4')['streams'] if s['codec_type']=='video')
+    for key in ['color_range','color_space','color_transfer','color_primaries']:assert src_alpha.get(key)==out_alpha.get(key),(key,src_alpha.get(key),out_alpha.get(key))
+    report['alpha_webm_colour_metadata_preserved']=True
     (d/'measurements.json').write_text(json.dumps(report,indent=2));print('PASS: exact picture, all timing windows, 44.1 kHz, audio offsets, repeat export and CFR conversion')
 
 if __name__=='__main__':main()
