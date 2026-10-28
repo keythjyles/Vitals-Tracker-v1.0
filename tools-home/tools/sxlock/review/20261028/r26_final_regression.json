@@ -1,0 +1,411 @@
+{
+  "C": {
+    "engine": "SxLock-R26",
+    "fps": 25,
+    "width": 270,
+    "height": 480,
+    "sourceFrames": 1000,
+    "duration": 40,
+    "video": "file-copy",
+    "audio": "file-copy",
+    "sampleRate": 48000,
+    "colorSpace": {
+      "primaries": "bt709",
+      "transfer": "bt709",
+      "matrix": "bt709",
+      "fullRange": false
+    },
+    "pictureResized": false,
+    "outputFrames": 1000
+  },
+  "D": {
+    "engine": "SxLock-R26",
+    "fps": 25,
+    "width": 270,
+    "height": 480,
+    "sourceFrames": 1000,
+    "duration": 40,
+    "video": "packet-copy",
+    "audio": "sample-mix",
+    "sampleRate": 48000,
+    "colorSpace": {
+      "primaries": "bt709",
+      "transfer": "bt709",
+      "matrix": "bt709",
+      "fullRange": false
+    },
+    "pictureResized": false,
+    "encoderPrimingSamples": 1024,
+    "outputFrames": 1000,
+    "outputWidth": 270,
+    "outputHeight": 480,
+    "outputColorSpace": {
+      "primaries": "bt709",
+      "transfer": "bt709",
+      "matrix": "bt709",
+      "fullRange": false
+    }
+  },
+  "E": {
+    "engine": "SxLock-R26",
+    "fps": 25,
+    "width": 270,
+    "height": 480,
+    "sourceFrames": 1000,
+    "duration": 40,
+    "video": "packet-copy",
+    "audio": "sample-mix",
+    "sampleRate": 48000,
+    "colorSpace": {
+      "primaries": "bt709",
+      "transfer": "bt709",
+      "matrix": "bt709",
+      "fullRange": false
+    },
+    "pictureResized": false,
+    "encoderPrimingSamples": 1024,
+    "outputFrames": 1000,
+    "outputWidth": 270,
+    "outputHeight": 480,
+    "outputColorSpace": {
+      "primaries": "bt709",
+      "transfer": "bt709",
+      "matrix": "bt709",
+      "fullRange": false
+    }
+  },
+  "F": {
+    "engine": "SxLock-R26",
+    "fps": 25,
+    "width": 270,
+    "height": 480,
+    "sourceFrames": 1000,
+    "duration": 40,
+    "video": "packet-copy",
+    "audio": "sample-mix",
+    "sampleRate": 48000,
+    "colorSpace": {
+      "primaries": "bt709",
+      "transfer": "bt709",
+      "matrix": "bt709",
+      "fullRange": false
+    },
+    "pictureResized": false,
+    "encoderPrimingSamples": 1024,
+    "outputFrames": 1000,
+    "outputWidth": 270,
+    "outputHeight": 480,
+    "outputColorSpace": {
+      "primaries": "bt709",
+      "transfer": "bt709",
+      "matrix": "bt709",
+      "fullRange": false
+    }
+  },
+  "G": {
+    "engine": "SxLock-R26",
+    "fps": 25,
+    "width": 270,
+    "height": 480,
+    "sourceFrames": 1000,
+    "duration": 40,
+    "video": "packet-copy",
+    "audio": "sample-mix",
+    "sampleRate": 48000,
+    "colorSpace": {
+      "primaries": "bt709",
+      "transfer": "bt709",
+      "matrix": "bt709",
+      "fullRange": false
+    },
+    "pictureResized": false,
+    "encoderPrimingSamples": 1024,
+    "outputFrames": 1000,
+    "outputWidth": 270,
+    "outputHeight": 480,
+    "outputColorSpace": {
+      "primaries": "bt709",
+      "transfer": "bt709",
+      "matrix": "bt709",
+      "fullRange": false
+    }
+  },
+  "Moved": {
+    "engine": "SxLock-R26",
+    "fps": 25,
+    "width": 270,
+    "height": 480,
+    "sourceFrames": 1000,
+    "duration": 40,
+    "video": "packet-copy",
+    "audio": "sample-mix",
+    "sampleRate": 48000,
+    "colorSpace": {
+      "primaries": "bt709",
+      "transfer": "bt709",
+      "matrix": "bt709",
+      "fullRange": false
+    },
+    "pictureResized": false,
+    "encoderPrimingSamples": 1024,
+    "outputFrames": 1000,
+    "outputWidth": 270,
+    "outputHeight": 480,
+    "outputColorSpace": {
+      "primaries": "bt709",
+      "transfer": "bt709",
+      "matrix": "bt709",
+      "fullRange": false
+    }
+  },
+  "Deleted": {
+    "engine": "SxLock-R26",
+    "fps": 25,
+    "width": 270,
+    "height": 480,
+    "sourceFrames": 1000,
+    "duration": 40,
+    "video": "file-copy",
+    "audio": "file-copy",
+    "sampleRate": 48000,
+    "colorSpace": {
+      "primaries": "bt709",
+      "transfer": "bt709",
+      "matrix": "bt709",
+      "fullRange": false
+    },
+    "pictureResized": false,
+    "outputFrames": 1000
+  },
+  "H": {
+    "engine": "SxLock-R26",
+    "fps": 25,
+    "width": 270,
+    "height": 480,
+    "sourceFrames": 1000,
+    "duration": 40,
+    "video": "file-copy",
+    "audio": "file-copy",
+    "sampleRate": 48000,
+    "colorSpace": {
+      "primaries": "bt709",
+      "transfer": "bt709",
+      "matrix": "bt709",
+      "fullRange": false
+    },
+    "pictureResized": false,
+    "outputFrames": 1000
+  },
+  "fixture_44100_out": {
+    "engine": "SxLock-R26",
+    "fps": 25,
+    "width": 270,
+    "height": 480,
+    "sourceFrames": 152,
+    "duration": 6.08,
+    "video": "packet-copy",
+    "audio": "sample-mix",
+    "sampleRate": 48000,
+    "colorSpace": {
+      "primaries": "bt709",
+      "transfer": "bt709",
+      "matrix": "bt709",
+      "fullRange": false
+    },
+    "pictureResized": false,
+    "encoderPrimingSamples": 1024,
+    "outputFrames": 152,
+    "outputWidth": 270,
+    "outputHeight": 480,
+    "outputColorSpace": {
+      "primaries": "bt709",
+      "transfer": "bt709",
+      "matrix": "bt709",
+      "fullRange": false
+    }
+  },
+  "fixture_audio_offset_out": {
+    "engine": "SxLock-R26",
+    "fps": 25,
+    "width": 270,
+    "height": 480,
+    "sourceFrames": 152,
+    "duration": 6.08,
+    "video": "packet-copy",
+    "audio": "sample-mix",
+    "sampleRate": 48000,
+    "colorSpace": {
+      "primaries": "bt709",
+      "transfer": "bt709",
+      "matrix": "bt709",
+      "fullRange": false
+    },
+    "pictureResized": false,
+    "encoderPrimingSamples": 1024,
+    "outputFrames": 152,
+    "outputWidth": 270,
+    "outputHeight": 480,
+    "outputColorSpace": {
+      "primaries": "bt709",
+      "transfer": "bt709",
+      "matrix": "bt709",
+      "fullRange": false
+    }
+  },
+  "fixture_30fps_out": {
+    "engine": "SxLock-R26",
+    "fps": 25,
+    "width": 270,
+    "height": 480,
+    "sourceFrames": 180,
+    "duration": 6,
+    "video": "offline-encode",
+    "audio": "sample-mix",
+    "sampleRate": 48000,
+    "colorSpace": {
+      "primaries": "bt709",
+      "transfer": "bt709",
+      "matrix": "bt709",
+      "fullRange": false
+    },
+    "pictureResized": false,
+    "encoderPrimingSamples": 1024,
+    "outputFrames": 150,
+    "outputWidth": 270,
+    "outputHeight": 480,
+    "outputColorSpace": {
+      "primaries": "bt709",
+      "transfer": "bt709",
+      "matrix": "bt709",
+      "fullRange": false
+    }
+  },
+  "color_full709_out": {
+    "engine": "SxLock-R26",
+    "fps": 25,
+    "width": 540,
+    "height": 960,
+    "sourceFrames": 100,
+    "duration": 4,
+    "video": "packet-copy",
+    "audio": "sample-mix",
+    "sampleRate": 48000,
+    "colorSpace": {
+      "primaries": "bt709",
+      "transfer": "bt709",
+      "matrix": "bt709",
+      "fullRange": true
+    },
+    "pictureResized": false,
+    "encoderPrimingSamples": 1024,
+    "outputFrames": 100,
+    "outputWidth": 540,
+    "outputHeight": 960,
+    "outputColorSpace": {
+      "primaries": "bt709",
+      "transfer": "bt709",
+      "matrix": "bt709",
+      "fullRange": true
+    }
+  },
+  "fixture_30fps_short_audio_out": {
+    "engine": "SxLock-R26",
+    "fps": 25,
+    "width": 270,
+    "height": 480,
+    "sourceFrames": 180,
+    "duration": 6,
+    "video": "offline-encode",
+    "audio": "packet-copy",
+    "sampleRate": 48000,
+    "colorSpace": {
+      "primaries": "bt709",
+      "transfer": "bt709",
+      "matrix": "bt709",
+      "fullRange": false
+    },
+    "pictureResized": false,
+    "outputFrames": 150,
+    "outputWidth": 270,
+    "outputHeight": 480,
+    "outputColorSpace": {
+      "primaries": "bt709",
+      "transfer": "bt709",
+      "matrix": "bt709",
+      "fullRange": false
+    }
+  },
+  "Alpha": {
+    "engine": "SxLock-R26",
+    "fps": 25,
+    "width": 270,
+    "height": 480,
+    "sourceFrames": 16,
+    "duration": 0.6,
+    "video": "offline-encode",
+    "audio": "sample-mix",
+    "sampleRate": 48000,
+    "colorSpace": {
+      "primaries": "bt709",
+      "transfer": "iec61966-2-1",
+      "matrix": "bt709",
+      "fullRange": true
+    },
+    "pictureResized": false,
+    "encoderPrimingSamples": 1024,
+    "outputFrames": 15,
+    "outputWidth": 270,
+    "outputHeight": 480,
+    "outputColorSpace": {
+      "primaries": "bt709",
+      "transfer": "iec61966-2-1",
+      "matrix": "bt709",
+      "fullRange": true
+    }
+  },
+  "AlphaColour": {
+    "source": {
+      "primaries": "bt709",
+      "transfer": "iec61966-2-1",
+      "matrix": "bt709",
+      "fullRange": true
+    },
+    "decoded": {
+      "mae": 0,
+      "meanRGB": [
+        0,
+        0,
+        0
+      ]
+    },
+    "encoded": {
+      "mae": 1.3108770576131688,
+      "meanRGB": [
+        0.6841743827160494,
+        0.10983796296296296,
+        -0.28443672839506173
+      ]
+    },
+    "format": "I420A"
+  },
+  "cancelled": true,
+  "AfterCancel": {
+    "engine": "SxLock-R26",
+    "fps": 25,
+    "width": 270,
+    "height": 480,
+    "sourceFrames": 1000,
+    "duration": 40,
+    "video": "file-copy",
+    "audio": "file-copy",
+    "sampleRate": 48000,
+    "colorSpace": {
+      "primaries": "bt709",
+      "transfer": "bt709",
+      "matrix": "bt709",
+      "fullRange": false
+    },
+    "pictureResized": false,
+    "outputFrames": 1000
+  }
+}

@@ -4,7 +4,7 @@ import {
   EncodedPacketSink, EncodedVideoPacketSource, EncodedAudioPacketSource,
   VideoSampleSink, VideoSampleSource, AudioBufferSink, AudioBufferSource, Quality,
   canEncodeAudio, canEncodeVideo,
-} from './vendor/mediabunny-1.62.1.mjs';
+} from './vendor/mediabunny-1.62.1-gs1.mjs';
 
 export const SAMPLE_RATE = 48000;
 const CHUNK_FRAMES = 8 * SAMPLE_RATE;
@@ -80,7 +80,7 @@ async function ensureAudioEncoder(codec) {
     sampleRate: SAMPLE_RATE, numberOfChannels: 2, bitrate: 256000 }))?.supported; } catch {}
   if (native) return 0;
   // Local pinned fallback, no paid service, network request or native AAC requirement.
-  aacFallback ||= import('./vendor/mediabunny-aac-encoder-1.62.1.mjs').then(m => m.registerAacEncoder());
+  aacFallback ||= import('./vendor/mediabunny-aac-encoder-1.62.1-gs1.mjs').then(m => m.registerAacEncoder());
   await aacFallback;
   if (!(await canEncodeAudio(codec))) throw new Error('AAC encoder unavailable in this browser.');
   // Pinned fallback 1.62.1 emits FFmpeg's priming packet at input PTS instead of its negative PTS.
