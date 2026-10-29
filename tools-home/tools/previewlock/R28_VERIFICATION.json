@@ -1,0 +1,48 @@
+{
+  "version": "R28",
+  "implementationCommit": "b0372b872875edb7d352ac05d9769327449c2a09",
+  "references": [
+    "SxLock R27.1",
+    "AspectLock R26.1"
+  ],
+  "referenceToolsModified": false,
+  "pages": {
+    "workflowRun": 40969129079,
+    "status": "completed",
+    "conclusion": "success"
+  },
+  "backend": {
+    "deployment": "dep-dbhsscqvcj2c73f6mf8g",
+    "status": "live",
+    "health": {
+      "status": "ok",
+      "assetCatalogVersion": 2
+    }
+  },
+  "tests": {
+    "backend": 69,
+    "playback": 4,
+    "passed": true
+  },
+  "browser": {
+    "title": "PreviewLock · R28",
+    "actualFile": "GS_Pebble_Gemini_Captions_REVIEW_v03b.mp4",
+    "source": "local saved original of delivered review; no upload performed",
+    "duration": 9.64,
+    "width": 1080,
+    "height": 1920,
+    "readyState": 4,
+    "error": null,
+    "playedToEnd": true,
+    "pauseAndFrameSteps": true,
+    "railRightOfPicture": true,
+    "railWidth": 82
+  },
+  "limits": [
+    "This cloud browser has no owner's private Dropbox connection. Authenticated exact-file opening and full Dropbox catalog were unit tested, not certified end-to-end in the owner's Android session.",
+    "Actual phone viewport layout was not tested in this browser.",
+    "Gemini whole-joke generation remains separate and unfinished; demonstrated media is original performance plus redesigned captions."
+  ],
+  "noPaidGeneration": true,
+  "originalMediaAndProjectsPreserved": true
+}
