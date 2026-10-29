@@ -5,32 +5,19 @@
     "cap": 5,
     "evidence": "Owner: You have a $5 budget, October 29, 2026; this single experiment, collaboration and generation combined. No upgrades or subscriptions."
   },
-  "assignment": "Review ONLY the new caption layer and captioned review derivative of the EXISTING approved pebble jokelet. Source is241frames,9.64s,25fps1080x1920. Its picture/edit/reaction and original AAC soundtrack are preserved; only captions have been added in a separate editable alpha layer and a separate review copy. Exact approved spoken words: 'What did the shy pebble wish for? That she was a little BOULDER.' A future whole-joke generation from approved audio+GS reference is a SEPARATE creative task; do not recreate the current jokelet or introduce new dialogue. The Architect wants creative freedom for the separate future task.",
+  "assignment": "Gemini is creative director for a substantial redesign of the Pebble transparent animated caplets. The Architect REJECTED v02 as basic and undesigned. Make an actual designed, publishable treatment. Exact audio words: What did the shy pebble wish for? That she was a little BOULDER. Existing master 1080x1920,25fps,241frames/9.64s remains the picture/sound bed. The separately rendered animated alpha layer is your design surface. ChatGPT implements your design and checks technical correctness; it must not replace your choices with its own minimal style.",
   "action": {
-    "id": "gemini-caption-output-independent-review-01",
+    "id": "gemini-caption-creative-direction-v03",
     "type": "text",
-    "purpose": "independent_media_review",
     "model": "gemini-3.8-flash",
-    "reserveUsd": 1,
+    "reserveUsd": 0.25,
     "requires": [
-      "gemini-architect-corrected-creative-brief-01"
+      "gemini-caption-output-independent-review-01"
     ],
     "architectNoteIds": [
       "e5685130-9519-4732-856a-7d6f389fb6f5"
     ],
-    "reviewAssets": [
-      {
-        "path": "/Grill Sergeant/Timmy Motion Library/GS_Pebble_Captions_REVIEW_v02.mp4",
-        "mimeType": "video/mp4",
-        "sha256": "97b1ce5524817bafdec86694848f264a799ea807bd41fcda9feefb3847b2ec78"
-      },
-      {
-        "path": "/Grill Sergeant/JokeLab Gemini Conversations/GS-GEMINI-20261029-01-approved-voice.wav",
-        "mimeType": "audio/wav",
-        "sha256": "09519972b493e2ec472b4114972c116905fc21204bf1d6c748b09230439f9879"
-      }
-    ],
-    "prompt": "Architect, you are getting an actual independent output review from Gemini. Inspect the supplied complete captioned MP4 and original approved WAV, with the image as GS identity reference. FIRST explicitly correct your preceding response: you invented the lines 'I had a pebble in my shoe' / 'Turned out to be a boulder.' Those are not this recording, and the resulting caption/treatment wording was rejected. Use the literal approved script above and confirm it against actual audio; never silently rewrite it. Evaluate actual caption words, line breaks, readability, face coverage, whether BOULDER appears in sync or early/late, and whether captions clear during the silent reaction. Report approximate actual speech onset/BOULDER onset/end if the audio permits; flag uncertainty instead of fabricated frame precision. Provisional caption cues: setupF6-56, 'That she was a little'F91-116, 'BOULDER.'F116-134, blank thereafter. Root technical checks independently confirm241actual picture frames/25fps9.64s, original approved bed SHA identical, AAC audio packets bit-identical, actual decoded WebM corneralpha0 and opaque letters255, validated CapLockv2 project with separate cloud references. Do not certify the independent alpha by watching an opaque review MP4; that is root's separate decode evidence. Review the whole supplied clip if supported, and state any modalities you cannot actually inspect. Recommend specific corrections if needed; distinguish quality assessment from final Architect approval. We will surgically change captions only if needed. No new video, voice, reaction, ambience or publishing is requested. Existing3.50 conservative reservations retained; this review reservesUSD1 underUSD5, not a claim of actual charges. Also acknowledge that the SEPARATE future whole-joke task must allow broad expressive/theatrical performance, setting and reaction invention while preserving exact approved audio; actual Omni external-audio limitation/resource failure remain unpassed capability checks. Keep reply under650words."
+    "prompt": "ARCHITECT'S EXACT FEEDBACK:\nI watched the captions. You would think 2 ai systems coukd create something good. Instead its the most basic captions tou could do. Im sure youll say it was a test. Fuck ygat. Test it with real results that we can use. What difference woukd it make. Neither of you tried to be creative or design something. You were both so rigid, especially you. I think you need to step aside and let gemini create something nice. You are not a good boss ir collaborator.\n\nChatGPT accepts responsibility for turning the prior brief into a sync checklist. You have the creative lead now. Design the actual caplets, not an apology or options list. You choose the typography, spatial composition, color, animation, transitions and material-specific visual wit. The reference is the actual approved GS frame. Previous v02 was static white uppercase two-line setup, static lead-in and a pale-yellow BOULDER with a tiny pop. Architect rejected that whole visual standard. Your earlier B/6 rating did not meet publication ambition. Let the design contribute to this shy-pebble/bolder pun without revealing the payoff before it is spoken. Your artistic choices need no ChatGPT stylistic approval. Preserve literal speech, face visibility/readability and the existing film/audio. Post-punchline silent reaction should retain breathing space; you decide the caption exit. Technical anchors: setup speech frames6-55, intentional speech pause56-90, 'That she was a little' about91-115, BOULDER onset about116, end about128. Word-level timings are approximate; avoid unsupported precision. No new video/voice generation needed.\n\nDELIVER THE IMPLEMENTABLE DESIGN NOW as a single Python code block defining draw(frame) returning a1080x1920 Pillow RGBA Image for frame0..240. Include imports/helpers and fonts from DejaVuSans/DejaVuSansCondensed/DejaVuSerif under /usr/share/fonts/truetype/dejavu/. Pillow/numpy available; procedural vector shapes and typography available, transparent background. Use supersampling only if useful. No file reads except fonts, no network, subprocess or file writes. Add a short opening code comment explaining the chosen visual concept. Full rendering is supported; choose whatever arrangement/motion serves your design. Keep code concise enough for2048output tokens, complete and runnable; do not spend the token budget apologizing, discussing API limitations or repeating constraints. The code will be rendered as your design into real separate alpha+review media; Architect judges the result. This bounded text direction call reservesUSD0.25 within existingUSD5cap, no render-provider charge."
   },
   "canonicalJokeId": "dad-00bda89167b4f15850aa1c91",
   "reconciliations": [

@@ -1,3 +1,6 @@
+## CURRENT — Caption v02 REJECTED; Gemini creative lead
+Read checkpoint Q in runs/GS-GEMINI-20261029-01.md. Architect rejected basic captions and ChatGPT rigidity. New bounded v03 design action prepared; Gemini owns typography/motion/art direction. ChatGPT implements and verifies. USD4.50 currently reserved, next0.25 brings4.75 under5. Do not repeat old jobs or mistake a technical pass for approval.
+
 ## CURRENT — October29 reviewed caption-only output; whole-joke generation still open
 Start runs/GS-GEMINI-20261029-01.md checkpoint P and GS-GEMINI-20261029-01.project.json. Architect corrected the scope: existing pebble master needs captions only; separate whole-joke creation must use approved audio/reference and preserve creative freedom. Caption-onlyv02 is technically verified and independently reviewed using actual MP4/WAV; Architect approval pending. Assets are in Google Drive/Dropbox and the live collaboration Media panel. Failed OmniRESOURCE_EXHAUSTED produced NO video. Do not reuse withdrawn static-blink/reaction-only direction.
 
