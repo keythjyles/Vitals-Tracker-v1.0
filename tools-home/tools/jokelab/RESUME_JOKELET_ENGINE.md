@@ -1,3 +1,6 @@
+## CURRENT — Gemini-led caption v03b ready for Architect review
+Read checkpoint R in runs/GS-GEMINI-20261029-01.md. Gemini Geologic Impact design implemented as new241frame/25fps9.64s review and independent transparent alpha. Original picture/audio retained. v02 rejected; truncated initialv03 rejected. Deliver v03b ONLY. Review is in PreviewLock/Drive/Library; alpha Dropbox verified, Drive mirror pending upload error. Gemini response was truncated, root completed its explicit design in code; no false claim Gemini rendered video. USD4.75 reserved under5; no new spend needed for review. Whole-joke generation remains open.
+
 ## CURRENT — Caption v02 REJECTED; Gemini creative lead
 Read checkpoint Q in runs/GS-GEMINI-20261029-01.md. Architect rejected basic captions and ChatGPT rigidity. New bounded v03 design action prepared; Gemini owns typography/motion/art direction. ChatGPT implements and verifies. USD4.50 currently reserved, next0.25 brings4.75 under5. Do not repeat old jobs or mistake a technical pass for approval.
 

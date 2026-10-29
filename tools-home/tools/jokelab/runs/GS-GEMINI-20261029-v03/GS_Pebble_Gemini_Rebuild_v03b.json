@@ -1,0 +1,41 @@
+{
+  "schema": "GS-Caption-Rebuild-3",
+  "canonicalJokeId": "dad-00bda89167b4f15850aa1c91",
+  "creativeDirector": "Gemini",
+  "rendererImplementation": "ChatGPT completed truncated Gemini code from explicit Geologic Impact concept; Image.new compatibility fix and installed font paths",
+  "providerActionId": "gemini-caption-creative-direction-v03",
+  "providerResponseStatus": "incomplete_output_limit; original preserved verbatim",
+  "sourceSha256": "8d85a1af2e7885e26d54476a5d888f01f108eae22abbff84e02fc2a7efd8647e",
+  "fps": 25,
+  "frames": 241,
+  "duration": 9.64,
+  "originalAudioPacketHash": "4d538ddef1644be47d351b63a4337376fdf9ac10dca28170bab6b36d4abfde95",
+  "alphaVerified": true,
+  "ownerApproval": false,
+  "releaseReady": false,
+  "reservedUsd": 4.75,
+  "actualChargeUsd": null,
+  "supersedes": "v03 uploaded before failed111-frame check was inspected; v03 REJECTED TECHNICAL. v03b uses atomic PNG writes, load checks and full export frame assertions.",
+  "outputs": [
+    {
+      "filename": "GS_Pebble_Gemini_Captions_REVIEW_v03b.mp4",
+      "bytes": 7941323,
+      "sha256": "30e026122a3ce3ebc901a17c52ab66382acbda4a438f480f0fc1c3b09552ada8"
+    },
+    {
+      "filename": "GS_Pebble_Gemini_Captions_ALPHA_v03b.webm",
+      "bytes": 839295,
+      "sha256": "245983b0dc463b3c3440ca918406fa36efa01103702cf919c1d83d197f023bcc"
+    },
+    {
+      "filename": "gemini_design.py",
+      "bytes": 7266,
+      "sha256": "0f987c13e3b3540a5c0cfbcdd60916585944a54fc002c1602b532763f1597085"
+    },
+    {
+      "filename": "render.py",
+      "bytes": 1582,
+      "sha256": "58a70a82d4f7fbdb059db48a74e893596be99d34e0f2ebe33c894e4d75f761a3"
+    }
+  ]
+}
