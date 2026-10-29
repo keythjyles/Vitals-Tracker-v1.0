@@ -15,3 +15,5 @@ Build: source/scripts/build-jokelab.mjs rebuilds only assets/jokelab.js; it does
 Baseline/rollback: main660914b752ddc0f971dd8b03b69b4cecef3e744e. Revert only the R4.2 source/bundle/style/entry changes; retain saved decisions and production media. Deployment and actual browser acceptance require separate receipts.
 
 R4.2.1 live inspection caught older Episode1 entries mapped only as possibleSourceMatches. These IDs and their aliases now also stay out of discovery while identity reconciliation is pending; this does not silently certify them as produced. Scarecrow/Impasta and the spaghetti alias are regression fixtures.
+
+Live Save acceptance passed on R4.2: saved the Bison joke, observed its immediate removal, selected Saved library and found it, refreshed and found it still saved, then Unsave returned it to Browse. The temporary test choice was restored. R4.2.2 also hides produced_approved items from the default current-production panel (retained in All) and prevents the short right-hand button labels wrapping. Eleven related tests passed. No specialist editor or media file changed.

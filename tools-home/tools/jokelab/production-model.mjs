@@ -18,7 +18,7 @@ export function assetURL(asset,base){
 export function visibleItems(items,overrides,view,query){
  const q=query.trim().toLowerCase();return items.filter(p=>{
   const edit=overrides[p.id]||{},decision=edit.decision||'';
-  if(view==='current'&&(decision==='REMOVED'||decision==='HOLD'||p.priority===2))return false;
+  if(view==='current'&&(decision==='REMOVED'||decision==='HOLD'||p.priority===2||p.state==='produced_approved'))return false;
   if(view==='all'&&decision==='REMOVED')return false;
   if(['HOLD','REMOVED'].includes(view)&&decision!==view)return false;
   return !q||[edit.name||p.name,p.id,p.state].join(' ').toLowerCase().includes(q);

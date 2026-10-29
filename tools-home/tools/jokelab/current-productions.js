@@ -1,4 +1,4 @@
-import {productionItems,assetURL,visibleItems} from './production-model.mjs';
+import {productionItems,assetURL,visibleItems} from './production-model.mjs?v=4.2.2';
 const $=id=>document.getElementById(id),API='https://gs-previewlock-api.onrender.com',CACHE='gs-jokelab-productions-v1';
 const rows=$('gs-current-rows'),status=$('gs-current-status');
 let rendering=false;
