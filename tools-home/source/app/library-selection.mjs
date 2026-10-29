@@ -1,7 +1,7 @@
 export function producedJokeIds(ledger){
  const aliases=ledger.aliases||{};const canonical=id=>{const seen=new Set();while(aliases[id]&&!seen.has(id)){seen.add(id);id=aliases[id]}return id};
  const made=new Set();
- for(const group of ledger.existingGroups||[])if(group.assets?.length){made.add(canonical(group.canonicalId));for(const id of group.sourceJokeIds||[])made.add(canonical(id))}
+ for(const group of ledger.existingGroups||[])if(group.assets?.length){made.add(canonical(group.canonicalId));for(const id of [...(group.sourceJokeIds||[]),...(group.possibleSourceMatches||[])])made.add(canonical(id))}
  for(const row of [...(ledger.sourceBacklog||[]),...(ledger.selectedBatch||[])])if(/^(?:produced|jokelet_produced|voiceover_produced|existing_output)/.test(row.state||'')){made.add(canonical(row.canonicalId||row.sourceJokeId));if(row.sourceJokeId)made.add(canonical(row.sourceJokeId))}
  return new Set([...made,...Object.keys(aliases).filter(id=>made.has(canonical(id)))]);
 }
