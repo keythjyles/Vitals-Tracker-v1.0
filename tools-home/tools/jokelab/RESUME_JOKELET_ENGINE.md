@@ -1,3 +1,9 @@
+# Current session recovery — 2026-10-28
+
+**Start here:** [GS Gemini production direction](GS_GEMINI_PRODUCTION_DIRECTION.md). JokeLab launch now has a read-only Current productions panel backed by PRODUCTION_LEDGER.json. This code is committed; live deployment and playback are not yet verified. Preserve the Oct 24 bookmark review checkpoint below, but do not mistake it for the complete Oct 28 production queue. Reconcile later bee/editor work and Drive/Dropbox before any new generation. Gemini connection and GS character registry are planned, not implemented. No NotebookLM production dependency.
+
+---
+
 # Current stage: bookmark jokelet completed and saved; final user review
 
 
