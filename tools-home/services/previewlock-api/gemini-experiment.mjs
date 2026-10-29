@@ -93,7 +93,7 @@ export async function runExperiment(token,{env=process.env,fetcher=fetch,jobOver
  if(ownerDirection.doc.notes.at(-1)?.id&&job.ownerNotesThrough!==ownerDirection.doc.notes.at(-1).id)throw Error('owner_direction_pending_review');
  if(prior.doc.events.some(e=>!['completed','rejected','abandoned_uncertain'].includes(e.state)))throw Error('unresolved_prior_request');
  if(action.requires?.some(id=>!prior.doc.events.some(e=>e.id===id&&e.state==='completed')))throw Error('missing_prerequisite');
- if(!((action.type==='text'&&action.model==='gemini-3.8-flash'&&action.reserveUsd===0.25)||(action.type==='video'&&action.model==='gemini-omni-1.1-flash'&&action.reserveUsd===2)))throw Error('unsupported_experiment_action');
+ if(!((action.type==='text'&&action.model==='gemini-3.8-flash'&&action.reserveUsd===(action.purpose==='independent_media_review'?1:0.25))||(action.type==='video'&&action.model==='gemini-omni-1.1-flash'&&action.reserveUsd===2)))throw Error('unsupported_experiment_action');
  if(action.type==='video'&&(!job.plan?.chatgptAgreed||!job.plan?.geminiAgreementActionId||!action.requires?.includes(job.plan.geminiAgreementActionId)))throw Error('missing_two_ai_plan');
  if(prior.doc.events.reduce((n,e)=>n+e.reservedUsd,0)+action.reserveUsd>5)throw Error('budget_exceeded');
  const skills=await Promise.all(['gs-character','gs-performance','gs-production'].map(name=>readFile(new URL('skills/'+name+'.v1.md',root),'utf8')));
@@ -103,14 +103,25 @@ export async function runExperiment(token,{env=process.env,fetcher=fetch,jobOver
  const prompt=job.assignment+'\n\n'+action.prompt+(privateNotes.length?'\n\nARCHITECT DIRECTION (verbatim, private record):\n'+privateNotes.join('\n\n'):'');
  // Conservative bound: <=250k encoded request bytes, <=2048 output tokens,
  // no tools/audio; low thinking within total output cap. $0.25 reservation retained even on failure.
- const body=JSON.stringify(action.type==='video'?{model:action.model,input:[{type:'text',text:instruction+'\n\n'+prompt},{type:'image',mime_type:'image/jpeg',data:image.toString('base64')}],generation_config:{max_output_tokens:65536},response_format:{type:'video',aspect_ratio:'9:16',resolution:'720p',duration:'10s',delivery:'uri'},background:true,store:true,stream:false}:{model:action.model,system_instruction:instruction,input:[{type:'text',text:prompt},{type:'image',mime_type:'image/jpeg',data:image.toString('base64')}],generation_config:{max_output_tokens:2048,thinking_level:'low'},background:true,store:true,stream:false});
- if(Buffer.byteLength(body)>250000)throw Error('input_bound_exceeded');
+ const reviewParts=[];
+ if(action.purpose==='independent_media_review'){
+  if(!Array.isArray(action.reviewAssets)||!action.reviewAssets.length||action.reviewAssets.length>3)throw Error('invalid_review_assets');
+  for(const asset of action.reviewAssets){
+   if(!['/Grill Sergeant/JokeLab Gemini Conversations/','/Grill Sergeant/Timmy Motion Library/'].some(prefix=>asset.path?.startsWith(prefix))||!['video/mp4','audio/wav','image/jpeg'].includes(asset.mimeType)||!/^[a-f0-9]{64}$/.test(asset.sha256||''))throw Error('invalid_review_asset');
+   const r=await fetcher('https://content.dropboxapi.com/2/files/download',{method:'POST',headers:{...headers,'dropbox-api-arg':JSON.stringify({path:asset.path})}});if(!r.ok)throw Error('review_asset_missing');
+   const data=Buffer.from(await r.arrayBuffer());if(hash(data)!==asset.sha256)throw Error('review_asset_hash_mismatch');
+   reviewParts.push({type:asset.mimeType.split('/')[0],mime_type:asset.mimeType,data:data.toString('base64')});
+  }
+ }
+ const body=JSON.stringify(action.type==='video'?{model:action.model,input:[{type:'text',text:instruction+'\n\n'+prompt},{type:'image',mime_type:'image/jpeg',data:image.toString('base64')}],generation_config:{max_output_tokens:65536},response_format:{type:'video',aspect_ratio:'9:16',resolution:'720p',duration:'10s',delivery:'uri'},background:true,store:true,stream:false}:{model:action.model,system_instruction:instruction,input:[{type:'text',text:prompt},{type:'image',mime_type:'image/jpeg',data:image.toString('base64')},...reviewParts],generation_config:{max_output_tokens:2048,thinking_level:'low'},background:true,store:true,stream:false});
+ if(Buffer.byteLength(body)>(action.purpose==='independent_media_review'?20000000:250000))throw Error('input_bound_exceeded');
  if(Date.now()>Date.parse('2027-01-01T00:00:00Z'))throw Error('pricing_verification_expired');
  const models=await fetcher('https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000',{headers:{'x-goog-api-key':env.GEMINI_API_KEY},signal:AbortSignal.timeout(20000)});
  if(!models.ok)throw Error('model_discovery_failed');
  const available=(await models.json()).models||[];
  if(!available.some(m=>m.name==='models/'+action.model))throw Error('text_model_unavailable');
- const event={id:action.id,type:action.type,model:action.model,state:'pending',at:new Date().toISOString(),reservedUsd:action.reserveUsd,requestSha256:hash(body),prompt,skillSha256:skills.map(hash),referenceSha256:hash(image),capabilities:available.filter(m=>/omni|veo|flash-latest|2.5-flash$|3.8-flash$/.test(m.name)).map(m=>({name:m.name,version:m.version,inputTokenLimit:m.inputTokenLimit,outputTokenLimit:m.outputTokenLimit,supportedGenerationMethods:m.supportedGenerationMethods})),reviewApproval:false};
+ if(action.purpose==='independent_media_review'&&available.find(m=>m.name==='models/'+action.model).inputTokenLimit!==1048576)throw Error('review_model_budget_bound_changed');
+ const event={id:action.id,type:action.type,model:action.model,state:'pending',at:new Date().toISOString(),reservedUsd:action.reserveUsd,requestSha256:hash(body),prompt,skillSha256:skills.map(hash),referenceSha256:hash(image),capabilities:available.filter(m=>/omni|veo|flash-latest|2.5-flash$|3.8-flash$/.test(m.name)).map(m=>({name:m.name,version:m.version,inputTokenLimit:m.inputTokenLimit,outputTokenLimit:m.outputTokenLimit,supportedGenerationMethods:m.supportedGenerationMethods})),reviewApproval:false,reviewAssets:action.reviewAssets||[]};
  const pending={...prior.doc,events:[...prior.doc.events,event]};
  const rev=await save(pending,prior.rev);
  let response;

@@ -2,7 +2,7 @@
 Usage: python GS-GEMINI-20261029-assemble.py --voice approved.wav --reaction original.mp4 --out new-directory
 Caption boundaries are an editorial draft until playback review; exact words remain editable.
 """
-import argparse, hashlib, json, subprocess, wave
+import argparse, hashlib, json, subprocess, wave, os
 from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
@@ -57,9 +57,16 @@ for f in range(total_frames):
    age=f-c['inFrame'];scale=1+0.08*max(0,1-age/4) if c['id']=='pebble-payoff' else 1
    face=ImageFont.truetype(fontpath,round(58*scale)) if scale!=1 else font
    d.text((500,1050+72*i),line,font=face,fill='#ffd780' if c['id']=='pebble-payoff' else 'white',anchor='mt',stroke_width=4,stroke_fill='#101713')
- im.save(frames/f'{f:04d}.png')
-run('-framerate','25','-i',frames/'%04d.png','-c:v','libvpx-vp9','-lossless','1','-pix_fmt','yuva420p','-auto-alt-ref','0','-an',out/'GS_Pebble_Captions_ALPHA_DRAFT_v01.webm')
+ target=frames/f'{f:04d}.png';tmp=target.with_suffix('.tmp')
+ with tmp.open('wb') as file:im.save(file,format='PNG');file.flush();os.fsync(file.fileno())
+ tmp.replace(target)
+ with Image.open(target) as checked:checked.verify()
+for png in frames.glob('*.png'):
+ with Image.open(png) as checked:checked.verify()
+run('-framerate','25','-i',frames/'%04d.png','-c:v','libvpx-vp9','-lossless','1','-cpu-used','5','-row-mt','1','-threads','2','-pix_fmt','yuva420p','-auto-alt-ref','0','-an',out/'GS_Pebble_Captions_ALPHA_DRAFT_v01.webm')
 run('-i',out/'GS_Pebble_Collaboration_clean-bed_v01.mp4','-framerate','25','-i',frames/'%04d.png','-filter_complex','[0:v][1:v]overlay=0:0:shortest=1[v]','-map','[v]','-map','0:a','-c:v','libx264','-preset','fast','-crf','18','-pix_fmt','yuv420p','-c:a','copy','-movflags','+faststart',out/'GS_Pebble_Collaboration_REVIEW_v01.mp4')
+measured=json.loads(subprocess.check_output(['ffprobe','-v','error','-select_streams','v:0','-show_entries','stream=nb_frames','-of','json',str(out/'GS_Pebble_Collaboration_REVIEW_v01.mp4')]))
+assert int(measured['streams'][0]['nb_frames'])==total_frames,'Truncated picture: do not deliver'
 recipe={'schema':'GS-Jokelet-Rebuild-2','runId':'GS-GEMINI-20261029-01','fps':25,'frames':total_frames,'target':'1080x1920','speed':1,'sources':{'approvedMaster':{'path':str(master.relative_to(repo)),'sha256':sha(master),'frames':[0,134]},'approvedVoice':{'driveId':'1-HrnqhQvBc-IZXmXLXnZCMBOhGvIoDPY','sha256':sha(voice)},'newReaction':None if a.existing_master else {'sha256':sha(reaction),'inFrameAt25fps':a.reaction_in_frame,'durationFrames':116,'sourcePreserved':True},'usesExistingApprovedMaster':a.existing_master},'ambient':sources,'captionCues':cues,'captionOnly':a.caption_only,'originalAudioCopiedUnchanged':a.caption_only,'captionTiming':'draft; speech onset/end silence anchors verified, word split still requires playback review','captionLayer':{'path':'GS_Pebble_Captions_ALPHA_DRAFT_v01.webm','independent':True,'alphaQA':'pending'},'reviewVideo':'GS_Pebble_Collaboration_REVIEW_v01.mp4','ownerApproval':False,'releaseReady':False,'outputs':[{'name':f.name,'bytes':f.stat().st_size,'sha256':sha(f)} for f in out.iterdir() if f.is_file()]}
 (out/'rebuild-recipe.json').write_text(json.dumps(recipe,indent=2)+'\n')
 print(json.dumps({'out':str(out),'frames':total_frames,'ownerApproval':False,'captionTimingReview':True}))

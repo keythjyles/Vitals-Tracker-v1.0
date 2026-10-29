@@ -1,14 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
 import {runExperiment} from './gemini-experiment.mjs';
 const env={GEMINI_API_KEY:'test-only',GEMINI_EXPERIMENT_RUN_ID:'GS-GEMINI-20261029-01'};
 const testJob={runId:'GS-GEMINI-20261029-01',authorization:{currency:'USD',cap:5,evidence:'Test-only'},assignment:'Test assignment',action:{id:'test-independent-0001',type:'text',model:'gemini-3.8-flash',reserveUsd:0.25,prompt:'Independent proposal'},reconciliations:[{id:'gemini-independent-proposal-02',requestSha256:'648a64792e1b71ee51f9f6ad91b007d32eca12e2ece42cbc8fec082f8827fafd',providerStatus:400,reason:'Test status/hash matched rejection'}]};
 const execute=(token,options)=>runExperiment(token,{...options,jobOverride:testJob});
-function fixture({failure=false,saveFailure=false,background=false,video=false,ownerNotes=[],doc=null}={}){
- const assets=new Map();let stored=doc,revision=doc?'r1':null,n=1,calls=0;
+function fixture({failure=false,saveFailure=false,background=false,video=false,ownerNotes=[],sourceMedia={},expectedReserve=0.25,doc=null}={}){
+ const assets=new Map(Object.entries(sourceMedia));let stored=doc,revision=doc?'r1':null,n=1,calls=0;
  const fetcher=async(url,options={})=>{
   if(url.endsWith('/files/download')&&JSON.parse(options.headers['dropbox-api-arg']).path.endsWith('-owner-notes.json'))return Response.json({notes:ownerNotes},{headers:{'dropbox-api-result':JSON.stringify({rev:'notes-1'})}});
-  if(url.endsWith('/files/download')&&JSON.parse(options.headers['dropbox-api-arg']).path.endsWith('.mp4')){const bytes=assets.get(JSON.parse(options.headers['dropbox-api-arg']).path);return bytes?new Response(bytes):new Response('',{status:409})}
+  if(url.endsWith('/files/download')&&assets.has(JSON.parse(options.headers['dropbox-api-arg']).path)){const bytes=assets.get(JSON.parse(options.headers['dropbox-api-arg']).path);return bytes?new Response(bytes):new Response('',{status:409})}
   if(url.endsWith('/files/download'))return stored?Response.json(stored,{headers:{'dropbox-api-result':JSON.stringify({rev:revision})}}):new Response('path/not_found',{status:409});
   if(url.endsWith('/files/create_folder_v2'))return Response.json({});
   if(url.endsWith('/files/upload')){
@@ -18,10 +19,10 @@ function fixture({failure=false,saveFailure=false,background=false,video=false,o
    if((arg.mode==='add'||arg.mode?.['.tag']==='add')&&stored||arg.mode?.['.tag']==='update'&&arg.mode.update!==revision)return new Response('conflict',{status:409});
    stored=JSON.parse(options.body);revision='r'+(++n);return Response.json({rev:revision});
   }
-  if(url.includes('/models?pageSize'))return Response.json({models:[{name:'models/gemini-3.8-flash'},{name:'models/gemini-omni-1.1-flash',outputTokenLimit:65536}]});
+  if(url.includes('/models?pageSize'))return Response.json({models:[{name:'models/gemini-3.8-flash',inputTokenLimit:1048576},{name:'models/gemini-omni-1.1-flash',outputTokenLimit:65536}]});
   if(url.endsWith('/interactions/reply-1'))return Response.json({id:'reply-1',model:'gemini-3.8-flash',status:'completed',steps:[{type:'model_output',content:[{type:'text',text:'Recovered background treatment.'}]}],usage:{total_input_tokens:1000,total_output_tokens:100}});
   if(url.endsWith('/interactions')){
-   calls++;assert.equal(stored.events.at(-1).state,'pending');assert.equal(stored.events.at(-1).reservedUsd,video?2:0.25);
+   calls++;assert.equal(stored.events.at(-1).state,'pending');assert.equal(stored.events.at(-1).reservedUsd,video?2:expectedReserve);
    const body=JSON.parse(options.body);assert.equal(body.generation_config.max_output_tokens,video?65536:2048);assert(!JSON.stringify(body).includes('ChatGPT independent proposal'));
    if(failure)throw Error('uncertain');
    if(video){assert.equal(body.system_instruction,undefined);assert.equal(body.response_format.duration,'10s');return Response.json({id:'video-1',model:'gemini-omni-1.1-flash',status:'completed',steps:[{type:'model_output',content:[{type:'video',mime_type:'video/mp4',data:Buffer.from('test-only-video-bytes').toString('base64')}]}],usage:{total_input_tokens:1000,total_output_tokens:57920}})}
@@ -49,3 +50,5 @@ test('video is bounded, original bytes are saved and read back, and restart neve
 test('read-only retrieval can never create a missing generation',async()=>{const f=fixture();const r=await runExperiment('test',{env,fetcher:f.fetcher,jobOverride:testJob,retrieveOnly:true,maxPolls:1});assert.equal(r.state,'not_started');assert.equal(f.calls,0)});
 
 test('new owner direction blocks the next paid stage until it is reviewed',async()=>{const f=fixture({ownerNotes:[{id:'owner-note-001',text:'Change the reaction'}]});await assert.rejects(execute('test',{env,fetcher:f.fetcher}),/owner_direction_pending_review/);assert.equal(f.calls,0)});
+
+test('independent review binds actual media bytes and reserves a bounded USD1',async()=>{const path='/Grill Sergeant/Timmy Motion Library/test-review.mp4',bytes=Buffer.from('test-only-review-media'),asset={path,mimeType:'video/mp4',sha256:createHash('sha256').update(bytes).digest('hex')},job={...testJob,action:{...testJob.action,id:'test-review-action-01',purpose:'independent_media_review',reserveUsd:1,reviewAssets:[asset]}};const f=fixture({sourceMedia:{[path]:bytes},expectedReserve:1});await runExperiment('test',{env,fetcher:f.fetcher,jobOverride:job});assert.equal(f.calls,1);assert.equal(f.doc.events[0].reservedUsd,1);const bad=fixture({sourceMedia:{[path]:bytes},expectedReserve:1});await assert.rejects(runExperiment('test',{env,fetcher:bad.fetcher,jobOverride:{...job,action:{...job.action,reviewAssets:[{...asset,sha256:'0'.repeat(64)}]}}}),/review_asset_hash_mismatch/);assert.equal(bad.calls,0)});

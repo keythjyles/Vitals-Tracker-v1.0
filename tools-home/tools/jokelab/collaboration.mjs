@@ -10,9 +10,9 @@ function showMedia(saved,live){
  const signature=JSON.stringify(assets);if(signature===mediaSignature)return;mediaSignature=signature;$('media-items').replaceChildren();
  for(const asset of assets){const row=document.createElement('div');row.className='media-row';const name=document.createElement('p');name.textContent=asset.name+' · '+asset.status;const controls=document.createElement('div');controls.className='media-actions';const play=document.createElement('button'),download=document.createElement('button');play.textContent='Play';download.textContent='Original';const message=document.createElement('small');let player;
   const resolve=async()=>asset.url||((await api('/api/playback?path='+encodeURIComponent(asset.dropboxPath))).url);
-  play.onclick=async()=>{play.disabled=true;try{if(!player){player=document.createElement(asset.kind==='audio'?'audio':'video');player.controls=true;player.playsInline=true;row.append(player)}player.src=await resolve();await player.play()}catch(e){message.textContent=e.message}finally{play.disabled=false}};
+  play.onclick=async()=>{play.disabled=true;try{if(!player){player=document.createElement(asset.kind==='audio'?'audio':'video');player.controls=true;player.playsInline=true;if(asset.alpha)player.className='alpha-preview';row.append(player)}player.src=await resolve();await player.play()}catch(e){message.textContent=e.message}finally{play.disabled=false}};
   download.onclick=async()=>{download.disabled=true;try{const url=await resolve();const r=await fetch(url);if(!r.ok)throw Error('Original file could not be retrieved');const blob=await r.blob(),local=URL.createObjectURL(blob),a=document.createElement('a');a.href=local;a.download=asset.filename||asset.name;a.click();setTimeout(()=>URL.revokeObjectURL(local),60000);message.textContent='Original file handed to your browser'}catch(e){message.textContent=e.message}finally{download.disabled=false}};
-  controls.append(play,download);row.append(name,controls,message);$('media-items').append(row);
+  if(['audio','video'].includes(asset.kind))controls.append(play);controls.append(download);row.append(name,controls,message);$('media-items').append(row);
  }
  if(!assets.length)$('media-items').textContent='No generated media yet.';
 }
