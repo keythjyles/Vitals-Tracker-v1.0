@@ -1,3 +1,6 @@
+## Current collaboration checkpoint — October 29, 2026
+Read GS_AI_COLLABORATION_20261029.md before further Gemini or jokelet work. The owner approved a 10-second standalone Gemini video experiment using existing ElevenLabs audio, approved GS pose, and a reaction concept. ChatGPT and Gemini should independently propose, critique, agree before execution and hold each other to GS protocols. Gemini Skills, variable comic performance, editable caplets and surgical regeneration are part of the plan. Text bridge deployed, but real AI exchange/video test not yet verified. No new paid generation authorized.
+
 # Gemini authentication verified
 
 ## Gemini credential connection verified — current checkpoint
