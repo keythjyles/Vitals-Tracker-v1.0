@@ -1,0 +1,69 @@
+{
+  "schema": "GS-CharacterRegistry-1",
+  "updated": "2026-10-28",
+  "verification": "Recovered from provider-backed production receipts and existing approved catalog. No new generation; current provider look availability not rechecked.",
+  "characters": [
+    {
+      "id": "gs4-recorded-look",
+      "name": "Grill Sergeant \u00b7 recorded GS4 identity",
+      "heygen": {
+        "avatarId": "85cc768c260a40359212b92f738de459",
+        "lookId": null,
+        "engine": "avatar_iv",
+        "evidence": "runs/JL-20261024-BOOKMARK-recipe-v01.json"
+      },
+      "voice": {
+        "voiceId": "RBNpu6jPzAoaxZKl9noJ",
+        "modelId": "eleven_v4",
+        "outputFormat": "mp3_44100_192",
+        "settings": {
+          "stability": 0.5
+        },
+        "referenceTakeId": "pqILh6dY0D1CO7Ckhplb",
+        "approval": "User: Both perfect",
+        "evidence": "performance-presets/GS-JOKES-V4-APPROVED-01.json"
+      },
+      "reference": {
+        "existingVideo": "../jokelets/media/GS_Jokelet_Bookmark_Brian_v01.mp4",
+        "originalDriveId": "17XQqbdruiI5Fw4c5E-fPVdb95y3Xc8wO",
+        "approvedReferenceImage": null
+      },
+      "constraints": {
+        "aspectRatio": "9:16",
+        "fps": 25,
+        "delivery": "terse, deadpan",
+        "afterPunchline": "no explanatory speech; restrained nonverbal reaction and engineered silence",
+        "mirrorSpeaking": false,
+        "mirrorReaction": "only existing approved reaction; inspect visible text first",
+        "wardrobe": "Preserve exact established look; standalone wardrobe description not verified",
+        "lighting": "Preserve source look; do not invent lighting variants"
+      },
+      "missing": [
+        "Provider lookId/reference-image mapping",
+        "Explicit mapping to Classic, Fireside, Daylight and Reaction looks"
+      ]
+    }
+  ],
+  "proposedVariants": [
+    {
+      "id": "classic",
+      "name": "Classic",
+      "status": "unmapped; do not substitute"
+    },
+    {
+      "id": "fireside",
+      "name": "Fireside",
+      "status": "unmapped; do not substitute"
+    },
+    {
+      "id": "daylight",
+      "name": "Daylight",
+      "status": "unmapped; do not substitute"
+    },
+    {
+      "id": "reaction",
+      "name": "Reaction",
+      "status": "unmapped; do not substitute"
+    }
+  ]
+}

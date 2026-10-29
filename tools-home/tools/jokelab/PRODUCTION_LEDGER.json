@@ -1,11 +1,11 @@
 {
   "schema": "JokeLab-ProductionLedger-1",
-  "updated": "2026-10-24",
+  "updated": "2026-10-28",
   "purpose": "Prevent paying to produce the same underlying joke again. This initial operator ledger is not yet enforced by the app.",
   "scope": {
     "libraryRecords": 900,
-    "existingCatalogEntries": 16,
-    "globalArchiveReconciliation": "Incomplete; other episode/source archives and remaining semantic aliases need checking.",
+    "existingCatalogEntries": 17,
+    "globalArchiveReconciliation": "Partial: Episode 4 Dropbox filenames/IDs discovered October 28; current SxLock state read from existing browser saves only when present. Drive production run receipts retained; unindexed files and caption projects remain unreconciled.",
     "semanticDedupe": "Initial manually identified alias groups only; no claim of exhaustive deduplication."
   },
   "rules": [
@@ -5331,6 +5331,79 @@
       "paidProductionClearance": false,
       "reservationScope": "One combined bee scene voiceover generated. Reuse this original; no retry or video generation authorized.",
       "record": "runs/JL-20261027-BEE-SCENE-VOICE-01.json"
+    }
+  ],
+  "currentProductions": [
+    {
+      "id": "gs-djd-episode-04",
+      "name": "Dad Joke Duty · Episode 4",
+      "state": "WORKING · assembly and SxLock review",
+      "previewName": "GS_EP4_BIG_SOCIAL_LOGOS_OUTRO_F1667_v02.mp4",
+      "assets": [
+        {
+          "dropboxPath": "/Grill Sergeant/Animation Lab/GS_EP4/GS_EP4_BIG_SOCIAL_LOGOS_OUTRO_F1667_v02.mp4",
+          "role": "working preview, not approved final"
+        }
+      ],
+      "publication": {
+        "ready": false
+      },
+      "workspace": {
+        "previewlock": "../previewlock/cloud-test.html",
+        "sxlock": "../sxlock/",
+        "savedState": "SxLock current project is device-scoped; discovered read-only when available"
+      },
+      "provenance": "Connected Dropbox search, filename, ID and modified metadata; full playback not yet verified"
+    },
+    {
+      "id": "dad-8387d3b82e8bf2dd6e7a36b1",
+      "name": "Bee scene · Hives / May-bee",
+      "state": "Voice produced · review pending",
+      "assets": [
+        {
+          "src": "../jokelab/voice-originals/JL-20261027-BEE-SCENE-VOICE-01.mp3",
+          "role": "original combined voice take",
+          "sha256": "ed63e3466cb643f51efc8e0a7ff0c61f17483cd187a918148b094f53bcd2e5cd"
+        }
+      ],
+      "runId": "JL-20261027-BEE-SCENE-VOICE-01",
+      "publication": {
+        "ready": false
+      }
+    },
+    {
+      "id": "dad-ba51e94046e2bc5f0cb1aa31",
+      "name": "Chicken / Egg · frame-gap insert",
+      "state": "Voice produced · video completion requires reconciliation",
+      "assets": [
+        {
+          "src": "../jokelab/voice-originals/JL-20261028-CHICKEN-EGG-VOICE-01.mp3",
+          "role": "existing voice original"
+        }
+      ],
+      "runId": "JL-20261028-CHICKEN-EGG-VOICE-01",
+      "publication": {
+        "ready": false
+      }
+    },
+    {
+      "id": "gs-caplock-bookmark",
+      "name": "Bookmark · transparent captions",
+      "state": "Editable caption layer · draft, review pending",
+      "assets": [],
+      "references": {
+        "libraryCaptionId": "libfile_9ca84f993a948191826a3042d9628624",
+        "libraryKitId": "libfile_296e8ff153148191afbc386d61c31cdb"
+      },
+      "workspace": {
+        "caplock": "../caplock/"
+      },
+      "missing": [
+        "Durable Drive/Dropbox location and caption-project link require reconciliation"
+      ],
+      "publication": {
+        "ready": false
+      }
     }
   ]
 }

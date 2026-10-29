@@ -211,3 +211,7 @@ Owner's explicit Sound Scrubber rule: rejecting a candidate deletes the rejected
 ## Managed Sound Scrubber deletion — October 27, 2026 (R14.3)
 
 Read `tools-home/tools/sound-scrubber/AUDIO_DELETE.md` before deleting or mirroring managed sound assets. This supersedes older browser-only deletion and approved-master protection statements. `/api/audio-delete` uses existing PreviewLock authentication, verifies stable identity, checkpoints deletion intent outside the asset folder, removes selected managed Dropbox files, and reports separate destination states. Drive deletion uses the EXISTING daily connected-account mirror action, before uploads; no new timer/service/credentials. Pending deletion intents block re-save and mirror resurrection. The UI retains a compact retry entry until both destinations are verified. Never report dual-cloud deletion from a queued job or a unit test. Completed intents are not rejection blacklists; rediscovered sounds may be approved again. SxLock R24 files remain locked and unchanged.
+
+
+## JokeLab R4 production continuity — October 28, 2026
+Read tools-home/tools/jokelab/CURRENT_PRODUCTIONS_R4.md before changing the launch panel. Durable decisions are separate from the immutable ledger/media and publication readiness. SxLock same-browser resume reuses its existing project importer; no cloud-project recovery or Drive decision mirror is implied. Real identity evidence is in GS_CHARACTER_REGISTRY.json; Gemini connection is still unestablished.

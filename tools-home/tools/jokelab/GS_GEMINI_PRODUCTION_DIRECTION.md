@@ -23,3 +23,7 @@ Create a versioned GS character registry keyed by explicit variant ID. Candidate
 
 ## Current verified code changes
 JokeLab launch panel committed 2026-10-28, reading existing ledger. Earlier manual Gemini bridge page exists as experimental code but was removed from JokeLab launch because it imposed manual copying. This file is the durable recovery record. Resume from ledger and existing productions; never restart production simply because a chat disconnected.
+
+
+## R4 implementation supersedes the read-only launch description
+See [CURRENT_PRODUCTIONS_R4.md](CURRENT_PRODUCTIONS_R4.md), [GS_CHARACTER_REGISTRY.json](GS_CHARACTER_REGISTRY.json) and [GEMINI_CONNECTION_STATUS.md](GEMINI_CONNECTION_STATUS.md). The launch now provides inline controls with separate decision persistence. Deployment evidence remains separate. Unmapped looks, full Drive/Dropbox reconciliation and authenticated Gemini integration remain outstanding.
