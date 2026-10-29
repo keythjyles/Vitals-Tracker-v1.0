@@ -1,3 +1,19 @@
+# CapLock R3 — independent animation speed (October29)
+
+Architect supplied17802.mp4: actual10.000s240-frame1280x720 H.264 animation at24fps, blue background with yellow/black lettering, varied directional entrances, pulsing question mark and expanding HIVES burst. This is evidence of a useful Gemini-app animation workflow. It is not alpha yet. Original source remains untouched.
+
+Selected clip now has independent0.100–8.000x speed, numeric precision0.001x, ±0.01x adjustments and1x reset. Changes apply while the bed continues at its normal rate. Bed IN/OUT remains fixed. Source IN/OUT selects a subrange of the original; Fit to bed IN/OUT computes the exact range/duration ratio. Loop repeats only that source range. The source can be24fps: its presentation time is mapped in seconds onto the25fps bed grid, not relabeled as25fps.
+
+Project version3 preserves playbackRate and optional trimOutFrame; opens v1/v2 at normal speed. Old R2 rejects v3 instead of silently losing timing. Undo/redo/drafts/project JSON retain these fields. Only selected media elements get playbackRate; the bed is never retimed. Native preview remains subject to decode/scheduling tolerance; deterministic exported frame accuracy is not claimed. No finished clip exporter or automatic background removal is introduced by this change.
+
+Creative correction: previous ChatGPT brief overconstrained Gemini to Pillow code, specified fonts and2048output tokens. Calling that unrestricted Gemini creative lead was inaccurate. Let Gemini generate the animation with the requested phrase structure and creative latitude. CapLock handles timing/placement; genuine alpha is preferred, uniform blue is an accepted removable source. Prompts now reflect this rather than forbidding the successful blue-background route. No new paid generation.
+
+17 Node checks pass before deployment, including rate/source-time mapping, trimmed loops, fit ratio, legacy migration/JSON/rejection and native layer-rate isolation. Browser verification is separate. Rollback: restore the CapLock directory from307fefab9673110fd725cc1d9c54feb3b7a19b3e; preserve originals and all version3 projects. PreviewLock/SxLock/AspectLock unchanged.
+
+The Architect’s supplied phone screenshots show PreviewLock R28 connected and playing the actual v03b at F32,56,132. This supplies phone playback evidence missing from the earlier browser-only R28 receipt. It does not approve the caption design or prove native animation quality.
+
+---
+
 # CapLock · GS-TOOL-CAPLOCK · R2
 
 October28,2026 owner revision: **transcript first → Gemini animation production → import transparent media layers**. Rotate means flat2D rotation only. No third-axis behavior, ZLock integration or changes to AspectLock/SxLock engines.

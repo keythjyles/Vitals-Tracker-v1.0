@@ -1,0 +1,23 @@
+{
+  "original": "17802.mp4",
+  "sourceSha256": "d89162b7a6628505179e14853bc6e8256d58bfb50f707ed7c45ab70d26f4c3c7",
+  "sourceFps": 24,
+  "requestedSourceRangeSeconds": [
+    6.84,
+    9.32
+  ],
+  "output": "GS_Bee_HIVES_CAPLET_v01.webm",
+  "outputSha256": "88b1e825c568a25af14e795a68a83d716b5a4da7058285072d00306fdd29424c",
+  "actualFrames": 61,
+  "fps": 25,
+  "actualDuration": 2.44,
+  "silent": true,
+  "keyColor": "098BDC",
+  "similarity": 0.2,
+  "blend": 0.04,
+  "alphaVerified": {
+    "corner": 0,
+    "opaqueLetter": 255
+  },
+  "approved": false
+}

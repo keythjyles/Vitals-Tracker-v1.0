@@ -1,3 +1,4 @@
+import {clipTime} from './clip-time.mjs?v=3';
 /* Independent reusable media-layer preview. Source picture/audio are never rewritten. */
 export class LayerTracks{
  constructor(root,{getClips,getFrame,isPlaying,onSelect,onChange,onStatus,getMode,onDragStart}){Object.assign(this,{root,getClips,getFrame,isPlaying,onSelect,onChange,onStatus,getMode,onDragStart});this.media=new Map();this.selected=null;this.generation=0;}
@@ -11,11 +12,11 @@ export class LayerTracks{
  clear(){this.generation++;for(const id of this.media.keys())this.detach(id);this.selected=null;}
  update(){
   const frame=this.getFrame(),playing=this.isPlaying(),clips=this.getClips();
-  for(const [id,m] of this.media){const c=clips.find(c=>c.id===id);if(!c){m.wrap.hidden=true;m.el.pause?.();continue;}const active=c.visible&&frame>=c.inFrame&&frame<c.outFrame;const local=Math.max(0,(frame-c.inFrame+c.trimInFrame)/25);const duration=m.el.duration;const exhausted=Number.isFinite(duration)&&local>=duration&&!c.loop;const shown=active&&!exhausted;
+  for(const [id,m] of this.media){const c=clips.find(c=>c.id===id);if(!c){m.wrap.hidden=true;m.el.pause?.();continue;}const duration=m.el.duration;const timing=clipTime(c,frame,duration);const shown=c.type==='image'?c.visible&&frame>=c.inFrame&&frame<c.outFrame:timing.shown;
    m.wrap.hidden=!shown;m.wrap.classList.toggle('selected-layer',id===this.selected);m.wrap.style.cssText=`left:${c.x}%;top:${c.y}%;width:${c.width}%;opacity:${c.opacity};transform:translate(-50%,-50%) rotate(${c.rotation}deg);z-index:${clips.indexOf(c)+1}`;
    if(c.type!=='image'){
-    m.el.volume=c.volume;m.el.muted=c.type==='video'||c.volume===0;const target=c.loop&&Number.isFinite(duration)&&duration>0?local%duration:local;
-    if(shown&&Number.isFinite(target)&&(!playing||Math.abs(m.el.currentTime-target)>.08)){if(!m.el.seeking&&Math.abs(m.el.currentTime-target)>.004)m.el.currentTime=Math.min(target,Number.isFinite(duration)?Math.max(0,duration-.001):target);}
+    m.el.volume=c.volume;m.el.muted=c.type==='video'||c.volume===0;const target=timing.target;if(m.el.playbackRate!==timing.rate)m.el.playbackRate=timing.rate;
+    if(shown&&Number.isFinite(target)&&(!playing||Math.abs(m.el.currentTime-target)>.08)){if(!m.el.seeking&&Math.abs(m.el.currentTime-target)>.004)m.el.currentTime=Math.min(target,Number.isFinite(duration)?Math.max(0,Math.min(duration,timing.end)-.001):target);}
     if(shown&&playing){if(m.el.paused)m.el.play().catch(()=>this.onStatus('Clip playback blocked or unavailable. Tap Play again.'));}else m.el.pause();
    }
   }
