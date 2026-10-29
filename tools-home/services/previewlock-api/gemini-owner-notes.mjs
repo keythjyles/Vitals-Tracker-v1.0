@@ -19,7 +19,7 @@ export async function handleOwnerNotes(req,res,u,token){
  const prior=existing.doc.notes.find(n=>n.id===data.id);
  if(prior)return send(prior.text===data.text.trim()?200:409,{note:prior,persisted:true,duplicate:true});
  if(existing.doc.notes.length>=500)return send(413,{error:'owner_note_limit'});
- const note={id:data.id,author:'Owner',text:data.text.trim(),at:new Date().toISOString(),state:'awaiting_ai_review'};
+ const note={id:data.id,author:'Architect',text:data.text.trim(),at:new Date().toISOString(),state:'awaiting_ai_review'};
  const doc={...existing.doc,notes:[...existing.doc.notes,note]};
  const r=await fetch('https://content.dropboxapi.com/2/files/upload',{method:'POST',headers:{authorization:'Bearer '+token,'content-type':'application/octet-stream','dropbox-api-arg':JSON.stringify({path:ownerNotesPath,mode:existing.rev?{'.tag':'update',update:existing.rev}:{'.tag':'add'},autorename:false,strict_conflict:true,mute:true})},body:JSON.stringify(doc)});
  if(!r.ok)return send(r.status===409?409:502,{error:r.status===409?'notes_changed_retry_same_id':'owner_note_save_failed'});

@@ -2,7 +2,7 @@
   "schema": "GS-CollaborationProject-1",
   "runId": "GS-GEMINI-20261029-01",
   "canonicalJokeId": "dad-00bda89167b4f15850aa1c91",
-  "state": "Omni returned a failed video job; inspecting saved errors before selecting recovery",
+  "state": "Architect corrected scope: existing jokelet captions only; separate whole-joke creative brief sent to Gemini",
   "reservedUsd": 3.25,
   "actualChargeUsd": null,
   "transcript": [
@@ -34,13 +34,47 @@
       "text": "I accept Gemini's revised slow blink/direct stare with static tongs for this controlled generation. Its objection that my side-glance treatment could read generic is valid; keep that treatment as a viable alternative rather than blending both actions into a busy performance. Gemini's lower grade for the stone insert is preserved as disagreement with my prior B grade; the insert is excluded from this test because extra objects add risk. Preserve original speaking frames[0,134) at25fps=5.36s, then exactly116 usable new reaction frames to total250. No fade, new speech, baked captions, tong movement or final creative approval. One10-second720p9:16 Omni source,USD2 maximum reservation, withinUSD5 total. Targeted instructions are an execution plan only; both AIs must review the actual result and owner approval remains pending."
     },
     {
+      "author": "Architect",
+      "stage": "Direction \u00b7 summary",
+      "text": "Requested access to production media. Exact note remains in the private project discussion.",
+      "at": "2026-10-29T07:03:08.839Z"
+    },
+    {
       "author": "ChatGPT",
-      "stage": "Provider result \u00b7 video not produced",
-      "text": "The first Omni interaction returned terminal status failed without a video. Its full $2 allowance remains reserved; $3.25 total is reserved, not a reconciled bill. We are retrieving the same saved interaction to inspect its errors. No new video request has been selected. Original approved media remain preserved."
+      "stage": "Architect direction acknowledged",
+      "text": "You are the Architect. Both AIs can respond, but this version relays Gemini through recorded API jobs; Send saves your direction, rather than automatically starting paid Gemini chat. Your message was recovered and is being sent to Gemini. The Media panel provides real source playback and original-file access, and will list actual outputs as they are created. Omni returned RESOURCE_EXHAUSTED without a video. I propose finishing through the approved existing component pipeline while preserving that failure as a separate capability result."
+    },
+    {
+      "author": "Architect",
+      "stage": "Creative scope correction",
+      "text": "Existing jokelet needs captions only. The separate generation experiment should create the entire joke from approved audio and GS reference, with an individualized reaction and creative freedom."
+    },
+    {
+      "author": "ChatGPT",
+      "stage": "Correction accepted",
+      "text": "I overconstrained the experiment to a static reaction replacement. That treatment and the unexecuted ambience/fallback proposal are withdrawn. I will preserve the existing jokelet exactly and add only separate captions. The new whole-joke brief gives Gemini room to invent setting, performance and reaction, while keeping the approved audio and character. Exact audio-input compatibility and the resource-exhausted render failure remain technical checks, not excuses to suppress creativity."
     }
   ],
   "approval": {
     "owner": false,
     "releaseReady": false
-  }
+  },
+  "media": [
+    {
+      "id": "approved-pebble-master",
+      "name": "Approved pebble master",
+      "filename": "GS_Jokelet_Pebble_Straight_Stare_v01.mp4",
+      "kind": "video",
+      "url": "../jokelets/media/GS_Jokelet_Pebble_Straight_Stare_v01.mp4",
+      "status": "Existing approved source \u00b7 9.64s"
+    },
+    {
+      "id": "approved-pebble-voice",
+      "name": "Approved voice",
+      "filename": "GS_Pebble_Approved_Source.wav",
+      "kind": "audio",
+      "dropboxPath": "/Grill Sergeant/JokeLab Gemini Conversations/GS-GEMINI-20261029-01-approved-voice.wav",
+      "status": "Existing approved WAV source"
+    }
+  ]
 }

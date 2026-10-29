@@ -32,8 +32,8 @@
       "constraints": {
         "aspectRatio": "9:16",
         "fps": 25,
-        "delivery": "terse, deadpan",
-        "afterPunchline": "no explanatory speech; restrained nonverbal reaction and engineered silence",
+        "delivery": "Terse wording; performance may be deadpan, expressive or theatrical as material requires",
+        "afterPunchline": "No additional spoken tags or explanations; individualized nonverbal comedy may be restrained, expressive or theatrical",
         "mirrorSpeaking": false,
         "mirrorReaction": "only existing approved reaction; inspect visible text first",
         "wardrobe": "Preserve exact established look; standalone wardrobe description not verified",

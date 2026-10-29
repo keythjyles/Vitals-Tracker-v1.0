@@ -1,6 +1,6 @@
 {
   "schema": "GS-PortableSkills-1",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "activation": {
     "textApi": "Explicit systemInstruction injection",
     "omniVideoApi": "Relevant instructions in ordinary input prompt; system instructions unsupported",
@@ -10,17 +10,17 @@
     {
       "name": "gs-character",
       "path": "gs-character.v1.md",
-      "sha256": "545b2384ccbf77e4fb287fe73a65b28bc4820269c9d21a5902d1fbe5bf7f1fcd"
+      "sha256": "bb43e41c620d72827e7c985781a99545db1bf2a7ca1a24a928a5450a782fe1ed"
     },
     {
       "name": "gs-performance",
       "path": "gs-performance.v1.md",
-      "sha256": "cc9753dec0d8447b1024ff1b370c51061d236231ae22572e100379257f2fd8ff"
+      "sha256": "2f0d2fd99c0c0bebce669b096a1dc73f4afbafcdb83285253d0ba87db73e4246"
     },
     {
       "name": "gs-production",
       "path": "gs-production.v1.md",
-      "sha256": "c980182e6b33cf76811ea551292bec84b3b391b9ea65de552a9c1903e28d3041"
+      "sha256": "335875d9b3de379c551cf3a2683f7f29cb69a7003a78e02740d39f321f531565"
     }
   ]
 }

@@ -5,16 +5,19 @@
     "cap": 5,
     "evidence": "Owner: You have a $5 budget, October 29, 2026; this single experiment, collaboration and generation combined. No upgrades or subscriptions."
   },
-  "assignment": "Independently develop one approximately 10-second Grill Sergeant jokelet derivative. Exact already-approved spoken words: What did the shy pebble wish for? That she was a little BOULDER. Existing approved speech is 5.32898 seconds; approved speaking picture covers frames [0,134) at 25fps. Preserve that speech and speaking performance. Final target is 250 frames: remaining frames [134,250) are silent nonverbal reaction. Reference image supplied is the thumbnail derived from the approved pebble master, not a new approved pose. Portrait 9:16. Current Omni supports reference images and silent video generation but not uploaded audio references or voice editing. Use Omni for a new silent reaction if supported by the actual account. Keep original audio/performance recoverable, ambience and transparent editable captions separate. Do not force a goat, location, or particular expression. No post-punchline speech. This is a planned experiment; no video has yet been generated or reviewed.",
+  "assignment": "Two separate assignments. A: Existing approved pebble jokelet (241frames,9.64s,25fps1080x1920) needs ONLY captions; do not recreate its performance, reaction, setting, edit, or soundtrack. Preserve the existing MP4 and supply an independent transparent editable caption layer. B: A separate future whole-joke experiment should start from an approved original audio recording and approved GS identity reference, and invite Gemini to create the entire scene, delivery/performance picture, setting and individualized nonverbal reaction. Do not constrain that creative exploration to recreating an existing jokelet or a static blink. Preserve exact approved spoken audio, GS identity, portrait9:16/25fps output target and post-punchline absence of extra speech. Deadpan, expressive and theatrical performances are all available. Verify actual supplied-audio compatibility before executing B; do not fake voice preservation or claim success when unsupported. Current Omni video call failed RESOURCE_EXHAUSTED; no new video exists.",
   "action": {
-    "id": "gemini-silent-reaction-video-01",
-    "type": "video",
-    "model": "gemini-omni-1.1-flash",
-    "reserveUsd": 2,
+    "id": "gemini-architect-corrected-creative-brief-01",
+    "type": "text",
+    "model": "gemini-3.8-flash",
+    "reserveUsd": 0.25,
     "requires": [
       "gemini-mutual-critique-and-plan-01"
     ],
-    "prompt": "GENERATE ONLY A SILENT REACTION SOURCE for later assembly. Do not recreate any spoken joke or speaking performance described in the shared assignment. Generate one continuous ten-second portrait720p shot. Use the supplied image as an identity/wardrobe/location reference, not a required mouth-open starting pose. Medium close-up of Wendell, the Grill Sergeant, on the same lakeside wooden deck at golden-hour sunset. Preserve his exact face, gray beard, weathered camo cap, black t-shirt, brown canvas Grill Sergeant apron with unreversed readable marks. His mouth is closed from the first frame and stays closed. Barbecue tongs rest completely still at his side; do not animate the hand or tongs. He looks directly into the lens, gives one slow deadpan blink in the first1.5seconds, then settles into an unblinking stoic direct stare through the rest of the shot. Subtle natural breathing, fire flicker and lake ripples only. Stable locked-off camera, one continuous shot. No dialogue, muttering, chuckle, lip movement, captions, title, graphic, camera zoom, cut, blackout or fade. This is a reaction insert; the approved speech and its original talking picture will be retained separately. Maintain picture until the last frame. Return actual video; this request does not ask for an explanation or script."
+    "architectNoteIds": [
+      "e5685130-9519-4732-856a-7d6f389fb6f5"
+    ],
+    "prompt": "Address the human as Architect. The Architect corrects us: 'Well, not sure why we have asked gemeni to recreate our jokelet. It just needs captions. We should be asking it to just create the entire joke with the audio. And tell it to make the reaction. But your instructions were anticreative.' ChatGPT accepts this criticism: it overconstrained the task to a silent reaction replacement, ordered static props/blink/direct stare, and incorrectly treated preservation as an instruction to reuse the talking picture. That narrow experiment is withdrawn. Do not defend or merely echo it. Give your independent response to the Architect, identify any further constraints you think should be removed, and separate the two assignments above clearly. For A, propose one useful material-specific transparent caption treatment with literal words and provisional timing (setup0.228-2.203s; pause2.203-3.631; payoff3.631-5.122s). Do not reveal BOULDER early, fabricate word alignment, or change the original video. For B, offer two distinct genuinely creative whole-joke treatments from approved audio+GS reference, including individualized reactions, with independent viability grades and no forced winner. You may choose expressive or theatrical comedy and a new setting. Distinguish creativity from technical limitations: current official Omni API documentation says uploaded audio references/voice editing unsupported; actual render also failed RESOURCE_EXHAUSTED. Explain what must be verified for exact original-audio use; do not invent successful audio ingestion, silently replace it with a new voice, or require a rigid component treatment. Your answer is relayed through a saved API job; direct automatic interactive chat is not yet verified. Media panel will expose actual sources and created outputs. No new render or paid speech is delegated by this text call. Keep response under650words."
   },
   "canonicalJokeId": "dad-00bda89167b4f15850aa1c91",
   "reconciliations": [
@@ -29,6 +32,13 @@
       "requestSha256": "c1e214cbebc7ef3cd15be1596f10e49a35e3892c5828d0dd447749680c6345d7",
       "kind": "operator_abandon_with_full_reservation",
       "reason": "Operator inspected durable timeout record. No response ID was received and store=false means no recoverable output. Abandon this result as UNKNOWN; retain full USD0.25 against cap. Separately initiate a background/store=true corrected request, not a runtime automatic retry. Owner USD5 covers all reserved attempts; at mostUSD1 reserved after next text call. No claim of no charge or provider rejection."
+    },
+    {
+      "id": "gemini-silent-reaction-video-01",
+      "requestSha256": "12177c3b22d2a5565f6c87db8e2232289c10eccb5cb0e6c921960f4484fd6085",
+      "kind": "terminal_provider_failure",
+      "errorCode": "RESOURCE_EXHAUSTED",
+      "reason": "Read saved provider errors array: terminal RESOURCE_EXHAUSTED with no returned video. Keep full USD2 reserve. Do not repeat the video request; develop an existing-component completion plan within the original USD5 authorization."
     }
   ],
   "plan": {
@@ -38,5 +48,6 @@
     "choice": "Gemini revised blink / static tongs / direct stare",
     "publicationApproval": false,
     "videoReserveUsd": 2
-  }
+  },
+  "ownerNotesThrough": "e5685130-9519-4732-856a-7d6f389fb6f5"
 }

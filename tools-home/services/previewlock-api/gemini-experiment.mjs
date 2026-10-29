@@ -40,9 +40,10 @@ export async function runExperiment(token,{env=process.env,fetcher=fetch,jobOver
  for(const resolution of job.reconciliations||[job.reconcile].filter(Boolean)){
   const old=prior.doc.events.find(e=>e.id===resolution.id);
   const rejected=old?.state==='uncertain'&&[400,404].includes(old.providerStatus)&&old.providerStatus===(resolution.providerStatus??404);
+  const terminalFailure=old?.state==='incomplete'&&old.providerState==='failed'&&resolution.kind==='terminal_provider_failure'&&JSON.stringify(old.providerError||'').includes(resolution.errorCode||'__none__');
   const manuallyAbandoned=old?.state==='uncertain'&&!old.providerStatus&&resolution.kind==='operator_abandon_with_full_reservation';
-  if((rejected||manuallyAbandoned)&&old.requestSha256===resolution.requestSha256){
-   old.state=rejected?'rejected':'abandoned_uncertain';old.resolution={at:new Date().toISOString(),reason:resolution.reason,reservationRetained:true};
+  if((rejected||manuallyAbandoned||terminalFailure)&&old.requestSha256===resolution.requestSha256){
+   old.state=(rejected||terminalFailure)?'rejected':'abandoned_uncertain';old.resolution={at:new Date().toISOString(),reason:resolution.reason,reservationRetained:true};
    prior.rev=await save(prior.doc,prior.rev);
   }
  }
@@ -98,7 +99,8 @@ export async function runExperiment(token,{env=process.env,fetcher=fetch,jobOver
  const skills=await Promise.all(['gs-character','gs-performance','gs-production'].map(name=>readFile(new URL('skills/'+name+'.v1.md',root),'utf8')));
  const imagePath=new URL('../jokelets/media/GS_Jokelet_Pebble_Straight_Stare_v01.jpg',root),image=await readFile(imagePath);
  const instruction=skills.join('\n\n');
- const prompt=job.assignment+'\n\n'+action.prompt;
+ const privateNotes=(action.architectNoteIds||[]).map(id=>{const n=ownerDirection.doc.notes.find(n=>n.id===id);if(!n)throw Error('missing_architect_direction');return n.text});
+ const prompt=job.assignment+'\n\n'+action.prompt+(privateNotes.length?'\n\nARCHITECT DIRECTION (verbatim, private record):\n'+privateNotes.join('\n\n'):'');
  // Conservative bound: <=250k encoded request bytes, <=2048 output tokens,
  // no tools/audio; low thinking within total output cap. $0.25 reservation retained even on failure.
  const body=JSON.stringify(action.type==='video'?{model:action.model,input:[{type:'text',text:instruction+'\n\n'+prompt},{type:'image',mime_type:'image/jpeg',data:image.toString('base64')}],generation_config:{max_output_tokens:65536},response_format:{type:'video',aspect_ratio:'9:16',resolution:'720p',duration:'10s',delivery:'uri'},background:true,store:true,stream:false}:{model:action.model,system_instruction:instruction,input:[{type:'text',text:prompt},{type:'image',mime_type:'image/jpeg',data:image.toString('base64')}],generation_config:{max_output_tokens:2048,thinking_level:'low'},background:true,store:true,stream:false});
