@@ -1,3 +1,9 @@
+# R4 current-production repair — October 28, 2026
+
+Read [CURRENT_PRODUCTIONS_R4.md](CURRENT_PRODUCTIONS_R4.md) for implementation and verification. Compact inline previews and production overrides replace the old read-only launch panel. Ledger now includes Episode 4, existing bee/chicken voice and caption references; archive reconciliation remains partial. Registry recovered from real receipts; Gemini API identified but not connected. Preserve existing media and paid jobs. Deployment/live verification is recorded separately below; do not infer it from this paragraph.
+
+---
+
 # Current session recovery — 2026-10-28
 
 **Start here:** [GS Gemini production direction](GS_GEMINI_PRODUCTION_DIRECTION.md). JokeLab launch now has a read-only Current productions panel backed by PRODUCTION_LEDGER.json. This code is committed; live deployment and playback are not yet verified. Preserve the Oct 24 bookmark review checkpoint below, but do not mistake it for the complete Oct 28 production queue. Reconcile later bee/editor work and Drive/Dropbox before any new generation. Gemini connection and GS character registry are planned, not implemented. No NotebookLM production dependency.
