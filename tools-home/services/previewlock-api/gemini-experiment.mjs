@@ -2,6 +2,7 @@
 // Credentials stay in the existing service; Dropbox CAS prevents restart spending.
 import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
+import {readOwnerNotes} from './gemini-owner-notes.mjs';
 const RUN='GS-GEMINI-20261029-01';
 const root=new URL('../../tools/jokelab/',import.meta.url);
 export const experimentPath='/Grill Sergeant/JokeLab Gemini Conversations/'+RUN+'-experiment.json';
@@ -75,7 +76,7 @@ export async function runExperiment(token,{env=process.env,fetcher=fetch,jobOver
    event.output={path,sha256:hash(bytes),bytes:bytes.length,mimeType:video.mime_type||'video/mp4',verifiedReadback:true};
   }
   event.response=(response.steps||[]).filter(s=>s.type==='model_output').flatMap(s=>(s.content||[]).filter(p=>p.type==='text').map(p=>p.text||'')).join('\n').trim();
-  event.responseId=response.id||event.responseId||null;event.modelVersion=response.model||null;event.usage=response.usage||null;event.providerState=response.status;event.providerError=response.error?JSON.parse(JSON.stringify(response.error).replaceAll(env.GEMINI_API_KEY,'[redacted]')):null;event.providerResponseKeys=Object.keys(response);
+  event.responseId=response.id||event.responseId||null;event.modelVersion=response.model||null;event.usage=response.usage||null;event.providerState=response.status;event.providerError=(response.error||response.errors)?JSON.parse(JSON.stringify(response.error||response.errors).replaceAll(env.GEMINI_API_KEY,'[redacted]')):null;event.providerResponseKeys=Object.keys(response);
   event.state=(event.response||event.output)&&response.status==='completed'?'completed':'incomplete';event.completedAt=new Date().toISOString();
   event.estimatedUsageUsd=event.usage?((event.usage.total_input_tokens||0)*(event.type==='video'?1.50:0.75)+(event.usage.total_output_tokens||0)*(event.type==='video'?17.50:3.75))/1e6:null;event.actualChargeUsd=null;
   await save(document,rev);
@@ -87,6 +88,8 @@ export async function runExperiment(token,{env=process.env,fetcher=fetch,jobOver
  if(recorded?.responseId&&['running','incomplete'].includes(recorded.state))return finish(recorded,prior.doc,prior.rev,{id:recorded.responseId,model:recorded.model,status:'in_progress'});
  if(recorded)return {state:'already_recorded',actionId:action.id};
  if(retrieveOnly)return {state:'not_started',actionId:action.id};
+ const ownerDirection=await readOwnerNotes(token,fetcher);
+ if(ownerDirection.doc.notes.at(-1)?.id&&job.ownerNotesThrough!==ownerDirection.doc.notes.at(-1).id)throw Error('owner_direction_pending_review');
  if(prior.doc.events.some(e=>!['completed','rejected','abandoned_uncertain'].includes(e.state)))throw Error('unresolved_prior_request');
  if(action.requires?.some(id=>!prior.doc.events.some(e=>e.id===id&&e.state==='completed')))throw Error('missing_prerequisite');
  if(!((action.type==='text'&&action.model==='gemini-3.8-flash'&&action.reserveUsd===0.25)||(action.type==='video'&&action.model==='gemini-omni-1.1-flash'&&action.reserveUsd===2)))throw Error('unsupported_experiment_action');

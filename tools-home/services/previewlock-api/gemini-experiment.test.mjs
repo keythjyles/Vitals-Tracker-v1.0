@@ -4,9 +4,10 @@ import {runExperiment} from './gemini-experiment.mjs';
 const env={GEMINI_API_KEY:'test-only',GEMINI_EXPERIMENT_RUN_ID:'GS-GEMINI-20261029-01'};
 const testJob={runId:'GS-GEMINI-20261029-01',authorization:{currency:'USD',cap:5,evidence:'Test-only'},assignment:'Test assignment',action:{id:'test-independent-0001',type:'text',model:'gemini-3.8-flash',reserveUsd:0.25,prompt:'Independent proposal'},reconciliations:[{id:'gemini-independent-proposal-02',requestSha256:'648a64792e1b71ee51f9f6ad91b007d32eca12e2ece42cbc8fec082f8827fafd',providerStatus:400,reason:'Test status/hash matched rejection'}]};
 const execute=(token,options)=>runExperiment(token,{...options,jobOverride:testJob});
-function fixture({failure=false,saveFailure=false,background=false,video=false,doc=null}={}){
+function fixture({failure=false,saveFailure=false,background=false,video=false,ownerNotes=[],doc=null}={}){
  const assets=new Map();let stored=doc,revision=doc?'r1':null,n=1,calls=0;
  const fetcher=async(url,options={})=>{
+  if(url.endsWith('/files/download')&&JSON.parse(options.headers['dropbox-api-arg']).path.endsWith('-owner-notes.json'))return Response.json({notes:ownerNotes},{headers:{'dropbox-api-result':JSON.stringify({rev:'notes-1'})}});
   if(url.endsWith('/files/download')&&JSON.parse(options.headers['dropbox-api-arg']).path.endsWith('.mp4')){const bytes=assets.get(JSON.parse(options.headers['dropbox-api-arg']).path);return bytes?new Response(bytes):new Response('',{status:409})}
   if(url.endsWith('/files/download'))return stored?Response.json(stored,{headers:{'dropbox-api-result':JSON.stringify({rev:revision})}}):new Response('path/not_found',{status:409});
   if(url.endsWith('/files/create_folder_v2'))return Response.json({});
@@ -46,3 +47,5 @@ test('video requires a joint plan before spending',async()=>{const f=fixture();a
 test('video is bounded, original bytes are saved and read back, and restart never regenerates',async()=>{const f=fixture({video:true,doc:{authorization:{cap:5},events:[{id:'agreement-test',state:'completed',reservedUsd:0.25}]}}),job={...testJob,plan:{chatgptAgreed:true,geminiAgreementActionId:'agreement-test'},action:{id:'video-test-01',type:'video',model:'gemini-omni-1.1-flash',reserveUsd:2,requires:['agreement-test'],prompt:'Silent reaction'}};await runExperiment('test',{env,fetcher:f.fetcher,jobOverride:job});const output=f.doc.events.at(-1).output;assert(output.verifiedReadback);assert.equal(output.bytes,21);assert.equal(f.doc.events.at(-1).reservedUsd,2);await runExperiment('test',{env,fetcher:f.fetcher,jobOverride:job});assert.equal(f.calls,1)});
 
 test('read-only retrieval can never create a missing generation',async()=>{const f=fixture();const r=await runExperiment('test',{env,fetcher:f.fetcher,jobOverride:testJob,retrieveOnly:true,maxPolls:1});assert.equal(r.state,'not_started');assert.equal(f.calls,0)});
+
+test('new owner direction blocks the next paid stage until it is reviewed',async()=>{const f=fixture({ownerNotes:[{id:'owner-note-001',text:'Change the reaction'}]});await assert.rejects(execute('test',{env,fetcher:f.fetcher}),/owner_direction_pending_review/);assert.equal(f.calls,0)});

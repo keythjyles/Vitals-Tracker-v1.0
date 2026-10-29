@@ -4,6 +4,7 @@ import {geminiConfiguration,geminiHealth,checkGeminiAccess,handleGeminiPreflight
 import {handleJokeLab} from './jokelab-state.mjs';
 import {handleGeminiCollaboration} from './gemini-collaboration.mjs';
 import {runExperiment,handleExperimentRead} from './gemini-experiment.mjs';
+import {handleOwnerNotes} from './gemini-owner-notes.mjs';
 import {handleAudio} from './audio-store.mjs';
 import {randomBytes,createHash,timingSafeEqual} from 'node:crypto';
 const PORT=Number(process.env.PORT||3101);
@@ -65,6 +66,7 @@ const server=http.createServer(async(req,res)=>{
    if(await handleAudio(req,res,u,t))return;
    if(await handleJokeLab(req,res,u,t))return;
    if(await handleGeminiCollaboration(req,res,u,t))return;
+   if(await handleOwnerNotes(req,res,u,t))return;
    if(await handleExperimentRead(req,res,u,t))return;
    if(await handleGeminiPreflight(req,res,u))return;
    if(req.method==='GET'&&u.pathname==='/api/release-catalog'){
