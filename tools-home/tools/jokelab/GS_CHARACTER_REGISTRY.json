@@ -8,9 +8,10 @@
       "name": "Grill Sergeant \u00b7 recorded GS4 identity",
       "heygen": {
         "avatarId": "85cc768c260a40359212b92f738de459",
-        "lookId": null,
+        "lookId": "85cc768c260a40359212b92f738de459",
         "engine": "avatar_iv",
-        "evidence": "runs/JL-20261024-BOOKMARK-recipe-v01.json"
+        "evidence": "runs/JL-20261024-BOOKMARK-recipe-v01.json",
+        "lookEvidence": "runs/JL-20261024-FARMLAND-PREPARED.json picture.lookId; same ID used as avatarId in completed render"
       },
       "voice": {
         "voiceId": "RBNpu6jPzAoaxZKl9noJ",
@@ -39,7 +40,7 @@
         "lighting": "Preserve source look; do not invent lighting variants"
       },
       "missing": [
-        "Provider lookId/reference-image mapping",
+        "Provider current availability and approved reference-image mapping",
         "Explicit mapping to Classic, Fireside, Daylight and Reaction looks"
       ]
     }

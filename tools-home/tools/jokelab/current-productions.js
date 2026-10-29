@@ -1,19 +1,20 @@
 import {productionItems,assetURL,visibleItems} from './production-model.mjs';
 const $=id=>document.getElementById(id),API='https://gs-previewlock-api.onrender.com',CACHE='gs-jokelab-productions-v1';
 const rows=$('gs-current-rows'),status=$('gs-current-status');
-let items=[],overrides={},revisions=new Map(),ready=new Set(),pending=new Set(),saveQueue=Promise.resolve(),localProject=null,urls=[],edits=new Map();
-try{const cached=JSON.parse(localStorage.getItem(CACHE)||'{}');overrides=cached.overrides||cached;pending=new Set(cached.pending||[])}catch{}
+let rendering=false;
+let items=[],overrides={},revisions=new Map(),ready=new Set(),pending=new Set(),saveQueue=Promise.resolve(),localProject=null,urls=[],edits=new Map(),conflicts=new Set();
+try{const cached=JSON.parse(localStorage.getItem(CACHE)||'{}');overrides=cached.overrides||cached;pending=new Set(cached.pending||[]);revisions=new Map(cached.revisions||[])}catch{}
 const key=()=>localStorage.getItem('gs_previewlock_key')||'';
 async function api(path,options={}){if(!key())throw Error('Cloud connection unavailable on this browser');const r=await fetch(API+path,{...options,headers:{authorization:'Bearer '+key(),...options.headers}});const data=await r.json();if(!r.ok)throw Error(data.error||'Cloud service unavailable');return data}
-function remember(){try{localStorage.setItem(CACHE,JSON.stringify({overrides,pending:[...pending]}))}catch{status.textContent='Browser recovery unavailable; cloud save still required.'}}
-async function loadOverride(id){const data=await api('/api/jokelab-production?id='+encodeURIComponent(id));revisions.set(id,data.rev);ready.add(id);if(data.production&&!pending.has(id))overrides[id]=data.production;return data}
+function remember(){try{localStorage.setItem(CACHE,JSON.stringify({overrides,pending:[...pending],revisions:[...revisions]}))}catch{status.textContent='Browser recovery unavailable; cloud save still required.'}}
+async function loadOverride(id){const data=await api('/api/jokelab-production?id='+encodeURIComponent(id));if(pending.has(id)&&revisions.has(id)&&revisions.get(id)!==data.rev){conflicts.add(id);return data}revisions.set(id,data.rev);ready.add(id);if(data.production&&!pending.has(id))overrides[id]=data.production;return data}
 async function save(item,patch,message){const id=item.id;const editNumber=(edits.get(id)||0)+1;edits.set(id,editNumber);overrides[id]={name:item.name,decision:'REVIEW',playhead:0,...overrides[id],...patch};pending.add(id);remember();message.textContent='Saving…';
  const intended={...overrides[id]};
  saveQueue=saveQueue.catch(()=>{}).then(async()=>{
-  try{if(!ready.has(id)){const remote=await loadOverride(id);if(remote.production){ready.delete(id);throw Error('Cloud record found; refresh before changing it')}}
+  try{if(conflicts.has(id))throw Error('Cloud changed on another device; load cloud version first');if(!ready.has(id)){const remote=await loadOverride(id);if(remote.production){ready.delete(id);throw Error('Cloud record found; refresh before changing it')}}
    const data=await api('/api/jokelab-production?id='+encodeURIComponent(id),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({rev:revisions.get(id),production:intended})});
    revisions.set(id,data.rev);if(edits.get(id)===editNumber){overrides[id]=data.production;pending.delete(id)}remember();message.textContent=data.production.decision+' · Saved to Dropbox';
-  }catch(e){if(e.message==='production_changed_reload'){ready.delete(id);revisions.delete(id)}message.textContent='Not cloud-saved · '+e.message;message.classList.add('production-error')}
+  }catch(e){if(e.message==='production_changed_reload'){ready.delete(id);conflicts.add(id)}message.textContent='Not cloud-saved · '+e.message;message.classList.add('production-error');const actions=message.closest('.production-row')?.querySelector('.production-actions');if(actions&&!actions.querySelector('[data-retry]')){const retry=document.createElement('button');retry.dataset.retry='true';retry.textContent='Retry save';retry.onclick=()=>save(item,{},message);actions.append(retry)}}
  });await saveQueue;
 }
 async function localSx(){
@@ -39,7 +40,7 @@ async function resumeSx(item,message){
 }
 function render(){
  const query=$('gs-production-search').value,view=$('gs-production-filter').value;
- rows.querySelectorAll('video,audio').forEach(v=>v.pause());rows.replaceChildren();const visible=visibleItems(items,overrides,view,query);
+ rendering=true;rows.querySelectorAll('video,audio').forEach(v=>v.pause());rows.replaceChildren();const visible=visibleItems(items,overrides,view,query);
  for(const item of visible){const edit=overrides[item.id]||{};const row=document.createElement('article');row.className='production-row';row.dataset.id=item.id;row.dataset.decision=edit.decision||'REVIEW';
  const preview=document.createElement('div'),info=document.createElement('div'),actions=document.createElement('div');info.className='production-info';actions.className='production-actions';
  const name=document.createElement('input');name.className='production-name';name.value=edit.name||item.name;name.maxLength=200;name.setAttribute('aria-label','Rename '+item.name);
@@ -47,12 +48,12 @@ function render(){
  name.addEventListener('change',()=>{const value=name.value.trim();if(value)save(item,{name:value},message);else name.value=edit.name||item.name});name.addEventListener('keydown',e=>{if(e.key==='Enter')name.blur()});info.append(name,message);
  const asset=item.assets?.find(a=>a.url||a.dropboxPath||/\.(mp4|webm|mp3|wav)(?:$|\?)/i.test(a.src||''));
  let media;
- if(asset){const audio=/\.(mp3|wav)(?:$|\?)/i.test(asset.src||asset.dropboxPath||'');media=document.createElement(audio?'audio':'video');media.controls=true;media.preload='none';media.setAttribute('aria-label','Preview '+item.name);if(!audio)media.playsInline=true;
+ if(asset){const audio=/\.(mp3|wav)(?:$|\?)/i.test(asset.src||asset.dropboxPath||'');media=document.createElement(audio?'audio':'video');media.controls=!asset.dropboxPath;media.preload='none';media.setAttribute('aria-label','Preview '+item.name);if(!audio)media.playsInline=true;
   const src=asset.url||assetURL(asset,new URL('../jokelets/',location.href));if(src)media.src=src;
   const play=document.createElement('button');play.textContent='▶ Play';play.className='production-play';play.setAttribute('aria-label','Play '+item.name);
-  play.onclick=async()=>{play.disabled=true;try{document.querySelectorAll('#gs-current-rows video,#gs-current-rows audio').forEach(v=>{if(v!==media)v.pause()});if(asset.dropboxPath){const d=await api('/api/playback?path='+encodeURIComponent(asset.dropboxPath));media.src=d.url}await media.play()}catch(e){message.textContent='Playback: '+e.message}finally{play.disabled=false}};
+  play.onclick=async()=>{play.disabled=true;try{document.querySelectorAll('#gs-current-rows video,#gs-current-rows audio').forEach(v=>{if(v!==media)v.pause()});if(asset.dropboxPath){const d=await api('/api/playback?path='+encodeURIComponent(asset.dropboxPath));media.src=d.url;media.controls=true}await media.play()}catch(e){message.textContent='Playback: '+e.message}finally{play.disabled=false}};
   media.addEventListener('loadedmetadata',()=>{if(Number.isFinite(media.duration))media.currentTime=Math.min(Number(overrides[item.id]?.playhead)||0,media.duration)});
-  media.addEventListener('pause',()=>{if(media.currentTime>0&&Math.abs(media.currentTime-(overrides[item.id]?.playhead||0))>.1)save(item,{playhead:media.currentTime},message)});
+  media.addEventListener('pause',()=>{if(!rendering&&media.isConnected&&media.currentTime>0&&Math.abs(media.currentTime-(overrides[item.id]?.playhead||0))>.1)save(item,{playhead:media.currentTime},message)});
   media.addEventListener('error',()=>{message.textContent='Preview unavailable · source retained'});
   if(audio){preview.append(play);info.append(media)}else preview.append(media,play);
  }else preview.textContent='Source pending';
@@ -61,10 +62,11 @@ function render(){
  if(item.localSx)button('Resume',()=>resumeSx(item,message));
  if(item.workspace?.caplock){const a=document.createElement('a');a.textContent='CapLock';a.href=item.workspace.caplock;a.target='_blank';actions.append(a)}
  if(item.previewName){const a=document.createElement('a');a.textContent='PreviewLock';a.href='../previewlock/cloud-test.html?v=R27.1&open='+encodeURIComponent(item.previewName);a.target='_blank';actions.append(a)}
- if(pending.has(item.id))button('Retry save',()=>save(item,{},message));
+ if(pending.has(item.id)){const retry=button('Retry save',()=>save(item,{},message));retry.dataset.retry='true'}
+ if(conflicts.has(item.id))button('Use cloud',async()=>{try{const data=await api('/api/jokelab-production?id='+encodeURIComponent(item.id));if(data.production){overrides[item.id]=data.production;revisions.set(item.id,data.rev);pending.delete(item.id);conflicts.delete(item.id);ready.add(item.id);remember();render()}}catch(e){message.textContent=e.message}});
  row.append(preview,info,actions);rows.append(row);
  }
- status.textContent=visible.length+' productions · '+(key()?'Existing cloud connection':'Cloud unavailable on this browser; changes need cloud save');
+ rendering=false;status.textContent=visible.length+' productions · '+(key()?'Existing cloud connection':'Cloud unavailable on this browser; changes need cloud save');
 }
 async function load(){status.textContent='Loading saved productions…';try{const response=await fetch('PRODUCTION_LEDGER.json',{cache:'no-store'});if(!response.ok)throw Error('Ledger unavailable');items=productionItems(await response.json());const local=await localSx().catch(()=>null);if(local)items.unshift(local);render();
  if(key()){for(let i=0;i<items.length;i+=4){await Promise.allSettled(items.slice(i,i+4).map(item=>loadOverride(item.id)));}remember();render()}
