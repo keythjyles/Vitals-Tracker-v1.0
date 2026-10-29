@@ -1,3 +1,8 @@
+## CURRENT — October29 reviewed caption-only output; whole-joke generation still open
+Start runs/GS-GEMINI-20261029-01.md checkpoint P and GS-GEMINI-20261029-01.project.json. Architect corrected the scope: existing pebble master needs captions only; separate whole-joke creation must use approved audio/reference and preserve creative freedom. Caption-onlyv02 is technically verified and independently reviewed using actual MP4/WAV; Architect approval pending. Assets are in Google Drive/Dropbox and the live collaboration Media panel. Failed OmniRESOURCE_EXHAUSTED produced NO video. Do not reuse withdrawn static-blink/reaction-only direction.
+
+USD5 run cap is authorized; USD4.50 conservatively reserved, exact bill unknown. Read private experiment and owner-notes JSON before any further action. New directions gate next paid stage; Gemini chat is operator-relayed, not automatic. No new video-generation budget within remaining established bound. Do not repeat credential onboarding or change existing scheduled posts.
+
 ## Active deployment — checkpoint D supersedes approval block below
 Owner explicitly approved repository push/deployment and USD5 execution. Published ac3e062 via connected GitHub after shell authentication failed. Specific Render run selector is armed; first independent proposal is deploying. Inspect private Dropbox experiment JSON and dated run checkpoint D before advancing. Broad generation remains disabled; no repeated onboarding or spending-approval request.
 

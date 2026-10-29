@@ -5411,12 +5411,13 @@
       "runId": "GS-GEMINI-20261029-01",
       "canonicalJokeId": "dad-00bda89167b4f15850aa1c91",
       "kind": "derivative_of_approved_pebble",
-      "state": "first_independent_proposal_deploying",
+      "state": "caption_only_v02_reviewed_architect_approval_pending",
       "budget": {
         "currency": "USD",
         "cap": 5,
         "authorized": true,
-        "actualChargeUsd": null
+        "actualChargeUsd": null,
+        "reservedUsd": 4.5
       },
       "sourceTakeId": "pqILh6dY0D1CO7Ckhplb",
       "sourceOutputSha256": "8d85a1af2e7885e26d54476a5d888f01f108eae22abbff84e02fc2a7efd8647e",
@@ -5426,7 +5427,17 @@
       "publication": {
         "ready": false
       },
-      "ownerApproval": false
+      "ownerApproval": false,
+      "wholeJokeGeneration": {
+        "state": "blocked_unverified",
+        "providerError": "RESOURCE_EXHAUSTED",
+        "outputCreated": false
+      },
+      "captionArtifacts": {
+        "reviewDriveId": "132X8ZY5ES6w_DRQBHK_heBRKsXjWJUR_",
+        "alphaDriveId": "1hQvvSDEv3QhMr2sf1dUgjt5bKrwxz2vA",
+        "caplockDriveId": "1srXFeyvcdCYFYBQxnMqycoJjnHSM1kVL"
+      }
     }
   ]
 }

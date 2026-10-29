@@ -21,7 +21,8 @@ function show(saved,live,notes){
  const events=[...(saved.transcript||[])],seen=new Set(events.map(e=>e.providerEventId).filter(Boolean));
  const knownTimes=(live?.events||[]).filter(e=>seen.has(e.id)).map(e=>Date.parse(e.at)||0),boundary=Math.max(0,...knownTimes),history=[];
  for(const e of live?.events||[]){if(seen.has(e.id))continue;const event={author:'Gemini',stage:e.id+' · '+e.state,text:e.response||e.providerErrorMessage||(e.providerError?JSON.stringify(e.providerError):null)||e.error||'Request saved; waiting for result',at:e.completedAt||e.at};(Date.parse(e.at)<boundary?history:events).push(event)}
- const ordered=[...notes.slice().reverse().map(n=>({author:'Architect',stage:n.state==='awaiting_ai_review'?'Direction · awaiting AI review':'Direction',text:n.text,at:n.at})),...events.reverse()];
+ for(const n of notes){const addressed=saved.architectNotesAddressed?.includes(n.id),item={author:'Architect',stage:addressed?'Direction · addressed':'Direction · awaiting AI review',text:n.text,at:n.at};const index=events.findIndex(e=>e.sourceNoteId===n.id||(e.author==='Architect'&&e.at===n.at));if(index>=0)events[index]=item;else events.push(item)}
+ const ordered=events.reverse();
  const signature=JSON.stringify({ordered,history});if(signature!==lastSignature){lastSignature=signature;const y=scrollY;$('events').replaceChildren(...ordered.map(card));$('history').replaceChildren(...history.reverse().map(card));if(y>100)window.scrollTo({top:y})}
  $('status').textContent=live?'Live saved discussion · '+(live.events.at(-1)?.state||'ready'):'Saved checkpoint · '+saved.state;
  const reserved=live?live.events.reduce((n,e)=>n+e.reservedUsd,0):saved.reservedUsd||0;

@@ -2,8 +2,8 @@
   "schema": "GS-CollaborationProject-1",
   "runId": "GS-GEMINI-20261029-01",
   "canonicalJokeId": "dad-00bda89167b4f15850aa1c91",
-  "state": "Caption-only v02 ready for Architect playback; actual MP4/WAV sent for Gemini independent review. Whole-joke generation remains separate and unverified.",
-  "reservedUsd": 3.5,
+  "state": "Caption-only v02 independently reviewed; Architect approval pending. Separate whole-joke generation remains unverified after RESOURCE_EXHAUSTED.",
+  "reservedUsd": 4.5,
   "actualChargeUsd": null,
   "transcript": [
     {
@@ -37,7 +37,8 @@
       "author": "Architect",
       "stage": "Direction · summary",
       "text": "Requested access to production media. Exact note remains in the private project discussion.",
-      "at": "2026-10-29T07:03:08.839Z"
+      "at": "2026-10-29T07:03:08.839Z",
+      "sourceNoteId": "e5685130-9519-4732-856a-7d6f389fb6f5"
     },
     {
       "author": "ChatGPT",
@@ -64,6 +65,17 @@
       "author": "ChatGPT",
       "stage": "Caption wording correction and real output",
       "text": "Gemini's reply accepted the wider creative scope, but invented different spoken lines. Those lines and the concepts relying on them are not approved. The actual caption-only v02 uses the approved 'What did the shy pebble wish for? That she was a little BOULDER.' source. The real preview, separate transparent caption WebM and editable CapLock project are now available in Media. Full241frames, actual alpha and bit-identical original audio were checked. Caption word alignment remains a draft until the supplied actual video/audio review and your feedback. No reaction, scene, soundtrack or existing master was changed."
+    },
+    {
+      "author": "Gemini",
+      "stage": "Independent review of actual video and audio",
+      "providerEventId": "gemini-caption-output-independent-review-01",
+      "text": "### Correction of Preceding Record\nI explicitly retract the invented dialogue (\"I had a pebble in my shoe\" / \"Turned out to be a boulder\"). The approved script is:\n> *\"What did the shy pebble wish for? That she was a little BOULDER.\"*\n\nNo modifications or alternate treatments are approved.\n\n---\n\n### Modality & Inspection Limits\n- **Inspected directly:** Video frames, layout, caption positions, and audio timeline.\n- **Not directly inspected:** Internal alpha channels of the raw WebM asset. Independent alpha decode is confirmed via technical logs.\n\n---\n\n### Caption Review & Sync Assessment\n\n```\nOverall Grade: B (Viable with minor reservations)\nNumeric Rating: 6 / 10\n```\n\n1. **Wording & Line Breaks:**\n   - **Setup:** \"WHAT DID THE / SHY PEBBLE WISH FOR?\" splits cleanly across two lines.\n   - **Punchline:** \"THAT SHE WAS / A LITTLE\" transitions cleanly to \"BOULDER.\" Correct punctuation and capitalization are observed.\n\n2. **Placement & Framing:**\n   - Text is centered low-to-mid frame over the apron. It avoids obscuring facial features or lip movements.\n\n3. **Audio-to-Visual Synchronization:**\n   - **Speech Onset:** Audio begins around ~0.24s (~F6). Setup title displays accurately in sync.\n   - **Setup Hold:** Extends to ~F56.\n   - **Punchline Lead-in:** Begins ~3.6s (~F91) with \"THAT SHE WAS A LITTLE\".\n   - **BOULDER Cue:** Fires at ~4.6s (~F116) and cuts out around ~5.4s (~F134).\n   - **Reaction Hold:** From ~F135 to F241 (5.4sâ9.64s), the screen remains entirely blank of captions during the silent reaction. Sync timing meets requirements.\n\n---\n\n### Future Whole-Joke Task Acknowledgement\n- The future whole-joke generation remains an independent task.\n- The approved audio track and GS visual reference must be preserved, while allowing for distinct staging, comedic timing, and visual delivery.\n- External API limitations regarding direct audio-in lip synchronization remain unresolved risks for automated pipelines.\n\n---\n\n### Cost & Approval Status\n- **Budget Tracking:** $1.00 reservation logged against the $5.00 limit ($3.50 prior reservations retained).\n- **Final Authority:** This constitutes an independent technical review; final sign-off rests with the Architect."
+    },
+    {
+      "author": "ChatGPT",
+      "stage": "Caption-only review complete; scope preserved",
+      "text": "I independently verified241actual frames/25fps9.64s, unchanged approved source hash, bit-identical AAC packets, and real decoded alpha0/255. The complete video decodes and representative frames show readable captions clear of the face, no early punchline, and a blank reaction hold. Gemini separately inspected the supplied MP4/WAV, corrected its invented dialogue and found the current wording/approximate timing aligned. Its B/6-of-10 assessment remains visible; this is a usable review draft, not automatic creative approval. Architect decides acceptance or changes. The separate whole-joke experiment must preserve original audio while inviting scene/performance/reaction invention; no successful Gemini video was produced and its RESOURCE_EXHAUSTED failure remains recorded. Total conservative reservationsUSD4.50 againstUSD5; exact bill is not reconciled."
     }
   ],
   "approval": {
@@ -77,7 +89,8 @@
       "filename": "GS_Pebble_Captions_REVIEW_v02.mp4",
       "kind": "video",
       "dropboxPath": "/Grill Sergeant/Timmy Motion Library/GS_Pebble_Captions_REVIEW_v02.mp4",
-      "status": "New caption review copy · timing review pending"
+      "status": "Independently reviewed · Architect review pending",
+      "driveFileId": "1hQvvSDEv3QhMr2sf1dUgjt5bKrwxz2vA"
     },
     {
       "id": "caption-alpha-v02",
@@ -86,7 +99,8 @@
       "kind": "video",
       "alpha": true,
       "dropboxPath": "/Grill Sergeant/JokeLab Gemini Conversations/GS_Pebble_Captions_ALPHA_DRAFT_v02.webm",
-      "status": "New separate alpha layer · 25fps"
+      "status": "Verified alpha · independent editable layer",
+      "driveFileId": "132X8ZY5ES6w_DRQBHK_heBRKsXjWJUR_"
     },
     {
       "id": "caplock-project-v02",
@@ -94,7 +108,8 @@
       "filename": "GS_Pebble_CapLock_Project_DRAFT_v02.json",
       "kind": "project",
       "dropboxPath": "/Grill Sergeant/JokeLab Gemini Conversations/GS_Pebble_CapLock_Project_DRAFT_v02.json",
-      "status": "New project · original bed and caption layer remain separate"
+      "status": "New project · original bed and caption layer remain separate",
+      "driveFileId": "1srXFeyvcdCYFYBQxnMqycoJjnHSM1kVL"
     },
     {
       "id": "approved-pebble-master",
@@ -112,5 +127,19 @@
       "dropboxPath": "/Grill Sergeant/JokeLab Gemini Conversations/GS-GEMINI-20261029-01-approved-voice.wav",
       "status": "Existing approved WAV source"
     }
-  ]
+  ],
+  "architectNotesAddressed": [
+    "e5685130-9519-4732-856a-7d6f389fb6f5"
+  ],
+  "architectApproval": false,
+  "preserving": {
+    "sourceAudioUnchanged": true,
+    "sourcePictureUnchanged": true,
+    "frameCount": 241,
+    "fps": 25,
+    "duration": 9.64,
+    "independentAlpha": true,
+    "newVideoGenerated": false,
+    "fullGenerationBlock": "RESOURCE_EXHAUSTED; exact supplied-audio route not verified"
+  }
 }
