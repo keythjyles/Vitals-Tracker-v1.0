@@ -1,3 +1,7 @@
+# R4.2 library correction
+
+Read [LIBRARY_R4_2.md](LIBRARY_R4_2.md). Save now removes the joke from Browse into Saved library; known produced jokes/aliases are hidden from discovery. Tight right-hand rows replace wide action blocks. These library choices remain browser-local and exportable; cloud synchronization is not implied. Deployment receipts are separate.
+
 # R4.1 current-production repair — October 28, 2026
 
 Read [CURRENT_PRODUCTIONS_R4.md](CURRENT_PRODUCTIONS_R4.md) for implementation and verification. Compact inline previews and production overrides replace the old read-only launch panel. Ledger now includes Episode 4, existing bee/chicken voice and caption references; archive reconciliation remains partial. Registry recovered from real receipts; Gemini API identified but not connected. Preserve existing media and paid jobs. R4 live deployment and Bookmark playback passed; backend health advertises the new route. Authenticated cloud-save and saved-editor resume remain unverified in this browser. See the receipt in CURRENT_PRODUCTIONS_R4.md.
