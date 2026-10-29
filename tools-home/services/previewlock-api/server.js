@@ -3,7 +3,7 @@ import http from 'node:http';
 import {geminiConfiguration,geminiHealth,checkGeminiAccess,handleGeminiPreflight} from './gemini-preflight.mjs';
 import {handleJokeLab} from './jokelab-state.mjs';
 import {handleGeminiCollaboration} from './gemini-collaboration.mjs';
-import {runExperiment} from './gemini-experiment.mjs';
+import {runExperiment,handleExperimentRead} from './gemini-experiment.mjs';
 import {handleAudio} from './audio-store.mjs';
 import {randomBytes,createHash,timingSafeEqual} from 'node:crypto';
 const PORT=Number(process.env.PORT||3101);
@@ -65,6 +65,7 @@ const server=http.createServer(async(req,res)=>{
    if(await handleAudio(req,res,u,t))return;
    if(await handleJokeLab(req,res,u,t))return;
    if(await handleGeminiCollaboration(req,res,u,t))return;
+   if(await handleExperimentRead(req,res,u,t))return;
    if(await handleGeminiPreflight(req,res,u))return;
    if(req.method==='GET'&&u.pathname==='/api/release-catalog'){
     const r=await fetch('https://content.dropboxapi.com/2/files/download',{method:'POST',headers:{authorization:'Bearer '+t,'dropbox-api-arg':JSON.stringify({path:'/Grill Sergeant/Timmy Motion Library/GS_Release_Review_Catalog_v02.json'})}});
