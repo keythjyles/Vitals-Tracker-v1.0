@@ -1,0 +1,26 @@
+{
+  "schema": "GS-Native-Gemini-Caption-Run-1",
+  "runId": "GS-GEMINI-APP-PEBBLE-20261029-02",
+  "canonicalJokeId": "dad-00bda89167b4f15850aa1c91",
+  "date": "2026-10-29",
+  "parentRun": "GS-GEMINI-APP-PEBBLE-20261029-01",
+  "authorization": "Owner: Try it! after reviewing simplified prompt.",
+  "route": "Gemini native web app Create video; existing subscription; Flash UI label, exact underlying video model not exposed.",
+  "conversationUrl": "https://gemini.google.com/app/042cebd9fc13ea0f",
+  "requestCount": 1,
+  "retries": 0,
+  "inputMedia": [],
+  "prompt": "Create animated captions on a completely flat, solid blue background.\n\nKeep it simple and fast, with consistent, bold lettering. Most phrases just pop or slide in, hold briefly, then disappear.\n\nMake the question mark wildly exaggerated and cartoonish. Make BOULDER! huge and comical, landing with a heavy impact. Keep the extra animation concentrated on those two moments.\n\nEach item below appears alone and disappears completely before the next. Show only the exact text, without numbers or added punctuation:\n\n1. What did\n2. the shy\n3. Pebble\n4. wish for\n5. ?\n6. That\n7. she was\n8. a little\n9. BOULDER!\n\nKeep every complete phrase safely inside the frame. No clipped letters, scenery, loose rocks, extra props, background shading or narration.",
+  "aspectRatio": "16:9 native caption source",
+  "status": "generating",
+  "cost": {
+    "additionalPurchase": false,
+    "newApiRequests": 0,
+    "actualQuotaOrCharge": "Not shown by Gemini UI",
+    "oldApiRunReservations": "Unchanged; separate run retains USD4.75."
+  },
+  "recovery": "Do not resubmit. Reopen exact conversation and retrieve accepted generation.",
+  "output": null,
+  "publicationReady": false,
+  "ownerReview": "Pending"
+}
