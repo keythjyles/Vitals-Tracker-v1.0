@@ -15,10 +15,10 @@ export async function handleExperimentRead(req,res,u,token){
  return send(200,{experiment:await r.json()});
 }
 const hash=value=>createHash('sha256').update(value).digest('hex');
-export async function runExperiment(token,{env=process.env,fetcher=fetch}={}){
+export async function runExperiment(token,{env=process.env,fetcher=fetch,jobOverride}={}){
  if(env.GEMINI_EXPERIMENT_RUN_ID!==RUN)return {state:'disabled'};
  if(!env.GEMINI_API_KEY)throw Error('experiment_not_configured');
- const job=JSON.parse(await readFile(new URL('runs/'+RUN+'.job.json',root),'utf8'));
+ const job=jobOverride||JSON.parse(await readFile(new URL('runs/'+RUN+'.job.json',root),'utf8'));
  if(job.runId!==RUN||job.authorization.currency!=='USD'||job.authorization.cap!==5||!job.authorization.evidence)throw Error('invalid_experiment_authorization');
  const headers={authorization:'Bearer '+token};
  async function load(){
@@ -45,7 +45,7 @@ export async function runExperiment(token,{env=process.env,fetcher=fetch}={}){
   }
  }
  async function finish(event,document,rev,response){
-  if(response.id){event.responseId=response.id;event.modelVersion=response.model||event.model;event.providerState=response.status;}
+  if(response.id){event.responseId=response.id;event.modelVersion=response.model||event.model;event.providerState=response.status;event.state='running';rev=await save(document,rev);}
   if(['in_progress','queued','running'].includes(response.status)){
    event.state='running';rev=await save(document,rev);
    for(let n=0;n<60;n++){
@@ -55,12 +55,30 @@ export async function runExperiment(token,{env=process.env,fetcher=fetch}={}){
    }
    if(['in_progress','queued','running'].includes(response.status))return {state:'running',actionId:event.id,persisted:true};
   }
+  const video=(response.steps||[]).filter(s=>s.type==='model_output').flatMap(s=>s.content||[]).find(p=>p.type==='video');
+  if(event.type==='video'&&video&&response.status==='completed'){
+   let bytes;
+   if(video.data)bytes=Buffer.from(video.data,'base64');
+   else if(video.uri){
+    const uri=new URL(video.uri);if(uri.protocol!=='https:'||!['generativelanguage.googleapis.com','storage.googleapis.com'].includes(uri.hostname))throw Error('unsupported_video_delivery_host');
+    const r=await fetcher(uri.href,{headers:uri.hostname==='generativelanguage.googleapis.com'?{'x-goog-api-key':env.GEMINI_API_KEY}:{},redirect:'error',signal:AbortSignal.timeout(60000)});if(!r.ok)throw Error('video_download_failed');bytes=Buffer.from(await r.arrayBuffer());
+   }
+   if(!bytes?.length||bytes.length>50000000)throw Error('invalid_video_bytes');
+   const folder=experimentPath.replace('-experiment.json','');
+   const mk=await fetcher('https://api.dropboxapi.com/2/files/create_folder_v2',{method:'POST',headers:{...headers,'content-type':'application/json'},body:JSON.stringify({path:folder,autorename:false})});if(!mk.ok&&!(await mk.text()).includes('conflict'))throw Error('video_folder_failed');
+   const path=folder+'/'+event.id+'-original.mp4';
+   const upload=await fetcher('https://content.dropboxapi.com/2/files/upload',{method:'POST',headers:{...headers,'content-type':'application/octet-stream','dropbox-api-arg':JSON.stringify({path,mode:{'.tag':'add'},autorename:false,strict_conflict:true,mute:true})},body:bytes});
+   if(!upload.ok&&upload.status!==409)throw Error('video_upload_failed');
+   const readback=await fetcher('https://content.dropboxapi.com/2/files/download',{method:'POST',headers:{...headers,'dropbox-api-arg':JSON.stringify({path})}});if(!readback.ok)throw Error('video_readback_failed');
+   const checked=Buffer.from(await readback.arrayBuffer());if(hash(checked)!==hash(bytes))throw Error('video_hash_mismatch');
+   event.output={path,sha256:hash(bytes),bytes:bytes.length,mimeType:video.mime_type||'video/mp4',verifiedReadback:true};
+  }
   event.response=(response.steps||[]).filter(s=>s.type==='model_output').flatMap(s=>(s.content||[]).filter(p=>p.type==='text').map(p=>p.text||'')).join('\n').trim();
   event.responseId=response.id||event.responseId||null;event.modelVersion=response.model||null;event.usage=response.usage||null;event.providerState=response.status;
-  event.state=event.response&&response.status==='completed'?'completed':'incomplete';event.completedAt=new Date().toISOString();
-  event.estimatedUsageUsd=event.usage?((event.usage.total_input_tokens||0)*0.75+(event.usage.total_output_tokens||0)*3.75)/1e6:null;event.actualChargeUsd=null;
+  event.state=(event.response||event.output)&&response.status==='completed'?'completed':'incomplete';event.completedAt=new Date().toISOString();
+  event.estimatedUsageUsd=event.usage?((event.usage.total_input_tokens||0)*(event.type==='video'?1.50:0.75)+(event.usage.total_output_tokens||0)*(event.type==='video'?17.50:3.75))/1e6:null;event.actualChargeUsd=null;
   await save(document,rev);
-  const check=await load();const stored=check.doc.events.find(e=>e.id===event.id);if(stored?.requestSha256!==event.requestSha256||stored?.response!==event.response)throw Error('experiment_readback_failed');
+  const check=await load();const stored=check.doc.events.find(e=>e.id===event.id);if(stored?.requestSha256!==event.requestSha256||stored?.response!==event.response||stored?.output?.sha256!==event.output?.sha256)throw Error('experiment_readback_failed');
   return {state:event.state,actionId:event.id,persisted:true};
  }
  if(prior.doc.authorization.cap!==5)throw Error('budget_identity_changed');
@@ -69,7 +87,8 @@ export async function runExperiment(token,{env=process.env,fetcher=fetch}={}){
  if(recorded)return {state:'already_recorded',actionId:action.id};
  if(prior.doc.events.some(e=>!['completed','rejected','abandoned_uncertain'].includes(e.state)))throw Error('unresolved_prior_request');
  if(action.requires?.some(id=>!prior.doc.events.some(e=>e.id===id&&e.state==='completed')))throw Error('missing_prerequisite');
- if(action.type!=='text'||action.model!=='gemini-3.8-flash'||action.reserveUsd!==0.25)throw Error('unsupported_experiment_action');
+ if(!((action.type==='text'&&action.model==='gemini-3.8-flash'&&action.reserveUsd===0.25)||(action.type==='video'&&action.model==='gemini-omni-1.1-flash'&&action.reserveUsd===2)))throw Error('unsupported_experiment_action');
+ if(action.type==='video'&&(!job.plan?.chatgptAgreed||!job.plan?.geminiAgreementActionId||!action.requires?.includes(job.plan.geminiAgreementActionId)))throw Error('missing_two_ai_plan');
  if(prior.doc.events.reduce((n,e)=>n+e.reservedUsd,0)+action.reserveUsd>5)throw Error('budget_exceeded');
  const skills=await Promise.all(['gs-character','gs-performance','gs-production'].map(name=>readFile(new URL('skills/'+name+'.v1.md',root),'utf8')));
  const imagePath=new URL('../jokelets/media/GS_Jokelet_Pebble_Straight_Stare_v01.jpg',root),image=await readFile(imagePath);
@@ -77,7 +96,7 @@ export async function runExperiment(token,{env=process.env,fetcher=fetch}={}){
  const prompt=job.assignment+'\n\n'+action.prompt;
  // Conservative bound: <=250k encoded request bytes, <=2048 output tokens,
  // no tools/audio; low thinking within total output cap. $0.25 reservation retained even on failure.
- const body=JSON.stringify({model:action.model,system_instruction:instruction,input:[{type:'text',text:prompt},{type:'image',mime_type:'image/jpeg',data:image.toString('base64')}],generation_config:{max_output_tokens:2048,thinking_level:'low'},background:true,store:true,stream:false});
+ const body=JSON.stringify(action.type==='video'?{model:action.model,input:[{type:'text',text:instruction+'\n\n'+prompt},{type:'image',mime_type:'image/jpeg',data:image.toString('base64')}],generation_config:{max_output_tokens:65536},response_format:{type:'video',aspect_ratio:'9:16',resolution:'720p',duration:'10s',delivery:'inline'},background:true,store:true,stream:false}:{model:action.model,system_instruction:instruction,input:[{type:'text',text:prompt},{type:'image',mime_type:'image/jpeg',data:image.toString('base64')}],generation_config:{max_output_tokens:2048,thinking_level:'low'},background:true,store:true,stream:false});
  if(Buffer.byteLength(body)>250000)throw Error('input_bound_exceeded');
  if(Date.now()>Date.parse('2027-01-01T00:00:00Z'))throw Error('pricing_verification_expired');
  const models=await fetcher('https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000',{headers:{'x-goog-api-key':env.GEMINI_API_KEY},signal:AbortSignal.timeout(20000)});
