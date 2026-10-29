@@ -12,10 +12,11 @@ export async function handleExperimentRead(req,res,u,token){
  if(req.headers.origin&&req.headers.origin!=='https://keythjyles.github.io')return send(403,{error:'origin_not_allowed'});
  const r=await fetch('https://content.dropboxapi.com/2/files/download',{method:'POST',headers:{authorization:'Bearer '+token,'dropbox-api-arg':JSON.stringify({path:experimentPath})}});
  if(!r.ok)return send(502,{error:'experiment_read_failed'});
- return send(200,{experiment:await r.json()});
+ const first=await r.json();if(first.events?.some(e=>e.state==='running')){await runExperiment(token,{retrieveOnly:true,maxPolls:1});const refreshed=await fetch('https://content.dropboxapi.com/2/files/download',{method:'POST',headers:{authorization:'Bearer '+token,'dropbox-api-arg':JSON.stringify({path:experimentPath})}});if(refreshed.ok)return send(200,{experiment:await refreshed.json()});}
+ return send(200,{experiment:first});
 }
 const hash=value=>createHash('sha256').update(value).digest('hex');
-export async function runExperiment(token,{env=process.env,fetcher=fetch,jobOverride}={}){
+export async function runExperiment(token,{env=process.env,fetcher=fetch,jobOverride,retrieveOnly=false,maxPolls=60}={}){
  if(env.GEMINI_EXPERIMENT_RUN_ID!==RUN)return {state:'disabled'};
  if(!env.GEMINI_API_KEY)throw Error('experiment_not_configured');
  const job=jobOverride||JSON.parse(await readFile(new URL('runs/'+RUN+'.job.json',root),'utf8'));
@@ -48,10 +49,10 @@ export async function runExperiment(token,{env=process.env,fetcher=fetch,jobOver
   if(response.id){event.responseId=response.id;event.modelVersion=response.model||event.model;event.providerState=response.status;event.state='running';rev=await save(document,rev);}
   if(['in_progress','queued','running'].includes(response.status)){
    event.state='running';rev=await save(document,rev);
-   for(let n=0;n<60;n++){
+   for(let n=0;n<maxPolls;n++){
     try{const r=await fetcher('https://generativelanguage.googleapis.com/v1beta/interactions/'+encodeURIComponent(event.responseId),{headers:{'x-goog-api-key':env.GEMINI_API_KEY},signal:AbortSignal.timeout(20000)});if(!r.ok)return {state:'running',actionId:event.id,persisted:true};response=await r.json();}catch{return {state:'running',actionId:event.id,persisted:true}}
     if(!['in_progress','queued','running'].includes(response.status))break;
-    await new Promise(resolve=>setTimeout(resolve,3000));
+    if(n+1<maxPolls)await new Promise(resolve=>setTimeout(resolve,3000));
    }
    if(['in_progress','queued','running'].includes(response.status))return {state:'running',actionId:event.id,persisted:true};
   }
@@ -85,6 +86,7 @@ export async function runExperiment(token,{env=process.env,fetcher=fetch,jobOver
  const recorded=prior.doc.events.find(e=>e.id===action.id);
  if(recorded?.state==='running'&&recorded.responseId)return finish(recorded,prior.doc,prior.rev,{id:recorded.responseId,model:recorded.model,status:'in_progress'});
  if(recorded)return {state:'already_recorded',actionId:action.id};
+ if(retrieveOnly)return {state:'not_started',actionId:action.id};
  if(prior.doc.events.some(e=>!['completed','rejected','abandoned_uncertain'].includes(e.state)))throw Error('unresolved_prior_request');
  if(action.requires?.some(id=>!prior.doc.events.some(e=>e.id===id&&e.state==='completed')))throw Error('missing_prerequisite');
  if(!((action.type==='text'&&action.model==='gemini-3.8-flash'&&action.reserveUsd===0.25)||(action.type==='video'&&action.model==='gemini-omni-1.1-flash'&&action.reserveUsd===2)))throw Error('unsupported_experiment_action');
