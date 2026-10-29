@@ -507,6 +507,18 @@
             "gaps": "Original reaction master source ID remains unresolved; exact approved working bytes preserved in repository. Restore/rebuild execution not yet tested."
           }
         }
+      ],
+      "captionRuns": [
+        {
+          "runId": "GS-GEMINI-APP-PEBBLE-20261029-01",
+          "record": "runs/GS-GEMINI-APP-PEBBLE-20261029-01.json",
+          "status": "rendered_owner_requests_simplification",
+          "filename": "GS_Pebble_Gemini_NATIVE_CAPTIONS_v01.mp4",
+          "sha256": "b20c072242b5ff896a5967bc387abaafa2c18c3491a0f1f39a33efb5ca6663ad",
+          "driveId": "1YZxQZ4OtGZoi93GWEEpX8H_F11CMjixc",
+          "dropboxId": "id:lnTiunUsDy8AAAAAAAAC7A",
+          "publicationReady": false
+        }
       ]
     },
     {

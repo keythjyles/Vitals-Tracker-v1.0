@@ -1,0 +1,70 @@
+{
+  "schema": "GS-Native-Gemini-Caption-Run-1",
+  "runId": "GS-GEMINI-APP-PEBBLE-20261029-01",
+  "canonicalJokeId": "dad-00bda89167b4f15850aa1c91",
+  "date": "2026-10-29",
+  "status": "rendered_owner_requests_simplification",
+  "authorization": "Owner: Run it! after reviewing exact construction-and-rocks brief.",
+  "route": "Gemini native web app, Create video; Flash shown in picker, onboarding says Gemini Omni; exact backend model not exposed.",
+  "conversationUrl": "https://gemini.google.com/app/60e7ec0b1265af92",
+  "requestCount": 1,
+  "retries": 0,
+  "inputMedia": [],
+  "prompt": "Create an animated caption video on a solid blue background using the exact phrases below.\n\nGive it a playful construction-and-rocks vibe. Think rolling pebbles, weight, impacts and a big boulder crashing in for the punchline. Be creative with the typography, movement and visual comedy. Keep a consistent look throughout.\n\nEach numbered item is one independent screen appearance. Show only that phrase, then remove it completely before the next appears. Do not display the numbers.\n\n1. What did\n2. the shy\n3. Pebble\n4. wish for\n5. ?\n6. That\n7. she was\n8. a little\n9. BOULDER!\n\nPreserve the wording, capitalization and punctuation exactly. Each phrase is eight characters or fewer, including spaces and punctuation. Do not combine phrases or wrap them onto additional lines.\n\nMake the entrances and exits quick and lively, with a clear, readable pose between them so each phrase can be clipped separately and held longer during editing.\n\nKeep the complete lettering comfortably inside the picture, with at least a 10% margin at every readable pose. Resize to fit. No accidentally cropped letters, outlines or shadows.\n\nMake the question mark big, centered and playfully pulsing. Give BOULDER! a large, comical, crashing finish—while keeping the whole word visible.\n\nKeep the blue background uniform throughout, including between phrases. No fades to black. No narration.",
+  "aspectRatio": "16:9 (native animation source, not finished GS portrait release)",
+  "cost": {
+    "route": "Existing Gemini subscription UI",
+    "additionalPurchase": false,
+    "apiRequests": 0,
+    "actualQuotaOrCharge": "Not shown; no separate purchase or API spend performed",
+    "oldApiRunReservations": "Unchanged; USD4.75 conservative reservation in separate GS-GEMINI-20261029-01 run."
+  },
+  "output": {
+    "fileName": "GS_Pebble_Gemini_NATIVE_CAPTIONS_v01.mp4",
+    "sha256": "b20c072242b5ff896a5967bc387abaafa2c18c3491a0f1f39a33efb5ca6663ad",
+    "bytes": 4161769,
+    "width": 1280,
+    "height": 720,
+    "fps": 24,
+    "frames": 240,
+    "videoDuration": 10,
+    "containerDuration": 10.026667,
+    "videoCodec": "h264",
+    "audioCodec": "aac",
+    "alpha": false,
+    "libraryFileId": "libfile_97065c2eda7481918cdb5208985aef64",
+    "drive": {
+      "id": "1YZxQZ4OtGZoi93GWEEpX8H_F11CMjixc",
+      "parentId": "1xvvS6Lh-R1qNtP1Bg0t2ljb76FhNfQFC",
+      "metadataReadback": "name, MIME, size4161769, parent verified; provider checksum not returned"
+    },
+    "dropbox": {
+      "id": "id:lnTiunUsDy8AAAAAAAAC7A",
+      "path": "/Grill Sergeant/Timmy Motion Library/GS_Pebble_Gemini_NATIVE_CAPTIONS_v01.mp4",
+      "uploadStatus": "completed",
+      "bytes": 4161769
+    }
+  },
+  "verification": {
+    "fullFileDecode": "passed",
+    "visualReview": "3fps contact sheet covering full video and full-size That frame inspected",
+    "observed": "Stone typography, rolling pebbles, crane-held wish for and question mark, big crashing boulder behind BOULDER!; separate phrase poses.",
+    "issues": [
+      "Adds exclamation mark to That!",
+      "Shaded/gradient blue background with ground shadows; not requested uniform chroma background.",
+      "Owner: rocks are cool but clutter on a fast joke; simplify all phrases except exaggerated question mark and final punchline."
+    ],
+    "audioListening": "Not performed; no auditory approval claimed",
+    "previewLock": "Direct-open page resolves. This cloud browser lacks owner Dropbox key, so authenticated cloud playback is not verified. Owner phone already demonstrated R28 playback of prior asset."
+  },
+  "continuity": {
+    "approvedMaster": "Preserved unchanged; no new GS performance, ElevenLabs or HeyGen request.",
+    "publicationReady": false,
+    "next": "Owner requested Draft another run. New simplified prompt is DRAFT ONLY; do not generate until owner directs.",
+    "caplock": "R3 whole-clip speed/source trims committed separately; within-clip speed ramps and freeze-frame holds remain requirements, not implemented by this generation."
+  },
+  "nextDraft": {
+    "status": "not_submitted",
+    "prompt": "Create an animated caption video on a completely flat, solid blue background.\n\nKeep it simple and fast. Use consistent, bold, readable lettering. Most phrases just pop or slide in, hold briefly, then disappear.\n\nGive the question mark a wildly exaggerated cartoon animation. Make BOULDER! huge, comical, and land with impact.\n\nEach item below appears alone. Clear it completely before the next. Do not show the numbers or add punctuation.\n\n1. What did\n2. the shy\n3. Pebble\n4. wish for\n5. ?\n6. That\n7. she was\n8. a little\n9. BOULDER!\n\nKeep every complete phrase safely inside the frame, with no clipped letters. No scenery, extra props, loose rocks, narration, or background shading."
+  }
+}
