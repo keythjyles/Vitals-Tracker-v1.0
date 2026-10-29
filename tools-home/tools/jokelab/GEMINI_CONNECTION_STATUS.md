@@ -1,6 +1,6 @@
 # Gemini connection investigation — October 28, 2026
 
-Status: supported API identified; no authenticated Gemini connection established and no provider request made.
+Status: server-to-Gemini authentication verified; selected model available. Content generation disabled. Creative workspace/handback not yet implemented.
 
 Official sources inspected:
 - https://ai.google.dev/gemini-api/docs/api-key
@@ -27,3 +27,6 @@ Actual gs-previewlock-api /health readback returned status:ok and gemini:{config
 User chose kjiles71@gmail.com through the secure Google account chooser. Fresh AI Studio access was verified, and approved first-use onboarding reached the Make your first API call screen with a masked API key. No secret value was revealed, copied, logged or committed. Render browser sign-in was requested securely but returned declined; do not retry it without a new user request. The key was not installed on gs-previewlock-api, no provider generation ran, and Gemini is not connected yet. Resume from the existing AI Studio account/key rather than repeating signup or creating a duplicate key. Render connector access remains verified for service metadata/settings, but safe transfer of this browser-held key to the service remains unfinished.
 
 Correction to the sign-in checkpoint: the user reported completing Render sign-in. A fresh browser tab verified an authenticated Render Dashboard for gs-previewlock-api in My Workspace, then opened its Environment page. The earlier browserAuth declined result did not establish that sign-in failed; the prior conclusion is superseded by this positive signed-in evidence. Do not repeat login or tell the user they declined it. API-key installation is still a separate pending operation.
+
+## Gemini credential connection verified — current checkpoint
+The user explicitly authorized storing the Google-supplied API key in the existing GS service and running a read-only connection test. Render now retains GEMINI_API_KEY, GEMINI_MODEL=gemini-flash-latest and GEMINI_ENABLED=false alongside all four prior storage/auth settings. Live /health verified authenticated:true, modelAvailable:true, generationPerformed:false at2026-10-29T03:03:46.862Z. Deployment dep-dbhbejfavr4c739l0m7g is live at6d28716bb678102a397ef1902e7514ace7de9458. See GEMINI_CONNECTION_RECEIPT.json. The earlier missing-credential/login blockers are superseded. This proves server-to-Gemini authentication only; the creative conversation UI, durable discussion and ElevenLabs/HeyGen/caplet handback remain unbuilt. Do not repeat login, onboarding or key creation. No billing was enabled and no provider content generation ran.

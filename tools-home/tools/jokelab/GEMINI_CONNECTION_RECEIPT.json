@@ -1,0 +1,23 @@
+{
+  "schema": "GS-GeminiConnectionReceipt-1",
+  "date": "2026-10-28",
+  "serviceId": "srv-dberk21srm7s73d4kqr0",
+  "workspaceId": "tea-d6rno2aa214c73bjm3ag",
+  "configuration": {
+    "credentialStored": "Render private GEMINI_API_KEY",
+    "model": "gemini-flash-latest",
+    "generationEnabled": false
+  },
+  "verification": {
+    "source": "Actual live /health browser readback after Render live deployment",
+    "authenticated": true,
+    "modelAvailable": true,
+    "generationPerformed": false,
+    "checkedAt": "2026-10-29T03:03:46.862Z",
+    "deployment": "dep-dbhbejfavr4c739l0m7g",
+    "commit": "6d28716bb678102a397ef1902e7514ace7de9458",
+    "dropboxReady": true
+  },
+  "next": "Implement saved per-joke creative conversation and approved structured handback. No content-generation request authorized or executed in this verification.",
+  "secretValuesIncluded": false
+}

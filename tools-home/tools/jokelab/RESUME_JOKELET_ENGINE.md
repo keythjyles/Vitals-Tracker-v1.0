@@ -1,3 +1,9 @@
+# Gemini authentication verified
+
+## Gemini credential connection verified — current checkpoint
+The user explicitly authorized storing the Google-supplied API key in the existing GS service and running a read-only connection test. Render now retains GEMINI_API_KEY, GEMINI_MODEL=gemini-flash-latest and GEMINI_ENABLED=false alongside all four prior storage/auth settings. Live /health verified authenticated:true, modelAvailable:true, generationPerformed:false at2026-10-29T03:03:46.862Z. Deployment dep-dbhbejfavr4c739l0m7g is live at6d28716bb678102a397ef1902e7514ace7de9458. See GEMINI_CONNECTION_RECEIPT.json. The earlier missing-credential/login blockers are superseded. This proves server-to-Gemini authentication only; the creative conversation UI, durable discussion and ElevenLabs/HeyGen/caplet handback remain unbuilt. Do not repeat login, onboarding or key creation. No billing was enabled and no provider content generation ran.
+
+---
 # Singles first and Gemini connection check
 
 Read SINGLES_FIRST.md and PRODUCTION_HANDOFF_CONTRACT.json. Develop singles independently, then collections. Gemini authentication check is implemented at GET /api/gemini-status; it uses existing PreviewLock authentication and makes a read-only provider model-list request. Public health reports only credential/model/enabled booleans. No creative request, paid job or authenticated conversation is yet verified. Workspace ambiguity is resolved by user delegation and verified Render owner/build/start metadata. See RENDER_SERVICE_MAP.json: all three services are in My Workspace; GS connection work belongs to gs-previewlock-api, not the root lex-backend. Do not ask the user to choose again.
