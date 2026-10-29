@@ -1,0 +1,13 @@
+{
+  "schema": "GS-CreativeHandback-1",
+  "status": "implementation contract; not a live Gemini exchange",
+  "releaseStrategy": "singles_first_collections_later",
+  "productionUnit": "one independently publishable joke",
+  "requiredIdentity": ["canonicalJokeId", "productionId", "revision", "parentRevision"],
+  "gemini": {"preserve": ["originalJoke", "discussion", "approvedWording", "creativeAlternatives", "assetReferences", "interactionIds"], "manualPromptCopying": false},
+  "elevenLabs": {"preserve": ["cuedScript", "spokenWords", "approvedVoiceProcedureId", "existingTakeId", "approval"], "autoGenerateOnHandback": false},
+  "heygen": {"preserve": ["approvedLookId", "approvedWavId", "performanceDirection", "existingRenderId", "reactionSourceId", "approval"], "autoGenerateOnHandback": false},
+  "caplets": {"deliverable": "independently insertable transparent animation layers", "required": ["layerId", "wordIds", "direction", "inFrame", "outFrameExclusive", "sourceAssetId", "position", "scale", "approval"], "fps": 25, "burnIntoMaster": false, "alphaSupportMustBeVerified": true},
+  "publishing": {"singles": "each has its own complete joke, reaction, soundtrack and caption review", "collections": "reference approved released singles; assemble after individual releases", "automaticApproval": false, "existingSchedules": "preserve until a verified replacement exists"},
+  "acceptance": ["select joke without entering ID", "open authenticated Gemini discussion", "save discussion to the same production", "approve and return structured voice/video/caplet instructions", "leave and reopen the same state", "preserve all existing paid sources"]
+}

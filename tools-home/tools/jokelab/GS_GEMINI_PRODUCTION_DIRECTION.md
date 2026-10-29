@@ -27,3 +27,7 @@ JokeLab launch panel committed 2026-10-28, reading existing ledger. Earlier manu
 
 ## R4 implementation supersedes the read-only launch description
 See [CURRENT_PRODUCTIONS_R4.md](CURRENT_PRODUCTIONS_R4.md), [GS_CHARACTER_REGISTRY.json](GS_CHARACTER_REGISTRY.json) and [GEMINI_CONNECTION_STATUS.md](GEMINI_CONNECTION_STATUS.md). The launch now provides inline controls with separate decision persistence. Deployment evidence remains separate. Unmapped looks, full Drive/Dropbox reconciliation and authenticated Gemini integration remain outstanding.
+
+
+## Owner strategy update — singles first
+See SINGLES_FIRST.md and PRODUCTION_HANDOFF_CONTRACT.json. One independently publishable joke is the primary unit; collections reference finished singles later. Episode-first planning is superseded, while existing masters remain preserved. The new read-only /api/gemini-status route can verify configured provider access without generation. It is not the creative workspace or a completed provider connection.

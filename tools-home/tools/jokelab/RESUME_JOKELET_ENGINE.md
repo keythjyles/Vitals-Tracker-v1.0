@@ -1,3 +1,7 @@
+# Singles first and Gemini connection check
+
+Read SINGLES_FIRST.md and PRODUCTION_HANDOFF_CONTRACT.json. Develop singles independently, then collections. Gemini authentication check is implemented at GET /api/gemini-status; it uses existing PreviewLock authentication and makes a read-only provider model-list request. Public health reports only credential/model/enabled booleans. No creative request, paid job or authenticated conversation is yet verified. Render connector has one workspace, My Workspace (kjiles71@gmail.com); its tool requires user workspace confirmation before selecting it.
+
 # R4.2 library correction
 
 Read [LIBRARY_R4_2.md](LIBRARY_R4_2.md). Save now removes the joke from Browse into Saved library; known produced jokes/aliases are hidden from discovery. Tight right-hand rows replace wide action blocks. These library choices remain browser-local and exportable; cloud synchronization is not implied. Deployment receipts are separate.
