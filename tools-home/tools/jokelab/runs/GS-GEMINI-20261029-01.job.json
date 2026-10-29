@@ -7,7 +7,7 @@
   },
   "assignment": "Independently develop one approximately 10-second Grill Sergeant jokelet derivative. Exact already-approved spoken words: What did the shy pebble wish for? That she was a little BOULDER. Existing approved speech is 5.32898 seconds; approved speaking picture covers frames [0,134) at 25fps. Preserve that speech and speaking performance. Final target is 250 frames: remaining frames [134,250) are silent nonverbal reaction. Reference image supplied is the thumbnail derived from the approved pebble master, not a new approved pose. Portrait 9:16. Current Omni supports reference images and silent video generation but not uploaded audio references or voice editing. Use Omni for a new silent reaction if supported by the actual account. Keep original audio/performance recoverable, ambience and transparent editable captions separate. Do not force a goat, location, or particular expression. No post-punchline speech. This is a planned experiment; no video has yet been generated or reviewed.",
   "action": {
-    "id": "gemini-independent-proposal-02",
+    "id": "gemini-independent-proposal-03",
     "type": "text",
     "model": "gemini-3.8-flash",
     "reserveUsd": 0.25,
@@ -15,8 +15,9 @@
   },
   "canonicalJokeId": "dad-00bda89167b4f15850aa1c91",
   "reconcile": {
-    "id": "gemini-independent-proposal-01",
-    "requestSha256": "ebd44643489a4125e0d9660ae7f3e44c0b14e1d28620a5c01df7508a14c20081",
-    "reason": "Observed HTTP404 rejection, no treatment generated. Official deprecations document restricts Gemini2.5 to established users; move to current pinned3.8 Flash through Interactions API. Retain the full USD0.25 reservation; this is a separately recorded corrected request within owner USD5 authorization."
+    "id": "gemini-independent-proposal-02",
+    "requestSha256": "648a64792e1b71ee51f9f6ad91b007d32eca12e2ece42cbc8fec082f8827fafd",
+    "providerStatus": 400,
+    "reason": "Observed explicit HTTP400 before generation: model does not support MINIMAL thinking. Change to documented LOW thinking; preserve entire reservation and failure history. New controlled request within USD5 total."
   }
 }

@@ -28,7 +28,7 @@ export async function runExperiment(token,{env=process.env,fetcher=fetch}={}){
  let prior=await load();const action=job.action;
  if(job.reconcile){
   const old=prior.doc.events.find(e=>e.id===job.reconcile.id);
-  if(old?.state==='uncertain'&&old.providerStatus===404&&old.requestSha256===job.reconcile.requestSha256){
+  if(old?.state==='uncertain'&&[400,404].includes(old.providerStatus)&&old.providerStatus===(job.reconcile.providerStatus??404)&&old.requestSha256===job.reconcile.requestSha256){
    old.state='rejected';old.resolution={at:new Date().toISOString(),reason:job.reconcile.reason,reservationRetained:true};
    prior.rev=await save(prior.doc,prior.rev);
   }
@@ -44,8 +44,8 @@ export async function runExperiment(token,{env=process.env,fetcher=fetch}={}){
  const instruction=skills.join('\n\n');
  const prompt=job.assignment+'\n\n'+action.prompt;
  // Conservative bound: <=250k encoded request bytes, <=2048 output tokens,
- // no tools/audio; minimal thinking within total output cap. $0.25 reservation retained even on failure.
- const body=JSON.stringify({model:action.model,system_instruction:instruction,input:[{type:'text',text:prompt},{type:'image',mime_type:'image/jpeg',data:image.toString('base64')}],generation_config:{max_output_tokens:2048,thinking_level:'minimal'},background:false,store:false,stream:false});
+ // no tools/audio; low thinking within total output cap. $0.25 reservation retained even on failure.
+ const body=JSON.stringify({model:action.model,system_instruction:instruction,input:[{type:'text',text:prompt},{type:'image',mime_type:'image/jpeg',data:image.toString('base64')}],generation_config:{max_output_tokens:2048,thinking_level:'low'},background:false,store:false,stream:false});
  if(Buffer.byteLength(body)>250000)throw Error('input_bound_exceeded');
  if(Date.now()>Date.parse('2027-01-01T00:00:00Z'))throw Error('pricing_verification_expired');
  const models=await fetcher('https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000',{headers:{'x-goog-api-key':env.GEMINI_API_KEY},signal:AbortSignal.timeout(20000)});
