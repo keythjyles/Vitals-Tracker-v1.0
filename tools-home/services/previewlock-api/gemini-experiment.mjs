@@ -75,7 +75,7 @@ export async function runExperiment(token,{env=process.env,fetcher=fetch,jobOver
    event.output={path,sha256:hash(bytes),bytes:bytes.length,mimeType:video.mime_type||'video/mp4',verifiedReadback:true};
   }
   event.response=(response.steps||[]).filter(s=>s.type==='model_output').flatMap(s=>(s.content||[]).filter(p=>p.type==='text').map(p=>p.text||'')).join('\n').trim();
-  event.responseId=response.id||event.responseId||null;event.modelVersion=response.model||null;event.usage=response.usage||null;event.providerState=response.status;
+  event.responseId=response.id||event.responseId||null;event.modelVersion=response.model||null;event.usage=response.usage||null;event.providerState=response.status;event.providerError=response.error?JSON.parse(JSON.stringify(response.error).replaceAll(env.GEMINI_API_KEY,'[redacted]')):null;event.providerResponseKeys=Object.keys(response);
   event.state=(event.response||event.output)&&response.status==='completed'?'completed':'incomplete';event.completedAt=new Date().toISOString();
   event.estimatedUsageUsd=event.usage?((event.usage.total_input_tokens||0)*(event.type==='video'?1.50:0.75)+(event.usage.total_output_tokens||0)*(event.type==='video'?17.50:3.75))/1e6:null;event.actualChargeUsd=null;
   await save(document,rev);
@@ -84,7 +84,7 @@ export async function runExperiment(token,{env=process.env,fetcher=fetch,jobOver
  }
  if(prior.doc.authorization.cap!==5)throw Error('budget_identity_changed');
  const recorded=prior.doc.events.find(e=>e.id===action.id);
- if(recorded?.state==='running'&&recorded.responseId)return finish(recorded,prior.doc,prior.rev,{id:recorded.responseId,model:recorded.model,status:'in_progress'});
+ if(recorded?.responseId&&['running','incomplete'].includes(recorded.state))return finish(recorded,prior.doc,prior.rev,{id:recorded.responseId,model:recorded.model,status:'in_progress'});
  if(recorded)return {state:'already_recorded',actionId:action.id};
  if(retrieveOnly)return {state:'not_started',actionId:action.id};
  if(prior.doc.events.some(e=>!['completed','rejected','abandoned_uncertain'].includes(e.state)))throw Error('unresolved_prior_request');
