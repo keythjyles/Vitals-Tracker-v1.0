@@ -1,3 +1,6 @@
+## Active deployment — checkpoint D supersedes approval block below
+Owner explicitly approved repository push/deployment and USD5 execution. Published ac3e062 via connected GitHub after shell authentication failed. Specific Render run selector is armed; first independent proposal is deploying. Inspect private Dropbox experiment JSON and dated run checkpoint D before advancing. Broad generation remains disabled; no repeated onboarding or spending-approval request.
+
 ## Deployment blocked — checkpoint C
 Prepared changes are LOCAL ONLY; auto-review rejected external push pending the owner's explicit authorization for keythjyles/Vitals-Tracker-v1.0 main deployment. See runs/GS-GEMINI-20261029-01.md checkpoint C. Specific run selection was cleared; no paid request occurred. USD5 budget is already authorized. Do not bypass the publication rejection or restart credential onboarding.
 

@@ -1,0 +1,26 @@
+{
+  "schema": "GS-PortableSkills-1",
+  "version": "1.0.0",
+  "activation": {
+    "textApi": "Explicit systemInstruction injection",
+    "omniVideoApi": "Relevant instructions in ordinary input prompt; system instructions unsupported",
+    "geminiApp": "Not installed or verified"
+  },
+  "files": [
+    {
+      "name": "gs-character",
+      "path": "gs-character.v1.md",
+      "sha256": "545b2384ccbf77e4fb287fe73a65b28bc4820269c9d21a5902d1fbe5bf7f1fcd"
+    },
+    {
+      "name": "gs-performance",
+      "path": "gs-performance.v1.md",
+      "sha256": "cc9753dec0d8447b1024ff1b370c51061d236231ae22572e100379257f2fd8ff"
+    },
+    {
+      "name": "gs-production",
+      "path": "gs-production.v1.md",
+      "sha256": "c980182e6b33cf76811ea551292bec84b3b391b9ea65de552a9c1903e28d3041"
+    }
+  ]
+}

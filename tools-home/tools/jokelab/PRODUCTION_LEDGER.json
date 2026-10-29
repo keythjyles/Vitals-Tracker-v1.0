@@ -5405,5 +5405,28 @@
         "ready": false
       }
     }
+  ],
+  "experiments": [
+    {
+      "runId": "GS-GEMINI-20261029-01",
+      "canonicalJokeId": "dad-00bda89167b4f15850aa1c91",
+      "kind": "derivative_of_approved_pebble",
+      "state": "first_independent_proposal_deploying",
+      "budget": {
+        "currency": "USD",
+        "cap": 5,
+        "authorized": true,
+        "actualChargeUsd": null
+      },
+      "sourceTakeId": "pqILh6dY0D1CO7Ckhplb",
+      "sourceOutputSha256": "8d85a1af2e7885e26d54476a5d888f01f108eae22abbff84e02fc2a7efd8647e",
+      "job": "runs/GS-GEMINI-20261029-01.job.json",
+      "record": "runs/GS-GEMINI-20261029-01.md",
+      "privateTranscriptPath": "/Grill Sergeant/JokeLab Gemini Conversations/GS-GEMINI-20261029-01-experiment.json",
+      "publication": {
+        "ready": false
+      },
+      "ownerApproval": false
+    }
   ]
 }
