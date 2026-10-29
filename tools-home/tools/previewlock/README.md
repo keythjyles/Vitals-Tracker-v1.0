@@ -46,3 +46,12 @@ This test establishes the render → Dropbox → direct-open PreviewLock workflo
 **Distinguish tools:** Gemini = animation generation; PreviewLock = review/delivery; FrameLock/AnchorLock = stabilization; MotionLock = compositing motion; SxLock/WavLock = audio and sound tools. Use only the stages the actual deliverable requires. Avoid unnecessary paid services.
 
 **Known failure:** On October 25, an incorrect Timmy clip was composited and the user identified the intended Gemini-rendered Timmy in a screenshot. This is an asset-selection error, not a reason to replace Gemini with another service. Source identification must be verified before compositing.
+
+## R28 — direct playback and compact right-hand layout (October29)
+Uses AspectLockR26.1 stage-left/right82px rail and SxLockR27.1 stacked controls as references; neither reference tool is modified. PreviewLock retains project membership, source media, cloud auth, rename/duplicate/unlink/import/export/tool navigation. Playback+paired frame steps are tightly grouped at right. Import and settings remain collapsed.
+
+Playback repair: open the exact Timmy Motion Library filename FIRST, without waiting for recursive catalog or thumbnails. Successful selection joins this browser's existing project. Backend asset-catalog.mjs follows every Dropbox cursor, errors instead of returning misleading partial data, and exposes assetCatalogVersion2 in health. Existing API bearer security remains unchanged. An absent browser connection, autoplay refusal and decoder/network failure are explicit; Reload is adjacent to player. deliveries.json supplies only the observed existing private Drive review URL as a saved-copy fallback; it contains no secrets, new sharing grants or public media. Local device preview is local-only and uploads nothing.
+
+Checks before deployment:4 playback tests (exact file before slow/failed catalog, selection race, absent auth, autoplay rejection);69 backend tests including3 new pagination/failure/cursor tests. Live browser/physical-phone verification is separate and must be recorded after deployment. No new paid generation.
+
+Rollback: restore cloud-test.html and server.js from c0df90fe3872eb0407ae1bb209ba748c62425cbf; remove R28-only JS/CSS/module imports. Source media/project caches were not migrated or removed.

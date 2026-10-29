@@ -1,0 +1,27 @@
+/* R28: same stage-left / compact right rail as AspectLock and SxLock. */
+header{max-width:980px;margin:auto;position:sticky;top:0;padding:4px!important}
+.stageWorkspace{display:grid;grid-template-columns:minmax(0,1fr) 82px;gap:4px;align-items:stretch}
+.picturePane{min-width:0;background:#05080c;display:flex;flex-direction:column}
+#viewerShell{height:44dvh;min-height:170px;flex:1}
+#viewerShell video{width:100%;height:100%;max-height:44dvh;object-fit:contain}
+#previewControls{display:flex;flex-direction:column;gap:4px;justify-content:flex-end;min-width:0}
+#previewControls .transport{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin:0}
+#previewControls button{min-width:0;min-height:36px;font-size:12px;padding:4px 1px;line-height:1.1;touch-action:manipulation}
+#previewControls #play,#previewControls #stop{min-height:44px;font-size:20px}
+#previewControls #viewerSize,#previewControls #retryPlayback{width:100%;height:auto;margin:0}
+#previewControls .actions{display:grid;grid-template-columns:1fr;gap:3px;margin:0}
+#previewControls .actions button{font-size:11px;min-height:31px}
+.largeViewer #viewerShell{height:67dvh;max-height:67dvh}.largeViewer #viewerShell video{max-height:67dvh;height:100%}
+#viewerInfo{min-height:23px;padding:0 2px}#fileName{font-size:12px;line-height:1.25}
+#playbackStatus{font-size:12px;line-height:1.25;color:#c8d9e8;padding:2px;overflow-wrap:anywhere}
+#playbackStatus:empty{display:none}#savedCopy{display:block;padding:6px;text-align:right;color:#ffda8a}#savedCopy[hidden]{display:none}
+main{padding:4px 7px;max-width:980px}section{padding:5px 0}#libraryBar{gap:4px;flex-wrap:wrap;margin-bottom:3px}#libraryBar button,#sort{padding:5px;font-size:11px;min-height:32px}
+#libraryBar h2{font-size:13px;min-width:60px}#clearProject{margin-left:auto}
+.listView article{display:grid;grid-template-columns:auto minmax(0,1fr) 38px;grid-template-rows:1fr 1fr;gap:2px 5px;padding:3px 0;min-height:68px}
+.listView .videoThumb{grid-row:1/3;grid-column:1;height:60px!important;max-width:40px;min-width:28px}
+.listView .assetInfo{grid-column:2;grid-row:1/3}.assetMeta{display:none}.assetName{font-size:12px;line-height:1.25}
+.listView article>button{grid-column:3;grid-row:1;height:30px;min-height:30px;width:38px;padding:2px}
+.listView article>.removeAsset{grid-row:2;width:38px!important;height:30px!important;min-height:30px!important}
+body>p{display:none}nav[aria-label="Caption production tools"]{gap:3px!important;padding:3px!important}nav[aria-label="Caption production tools"] a{min-height:30px!important;padding:3px 5px!important;font-size:11px}
+#seekBar{height:23px;min-height:23px}#top{height:28px!important}#importPanel,details#settings{margin:4px 0}summary{font-size:12px;padding:5px 0}
+@media(max-width:350px){.stageWorkspace{grid-template-columns:minmax(0,1fr) 74px}#previewControls button{font-size:11px}}
