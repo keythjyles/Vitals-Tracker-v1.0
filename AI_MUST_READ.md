@@ -41,3 +41,6 @@
 - If the task requires permissions, credentials, live provider data, or confirmation that is unavailable, state the limitation; never claim success from an unverified write.
 
 **This document is a navigation and reading contract, not a substitute for the underlying documents.**
+
+## Render workspace and service discovery
+Before Render/Gemini/GS backend work, read [RENDER_SERVICE_MAP.json](tools-home/tools/jokelab/RENDER_SERVICE_MAP.json). The workspace question is resolved; route GS media/Gemini checks to gs-previewlock-api and voice to jokelet-api. The root lex-backend is a separate legacy VA-analysis/testing runtime. Current service metadata wins if IDs/build paths have changed; do not infer service identity from the shared repository name.

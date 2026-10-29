@@ -215,3 +215,7 @@ Read `tools-home/tools/sound-scrubber/AUDIO_DELETE.md` before deleting or mirror
 
 ## JokeLab R4 production continuity — October 28, 2026
 Read tools-home/tools/jokelab/CURRENT_PRODUCTIONS_R4.md before changing the launch panel. Durable decisions are separate from the immutable ledger/media and publication readiness. SxLock same-browser resume reuses its existing project importer; no cloud-project recovery or Drive decision mirror is implied. Real identity evidence is in GS_CHARACTER_REGISTRY.json; Gemini connection is still unestablished.
+
+
+## Verified Render routing — October 28, 2026
+The user delegated identifying the correct workspace; this is resolved. See [verified service map](tools-home/tools/jokelab/RENDER_SERVICE_MAP.json). Workspace My Workspace, tea-d6rno2aa214c73bjm3ag (kjiles71@gmail.com), owns all three services. gs-previewlock-api (srv-dberk21srm7s73d4kqr0) runs tools-home/services/previewlock-api and is the GS media/storage/Gemini-preflight service. jokelet-api (srv-dbdui3vb9u1s73bir8kg) is the existing GS voice service. lex-backend (srv-d6rnut4r85hc73ehc12g) starts repository-root server.js and is the legacy VA-analysis/testing backend. Shared repository does not mean shared runtime. Verify service ID and build/start path before a mutation. Do not ask the user to identify the workspace again, repurpose the root backend, replace existing environment variables, create new services, or upgrade plans by assumption. Current authorization does not imply a new paid-generation budget.

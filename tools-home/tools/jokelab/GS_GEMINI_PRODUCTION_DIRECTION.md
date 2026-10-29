@@ -31,3 +31,6 @@ See [CURRENT_PRODUCTIONS_R4.md](CURRENT_PRODUCTIONS_R4.md), [GS_CHARACTER_REGIST
 
 ## Owner strategy update — singles first
 See SINGLES_FIRST.md and PRODUCTION_HANDOFF_CONTRACT.json. One independently publishable joke is the primary unit; collections reference finished singles later. Episode-first planning is superseded, while existing masters remain preserved. The new read-only /api/gemini-status route can verify configured provider access without generation. It is not the creative workspace or a completed provider connection.
+
+## Service routing is verified
+RENDER_SERVICE_MAP.json identifies the resolved My Workspace account and the three separate runtime paths. User delegated discovery; no further workspace-choice question is needed. Build the GS Gemini connection in gs-previewlock-api, preserving the dedicated voice service and the separate legacy VA-analysis/root testing backend. Gemini authentication and the actual creative round trip still require independent evidence.

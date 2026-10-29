@@ -1,6 +1,6 @@
 # Singles first and Gemini connection check
 
-Read SINGLES_FIRST.md and PRODUCTION_HANDOFF_CONTRACT.json. Develop singles independently, then collections. Gemini authentication check is implemented at GET /api/gemini-status; it uses existing PreviewLock authentication and makes a read-only provider model-list request. Public health reports only credential/model/enabled booleans. No creative request, paid job or authenticated conversation is yet verified. Render connector has one workspace, My Workspace (kjiles71@gmail.com); its tool requires user workspace confirmation before selecting it.
+Read SINGLES_FIRST.md and PRODUCTION_HANDOFF_CONTRACT.json. Develop singles independently, then collections. Gemini authentication check is implemented at GET /api/gemini-status; it uses existing PreviewLock authentication and makes a read-only provider model-list request. Public health reports only credential/model/enabled booleans. No creative request, paid job or authenticated conversation is yet verified. Workspace ambiguity is resolved by user delegation and verified Render owner/build/start metadata. See RENDER_SERVICE_MAP.json: all three services are in My Workspace; GS connection work belongs to gs-previewlock-api, not the root lex-backend. Do not ask the user to choose again.
 
 # R4.2 library correction
 

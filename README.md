@@ -12,3 +12,6 @@
 - [Tools home](tools-home/)
 
 The direct-open handoff has been verified by the user. Persistent frame-specific review notes and AI retrieval remain to be built.
+
+## Backend routing
+[Verified Render service map](tools-home/tools/jokelab/RENDER_SERVICE_MAP.json): GS media/Gemini checks use gs-previewlock-api; GS voice uses jokelet-api; root lex-backend is the separate legacy VA-analysis/testing runtime. All three currently belong to the same verified workspace. Start with AI_MUST_READ.md before changes.

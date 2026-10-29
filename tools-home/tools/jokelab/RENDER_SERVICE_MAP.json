@@ -1,0 +1,43 @@
+{
+  "schema": "GS-ServiceMap-1",
+  "verified": "2026-10-28",
+  "workspace": {
+    "id": "tea-d6rno2aa214c73bjm3ag",
+    "name": "My Workspace",
+    "account": "kjiles71@gmail.com",
+    "selectionEvidence": "User delegated identifying the correct workspace; service ownerId and repository/build/start paths verified through Render connector"
+  },
+  "repository": "keythjyles/Vitals-Tracker-v1.0",
+  "services": [
+    {
+      "id": "srv-d6rnut4r85hc73ehc12g",
+      "name": "lex-backend",
+      "role": "repository-root legacy VA-analysis/testing backend in the Vitals repository",
+      "start": "node server.js",
+      "useForGemini": false,
+      "codeEvidence": "Root server.js exposes POST /api/analyze using ANTHROPIC_API_KEY and a VA claim evidence analysis prompt; not the GS Gemini runtime"
+    },
+    {
+      "id": "srv-dbdui3vb9u1s73bir8kg",
+      "name": "jokelet-api",
+      "role": "GS voice production",
+      "root": "tools-home/services/jokelet-api/",
+      "useForGemini": false
+    },
+    {
+      "id": "srv-dberk21srm7s73d4kqr0",
+      "name": "gs-previewlock-api",
+      "role": "GS media/storage bridge and Gemini preflight",
+      "start": "cd tools-home/services/previewlock-api && npm start",
+      "useForGemini": true,
+      "url": "https://gs-previewlock-api.onrender.com",
+      "deploymentVerified": "efa9293283400c646816e69081e2751109a2b077"
+    }
+  ],
+  "constraints": [
+    "Preserve existing env vars and authentication",
+    "Do not repurpose the root backend for GS",
+    "No plan upgrades or additional paid infrastructure",
+    "Workspace ambiguity resolved; do not ask the user to identify it again"
+  ]
+}

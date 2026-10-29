@@ -15,3 +15,7 @@ No configured credential was found in the inspected repository code/manifests. R
 Next: verify the existing server's configured Gemini access through an authorized execution path, then implement an embedded conversation under each production with a return action. Do not reinstate the rejected manual gemini-bridge workflow or silently treat a normal Gemini link as integration.
 
 Plugin discovery: Gemini/Google AI query returned no suitable Gemini creative connector among the results. No plugin was installed or unrelated integration suggested.
+
+## Workspace identification resolved — October 28, 2026
+The earlier no-selected-workspace observation is superseded. The user delegated discovery; Render get_service, list_services and deployment metadata establish that My Workspace (tea-d6rno2aa214c73bjm3ag, kjiles71@gmail.com) owns all three runtimes. Use gs-previewlock-api (srv-dberk21srm7s73d4kqr0) for the existing media/Gemini bridge and jokelet-api for voice. lex-backend is the root legacy VA-analysis/testing runtime. Exact routes/commands are in RENDER_SERVICE_MAP.json. No configuration, credentials or plan was changed by this read-only identification.
+The Gemini preflight commit efa9293283400c646816e69081e2751109a2b077 is confirmed live by Render deployment dep-dbhacu5ckfvc73f602k0. This is deployment evidence, not successful Gemini provider authentication or creative-generation evidence.
