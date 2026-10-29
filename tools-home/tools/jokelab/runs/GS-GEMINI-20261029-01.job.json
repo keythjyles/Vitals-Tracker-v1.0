@@ -1,0 +1,12 @@
+{
+  "runId": "GS-GEMINI-20261029-01",
+  "authorization": {"currency":"USD","cap":5,"evidence":"Owner: You have a $5 budget, October 29, 2026; this single experiment, collaboration and generation combined. No upgrades or subscriptions."},
+  "assignment": "Independently develop one approximately 10-second Grill Sergeant jokelet derivative. Exact already-approved spoken words: What did the shy pebble wish for? That she was a little BOULDER. Existing approved speech is 5.32898 seconds; approved speaking picture covers frames [0,134) at 25fps. Preserve that speech and speaking performance. Final target is 250 frames: remaining frames [134,250) are silent nonverbal reaction. Reference image supplied is the thumbnail derived from the approved pebble master, not a new approved pose. Portrait 9:16. Current Omni supports reference images and silent video generation but not uploaded audio references or voice editing. Use Omni for a new silent reaction if supported by the actual account. Keep original audio/performance recoverable, ambience and transparent editable captions separate. Do not force a goat, location, or particular expression. No post-punchline speech. This is a planned experiment; no video has yet been generated or reviewed.",
+  "action": {
+    "id":"gemini-independent-proposal-01",
+    "type":"text",
+    "model":"gemini-2.5-flash",
+    "reserveUsd":0.25,
+    "prompt":"Propose your own specific treatment independently. You have not been shown ChatGPT's treatment. Describe one practical silent reaction, its comic mechanism, timing, continuity with the supplied image, a concise generation prompt, caption concept and risks. Identify what the current API cannot guarantee. No provider calls or approvals are delegated to you. Keep response below 700 words."
+  }
+}

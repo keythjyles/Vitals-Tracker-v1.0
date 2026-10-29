@@ -1,3 +1,9 @@
+## Deployment blocked — checkpoint C
+Prepared changes are LOCAL ONLY; auto-review rejected external push pending the owner's explicit authorization for keythjyles/Vitals-Tracker-v1.0 main deployment. See runs/GS-GEMINI-20261029-01.md checkpoint C. Specific run selection was cleared; no paid request occurred. USD5 budget is already authorized. Do not bypass the publication rejection or restart credential onboarding.
+
+## Active October29 experiment — USD5 owner cap
+Continue runs/GS-GEMINI-20261029-01.md checkpoint B and the exact .job.json. Owner authorized USD5 TOTAL. Startup runner uses existing service credentials with a run-specific environment selection, durable Dropbox reservation/CAS and no automatic retry. Broad GEMINI_ENABLED stays false. Read the private Dropbox experiment JSON before changing actions; pending/uncertain requests are not safe to repeat. Portable GS instructions and the independent ChatGPT proposal are saved. Never restart paid voice or the approved pebble master.
+
 ## Current collaboration checkpoint — October 29, 2026
 Read GS_AI_COLLABORATION_20261029.md before further Gemini or jokelet work. The owner approved a 10-second standalone Gemini video experiment using existing ElevenLabs audio, approved GS pose, and a reaction concept. ChatGPT and Gemini should independently propose, critique, agree before execution and hold each other to GS protocols. Gemini Skills, variable comic performance, editable caplets and surgical regeneration are part of the plan. Text bridge deployed, but real AI exchange/video test not yet verified. No new paid generation authorized.
 

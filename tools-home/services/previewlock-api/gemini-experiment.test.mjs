@@ -1,0 +1,32 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {runExperiment} from './gemini-experiment.mjs';
+const env={GEMINI_API_KEY:'test-only',GEMINI_EXPERIMENT_RUN_ID:'GS-GEMINI-20261029-01'};
+function fixture({failure=false,saveFailure=false,doc=null}={}){
+ let stored=doc,revision=doc?'r1':null,n=1,calls=0;
+ const fetcher=async(url,options={})=>{
+  if(url.endsWith('/files/download'))return stored?Response.json(stored,{headers:{'dropbox-api-result':JSON.stringify({rev:revision})}}):new Response('path/not_found',{status:409});
+  if(url.endsWith('/files/create_folder_v2'))return Response.json({});
+  if(url.endsWith('/files/upload')){
+   if(saveFailure)return new Response('',{status:503});
+   const arg=JSON.parse(options.headers['dropbox-api-arg']);
+   if((arg.mode==='add'||arg.mode?.['.tag']==='add')&&stored||arg.mode?.['.tag']==='update'&&arg.mode.update!==revision)return new Response('conflict',{status:409});
+   stored=JSON.parse(options.body);revision='r'+(++n);return Response.json({rev:revision});
+  }
+  if(url.includes('/models?pageSize'))return Response.json({models:[{name:'models/gemini-2.5-flash'},{name:'models/gemini-omni-1.1-flash',outputTokenLimit:65536}]});
+  if(url.endsWith(':generateContent')){
+   calls++;assert.equal(stored.events.at(-1).state,'pending');assert.equal(stored.events.at(-1).reservedUsd,0.25);
+   const body=JSON.parse(options.body);assert.equal(body.generationConfig.thinkingConfig.thinkingBudget,0);assert(!JSON.stringify(body).includes('ChatGPT independent proposal'));
+   if(failure)throw Error('uncertain');
+   return Response.json({responseId:'reply-1',modelVersion:'gemini-2.5-flash',candidates:[{finishReason:'STOP',content:{parts:[{text:'Independent treatment.'}]}}],usageMetadata:{promptTokenCount:1000,candidatesTokenCount:100}});
+  }
+  throw Error('Unexpected URL');
+ };
+ return {fetcher,get calls(){return calls},get doc(){return stored}};
+}
+test('disabled job never accesses storage or provider',async()=>{const f=fixture();assert.equal((await runExperiment('test',{env:{},fetcher:f.fetcher})).state,'disabled');assert.equal(f.calls,0)});
+test('reserves durably before one call, saves usage and independently reads back, restart cannot repeat',async()=>{const f=fixture();assert.equal((await runExperiment('test',{env,fetcher:f.fetcher})).state,'completed');assert.equal(f.doc.events[0].response,'Independent treatment.');assert.equal(f.doc.events[0].actualChargeUsd,null);assert.equal((await runExperiment('test',{env,fetcher:f.fetcher})).state,'already_recorded');assert.equal(f.calls,1)});
+test('uncertain provider call stays reserved and cannot repeat',async()=>{const f=fixture({failure:true});assert.equal((await runExperiment('test',{env,fetcher:f.fetcher})).state,'uncertain');assert.equal((await runExperiment('test',{env,fetcher:f.fetcher})).state,'already_recorded');assert.equal(f.calls,1);assert.equal(f.doc.events[0].reservedUsd,0.25)});
+test('failed pre-call persistence prohibits spend',async()=>{const f=fixture({saveFailure:true});await assert.rejects(runExperiment('test',{env,fetcher:f.fetcher}),/experiment_save_failed/);assert.equal(f.calls,0)});
+test('exhausted budget and unresolved jobs prohibit spend',async()=>{for(const events of [[{id:'other',state:'completed',reservedUsd:5}],[{id:'other',state:'pending',reservedUsd:0.25}]]){const f=fixture({doc:{authorization:{cap:5},events}});await assert.rejects(runExperiment('test',{env,fetcher:f.fetcher}),/budget_exceeded|unresolved_prior_request/);assert.equal(f.calls,0)}});
+test('competing starts admit at most one paid request through Dropbox CAS',async()=>{const f=fixture();await Promise.allSettled([runExperiment('test',{env,fetcher:f.fetcher}),runExperiment('test',{env,fetcher:f.fetcher})]);assert.equal(f.calls,1)});

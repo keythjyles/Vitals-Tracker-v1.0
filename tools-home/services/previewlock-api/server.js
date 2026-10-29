@@ -3,6 +3,7 @@ import http from 'node:http';
 import {geminiConfiguration,geminiHealth,checkGeminiAccess,handleGeminiPreflight} from './gemini-preflight.mjs';
 import {handleJokeLab} from './jokelab-state.mjs';
 import {handleGeminiCollaboration} from './gemini-collaboration.mjs';
+import {runExperiment} from './gemini-experiment.mjs';
 import {handleAudio} from './audio-store.mjs';
 import {randomBytes,createHash,timingSafeEqual} from 'node:crypto';
 const PORT=Number(process.env.PORT||3101);
@@ -164,5 +165,5 @@ const server=http.createServer(async(req,res)=>{
   }catch{return send(res,502,{error:'dropbox_operation_failed'})}
  }
  return send(res,404,{error:'not_found'});
-});server.listen(PORT,'0.0.0.0',()=>{console.log('PreviewLock listening');if(geminiConfiguration().configured)void checkGeminiAccess()});
+});server.listen(PORT,'0.0.0.0',()=>{console.log('PreviewLock listening');if(geminiConfiguration().configured)void checkGeminiAccess();if(process.env.GEMINI_EXPERIMENT_RUN_ID)void token().then(t=>runExperiment(t)).then(result=>console.log('Gemini experiment',JSON.stringify(result))).catch(()=>console.error('Gemini experiment stopped; inspect durable record before retry'))});
 
