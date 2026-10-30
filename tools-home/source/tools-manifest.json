@@ -87,9 +87,9 @@
     {
       "tool": "caplock",
       "tool_id": "GS-TOOL-CAPLOCK",
-      "source_version": "R6",
+      "source_version": "R7",
       "hosted_path": "tools/caplock/index.html",
-      "description": "Finished caption folder import and clipper handoff; numeric component preview; paused Previous/Next; explicit Insert locks timing/position; joke-folder persistence.",
+      "description": "Sticky Load video opens visual joke project picker; restores saved bed, assets and edits; grid/list previews; centered portrait workspace; explicit caption Insert/Previous/Next.",
       "navigation": [
         "tools",
         "aspectlock",

@@ -1,3 +1,7 @@
+## Current project entry — October30, R7
+
+The shared visual project picker and sticky bed selector are implemented in CapLock R7; the complete cross-module studio shell and adapters remain planned. Open project restores its saved bed/edits and exposes recorded assets. Read [R7 evidence](../caplock/PROJECT_ENTRY_R7.json), [procedure and clean-start directive](../studio/PROJECT_PICKER_R7.md) and [recovery](RESUME_JOKELET_ENGINE.md). After owner testing, start from a clean new text-first workspace; test/rejected media stay outside active selection with recoverable lineage. Cleanup is pending; no originals were deleted. Earlier deployment notes below are historical where superseded.
+
 ## Current editing direction — October30, 2026
 
 [Studio direction](../studio/STUDIO_DIRECTION.md) is the governing owner requirement: one joke project, visual list/grid picker with preview, associated assets loaded from bed identity, and state-preserving module tabs/phase navigation. CapLock/AspectLock are specialized compositing modules. Shell and unified picker are not implemented. CapLock R6 placement is deployed and browser-verified; read [current recovery](RESUME_JOKELET_ENGINE.md) and [exact evidence](../caplock/CAPTION_PLACEMENT_R6.json). Historical architecture below remains useful but is not a current inventory or deployment receipt.

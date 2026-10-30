@@ -1,3 +1,11 @@
+## Current entry — CapLock R7
+
+Load video at the sticky top opens your visual joke-project picker. Open project restores its saved bed/CapLock state and makes associated assets available in Assets; use Grid/List, search and inline previews. Other folders and optional device ingress remain available. The clipper still opens the exact project/caption batch directly. [Project-entry instructions](../studio/PROJECT_PICKER_R7.md) and [release evidence](../caplock/PROJECT_ENTRY_R7.json).
+
+After owner testing, start clean from an empty project with saved joke text. Test/rejected material must not clutter active selection; retain recoverable sources and lineage. Cleanup is pending owner testing, not completed by R7. Full cross-module shell/adapters remain unbuilt.
+
+---
+
 # Animated captions and the joke project
 
 Owner-directed working method, October 29, 2026. Dropbox is the working project home; Drive is its backup. This explicitly supersedes the earlier Drive-primary rule **for these joke-project workspaces**. Existing libraries and originals are retained. A caption source is not a new joke performance or a publication.

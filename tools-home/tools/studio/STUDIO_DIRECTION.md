@@ -1,6 +1,6 @@
 # Grill Sergeant Studio — owner direction
 
-October 30, 2026. **Status: governing design recorded; studio shell and unified picker are NOT implemented.** Existing modules continue working. This direction supersedes treating CapLock and AspectLock as disconnected production destinations.
+October 30, 2026. **Status: CapLock R7 implements shared visual project entry/picker; the complete studio shell and cross-module adapters remain unbuilt.** Existing modules continue working. This direction supersedes treating CapLock and AspectLock as disconnected production destinations.
 
 ## Product model
 
@@ -36,3 +36,7 @@ CapLock R6 imports finished caption batches from the saved joke folder, links th
 ## Delivery gates
 
 Before claiming the studio operational, verify project/bed selection recovers the real associated assets; grid/list previews play; each tab resumes the same edit without source duplication; Next element, Insert and Next phase have distinct effects; original and module edits survive close/reopen and cloud recovery; and the existing SxLock/AspectLock picture/audio behavior remains preserved. Test with actual saved jokes and media, retaining explicit phone/authenticated-cloud verification limits.
+
+## R7 project-entry implementation and clean production start
+
+[PROJECT_PICKER_R7.md](PROJECT_PICKER_R7.md) records the implemented sticky bed control, visual project/catalog picker, source-preserving legacy import, project asset selection and viewport centering. This is a shared module used by CapLock, not a finished cross-module shell. After owner testing, start clean from a new saved joke text; remove test/rejected material from active selection while retaining recoverable originals and lineage. Do not populate the new workspace with test overlays or auto-open an old caption batch as the new production. Cleanup remains pending owner testing and verified classification.

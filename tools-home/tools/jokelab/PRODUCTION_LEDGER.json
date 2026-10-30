@@ -1,6 +1,6 @@
 {
   "schema": "JokeLab-ProductionLedger-1",
-  "updated": "2026-10-28",
+  "updated": "2026-10-30",
   "purpose": "Prevent paying to produce the same underlying joke again. This initial operator ledger is not yet enforced by the app.",
   "scope": {
     "libraryRecords": 900,
@@ -531,6 +531,7 @@
         }
       ],
       "projectWorkspace": {
+        "projectEntry": {"release":"R7","codeCommit":"91909fbc545c7c2c0636dac3bb14462593ebe5ee","receipt":"../caplock/PROJECT_ENTRY_R7.json","status":"deployed_browser_verified_owner_testing_pending","ownerPhoneCloud":"unverified","projectManifestAndBackupReceipt":"Existing stored manifest/hash/receipts below are unchanged by frontend release"},
         "schema": "GS-JokeProject-1",
         "dropboxRoot": "/Grill Sergeant/JokeLab Productions/dad-00bda89167b4f15850aa1c91",
         "driveBackupRootId": "1syZBNE74_l5TASkOvWJL_WyftRnr5xSo",

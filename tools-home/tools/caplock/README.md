@@ -1,3 +1,17 @@
+# CapLock R7 — project entry and centered workspace
+
+Load video stays at the top while scrolling and opens the studio project picker, not the phone's photo picker. Search saved joke projects or known existing catalog jokes; use Grid/List and actual media previews. Open project restores its saved bed/edits and makes its recorded assets available through Assets. Other folders browses the existing Dropbox catalog; Import from device remains optional inside the picker. The old silent PreviewLock-library control is replaced.
+
+Saved text-only and bed-only projects also open. Known catalog sources enter a missing joke project only on explicit Open project: literal recorded text first, then existing originals verified against SHA256 and saved using the existing hash-reuse/byte-verification bridge. Missing text is reported, not invented. Browsing creates no projects and uploads no test assets.
+
+Scene sizing uses both available dimensions and preserves9:16, centered and entirely contained. Loading a source resets view pan/zoom; Fit view does the same without changing layer geometry. R6 Insert/Previous/Next semantics and schema4 are retained; SxLock/AspectLock remain unchanged.
+
+[Operating instructions and clean-start direction](../studio/PROJECT_PICKER_R7.md). [Verification receipt](PROJECT_ENTRY_R7.json).34 Node checks plus full branch browser CI41077605656 passed. Physical-phone and owner-authenticated cloud acceptance remain separate.
+
+After owner testing, start a fresh text-first production workspace and keep rejected/test material outside normal active selection with recoverable lineage. Cleanup has not been performed by this release.
+
+---
+
 # CapLock R6 — finished caption placement (October 30, 2026)
 
 This stage imports already-created caption animations and numbered cuts. Source information is removed from the UI; its diagnostic output remains internal. The clock is above the player; the18px seek bar is flush beneath it. The main rail is Import captions, bed/precision/placement controls, Insert, Previous and Next. Transcript tools remain tucked inside the optional built-in-caption panel.

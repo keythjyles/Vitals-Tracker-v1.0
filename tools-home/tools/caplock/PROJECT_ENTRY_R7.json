@@ -1,0 +1,125 @@
+{
+  "schema": "GS-ProjectEntry-1",
+  "date": "2026-10-30",
+  "release": "R7",
+  "status": "deployed_browser_verified_owner_testing_pending",
+  "baseline": "e40520366a38bc76a66ffb5fbd1650b97550eba3",
+  "codeCommit": "91909fbc545c7c2c0636dac3bb14462593ebe5ee",
+  "implemented": [
+    "Sticky top Load video opens project picker immediately; optional device import stays inside picker",
+    "Project-owned grid/list, search, actual media preview and other-folder browse",
+    "Saved manifest bed, assets, CapLock edits and playhead restore; no caption-cuts prerequisite",
+    "Assets exposes saved text, original and clipped caption sources, bed and other recorded assets without auto-inserting",
+    "Known catalog joke first saves its exact recorded text then hash-verifies and preserves existing originals; reopen reuses hashes",
+    "Portrait fits available width and height, centers on both axes, resets viewing offsets on source load/Fit view",
+    "Connection/loading failures remain visible inside the picker"
+  ],
+  "verification": {
+    "nodeChecks": 34,
+    "branchCI": {
+      "run": 41077605656,
+      "job": 124137841977,
+      "conclusion": "success"
+    },
+    "mainCI": {
+      "run": 41077810783,
+      "conclusion": "success"
+    },
+    "pages": {
+      "run": 41077810622,
+      "conclusion": "success"
+    },
+    "browserFixture": {
+      "projectSelection": true,
+      "gridAndList": true,
+      "recordedProjectAssets": true,
+      "legacyOriginalHashImportAndReuse": true,
+      "visibleConnectionError": true,
+      "stickyTopControl": true,
+      "centering": [
+        {
+          "viewport": "390x844",
+          "centerX": 0,
+          "centerY": 0,
+          "contained": true
+        },
+        {
+          "viewport": "360x640",
+          "centerX": 0,
+          "centerY": 0,
+          "contained": true
+        },
+        {
+          "viewport": "720x390",
+          "centerX": 0,
+          "centerY": 0,
+          "contained": true
+        }
+      ],
+      "oldCapLockAndAspectLockAndClipperRegressions": "passed",
+      "note": "Mocked authenticated APIs; disposable isolated contexts. Not real owner-cloud writes."
+    },
+    "live": {
+      "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/caplock/?v=R7",
+      "visibleRelease": "R7",
+      "catalogProjects": 17,
+      "actualCatalogPreview": {
+        "name": "GS_Jokelet_Pebble_Straight_Stare_v01.mp4",
+        "readyState": 4,
+        "paused": true,
+        "error": null
+      },
+      "actualBed": {
+        "name": "GS_Jokelet_Pebble_Straight_Stare_v01.mp4",
+        "source": "Exact preserved Dropbox copy via optional local ingress for this cloud-browser check",
+        "readyState": 4,
+        "paused": true,
+        "error": null,
+        "centerX": 0.0078125,
+        "centerY": 0,
+        "contained": true
+      },
+      "proof": "caplock-r7-centered-project-entry.jpg",
+      "ownerPhoneConnection": "not present in this separate cloud browser; no new setup key requested"
+    },
+    "physicalPhone": "owner testing pending",
+    "authenticatedOwnerCloudSave": "unverified",
+    "previousRun": {
+      "id": 41077257036,
+      "result": "Existing app/AspectLock regressions passed; source-panel check read before async folder load completed. Readiness waits corrected; final full run passed."
+    }
+  },
+  "inventory": {
+    "dropboxProjectFolders": 1,
+    "pebbleWorkspacePresent": true,
+    "oldDecisionRecords": 8,
+    "catalogGroups": 17,
+    "discovery": "Connected Dropbox direct listing exhausted has_more=false; current production ledger/catalog joined by stable identity",
+    "missingLegacyText": "Explicitly blocked from inventing a script; original previews remain",
+    "allUpstreamAssetsReconciled": false
+  },
+  "cleanStart": {
+    "state": "pending_completion_of_owner_testing",
+    "direction": "Empty new working project; save joke text first and grow the structure forward. Keep test drafts and rejected/bad assets outside active selection, recoverable with lineage.",
+    "cleanupPerformed": false,
+    "productionFixtureUploads": 0
+  },
+  "preservation": {
+    "newPaidGeneration": false,
+    "originalMediaMutated": false,
+    "sourceDeletion": false,
+    "sxLockUnchanged": true,
+    "aspectLockUnchanged": true,
+    "postingSchedulesChanged": false,
+    "projectSchema": 4,
+    "driveBackup": "Existing queued executor; older receipts do not verify later edits"
+  },
+  "remaining": [
+    "Full cross-module studio shell and adapters",
+    "Complete historical source reconciliation",
+    "Owner-phone/private-cloud acceptance",
+    "Within-item speed ramps/freeze holds",
+    "Finished CapLock video exporter"
+  ],
+  "rollback": "Restore changed app/picker files from e40520366a38bc76a66ffb5fbd1650b97550eba3; retain all media, manifests and editor history"
+}

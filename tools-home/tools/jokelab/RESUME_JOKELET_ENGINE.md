@@ -1,3 +1,15 @@
+## CURRENT — CapLock R7 project entry; owner testing in progress
+
+Code `91909fbc545c7c2c0636dac3bb14462593ebe5ee` adds the sticky top Load video selector and project-scoped Assets entry. Load video opens a visual searchable grid/list picker immediately, with request failures inside the picker. It reads saved project folders and joins known existing joke videos by canonical ledger/asset identity. Opening a saved joke restores the bed, original/cut captions, other recorded assets and CapLock state; bed-only/text-first projects do not require caption cuts. Opening a known catalog joke without a project saves recorded text and hash-verified original bytes through the existing Dropbox bridge. Unknown legacy text remains an explicit gap, never a substitute script.
+
+The portrait scene now fits inside the actual viewport at9:16 and is centered on both axes; loading media and Fit view reset viewing pan/zoom. SxLock and AspectLock remain unchanged. Read [R7 procedure](../studio/PROJECT_PICKER_R7.md) and [release evidence](../caplock/PROJECT_ENTRY_R7.json). Branch CI41077605656 passed34 Node checks and the full browser suite, including R6 placement/recovery, project assets, grid/list previews, exact legacy-source import/reuse, visible connection failure, sticky selector and centered/contained video at390×844,360×640 and720×390. Phone/private-cloud acceptance remains separate; no owner session key was requested.
+
+**Owner correction after testing:** start clean with an empty working project and build its folder from the saved joke text forward. Test drafts/rejected/bad assets must not clutter the active picker. Classify and move such material to recoverable storage outside the active workspace; preserve originals, paid sources and saved edits with lineage. Cleanup is pending completion of owner testing, not already done. CI uses mocked APIs/disposable contexts and created no production fixture files.
+
+The shared picker/project-entry foundation is implemented in CapLock. The complete studio shell, top-tab adapters and cross-module state continuity remain planned. Full historical asset reconciliation, final CapLock video export and within-item speed/freeze holds remain unfinished. Existing backup receipts are not upgraded by this source release.
+
+---
+
 ## CURRENT — CapLock R6 verified; shared studio direction recorded
 
 Code `67da085ebff863aa0d94a7619e5d8922e150f467` is deployed. Branch CI41061610623 and main CI41062054097 succeeded:29 Node checks, existing media/edit/recovery tests, three AspectLock viewport checks, default joke-folder caption load and actual clipper Finish→CapLock popup handoff against mocked authenticated APIs. Pages41062052822 succeeded. Live R6 was exercised with the preserved Pebble bed and actual1.webm/2.webm/9.webm. Numeric import begins at1; Next/Previous pause and select without insertion; separate Insert commits/locks only the chosen item and does not advance. Original-source panel replaces Source information; clock above and18px seek flush below player. General animation/graphic/audio ingress remains.
