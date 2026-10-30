@@ -22,7 +22,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - run: sudo apt-get update -qq && sudo apt-get install -y ffmpeg
+      - run: command -v ffmpeg || (sudo apt-get update -qq && sudo apt-get install -y ffmpeg)
       - run: npm install --prefix /tmp/clip-browser --no-audit --no-fund playwright@1.62.1
       - run: node /tmp/clip-browser/node_modules/playwright/cli.js install --with-deps chromium
       - run: node --test tools-home/tools/cliplock/tests/core.test.mjs
