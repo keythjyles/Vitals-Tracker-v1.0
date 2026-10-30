@@ -18,7 +18,7 @@ The source/project/title/version drawer disappears after loading. The player/tra
 
 Schema6 separates placed, visible and selected/focused state. R6–R8 automatically locked placements migrate to placed=true/locked=false with exact source references, timing, geometry, bed transform and queue retained. R9 reads1–5; older apps reject6. Preserve6 JSON/history during rollback. Pending layers remain out of normal playback until Insert. Original video/audio/animation bytes are untouched; no renderer, paid provider call, new test upload, cleanup or schedule change is performed.
 
-Operation and evidence: EDITABLE_LAYERS_R9.json.42 local Node checks passed before publication, including old-lock migration, editable placed timing, hide/recovery and the existing geometry/source tests. Browser evidence and deployment are independent; owner-phone/private-cloud acceptance remains separate.
+Operation and evidence: EDITABLE_LAYERS_R9.json.43 local Node checks passed before publication, including old-lock migration, editable placed timing, hide/recovery and the existing geometry/source tests. Browser evidence and deployment are independent; owner-phone/private-cloud acceptance remains separate.
 
 Project scope remains all recorded text/scripts/transcripts, clips/sounds, original/alternate animations/reactions, HeyGen/ElevenLabs outputs and metadata. Individual assets remain savable. Historical upstream reconciliation, full studio adapters, in-item speed/freeze and final export remain unfinished. Performance analytics are a future exact-version/post-linked extension with organic/paid separate. Clean-start cleanup waits for owner testing to finish and must preserve recoverable originals outside active selection.
 
