@@ -1,3 +1,17 @@
+# CapLock R9 — editable layers after Insert
+
+Insert adds a timeline layer and keeps it editable. It does not burn in an animation, flatten the video or automatically lock settings. Old R6–R8 locked placements migrate to editable layers without changing timing, geometry or source. Schema6 reads1–5; preserve6 on rollback.
+
+Tap a placed item's name to edit it. Apply settings stays at the sheet top; Move/Rotate closes the modal for canvas work. Previous/Next select components; placed components return paused to their saved insertion. Done or blank space hides the selection box. The row's Hide/Show controls visibility without deleting the layer. Pending layers stay out of ordinary playback; placed layers follow only their saved timeline/visibility. Selecting a row synchronizes the queue so another pending item cannot linger over it.
+
+After loading, project/title/version controls disappear into the drawer. From a scrolled page, pull to return to top, then pull again to reveal controls; tap grip is the explicit accessible alternative. The outer player remains docked and its viewport stays fixed. Independent bed/overlay sizing remains.
+
+[Operation](EDITABLE_LAYERS_R9.md), [release evidence](EDITABLE_LAYERS_R9.json).43 Node checks and full browser suite passed, including Insert→Next→return→edit→deselect→hide/show→recovery, migration, real touch sizing and existing project/clipper/AspectLock regressions. Main CI41087733684 and Pages41087733216 succeeded. Live Pebble/1.webm/2.webm review confirmed insertion, return, editable X37, Done, Hide/Show and tucked drawer, with paused/ready4/error-null video. Phone/private-cloud acceptance remains separate.
+
+Project-first entry, individual asset saves, original bytes and queued backups remain. Full studio adapters, upstream reconciliation, speed/freeze and final video export remain unfinished. Future performance records are planned, not implemented. Clean-start cleanup waits for owner testing. No paid generation, source deletion or schedule changes.
+
+---
+
 # CapLock R8 — independent focused elements and docked project workspace
 
 Open project opens the joke workspace. Its text, scripts/transcripts, clips, sounds, caption originals/cuts, alternate animations, reactions, HeyGen/ElevenLabs outputs and other recorded assets remain individually selectable/savable inside it. Other-folder/device imports belong inside a current project. The empty player provides Open project; loaded projects tuck identity and controls into a pull-down drawer, while the player/transport/seek/placement dock together.

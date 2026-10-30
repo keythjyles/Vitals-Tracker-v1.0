@@ -87,9 +87,9 @@
     {
       "tool": "caplock",
       "tool_id": "GS-TOOL-CAPLOCK",
-      "source_version": "R8",
+      "source_version": "R9",
       "hosted_path": "tools/caplock/index.html",
-      "description": "Project-first visual workspace; independently pinch/resize bed and overlays; focused controls, docked player and pull-down project drawer; individual asset saves.",
+      "description": "Project-first workspace with editable Insert, independent bed/overlay focus, hidden project drawer, placed-item properties and Hide/Show.",
       "navigation": [
         "tools",
         "aspectlock",

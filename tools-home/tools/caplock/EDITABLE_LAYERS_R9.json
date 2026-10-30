@@ -1,0 +1,98 @@
+{
+  "schema": "GS-EditableLayers-1",
+  "date": "2026-10-30",
+  "release": "R9",
+  "status": "deployed_ci_and_live_local_review_verified_owner_testing_pending",
+  "baseline": "f25cd556616802c8c9718c71ef399643f1e3d6cf",
+  "codeCommit": "34262bb6142c1282975d4d536d5bb99fc26ddf5a",
+  "ownerCorrection": "Insert places editable layers; no automatic lock or flattening. Settings, selection, visibility and timeline placement remain independent. Hide project controls after load; return to top then pull again to reveal.",
+  "implemented": [
+    "Placed flag replaces automatic edit lock; legacy locked placements reopen editable without changing geometry/source",
+    "Done / blank-space deselect without removing layer; row Hide/Show independent of selection",
+    "Placed media follows timeline/visibility instead of lingering as an unconditional staged preview",
+    "Selecting a row synchronizes active component; previous placed component returns paused to saved insertion",
+    "Apply settings stays at top of sheet; Move/Rotate closes modal for direct canvas manipulation",
+    "First pull from a scrolled page returns toward top; fresh pull at top reveals hidden project/title/version controls; explicit tap alternative",
+    "Project schema6 reads1–5 and preserves bed, source, queue, timing, visibility and editing focus; older apps reject6"
+  ],
+  "verification": {
+    "nodeChecks": 43,
+    "syntax": "passed",
+    "staticControls": "passed",
+    "branchCI": {
+      "run": 41087473606,
+      "job": 124172306648,
+      "conclusion": "success"
+    },
+    "browser": {
+      "insertThenNextPreviousAndReedit": true,
+      "placedSettingsEnabled": true,
+      "deselectAndHideShow": true,
+      "restoredPositionsAndSources": true,
+      "realTwoTouchBedHalf": true,
+      "overlayIndependent": true,
+      "projectPickerAssetDownload": true,
+      "twoPullProjectDrawer": true,
+      "stickyThroughSaveExport": true,
+      "caplockAspectlockClipperRegressions": "passed",
+      "errors": []
+    },
+    "pages": {
+      "run": 41087733216,
+      "conclusion": "success"
+    },
+    "live": {
+      "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/caplock/?v=R9",
+      "build": "R9",
+      "media": "Preserved actual Pebble bed plus existing 1.webm and 2.webm, browser-local review only",
+      "insertNextPrevious": "Returned to first placed caption paused with enabled properties",
+      "settings": "Changed X50 to37 after Insert; reopened and confirmed X37",
+      "deselect": "Done cleared selection (selected-layer count0) while placed count remained1",
+      "visibility": "Hide then Show changed visibility without removing placement",
+      "drawer": "Collapsed automatically after bed loaded",
+      "bed": {
+        "paused": true,
+        "readyState": 4,
+        "error": null
+      },
+      "proof": "caplock-r9-editable-layers.jpg",
+      "ownerPrivateCloud": "Not verified in this browser; CI uses authenticated fixtures",
+      "gesture": "Two-pull behavior verified in browser CI, not a physical phone"
+    },
+    "physicalPhone": "owner testing pending",
+    "privateOwnerCloud": "unverified; fixture cloud behavior is separate",
+    "legacyLockMigrationUnit": "passed with exact source/timing/geometry and editable state",
+    "reconnectionSelectionRegression": "Fixed restore-time clip selection mutating the saved active caption and deselected focus; added direct regression and wait for save acknowledgement",
+    "previousMainRun": {
+      "id": 41086533631,
+      "result": "Timed out restoring the saved active component; root cause was selection mutation while reconnecting clips. Fixed before final delivery."
+    },
+    "mainCI": {
+      "run": 41087733684,
+      "conclusion": "success"
+    }
+  },
+  "preservation": {
+    "newPaidGeneration": false,
+    "mediaMutation": false,
+    "sourceDeletion": false,
+    "videoFlattening": false,
+    "productionTestUploads": 0,
+    "sxLockUnchanged": true,
+    "aspectLockUnchanged": true,
+    "schedulesChanged": false,
+    "driveBackup": "existing queued executor; no new verified Drive receipt from UI release"
+  },
+  "future": {
+    "fullStudioAdapters": "not implemented",
+    "performanceMetrics": "planned exact-project/version/post-linked records with organic/paid separate",
+    "historicalUpstreamReconciliation": "incomplete",
+    "inItemSpeedFreeze": "unfinished",
+    "finishedVideoExport": "unfinished"
+  },
+  "cleanStart": {
+    "state": "pending completion of owner testing",
+    "cleanupPerformed": false
+  },
+  "rollback": "Restore app files from f25cd556616802c8c9718c71ef399643f1e3d6cf; preserve schema6 projects, every source and immutable history"
+}

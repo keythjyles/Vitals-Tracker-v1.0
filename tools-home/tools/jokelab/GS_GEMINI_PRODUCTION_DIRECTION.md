@@ -1,3 +1,15 @@
+## Current correction — CapLock R9, October 30
+
+Insert records an editable layer; it never flattens media or automatically locks properties. R6–R8 automatic locks migrate without source, timing or geometry loss. Tap a placed name to edit; Apply settings stays at the sheet top. Move / size or Rotate returns to the canvas. Done or blank space clears selection; Hide/Show changes visibility without deletion. Previous/Next returns to placed items paused at their saved insertion. Schema6 reads1–5; preserve schema6 JSON on rollback.
+
+Project/title/version controls hide after load. From a scrolled page, pull to the top, then pull again to reveal; tapping the grip is an explicit alternative. Independent bed/overlay transforms remain. Full studio adapters, in-item freeze/speed mapping, finished-video export and performance metrics remain unfinished/planned.
+
+Behavior commit `34262bb6142c1282975d4d536d5bb99fc26ddf5a`:43 Node tests and full browser regressions passed (branch41087473606, main41087733684); Pages41087733216 succeeded. Live actual Pebble/1.webm/2.webm review verified insertion, return, X37 applied after insertion, deselection, Hide/Show, tucked drawer and paused ready4/error-null video. Owner-phone and owner-private-cloud acceptance remain separate. See CapLock EDITABLE_LAYERS_R9.json for evidence and the fixed restore-selection regression. No original-media mutation, production test upload, paid generation, SxLock/AspectLock change or schedule change. Clean-start cleanup waits for owner testing.
+
+Historical lock instructions below are superseded by this correction.
+
+---
+
 ## Current project/focus direction — October30, R8
 
 Open project is the normal entry; files reveal within the suite and are individually savable. Include recorded text/scripts/transcripts, source media/clips/sounds, caption originals/cuts, alternate animations/reactions, HeyGen/ElevenLabs outputs and provenance/settings/costs. No paid regeneration to fill a stale catalog. R8 independently transforms focused bed/overlays inside a fixed docked player with tucked pull-down project controls; schema5 preserves state. Full cross-module shell/adapters and historical upstream reconciliation remain planned. Future exact-version/platform-post performance records keep organic and paid separate; analytics are unimplemented. Clean-start cleanup remains pending owner testing. Read [R8 operation](../caplock/FOCUSED_WORKSPACE_R8.md), [evidence](../caplock/FOCUSED_WORKSPACE_R8.json) and [recovery](RESUME_JOKELET_ENGINE.md).

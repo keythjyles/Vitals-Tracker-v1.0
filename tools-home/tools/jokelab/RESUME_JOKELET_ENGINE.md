@@ -1,3 +1,17 @@
+## CURRENT — CapLock R9: Insert stays editable; owner correction supersedes automatic locks
+
+Behavior code `34262bb6142c1282975d4d536d5bb99fc26ddf5a`; branch CI41087473606 passed43 Node checks plus full browser regressions. **Insert records an editable layer, never flattens media or automatically locks settings.** Legacy R6–R8 locks migrate to placed=true/locked=false with source, timing, geometry, bed transform and queue retained. Schema6 reads1–5; preserve6 JSON on rollback.
+
+[Operation](../caplock/EDITABLE_LAYERS_R9.md), [evidence](../caplock/EDITABLE_LAYERS_R9.json). Selection, visibility and placement are independent: Done/blank space hides the box; row Hide/Show controls the layer without deleting it; selecting a row synchronizes the component queue. Pending Next/Previous stay at the paused frame; returning to a placed component seeks paused to its saved insertion for editing. Already-placed layers follow only saved timeline/visibility, rather than remaining staged everywhere. Settings stay enabled; Apply stays at the sheet top; Move/Rotate closes the sheet for canvas work. Original video/audio/animation bytes remain unchanged.
+
+Project/title/version controls tuck after load. First pull when scrolled returns toward the page top; a fresh pull at the top reveals controls. Tap grip is an accessible explicit alternative. Player, transport, seek and placement stay docked through Save/export. R9 retains independent bed/overlay focus and scaling. Browser checks cover the owner's Insert→Next→return→settings→deselect→hide/show→restore sequence, exact source preservation, real two-touch sizing, project asset download and clipper handoff. Pages41087733216 and main CI41087733684 succeeded. Live actual Pebble/1.webm/2.webm review confirmed insertion, return, editable X37, Done, Hide/Show and tucked drawer; the video was paused/ready4/error-null. Owner-phone/private-cloud acceptance remains separate in the receipt.
+
+Open project remains the only normal entry. All recorded text/scripts/transcripts, clips/sounds, alternate animations/reactions, HeyGen/ElevenLabs originals and metadata belong inside it and are individually savable. Complete upstream reconciliation and full cross-module adapters remain unfinished. Performance records are future exact-version/post-linked analytics with organic/paid separate. In-item speed/freeze and final CapLock exporter remain unfinished.
+
+No paid/provider generation, production test upload, source deletion, SxLock/AspectLock mutation, schedule change or timer. Clean-start cleanup waits for owner testing to finish; keep rejected/test material outside active selection with recoverable lineage. Older R6–R8 lock instructions below are historical and superseded.
+
+---
+
 ## CURRENT — CapLock R8 focused workspace / project-first entry
 
 Behavior code `6a5c596c35e47f0ed76b3436f2ae3fc5ed9db0de` is deployed. Branch CI41082582464 and main CI41083008855 succeeded:39 Node checks plus full CapLock/AspectLock/project/clipper regression and real two-touch browser tests. Pages41083007405 succeeded. Read [R8 operation](../caplock/FOCUSED_WORKSPACE_R8.md) and [evidence](../caplock/FOCUSED_WORKSPACE_R8.json). Cache-only final delivery identifiers are8-final /2-project.

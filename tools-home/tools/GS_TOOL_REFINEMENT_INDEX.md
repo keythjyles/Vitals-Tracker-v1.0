@@ -329,3 +329,17 @@ Code `91909fbc545c7c2c0636dac3bb14462593ebe5ee`; branch CI41077605656 and main C
 Behavior `6a5c596c35e47f0ed76b3436f2ae3fc5ed9db0de`; branch CI41082582464 and main CI41083008855 passed39 Node checks and full browser suite. Real CDP two-touch pinch halves only the bed, resize/controls expand overlay beyond the bed, fixed viewport and paused sources remain unchanged, locked placements reject resizing, schema5 JSON persists transforms, pull/tap reveals tucked project controls, dock remains visible through Save/export, and individual asset download bytes match source. Pages41083007405 succeeded. Live actual Pebble/1.webm tested at bed40.96% and overlay140.625%, ready4/error-null/paused; no original bytes changed. Owner-phone/cloud acceptance remains separate. [Operation](caplock/FOCUSED_WORKSPACE_R8.md), [evidence](caplock/FOCUSED_WORKSPACE_R8.json).
 
 Entry is **Open project**, not a bare-file picker. All recorded project assets are revealed within the suite and individually savable: text/scripts/transcripts, clips, sounds, caption sources/cuts, alternates/reactions, HeyGen/ElevenLabs outputs and settings/lineage. Complete historical upstream reconciliation and the cross-module shell/adapters remain unbuilt. Future performance records bind exact versions/platform post IDs/dates/metrics and separate paid/organic; no analytics job implemented. Clean start remains pending owner testing; no cleanup, production test upload, paid generation, SxLock/AspectLock changes or schedule changes. Rollback1823fc8e; retain schema5 and all sources/history/receipts.
+
+
+## Current correction — CapLock R9, October 30
+
+Insert records an editable layer; it never flattens media or automatically locks properties. R6–R8 automatic locks migrate without source, timing or geometry loss. Tap a placed name to edit; Apply settings stays at the sheet top. Move / size or Rotate returns to the canvas. Done or blank space clears selection; Hide/Show changes visibility without deletion. Previous/Next returns to placed items paused at their saved insertion. Schema6 reads1–5; preserve schema6 JSON on rollback.
+
+Project/title/version controls hide after load. From a scrolled page, pull to the top, then pull again to reveal; tapping the grip is an explicit alternative. Independent bed/overlay transforms remain. Full studio adapters, in-item freeze/speed mapping, finished-video export and performance metrics remain unfinished/planned.
+
+Behavior commit `34262bb6142c1282975d4d536d5bb99fc26ddf5a`:43 Node tests and full browser regressions passed (branch41087473606, main41087733684); Pages41087733216 succeeded. Live actual Pebble/1.webm/2.webm review verified insertion, return, X37 applied after insertion, deselection, Hide/Show, tucked drawer and paused ready4/error-null video. Owner-phone and owner-private-cloud acceptance remain separate. See CapLock EDITABLE_LAYERS_R9.json for evidence and the fixed restore-selection regression. No original-media mutation, production test upload, paid generation, SxLock/AspectLock change or schedule change. Clean-start cleanup waits for owner testing.
+
+Historical lock instructions below are superseded by this correction.
+
+---
+
