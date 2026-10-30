@@ -11,7 +11,7 @@ test('matrix seeks use the full rectangle, clamp boundaries, and retain integer 
 });
 test('CapLock item selection pauses and opens the existing item at its insertion frame',()=>{
  const calls=[],els={clipPropertiesTitle:{},viewport:{scrollIntoView:()=>calls.push('scroll')},clipProperties:{open:false,showModal(){this.open=true;calls.push('open');}}};
- const state={selectedClip:'old',editMode:'move',layers:{update:()=>calls.push('update')},pause:()=>calls.push('pause'),renderClips:()=>calls.push('render'),clipCurrent:()=>({name:'9.webm',inFrame:120}),seek:n=>calls.push(['seek',n]),v:{src:'bed.mp4'},$:id=>els[id]};
+ const state={project:{editFocus:'bed'},paintFocus:()=>{},selectedClip:'old',editMode:'move',layers:{update:()=>calls.push('update')},pause:()=>calls.push('pause'),renderClips:()=>calls.push('render'),clipCurrent:()=>({name:'9.webm',inFrame:120}),seek:n=>calls.push(['seek',n]),v:{src:'bed.mp4'},$:id=>els[id]};
  vm.createContext(state);vm.runInContext(declaration(cap,'selectClip')+'\n'+declaration(cap,'openClipProperties'),state);state.openClipProperties('new');
  assert.equal(state.selectedClip,'new');assert.equal(state.editMode,'view');assert.equal(calls[0],'pause');assert.ok(calls.find(x=>Array.isArray(x)&&x[0]==='seek'&&x[1]===120));assert.equal(els.clipProperties.open,true);assert.equal(els.clipPropertiesTitle.textContent,'Edit · 9.webm');
 });
@@ -19,3 +19,4 @@ test('AspectLock returning to a bed frame pauses both media and never initiates 
  let pauses=0,syncs=0;const bv={readyState:4,duration:10,currentTime:7};const state={bv,overlayPreview:true,Q:id=>id==='pause'?{click:()=>pauses++}:{},syncOverlay:()=>syncs++,paintAddedMatrix:()=>{}};
  vm.createContext(state);vm.runInContext(declaration(aspect,'seekBedFrame'),state);state.seekBedFrame(0);assert.equal(pauses,1);assert.equal(bv.currentTime,0);assert.equal(state.overlayPreview,false);assert.equal(syncs,1);state.seekBedFrame(125);assert.equal(bv.currentTime,5);assert.equal(pauses,2);
 });
+

@@ -1,19 +1,19 @@
 import {clipTime} from './clip-time.mjs?v=3';
 /* Independent reusable media-layer preview. Source picture/audio are never rewritten. */
 export class LayerTracks{
- constructor(root,{getClips,getFrame,isPlaying,getStagedId,onSelect,onChange,onStatus,getMode,onDragStart}){Object.assign(this,{root,getClips,getFrame,isPlaying,getStagedId,onSelect,onChange,onStatus,getMode,onDragStart});this.media=new Map();this.selected=null;this.generation=0;}
+ constructor(root,{getClips,getFrame,isPlaying,getStagedId,onSelect,onChange,onStatus,getMode,onDragStart,isFocused}){Object.assign(this,{root,getClips,getFrame,isPlaying,getStagedId,onSelect,onChange,onStatus,getMode,onDragStart,isFocused});this.media=new Map();this.selected=null;this.generation=0;}
  async attach(clip,blob){
   const generation=this.generation,url=URL.createObjectURL(blob),el=document.createElement(clip.type==='image'?'img':clip.type==='audio'?'audio':'video');el.preload='auto';el.playsInline=true;el.muted=clip.type==='video';
   try{await new Promise((ok,no)=>{if(clip.type==='image')el.onload=ok;else el.onloadedmetadata=ok;el.onerror=()=>no(Error('Clip format cannot decode. Use a browser-supported alpha WebM or transparent PNG.'));el.src=url;});}catch(e){URL.revokeObjectURL(url);throw e;}
   if(generation!==this.generation){el.pause?.();URL.revokeObjectURL(url);throw Error('Import cancelled because project changed');}
-  this.detach(clip.id);const wrap=document.createElement('div');wrap.className='media-layer';wrap.dataset.clipId=clip.id;wrap.append(el);wrap.onpointerdown=e=>this.drag(e,clip.id);this.root.append(wrap);this.media.set(clip.id,{el,wrap,url});this.update();return Number.isFinite(el.duration)?el.duration:2;
+  this.detach(clip.id);const wrap=document.createElement('div');wrap.className='media-layer';wrap.dataset.clipId=clip.id;wrap.append(el);if(clip.type!=='audio'){const resize=document.createElement('button');resize.type='button';resize.className='layer-resize';resize.textContent='↘';resize.setAttribute('aria-label','Resize animation '+clip.name);wrap.append(resize);}wrap.onpointerdown=e=>this.drag(e,clip.id);this.root.append(wrap);this.media.set(clip.id,{el,wrap,url});this.update();return Number.isFinite(el.duration)?el.duration:2;
  }
  detach(id){const m=this.media.get(id);if(m){m.el.pause?.();m.el.removeAttribute('src');m.el.load?.();m.wrap.remove();URL.revokeObjectURL(m.url);this.media.delete(id);}}
  clear(){this.generation++;for(const id of this.media.keys())this.detach(id);this.selected=null;}
  update(){
   const frame=this.getFrame(),playing=this.isPlaying(),clips=this.getClips();
   for(const [id,m] of this.media){const c=clips.find(c=>c.id===id);if(!c){m.wrap.hidden=true;m.el.pause?.();continue;}const duration=m.el.duration;const timing=clipTime(c,frame,duration);const shown=c.type==='image'?c.visible&&frame>=c.inFrame&&frame<c.outFrame:timing.shown;
-   const staged=!playing&&id===this.getStagedId?.();m.wrap.hidden=!(shown||staged);m.wrap.classList.toggle('selected-layer',id===this.selected);m.wrap.style.cssText=`left:${c.x}%;top:${c.y}%;width:${c.width}%;opacity:${c.opacity};transform:translate(-50%,-50%) rotate(${c.rotation}deg);z-index:${clips.indexOf(c)+1}`;
+   const staged=!playing&&id===this.getStagedId?.();m.wrap.hidden=!(shown||staged);m.wrap.classList.toggle('selected-layer',id===this.selected&&(this.isFocused?.()??true));m.wrap.classList.toggle('locked-layer',!!c.locked);m.wrap.style.cssText=`left:${c.x}%;top:${c.y}%;width:${c.width}%;opacity:${c.opacity};transform:translate(-50%,-50%) rotate(${c.rotation}deg);z-index:${clips.indexOf(c)+1}`;
    if(c.type!=='image'){
     m.el.volume=c.volume;m.el.muted=c.type==='video'||c.volume===0;const target=timing.target;if(m.el.playbackRate!==timing.rate)m.el.playbackRate=timing.rate;
     if((shown||staged)&&Number.isFinite(target)&&(!playing||Math.abs(m.el.currentTime-target)>.08)){const preview=staged?c.trimInFrame/25:target;if(!m.el.seeking&&Math.abs(m.el.currentTime-preview)>.004)m.el.currentTime=Math.min(preview,Number.isFinite(duration)?Math.max(0,Math.min(duration,timing.end)-.001):preview);}
