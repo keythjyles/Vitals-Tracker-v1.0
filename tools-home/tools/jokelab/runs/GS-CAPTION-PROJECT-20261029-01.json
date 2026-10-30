@@ -415,7 +415,7 @@
     "No finished-video export, variable in-clip speed ramps or freeze holds in this release",
     "Authenticated live cloud round trip pending; this cloud browser lacks owner PreviewLock key"
   ],
-  "status": "release_prepared",
+  "status": "deployed_phone_verification_pending",
   "progress": {
     "completed": [
       "Native Gemini procedure documented",
@@ -423,9 +423,10 @@
       "All17 Drive files downloaded and byte-verified",
       "PreviewLock one-column layout and single app row verified live",
       "Actual bed plus alpha caplet playback verified; bed1x/layer1.375x",
-      "Asset-import preservation refinement passed91 local checks"
+      "Asset-import preservation refinement passed91 local checks",
+      "R4.2 page title verified in live browser; GitHub CI and Pages success; Render deploy live"
     ],
-    "current": "Publish R4.2 and verify deployed page/CI",
+    "current": "R4.2 code deployed and page version verified; finishing pass complete",
     "remainingVerification": "Authenticated cloud save/handoff on owner's phone. This cloud browser has no saved PreviewLock connection."
   },
   "priorDeployments": {
@@ -436,5 +437,21 @@
     "pagesRun": 40981791385,
     "caplockChecksRun": 40981791930,
     "renderDeploy": "dep-dbhuhpivcj2c73f8job0"
+  },
+  "deployment": {
+    "codeCommit": "e3df87045f1e83533831c58984dbbc59a2a476b0",
+    "pagesRun": 40984834870,
+    "pagesConclusion": "success",
+    "caplockChecksRun": 40984836802,
+    "caplockChecksConclusion": "success",
+    "renderDeploy": "dep-dbhuvp2vcj2c73f91o4g",
+    "renderStatus": "live",
+    "renderFinishedAt": "2026-10-30T01:17:30.011779Z",
+    "browser": {
+      "release": "R4.2",
+      "title": "CapLock · GS-TOOL-CAPLOCK · R4.2",
+      "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/caplock/?v=R4.2"
+    },
+    "authenticatedPhoneHandoff": "unverified"
   }
 }

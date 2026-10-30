@@ -542,7 +542,15 @@
         "backupReceipt": "drive-receipt-1793321050309.json",
         "rawDriveFilesVerified": 17,
         "recovery": "runs/GS-CAPTION-PROJECT-20261029-01.json",
-        "captionWorkflow": "ANIMATED_CAPTION_WORKFLOW.md"
+        "captionWorkflow": "ANIMATED_CAPTION_WORKFLOW.md",
+        "deployment": {
+          "codeCommit": "e3df87045f1e83533831c58984dbbc59a2a476b0",
+          "previewLock": "R29",
+          "capLock": "R4.2",
+          "pages": "success",
+          "backend": "live",
+          "phoneHandoff": "unverified"
+        }
       }
     },
     {
