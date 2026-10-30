@@ -105,6 +105,15 @@
       "source_version": "R27",
       "hosted_path": "tools/aspectlock/index.html",
       "description": "Single-animation compositor with compact fixed right controls, placement matrix, added-item row and tap-to-edit property sheet; paused seeking."
+    },
+    {
+      "tool": "cliplock",
+      "tool_id": "GS-TOOL-CLIPLOCK",
+      "source_version": "R1",
+      "hosted_path": "tools/cliplock/index.html",
+      "description": "Quick video cutter: original frame IN/OUT, selection playback, independent clip and lineage recipe save to the existing joke project.",
+      "verification": "Core checks passed; browser and production verification pending.",
+      "operator_guide": "tools/cliplock/README.md"
     }
   ]
 }
