@@ -83,3 +83,7 @@ Add persistent asset IDs, project/layer manifest UI, automatic archive/PreviewLo
 
 ## 11. Handoff instruction for any future assistant or editor
 **Read this runbook and the dated EP4 production notes before editing, generating, loading, compositing, rendering or publishing.** Inspect the latest GitHub editor code and connected Dropbox/PreviewLock assets. Preserve user-approved settings. Never invent an alternate workflow merely because the current one needs debugging. Make every asset and output discoverable, timestamped and reversible.
+
+## AspectLock R26.2 — compact fixed controls, October 29, 2026
+
+Owner rejected oversized right-hand controls and scrolling within the player. R26.2 removes the 44px minimum and the inner scrolling rail. All ten existing playback/frame/start/reset actions remain in the same order in one compact right column, with at most 32px buttons and rows fitted to the player. The player has a 288px minimum in short viewports so controls remain reachable. No media engine, event handler, saved alignment key, source asset or export setting changes; release metadata only changes in script. R26.1 rollback: main `7e961d1df43233f990dabf43481d0337e769c5f4`. Physical phone acceptance is pending; do not infer it from desktop verification. Do not enlarge or make this rail scroll in unrelated tool work.

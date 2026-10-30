@@ -68,7 +68,7 @@
       "source_version": "R14",
       "hosted_path": "tools/sound-scrubber/index.html",
       "description": "Sound acquisition and owner quality control: search, inline Play / Approve / Reject, filename-tap rename, pending/approved/held/culled review states.",
-      "workflow": "Scrubber approval \u2192 instant shared Approved effects \u2192 WavLock Use or SxLock Play/Use/Add. Actual originals already cached for immediate use; verified Dropbox fallback when cache is unavailable. Drive backup remains queued.",
+      "workflow": "Scrubber approval → instant shared Approved effects → WavLock Use or SxLock Play/Use/Add. Actual originals already cached for immediate use; verified Dropbox fallback when cache is unavailable. Drive backup remains queued.",
       "navigation": {
         "sxlock": "tools/sxlock/",
         "wavlock": "tools/wavlock/",
@@ -98,6 +98,13 @@
         "sxlock",
         "previewlock"
       ]
+    },
+    {
+      "tool": "aspectlock",
+      "tool_id": "GS-TOOL-ASPECTLOCK",
+      "source_version": "R26.2",
+      "hosted_path": "tools/aspectlock/index.html",
+      "description": "Existing animation compositor with compact fixed right-hand precision controls; original placement, audio and export behavior preserved."
     }
   ]
 }
