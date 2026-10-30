@@ -1,4 +1,6 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {frameAt,selection,clipName,cloudResult} from '../core.mjs';
+import test from 'node:test';import assert from 'node:assert/strict';import {frameAt,selection,clipName,cloudResult,constantFrameRate} from '../core.mjs';
 test('Variable frame timing remains exact; OUT is exclusive',()=>{const t=[0,.04,.09,.12];assert.equal(frameAt(t,.089),1);assert.equal(frameAt(t,.09),2);assert.deepEqual(selection(t,.17,1,3),{inFrame:1,outFrame:3,start:.04,end:.12,frames:2});assert.equal(selection(t,.17,1,4).end,.17);assert.throws(()=>selection(t,.17,3,3));assert.throws(()=>selection(t,.17,0,5));assert.throws(()=>selection(t,.17,.5,3));});
 test('Cloud success requires exact original bytes and receipt',()=>{const r={persisted:true,asset:{sha256:'abc',size:9,path:'/saved'}};assert.equal(cloudResult(r,'abc',9).path,'/saved');assert.throws(()=>cloudResult(r,'wrong',9));assert.throws(()=>cloudResult(r,'abc',8));assert.throws(()=>cloudResult({asset:r.asset},'abc',9));});
 test('Cut filenames cannot traverse or overwrite a source path',()=>{assert.equal(clipName('../../clip:one.mp4','webm'),'_.._clip_one.webm');assert.equal(clipName('','mp4'),'Clip.mp4');});
+
+test('CFR metadata is declared only for genuinely constant source timing',()=>{assert.equal(constantFrameRate([0,.04,.08],.12),25);assert.equal(constantFrameRate([.52,.56,.60],.64),25);assert.equal(constantFrameRate([0,.04,.09],.13),null);});
