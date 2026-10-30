@@ -25,3 +25,10 @@ h1{font-size:20px;margin:4px 0}#viewerPage{padding:0;border:0;background:none}#s
 #clipProperties{position:fixed;inset:auto 0 0;margin:0 auto;width:min(100%,760px);max-width:100%;max-height:58dvh;overflow:auto;border:1px solid #718da6;border-radius:12px 12px 0 0;padding:10px;background:#182635;color:#edf3fa}
 #clipProperties::backdrop{background:#0003}#clipProperties .actions{justify-content:flex-end}#clipProperties .actions button{min-height:34px}#clipProperties label{font-size:12px}
 #clipSelect{display:none}#clipProperties label:has(#clipSelect){display:none}#clipProperties #clipName{font-size:16px}
+
+
+/* R6 caption placement: clock above picture; scrubber flush below it. */
+#viewerPage>.readout{margin:0;padding:0 0 2px;min-height:20px;font-size:13px}#seek{display:block;min-height:0!important;height:18px;padding:0;margin:0;line-height:1;touch-action:pan-y}
+#placementBar{display:flex;align-items:center;justify-content:flex-end;gap:4px;margin:2px 0;padding:2px 0}#placementBar button{min-height:30px;padding:3px 6px;font-size:12px}#editActiveCaption{margin-right:auto;text-align:left;min-width:0;overflow-wrap:anywhere}#placementState{font-size:11px;color:#ffda8a}
+.rail #insertCaption{background:#efcd87;color:#122131;font-weight:700}#captionImport{position:fixed;inset:auto 0 0;margin:0 auto;width:min(100%,760px);max-width:100%;max-height:70dvh;overflow:auto;background:#182635;color:#edf3fa;border:1px solid #718da6;border-radius:12px 12px 0 0;padding:10px}#captionImport::backdrop{background:#0004}#captionImport label{margin-top:7px}#captionImportStatus{font-size:13px;overflow-wrap:anywhere}#captionComponents{font-size:12px;color:#bad0df;max-height:100px;overflow:auto}#captionSourcePreview{display:block;width:100%;max-height:200px;background:#000}
+#captionFolder{overflow-wrap:anywhere;font-size:11px}#clipTimeline .locked-placement{border-left:3px solid #efcd87}#layerEditor>.actions:has(#overlayFile){display:none}#clipProperties .actions:has(#sheetInsertCaption){gap:3px}

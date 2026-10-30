@@ -1,3 +1,17 @@
+# CapLock R6 — finished caption placement (October 30, 2026)
+
+This stage imports already-created caption animations and numbered cuts. Source information is removed from the UI; its diagnostic output remains internal. The clock is above the player; the18px seek bar is flush beneath it. The main rail is Import captions, bed/precision/placement controls, Insert, Previous and Next. Transcript tools remain tucked inside the optional built-in-caption panel.
+
+**Latest owner correction controls:** Previous and Next pause the bed and change only the current component. They never insert, lock or advance the bed. **Insert** is a separate action: it commits the current component's timing/position and locks that placement without selecting another. Unlock placement is explicit. Numeric ordering is1,2,10, rather than lexical1,10,2. The first unplaced/lowest component is previewed above the bed while paused; playback shows only inserted timeline items. Paused preview does not create a timeline insertion.
+
+Import captions defaults to the remembered joke project under Dropbox /Grill Sergeant/JokeLab Productions and its caption-asset folder; first use falls back to the existing canonical Pebble project. Choose a finished caption batch, view its original animation and components, or use the connected PreviewLock clipper's Finish clips→CapLock handoff. The saved bed, original source reference and numbered cuts load together. No prompt transfer or caption generation occurs here. Local numbered files/folders are optional ingress. A browser cannot silently choose a device folder; the default is the existing authenticated cloud project folder.
+
+Project version4 preserves caption sequence, active number, source/cut identity, paused playhead and locks. R6 reads v1–v3 without changing old placements. Older R5 rejects v4 rather than silently discarding locks. Inserted geometry/timing cannot change without Unlock; originals remain untouched. Existing Dropbox snapshots/CAS and separately queued Drive backups remain in use. Navigation and locally imported files clearly distinguish browser drafts from cloud saves. Switching jokes flushes prior writes before changing the folder context. Interrupted restores do not save transient frames into the previous project.
+
+Validation:28 Node checks pass (numeric sequencing, Next/Previous without insertion, explicit idempotent Insert, geometry locks, no-autoplay preview, JSON recovery and existing speed/source-save regressions). Script syntax/static controls pass. Full browser/default-folder/handoff checks and live/phone evidence are recorded independently in CAPTION_PLACEMENT_R6.json. No finished-video exporter, within-item freeze/speed ramps or new paid generation. Rollback baseline: `6052c78778c78e931b7ed3d54eb1530f7f508c18`; retain v4 projects and media.
+
+---
+
 # CapLock R5 — multi-item compositor (October 29, 2026)
 
 The owner corrected the interaction model: CapLock is AspectLock with multiple added items, using SxLock's placement matrix, compact insertion list and tap-to-edit properties. The player now opens first. Transcript, phrase directions and Gemini preparation remain available through Transcript; they are no longer the compulsory opening workflow. This supersedes the historical R2 transcript-first entry instruction below.

@@ -87,9 +87,9 @@
     {
       "tool": "caplock",
       "tool_id": "GS-TOOL-CAPLOCK",
-      "source_version": "R5",
+      "source_version": "R6",
       "hosted_path": "tools/caplock/index.html",
-      "description": "Multi-item compositor: player first, placement matrix, compact insertion rows, property sheets and paused bed/item-start seeking; existing joke-folder persistence.",
+      "description": "Finished caption folder import and clipper handoff; numeric component preview; paused Previous/Next; explicit Insert locks timing/position; joke-folder persistence.",
       "navigation": [
         "tools",
         "aspectlock",

@@ -2,7 +2,7 @@ export const FPS=25;
 export const DEFAULT_STYLE={font:'Arial',weight:700,size:52,color:'#ffffff',outline:4,shadow:6,background:'#000000',backgroundOpacity:0,align:'center',x:50,y:78,width:86,lineHeight:1.15,animation:'none',emphasis:false};
 export const uid=()=>globalThis.crypto.randomUUID();
 export const phrase=(text,frames={})=>({id:uid(),text,inFrame:null,outFrame:null,visible:true,layer:'caplock.caption',styleRef:'global',overrides:{},...frames});
-export const createProject=()=>({schema:'GS-CapLock-1',version:3,fps:FPS,media:null,clips:[],protocol:{text:'',approved:false},nativeCaptions:false,globalStyle:{...DEFAULT_STYLE},presets:{},captions:[]});
+export const createProject=()=>({schema:'GS-CapLock-1',version:4,fps:FPS,media:null,clips:[],protocol:{text:'',approved:false},nativeCaptions:false,globalStyle:{...DEFAULT_STYLE},presets:{},captions:[]});
 export const timed=c=>Number.isInteger(c.inFrame)&&Number.isInteger(c.outFrame)&&c.inFrame>=0&&c.outFrame>c.inFrame;
 export const effective=(p,c)=>({...p.globalStyle,...c.overrides});
 export function segment(text){
@@ -33,10 +33,11 @@ export function subtitle(p,type){
  return (type==='vtt'?'WEBVTT\n\n':'')+visible.slice().sort((a,b)=>a.inFrame-b.inFrame).map((c,i)=>(type==='srt'?(i+1)+'\n':'')+stamp(c.inFrame)+' --> '+stamp(c.outFrame)+'\n'+c.text+'\n').join('\n');
 }
 export function validateProject(raw){
- if(raw?.schema!=='GS-CapLock-1'||![1,2,3].includes(raw.version)||raw.fps!==FPS||!Array.isArray(raw.captions)||raw.captions.length>10000)throw Error('Unsupported CapLock project.');
+ if(raw?.schema!=='GS-CapLock-1'||![1,2,3,4].includes(raw.version)||raw.fps!==FPS||!Array.isArray(raw.captions)||raw.captions.length>10000)throw Error('Unsupported CapLock project.');
  const p=createProject();p.globalStyle=validateStyle(raw.globalStyle);p.media=raw.media?{kind:String(raw.media.kind),name:String(raw.media.name||''),path:String(raw.media.path||''),size:Number(raw.media.size)||0,lastModified:Number(raw.media.lastModified)||0}:null;
  p.protocol={text:String(raw.protocol?.text||''),approved:raw.protocol?.approved===true};p.nativeCaptions=raw.nativeCaptions===true;p.clips=(raw.clips||[]).map(validateClip);if(new Set(p.clips.map(c=>c.id)).size!==p.clips.length)throw Error('Duplicate clip IDs');
  if(raw.workspace){const w=raw.workspace;if(!/^[a-z0-9][a-z0-9-]{5,99}$/.test(w.id||''))throw Error('Invalid project workspace');p.workspace={id:w.id,assetId:String(w.assetId||''),playhead:Math.max(0,Number(w.playhead)||0),selectedClip:String(w.selectedClip||'')};}
+ if(raw.captionSequence){const s=raw.captionSequence,ids=s.clipIds;if(!Array.isArray(ids)||!ids.length||ids.length>1000||new Set(ids).size!==ids.length||ids.some(id=>!p.clips.some(c=>c.id===id))||!ids.includes(s.activeId))throw Error('Invalid caption sequence');p.captionSequence={clipIds:[...ids],activeId:s.activeId,preparedIds:(s.preparedIds||[]).filter(id=>ids.includes(id)),playhead:Math.max(0,Math.round(Number(s.playhead)||0)),folder:String(s.folder||''),source:s.source?{id:String(s.source.id||''),cutId:String(s.source.cutId||''),name:String(s.source.name||''),path:String(s.source.path||''),kind:s.source.kind==='local'?'local':'previewlock'}:null};}
  const ids=new Set();p.captions=raw.captions.map(c=>{if(typeof c.id!=='string'||ids.has(c.id)||typeof c.text!=='string'||c.text.length>10000)throw Error('Invalid caption identity or text.');ids.add(c.id);if((c.inFrame!==null&&(!Number.isInteger(c.inFrame)||c.inFrame<0))||(c.outFrame!==null&&(!Number.isInteger(c.outFrame)||c.outFrame<0))||(c.inFrame!==null&&c.outFrame!==null&&c.outFrame<=c.inFrame))throw Error('Invalid caption boundaries.');return phrase(c.text,{id:c.id,inFrame:c.inFrame,outFrame:c.outFrame,visible:c.visible!==false,overrides:validateStyle(c.overrides,true),direction:String(c.direction||''),useProtocol:c.useProtocol!==false,timingReview:!!c.timingReview,words:Array.isArray(c.words)?c.words.map(w=>({id:String(w.id),text:String(w.text),effect:String(w.effect||'')})):undefined,...(c.originalTiming?{originalTiming:c.originalTiming}:{})});});
  for(const [name,style] of Object.entries(raw.presets||{}))if(!['__proto__','constructor','prototype'].includes(name))p.presets[name]=validateStyle(style);
  return p;
@@ -61,6 +62,8 @@ export function validateClip(c){
  if(c.outFrame<=c.inFrame)throw Error('Clip OUT must follow IN');
  if(c.trimOutFrame!=null&&(!Number.isInteger(c.trimOutFrame)||c.trimOutFrame<=c.trimInFrame))throw Error('Source OUT must follow source IN');
  if(c.playbackRate!=null&&(!Number.isFinite(c.playbackRate)||c.playbackRate<.1||c.playbackRate>8))throw Error('Animation speed must be0.1x to8x');
+ if(c.captionNumber!=null&&(!Number.isInteger(c.captionNumber)||c.captionNumber<1))throw Error('Invalid caption number');
  for(const [k,min,max] of [['x',-100,200],['y',-100,200],['width',5,200],['rotation',-180,180],['opacity',0,1],['volume',0,1]])if(!Number.isFinite(c[k])||c[k]<min||c[k]>max)throw Error('Invalid clip '+k);
- return {id:c.id,name:String(c.name||c.ref.name||'Clip'),phraseId:String(c.phraseId||''),type:c.type,ref:{kind:c.ref.kind,name:String(c.ref.name||''),path:String(c.ref.path||''),size:Number(c.ref.size)||0},inFrame:c.inFrame,outFrame:c.outFrame,trimInFrame:c.trimInFrame,trimOutFrame:c.trimOutFrame??null,playbackRate:c.playbackRate??1,x:c.x,y:c.y,width:c.width,rotation:c.rotation,opacity:c.opacity,volume:c.volume,visible:c.visible!==false,loop:!!c.loop};
+ return {id:c.id,name:String(c.name||c.ref.name||'Clip'),phraseId:String(c.phraseId||''),type:c.type,ref:{kind:c.ref.kind,name:String(c.ref.name||''),path:String(c.ref.path||''),size:Number(c.ref.size)||0},inFrame:c.inFrame,outFrame:c.outFrame,trimInFrame:c.trimInFrame,trimOutFrame:c.trimOutFrame??null,playbackRate:c.playbackRate??1,x:c.x,y:c.y,width:c.width,rotation:c.rotation,opacity:c.opacity,volume:c.volume,visible:c.visible!==false,loop:!!c.loop,locked:!!c.locked,...(c.captionNumber?{captionNumber:c.captionNumber}:{})};
 }
+

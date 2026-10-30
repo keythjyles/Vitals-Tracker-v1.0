@@ -1,0 +1,33 @@
+{
+  "schema": "GS-CaptionPlacement-1",
+  "date": "2026-10-30",
+  "baseline": "6052c78778c78e931b7ed3d54eb1530f7f508c18",
+  "status": "implemented_verification_pending",
+  "release": "R6",
+  "ownerCorrection": "Next pauses the player and chooses the next numbered caption. User separately decides Insert, advance or reverse. No auto-insert or bed advance.",
+  "implemented": [
+    "Source information panel removed",
+    "Clock above and18px seek bar directly below player",
+    "Default existing joke caption folder; original source and numbered components",
+    "Clipper Finish launches R6 for exact project/caption asset",
+    "Lowest pending numeric component preview",
+    "Separate Insert/Previous/Next; locked geometry and timing",
+    "Project v4 queue/lock/source recovery; legacy migration"
+  ],
+  "verification": {
+    "nodeChecks": 28,
+    "syntax": "passed",
+    "staticControls": "passed",
+    "browser": "pending",
+    "deployment": "pending",
+    "physicalPhone": "unverified",
+    "authenticatedCloud": "unverified"
+  },
+  "preservation": {
+    "noPaidGeneration": true,
+    "noOriginalMediaChanged": true,
+    "sxLockUnchanged": true,
+    "aspectLockUnchanged": true,
+    "driveBackup": "existing queued executor"
+  }
+}
