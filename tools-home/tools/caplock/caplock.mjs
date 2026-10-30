@@ -75,7 +75,7 @@ const points=new Map();let gesture=null;
 function transform(){$('scene').style.transform=`translate(${pan.x}px,${pan.y}px) scale(${zoom})`;}
 $('fit').onclick=()=>{zoom=1;pan={x:0,y:0};transform();};
 function resetGesture(){const a=[...points.values()];gesture=a.length?{a,zoom,pan:{...pan}}:null;}
-$('viewport').onpointerdown=e=>{if(editMode==='move'&&e.target.closest('.media-layer'))return;e.currentTarget.setPointerCapture(e.pointerId);points.set(e.pointerId,{x:e.clientX,y:e.clientY});resetGesture();};
+$('viewport').onpointerdown=e=>{if(e.target.closest('button,input,label,a,select,textarea,#bedLoader'))return;if(editMode==='move'&&e.target.closest('.media-layer'))return;e.currentTarget.setPointerCapture(e.pointerId);points.set(e.pointerId,{x:e.clientX,y:e.clientY});resetGesture();};
 $('viewport').onpointermove=e=>{if(!points.has(e.pointerId)||!gesture)return;points.set(e.pointerId,{x:e.clientX,y:e.clientY});const a=[...points.values()];if(a.length===1&&gesture.a.length===1){pan.x=gesture.pan.x+a[0].x-gesture.a[0].x;pan.y=gesture.pan.y+a[0].y-gesture.a[0].y;}else if(a.length>=2&&gesture.a.length>=2){const distance=p=>Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);zoom=Math.max(1,Math.min(4,gesture.zoom*distance(a)/Math.max(1,distance(gesture.a))));}transform();};
 for(const event of ['pointerup','pointercancel','lostpointercapture'])$('viewport').addEventListener(event,e=>{points.delete(e.pointerId);resetGesture();});
 const layers=new LayerTracks($('layerRoot'),{getClips:()=>project.clips,getFrame:()=>frame,isPlaying:()=>!v.paused,getMode:()=>editMode,onSelect:id=>selectClip(id),onStatus:say,onDragStart:()=>{dragBefore=JSON.stringify(project);},onChange:()=>{if(dragBefore){undo.push(dragBefore);redo=[];dragBefore=null;saveDraft();render();}}});
