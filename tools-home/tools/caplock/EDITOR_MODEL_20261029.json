@@ -2,7 +2,7 @@
   "schema": "GS-EditorModel-1",
   "date": "2026-10-29",
   "baseline": "c24ee364317594ce2da2514494d478024b63123e",
-  "status": "implemented_verification_pending",
+  "status": "deployed_browser_verified_phone_pending",
   "ownerDirection": "Study SxLock matrix, compact added-item list and tap-to-edit controls. AspectLock is one overlay; CapLock multiple. Easy seek-to-front; no autoplay.",
   "versions": {
     "capLock": "R5",
@@ -23,15 +23,109 @@
     "localNodeChecks": 22,
     "syntax": "passed",
     "staticControlIDs": "passed",
-    "githubCI": "pending",
-    "liveUI": "pending",
+    "githubCI": {
+      "branchRun": 41003659943,
+      "conclusion": "success",
+      "mainRun": 41003781786,
+      "mainConclusion": "success"
+    },
+    "liveUI": {
+      "capLock": {
+        "release": "R5",
+        "actualBed": "GS_Jokelet_Pebble_Straight_Stare_v01.mp4",
+        "actualItems": [
+          "9.webm",
+          "5.webm"
+        ],
+        "placements": [
+          [
+            120,
+            182
+          ],
+          [
+            60,
+            88
+          ]
+        ],
+        "reviewFrame": 126,
+        "bedTime": 5.04,
+        "allMediaPaused": true,
+        "allMediaReadyState": 4,
+        "mediaErrors": null,
+        "railHeight": 431,
+        "railScrollHeight": 431,
+        "propertySheetOpened": true
+      },
+      "aspectLock": {
+        "release": "R27",
+        "addedListPresent": true,
+        "propertySheetPresent": true,
+        "railButtons": 10,
+        "railHeight": 347,
+        "railScrollHeight": 347,
+        "authenticatedMediaInCloudBrowser": "not connected"
+      }
+    },
     "physicalPhone": "unverified",
-    "authenticatedCloudRoundTrip": "unverified"
+    "authenticatedCloudRoundTrip": "unverified",
+    "pages": {
+      "run": 41003781711,
+      "conclusion": "success"
+    },
+    "fixtureBrowser": {
+      "capLock": {
+        "compositorFirst": true,
+        "multipleItems": true,
+        "properties": true,
+        "pausedStartAndSeek": true,
+        "undoRedo": true,
+        "localRecovery": true,
+        "rotation": true,
+        "alpha": {
+          "corner": 0,
+          "center": 255
+        },
+        "pageErrors": []
+      },
+      "aspectLock": {
+        "viewportChecks": [
+          [
+            390,
+            844
+          ],
+          [
+            360,
+            640
+          ],
+          [
+            720,
+            390
+          ]
+        ],
+        "addedRow": true,
+        "propertiesSheet": true,
+        "pausedNavigation": true,
+        "pageErrors": [],
+        "seek": {
+          "frame": 10,
+          "time": 0.4,
+          "readyState": 4,
+          "seeking": false
+        }
+      }
+    },
+    "repairedBeforeRelease": [
+      "Same-file bed chooser selection now triggers reimport after project recovery.",
+      "Media loading waits for a decoded frame.",
+      "CI media fixture serves byte ranges; earlier non-range responses could not complete a seek."
+    ]
   },
   "limits": [
     "No finished CapLock video export",
     "No within-item freeze/speed ramps",
     "AspectLock remains a single-overlay pass"
   ],
-  "rollback": "Restore changed editor/shared files from baseline; retain current projects and media."
+  "rollback": "Restore changed editor/shared files from baseline; retain current projects and media.",
+  "codeCommit": "f9ce6b4323af26874c82fcb00198559ea693f591",
+  "documentation": "Historical transcript-first and prior pending-deployment notes are superseded by this receipt and the current recovery heading."
 }

@@ -1,3 +1,11 @@
+## CURRENT — CapLock R5 / AspectLock R27: SxLock editing model
+
+Owner correction: CapLock is AspectLock with multiple added items. Both now use a placement matrix, compact added-item rows directly below the player and tap-to-edit property sheets. CapLock opens the player first; Transcript preserves the earlier text/Gemini tools. Start and item-start navigation, scrubbing, selection and imports pause playback. Do not restore compulsory transcript-first entry or oversized scrolling button rails.
+
+Code `f9ce6b4323af26874c82fcb00198559ea693f591` is deployed: Pages `41003781711` succeeded. CI `41003659943` passed 22 Node checks plus real video/alpha browser exercises, multi-item editing, undo/recovery and three AspectLock viewport sizes. Live CapLock verified with the actual Pebble bed and saved9.webm/5.webm, two rows, editable properties and F126 paused with all media readyState4/error-null. Live AspectLock R27 confirms list/sheet/fixed ten-button rail; this cloud browser lacks its private media connection. Physical-phone and authenticated cloud save/reopen remain unverified. Read [full verification receipt](../caplock/EDITOR_MODEL_20261029.json). Rollback source: `c24ee364317594ce2da2514494d478024b63123e`; retain media and projects.
+
+Existing Pebble Dropbox/Drive receipts and original animation/approved bed remain unchanged. No paid generation, source-media mutation, scheduled-post change or timer. CapLock final-video export and in-item speed ramps/freeze holds remain unfinished. Older checkpoints below remain historical.
+
 ## CURRENT PROGRESS — Caption project finishing pass
 
 Status: **R4.2 deployed; authenticated phone handoff remains unverified**. Code commit `e3df87045f1e83533831c58984dbbc59a2a476b0`: GitHub checks `40984836802` and Pages `40984834870` both succeeded; Render `dep-dbhuvp2vcj2c73f91o4g` is live (finished 2026-10-30T01:17:30Z). Live browser title confirms CapLock R4.2. Asset-save refinement passes 91 local checks. This completes the bounded finishing pass; it does not establish full phone acceptance.
