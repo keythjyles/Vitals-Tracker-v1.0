@@ -1,3 +1,9 @@
+## Current interaction — AspectLock R27 (October 29, 2026)
+
+Owner requests the SxLock interaction pattern. One added animation now has a placement matrix and compact named row directly below the player; tap it to open the existing placement, keying, audio and trim controls in a property sheet. ↤ beside the row seeks to its insertion paused. Bed ↤0 returns to frame0 paused. Scrubbing, selection and new source loading pause both videos. Source-preview and main Play buttons remain explicit playback actions. The previous R26.2 compact ten-button right rail remains fixed and unscrolling. No compositing/chroma/export formula or saved alignment key changes. CapLock R5 extends this same model to multiple independent items. SxLock itself stays unchanged.
+
+Validation source/rollback: main `c24ee364317594ce2da2514494d478024b63123e`. Local navigation tests and syntax pass; deployed/browser/phone results are separate in ../caplock/EDITOR_MODEL_20261029.json. Existing animation pass and asset-preservation rules below still apply.
+
 # ANIMATION LAB — Operating Runbook
 **Established:** 2026-10-25, America/Chicago (CDT). **Revision:** 1.0. **Owner:** Grill Sergeant production. **Search terms:** Animation Lab, AspectLock, PreviewLock, Gemini, overlay, green screen, blue screen, checkerboard, chroma key, flatten, stage, Dad Joke Duty, EP4, Timmy, scissors.
 

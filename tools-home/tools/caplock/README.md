@@ -1,3 +1,15 @@
+# CapLock R5 — multi-item compositor (October 29, 2026)
+
+The owner corrected the interaction model: CapLock is AspectLock with multiple added items, using SxLock's placement matrix, compact insertion list and tap-to-edit properties. The player now opens first. Transcript, phrase directions and Gemini preparation remain available through Transcript; they are no longer the compulsory opening workflow. This supersedes the historical R2 transcript-first entry instruction below.
+
+Added clips appear directly below the player as compact rows. Tap the name for its property sheet: name, IN/OUT, source trim, independent speed, position/size, rotation, opacity, audio volume, looping and order. Row ↤ seeks to that item's insertion and stays paused. The rail provides Start (bed frame0), Item (selected insertion), Play, ±1 frame and existing placement/import tools. Matrix clicks and Home/arrow keys seek paused. Importing, selecting and changing media also pause; only an explicit Play starts playback. Move and Rotate retain their existing independent modes. Close the sheet to position directly on the video.
+
+Source references and geometry remain in the existing version3 project, undo/redo and Dropbox save path; no new schema, library or paid generation. CapLock still has no finished-video exporter, within-item speed ramps or freeze holds. Physical phone and authenticated cloud save/reopen remain separate acceptance checks. Shared matrix: ../../shared/item-matrix.mjs. SxLock is a read-only behavioral reference and its bytes are untouched.
+
+Pre-publication:22 Node checks pass, script syntax and all static control IDs pass. The expanded existing CI browser suite covers multi-item import, property sheets, paused seeking, prior word/style/rotation/undo/recovery, plus AspectLock with actual fixture video/alpha at three viewport sizes. CI/live results are recorded independently in EDITOR_MODEL_20261029.json and the master index. Rollback main: `c24ee364317594ce2da2514494d478024b63123e`; preserve media and saved projects.
+
+---
+
 R4.2 finishing pass: new locally imported overlays/audio and external library layers are copied into this joke project before the edit can reference them. Writes are serialized; failures remain visible. This preserves reconnectable sources, rather than saving only local filenames.
 
 # R4.2 — joke-folder clip tray and durable workspace

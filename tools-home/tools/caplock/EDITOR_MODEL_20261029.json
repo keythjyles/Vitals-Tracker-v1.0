@@ -1,0 +1,37 @@
+{
+  "schema": "GS-EditorModel-1",
+  "date": "2026-10-29",
+  "baseline": "c24ee364317594ce2da2514494d478024b63123e",
+  "status": "implemented_verification_pending",
+  "ownerDirection": "Study SxLock matrix, compact added-item list and tap-to-edit controls. AspectLock is one overlay; CapLock multiple. Easy seek-to-front; no autoplay.",
+  "versions": {
+    "capLock": "R5",
+    "aspectLock": "R27"
+  },
+  "implementation": {
+    "playerFirst": true,
+    "addedItemRows": true,
+    "matrix": true,
+    "propertySheets": true,
+    "seekBedStartPaused": true,
+    "seekItemStartPaused": true,
+    "pauseOnScrubAndImport": true,
+    "sxLockUnchanged": true,
+    "existingProjectsAndSourcesPreserved": true
+  },
+  "verification": {
+    "localNodeChecks": 22,
+    "syntax": "passed",
+    "staticControlIDs": "passed",
+    "githubCI": "pending",
+    "liveUI": "pending",
+    "physicalPhone": "unverified",
+    "authenticatedCloudRoundTrip": "unverified"
+  },
+  "limits": [
+    "No finished CapLock video export",
+    "No within-item freeze/speed ramps",
+    "AspectLock remains a single-overlay pass"
+  ],
+  "rollback": "Restore changed editor/shared files from baseline; retain current projects and media."
+}

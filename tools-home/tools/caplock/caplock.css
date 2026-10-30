@@ -8,3 +8,20 @@ h1{font-size:20px;margin:4px 0}#viewerPage{padding:0;border:0;background:none}#s
 #layerRoot{z-index:10;isolation:isolate}
 
 #scene{overflow:hidden}
+
+
+/* R5: compositor first; SxLock-style matrix, compact insertions, properties sheet. */
+.workspace{--player-height:max(46dvh,366px);grid-template-columns:minmax(0,1fr) 86px;align-items:start}
+.workspace #viewport{height:var(--player-height);min-height:0;max-height:none}
+.rail{height:min(var(--player-height),439px);display:grid;grid-template-rows:repeat(12,minmax(0,1fr));gap:3px}
+.rail button{min-height:0;height:100%;font-size:11px;padding:2px 3px}
+#layerEditor{margin:4px 0;padding:5px}#clipTimeline{display:grid;gap:2px;overflow:visible}
+.item-row{display:grid;grid-template-columns:minmax(0,1fr) 36px 36px;gap:4px;align-items:stretch;border-bottom:1px solid #3e566d;padding:3px 0}
+#clipTimeline .item-open{min-width:0;min-height:38px;width:100%;font-size:13px;padding:4px 6px;text-align:left;overflow:hidden}
+.item-open span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#clipTimeline small{font-size:11px;display:block;color:#b5c8da}
+#clipTimeline .item-action{min-height:38px;padding:3px;font-size:15px}
+.item-heading{display:flex;justify-content:space-between;align-items:center;gap:7px}.item-heading h2{margin:0}.item-heading button{min-height:32px;padding:4px 8px;font-size:12px}
+#itemMatrix{display:block;width:100%;height:90px;background:#0c1621;border-radius:5px;touch-action:none;margin:3px 0}
+#clipProperties{position:fixed;inset:auto 0 0;margin:0 auto;width:min(100%,760px);max-width:100%;max-height:58dvh;overflow:auto;border:1px solid #718da6;border-radius:12px 12px 0 0;padding:10px;background:#182635;color:#edf3fa}
+#clipProperties::backdrop{background:#0003}#clipProperties .actions{justify-content:flex-end}#clipProperties .actions button{min-height:34px}#clipProperties label{font-size:12px}
+#clipSelect{display:none}#clipProperties label:has(#clipSelect){display:none}#clipProperties #clipName{font-size:16px}

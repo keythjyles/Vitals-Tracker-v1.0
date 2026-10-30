@@ -89,9 +89,9 @@
     {
       "tool": "caplock",
       "tool_id": "GS-TOOL-CAPLOCK",
-      "source_version": "R4.2",
+      "source_version": "R5",
       "hosted_path": "tools/caplock/index.html",
-      "description": "Joke-project numbered alpha-clip tray, independent bed/placement, source speed, and revision-guarded Dropbox workspace save; Drive backup separately verified.",
+      "description": "Multi-item compositor: player first, placement matrix, compact insertion rows, property sheets and paused bed/item-start seeking; existing joke-folder persistence.",
       "navigation": [
         "tools",
         "aspectlock",
@@ -102,9 +102,9 @@
     {
       "tool": "aspectlock",
       "tool_id": "GS-TOOL-ASPECTLOCK",
-      "source_version": "R26.2",
+      "source_version": "R27",
       "hosted_path": "tools/aspectlock/index.html",
-      "description": "Existing animation compositor with compact fixed right-hand precision controls; original placement, audio and export behavior preserved."
+      "description": "Single-animation compositor with compact fixed right controls, placement matrix, added-item row and tap-to-edit property sheet; paused seeking."
     }
   ]
 }
