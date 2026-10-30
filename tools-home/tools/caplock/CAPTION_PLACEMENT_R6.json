@@ -15,13 +15,17 @@
     "Project v4 queue/lock/source recovery; legacy migration"
   ],
   "verification": {
-    "nodeChecks": 28,
+    "nodeChecks": 29,
     "syntax": "passed",
     "staticControls": "passed",
     "browser": "pending",
     "deployment": "pending",
     "physicalPhone": "unverified",
-    "authenticatedCloud": "unverified"
+    "authenticatedCloud": "unverified",
+    "previousBrowserRun": {
+      "id": 41059595677,
+      "result": "Existing browser suite passed; placement flow caught Insert rejecting a loaded bed while paused-frame decode was pending. Fixed and added direct regression."
+    }
   },
   "preservation": {
     "noPaidGeneration": true,
@@ -29,5 +33,9 @@
     "sxLockUnchanged": true,
     "aspectLockUnchanged": true,
     "driveBackup": "existing queued executor"
+  },
+  "studio": {
+    "direction": "../studio/STUDIO_DIRECTION.md",
+    "status": "requirements documented; shell not implemented"
   }
 }

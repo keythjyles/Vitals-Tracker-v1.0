@@ -137,7 +137,7 @@ async function importLayer(blob,ref,restore=null){
  let duration;try{duration=await layers.attach(c,blob);}catch(e){if(epoch===projectEpoch)say(e.message);return;}if(epoch!==projectEpoch){layers.detach(c.id);return;}
  if(!reconnect){c.trimOutFrame=Math.max(1,Math.round(duration*25));c.outFrame=timed(current()||{})?current().outFrame:start+Math.max(1,Math.ceil(duration*25));change(()=>{project.clips.push(c);selectedClip=c.id;});}else{selectedClip=c.id;render();}selectClip(c.id);saveDraft();say('Layer connected. Source time maps in seconds to the25fps timeline. Real transparency depends on the imported file; no background is removed.');
 }
-$('overlayFile').onchange=async e=>{try{for(const file of e.target.files||[])await importLayer(file,{kind:'local',name:file.name,size:file.size});e.target.value='';}catch(error){say('Overlay import not saved: '+error.message);}};
+$('overlayFile').onchange=async e=>{try{for(const file of e.target.files||[])await importLayer(file,{kind:'local',name:file.name,size:file.size});e.target.value='';if($('captionImport').open)$('captionImport').close();}catch(error){say('Overlay import not saved: '+error.message);}};
 async function loadCloudOverlay(ref,restore=null){pause();if(cloudSession&&!ref.path.startsWith('/Grill Sergeant/JokeLab Productions/'+cloudSession.id+'/'))ref=await storeCloudAsset(ref,null,/\.(wav|mp3|m4a|aac|ogg)$/i.test(ref.name)?'voice':'animation');const d=await api('/api/playback?path='+encodeURIComponent(ref.path));const r=await fetch(d.url);if(!r.ok)throw Error('Clip download failed: '+r.status);await importLayer(await r.blob(),ref,restore);}
 $('overlayLibrary').onclick=()=>openCaptionImport();$('railMove').onclick=()=>{if(editMode==='move')$('viewMode').click();else $('moveMode').click();};$('railRotate').onclick=()=>{if(editMode==='rotate')$('viewMode').click();else $('rotateMode').click();};
 
@@ -187,12 +187,12 @@ function renderPlacement(){
  $('editActiveCaption').textContent=c?`${index+1}/${seq.clipIds.length} · ${c.name}`:'Import created caption components';
  $('placementState').textContent=c?(c.locked?'Placed · locked':'Ready to place'):'';
  $('previousCaption').disabled=placementBusy||!seq||index<=0;$('nextCaption').disabled=placementBusy||!seq||index>=seq.clipIds.length-1;
- for(const id of ['insertCaption','sheetInsertCaption'])$(id).disabled=placementBusy||!c||c.locked||!layers.media.has(c.id)||v.readyState<2;
+ for(const id of ['insertCaption','sheetInsertCaption'])$(id).disabled=placementBusy||!c||c.locked||!layers.media.has(c.id)||v.readyState<1;
  $('toItemStart').disabled=!clipCurrent();
 }
 function navigatePlacement(delta){if(!v.paused)frame=Math.min(maxFrame,Math.round(v.currentTime*FPS));pause();if(v.src)seek(frame);closeClipProperties();if(!project.captionSequence)return say('Import numbered caption components first.');change(()=>navigateCaption(project,delta,frame));selectedClip=project.captionSequence.activeId;layers.selected=selectedClip;editMode=activeCaption(project)?.locked?'view':'move';render();say('Bed paused. Insert this caption, or use Previous / Next.');}
 async function insertPlacement(){
- if(!v.paused)frame=Math.min(maxFrame,Math.round(v.currentTime*FPS));pause();if(v.src)seek(frame);const c=activeCaption(project);if(placementBusy||!c||c.locked)return;if(v.readyState<2||!layers.media.has(c.id))return say('Load the bed and caption media first.');
+ if(!v.paused)frame=Math.min(maxFrame,Math.round(v.currentTime*FPS));pause();if(v.src)seek(frame);const c=activeCaption(project);if(placementBusy||!c||c.locked)return;if(v.readyState<1||!layers.media.has(c.id))return say('Load the bed and caption media first.');
  placementBusy=true;try{closeClipProperties();if(!change(()=>insertCaption(project,frame)))return;editMode='view';render();if(cloudSession){clearTimeout(cloudTimer);await saveCloudWorkspace();say(c.name+' inserted and saved in the joke project. Use Previous / Next to choose another.');}else say(c.name+' inserted in this browser draft. Download the project to keep this local-file edit.');}catch(e){say('Placement retained in the browser draft; Dropbox save pending: '+e.message);}finally{placementBusy=false;render();}
 }
 $('previousCaption').onclick=()=>navigatePlacement(-1);$('nextCaption').onclick=()=>navigatePlacement(1);$('insertCaption').onclick=insertPlacement;$('sheetInsertCaption').onclick=insertPlacement;
