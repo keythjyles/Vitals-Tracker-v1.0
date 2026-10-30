@@ -48,3 +48,6 @@ h1{font-size:20px;margin:4px 0}#viewerPage{padding:0;border:0;background:none}#s
 
 /* Let the dock's containing block include save/export and the rest of the page. */
 #viewerPage{display:contents}
+
+/* R9: editable placements, stable controls and an explicit deselection action. */
+#pickerDrawer{transition:none}.item-row{grid-template-columns:minmax(0,1fr) 32px 32px 32px}#focusBar #clearFocus{min-width:34px}#focusBar{gap:2px}#clipProperties .item-heading{position:sticky;top:-10px;z-index:4;background:#182635;padding:4px 0}#clipProperties .item-heading h2{flex:1;min-width:0}

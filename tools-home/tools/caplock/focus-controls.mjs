@@ -15,7 +15,7 @@ export class FocusGestures{
   if(e.target.closest('button,input,label,a,select,textarea')&&!e.target.closest('.layer-resize'))return;
   const layer=e.target.closest('.media-layer'),id=layer?.dataset.clipId,resize=!!e.target.closest('.layer-resize');
   e.stopPropagation();e.preventDefault();
-  if(!this.active){this.focus(id||null);const target=this.getTarget();if(!target)return;if(target.target.locked){this.onLocked();return;}this.active=target;this.active.resize=resize;this.changed=false;this.onStart();}
+  if(!this.active){this.focus(id||null,!!e.target.closest('#bedSurface'));const target=this.getTarget();if(!target)return;if(target.target.locked){this.onLocked();return;}this.active=target;this.active.resize=resize;this.changed=false;this.onStart();}
   this.points.set(e.pointerId,{x:e.clientX,y:e.clientY});this.viewport.setPointerCapture(e.pointerId);this.baseline();
  }
  move(e){

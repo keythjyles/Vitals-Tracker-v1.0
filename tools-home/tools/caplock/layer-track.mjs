@@ -12,7 +12,7 @@ export class LayerTracks{
  clear(){this.generation++;for(const id of this.media.keys())this.detach(id);this.selected=null;}
  update(){
   const frame=this.getFrame(),playing=this.isPlaying(),clips=this.getClips();
-  for(const [id,m] of this.media){const c=clips.find(c=>c.id===id);if(!c){m.wrap.hidden=true;m.el.pause?.();continue;}const duration=m.el.duration;const timing=clipTime(c,frame,duration);const shown=c.type==='image'?c.visible&&frame>=c.inFrame&&frame<c.outFrame:timing.shown;
+  for(const [id,m] of this.media){const c=clips.find(c=>c.id===id);if(!c){m.wrap.hidden=true;m.el.pause?.();continue;}const duration=m.el.duration;const timing=clipTime(c,frame,duration);const inserted=!c.captionNumber||c.placed;const shown=inserted&&(c.type==='image'?c.visible&&frame>=c.inFrame&&frame<c.outFrame:timing.shown);
    const staged=!playing&&id===this.getStagedId?.();m.wrap.hidden=!(shown||staged);m.wrap.classList.toggle('selected-layer',id===this.selected&&(this.isFocused?.()??true));m.wrap.classList.toggle('locked-layer',!!c.locked);m.wrap.style.cssText=`left:${c.x}%;top:${c.y}%;width:${c.width}%;opacity:${c.opacity};transform:translate(-50%,-50%) rotate(${c.rotation}deg);z-index:${clips.indexOf(c)+1}`;
    if(c.type!=='image'){
     m.el.volume=c.volume;m.el.muted=c.type==='video'||c.volume===0;const target=timing.target;if(m.el.playbackRate!==timing.rate)m.el.playbackRate=timing.rate;
