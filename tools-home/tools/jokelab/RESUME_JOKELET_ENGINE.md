@@ -1,3 +1,11 @@
+## CURRENT PROGRESS — Caption project finishing pass
+
+Status: **release prepared; deployment verification next**. Asset-save refinement passes91 local checks. Actual Pebble joke text, native animation, nine25fps transparent clips and project state are saved under the canonical Dropbox joke folder; all17 Drive copies were downloaded and byte/SHA256 verified. Backup receipt: `drive-receipt-1793321050309.json`; exact project SHA256 `d6269e294dea0307387ff3e0268a49459113e2b59a5f34b5991fb6a412f20fb8`.
+
+PreviewLockR29 already verified: ten controls in one right column, five bottom app buttons, no duplicate app links, sticky player, actual video readyState4/error-null. CapLockR4.1 actual bed/caplet import and playback passed; bed1x, caplet1.375x. R4.2 adds preservation for newly imported overlays/audio plus clear write failures. Authenticated phone cloud-handoff remains UNVERIFIED; do not restart credentials or imply the owner's connection is lost. No new Gemini/voice/HeyGen request, spending, posting changes or additional timer.
+
+Next: publish/verify R4.2, then mark the run receipt complete with exact commit/deployment IDs. Read [working procedure](ANIMATED_CAPTION_WORKFLOW.md) and [full receipt](runs/GS-CAPTION-PROJECT-20261029-01.json). Source baseline/rollback is `a03f77972e2e0106d1db0365f56b0576fd771606` for this finishing pass. Per-section speed/freeze and finished-video export remain separate unfinished work.
+
 ## CURRENT — Joke-folder caption pipeline implementation
 Owner accepted native captionv02 for clipping and requested integrated joke text→animation→numeric clips→CapLock, Dropbox working folders and Drive backup. Read ANIMATED_CAPTION_WORKFLOW.md and runs/GS-CAPTION-PROJECT-20261029-01.json. PreviewLockR29 single-column/right and one bottom app row; CapLockR4 project handoff/cloud save. No new Gemini/voice/HeyGen request. Preserve the exact native source and earlier API reservations. Deployment, actual seeded project/backup and browser receipts follow separately; never claim unit coverage is live acceptance.
 

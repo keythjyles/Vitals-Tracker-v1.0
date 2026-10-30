@@ -73,6 +73,9 @@ The daily action must leave failed or missing files pending and checkpoint IDs. 
 
 ## Implemented versus verified
 
-PreviewLockR29: one right-side column, one bottom app-button row, both part of sticky player; project creation/import/cut UI. CapLockR4: numbered clip handoff, arbitrary bed, placement and project-folder save. Backend uses existing PreviewLock bearer and adds scoped project routes plus serial FFmpeg rendering. No secrets appear in manifests or URLs. Tests use a real FFmpeg alpha render, CAS races, immutable sources, duplicate reuse, bounds checks and editor handoff. Browser/deployment/cloud receipts must be recorded independently in `runs/GS-CAPTION-PROJECT-20261029-01.json`; code alone is not live acceptance.
+PreviewLockR29: one right-side column, one bottom app-button row, both part of sticky player; project creation/import/cut UI. CapLockR4.2: numbered clip handoff, arbitrary bed, placement and project-folder save. Backend uses existing PreviewLock bearer and adds scoped project routes plus serial FFmpeg rendering. No secrets appear in manifests or URLs. Tests use a real FFmpeg alpha render, CAS races, immutable sources, duplicate reuse, bounds checks and editor handoff. Browser/deployment/cloud receipts must be recorded independently in `runs/GS-CAPTION-PROJECT-20261029-01.json`; code alone is not live acceptance.
 
 Rollback baseline: main `2d3ae5b318a5723690850c17ba5909d6e8566c80`. SxLock and AspectLock source/media remain unchanged. Existing whole-joke Gemini task and old API reservations remain separate.
+
+### Finishing pass checkpoint
+Pebble now has nine actual numbered alpha clips and a matching approved bed under its canonical joke folder. Seventeen Drive files have raw-byte/SHA256 verification; receipt drive-receipt-1793321050309.json is stored in both roots. CapLockR4.2 extends project preservation to new overlays/audio and external library imports before attaching them to an edit, with serialized writes and visible failures. Latest progress and authenticated-phone verification limits are maintained at the top of RESUME_JOKELET_ENGINE.md.

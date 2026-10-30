@@ -529,7 +529,21 @@
           "driveId": "1Fmv9n-Bxoy8Eewv1tUzz5fP_bvg7V-Wr",
           "dropboxId": "id:lnTiunUsDy8AAAAAAAAC7Q"
         }
-      ]
+      ],
+      "projectWorkspace": {
+        "schema": "GS-JokeProject-1",
+        "dropboxRoot": "/Grill Sergeant/JokeLab Productions/dad-00bda89167b4f15850aa1c91",
+        "driveBackupRootId": "1syZBNE74_l5TASkOvWJL_WyftRnr5xSo",
+        "manifest": "project.json",
+        "projectSha256": "d6269e294dea0307387ff3e0268a49459113e2b59a5f34b5991fb6a412f20fb8",
+        "captionAssetId": "caption-native-v02",
+        "clipCount": 9,
+        "clipStatus": "Saved transparent sources; placement review pending",
+        "backupReceipt": "drive-receipt-1793321050309.json",
+        "rawDriveFilesVerified": 17,
+        "recovery": "runs/GS-CAPTION-PROJECT-20261029-01.json",
+        "captionWorkflow": "ANIMATED_CAPTION_WORKFLOW.md"
+      }
     },
     {
       "canonicalId": "dad-00d6dea00e3a33805c7b5007",

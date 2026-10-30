@@ -7,10 +7,33 @@
   "baseline": "2d3ae5b318a5723690850c17ba5909d6e8566c80",
   "implementation": {
     "previewLock": "R29",
-    "capLock": "R4",
+    "capLock": "R4.2",
     "backend": "jokeProjectVersion1",
-    "tests": "89 passing Node tests including real FFmpeg alpha/frame verification, out-of-source cut rejection, CAS/duplicate/source-preservation/editor handoff",
-    "browser": "Pending live deployment",
+    "tests": "91 passing local Node checks; real FFmpeg alpha/frame verification and media-write failure/serialization tests",
+    "browser": {
+      "previewLock": {
+        "release": "R29",
+        "oneRightColumn": true,
+        "controlCount": 10,
+        "appRowButtons": 5,
+        "duplicateAppNav": 0,
+        "stickyHeader": true,
+        "actualSourceReadyState": 4,
+        "actualSourceError": null
+      },
+      "capLock": {
+        "release": "R4.1 previously verified",
+        "actualBed": "GS_Jokelet_Pebble_Straight_Stare_v01.mp4",
+        "actualCaplet": "9.webm",
+        "bedPlaybackRate": 1,
+        "capletPlaybackRate": 1.375,
+        "bothReadyState": 4,
+        "reviewFrame": 126,
+        "errors": null,
+        "importFix": "Explicit bed picker plus viewer drag exclusion; fresh module cache version"
+      },
+      "authenticatedCloudUI": "Unverified; private connection absent only in this cloud browser"
+    },
     "paidGeneration": false,
     "adjacentTools": "SxLock and AspectLock unchanged"
   },
@@ -20,12 +43,366 @@
     "ownerSourceDecision": "Looks perfect for clipping",
     "clips": 9,
     "clipVerification": "All9 full decodes, exact expected frame counts and25fps, sampled cornerAlpha0/maxAlpha255",
-    "clipReview": "New keyed derivatives still require review over a bed"
+    "clipReview": "New keyed derivatives still require review over a bed",
+    "clipChecks": [
+      {
+        "number": 1,
+        "frames": 17,
+        "fps": "25/1",
+        "decoded": true,
+        "cornerAlpha": 0,
+        "maxAlpha": 255
+      },
+      {
+        "number": 2,
+        "frames": 22,
+        "fps": "25/1",
+        "decoded": true,
+        "cornerAlpha": 0,
+        "maxAlpha": 255
+      },
+      {
+        "number": 3,
+        "frames": 16,
+        "fps": "25/1",
+        "decoded": true,
+        "cornerAlpha": 0,
+        "maxAlpha": 255
+      },
+      {
+        "number": 4,
+        "frames": 16,
+        "fps": "25/1",
+        "decoded": true,
+        "cornerAlpha": 0,
+        "maxAlpha": 255
+      },
+      {
+        "number": 5,
+        "frames": 28,
+        "fps": "25/1",
+        "decoded": true,
+        "cornerAlpha": 0,
+        "maxAlpha": 255
+      },
+      {
+        "number": 6,
+        "frames": 18,
+        "fps": "25/1",
+        "decoded": true,
+        "cornerAlpha": 0,
+        "maxAlpha": 255
+      },
+      {
+        "number": 7,
+        "frames": 18,
+        "fps": "25/1",
+        "decoded": true,
+        "cornerAlpha": 0,
+        "maxAlpha": 255
+      },
+      {
+        "number": 8,
+        "frames": 15,
+        "fps": "25/1",
+        "decoded": true,
+        "cornerAlpha": 0,
+        "maxAlpha": 255
+      },
+      {
+        "number": 9,
+        "frames": 62,
+        "fps": "25/1",
+        "decoded": true,
+        "cornerAlpha": 0,
+        "maxAlpha": 255
+      }
+    ]
   },
   "storage": {
     "dropbox": "/Grill Sergeant/JokeLab Productions/dad-00bda89167b4f15850aa1c91",
     "driveRootId": "1syZBNE74_l5TASkOvWJL_WyftRnr5xSo",
-    "backup": "In progress; final file receipts follow"
+    "backup": "Complete for exact saved project snapshot",
+    "projectSha256": "d6269e294dea0307387ff3e0268a49459113e2b59a5f34b5991fb6a412f20fb8",
+    "receipt": "drive-receipt-1793321050309.json",
+    "receiptDropboxId": "id:lnTiunUsDy8AAAAAAAADBw",
+    "receiptDriveId": "1MsRqv-69heK1QXUiNqTZTDZs7SMkzXz2",
+    "rawDriveFilesVerified": 17,
+    "verification": "All17 actual Drive downloads byte-compared and SHA256 matched against source; size/name/parent readbacks; Dropbox upload completion/copy receipts.",
+    "files": [
+      {
+        "relative": "captions/caption-native-v02/clips/cut-01/1.webm",
+        "bytes": 743564,
+        "sha256": "654de224f044ef581105f162feaf60321efe3be5a44e56a3b28980aae405f22f",
+        "dropbox": {
+          "id": "id:lnTiunUsDy8AAAAAAAAC9w",
+          "path": "/Grill Sergeant/JokeLab Productions/dad-00bda89167b4f15850aa1c91/captions/caption-native-v02/clips/cut-01/1.webm"
+        },
+        "drive": {
+          "id": "1YXVh-UXxtxW4TnkR54pUAvIg7zfIotFY",
+          "parents": [
+            "1WYAWbcFdPptIqmpfVP_eHIW1WqRuPy5m"
+          ]
+        },
+        "rawDriveHashVerified": true
+      },
+      {
+        "relative": "captions/caption-native-v02/clips/cut-01/2.webm",
+        "bytes": 1205511,
+        "sha256": "21a2fb2dd56f32d1b501c5192e304b375ae4601a068e45858552305cb9e181df",
+        "dropbox": {
+          "id": "id:lnTiunUsDy8AAAAAAAAC-A",
+          "path": "/Grill Sergeant/JokeLab Productions/dad-00bda89167b4f15850aa1c91/captions/caption-native-v02/clips/cut-01/2.webm"
+        },
+        "drive": {
+          "id": "1uiNHc64sCxbv6kFPQ-m-9lmJTmAaoXXG",
+          "parents": [
+            "1WYAWbcFdPptIqmpfVP_eHIW1WqRuPy5m"
+          ]
+        },
+        "rawDriveHashVerified": true
+      },
+      {
+        "relative": "captions/caption-native-v02/clips/cut-01/3.webm",
+        "bytes": 773251,
+        "sha256": "bf50bc7fab35d526c4faa7130fed78a8f4b068f8cd06519ec4fceba82f7d97d5",
+        "dropbox": {
+          "id": "id:lnTiunUsDy8AAAAAAAAC-Q",
+          "path": "/Grill Sergeant/JokeLab Productions/dad-00bda89167b4f15850aa1c91/captions/caption-native-v02/clips/cut-01/3.webm"
+        },
+        "drive": {
+          "id": "1CeqRPwJnm9DDP29v4h5ykrKulA6em9Dg",
+          "parents": [
+            "1WYAWbcFdPptIqmpfVP_eHIW1WqRuPy5m"
+          ]
+        },
+        "rawDriveHashVerified": true
+      },
+      {
+        "relative": "captions/caption-native-v02/clips/cut-01/4.webm",
+        "bytes": 762831,
+        "sha256": "78419c7e8f403f0d824c66b4b46185e1abcf6d3cd7493bbb9d5be17a5e997b85",
+        "dropbox": {
+          "id": "id:lnTiunUsDy8AAAAAAAAC-g",
+          "path": "/Grill Sergeant/JokeLab Productions/dad-00bda89167b4f15850aa1c91/captions/caption-native-v02/clips/cut-01/4.webm"
+        },
+        "drive": {
+          "id": "1OqGqIAe7d-c0LSTFlpzbQpDAer8EdcEf",
+          "parents": [
+            "1WYAWbcFdPptIqmpfVP_eHIW1WqRuPy5m"
+          ]
+        },
+        "rawDriveHashVerified": true
+      },
+      {
+        "relative": "captions/caption-native-v02/clips/cut-01/5.webm",
+        "bytes": 1779448,
+        "sha256": "5b0fa9e8212303c01e5b3d4d48bf503c1883adddfa58f14aba1946215f0ae945",
+        "dropbox": {
+          "id": "id:lnTiunUsDy8AAAAAAAAC-w",
+          "path": "/Grill Sergeant/JokeLab Productions/dad-00bda89167b4f15850aa1c91/captions/caption-native-v02/clips/cut-01/5.webm"
+        },
+        "drive": {
+          "id": "1qScctugSPt5s_vpHE-HAHlFihEj83q3q",
+          "parents": [
+            "1WYAWbcFdPptIqmpfVP_eHIW1WqRuPy5m"
+          ]
+        },
+        "rawDriveHashVerified": true
+      },
+      {
+        "relative": "captions/caption-native-v02/clips/cut-01/6.webm",
+        "bytes": 671460,
+        "sha256": "175fa37f35c5e233da2744ecf9d1ed464896ccf65c8e4f2f610622e9c28970c9",
+        "dropbox": {
+          "id": "id:lnTiunUsDy8AAAAAAAAC_A",
+          "path": "/Grill Sergeant/JokeLab Productions/dad-00bda89167b4f15850aa1c91/captions/caption-native-v02/clips/cut-01/6.webm"
+        },
+        "drive": {
+          "id": "1w8w4_zf1LGbLR-5YscknM4NgpWX-5zry",
+          "parents": [
+            "1WYAWbcFdPptIqmpfVP_eHIW1WqRuPy5m"
+          ]
+        },
+        "rawDriveHashVerified": true
+      },
+      {
+        "relative": "captions/caption-native-v02/clips/cut-01/7.webm",
+        "bytes": 879254,
+        "sha256": "a5a35098bb3e0ffb1682404acfdc5601a7e75f2a9ccff2dd1e1933b184479da9",
+        "dropbox": {
+          "id": "id:lnTiunUsDy8AAAAAAAAC_Q",
+          "path": "/Grill Sergeant/JokeLab Productions/dad-00bda89167b4f15850aa1c91/captions/caption-native-v02/clips/cut-01/7.webm"
+        },
+        "drive": {
+          "id": "1pwNW8D2DaSoDmgQI2em9nVIRrl4194_C",
+          "parents": [
+            "1WYAWbcFdPptIqmpfVP_eHIW1WqRuPy5m"
+          ]
+        },
+        "rawDriveHashVerified": true
+      },
+      {
+        "relative": "captions/caption-native-v02/clips/cut-01/8.webm",
+        "bytes": 751090,
+        "sha256": "7c8700cfe45c6ac144379ab70c8e2f742323af2f545aa27401f62af8eba06573",
+        "dropbox": {
+          "id": "id:lnTiunUsDy8AAAAAAAAC_g",
+          "path": "/Grill Sergeant/JokeLab Productions/dad-00bda89167b4f15850aa1c91/captions/caption-native-v02/clips/cut-01/8.webm"
+        },
+        "drive": {
+          "id": "11qtdJcnXGZIKrMYJV5Ygmq976C5DYqgr",
+          "parents": [
+            "1WYAWbcFdPptIqmpfVP_eHIW1WqRuPy5m"
+          ]
+        },
+        "rawDriveHashVerified": true
+      },
+      {
+        "relative": "captions/caption-native-v02/clips/cut-01/9.webm",
+        "bytes": 5422471,
+        "sha256": "527b8cb6309bd83c849d601033a3d8b974ebf0c5810d609e6ec56c998be45826",
+        "dropbox": {
+          "id": "id:lnTiunUsDy8AAAAAAAAC_w",
+          "path": "/Grill Sergeant/JokeLab Productions/dad-00bda89167b4f15850aa1c91/captions/caption-native-v02/clips/cut-01/9.webm"
+        },
+        "drive": {
+          "id": "11Ac7kpd6UNFEegIRK-XUB-NjbgfEOjRY",
+          "parents": [
+            "1WYAWbcFdPptIqmpfVP_eHIW1WqRuPy5m"
+          ]
+        },
+        "rawDriveHashVerified": true
+      },
+      {
+        "relative": "joke.txt",
+        "bytes": 65,
+        "sha256": "0f46046dfb6072c9bbe2a71ae63cef78911f205050ba95887a1ca5f486680108",
+        "dropbox": {
+          "id": "id:lnTiunUsDy8AAAAAAAADAA",
+          "path": "/Grill Sergeant/JokeLab Productions/dad-00bda89167b4f15850aa1c91/joke.txt"
+        },
+        "drive": {
+          "id": "1grRYIhU25Llk2eCzt9IphWuvXsDE72uU",
+          "parents": [
+            "1syZBNE74_l5TASkOvWJL_WyftRnr5xSo"
+          ]
+        },
+        "rawDriveHashVerified": true
+      },
+      {
+        "relative": "text/joke-v01.txt",
+        "bytes": 65,
+        "sha256": "0f46046dfb6072c9bbe2a71ae63cef78911f205050ba95887a1ca5f486680108",
+        "dropbox": {
+          "id": "id:lnTiunUsDy8AAAAAAAADAQ",
+          "path": "/Grill Sergeant/JokeLab Productions/dad-00bda89167b4f15850aa1c91/text/joke-v01.txt"
+        },
+        "drive": {
+          "id": "1QPcrNfJLMEIlGeYSgiG1_N5pOsAla4ar",
+          "parents": [
+            "1dAnBQ8TR-rEuMxtIVYuZr4As04GiRbpF"
+          ]
+        },
+        "rawDriveHashVerified": true
+      },
+      {
+        "relative": "phrases.txt",
+        "bytes": 66,
+        "sha256": "0a765eb72dcb3867b2bc871802ac98620c1f988c0670286f426420c153c4b314",
+        "dropbox": {
+          "id": "id:lnTiunUsDy8AAAAAAAADAg",
+          "path": "/Grill Sergeant/JokeLab Productions/dad-00bda89167b4f15850aa1c91/phrases.txt"
+        },
+        "drive": {
+          "id": "1yfobV6mIvV0f7VwWMbsYHIy0K1mNzinG",
+          "parents": [
+            "1syZBNE74_l5TASkOvWJL_WyftRnr5xSo"
+          ]
+        },
+        "rawDriveHashVerified": true
+      },
+      {
+        "relative": "captions/caption-native-v02/prompt.txt",
+        "bytes": 747,
+        "sha256": "9709fdfe9029ac9f91a2788aada0751aaa97f834340b51ef923e5b4f80f12850",
+        "dropbox": {
+          "id": "id:lnTiunUsDy8AAAAAAAADAw",
+          "path": "/Grill Sergeant/JokeLab Productions/dad-00bda89167b4f15850aa1c91/captions/caption-native-v02/prompt.txt"
+        },
+        "drive": {
+          "id": "1fTboDtdblR2G_kzq7HItTNKMwypk_8zx",
+          "parents": [
+            "1lzUnVQNmX2fRCQmhAJDiCP1dKIx33sbW"
+          ]
+        },
+        "rawDriveHashVerified": true
+      },
+      {
+        "relative": "video/bed-approved-v01/GS_Jokelet_Pebble_Straight_Stare_v01.mp4",
+        "bytes": 6398154,
+        "sha256": "8d85a1af2e7885e26d54476a5d888f01f108eae22abbff84e02fc2a7efd8647e",
+        "dropbox": {
+          "id": "id:lnTiunUsDy8AAAAAAAADBA",
+          "path": "/Grill Sergeant/JokeLab Productions/dad-00bda89167b4f15850aa1c91/video/bed-approved-v01/GS_Jokelet_Pebble_Straight_Stare_v01.mp4"
+        },
+        "drive": {
+          "id": "1nNSedkfzBjziKNdOSXQaTeyc3l76eqX_",
+          "parents": [
+            "1jU4Dw_qiWavBuvOnapdbd8pBsWfUFpfc"
+          ]
+        },
+        "rawDriveHashVerified": true
+      },
+      {
+        "relative": "captions/caption-native-v02/GS_Pebble_Gemini_NATIVE_CAPTIONS_v02.mp4",
+        "bytes": 1957328,
+        "sha256": "d4d393a36a0663348970e10646f54afef474190f40848b063b114c533ce1080a",
+        "dropbox": {
+          "id": "id:lnTiunUsDy8AAAAAAAAC9g",
+          "path": "/Grill Sergeant/JokeLab Productions/dad-00bda89167b4f15850aa1c91/captions/caption-native-v02/GS_Pebble_Gemini_NATIVE_CAPTIONS_v02.mp4"
+        },
+        "drive": {
+          "id": "1DH0JhOD3HNx9i_SV6SQRNwyc87gbmGVG",
+          "parents": [
+            "1lzUnVQNmX2fRCQmhAJDiCP1dKIx33sbW"
+          ]
+        },
+        "rawDriveHashVerified": true
+      },
+      {
+        "relative": "project.json",
+        "bytes": 15966,
+        "sha256": "d6269e294dea0307387ff3e0268a49459113e2b59a5f34b5991fb6a412f20fb8",
+        "dropbox": {
+          "id": "id:lnTiunUsDy8AAAAAAAADBQ",
+          "path": "/Grill Sergeant/JokeLab Productions/dad-00bda89167b4f15850aa1c91/project.json"
+        },
+        "drive": {
+          "id": "1azfQfK1hiEVyOuuGVgk3YfD02fcxWYX4",
+          "parents": [
+            "1syZBNE74_l5TASkOvWJL_WyftRnr5xSo"
+          ]
+        },
+        "rawDriveHashVerified": true
+      },
+      {
+        "relative": "backup-needed.json",
+        "bytes": 378,
+        "sha256": "fe0bb0c6ca3ade4589638a770ffa0a43e9b841dac387046fca3309f9c13f5c74",
+        "dropbox": {
+          "id": "id:lnTiunUsDy8AAAAAAAADBg",
+          "path": "/Grill Sergeant/JokeLab Productions/dad-00bda89167b4f15850aa1c91/backup-needed.json"
+        },
+        "drive": {
+          "id": "1SCCi2N7dK7nVKxxAPJRaLELDzd9jt0Le",
+          "parents": [
+            "1syZBNE74_l5TASkOvWJL_WyftRnr5xSo"
+          ]
+        },
+        "rawDriveHashVerified": true
+      }
+    ]
   },
   "dailyBackup": {
     "executor": "Existing Daily Calendar Task Review",
@@ -37,5 +414,27 @@
     "No new Gemini generation or automatic Gemini API exchange",
     "No finished-video export, variable in-clip speed ramps or freeze holds in this release",
     "Authenticated live cloud round trip pending; this cloud browser lacks owner PreviewLock key"
-  ]
+  ],
+  "status": "release_prepared",
+  "progress": {
+    "completed": [
+      "Native Gemini procedure documented",
+      "Original/text/nine alpha clips and project saved to Dropbox",
+      "All17 Drive files downloaded and byte-verified",
+      "PreviewLock one-column layout and single app row verified live",
+      "Actual bed plus alpha caplet playback verified; bed1x/layer1.375x",
+      "Asset-import preservation refinement passed91 local checks"
+    ],
+    "current": "Publish R4.2 and verify deployed page/CI",
+    "remainingVerification": "Authenticated cloud save/handoff on owner's phone. This cloud browser has no saved PreviewLock connection."
+  },
+  "priorDeployments": {
+    "code": "4251090f2d8aa223539c4d37279278e1d70420ef",
+    "navigationFix": "ec4232494cedca0dde12b49c1e72b215e8aa1b4c",
+    "importFix": "89f3367cc189384403e8719ac32ca7d5c502154a",
+    "lastVerifiedLive": "a03f77972e2e0106d1db0365f56b0576fd771606",
+    "pagesRun": 40981791385,
+    "caplockChecksRun": 40981791930,
+    "renderDeploy": "dep-dbhuhpivcj2c73f8job0"
+  }
 }

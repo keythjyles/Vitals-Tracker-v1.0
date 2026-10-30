@@ -1,4 +1,6 @@
-# R4 — joke-folder clip tray and durable workspace
+R4.2 finishing pass: new locally imported overlays/audio and external library layers are copied into this joke project before the edit can reference them. Writes are serialized; failures remain visible. This preserves reconnectable sources, rather than saving only local filenames.
+
+# R4.2 — joke-folder clip tray and durable workspace
 Receives numbered alpha clips from PreviewLock, opens the recorded bed or any selected bed, Place at playhead, immutable cloud edit snapshots and revision-guarded Dropbox save. Drive mirror is a separate queued process; no finished-video export or in-clip freeze/speed-ramp claim. See ../jokelab/ANIMATED_CAPTION_WORKFLOW.md.
 
 # CapLock R3 — independent animation speed (October29)

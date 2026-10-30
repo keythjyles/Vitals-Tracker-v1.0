@@ -2,7 +2,7 @@
 (()=>{
  let selection=0,selectedAsset=null,deliveryMap={},localURL='';
  window.gsPreviewSelection=()=>({path:typeof path==='string'?path:'',name:$('fileName').textContent,currentTime:v.currentTime,source:v.currentSrc});
- $('caplockLink').onclick=()=>window.open('../caplock/','gs-caplock');$('toolsLink').onclick=()=>window.open('../../','gs-audio-tools');
+ $('caplockLink').onclick=()=>window.open('../caplock/?v=R4.2','gs-caplock');$('toolsLink').onclick=()=>window.open('../../','gs-audio-tools');
  const status=text=>$('playbackStatus').textContent=text;
  const controls=['play','stop','minus5','minus1','plus1','plus5'];
  const enable=on=>controls.forEach(id=>$(id).disabled=!on);
