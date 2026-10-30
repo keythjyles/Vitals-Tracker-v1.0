@@ -27,6 +27,8 @@ jobs:
             /tools-home/tools/sxlock/vendor/
             /tools-home/tools/aspectlock/index.html
             /tools-home/tools/previewlock/*.html
+            /tools-home/tools/previewlock/*.js
+            /tools-home/tools/previewlock/*.mjs
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -44,3 +46,4 @@ jobs:
           node tools-home/tools/caplock/tests/browser.cjs
         env:
           PLAYWRIGHT_MODULE: /tmp/cap-browser/node_modules/playwright
+
