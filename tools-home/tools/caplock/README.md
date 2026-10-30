@@ -8,6 +8,8 @@ Import captions defaults to the remembered joke project under Dropbox /Grill Ser
 
 Project version4 preserves caption sequence, active number, source/cut identity, paused playhead and locks. R6 reads v1–v3 without changing old placements. Older R5 rejects v4 rather than silently discarding locks. Inserted geometry/timing cannot change without Unlock; originals remain untouched. Existing Dropbox snapshots/CAS and separately queued Drive backups remain in use. Navigation and locally imported files clearly distinguish browser drafts from cloud saves. Switching jokes flushes prior writes before changing the folder context. Interrupted restores do not save transient frames into the previous project.
 
+Release evidence: code `67da085ebff863aa0d94a7619e5d8922e150f467`, branch CI41061610623 and main CI41062054097 passed; Pages41062052822 succeeded. Live R6 verified with the exact Pebble bed and numbered1/2/9.webm: separate navigation and locked Insert work. Default cloud-folder/save/reopen and real clipper popup pass mocked authenticated browser fixtures; owner-phone cloud acceptance remains unverified. Full receipt: CAPTION_PLACEMENT_R6.json.
+
 Validation:29 Node checks pass (numeric sequencing, Next/Previous without insertion, explicit idempotent Insert, geometry locks, no-autoplay preview, JSON recovery and existing speed/source-save regressions). Script syntax/static controls pass. Full browser/default-folder/handoff checks and live/phone evidence are recorded independently in CAPTION_PLACEMENT_R6.json. No finished-video exporter, within-item freeze/speed ramps or new paid generation. Rollback baseline: `6052c78778c78e931b7ed3d54eb1530f7f508c18`; retain v4 projects and media.
 
 ---

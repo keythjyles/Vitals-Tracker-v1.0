@@ -1,3 +1,7 @@
+## Current editing direction — October30, 2026
+
+[Studio direction](../studio/STUDIO_DIRECTION.md) is the governing owner requirement: one joke project, visual list/grid picker with preview, associated assets loaded from bed identity, and state-preserving module tabs/phase navigation. CapLock/AspectLock are specialized compositing modules. Shell and unified picker are not implemented. CapLock R6 placement is deployed and browser-verified; read [current recovery](RESUME_JOKELET_ENGINE.md) and [exact evidence](../caplock/CAPTION_PLACEMENT_R6.json). Historical architecture below remains useful but is not a current inventory or deployment receipt.
+
 # Grill Sergeant — production direction and session recovery
 Updated: 2026-10-28. Status: architecture agreed; implementation partial.
 

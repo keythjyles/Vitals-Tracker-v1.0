@@ -2,7 +2,7 @@
   "schema": "GS-CaptionPlacement-1",
   "date": "2026-10-30",
   "baseline": "6052c78778c78e931b7ed3d54eb1530f7f508c18",
-  "status": "implemented_verification_pending",
+  "status": "deployed_browser_verified_phone_acceptance_pending",
   "release": "R6",
   "ownerCorrection": "Next pauses the player and chooses the next numbered caption. User separately decides Insert, advance or reverse. No auto-insert or bed advance.",
   "implemented": [
@@ -18,13 +18,45 @@
     "nodeChecks": 29,
     "syntax": "passed",
     "staticControls": "passed",
-    "browser": "pending",
-    "deployment": "pending",
+    "browser": "passed: existing generic CapLock/AspectLock regressions, mocked connected default-folder and real clipper Finish→CapLock popup handoff; see CI",
+    "deployment": {
+      "pagesRun": 41062052822,
+      "result": "success",
+      "sha": "67da085ebff863aa0d94a7619e5d8922e150f467"
+    },
     "physicalPhone": "unverified",
     "authenticatedCloud": "unverified",
     "previousBrowserRun": {
       "id": 41059595677,
       "result": "Existing browser suite passed; placement flow caught Insert rejecting a loaded bed while paused-frame decode was pending. Fixed and added direct regression."
+    },
+    "ci": {
+      "branchRun": 41061610623,
+      "branchJob": 124082475565,
+      "mainRun": 41062054097,
+      "result": "success",
+      "nodeChecks": 29,
+      "fixtureCloudOnly": true
+    },
+    "live": {
+      "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/caplock/?v=R6",
+      "visibleRelease": "R6",
+      "bed": "GS_Jokelet_Pebble_Straight_Stare_v01.mp4",
+      "components": [
+        "1.webm",
+        "2.webm",
+        "9.webm"
+      ],
+      "observations": [
+        "Loaded exact preserved binaries through optional local ingress; this cloud browser does not hold the owner phone connection",
+        "Import order 9,1,2 selects 1 first with placed count 0",
+        "Next selects 2; bed paused at 0.000s, readyState4, media error null; placed count remains 0",
+        "Previous selects 1; Insert commits only 1, locks placement, and stays on 1",
+        "Next selects 2 ready to place; placed count remains 1, caption1 locked",
+        "Source information absent; frame label above player and seek directly beneath"
+      ],
+      "proof": "caplock-r6-placement-proof.jpg",
+      "cloudWritesPerformed": false
     }
   },
   "preservation": {
@@ -32,10 +64,13 @@
     "noOriginalMediaChanged": true,
     "sxLockUnchanged": true,
     "aspectLockUnchanged": true,
-    "driveBackup": "existing queued executor"
+    "driveBackup": "existing queued executor",
+    "recoveredOriginals": "Exact Dropbox source bytes/hash verified for bed and captions1,2,9; no new encode/generation"
   },
   "studio": {
     "direction": "../studio/STUDIO_DIRECTION.md",
-    "status": "requirements documented; shell not implemented"
-  }
+    "status": "requirements documented; shell not implemented",
+    "next": "Implement shared project context, visual project-scoped picker and state-preserving module adapters. Existing module links are not a studio shell."
+  },
+  "codeCommit": "67da085ebff863aa0d94a7619e5d8922e150f467"
 }

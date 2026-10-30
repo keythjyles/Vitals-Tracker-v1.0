@@ -1,3 +1,15 @@
+## CURRENT — CapLock R6 verified; shared studio direction recorded
+
+Code `67da085ebff863aa0d94a7619e5d8922e150f467` is deployed. Branch CI41061610623 and main CI41062054097 succeeded:29 Node checks, existing media/edit/recovery tests, three AspectLock viewport checks, default joke-folder caption load and actual clipper Finish→CapLock popup handoff against mocked authenticated APIs. Pages41062052822 succeeded. Live R6 was exercised with the preserved Pebble bed and actual1.webm/2.webm/9.webm. Numeric import begins at1; Next/Previous pause and select without insertion; separate Insert commits/locks only the chosen item and does not advance. Original-source panel replaces Source information; clock above and18px seek flush below player. General animation/graphic/audio ingress remains.
+
+Read [R6 evidence](../caplock/CAPTION_PLACEMENT_R6.json). Live acceptance used local copies of exact Dropbox binaries; it did not test the owner's authenticated phone cloud save/reopen. Existing connected folder defaults and clipper handoff pass the browser fixtures; physical phone and private-cloud acceptance remain separate. Project version4 preserves queue, source identity, position and locks; R6 reads legacy v1–v3, but retain v4 when rolling back. Rollback source `6052c78778c78e931b7ed3d54eb1530f7f508c18`; never discard media/projects.
+
+**Latest governing direction:** [Studio direction](../studio/STUDIO_DIRECTION.md). Loading a bed identifies one joke project and makes all associated assets available through a visual list/grid picker with inline previews. Top module tabs keep bed, playhead and edits; Next element selects paused, Insert commits, Next phase saves and advances. CapLock and AspectLock are specialized compositing modules. **The studio shell, shared picker and module adapters are documented requirements, not implemented by R6.** Preserve the proven SxLock/AspectLock engines and verify actual asset ancestry before presenting inventory as complete.
+
+SxLock and AspectLock are unchanged in this release. No new paid generation, original-media changes, schedule changes or timer. Within-item speed ramps/freeze holds and finished CapLock video export remain unfinished. Older checkpoints below are historical.
+
+---
+
 ## CURRENT — CapLock R5 / AspectLock R27: SxLock editing model
 
 Owner correction: CapLock is AspectLock with multiple added items. Both now use a placement matrix, compact added-item rows directly below the player and tap-to-edit property sheets. CapLock opens the player first; Transcript preserves the earlier text/Gemini tools. Start and item-start navigation, scrubbing, selection and imports pause playback. Do not restore compulsory transcript-first entry or oversized scrolling button rails.
