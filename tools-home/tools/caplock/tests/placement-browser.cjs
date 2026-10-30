@@ -1,6 +1,6 @@
 const assert=require('node:assert/strict'),fs=require('node:fs/promises');
 module.exports=async(browser,base,alphaBytes)=>{
- const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),errors=[];
+ const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),page=await context.newPage(),errors=[];
  page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
  const id='dad-00bda89167b4f15850aa1c91',root='/Grill Sergeant/JokeLab Productions/'+id,assetId='caption-fixture';let rev=1,session=null,writes=0;
  const caption={id:assetId,role:'caption',name:'original.mp4',path:root+'/captions/'+assetId+'/original.mp4',cuts:{id:'cut-fixture',status:'complete',ranges:[{inFrame:0,outFrame:20},{inFrame:20,outFrame:40},{inFrame:40,outFrame:60}],chroma:{color:'#0a77d4'},clips:[10,2,1].map(number=>({number,frames:20,path:root+'/captions/'+assetId+'/clips/cut-fixture/'+number+'.webm',size:alphaBytes.length}))}};
