@@ -89,9 +89,9 @@
     {
       "tool": "caplock",
       "tool_id": "GS-TOOL-CAPLOCK",
-      "source_version": "R7",
+      "source_version": "R8",
       "hosted_path": "tools/caplock/index.html",
-      "description": "Sticky Load video opens visual joke project picker; restores saved bed, assets and edits; grid/list previews; centered portrait workspace; explicit caption Insert/Previous/Next.",
+      "description": "Project-first visual workspace; independently pinch/resize bed and overlays; focused controls, docked player and pull-down project drawer; individual asset saves.",
       "navigation": [
         "tools",
         "aspectlock",

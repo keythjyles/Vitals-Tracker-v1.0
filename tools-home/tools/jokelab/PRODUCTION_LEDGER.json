@@ -531,7 +531,7 @@
         }
       ],
       "projectWorkspace": {
-        "projectEntry": {"release":"R7","codeCommit":"91909fbc545c7c2c0636dac3bb14462593ebe5ee","receipt":"../caplock/PROJECT_ENTRY_R7.json","status":"deployed_browser_verified_owner_testing_pending","ownerPhoneCloud":"unverified","projectManifestAndBackupReceipt":"Existing stored manifest/hash/receipts below are unchanged by frontend release"},
+        "projectEntry": {"release":"R8","behaviorCommit":"6a5c596c35e47f0ed76b3436f2ae3fc5ed9db0de","receipt":"../caplock/FOCUSED_WORKSPACE_R8.json","status":"deployed_browser_verified_owner_testing_pending","ownerPhoneCloud":"unverified","projectSchema":5,"projectManifestAndBackupReceipt":"Previously stored manifest/hash/receipts unchanged by frontend release"},
         "schema": "GS-JokeProject-1",
         "dropboxRoot": "/Grill Sergeant/JokeLab Productions/dad-00bda89167b4f15850aa1c91",
         "driveBackupRootId": "1syZBNE74_l5TASkOvWJL_WyftRnr5xSo",

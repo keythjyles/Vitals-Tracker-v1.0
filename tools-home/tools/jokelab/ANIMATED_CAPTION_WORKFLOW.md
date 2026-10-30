@@ -1,3 +1,13 @@
+## Current project workspace — R8
+
+**Open project** is the entry. The empty player provides it; after loading, pull/tap the dock grip to reveal the tucked project title/version and controls. The project reveals its text, scripts/transcripts, original media, clips, sounds, alternate animations, caption sources/cuts, reactions, HeyGen/ElevenLabs originals and other recorded assets. Save asset keeps an individual copy; source originals remain. Other-folder/device ingress belongs inside an opened project.
+
+The outer player stays fixed and docked. Bed/Overlay focus routes pinch, Move and size controls to one target; bed can shrink to25%, including50%, while overlay boxes can exceed the bed width. Insert/Previous/Next retain separate effects and placement locks. Schema5 preserves new transforms/focus and reads old projects. See [operation](../caplock/FOCUSED_WORKSPACE_R8.md), [receipt](../caplock/FOCUSED_WORKSPACE_R8.json) and [recovery](RESUME_JOKELET_ENGINE.md). Historical upstream/provider reconciliation, full shell/adapters and in-item speed/freeze/export remain unfinished.
+
+After owner testing, clean production starts from saved joke text in an empty project; test/rejected assets stay out of active selection with recoverable lineage. Future project/version/post-linked performance records remain planned, with organic/paid separate. No cleanup or analytics job has been performed here.
+
+---
+
 ## Current entry — CapLock R7
 
 Load video at the sticky top opens your visual joke-project picker. Open project restores its saved bed/CapLock state and makes associated assets available in Assets; use Grid/List, search and inline previews. Other folders and optional device ingress remain available. The clipper still opens the exact project/caption batch directly. [Project-entry instructions](../studio/PROJECT_PICKER_R7.md) and [release evidence](../caplock/PROJECT_ENTRY_R7.json).

@@ -1,6 +1,6 @@
 # Grill Sergeant Studio — owner direction
 
-October 30, 2026. **Status: CapLock R7 implements shared visual project entry/picker; the complete studio shell and cross-module adapters remain unbuilt.** Existing modules continue working. This direction supersedes treating CapLock and AspectLock as disconnected production destinations.
+October 30, 2026. **Status: CapLock R8 implements project-first visual entry/picker and focused compositing; the complete studio shell and cross-module adapters remain unbuilt.** Existing modules continue working. This direction supersedes treating CapLock and AspectLock as disconnected production destinations.
 
 ## Product model
 
@@ -40,3 +40,11 @@ Before claiming the studio operational, verify project/bed selection recovers th
 ## R7 project-entry implementation and clean production start
 
 [PROJECT_PICKER_R7.md](PROJECT_PICKER_R7.md) records the implemented sticky bed control, visual project/catalog picker, source-preserving legacy import, project asset selection and viewport centering. This is a shared module used by CapLock, not a finished cross-module shell. After owner testing, start clean from a new saved joke text; remove test/rejected material from active selection while retaining recoverable originals and lineage. Do not populate the new workspace with test overlays or auto-open an old caption batch as the new production. Cleanup remains pending owner testing and verified classification.
+
+## R8 owner corrections — project and focused surfaces
+
+[FOCUSED_WORKSPACE_R8.md](../caplock/FOCUSED_WORKSPACE_R8.md) governs the current entry and editing model. Open project is the entry; never frame the normal workflow as picking a bare video file. The suite reveals saved text/scripts/transcripts, source media/clips/sounds, alternate animations/reactions, HeyGen/ElevenLabs originals and their recorded settings/lineage, with individual asset saves. Reconcile missing historical provider/source records explicitly; no automatic paid regeneration. Other-folder/device ingress remains inside a current project.
+
+Fixed outer player, independently transformable bed and overlays, explicit focus, no bed-edge editing constraint. Loaded projects tuck title/version/project controls into a pull-down drawer; the player/transport/seek/placement stay docked. Schema5 preserves the new transforms and reads legacy projects. The complete cross-module shell/adapters remain unbuilt.
+
+Future performance records should bind exact source/project/export versions to platform post IDs, release dates and metrics, with organic and paid separate. This is planned, not an implemented analytics dashboard or a scheduled job. Clean-start requirements remain pending owner testing; preserve recoverable originals and keep test/rejected material out of active selection.

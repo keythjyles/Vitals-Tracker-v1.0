@@ -1,0 +1,126 @@
+{
+  "schema": "GS-FocusedWorkspace-1",
+  "date": "2026-10-30",
+  "release": "R8",
+  "status": "deployed_browser_verified_owner_phone_testing_pending",
+  "baseline": "1823fc8e9dbe59be0668077117263d010ab034db",
+  "behaviorCommit": "6a5c596c35e47f0ed76b3436f2ae3fc5ed9db0de",
+  "implemented": [
+    "Open project entry; project files and assets revealed inside the suite; individual Save asset",
+    "Picker in empty player; project title/version/controls tucked after media loads; pull/tap grip reveals drawer",
+    "Player, transport, seek and placement controls dock together, including through Save/export scrolling",
+    "Fixed outer viewport and fixed portrait composition surface; independent bed transform and overlay geometry",
+    "Bed pinch/controls25–400%; overlay pinch/resize/controls5–400% composition width; no bed-edge clipping",
+    "Bed/Overlay focus targets gestures; locked placements reject scaling/drag/resize; Rotate remains overlay-only",
+    "Project schema5 persists bed transform/focus; reads1–4 neutral transform; R7 rejects5 instead of losing state"
+  ],
+  "verification": {
+    "nodeChecks": 39,
+    "branchCI": {
+      "run": 41082582464,
+      "job": 124155273941,
+      "conclusion": "success"
+    },
+    "mainCI": {
+      "run": 41083008855,
+      "conclusion": "success"
+    },
+    "pages": {
+      "run": 41083007405,
+      "conclusion": "success"
+    },
+    "browser": {
+      "realCDPTwoTouchPinchToHalf": true,
+      "overlayGeometryIndependent": true,
+      "resizeBeyondBed": true,
+      "outerViewportUnchanged": true,
+      "pullDownAndTapDrawer": true,
+      "stickyThroughSaveExport": true,
+      "assetDownloadBytesChecked": true,
+      "lockedPlacementProtected": true,
+      "schema5JsonPreservation": true,
+      "caplockAspectlockClipperProjectRegressions": "passed",
+      "phoneSizes": [
+        "390x844",
+        "360x640",
+        "720x390"
+      ],
+      "pageScriptErrors": []
+    },
+    "live": {
+      "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/caplock/?v=R8",
+      "visibleRelease": "R8 in browser title / revealed project drawer",
+      "bed": "GS_Jokelet_Pebble_Straight_Stare_v01.mp4",
+      "caption": "1.webm",
+      "bedScale": 0.4096,
+      "overlayWidthPercent": 140.625,
+      "viewport": {
+        "width": 655,
+        "height": 430.546875
+      },
+      "bedDisplay": {
+        "width": 99.193603515625,
+        "height": 176.35198974609375
+      },
+      "overlayDisplay": {
+        "width": 340.546875,
+        "height": 191.546875
+      },
+      "paused": true,
+      "readyState": 4,
+      "mediaError": null,
+      "drawerHidden": true,
+      "originalMediaChanged": false,
+      "note": "Separate cloud browser used its recovered local review project with exact preserved Dropbox source copies. No owner private-cloud verification inferred.",
+      "proof": "caplock-r8-focused-workspace.jpg"
+    },
+    "ownerPhoneCloud": "unverified; owner testing continues",
+    "cacheDelivery": "Final cache-only identifiers caplock.css/mjs?v=8-final and project-picker.mjs?v=2-project; no behavior change from tested commit"
+  },
+  "projectContract": {
+    "entry": "Project, never a bare media file",
+    "scope": [
+      "joke text",
+      "scripts/transcripts",
+      "source media",
+      "clips",
+      "sounds",
+      "caption originals and cuts",
+      "alternate animations",
+      "reactions",
+      "HeyGen videos",
+      "ElevenLabs audio",
+      "B-roll",
+      "outro",
+      "provider identifiers/settings/costs and lineage"
+    ],
+    "historicalUpstreamReconciliation": "incomplete; picker shows recorded assets, not unverified completeness",
+    "metrics": "future link between exact versions/platform post IDs/publication dates and performance; organic and paid separate; not implemented"
+  },
+  "preservation": {
+    "newPaidGeneration": false,
+    "newProviderRequest": false,
+    "mediaDeletion": false,
+    "mediaMutation": false,
+    "sxLockUnchanged": true,
+    "aspectLockUnchanged": true,
+    "previewLock": "caption handoff/cache only; existing R29 engine retained",
+    "schedulesChanged": false,
+    "productionTestUploads": 0,
+    "drive": "existing backup queue; current UI work does not verify a fresh Drive receipt"
+  },
+  "cleanStart": {
+    "state": "pending completion of owner testing",
+    "direction": "Fresh empty project from saved joke text; keep test/rejected assets out of active selection with recoverable lineage",
+    "cleanupPerformed": false
+  },
+  "remaining": [
+    "full cross-module shell/adapters",
+    "exhaustive upstream provider/source reconciliation",
+    "physical-phone/authenticated-cloud acceptance",
+    "within-item speed ramps/freeze holds",
+    "finished CapLock exporter",
+    "performance analytics"
+  ],
+  "rollback": "Restore app/picker files from 1823fc8e9dbe59be0668077117263d010ab034db; retain schema5 projects and all original sources/history/receipts"
+}

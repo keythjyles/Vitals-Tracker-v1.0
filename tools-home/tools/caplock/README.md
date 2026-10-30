@@ -1,3 +1,15 @@
+# CapLock R8 — independent focused elements and docked project workspace
+
+Open project opens the joke workspace. Its text, scripts/transcripts, clips, sounds, caption originals/cuts, alternate animations, reactions, HeyGen/ElevenLabs outputs and other recorded assets remain individually selectable/savable inside it. Other-folder/device imports belong inside a current project. The empty player provides Open project; loaded projects tuck identity and controls into a pull-down drawer, while the player/transport/seek/placement dock together.
+
+The outer viewport stays fixed. Bed focus enables pinch/size controls25–400% and Move; Overlay focus enables pinch/resize/size controls5–400% of the composition width, beyond the bed edge. Only the outer player clips the display. Pinch/drag starts with one target and keeps it through the gesture. Locked inserted captions require Unlock before resizing. Fit view refits the fixed composition; Reset size affects only the focused element. Source bytes,25fps timing and bed audio rate remain intact.
+
+Schema5 preserves bed transform/focus; legacy1–4 migrate neutrally. R7 rejects5 rather than losing changes. Preserve5 JSON/media on rollback. [Operation and complete project contract](FOCUSED_WORKSPACE_R8.md); [release evidence](FOCUSED_WORKSPACE_R8.json).39 Node checks, actual two-touch/resize/dock/drawer browser checks, individual asset-byte download and earlier CapLock/AspectLock/project/clipper regressions passed. Physical phone and owner-authenticated cloud acceptance remain separate.
+
+Performance records are a future project extension, not implemented metrics. Clean-start cleanup remains pending owner testing. Full studio adapters, historical upstream reconciliation, in-item speed/freeze and final video export remain unfinished. No paid generation, source deletion or posting change.
+
+---
+
 # CapLock R7 — project entry and centered workspace
 
 Load video stays at the top while scrolling and opens the studio project picker, not the phone's photo picker. Search saved joke projects or known existing catalog jokes; use Grid/List and actual media previews. Open project restores its saved bed/edits and makes its recorded assets available through Assets. Other folders browses the existing Dropbox catalog; Import from device remains optional inside the picker. The old silent PreviewLock-library control is replaced.

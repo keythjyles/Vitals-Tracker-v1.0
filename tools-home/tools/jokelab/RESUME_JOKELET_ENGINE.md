@@ -1,3 +1,17 @@
+## CURRENT — CapLock R8 focused workspace / project-first entry
+
+Behavior code `6a5c596c35e47f0ed76b3436f2ae3fc5ed9db0de` is deployed. Branch CI41082582464 and main CI41083008855 succeeded:39 Node checks plus full CapLock/AspectLock/project/clipper regression and real two-touch browser tests. Pages41083007405 succeeded. Read [R8 operation](../caplock/FOCUSED_WORKSPACE_R8.md) and [evidence](../caplock/FOCUSED_WORKSPACE_R8.json). Cache-only final delivery identifiers are8-final /2-project.
+
+**Owner's corrected model:** Open project is the entry, never a bare file. Text, scripts/transcripts, clips, sounds, alternate animations, reactions, HeyGen videos, ElevenLabs audio and other assets reveal inside the suite and remain individually savable. Keep actual originals/provider IDs/settings/costs/lineage; missing historical upstream assets are not automatically reconciled by this picker. Future performance records belong to exact project/version/post IDs, keeping organic/paid separate; analytics remain planned.
+
+The player viewport stays fixed; Bed and Overlay focus target independent transforms. Bed can pinch/scale down to25% (including50%); overlay can pinch/resize beyond the bed and composition width, clipped only at the outer player. Locked placements remain protected. The dock includes player/transport/seek/placement and stays at top through Save/export. Empty player contains Open project; after loading, pull/tap the grip to reveal hidden title/version/project controls. Individual Save asset downloads actual source bytes; source originals are unchanged. Source timing/audio rate remains unchanged.
+
+Schema5 preserves bed transform/focus and overlay widths up to400%; older1–4 projects migrate with a neutral bed. R7 rejects5; retain5 on rollback. Live actual Pebble bed and1.webm verified paused/ready4/error-null, bed40.96%, overlay140.625% with independent dimensions and tucked drawer. Owner-phone/private-cloud acceptance remains separate from this local review and mocked authenticated CI.
+
+Clean-start directive remains pending completion of owner testing: new empty text-first project; test/rejected/bad assets outside active selection with recoverable lineage. No cleanup, production fixture upload, paid/provider generation, original-media mutation, schedules or new timer. SxLock/AspectLock engines unchanged. Full shell/adapters, historical upstream reconciliation, finished CapLock export and within-item speed/freeze remain unfinished. Older checkpoints are historical.
+
+---
+
 ## CURRENT — CapLock R7 project entry; owner testing in progress
 
 Code `91909fbc545c7c2c0636dac3bb14462593ebe5ee` adds the sticky top Load video selector and project-scoped Assets entry. Load video opens a visual searchable grid/list picker immediately, with request failures inside the picker. It reads saved project folders and joins known existing joke videos by canonical ledger/asset identity. Opening a saved joke restores the bed, original/cut captions, other recorded assets and CapLock state; bed-only/text-first projects do not require caption cuts. Opening a known catalog joke without a project saves recorded text and hash-verified original bytes through the existing Dropbox bridge. Unknown legacy text remains an explicit gap, never a substitute script.

@@ -1,5 +1,5 @@
 import {FocusGestures,scaledTarget} from './focus-controls.mjs?v=8';
-import {createProjectPicker} from '../studio/project-picker.mjs?v=2';
+import {createProjectPicker} from '../studio/project-picker.mjs?v=2-project';
 import {fitPortrait,preferredBed} from '../studio/project-index.mjs?v=1';
 import {captionNumber,activeCaption,startCaptionSequence,navigateCaption,moveCaptionDraft,insertCaption} from './placement.mjs?v=6';
 import {paintMatrix,matrixFrame} from '../../shared/item-matrix.mjs?v=1';
