@@ -1,9 +1,9 @@
 name: CapLock prototype checks
 on:
   pull_request:
-    paths: ['tools-home/tools/caplock/**', 'tools-home/shared/caplock-launch.js', '.github/workflows/caplock-prototype.yml']
+    paths: ['tools-home/tools/caplock/**', 'tools-home/tools/studio/**', 'tools-home/shared/caplock-launch.js', '.github/workflows/caplock-prototype.yml']
   push:
-    paths: ['tools-home/tools/caplock/**', 'tools-home/shared/caplock-launch.js', '.github/workflows/caplock-prototype.yml']
+    paths: ['tools-home/tools/caplock/**', 'tools-home/tools/studio/**', 'tools-home/shared/caplock-launch.js', '.github/workflows/caplock-prototype.yml']
 permissions:
   contents: read
 jobs:
@@ -20,6 +20,9 @@ jobs:
             /tools-home/assets/style.css
             /tools-home/shared/
             /tools-home/tools/caplock/
+            /tools-home/tools/studio/
+            /tools-home/tools/jokelab/PRODUCTION_LEDGER.json
+            /tools-home/tools/jokelets/catalog.json
             /tools-home/tools/sxlock/*.html
             /tools-home/tools/sxlock/*.js
             /tools-home/tools/sxlock/*.mjs
