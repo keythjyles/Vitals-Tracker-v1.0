@@ -1,3 +1,6 @@
+# R4 — joke-folder clip tray and durable workspace
+Receives numbered alpha clips from PreviewLock, opens the recorded bed or any selected bed, Place at playhead, immutable cloud edit snapshots and revision-guarded Dropbox save. Drive mirror is a separate queued process; no finished-video export or in-clip freeze/speed-ramp claim. See ../jokelab/ANIMATED_CAPTION_WORKFLOW.md.
+
 # CapLock R3 — independent animation speed (October29)
 
 Architect supplied17802.mp4: actual10.000s240-frame1280x720 H.264 animation at24fps, blue background with yellow/black lettering, varied directional entrances, pulsing question mark and expanding HIVES burst. This is evidence of a useful Gemini-app animation workflow. It is not alpha yet. Original source remains untouched.

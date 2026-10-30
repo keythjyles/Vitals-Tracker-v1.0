@@ -1,4 +1,4 @@
-/* R28: same stage-left / compact right rail as AspectLock and SxLock. */
+/* R29: same stage-left / compact right rail as AspectLock and SxLock. */
 header{max-width:980px;margin:auto;position:sticky;top:0;padding:4px!important}
 .stageWorkspace{display:grid;grid-template-columns:minmax(0,1fr) 82px;gap:4px;align-items:stretch}
 .picturePane{min-width:0;background:#05080c;display:flex;flex-direction:column}
@@ -25,3 +25,13 @@ main{padding:4px 7px;max-width:980px}section{padding:5px 0}#libraryBar{gap:4px;f
 body>p{display:none}nav[aria-label="Caption production tools"]{gap:3px!important;padding:3px!important}nav[aria-label="Caption production tools"] a{min-height:30px!important;padding:3px 5px!important;font-size:11px}
 #seekBar{height:23px;min-height:23px}#top{height:28px!important}#importPanel,details#settings{margin:4px 0}summary{font-size:12px;padding:5px 0}
 @media(max-width:350px){.stageWorkspace{grid-template-columns:minmax(0,1fr) 74px}#previewControls button{font-size:11px}}
+
+/* One right-hand column; a single app row belongs to the sticky player. */
+.stageWorkspace{grid-template-columns:minmax(0,1fr) 62px;gap:4px}
+#previewControls{justify-content:stretch;gap:3px}#previewControls .transport{display:flex;flex-direction:column;gap:3px}
+#previewControls button{width:100%;min-height:30px;font-size:11px;padding:4px 1px}#previewControls #play,#previewControls #stop{min-height:34px;font-size:18px}
+#viewerShell{height:44dvh;min-height:330px}#viewerShell video{max-height:48dvh;height:100%}
+.playerApps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;padding-top:4px}.playerApps button{min-height:30px;padding:4px 1px;font-size:11px}
+@media(max-width:350px){.stageWorkspace{grid-template-columns:minmax(0,1fr) 57px}.playerApps button{font-size:10px}}
+@media(max-height:600px){#previewControls button{min-height:23px;padding:2px;font-size:10px}#previewControls #play,#previewControls #stop{min-height:25px}#viewerShell{min-height:250px}.playerApps button{min-height:25px}}
+#jokeWorkspace{scroll-margin-top:65dvh;background:#142230;border:1px solid #344e65;border-radius:7px;padding:7px;margin:5px 0}#jokeWorkspace label{display:block;font-size:12px;margin:4px 0}#jokeWorkspace textarea,#jokeWorkspace input:not([type=color]),#jokeWorkspace select{max-width:100%;width:100%;background:#101c2a;color:#e6edf6;border:1px solid #456078;border-radius:4px;padding:5px}#jokeWorkspace p{font-size:12px;margin:5px 0;overflow-wrap:anywhere}.projectHeading{display:flex;gap:4px;margin:4px 0}.projectHeading select{min-width:0;flex:1}.projectHeading button{flex-shrink:0;font-size:12px;padding:6px}.cutMarks{display:grid;grid-template-columns:36px 1fr 36px 1fr 54px;gap:3px;align-items:center}.cutMarks button{padding:5px 2px}.captionCutRow{display:flex;align-items:center;gap:7px;padding:3px;border-bottom:1px solid #344e65}.captionCutRow span{flex:1}.captionCutRow button{min-width:32px;padding:4px}

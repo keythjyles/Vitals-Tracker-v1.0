@@ -1,3 +1,6 @@
+# R29 — project caption cutter and single-column player
+One right-hand transport column; app buttons appear once across the sticky player bottom. Joke project/text/animation save, ordered IN/OUT cuts, real alpha clip generation and Finish clips → CapLock. See ../jokelab/ANIMATED_CAPTION_WORKFLOW.md for source/backup rules and limits.
+
 # PreviewLock — AI-to-reviewer delivery protocol
 
 **Status: user-verified October 25, 2026.** This is the standard delivery workflow for Grill Sergeant video previews. Do not substitute a sandbox download link for the cloud handoff.

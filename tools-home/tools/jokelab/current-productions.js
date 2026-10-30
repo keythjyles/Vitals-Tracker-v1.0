@@ -60,6 +60,7 @@ function render(){
  const button=(text,fn)=>{const b=document.createElement('button');b.textContent=text;b.onclick=fn;actions.append(b);return b};
  for(const [label,decision]of edit.decision==='REMOVED'?[['Restore','REVIEW']]:[['Approve','APPROVED'],['Hold','HOLD'],['Remove','REMOVED']])button(label,async()=>{actions.querySelectorAll('button').forEach(b=>b.disabled=true);await save(item,{decision},message);row.dataset.decision=decision;actions.querySelectorAll('button').forEach(b=>b.disabled=false);if(!pending.has(item.id)&&['HOLD','REMOVED'].includes(decision))row.remove()});
  if(item.localSx)button('Resume',()=>resumeSx(item,message));
+ if(!item.localSx){const a=document.createElement('a');a.textContent='Project';a.href='../previewlock/cloud-test.html?v=R29&project='+encodeURIComponent(item.id)+(item.previewName?'&open='+encodeURIComponent(item.previewName):'');a.target='_blank';actions.append(a)}
  if(item.id==='dad-00bda89167b4f15850aa1c91'){const a=document.createElement('a');a.textContent='AI project';a.href='collaboration.html';actions.append(a)}
  if(item.workspace?.caplock){const a=document.createElement('a');a.textContent='CapLock';a.href=item.workspace.caplock;a.target='_blank';actions.append(a)}
  if(item.previewName){const a=document.createElement('a');a.textContent='PreviewLock';a.href='../previewlock/cloud-test.html?v=R27.1&open='+encodeURIComponent(item.previewName);a.target='_blank';actions.append(a)}

@@ -1,6 +1,8 @@
-/* R28: exact-file first, catalog second. No credential or source-media changes. */
+/* R29: exact-file first, catalog second. No credential or source-media changes. */
 (()=>{
  let selection=0,selectedAsset=null,deliveryMap={},localURL='';
+ window.gsPreviewSelection=()=>({path:typeof path==='string'?path:'',name:$('fileName').textContent,currentTime:v.currentTime,source:v.currentSrc});
+ $('caplockLink').onclick=()=>window.open('../caplock/','gs-caplock');$('toolsLink').onclick=()=>window.open('../../','gs-audio-tools');
  const status=text=>$('playbackStatus').textContent=text;
  const controls=['play','stop','minus5','minus1','plus1','plus5'];
  const enable=on=>controls.forEach(id=>$(id).disabled=!on);
@@ -8,7 +10,7 @@
  const safeName=name=>name&&!/[\\/\x00-\x1f]/.test(name)&&/\.mp4$/i.test(name);
  const target=name=>({name,path_display:'/Grill Sergeant/Timmy Motion Library/'+name});
  const fallback=name=>{const d=deliveryMap[name],a=$('savedCopy');a.hidden=!d?.savedCopy;if(d?.savedCopy)a.href=d.savedCopy;};
- fetch('deliveries.json?v=R28').then(r=>r.ok?r.json():{}).then(d=>{deliveryMap=d;fallback(requested()||selectedAsset?.name)}).catch(()=>{});
+ fetch('deliveries.json?v=R29').then(r=>r.ok?r.json():{}).then(d=>{deliveryMap=d;fallback(requested()||selectedAsset?.name)}).catch(()=>{});
  const originalApi=api;
  api=(endpoint,opt={})=>originalApi(endpoint,{...opt,signal:opt.signal?AbortSignal.any([opt.signal,AbortSignal.timeout(65000)]):AbortSignal.timeout(65000)});
  playVideo=async()=>{if(!v.getAttribute('src'))return status('Choose a video first.');try{await v.play();status('')}catch(e){status(e.name==='NotAllowedError'?'Video ready — tap Play.':'Could not start playback. Tap Reload or Open saved video.')}};
