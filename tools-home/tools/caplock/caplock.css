@@ -45,3 +45,6 @@ h1{font-size:20px;margin:4px 0}#viewerPage{padding:0;border:0;background:none}#s
 #scene{overflow:visible;background:transparent;transform:none!important}#bedSurface{position:absolute;width:100%;height:100%;left:0;top:0;transform-origin:center;z-index:0;touch-action:none}#bedSurface.focused-bed{outline:1px dashed #80b8db;outline-offset:1px}#layerRoot{overflow:visible}#viewport{overflow:hidden}#bedLoader button{pointer-events:auto;min-height:44px;background:#efcd87;color:#142333;font-weight:600}#bedLoader.has-media{display:none}#bedLoader p{position:static;margin:5px;font-size:12px}
 .layer-resize{position:absolute;right:-7px;bottom:-7px;width:20px;height:20px;min-height:20px;padding:0;border:2px solid #ffda8a;background:#24384c;border-radius:3px;touch-action:none;font-size:14px;line-height:14px;z-index:2}.media-layer:not(.selected-layer) .layer-resize{display:none}.media-layer.locked-layer .layer-resize{display:none}#scene #video,#scene #decoded{width:100%;height:100%}
 @media(max-height:480px){.workspace{--player-height:250px}#focusBar{min-height:28px}#focusBar button{height:25px;min-height:25px}#placementBar{margin:0}}
+
+/* Let the dock's containing block include save/export and the rest of the page. */
+#viewerPage{display:contents}
