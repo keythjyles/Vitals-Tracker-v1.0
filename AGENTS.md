@@ -1,3 +1,13 @@
+## Owner correction — unapproved shell prototype, October 30, 2026
+
+**The separate ChatGPT Site formerly titled “GS Production Shell” is an unapproved, unintended prototype. It is not the Grill Sergeant studio plan, an approved design, the canonical production workspace, or a replacement for the existing tools.** The owner requested a discussion of a shell/container; that session began building before the design discussion was agreed. Its Site display title is now “UNAPPROVED — GS Shell Prototype — Not the Plan” (Site ID `appgprj_6ae4e8b998888191b81f03ac7a45a427`; original Library reference `libfile_57965f2357188191abf94495558928d5`). Preserve this identity so old links and captured text cannot be mistaken for approval. The title correction does not change its historical page content or turn its browser-local storage into an approved workflow.
+
+Do not adopt, extend, integrate, or promote that prototype as the agreed architecture. Do not infer approval from its publication or presence in Library. Preserve it as historical work; no deletion or production migration was requested. Existing owner requirements remain valid: project-first access, all joke assets together, durable working projects in Dropbox with Drive backup, preservation and recovery, editable layers, compact right/bottom phone controls, and reuse of the existing tools. Those requirements do not approve the prototype's layout, implementation, storage model, or tab structure.
+
+**Development is stopped.** The next shell work is discussion: examine the actual existing tools and production process, identify overlap, and agree how one project and its assets move through the modules before implementation is authorized. A request to discuss is not permission to build. Reuse the existing tools rather than recreating their functionality or creating another standalone shell. This record correction changes no application code, assets, scheduled work, or approved release behavior. Earlier shell proposals below remain historical; they do not establish an agreed final design.
+
+---
+
 # Instructions for AI operators
 
 **Mandatory AI onboarding:** [AI MUST READ](AI_MUST_READ.md) — read before any changes. It lists universal and task-specific required documents; preserve source material and follow the master index.
