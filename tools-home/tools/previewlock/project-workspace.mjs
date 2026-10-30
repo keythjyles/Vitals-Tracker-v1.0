@@ -14,7 +14,7 @@ function render(){const p=state.project;if(p){$('jokeTitle').value=p.title;$('jo
  $('launchCaplock').disabled=a?.cuts?.status!=='complete';renderCuts();if(p?.assets.some(a=>a.cuts?.status==='running'))startPoll();}
 async function projects(){const d=await api('/api/joke-projects');$('jokeProjects').replaceChildren();for(const p of d.projects){const o=document.createElement('option');o.value=p.id;o.textContent=p.id==='dad-00bda89167b4f15850aa1c91'?'Pebble':p.id;$('jokeProjects').append(o);}$('jokeProjects').value=id;}
 async function guarded(fn){try{await fn();}catch(e){status(e.message);}}
-$('cutCaptions').onclick=()=>{panel.open=!panel.open;if(panel.open){panel.scrollIntoView({behavior:'smooth',block:'start'});guarded(async()=>{await projects();await load();});}};
+$('cutCaptions').onclick=()=>{const suffix=state.project?'&project='+encodeURIComponent(id)+(selectedAsset?'&asset='+encodeURIComponent(selectedAsset):''):'';window.open('../cliplock/?v=R2'+suffix,'gs-cliplock');};
 $('loadJokeProject').onclick=()=>guarded(async()=>{id=$('jokeProjects').value;await load();});
 $('newJokeProject').onclick=()=>{id='project-'+crypto.randomUUID();state={project:null,rev:null};selectedAsset='';cuts=[];$('jokeTitle').value='';$('jokeText').value='';render();status('Enter a name and save the joke text.');};
 $('jokeTextFile').onchange=e=>guarded(async()=>{$('jokeText').value=await e.target.files[0].text();});
@@ -28,4 +28,5 @@ function startPoll(){if(poll)return;poll=setInterval(async()=>{try{state=await a
 $('saveCaptionCuts').onclick=()=>guarded(async()=>{if(!asset()||!cuts.length)throw Error('Save an animation and add cuts first.');$('saveCaptionCuts').disabled=true;try{state=await api(endpoint('/cuts'),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({rev:state.rev,assetId:selectedAsset,cuts,chroma:{color:$('captionBlue').value,similarity:.18,blend:.04}})});render();startPoll();}finally{$('saveCaptionCuts').disabled=false;}});
 $('launchCaplock').onclick=()=>{if(asset()?.cuts?.status!=='complete')return;window.open('../caplock/?v=R9&project='+encodeURIComponent(id)+'&caption='+encodeURIComponent(selectedAsset),'gs-caplock');};
 if(new URLSearchParams(location.search).has('project')){panel.open=true;guarded(async()=>{await projects();await load();});}
+
 
