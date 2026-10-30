@@ -522,8 +522,12 @@
         {
           "runId": "GS-GEMINI-APP-PEBBLE-20261029-02",
           "record": "runs/GS-GEMINI-APP-PEBBLE-20261029-02.json",
-          "status": "generating",
-          "publicationReady": false
+          "status": "rendered_pending_owner_review",
+          "publicationReady": false,
+          "filename": "GS_Pebble_Gemini_NATIVE_CAPTIONS_v02.mp4",
+          "sha256": "d4d393a36a0663348970e10646f54afef474190f40848b063b114c533ce1080a",
+          "driveId": "1Fmv9n-Bxoy8Eewv1tUzz5fP_bvg7V-Wr",
+          "dropboxId": "id:lnTiunUsDy8AAAAAAAAC7Q"
         }
       ]
     },

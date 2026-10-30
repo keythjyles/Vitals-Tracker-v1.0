@@ -12,15 +12,58 @@
   "inputMedia": [],
   "prompt": "Create animated captions on a completely flat, solid blue background.\n\nKeep it simple and fast, with consistent, bold lettering. Most phrases just pop or slide in, hold briefly, then disappear.\n\nMake the question mark wildly exaggerated and cartoonish. Make BOULDER! huge and comical, landing with a heavy impact. Keep the extra animation concentrated on those two moments.\n\nEach item below appears alone and disappears completely before the next. Show only the exact text, without numbers or added punctuation:\n\n1. What did\n2. the shy\n3. Pebble\n4. wish for\n5. ?\n6. That\n7. she was\n8. a little\n9. BOULDER!\n\nKeep every complete phrase safely inside the frame. No clipped letters, scenery, loose rocks, extra props, background shading or narration.",
   "aspectRatio": "16:9 native caption source",
-  "status": "generating",
+  "status": "rendered_pending_owner_review",
   "cost": {
     "additionalPurchase": false,
     "newApiRequests": 0,
     "actualQuotaOrCharge": "Not shown by Gemini UI",
     "oldApiRunReservations": "Unchanged; separate run retains USD4.75."
   },
-  "recovery": "Do not resubmit. Reopen exact conversation and retrieve accepted generation.",
-  "output": null,
+  "recovery": "Original downloaded and preserved. Do not generate again; retrieve saved bytes and edit derivatives.",
+  "output": {
+    "fileName": "GS_Pebble_Gemini_NATIVE_CAPTIONS_v02.mp4",
+    "sha256": "d4d393a36a0663348970e10646f54afef474190f40848b063b114c533ce1080a",
+    "bytes": 1957328,
+    "width": 1280,
+    "height": 720,
+    "fps": 24,
+    "frames": 240,
+    "videoDuration": 10,
+    "containerDuration": 10.005,
+    "videoCodec": "h264",
+    "audioCodec": "aac",
+    "alpha": false,
+    "libraryFileId": "libfile_fe79c99b8370819183b5484dcb86a15e",
+    "drive": {
+      "id": "1Fmv9n-Bxoy8Eewv1tUzz5fP_bvg7V-Wr",
+      "parentId": "1xvvS6Lh-R1qNtP1Bg0t2ljb76FhNfQFC",
+      "metadataReadback": "Name, MIME, size1957328 and parent verified; provider checksum not returned."
+    },
+    "dropbox": {
+      "id": "id:lnTiunUsDy8AAAAAAAAC7Q",
+      "path": "/Grill Sergeant/Timmy Motion Library/GS_Pebble_Gemini_NATIVE_CAPTIONS_v02.mp4",
+      "status": "completed",
+      "bytes": 1957328
+    }
+  },
   "publicationReady": false,
-  "ownerReview": "Pending"
+  "ownerReview": "Pending",
+  "verification": {
+    "fullDecode": "passed",
+    "visualReview": "4fps contact sheet covers full 10 seconds; native frames around4.40–4.75s separately inspected.",
+    "text": "All nine intended phrase poses observed; That has no added exclamation mark.",
+    "style": "Plain white bold setup phrases, cartoon question mark bounce and outlined oversized BOULDER impact. No rocks or scenery observed.",
+    "issues": [
+      "Question mark exit and That entrance overlap briefly around4.5s. Must separate when extracting caplets; strict independent-screen brief is not fully met.",
+      "Blue background remains encoded opaque picture; alpha conversion not performed.",
+      "Audio track exists; no auditory approval or no-narration certification claimed."
+    ],
+    "nativePlayback": "Play video control responded; actual video valid by whole-file decode. No owner approval inferred."
+  },
+  "quota": {
+    "observed": "Gemini UI after completion says You’re out of videos for now.",
+    "resetText": "Videos will be available again on Oct 29 at 10:18 PM, or upgrade to keep going.",
+    "timezone": "UI timezone not verified; no converted reset time asserted.",
+    "action": "No upgrade or further generation attempted."
+  }
 }
