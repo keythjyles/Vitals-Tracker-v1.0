@@ -44,3 +44,7 @@ Direct path: `tools/caplock/`. Independent phone-first caption prototype; global
 ### CapLock R2 revision
 
 CapLock is now transcript-first: selectable/movable words with Gemini directions, approved visual-protocol inheritance or independent segment prompts, then transparent animation/graphic/audio layers in the viewer. Native caption tools are collapsed. Rotate is explicitly enabled and Square resets exactly0°. Project version2 preserves layers/word metadata and imports R1. Finished-video export/cloud project saves remain pending. Existing production engines are unchanged.
+
+## ClipLock · GS-TOOL-CLIPLOCK · R1
+
+Source: `tools-home/tools/cliplock/`. Intended live path: https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/cliplock/?v=R1 . Quick WavLock-style video cutter using the existing studio picker, project API and pinned GS1 media library. Source frame IN/exclusive OUT, selection preview, independent MP4/WebM download, original-preserving project save plus cut recipe. Source baseline ac16a29694359ff328698a3bfca47d05b14fcb0f. Local core checks passed; browser/deployment/phone and authenticated cloud acceptance remain separate. No existing editor or backend changed. Rollback removes launch entries/files but retains saved original/derived media and lineage. See the tool README and cliplock-checks workflow for verification.

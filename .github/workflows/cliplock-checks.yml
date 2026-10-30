@@ -1,0 +1,34 @@
+name: ClipLock cutter checks
+on:
+  push:
+    paths: ['tools-home/tools/cliplock/**', '.github/workflows/cliplock-checks.yml']
+  pull_request:
+    paths: ['tools-home/tools/cliplock/**', '.github/workflows/cliplock-checks.yml']
+permissions:
+  contents: read
+jobs:
+  clipper:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            tools-home/tools/cliplock
+            tools-home/tools/studio
+            tools-home/tools/sxlock/vendor
+            tools-home/tools/jokelab
+            tools-home/tools/jokelets
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: command -v ffmpeg || (sudo apt-get update -qq && sudo apt-get install -y ffmpeg)
+      - run: npm install --prefix /tmp/clip-browser --no-audit --no-fund playwright@1.62.1
+      - run: node /tmp/clip-browser/node_modules/playwright/cli.js install --with-deps chromium
+      - run: node --test tools-home/tools/cliplock/tests/core.test.mjs
+      - run: |
+          python3 -m http.server 8767 --bind 127.0.0.1 >/tmp/clip-server.log 2>&1 &
+          curl --retry 20 --retry-connrefused --retry-delay 1 --fail --silent http://127.0.0.1:8767/tools-home/tools/cliplock/ >/dev/null
+          node tools-home/tools/cliplock/tests/browser.cjs
+        env:
+          PLAYWRIGHT_MODULE: /tmp/clip-browser/node_modules/playwright
