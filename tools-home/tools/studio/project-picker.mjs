@@ -73,5 +73,5 @@ export function createProjectPicker({api,onOpenProject,onUseAsset,onLocal,onPaus
  }
  search.oninput=()=>{if(current?.startsWith('/')){const q=search.value.toLowerCase();for(const row of results.children)row.hidden=!row.textContent.toLowerCase().includes(q);}else render();};
  dialog.addEventListener('close',()=>{stop();observer.disconnect();++epoch;});
- return {open:async(id)=>{onPause?.();footer.hidden=!hasProject();if(!dialog.open)dialog.showModal();status.classList.remove('error');await load();if(id&&dialog.open)showProject(id);},close:()=>dialog.close(),showCurrent:()=>current};
+ return {open:async(id)=>{onPause?.();footer.hidden=!hasProject();folders.disabled=!hasProject();if(!dialog.open)dialog.showModal();status.classList.remove('error');await load();if(id&&dialog.open)showProject(id);},close:()=>dialog.close(),showCurrent:()=>current};
 }
