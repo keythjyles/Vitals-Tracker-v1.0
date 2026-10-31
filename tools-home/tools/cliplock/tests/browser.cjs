@@ -60,6 +60,7 @@ const {execFileSync}=require('node:child_process');
  await page.goto('http://127.0.0.1:8767/tools-home/tools/cliplock/?project=empty-fixture');await page.waitForFunction(()=>!document.querySelector('#importCaption').disabled);
  assert.equal(await page.locator('#video').isVisible(),false);assert.match(await page.locator('#emptyMessage').innerText(),/No caption animation/);
  await page.locator('#import').setInputFiles(source);await page.waitForFunction(()=>!document.querySelector('#next').disabled);
+ await page.locator('#play').click();await page.waitForFunction(()=>document.querySelector('#video').currentTime>.8);const beforePlayStep=await page.locator('#video').evaluate(v=>Math.floor(v.currentTime*24));await page.locator('#next').click();assert.equal(await page.locator('#video').evaluate(v=>v.paused),true);assert.ok(Number((await page.locator('#clock').innerText()).match(/^F([0-9]+)/)[1])>=beforePlayStep,'Step pauses and advances from current playback');
  for(const viewport of [{width:360,height:640},{width:390,height:844},{width:720,height:390}]){await page.setViewportSize(viewport);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);}
  assert.deepEqual(errors,[]);
  console.log('Caption-only selection/import, rounded24fps +1, rapid20-tap cursor, reverse stepping, mark isolation, overlap queue, custom naming, draft recovery, save and CapLock handoff passed. Cloud uses authenticated fixtures; no production writes.');
