@@ -1,3 +1,9 @@
+## Studio milestone 0 — live/source inspection and layout review, October 31
+
+[Inspection and first integration review](STUDIO_MILESTONE_0_REVIEW_2026-10-31.md) records the proposed Project → Cut → Captions → Scene → Sound → Review flow, actual Pebble cloud state and exact adapter gaps. Fresh live identities: SxLock R27.1, CapLock R9, AspectLock R27, Clipper R4, PreviewLock R29. Pebble retains nine legacy v1 cuts, a schema4 CapLock edit at frame138 and62 snapshot references; latest manifest backup is pending and the existing receipt covers an earlier snapshot. Proposed first implementation slice: Project/Cut/Captions, including a durable recipe-only Clipper checkpoint. Layout discussion is pending; no shell application, provider call, project migration, cleanup or runtime mutation occurred. This is a design review, not approval of the rejected Site or a completed adapter implementation.
+
+---
+
 ## Portable studio handoff — October 31, 2026
 
 [GS Studio Master Handoff](GS_STUDIO_MASTER_HANDOFF_2026-10-31.md) consolidates the project-first production flow, current Clipper R4 / CapLock R9 foundations, native Gemini caption method, proposed module adapters, remaining work, verification and cross-platform recovery. It is a documentation handoff for the next session, not shell implementation or approval of the rejected Site prototype. The pending shell design discussion and existing tool/media preservation requirements remain in force. Older checkpoints below remain historical where superseded.
