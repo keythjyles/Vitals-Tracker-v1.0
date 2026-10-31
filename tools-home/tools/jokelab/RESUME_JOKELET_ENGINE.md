@@ -1,3 +1,9 @@
+## Portable studio handoff — October 31, 2026
+
+[GS Studio Master Handoff](../studio/GS_STUDIO_MASTER_HANDOFF_2026-10-31.md) consolidates the project-first production flow, current Clipper R4 / CapLock R9 foundations, native Gemini caption method, proposed module adapters, remaining work, verification and cross-platform recovery. It is a documentation handoff for the next session, not shell implementation or approval of the rejected Site prototype. The pending shell design discussion and existing tool/media preservation requirements remain in force. Older checkpoints below remain historical where superseded.
+
+---
+
 ## Caption Clipper R4 — immediate cut list and versioned blank passes, October30
 
 Owner rule: added elements populate their editable list directly under the player, following SxLock's established pattern. Source details, optional controls and explanatory panels do not precede the list. This release applies that rule to Caption Clipper; it does not redesign SxLock or AspectLock.

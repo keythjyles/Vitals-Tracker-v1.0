@@ -44,3 +44,7 @@
 
 ## Render workspace and service discovery
 Before Render/Gemini/GS backend work, read [RENDER_SERVICE_MAP.json](tools-home/tools/jokelab/RENDER_SERVICE_MAP.json). The workspace question is resolved; route GS media/Gemini checks to gs-previewlock-api and voice to jokelet-api. The root lex-backend is a separate legacy VA-analysis/testing runtime. Current service metadata wins if IDs/build paths have changed; do not infer service identity from the shared repository name.
+
+## Studio shell design and cross-platform continuation — October 31, 2026
+
+Read the [portable GS Studio Master Handoff](tools-home/tools/studio/GS_STUDIO_MASTER_HANDOFF_2026-10-31.md) before studio/container work. It consolidates the existing tools, project/asset workflow, source/API map, implementation sequence and verification limits. The owner requested this document for reuse as instructions; creating it does not implement or approve a shell layout. Preserve the pending design discussion and never adopt the explicitly unapproved shell Site as the plan.
