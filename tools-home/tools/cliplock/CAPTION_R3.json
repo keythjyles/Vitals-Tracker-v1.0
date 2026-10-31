@@ -1,0 +1,75 @@
+{
+  "schema": "GS-CaptionClipperRelease-1",
+  "release": "R3",
+  "date": "2026-10-30",
+  "baseline": "222506eb6f392e48570bc1b2ce6bb1aa51c60bfe",
+  "behaviorCommit": "023e0a33915e059f97f62244132bc5f3c09c18b0",
+  "status": "deployed_ci_verified_live_entry_and_menu_verified_owner_phone_pending",
+  "purpose": "Caption Clipper on the existing ClipLock URL/ID. General animation clipping belongs to SceneLock direction (currently AspectLock), not this caption page.",
+  "fix": {
+    "frameStep": "Always source-picture stepping. Requested paused frame is independent from rounded currentTime; seek inside its native interval. Playback stepping starts from current media frame.",
+    "boundary": "Mark IN/OUT copies the displayed source frame. Handles/fields adjust independent ranges; stepping does not silently change markers.",
+    "scope": "Latest saved caption original, caption-only source selector, empty-project caption import, no general video/audio export controls.",
+    "continuity": "Existing numbered/named overlapping queue, project/source-bound draft plus cursor, silent alpha render and exact CapLock batch remain.",
+    "links": "Tools authoring source and deployed menu, CapLock and PreviewLock launch this same Caption Clipper R3."
+  },
+  "verification": {
+    "nodeTests": 10,
+    "branchClipLock": {
+      "run": 41151665137,
+      "job": 124389352293,
+      "conclusion": "success"
+    },
+    "branchCapLock": {
+      "run": 41151529236,
+      "conclusion": "success",
+      "commit": "4e0b050c282fd2f3d582d5ada6e0ad00cb3b95e5",
+      "note": "Latest CapLock/PreviewLock link changes; final subsequent commit changes only caption stepping."
+    },
+    "browser": [
+      "24fps rounded media-time emulation",
+      "20 rapid forward requests before seek completion",
+      "reverse stepping and picture inside requested frame",
+      "IN unchanged when stepping after Mark IN or Add cut",
+      "step from active playback pauses at current source frame",
+      "overlap queue, custom name, draft recovery, durable-request payload and exact CapLock handoff",
+      "caption original chosen instead of bed; empty project imports captions",
+      "360x640,390x844,720x390 no horizontal overflow"
+    ],
+    "staticControls": "No missing literal controller elements",
+    "ownerPhone": "Not verified by agent; browser tests use authenticated fixtures, not owner private session",
+    "live": {
+      "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/cliplock/?v=R3",
+      "title": "Caption Clipper · GS-TOOL-CLIPLOCK · R3",
+      "toolsMenu": "Both A–Z entry and production entry read Caption Clipper and open R3; observed by direct browser interaction",
+      "scope": "Caption animation entry, Caption source section, no general single-cut export controls",
+      "proof": "caption-clipper-r3.jpg",
+      "sourceFrameInteraction": "Browser CI regression with authenticated fixtures; owner private browser not controlled"
+    },
+    "mainClipLock": {
+      "run": 41151814819,
+      "conclusion": "success"
+    },
+    "mainCapLock": {
+      "run": 41151814948,
+      "conclusion": "success"
+    },
+    "pages": {
+      "run": 41151814038,
+      "conclusion": "success"
+    }
+  },
+  "preservation": {
+    "paidGeneration": 0,
+    "productionTestUploads": 0,
+    "sourceMediaChanged": false,
+    "backendChanged": false,
+    "aspectLockChanged": false,
+    "sxLockChanged": false,
+    "wavLockChanged": false,
+    "shellBuilt": false,
+    "schedulesChanged": false,
+    "generalAnimationEngineSource": "Retained, not exposed as caption export UI"
+  },
+  "rollback": "Restore changed source/menu files from222506eb6f392e48570bc1b2ce6bb1aa51c60bfe, preserving every project, source, batch, editor snapshot and backup receipt."
+}

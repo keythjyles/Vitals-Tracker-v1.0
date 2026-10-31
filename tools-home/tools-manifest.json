@@ -109,10 +109,10 @@
     {
       "tool": "cliplock",
       "tool_id": "GS-TOOL-CLIPLOCK",
-      "source_version": "R2",
+      "source_version": "R3",
       "hosted_path": "tools/cliplock/index.html",
-      "description": "Queue numbered or named caption cuts with independent overlaps/gaps, visual IN/OUT adjustment, saved originals and exact-project CapLock handoff.",
-      "verification": "Release checks/deploy status recorded in tools/cliplock/BATCH_R2.json.",
+      "description": "Caption Clipper: reliable native-frame stepping; caption originals, independent numbered/named cuts, transparent components and exact CapLock handoff.",
+      "verification": "R3 release checks and deployment receipts in tools/cliplock/CAPTION_R3.json.",
       "operator_guide": "tools/cliplock/README.md"
     }
   ]

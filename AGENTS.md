@@ -1,3 +1,15 @@
+## Caption Clipper R3 — source stepping and caption-only scope, October30
+
+Owner correction: this is a caption clipper. General animation clipping belongs with the future SceneLock direction (currently AspectLock); that does not authorize an AspectLock rewrite or rename in this repair.
+
+−1f/+1f always move the source picture exactly one native frame, regardless of the last marked boundary. The selected frame is maintained independently from rounded media currentTime; paused picture seeking goes inside the intended frame. Mark IN/OUT copies that displayed native frame into the range. Handles/numeric fields adjust boundaries independently. Preview stops on the last included frame. Rapid stepping and24fps rounded-time reads have direct browser regressions.
+
+The existing ClipLock URL/tool ID is retained and the page/menu says Caption Clipper R3. It chooses saved caption originals instead of loading the joke bed, supports import into an opened project, keeps numbered/named overlapping caption batches and exact CapLock handoff, and removes general single-video export controls from this caption UI. Existing rendering engine source is retained for reuse; no separate animation clipper or shell was built here. CapLock/PreviewLock clipper links point to this same caption tool.
+
+[Operation](tools-home/tools/cliplock/README.md) · [evidence](tools-home/tools/cliplock/CAPTION_R3.json). Existing originals, cuts, editor saves and backups remain intact. Drive remains queued until verified. Physical owner-phone/private-cloud acceptance remains separate from authenticated fixture browser tests. Older R2 hidden-boundary step-mode and general export instructions below are superseded.
+
+---
+
 ## ClipLock R2 — owner-authorized caption batch work, October30
 
 The owner explicitly said “Make it work” after agreeing OUT→next IN as an adjustable default, with overlaps/gaps and independent saved ranges. This authorizes extending EXISTING ClipLock, not building the unapproved shell. The shell remains discussion-only.

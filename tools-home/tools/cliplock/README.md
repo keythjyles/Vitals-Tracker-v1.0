@@ -1,3 +1,19 @@
+# Caption Clipper R3 · existing ClipLock tool
+
+Cut a Gemini caption animation into numbered or custom-named, independent components for CapLock. This is caption preparation; general scene animation clipping is a separate SceneLock direction (currently AspectLock).
+
+Open the joke project. Its latest saved caption original loads automatically; Caption source lets you choose another saved caption or import the Gemini animation. The bed stays in CapLock. If no caption exists, import it inside the opened project.
+
+**−1f and +1f always move the source picture.** They never silently edit a boundary. Rapid taps retain every requested step even while the decoder is seeking, and the displayed native frame is independent from rounded media-time reads. Mark IN/OUT copies that frame into the selection. Drag the gold/blue handles or edit the IN/OUT fields to adjust a boundary. Exclusive OUT is the first frame not included; selection playback stops on the last included frame.
+
+Add cut queues the current range and suggests its OUT as the next IN. That IN can move backward into the previous range or forward to leave a gap; saved cuts remain independent. Tap a queued name to edit/update or use its play button. Automatic names are1,2,3… with optional custom names. Save clips preserves/reuses the original, renders silent25fps WebM components in the same caption source's cut-pass subfolder, and preserves prior cut history. Finish → CapLock restores the exact project and component batch. Caption blue removal / existing VP9 transparency behavior, immutable originals and the established Dropbox/queued Drive workflow are unchanged from R2.
+
+General MP4/video-with-sound export controls have been removed from this caption page. The original conversion engine remains in source for reuse; no new animation clipper, SceneLock engine, AspectLock redesign, provider generation or shell is implemented here. Existing ClipLock links and stable ID remain valid. Tools, CapLock and PreviewLock all launch this same Caption Clipper.
+
+See CAPTION_R3.json for verified release evidence and limitations. Rollback restores app/menu source from222506eb6f392e48570bc1b2ce6bb1aa51c60bfe while retaining every original, project, component batch and editor snapshot. Earlier R2 instructions below are historical.
+
+---
+
 # ClipLock R2 — fast caption batches
 
 Use the existing ClipLock from Tools. Open the joke project, select its Gemini animation under Source / output (or import that animation into the open project), then work entirely in the player.
