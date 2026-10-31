@@ -4,3 +4,10 @@ test('Cloud success requires exact original bytes and receipt',()=>{const r={per
 test('Cut filenames cannot traverse or overwrite a source path',()=>{assert.equal(clipName('../../clip:one.mp4','webm'),'_.._clip_one.webm');assert.equal(clipName('','mp4'),'Clip.mp4');});
 
 test('CFR metadata is declared only for genuinely constant source timing',()=>{assert.equal(constantFrameRate([0,.04,.08],.12),25);assert.equal(constantFrameRate([.52,.56,.60],.64),25);assert.equal(constantFrameRate([0,.04,.09],.13),null);});
+
+
+test('frame preview seeks inside native variable frame boundaries',async()=>{
+ const {frameSeekTime,steppedFrame}=await import('../core.mjs');const meta={times:[0,.0416666667,.0833333333,.125],end:.1666666667};
+ for(let i=0;i<meta.times.length;i++){const t=frameSeekTime(meta,i);assert.ok(t>meta.times[i]);assert.ok(t<(meta.times[i+1]??meta.end));}
+ assert.equal(steppedFrame(0,-1,4),0);assert.equal(steppedFrame(3,1,4),3);
+});

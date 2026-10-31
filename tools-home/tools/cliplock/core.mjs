@@ -4,3 +4,11 @@ export function clipName(name,ext){return (String(name||'Clip').replace(/\.[^.]+
 export function cloudResult(receipt,hash,bytes){if(!receipt?.persisted&&!receipt?.reused)throw Error('Cloud save was not acknowledged.');if(receipt.asset?.sha256!==hash||receipt.asset?.size!==bytes||!receipt.asset?.path)throw Error('Cloud byte verification did not match.');return receipt.asset;}
 
 export function constantFrameRate(times,end){if(!times.length)return null;const step=(end-times[0])/times.length;if(!(step>0)||!times.every((t,i)=>Math.abs(t-(times[0]+i*step))<.00001))return null;return 1/step;}
+
+
+// Display inside the requested frame, not on its codec/rounded-time boundary.
+export function frameSeekTime(meta,frame){
+ const first=meta.times[frame],end=meta.times[frame+1]??meta.end;
+ return first+Math.max(0,(end-first)/2);
+}
+export function steppedFrame(current,delta,total){return Math.max(0,Math.min(total-1,current+delta));}
