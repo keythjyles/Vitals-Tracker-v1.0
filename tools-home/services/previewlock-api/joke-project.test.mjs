@@ -19,6 +19,20 @@ test('project → stored original → real alpha cuts → CapLock state, with CA
  const out=join(dir,'1.webm');await writeFile(out,files.get(cuts.clips[0].path).bytes);const decode=spawnSync('ffmpeg',['-v','error','-c:v','libvpx-vp9','-i',out,'-frames:v','1','-f','rawvideo','-pix_fmt','rgba','-']);assert.equal(decode.status,0,decode.stderr?.toString());assert.equal(decode.stdout[3],0);assert.equal(decode.stdout[(45*160+80)*4+3],255);
  const info=spawnSync('ffprobe',['-v','error','-count_frames','-select_streams','v','-show_entries','stream=nb_read_frames,r_frame_rate','-of','json',out]);const stream=JSON.parse(info.stdout).streams[0];assert.equal(stream.nb_read_frames,'8');assert.equal(stream.r_frame_rate,'25/1');const handoff=await call('GET','/caplock?id=test-project&asset='+asset.id);assert.equal(handoff.asset.cuts.clips.length,2);assert.equal(handoff.rev,p.rev);
  const session={schema:'GS-CapLock-1',version:3,fps:25,captions:[],clips:[],workspace:{id:'test-project',assetId:asset.id,playhead:17}};p=await call('POST','/caplock?id=test-project',{rev:p.rev,session});assert.equal(p.project.caplock.workspace.playhead,17);assert.equal(p.project.caplockHistory.length,1);assert.equal(p.project.backup.state,'pending');
+ const v1=structuredClone(p.project.assets[0].cuts),v1Bytes=v1.clips.map(c=>Buffer.from(files.get(c.path).bytes));
+ const passRequest={rev:p.rev,assetId:asset.id,previousPassId:v1.id,requestId:'pass-request-0001',ranges:v1.ranges,chroma:v1.chroma};
+ p=await call('POST','/cut-pass?id=test-project',passRequest);assert.equal(p.code,200);
+ assert.equal(p.project.assets[0].cuts.version,2);assert.equal(p.project.assets[0].cuts.status,'draft');assert.deepEqual(p.project.assets[0].cuts.ranges,[]);assert.deepEqual(p.project.assets[0].cuts.clips,[]);
+ assert.equal(p.project.assets[0].cutHistory.length,1);assert.equal(p.project.assets[0].cutHistory[0].clips[0].path,v1.clips[0].path);assert.equal(p.project.caplock.workspace.playhead,17);
+ const retry=await call('POST','/cut-pass?id=test-project',passRequest);assert.equal(retry.reused,true);assert.equal(retry.project.assets[0].cuts.version,2);assert.equal(retry.project.assets[0].cutHistory.length,1);
+ const changed=await call('POST','/cut-pass?id=test-project',{...passRequest,rev:p.rev,requestId:'pass-request-0002'});assert.equal(changed.code,409);
+ const v2Id=p.project.assets[0].cuts.id;
+ p=await call('POST','/cuts?id=test-project',{rev:p.rev,assetId:asset.id,cuts:v1.ranges,chroma:v1.chroma});assert.equal(p.code,202);
+ for(let i=0;i<150;i++){await new Promise(r=>setTimeout(r,70));p=await call('GET','?id=test-project');if(p.project.assets[0].cuts.status!=='running')break;}
+ assert.equal(p.project.assets[0].cuts.status,'complete',p.project.assets[0].cuts.error);assert.equal(p.project.assets[0].cuts.id,v2Id);assert.equal(p.project.assets[0].cuts.version,2);assert.equal(p.project.assets[0].cutHistory.length,1);
+ for(let i=0;i<v1.clips.length;i++)assert.equal(files.get(v1.clips[i].path).bytes.equals(v1Bytes[i]),true);
+ assert.notEqual(p.project.assets[0].cuts.clips[0].path,v1.clips[0].path);assert.equal(files.get(asset.path).bytes.equals(original),true);
+
  }finally{global.fetch=realFetch;await rm(dir,{recursive:true,force:true});}
 });
 

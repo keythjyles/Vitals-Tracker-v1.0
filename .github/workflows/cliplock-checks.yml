@@ -1,9 +1,9 @@
 name: ClipLock cutter checks
 on:
   push:
-    paths: ['tools-home/tools/cliplock/**', 'tools-home/services/previewlock-api/joke-project*', '.github/workflows/cliplock-checks.yml']
+    paths: ['tools-home/tools/cliplock/**', 'tools-home/services/previewlock-api/joke-project*', 'tools-home/shared/cut-passes.mjs', 'tools-home/tools/studio/project-index.mjs', 'tools-home/tools/studio/project-picker.mjs', '.github/workflows/cliplock-checks.yml']
   pull_request:
-    paths: ['tools-home/tools/cliplock/**', 'tools-home/services/previewlock-api/joke-project*', '.github/workflows/cliplock-checks.yml']
+    paths: ['tools-home/tools/cliplock/**', 'tools-home/services/previewlock-api/joke-project*', 'tools-home/shared/cut-passes.mjs', 'tools-home/tools/studio/project-index.mjs', 'tools-home/tools/studio/project-picker.mjs', '.github/workflows/cliplock-checks.yml']
 permissions:
   contents: read
 jobs:
@@ -16,6 +16,7 @@ jobs:
           sparse-checkout: |
             tools-home/tools/cliplock
             tools-home/services/previewlock-api
+            tools-home/shared
             tools-home/tools/studio
             tools-home/tools/sxlock/vendor
             tools-home/tools/jokelab

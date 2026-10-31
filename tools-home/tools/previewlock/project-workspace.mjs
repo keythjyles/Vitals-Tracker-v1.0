@@ -14,7 +14,7 @@ function render(){const p=state.project;if(p){$('jokeTitle').value=p.title;$('jo
  $('launchCaplock').disabled=a?.cuts?.status!=='complete';renderCuts();if(p?.assets.some(a=>a.cuts?.status==='running'))startPoll();}
 async function projects(){const d=await api('/api/joke-projects');$('jokeProjects').replaceChildren();for(const p of d.projects){const o=document.createElement('option');o.value=p.id;o.textContent=p.id==='dad-00bda89167b4f15850aa1c91'?'Pebble':p.id;$('jokeProjects').append(o);}$('jokeProjects').value=id;}
 async function guarded(fn){try{await fn();}catch(e){status(e.message);}}
-$('cutCaptions').onclick=()=>{const suffix=state.project?'&project='+encodeURIComponent(id)+(selectedAsset?'&asset='+encodeURIComponent(selectedAsset):''):'';window.open('../cliplock/?v=R3'+suffix,'gs-cliplock');};
+$('cutCaptions').onclick=()=>{const suffix=state.project?'&project='+encodeURIComponent(id)+(selectedAsset?'&asset='+encodeURIComponent(selectedAsset):''):'';window.open('../cliplock/?v=R4'+suffix,'gs-cliplock');};
 $('loadJokeProject').onclick=()=>guarded(async()=>{id=$('jokeProjects').value;await load();});
 $('newJokeProject').onclick=()=>{id='project-'+crypto.randomUUID();state={project:null,rev:null};selectedAsset='';cuts=[];$('jokeTitle').value='';$('jokeText').value='';render();status('Enter a name and save the joke text.');};
 $('jokeTextFile').onchange=e=>guarded(async()=>{$('jokeText').value=await e.target.files[0].text();});

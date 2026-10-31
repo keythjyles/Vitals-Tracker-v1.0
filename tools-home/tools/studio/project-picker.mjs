@@ -1,4 +1,5 @@
-import {PROJECT_ROOT,indexedJokes,projectFolders,projectAssets,preferredBed,isVideo} from './project-index.mjs?v=1';
+import {captionCutLabel} from '../../shared/cut-passes.mjs?v=4';
+import {PROJECT_ROOT,indexedJokes,projectFolders,projectAssets,preferredBed,isVideo} from './project-index.mjs?v=4';
 const el=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;};
 const button=(text,fn)=>{const b=el('button',text);b.type='button';b.onclick=fn;return b;};
 const sourceURL=a=>new URL('../jokelets/'+a.src,import.meta.url).href;
@@ -60,7 +61,7 @@ export function createProjectPicker({api,onOpenProject,onUseAsset,onLocal,onPaus
   stop();const p=projects.get(id);if(!p)return;current=id;detail.replaceChildren();detail.hidden=false;
   detail.append(el('h2',p.title||p.id),el('p',p.path,'picker-path'));
   if(p.text){const text=el('details'),summary=el('summary','Saved joke text');text.append(summary,el('p',p.text,'picker-text'));detail.append(text);}
-  const assets=el('div',undefined,'picker-list');assets.classList.toggle('list',mode==='list');const list=projectAssets(p);for(const a of list.length?list:p.assets||[]){const row=el('article',undefined,'picker-card');row.append(media(a),el('h3',a.name||a.id),el('p',a.role||'Asset'));row.append(button('Save asset',async()=>{try{const url=a.src?sourceURL(a):(await api('/api/playback?path='+encodeURIComponent(a.path))).url;const response=await fetch(url);if(!response.ok)throw Error('Source download failed');const blob=await response.blob(),href=URL.createObjectURL(blob),link=el('a');link.href=href;link.download=a.name||'asset';link.click();setTimeout(()=>URL.revokeObjectURL(href),30000);message('Save requested for '+a.name+'. Original stays in the project.');}catch(e){message(e.message,true);}}));if(a.role==='bed')row.append(button('Use this bed',()=>openProject(p,a)));else if(!a.parent&&onUseAsset)row.append(button('Add this item',async()=>{try{message('Loading '+a.name+'…');await onUseAsset(p,a);dialog.close();}catch(e){message(e.message,true);}}));assets.append(row);}detail.append(assets);detail.scrollIntoView({block:'nearest'});
+  const assets=el('div',undefined,'picker-list');assets.classList.toggle('list',mode==='list');const list=projectAssets(p);for(const a of list.length?list:p.assets||[]){const row=el('article',undefined,'picker-card');row.append(media(a),el('h3',a.name||a.id),el('p',[a.role||'Asset',captionCutLabel(a)].filter(Boolean).join(' · ')));row.append(button('Save asset',async()=>{try{const url=a.src?sourceURL(a):(await api('/api/playback?path='+encodeURIComponent(a.path))).url;const response=await fetch(url);if(!response.ok)throw Error('Source download failed');const blob=await response.blob(),href=URL.createObjectURL(blob),link=el('a');link.href=href;link.download=a.name||'asset';link.click();setTimeout(()=>URL.revokeObjectURL(href),30000);message('Save requested for '+a.name+'. Original stays in the project.');}catch(e){message(e.message,true);}}));if(a.role==='bed')row.append(button('Use this bed',()=>openProject(p,a)));else if(!a.parent&&onUseAsset)row.append(button('Add this item',async()=>{try{message('Loading '+a.name+'…');await onUseAsset(p,a);dialog.close();}catch(e){message(e.message,true);}}));assets.append(row);}detail.append(assets);detail.scrollIntoView({block:'nearest'});
  }
  async function browse(folder){
   const token=++epoch;current=folder;clear();path.textContent=folder;message('Loading folders…');try{
@@ -75,3 +76,4 @@ export function createProjectPicker({api,onOpenProject,onUseAsset,onLocal,onPaus
  dialog.addEventListener('close',()=>{stop();observer.disconnect();++epoch;});
  return {open:async(id)=>{onPause?.();footer.hidden=!hasProject();folders.disabled=!hasProject();if(!dialog.open)dialog.showModal();status.classList.remove('error');await load();if(id&&dialog.open)showProject(id);},close:()=>dialog.close(),showCurrent:()=>current};
 }
+
