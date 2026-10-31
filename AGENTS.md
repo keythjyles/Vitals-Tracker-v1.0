@@ -1,3 +1,15 @@
+## Caption Clipper R4 — immediate cut list and versioned blank passes, October30
+
+Owner rule: added elements populate their editable list directly under the player, following SxLock's established pattern. Source details, optional controls and explanatory panels do not precede the list. This release applies that rule to Caption Clipper; it does not redesign SxLock or AspectLock.
+
+The active cut list now begins immediately under the player/control dock. Restored work says “Restored vN · N saved clips” or “Restored working draft”. Caption originals in the source selector and shared asset picker are labeled Cut/Draft with their cut-pass version; archived components retain version badges and custom names.
+
+**New pass · v2** (or the next available version) clears the working list only after a durable project save creates the empty next pass. Earlier rendered files, their cut recipe, and any current unsaved working ranges remain recorded under the source's cutHistory. Original animation and existing CapLock snapshots remain unchanged. Reloading the blank pass cannot resurrect a previous pass's browser draft; unmatched temporary drafts are preserved separately. Save clips renders within that new pass; it does not advance another version. Request/revision checks prevent duplicate or stale clears. Pass versions belong to the selected caption original, independently of its filename/source version.
+
+[Operation](tools-home/tools/cliplock/README.md) · [evidence](tools-home/tools/cliplock/PASSES_R4.json). Dropbox working project / queued Drive mirror remain distinct from verified dual-cloud backup. No paid generation, production test upload, source deletion, schedule change, SceneLock/AspectLock implementation or shell build. Older list-placement and unversioned-clearing behavior below is historical.
+
+---
+
 ## Caption Clipper R3 — source stepping and caption-only scope, October30
 
 Owner correction: this is a caption clipper. General animation clipping belongs with the future SceneLock direction (currently AspectLock); that does not authorize an AspectLock rewrite or rename in this repair.

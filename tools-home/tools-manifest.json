@@ -109,10 +109,10 @@
     {
       "tool": "cliplock",
       "tool_id": "GS-TOOL-CLIPLOCK",
-      "source_version": "R3",
+      "source_version": "R4",
       "hosted_path": "tools/cliplock/index.html",
-      "description": "Caption Clipper: reliable native-frame stepping; caption originals, independent numbered/named cuts, transparent components and exact CapLock handoff.",
-      "verification": "R3 release checks and deployment receipts in tools/cliplock/CAPTION_R3.json.",
+      "description": "Caption Clipper: cut list immediately under player, Cut/Draft asset badges and durable blank next-version passes preserving earlier clips.",
+      "verification": "Release and storage/phone verification limits: tools/cliplock/PASSES_R4.json.",
       "operator_guide": "tools/cliplock/README.md"
     }
   ]

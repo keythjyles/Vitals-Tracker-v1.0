@@ -1,0 +1,100 @@
+{
+  "release": "Caption Clipper R4",
+  "status": "Implemented, deployed and verified; owner-phone acceptance remains separate",
+  "behavior_commit": "62dc9ef7d528c89509cc1a5bec9c59aebf86c538",
+  "rollback_baseline": "3931616d17f42902cdad8b85bd9eaf09228fa37f",
+  "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/cliplock/?v=R4",
+  "verified_at_utc": "2026-10-31",
+  "implemented": [
+    "Editable cut list is the first section immediately beneath the player/control dock; source information is collapsed below it.",
+    "Restored saved clips and working drafts are labeled explicitly; source/asset picker labels Cut, Draft and cut-pass version.",
+    "New pass durably creates the next empty version before clearing the working list, while preserving original media, previous recipes, rendered clips and unsaved working ranges.",
+    "Current pass identity binds browser drafts. Older drafts cannot repopulate a new blank pass; unmatched drafts are archived for recovery.",
+    "Rendering a reserved blank pass retains its ID/version; request retries are idempotent and stale revisions are rejected.",
+    "Prior components remain discoverable in Assets with pass-version labels and custom filenames; existing CapLock snapshot references are preserved."
+  ],
+  "checks": {
+    "node_tests": {
+      "passed": 11,
+      "includes": [
+        "Real FFmpeg blue-background removal",
+        "Real VP9 alpha preservation",
+        "v1 complete to blank v2 to idempotent retry to v2 render; v1 file bytes and original unchanged using mocked Dropbox transaction"
+      ]
+    },
+    "browser": {
+      "success": true,
+      "includes": [
+        "Immediate list position and no metadata before list",
+        "Saved v1 and Cut v1 labels in picker",
+        "New pass clears list; Finish disabled until render",
+        "Reload blank v2 with injected stale v1 draft remains empty",
+        "Save v2 keeps reserved version and preserved v1 history",
+        "Exact CapLock handoff",
+        "Rounded 24fps source stepping, rapid steps, stepping from playback and independent marks"
+      ]
+    },
+    "github_actions": [
+      {
+        "scope": "branch ClipLock",
+        "run": 41166996395,
+        "job": 124436592931,
+        "conclusion": "success"
+      },
+      {
+        "scope": "branch CapLock",
+        "run": 41166836264,
+        "conclusion": "success"
+      },
+      {
+        "scope": "main ClipLock",
+        "run": 41167136259,
+        "conclusion": "success"
+      },
+      {
+        "scope": "main CapLock",
+        "run": 41167136230,
+        "conclusion": "success"
+      },
+      {
+        "scope": "Pages",
+        "run": 41167135698,
+        "conclusion": "success"
+      }
+    ],
+    "initial_test_correction": "The first branch browser assertion read innerText from intentionally collapsed source metadata. Changed assertion to textContent; no production rendering failure was inferred.",
+    "renderer": {
+      "service_id": "srv-dberk21srm7s73d4kqr0",
+      "deploy_id": "dep-dbimi93ncjis73cpsmbg",
+      "status": "live",
+      "commit": "62dc9ef7d528c89509cc1a5bec9c59aebf86c538",
+      "existing_service_reused": true
+    },
+    "live_browser": {
+      "title": "Caption Clipper · GS-TOOL-CLIPLOCK · R4",
+      "observed": [
+        "R4 live entry",
+        "Queued cuts immediately beneath dock",
+        "New pass v2 control"
+      ],
+      "screenshot": "caption-clipper-r4-passes.jpg",
+      "screenshot_scope": "Unauthenticated empty entry layout; authenticated project flow verified separately in browser fixtures"
+    }
+  },
+  "limits": [
+    "Physical owner phone and private production cloud acceptance not verified in this session.",
+    "Authenticated browser tests use fixtures; no production test uploads.",
+    "Existing Drive mirror remains queued unless a matching verified backup receipt exists."
+  ],
+  "preservation": {
+    "original_media": true,
+    "prior_pass_media_and_recipes": true,
+    "editor_snapshots": true,
+    "paid_generations": 0,
+    "schedule_changes": 0,
+    "source_deletions": 0,
+    "other_editor_engine_rewrites": false,
+    "new_shell_built": false
+  },
+  "recovery": "README.md, root AGENTS.md, RESUME_JOKELET_ENGINE.md, ANIMATED_CAPTION_WORKFLOW.md, GS_TOOL_REFINEMENT_INDEX.md, STUDIO_DIRECTION.md and both tool manifests updated. Previous shell prototype remains unapproved."
+}

@@ -1,3 +1,15 @@
+## Caption Clipper R4 — immediate cut list and versioned blank passes, October30
+
+Owner rule: added elements populate their editable list directly under the player, following SxLock's established pattern. Source details, optional controls and explanatory panels do not precede the list. This release applies that rule to Caption Clipper; it does not redesign SxLock or AspectLock.
+
+The active cut list now begins immediately under the player/control dock. Restored work says “Restored vN · N saved clips” or “Restored working draft”. Caption originals in the source selector and shared asset picker are labeled Cut/Draft with their cut-pass version; archived components retain version badges and custom names.
+
+**New pass · v2** (or the next available version) clears the working list only after a durable project save creates the empty next pass. Earlier rendered files, their cut recipe, and any current unsaved working ranges remain recorded under the source's cutHistory. Original animation and existing CapLock snapshots remain unchanged. Reloading the blank pass cannot resurrect a previous pass's browser draft; unmatched temporary drafts are preserved separately. Save clips renders within that new pass; it does not advance another version. Request/revision checks prevent duplicate or stale clears. Pass versions belong to the selected caption original, independently of its filename/source version.
+
+[Operation](../cliplock/README.md) · [evidence](../cliplock/PASSES_R4.json). Dropbox working project / queued Drive mirror remain distinct from verified dual-cloud backup. No paid generation, production test upload, source deletion, schedule change, SceneLock/AspectLock implementation or shell build. Older list-placement and unversioned-clearing behavior below is historical.
+
+---
+
 ## Owner correction — unapproved shell prototype, October 30, 2026
 
 **The separate ChatGPT Site formerly titled “GS Production Shell” is an unapproved, unintended prototype. It is not the Grill Sergeant studio plan, an approved design, the canonical production workspace, or a replacement for the existing tools.** The owner requested a discussion of a shell/container; that session began building before the design discussion was agreed. Its Site display title is now “UNAPPROVED — GS Shell Prototype — Not the Plan” (Site ID `appgprj_6ae4e8b998888191b81f03ac7a45a427`; original Library reference `libfile_57965f2357188191abf94495558928d5`). Preserve this identity so old links and captured text cannot be mistaken for approval. The title correction does not change its historical page content or turn its browser-local storage into an approved workflow.

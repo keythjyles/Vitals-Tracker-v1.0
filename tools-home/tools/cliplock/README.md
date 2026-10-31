@@ -1,3 +1,21 @@
+# Caption Clipper R4 — cuts directly below the player
+
+Open the joke project and its caption original. The first section under the player and its marking controls is the cut list. Tap a cut name to edit; use its adjacent play button to preview that range. The source details and optional background settings are below the list. R3's source-frame stepping, independent overlaps/gaps, numbering/naming and exact CapLock handoff remain.
+
+The page distinguishes restored work from cuts you make now. It says **Restored v1 ·9 saved clips**, for example, or **Restored working draft ·v1**. The caption source dropdown and project Assets list label originals **Cut ·v1 ·9 clips**, **Uncut**, or **Draft ·v2 ·v1 cut**. Individual archived components carry their cut-pass version and original custom filename.
+
+Choose **New pass ·v2** to start blank from the same original. It saves the empty next pass into project.json before clearing the working rows, resets marks and playhead to the source start, and disables Finish until that pass is rendered. Earlier pass media and recipes remain saved; unsaved working ranges are attached as a workingDraft in the archived pass metadata. No original or paid asset is deleted. A pass number is separate from the Gemini source filename's version.
+
+Reload/reopening restores the current pass only. Temporary drafts are bound to project, original SHA256 and pass ID. A stale draft from another pass is archived separately in browser recovery storage and cannot repopulate the blank slate. A New pass retry reuses its request ID rather than allocating another version; stale project/pass revisions are rejected with existing rows intact. An empty new pass cannot be cleared repeatedly into empty extra versions.
+
+**Save clips** fills that pass with silent transparent components using the established25fps renderer, then **Finish →CapLock** carries its exact project/source/batch. It keeps the reserved pass ID/version. Prior components remain visible in Assets with version labels, and earlier CapLock snapshots/media references remain preserved. New-pass actions do not render clips. The existing cloud-render limits, original hash checks, blue removal / VP9-alpha behavior and queued Drive backup continue to apply. Only a matching verified mirror receipt establishes Drive backup.
+
+Implementation: shared cut-passes helpers, additive authenticated /api/joke-project/cut-pass endpoint with revision/pass identity/idempotency checks, source cutHistory records, and a compact list-first Caption Clipper UI. R4 client saves require the compatible server; an old or incomplete deployment fails visibly before clearing anything.
+
+Read PASSES_R4.json for verification, release IDs and remaining physical-phone/private-cloud limits. Rollback baseline3931616d17f42902cdad8b85bd9eaf09228fa37f. Retain every source, project, pass history, clip, editor snapshot and backup receipt when rolling back; do not use the old server to render new versioned drafts.
+
+---
+
 # Caption Clipper R3 · existing ClipLock tool
 
 Cut a Gemini caption animation into numbered or custom-named, independent components for CapLock. This is caption preparation; general scene animation clipping is a separate SceneLock direction (currently AspectLock).
