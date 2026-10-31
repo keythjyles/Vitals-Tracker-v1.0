@@ -75,13 +75,13 @@ $('removeBlue').onchange=$('blue').onchange=()=>changedBatch();
 async function monitorBatch(assetId){
  for(;;){const d=await api('/api/joke-project?id='+encodeURIComponent(project.id));project=d.project;const a=project.assets.find(x=>x.id===assetId);if(!a?.cuts)throw Error('Saved batch is missing; original remains intact.');savedBatch=a.cuts;$('batchStatus').textContent='Saving clips · '+savedBatch.clips.length+' / '+savedBatch.ranges.length;
   if(savedBatch.status==='failed')throw Error('Clip render stopped: '+savedBatch.error+' Original and partial clips remain saved.');
-  if(savedBatch.status==='complete'){batchDirty=false;passOrigin='saved';source=a;refreshSourceList();renderBatch();rememberBatch();say('Numbered clips saved in this project. Ready for CapLock. Drive backup queued.');return;}
+  if(savedBatch.status==='complete'){batchDirty=false;passOrigin='saved';pendingPassRequest='';source=a;refreshSourceList();renderBatch();rememberBatch();say('Numbered clips saved in this project. Ready for CapLock. Drive backup queued.');return;}
   await new Promise(resolve=>setTimeout(resolve,2500));
  }
 }
 $('saveBatch').onclick=()=>run(async()=>{
  const ranges=toBatchRanges(meta,cuts);if(!project)throw Error('Open the joke project first.');
- let d=await api('/api/joke-project?id='+encodeURIComponent(project.id));if(d.capabilities?.clipBatch!==2)throw Error('Clip batch server update is not ready. Your cut draft is preserved; retry Save clips after deployment.');project=d.project;let parent=project.assets.find(a=>a.role==='caption'&&a.sha256===sourceDigest&&a.size===file.size);
+ let d=await api('/api/joke-project?id='+encodeURIComponent(project.id));if(d.capabilities?.clipBatch!==2||d.capabilities?.cutPass!==1)throw Error('Clip batch server update is not ready. Your cut draft is preserved; retry Save clips after deployment.');project=d.project;let parent=project.assets.find(a=>a.role==='caption'&&a.sha256===sourceDigest&&a.size===file.size);
  if(!parent){say('Preserving original animation…');parent=await saveBlob(file,source.name,'caption');d=await api('/api/joke-project?id='+encodeURIComponent(project.id));project=d.project;}
  if(parent.cuts?.status!=='running')d=await api('/api/joke-project/cuts?id='+encodeURIComponent(project.id),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({rev:d.rev,assetId:parent.id,cuts:ranges,chroma:{enabled:$('removeBlue').checked,color:$('blue').value,similarity:.18,blend:.04}})});
  else {const expected=ranges.map(c=>JSON.stringify(c)),actual=parent.cuts.ranges.map(({number,...c})=>JSON.stringify(c));if(expected.length!==actual.length||expected.some((x,i)=>x!==actual[i]))throw Error('An earlier batch is still rendering. Reopen its caption source to recover it before saving another batch.');}
@@ -106,7 +106,7 @@ $('newPass').onclick=()=>run(async()=>{
  if((parent.cuts?.id||null)!==(savedBatch?.id||null)&&parent.cuts?.requestId!==pendingPassRequest)throw Error('Caption pass changed. Reopen the source before starting a new pass.');
  const ranges=cuts.length?toBatchRanges(meta,cuts):[];
  d=await api('/api/joke-project/cut-pass?id='+encodeURIComponent(project.id),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({rev:d.rev,assetId:parent.id,previousPassId:savedBatch?.id||null,requestId:pendingPassRequest,ranges,chroma:{enabled:$('removeBlue').checked,color:$('blue').value,similarity:.18,blend:.04}})});
- project=d.project;source=project.assets.find(a=>a.id===parent.id);savedBatch=source.cuts;cuts=[];editingId='';batchDirty=false;pendingPassRequest='';passOrigin='newpass';
+ project=d.project;source=project.assets.find(a=>a.id===parent.id);if(source.cuts.status!=='draft'){restoreBatch();refreshSourceList();say('Existing v'+cutPassVersion(source)+' restored; no new pass was created.');return;}savedBatch=source.cuts;cuts=[];editingId='';batchDirty=false;pendingPassRequest='';passOrigin='newpass';
  $('in').value=0;$('out').value=meta.times.length;$('cutName').value='1';refreshSourceList();rangeChanged();renderBatch();seek(0);rememberBatch();
  say('v'+cutPassVersion(source)+' started. Previous passes and clips remain saved.');
 });
