@@ -1,3 +1,11 @@
+## ClipLock R2 — owner-authorized caption batch work, October30
+
+The owner explicitly said “Make it work” after agreeing OUT→next IN as an adjustable default, with overlaps/gaps and independent saved ranges. This authorizes extending EXISTING ClipLock, not building the unapproved shell. The shell remains discussion-only.
+
+ClipLock R2 is the normal batch-cutting entry. See [operation](../cliplock/README.md) and [release evidence](../cliplock/BATCH_R2.json). Native source-frame marks and visual handles queue independent numbered/custom-named cuts, Save clips uses the existing project original/alpha-render/checkpoint path, and Finish opens the exact CapLock project/source batch. Previous OUT is only the starting suggestion for next IN. Earlier no-overlap/source-order-only instructions below are historical and superseded. Prior batch metadata and originals are preserved. Single-cut export stays available. Drive remains queued until verified; owner-phone/private-cloud acceptance is separate from test fixtures. No provider generation, original deletion, schedule change or new shell.
+
+---
+
 ## Current correction — CapLock R9, October 30
 
 Insert records an editable layer; it never flattens media or automatically locks properties. R6–R8 automatic locks migrate without source, timing or geometry loss. Tap a placed name to edit; Apply settings stays at the sheet top. Move / size or Rotate returns to the canvas. Done or blank space clears selection; Hide/Show changes visibility without deletion. Previous/Next returns to placed items paused at their saved insertion. Schema6 reads1–5; preserve schema6 JSON on rollback.

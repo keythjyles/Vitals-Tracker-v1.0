@@ -1,3 +1,11 @@
+## ClipLock R2 — owner-authorized caption batch work, October30
+
+The owner explicitly said “Make it work” after agreeing OUT→next IN as an adjustable default, with overlaps/gaps and independent saved ranges. This authorizes extending EXISTING ClipLock, not building the unapproved shell. The shell remains discussion-only.
+
+ClipLock R2 is the normal batch-cutting entry. See [operation](../cliplock/README.md) and [release evidence](../cliplock/BATCH_R2.json). Native source-frame marks and visual handles queue independent numbered/custom-named cuts, Save clips uses the existing project original/alpha-render/checkpoint path, and Finish opens the exact CapLock project/source batch. Previous OUT is only the starting suggestion for next IN. Earlier no-overlap/source-order-only instructions below are historical and superseded. Prior batch metadata and originals are preserved. Single-cut export stays available. Drive remains queued until verified; owner-phone/private-cloud acceptance is separate from test fixtures. No provider generation, original deletion, schedule change or new shell.
+
+---
+
 ## Owner correction — unapproved shell prototype, October 30, 2026
 
 **The separate ChatGPT Site formerly titled “GS Production Shell” is an unapproved, unintended prototype. It is not the Grill Sergeant studio plan, an approved design, the canonical production workspace, or a replacement for the existing tools.** The owner requested a discussion of a shell/container; that session began building before the design discussion was agreed. Its Site display title is now “UNAPPROVED — GS Shell Prototype — Not the Plan” (Site ID `appgprj_6ae4e8b998888191b81f03ac7a45a427`; original Library reference `libfile_57965f2357188191abf94495558928d5`). Preserve this identity so old links and captured text cannot be mistaken for approval. The title correction does not change its historical page content or turn its browser-local storage into an approved workflow.

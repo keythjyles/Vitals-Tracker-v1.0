@@ -109,10 +109,10 @@
     {
       "tool": "cliplock",
       "tool_id": "GS-TOOL-CLIPLOCK",
-      "source_version": "R1",
+      "source_version": "R2",
       "hosted_path": "tools/cliplock/index.html",
-      "description": "Quick video cutter: original frame IN/OUT, selection playback, independent clip and lineage recipe save to the existing joke project.",
-      "verification": "Core checks passed; browser and production verification pending.",
+      "description": "Queue numbered or named caption cuts with independent overlaps/gaps, visual IN/OUT adjustment, saved originals and exact-project CapLock handoff.",
+      "verification": "Release checks/deploy status recorded in tools/cliplock/BATCH_R2.json.",
       "operator_guide": "tools/cliplock/README.md"
     }
   ]

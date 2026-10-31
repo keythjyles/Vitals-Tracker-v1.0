@@ -1,0 +1,76 @@
+{
+  "schema": "GS-ClipLockBatchRelease-1",
+  "date": "2026-10-30",
+  "release": "R2",
+  "baseline": "124eeeac3b6f5a03b23fee70f6e584664211ae92",
+  "behaviorCommit": "608503e1e18b4b5fb0f72d1dc7ba98ef4d86c188",
+  "status": "deployed_ci_verified_live_entry_verified_owner_phone_cloud_pending",
+  "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/cliplock/?v=R2",
+  "verification": {
+    "nodeTests": 9,
+    "branchClipLock": {
+      "run": 41147394405,
+      "job": 124375585112,
+      "result": "success"
+    },
+    "mainClipLock": {
+      "run": 41147499236,
+      "result": "success"
+    },
+    "capLockRegression": {
+      "branchRun": 41147149684,
+      "mainRun": 41147499310,
+      "result": "success"
+    },
+    "pages": {
+      "run": 41147499093,
+      "result": "success"
+    },
+    "render": {
+      "service": "srv-dberk21srm7s73d4kqr0",
+      "deploy": "dep-dbiitv95efls73d4du8g",
+      "commit": "608503e1e18b4b5fb0f72d1dc7ba98ef4d86c188",
+      "status": "live"
+    },
+    "browser": [
+      "360px no horizontal overflow",
+      "independent overlapping ranges; prior OUT unchanged",
+      "native frame IN/OUT handles and boundary stepping",
+      "custom name and source/project-hash-bound recovery",
+      "save components and exact project/caption handoff URL",
+      "single-cut video/sound alignment and VP9 alpha regression"
+    ],
+    "realFFmpeg": [
+      "24fps blue original →25fps alpha components; real decode and frame-count check",
+      "overlapping native-time custom-named cuts",
+      "keep128/255 alpha from an existing VP9 WebM when keying disabled"
+    ],
+    "live": "R2 title, fixed controls and queued-cut interface observed on published URL; owner credentials were not present in separate review browser",
+    "ownerPhoneCloud": "Not verified by this release; authenticated browser tests use fixture responses. No production test uploads.",
+    "initialFailure": "Browser test exposed queued rows covered by sticky controls. Fixed as separate scrolling work area below fixed player; hit-tested row clicks now pass."
+  },
+  "storage": {
+    "source": "Original preserved and hash-reused in project captions role",
+    "components": "Same original asset / clips / unique cut-pass / numbered-or-custom.webm",
+    "history": "Prior batch metadata retained in cutHistory; source files never deleted",
+    "drive": "Existing mirror queued, not newly verified"
+  },
+  "boundaries": {
+    "source": "Original native frame timestamp pairs retained",
+    "output": "25fps silent components, width capped1280 by existing renderer, nearest output frame count with final-frame pad under one25fps frame",
+    "overlap": true,
+    "gaps": true,
+    "independent": true,
+    "limits": "40MB source;1–40 cuts; first60s of source; each<=30s"
+  },
+  "preservation": {
+    "paidGeneration": 0,
+    "schedulesChanged": false,
+    "shellBuilt": false,
+    "sxLockChanged": false,
+    "aspectLockChanged": false,
+    "wavLockChanged": false,
+    "sourceDeletion": false
+  },
+  "rollback": "Restore changed app/service files from124eeeac3b6f5a03b23fee70f6e584664211ae92; keep project metadata/history, originals, components and editor snapshots. R2 capability gating rejects old server batches."
+}
