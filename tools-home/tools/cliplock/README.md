@@ -1,3 +1,13 @@
+# Clipper R8 — SxLock equipment and hidden source drawer
+
+The player now uses the actual locked SxLock profile: compact 29px single-row controls, paired −/+ frame buttons, and monitor height determined by its right rail. Playback, explicit frame Go, IN/OUT, cut preview, Add/Update and Prepare all occupy that rail. The name row and editable cut list immediately follow the monitor.
+
+Load the initial source from the empty picture. Afterward files, saved projects, modes, format and recovery controls stay in the shared pull-down drawer. Pull to the top then pull again on the grip, or tap it, to reveal sources. Selection is paused, source frames and saved ranges are unchanged, and picture gestures do not reveal the drawer.
+
+R7 export, recovery and source-preservation behavior is retained. Its earlier visual matching claim was rejected by the owner; the locked component and its release evidence supersede that claim.
+
+---
+
 # Clipper R7 — compact, protected cuts
 
 Verified runtime `7ea3d1b456bde159bfcf7d74871850d8012f047f`: native checks and Pages passed. [Shared-player release evidence](../../shared/COMPACT_PLAYER_R1.json).

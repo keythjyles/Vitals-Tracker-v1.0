@@ -12,7 +12,7 @@
     {
       "tool": "framelock",
       "source_file": "FrameLock_v1.3.12_CLEAN_MANUAL_25FPS.html",
-      "source_version": "1.3.16",
+      "source_version": "1.3.17",
       "source_sha256": "ca182c8155d6dd650ecb5dee3e7d1af288b8f667a61b618464e7183224b999f0",
       "hub_revision": "hub.1",
       "source_preserved": "tool-sources/FrameLock_v1.3.12_CLEAN_MANUAL_25FPS.html",
@@ -23,7 +23,7 @@
     {
       "tool": "motionlock",
       "source_file": "v0.1.5_MotionLock.html",
-      "source_version": "0.1.6",
+      "source_version": "0.1.7",
       "source_sha256": "660703a6916804f38926b7f098d825ffca0a5d6321502bcf4e5bc3abfa3d97c5",
       "hub_revision": "hub.1",
       "source_preserved": "tool-sources/v0.1.5_MotionLock.html",
@@ -44,7 +44,7 @@
     },
     {
       "tool": "wavlock",
-      "source_version": "R1.4",
+      "source_version": "R1.5",
       "hosted_path": "tools/wavlock/index.html",
       "description": "Live searchable Approved effects list with Preview/Use, plus existing precision cutter, file import and WAV export.",
       "tool_id": "GS-TOOL-WAVLOCK",
@@ -57,7 +57,7 @@
     },
     {
       "tool": "sxlock",
-      "source_version": "R29",
+      "source_version": "R30",
       "hosted_path": "tools/sxlock/index.html",
       "description": "Approved Scrubber effects populate the live Approved effects category automatically; Play/Use use the saved original, Add alone inserts into the timeline.",
       "verification": "JavaScript syntax and asset decode/hash checks; browser playback/search/favorites/placement review. Physical Android playback not independently tested.",
@@ -97,7 +97,7 @@
     {
       "tool": "caplock",
       "tool_id": "GS-TOOL-CAPLOCK",
-      "source_version": "R12",
+      "source_version": "R13",
       "hosted_path": "tools/caplock/index.html",
       "description": "Project-first workspace with editable Insert, independent bed/overlay focus, hidden project drawer, placed-item properties and Hide/Show. Built-in text captioning is hidden/locked; import Gemini animation layers.",
       "navigation": [
@@ -111,14 +111,14 @@
     {
       "tool": "aspectlock",
       "tool_id": "GS-TOOL-ASPECTLOCK",
-      "source_version": "R29",
+      "source_version": "R30",
       "hosted_path": "tools/aspectlock/index.html",
       "description": "Single-animation compositor with compact fixed right controls, placement matrix, added-item row and tap-to-edit property sheet; paused seeking."
     },
     {
       "tool": "cliplock",
       "tool_id": "GS-TOOL-CLIPLOCK",
-      "source_version": "R7",
+      "source_version": "R8",
       "hosted_path": "tools/cliplock/index.html",
       "description": "One compact cutter: video with sound or caption animation. Exact marks, read-only position, recoverable cut lists and one ZIP download.",
       "verification": "tools/cliplock/VIDEO_R6.json; existing caption pass evidence in tools/cliplock/PASSES_R4.json.",
