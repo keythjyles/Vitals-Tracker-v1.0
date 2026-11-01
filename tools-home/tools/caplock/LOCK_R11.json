@@ -1,0 +1,24 @@
+{
+  "schema": "GS-CapLockOwnerLock-1",
+  "release": "R11",
+  "runtimeCommit": "c1cbb720040cccbf1d46b20766848eba45a55f6b",
+  "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/caplock/?v=R11",
+  "locked": [
+    "Built-in caption panel",
+    "Transcript segmentation UI",
+    "Native text caption rendering",
+    "Subtitle export controls"
+  ],
+  "noUnlockSwitch": true,
+  "legacyNativeTextAndSettingsPreserved": true,
+  "restoredNativeTrueCannotRender": true,
+  "geminiAnimationImportAndEditableLayerPlacementRetained": true,
+  "verification": {
+    "featureRun": 41328835027,
+    "featureJob": 124914422108,
+    "mainRun": 41329364160,
+    "status": "success",
+    "liveUIObserved": true
+  },
+  "cuttingWorkflow": "Use the same Clipper in Video + sound mode. FrameLock may also supply exact IN/OUT frames; no automatic subtitles substitute for Gemini animation."
+}

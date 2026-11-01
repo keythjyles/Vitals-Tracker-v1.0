@@ -97,13 +97,14 @@
       "tool_id": "GS-TOOL-CAPLOCK",
       "source_version": "R11",
       "hosted_path": "tools/caplock/index.html",
-      "description": "Project-first workspace with editable Insert, independent bed/overlay focus, hidden project drawer, placed-item properties and Hide/Show.",
+      "description": "Project-first workspace with editable Insert, independent bed/overlay focus, hidden project drawer, placed-item properties and Hide/Show. Built-in text captioning is hidden/locked; import Gemini animation layers.",
       "navigation": [
         "tools",
         "aspectlock",
         "sxlock",
         "previewlock"
-      ]
+      ],
+      "verification": "tools/caplock/LOCK_R11.json"
     },
     {
       "tool": "aspectlock",
@@ -118,7 +119,7 @@
       "source_version": "R6",
       "hosted_path": "tools/cliplock/index.html",
       "description": "Video + sound cuts in ?mode=video; existing silent caption-component workflow retained separately.",
-      "verification": "Release and storage/phone verification limits: tools/cliplock/PASSES_R4.json.",
+      "verification": "tools/cliplock/VIDEO_R6.json; existing caption pass evidence in tools/cliplock/PASSES_R4.json.",
       "operator_guide": "tools/cliplock/README.md"
     }
   ]
