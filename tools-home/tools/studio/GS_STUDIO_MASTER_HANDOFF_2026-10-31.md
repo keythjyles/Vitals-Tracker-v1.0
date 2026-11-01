@@ -4,7 +4,10 @@ The owner approved the clarified entrance with **“Right. Make it.”** The app
 
 Implementation and recovery: [GS Studio R1 operation](README.md). The R1 container uses existing native editors with versioned cloud checkpoints, a recipe-only unrendered-cut save, stable app manifest/icons and same-project asset discovery. Native tool releases: JokeLab R5, Clipper R5, CapLock R10, AspectLock R28, SxLock R28 and PreviewLock R30. Editor engine behavior remains the established baseline; source/media/history are retained. Working Dropbox saves and queued Drive mirrors remain separate states. Automatic Gemini creative handback, within-layer speed/freeze maps and combined final rendering remain separate unfinished milestones.
 
-This implementation is under verification on its feature branch until the release receipt records passing tests and actual deployment. Do not infer owner-phone installation, production-cloud acceptance or final publishing approval from unit tests. No paid/provider generation, production test upload, cleanup or scheduled-post change.
+GS Studio R1 is implemented and deployed from commit `5e1dbf37a1505111719735ece8c1d3e453792a5b`. The release receipt records passing native regressions, the complete authenticated-fixture module round trip, 127 code/transaction tests, Pages verification and the existing Render deployment. The live entry opens the actual JokeLab selector. See `tools-home/tools/studio/RELEASE_R1.json` from the repository root. Do not infer owner-phone installation, production-cloud acceptance or final publishing approval from unit tests. No paid/provider generation, production test upload, cleanup or scheduled-post change.
+
+
+Current resume instruction: continue from deployed GS Studio R1 in this repository. Launch at Select a joke, retain the existing native modules and cloud checkpoint contract, and read RELEASE_R1.json and README.md first. The earlier proposal, stage order and resume command below are historical where superseded. Do not revive the rejected Site. Next milestones are owner-phone acceptance, complete cloud-backup reconciliation, intelligent Gemini handback and a shared final composition/export; do not claim these complete.
 
 ---
 

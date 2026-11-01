@@ -1,0 +1,150 @@
+{
+  "schema": "GS-StudioRelease-1",
+  "release": "R1",
+  "runtimeCommit": "5e1dbf37a1505111719735ece8c1d3e453792a5b",
+  "baselineCommit": "9088243aae62dcaa3f78d5c532337639db6640a2",
+  "verifiedAt": "2026-11-01T03:23:30.925140+00:00",
+  "appUrl": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/studio/",
+  "entry": "Select a joke in the existing JokeLab library, then create/resume its canonical saved project.",
+  "modules": {
+    "joke": "JokeLab R5",
+    "cut": "Caption Clipper R5",
+    "captions": "CapLock R10",
+    "scene": "AspectLock R28",
+    "sound": "SxLock R28",
+    "review": "PreviewLock R30"
+  },
+  "implemented": [
+    "Joke-first existing library selection and text-first project creation",
+    "Installable standalone app manifest, stable launch URL, reproducible icons",
+    "Same-project source asset preview/import/save and explicit shared bed selection",
+    "Native per-module cloud checkpoints, immutable snapshots and stale-write rejection",
+    "Unrendered caption-cut recipes saved without invoking renderer",
+    "Paused native edit restore across phases and reload; editable CapLock Insert",
+    "Native sound source preservation and restored mixer, notes and used cue references"
+  ],
+  "tests": {
+    "node": {
+      "passed": 127,
+      "failed": 0,
+      "scope": "CapLock, Clipper, Studio and previewlock-api tests"
+    },
+    "jokeLibrary": {
+      "passed": 4,
+      "failed": 0
+    },
+    "browser": {
+      "workflowRun": 41268795937,
+      "featureRun": 41268676716,
+      "featureJob": 124736735202,
+      "fixtureOnly": true,
+      "checked": [
+        "Real JokeLab selector",
+        "Create new joke project with text and no media",
+        "Cut and caption round trips",
+        "Scene position and sound cue/Scribe round trips",
+        "Shared bed replacement across editors",
+        "Review opens paused and source is labeled Source preview",
+        "Stale save retains local edit and active module",
+        "Reload restores saved phases",
+        "360px and 709px no horizontal overflow",
+        "Install manifest"
+      ],
+      "studioWrites": 18,
+      "paidGenerationCalls": 0,
+      "cutRenderCallsOnNavigation": 0,
+      "pageErrors": []
+    },
+    "mainWorkflows": [
+      {
+        "id": 41268795949,
+        "name": "SxLock media regression",
+        "sha": "5e1dbf37a1505111719735ece8c1d3e453792a5b",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 41268795265,
+        "name": "pages build and deployment",
+        "sha": "5e1dbf37a1505111719735ece8c1d3e453792a5b",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 41268795954,
+        "name": "ClipLock cutter checks",
+        "sha": "5e1dbf37a1505111719735ece8c1d3e453792a5b",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 41268795937,
+        "name": "GS Studio checks",
+        "sha": "5e1dbf37a1505111719735ece8c1d3e453792a5b",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 41268795968,
+        "name": "CapLock prototype checks",
+        "sha": "5e1dbf37a1505111719735ece8c1d3e453792a5b",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "deployment": {
+    "pages": {
+      "workflowRun": 41268795265,
+      "status": "success",
+      "runtimeCommit": "5e1dbf37a1505111719735ece8c1d3e453792a5b"
+    },
+    "render": {
+      "serviceId": "srv-dberk21srm7s73d4kqr0",
+      "deployId": "dep-dbjb00lg1s2s73fq7v30",
+      "status": "live",
+      "commit": "5e1dbf37a1505111719735ece8c1d3e453792a5b",
+      "finishedAt": "2026-11-01T03:21:47.798314Z"
+    },
+    "health": {
+      "url": "https://gs-previewlock-api.onrender.com/health",
+      "status": "ok",
+      "dropboxReady": true
+    }
+  },
+  "liveUi": {
+    "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/studio/",
+    "title": "GS Studio \u00b7 GS-TOOL-STUDIO \u00b7 R1",
+    "libraryTotal": 900,
+    "browseCountAfterProducedExclusion": 888,
+    "screenshot": "r1-entry.jpg",
+    "scope": "Public live entrance inspected; no production test project was created. Authenticated editor behavior verified with disposable CI fixtures."
+  },
+  "persistence": {
+    "working": "Dropbox /Grill Sergeant/JokeLab Productions/<canonical-id>/",
+    "backup": "Existing Drive queue; current matching backup must be independently verified.",
+    "code": "Existing GitHub repository; no new service, permissions or credentials."
+  },
+  "remaining": [
+    "Owner Android installation and authenticated physical-phone acceptance",
+    "Automated Gemini creative workspace handback",
+    "Within-layer variable speed and freeze/hold maps",
+    "Shared final composition/export across visual and sound passes",
+    "Complete historical asset reconciliation and matching Drive backup verification",
+    "Release/post performance metrics"
+  ],
+  "preserved": [
+    "Existing media and paid-generation assets",
+    "Canonical IDs and literal text history",
+    "Caption original, current cut pass and cutHistory",
+    "Existing native CapLock snapshots/history",
+    "Existing schedules and posts"
+  ],
+  "notPerformed": [
+    "Paid provider generation",
+    "Production test media/project upload",
+    "Source cleanup or deletion",
+    "Scheduled-post changes",
+    "Adoption of rejected ChatGPT Site"
+  ]
+}

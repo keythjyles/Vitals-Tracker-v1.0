@@ -18,7 +18,7 @@ Cut uses Caption Clipper R5; Captions uses CapLock R10; Scene uses AspectLock R2
 
 Each departure pauses the active module, saves a native snapshot and unloads the frame after success. This avoids keeping six media engines decoded on the phone. Reopening restores native state rather than reimporting the source from Downloads. CapLock's undo/redo/view metadata is included when it belongs to the same current native cloud snapshot; newer standalone CapLock edits win. Other native undo behavior is not invented as a new persistent undo system.
 
-The Joke phase's Assets list shows original and historical component media with preview/save controls. Existing source folders are reused; device choice is optional import ingress. The first native player and its right-hand precision controls remain intact, with added items immediately below the player/control dock. Duplicate app navigation is hidden only while inside the container.
+The Joke phase's Assets list shows original and historical component media with preview/save controls. Use as bed selects one saved video for the whole joke; Captions, Scene, Sound and Review use that bed while retaining their editable passes. Importing an alternate video alone does not replace the selected bed. Existing source folders are reused; device choice is optional import ingress. The first native player and its right-hand precision controls remain intact, with added items immediately below the player/control dock. Duplicate app navigation is hidden only while inside the container.
 
 ## Persistence contract
 
