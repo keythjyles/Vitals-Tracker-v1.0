@@ -1,3 +1,15 @@
+## Clipper R7 — SxLock/AspectLock control layout and save-all, November 1, 2026
+
+The existing player now has a compact right-hand control rail and a single-line identity/frame label. Seek and IN/OUT range sliders are flush under the picture. The 20dvh video cap, large pre-player header and fixed-height inner work scroller are removed. Named cuts begin immediately below the player, with normal page scrolling. This follows the existing SxLock/AspectLock player/rail/item-list model; those tools are unchanged.
+
+Video mode Save all prepares the existing named ranges and downloads one ZIP containing the videos plus cuts.json with source hash, exact ranges, output hashes and verified media properties. The Download ZIP link remains available if an automatic download is suppressed. This is a local download request, not proof of cloud save or phone Downloads completion. Individual Save remains. Existing mode/project/source-hash draft keys and schemas are unchanged, preserving the owner's six named working cuts when the same source is reselected. No source, cut history or project is deleted.
+
+Each ±1 frame tap requests a12ms device haptic when the browser supports it. Play only pauses/resumes, and stays at the end instead of automatically restarting. Adding/updating/selecting a cut or changing numeric marks no longer seeks the source. Slider/frame controls and an explicitly requested cut preview still seek. Changing modes restores that mode's saved cursor. Codec/renderer behavior, Gemini caption handling and CapLock's native-text lock are retained.
+
+Save investigation: the screenshot proves six queued rows, not six exported files. November1 Dropbox and both connected Drive searches found no new Slide/Eclipse exports. Phone Downloads cannot be inspected through those cloud searches; do not claim the six cuts were saved or lost. Slide is visibly F0–1674 (the full source) in the owner's screenshot; preserve that range rather than silently inventing a shorter cut.
+
+---
+
 ## Clipper R6 — one cutter, two modes, November 1, 2026
 
 The existing Clipper now has **Video + sound** (`?mode=video`) and **Caption animation** modes. They share the same player, exact source-frame stepping, IN/OUT marks, independent overlapping/gapped cuts and immediate editable cut list. Mode switching pauses playback and retains each mode's source and working cuts in-session. Browser recovery drafts remain bound to mode/project/source hash; after closing the tab, reselect the unchanged source to recover its cuts. Studio's Cut phase remains the caption-specific route.

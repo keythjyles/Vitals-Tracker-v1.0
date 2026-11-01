@@ -116,9 +116,9 @@
     {
       "tool": "cliplock",
       "tool_id": "GS-TOOL-CLIPLOCK",
-      "source_version": "R6",
+      "source_version": "R7",
       "hosted_path": "tools/cliplock/index.html",
-      "description": "Video + sound cuts in ?mode=video; existing silent caption-component workflow retained separately.",
+      "description": "Player-attached right rail; body-scrolling cut list; video+sound or caption mode; one ZIP saves all named video cuts.",
       "verification": "tools/cliplock/VIDEO_R6.json; existing caption pass evidence in tools/cliplock/PASSES_R4.json.",
       "operator_guide": "tools/cliplock/README.md"
     }
