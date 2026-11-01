@@ -42,7 +42,7 @@ for(const link of document.querySelectorAll('.links a[target]'))link.addEventLis
 
 
 function batchControls(){
- $('copyList').disabled=!meta||!cuts.length;
+ $('copyList').disabled=busy||!meta||!cuts.length;
  for(const id of ['addCut','cutName','removeBlue','blue'])$(id).disabled=busy||!meta;
  $('saveBatch').disabled=busy||(!videoMode&&!project)||!meta||!cuts.length;$('saveBatch').textContent=videoMode?(cuts.length?'All '+cuts.length+' · ZIP':'All clips · ZIP'):'Save clips';
  $('finishBatch').disabled=busy||batchDirty||savedBatch?.status!=='complete';
