@@ -1,3 +1,13 @@
+## Authorized GS Studio implementation — October 31, 2026
+
+The owner approved the clarified entrance with **“Right. Make it.”** The app opens at **Select a joke**, using the existing JokeLab selector. Selecting the joke creates/resumes its canonical project; the container then carries it through Joke, Cut, Captions, Scene, Sound and Review. ChatGPT is not a required manual joke-entry stage. This authorizes repository implementation of the container and adapters; it does not approve or revive the earlier unapproved ChatGPT Site, paid generation, source cleanup or schedule changes. Earlier discussion-only stops and ChatGPT-entry framing below are historical for the previous proposal.
+
+Implementation and recovery: [GS Studio R1 operation](README.md). The R1 container uses existing native editors with versioned cloud checkpoints, a recipe-only unrendered-cut save, stable app manifest/icons and same-project asset discovery. Native tool releases: JokeLab R5, Clipper R5, CapLock R10, AspectLock R28, SxLock R28 and PreviewLock R30. Editor engine behavior remains the established baseline; source/media/history are retained. Working Dropbox saves and queued Drive mirrors remain separate states. Automatic Gemini creative handback, within-layer speed/freeze maps and combined final rendering remain separate unfinished milestones.
+
+This implementation is under verification on its feature branch until the release receipt records passing tests and actual deployment. Do not infer owner-phone installation, production-cloud acceptance or final publishing approval from unit tests. No paid/provider generation, production test upload, cleanup or scheduled-post change.
+
+---
+
 ## Owner correction — the studio starts with a joke, October 31, 2026
 
 **New production starts with a joke, written in ChatGPT or selected/written in JokeLab. Saving the exact joke creates or resumes its associated project; the owner should not have to create an empty project first.** Canonical identity, text history and source preservation begin there. Creative development, voice/video sources, caption generation/clipping, composition, sound and review grow within that same joke project. Existing paid assets are reused. The visual project picker is the way to resume existing work; it is not a prerequisite before writing/selecting a new joke. A bed is an asset added later, not the origin of the production. No manual joke-ID or repeated prompt transfer is required by the intended workflow.

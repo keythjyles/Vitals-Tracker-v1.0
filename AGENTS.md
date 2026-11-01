@@ -1,3 +1,13 @@
+## Authorized GS Studio implementation — October 31, 2026
+
+The owner approved the clarified entrance with **“Right. Make it.”** The app opens at **Select a joke**, using the existing JokeLab selector. Selecting the joke creates/resumes its canonical project; the container then carries it through Joke, Cut, Captions, Scene, Sound and Review. ChatGPT is not a required manual joke-entry stage. This authorizes repository implementation of the container and adapters; it does not approve or revive the earlier unapproved ChatGPT Site, paid generation, source cleanup or schedule changes. Earlier discussion-only stops and ChatGPT-entry framing below are historical for the previous proposal.
+
+Implementation and recovery: [GS Studio R1 operation](tools-home/tools/studio/README.md). The R1 container uses existing native editors with versioned cloud checkpoints, a recipe-only unrendered-cut save, stable app manifest/icons and same-project asset discovery. Native tool releases: JokeLab R5, Clipper R5, CapLock R10, AspectLock R28, SxLock R28 and PreviewLock R30. Editor engine behavior remains the established baseline; source/media/history are retained. Working Dropbox saves and queued Drive mirrors remain separate states. Automatic Gemini creative handback, within-layer speed/freeze maps and combined final rendering remain separate unfinished milestones.
+
+This implementation is under verification on its feature branch until the release receipt records passing tests and actual deployment. Do not infer owner-phone installation, production-cloud acceptance or final publishing approval from unit tests. No paid/provider generation, production test upload, cleanup or scheduled-post change.
+
+---
+
 ## Caption Clipper R4 — immediate cut list and versioned blank passes, October30
 
 Owner rule: added elements populate their editable list directly under the player, following SxLock's established pattern. Source details, optional controls and explanatory panels do not precede the list. This release applies that rule to Caption Clipper; it does not redesign SxLock or AspectLock.

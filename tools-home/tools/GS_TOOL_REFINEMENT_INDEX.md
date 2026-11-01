@@ -1,3 +1,13 @@
+## Authorized GS Studio implementation — October 31, 2026
+
+The owner approved the clarified entrance with **“Right. Make it.”** The app opens at **Select a joke**, using the existing JokeLab selector. Selecting the joke creates/resumes its canonical project; the container then carries it through Joke, Cut, Captions, Scene, Sound and Review. ChatGPT is not a required manual joke-entry stage. This authorizes repository implementation of the container and adapters; it does not approve or revive the earlier unapproved ChatGPT Site, paid generation, source cleanup or schedule changes. Earlier discussion-only stops and ChatGPT-entry framing below are historical for the previous proposal.
+
+Implementation and recovery: [GS Studio R1 operation](studio/README.md). The R1 container uses existing native editors with versioned cloud checkpoints, a recipe-only unrendered-cut save, stable app manifest/icons and same-project asset discovery. Native tool releases: JokeLab R5, Clipper R5, CapLock R10, AspectLock R28, SxLock R28 and PreviewLock R30. Editor engine behavior remains the established baseline; source/media/history are retained. Working Dropbox saves and queued Drive mirrors remain separate states. Automatic Gemini creative handback, within-layer speed/freeze maps and combined final rendering remain separate unfinished milestones.
+
+This implementation is under verification on its feature branch until the release receipt records passing tests and actual deployment. Do not infer owner-phone installation, production-cloud acceptance or final publishing approval from unit tests. No paid/provider generation, production test upload, cleanup or scheduled-post change.
+
+---
+
 ## Studio milestone 0 — live/source inspection and layout review, October 31
 
 [Inspection and first integration review](studio/STUDIO_MILESTONE_0_REVIEW_2026-10-31.md) records the proposed Project → Cut → Captions → Scene → Sound → Review flow, actual Pebble cloud state and exact adapter gaps. Fresh live identities: SxLock R27.1, CapLock R9, AspectLock R27, Clipper R4, PreviewLock R29. Pebble retains nine legacy v1 cuts, a schema4 CapLock edit at frame138 and62 snapshot references; latest manifest backup is pending and the existing receipt covers an earlier snapshot. Proposed first implementation slice: Project/Cut/Captions, including a durable recipe-only Clipper checkpoint. Layout discussion is pending; no shell application, provider call, project migration, cleanup or runtime mutation occurred. This is a design review, not approval of the rejected Site or a completed adapter implementation.

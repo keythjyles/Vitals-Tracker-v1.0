@@ -1,3 +1,5 @@
+import {inStudio,installAdapter} from '../studio/adapter.mjs?v=1';
+import {moduleSession} from '../studio/core.mjs?v=1';
 import {FocusGestures,scaledTarget} from './focus-controls.mjs?v=9';
 import {createProjectPicker} from '../studio/project-picker.mjs?v=4-cuts';
 import {fitPortrait,preferredBed} from '../studio/project-index.mjs?v=4';
@@ -168,7 +170,7 @@ const params=new URLSearchParams(location.search);if(params.get('assetPath'))loa
 // Project-folder handoff: numbered cloud caplets are loaded as an unplaced tray.
 async function saveCloudWorkspace(){
  if(!cloudSession)throw Error('Open a joke project to save to its folder.');
- cloudWrite=cloudWrite.catch(()=>{}).then(async()=>{cloudSaving=true;try{project.workspace={id:cloudSession.id,assetId:cloudSession.asset,playhead:frame,selectedClip:selectedClip||''};const snapshot=JSON.stringify(project);const d=await api('/api/joke-project/caplock?id='+encodeURIComponent(cloudSession.id),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({rev:cloudSession.rev,session:JSON.parse(snapshot)})});cloudSession.rev=d.rev;if(snapshot===JSON.stringify(project))dirty=false;$('saveStatus').textContent='CapLock workspace saved in Dropbox. Drive backup queued.';}finally{cloudSaving=false;}});return cloudWrite;
+ cloudWrite=cloudWrite.catch(()=>{}).then(async()=>{cloudSaving=true;try{project.workspace={id:cloudSession.id,assetId:cloudSession.asset,playhead:frame,selectedClip:selectedClip||''};const snapshot=JSON.stringify(project);const d=await api('/api/joke-project/caplock?id='+encodeURIComponent(cloudSession.id),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({rev:cloudSession.rev,session:JSON.parse(snapshot)})});cloudSession.rev=d.rev;if(d.project)projectContext=d.project;if(snapshot===JSON.stringify(project))dirty=false;$('saveStatus').textContent='CapLock workspace saved in Dropbox. Drive backup queued.';}finally{cloudSaving=false;}});return cloudWrite;
 }
 async function storeCloudAsset(ref,file,role='bed'){
  clearTimeout(cloudTimer);cloudWrite=cloudWrite.catch(()=>{}).then(async()=>{const route='/api/joke-project/asset?id='+encodeURIComponent(cloudSession.id)+'&role='+encodeURIComponent(role)+'&name='+encodeURIComponent(ref.name)+(file?'':'&source='+encodeURIComponent(ref.path));const d=await api(route,{method:'POST',...(file?{headers:{'content-type':'application/octet-stream'},body:file}:{})});cloudSession.rev=d.rev;return {kind:'previewlock',name:d.asset.name,path:d.asset.path,size:d.asset.size};});return cloudWrite;
@@ -246,8 +248,8 @@ async function importNumberedFiles(input){
 for(const id of ['captionFiles','captionFolderFiles'])$(id).onchange=e=>importNumberedFiles(e.target).catch(error=>{$('captionImportStatus').textContent=error.message;});
 $('overlayLibrary').textContent='Import captions';
 // A clipper link is authoritative; project entry also supports text-only and bed-only workspaces.
-if(params.get('project')&&params.get('caption'))openJokeWorkspace(params.get('project'),params.get('caption')).catch(e=>say('Caption handoff: '+e.message));
-else if(params.get('project')||localStorage.getItem('gs_previewlock_key')){const id=params.get('project')||localStorage.getItem('gs_studio_project')||localStorage.getItem('gs_caplock_caption_project')||'dad-00bda89167b4f15850aa1c91';openFullJokeProject({id}).catch(e=>say('Saved joke project unavailable: '+e.message));}
+if(!inStudio()&&params.get('project')&&params.get('caption'))openJokeWorkspace(params.get('project'),params.get('caption')).catch(e=>say('Caption handoff: '+e.message));
+else if(!inStudio()&&(params.get('project')||localStorage.getItem('gs_previewlock_key'))){const id=params.get('project')||localStorage.getItem('gs_studio_project')||localStorage.getItem('gs_caplock_caption_project')||'dad-00bda89167b4f15850aa1c91';openFullJokeProject({id}).catch(e=>say('Saved joke project unavailable: '+e.message));}
 
 async function openFullJokeProject(record,chosenBed=null,progress=say){
  pause();if(cloudSession&&dirty){clearTimeout(cloudTimer);await saveCloudWorkspace();}await cloudWrite;
@@ -272,3 +274,21 @@ async function openFullJokeProject(record,chosenBed=null,progress=say){
  localStorage.setItem('gs_studio_project',p.id);showPage('viewer');render();say(p.title+' project loaded · '+p.assets.length+' saved assets available in Assets. Playback stays paused.');
 }
 
+
+installAdapter('captions',{
+ busy:()=>placementBusy||cloudSaving,
+ pause,
+ async open({project:p,session}){
+  await openFullJokeProject({id:p.id});
+  if(session?.project&&session.caplockCheckpoint===p.caplockDigest){cloudSession=null;clearTimeout(cloudTimer);await openProject(session.project);const d=await api('/api/joke-project?id='+encodeURIComponent(p.id));cloudSession={id:p.id,asset:project.workspace?.assetId||'',rev:d.rev};projectContext=d.project;}
+  if(session&&session.caplockCheckpoint===p.caplockDigest){undo=session.undo||[];redo=session.redo||[];selectedClip=session.selectedClip||selectedClip;layers.selected=selectedClip;editMode=session.editMode||'view';zoom=session.zoom||1;pan=session.pan||{x:0,y:0};render();await seek(session.frame??frame);}
+  clearTimeout(cloudTimer);pause();
+ },
+ async checkpoint({project:p}){
+  pause();clearTimeout(cloudTimer);if(dirty)await saveCloudWorkspace();else await cloudWrite;
+  project.workspace={...project.workspace,id:p.id,playhead:frame,selectedClip:selectedClip||''};
+  return moduleSession('captions',p.id,{project:JSON.parse(JSON.stringify(project)),caplockCheckpoint:projectContext?.caplockDigest||null,frame,selectedClip,editMode,zoom,pan,undo,redo});
+ }
+});
+
+if(inStudio()){for(const id of ['bedLoad','emptyLoadProject','projectAssets'])$(id).onclick=()=>window.parent.postMessage({protocol:'GS-Studio-1',action:'navigate-phase',phase:'joke'},location.origin);$('captionProject').onchange=()=>{if(cloudSession){$('captionProject').value=cloudSession.id;loadCaptionFolder(cloudSession.id).catch(e=>say(e.message));}};$('openCaptionClipper').onclick=()=>window.parent.postMessage({protocol:'GS-Studio-1',action:'navigate-phase',phase:'cut'},location.origin);}

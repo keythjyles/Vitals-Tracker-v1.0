@@ -14,10 +14,10 @@
  const originalApi=api;
  api=(endpoint,opt={})=>originalApi(endpoint,{...opt,signal:opt.signal?AbortSignal.any([opt.signal,AbortSignal.timeout(65000)]):AbortSignal.timeout(65000)});
  playVideo=async()=>{if(!v.getAttribute('src'))return status('Choose a video first.');try{await v.play();status('')}catch(e){status(e.name==='NotAllowedError'?'Video ready — tap Play.':'Could not start playback. Tap Reload or Open saved video.')}};
- const showSource=(source,name)=>{v.src=source;v.load();$('fileName').textContent=name;enable(true);playVideo();};
- select=async(f)=>{
+ const showSource=(source,name,autoplay=true)=>{v.src=source;v.load();$('fileName').textContent=name;enable(true);if(autoplay)playVideo();};
+ select=async(f,{autoplay=true}={})=>{
   selectedAsset=f;const turn=++selection;path=f.path_display;$('fileName').textContent=f.name;status('Loading video…');fallback(f.name);enable(false);$('download').disabled=true;
-  try{const d=await api('/api/playback?path='+encodeURIComponent(f.path_display));if(turn!==selection)return;url=d.url;showSource(url,f.name);$('download').disabled=false;projectIds.add(f.path_display);saveProject();renderLibrary();}
+  try{const d=await api('/api/playback?path='+encodeURIComponent(f.path_display));if(turn!==selection)return;url=d.url;showSource(url,f.name,autoplay);$('download').disabled=false;projectIds.add(f.path_display);saveProject();renderLibrary();}
   catch(e){if(turn!==selection)return;status('Video could not load. '+(e.message==='unauthorized'?'This browser needs your existing Dropbox connection.':'Try Reload; the original is saved.'));}
  };
  load=async()=>{

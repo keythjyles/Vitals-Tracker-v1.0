@@ -2,6 +2,14 @@
   "version": "1.2",
   "tools": [
     {
+      "tool": "studio",
+      "tool_id": "GS-TOOL-STUDIO",
+      "source_version": "R1",
+      "hosted_path": "tools/studio/index.html",
+      "description": "Installable joke-first container with shared project assets and versioned native-module checkpoints.",
+      "operator_guide": "tools/studio/README.md"
+    },
+    {
       "tool": "framelock",
       "source_file": "FrameLock_v1.3.12_CLEAN_MANUAL_25FPS.html",
       "source_version": "1.3.12",
@@ -49,7 +57,7 @@
     },
     {
       "tool": "sxlock",
-      "source_version": "R1.11",
+      "source_version": "R28",
       "hosted_path": "tools/sxlock/index.html",
       "description": "Approved Scrubber effects populate the live Approved effects category automatically; Play/Use use the saved original, Add alone inserts into the timeline.",
       "verification": "JavaScript syntax and asset decode/hash checks; browser playback/search/favorites/placement review. Physical Android playback not independently tested.",
@@ -68,7 +76,7 @@
       "source_version": "R14",
       "hosted_path": "tools/sound-scrubber/index.html",
       "description": "Sound acquisition and owner quality control: search, inline Play / Approve / Reject, filename-tap rename, pending/approved/held/culled review states.",
-      "workflow": "Scrubber approval → instant shared Approved effects → WavLock Use or SxLock Play/Use/Add. Actual originals already cached for immediate use; verified Dropbox fallback when cache is unavailable. Drive backup remains queued.",
+      "workflow": "Scrubber approval \u2192 instant shared Approved effects \u2192 WavLock Use or SxLock Play/Use/Add. Actual originals already cached for immediate use; verified Dropbox fallback when cache is unavailable. Drive backup remains queued.",
       "navigation": {
         "sxlock": "tools/sxlock/",
         "wavlock": "tools/wavlock/",
@@ -89,7 +97,7 @@
     {
       "tool": "caplock",
       "tool_id": "GS-TOOL-CAPLOCK",
-      "source_version": "R9",
+      "source_version": "R10",
       "hosted_path": "tools/caplock/index.html",
       "description": "Project-first workspace with editable Insert, independent bed/overlay focus, hidden project drawer, placed-item properties and Hide/Show.",
       "navigation": [
@@ -102,14 +110,14 @@
     {
       "tool": "aspectlock",
       "tool_id": "GS-TOOL-ASPECTLOCK",
-      "source_version": "R27",
+      "source_version": "R28",
       "hosted_path": "tools/aspectlock/index.html",
       "description": "Single-animation compositor with compact fixed right controls, placement matrix, added-item row and tap-to-edit property sheet; paused seeking."
     },
     {
       "tool": "cliplock",
       "tool_id": "GS-TOOL-CLIPLOCK",
-      "source_version": "R4",
+      "source_version": "R5",
       "hosted_path": "tools/cliplock/index.html",
       "description": "Caption Clipper: cut list immediately under player, Cut/Draft asset badges and durable blank next-version passes preserving earlier clips.",
       "verification": "Release and storage/phone verification limits: tools/cliplock/PASSES_R4.json.",

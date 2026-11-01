@@ -14,7 +14,7 @@ let clips=[],ctx,master,bedGain,analyser,sourceNode,videoFile=null,videoURL=null
 const scheduled=new Set(),compressed=new Map(),PCM_BUDGET=24*1024*1024,COMPRESSED_BUDGET=8*1024*1024,LOOKAHEAD=8;
 let cleanupExport=null,exportPhase=null;
 const savedCustom=new Set(),savedVideos=new Set(),savedRecordings=new Set();let videoRef=null,recoveryQueue=Promise.resolve(),recoveryRevision=0,recoveryPending=0,restoredPlayhead=0;
-const health={version:"R27",errors:[]};try{health.errors=JSON.parse(localStorage.getItem(KEY+"-health")||"null")?.errors?.slice(-12)||[]}catch{}
+const health={version:"R28",errors:[]};try{health.errors=JSON.parse(localStorage.getItem(KEY+"-health")||"null")?.errors?.slice(-12)||[]}catch{}
 let sourceDuration=0,sourceReady=Promise.resolve(),sourceLoadToken=0;
 const num=(v,min=0,max=Infinity)=>Math.max(min,Math.min(max,Number(v)||0));
 const stamp=t=>`${Math.floor(t/60)}:${(t%60).toFixed(3).padStart(6,'0')}`;
@@ -406,5 +406,33 @@ function showClassification(sound){
 }
 
 window.SxLock.cloudReady=libraryReady.then(openCloudSource).catch(e=>{recordIssue('cloud-source',e);message(e.message)});
-})();
 
+
+import('../studio/adapter.mjs?v=1').then(({installAdapter,assetBlob,storeAsset})=>import('../studio/core.mjs?v=1').then(({moduleSession,preferredBed})=>{
+ let studioBed=null,studioSoundRefs={};
+ installAdapter('sound',{
+  busy:()=>exportBusy||recording||!!liveTake,
+  pause:pauseForEdit,
+  async open({project:p,session}){
+   await libraryReady;await recoveryQueue;pauseForEdit();
+   const state=structuredClone(session?.state||{schema:'SxLock-1.0',version:'1.8',sourceFps:25,clips:[],sounds:[],recordings:[],notes:'',filename:p.title+'_sound_v01',videoVolume:100,mixer:{effects:100,voice:100}});
+   studioBed=session?.bed||preferredBed(p);studioSoundRefs=session?.soundRefs||{};
+   for(const a of state.sounds||[]){const ref=studioSoundRefs[a.id];if(ref){a.data=to64(new Uint8Array(await (await assetBlob(ref)).arrayBuffer()));}}
+   for(const a of state.recordings||[]){const ref=studioSoundRefs[a.id];if(ref)sounds.set(a.id,{...a,url:'dropbox:'+ref.path,origin:'studio',studioOriginalOrigin:a.origin||'recording',builtin:true,recording:true,buffer:null});}
+   projectReady=false;setBusy(true);
+   try{sxActivate();restore(state);state.clips.forEach((c,i)=>{if(clips[i]&&typeof c.id==='string')clips[i].id=c.id;});if(studioBed){const b=await assetBlob(studioBed);await loadVideo(new File([b],studioBed.name,{type:b.type||'video/mp4'}),{restoring:true});await sourceReady;video.currentTime=Math.max(0,Math.min(duration(),state.playheadSeconds||0));}renderClips();updateMixer();pauseForEdit();}
+   finally{projectReady=true;setBusy(false);updateViewerDock();}
+   message(p.title+' · sound pass restored · original soundtrack preserved');
+  },
+  async checkpoint({project:p}){
+   pauseForEdit();await flushProject();await recoveryQueue;
+   if(videoFile&&(!studioBed||studioBed.name!==videoFile.name||studioBed.size!==videoFile.size)){studioBed=(await storeAsset(p.id,videoFile,videoFile.name,'bed')).asset;}
+   const state=snapshot(true),used=new Set(state.clips.map(c=>c.soundId));state.sounds=state.sounds.filter(s=>used.has(s.id));state.recordings=state.recordings.filter(s=>used.has(s.id));
+   for(const a of state.recordings){if(!studioSoundRefs[a.id]){const live=sounds.get(a.id),bytes=await recordedBytes(live),name=(a.name||a.id).replace(/[\\/<>:"|?*\x00-\x1f]/g,'_')+( /\.[a-z0-9]{2,5}$/i.test(a.name||'')?'':'.mp3');studioSoundRefs[a.id]=(await storeAsset(p.id,new Blob([bytes],{type:a.mimeType||'audio/mpeg'}),name,'sound')).asset;}}
+   for(const a of state.sounds){if(a.data&&!studioSoundRefs[a.id]){const bytes=from64(a.data),name=(a.name||a.id).replace(/[\\/<>:"|?*\x00-\x1f]/g,'_');studioSoundRefs[a.id]=(await storeAsset(p.id,new Blob([bytes],{type:a.mimeType||'audio/wav'}),name,'sound')).asset;}delete a.data;}
+   state.video=studioBed?.name||null;return moduleSession('sound',p.id,{state,bed:studioBed,soundRefs:studioSoundRefs});
+  }
+ });
+}));
+
+})();
