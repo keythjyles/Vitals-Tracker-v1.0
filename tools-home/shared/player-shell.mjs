@@ -126,7 +126,7 @@ export function mountPlayerShell(tool,config){
   const apps=q('.playerApps');if(apps)root.after(apps);
  }
  const pause=()=>media?.pause();
- function applyDrawer(open){important(drawer,{display:open?'block':'none',height:open?'auto':'0px','max-height':open?'45dvh':'0px',padding:open?'5px':'0px',visibility:open?'visible':'hidden',overflow:open?'auto':'hidden','pointer-events':open?'auto':'none'});grip.setAttribute('aria-expanded',String(open));grip.setAttribute('aria-label',open?'Hide file picker':'Show file picker');grip.textContent=open?'⌃':'⌄';}
+ function applyDrawer(open){important(drawer,{display:open?'block':'none',height:open?'auto':'0px','max-height':open?'min(35dvh, 180px)':'0px',padding:open?'5px':'0px',visibility:open?'visible':'hidden',overflow:open?'auto':'hidden','pointer-events':open?'auto':'none'});grip.setAttribute('aria-expanded',String(open));grip.setAttribute('aria-label',open?'Hide file picker':'Show file picker');grip.textContent=open?'⌃':'⌄';}
  function setDrawer(open){root.classList.toggle('drawer-closed',!open);applyDrawer(open);if(open)pause();}
  new MutationObserver(()=>applyDrawer(!root.classList.contains('drawer-closed'))).observe(root,{attributes:true,attributeFilter:['class']});
  const scrollNode=tool==='cliplock'?q('.work'):document.scrollingElement;

@@ -3,7 +3,7 @@
 .gs-player-shell [hidden]{display:none!important}
 .gs-source-grip{display:block!important;width:100%!important;height:14px!important;min-height:14px!important;max-height:14px!important;padding:0!important;margin:0!important;border:0!important;border-radius:0!important;background:#192b3b!important;color:#b8cddd!important;font:13px/14px system-ui!important;touch-action:none}
 .gs-source-grip::after{content:'';display:inline-block;width:36px;height:3px;margin-left:5px;background:#8fa9bd;border-radius:4px;vertical-align:middle}
-.gs-source-drawer{overflow:auto;max-height:45dvh;padding:5px;font:13px system-ui;border-bottom:1px solid #34485a}
+.gs-source-drawer{overflow:auto;max-height:min(35dvh,180px);padding:5px;font:13px system-ui;border-bottom:1px solid #34485a}
 .gs-player-shell.drawer-closed>.gs-source-drawer{max-height:0!important;height:0!important;padding:0!important;border:0!important;overflow:hidden!important;visibility:hidden!important;pointer-events:none!important}
 .gs-source-drawer header,.gs-source-drawer section,.gs-source-drawer details{position:static!important;margin:3px 0!important;padding:4px!important;max-width:100%}
 .gs-source-drawer button,.gs-source-drawer select,.gs-source-drawer input:not([type=checkbox]):not([type=color]){min-height:29px;padding:3px 6px;font-size:12px;max-width:100%}
