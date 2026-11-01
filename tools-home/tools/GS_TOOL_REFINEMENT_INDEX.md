@@ -1,3 +1,17 @@
+## Clipper R9 — owner refinements, November 1, 2026
+
+Owner requested Samsung edge clearance, filename display, Photos or Files selection, obvious current-frame IN/OUT buttons, ±25-frame jumps, export clarity and hover help. The shared shell now has at least 16px horizontal insets (including safe-area support), a compact source-name row, native hover titles and touch-hold help. The approved SxLock rail/row/frame dimensions remain locked. All eight HTML adapters use compact-player v3 and player-shell v2; native engines and existing drafts/media remain intact.
+
+Clipper keeps full-width IN/OUT buttons showing their marks. Each click stamps the displayed native source frame; OUT remains exclusive. Exact number entry is retained under the hidden drawer's Exact IN / OUT panel. The additional 25-frame buttons use the same authoritative native cursor and one haptic per click; navigation changes no mark. Photos requests video-only media selection; Files deliberately has no MIME filter so Android can use its general chooser. Android controls which media provider appears; do not claim a web page can force a specific Google Photos account/provider.
+
+One clip prepares only its row, followed by Save clip. All N · ZIP prepares the complete set directly, followed by Save all; individual preparation is optional. No output engine, timing, audio, naming, cut-pass or source-hash storage keys changed.
+
+Copy list copies the entire queued data array, including rows outside the scroll panel. It includes source filename, source SHA-256, total source frames, indexed custom names (automatic names use their index), IN/OUT and duration frames, UTC copy timestamp and device-local date/time with timezone. It records snapshot/copy time, never fabricates creation dates for older cuts. Clipboard failure opens a selected read-only full-text fallback. This is a shareable record, not a media upload or proof of finished exports.
+
+The owner's latest screenshot shows a 1667-frame source and seven cuts; older 1674-frame recovery data must never auto-apply to it. Preserve all existing work. Rollback source: b909ce930a6e485ed5093b81f5266f2d2a3c41b1.
+
+---
+
 ## Owner correction: lock and reuse SxLock equipment — November 1, 2026
 
 R7's generic compact layout was rejected. It did not match SxLock and left source controls above the player. The accepted reference is SxLock R24's actual equipment: 76px right rail; normal controls fixed at 29px; −/+ paired in one 36px row with 30px glyphs; 7px vertical spacing; intrinsic controls determine monitor height. Never stretch buttons from video/viewport height.
