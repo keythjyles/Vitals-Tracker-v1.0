@@ -1,4 +1,6 @@
-Current shared-player releases (November 1, 2026): ClipLock R7, CapLock R12, SxLock R29, AspectLock R29, PreviewLock R31, FrameLock 1.3.16, MotionLock 0.1.6, WavLock R1.4. See [the shared compact-player contract](shared/COMPACT_PLAYER.md). Historical entries below retain their provenance.
+Current locked equipment (owner correction, November 1): Clipper R8, CapLock R13, SxLock R30, AspectLock R30, PreviewLock R32, FrameLock 1.3.17, MotionLock 0.1.7, WavLock R1.5. Shared component: `shared/player-shell.mjs` and `shared/player-shell.css`; profile SxLock-R24. R7 matching claims below were rejected.
+
+Superseded R7 releases (historical, November 1, 2026): ClipLock R7, CapLock R12, SxLock R29, AspectLock R29, PreviewLock R31, FrameLock 1.3.16, MotionLock 0.1.6, WavLock R1.4. See [the shared compact-player contract](shared/COMPACT_PLAYER.md). Historical entries below retain their provenance.
 
 # GS / Thicket Tools — Canonical Registry
 Updated: 2026-10-24

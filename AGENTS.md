@@ -1,3 +1,17 @@
+## Owner correction: lock and reuse SxLock equipment — November 1, 2026
+
+R7's generic compact layout was rejected. It did not match SxLock and left source controls above the player. The accepted reference is SxLock R24's actual equipment: 76px right rail; normal controls fixed at 29px; −/+ paired in one 36px row with 30px glyphs; 7px vertical spacing; intrinsic controls determine monitor height. Never stretch buttons from video/viewport height.
+
+`tools-home/shared/player-shell.mjs` and `player-shell.css` own this locked component. `PLAYER_PROFILE` is frozen, and the component applies the dimensions directly. Native editors provide existing nodes/handlers only. Do not introduce a tool-specific density, header or picker layout. Change this shared equipment only in response to an explicit owner request, preserving the reference and validating every adapter.
+
+File/project selection is a hidden pull-down drawer after opening media. Pull to the top, then pull again on the grip to reveal it; tapping the grip is the equivalent accessible action. Picture/layer gestures never open the drawer. Opening it pauses playback and changes no cut, placement or source. No repeated Load/Saved/mode header occupies working picture space.
+
+Clipper R8 places playback, paired frame steps, explicit frame Go, IN/OUT, preview and cut/export actions in the right rail. Only the compact name row remains beneath the monitor; cuts immediately follow. Source media, native engines, browser draft keys, cloud projects, six-range recovery and output recipes remain intact. A 1667-frame source is not automatically treated as the 1674-frame screenshot source.
+
+Rollback: `307af6a07a4ff3b40339a81da3259fc58d400488`. Keep all media and saved edits on rollback. Older R7 matching/compact claims below are historical and superseded by this correction.
+
+---
+
 ## Shared compact players and protected precision — November 1, 2026
 
 Owner instruction: all editing tools use the same compact picture/clock/right-hand transport pattern. Position bars and painted timeline maps are read-only. Use frame buttons or an explicit Go field; other former sliders use typed values plus Set. No swipe, preview or export commits an unfinished cut. Single-frame buttons carry the large −/+ glyphs and request a short haptic on supported devices. Keep source picture, sound, assets, project IDs and native editing engines intact.

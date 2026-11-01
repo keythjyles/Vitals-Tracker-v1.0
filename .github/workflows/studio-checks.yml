@@ -1,9 +1,9 @@
 name: GS Studio checks
 on:
   push:
-    paths: ['tools-home/shared/compact-player*','tools-home/tools/studio/**','tools-home/tools/jokelab/**','tools-home/source/app/workbench.tsx','tools-home/source/app/joke-library.tsx','tools-home/tools/caplock/**','tools-home/tools/cliplock/**','tools-home/tools/aspectlock/**','tools-home/tools/sxlock/**','tools-home/tools/previewlock/**','tools-home/services/previewlock-api/**','.github/workflows/studio-checks.yml']
+    paths: ['tools-home/shared/compact-player*','tools-home/shared/player-shell*','tools-home/tools/studio/**','tools-home/tools/jokelab/**','tools-home/source/app/workbench.tsx','tools-home/source/app/joke-library.tsx','tools-home/tools/caplock/**','tools-home/tools/cliplock/**','tools-home/tools/aspectlock/**','tools-home/tools/sxlock/**','tools-home/tools/previewlock/**','tools-home/services/previewlock-api/**','.github/workflows/studio-checks.yml']
   pull_request:
-    paths: ['tools-home/shared/compact-player*','tools-home/tools/studio/**','tools-home/services/previewlock-api/**','.github/workflows/studio-checks.yml']
+    paths: ['tools-home/shared/compact-player*','tools-home/shared/player-shell*','tools-home/tools/studio/**','tools-home/services/previewlock-api/**','.github/workflows/studio-checks.yml']
 permissions:
   contents: read
 jobs:

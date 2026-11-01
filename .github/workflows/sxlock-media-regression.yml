@@ -1,9 +1,9 @@
 name: SxLock media regression
 on:
   pull_request:
-    paths: ['tools-home/shared/compact-player*','tools-home/tools/sxlock/**', '.github/workflows/sxlock-media-regression.yml']
+    paths: ['tools-home/shared/compact-player*','tools-home/shared/player-shell*','tools-home/tools/sxlock/**', '.github/workflows/sxlock-media-regression.yml']
   push:
-    paths: ['tools-home/shared/compact-player*','tools-home/tools/sxlock/**', '.github/workflows/sxlock-media-regression.yml']
+    paths: ['tools-home/shared/compact-player*','tools-home/shared/player-shell*','tools-home/tools/sxlock/**', '.github/workflows/sxlock-media-regression.yml']
 permissions:
   contents: read
 jobs:

@@ -29,7 +29,7 @@ const {execFileSync}=require('node:child_process');
  await page.route('**/caption-fixture.mp4',r=>r.fulfill({contentType:'video/mp4',body:bytes}));
  await page.goto('http://127.0.0.1:8767/tools-home/tools/cliplock/?project=caption-fixture');
  await page.waitForFunction(()=>!document.querySelector('#next').disabled);
- assert.match(await page.title(),/Caption Clipper.*R7/);assert.equal(await page.locator('#sourceSelect option').count(),1);
+ assert.match(await page.title(),/Caption Clipper.*R8/);assert.equal(await page.locator('#sourceSelect option').count(),1);
  assert.equal(await page.locator('#singleExport').count(),0);assert.match(await page.locator('#source').textContent(),/caption.mp4.*96 frames/);
  // Emulate rounded browser media-time reads on a 24fps source, and multiple taps before seek completion.
  await page.locator('#video').evaluate(v=>{const d=Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype,'currentTime');Object.defineProperty(v,'currentTime',{configurable:true,get(){return Math.floor(d.get.call(this)*1000)/1000;},set(n){d.set.call(this,n);}});});
@@ -58,7 +58,7 @@ const {execFileSync}=require('node:child_process');
  const scroll=await page.locator('.work').evaluate(e=>e.scrollTop);assert.ok(listTop+scroll-dockBottom<90&&listTop+scroll>=dockBottom,'Cut list is immediately below player');
  assert.equal(await page.locator('.work').evaluate(e=>e.firstElementChild.getAttribute('aria-label')),'Queued cuts');
  assert.match(await page.locator('#restoreStatus').innerText(),/Saved v1.*2 saved clips/);
- await page.getByText('Caption source',{exact:true}).click();assert.match(await page.locator('#sourceSelect').innerText(),/Cut · v1/);
+ await page.getByRole('button',{name:'Show file picker',exact:true}).click();await page.getByText('Caption source',{exact:true}).click();assert.match(await page.locator('#sourceSelect').innerText(),/Cut · v1/);
  await page.locator('#assets').click();await page.waitForFunction(()=>document.querySelector('#projectPickerDetail').textContent.includes('Cut · v1'));
  await page.locator('#projectPicker').getByRole('button',{name:'✕ Close',exact:true}).click();
  const v1Paths=original.cuts.clips.map(c=>c.path);await page.locator('#newPass').click();await page.waitForFunction(()=>document.querySelector('#passLabel').textContent==='v2'&&document.querySelector('#cutCount').textContent==='0');

@@ -1,12 +1,13 @@
+import {mountPlayerShell} from './player-shell.mjs?v=1';
 /** Shared UI adapter; never stores or rewrites media or native edit records. */
-export const COMPACT_PLAYER_VERSION='1';
+export const COMPACT_PLAYER_VERSION='2';
 export function explicitValue(value,min,max){const n=Number(value);if(String(value).trim()===''||!Number.isFinite(n)||n<min||n>max)throw Error('Enter a value from '+min+' to '+max+'.');return n;}
 export function hapticClick(device=globalThis.navigator){try{return device?.vibrate?.(12)??false;}catch{return false;}}
 if(typeof document!=='undefined'){
  const tool=location.pathname.match(/\/tools\/([^/]+)/)?.[1]||'';
  document.body.classList.add('gs-compact');document.body.dataset.gsTool=tool;
  const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
- const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./compact-player.css?v=1',import.meta.url).href;document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./compact-player.css?v=2',import.meta.url).href;document.head.append(css);const shellCSS=document.createElement('link');shellCSS.rel='stylesheet';shellCSS.href=new URL('./player-shell.css?v=1',import.meta.url).href;document.head.append(shellCSS);
  const configs={
   cliplock:{workspace:'.player-workspace',stage:'.picture',rail:'.transport',clock:'#clock',video:'#video',frames:['back','next']},
   caplock:{workspace:'.workspace',stage:'#viewport',rail:'.rail',clock:'.readout',video:'#video',frames:['prev','next','sheetBack','sheetForward'],ranges:{seek:'frame'}},
@@ -69,4 +70,5 @@ if(typeof document!=='undefined'){
  }}
  if(tool==='framelock'&&nativeVideo){nativeVideo.controls=false;const progress=document.createElement('progress');progress.className='gs-progress';progress.max=1;progress.value=0;nativeVideo.after(progress);nativeVideo.addEventListener('timeupdate',()=>progress.value=nativeVideo.duration>0?nativeVideo.currentTime/nativeVideo.duration:0);const seek=document.createElement('details'),summary=document.createElement('summary'),row=document.createElement('div'),input=document.createElement('input'),go=document.createElement('button');seek.className='gs-precision';summary.textContent='Go to frame';row.className='gs-set-row';input.type='number';input.inputMode='numeric';input.min='0';input.value='0';input.setAttribute('aria-label','Go to frame');go.textContent='Go';go.type='button';row.append(input,go);seek.append(summary,row);progress.after(seek);go.onclick=()=>{const state=window.toolsHubState?.(),fps=state?.fps,n=Number(input.value);if(fps&&Number.isInteger(n)&&n>=0&&n<Math.ceil(nativeVideo.duration*fps)){nativeVideo.pause();nativeVideo.currentTime=n/fps;seek.open=false;}};}
  protectNativeVideos();new MutationObserver(protectNativeVideos).observe(document.body,{subtree:true,childList:true});
+ mountPlayerShell(tool,config);
 }
