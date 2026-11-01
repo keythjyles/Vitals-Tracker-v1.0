@@ -43,10 +43,10 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises'),{creat
  tool=await enter('captions');await tool.locator('#video').evaluate(v=>v.readyState>=2);await tool.locator('#insertCaption').click();await tool.locator('#itemCount').waitFor();assert.equal(await tool.locator('#itemCount').textContent(),'1');
  tool=await enter('cut');assert.match(await tool.locator('#cutList').textContent(),/Question/);assert.equal(renderCalls,0);assert.equal(source.cuts.clips.length,1);
  tool=await enter('captions');assert.equal(await tool.locator('#itemCount').textContent(),'1');assert.equal(await tool.locator('#video').evaluate(v=>v.paused),true);
- tool=await enter('scene');await tool.locator('#editAdded').click();await tool.locator('#x').fill('75');await tool.locator('#x').dispatchEvent('input');await tool.locator('#closeItemProperties').click();
+ tool=await enter('scene');await tool.locator('#editAdded').click();await tool.locator('#x').press('End');await tool.locator('#x').press('ArrowLeft');await tool.locator('#closeItemProperties').click();
  tool=await enter('sound');await tool.locator('#addEffect').click();await tool.locator('#sheetSearch').fill('Cricket');await tool.locator('#effectSheet').getByRole('button',{name:'Place Cricket chirps',exact:true}).click();await tool.locator('#applyEffect').click();await tool.locator('#notes').fill('Saved sound direction');
  tool=await enter('review');assert.equal(await tool.locator('#player').evaluate(v=>v.paused),true);assert.match(await tool.locator('#message').textContent(),/Source preview/);
- tool=await enter('scene');assert.equal(await tool.locator('#x').inputValue(),'75');
+ tool=await enter('scene');assert.equal(await tool.locator('#x').inputValue(),'539');
  tool=await enter('sound');assert.equal(await tool.locator('#notes').inputValue(),'Saved sound direction');assert.equal(p.studio.modules.sound.session.state.clips.length,1);assert.equal(await tool.locator('#video').evaluate(v=>v.paused),true);
  await page.locator('#saveWork').click();await page.waitForFunction(()=>document.querySelector('#saveState').textContent.includes('Saved in Dropbox'));
  // Choosing the bed once carries it through the existing visual and sound engines.
