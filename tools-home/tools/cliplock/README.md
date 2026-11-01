@@ -1,5 +1,7 @@
 # Clipper R7 — compact, protected cuts
 
+Verified runtime `7ea3d1b456bde159bfcf7d74871850d8012f047f`: native checks and Pages passed. [Shared-player release evidence](../../shared/COMPACT_PLAYER_R1.json).
+
 The same cutter handles video with sound and caption animation. The clock sits above the picture, large single-frame −/+ buttons sit at the right, and the editable cut list begins directly beneath the marks/name dock. The position bar shows progress only. Find a frame uses an explicit number and Go. Frame buttons request a 12ms haptic where supported.
 
 Marks and names are working edits until Update cut. Preview/export never commits them. Undo restores recent added, updated, removed or recovered ranges; source-hash-bound drafts retain the working list across reload after the unchanged source is reselected. Save cut list exports a portable recovery recipe; Restore cut list validates source hash and frame count before changing the list.

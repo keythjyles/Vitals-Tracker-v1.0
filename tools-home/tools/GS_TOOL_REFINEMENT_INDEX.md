@@ -1,3 +1,5 @@
+Verified release: runtime `7ea3d1b456bde159bfcf7d74871850d8012f047f`; all four native check suites and Pages deployment passed on main. Live HTTPS R7 recovered all six screenshot ranges using a synthetic 1674-frame source, including Slide F0–300. [Release evidence and limits](../shared/COMPACT_PLAYER_R1.json). Owner-phone and actual Episode 4 source acceptance remain separate.
+
 ## Shared compact players and protected precision — November 1, 2026
 
 Owner instruction: all editing tools use the same compact picture/clock/right-hand transport pattern. Position bars and painted timeline maps are read-only. Use frame buttons or an explicit Go field; other former sliders use typed values plus Set. No swipe, preview or export commits an unfinished cut. Single-frame buttons carry the large −/+ glyphs and request a short haptic on supported devices. Keep source picture, sound, assets, project IDs and native editing engines intact.

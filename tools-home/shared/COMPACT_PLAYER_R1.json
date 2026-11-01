@@ -1,0 +1,143 @@
+{
+  "schema": "GS-CompactPlayerRelease-1",
+  "release": "shared-player-v1 / ClipLock-R7",
+  "baseline": "1f084ac8f3c075bd3962841d9e8c6a99bc446e46",
+  "runtimeCommit": "7ea3d1b456bde159bfcf7d74871850d8012f047f",
+  "validatedFeatureCommit": "38b383ffcc381831d47d7d650416da998ad435f0",
+  "validatedSourceTree": "8113343c9cfe8eaea42d4ba8ecbe2ae879ac60d5",
+  "releases": {
+    "cliplock": "R7",
+    "caplock": "R12",
+    "sxlock": "R29",
+    "aspectlock": "R29",
+    "previewlock": "R31",
+    "framelock": "1.3.16",
+    "motionlock": "0.1.6",
+    "wavlock": "R1.4"
+  },
+  "verification": {
+    "localChecksPassed": 14,
+    "featureWorkflows": [
+      {
+        "id": 41353800600,
+        "name": "GS Studio checks",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 41353800569,
+        "name": "CapLock prototype checks",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 41353800590,
+        "name": "ClipLock cutter checks",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 41353800536,
+        "name": "SxLock media regression",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "sixCuts": {
+      "ranges": [
+        [
+          0,
+          300
+        ],
+        [
+          320,
+          567
+        ],
+        [
+          865,
+          1103
+        ],
+        [
+          1103,
+          1385
+        ],
+        [
+          1386,
+          1608
+        ],
+        [
+          1609,
+          1674
+        ]
+      ],
+      "restored": true,
+      "swipeProtected": true,
+      "uncommittedEditProtected": true,
+      "zipEntries": 7,
+      "strictFullDecode": true,
+      "primaryAudioRetained": true,
+      "reloadRecovery": true,
+      "optionalPreviewCleanup": true
+    },
+    "eightPhoneWidthEntries": true,
+    "studioRoundTrip": true,
+    "sxColorTimingAndAudio": true,
+    "productionWorkflows": [
+      {
+        "id": 41353992886,
+        "name": "ClipLock cutter checks",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 41353992939,
+        "name": "CapLock prototype checks",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 41353992915,
+        "name": "pages build and deployment",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 41353992955,
+        "name": "SxLock media regression",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 41353992875,
+        "name": "GS Studio checks",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "liveHTTPS": {
+      "release": "R7",
+      "recoveredCutCount": 6,
+      "slideRange": [
+        0,
+        300
+      ],
+      "source": "1674-frame synthetic test fixture",
+      "noProductionCloudWrites": true
+    }
+  },
+  "preservation": {
+    "originalMediaUnchanged": true,
+    "nativeEditingEnginesRetained": true,
+    "oldDraftsArchived": true,
+    "localDownloadsAreNotCloudReceipts": true,
+    "noScheduledPublishingChange": true
+  },
+  "limits": [
+    "Physical owner-phone vibration and downloaded-file acceptance are not established by automated checks.",
+    "The screenshot recovery recipe has no source hash and requires explicit selection/review of the same 1674-frame original.",
+    "The two supplied project videos contain 3070 and 954 frames and were not used as the Episode 4 source.",
+    "No new Episode 4 production exports or final layered CapLock render were created by this UI release."
+  ],
+  "verifiedAt": "2026-11-01T21:54:08.413Z",
+  "liveUrl": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/cliplock/?mode=video&v=R7&recover=ep4"
+}
