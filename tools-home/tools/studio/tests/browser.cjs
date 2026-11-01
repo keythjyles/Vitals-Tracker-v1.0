@@ -9,6 +9,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises'),{creat
  const bed=await fs.readFile(dir+'/bed.mp4'),caption=await fs.readFile(dir+'/caption.mp4'),alpha=await fs.readFile(dir+'/alpha.webm'),hash=b=>createHash('sha256').update(b).digest('hex'),id='dad-studio-fixture',root='/Grill Sergeant/JokeLab Productions/'+id;
  const source={id:'caption-a',role:'caption',name:'caption.mp4',path:root+'/captions/caption.mp4',size:caption.length,sha256:hash(caption),cuts:{id:'cut-01',version:1,status:'complete',chroma:{enabled:false,color:'#0a77d4'},ranges:[{number:1,inFrame:0,outFrame:25,sourceInFrame:0,sourceOutFrame:24,sourceStart:0,sourceEnd:1}],clips:[{number:1,name:'1.webm',path:root+'/captions/clips/1.webm',frames:25,fps:25,size:alpha.length,sha256:hash(alpha)}]}};
  const p={schema:'GS-JokeProject-1',version:1,id,title:'Fixture joke',text:'Why did the fixture cross the road? For a test.',assets:[{id:'bed-a',role:'bed',name:'bed.mp4',path:root+'/video/bed.mp4',size:bed.length,sha256:hash(bed)},source,{id:'animation-a',role:'animation',name:'reaction.webm',path:root+'/animations/reaction.webm',size:alpha.length,sha256:hash(alpha)}]};
+ p.studio={bedAssetId:'bed-a',modules:{}};
  p.assets.push({id:'bed-b',role:'bed',name:'bed2.mp4',path:root+'/video/bed2.mp4',size:bed.length,sha256:hash(bed)});
  let rev=0,renderCalls=0,studioWrites=0,createCalls=0,created=null;
  const browser=await chromium.launch({headless:true,args:['--autoplay-policy=no-user-gesture-required']});
