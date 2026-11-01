@@ -1,0 +1,71 @@
+{
+  "sourceCommit": "bdff2ec3715f0f29ef1e75595201abcf921db8fc",
+  "date": "2026-11-01",
+  "checks": [
+    {
+      "id": 41363511230,
+      "name": "CapLock prototype checks",
+      "result": "success"
+    },
+    {
+      "id": 41363511238,
+      "name": "GS Studio checks",
+      "result": "success"
+    },
+    {
+      "id": 41363511250,
+      "name": "ClipLock cutter checks",
+      "result": "success"
+    },
+    {
+      "id": 41363511247,
+      "name": "SxLock media regression",
+      "result": "success"
+    },
+    {
+      "id": 41363510684,
+      "name": "pages build and deployment",
+      "result": "success"
+    }
+  ],
+  "phone": {
+    "width": 390,
+    "minHorizontalInset": 16,
+    "railWidth": 76,
+    "buttonHeight": 29,
+    "singleFrameHeight": 36,
+    "markButtons": "Full-width IN/OUT stamp the native cursor; exact numeric inputs remain in the drawer",
+    "sourceFilenameVisible": true,
+    "jumps": [
+      -25,
+      25
+    ],
+    "help": "Native hover titles and touch-hold help; help holds do not commit edits"
+  },
+  "clipboard": {
+    "liveVerified": true,
+    "sourceFile": "portrait-layout.mp4",
+    "sourceFrames": 50,
+    "sourceSha256": "3b9ca96bd2a26866457494ca1c59a55dbe09685bcf91187d54282916cc9a25fd",
+    "cutCount": 7,
+    "allRowsIncluded": true,
+    "customNameVerified": "QA clip 1",
+    "automaticNamesUseIndex": true,
+    "copiedAt": "2026-11-01T23:46:36.140Z",
+    "localZone": "America/Chicago",
+    "includesSourceAndBounds": true,
+    "manualFallback": true
+  },
+  "picker": {
+    "photosAccept": "video/*",
+    "filesAccept": null,
+    "providerControlledByOS": true,
+    "desktopBrowserInputsVerified": true,
+    "physicalSamsungProviderUIVerified": false
+  },
+  "export": "One clip prepares a single row; All N · ZIP prepares the entire set. Existing frame, audio, recipe and restored-list regressions passed.",
+  "proof": {
+    "path": "clipper-r9-phone-proof.jpg",
+    "context": "Live 390px phone review with seven QA cuts in a two-second portrait derivative. This is not the user's EP4 source; it does not replace their 1667-frame/seven-cut work."
+  }
+}
