@@ -3,7 +3,7 @@
 .gs-compact .gs-viewer{display:grid!important;grid-template-columns:minmax(0,1fr) var(--gs-rail-width)!important;gap:4px!important;align-items:start!important;min-width:0}
 .gs-compact .gs-stage{min-width:0;overflow:hidden;background:#050a10}
 .gs-compact .gs-rail{grid-column:2!important;grid-row:1!important;display:flex!important;flex-direction:column!important;gap:4px!important;min-width:0;align-self:start;overflow:visible!important;height:auto!important;min-height:0!important;max-height:none!important}
-.gs-compact .gs-rail button{min-width:0;width:100%;min-height:28px;height:auto;max-height:none;padding:4px 2px;font:12px/1.1 system-ui;touch-action:manipulation}
+.gs-compact .gs-rail button{min-width:0;width:100%;min-height:28px;height:auto;max-height:none;padding:4px 2px;font:12px/1.1 system-ui;touch-action:manipulation;overflow-wrap:anywhere;white-space:normal;overflow:hidden}
 .gs-compact .gs-frame-button{font:800 32px/1 system-ui!important;padding:0!important;min-height:40px!important;touch-action:manipulation}
 .gs-compact .gs-clock{font:12px/1.3 system-ui;font-variant-numeric:tabular-nums;min-height:18px}
 .gs-compact .gs-progress{appearance:none;display:block;width:100%;height:5px;margin:2px 0;background:#34485a;border:0;pointer-events:none;touch-action:pan-y}
@@ -23,5 +23,6 @@
 .gs-compact[data-gs-tool=motionlock] .player-row{grid-template-columns:minmax(0,1fr) var(--gs-rail-width)!important}.gs-compact[data-gs-tool=motionlock] .stage{grid-column:1!important;grid-row:1!important;height:var(--gs-picture-height)!important;min-height:0!important}.gs-compact[data-gs-tool=motionlock] #screen{height:100%!important;width:100%!important;object-fit:contain}.gs-compact[data-gs-tool=motionlock] .gs-motion-controls .buttons{display:contents}.gs-compact[data-gs-tool=motionlock] .gs-motion-controls .rail{width:auto;display:flex;flex-direction:column;gap:2px}.gs-compact[data-gs-tool=motionlock] .gs-motion-controls .rail-label{font-size:9px}.gs-compact[data-gs-tool=motionlock] .gs-motion-controls .rail button{font-size:10px;min-height:23px;padding:2px}.gs-compact[data-gs-tool=motionlock] .shuttle-wrap{display:none!important}
 .gs-compact .gs-inline-video-controls{display:flex;gap:4px;justify-content:flex-end}.gs-inline-video-controls button{min-height:32px;padding:4px 10px}.gs-inline-video-progress{width:100%}
 .gs-compact[data-gs-tool=caplock] #viewerPage:not([hidden]){display:contents}
+.gs-compact .gs-empty-load{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:3;min-height:38px;padding:6px 10px;background:#edcf8d;color:#15212c;border:1px solid #786d4b;border-radius:6px}.gs-compact .gs-frame-picture,.gs-compact[data-gs-tool=motionlock] .stage{position:relative}
 @media(max-width:350px){.gs-compact{--gs-rail-width:66px}.gs-compact .gs-rail button{font-size:11px}}
 @media(max-height:500px){.gs-compact{--gs-picture-height:140px}.gs-compact .gs-rail button{min-height:22px;padding:2px}.gs-compact .gs-frame-button{min-height:30px!important;font-size:27px!important}}

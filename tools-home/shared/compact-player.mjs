@@ -25,8 +25,13 @@ if(typeof document!=='undefined'){
   const workspace=$('.player-row'),rail=document.createElement('div'),controls=workspace.parentElement.querySelector('.buttons');rail.className='gs-motion-controls';if(controls)rail.append(controls);for(const r of [...workspace.children].filter(n=>n.classList.contains('rail')))rail.append(r);workspace.append(rail);
   const shuttle=$('#shuttleKnob');if(shuttle){shuttle.tabIndex=-1;shuttle.setAttribute('aria-hidden','true');}
  }
+ if(tool==='aspectlock'&&$('#position')&&$('.stageWorkspace'))$('.stageWorkspace').before($('#position'));
+ if(tool==='motionlock'&&$('.status')&&$('.player-row'))$('.player-row').before($('.status'));
  for(const [key,cls]of [['workspace','gs-viewer'],['stage','gs-stage'],['rail','gs-rail'],['clock','gs-clock']])if(config[key])$(config[key])?.classList.add(cls);
  const nativeVideo=config.video?$(config.video):null;
+ if(nativeVideo&&['framelock','motionlock'].includes(tool)){
+  const stage=$(config.stage),input=$('input[type=file]');if(stage&&input){const load=document.createElement('button');load.type='button';load.className='gs-empty-load';load.textContent='Load video';load.onclick=()=>input.click();stage.append(load);const show=()=>load.hidden=!!nativeVideo.getAttribute('src');for(const name of ['loadedmetadata','emptied','loadstart'])nativeVideo.addEventListener(name,show);show();}
+ }
  if(tool==='aspectlock')for(const [playId,pauseId,mediaId,title]of [['play','pause','bv','Bed'],['playOverlay','pauseOverlay','ov','Animation']]){
   const play=$('#'+playId),pause=$('#'+pauseId),media=$('#'+mediaId);if(!play||!pause||!media)continue;pause.hidden=true;
   document.addEventListener('click',e=>{if(e.target.closest('#'+playId)&&!media.paused){e.preventDefault();e.stopImmediatePropagation();pause.click();}},true);
