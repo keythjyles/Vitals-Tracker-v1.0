@@ -1,5 +1,5 @@
 import {captionCutLabel} from '../../shared/cut-passes.mjs?v=4';
-import {PROJECT_ROOT,indexedJokes,projectFolders,projectAssets,preferredBed,isVideo} from './project-index.mjs?v=4';
+import {PROJECT_ROOT,indexedJokes,projectFolders,projectAssets,preferredBed,isVideo} from './project-index.mjs?v=5-studio';
 const el=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;};
 const button=(text,fn)=>{const b=el('button',text);b.type='button';b.onclick=fn;return b;};
 const sourceURL=a=>new URL('../jokelets/'+a.src,import.meta.url).href;

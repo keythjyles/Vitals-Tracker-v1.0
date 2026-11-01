@@ -416,7 +416,7 @@ import('../studio/adapter.mjs?v=1').then(({installAdapter,assetBlob,storeAsset})
   async open({project:p,session}){
    await libraryReady;await recoveryQueue;pauseForEdit();
    const state=structuredClone(session?.state||{schema:'SxLock-1.0',version:'1.8',sourceFps:25,clips:[],sounds:[],recordings:[],notes:'',filename:p.title+'_sound_v01',videoVolume:100,mixer:{effects:100,voice:100}});
-   studioBed=session?.bed||preferredBed(p);studioSoundRefs=session?.soundRefs||{};
+   studioBed=(p.studio?.bedAssetId?preferredBed(p):null)||session?.bed||preferredBed(p);studioSoundRefs=session?.soundRefs||{};
    for(const a of state.sounds||[]){const ref=studioSoundRefs[a.id];if(ref){a.data=to64(new Uint8Array(await (await assetBlob(ref)).arrayBuffer()));}}
    for(const a of state.recordings||[]){const ref=studioSoundRefs[a.id];if(ref)sounds.set(a.id,{...a,url:'dropbox:'+ref.path,origin:'studio',studioOriginalOrigin:a.origin||'recording',builtin:true,recording:true,buffer:null});}
    projectReady=false;setBusy(true);

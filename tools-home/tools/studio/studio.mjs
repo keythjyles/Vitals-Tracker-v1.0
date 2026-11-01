@@ -1,10 +1,10 @@
 import {PHASES,LABELS,canonicalId,validProjectId,moduleSession,moduleRevision,nextPhase,phaseSession,preferredBed} from './core.mjs?v=1';
 import {api,assetBlob,storeAsset} from './adapter.mjs?v=1';
-import {projectAssets} from './project-index.mjs?v=4';
+import {projectAssets} from './project-index.mjs?v=5-studio';
 import {captionCutLabel} from '../../shared/cut-passes.mjs?v=4';
 import {createProjectPicker} from './project-picker.mjs?v=4';
 const $=id=>document.getElementById(id),origin=location.origin;
-let project=null,phase='joke',loadedRevision=0,child=null,working=false,ledger=null,pendingSave=null,installPrompt=null,epoch=0,jokeDirty=false,jokeBase=null;
+let project=null,phase='joke',loadedRevision=0,child=null,working=false,ledger=null,pendingSave=null,installPrompt=null,epoch=0,jokeDirty=false,jokeBase=null,pendingBedId=null;
 const urls={cut:'../cliplock/?studio=1',captions:'../caplock/?studio=1',scene:'../aspectlock/?studio=1',sound:'../sxlock/?studio=1',review:'../previewlock/cloud-test.html?studio=1'};
 const inflight=new Map();
 function status(text){$('saveState').textContent='GS-TOOL-STUDIO · R1 · '+text;}
@@ -28,7 +28,7 @@ async function checkpoint(target){
  let session;
  if(phase==='joke'){
   if(jokeDirty){let d=await readProject();if(project.text!==jokeBase.text||project.title!==jokeBase.title)throw Error('Joke text changed elsewhere. Your wording remains on screen; reconcile it before saving.');d=await api('/api/joke-project?id='+encodeURIComponent(project.id),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({rev:d.rev,title:$('title').value,text:$('text').value})});project=d.project;jokeDirty=false;jokeBase={text:project.text,title:project.title};}
-  session=moduleSession('joke',project.id,{phrases:$('phrases').value.split('\n'),scribe:$('scribe').value});
+  session=moduleSession('joke',project.id,{phrases:$('phrases').value.split('\n'),scribe:$('scribe').value,bedAssetId:pendingBedId||project.studio?.bedAssetId||null});
  }else session=await rpc('checkpoint');
  const d=await readProject();
  const signature=JSON.stringify({module:phase,nextPhase:target,session,moduleRevision:loadedRevision});
@@ -45,7 +45,7 @@ async function openModule(target){
  await rpc('open',{project,session:phaseSession(project,target)});status(LABELS[target]+' · '+project.title+' · playback paused');
 }
 async function switchPhase(target){if(!project||target===phase)return;await checkpoint(target);if(child){child.remove();child=null;}try{await openModule(target);}catch(e){child?.remove();child=null;phase='joke';loadedRevision=moduleRevision(project,'joke');fillJoke();showPhase();throw e;}}
-function fillJoke(){const s=phaseSession(project,'joke');$('title').value=project.title;$('text').value=project.text;$('phrases').value=(s?.phrases||[]).join('\n');$('scribe').value=s?.scribe||'';jokeDirty=false;jokeBase={text:project.text,title:project.title};renderAssets();}
+function fillJoke(){const s=phaseSession(project,'joke');$('title').value=project.title;$('text').value=project.text;$('phrases').value=(s?.phrases||[]).join('\n');$('scribe').value=s?.scribe||'';jokeDirty=false;jokeBase={text:project.text,title:project.title};pendingBedId=null;renderAssets();}
 async function selectJoke(joke){
  if(project)await checkpoint('joke');
  ledger||=await fetch('../jokelab/PRODUCTION_LEDGER.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('Production identity ledger unavailable.');return r.json();});
@@ -69,6 +69,7 @@ function renderAssets(){
   const row=document.createElement('article');row.className='asset';const name=document.createElement('strong');name.textContent=a.name;const role=document.createElement('small');role.textContent=[a.role,captionCutLabel(a)].filter(Boolean).join(' · ');row.append(name,role);
   const type=/\.(mp4|webm|mov)$/i.test(a.name)?'video':/\.(mp3|wav|m4a|ogg)$/i.test(a.name)?'audio':/\.(png|jpg|jpeg|webp)$/i.test(a.name)?'img':null;
   if(type){const m=document.createElement(type);if(type!=='img'){m.controls=true;m.preload='none';m.playsInline=true;}const preview=document.createElement('button');preview.textContent='Preview';preview.onclick=async()=>{try{preview.disabled=true;const d=await api('/api/playback?path='+encodeURIComponent(a.path));m.src=d.url;row.append(m);preview.hidden=true;}catch(e){fail(e);}finally{preview.disabled=false;}};row.append(preview);}
+  if(a.role==='bed'){const use=document.createElement('button');use.textContent=preferredBed(project)?.id===a.id?'Current bed':'Use as bed';use.disabled=preferredBed(project)?.id===a.id;use.onclick=()=>run(async()=>{pendingBedId=a.id;await checkpoint('joke');renderAssets();status('Bed selected for this joke · other native passes stay editable');});row.append(use);}
   const save=document.createElement('button');save.textContent='Save asset';save.onclick=()=>showAsset(a).catch(fail);row.append(save);list.append(row);
  }
 }

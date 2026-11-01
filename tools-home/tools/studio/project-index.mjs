@@ -16,6 +16,6 @@ export function projectFolders(entries){
 export function projectAssets(p){
  const result=[],paths=new Set();for(const a of p.assets||[]){if(a.path&&!paths.has(a.path)){result.push(a);paths.add(a.path);}for(const pass of [...(a.cutHistory||[]),a.cuts].filter(Boolean))for(const c of pass.clips||[]){if(c.path&&!paths.has(c.path)){result.push({...c,name:c.name||c.number+'.webm',role:'caption component',parent:a.id,cutPassVersion:cutPassVersion(a,pass)});paths.add(c.path);}}}return result;
 }
-export function preferredBed(p){return (p.assets||[]).find(a=>a.path===p.caplock?.media?.path)||(p.assets||[]).filter(a=>a.role==='bed').at(-1)||null;}
+export function preferredBed(p){return (p.assets||[]).find(a=>!!p.studio?.bedAssetId&&a.id===p.studio.bedAssetId&&a.role==='bed')||(p.assets||[]).find(a=>a.path===p.caplock?.media?.path)||(p.assets||[]).filter(a=>a.role==='bed').at(-1)||null;}
 export function fitPortrait(width,height){const w=Math.max(0,Math.min(width,height*9/16));return {width:w,height:w*16/9};}
 

@@ -2,7 +2,7 @@ import {inStudio,installAdapter} from '../studio/adapter.mjs?v=1';
 import {moduleSession} from '../studio/core.mjs?v=1';
 import {FocusGestures,scaledTarget} from './focus-controls.mjs?v=9';
 import {createProjectPicker} from '../studio/project-picker.mjs?v=4-cuts';
-import {fitPortrait,preferredBed} from '../studio/project-index.mjs?v=4';
+import {fitPortrait,preferredBed} from '../studio/project-index.mjs?v=5-studio';
 import {captionNumber,activeCaption,startCaptionSequence,navigateCaption,moveCaptionDraft,insertCaption} from './placement.mjs?v=9';
 import {paintMatrix,matrixFrame} from '../../shared/item-matrix.mjs?v=1';
 import {rateOf,fitRate} from './clip-time.mjs?v=4';
@@ -282,6 +282,7 @@ installAdapter('captions',{
   await openFullJokeProject({id:p.id});
   if(session?.project&&session.caplockCheckpoint===p.caplockDigest){cloudSession=null;clearTimeout(cloudTimer);await openProject(session.project);const d=await api('/api/joke-project?id='+encodeURIComponent(p.id));cloudSession={id:p.id,asset:project.workspace?.assetId||'',rev:d.rev};projectContext=d.project;}
   if(session&&session.caplockCheckpoint===p.caplockDigest){undo=session.undo||[];redo=session.redo||[];selectedClip=session.selectedClip||selectedClip;layers.selected=selectedClip;editMode=session.editMode||'view';zoom=session.zoom||1;pan=session.pan||{x:0,y:0};render();await seek(session.frame??frame);}
+  const bed=preferredBed(p);if(p.studio?.bedAssetId&&bed&&project.media?.path!==bed.path)await loadCloud({kind:'previewlock',name:bed.name,path:bed.path,size:bed.size});
   clearTimeout(cloudTimer);pause();
  },
  async checkpoint({project:p}){

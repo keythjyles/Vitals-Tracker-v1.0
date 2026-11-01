@@ -3,7 +3,7 @@ import {moduleSession,sourcePassMatches} from '../studio/core.mjs?v=1';
 import {cutPassVersion,nextCutPassVersion,captionCutLabel} from '../../shared/cut-passes.mjs?v=4';
 import {addOrUpdate,toBatchRanges,nextMarks} from './batch.mjs?v=2';
 import {createProjectPicker} from '../studio/project-picker.mjs?v=4-cuts';
-import {projectAssets,isVideo} from '../studio/project-index.mjs?v=4';
+import {projectAssets,isVideo} from '../studio/project-index.mjs?v=5-studio';
 import {frameAt,selection,clipName,cloudResult,frameSeekTime,steppedFrame} from './core.mjs?v=3';
 import {inspect} from './engine.mjs?v=1';
 const $=id=>document.getElementById(id),video=$('video'),API='https://gs-previewlock-api.onrender.com';
@@ -117,7 +117,7 @@ installAdapter('cut',{
  busy:()=>busy||savedBatch?.status==='running',pause,
  async open({project:p,session}){
   let local;try{local=JSON.parse(localStorage.getItem('gs_cliplock_batch_v2_'+p.id+'_'+session?.source?.sha256)||'null');}catch{}
-  await openProject({id:p.id});
+  await openProject({id:p.id},p.assets.find(a=>a.id===session?.source?.assetId));
   if(session?.source&&sourcePassMatches(session,source)){
    if(!(local?.updated>session.updated&&local.passId===(savedBatch?.id||null))){
     for(const c of session.cuts||[])selection(meta.times,meta.end,c.inFrame,c.outFrame);
