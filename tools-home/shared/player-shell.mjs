@@ -59,6 +59,7 @@ export function mountPlayerShell(tool,config){
  const oldSxPicture=tool==='sxlock'?$('viewerDock'):null;
  if(tool==='sxlock'){
   // Native source/recording/collapse hooks still address their original elements.
+  for(const id of ['peak','collapseViewer'])if($(id))stash.append($(id));
   content.replaceChildren();picture.append(oldSxPicture);oldSxPicture.replaceChildren(content);
   important(oldSxPicture,{display:'flex',height:'100%',width:'100%',padding:'0','min-height':'0',overflow:'hidden','flex-direction':'column'});
  }
