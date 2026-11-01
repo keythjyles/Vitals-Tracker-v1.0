@@ -155,6 +155,7 @@ export function mountPlayerShell(tool,config){
   important(surface,{height:screenHeight+'px','min-height':'0','max-height':screenHeight+'px',width:'100%',margin:'0',padding:'0',flex:'none',overflow:'hidden',background:'#070c12'});
   if(tool==='aspectlock')important($('stage'),{height:'100%','min-height':'0','max-height':'100%',width:'auto','max-width':'100%','aspect-ratio':'9 / 16',margin:'auto'});
   for(const child of surface.querySelectorAll(':scope>video,:scope>canvas'))important(child,{width:'100%',height:'100%','max-height':'100%','object-fit':'contain'});
+  for(const video of surface.querySelectorAll(':scope>video'))important(video,{position:'absolute',inset:'0px','min-width':'0','min-height':'0'});
  }
  sizeControls();sizePicture();new ResizeObserver(sizePicture).observe(right);
  let pending=false;new MutationObserver(()=>{if(pending)return;pending=true;queueMicrotask(()=>{pending=false;sizeControls();sizePicture();});}).observe(rail,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden']});
