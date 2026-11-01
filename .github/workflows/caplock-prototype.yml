@@ -1,9 +1,9 @@
 name: CapLock prototype checks
 on:
   pull_request:
-    paths: ['tools-home/tools/caplock/**', 'tools-home/tools/studio/**', 'tools-home/shared/caplock-launch.js', 'tools-home/shared/cut-passes.mjs', '.github/workflows/caplock-prototype.yml']
+    paths: ['tools-home/shared/compact-player*','tools-home/tools/caplock/**', 'tools-home/tools/studio/**', 'tools-home/shared/caplock-launch.js', 'tools-home/shared/cut-passes.mjs', '.github/workflows/caplock-prototype.yml']
   push:
-    paths: ['tools-home/tools/caplock/**', 'tools-home/tools/studio/**', 'tools-home/shared/caplock-launch.js', 'tools-home/shared/cut-passes.mjs', '.github/workflows/caplock-prototype.yml']
+    paths: ['tools-home/shared/compact-player*','tools-home/tools/caplock/**', 'tools-home/tools/studio/**', 'tools-home/shared/caplock-launch.js', 'tools-home/shared/cut-passes.mjs', '.github/workflows/caplock-prototype.yml']
 permissions:
   contents: read
 jobs:
@@ -49,4 +49,5 @@ jobs:
           node tools-home/tools/caplock/tests/browser.cjs
         env:
           PLAYWRIGHT_MODULE: /tmp/cap-browser/node_modules/playwright
+
 

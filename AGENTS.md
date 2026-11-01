@@ -1,3 +1,13 @@
+## Shared compact players and protected precision — November 1, 2026
+
+Owner instruction: all editing tools use the same compact picture/clock/right-hand transport pattern. Position bars and painted timeline maps are read-only. Use frame buttons or an explicit Go field; other former sliders use typed values plus Set. No swipe, preview or export commits an unfinished cut. Single-frame buttons carry the large −/+ glyphs and request a short haptic on supported devices. Keep source picture, sound, assets, project IDs and native editing engines intact.
+
+Clipper R7 retains one tool with Video + sound and Caption animation modes. Six Episode 4 ranges are recoverable from its Find a frame panel, including Slide F0–300; these screenshot ranges have no source hash, so they require the same 1674-frame original and owner review. Gaps and the shared F1103 boundary are intentional preserved evidence. Two attached project videos (3070 and 954 frames) are not that source. Export previews are released between cuts; Prepare all clips creates one ZIP containing every clip and the source-bound recovery list. Local download remains distinct from a cloud save.
+
+Shared adapter: `tools-home/shared/compact-player.mjs`, styles and `COMPACT_PLAYER.md`. Releases: ClipLock R7, CapLock R12, SxLock R29, AspectLock R29, PreviewLock R31, FrameLock 1.3.16 (includes AnchorLock), MotionLock 0.1.6, WavLock R1.4. Rollback baseline `1f084ac8f3c075bd3962841d9e8c6a99bc446e46`. Never delete media or browser recovery data during rollback. See the release receipt for verification and deployment status.
+
+---
+
 ## Clipper R6 — one cutter, two modes, November 1, 2026
 
 The existing Clipper now has **Video + sound** (`?mode=video`) and **Caption animation** modes. They share the same player, exact source-frame stepping, IN/OUT marks, independent overlapping/gapped cuts and immediate editable cut list. Mode switching pauses playback and retains each mode's source and working cuts in-session. Browser recovery drafts remain bound to mode/project/source hash; after closing the tab, reselect the unchanged source to recover its cuts. Studio's Cut phase remains the caption-specific route.
@@ -292,3 +302,4 @@ The user delegated identifying the correct workspace; this is resolved. See [ver
 
 ## Joke project folders — owner direction October29
 Read tools-home/tools/jokelab/ANIMATED_CAPTION_WORKFLOW.md before animated-caption production or project saves. For these joke workspaces, Dropbox is the working project home and Drive the backup (explicit owner correction to earlier Drive-primary default). Start from canonical identity and saved joke.txt; save original Gemini animation independently; numeric transparent clips remain under the same project. Do not make the user copy joke IDs. Project-folder save, queued backup and verified Drive receipt are different states. Preserve earlier masters, editor snapshots and assets. Native Gemini app caption generation is distinct from API experiments and does not prove automatic Gemini integration. R29/R4 live acceptance requires actual receipts.
+

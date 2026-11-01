@@ -1,9 +1,9 @@
 name: SxLock media regression
 on:
   pull_request:
-    paths: ['tools-home/tools/sxlock/**', '.github/workflows/sxlock-media-regression.yml']
+    paths: ['tools-home/shared/compact-player*','tools-home/tools/sxlock/**', '.github/workflows/sxlock-media-regression.yml']
   push:
-    paths: ['tools-home/tools/sxlock/**', '.github/workflows/sxlock-media-regression.yml']
+    paths: ['tools-home/shared/compact-player*','tools-home/tools/sxlock/**', '.github/workflows/sxlock-media-regression.yml']
 permissions:
   contents: read
 jobs:
@@ -33,3 +33,4 @@ jobs:
           DATA_DIR: /tmp/sx-media
           PLAYWRIGHT_MODULE: /tmp/sx-browser/node_modules/playwright
       - run: python tools-home/tools/sxlock/tests/measure_regression.py /tmp/sx-media
+

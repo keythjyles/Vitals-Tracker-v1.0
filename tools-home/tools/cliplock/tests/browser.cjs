@@ -29,7 +29,7 @@ const {execFileSync}=require('node:child_process');
  await page.route('**/caption-fixture.mp4',r=>r.fulfill({contentType:'video/mp4',body:bytes}));
  await page.goto('http://127.0.0.1:8767/tools-home/tools/cliplock/?project=caption-fixture');
  await page.waitForFunction(()=>!document.querySelector('#next').disabled);
- assert.match(await page.title(),/Caption Clipper.*R6/);assert.equal(await page.locator('#sourceSelect option').count(),1);
+ assert.match(await page.title(),/Caption Clipper.*R7/);assert.equal(await page.locator('#sourceSelect option').count(),1);
  assert.equal(await page.locator('#singleExport').count(),0);assert.match(await page.locator('#source').textContent(),/caption.mp4.*96 frames/);
  // Emulate rounded browser media-time reads on a 24fps source, and multiple taps before seek completion.
  await page.locator('#video').evaluate(v=>{const d=Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype,'currentTime');Object.defineProperty(v,'currentTime',{configurable:true,get(){return Math.floor(d.get.call(this)*1000)/1000;},set(n){d.set.call(this,n);}});});
@@ -47,7 +47,7 @@ const {execFileSync}=require('node:child_process');
  await page.locator('#in').fill('0');await page.locator('#out').fill('24');await page.locator('#out').dispatchEvent('change');await page.locator('#addCut').click();
  assert.equal(await page.locator('#in').inputValue(),'24');
  await page.locator('#next').click();assert.equal(await page.locator('#in').inputValue(),'24','Stepping after Add cut moves picture only');
- await page.locator('#inHandle').press('ArrowLeft');await page.locator('#inHandle').press('ArrowLeft');assert.equal(await page.locator('#in').inputValue(),'22');
+ assert.equal(await page.locator('#inHandle').count(),0);assert.equal(await page.locator('#outHandle').count(),0);assert.equal(await page.locator('input[type=range]').count(),0);await page.locator('#in').fill('22');await page.locator('#in').dispatchEvent('change');assert.equal(await page.locator('#in').inputValue(),'22');
  await page.locator('#in').fill('20');await page.locator('#out').fill('48');await page.locator('#out').dispatchEvent('change');await page.locator('#cutName').fill('question');await page.locator('#addCut').click();
  assert.match(await page.locator('#cutList').innerText(),/F0–24/);assert.match(await page.locator('#cutList').innerText(),/F20–48/);
  await page.getByRole('button',{name:'Edit cut 1',exact:true}).click();assert.equal(await page.locator('#out').inputValue(),'24');await page.locator('#newCut').click();
@@ -83,3 +83,4 @@ const {execFileSync}=require('node:child_process');
  console.log('Caption-only selection/import, versioned clear/resume, Cut asset labels, direct-under-player list, rounded24fps +1, rapid20-tap cursor, reverse stepping, mark isolation, overlap queue, custom naming, draft recovery, save and CapLock handoff passed. Cloud uses authenticated fixtures; no production writes.');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exit(1)});
+

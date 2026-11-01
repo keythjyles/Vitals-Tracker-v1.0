@@ -1,3 +1,17 @@
+# Clipper R7 — compact, protected cuts
+
+The same cutter handles video with sound and caption animation. The clock sits above the picture, large single-frame −/+ buttons sit at the right, and the editable cut list begins directly beneath the marks/name dock. The position bar shows progress only. Find a frame uses an explicit number and Go. Frame buttons request a 12ms haptic where supported.
+
+Marks and names are working edits until Update cut. Preview/export never commits them. Undo restores recent added, updated, removed or recovered ranges; source-hash-bound drafts retain the working list across reload after the unchanged source is reselected. Save cut list exports a portable recovery recipe; Restore cut list validates source hash and frame count before changing the list.
+
+For the owner's six Episode 4 screenshot cuts, Find a frame → Restore six EP4 cuts requires the same 1674-frame source. Slide is F0–300. This recovery has no source hash; it must not auto-apply to unrelated footage. Previous browser cuts are archived before this recovery and Undo restores them.
+
+Prepare beside one cut releases the previous encoded preview, then creates a deliberate Save link. The optional exported preview loads only while expanded. Prepare all clips renders sequentially and creates one ZIP download for every clip plus cut-list.json. This avoids multiple automatic-download prompts and simultaneous decoded video previews. Sources, dimensions, original primary soundtrack and exact frame validation remain in the existing engine. Downloads do not establish cloud preservation.
+
+R6 operation/history follows. Current source and release evidence take precedence.
+
+---
+
 ## Clipper R6 — one cutter, two modes, November 1, 2026
 
 The existing Clipper now has **Video + sound** (`?mode=video`) and **Caption animation** modes. They share the same player, exact source-frame stepping, IN/OUT marks, independent overlapping/gapped cuts and immediate editable cut list. Mode switching pauses playback and retains each mode's source and working cuts in-session. Browser recovery drafts remain bound to mode/project/source hash; after closing the tab, reselect the unchanged source to recover its cuts. Studio's Cut phase remains the caption-specific route.
@@ -80,3 +94,4 @@ Offline WebCodecs conversion uses exact trim boundaries and refuses dropped audi
 The existing 40 MB cloud per-file limit applies to originals and cuts. Local download is distinct from cloud save. Source load/project browsing never writes media. Working marks are temporary until a clip recipe saves; they do not change another module's playhead. A full studio session adapter is separate work.
 
 Source baseline ac16a29694359ff328698a3bfca47d05b14fcb0f. New isolated feature branch; no backend, SxLock, AspectLock, CapLock or scheduling changes. Rollback removes this tool's launch entries/files, retaining all cloud originals/derived clips/recipes. Release is not production-verified until CI, browser and deployment receipts are recorded.
+
