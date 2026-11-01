@@ -17,7 +17,7 @@ export function mountPlayerShell(tool,config){
  const root=(tool==='cliplock'?workspace.closest('.dock'):tool==='caplock'?$('playerDock'):null)||el('section','');
  if(!root.isConnected)workspace.before(root);
  root.classList.add('gs-player-shell');root.dataset.playerProfile=PLAYER_PROFILE.id;
- important(root,{position:'sticky',top:'0px','z-index':'20',order:'-10',margin:'0',padding:'0',background:'#101924','border-radius':'0'});
+ important(root,{position:'sticky',top:'0px','z-index':'20',order:'-10',margin:'0',padding:'0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left))',background:'#101924','border-radius':'0','box-sizing':'border-box'});
  let grip=tool==='caplock'?$('dockGrip'):null,drawer=tool==='caplock'?$('pickerDrawer'):null;
  grip=grip||el('button','');grip.type='button';grip.classList.add('gs-source-grip');grip.setAttribute('aria-controls',drawer?.id||'gsSourceDrawer');
  drawer=drawer||el('div','');if(!drawer.id)drawer.id='gsSourceDrawer';drawer.classList.add('gs-source-drawer');
@@ -28,6 +28,14 @@ export function mountPlayerShell(tool,config){
  const syncIdentity=()=>{const version=document.title.match(/\bR\d+(?:\.\d+)*\b|\bv\d+(?:\.\d+)+\b/)?.[0]||'';identity.textContent=(tool==='cliplock'?($('toolTitle')?.textContent||names[tool]):names[tool])+' · GS-TOOL-'+tool.toUpperCase()+' · '+version;};syncIdentity();
  if(q('title'))new MutationObserver(syncIdentity).observe(q('title'),{childList:true,subtree:true,characterData:true});
  const stash=el('div','gs-original-controls');stash.hidden=true;
+ const filename=el('div','gs-player-filename');filename.textContent='No file loaded';filename.setAttribute('aria-label','Source filename');
+ const sourceLabels={cliplock:'#source',sxlock:'#videoName',caplock:'#bedName',aspectlock:'#baseChosen',previewlock:'#fileName',framelock:'#meta',wavlock:'#source'};
+ const sourceLabel=q(sourceLabels[tool]);let chosenName='';
+ const syncFilename=()=>{const loaded=!!media?.getAttribute('src'),label=sourceLabel?.textContent?.trim().split(' · ')[0];filename.textContent=loaded?(label||chosenName||'Video loaded'):'No file loaded';filename.title=filename.textContent;};
+ if(sourceLabel)new MutationObserver(syncFilename).observe(sourceLabel,{childList:true,subtree:true,characterData:true});
+ const sourceInput=$(['framelock','previewlock','wavlock'].includes(tool)?'file':'videoFile');sourceInput?.addEventListener('change',e=>{chosenName=e.target.files?.[0]?.name||chosenName;},true);
+ if(media)for(const name of ['loadedmetadata','emptied','loadstart'])media.addEventListener(name,syncFilename);
+ syncFilename();
  const put=node=>{if(node&&!drawer.contains(node)&&node!==root&&!node.contains(root))drawer.append(node);};
  const selectIntoDrawer=selector=>{for(const node of document.querySelectorAll(selector))put(node);};
  // Source controls use the same pull-down drawer as the established CapLock grip.
@@ -79,8 +87,11 @@ export function mountPlayerShell(tool,config){
  for(let i=0;i+1<frameIds.length;i+=2){const back=$(frameIds[i]),forward=$(frameIds[i+1]);if(back.parentElement===forward.parentElement&&back.parentElement!==rail&&back.parentElement.children.length===2)back.parentElement.classList.add('gs-frame-pair');else{const pair=el('div','gs-frame-pair');back.before(pair);pair.append(back,forward);}paired.add(back);paired.add(forward);}
  if(tool==='cliplock'){
   const order=['play','start'];for(let i=order.length-1;i>=0;i--)if($(order[i]))rail.prepend($(order[i]));
-  for(const [mark,field]of [['markIn','in'],['markOut','out']]){const row=el('div','gs-control-row');$(mark).textContent=mark==='markIn'?'IN':'OUT';row.append($(mark),$(field));rail.append(row);}
-  const jump=el('div','gs-control-row gs-jump-row');jump.append($('jumpFrame'),$('goFrame'));const pair=rail.querySelector('.gs-frame-pair');pair.after(jump);
+  const exact=el('details','gs-exact-marks');exact.id='exactMarks';const summary=el('summary','');summary.textContent='Exact IN / OUT';exact.append(summary);
+  for(const [mark,field]of [['markIn','in'],['markOut','out']]){const label=el('label','');label.textContent=field.toUpperCase()+' frame ';label.append($(field));exact.append(label);rail.append($(mark));}
+  drawer.append(exact);
+  if($('back25')&&$('next25')){const bulk=el('div','gs-control-pair');bulk.append($('back25'),$('next25'));rail.querySelector('.gs-frame-pair').after(bulk);}
+  const jump=el('div','gs-control-row gs-jump-row');jump.append($('jumpFrame'),$('goFrame'));const pair=rail.querySelector('.gs-control-pair')||rail.querySelector('.gs-frame-pair');pair.after(jump);
   for(const id of ['preview','addCut','saveBatch','cancelVideo'])if($(id))rail.append($(id));
   const name=q('.batch-add');if(name){name.classList.add('gs-under-player');for(const empty of [...name.children])if(!empty.contains($('cutName')))empty.remove();root.append(name);}
   q('.boundary-row')?.remove();
@@ -106,7 +117,7 @@ export function mountPlayerShell(tool,config){
  const under=[];if(tool==='caplock')for(const id of ['focusBar','placementBar'])if($(id))under.push($(id));
  if(tool==='motionlock'){const status=q('.status');if(status&&!content.contains(status)){content.prepend(status);}const shuttle=q('.shuttle-wrap');if(shuttle)important(shuttle,{display:'none'});}
  const existingName=tool==='cliplock'?q('.batch-add'):null;
- root.replaceChildren(grip,drawer,identity,workspace,...under,...(existingName?[existingName]:[]),stash,...root.querySelectorAll(':scope>.gs-player-error'));
+ root.replaceChildren(grip,drawer,identity,filename,workspace,...under,...(existingName?[existingName]:[]),stash,...root.querySelectorAll(':scope>.gs-player-error'));
  // Keep now-empty source wrappers from taking a row above or under the monitor.
  if(tool==='cliplock')q('#frameTools .jump')?.remove();
  if(tool==='aspectlock')important($('stage')?.parentElement,{padding:'0',margin:'0'});
@@ -146,7 +157,7 @@ export function mountPlayerShell(tool,config){
   for(const row of rail.querySelectorAll('.gs-control-row'))important(row,{display:'flex',gap:'3px',height:PLAYER_PROFILE.row+'px','min-height':PLAYER_PROFILE.row+'px',padding:'0',margin:'0',width:'100%','align-items':'center'});
   for(const field of rail.querySelectorAll('input'))important(field,{'min-width':'0',width:'100%',height:PLAYER_PROFILE.row+'px','min-height':PLAYER_PROFILE.row+'px',padding:'2px','font-size':'11px',margin:'0','border-radius':'5px'});
   for(const b of rail.querySelectorAll('.gs-control-row button'))important(b,{width:'25px',flex:'0 0 25px'});
-  for(const id of ['markIn','markOut'])if($(id)&&rail.contains($(id)))important($(id),{width:'29px',flex:'0 0 29px'});
+  if(tool==='wavlock')for(const id of ['markIn','markOut'])if($(id)&&rail.contains($(id)))important($(id),{width:'29px',flex:'0 0 29px'});
  }
  function sizePicture(){
   const height=Math.ceil(right.getBoundingClientRect().height);if(height<1)return;

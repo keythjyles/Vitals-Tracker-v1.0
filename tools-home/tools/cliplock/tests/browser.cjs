@@ -44,11 +44,11 @@ const {execFileSync}=require('node:child_process');
  await page.getByRole('button',{name:'Next source frame',exact:true}).click();assert.match(await page.locator('#clock').innerText(),/^F16 /);
  assert.equal(await page.locator('#in').inputValue(),'15','Stepping must never silently edit IN');
  await page.getByRole('button',{name:'Mark OUT',exact:true}).click();assert.equal(await page.locator('#out').inputValue(),'16');
- await page.locator('#in').fill('0');await page.locator('#out').fill('24');await page.locator('#out').dispatchEvent('change');await page.locator('#addCut').click();
+ await exactMark(page,'in','0');await exactMark(page,'out','24');await page.locator('#out').dispatchEvent('change');await page.locator('#addCut').click();
  assert.equal(await page.locator('#in').inputValue(),'24');
  await page.locator('#next').click();assert.equal(await page.locator('#in').inputValue(),'24','Stepping after Add cut moves picture only');
- assert.equal(await page.locator('#inHandle').count(),0);assert.equal(await page.locator('#outHandle').count(),0);assert.equal(await page.locator('input[type=range]').count(),0);await page.locator('#in').fill('22');await page.locator('#in').dispatchEvent('change');assert.equal(await page.locator('#in').inputValue(),'22');
- await page.locator('#in').fill('20');await page.locator('#out').fill('48');await page.locator('#out').dispatchEvent('change');await page.locator('#cutName').fill('question');await page.locator('#addCut').click();
+ assert.equal(await page.locator('#inHandle').count(),0);assert.equal(await page.locator('#outHandle').count(),0);assert.equal(await page.locator('input[type=range]').count(),0);await exactMark(page,'in','22');await page.locator('#in').dispatchEvent('change');assert.equal(await page.locator('#in').inputValue(),'22');
+ await exactMark(page,'in','20');await exactMark(page,'out','48');await page.locator('#out').dispatchEvent('change');await page.locator('#cutName').fill('question');await page.locator('#addCut').click();
  assert.match(await page.locator('#cutList').innerText(),/F0–24/);assert.match(await page.locator('#cutList').innerText(),/F20–48/);
  await page.getByRole('button',{name:'Edit cut 1',exact:true}).click();assert.equal(await page.locator('#out').inputValue(),'24');await page.locator('#newCut').click();
  await page.reload();await page.waitForFunction(()=>document.querySelector('#cutCount').textContent==='2'&&!document.querySelector('#saveBatch').disabled);
@@ -68,7 +68,7 @@ const {execFileSync}=require('node:child_process');
  await page.reload();await page.waitForFunction(()=>!document.querySelector('#next').disabled);
  assert.equal(await page.locator('#cutCount').innerText(),'0');assert.equal(await page.locator('#passLabel').innerText(),'v2');assert.equal(await page.locator('#newPass').isEnabled(),false);
  assert.ok(await page.evaluate(()=>Object.keys(localStorage).some(k=>k.includes('_archived_'))),'stale draft preserved separately');
- await page.locator('#out').fill('12');await page.locator('#out').dispatchEvent('change');await page.locator('#addCut').click();await page.locator('#saveBatch').click();await page.waitForFunction(()=>!document.querySelector('#finishBatch').disabled);
+ await exactMark(page,'out','12');await page.locator('#out').dispatchEvent('change');await page.locator('#addCut').click();await page.locator('#saveBatch').click();await page.waitForFunction(()=>!document.querySelector('#finishBatch').disabled);
  assert.equal(original.cuts.version,2);assert.equal(original.cuts.id,'batch-v2');assert.equal(original.cutHistory.length,1);assert.deepEqual(original.cutHistory[0].clips.map(c=>c.path),v1Paths);
 
  await page.route('**/tools/caplock/**',r=>r.fulfill({contentType:'text/html',body:'<title>CapLock handoff</title>'}));await page.locator('#finishBatch').click();await page.waitForURL(/caplock/);
@@ -84,3 +84,5 @@ const {execFileSync}=require('node:child_process');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exit(1)});
 
+
+async function exactMark(page,id,value){const drawer=page.locator('.gs-source-drawer'),wasOpen=await drawer.isVisible();if(!wasOpen)await page.getByRole('button',{name:'Show file picker',exact:true}).click();const panel=page.locator('#exactMarks');if(!await panel.evaluate(e=>e.open))await panel.locator('summary').click();await page.locator('#'+id).fill(value);if(!wasOpen)await page.getByRole('button',{name:'Hide file picker',exact:true}).click();}
