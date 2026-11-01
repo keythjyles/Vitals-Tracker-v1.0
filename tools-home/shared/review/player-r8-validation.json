@@ -1,0 +1,49 @@
+{
+  "sourceCommit": "5a500aa1c1f19c60dff8e07d01ed9b4aaab7e8fc",
+  "date": "2026-11-01",
+  "profile": {
+    "id": "SxLock-R24",
+    "railWidth": 76,
+    "buttonHeight": 29,
+    "framePairHeight": 36,
+    "gap": 7
+  },
+  "editors": [
+    "cliplock",
+    "caplock",
+    "sxlock",
+    "aspectlock",
+    "previewlock",
+    "framelock",
+    "motionlock",
+    "wavlock"
+  ],
+  "checks": {
+    "cliplock": 41359803962,
+    "caplock": 41359803978,
+    "sxlock": 41359803935,
+    "studio": 41359803903,
+    "pages": 41359803402
+  },
+  "results": "All five runs succeeded.",
+  "livePhone": {
+    "width": 390,
+    "railHeight": 324,
+    "pictureHeight": 324,
+    "surfaceHeight": 299,
+    "videoHeight": 299,
+    "horizontalOverflow": false,
+    "drawerInitiallyHidden": true,
+    "drawerTogglePreservesSelection": true,
+    "frameStep": "F1 / 50 · 0.040s",
+    "selection": [
+      0,
+      50
+    ]
+  },
+  "proof": {
+    "path": "clipper-r8-phone-proof.jpg",
+    "context": "Live 390px phone review inside browser viewport. 2-second portrait QA derivative with no audio. This is not the user's EP4 source."
+  },
+  "sourceAndEditPreservation": "Existing source hashes, draft keys, cloud projects and native media engines retained. Regression checks cover saved cuts, placement, source/cut restore and audio-bearing exports."
+}
