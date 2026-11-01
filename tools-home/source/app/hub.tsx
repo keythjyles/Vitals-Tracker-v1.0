@@ -20,6 +20,7 @@ No separate AI API, paid generation service, automatic publishing or changes to 
  function addLink(){try{const u=new URL(toolURL);if(u.protocol!=='https:')throw Error();const name=toolName.trim();if(!name)throw Error();const next={...custom,[name]:u.href};localStorage.setItem('toolsHub.links.v1',JSON.stringify(next));setCustom(next);setToolURL('');setMessage('Link added on this browser.');}catch{setMessage('Enter a tool name and a complete https:// address.');}}
  const tools=[
   {name:'GS Studio',version:'R1',desc:'Select a joke. Carry its assets and saved edits through the production tools.',href:'./tools/studio/',icon:Clapperboard},
+  {name:'Video Clipper',version:'R6',desc:'Load a video, mark cuts and save clips with the original sound.',href:'./tools/cliplock/?mode=video&v=R6',icon:Scissors},
   {name:'Caption Clipper',version:'R4',desc:'Cut Gemini captions into numbered components; preview, adjust and send to CapLock.',href:'./tools/cliplock/?v=R4',icon:Scissors},
   {name:'CapLock',version:'R3',desc:'Transcript-first Gemini animation briefs and transparent media layers; optional native captions.',href:'./tools/caplock/',icon:Clapperboard},
   {name:'Sound Scrubber',version:'R14',desc:'Discover and review sounds: inline play, approve, reject and rename. Dropbox save with queued verified Drive mirror.',href:'./tools/sound-scrubber/',icon:Music2},

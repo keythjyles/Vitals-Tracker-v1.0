@@ -15,3 +15,10 @@ export function toBatchRanges(meta,cuts){
  });
 }
 export function nextMarks(out,total){return {inFrame:Math.min(out,total-1),outFrame:total};}
+
+// Finished-video cuts use native timestamps and audio; caption renderer limits do not apply.
+export function toVideoRanges(meta,cuts,format){
+ if(!cuts.length||cuts.length>40)throw Error('Add1–40 cuts.');
+ if(!['mp4','webm'].includes(format))throw Error('Choose MP4 or WebM.');
+ const names=new Set();return cuts.map((c,i)=>{const r=selection(meta.times,meta.end,c.inFrame,c.outFrame),name=clipName(c.name||String(i+1),format);if(names.has(name.toLowerCase()))throw Error('Give each cut a different name.');names.add(name.toLowerCase());return {...r,name,id:c.id};});
+}

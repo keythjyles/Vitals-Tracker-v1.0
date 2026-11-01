@@ -32,6 +32,7 @@ jobs:
           python3 -m http.server 8767 --bind 127.0.0.1 >/tmp/clip-server.log 2>&1 &
           curl --retry 20 --retry-connrefused --retry-delay 1 --fail --silent http://127.0.0.1:8767/tools-home/tools/cliplock/ >/dev/null
           node tools-home/tools/cliplock/tests/browser.cjs
+          node tools-home/tools/cliplock/tests/video-browser.cjs
         env:
           PLAYWRIGHT_MODULE: /tmp/clip-browser/node_modules/playwright
 

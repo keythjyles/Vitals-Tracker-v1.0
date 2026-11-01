@@ -10,6 +10,8 @@ import {words,moveWords,shiftWords,geminiPrompt} from './script.mjs?v=4';
 import {LayerTracks} from './layer-track.mjs?v=9';
 import {FPS,DEFAULT_STYLE,createProject,phrase,importTranscript,subtitle,timed,effective,validateProject,validateStyle} from './core.mjs?v=9';
 const $=id=>document.getElementById(id),v=$('video'),draftKey='gs_caplock_draft_v1',API='https://gs-previewlock-api.onrender.com';
+// Owner lock: built-in text captions cannot be enabled by UI, URL, or restored data.
+const BUILTIN_CAPTIONING_LOCKED=true;
 let projectContext=null;
 let restoring=false,placementBusy=false,cloudSession=null,cloudTimer=null,cloudSaving=false,cloudWrite=Promise.resolve();
 let selectedWords=[],selectedClip=null,editMode='view',libraryTarget='base',projectEpoch=0,dragBefore=null;
@@ -23,12 +25,12 @@ function render(){
  $('projectName').textContent=projectContext?.title||'Joke project';$('bedName').textContent=project.media?.name||'Choose a joke project';
  $('timeline').replaceChildren();for(const c of project.captions){const b=document.createElement('button');b.textContent=c.text||'(empty caption)';b.setAttribute('aria-pressed',String(c.id===selected));const small=document.createElement('small');small.textContent=(c.visible?'':'Hidden · ')+(timed(c)?'F'+c.inFrame+'–'+c.outFrame:'UNTIMED')+(Object.keys(c.overrides).length?' · local':'');b.append(small);b.onclick=()=>choose(c.id);$('timeline').append(b);}
  const c=current();$('editor').querySelectorAll('textarea,input,button').forEach(el=>{if(!['undo','redo'].includes(el.id))el.disabled=!c});$('selectedLabel').textContent=c?'Selected phrase '+(project.captions.indexOf(c)+1)+' of '+project.captions.length:'Selected phrase — none';$('text').value=c?.text||'';$('inFrame').value=c?.inFrame??'';$('outFrame').value=c?.outFrame??'';$('duration').textContent=c?(timed(c)?(c.outFrame-c.inFrame)+' frames · '+((c.outFrame-c.inFrame)/FPS).toFixed(3)+' seconds · OUT excluded':'Untimed — mark IN and OUT.')+(c&&!c.visible?' · Hidden':''):'';
- fillStyle(c?effective(project,c):project.globalStyle);$('undo').disabled=!undo.length;$('redo').disabled=!redo.length;$('presets').replaceChildren();for(const name of Object.keys(project.presets)){const o=document.createElement('option');o.value=name;o.textContent=name;$('presets').append(o);}renderScript();renderClips();draw();
+ fillStyle(c?effective(project,c):project.globalStyle);$('undo').disabled=!undo.length;$('redo').disabled=!redo.length;$('presets').replaceChildren();for(const name of Object.keys(project.presets)){const o=document.createElement('option');o.value=name;o.textContent=name;$('presets').append(o);}renderScript();renderClips();lockBuiltInCaptioning();draw();
 }
 function choose(id){selected=id;render();const c=current();selectedWords=[];renderScript();if(c?.inFrame!==null&&c&&v.src)seek(c.inFrame);}
 function clock(){const t=frame/FPS;$('clock').textContent='F'+frame+' · '+Math.floor(t/60)+':'+(t%60).toFixed(3).padStart(6,'0')+' · 25 fps';$('seek').value=frame;}
 function draw(){
- paintFocus();clock();layers.update();paintMatrix($('itemMatrix'),placedClips(),frame,maxFrame,selectedClip);$('captions').replaceChildren();if(!project.nativeCaptions)return;const c=current();const active=project.captions.filter(x=>x.visible&&timed(x)&&frame>=x.inFrame&&frame<x.outFrame);if(c&&c.visible&&!timed(c))active.push(c);
+ paintFocus();clock();layers.update();paintMatrix($('itemMatrix'),placedClips(),frame,maxFrame,selectedClip);$('captions').replaceChildren();if(BUILTIN_CAPTIONING_LOCKED||!project.nativeCaptions)return;const c=current();const active=project.captions.filter(x=>x.visible&&timed(x)&&frame>=x.inFrame&&frame<x.outFrame);if(c&&c.visible&&!timed(c))active.push(c);
  for(const c of active){const s=effective(project,c),el=document.createElement('div');el.className='caption';el.textContent=c.text;const alpha=s.backgroundOpacity,hex=s.background;let progress=timed(c)?Math.min(1,(frame-c.inFrame)/5,(c.outFrame-frame)/5):1;progress=Math.max(0,progress);el.style.cssText=`left:${s.x}%;top:${s.y}%;width:${s.width}%;font-family:${s.font};font-weight:${s.emphasis?900:s.weight};font-size:${s.size/5.4}cqw;color:${s.color};text-align:${s.align};line-height:${s.lineHeight};-webkit-text-stroke:${s.outline/5.4}cqw #000;paint-order:stroke fill;text-shadow:0 ${s.shadow/10.8}cqw ${s.shadow/5.4}cqw #000;background:${hex}${Math.round(alpha*255).toString(16).padStart(2,'0')};`;if(s.animation==='fade')el.style.opacity=progress;if(s.animation==='pop')el.style.transform=`translate(-50%,-50%) scale(${.85+.15*progress})`;$('captions').append(el);}
 }
 function pause(){v.pause();$('play').textContent='▶ Play';layers.update();}
@@ -103,7 +105,7 @@ $('focusReset').onclick=()=>{const f=focusedTarget();if(!f)return;if(f.target.lo
 const layers=new LayerTracks($('layerRoot'),{getClips:()=>project.clips,getFrame:()=>frame,isPlaying:()=>!v.paused,getStagedId:()=>activeCaption(project)?.placed?null:project.captionSequence?.activeId,getMode:()=>editMode,isFocused:()=>project.editFocus==='overlay',onSelect:id=>selectClip(id),onStatus:say,onDragStart:()=>{dragBefore=JSON.stringify(project);},onChange:()=>{if(dragBefore){undo.push(dragBefore);redo=[];dragBefore=null;saveDraft();render();}}});
 let focusBefore=null;
 const focusGestures=new FocusGestures($('viewport'),{getTarget:focusedTarget,getSceneRect:()=>$('scene').getBoundingClientRect(),focus:(id,bedHit)=>setFocus(id?'overlay':bedHit?'bed':'none',id),getMode:()=>editMode,onStart:()=>{focusBefore=JSON.stringify(project);},onUpdate:()=>{paintFocus();layers.update();},onLocked:()=>say('Caption placement locked. Use Unlock placement to resize.'),onCommit:changed=>{if(changed&&focusBefore){const before=focusBefore;focusBefore=null;try{validateProject(project);undo.push(before);redo=[];saveDraft();render();}catch(e){project=JSON.parse(before);render();say(e.message);}}else focusBefore=null;}});
-function showPage(which){$('scriptPage').hidden=which!=='script';$('viewerPage').hidden=which!=='viewer';if(which==='script')pause();window.scrollTo(0,0);}
+function showPage(which){if(BUILTIN_CAPTIONING_LOCKED&&which==='script'){say('Built-in captioning is locked. Import the Gemini-created animation.');which='viewer';}$('scriptPage').hidden=which!=='script';$('viewerPage').hidden=which!=='viewer';if(which==='script')pause();window.scrollTo(0,0);}
 $('openViewer').onclick=()=>showPage('viewer');$('backScript').onclick=()=>{$('nativeTools').open=false;showPage('script');};$('bedLoad').onclick=()=>projectPicker.open();$('railImport').onclick=()=>openCaptionImport();
 function renderScript(){
  const root=$('scriptList'),wordEditor=$('wordEditor');root.before(wordEditor);root.replaceChildren();for(const [i,c] of project.captions.entries()){
@@ -111,7 +113,7 @@ function renderScript(){
   for(const w of words(c)){const b=document.createElement('button');b.className='word'+(w.effect?' has-effect':'');b.textContent=w.text;b.dataset.wordId=w.id;b.setAttribute('aria-pressed',String(selected===c.id&&selectedWords.includes(w.id)));b.title=w.effect||'Select word';b.onclick=()=>{if(selected!==c.id){selected=c.id;selectedWords=[];}selectedWords=selectedWords.includes(w.id)?selectedWords.filter(id=>id!==w.id):[...selectedWords,w.id];render();$('wordEditor').open=true;};line.append(b);}
   row.append(heading,line);root.append(row);if(c.id===selected)row.after(wordEditor);
  }
- const c=current();$('wordEditor').hidden=!c;$('wordSelection').textContent=c?`Phrase ${project.captions.indexOf(c)+1} · ${selectedWords.length} word${selectedWords.length===1?'':'s'} selected`:'Select a phrase or words';$('scriptText').value=c?.text||'';$('segmentDirection').value=c?.direction||'';$('inheritProtocol').checked=c?.useProtocol!==false;$('wordEffect').value=c&&selectedWords.length?words(c).find(w=>selectedWords.includes(w.id))?.effect||'':'';$('protocolText').value=project.protocol.text;$('approveProtocol').checked=project.protocol.approved;$('protocolStatus').textContent=project.protocol.approved?'Approved visual protocol · each segment can override it':'Draft visual protocol · first-look review pending';$('promptOutput').value=c?geminiPrompt(project,c):'Select a phrase to prepare its Gemini prompt.';$('showNative').checked=project.nativeCaptions;
+ const c=current();$('wordEditor').hidden=!c;$('wordSelection').textContent=c?`Phrase ${project.captions.indexOf(c)+1} · ${selectedWords.length} word${selectedWords.length===1?'':'s'} selected`:'Select a phrase or words';$('scriptText').value=c?.text||'';$('segmentDirection').value=c?.direction||'';$('inheritProtocol').checked=c?.useProtocol!==false;$('wordEffect').value=c&&selectedWords.length?words(c).find(w=>selectedWords.includes(w.id))?.effect||'':'';$('protocolText').value=project.protocol.text;$('approveProtocol').checked=project.protocol.approved;$('protocolStatus').textContent=project.protocol.approved?'Approved visual protocol · each segment can override it':'Draft visual protocol · first-look review pending';$('promptOutput').value=c?geminiPrompt(project,c):'Select a phrase to prepare its Gemini prompt.';$('showNative').checked=!BUILTIN_CAPTIONING_LOCKED&&project.nativeCaptions;
  for(const id of ['scriptUndo','layerUndo'])$(id).disabled=!undo.length;for(const id of ['scriptRedo','layerRedo'])$(id).disabled=!redo.length;
 }
 $('scriptText').onchange=()=>change(()=>{if(current()){current().text=$('scriptText').value;words(current());current().timingReview=timed(current());selectedWords=[];}});
@@ -124,7 +126,17 @@ for(const [id,delta] of [['wordPrevious',-1],['wordNext',1]])$(id).onclick=()=>{
 $('wordNew').onclick=()=>{const c=current();if(!c||!selectedWords.length)return say('Select words first.');change(()=>{const target=phrase('');target.words=[];moveWords(c,target,selectedWords);project.captions.splice(project.captions.indexOf(c)+1,0,target);selected=target.id;});};
 for(const prefix of ['script','layer']){$(prefix+'Undo').onclick=()=>history(undo,redo);$(prefix+'Redo').onclick=()=>history(redo,undo);}
 $('copyPrompt').onclick=async()=>{if(!current())return say('Select a phrase first.');const text=geminiPrompt(project,current());$('promptOutput').value=text;try{await navigator.clipboard.writeText(text);say('Gemini prompt copied. Paste it into your Gemini project.');}catch{$('promptOutput').focus();$('promptOutput').select();say('Prompt selected. Use Copy, then paste in Gemini.');}};
-$('showNative').onchange=()=>change(()=>{project.nativeCaptions=$('showNative').checked;});
+function lockBuiltInCaptioning(){
+ if(!BUILTIN_CAPTIONING_LOCKED)return;
+ const blocked=e=>{e?.preventDefault();e?.stopImmediatePropagation();};
+ for(const id of ['nativeTools','scriptPage']){const panel=$(id);panel.hidden=true;panel.inert=true;panel.setAttribute('aria-hidden','true');if(id==='nativeTools')panel.open=false;
+  if(!panel.dataset.ownerLocked){for(const type of ['click','input','change','submit'])panel.addEventListener(type,blocked,true);panel.dataset.ownerLocked='true';}
+  for(const control of panel.querySelectorAll('button,input,textarea,select,a')){control.disabled=true;control.tabIndex=-1;control.onclick=control.oninput=control.onchange=blocked;}
+ }
+ for(const id of ['srt','vtt']){const control=$(id);control.hidden=true;control.disabled=true;control.onclick=blocked;}
+ $('showNative').checked=false;$('captions').replaceChildren();
+}
+$('showNative').onchange=e=>{if(BUILTIN_CAPTIONING_LOCKED){e.target.checked=false;return;}change(()=>{project.nativeCaptions=$('showNative').checked;});};
 const clipFields={clipStart:'inFrame',clipEnd:'outFrame',clipTrim:'trimInFrame',clipTrimOut:'trimOutFrame',clipSpeed:'playbackRate',clipWidth:'width',clipX:'x',clipY:'y',clipOpacity:'opacity',clipVolume:'volume',clipRotation:'rotation'};
 const clipCurrent=()=>project.clips.find(c=>c.id===selectedClip);
 function selectClip(id){pause();if(!restoring){project.editFocus='overlay';if(project.captionSequence?.clipIds.includes(id))project.captionSequence.activeId=id;}if(id!==selectedClip)editMode='view';selectedClip=id;layers.selected=id;renderClips();paintFocus();layers.update();}

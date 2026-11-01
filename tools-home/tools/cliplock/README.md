@@ -1,3 +1,13 @@
+## Clipper R6 — one cutter, two modes, November 1, 2026
+
+The existing Clipper now has **Video + sound** (`?mode=video`) and **Caption animation** modes. They share the same player, exact source-frame stepping, IN/OUT marks, independent overlapping/gapped cuts and immediate editable cut list. Mode switching pauses playback and retains each mode's source and working cuts in-session. Browser recovery drafts remain bound to mode/project/source hash; after closing the tab, reselect the unchanged source to recover its cuts. Studio's Cut phase remains the caption-specific route.
+
+For Episode 4: Load video, mark IN, mark exclusive OUT, optionally name it, Add cut, then tap Save on that cut's row. Next IN defaults to the previous OUT and remains adjustable. Video exports use the existing local conversion engine, retain source dimensions/timing and the primary soundtrack, and refuse a missing audio track after export. MP4 is offered when the browser can encode H.264/AAC; otherwise use the explicitly labeled WebM option. No blue-key removal is applied in Video mode. General cuts are not subject to the caption renderer's 60-second-source/30-second-cut limits.
+
+Prepare all clips creates playable downloads; it does not mean Dropbox/Drive save. Save video and Save cut recipe are local downloads. Keep the original in its existing saved location. The shared project/folder picker remains available under Saved videos, with device loading as a direct shortcut. No media is uploaded or deleted by selecting a source, switching modes or making a local cut. Gemini-created caption animation and CapLock placement remain the caption workflow; automatic subtitles are hidden/locked in CapLock R11. Final layered export remains a separate unfinished item. FrameLock is available for identifying frame ranges when needed.
+
+---
+
 # Caption Clipper R4 — cuts directly below the player
 
 Open the joke project and its caption original. The first section under the player and its marking controls is the cut list. Tap a cut name to edit; use its adjacent play button to preview that range. The source details and optional background settings are below the list. R3's source-frame stepping, independent overlaps/gaps, numbering/naming and exact CapLock handoff remain.

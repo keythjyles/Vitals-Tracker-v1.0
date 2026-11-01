@@ -95,7 +95,7 @@
     {
       "tool": "caplock",
       "tool_id": "GS-TOOL-CAPLOCK",
-      "source_version": "R10",
+      "source_version": "R11",
       "hosted_path": "tools/caplock/index.html",
       "description": "Project-first workspace with editable Insert, independent bed/overlay focus, hidden project drawer, placed-item properties and Hide/Show.",
       "navigation": [
@@ -115,9 +115,9 @@
     {
       "tool": "cliplock",
       "tool_id": "GS-TOOL-CLIPLOCK",
-      "source_version": "R5",
+      "source_version": "R6",
       "hosted_path": "tools/cliplock/index.html",
-      "description": "Caption Clipper: cut list immediately under player, Cut/Draft asset badges and durable blank next-version passes preserving earlier clips.",
+      "description": "Video + sound cuts in ?mode=video; existing silent caption-component workflow retained separately.",
       "verification": "Release and storage/phone verification limits: tools/cliplock/PASSES_R4.json.",
       "operator_guide": "tools/cliplock/README.md"
     }
