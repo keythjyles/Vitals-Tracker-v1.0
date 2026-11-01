@@ -1,3 +1,5 @@
+Current shared-player releases (November 1, 2026): ClipLock R7, CapLock R12, SxLock R29, AspectLock R29, PreviewLock R31, FrameLock 1.3.16, MotionLock 0.1.6, WavLock R1.4. See [the shared compact-player contract](shared/COMPACT_PLAYER.md). Historical entries below retain their provenance.
+
 # GS / Thicket Tools — Canonical Registry
 Updated: 2026-10-24
 Repository: https://github.com/keythjyles/Vitals-Tracker-v1.0
@@ -48,3 +50,4 @@ CapLock is now transcript-first: selectable/movable words with Gemini directions
 ## ClipLock · GS-TOOL-CLIPLOCK · R1
 
 Source: `tools-home/tools/cliplock/`. Intended live path: https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/cliplock/?v=R1 . Quick WavLock-style video cutter using the existing studio picker, project API and pinned GS1 media library. Source frame IN/exclusive OUT, selection preview, independent MP4/WebM download, original-preserving project save plus cut recipe. Source baseline ac16a29694359ff328698a3bfca47d05b14fcb0f. Local core checks passed; browser/deployment/phone and authenticated cloud acceptance remain separate. No existing editor or backend changed. Rollback removes launch entries/files but retains saved original/derived media and lineage. See the tool README and cliplock-checks workflow for verification.
+
