@@ -1,3 +1,11 @@
+## Owner correction — the studio starts with a joke, October 31, 2026
+
+**New production starts with a joke, written in ChatGPT or selected/written in JokeLab. Saving the exact joke creates or resumes its associated project; the owner should not have to create an empty project first.** Canonical identity, text history and source preservation begin there. Creative development, voice/video sources, caption generation/clipping, composition, sound and review grow within that same joke project. Existing paid assets are reused. The visual project picker is the way to resume existing work; it is not a prerequisite before writing/selecting a new joke. A bed is an asset added later, not the origin of the production. No manual joke-ID or repeated prompt transfer is required by the intended workflow.
+
+This corrects the previous Project-first entry framing and proposed first-tab wording. First entry is **Joke** (write/select/develop/save), with **Resume project** available alongside it. Exact tab naming/layout remains a design discussion; this records owner direction, not a newly implemented shell or paid-generation authorization.
+
+---
+
 # GRILL SERGEANT — STUDIO MASTER HANDOFF
 
 Prepared October 31, 2026 · America/Chicago

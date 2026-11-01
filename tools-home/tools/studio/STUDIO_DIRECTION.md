@@ -1,3 +1,11 @@
+## Owner correction — the studio starts with a joke, October 31, 2026
+
+**New production starts with a joke, written in ChatGPT or selected/written in JokeLab. Saving the exact joke creates or resumes its associated project; the owner should not have to create an empty project first.** Canonical identity, text history and source preservation begin there. Creative development, voice/video sources, caption generation/clipping, composition, sound and review grow within that same joke project. Existing paid assets are reused. The visual project picker is the way to resume existing work; it is not a prerequisite before writing/selecting a new joke. A bed is an asset added later, not the origin of the production. No manual joke-ID or repeated prompt transfer is required by the intended workflow.
+
+This corrects the previous Project-first entry framing and proposed first-tab wording. First entry is **Joke** (write/select/develop/save), with **Resume project** available alongside it. Exact tab naming/layout remains a design discussion; this records owner direction, not a newly implemented shell or paid-generation authorization.
+
+---
+
 ## Studio milestone 0 — live/source inspection and layout review, October 31
 
 [Inspection and first integration review](STUDIO_MILESTONE_0_REVIEW_2026-10-31.md) records the proposed Project → Cut → Captions → Scene → Sound → Review flow, actual Pebble cloud state and exact adapter gaps. Fresh live identities: SxLock R27.1, CapLock R9, AspectLock R27, Clipper R4, PreviewLock R29. Pebble retains nine legacy v1 cuts, a schema4 CapLock edit at frame138 and62 snapshot references; latest manifest backup is pending and the existing receipt covers an earlier snapshot. Proposed first implementation slice: Project/Cut/Captions, including a durable recipe-only Clipper checkpoint. Layout discussion is pending; no shell application, provider call, project migration, cleanup or runtime mutation occurred. This is a design review, not approval of the rejected Site or a completed adapter implementation.
