@@ -1,9 +1,9 @@
 name: ClipLock cutter checks
 on:
   push:
-    paths: ['tools-home/tools/cliplock/**', 'tools-home/services/previewlock-api/joke-project*', 'tools-home/shared/cut-passes.mjs', 'tools-home/tools/studio/project-index.mjs', 'tools-home/tools/studio/project-picker.mjs', '.github/workflows/cliplock-checks.yml']
+    paths: ['tools-home/tools/cliplock/**', 'tools-home/services/previewlock-api/joke-project*', 'tools-home/shared/**', 'tools-home/tools/studio/project-index.mjs', 'tools-home/tools/studio/project-picker.mjs', '.github/workflows/cliplock-checks.yml']
   pull_request:
-    paths: ['tools-home/tools/cliplock/**', 'tools-home/services/previewlock-api/joke-project*', 'tools-home/shared/cut-passes.mjs', 'tools-home/tools/studio/project-index.mjs', 'tools-home/tools/studio/project-picker.mjs', '.github/workflows/cliplock-checks.yml']
+    paths: ['tools-home/tools/cliplock/**', 'tools-home/services/previewlock-api/joke-project*', 'tools-home/shared/**', 'tools-home/tools/studio/project-index.mjs', 'tools-home/tools/studio/project-picker.mjs', '.github/workflows/cliplock-checks.yml']
 permissions:
   contents: read
 jobs:
@@ -18,7 +18,13 @@ jobs:
             tools-home/services/previewlock-api
             tools-home/shared
             tools-home/tools/studio
-            tools-home/tools/sxlock/vendor
+            tools-home/tools/sxlock
+            tools-home/tools/caplock
+            tools-home/tools/aspectlock
+            tools-home/tools/previewlock
+            tools-home/tools/framelock
+            tools-home/tools/motionlock
+            tools-home/tools/wavlock
             tools-home/tools/jokelab
             tools-home/tools/jokelets
       - uses: actions/setup-node@v4
@@ -27,12 +33,14 @@ jobs:
       - run: command -v ffmpeg || (sudo apt-get update -qq && sudo apt-get install -y ffmpeg)
       - run: npm install --prefix /tmp/clip-browser --no-audit --no-fund playwright@1.62.1
       - run: node /tmp/clip-browser/node_modules/playwright/cli.js install --with-deps chromium
-      - run: node --test tools-home/tools/cliplock/tests/*.test.mjs tools-home/services/previewlock-api/joke-project.test.mjs
+      - run: node --test tools-home/shared/tests/*.test.mjs tools-home/tools/cliplock/tests/*.test.mjs tools-home/services/previewlock-api/joke-project.test.mjs
       - run: |
           python3 -m http.server 8767 --bind 127.0.0.1 >/tmp/clip-server.log 2>&1 &
           curl --retry 20 --retry-connrefused --retry-delay 1 --fail --silent http://127.0.0.1:8767/tools-home/tools/cliplock/ >/dev/null
           node tools-home/tools/cliplock/tests/browser.cjs
           node tools-home/tools/cliplock/tests/video-browser.cjs
+          node tools-home/shared/tests/compact-player.cjs
         env:
           PLAYWRIGHT_MODULE: /tmp/clip-browser/node_modules/playwright
+
 

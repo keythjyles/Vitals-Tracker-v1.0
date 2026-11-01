@@ -47,7 +47,7 @@ const {execFileSync}=require('node:child_process');
  await page.locator('#in').fill('0');await page.locator('#out').fill('24');await page.locator('#out').dispatchEvent('change');await page.locator('#addCut').click();
  assert.equal(await page.locator('#in').inputValue(),'24');
  await page.locator('#next').click();assert.equal(await page.locator('#in').inputValue(),'24','Stepping after Add cut moves picture only');
- await page.locator('#inHandle').press('ArrowLeft');await page.locator('#inHandle').press('ArrowLeft');assert.equal(await page.locator('#in').inputValue(),'22');
+ assert.equal(await page.locator('#inHandle').count(),0);assert.equal(await page.locator('#outHandle').count(),0);assert.equal(await page.locator('input[type=range]').count(),0);await page.locator('#in').fill('22');await page.locator('#in').dispatchEvent('change');assert.equal(await page.locator('#in').inputValue(),'22');
  await page.locator('#in').fill('20');await page.locator('#out').fill('48');await page.locator('#out').dispatchEvent('change');await page.locator('#cutName').fill('question');await page.locator('#addCut').click();
  assert.match(await page.locator('#cutList').innerText(),/F0–24/);assert.match(await page.locator('#cutList').innerText(),/F20–48/);
  await page.getByRole('button',{name:'Edit cut 1',exact:true}).click();assert.equal(await page.locator('#out').inputValue(),'24');await page.locator('#newCut').click();
@@ -83,3 +83,4 @@ const {execFileSync}=require('node:child_process');
  console.log('Caption-only selection/import, versioned clear/resume, Cut asset labels, direct-under-player list, rounded24fps +1, rapid20-tap cursor, reverse stepping, mark isolation, overlap queue, custom naming, draft recovery, save and CapLock handoff passed. Cloud uses authenticated fixtures; no production writes.');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exit(1)});
+

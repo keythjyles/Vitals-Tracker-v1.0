@@ -13,3 +13,7 @@ Established with Keyth on 2026-10-26. Applies to all Thicket production tools, i
 - Check narrow portrait-phone layout first; desktop is secondary.
 
 Interpretation of the correction: NEVER LEFT OR TOP controls; ALWAYS RIGHT OR BOTTOM.
+
+
+
+Shared editing-player implementation and latest owner corrections: [compact player contract](shared/COMPACT_PLAYER.md). Position bars are read-only; exact entry requires Go or Set.

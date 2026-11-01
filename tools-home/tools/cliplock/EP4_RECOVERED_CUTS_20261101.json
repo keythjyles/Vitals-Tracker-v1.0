@@ -1,0 +1,15 @@
+{
+  "schema": "GS-ClipLockList-1",
+  "release": "R7",
+  "outExclusive": true,
+  "source": {"name": "EP4 source used in owner screenshots", "sha256": null, "totalFrames": 1674},
+  "provenance": "Recovered from the owner's November 1 screenshots. Owner confirmed Slide uses the shorter F0–300 range. Source hash is unknown; verify the same source before rendering. Other ranges, gaps and the shared F1103 boundary are retained exactly as shown.",
+  "cuts": [
+    {"name": "Slide", "inFrame": 0, "outFrame": 300},
+    {"name": "Eclipse", "inFrame": 320, "outFrame": 567},
+    {"name": "Mint", "inFrame": 865, "outFrame": 1103},
+    {"name": "Smart Grill", "inFrame": 1103, "outFrame": 1385},
+    {"name": "Guacamole", "inFrame": 1386, "outFrame": 1608},
+    {"name": "Jokelet Outro 65 frames", "inFrame": 1609, "outFrame": 1674}
+  ]
+}
