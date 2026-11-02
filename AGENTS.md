@@ -1,3 +1,11 @@
+## Clipper R12 — Save becomes Resave, November 1, 2026
+
+Owner request: after tapping Save, that action must say Resave. Each prepared video clip now remembers its download click for that prepared output in this session. Its visible label, accessible name and tooltip change to Resave; later clicks reuse the same file. Row refreshes, inline preview and preparing another clip keep that indication. A replacement output starts at Save. Save ZIP and the bundle link similarly become Resave ZIP / Resave all after a download request.
+
+Resave records the click, not a device-download completion or cloud-save receipt. The original source, saved cut drafts, visible editable IN/OUT fields, compact layout and media engines remain intact. Rollback: 32893ef97c8c7117548640f2e07854d5052bf87e. Verification: tools-home/shared/review/player-r12-validation.json.
+
+---
+
 ## Clipper R11 — restore visible IN and OUT boxes, November 1, 2026
 
 Owner correction: Mark IN and Mark OUT must fill the adjacent editable number boxes with the displayed source frame. R9 incorrectly moved those boxes into the hidden drawer. Restore the original inputs beside their buttons using the existing compact WavLock row pattern: 29px rows in the locked 76px rail, with 29px IN/OUT buttons and the remaining space for exact frame entry. Both boxes stay visible; marking fills only the matching box, and typing commits through the existing native handler. OUT stays exclusive. Do not hide, replace or remove these exact-entry fields again without an explicit owner request.
