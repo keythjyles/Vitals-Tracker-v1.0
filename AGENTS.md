@@ -1,3 +1,7 @@
+## Verified production stages — November 2, 2026
+
+CapLock R16 now produces a captioned composite and opens the same single-joke project in SxLock R31. SxLock saves the editable sound pass and verified jokelet. Clipper R15 remains optional; Studio R2 skips cutting in its normal joke route. Stage-aware lists default to ready inputs with Show all files off. Originals, layers, captions and prior versions are retained. The locked player equipment is unchanged. [Operation, file extensions, rebuild contract and rollback](tools-home/tools/studio/PRODUCTION_STAGES_R16.md). Earlier release sections remain historical.
+
 ## Direct jokelet caption workflow — Clipper R14 / CapLock R15, November 2, 2026
 
 Owner correction: Clipper is optional equipment. A saved joke video (for example Slide test 2.mp4) opens directly in CapLock through Files or Photos and becomes its own project. Existing projects remain selectable. A whole-video import preserves the exact source bytes and soundtrack; it does not render, stitch, transcribe or require a visit to Clipper. Its source-bound full range is recorded with origin cut ID `whole-video`, using the existing verified bed-save route. Reopening the same bytes resumes the same project; names never establish identity.

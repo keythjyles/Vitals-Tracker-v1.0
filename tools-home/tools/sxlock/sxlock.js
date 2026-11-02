@@ -419,6 +419,8 @@ async function installProductionBridge(adapter,assetBlob){
    const saved=p.studio?.modules?.sound?.session,session=saved?.bed?.id===bed.id?saved:{bed,state:null};await adapter.open({project:p,session:{...session,bed}});current={id:p.id,bed};$('soundNext').hidden=false;$('soundStageName').textContent=p.title+' · Ready for SX';$('exportSection').open=true;message(p.title+' · captioned video opened · original soundtrack retained.');
   }catch(e){if(previous){try{restore(previous);await restoreAssets(previous);}catch(error){recordIssue('stage-rollback',error);}}throw e;}finally{opening=false;}
  }
+ adapter.productionOpened=(p,bed)=>{if(!bed||P.stageAsset(p,'captioned')?.id!==bed.id)return;current={id:p.id,bed};$('soundNext').hidden=false;$('soundStageName').textContent=p.title+' · Ready for SX';};
+ if(adapter.currentProduction)adapter.productionOpened(adapter.currentProduction.p,adapter.currentProduction.bed);
  const picker=createProjectPicker({api,module:'sound',hasProject:()=>true,onPause:pauseForEdit,onOpenProject:open,onLocal:()=>$('loadProject').click(),onUseAsset:async(p,a)=>{if(p&&P.stageAsset(p,'captioned')?.id===a.id)return open(p);const b=await assetBlob(a);sxActivate();await loadVideo(new File([b],a.name,{type:b.type||'video/mp4'}));current=null;$('soundNext').hidden=true;}});
  $('sxPickProject').onclick=()=>picker.open().catch(e=>message(e.message));
  $('soundProjects').onclick=()=>picker.open().catch(e=>message(e.message));
@@ -432,13 +434,13 @@ async function installProductionBridge(adapter,assetBlob){
   const version=1+(d.project.production?.records||[]).filter(r=>r.stage==='jokelet').length,name=P.stageFilename(d.project.title,'jokelet',version);
   d=await api('/api/joke-project/asset?id='+encodeURIComponent(p.id)+'&role=stage&name='+encodeURIComponent(name),{method:'POST',headers:{'content-type':'application/octet-stream'},body:result.blob});
   d=await saveProductionStage(api,p.id,d.asset,'jokelet',{recipe:P.soundRecipe(session),report:result.report});
-  exported=new File([result.blob],d.record.fileName,{type:result.blob.type});$('exportName').textContent=d.record.fileName+' · Ready for music / outro';$('soundStageName').textContent=p.title+' · Ready for music / outro';message('Jokelet saved with its editable sound pass. Music / outro remains the next stage. Drive backup is pending.');
+  exported=new File([result.blob],d.record.fileName,{type:'application/octet-stream'});$('exportName').textContent=d.record.fileName+' · Ready for music / outro';$('soundStageName').textContent=p.title+' · Ready for music / outro';message('Jokelet saved with its editable sound pass. Music / outro remains the next stage. Drive backup is pending.');
  });
  const params=new URLSearchParams(location.search);if(params.get('production'))open({id:params.get('production')}).catch(e=>{recordIssue('production-open',e);message(e.message);});
 }
 
 import('../studio/adapter.mjs?v=1').then(({installAdapter,assetBlob,storeAsset})=>import('../studio/core.mjs?v=1').then(({moduleSession,preferredBed})=>{
- let studioBed=null,studioSoundRefs={};
+ let studioBed=null,studioSoundRefs={};const adapterNotify=(p,bed)=>soundAdapter.productionOpened?.(p,bed);
  const soundAdapter={
   busy:()=>exportBusy||recording||!!liveTake,
   pause:pauseForEdit,
@@ -451,7 +453,7 @@ import('../studio/adapter.mjs?v=1').then(({installAdapter,assetBlob,storeAsset})
    projectReady=false;setBusy(true);
    try{sxActivate();restore(state);state.clips.forEach((c,i)=>{if(clips[i]&&typeof c.id==='string')clips[i].id=c.id;});if(studioBed){const b=await assetBlob(studioBed);await loadVideo(new File([b],studioBed.name,{type:b.type||'video/mp4'}),{restoring:true});await sourceReady;video.currentTime=Math.max(0,Math.min(duration(),state.playheadSeconds||0));}renderClips();updateMixer();pauseForEdit();}
    finally{projectReady=true;setBusy(false);updateViewerDock();}
-   message(p.title+' · sound pass restored · original soundtrack preserved');
+   soundAdapter.currentProduction={p,bed:studioBed};adapterNotify(p,studioBed);message(p.title+' · sound pass restored · original soundtrack preserved');
   },
   async checkpoint({project:p}){
    pauseForEdit();await flushProject();await recoveryQueue;

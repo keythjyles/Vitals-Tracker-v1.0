@@ -1,6 +1,6 @@
 import {createHash} from 'node:crypto';
 import {Input,ALL_FORMATS,BlobSource,EncodedPacketSink} from '../../tools/sxlock/vendor/mediabunny-1.62.1-gs1.mjs';
-import {STAGES,stageFilename,captionRecipe,soundRecipe,mediaContainer,mediaType,stageAsset} from '../../shared/production-stages.mjs';
+import {STAGES,stageFilename,captionRecipe,soundRecipe,mediaContainer,mediaType,stageAsset,pendingCaptions} from '../../shared/production-stages.mjs';
 const digest=s=>createHash('sha256').update(s).digest('hex');
 export function productionAsset(p,id){return (p.assets||[]).flatMap(a=>[a,...[...(a.cutHistory||[]),a.cuts].filter(Boolean).flatMap(pass=>(pass.clips||[]).map(c=>({...c,parent:a.id,cutPassId:pass.id,passVersion:pass.version||1,role:'caption component'})))]).find(a=>a.id===id);}
 export async function verifyStage(p,data,a,bytes){
@@ -11,7 +11,7 @@ export async function verifyStage(p,data,a,bytes){
  try{const v=await input.getPrimaryVideoTrack();if(!v)throw Error('A production stage needs a readable video.');let frames=0,end=0;for await(const packet of new EncodedPacketSink(v).packets(undefined,undefined,{metadataOnly:true})){frames++;end=Math.max(end,packet.timestamp+packet.duration);}media={format,mimeType:mediaType(format),frames,duration:end,width:await v.getDisplayWidth(),height:await v.getDisplayHeight(),audio:!!await input.getPrimaryAudioTrack(),alpha:await v.canBeTransparent()};if(!frames||!end)throw Error('The saved video is empty.');}finally{input.dispose();}
  let recipe=null,parents=[];
  if(data.stage==='captioned'){
-  recipe=captionRecipe(p.caplock);if(!recipe?.media?.path)throw Error('Save the editable CapLock project first.');
+  if(pendingCaptions(p.caplock).length)throw Error('Place or remove the remaining caption components before marking this stage ready.');recipe=captionRecipe(p.caplock);if(!recipe?.media?.path)throw Error('Save the editable CapLock project first.');
   if(data.recipeJSON!==JSON.stringify(recipe))throw Error('Caption placements changed during export. The rendered file is retained; reopen the current edit before advancing.');
   if(!data.report?.composited||data.report.outputFrames!==media.frames||Math.abs(data.report.duration-media.duration)>.003||data.report.outputWidth!==media.width||data.report.outputHeight!==media.height)throw Error('The composite did not match its export receipt.');
   const refs=[recipe.media,...recipe.clips.map(c=>c.ref)];parents=refs.map(ref=>{const parent=(p.assets||[]).flatMap(a=>[a,...[...(a.cutHistory||[]),a.cuts].filter(Boolean).flatMap(pass=>pass.clips||[])]).find(a=>a.path===ref.path);if(!parent||parent.size!==ref.size)throw Error('A caption-render source is not saved in this joke project.');return {id:parent.id,path:parent.path,sha256:parent.sha256};});

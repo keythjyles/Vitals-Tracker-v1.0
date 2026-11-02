@@ -1,3 +1,7 @@
+## Production-stage receipts — November 2, 2026
+
+The existing service adds `/api/joke-project/stage` and verifies saved bytes, container, alpha, frames, audio, current render recipe and project-local parents before appending an optional production receipt. Stage assets use `role=stage`; existing originals are preserved. This release requires the same main-branch service deployment, with no settings or credentials changed. [Protocol and rollback](../../tools/studio/PRODUCTION_STAGES_R16.md). Earlier notes remain historical.
+
 ## Independent video-cut jokelet projects
 
 `POST /api/joke-project/from-cut?id=cut-<source-bound SHA-256>` accepts a validated `origin` from `shared/cut-jokelets-core.mjs`. It creates a new project with explicitly untranscribed text and pending video, without replacing an existing joke. Upload actual prepared video through the existing `/asset?role=bed` route, then call `/from-cut` with `assetId` and the verified output SHA-256/size/frame/duration/audio metadata. Only an asset saved in this project can complete the binding. A ready retry returns the current project unchanged, including later caption edits. Cut-project CapLock saves must reference that same project and one of its saved beds. Every write retains existing Dropbox byte verification and queues the established Drive backup.

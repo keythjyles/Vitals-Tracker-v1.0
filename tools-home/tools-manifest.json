@@ -1,12 +1,12 @@
 {
-  "version": "1.2",
+  "version": "1.3",
   "tools": [
     {
       "tool": "studio",
       "tool_id": "GS-TOOL-STUDIO",
-      "source_version": "R1",
+      "source_version": "R2",
       "hosted_path": "tools/studio/index.html",
-      "description": "Installable joke-first container with shared project assets and versioned native-module checkpoints.",
+      "description": "Joke-first workspace; cutting and scene tools are optional. Native caption and sound Next actions verify their stage outputs.",
       "operator_guide": "tools/studio/README.md"
     },
     {
@@ -57,10 +57,10 @@
     },
     {
       "tool": "sxlock",
-      "source_version": "R30",
+      "source_version": "R31",
       "hosted_path": "tools/sxlock/index.html",
-      "description": "Approved Scrubber effects populate the live Approved effects category automatically; Play/Use use the saved original, Add alone inserts into the timeline.",
-      "verification": "JavaScript syntax and asset decode/hash checks; browser playback/search/favorites/placement review. Physical Android playback not independently tested.",
+      "description": "Open verified captioned joke projects, place effects with the native editor, then save an editable sound pass and rendered jokelet.",
+      "verification": "tools/studio/PRODUCTION_STAGES_R16.json",
       "changes": "31 additions with provenance and decode checks; credit-required entries explicitly marked; large playable rows and synonym/tag search.",
       "tool_id": "GS-TOOL-SXLOCK",
       "navigation": [
@@ -97,16 +97,16 @@
     {
       "tool": "caplock",
       "tool_id": "GS-TOOL-CAPLOCK",
-      "source_version": "R15",
+      "source_version": "R16",
       "hosted_path": "tools/caplock/index.html",
-      "description": "Open a joke video or saved project directly. Import Gemini caption animation, cut only when needed, and return clips to the same editable joke scene.",
+      "description": "Individual joke caption projects with preserved Gemini originals, editable layers and verified composite Next to SxLock.",
       "navigation": [
         "tools",
         "aspectlock",
         "sxlock",
         "previewlock"
       ],
-      "verification": "tools/cliplock/CAPTION_WORKFLOW_R14.json"
+      "verification": "tools/studio/PRODUCTION_STAGES_R16.json"
     },
     {
       "tool": "aspectlock",
@@ -118,10 +118,10 @@
     {
       "tool": "cliplock",
       "tool_id": "GS-TOOL-CLIPLOCK",
-      "source_version": "R14",
+      "source_version": "R15",
       "hosted_path": "tools/cliplock/index.html",
-      "description": "Optional precision video/caption cutter. Next opens independent video-cut projects or saves caption clips and returns to the same CapLock project.",
-      "verification": "tools/cliplock/CAPTION_WORKFLOW_R14.json",
+      "description": "Optional cutter for joke videos or Gemini caption animations; saved components carry verified production stages.",
+      "verification": "tools/studio/PRODUCTION_STAGES_R16.json",
       "operator_guide": "tools/cliplock/README.md",
       "changes": "Stable per-cut Prepare/progress/Retry/Save states, inline Play/Pause/Replay, one active decoded preview, retained prepared clips and Save ZIP."
     }

@@ -12,3 +12,5 @@ export function captionRecipe(p){if(!p)return null;const keys=['id','type','inFr
 export function soundRecipe(session){if(!session?.state)return null;const s=session.state;return {schema:'GS-SoundRender-1',bed:session.bed?{id:session.bed.id,sha256:session.bed.sha256,path:session.bed.path}:null,sourceFps:s.sourceFps,videoVolume:s.videoVolume,mixer:s.mixer,export:s.export,clips:s.clips,soundRefs:session.soundRefs||{},sounds:s.sounds,recordings:s.recordings};}
 export function mediaContainer(bytes){const b=bytes instanceof Uint8Array?bytes:new Uint8Array(bytes);if(b[0]===0x1a&&b[1]===0x45&&b[2]===0xdf&&b[3]===0xa3)return 'webm';if(String.fromCharCode(...b.slice(4,8))==='ftyp')return 'mp4';throw Error('The file is not readable MP4 or WebM media. Renaming is not conversion.');}
 export const mediaType=format=>format==='mp4'?'video/mp4':format==='webm'?'video/webm':'application/octet-stream';
+
+export function pendingCaptions(p){return (p?.captionSequence?.clipIds||[]).filter(id=>{const c=p.clips?.find(c=>c.id===id);return c&&!c.placed;});}

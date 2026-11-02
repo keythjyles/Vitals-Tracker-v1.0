@@ -1,5 +1,5 @@
 // Numbered caption placement. Insertion records an editable layer; navigation never flattens media.
-export const captionNumber=c=>c.captionNumber??Number(/^(\d+)\.[^.]+$/.exec(c.ref?.name||c.name||'')?.[1]||0);
+export const captionNumber=c=>c.captionNumber??Number((/^(\d+)\.[^.]+$/.exec(c.ref?.name||c.name||'')||/\.(\d+)_v\d+\.alp$/i.exec(c.ref?.name||c.name||''))?.[1]||0);
 export const activeCaption=p=>p.clips.find(c=>c.id===p.captionSequence?.activeId);
 export function startCaptionSequence(p,ids,{source=null,folder='',frame=0}={}){
  const order=ids.map(id=>p.clips.find(c=>c.id===id)).filter(Boolean).sort((a,b)=>captionNumber(a)-captionNumber(b));
@@ -25,3 +25,4 @@ export function insertCaption(p,frame){
  const c=activeCaption(p);if(!c)throw Error('Import caption components first.');if(c.placed)return null;
  if(!Number.isInteger(frame)||frame<0)throw Error('Choose a bed frame first.');moveCaptionDraft(p,frame);c.placed=true;c.locked=false;c.visible=true;return c;
 }
+

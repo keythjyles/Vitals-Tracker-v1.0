@@ -1,3 +1,7 @@
+## Verified production stages — November 2, 2026
+
+CapLock R16 now produces a captioned composite and opens the same single-joke project in SxLock R31. SxLock saves the editable sound pass and verified jokelet. Clipper R15 remains optional; Studio R2 skips cutting in its normal joke route. Stage-aware lists default to ready inputs with Show all files off. Originals, layers, captions and prior versions are retained. The locked player equipment is unchanged. [Operation, file extensions, rebuild contract and rollback](../studio/PRODUCTION_STAGES_R16.md). Earlier release sections remain historical.
+
 # SxLock R1.7
 
 **GS audio tools master work index:** [`GS_TOOL_REFINEMENT_INDEX.md`](../GS_TOOL_REFINEMENT_INDEX.md). This is the single authoritative record for current step status, release reconciliation, SxLock preservation lock, verification, and rollback. This document retains historical technical detail; do not infer that an old heading is the current release.
@@ -82,3 +86,4 @@ Baseline main `d6119539195b0faf2025ad9a93b297da3a4cb19a`; isolated branch `sound
 
 
 Validation before release: all 48 automated state/provider/classification checks passed. Includes 50 scientific-name cricket approvals, category/tag search, AI/owner precedence, offline edits, cloud-refresh deletion races, identity-bound AI receipts, owner-only metadata writes, safe receipt deletion, preservation of decoded buffers and placed cue decisions, and prior review/capture/cloud regressions. Full Scrubber inline script and changed JavaScript parse. Live deployment/browser/cloud checks follow separately.
+

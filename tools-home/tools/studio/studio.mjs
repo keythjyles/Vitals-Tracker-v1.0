@@ -1,17 +1,17 @@
-import {PHASES,LABELS,canonicalId,validProjectId,moduleSession,moduleRevision,nextPhase,phaseSession,preferredBed} from './core.mjs?v=1';
+import {PHASES,LABELS,canonicalId,validProjectId,moduleSession,moduleRevision,nextPhase,phaseSession,preferredBed} from './core.mjs?v=2-stages';
 import {api,assetBlob,storeAsset} from './adapter.mjs?v=1';
 import {projectAssets} from './project-index.mjs?v=5-studio';
 import {captionCutLabel} from '../../shared/cut-passes.mjs?v=4';
-import {createProjectPicker} from './project-picker.mjs?v=4';
+import {createProjectPicker} from './project-picker.mjs?v=6-stages';
 const $=id=>document.getElementById(id),origin=location.origin;
 let project=null,phase='joke',loadedRevision=0,child=null,working=false,ledger=null,pendingSave=null,installPrompt=null,epoch=0,jokeDirty=false,jokeBase=null,pendingBedId=null;
-const urls={cut:'../cliplock/?studio=1',captions:'../caplock/?studio=1',scene:'../aspectlock/?studio=1',sound:'../sxlock/?studio=1',review:'../previewlock/cloud-test.html?studio=1'};
+const urls={cut:'../cliplock/?studio=1&v=R15-stages',captions:'../caplock/?studio=1&v=R16-stages',scene:'../aspectlock/?studio=1',sound:'../sxlock/?studio=1&v=R31-stages',review:'../previewlock/cloud-test.html?studio=1'};
 const inflight=new Map();
-function status(text){$('saveState').textContent='GS-TOOL-STUDIO · R1 · '+text;}
+function status(text){$('saveState').textContent='GS-TOOL-STUDIO · R2 · '+text;}
 function fail(e){status(e.message||String(e));$('errorText').textContent=e.message||String(e);if(!$('errorDialog').open)$('errorDialog').showModal();}
 $('closeError').onclick=()=>$('errorDialog').close();
 function busy(on){working=on;$('moduleHost').inert=on;$('jokeWorkspace').inert=on;$('entrance').inert=on;for(const b of document.querySelectorAll('[data-phase]'))b.disabled=on||(!project&&b.dataset.phase!=='joke');$('nextPhase').disabled=on||!project||phase==='review';$('assets').disabled=on||!project;$('saveWork').disabled=on||!project;$('chooseJoke').disabled=on;}
-function showPhase(){for(const b of document.querySelectorAll('[data-phase]')){if(b.dataset.phase===phase)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');}$('entrance').hidden=!!project;$('jokeWorkspace').hidden=!project||phase!=='joke';$('moduleHost').hidden=phase==='joke';$('jokeTitle').textContent=project?.title||'Select a joke';busy(working);}
+function showPhase(){for(const b of document.querySelectorAll('[data-phase]')){if(b.dataset.phase===phase)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');}$('entrance').hidden=!!project;$('jokeWorkspace').hidden=!project||phase!=='joke';$('moduleHost').hidden=phase==='joke';$('nextPhase').hidden=['captions','sound'].includes(phase);$('nextPhase').title='Continue this joke. Cut and Scene remain optional tools.';$('jokeTitle').textContent=project?.title||'Select a joke';busy(working);}
 function rpc(action,payload,timeout=65000){
  if(!child)throw Error('Module is not open.');const frame=child,id=crypto.randomUUID(),module=phase;
  return new Promise((resolve,reject)=>{const timer=setTimeout(()=>{inflight.delete(id);reject(Error('The tool did not acknowledge '+action+'. Work remains open; retry when it is ready.'));},timeout);inflight.set(id,{frame,module,resolve,reject,timer});frame.contentWindow.postMessage({protocol:'GS-Studio-1',module,id,action,payload},origin);});
@@ -93,3 +93,4 @@ const initial=new URLSearchParams(location.search).get('joke');if(initial&&valid
 showPhase();
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{});
+

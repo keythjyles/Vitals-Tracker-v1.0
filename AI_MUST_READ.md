@@ -1,3 +1,7 @@
+## Verified production stages — November 2, 2026
+
+CapLock R16 now produces a captioned composite and opens the same single-joke project in SxLock R31. SxLock saves the editable sound pass and verified jokelet. Clipper R15 remains optional; Studio R2 skips cutting in its normal joke route. Stage-aware lists default to ready inputs with Show all files off. Originals, layers, captions and prior versions are retained. The locked player equipment is unchanged. [Operation, file extensions, rebuild contract and rollback](tools-home/tools/studio/PRODUCTION_STAGES_R16.md). Earlier release sections remain historical.
+
 # AI MUST READ — GS / Vitals Tracker repository
 
 **Mandatory entry point for every AI operator before inspecting, editing, deploying, deleting, or publishing anything in this repository.** Read the documents applicable to the task, then inspect the actual code, data, and current production state. Do not assume a prior chat or a document heading reflects the current deployed version.
@@ -48,3 +52,4 @@ Before Render/Gemini/GS backend work, read [RENDER_SERVICE_MAP.json](tools-home/
 ## Studio shell design and cross-platform continuation — October 31, 2026
 
 Read the [portable GS Studio Master Handoff](tools-home/tools/studio/GS_STUDIO_MASTER_HANDOFF_2026-10-31.md) before studio/container work. It consolidates the existing tools, project/asset workflow, source/API map, implementation sequence and verification limits. The owner requested this document for reuse as instructions; creating it does not implement or approve a shell layout. Preserve the pending design discussion and never adopt the explicitly unapproved shell Site as the plan.
+

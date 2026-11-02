@@ -1,3 +1,7 @@
+## Verified production stages — November 2, 2026
+
+CapLock R16 now produces a captioned composite and opens the same single-joke project in SxLock R31. SxLock saves the editable sound pass and verified jokelet. Clipper R15 remains optional; Studio R2 skips cutting in its normal joke route. Stage-aware lists default to ready inputs with Show all files off. Originals, layers, captions and prior versions are retained. The locked player equipment is unchanged. [Operation, file extensions, rebuild contract and rollback](../studio/PRODUCTION_STAGES_R16.md). Earlier release sections remain historical.
+
 ## Jokelet-first cut projects — Clipper R13 / CapLock R14, November 1, 2026
 
 Owner direction: finish and caption individual jokelets. An episode assembly is not a prerequisite. Existing finished/mixed source cuts retain their picture, soundtrack and exact source range; no new performance or automatic transcript is invented.

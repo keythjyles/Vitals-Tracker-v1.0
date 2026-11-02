@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {captionRecipe,stageAsset,stageAccepts,stageFilename,mediaContainer} from '../production-stages.mjs';
+import {captionRecipe,stageAsset,stageAccepts,stageFilename,mediaContainer,pendingCaptions} from '../production-stages.mjs';
 test('ready filters follow saved stage receipts and invalidate changed render decisions',()=>{
  const caplock={media:{path:'/raw',size:50},bedTransform:{x:50,y:50,scale:1},clips:[]},asset={id:'cap',sha256:'hash',role:'stage'},p={caplock,assets:[asset],production:{records:[{assetId:'cap',sha256:'hash',stage:'captioned',verified:true,recipeJSON:JSON.stringify(captionRecipe(caplock))}]}};
  assert.equal(stageAccepts(p,asset,'sound'),true);assert.equal(stageAccepts(p,asset,'cut'),false);assert.equal(stageAsset(p,'captioned').id,'cap');
@@ -8,3 +8,8 @@ test('ready filters follow saved stage receipts and invalidate changed render de
  assert.equal(stageAccepts(p,{id:'unknown',name:'looks-ready.cap'},'sound'),false,'a renamed file is not a verified next-stage output');
 });
 test('stage filenames are readable, safe and independent of the actual media container',()=>{assert.equal(stageFilename('Slide','captioned',2),'Slide_v02.cap');assert.equal(stageFilename('Slide','alpha',1,2),'Slide.02_v01.alp');assert.equal(mediaContainer(new Uint8Array([0,0,0,0,102,116,121,112])),'mp4');assert.throws(()=>mediaContainer(new Uint8Array([1,2,3])),/not readable/);assert.ok(!stageFilename('../Slide: x','raw').includes('/'));});
+
+test('unfinished active caption trays are explicit and removed pieces do not block completion',()=>{const p={captionSequence:{clipIds:['placed','waiting','removed']},clips:[{id:'placed',placed:true},{id:'waiting',placed:false}]};assert.deepEqual(pendingCaptions(p),['waiting']);p.clips[1].placed=true;assert.deepEqual(pendingCaptions(p),[]);});
+
+import {nextPhase} from '../../tools/studio/core.mjs';
+test('the single-joke route skips optional cutting and scene equipment',()=>{assert.equal(nextPhase('joke'),'captions');assert.equal(nextPhase('cut'),'captions');assert.equal(nextPhase('captions'),'sound');});

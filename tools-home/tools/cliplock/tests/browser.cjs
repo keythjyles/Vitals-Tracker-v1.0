@@ -59,7 +59,7 @@ const {execFileSync}=require('node:child_process');
  assert.equal(await page.locator('.work').evaluate(e=>e.firstElementChild.getAttribute('aria-label')),'Queued cuts');
  assert.match(await page.locator('#restoreStatus').innerText(),/Saved v1.*2 saved clips/);
  await page.getByRole('button',{name:'Show file picker',exact:true}).click();await page.getByText('Caption source',{exact:true}).click();assert.match(await page.locator('#sourceSelect').innerText(),/Cut · v1/);
- await page.locator('#assets').click();await page.waitForFunction(()=>document.querySelector('#projectPickerDetail').textContent.includes('Cut · v1'));
+ await page.locator('#assets').click();await page.locator('#productionShowAll').check();await page.waitForFunction(()=>document.querySelector('#projectPickerDetail').textContent.includes('Cut · v1'));
  await page.locator('#projectPicker').getByRole('button',{name:'✕ Close',exact:true}).click();
  const v1Paths=original.cuts.clips.map(c=>c.path);await page.locator('#newPass').click();await page.waitForFunction(()=>document.querySelector('#passLabel').textContent==='v2'&&document.querySelector('#cutCount').textContent==='0');
  assert.match(await page.locator('#restoreStatus').innerText(),/New pass/);assert.equal(await page.locator('#finishBatch').isEnabled(),false);assert.equal(original.cutHistory.length,1);assert.deepEqual(original.cutHistory[0].clips.map(c=>c.path),v1Paths);

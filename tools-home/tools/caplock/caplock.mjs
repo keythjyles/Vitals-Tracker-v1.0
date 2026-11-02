@@ -1,5 +1,5 @@
 import {renderCaptioned} from './composite.mjs?v=1';
-import {stageAsset,stageRecord,stageFilename,captionRecipe,stageForName} from '../../shared/production-stages.mjs?v=1';
+import {stageAsset,stageRecord,stageFilename,captionRecipe,stageForName,pendingCaptions} from '../../shared/production-stages.mjs?v=1';
 import {saveProductionStage} from '../../shared/production-client.mjs?v=1';
 import {withCaptionBatch} from './caption-batch.mjs?v=1';
 import {openVideoProject} from '../../shared/video-project.mjs?v=1';
@@ -10,7 +10,7 @@ import {moduleSession} from '../studio/core.mjs?v=1';
 import {FocusGestures,scaledTarget} from './focus-controls.mjs?v=9';
 import {createProjectPicker} from '../studio/project-picker.mjs?v=6-stages';
 import {fitPortrait,preferredBed} from '../studio/project-index.mjs?v=5-studio';
-import {captionNumber,activeCaption,startCaptionSequence,navigateCaption,moveCaptionDraft,insertCaption} from './placement.mjs?v=9';
+import {captionNumber,activeCaption,startCaptionSequence,navigateCaption,moveCaptionDraft,insertCaption} from './placement.mjs?v=10-stages';
 import {paintMatrix,matrixFrame} from '../../shared/item-matrix.mjs?v=1';
 import {rateOf,fitRate} from './clip-time.mjs?v=4';
 import {words,moveWords,shiftWords,geminiPrompt} from './script.mjs?v=4';
@@ -353,7 +353,7 @@ $('sourceStage').onchange=()=>{if(!$('sourceStage').value)return render();tagCur
 let compositeBusy=false,compositeCancelled=false,lastComposite=null;
 $('cancelComposite').onclick=()=>{compositeCancelled=true;say('Cancelling composite; saved layers are retained.');};
 $('produceCaptioned').onclick=async()=>{
- if(compositeBusy)return;if(!cloudSession)return say('Open a saved joke project before continuing to SX.');
+ if(compositeBusy)return;if(!cloudSession)return say('Open a saved joke project before continuing to SX.');const pending=pendingCaptions(project).length;if(pending)return say('Insert or remove the '+pending+' remaining caption components before continuing to SX.');
  pause();compositeBusy=true;compositeCancelled=false;const disabled=new Map([...document.querySelectorAll('button,input,select,textarea')].map(e=>[e,e.disabled]));for(const [e]of disabled)if(e.id!=='cancelComposite')e.disabled=true;
  const button=$('produceCaptioned');$('cancelComposite').hidden=false;$('cancelComposite').disabled=false;$('compositeProgress').hidden=false;
  try{

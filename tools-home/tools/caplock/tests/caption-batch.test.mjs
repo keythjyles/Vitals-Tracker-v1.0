@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createProject,validateProject} from '../core.mjs';
+import {captionNumber} from '../placement.mjs';
 import {withCaptionBatch} from '../caption-batch.mjs';
 
 const project={id:'cut-project-abc',assets:[{id:'bed',role:'bed',name:'Slide.mp4',path:'/project/Slide.mp4',size:100}]};
@@ -16,3 +17,5 @@ test('reopening the same pass restores its active caption and edits',()=>{
  assert.deepEqual(withCaptionBatch(saved,project,asset),saved);
  assert.throws(()=>withCaptionBatch({...saved,workspace:{id:'another-project'}},project,asset),/another joke/);
 });
+
+test('private alpha filenames retain the caption component order',()=>{assert.equal(captionNumber({ref:{name:'Slide.02_v01.alp'}}),2);assert.equal(captionNumber({ref:{name:'9.webm'}}),9);assert.equal(captionNumber({ref:{name:'Slide_v01.raw'}}),0);});
