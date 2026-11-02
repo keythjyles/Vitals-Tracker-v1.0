@@ -33,7 +33,7 @@ export function createProjectPicker({api,onOpenProject,onUseAsset,onLocal,onPaus
   if(!p.stagedCut&&p.cutOrigin&&p.cutOrigin.state!=='ready')description='Video save incomplete · reopen this cut from Clipper.';
   if(p.stagedCut){const c=p.cutOriginLocal.cut;description=p.cutState==='preparing'?'Preparing'+(p.progress==null?'…':' · '+p.progress+'%'):p.cutState==='error'?'Preparation failed: '+p.error:'Jokelet · F'+c.inFrame+'–'+c.outFrame;}
   const note=el('p',description);row.append(name,note);
-  const actions=el('div',undefined,'picker-actions'),open=button('Open project',()=>openProject(p));open.className='picker-open';open.disabled=openingProject||(p.stagedCut&&!['ready','saved'].includes(p.cutState))||(!p.stagedCut&&p.cutOrigin&&p.cutOrigin.state!=='ready');
+  const actions=el('div',undefined,'picker-actions'),open=button('Open project',()=>openProject(p));open.className='picker-open';if(p.stagedCut){open.dataset.gsDynamicHelp='true';open.title='Open '+p.title+' with its own video and caption workspace.';}open.disabled=openingProject||(p.stagedCut&&!['ready','saved'].includes(p.cutState))||(!p.stagedCut&&p.cutOrigin&&p.cutOrigin.state!=='ready');
   if(!p.stagedCut||p.saved)actions.append(button('Assets',()=>showProject(p.id)));actions.append(open);row.append(actions);return row;
  }
  function render(){
@@ -91,7 +91,7 @@ export function createProjectPicker({api,onOpenProject,onUseAsset,onLocal,onPaus
  }
  search.oninput=()=>{if(current?.startsWith('/')){const q=search.value.toLowerCase();for(const row of results.children)row.hidden=!row.textContent.toLowerCase().includes(q);}else render();};
  dialog.addEventListener('close',()=>{stop();observer.disconnect();for(const url of localURLs)URL.revokeObjectURL(url);localURLs.clear();++epoch;});
- return {open:async(id,options={})=>{onPause?.();if(options.sourceHash!==undefined){sourceFilter=options.sourceHash;mode='list';}else if(id)sourceFilter=null;footer.hidden=!hasProject();folders.disabled=!hasProject();if(!dialog.open)dialog.showModal();status.classList.remove('error');await load();if(id&&dialog.open)showProject(id);},refreshExtras,close:()=>dialog.close(),showCurrent:()=>current};
+ return {open:async(id,options={})=>{onPause?.();if(options.sourceHash!==undefined){sourceFilter=options.sourceHash;search.value='';mode='list';}else if(id)sourceFilter=null;footer.hidden=!hasProject();folders.disabled=!hasProject();if(!dialog.open)dialog.showModal();status.classList.remove('error');await load();if(id&&dialog.open)showProject(id);},refreshExtras,close:()=>dialog.close(),showCurrent:()=>current};
 }
 
 
