@@ -1,0 +1,125 @@
+{
+  "release": "R11",
+  "source_commit": "dab044bb89ee04f251f32d8ab58f71daa904ff14",
+  "rollback": "5c4dd5aac8389c721553170c0ee1e04f26fcecea",
+  "change": "Restore original editable IN and OUT boxes beside their current-frame mark buttons.",
+  "branch_checks": [
+    {
+      "id": 41372388716,
+      "name": "ClipLock cutter checks",
+      "sha": "dab044bb89ee04f251f32d8ab58f71daa904ff14",
+      "conclusion": "success",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41372388716"
+    },
+    {
+      "id": 41372388725,
+      "name": "GS Studio checks",
+      "sha": "dab044bb89ee04f251f32d8ab58f71daa904ff14",
+      "conclusion": "success",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41372388725"
+    },
+    {
+      "id": 41372189371,
+      "name": "GS Studio checks",
+      "sha": "a86faf4b12151618c18da94b28c0239721fff9e9",
+      "conclusion": "success",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41372189371"
+    },
+    {
+      "id": 41372189387,
+      "name": "SxLock media regression",
+      "sha": "a86faf4b12151618c18da94b28c0239721fff9e9",
+      "conclusion": "success",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41372189387"
+    },
+    {
+      "id": 41372189322,
+      "name": "CapLock prototype checks",
+      "sha": "a86faf4b12151618c18da94b28c0239721fff9e9",
+      "conclusion": "success",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41372189322"
+    }
+  ],
+  "local_unit_tests": {
+    "passed": 15,
+    "failed": 0
+  },
+  "browser_regressions": [
+    "Visible mark boxes in closed-drawer editor",
+    "Buttons autofill native frame numbers",
+    "Manual number entry and source-frame navigation",
+    "Locked 76px rail and 29px input/button rows",
+    "Caption and finished-video cut/export/recovery workflows",
+    "Stable Prepare/Save/Retry and inline playback",
+    "Six-clip ZIP download, frame/audio verification and recovery",
+    "Eight native editors retain shared compact equipment"
+  ],
+  "engine_timing_audio_source_storage_changes": false,
+  "user_episode_4_media_modified": false,
+  "live_url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/cliplock/?mode=video&v=R11-marks",
+  "main_checks": [
+    {
+      "id": 41372595872,
+      "name": "ClipLock cutter checks",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41372595872"
+    },
+    {
+      "id": 41372595768,
+      "name": "GS Studio checks",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41372595768"
+    },
+    {
+      "id": 41372595623,
+      "name": "CapLock prototype checks",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41372595623"
+    },
+    {
+      "id": 41372595963,
+      "name": "SxLock media regression",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41372595963"
+    },
+    {
+      "id": 41372595311,
+      "name": "pages build and deployment",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41372595311"
+    }
+  ],
+  "live_verification": {
+    "fixture": "short-portrait.mp4",
+    "fixture_only": true,
+    "source_frames": 50,
+    "source_fps": 25,
+    "mark_in": {
+      "current_frame": 25,
+      "in_box": 25,
+      "out_box_unchanged": 50
+    },
+    "mark_out": {
+      "current_frame": 35,
+      "out_box": 35,
+      "in_box_unchanged": 25
+    },
+    "keyboard_entry": {
+      "in_box": 13,
+      "out_box": 35,
+      "clock": "F13 / 50 · 0.520s"
+    },
+    "geometry": {
+      "rail_width": 76,
+      "row_height": 29,
+      "field_width": 44,
+      "drawer_closed": true
+    },
+    "screenshot": "clipper-r11-mark-boxes-proof.jpg"
+  }
+}
