@@ -1,0 +1,121 @@
+{
+  "release": {
+    "clipper": "R13",
+    "caplock": "R14"
+  },
+  "source_commit": "417822307fb490210759bd2124599cef32a5569c",
+  "rollback": "d984d51b589468a19942a34aa4448f682b40938e",
+  "backend": {
+    "service": "gs-previewlock-api",
+    "serviceId": "srv-dberk21srm7s73d4kqr0",
+    "workspaceId": "tea-d6rno2aa214c73bjm3ag",
+    "deployId": "dep-dbk0ds5g1s2s738fllr0",
+    "rollbackDeploy": "dep-dbjv9uh5efls73efvnjg",
+    "source_commit": "ea30ba1f447f3d2a9df3019513ac96bec61d56a7",
+    "status": "live",
+    "runtime_error_logs": 0
+  },
+  "local_unit_tests": {
+    "passed": 21,
+    "failed": 0
+  },
+  "branch_checks": [
+    {
+      "id": 41384469448,
+      "name": "GS Studio checks",
+      "sha": "ea30ba1f447f3d2a9df3019513ac96bec61d56a7",
+      "conclusion": "success",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41384469448"
+    },
+    {
+      "id": 41384469446,
+      "name": "ClipLock cutter checks",
+      "sha": "ea30ba1f447f3d2a9df3019513ac96bec61d56a7",
+      "conclusion": "success",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41384469446"
+    },
+    {
+      "id": 41384215880,
+      "name": "GS Studio checks",
+      "sha": "c78d988e3e3b1c9948d14f188801f31afb514d6f",
+      "conclusion": "success",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41384215880"
+    },
+    {
+      "id": 41384215865,
+      "name": "ClipLock cutter checks",
+      "sha": "c78d988e3e3b1c9948d14f188801f31afb514d6f",
+      "conclusion": "success",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41384215865"
+    },
+    {
+      "id": 41384215862,
+      "name": "CapLock prototype checks",
+      "sha": "c78d988e3e3b1c9948d14f188801f31afb514d6f",
+      "conclusion": "success",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41384215862"
+    }
+  ],
+  "authenticated_fixture_e2e": {
+    "named_cut_picker": true,
+    "independent_video_and_caption_projects": true,
+    "actual_project_handler": true,
+    "saved_reopened_caption_edits": true,
+    "connection_failure_retains_cut": true,
+    "lost_upload_response_reuses_one_original": true,
+    "one_caplock_tab": true,
+    "video_frames_per_cut": 20,
+    "primary_audio_retained": true,
+    "source_cursor_unchanged": true,
+    "originals_preserved": true,
+    "drive_backup": "pending",
+    "production_test_uploads": false,
+    "page_errors": []
+  },
+  "verified_at": "2026-11-02",
+  "main_checks": [
+    {
+      "id": 41385553848,
+      "name": "CapLock prototype checks",
+      "sha": "417822307fb490210759bd2124599cef32a5569c",
+      "conclusion": "success",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41385553848"
+    },
+    {
+      "id": 41385553528,
+      "name": "pages build and deployment",
+      "sha": "417822307fb490210759bd2124599cef32a5569c",
+      "conclusion": "success",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41385553528"
+    },
+    {
+      "id": 41385553907,
+      "name": "GS Studio checks",
+      "sha": "417822307fb490210759bd2124599cef32a5569c",
+      "conclusion": "success",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41385553907"
+    },
+    {
+      "id": 41385553934,
+      "name": "ClipLock cutter checks",
+      "sha": "417822307fb490210759bd2124599cef32a5569c",
+      "conclusion": "success",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41385553934"
+    }
+  ],
+  "live_browser": {
+    "source": "short-portrait.mp4 (50-frame QA fixture)",
+    "named_jokelets_ready": 7,
+    "picker": "compact list with video preview, source frame bounds and Open project",
+    "screenshot": "tools-home/shared/review/jokelet-projects-r13-compact-live.jpg",
+    "production_cloud_project_created": false,
+    "owner_episode4_media_used": false,
+    "native_player_geometry_unchanged": true
+  },
+  "limits": {
+    "live_cloud_uploads": "Authenticated create, upload, edit isolation, retry and reopen were tested against the real project handler with disposable provider fixtures; no production QA project was uploaded.",
+    "health": "Render reports the deployed backend live with no error logs in the queried interval. The public HTTP health body was not independently retrieved.",
+    "captions": "Each cut starts with its actual video and soundtrack. Import animated captions through the existing CapLock flow.",
+    "finished_video_renderer": "No new layered final-video renderer is included."
+  }
+}
