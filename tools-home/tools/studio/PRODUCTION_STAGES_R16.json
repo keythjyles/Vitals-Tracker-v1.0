@@ -85,10 +85,110 @@
     "Final music/outro assembly and publishing export remain later work."
   ],
   "deployment": {
-    "status": "awaiting main publication and live verification",
+    "status": "live",
     "existing_service": "srv-dberk21srm7s73d4kqr0",
     "settings_changed": false,
     "previous_live_deploy": "dep-dbk0ds5g1s2s738fllr0",
-    "previous_live_commit": "ea30ba1f447f3d2a9df3019513ac96bec61d56a7"
+    "previous_live_commit": "ea30ba1f447f3d2a9df3019513ac96bec61d56a7",
+    "deploy_id": "dep-dbkb6ch5efls73eub1og",
+    "commit": "4bfeb1e4a321a5f59ceaa763dc2d3d06b96f582f",
+    "finished_at": "2026-11-02T16:00:26.639445Z",
+    "health": {
+      "service": "gs-previewlock-api",
+      "status": "ok",
+      "productionStagesVersion": 1,
+      "dropboxReady": true
+    },
+    "error_log_check": {
+      "start": "2026-11-02T16:00:00Z",
+      "end": "2026-11-02T16:03:59.716294982Z",
+      "level": "error",
+      "count": 0
+    }
+  },
+  "source_commit": "4bfeb1e4a321a5f59ceaa763dc2d3d06b96f582f",
+  "verification_commit": "75b79e3645bd91b5e12f005d6c8c1f4555d8f566",
+  "main_checks": [
+    {
+      "id": 41477562774,
+      "name": "ClipLock cutter checks",
+      "conclusion": "success",
+      "source": "75b79e3645bd91b5e12f005d6c8c1f4555d8f566",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41477562774"
+    },
+    {
+      "id": 41476894459,
+      "name": "CapLock prototype checks",
+      "conclusion": "success",
+      "source": "4bfeb1e4a321a5f59ceaa763dc2d3d06b96f582f",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41476894459"
+    },
+    {
+      "id": 41477563006,
+      "name": "GS Studio checks",
+      "conclusion": "success",
+      "source": "75b79e3645bd91b5e12f005d6c8c1f4555d8f566",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41477563006"
+    },
+    {
+      "id": 41476894317,
+      "name": "SxLock media regression",
+      "conclusion": "success",
+      "source": "4bfeb1e4a321a5f59ceaa763dc2d3d06b96f582f",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41476894317"
+    },
+    {
+      "id": 41477562566,
+      "name": "pages build and deployment",
+      "conclusion": "success",
+      "source": "75b79e3645bd91b5e12f005d6c8c1f4555d8f566",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41477562566"
+    }
+  ],
+  "resolved_check": {
+    "id": 41476894520,
+    "reason": "The browser test read the prior project ID before direct import finished.",
+    "fix": "Wait for the named import completion receipt before checking whole-video provenance.",
+    "rerun": 41477562774
+  },
+  "live_browser": {
+    "caplock": {
+      "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/caplock/?new=video&v=R16-stages",
+      "title": "CapLock · GS-TOOL-CAPLOCK · R16",
+      "next_visible": true
+    },
+    "sxlock": {
+      "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/sxlock/?v=R31-stages",
+      "title": "SxLock · GS-TOOL-SXLOCK · R31"
+    },
+    "stage_picker_show_all_default": false,
+    "cloud_browser_owner_connection": false,
+    "owner_cloud_write_acceptance": "not performed",
+    "screenshot": "review/production-stages-r16-caplock.jpg"
+  },
+  "fixture_artifact": {
+    "id": 13156354985,
+    "run": 41476409945,
+    "zip_sha256": "6bf488c5b808b42f2312e2a085607ff22cff31ecb395b9e7608564264acb6678",
+    "source": "6d60015a79311fda9f9bac25aa8a6cd03a75e198",
+    "screenshot": "review/production-stages-r16-fixture.png",
+    "sample_only": true,
+    "composite_sha256": "b06a6f82d4cd3cb267da3912d16fd42986361effb07bc3e48568f3d94a704d92",
+    "jokelet_sha256": "5e4c359366a46a2c8e77c8d6fb948e4d106e92536eab176a81106d49312637b4",
+    "video_frames": 50,
+    "width": 90,
+    "height": 160,
+    "video_duration_seconds": 2,
+    "video_frames_identical_through_sx": true,
+    "audio_measurement": {
+      "measurement": "first audio channel, Hann-windowed tone amplitude",
+      "source_440": 0.12510366294517122,
+      "jokelet_440": 0.1250428059446032,
+      "source_880": 1.8237082515949753e-7,
+      "jokelet_880_during_cue": 0.02489962392551197,
+      "jokelet_880_after_cue": 1.4841870275129496e-7,
+      "passed": true,
+      "note": "Compare the first channel directly; summing stereo to mono changes the measurement gain."
+    }
   }
 }
