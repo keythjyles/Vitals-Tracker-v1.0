@@ -1,9 +1,9 @@
 name: ClipLock cutter checks
 on:
   push:
-    paths: ['tools-home/tools/cliplock/**', 'tools-home/services/previewlock-api/joke-project*', 'tools-home/shared/**', 'tools-home/tools/studio/project-index.mjs', 'tools-home/tools/studio/project-picker.mjs', '.github/workflows/cliplock-checks.yml']
+    paths: ['tools-home/tools/cliplock/**', 'tools-home/tools/caplock/**', 'tools-home/tools/sxlock/**', 'tools-home/services/previewlock-api/**', 'tools-home/shared/**', 'tools-home/tools/studio/project-index.mjs', 'tools-home/tools/studio/project-picker.mjs', '.github/workflows/cliplock-checks.yml']
   pull_request:
-    paths: ['tools-home/tools/cliplock/**', 'tools-home/services/previewlock-api/joke-project*', 'tools-home/shared/**', 'tools-home/tools/studio/project-index.mjs', 'tools-home/tools/studio/project-picker.mjs', '.github/workflows/cliplock-checks.yml']
+    paths: ['tools-home/tools/cliplock/**', 'tools-home/tools/caplock/**', 'tools-home/tools/sxlock/**', 'tools-home/services/previewlock-api/**', 'tools-home/shared/**', 'tools-home/tools/studio/project-index.mjs', 'tools-home/tools/studio/project-picker.mjs', '.github/workflows/cliplock-checks.yml']
 permissions:
   contents: read
 jobs:
@@ -55,3 +55,12 @@ jobs:
         run: node tools-home/shared/tests/compact-player.cjs
         env:
           PLAYWRIGHT_MODULE: /tmp/clip-browser/node_modules/playwright
+      - name: Keep production-route proof
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jokelet-production-stage-proof
+          path: |
+            /tmp/jokelet-projects-browser.png
+            /tmp/jokelet-projects-check/composite.mp4
+            /tmp/jokelet-projects-check/finished-jokelet.mp4
