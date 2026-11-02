@@ -1,0 +1,94 @@
+{
+  "schema": "GS-ProductionStages-1",
+  "date": "2026-11-02",
+  "release": {
+    "caplock": "R16",
+    "clipper": "R15",
+    "sxlock": "R31",
+    "studio": "R2"
+  },
+  "rollback_code": "9cd7a94a76662c6e55ab256b6d02b498ec4a78b8",
+  "branch_checks": [
+    {
+      "id": 41476409945,
+      "name": "ClipLock cutter checks",
+      "source": "6d60015a79311fda9f9bac25aa8a6cd03a75e198",
+      "conclusion": "success"
+    },
+    {
+      "id": 41476192567,
+      "name": "CapLock prototype checks",
+      "source": "39a483053f6b3b6c59ddf4318114cd39ebfa11ff",
+      "conclusion": "success"
+    },
+    {
+      "id": 41476303936,
+      "name": "GS Studio checks",
+      "source": "6f3953584152c92812b43a3bb379fdda227e7588",
+      "conclusion": "success"
+    },
+    {
+      "id": 41476303961,
+      "name": "SxLock media regression",
+      "source": "6f3953584152c92812b43a3bb379fdda227e7588",
+      "conclusion": "success"
+    }
+  ],
+  "authenticated_fixture_e2e": {
+    "jokeletCutProjects": true,
+    "directVideoProject": true,
+    "wholeVideoBytesPreserved": true,
+    "exportedCutResumesProject": true,
+    "nextSavesAndReturnsCaptions": true,
+    "geminiHandoff": true,
+    "captionPassPreservesScene": true,
+    "compositeToSx": true,
+    "unfinishedCaptionsCannotAdvance": true,
+    "alphaPixelsVerified": true,
+    "exclusiveOutVerified": true,
+    "jokeletWithEditableSound": true,
+    "pictureFramesPreservedThroughSx": true,
+    "privateStageDownloads": true,
+    "namedCutPicker": true,
+    "independentVideoAndCaptionProjects": true,
+    "realProjectHandler": true,
+    "cloudSaveAndReopen": true,
+    "connectionFailurePreservesCut": true,
+    "uploadRetryReusesProject": true,
+    "oneCapLockTab": true,
+    "framesPerBed": 20,
+    "audioPreserved": true,
+    "sourceCursorPreserved": true,
+    "originalsPreserved": true,
+    "driveBackup": "pending",
+    "productionWrites": false,
+    "errors": []
+  },
+  "production_media": {
+    "inspected": "Pebble saved manifest",
+    "placed": 2,
+    "unplaced": 7,
+    "promoted": false,
+    "reason": "Creative placement remains incomplete. No owner media or cloud files were changed."
+  },
+  "private_extensions": {
+    "raw": "clean performance",
+    "anm": "Gemini original",
+    "alp": "transparent numbered component",
+    "cap": "verified caption composite",
+    "jkt": "verified rendered sound pass",
+    "mp4": "final publishing export, not implemented in this release"
+  },
+  "verification_limits": [
+    "Physical Samsung acceptance is not claimed.",
+    "The full route used actual encoded media with the real project handler and disposable storage, not production uploads.",
+    "Final music/outro assembly and publishing export remain later work."
+  ],
+  "deployment": {
+    "status": "awaiting main publication and live verification",
+    "existing_service": "srv-dberk21srm7s73d4kqr0",
+    "settings_changed": false,
+    "previous_live_deploy": "dep-dbk0ds5g1s2s738fllr0",
+    "previous_live_commit": "ea30ba1f447f3d2a9df3019513ac96bec61d56a7"
+  }
+}
