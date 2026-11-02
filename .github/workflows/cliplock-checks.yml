@@ -33,7 +33,7 @@ jobs:
       - run: command -v ffmpeg || (sudo apt-get update -qq && sudo apt-get install -y ffmpeg)
       - run: npm install --prefix /tmp/clip-browser --no-audit --no-fund playwright@1.62.1
       - run: node /tmp/clip-browser/node_modules/playwright/cli.js install --with-deps chromium
-      - run: node --test tools-home/shared/tests/*.test.mjs tools-home/tools/cliplock/tests/*.test.mjs tools-home/services/previewlock-api/joke-project.test.mjs tools-home/services/previewlock-api/cut-jokelets.test.mjs
+      - run: node --test tools-home/shared/tests/*.test.mjs tools-home/tools/cliplock/tests/*.test.mjs tools-home/services/previewlock-api/joke-project.test.mjs tools-home/services/previewlock-api/cut-jokelets.test.mjs tools-home/services/previewlock-api/production-stages.test.mjs
       - run: |
           python3 -m http.server 8767 --bind 127.0.0.1 >/tmp/clip-server.log 2>&1 &
           curl --retry 20 --retry-connrefused --retry-delay 1 --fail --silent http://127.0.0.1:8767/tools-home/tools/cliplock/ >/dev/null

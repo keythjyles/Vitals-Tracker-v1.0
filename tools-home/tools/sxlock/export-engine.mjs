@@ -3,7 +3,7 @@ import {
   Input, ALL_FORMATS, BlobSource, Output, BufferTarget, Mp4OutputFormat, WebMOutputFormat,
   EncodedPacketSink, EncodedVideoPacketSource, EncodedAudioPacketSource,
   VideoSampleSink, VideoSampleSource, AudioBufferSink, AudioBufferSource, Quality,
-  canEncodeAudio, canEncodeVideo,
+  canEncodeAudio, canEncodeVideo, CanvasSource,
 } from './vendor/mediabunny-1.62.1-gs1.mjs';
 
 export const SAMPLE_RATE = 48000;
@@ -98,7 +98,7 @@ function createInput(file) {
  */
 export async function exportVideo({ file, fps = 25, size = 'original', format = 'mp4',
   soundtrackGain = 1, hasEffects = false, placeEffects = async () => {},
-  cancelled, onProgress = () => {}, onPhase = () => {} }) {
+  cancelled, onProgress = () => {}, onPhase = () => {}, visual = null }) {
   if (!(file instanceof Blob)) throw new Error('Load an original video first.');
   if (!Number.isInteger(fps) || fps < 1 || fps > 60) throw new Error('Invalid output frame rate.');
   if (!['original', '720'].includes(size) || !['mp4', 'webm'].includes(format)) throw new Error('Invalid export settings.');
@@ -116,12 +116,12 @@ export async function exportVideo({ file, fps = 25, size = 'original', format = 
     const videoCodec = format === 'mp4' ? 'avc' : 'vp9';
     const audioCodec = format === 'mp4' ? 'aac' : 'opus';
     const scale = size === '720' ? Math.min(1, 720 / width) : 1;
-    const copyVideo = video.codec === videoCodec && scale === 1 && isCfr(timing.timestamps, fps)
+    const copyVideo = !visual && video.codec === videoCodec && scale === 1 && isCfr(timing.timestamps, fps)
       && Math.abs(timing.end - timing.count / fps) <= 0.000002;
     const copyAudio = !!audio && audio.codec === audioCodec && soundtrackGain === 1 && !hasEffects;
     const exactDuration = copyVideo ? timing.end : Math.ceil((timing.end - 0.000002) * fps) / fps;
     const report = { engine: 'SxLock-R26', fps, width, height, sourceFrames: timing.count,
-      duration: exactDuration, video: copyVideo ? 'packet-copy' : 'offline-encode',
+      duration: exactDuration, hasSourceAudio:!!audio, hasEffects, video: copyVideo ? 'packet-copy' : 'offline-encode',
       audio: copyAudio ? 'packet-copy' : 'sample-mix', sampleRate: SAMPLE_RATE,
       colorSpace: await video.getColorSpace(), pictureResized: scale !== 1 };
     // A true no-op is byte-identical, including codec configuration, colour metadata and encoder delay.
@@ -141,13 +141,15 @@ export async function exportVideo({ file, fps = 25, size = 'original', format = 
     const target = new BufferTarget();
     output = new Output({ target, format: format === 'mp4'
       ? new Mp4OutputFormat({ fastStart: 'in-memory' }) : new WebMOutputFormat() });
-    const videoSource = copyVideo ? new EncodedVideoPacketSource(videoCodec) : new VideoSampleSource({
+    if(visual&&(!Number.isSafeInteger(visual.width)||!Number.isSafeInteger(visual.height)||visual.width<2||visual.height<2||visual.width%2||visual.height%2||typeof visual.draw!=='function'))throw Error('Invalid composite surface.');
+    const canvas=visual?new OffscreenCanvas(visual.width,visual.height):null;
+    const videoSource = visual?new CanvasSource(canvas,{codec:videoCodec,quality:new Quality({quantizer:18,bitrate:Math.max(6e6,visual.width*visual.height*fps*.2)}),latencyMode:'quality',keyFrameInterval:2}):copyVideo ? new EncodedVideoPacketSource(videoCodec) : new VideoSampleSource({
       codec: videoCodec, quality: new Quality({ quantizer: 18, bitrate: Math.max(6e6, width * height * fps * 0.2) }),
       latencyMode: 'quality', keyFrameInterval: 2,
       transform: scale === 1 ? undefined : { width: Math.round(width * scale / 2) * 2, height: Math.round(height * scale / 2) * 2 },
     });
     output.addVideoTrack(videoSource, { decoderConfig: copyVideo ? decoderConfig : undefined,
-      rotation: await video.getRotation(), frameRate: fps });
+      rotation: visual?0:await video.getRotation(), frameRate: fps });
     let audioSource;
     if (copyAudio) audioSource = new EncodedAudioPacketSource(audioCodec);
     else if (audio || hasEffects) {
@@ -192,7 +194,7 @@ export async function exportVideo({ file, fps = 25, size = 'original', format = 
           const timestamp = nextFrame / fps;
           const sample = (await videoFrames.next()).value;
           if (!sample) throw new Error('Missing source frame at ' + timestamp.toFixed(3) + 's.');
-          try { sample.setTimestamp(timestamp); sample.setDuration(1 / fps); await videoSource.add(sample); }
+          try { if(visual){await visual.draw(canvas,sample,timestamp);await videoSource.add(timestamp,1/fps);}else{sample.setTimestamp(timestamp); sample.setDuration(1 / fps); await videoSource.add(sample);} }
           finally { sample.close(); }
           nextFrame++; renderedFrames++;
         }
@@ -237,11 +239,11 @@ export async function exportVideo({ file, fps = 25, size = 'original', format = 
       if (audioSource && (!resultAudio || Math.abs((await resultAudio.computeDuration()) - expectedAudioEnd) > 0.04)) {
         throw new Error('Export failed audio duration validation.');
       }
-      report.outputFrames = actual.count;
+      report.outputFrames = actual.count;report.composited=!!visual;
       report.outputWidth = await resultVideo.getDisplayWidth();
       report.outputHeight = await resultVideo.getDisplayHeight();
-      if (report.outputWidth !== Math.round(width * scale / 2) * 2
-          || report.outputHeight !== Math.round(height * scale / 2) * 2) {
+      if (report.outputWidth !== (visual?.width||Math.round(width * scale / 2) * 2)
+          || report.outputHeight !== (visual?.height||Math.round(height * scale / 2) * 2)) {
         throw new Error('Export failed picture size validation.');
       }
       report.outputColorSpace = await resultVideo.getColorSpace();
@@ -257,3 +259,4 @@ export async function exportVideo({ file, fps = 25, size = 'original', format = 
     input.dispose();
   }
 }
+

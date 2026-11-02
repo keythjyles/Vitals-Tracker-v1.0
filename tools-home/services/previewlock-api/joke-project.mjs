@@ -1,3 +1,4 @@
+import {productionAsset,verifyStage} from './production-stages.mjs';
 import {cutPassVersion,nextCutPassVersion} from '../../shared/cut-passes.mjs';
 import {normalizeCutOrigin,cutProjectId,verifyCutOutput} from '../../shared/cut-jokelets-core.mjs';
 // Shared joke workspace. Existing PreviewLock bearer authentication stays in server.js.
@@ -52,7 +53,7 @@ async function backupStatus(id,p,t){
 async function body(req,max=600000){const chunks=[];let n=0;for await(const b of req){n+=b.length;if(n>max)throw Error('Request too large');chunks.push(b);}return Buffer.concat(chunks);}
 function allowedSource(path){return typeof path==='string'&&path.startsWith('/Grill Sergeant/')&&!path.includes('..')&&!/[\x00-\x1f]/.test(path);}
 function cleanName(name){if(typeof name!=='string'||name.length>160||/[\\/<>:"|?*\x00-\x1f]/.test(name)||name.startsWith('.'))throw Error('Invalid filename');return name;}
-const roles={caption:'captions',bed:'video',voice:'audio',reaction:'reactions',animation:'animations',outro:'outro',broll:'broll',sound:'audio',music:'audio',image:'images',review:'reviews'};
+const roles={caption:'captions',bed:'video',voice:'audio',reaction:'reactions',animation:'animations',outro:'outro',broll:'broll',sound:'audio',music:'audio',image:'images',review:'reviews',stage:'stages'};
 async function assetFolder(id,role,assetId,t){if(!roles[role])throw Error('Invalid asset role');await mkdir(folder(id)+'/'+roles[role],t);const path=folder(id)+'/'+roles[role]+'/'+assetId;await mkdir(path,t);return path;}
 async function runCuts(id,assetId,jobId,t){let dir;try{dir=await mkdtemp(join(tmpdir(),'gs-caplets-'));let state=await readProject(id,t),p=state.project,a=p.assets.find(a=>a.id===assetId),job=a.cuts;if(job.id!==jobId)throw Error('Cut job changed');const response=await fetch('https://content.dropboxapi.com/2/files/download',{method:'POST',headers:{...auth(t),'dropbox-api-arg':JSON.stringify({path:a.path})}});if(!response.ok)throw Error('Source download failed');const bytes=Buffer.from(await response.arrayBuffer());if(bytes.length>40*1024*1024||sha(bytes)!==a.sha256)throw Error('Source hash mismatch or larger than 40 MB');const source=join(dir,a.name.toLowerCase().endsWith('.webm')?'source.webm':'source.mp4');await writeFile(source,bytes);const clipRoot=a.path.slice(0,a.path.lastIndexOf('/'))+'/clips';await mkdir(clipRoot,t);const batchRoot=clipRoot+'/'+job.id;await mkdir(batchRoot,t);
  for(const cut of job.ranges){const out=join(dir,cut.number+'.webm');await renderClip(source,out,cut,job.chroma);const data=await readFile(out),receipt=await put(batchRoot+'/'+(cut.name||cut.number+'.webm'),data,t);job.clips.push({...receipt,...cut,fps:25,frames:cut.outFrame-cut.inFrame,type:'video',alpha:true});state=await readProject(id,t);const current=state.project.assets.find(x=>x.id===assetId);if(current.cuts.id!==job.id)throw Error('Cut job changed');current.cuts=job;await save(state.project,state.rev,t);await rm(out,{force:true});}
@@ -61,7 +62,7 @@ async function runCuts(id,assetId,jobId,t){let dir;try{dir=await mkdtemp(join(tm
 export async function handleJokeProject(req,res,u,t){if(!u.pathname.startsWith('/api/joke-project'))return false;const send=(s,d)=>{res.writeHead(s,{'content-type':'application/json','cache-control':'no-store','access-control-allow-origin':'*'});res.end(JSON.stringify(d));return true;};const origin=req.headers.origin;if(origin&&!['https://keythjyles.github.io','http://localhost:3101','http://127.0.0.1:3199'].includes(origin))return send(403,{error:'origin_not_allowed'});
  try{if(req.method==='GET'&&u.pathname==='/api/joke-projects'){const result=await db('list_folder',t,{path:PROJECT_ROOT,recursive:false,limit:2000});const entries=(result.entries||[]).filter(e=>e['.tag']==='folder').map(e=>({id:e.name,path:e.path_display}));return send(200,{projects:entries,has_more:result.has_more});}
  const id=projectId(u.searchParams.get('id'));let state=await readProject(id,t),p=state.project;
- if(req.method==='GET'&&u.pathname==='/api/joke-project')return send(200,{...state,capabilities:{clipBatch:2,cutPass:1,studio:1,videoCutProjects:1},backup:p?await backupStatus(id,p,t):null});
+ if(req.method==='GET'&&u.pathname==='/api/joke-project')return send(200,{...state,capabilities:{clipBatch:2,cutPass:1,studio:1,videoCutProjects:1,productionStages:1},backup:p?await backupStatus(id,p,t):null});
  if(req.method==='GET'&&u.pathname==='/api/joke-project/caplock'){if(!p)return send(404,{error:'Project not found'});const a=p.assets.find(a=>a.id===u.searchParams.get('asset'));if(a?.cuts?.status!=='complete')return send(409,{error:'Finish saving the cuts first.'});return send(200,{project:p,asset:a,session:p.caplock||null,rev:state.rev});}
  if(req.method!=='POST')return send(405,{error:'method_not_allowed'});if(locks.has(id))return send(409,{error:'Project is busy saving clips. Please wait.'});locks.add(id);
  try{
@@ -86,6 +87,15 @@ export async function handleJokeProject(req,res,u,t){if(!u.pathname.startsWith('
  }
  if(u.pathname==='/api/joke-project'){const data=JSON.parse(await body(req));if((data.rev??null)!==state.rev)return send(409,{error:'Project changed; reload before saving.'});if(typeof data.title!=='string'||!data.title.trim()||data.title.length>200||typeof data.text!=='string'||!data.text.trim()||data.text.length>30000)return send(400,{error:'Save a title and joke text.'});await mkdir(folder(id),t);p??={schema:'GS-JokeProject-1',version:1,id,created:new Date().toISOString(),assets:[],textHistory:[]};if(p.text!==data.text){await mkdir(folder(id)+'/text',t);const textRef=await put(folder(id)+'/text/'+randomUUID()+'.txt',data.text,t);p.textHistory.push(textRef);await put(folder(id)+'/joke.txt',data.text,t,{replace:true});}p.title=data.title.trim();p.text=data.text;return send(200,await save(p,state.rev,t));}
  if(!p)return send(404,{error:'Save the joke project first.'});
+ if(u.pathname==='/api/joke-project/stage'){
+  const data=JSON.parse(await body(req));if(data.rev!==state.rev)return send(409,{error:'Project changed; refresh before marking the stage ready.'});
+  const ids=data.assetIds||[data.assetId];if(!Array.isArray(ids)||!ids.length||ids.length>40||new Set(ids).size!==ids.length)throw Error('Choose 1–40 saved stage assets.');const records=[];let changed=false;
+  for(const assetId of ids){const a=productionAsset(p,assetId);if(!a)throw Error('Choose a saved asset in this project.');if(a.size>40*1024*1024)throw Error('Existing project-file limit is 40 MB.');
+   const r=await fetch('https://content.dropboxapi.com/2/files/download',{method:'POST',headers:{...auth(t),'dropbox-api-arg':JSON.stringify({path:a.path})}});if(!r.ok)throw Error('Saved stage media could not be verified.');
+   const result=await verifyStage(p,data,a,Buffer.from(await r.arrayBuffer()));records.push(result.record);if(!result.reused){changed=true;p.production={...p.production,schema:'GS-ProductionStages-1',version:1,records:[...(p.production?.records||[]),result.record]};}
+  }
+  return send(200,{...(changed?await save(p,state.rev,t):{...state,persisted:true,reused:true}),record:records[0],records});
+ }
  if(u.pathname==='/api/joke-project/studio'){
   const data=JSON.parse(await body(req,1200000)),phases=['joke','cut','captions','scene','sound','review'];
   if(!phases.includes(data.module)||!phases.includes(data.nextPhase)||!/^[-a-zA-Z0-9]{12,100}$/.test(data.requestId||''))return send(400,{error:'Invalid studio checkpoint.'});

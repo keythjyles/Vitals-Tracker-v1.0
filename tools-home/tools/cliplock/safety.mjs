@@ -1,6 +1,6 @@
 import {selection,clipName} from './core.mjs?v=3';
 export {hapticClick} from '../../shared/compact-player.mjs?v=5';
-export function cutListRecipe(source,meta,cuts){return {schema:'GS-ClipLockList-1',release:'R14',outExclusive:true,source:{...source,totalFrames:meta.times.length},cuts:structuredClone(cuts)};}
+export function cutListRecipe(source,meta,cuts){return {schema:'GS-ClipLockList-1',release:'R15',outExclusive:true,source:{...source,totalFrames:meta.times.length},cuts:structuredClone(cuts)};}
 export function readCutList(recipe,meta,digest){
  if(recipe?.schema!=='GS-ClipLockList-1'||recipe.outExclusive!==true)throw Error('Choose a ClipLock cut list with exclusive OUT frames.');
  if(recipe.source?.sha256&&recipe.source.sha256!==digest)throw Error('This cut list belongs to a different source. Your cuts are unchanged.');

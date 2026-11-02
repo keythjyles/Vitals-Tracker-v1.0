@@ -234,7 +234,7 @@ async function videoExport(){
  if(!videoFile)throw Error('Load a video first.');
  video.pause();stopAuditions();stopEffects();
  await prepareExportFiles();
- const ac=await audioContext(),engine=await import('./export-engine.mjs?v=26');
+ const ac=await audioContext(),engine=await import('./export-engine.mjs?v=27');
  const selected=clips.filter(c=>c.enabled&&c.volume>0&&busLevel(c)>0).map(c=>({...c}));
  $('progress').hidden=false;$('progress').value=0;
  const result=await engine.exportVideo({file:videoFile,fps:num($('fps').value,1,60),size:$('size').value,
@@ -248,7 +248,7 @@ async function videoExport(){
   }trimDecoded();}
  });
  health.lastExport=result.report;
- finishExport(result.blob,result.blob.type==='video/mp4'?'mp4':'webm');
+ finishExport(result.blob,result.blob.type==='video/mp4'?'mp4':'webm');return result;
 }
 
 function wav(buffer){const ch=buffer.numberOfChannels,n=buffer.length,sr=buffer.sampleRate,data=new ArrayBuffer(44+n*ch*2),v=new DataView(data);let p=0;const str=s=>{for(const c of s)v.setUint8(p++,c.charCodeAt(0))},u16=x=>{v.setUint16(p,x,true);p+=2},u32=x=>{v.setUint32(p,x,true);p+=4};str('RIFF');u32(data.byteLength-8);str('WAVEfmt ');u32(16);u16(1);u16(ch);u32(sr);u32(sr*ch*2);u16(ch*2);u16(16);str('data');u32(n*ch*2);for(let i=0;i<n;i++)for(let c=0;c<ch;c++){const x=Math.max(-1,Math.min(1,buffer.getChannelData(c)[i]));v.setInt16(p,x<0?x*32768:x*32767,true);p+=2}return new Blob([data],{type:'audio/wav'})}
@@ -408,15 +408,44 @@ function showClassification(sound){
 window.SxLock.cloudReady=libraryReady.then(openCloudSource).catch(e=>{recordIssue('cloud-source',e);message(e.message)});
 
 
+async function installProductionBridge(adapter,assetBlob){
+ const [{createProjectPicker},P,{saveProductionStage}]=await Promise.all([import('../studio/project-picker.mjs?v=6-stages'),import('../../shared/production-stages.mjs?v=1'),import('../../shared/production-client.mjs?v=1')]);
+ let current=null,opening=false;
+ const api=async(path,options={})=>{const key=localStorage.getItem('gs_previewlock_key');if(!key)throw Error('Use the existing PreviewLock connection in this browser.');const r=await fetch('https://gs-previewlock-api.onrender.com'+path,{...options,headers:{Authorization:'Bearer '+key,...options.headers},signal:AbortSignal.timeout(65000)}),d=await r.json();if(!r.ok)throw Error(d.error||'Project request failed.');return d;};
+ async function open(record){
+  if(opening||exportBusy||recording||liveTake)throw Error('Finish the current recording or export first.');opening=true;let previous;
+  try{await libraryReady;await recoveryQueue;pauseForEdit();await flushProject();previous=snapshot(true);const database=await db();try{await new Promise((resolve,reject)=>{const tx=database.transaction('projects','readwrite');tx.objectStore('projects').put({id:'before-stage-'+uid(),state:previous,savedAt:Date.now()});tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});}finally{database.close();}
+   const d=await api('/api/joke-project?id='+encodeURIComponent(record.id)),p=d.project,bed=P.stageAsset(p,'captioned');if(!bed)throw Error('This joke has no current video ready for SX. Show all files to use other media.');
+   const saved=p.studio?.modules?.sound?.session,session=saved?.bed?.id===bed.id?saved:{bed,state:null};await adapter.open({project:p,session:{...session,bed}});current={id:p.id,bed};$('soundNext').hidden=false;$('soundStageName').textContent=p.title+' · Ready for SX';$('exportSection').open=true;message(p.title+' · captioned video opened · original soundtrack retained.');
+  }catch(e){if(previous){try{restore(previous);await restoreAssets(previous);}catch(error){recordIssue('stage-rollback',error);}}throw e;}finally{opening=false;}
+ }
+ const picker=createProjectPicker({api,module:'sound',hasProject:()=>true,onPause:pauseForEdit,onOpenProject:open,onLocal:()=>$('loadProject').click(),onUseAsset:async(p,a)=>{if(p&&P.stageAsset(p,'captioned')?.id===a.id)return open(p);const b=await assetBlob(a);sxActivate();await loadVideo(new File([b],a.name,{type:b.type||'video/mp4'}));current=null;$('soundNext').hidden=true;}});
+ $('sxPickProject').onclick=()=>picker.open().catch(e=>message(e.message));
+ $('soundProjects').onclick=()=>picker.open().catch(e=>message(e.message));
+ $('soundNext').onclick=()=>runExport('jokelet stage',async()=>{
+  if(!current)throw Error('Open a ready-for-SX project first.');
+  const p=(await api('/api/joke-project?id='+encodeURIComponent(current.id))).project;
+  if(!videoFile||videoFile.name!==current.bed.name||videoFile.size!==current.bed.size)throw Error('The source changed. Reopen this joke’s stage project before advancing.');
+  const session=await adapter.checkpoint({project:p}),fresh=await api('/api/joke-project?id='+encodeURIComponent(p.id));
+  let d=await api('/api/joke-project/studio?id='+encodeURIComponent(p.id),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({rev:fresh.rev,module:'sound',moduleRevision:fresh.project.studio?.modules?.sound?.revision||0,nextPhase:'review',requestId:crypto.randomUUID(),session})});
+  const result=await videoExport();if(cancelled)throw Error('Export cancelled.');if(result.blob.size>40*1024*1024)throw Error('The jokelet exceeds the existing 40 MB project-file limit. Its sound project is saved.');
+  const version=1+(d.project.production?.records||[]).filter(r=>r.stage==='jokelet').length,name=P.stageFilename(d.project.title,'jokelet',version);
+  d=await api('/api/joke-project/asset?id='+encodeURIComponent(p.id)+'&role=stage&name='+encodeURIComponent(name),{method:'POST',headers:{'content-type':'application/octet-stream'},body:result.blob});
+  d=await saveProductionStage(api,p.id,d.asset,'jokelet',{recipe:P.soundRecipe(session),report:result.report});
+  exported=new File([result.blob],d.record.fileName,{type:result.blob.type});$('exportName').textContent=d.record.fileName+' · Ready for music / outro';$('soundStageName').textContent=p.title+' · Ready for music / outro';message('Jokelet saved with its editable sound pass. Music / outro remains the next stage. Drive backup is pending.');
+ });
+ const params=new URLSearchParams(location.search);if(params.get('production'))open({id:params.get('production')}).catch(e=>{recordIssue('production-open',e);message(e.message);});
+}
+
 import('../studio/adapter.mjs?v=1').then(({installAdapter,assetBlob,storeAsset})=>import('../studio/core.mjs?v=1').then(({moduleSession,preferredBed})=>{
  let studioBed=null,studioSoundRefs={};
- installAdapter('sound',{
+ const soundAdapter={
   busy:()=>exportBusy||recording||!!liveTake,
   pause:pauseForEdit,
   async open({project:p,session}){
    await libraryReady;await recoveryQueue;pauseForEdit();
    const state=structuredClone(session?.state||{schema:'SxLock-1.0',version:'1.8',sourceFps:25,clips:[],sounds:[],recordings:[],notes:'',filename:p.title+'_sound_v01',videoVolume:100,mixer:{effects:100,voice:100}});
-   studioBed=(p.studio?.bedAssetId?preferredBed(p):null)||session?.bed||preferredBed(p);studioSoundRefs=session?.soundRefs||{};
+   const stages=await import('../../shared/production-stages.mjs?v=1');studioBed=stages.stageAsset(p,'captioned')||(p.studio?.bedAssetId?preferredBed(p):null)||session?.bed||preferredBed(p);studioSoundRefs=session?.soundRefs||{};
    for(const a of state.sounds||[]){const ref=studioSoundRefs[a.id];if(ref){a.data=to64(new Uint8Array(await (await assetBlob(ref)).arrayBuffer()));}}
    for(const a of state.recordings||[]){const ref=studioSoundRefs[a.id];if(ref)sounds.set(a.id,{...a,url:'dropbox:'+ref.path,origin:'studio',studioOriginalOrigin:a.origin||'recording',builtin:true,recording:true,buffer:null});}
    projectReady=false;setBusy(true);
@@ -429,10 +458,12 @@ import('../studio/adapter.mjs?v=1').then(({installAdapter,assetBlob,storeAsset})
    if(videoFile&&(!studioBed||studioBed.name!==videoFile.name||studioBed.size!==videoFile.size)){studioBed=(await storeAsset(p.id,videoFile,videoFile.name,'bed')).asset;}
    const state=snapshot(true),used=new Set(state.clips.map(c=>c.soundId));state.sounds=state.sounds.filter(s=>used.has(s.id));state.recordings=state.recordings.filter(s=>used.has(s.id));
    for(const a of state.recordings){if(!studioSoundRefs[a.id]){const live=sounds.get(a.id),bytes=await recordedBytes(live),name=(a.name||a.id).replace(/[\\/<>:"|?*\x00-\x1f]/g,'_')+( /\.[a-z0-9]{2,5}$/i.test(a.name||'')?'':'.mp3');studioSoundRefs[a.id]=(await storeAsset(p.id,new Blob([bytes],{type:a.mimeType||'audio/mpeg'}),name,'sound')).asset;}}
+   for(const a of state.recordings)delete a.data;
    for(const a of state.sounds){if(a.data&&!studioSoundRefs[a.id]){const bytes=from64(a.data),name=(a.name||a.id).replace(/[\\/<>:"|?*\x00-\x1f]/g,'_');studioSoundRefs[a.id]=(await storeAsset(p.id,new Blob([bytes],{type:a.mimeType||'audio/wav'}),name,'sound')).asset;}delete a.data;}
    state.video=studioBed?.name||null;return moduleSession('sound',p.id,{state,bed:studioBed,soundRefs:studioSoundRefs});
   }
- });
+ };installAdapter('sound',soundAdapter);
+ installProductionBridge(soundAdapter,assetBlob).catch(e=>{recordIssue('production-bridge',e);message(e.message);});
 }));
 
 })();

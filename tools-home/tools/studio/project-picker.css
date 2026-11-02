@@ -11,3 +11,5 @@
 .picker-list.list .jokelet-card .gs-inline-video-progress{grid-column:2;grid-row:3;align-self:start}
 .picker-list.list .jokelet-card .gs-inline-video-controls{grid-column:3;grid-row:1}
 .picker-list.list .jokelet-card .picker-actions{grid-column:3;grid-row:2/4;align-self:end}
+
+.picker-show-all{display:inline-flex;gap:5px;align-items:center;font-size:12px;white-space:nowrap}.picker-show-all input{min-height:0;width:16px;height:16px}.picker-show-all[hidden]{display:none}
