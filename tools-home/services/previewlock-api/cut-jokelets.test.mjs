@@ -18,7 +18,7 @@ test('independent cut projects reuse verified beds and preserve each caption wor
  try{
   assert.equal((await call('dad-wrong-project','/from-cut',{origin})).code,400);
   let first=await call(a,'/from-cut',{origin});assert.equal(first.code,200);assert.equal(first.project.text,'');assert.equal(first.project.textStatus,'not-transcribed');assert.equal(first.project.cutOrigin.state,'awaiting-video');assert.equal([...files.keys()].some(p=>p.endsWith('/joke.txt')),false);
-  const uploaded=await call(a,'/asset?role=bed&name=Slide.mp4',bytes);assert.equal(uploaded.persisted,true);
+  const uploaded=await call(a,'/asset?role=bed&name=Slide.mp4',bytes);assert.equal(uploaded.persisted,true);const duplicate=await call(a,'/asset?role=bed&name=Slide.mp4',bytes);assert.equal(duplicate.reused,true);assert.equal(duplicate.persisted,true);assert.equal(duplicate.asset.id,uploaded.asset.id);
   const bad=await call(a,'/from-cut',{origin,assetId:uploaded.asset.id,output:{...output,sha256:'b'.repeat(64)}});assert.equal(bad.code,409);assert.equal((await call(a,'')).project.cutOrigin.state,'awaiting-video');
   first=await call(a,'/from-cut',{origin,assetId:uploaded.asset.id,output});assert.equal(first.project.cutOrigin.state,'ready');assert.equal(first.project.cutOrigin.bedAssetId,uploaded.asset.id);
   const session={schema:'GS-CapLock-1',version:6,fps:25,captions:[],clips:[],workspace:{id:a,playhead:7},media:{kind:'previewlock',name:'Slide.mp4',path:uploaded.asset.path,size:bytes.length}};
