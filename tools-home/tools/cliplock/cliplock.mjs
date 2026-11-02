@@ -14,6 +14,7 @@ let cuts=[],editingId='',sourceDigest='',savedBatch=null,batchDirty=false,bounda
 let videoMode=new URLSearchParams(location.search).get('mode')==='video'&&!inStudio();
 const videoResults=new Map(),modeSources=new Map();let videoResultSource='',bundleURL=null,undoCuts=[];
 const cutRows=new Map(),prepareJobs=new Map();let inlinePreview=null,bundleLink=null,batchJob=null;
+const text=(node,value)=>{if(node.textContent!==value)node.textContent=value;};
 const say=s=>$('status').textContent=s;
 const hash=async blob=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',await blob.arrayBuffer()))].map(x=>x.toString(16).padStart(2,'0')).join('');
 async function api(path,options={}){const key=localStorage.getItem('gs_previewlock_key');if(!key)throw Error('Use your existing PreviewLock connection in this browser.');const r=await fetch(API+path,{...options,headers:{Authorization:'Bearer '+key,...options.headers},signal:AbortSignal.timeout(65000)});const d=await r.json();if(!r.ok)throw Error(d.error||'Cloud request failed ('+r.status+').');return d;}
@@ -68,7 +69,6 @@ $('undo').onclick=()=>{const old=undoCuts.pop();if(!old||busy)return;cuts=old.cu
 function cutForExport(c){if(!c)throw Error('Choose a saved cut.');if(editingId===c.id){const r=range(),name=$('cutName').value.trim()||c.name;if(r.inFrame!==c.inFrame||r.outFrame!==c.outFrame||name!==c.name)throw Error('Tap Update cut to keep your edits, or Cancel editing to use the saved range.');}return c;}
 $('addCut').onclick=()=>{try{const r=range();const name=$('cutName').value.trim()||String(cuts.length+1);const next=addOrUpdate(cuts,{inFrame:r.inFrame,outFrame:r.outFrame},{id:editingId||undefined,name});if(videoMode)toVideoRanges(meta,next,$('videoFormat').value);else toBatchRanges(meta,next);const index=editingId?cuts.findIndex(c=>c.id===editingId):cuts.length;next[index].autoName=name===String(index+1);checkpointCuts();cuts=next;editingId='';boundaryFocus='in';const marks=nextMarks(r.outFrame,meta.times.length);$('in').value=marks.inFrame;$('out').value=marks.outFrame;$('cutName').value=String(cuts.length+1);rangeChanged();seek(marks.inFrame);changedBatch();say('Cut added. Next IN starts at the previous OUT. All clips · ZIP exports the set; One clip exports a single cut.');}catch(e){say(e.message);}};
 $('newCut').onclick=()=>{editingId='';const marks=nextMarks(cuts.at(-1)?.outFrame||0,meta.times.length);$('in').value=marks.inFrame;$('out').value=marks.outFrame;$('cutName').value=String(cuts.length+1);rangeChanged();renderBatch();seek(marks.inFrame);rememberBatch();};
-const text=(node,value)=>{if(node.textContent!==value)node.textContent=value;};
 function hint(node,value){node.title=value;node.dataset.gsHelp=value;node.dataset.gsDynamicHelp=value;node.setAttribute('aria-description',value);}
 function invalidateBundle(){if(bundleURL)URL.revokeObjectURL(bundleURL);bundleURL=null;bundleLink?.remove();bundleLink=null;batchJob=null;}
 function releasePrepared(key){const result=videoResults.get(key);if(result){if(inlinePreview?.url===result.url)closeInlinePreview();URL.revokeObjectURL(result.url);videoResults.delete(key);}prepareJobs.delete(key);}
