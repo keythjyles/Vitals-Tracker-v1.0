@@ -1,0 +1,110 @@
+{
+  "schema": "GS-CaptionWorkflow-1",
+  "date": "2026-11-02",
+  "release": {
+    "clipper": "R14",
+    "caplock": "R15"
+  },
+  "source_commit": "48d7457fe665bce32a04065fec33aeeeb444010f",
+  "rollback_code": "dba4614ee11fd936033242b79358de41ec0aa31b",
+  "branch_checks": [
+    {
+      "id": 41414720403,
+      "name": "CapLock prototype checks",
+      "conclusion": "success",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41414720403"
+    },
+    {
+      "id": 41414720053,
+      "name": "ClipLock cutter checks",
+      "conclusion": "success",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41414720053"
+    },
+    {
+      "id": 41414720427,
+      "name": "GS Studio checks",
+      "conclusion": "success",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41414720427"
+    }
+  ],
+  "main_checks": [
+    {
+      "id": 41415101631,
+      "name": "CapLock prototype checks",
+      "conclusion": "success",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41415101631"
+    },
+    {
+      "id": 41415101754,
+      "name": "GS Studio checks",
+      "conclusion": "success",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41415101754"
+    },
+    {
+      "id": 41415101630,
+      "name": "ClipLock cutter checks",
+      "conclusion": "success",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41415101630"
+    },
+    {
+      "id": 41415100945,
+      "name": "pages build and deployment",
+      "conclusion": "success",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41415100945"
+    }
+  ],
+  "authenticated_fixture_e2e": {
+    "jokeletCutProjects": true,
+    "directVideoProject": true,
+    "wholeVideoBytesPreserved": true,
+    "exportedCutResumesProject": true,
+    "nextSavesAndReturnsCaptions": true,
+    "geminiHandoff": true,
+    "captionPassPreservesScene": true,
+    "namedCutPicker": true,
+    "independentVideoAndCaptionProjects": true,
+    "realProjectHandler": true,
+    "cloudSaveAndReopen": true,
+    "connectionFailurePreservesCut": true,
+    "uploadRetryReusesProject": true,
+    "oneCapLockTab": true,
+    "framesPerBed": 20,
+    "audioPreserved": true,
+    "sourceCursorPreserved": true,
+    "originalsPreserved": true,
+    "driveBackup": "pending",
+    "productionWrites": false,
+    "errors": []
+  },
+  "live_ui": {
+    "caplock": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/caplock/?new=video&v=R15-workflow",
+    "clipper": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/cliplock/?mode=video&v=R14-workflow",
+    "visible": [
+      "Files",
+      "Photos",
+      "Open project",
+      "Import captions",
+      "Next → CapLock"
+    ],
+    "files_accept": null,
+    "photos_accept": "video/*",
+    "screenshot": "tools-home/shared/review/caplock-r15-video-entry-live.jpg",
+    "production_cloud_test_uploads": false,
+    "owner_episode4_media_used": false
+  },
+  "preservation": {
+    "original_whole_video": "Exact bytes, dimensions, timing and soundtrack; no conversion.",
+    "matching_export": "A unique known same-browser cut with matching video SHA resumes its existing project.",
+    "caption_original": "Provider blue video preserved independently.",
+    "caption_return": "Pending components saved by Next; same project and editor; earlier bed transforms and placed layers retained.",
+    "locked_player": "All eight native equipment adapters passed existing shared-player regression.",
+    "backup": "Dropbox working save; Drive pending until separately verified.",
+    "backend": "Existing deployed service; no backend code/settings/credentials changed."
+  },
+  "limits": [
+    "Authenticated cloud transactions were verified against the real project handler with disposable provider fixtures. No production QA media was uploaded.",
+    "Physical Samsung selection and owner media acceptance are separate from browser/CI verification.",
+    "Gemini creation remains in the existing Gemini app; this change provides a copied brief and import/return flow.",
+    "No finished layered-video renderer is included."
+  ]
+}
