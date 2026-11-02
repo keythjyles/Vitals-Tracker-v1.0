@@ -1,6 +1,9 @@
 /** Locked SxLock equipment. Editors supply nodes and behavior, never new sizing. */
 export const PLAYER_PROFILE=Object.freeze({id:'SxLock-R24',rail:76,row:29,frame:36,gap:7,frameGlyph:30,record:40,secondary:25});
+// Owner-requested CapLock-only density; the other seven editors retain SxLock R24.
+export const CAPLOCK_PROFILE=Object.freeze({...PLAYER_PROFILE,id:'CapLock-R18',row:25,frame:32,gap:4});
 export function mountPlayerShell(tool,config){
+ const profile=tool==='caplock'?CAPLOCK_PROFILE:PLAYER_PROFILE;
  if(typeof document==='undefined'||document.querySelector('.gs-player-shell'))return;
  const q=s=>s?document.querySelector(s):null,$=id=>document.getElementById(id),el=(tag,cls)=>Object.assign(document.createElement(tag),{className:cls});
  const important=(node,values)=>{if(node)for(const [key,value]of Object.entries(values))node.style.setProperty(key,String(value),'important');};
@@ -16,7 +19,7 @@ export function mountPlayerShell(tool,config){
  // A surface, a clock, and one fixed-height transport: actual existing nodes.
  const root=(tool==='cliplock'?workspace.closest('.dock'):tool==='caplock'?$('playerDock'):null)||el('section','');
  if(!root.isConnected)workspace.before(root);
- root.classList.add('gs-player-shell');root.dataset.playerProfile=PLAYER_PROFILE.id;
+ root.classList.add('gs-player-shell');root.dataset.playerProfile=profile.id;
  important(root,{position:'sticky',top:'0px','z-index':'20',order:'-10',margin:'0',padding:'0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left))',background:'#101924','border-radius':'0','box-sizing':'border-box'});
  let grip=tool==='caplock'?$('dockGrip'):null,drawer=tool==='caplock'?$('pickerDrawer'):null;
  grip=grip||el('button','');grip.type='button';grip.classList.add('gs-source-grip');grip.setAttribute('aria-controls',drawer?.id||'gsSourceDrawer');
@@ -76,11 +79,11 @@ export function mountPlayerShell(tool,config){
  if(clock)content.append(clock);content.append(surface);
  surface.classList.add('gs-player-surface');clock?.classList.add('gs-player-clock');
  const transportWrapper=tool==='sxlock'?rail.closest('.sticky'):rail;
- rail.classList.add('gs-rail-stack');if(transportWrapper!==rail)important(transportWrapper,{position:'static',margin:'0',padding:'0',width:PLAYER_PROFILE.rail+'px'});
+ rail.classList.add('gs-rail-stack');if(transportWrapper!==rail)important(transportWrapper,{position:'static',margin:'0',padding:'0',width:profile.rail+'px'});
  const right=transportWrapper||rail;right.classList.add('gs-player-rail');
  // Remove obsolete visual wrappers, not controls, media, or engine state.
  workspace.replaceChildren(picture,right);workspace.classList.add('gs-player-workspace');
- important(workspace,{display:'grid','grid-template-columns':'minmax(0,1fr) '+PLAYER_PROFILE.rail+'px',gap:'4px','align-items':'start',position:'static',margin:'0',padding:'0',height:'auto','min-height':'0','max-height':'none',order:'0'});
+ important(workspace,{display:'grid','grid-template-columns':'minmax(0,1fr) '+profile.rail+'px',gap:'4px','align-items':'start',position:'static',margin:'0',padding:'0',height:'auto','min-height':'0','max-height':'none',order:'0'});
  important(picture,{'min-width':'0',margin:'0',padding:'0',overflow:'hidden'});
  const frameIds=(config.frames||[]).filter(id=>$(id)&&rail.contains($(id)));
  const paired=new Set();
@@ -115,7 +118,10 @@ export function mountPlayerShell(tool,config){
  const under=[];if(tool==='caplock')for(const id of ['focusBar','placementBar'])if($(id))under.push($(id));
  if(tool==='motionlock'){const status=q('.status');if(status&&!content.contains(status)){content.prepend(status);}const shuttle=q('.shuttle-wrap');if(shuttle)important(shuttle,{display:'none'});}
  const existingName=tool==='cliplock'?q('.batch-add'):null;
- root.replaceChildren(grip,drawer,identity,filename,workspace,...under,...(existingName?[existingName]:[]),stash,...root.querySelectorAll(':scope>.gs-player-error'));
+ if(tool==='caplock'){
+  const line=el('div','gs-player-line');identity.title=identity.textContent;line.append(grip,identity,filename);if(clock)line.append(clock);
+  root.replaceChildren(line,drawer,workspace,...under,stash,...root.querySelectorAll(':scope>.gs-player-error'));
+ }else root.replaceChildren(grip,drawer,identity,filename,workspace,...under,...(existingName?[existingName]:[]),stash,...root.querySelectorAll(':scope>.gs-player-error'));
  // Keep now-empty source wrappers from taking a row above or under the monitor.
  if(tool==='cliplock')q('#frameTools .jump')?.remove();
  if(tool==='aspectlock')important($('stage')?.parentElement,{padding:'0',margin:'0'});
@@ -142,25 +148,25 @@ export function mountPlayerShell(tool,config){
   load.onclick=()=>{if(tool==='sxlock')$('sxPickVideo')?.click();else if(tool==='aspectlock')$('pickBase')?.click();else if(tool==='wavlock')$('file')?.click();else setDrawer(true);};surface.append(load);
   const show=()=>load.hidden=!!media.getAttribute('src');for(const name of ['loadstart','loadedmetadata','emptied'])media.addEventListener(name,show);show();
  }
- root.gsPlayer=Object.freeze({profile:PLAYER_PROFILE,setDrawer});
+ root.gsPlayer=Object.freeze({profile,setDrawer});
  // Lock the approved single-row geometry. A bigger picture never stretches buttons.
  function sizeControls(){
-  important(rail,{display:'flex','flex-direction':'column','grid-template-rows':'none',gap:PLAYER_PROFILE.gap+'px',width:PLAYER_PROFILE.rail+'px',height:'auto','min-height':'0','max-height':'none',padding:'0',margin:'0',overflow:'visible'});
+  important(rail,{display:'flex','flex-direction':'column','grid-template-rows':'none',gap:profile.gap+'px',width:profile.rail+'px',height:'auto','min-height':'0','max-height':'none',padding:'0',margin:'0',overflow:'visible'});
   for(const pair of rail.querySelectorAll('.gs-frame-pair,.gs-control-pair,.sx-frame'))important(pair,{display:'grid','grid-template-columns':'1fr 1fr',width:'100%',gap:'5px',height:'auto',margin:'0',padding:'0'});
   for(const group of rail.querySelectorAll('.compactBar,.transport,.buttons'))if(group!==rail&&!group.closest('.gs-control-row'))important(group,{display:'contents'});
   for(const b of rail.querySelectorAll('button')){
-   const frame=paired.has(b)||b.classList.contains('gs-frame-button'),height=frame?PLAYER_PROFILE.frame:b.id==='liveRecord'?PLAYER_PROFILE.record:['liveStop','saveTake'].includes(b.id)?PLAYER_PROFILE.secondary:PLAYER_PROFILE.row;
-   important(b,{height:height+'px','min-height':height+'px','max-height':height+'px',padding:frame?'0px':'2px','font-size':frame?PLAYER_PROFILE.frameGlyph+'px':'11px','line-height':frame?'1':'1.1',width:'100%','min-width':'0','max-width':'100%',margin:'0',flex:'none','white-space':'nowrap',overflow:'hidden','text-overflow':'ellipsis','border-radius':'5px'});
+   const frame=paired.has(b)||b.classList.contains('gs-frame-button'),height=frame?profile.frame:b.id==='liveRecord'?profile.record:['liveStop','saveTake'].includes(b.id)?profile.secondary:profile.row;
+   important(b,{height:height+'px','min-height':height+'px','max-height':height+'px',padding:frame?'0px':'2px','font-size':frame?profile.frameGlyph+'px':'11px','line-height':frame?'1':'1.1',width:'100%','min-width':'0','max-width':'100%',margin:'0',flex:'none','white-space':'nowrap',overflow:'hidden','text-overflow':'ellipsis','border-radius':'5px'});
   }
-  for(const row of rail.querySelectorAll('.gs-control-row'))important(row,{display:'flex',gap:'3px',height:PLAYER_PROFILE.row+'px','min-height':PLAYER_PROFILE.row+'px',padding:'0',margin:'0',width:'100%','align-items':'center'});
-  for(const field of rail.querySelectorAll('input'))important(field,{'min-width':'0',width:'100%',height:PLAYER_PROFILE.row+'px','min-height':PLAYER_PROFILE.row+'px',padding:'2px','font-size':'11px',margin:'0','border-radius':'5px'});
+  for(const row of rail.querySelectorAll('.gs-control-row'))important(row,{display:'flex',gap:'3px',height:profile.row+'px','min-height':profile.row+'px',padding:'0',margin:'0',width:'100%','align-items':'center'});
+  for(const field of rail.querySelectorAll('input'))important(field,{'min-width':'0',width:'100%',height:profile.row+'px','min-height':profile.row+'px',padding:'2px','font-size':'11px',margin:'0','border-radius':'5px'});
   for(const b of rail.querySelectorAll('.gs-control-row button'))important(b,{width:'25px',flex:'0 0 25px'});
   if(['cliplock','wavlock'].includes(tool))for(const id of ['markIn','markOut'])if($(id)&&rail.contains($(id)))important($(id),{width:'29px',flex:'0 0 29px'});
  }
  function sizePicture(){
   const height=Math.ceil(right.getBoundingClientRect().height);if(height<1)return;
   important(picture,{height:height+'px','min-height':'0','max-height':height+'px'});
-  const clockHeight=clock?.getBoundingClientRect().height||0,progress=[...content.children].filter(n=>n.tagName==='PROGRESS').reduce((n,p)=>n+p.getBoundingClientRect().height+4,0),screenHeight=Math.max(50,height-clockHeight-progress);
+  const clockHeight=clock&&content.contains(clock)?clock.getBoundingClientRect().height:0,progress=[...content.children].filter(n=>n.tagName==='PROGRESS').reduce((n,p)=>n+p.getBoundingClientRect().height+4,0),screenHeight=Math.max(50,height-clockHeight-progress);
   important(surface,{height:screenHeight+'px','min-height':'0','max-height':screenHeight+'px',width:'100%',margin:'0',padding:'0',flex:'none',overflow:'hidden',background:'#070c12'});
   if(tool==='aspectlock')important($('stage'),{height:'100%','min-height':'0','max-height':'100%',width:'auto','max-width':'100%','aspect-ratio':'9 / 16',margin:'auto'});
   for(const child of surface.querySelectorAll(':scope>video,:scope>canvas'))important(child,{width:'100%',height:'100%','max-height':'100%','object-fit':'contain'});

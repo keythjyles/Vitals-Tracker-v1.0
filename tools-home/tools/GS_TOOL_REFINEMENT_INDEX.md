@@ -1,3 +1,11 @@
+## CapLock R18 — local video loading and compact workspace, November 2, 2026
+
+Owner correction: Files and Photos load a device video immediately. A cloud project, upload, setup key and the former 40 MB cloud limit are not prerequisites for manual placement. Import captions opens the numbered local-file picker in a local workspace. Merely having an old PreviewLock connection no longer auto-opens an unrelated cloud joke. Explicit project links, Open project and Studio retain the existing saved-project routes; `?new=cloud-video` retains explicit agent cloud ingress.
+
+The visible tool identity, filename and clock share one 16 px line with the source grip. Only CapLock uses the owner-requested shorter rows (25 px), paired frame row (32 px) and 4 px gaps; the other editors retain their locked SxLock R24 dimensions. The item map and Undo/Redo are shorter. Original media, imported captions, source timing, precision controls and editable layers remain intact. A late cloud-save response cannot replace a newly selected local workspace. Local edits remain browser drafts until Download project; file loading is not a cloud-save receipt.
+
+Baseline/rollback: `e7f8d6eb7fba1c645631f449d57826240afa691d`. Retain all original media, saved projects and recovery data on rollback. Operation and verification: [LOCAL_ENTRY_R18.json](tools-home/tools/caplock/LOCAL_ENTRY_R18.json). Deployment/browser receipts are recorded separately from the 70 passing local Node checks.
+
 ## Caption save recovery — November 2, 2026
 
 Clipper R16 / CapLock R17 repair the six-component field-test failure. The server timed out on the last clip after saving five. Retry reuses the same source-bound cut pass, verifies and retains completed files, and renders only missing components. Stopped or interrupted jobs expose Resume; active jobs expose frame progress. Named partial files remain downloadable. Reopening an already-saved jokelet reads its verified project instead of attempting a blocked write. Lossless encoding is faster with unchanged decoded color/alpha pixels. [Operation and validation](cliplock/CAPTION_RECOVERY_R16.json). Originals, exact native cut marks, prior passes, editor state and the locked player equipment are retained.

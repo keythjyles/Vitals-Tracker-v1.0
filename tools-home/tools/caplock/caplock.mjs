@@ -28,6 +28,7 @@ const say=s=>$('status').textContent=s, current=()=>project.captions.find(c=>c.i
 if(!inStudio()&&!window.name)window.name='gs-caplock';
 let importingVideo=false;
 async function newVideoProject(file){
+ if(!inStudio()&&new URLSearchParams(location.search).get('new')!=='cloud-video')return loadDeviceVideo(file);
  if(importingVideo)return;importingVideo=true;pause();
  for(const id of ['newVideoFiles','newVideoPhotos','emptyVideoFiles','emptyVideoPhotos'])$(id).disabled=true;
  try{
@@ -37,6 +38,24 @@ async function newVideoProject(file){
   const record=await openVideoProject(api,file,meta,say);await openFullJokeProject(record);const importedStage=stageForName(file.name);if(importedStage==='raw')await tagCurrentSource('raw');
   say(record.title+' is now its own caption project. Import its Gemini animation when ready.');return record;
  }catch(e){say('Video project not opened: '+e.message);}finally{importingVideo=false;for(const id of ['newVideoFiles','newVideoPhotos','emptyVideoFiles','emptyVideoPhotos'])$(id).disabled=false;}
+}
+async function loadDeviceVideo(file){
+ if(importingVideo)return;importingVideo=true;pause();
+ for(const id of ['newVideoFiles','newVideoPhotos','emptyVideoFiles','emptyVideoPhotos'])$(id).disabled=true;
+ try{
+  // Preserve the current edit before detaching from cloud autosave. Device loading
+  // must never depend on authentication, an upload, or a project reservation.
+  if(project.media||project.clips.length||project.captions.length){
+   try{archiveWorkspace();}catch{/* Loading a device file also works when browser recovery storage is full. */}
+  }
+  clearTimeout(cloudTimer);cloudSession=null;projectContext=null;delete project.workspace;$('saveCloud').hidden=true;
+  const ref={kind:'local',name:file.name,size:file.size,lastModified:file.lastModified};
+  $('projectName').textContent='Local video';$('bedName').textContent=file.name;
+  await loadMedia(file,ref);
+  if(project.media===ref)say('Source loaded from your device. Import numbered caption files, then Insert and Next.');
+ }catch(e){say('Video not loaded: '+e.message);}finally{
+  importingVideo=false;for(const id of ['newVideoFiles','newVideoPhotos','emptyVideoFiles','emptyVideoPhotos'])$(id).disabled=false;
+ }
 }
 for(const id of ['newVideoFiles','emptyVideoFiles'])$(id).onclick=()=>$('newVideoFile').click();
 for(const id of ['newVideoPhotos','emptyVideoPhotos'])$(id).onclick=()=>$('newVideoPhoto').click();
@@ -94,7 +113,7 @@ async function loadMedia(blob,ref){
  try{await new Promise((resolve,reject)=>{v.onloadedmetadata=resolve;v.onerror=()=>reject(Error('Video cannot decode in this browser.'));});if(rev!==mediaRevision)return;
   const M=await import('../sxlock/vendor/mediabunny-1.62.1-gs1.mjs');if(rev!==mediaRevision)return;input=new M.Input({source:new M.BlobSource(blob),formats:M.ALL_FORMATS});const track=await input.getPrimaryVideoTrack();if(!track)throw Error('No video track.');const timestamps=[];let end=0;for await(const packet of new M.EncodedPacketSink(track).packets(undefined,undefined,{metadataOnly:true})){if(rev!==mediaRevision)return;timestamps.push(packet.timestamp);end=Math.max(end,packet.timestamp+packet.duration);}timestamps.sort((a,b)=>a-b);if(!timestamps.length)throw Error('No source frames.');maxFrame=Math.max(0,Math.ceil(end*FPS-1e-5)-1);$('seek').max=maxFrame;
   const cfr25=timestamps.every((t,i)=>Math.abs(t-i/FPS)<.00001);const rate=timestamps.length/end;const ratio=v.videoWidth/v.videoHeight;const geometry=Math.abs(ratio-9/16)<.01?'9:16 source':'Non-9:16 source — contained in portrait, no crop';$('mediaStatus').textContent=`${ref.name} · ${v.videoWidth}×${v.videoHeight} · ${rate.toFixed(3)} source fps · ${cfr25?'25 fps timestamps verified':'Explicit time mapping: F / 25 seconds; source frames repeat or skip'} · ${geometry}.`;
-  sink=new M.VideoSampleSink(track);project.media=ref;saveDraft();await seek(0);say('Source loaded. Frame boundaries use the 25 fps production timeline.');
+  sink=new M.VideoSampleSink(track);project.media=ref;$('bedName').textContent=ref.name;saveDraft();await seek(0);say('Source loaded. Frame boundaries use the 25 fps production timeline.');
  }catch(e){if(rev!==mediaRevision)return;if(v.error||v.readyState<1){$('empty').hidden=false;$('bedLoader').classList.remove('has-media');$('mediaStatus').textContent='Import failed: '+e.message;say('Video could not be decoded. Original source and caption project remain unchanged.');render();return;}project.media=ref;maxFrame=Number.isFinite(v.duration)?Math.max(0,Math.ceil(v.duration*FPS)-1):0;$('seek').max=maxFrame;$('mediaStatus').textContent='Native browser preview only; precise source timing not verified. '+e.message;saveDraft();say('Video loaded with approximate seeking. Exact decode unavailable.');}
  render();
 }
@@ -206,7 +225,8 @@ const params=new URLSearchParams(location.search);if(params.get('assetPath'))loa
 // Project-folder handoff: numbered cloud caplets are loaded as an unplaced tray.
 async function saveCloudWorkspace(){
  if(!cloudSession)throw Error('Open a joke project to save to its folder.');
- cloudWrite=cloudWrite.catch(()=>{}).then(async()=>{cloudSaving=true;try{project.workspace={id:cloudSession.id,assetId:cloudSession.asset,playhead:frame,selectedClip:selectedClip||''};const snapshot=JSON.stringify(project);const d=await api('/api/joke-project/caplock?id='+encodeURIComponent(cloudSession.id),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({rev:cloudSession.rev,session:JSON.parse(snapshot)})});cloudSession.rev=d.rev;if(d.project)projectContext=d.project;if(snapshot===JSON.stringify(project))dirty=false;$('saveStatus').textContent='CapLock workspace saved in Dropbox. Drive backup queued.';}finally{cloudSaving=false;}});return cloudWrite;
+ const session=cloudSession;
+ cloudWrite=cloudWrite.catch(()=>{}).then(async()=>{if(cloudSession!==session)return;cloudSaving=true;try{project.workspace={id:session.id,assetId:session.asset,playhead:frame,selectedClip:selectedClip||''};const snapshot=JSON.stringify(project);const d=await api('/api/joke-project/caplock?id='+encodeURIComponent(session.id),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({rev:session.rev,session:JSON.parse(snapshot)})});if(cloudSession!==session)return;session.rev=d.rev;if(d.project)projectContext=d.project;if(snapshot===JSON.stringify(project))dirty=false;$('saveStatus').textContent='CapLock workspace saved in Dropbox. Drive backup queued.';}finally{cloudSaving=false;}});return cloudWrite;
 }
 async function storeCloudAsset(ref,file,role='bed'){
  clearTimeout(cloudTimer);cloudWrite=cloudWrite.catch(()=>{}).then(async()=>{const route='/api/joke-project/asset?id='+encodeURIComponent(cloudSession.id)+'&role='+encodeURIComponent(role)+'&name='+encodeURIComponent(ref.name)+(file?'':'&source='+encodeURIComponent(ref.path));const d=await api(route,{method:'POST',...(file?{headers:{'content-type':'application/octet-stream'},body:file}:{})});cloudSession.rev=d.rev;if(d.project)projectContext=d.project;return {kind:'previewlock',name:d.asset.name,path:d.asset.path,size:d.asset.size};});return cloudWrite;
@@ -273,8 +293,10 @@ function renderCaptionImport(){
 }
 async function loadCaptionFolder(id){const d=await api('/api/joke-project?id='+encodeURIComponent(id));if(!d.project)throw Error('This joke folder has no saved caption project.');importState={project:d.project,id,assetId:importState.id===id?importState.assetId:'',runtime:d.cutRuntime};renderCaptionImport();const a=d.project.assets.find(a=>a.id===importState.assetId);if(a)await loadCaptionSource(a.path);}
 async function openCaptionImport(){
- if(!project.workspace?.id){say('Open a joke video or project before importing its captions.');return projectPicker.open();}
- pause();if(!$('captionImport').open)$('captionImport').showModal();$('captionImportStatus').textContent='Loading the saved caption folder…';
+ if(!project.media||!v.src){say('Open your joke video with Files or Photos before importing its captions.');return;}
+ pause();if(!$('captionImport').open)$('captionImport').showModal();$('savedCaptionControls').hidden=!cloudSession;
+ if(!cloudSession){$('captionImportTitle').textContent='Import caption files';$('captionImportStatus').textContent='Choose numbered files from your device. Insert places each caption; Next selects the following caption.';return;}
+ $('captionImportStatus').textContent='Loading the saved caption folder…';
  try{const id=project.workspace?.id||localStorage.getItem('gs_caplock_caption_project')||'dad-00bda89167b4f15850aa1c91';const d=await api('/api/joke-projects');$('captionProject').replaceChildren();for(const p of d.projects){const o=document.createElement('option');o.value=p.id;o.textContent=projectContext?.id===p.id?projectContext.title:p.title||(p.id==='dad-00bda89167b4f15850aa1c91'?'Pebble':p.id);$('captionProject').append(o);}$('captionProject').value=id;await loadCaptionFolder(id);if(!importState.project.assets.find(a=>a.id===importState.assetId)?.cuts)$('captionImportStatus').textContent='Import the blue Gemini video to cut it. Next in Clipper returns the clips to this joke.';}catch(e){$('captionImportStatus').textContent=localStorage.getItem('gs_previewlock_key')?e.message:'Saved caption folders are not connected in this browser. Import numbered files, or open CapLock from your connected clipper.';}
 }
 $('closeCaptionImport').onclick=()=>$('captionImport').close();$('captionImport').addEventListener('close',()=>$('captionSourcePreview').pause());
@@ -300,7 +322,7 @@ $('overlayLibrary').textContent='Import captions';
 // A clipper link is authoritative; project entry also supports text-only and bed-only workspaces.
 if(!inStudio()&&/^[a-f0-9]{64}$/.test(params.get('cuts')||''))projectPicker.open(null,{sourceHash:params.get('cuts')}).catch(e=>say('Cut list unavailable: '+e.message));
 else if(!inStudio()&&params.get('project')&&params.get('caption'))openJokeWorkspace(params.get('project'),params.get('caption')).catch(e=>say('Caption handoff: '+e.message));
-else if(!inStudio()&&params.get('new')!=='video'&&(params.get('project')||localStorage.getItem('gs_previewlock_key'))){const id=params.get('project')||localStorage.getItem('gs_studio_project')||localStorage.getItem('gs_caplock_caption_project')||'dad-00bda89167b4f15850aa1c91';openFullJokeProject({id}).catch(e=>say('Saved joke project unavailable: '+e.message));}
+else if(!inStudio()&&params.get('project'))openFullJokeProject({id:params.get('project')}).catch(e=>say('Saved joke project unavailable: '+e.message));
 
 async function openFullJokeProject(record,chosenBed=null,progress=say){
  pause();if(cloudSession&&dirty){clearTimeout(cloudTimer);await saveCloudWorkspace();}await cloudWrite;

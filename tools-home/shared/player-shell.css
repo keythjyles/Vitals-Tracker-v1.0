@@ -25,6 +25,19 @@ body.gs-compact[data-gs-tool=motionlock] .shuttle-wrap{display:none!important}.g
 .gs-player-shell .gs-empty-load{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;min-height:29px!important;height:29px!important;padding:3px 8px;font-size:12px;background:#edcf8d;color:#15212c;border-radius:5px}
 .gs-player-shell .gs-empty-load[hidden]{display:none!important}
 .gs-player-filename{font:12px/16px system-ui;color:#dce7ef;height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* CapLock R18: one owner-requested header line, with room left for placed items. */
+body.gs-compact[data-gs-tool=caplock] .gs-player-line{display:flex;align-items:center;gap:3px;width:100%;min-width:0;height:16px;overflow:hidden}
+body.gs-compact[data-gs-tool=caplock] .gs-player-line .gs-source-grip{flex:0 0 18px;width:18px!important;height:16px!important;min-height:16px!important;max-height:16px!important;font-size:11px!important}
+body.gs-compact[data-gs-tool=caplock] .gs-player-line .gs-source-grip::after{display:none}
+body.gs-compact[data-gs-tool=caplock] .gs-player-line .gs-player-identity{flex:none;min-height:0;padding:0;font:9px/16px system-ui!important}
+body.gs-compact[data-gs-tool=caplock] .gs-player-line .gs-player-filename{flex:1;min-width:0;font:9px/16px system-ui}
+body.gs-compact[data-gs-tool=caplock] .gs-player-line .gs-player-clock{flex:none;font:9px/16px system-ui!important;width:auto!important}
+body.gs-compact[data-gs-tool=caplock] .gs-player-line #clock{font:inherit;white-space:nowrap}
+body.gs-compact[data-gs-tool=caplock] .gs-player-shell #focusBar,body.gs-compact[data-gs-tool=caplock] .gs-player-shell #placementBar{padding:1px 0}
+body.gs-compact[data-gs-tool=caplock] .gs-player-shell #focusBar button,body.gs-compact[data-gs-tool=caplock] .gs-player-shell #placementBar button{height:23px;min-height:23px;padding:1px 4px}
+body.gs-compact[data-gs-tool=caplock] #itemMatrix{height:52px}
+body.gs-compact[data-gs-tool=caplock] #itemEmpty{margin:3px 0;font-size:11px;line-height:14px}
+body.gs-compact[data-gs-tool=caplock] #layerEditor>.actions button{height:26px;min-height:26px;padding:2px 6px;font-size:12px}
 .gs-source-drawer .gs-exact-marks label{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:4px 0}.gs-source-drawer .gs-exact-marks input{width:110px}
 .gs-control-help{position:fixed;z-index:2147483000;max-width:min(300px,calc(100vw - 32px));box-sizing:border-box;padding:8px 10px;background:#e4edf5;color:#101924;border:1px solid #617b90;border-radius:6px;font:12px/1.35 system-ui;pointer-events:none;box-shadow:0 2px 12px #0008}.gs-control-help[hidden]{display:none}
 body.gs-compact[data-gs-tool=cliplock] .work{padding:0 max(16px,env(safe-area-inset-right)) 4px max(16px,env(safe-area-inset-left))}body.gs-compact[data-gs-tool=cliplock] #status{padding:0 16px}

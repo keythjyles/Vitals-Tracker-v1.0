@@ -53,3 +53,11 @@ jobs:
           PLAYWRIGHT_MODULE: /tmp/cap-browser/node_modules/playwright
 
 
+
+      - name: Keep local entry and mobile layout proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: caplock-r18-local-entry
+          path: /tmp/caplock-fixtures/r18-local-entry.png
+          if-no-files-found: ignore

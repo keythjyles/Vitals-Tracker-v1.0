@@ -1,0 +1,34 @@
+{
+  "schema": "GS-CapLock-Local-Entry-1",
+  "release": "R18",
+  "ownerRequest": "One thin header line, shorter controls, direct Files/Photos source loading without a cloud gate. Owner confirms no placements yet.",
+  "baseline": "e7f8d6eb7fba1c645631f449d57826240afa691d",
+  "manualPath": [
+    "Files or Photos",
+    "load original device video",
+    "Import captions / Import numbered files",
+    "Insert / Next",
+    "Download project for edit handoff"
+  ],
+  "preserved": [
+    "original media and native frames",
+    "caption media and placement logic",
+    "existing cloud project and Studio handoffs",
+    "seven other editor geometries",
+    "built-in caption owner lock"
+  ],
+  "geometry": {
+    "header": 16,
+    "normalRow": 25,
+    "frameRow": 32,
+    "gap": 4,
+    "rail": 76,
+    "itemMatrix": 52
+  },
+  "checks": {
+    "nodePassed": 70,
+    "browser": "pending CI",
+    "live": "pending publication"
+  },
+  "rollback": "Restore only changed source files from baseline; keep all media, projects and recovery records."
+}
