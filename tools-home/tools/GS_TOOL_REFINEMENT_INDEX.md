@@ -1,3 +1,7 @@
+## Caption save recovery — November 2, 2026
+
+Clipper R16 / CapLock R17 repair the six-component field-test failure. The server timed out on the last clip after saving five. Retry reuses the same source-bound cut pass, verifies and retains completed files, and renders only missing components. Stopped or interrupted jobs expose Resume; active jobs expose frame progress. Named partial files remain downloadable. Reopening an already-saved jokelet reads its verified project instead of attempting a blocked write. Lossless encoding is faster with unchanged decoded color/alpha pixels. [Operation and validation](cliplock/CAPTION_RECOVERY_R16.json). Originals, exact native cut marks, prior passes, editor state and the locked player equipment are retained.
+
 ## Verified production stages — November 2, 2026
 
 CapLock R16 now produces a captioned composite and opens the same single-joke project in SxLock R31. SxLock saves the editable sound pass and verified jokelet. Clipper R15 remains optional; Studio R2 skips cutting in its normal joke route. Stage-aware lists default to ready inputs with Show all files off. Originals, layers, captions and prior versions are retained. The locked player equipment is unchanged. [Operation, file extensions, rebuild contract and rollback](studio/PRODUCTION_STAGES_R16.md). Earlier release sections remain historical.

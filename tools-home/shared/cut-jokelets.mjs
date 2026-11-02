@@ -53,7 +53,7 @@ export async function publishCutProject(api,id,onProgress=()=>{}){
  const record=await getCutProject(id);if(!record)throw Error('This cut is still being prepared in Clipper.');const origin=normalizeCutOrigin(record.origin);if(record.hasVideo&&record.bytes>40*1024*1024)throw Error('This jokelet exceeds the existing 40 MB project-file limit. Its prepared video is retained.');
  onProgress('Opening '+origin.cut.name+' project…');
  const route='/api/joke-project/from-cut?id='+encodeURIComponent(id),post=body=>api(route,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
- let d=await post({origin});
+ let d=await api('/api/joke-project?id='+encodeURIComponent(id));if(d.project?.cutOrigin?.state==='ready'){const prior=normalizeCutOrigin(d.project.cutOrigin.origin);if(prior.source.frames!==origin.source.frames||prior.source.bytes!==origin.source.bytes||Math.abs(prior.cut.start-origin.cut.start)>1e-6||Math.abs(prior.cut.end-origin.cut.end)>1e-6)throw Error('The original cut timing changed. Reopen it in Clipper.');d={...d,persisted:true,reused:true};}else d=await post({origin});
  if(d.project?.cutOrigin?.state!=='ready'){
   const blob=await readCutVideo(id);if(!blob)throw Error('Return to Clipper and tap CapLock to prepare this cut again.');
   const output=verifyCutOutput({...record.verified,format:record.format,bytes:blob.size,sha256:await sha256Bytes(await blob.arrayBuffer())},origin);

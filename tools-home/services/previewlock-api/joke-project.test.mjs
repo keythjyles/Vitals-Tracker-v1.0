@@ -46,3 +46,38 @@ test('already-transparent VP9 source retains alpha without blue removal',async()
  const decoded=spawnSync('ffmpeg',['-v','error','-c:v','libvpx-vp9','-i',out,'-vf','alphaextract','-frames:v','1','-pix_fmt','gray','-f','rawvideo','-']);assert.equal(decoded.status,0,decoded.stderr?.toString());assert.ok(Math.abs(decoded.stdout[0]-128)<3);
  }finally{await rm(dir,{recursive:true,force:true});}
 });
+
+
+test('failed caption batch resumes its saved pass and files; orphaned running jobs also recover',async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'gs-caption-resume-')),source=join(dir,'source.mp4');
+ const gen=spawnSync('ffmpeg',['-v','error','-y','-f','lavfi','-i','color=c=0x0a77d4:s=160x90:r=25:d=1,drawbox=x=40:y=20:w=40:h=30:color=white:t=fill','-c:v','libx264','-pix_fmt','yuv420p',source]);assert.equal(gen.status,0);
+ const original=await readFile(source),files=new Map(),writes=new Map(),realFetch=global.fetch;let serial=0,failSecond=true;
+ global.fetch=async(url,opt)=>{
+  const data=opt.headers['dropbox-api-arg']?JSON.parse(opt.headers['dropbox-api-arg']):JSON.parse(opt.body),path=data.path;
+  if(url.endsWith('/create_folder_v2'))return Response.json({metadata:{path_display:path}});
+  if(url.endsWith('/download')){const f=files.get(path);return f?new Response(f.bytes,{headers:{'dropbox-api-result':JSON.stringify({rev:f.rev})}}):new Response('not_found',{status:409});}
+  if(url.endsWith('/upload')){
+   if(failSecond&&path.endsWith('/2 Hives.webm')){failSecond=false;return new Response('Interrupted fixture upload',{status:503});}
+   const prior=files.get(path);if(data.mode?.['.tag']==='update'&&data.mode.update!==prior?.rev||data.mode==='add'&&prior)return new Response('conflict',{status:409});
+   const bytes=Buffer.from(opt.body),rev='r'+(++serial),id='id:'+path;files.set(path,{bytes,rev,id});writes.set(path,(writes.get(path)||0)+1);return Response.json({id,rev,path_display:path});
+  }
+  if(url.endsWith('/get_metadata')){const [name,f]=[...files].find(([p,f])=>p===path||f.id===path)||[];assert.ok(f);return Response.json({id:f.id,rev:f.rev,path_display:name,size:f.bytes.length,content_hash:dropboxHash(f.bytes)});}
+  if(url.endsWith('/list_folder'))return Response.json({entries:[],has_more:false});
+  throw Error('Unexpected fixture request '+url);
+ };
+ const call=async(method,tail,data)=>{let result,code;const req=Readable.from(data===undefined?[]:[Buffer.isBuffer(data)?data:Buffer.from(JSON.stringify(data))]);req.method=method;req.headers={origin:'http://127.0.0.1:3199'};await handleJokeProject(req,{writeHead(s){code=s;},end(b){result=JSON.parse(b);}},new URL('https://service/api/joke-project'+tail),'fixture');return {code,...result};};
+ const wait=async()=>{let d;for(let i=0;i<200;i++){d=await call('GET','?id=resume-project');if(d.project.assets[0].cuts.status!=='running')return d;await new Promise(r=>setTimeout(r,20));}throw Error('Fixture render did not finish');};
+ try{
+  await call('POST','?id=resume-project',{rev:null,title:'Resume',text:'Saved exact words.'});
+  let d=await call('POST','/asset?id=resume-project&role=caption&name=original.mp4',original);const asset=d.asset;
+  const ranges=[{inFrame:0,outFrame:8,name:'1 why did.webm'},{inFrame:10,outFrame:18,name:'2 Hives.webm'}],request=rev=>({rev,assetId:asset.id,cuts:ranges,chroma:{color:'#0a77d4'}});
+  d=await call('POST','/cuts?id=resume-project',request(d.rev));assert.equal(d.code,202);
+  d=await wait();let job=d.project.assets[0].cuts;assert.equal(job.status,'failed');assert.equal(job.clips.length,1);const jobId=job.id,first=job.clips[0],firstBytes=Buffer.from(files.get(first.path).bytes);
+  d=await call('POST','/cuts?id=resume-project',request(d.rev));assert.equal(d.code,202);assert.equal(d.resumed,true);assert.equal(d.project.assets[0].cuts.id,jobId);
+  const live=await call('GET','?id=resume-project');assert.equal(live.cutRuntime[asset.id].active,true);
+  d=await wait();job=d.project.assets[0].cuts;assert.equal(job.status,'complete',job.error);assert.equal(job.id,jobId);assert.equal(job.version,1);assert.equal(job.clips.length,2);assert.equal(job.attempts.length,1);assert.deepEqual(job.ranges,validateCuts(ranges));assert.equal(writes.get(first.path),1);assert.ok(files.get(first.path).bytes.equals(firstBytes));assert.ok(files.get(asset.path).bytes.equals(original));assert.equal(d.project.assets[0].cutHistory,undefined);
+  const path='/Grill Sergeant/JokeLab Productions/resume-project/project.json',stored=files.get(path),interrupted=JSON.parse(stored.bytes);interrupted.assets[0].cuts.status='running';stored.bytes=Buffer.from(JSON.stringify(interrupted));stored.rev='r'+(++serial);
+  d=await call('GET','?id=resume-project');assert.equal(d.cutRuntime[asset.id].active,false);
+  d=await call('POST','/cuts?id=resume-project',request(d.rev));assert.equal(d.resumed,true);d=await wait();assert.equal(d.project.assets[0].cuts.status,'complete');assert.equal(writes.get(first.path),1);assert.equal(writes.get(job.clips[1].path),1);
+ }finally{global.fetch=realFetch;await rm(dir,{recursive:true,force:true});}
+});

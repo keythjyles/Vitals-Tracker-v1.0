@@ -1,0 +1,58 @@
+{
+  "schema": "GS-CaptionRecovery-1",
+  "date": "2026-11-02",
+  "release": {
+    "clipper": "R16",
+    "caplock": "R17"
+  },
+  "rollback_code": "dc1c52863e58e3df3bca006628b12d7294e24580",
+  "owner_case": {
+    "saved_components": 5,
+    "requested_components": 6,
+    "failed_component": "6 Hives 58f.webm",
+    "failure": "Clip render timed out",
+    "all_source_ranges_retained": true,
+    "closing_screen_was_cause": false,
+    "live_resume": "pending connected owner browser"
+  },
+  "actual_media_validation": {
+    "source_sha256": "d89162b7a6628505179e14853bc6e8256d58bfb50f707ed7c45ab70d26f4c3c7",
+    "source_bytes": 2215198,
+    "source_frames": 240,
+    "source_fps": 24,
+    "output_frames": 60,
+    "output_fps": 25,
+    "baseline_seconds": 15.857950512,
+    "fast_seconds": 3.637441955,
+    "all_decoded_frame_hashes_identical": true,
+    "decoded_frame_hash_digest": "7af2eb72b2e6d9c034d109a03d7581e5ca2c36b8b799f60900a7d63a264f7151"
+  },
+  "local_checks": {
+    "node": 76,
+    "passed": true,
+    "real_ffmpeg_retry": true,
+    "completed_clip_reused_byte_for_byte": true,
+    "orphaned_running_job_resumes": true
+  },
+  "browser_checks": {
+    "state": "pending GitHub browser regression",
+    "attempts": [
+      "Existing browser regression could not launch: Chromium executable missing.",
+      "Official browser installer returned an invalid empty archive.",
+      "Cloud browser could not reach the local test server."
+    ],
+    "ci": "pending explicit publishing approval"
+  },
+  "deployment": {
+    "state": "approved; branch checks pending",
+    "authorization": "User explicitly approved publication to keythjyles/Vitals-Tracker-v1.0 and deployment of the repaired apps on November 2, 2026."
+  },
+  "preservation": {
+    "originals": true,
+    "names_and_native_ranges": true,
+    "prior_passes": true,
+    "editor_sessions": true,
+    "player_geometry": true,
+    "no_production_qa_writes": true
+  }
+}

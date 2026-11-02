@@ -1,3 +1,15 @@
+## Caption save recovery — Clipper R16 / CapLock R17, November 2, 2026
+
+The November 2 field test saved five named caption components, then timed out encoding the final Hives component. Closing the screen did not cause the failure: the original and all six named source ranges were saved. The old import sheet hid those partial files, and the old retry started another pass. The fixed route keeps the same pass and verified completed files and renders only what is missing. A changed recipe still creates an independent pass and preserves earlier media.
+
+Open the same saved caption animation. **Resume N** restarts an interrupted/failed batch; it does not clear marks or require New pass. The existing Save clips button shows the active clip and frame progress. Each completed named component exposes Save/Resave immediately, including before the final clip finishes. CapLock's caption import sheet lists actual saved names and counts and offers Resume clips or View save progress. A complete set remains required before loading the caption batch for placement. **Next → CapLock** returns that finished set to the same joke without replacing existing placements.
+
+The server uses a faster lossless VP9 profile, bounded frame-aware deadlines and the same whole-file decode/frame verification. On the actual 240-frame/24fps animation, the 60-frame Hives output took 3.637 s instead of 15.858 s locally; all 60 decoded color/alpha frame hashes were identical. Server timing and physical Samsung acceptance are separate measurements. In-memory runtime reporting identifies a stopped worker after restart, enabling an explicit same-job resume rather than an endless poll.
+
+Reopening an already-ready cut jokelet now uses its source-bound saved project through GET, avoiding the redundant project write that was blocked during caption rendering. Every existing identity, source hash, frame range, original byte file and immutable prior pass remains retained. Working Dropbox saves and queued Drive backup remain separate states. Rollback code baseline: `dc1c52863e58e3df3bca006628b12d7294e24580`. Preserve optional attempt history and all project/media records on rollback. Evidence: [CAPTION_RECOVERY_R16.json](../cliplock/CAPTION_RECOVERY_R16.json).
+
+---
+
 ## Verified production stages — November 2, 2026
 
 CapLock R16 now produces a captioned composite and opens the same single-joke project in SxLock R31. SxLock saves the editable sound pass and verified jokelet. Clipper R15 remains optional; Studio R2 skips cutting in its normal joke route. Stage-aware lists default to ready inputs with Show all files off. Originals, layers, captions and prior versions are retained. The locked player equipment is unchanged. [Operation, file extensions, rebuild contract and rollback](../studio/PRODUCTION_STAGES_R16.md). Earlier release sections remain historical.

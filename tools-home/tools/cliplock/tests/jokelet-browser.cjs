@@ -6,12 +6,12 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright'),assert=req
  execFileSync('ffmpeg',['-v','error','-y','-f','lavfi','-i','color=c=red:s=64x64:r=25:d=0.4,format=yuva420p,lut=a=128','-c:v','libvpx-vp9','-lossless','1','-auto-alt-ref','0',alpha]);
  execFileSync('ffmpeg',['-v','error','-y','-f','lavfi','-i','color=c=0x0a77d4:s=160x90:r=25:d=1,drawbox=x=30:y=30:w=40:h=20:color=white:t=fill','-c:v','libx264','-pix_fmt','yuv420p',gemini]);
  execFileSync('ffmpeg',['-v','error','-y','-f','lavfi','-i','sine=frequency=880:sample_rate=48000:duration=0.2',fx]);
- const files=new Map(),folders=new Set(),root='/Grill Sergeant/JokeLab Productions',original=global.fetch;let serial=0,failBed=false;
+ const files=new Map(),folders=new Set(),root='/Grill Sergeant/JokeLab Productions',original=global.fetch;let serial=0,failBed=false,failCaptionOnce=false;
  global.fetch=async(url,opt)=>{
   const arg=opt.headers['dropbox-api-arg']?JSON.parse(opt.headers['dropbox-api-arg']):JSON.parse(opt.body),p=arg.path;
   if(url.endsWith('/create_folder_v2')){folders.add(p);return Response.json({metadata:{path_display:p}});}
   if(url.endsWith('/download')){const f=files.get(p);return f?new Response(f.bytes,{headers:{'dropbox-api-result':JSON.stringify({rev:f.rev})}}):new Response('not_found',{status:409});}
-  if(url.endsWith('/upload')){const prior=files.get(p);if(arg.mode?.['.tag']==='update'&&arg.mode.update!==prior?.rev||arg.mode==='add'&&prior)return new Response('conflict',{status:409});const bytes=Buffer.from(opt.body),rev='r'+(++serial),id='id:'+p;files.set(p,{bytes,rev,id});return Response.json({id,rev,path_display:p});}
+  if(url.endsWith('/upload')){if(failCaptionOnce&&p.includes('/clips/')&&p.endsWith('/2.webm')){failCaptionOnce=false;return new Response('Interrupted caption fixture',{status:503});}const prior=files.get(p);if(arg.mode?.['.tag']==='update'&&arg.mode.update!==prior?.rev||arg.mode==='add'&&prior)return new Response('conflict',{status:409});const bytes=Buffer.from(opt.body),rev='r'+(++serial),id='id:'+p;files.set(p,{bytes,rev,id});return Response.json({id,rev,path_display:p});}
   if(url.endsWith('/get_metadata')){const [name,f]=[...files].find(([name,f])=>name===p||f.id===p)||[];assert.ok(f);return Response.json({id:f.id,rev:f.rev,path_display:name,size:f.bytes.length,content_hash:dropboxHash(f.bytes)});}
   if(url.endsWith('/list_folder')){const entries=[...folders].filter(name=>name.startsWith(p+'/')&&!name.slice(p.length+1).includes('/')).map(name=>({'.tag':'folder',name:name.split('/').pop(),path_display:name}));return Response.json({entries,has_more:false});}
   throw Error('Unexpected fixture storage call '+url);
@@ -56,7 +56,15 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright'),assert=req
   const captionPopup=cap.waitForEvent('popup');await cap.locator('#geminiVideoFile').setInputFiles(gemini);const captionCutter=await captionPopup;await captionCutter.waitForURL('**/cliplock/**');await captionCutter.waitForFunction(()=>!document.querySelector('#addCut').disabled);
   assert.equal(new URL(captionCutter.url()).searchParams.get('project'),wholeId);assert.equal(await captionCutter.locator('#source').textContent().then(t=>t.includes('.anm')),true);assert.equal(await captionCutter.locator('#captionBackground').isVisible(),false,'background settings stay tucked away');
   for(const [first,last]of [[0,10],[10,20]]){await captionCutter.locator('#in').fill(String(first));await captionCutter.locator('#out').fill(String(last));await captionCutter.locator('#addCut').click();}
-  // Next performs the pending component save, then reuses the waiting CapLock tab.
+  // A stopped save exposes the named partial file; retry resumes the same pass.
+  failCaptionOnce=true;await captionCutter.locator('#finishBatch').click();
+  await captionCutter.waitForFunction(()=>document.querySelector('#status').textContent.includes('Stopped · 1 / 2'));
+  assert.equal(await captionCutter.locator('#saveBatch').textContent(),'Resume 1');
+  assert.equal(await captionCutter.getByRole('button',{name:'Save caption 1',exact:true}).isVisible(),true);
+  const stopped=project(wholeId).assets.find(a=>a.role==='caption').cuts,kept=Buffer.from(files.get(stopped.clips[0].path).bytes);
+  await captionCutter.locator('#saveBatch').click();await captionCutter.waitForFunction(()=>document.querySelector('#status').textContent.includes('Ready for CapLock'));
+  const resumed=project(wholeId).assets.find(a=>a.role==='caption').cuts;assert.equal(resumed.id,stopped.id);assert.ok(files.get(resumed.clips[0].path).bytes.equals(kept));
+  // Next returns the completed batch to the waiting CapLock tab.
   await captionCutter.locator('#finishBatch').click();await cap.waitForFunction(()=>!document.querySelector('#captionImport').open&&document.querySelector('#status').textContent.includes('Caption components ready'),null,{timeout:120000});
   assert.equal(context.pages().length,2,'Next returns to the waiting CapLock rather than creating another editor');assert.equal(await cap.locator('#projectName').textContent(),'Slide test 2');assert.equal(project(wholeId).caplock.bedTransform.scale,.8);assert.deepEqual(project(wholeId).caplock.clips.find(c=>c.id===priorCaption.id),priorCaption);assert.equal(project(wholeId).caplock.clips.length,3);assert.equal(project(wholeId).caplock.captionSequence.clipIds.length,2);assert.equal(await cap.locator('#video').evaluate(v=>v.paused),true);
   const animation=project(wholeId).assets.find(a=>a.role==='caption');assert.deepEqual(files.get(animation.path).bytes,await fs.readFile(gemini),'blue provider original remains unchanged');for(const c of animation.cuts.clips){const saved=dir+'/'+c.number+'.webm';await fs.writeFile(saved,files.get(c.path).bytes);const info=JSON.parse(execFileSync('ffprobe',['-v','error','-count_frames','-show_streams','-of','json',saved],{encoding:'utf8'}));assert.equal(+info.streams.find(s=>s.codec_type==='video').nb_read_frames,10);assert.equal(info.streams.some(s=>s.codec_type==='audio'),false);}
