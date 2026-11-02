@@ -1,3 +1,10 @@
+## Independent video-cut jokelet projects
+
+`POST /api/joke-project/from-cut?id=cut-<source-bound SHA-256>` accepts a validated `origin` from `shared/cut-jokelets-core.mjs`. It creates a new project with explicitly untranscribed text and pending video, without replacing an existing joke. Upload actual prepared video through the existing `/asset?role=bed` route, then call `/from-cut` with `assetId` and the verified output SHA-256/size/frame/duration/audio metadata. Only an asset saved in this project can complete the binding. A ready retry returns the current project unchanged, including later caption edits. Cut-project CapLock saves must reference that same project and one of its saved beds. Every write retains existing Dropbox byte verification and queues the established Drive backup.
+
+Public health advertises `cutJokeletVersion:1`; authenticated project reads advertise `videoCutProjects:1`. No provider credentials, new service, disk or schedule is added. The browser staging tray is transfer recovery rather than cloud backup. Tests use disposable in-memory Dropbox fixtures and real encoded video; they must not upload test material to production.
+
+---
 # PreviewLock API (isolated)
 This service does not modify jokelet-api or lex-backend.
 

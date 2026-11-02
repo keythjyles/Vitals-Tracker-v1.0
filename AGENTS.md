@@ -1,3 +1,16 @@
+## Jokelet-first cut projects — Clipper R13 / CapLock R14, November 1, 2026
+
+Owner direction: finish and caption individual jokelets. An episode assembly is not a prerequisite. Existing finished/mixed source cuts retain their picture, soundtrack and exact source range; no new performance or automatic transcript is invented.
+
+In Clipper Video + sound, tap the existing CapLock link. Its saved cut list appears by name in a compact CapLock picker while the existing cutter prepares any missing video files. Prepared outputs are reused. Open project creates or resumes that cut's independent jokelet folder and video bed through the existing authenticated PreviewLock service. Browsing alone does not create cloud projects. Each jokelet owns its caption animations, numbered components and CapLock edits; switching saves the current workspace first. The source fingerprint, native IN/exclusive OUT, timestamps, original filename and saved cut ID remain recorded in cutOrigin. Renaming/reordering a cut preserves identity; a changed source or committed frame range creates a separate project without replacing prior caption work.
+
+The same-origin IndexedDB handoff holds temporary cut bytes until the selected video's Dropbox save and hash/size receipt are verified. Opening a project uses the owner's existing PreviewLock connection. Failed/partial saves retain the staged file for retry and never claim a complete project. A verified bed releases its temporary handoff copy, while the cutter's prepared download remains available. Drive backup stays explicitly pending through the existing mirror workflow. No credentials or media bytes enter navigation URLs.
+
+Saved project schema GS-JokeProject-1 gains optional GS-CutJokelet-1 provenance. POST /api/joke-project/from-cut creates the source-bound project without fabricated joke text, then binds the verified bed. Retries reuse a ready project and preserve its title, text, assets and caption history. Cut workspaces reject a CapLock save bound to another jokelet or bed. Existing canonical joke IDs are not guessed from short cut names. Built-in auto-captioning remains owner-locked; import the created animated caption components as before. This handoff does not add a final layered-video renderer or authorize generation/publication.
+
+Rollback: d984d51b589468a19942a34aa4448f682b40938e. Preserve all original media, prepared downloads, cut drafts, child projects, optional cutOrigin data and edit histories. Verification: tools-home/tools/cliplock/JOKELET_PROJECTS_R13.json. Phone/private-cloud acceptance remains distinct from authenticated fixtures and code deployment.
+
+---
 ## Clipper R12 — Save becomes Resave, November 1, 2026
 
 Owner request: after tapping Save, that action must say Resave. Each prepared video clip now remembers its download click for that prepared output in this session. Its visible label, accessible name and tooltip change to Resave; later clicks reuse the same file. Row refreshes, inline preview and preparing another clip keep that indication. A replacement output starts at Save. Save ZIP and the bundle link similarly become Resave ZIP / Resave all after a download request.

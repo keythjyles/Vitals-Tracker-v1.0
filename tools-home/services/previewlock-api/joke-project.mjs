@@ -1,4 +1,5 @@
 import {cutPassVersion,nextCutPassVersion} from '../../shared/cut-passes.mjs';
+import {normalizeCutOrigin,cutProjectId,verifyCutOutput} from '../../shared/cut-jokelets-core.mjs';
 // Shared joke workspace. Existing PreviewLock bearer authentication stays in server.js.
 import {createHash,randomUUID} from 'node:crypto';
 import {mkdtemp,writeFile,readFile,rm} from 'node:fs/promises';
@@ -60,10 +61,29 @@ async function runCuts(id,assetId,jobId,t){let dir;try{dir=await mkdtemp(join(tm
 export async function handleJokeProject(req,res,u,t){if(!u.pathname.startsWith('/api/joke-project'))return false;const send=(s,d)=>{res.writeHead(s,{'content-type':'application/json','cache-control':'no-store','access-control-allow-origin':'*'});res.end(JSON.stringify(d));return true;};const origin=req.headers.origin;if(origin&&!['https://keythjyles.github.io','http://localhost:3101','http://127.0.0.1:3199'].includes(origin))return send(403,{error:'origin_not_allowed'});
  try{if(req.method==='GET'&&u.pathname==='/api/joke-projects'){const result=await db('list_folder',t,{path:PROJECT_ROOT,recursive:false,limit:2000});const entries=(result.entries||[]).filter(e=>e['.tag']==='folder').map(e=>({id:e.name,path:e.path_display}));return send(200,{projects:entries,has_more:result.has_more});}
  const id=projectId(u.searchParams.get('id'));let state=await readProject(id,t),p=state.project;
- if(req.method==='GET'&&u.pathname==='/api/joke-project')return send(200,{...state,capabilities:{clipBatch:2,cutPass:1,studio:1},backup:p?await backupStatus(id,p,t):null});
+ if(req.method==='GET'&&u.pathname==='/api/joke-project')return send(200,{...state,capabilities:{clipBatch:2,cutPass:1,studio:1,videoCutProjects:1},backup:p?await backupStatus(id,p,t):null});
  if(req.method==='GET'&&u.pathname==='/api/joke-project/caplock'){if(!p)return send(404,{error:'Project not found'});const a=p.assets.find(a=>a.id===u.searchParams.get('asset'));if(a?.cuts?.status!=='complete')return send(409,{error:'Finish saving the cuts first.'});return send(200,{project:p,asset:a,session:p.caplock||null,rev:state.rev});}
  if(req.method!=='POST')return send(405,{error:'method_not_allowed'});if(locks.has(id))return send(409,{error:'Project is busy saving clips. Please wait.'});locks.add(id);
  try{
+ if(u.pathname==='/api/joke-project/from-cut'){
+  const data=JSON.parse(await body(req)),origin=normalizeCutOrigin(data.origin),expectedId=await cutProjectId(origin);
+  if(id!==expectedId)return send(400,{error:'The project identity does not match this source cut.'});
+  if(p){
+   if(p.cutOrigin?.schema!=='GS-CutJokelet-1'||await cutProjectId(p.cutOrigin.origin)!==id)return send(409,{error:'This project belongs to different source material.'});
+   const old=p.cutOrigin.origin;
+   if(old.source.frames!==origin.source.frames||old.source.bytes!==origin.source.bytes||Math.abs(old.cut.start-origin.cut.start)>1e-6||Math.abs(old.cut.end-origin.cut.end)>1e-6)return send(409,{error:'The original cut timing changed. Reopen it in Clipper.'});
+   if(p.cutOrigin.state==='ready')return send(200,{...state,persisted:true,reused:true,backup:p.backup?.state||'pending'});
+  }else{
+   await mkdir(folder(id),t);
+   p={schema:'GS-JokeProject-1',version:1,id,created:new Date().toISOString(),title:origin.cut.name,text:'',textStatus:'not-transcribed',textHistory:[],assets:[],cutOrigin:{schema:'GS-CutJokelet-1',origin,state:'awaiting-video'}};
+  }
+  if(data.assetId){
+   const output=verifyCutOutput(data.output,p.cutOrigin.origin),a=p.assets.find(a=>a.id===data.assetId&&a.role==='bed');
+   if(!a||a.sha256!==output.sha256||a.size!==output.bytes||!a.path.startsWith(folder(id)+'/'))return send(409,{error:'The saved jokelet video could not be verified.'});
+   p.cutOrigin={...p.cutOrigin,state:'ready',bedAssetId:a.id,output,readyAt:new Date().toISOString()};
+  }else if(state.project)return send(200,{...state,persisted:true,reused:true,backup:p.backup?.state||'pending'});
+  return send(200,await save(p,state.rev,t));
+ }
  if(u.pathname==='/api/joke-project'){const data=JSON.parse(await body(req));if((data.rev??null)!==state.rev)return send(409,{error:'Project changed; reload before saving.'});if(typeof data.title!=='string'||!data.title.trim()||data.title.length>200||typeof data.text!=='string'||!data.text.trim()||data.text.length>30000)return send(400,{error:'Save a title and joke text.'});await mkdir(folder(id),t);p??={schema:'GS-JokeProject-1',version:1,id,created:new Date().toISOString(),assets:[],textHistory:[]};if(p.text!==data.text){await mkdir(folder(id)+'/text',t);const textRef=await put(folder(id)+'/text/'+randomUUID()+'.txt',data.text,t);p.textHistory.push(textRef);await put(folder(id)+'/joke.txt',data.text,t,{replace:true});}p.title=data.title.trim();p.text=data.text;return send(200,await save(p,state.rev,t));}
  if(!p)return send(404,{error:'Save the joke project first.'});
  if(u.pathname==='/api/joke-project/studio'){
@@ -98,8 +118,7 @@ export async function handleJokeProject(req,res,u,t){if(!u.pathname.startsWith('
   return send(200,await save(p,state.rev,t));
  }
  if(u.pathname==='/api/joke-project/cuts'){const data=JSON.parse(await body(req));if(data.rev!==state.rev)return send(409,{error:'Project changed; reload.'});const a=p.assets.find(a=>a.id===data.assetId&&a.role==='caption');if(!a)return send(404,{error:'Choose a saved caption animation.'});if(rendering)return send(409,{error:'Another clip render is running. Try again when it finishes.'});const ranges=validateCuts(data.cuts),chroma=keySettings(data.chroma),digest=sha(JSON.stringify({sha256:a.sha256,ranges,chroma}));if(a.cuts?.digest===digest&&a.cuts.status==='complete')return send(200,{...state,reused:true});const draft=a.cuts?.status==='draft'?a.cuts:null,version=draft?cutPassVersion(a):nextCutPassVersion(a);const job={id:draft?.id||'cut-'+randomUUID(),version,requestId:draft?.requestId,digest,status:'running',started:new Date().toISOString(),ranges,chroma,clips:[]};if(a.cuts&&!draft)a.cutHistory=[...(a.cutHistory||[]),{...a.cuts,version:cutPassVersion(a)}];a.cuts=job;const saved=await save(p,state.rev,t);rendering=true;void runCuts(id,a.id,job.id,t);return send(202,saved);}
- if(u.pathname==='/api/joke-project/caplock'){const data=JSON.parse(await body(req));if(data.rev!==state.rev)return send(409,{error:'Project changed; reload before saving CapLock.'});if(data.session?.schema!=='GS-CapLock-1')return send(400,{error:'Invalid CapLock project'});await mkdir(folder(id)+'/edits',t);const snapshot=await put(folder(id)+'/edits/'+randomUUID()+'.json',JSON.stringify(data.session),t);p.caplockHistory=[...(p.caplockHistory||[]),snapshot];p.caplock=data.session;p.caplockUpdated=new Date().toISOString();p.caplockDigest=sha(JSON.stringify(data.session));return send(200,await save(p,state.rev,t));}
+ if(u.pathname==='/api/joke-project/caplock'){const data=JSON.parse(await body(req));if(data.rev!==state.rev)return send(409,{error:'Project changed; reload before saving CapLock.'});if(data.session?.schema!=='GS-CapLock-1')return send(400,{error:'Invalid CapLock project'});if(p.cutOrigin&&(data.session.workspace?.id!==id||(data.session.media&&!p.assets.some(a=>a.role==='bed'&&a.path===data.session.media.path))))return send(409,{error:'This video and caption workspace belong to another jokelet. Reopen this project before saving.'});await mkdir(folder(id)+'/edits',t);const snapshot=await put(folder(id)+'/edits/'+randomUUID()+'.json',JSON.stringify(data.session),t);p.caplockHistory=[...(p.caplockHistory||[]),snapshot];p.caplock=data.session;p.caplockUpdated=new Date().toISOString();p.caplockDigest=sha(JSON.stringify(data.session));return send(200,await save(p,state.rev,t));}
  return send(404,{error:'not_found'});
  }finally{if(!rendering||p?.assets?.every(a=>a.cuts?.status!=='running'))locks.delete(id);}
  }catch(e){locks.delete(u.searchParams.get('id'));return send(400,{error:e.message});}}
-

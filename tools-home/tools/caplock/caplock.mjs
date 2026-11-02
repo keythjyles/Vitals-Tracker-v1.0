@@ -1,7 +1,8 @@
 import {inStudio,installAdapter} from '../studio/adapter.mjs?v=1';
+import {listCutProjects,readCutVideo,publishCutProject,watchCutProjects} from '../../shared/cut-jokelets.mjs?v=1';
 import {moduleSession} from '../studio/core.mjs?v=1';
 import {FocusGestures,scaledTarget} from './focus-controls.mjs?v=9';
-import {createProjectPicker} from '../studio/project-picker.mjs?v=4-cuts';
+import {createProjectPicker} from '../studio/project-picker.mjs?v=5-jokelets';
 import {fitPortrait,preferredBed} from '../studio/project-index.mjs?v=5-studio';
 import {captionNumber,activeCaption,startCaptionSequence,navigateCaption,moveCaptionDraft,insertCaption} from './placement.mjs?v=9';
 import {paintMatrix,matrixFrame} from '../../shared/item-matrix.mjs?v=1';
@@ -201,7 +202,16 @@ async function openJokeWorkspace(id,assetId){
 $('previousWorkspace').onclick=async()=>{try{const list=JSON.parse(localStorage.getItem('gs_caplock_previous_workspaces')||'[]');const last=list.pop();if(!last)return say('No earlier workspace archived.');cloudSession=null;projectContext=null;await openProject(last.project);localStorage.setItem('gs_caplock_previous_workspaces',JSON.stringify(list));showPage('viewer');say('Earlier workspace restored. Its cloud references remain in the project.');}catch(e){say(e.message);}};
 
 
-const projectPicker=createProjectPicker({api,onPause:pause,onOpenProject:openFullJokeProject,onLocal:()=>$('videoFile').click(),hasProject:()=>!!project.media||!!project.workspace,onUseAsset:async(p,a)=>{if(p&&p.id!==cloudSession?.id)await openFullJokeProject(p);const ref={kind:'previewlock',name:a.name,path:a.path,size:a.size};if(a.role==='bed'||!p)await loadCloud(ref);else await loadCloudOverlay(ref);}});
+const projectPicker=createProjectPicker({api,onPause:pause,onOpenProject:openJokeletProject,onLocal:()=>$('videoFile').click(),hasProject:()=>!!project.media||!!project.workspace,extraProjects:listCutProjects,extraMedia:readCutVideo,onUseAsset:async(p,a)=>{if(p&&p.id!==cloudSession?.id)await openFullJokeProject(p);const ref={kind:'previewlock',name:a.name,path:a.path,size:a.size};if(a.role==='bed'||!p)await loadCloud(ref);else await loadCloudOverlay(ref);}});
+async function openJokeletProject(record,chosenBed,progress){
+ if(record.stagedCut){
+  if(cloudSession&&dirty){clearTimeout(cloudTimer);await saveCloudWorkspace();}await cloudWrite.catch(()=>{});
+  record=await publishCutProject(api,record.id,progress);
+ }
+ return openFullJokeProject(record,chosenBed,progress);
+}
+watchCutProjects(()=>projectPicker.refreshExtras().catch(e=>say('Cut list unavailable: '+e.message)));
+window.addEventListener('message',event=>{if(inStudio()||event.origin!==location.origin||event.data?.protocol!=='GS-JokeletCuts-1'||!/^[a-f0-9]{64}$/.test(event.data.sourceHash||''))return;projectPicker.open(null,{sourceHash:event.data.sourceHash}).catch(e=>say('Cut list unavailable: '+e.message));});
 $('bedDeviceLoad').onclick=()=>projectPicker.open();
 $('emptyLoadProject').onclick=()=>projectPicker.open();
 $('projectAssets').onclick=()=>projectPicker.open(project.workspace?.id);
@@ -244,7 +254,7 @@ function renderCaptionImport(){
 async function loadCaptionFolder(id){const d=await api('/api/joke-project?id='+encodeURIComponent(id));if(!d.project)throw Error('This joke folder has no saved caption project.');importState={project:d.project,id,assetId:importState.id===id?importState.assetId:''};renderCaptionImport();const a=d.project.assets.find(a=>a.id===importState.assetId);if(a)await loadCaptionSource(a.path);}
 async function openCaptionImport(){
  pause();if(!$('captionImport').open)$('captionImport').showModal();$('captionImportStatus').textContent='Loading the saved caption folder…';
- try{const id=project.workspace?.id||localStorage.getItem('gs_caplock_caption_project')||'dad-00bda89167b4f15850aa1c91';const d=await api('/api/joke-projects');$('captionProject').replaceChildren();for(const p of d.projects){const o=document.createElement('option');o.value=p.id;o.textContent=p.id==='dad-00bda89167b4f15850aa1c91'?'Pebble':p.id;$('captionProject').append(o);}$('captionProject').value=id;await loadCaptionFolder(id);$('captionImportStatus').textContent='Choose a finished batch, or import numbered files.';}catch(e){$('captionImportStatus').textContent=localStorage.getItem('gs_previewlock_key')?e.message:'Saved caption folders are not connected in this browser. Import numbered files, or open CapLock from your connected clipper.';}
+ try{const id=project.workspace?.id||localStorage.getItem('gs_caplock_caption_project')||'dad-00bda89167b4f15850aa1c91';const d=await api('/api/joke-projects');$('captionProject').replaceChildren();for(const p of d.projects){const o=document.createElement('option');o.value=p.id;o.textContent=projectContext?.id===p.id?projectContext.title:p.title||(p.id==='dad-00bda89167b4f15850aa1c91'?'Pebble':p.id);$('captionProject').append(o);}$('captionProject').value=id;await loadCaptionFolder(id);$('captionImportStatus').textContent='Choose a finished batch, or import numbered files.';}catch(e){$('captionImportStatus').textContent=localStorage.getItem('gs_previewlock_key')?e.message:'Saved caption folders are not connected in this browser. Import numbered files, or open CapLock from your connected clipper.';}
 }
 $('closeCaptionImport').onclick=()=>$('captionImport').close();$('captionImport').addEventListener('close',()=>$('captionSourcePreview').pause());
 $('captionProject').onchange=()=>loadCaptionFolder($('captionProject').value).catch(e=>{$('captionImportStatus').textContent=e.message;});
@@ -260,7 +270,8 @@ async function importNumberedFiles(input){
 for(const id of ['captionFiles','captionFolderFiles'])$(id).onchange=e=>importNumberedFiles(e.target).catch(error=>{$('captionImportStatus').textContent=error.message;});
 $('overlayLibrary').textContent='Import captions';
 // A clipper link is authoritative; project entry also supports text-only and bed-only workspaces.
-if(!inStudio()&&params.get('project')&&params.get('caption'))openJokeWorkspace(params.get('project'),params.get('caption')).catch(e=>say('Caption handoff: '+e.message));
+if(!inStudio()&&/^[a-f0-9]{64}$/.test(params.get('cuts')||''))projectPicker.open(null,{sourceHash:params.get('cuts')}).catch(e=>say('Cut list unavailable: '+e.message));
+else if(!inStudio()&&params.get('project')&&params.get('caption'))openJokeWorkspace(params.get('project'),params.get('caption')).catch(e=>say('Caption handoff: '+e.message));
 else if(!inStudio()&&(params.get('project')||localStorage.getItem('gs_previewlock_key'))){const id=params.get('project')||localStorage.getItem('gs_studio_project')||localStorage.getItem('gs_caplock_caption_project')||'dad-00bda89167b4f15850aa1c91';openFullJokeProject({id}).catch(e=>say('Saved joke project unavailable: '+e.message));}
 
 async function openFullJokeProject(record,chosenBed=null,progress=say){
@@ -305,3 +316,4 @@ installAdapter('captions',{
 });
 
 if(inStudio()){for(const id of ['bedLoad','emptyLoadProject','projectAssets'])$(id).onclick=()=>window.parent.postMessage({protocol:'GS-Studio-1',action:'navigate-phase',phase:'joke'},location.origin);$('captionProject').onchange=()=>{if(cloudSession){$('captionProject').value=cloudSession.id;loadCaptionFolder(cloudSession.id).catch(e=>say(e.message));}};$('openCaptionClipper').onclick=()=>window.parent.postMessage({protocol:'GS-Studio-1',action:'navigate-phase',phase:'cut'},location.origin);}
+

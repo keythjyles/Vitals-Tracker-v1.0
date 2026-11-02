@@ -95,7 +95,7 @@
     {
       "tool": "caplock",
       "tool_id": "GS-TOOL-CAPLOCK",
-      "source_version": "R13",
+      "source_version": "R14",
       "hosted_path": "tools/caplock/index.html",
       "description": "Project-first workspace with editable Insert, independent bed/overlay focus, hidden project drawer, placed-item properties and Hide/Show. Built-in text captioning is hidden/locked; import Gemini animation layers.",
       "navigation": [
@@ -116,7 +116,7 @@
     {
       "tool": "cliplock",
       "tool_id": "GS-TOOL-CLIPLOCK",
-      "source_version": "R12",
+      "source_version": "R13",
       "hosted_path": "tools/cliplock/index.html",
       "description": "One compact cutter: video with sound or caption animation. Exact marks, read-only position, recoverable cut lists and one ZIP download.",
       "verification": "tools/cliplock/VIDEO_R6.json; existing caption pass evidence in tools/cliplock/PASSES_R4.json.",
