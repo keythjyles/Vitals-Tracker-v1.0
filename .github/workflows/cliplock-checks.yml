@@ -38,10 +38,20 @@ jobs:
           python3 -m http.server 8767 --bind 127.0.0.1 >/tmp/clip-server.log 2>&1 &
           curl --retry 20 --retry-connrefused --retry-delay 1 --fail --silent http://127.0.0.1:8767/tools-home/tools/cliplock/ >/dev/null
           node tools-home/tools/cliplock/tests/browser.cjs
-          node tools-home/tools/cliplock/tests/video-browser.cjs
-          node tools-home/tools/cliplock/tests/jokelet-browser.cjs
-          node tools-home/shared/tests/compact-player.cjs
         env:
           PLAYWRIGHT_MODULE: /tmp/clip-browser/node_modules/playwright
 
 
+      - name: Finished-video cutter regression
+        run: node tools-home/tools/cliplock/tests/video-browser.cjs
+        env:
+          PLAYWRIGHT_MODULE: /tmp/clip-browser/node_modules/playwright
+      - name: Single-joke caption-to-sound production route
+        timeout-minutes: 5
+        run: node tools-home/tools/cliplock/tests/jokelet-browser.cjs
+        env:
+          PLAYWRIGHT_MODULE: /tmp/clip-browser/node_modules/playwright
+      - name: Locked compact player geometry
+        run: node tools-home/shared/tests/compact-player.cjs
+        env:
+          PLAYWRIGHT_MODULE: /tmp/clip-browser/node_modules/playwright

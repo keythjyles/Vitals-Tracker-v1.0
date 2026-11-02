@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {captionRecipe,stageAsset,stageAccepts,stageFilename,mediaContainer,pendingCaptions} from '../production-stages.mjs';
+import {captionRecipe,stageAsset,stageAccepts,stageFilename,mediaContainer,pendingCaptions,soundRecipe} from '../production-stages.mjs';
 test('ready filters follow saved stage receipts and invalidate changed render decisions',()=>{
  const caplock={media:{path:'/raw',size:50},bedTransform:{x:50,y:50,scale:1},clips:[]},asset={id:'cap',sha256:'hash',role:'stage'},p={caplock,assets:[asset],production:{records:[{assetId:'cap',sha256:'hash',stage:'captioned',verified:true,recipeJSON:JSON.stringify(captionRecipe(caplock))}]}};
  assert.equal(stageAccepts(p,asset,'sound'),true);assert.equal(stageAccepts(p,asset,'cut'),false);assert.equal(stageAsset(p,'captioned').id,'cap');
@@ -13,3 +13,5 @@ test('unfinished active caption trays are explicit and removed pieces do not blo
 
 import {nextPhase} from '../../tools/studio/core.mjs';
 test('the single-joke route skips optional cutting and scene equipment',()=>{assert.equal(nextPhase('joke'),'captions');assert.equal(nextPhase('cut'),'captions');assert.equal(nextPhase('captions'),'sound');});
+
+test('upstream caption changes remove downstream jokelets from ready lists without deleting outputs',()=>{const cap={id:'cap',sha256:'c'},jkt={id:'jkt',sha256:'j'},caplock={media:{path:'/raw',size:1},clips:[],bedTransform:{x:50,y:50,scale:1}},session={bed:cap,state:{clips:[]}},p={assets:[cap,jkt],caplock,studio:{modules:{sound:{session}}},production:{records:[{assetId:'cap',sha256:'c',verified:true,stage:'captioned',recipeJSON:JSON.stringify(captionRecipe(caplock))},{assetId:'jkt',sha256:'j',verified:true,stage:'jokelet',parents:[cap],recipeJSON:JSON.stringify(soundRecipe(session))}]}};assert.equal(stageAsset(p,'jokelet').id,'jkt');p.caplock.bedTransform.x=49;assert.equal(stageAsset(p,'jokelet'),null);assert.equal(p.assets.length,2);});
