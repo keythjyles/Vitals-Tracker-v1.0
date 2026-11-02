@@ -85,4 +85,4 @@ const {execFileSync}=require('node:child_process');
 })().catch(e=>{console.error(e);process.exit(1)});
 
 
-async function exactMark(page,id,value){const drawer=page.locator('.gs-source-drawer'),wasOpen=await drawer.isVisible();if(!wasOpen)await page.getByRole('button',{name:'Show file picker',exact:true}).click();const panel=page.locator('#exactMarks');if(!await panel.evaluate(e=>e.open))await panel.locator('summary').click();await page.locator('#'+id).fill(value);if(!wasOpen)await page.getByRole('button',{name:'Hide file picker',exact:true}).click();}
+async function exactMark(page,id,value){assert.equal(await page.locator('#'+id).isVisible(),true,'exact marks stay beside their buttons');await page.locator('#'+id).fill(value);await page.locator('#'+id).press('Tab');}

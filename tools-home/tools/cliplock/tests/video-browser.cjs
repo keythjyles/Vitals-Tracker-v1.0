@@ -34,19 +34,19 @@ async function checkRecovery(page,source){
  assert.equal(await page.locator('#videoDownloads video').count(),0);await page.reload();await page.locator('#videoFile').setInputFiles(source);await page.waitForFunction(()=>document.querySelector('#cutCount').textContent==='6');assert.match(await page.locator('#cutList').innerText(),/F0–300/);console.log('Six cuts recovered, protected, bundled, decoded with audio and restored after reload.');
 }
 
-async function exactMark(page,id,value){const drawer=page.locator('.gs-source-drawer'),wasOpen=await drawer.isVisible();if(!wasOpen)await page.getByRole('button',{name:'Show file picker',exact:true}).click();const panel=page.locator('#exactMarks');if(!await panel.evaluate(e=>e.open))await panel.locator('summary').click();await page.locator('#'+id).fill(value);if(!wasOpen)await page.getByRole('button',{name:'Hide file picker',exact:true}).click();}
+async function exactMark(page,id,value){assert.equal(await page.locator('#'+id).isVisible(),true,'exact marks stay beside their buttons');await page.locator('#'+id).fill(value);await page.locator('#'+id).press('Tab');}
 
 async function checkControls(page){
  assert.equal(await page.locator('.gs-player-filename').textContent(),'episode.mp4');
- assert.equal(await page.locator('#in').isVisible(),false);assert.equal(await page.locator('#out').isVisible(),false);
+ assert.equal(await page.locator('#in').isVisible(),true);assert.equal(await page.locator('#out').isVisible(),true);
  await page.locator('#next25').click();assert.match(await page.locator('#clock').textContent(),/^F25 /);
  // Holding a marking button explains it without changing a boundary.
  await page.locator('#markIn').dispatchEvent('pointerdown',{pointerType:'touch',clientX:350,clientY:250});await page.locator('#gsControlHelp').waitFor({state:'visible'});await page.locator('#markIn').dispatchEvent('pointerup',{pointerType:'touch'});await page.locator('#markIn').dispatchEvent('click');assert.equal(await page.locator('#in').inputValue(),'0');
- await page.locator('#markIn').click();assert.equal(await page.locator('#in').inputValue(),'25');assert.equal(await page.locator('#markIn').textContent(),'IN · 25');
- await page.locator('#next25').click();assert.match(await page.locator('#clock').textContent(),/^F50 /);await page.locator('#markOut').click();assert.equal(await page.locator('#out').inputValue(),'50');assert.equal(await page.locator('#markOut').textContent(),'OUT · 50');
+ await page.locator('#markIn').click();assert.equal(await page.locator('#in').inputValue(),'25');assert.equal(await page.locator('#markIn').textContent(),'IN');
+ await page.locator('#next25').click();assert.match(await page.locator('#clock').textContent(),/^F50 /);await page.locator('#markOut').click();assert.equal(await page.locator('#out').inputValue(),'50');assert.equal(await page.locator('#markOut').textContent(),'OUT');
  await page.locator('#back25').click();assert.match(await page.locator('#clock').textContent(),/^F25 /);assert.equal(await page.locator('#out').inputValue(),'50');
  await page.locator('#start').click();await page.locator('#back25').click();assert.match(await page.locator('#clock').textContent(),/^F0 /);
- const geometry=await page.locator('.gs-player-rail').evaluate(e=>({right:e.getBoundingClientRect().right,view:innerWidth,mark:document.querySelector('#markIn').getBoundingClientRect().width,width:e.getBoundingClientRect().width}));assert.ok(geometry.right<=geometry.view-16);assert.equal(geometry.mark,geometry.width);
+ const geometry=await page.locator('.gs-player-rail').evaluate(e=>({right:e.getBoundingClientRect().right,view:innerWidth,width:e.getBoundingClientRect().width,rows:['markIn','markOut'].map(id=>{const b=document.getElementById(id),f=b.nextElementSibling,r=b.parentElement.getBoundingClientRect();return {height:r.height,width:r.width,field:f.id,fieldWidth:f.getBoundingClientRect().width};})}));assert.ok(geometry.right<=geometry.view-16);assert.equal(geometry.width,76);assert.deepEqual(geometry.rows.map(r=>r.field),['in','out']);for(const row of geometry.rows){assert.equal(row.height,29);assert.equal(row.width,76);assert.ok(row.fieldWidth>=40);}
  assert.equal(await page.locator('.gs-player-shell button').evaluateAll(es=>es.filter(e=>e.getBoundingClientRect().height>0).every(e=>!!e.title)),true);
 }
 

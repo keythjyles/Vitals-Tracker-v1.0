@@ -87,9 +87,7 @@ export function mountPlayerShell(tool,config){
  for(let i=0;i+1<frameIds.length;i+=2){const back=$(frameIds[i]),forward=$(frameIds[i+1]);if(back.parentElement===forward.parentElement&&back.parentElement!==rail&&back.parentElement.children.length===2)back.parentElement.classList.add('gs-frame-pair');else{const pair=el('div','gs-frame-pair');back.before(pair);pair.append(back,forward);}paired.add(back);paired.add(forward);}
  if(tool==='cliplock'){
   const order=['play','start'];for(let i=order.length-1;i>=0;i--)if($(order[i]))rail.prepend($(order[i]));
-  const exact=el('details','gs-exact-marks');exact.id='exactMarks';const summary=el('summary','');summary.textContent='Exact IN / OUT';exact.append(summary);
-  for(const [mark,field]of [['markIn','in'],['markOut','out']]){const label=el('label','');label.textContent=field.toUpperCase()+' frame ';label.append($(field));exact.append(label);rail.append($(mark));}
-  drawer.append(exact);
+  for(const [mark,field,label]of [['markIn','in','IN'],['markOut','out','OUT']]){const row=el('div','gs-control-row');$(mark).textContent=label;row.append($(mark),$(field));rail.append(row);}
   if($('back25')&&$('next25')){const bulk=el('div','gs-control-pair');bulk.append($('back25'),$('next25'));rail.querySelector('.gs-frame-pair').after(bulk);}
   const jump=el('div','gs-control-row gs-jump-row');jump.append($('jumpFrame'),$('goFrame'));const pair=rail.querySelector('.gs-control-pair')||rail.querySelector('.gs-frame-pair');pair.after(jump);
   for(const id of ['preview','addCut','saveBatch','cancelVideo'])if($(id))rail.append($(id));
@@ -157,7 +155,7 @@ export function mountPlayerShell(tool,config){
   for(const row of rail.querySelectorAll('.gs-control-row'))important(row,{display:'flex',gap:'3px',height:PLAYER_PROFILE.row+'px','min-height':PLAYER_PROFILE.row+'px',padding:'0',margin:'0',width:'100%','align-items':'center'});
   for(const field of rail.querySelectorAll('input'))important(field,{'min-width':'0',width:'100%',height:PLAYER_PROFILE.row+'px','min-height':PLAYER_PROFILE.row+'px',padding:'2px','font-size':'11px',margin:'0','border-radius':'5px'});
   for(const b of rail.querySelectorAll('.gs-control-row button'))important(b,{width:'25px',flex:'0 0 25px'});
-  if(tool==='wavlock')for(const id of ['markIn','markOut'])if($(id)&&rail.contains($(id)))important($(id),{width:'29px',flex:'0 0 29px'});
+  if(['cliplock','wavlock'].includes(tool))for(const id of ['markIn','markOut'])if($(id)&&rail.contains($(id)))important($(id),{width:'29px',flex:'0 0 29px'});
  }
  function sizePicture(){
   const height=Math.ceil(right.getBoundingClientRect().height);if(height<1)return;

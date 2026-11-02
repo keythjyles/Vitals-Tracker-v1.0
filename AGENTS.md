@@ -1,3 +1,11 @@
+## Clipper R11 — restore visible IN and OUT boxes, November 1, 2026
+
+Owner correction: Mark IN and Mark OUT must fill the adjacent editable number boxes with the displayed source frame. R9 incorrectly moved those boxes into the hidden drawer. Restore the original inputs beside their buttons using the existing compact WavLock row pattern: 29px rows in the locked 76px rail, with 29px IN/OUT buttons and the remaining space for exact frame entry. Both boxes stay visible; marking fills only the matching box, and typing commits through the existing native handler. OUT stays exclusive. Do not hide, replace or remove these exact-entry fields again without an explicit owner request.
+
+This correction preserves source media, browser drafts, queued cuts, playback, Prepare/Save/ZIP and inline review behavior. Native export engines and timing are unchanged. Rollback: 5c4dd5aac8389c721553170c0ee1e04f26fcecea. Validation and publication evidence: tools-home/shared/review/player-r11-validation.json.
+
+---
+
 ## R10 boundary follow-up — verified native-frame exports
 
 The live F5–10 test exposed a pre-existing frame-rate resampling error: 5 requested frames became 4. Clipper now leaves decoded source samples at their native timing and supplies known CFR cadence only to output track metadata, so the container also retains the last frame's duration. The pinned SxLock vendor library is unchanged. Frame, duration, size, audio and alpha verification remain strict; bad results never become Save links. The exact 50-frame QA source is a small regression fixture, and both MP4/WebM five-frame outputs plus the longer audio-bearing exports are checked. The active row's cancel square remains enabled during preparation.
