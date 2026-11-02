@@ -3,6 +3,7 @@
   "release": "R18",
   "ownerRequest": "One thin header line, shorter controls, direct Files/Photos source loading without a cloud gate. Owner confirms no placements yet.",
   "baseline": "e7f8d6eb7fba1c645631f449d57826240afa691d",
+  "testedSourceCommit": "9d9969b04ba930fdd81d2627dcbae3f376c5b565",
   "manualPath": [
     "Files or Photos",
     "load original device video",
@@ -13,7 +14,7 @@
   "preserved": [
     "original media and native frames",
     "caption media and placement logic",
-    "existing cloud project and Studio handoffs",
+    "explicit cloud project and Studio handoffs",
     "seven other editor geometries",
     "built-in caption owner lock"
   ],
@@ -23,12 +24,31 @@
     "frameRow": 32,
     "gap": 4,
     "rail": 76,
-    "itemMatrix": 52
+    "itemMatrix": 52,
+    "measuredPlayerDock": 359,
+    "roomBelowAt360x640": 281,
+    "roomBelowAt390x844": 485
   },
   "checks": {
     "nodePassed": 70,
-    "browser": "pending CI",
-    "live": "pending publication"
+    "browser": {
+      "filesChooser": true,
+      "photosChooser": true,
+      "cloudRequests": 0,
+      "numberedCaptionImport": true,
+      "insertNext": true,
+      "noHorizontalOverflow": true,
+      "cloudProjectRegression": true,
+      "captionPlacementRegression": true,
+      "errors": []
+    },
+    "runs": {
+      "caplock": 41541980537,
+      "cliplock": 41541980533,
+      "studio": 41541980536,
+      "sxlock": 41541980517
+    },
+    "live": "pending Pages publication"
   },
   "rollback": "Restore only changed source files from baseline; keep all media, projects and recovery records."
 }
