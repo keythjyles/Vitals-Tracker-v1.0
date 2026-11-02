@@ -237,3 +237,5 @@ controls();
 
 $('copyList').onclick=async()=>{const text=cutListText({source:{name:source.name,sha256:sourceDigest},totalFrames:meta.times.length,cuts});try{await navigator.clipboard.writeText(text);say('Copied all '+cuts.length+' cuts, source file and timestamp.');}catch{$('copyListText').value=text;$('copyListDialog').showModal();$('copyListText').focus();$('copyListText').select();say('Select and copy the complete list below.');}};
 $('closeCopyList').onclick=()=>$('copyListDialog').close();
+
+const playerShell=document.querySelector('.gs-player-shell');if(playerShell)new MutationObserver(()=>{if(!playerShell.classList.contains('drawer-closed'))pauseInlinePreview();}).observe(playerShell,{attributes:true,attributeFilter:['class']});
