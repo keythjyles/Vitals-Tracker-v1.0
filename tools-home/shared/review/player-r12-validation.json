@@ -1,0 +1,52 @@
+{
+  "release": "R12",
+  "source_commit": "3ad763a305738296f60d5fcfd7f0387c1eb0f91c",
+  "rollback": "32893ef97c8c7117548640f2e07854d5052bf87e",
+  "live_url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/cliplock/?mode=video&v=R12-resave",
+  "changes": [
+    "Per-clip Save becomes Resave after its download click.",
+    "The indication stays with the prepared output through row refreshes and preparation of other clips.",
+    "Save ZIP and its bundle link become Resave ZIP / Resave all after a download click."
+  ],
+  "ci": [
+    {
+      "id": 41377310861,
+      "name": "ClipLock cutter checks",
+      "conclusion": "success",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41377310861"
+    },
+    {
+      "id": 41377310734,
+      "name": "GS Studio checks",
+      "conclusion": "success",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41377310734"
+    },
+    {
+      "id": 41377310386,
+      "name": "pages build and deployment",
+      "conclusion": "success",
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/41377310386"
+    }
+  ],
+  "local_unit_tests": {
+    "passed": 15,
+    "failed": 0
+  },
+  "live_verification": {
+    "fixture": "short-portrait.mp4",
+    "fixture_only": true,
+    "source_frames": 50,
+    "first_clip_after_save_click": "Resave",
+    "first_clip_after_preparing_second_clip": "Resave",
+    "second_clip_without_individual_save_click": "Save",
+    "first_clip_prepared_blob_url_unchanged": true,
+    "zip_after_save_click": "Resave ZIP",
+    "bundle_link_after_click": "Resave all 7 clips (ZIP)",
+    "source_clock": "F13 / 50 · 0.520s",
+    "screenshot": "clipper-r12-resave-proof.jpg",
+    "browser_download_event_observed": false,
+    "verification_limit": "Live UI labels and retained file identity were verified. The iframe download event was not exposed to the browser harness; completed output downloads and decode checks passed in CI. Resave records a requested download, not a device or cloud save receipt."
+  },
+  "production_media_used": false,
+  "media_engine_changes": false
+}
