@@ -13,7 +13,7 @@
     "failure": "Clip render timed out",
     "all_source_ranges_retained": true,
     "closing_screen_was_cause": false,
-    "live_resume": "pending connected owner browser"
+    "live_resume": "Five named files and all six native ranges remain saved. Resume 1 in the connected owner browser completes the missing Hives clip. No production media was overwritten or rerendered by the operator."
   },
   "actual_media_validation": {
     "source_sha256": "d89162b7a6628505179e14853bc6e8256d58bfb50f707ed7c45ab70d26f4c3c7",
@@ -35,17 +35,62 @@
     "orphaned_running_job_resumes": true
   },
   "browser_checks": {
-    "state": "pending GitHub browser regression",
-    "attempts": [
-      "Existing browser regression could not launch: Chromium executable missing.",
-      "Official browser installer returned an invalid empty archive.",
-      "Cloud browser could not reach the local test server."
+    "state": "passed",
+    "branch_runs": [
+      {
+        "id": 41490650391,
+        "name": "ClipLock cutter checks",
+        "sha": "158009d87ff1b4395e4ab466e83fed2ce74b27f6"
+      },
+      {
+        "id": 41490349678,
+        "name": "CapLock prototype checks",
+        "sha": "204e893e7f5838ae973fce5f29d4fb06d8fc415a"
+      },
+      {
+        "id": 41490650235,
+        "name": "GS Studio checks",
+        "sha": "158009d87ff1b4395e4ab466e83fed2ce74b27f6"
+      }
     ],
-    "ci": "pending explicit publishing approval"
+    "main_runs": [
+      {
+        "id": 41491026916,
+        "name": "ClipLock cutter checks"
+      },
+      {
+        "id": 41491026846,
+        "name": "CapLock prototype checks"
+      },
+      {
+        "id": 41491026776,
+        "name": "GS Studio checks"
+      }
+    ],
+    "verified": [
+      "failed caption save exposes its named partial file",
+      "same-pass retry preserves completed clip bytes",
+      "caption return preserves the waiting joke scene",
+      "finished-video frame export",
+      "caption-to-sound production route",
+      "locked compact player geometry"
+    ],
+    "physical_phone_acceptance": "pending"
   },
   "deployment": {
-    "state": "approved; branch checks pending",
-    "authorization": "User explicitly approved publication to keythjyles/Vitals-Tracker-v1.0 and deployment of the repaired apps on November 2, 2026."
+    "state": "live",
+    "source_commit": "158009d87ff1b4395e4ab466e83fed2ce74b27f6",
+    "service": "srv-dberk21srm7s73d4kqr0",
+    "deploy_id": "dep-dbkcf0navr4c73d2sptg",
+    "finished_at": "2026-11-02T17:26:46.739783Z",
+    "pages_run": 41491025351,
+    "backend_health": "200 / ok / Dropbox ready",
+    "public_ui": {
+      "clipper": "R16",
+      "caplock": "R17"
+    },
+    "settings_changed": false,
+    "authorization": "User explicitly approved existing-repository publication and app deployment."
   },
   "preservation": {
     "originals": true,
