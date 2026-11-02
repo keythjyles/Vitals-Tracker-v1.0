@@ -1,3 +1,7 @@
+## R10 boundary follow-up — verified native-frame exports
+
+The live F5–10 test exposed a pre-existing frame-rate resampling error: 5 requested frames became 4. Clipper now leaves decoded source samples at their native timing and supplies known CFR cadence only to output track metadata, so the container also retains the last frame's duration. The pinned SxLock vendor library is unchanged. Frame, duration, size, audio and alpha verification remain strict; bad results never become Save links. The exact 50-frame QA source is a small regression fixture, and both MP4/WebM five-frame outputs plus the longer audio-bearing exports are checked. The active row's cancel square remains enabled during preparation.
+
 ## Clipper R10 — visible preparation and inline playback, November 1, 2026
 
 Owner reported Prepare flickering without a visible result and requested a changing button, Save, and inline Play/Pause. Cut rows are now keyed and updated in place. Prepare becomes Prep N%, then Save only after the unchanged media engine verifies the output. Errors (including unapplied-editor validation) stay in that row with Retry. The row's stop square cancels its active preparation without deleting the cut. Do not insert/remove a Cancel row in the fixed-height player rail during processing: that was resizing the picture and shifting the list.
