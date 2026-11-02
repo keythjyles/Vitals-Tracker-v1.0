@@ -2,3 +2,12 @@
 
 
 .picker-list.list .picker-card .picker-missing{grid-row:1/4;height:94px;min-height:94px}
+
+/* Keep video controls and project actions in the same compact jokelet row. */
+.picker-list.list .jokelet-card{grid-template-columns:64px minmax(0,1fr) auto;gap:2px 6px}
+.picker-list.list .jokelet-card video,.picker-list.list .jokelet-card .picker-missing{grid-column:1;grid-row:1/4;width:64px;height:72px;min-height:72px}
+.picker-list.list .jokelet-card h3{grid-column:2;grid-row:1}
+.picker-list.list .jokelet-card p{grid-column:2;grid-row:2}
+.picker-list.list .jokelet-card .gs-inline-video-progress{grid-column:2;grid-row:3;align-self:start}
+.picker-list.list .jokelet-card .gs-inline-video-controls{grid-column:3;grid-row:1}
+.picker-list.list .jokelet-card .picker-actions{grid-column:3;grid-row:2/4;align-self:end}
