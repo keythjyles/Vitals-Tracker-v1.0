@@ -1,5 +1,5 @@
 import {normalizeCutOrigin,cutProjectId,sha256Bytes} from './cut-jokelets-core.mjs?v=1';
-import {beginCutQueue,stageCutProject,publishCutProject} from './cut-jokelets.mjs?v=2';
+import {beginCutQueue,stageCutProject,publishCutProject,matchingCutVideo} from './cut-jokelets.mjs?v=2';
 
 // A whole video uses the same verified project save as a cut, without encoding it.
 export async function videoProjectSource(file,meta){
@@ -14,6 +14,8 @@ export async function videoProjectSource(file,meta){
 }
 export async function openVideoProject(api,file,meta,progress=()=>{}){
  const source=await videoProjectSource(file,meta);
+ const existing=await matchingCutVideo(source.origin.source.sha256);
+ if(existing)return publishCutProject(api,existing.id,progress);
  beginCutQueue(source.origin.source.sha256,[source.origin],{append:true});
  await stageCutProject(source.origin,source.output);
  return publishCutProject(api,source.id,progress);

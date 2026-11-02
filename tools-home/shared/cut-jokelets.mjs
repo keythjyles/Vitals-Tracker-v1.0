@@ -21,11 +21,21 @@ export function cutQueueStatus(sourceHash,id,state,error='',progress=null){
 }
 export const getCutProject=id=>read('projects',id);
 export async function readCutVideo(id){const v=await read('media',id);return v?.blob||null;}
+export async function matchingCutVideo(sha256){
+ const matches=[];
+ for(const record of await read('projects')){
+  let digest=record.cloud?.asset?.sha256||record.sha256;
+  if(!digest&&record.hasVideo){const blob=await readCutVideo(record.id);if(blob)digest=await sha256Bytes(await blob.arrayBuffer());}
+  if(digest===sha256)matches.push(record);
+ }
+ // Identical footage can deliberately appear in several projects. Never guess among them.
+ return matches.length===1?matches[0]:null;
+}
 export async function stageCutProject(origin,output){
  origin=normalizeCutOrigin(origin);const id=await cutProjectId(origin),prior=await getCutProject(id);
  if(prior?.cloud||prior?.hasVideo){const next={...prior,origin,updated:new Date().toISOString()};await write(projects=>projects.put(next));changed();return next;}
  const blob=output.blob;if(!(blob instanceof Blob)||!blob.size)throw Error('Prepare the cut video before opening its caption project.');
- const record={id,origin,name:output.name,format:output.format,verified:output.verified,bytes:blob.size,hasVideo:true,updated:new Date().toISOString()};
+ const record={id,origin,name:output.name,format:output.format,verified:output.verified,sha256:await sha256Bytes(await blob.arrayBuffer()),bytes:blob.size,hasVideo:true,updated:new Date().toISOString()};
  await write((projects,media)=>{projects.put(record);media.put({id,blob});});changed();return record;
 }
 async function markCloudProject(record,project){
