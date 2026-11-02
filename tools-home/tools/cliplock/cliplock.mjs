@@ -7,7 +7,7 @@ import {addOrUpdate,toBatchRanges,toVideoRanges,nextMarks} from './batch.mjs?v=6
 import {createProjectPicker} from '../studio/project-picker.mjs?v=4-cuts';
 import {projectAssets,isVideo} from '../studio/project-index.mjs?v=5-studio';
 import {frameAt,selection,clipName,cloudResult,frameSeekTime,steppedFrame} from './core.mjs?v=3';
-import {inspect,cut} from './engine.mjs?v=1';
+import {inspect,cut} from './engine.mjs?v=2';
 const $=id=>document.getElementById(id),video=$('video'),API='https://gs-previewlock-api.onrender.com';
 let project=null,file=null,source=null,meta=null,sourceURL=null,resultURL=null,result=null,busy=false,controller=null,loadEpoch=0,previewEnd=null,previewLast=0,selectedFrame=0;
 let cuts=[],editingId='',sourceDigest='',savedBatch=null,batchDirty=false,boundaryFocus='',passOrigin='',pendingPassRequest='';
@@ -49,7 +49,7 @@ function batchControls(){
  $('saveBatch').disabled=busy||(!videoMode&&!project)||!meta||!cuts.length;$('saveBatch').textContent=videoMode?(cuts.length?'All '+cuts.length+' · ZIP':'All clips · ZIP'):'Save clips';
  $('finishBatch').disabled=busy||batchDirty||savedBatch?.status!=='complete';
  $('newPass').disabled=busy||!project||!meta||savedBatch?.status==='running'||(!cuts.length&&!savedBatch?.clips?.length);$('undo').disabled=busy||!undoCuts.length;$('newCut').hidden=!editingId;$('addCut').textContent=editingId?'Update cut':'Add cut';refreshCutRows();
- for(const b of $('cutList').querySelectorAll('button'))b.disabled=busy;
+ 
 }
 function draftKey(){return (videoMode?'gs_cliplock_video_v1_':'gs_cliplock_batch_v2_')+(project?.id||'local')+'_'+sourceDigest;}
 function rememberBatch(){if(!sourceDigest)return;try{const key=draftKey(),raw=localStorage.getItem(key);if(raw){try{const prior=JSON.parse(raw);if(prior.sourceDigest!==sourceDigest||prior.passId!==(savedBatch?.id||null))localStorage.setItem(key+'_archived_'+Date.now(),raw);}catch{localStorage.setItem(key+'_archived_'+Date.now(),raw);}}localStorage.setItem(key,JSON.stringify({schema:2,updated:Date.now(),sourceDigest,cuts,videoFormat:$('videoFormat').value,removeBlue:$('removeBlue').checked,blue:$('blue').value,editingId,marks:{inFrame:Number($('in').value),outFrame:Number($('out').value)},cutName:$('cutName').value,cursor:selectedFrame,undoCuts:undoCuts.slice(-20),passId:savedBatch?.id||null,pendingPassRequest}));}catch{say('Browser draft unavailable. Save clips to preserve the cut recipe.');}}
