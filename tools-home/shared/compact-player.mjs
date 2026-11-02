@@ -1,7 +1,7 @@
-import {installControlHelp} from './control-help.mjs?v=1';
+import {installControlHelp} from './control-help.mjs?v=2';
 import {mountPlayerShell} from './player-shell.mjs?v=2';
 /** Shared UI adapter; never stores or rewrites media or native edit records. */
-export const COMPACT_PLAYER_VERSION='3';
+export const COMPACT_PLAYER_VERSION='4';
 export function explicitValue(value,min,max){const n=Number(value);if(String(value).trim()===''||!Number.isFinite(n)||n<min||n>max)throw Error('Enter a value from '+min+' to '+max+'.');return n;}
 export function hapticClick(device=globalThis.navigator){try{return device?.vibrate?.(12)??false;}catch{return false;}}
 if(typeof document!=='undefined'){

@@ -116,12 +116,12 @@
     {
       "tool": "cliplock",
       "tool_id": "GS-TOOL-CLIPLOCK",
-      "source_version": "R9",
+      "source_version": "R10",
       "hosted_path": "tools/cliplock/index.html",
       "description": "One compact cutter: video with sound or caption animation. Exact marks, read-only position, recoverable cut lists and one ZIP download.",
       "verification": "tools/cliplock/VIDEO_R6.json; existing caption pass evidence in tools/cliplock/PASSES_R4.json.",
       "operator_guide": "tools/cliplock/README.md",
-      "changes": "Locked shared viewer with edge insets, visible filename, Files/Photos choice, button marks, 25-frame jumps, full-list clipboard and contextual help."
+      "changes": "Stable per-cut Prepare/progress/Retry/Save states, inline Play/Pause/Replay, one active decoded preview, retained prepared clips and Save ZIP."
     }
   ]
 }
