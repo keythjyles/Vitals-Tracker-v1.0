@@ -1,3 +1,15 @@
+## Clipper R10 — visible preparation and inline playback, November 1, 2026
+
+Owner reported Prepare flickering without a visible result and requested a changing button, Save, and inline Play/Pause. Cut rows are now keyed and updated in place. Prepare becomes Prep N%, then Save only after the unchanged media engine verifies the output. Errors (including unapplied-editor validation) stay in that row with Retry. The row's stop square cancels its active preparation without deleting the cut. Do not insert/remove a Cancel row in the fixed-height player rail during processing: that was resizing the picture and shifting the list.
+
+Prepared compressed files remain available for unchanged cuts while other clips are prepared or added. Only invalidated results are released after committed edits; source/mode/format changes clear the relevant transient outputs. All N · ZIP shows batch progress, then Save ZIP downloads the already-completed bundle on the next click. Individual Save links remain available. Ready states are session outputs, not cloud-save or device-download receipts.
+
+Video cuts play/pause inline in their own row; Replay is explicit at the end. Before preparation the preview reads the stored source range; afterward it reads the verified exported file. One lazy inline video is active at a time; switching/closing releases its media and frame callback. The editing viewer's playhead, marks and frame geometry are unchanged. Per-cut output recipes remain downloadable from a prepared inline preview. Read-only timelines, exact-frame behavior, sound, source hashes, cut storage, Photos/Files, clipboard and the locked shared shell stay intact.
+
+Rollback: a59e22aabd7cb2c3288a45384d2850d9c094074d. Preserve all source videos and saved cut drafts on rollback. The user's current 1667-frame/seven-cut work is separate from the synthetic fixtures and older 1674-frame recovery.
+
+---
+
 ## Clipper R9 — owner refinements, November 1, 2026
 
 Owner requested Samsung edge clearance, filename display, Photos or Files selection, obvious current-frame IN/OUT buttons, ±25-frame jumps, export clarity and hover help. The shared shell now has at least 16px horizontal insets (including safe-area support), a compact source-name row, native hover titles and touch-hold help. The approved SxLock rail/row/frame dimensions remain locked. All eight HTML adapters use compact-player v3 and player-shell v2; native engines and existing drafts/media remain intact.
