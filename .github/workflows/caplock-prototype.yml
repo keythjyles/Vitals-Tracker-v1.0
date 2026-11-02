@@ -19,6 +19,8 @@ jobs:
             /tools-home/assets/hub.js
             /tools-home/assets/style.css
             /tools-home/shared/
+            /tools-home/tools/cliplock/engine.mjs
+            /tools-home/tools/cliplock/core.mjs
             /tools-home/tools/caplock/
             /tools-home/tools/studio/
             /tools-home/tools/jokelab/PRODUCTION_LEDGER.json

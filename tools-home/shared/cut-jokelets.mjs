@@ -12,9 +12,9 @@ async function read(store,key){const db=await database();return new Promise((res
 async function write(fn){const db=await database();return new Promise((resolve,reject)=>{const tx=db.transaction(['projects','media'],'readwrite');try{fn(tx.objectStore('projects'),tx.objectStore('media'));}catch(e){tx.abort();reject(e);return;}tx.oncomplete=resolve;tx.onerror=tx.onabort=()=>reject(tx.error||Error('Cut handoff could not be stored.'));});}
 function queues(){const q=JSON.parse(localStorage.getItem(QUEUES)||'{}');if(!q||Array.isArray(q)||typeof q!=='object')throw Error('The cut handoff list could not be read.');return q;}
 function changed(){try{localStorage.setItem(PING,String(Date.now())+'-'+Math.random());}catch{}window.dispatchEvent(new Event(EVENT));}
-export function beginCutQueue(sourceHash,origins){
+export function beginCutQueue(sourceHash,origins,{append=false}={}){
  if(!/^[a-f0-9]{64}$/.test(sourceHash)||!origins.length)throw Error('Choose a source and at least one saved cut.');
- const q=queues();q[sourceHash]={origins:origins.map(normalizeCutOrigin),states:{},updated:new Date().toISOString()};localStorage.setItem(QUEUES,JSON.stringify(q));changed();
+ const q=queues(),prior=append?q[sourceHash]:null,values=origins.map(normalizeCutOrigin);const merged=[...(prior?.origins||[]).filter(o=>!values.some(v=>v.cut.id===o.cut.id&&v.cut.inFrame===o.cut.inFrame&&v.cut.outFrame===o.cut.outFrame)),...values];q[sourceHash]={origins:merged,states:prior?.states||{},updated:new Date().toISOString()};localStorage.setItem(QUEUES,JSON.stringify(q));changed();
 }
 export function cutQueueStatus(sourceHash,id,state,error='',progress=null){
  const q=queues();if(!q[sourceHash])return;q[sourceHash].states[id]={state,error:String(error).slice(0,800),progress};q[sourceHash].updated=new Date().toISOString();localStorage.setItem(QUEUES,JSON.stringify(q));changed();

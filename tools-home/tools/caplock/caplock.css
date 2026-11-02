@@ -51,3 +51,6 @@ h1{font-size:20px;margin:4px 0}#viewerPage{padding:0;border:0;background:none}#s
 
 /* R9: editable placements, stable controls and an explicit deselection action. */
 #pickerDrawer{transition:none}.item-row{grid-template-columns:minmax(0,1fr) 32px 32px 32px}#focusBar #clearFocus{min-width:34px}#focusBar{gap:2px}#clipProperties .item-heading{position:sticky;top:-10px;z-index:4;background:#182635;padding:4px 0}#clipProperties .item-heading h2{flex:1;min-width:0}
+
+
+#bedLoader .video-entry{display:flex;gap:5px;justify-content:center;pointer-events:auto;margin-bottom:6px}#bedLoader #emptyLoadProject{margin-top:2px}#captionImport .actions a{color:#ffd577;align-self:center}#geminiHandoffText{width:100%}

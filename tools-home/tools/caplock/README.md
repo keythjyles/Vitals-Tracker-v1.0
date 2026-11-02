@@ -1,3 +1,17 @@
+## Direct jokelet caption workflow — Clipper R14 / CapLock R15, November 2, 2026
+
+Owner correction: Clipper is optional equipment. A saved joke video (for example Slide test 2.mp4) opens directly in CapLock through Files or Photos and becomes its own project. Existing projects remain selectable. A whole-video import preserves the exact source bytes and soundtrack; it does not render, stitch, transcribe or require a visit to Clipper. Its source-bound full range is recorded with origin cut ID `whole-video`, using the existing verified bed-save route. Reopening the same bytes resumes the same project; names never establish identity.
+
+For a source that needs cuts, Clipper's visible **Next → CapLock** sends the named video cuts to the jokelet picker. Each selected cut still owns an independent caption project. This replaces the hidden-footer-only handoff as the normal instruction; the footer remains compatible. The locked right rail, editable IN/OUT boxes, exact source frames, media engines and Save/Resave stay intact.
+
+In the opened CapLock joke, **Import captions → Import Gemini video** preserves the blue provider original in that project and opens Caption Clipper with the project and return target already bound. Mark/add the animation ranges, then **Next → CapLock** saves any pending transparent components and returns to the waiting editor tab. A changed caption pass adds its unplaced component tray to the same scene, preserving bed transforms, existing layers and prior placements. Reopening the same pass restores its active item. Previous/Next caption navigation and Insert remain separate actions.
+
+The caption sheet also offers **Joke text · Gemini handoff → Copy Gemini handoff**. Existing JokeLab text is reused. Imported videos with no text do not get a fabricated transcript: literal text may be saved before copying the brief. The existing Gemini app performs creation; no paid generation or automatic Gemini request is triggered. Blue source, numbered alpha clips and editable placements remain independent assets. In Studio, the caption round trip uses the existing Cut/Captions adapters; no parallel shell or new project is created from inside a selected Studio module.
+
+Cloud working saves use the existing PreviewLock authentication, byte/hash verification and Dropbox project. Temporary browser staging supports retries; Drive remains pending until separately verified. No production QA upload or source deletion is authorized by this engineering change. No finished layered-video renderer is added. Rollback code baseline: dba4614ee11fd936033242b79358de41ec0aa31b; preserve projects, full-video source origins, cut drafts, media, edit history and caption passes. Evidence: tools-home/tools/cliplock/CAPTION_WORKFLOW_R14.json. Earlier release instructions below remain historical.
+
+---
+
 ## Jokelet-first cut projects — Clipper R13 / CapLock R14, November 1, 2026
 
 Owner direction: finish and caption individual jokelets. An episode assembly is not a prerequisite. Existing finished/mixed source cuts retain their picture, soundtrack and exact source range; no new performance or automatic transcript is invented.

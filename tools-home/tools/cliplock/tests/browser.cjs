@@ -29,7 +29,7 @@ const {execFileSync}=require('node:child_process');
  await page.route('**/caption-fixture.mp4',r=>r.fulfill({contentType:'video/mp4',body:bytes}));
  await page.goto('http://127.0.0.1:8767/tools-home/tools/cliplock/?project=caption-fixture');
  await page.waitForFunction(()=>!document.querySelector('#next').disabled);
- assert.match(await page.title(),/Caption Clipper.*R13/);assert.equal(await page.locator('#sourceSelect option').count(),1);
+ assert.match(await page.title(),/Caption Clipper.*R14/);assert.equal(await page.locator('#sourceSelect option').count(),1);
  assert.equal(await page.locator('#singleExport').count(),0);assert.match(await page.locator('#source').textContent(),/caption.mp4.*96 frames/);
  // Emulate rounded browser media-time reads on a 24fps source, and multiple taps before seek completion.
  await page.locator('#video').evaluate(v=>{const d=Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype,'currentTime');Object.defineProperty(v,'currentTime',{configurable:true,get(){return Math.floor(d.get.call(this)*1000)/1000;},set(n){d.set.call(this,n);}});});
@@ -71,8 +71,8 @@ const {execFileSync}=require('node:child_process');
  await exactMark(page,'out','12');await page.locator('#out').dispatchEvent('change');await page.locator('#addCut').click();await page.locator('#saveBatch').click();await page.waitForFunction(()=>!document.querySelector('#finishBatch').disabled);
  assert.equal(original.cuts.version,2);assert.equal(original.cuts.id,'batch-v2');assert.equal(original.cutHistory.length,1);assert.deepEqual(original.cutHistory[0].clips.map(c=>c.path),v1Paths);
 
- await page.route('**/tools/caplock/**',r=>r.fulfill({contentType:'text/html',body:'<title>CapLock handoff</title>'}));await page.locator('#finishBatch').click();await page.waitForURL(/caplock/);
- assert.equal(new URL(page.url()).searchParams.get('caption'),'original');assert.equal(new URL(page.url()).searchParams.get('project'),'caption-fixture');
+ await page.route('**/tools/caplock/**',r=>r.fulfill({contentType:'text/html',body:'<title>CapLock handoff</title>'}));const returned=page.waitForEvent('popup');await page.locator('#finishBatch').click();const capReturn=await returned;await capReturn.waitForURL(/caplock/);
+ assert.equal(new URL(capReturn.url()).searchParams.get('caption'),'original');assert.equal(new URL(capReturn.url()).searchParams.get('project'),'caption-fixture');assert.match(page.url(),/cliplock/);await capReturn.close();
  // Empty caption project keeps import available and never substitutes the bed.
  await page.goto('http://127.0.0.1:8767/tools-home/tools/cliplock/?project=empty-fixture');await page.waitForFunction(()=>!document.querySelector('#importCaption').disabled);
  assert.equal(await page.locator('#video').isVisible(),false);assert.match(await page.locator('#emptyMessage').innerText(),/No caption animation/);

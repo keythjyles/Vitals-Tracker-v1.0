@@ -1,7 +1,8 @@
+import {caplockTarget,returnCaptions} from '../../shared/caption-handoff.mjs?v=1';
 import {cutListText} from './cut-list-text.mjs?v=1';
-import {beginCutQueue,cutQueueStatus,getCutProject,stageCutProject} from '../../shared/cut-jokelets.mjs?v=1';
+import {beginCutQueue,cutQueueStatus,getCutProject,stageCutProject} from '../../shared/cut-jokelets.mjs?v=2';
 import {normalizeCutOrigin,cutProjectId} from '../../shared/cut-jokelets-core.mjs?v=1';
-import {hapticClick,cutListRecipe,readCutList,clipZip} from './safety.mjs?v=13';
+import {hapticClick,cutListRecipe,readCutList,clipZip} from './safety.mjs?v=14';
 import {inStudio,installAdapter} from '../studio/adapter.mjs?v=1';
 import {moduleSession,sourcePassMatches} from '../studio/core.mjs?v=1';
 import {cutPassVersion,nextCutPassVersion,captionCutLabel} from '../../shared/cut-passes.mjs?v=4';
@@ -14,6 +15,7 @@ const $=id=>document.getElementById(id),video=$('video'),API='https://gs-preview
 let project=null,file=null,source=null,meta=null,sourceURL=null,resultURL=null,result=null,busy=false,controller=null,loadEpoch=0,previewEnd=null,previewLast=0,selectedFrame=0;
 let cuts=[],editingId='',sourceDigest='',savedBatch=null,batchDirty=false,boundaryFocus='',passOrigin='',pendingPassRequest='';
 let videoMode=new URLSearchParams(location.search).get('mode')==='video'&&!inStudio();
+let returnTarget=caplockTarget(new URLSearchParams(location.search).get('returnTo'));
 const videoResults=new Map(),modeSources=new Map();let videoResultSource='',bundleURL=null,undoCuts=[];
 const cutRows=new Map(),prepareJobs=new Map();let inlinePreview=null,bundleLink=null,batchJob=null;
 const text=(node,value)=>{if(node.textContent!==value)node.textContent=value;};
@@ -29,7 +31,7 @@ function updateClock(){if(!meta)return;if(!video.paused&&!video.seeking)selected
 function pause(){if(meta&&!video.paused&&!video.seeking)selectedFrame=frameAt(meta.times,video.currentTime);previewEnd=null;video.pause();}
 async function loadSource(blob,ref){const token=++loadEpoch;closeInlinePreview();pause();busy=true;controls();say('Reading source frames…');try{const next=await inspect(blob);if(token!==loadEpoch)return;meta=next;file=blob;source=ref;result=null;if(sourceURL)URL.revokeObjectURL(sourceURL);if(resultURL)URL.revokeObjectURL(resultURL);boundaryFocus='';sourceURL=URL.createObjectURL(blob);video.src=sourceURL;video.hidden=false;$('empty').hidden=true;$('result').hidden=true;$('source').textContent=ref.name+' · '+next.width+'×'+next.height+' · '+next.times.length+' frames';$('in').value=0;$('out').value=next.times.length;$('in').max=next.times.length-1;$('out').max=next.times.length;$('seek').max=next.times.length-1;$('jumpFrame').max=next.times.length-1;selectedFrame=0;sourceDigest=await hash(blob);if(token!==loadEpoch)return;const existing=project?.assets.find(a=>(videoMode||a.role==='caption')&&a.sha256===sourceDigest&&a.size===blob.size);if(existing)source=existing;if(videoMode){$('videoFormat').value=next.alpha||!next.mp4Possible?'webm':'mp4';if(videoResultSource!==sourceDigest){clearVideoResults();videoResultSource=sourceDigest;}}restoreBatch();updateClock();rangeChanged();say(videoMode?'Video loaded with '+(next.audio?'original sound':'no audio track')+'.':'Mark IN, mark OUT, then Add cut.');}catch(e){throw e;}finally{if(token===loadEpoch){busy=false;controls();}}}
 async function useAsset(a){if(!isVideo(a)||(!videoMode&&['bed','voice','reaction','outro'].includes(a.role)))throw Error('Choose the caption animation. The bed is selected later in CapLock.');pause();say('Loading '+a.name+'…');const u=a.src?new URL('../jokelets/'+a.src,import.meta.url).href:(await api('/api/playback?path='+encodeURIComponent(a.path))).url;const r=await fetch(u);if(!r.ok)throw Error('Source download failed.');await loadSource(await r.blob(),a);}
-async function openProject(record,chosen){const d=await api('/api/joke-project?id='+encodeURIComponent(record.id));if(!d.project)throw Error('Open this catalog joke in CapLock once to establish its saved project.');project=d.project;$('projectName').textContent=project.title;$('return').href='../caplock/?v=R14-jokelets-compact&project='+encodeURIComponent(project.id);const options=project.assets.filter(a=>(videoMode||a.role==='caption')&&isVideo(a));$('sourceSelect').replaceChildren();for(const a of options){const o=document.createElement('option');o.value=a.path;o.textContent=a.name+(videoMode?'':' · '+captionCutLabel(a));$('sourceSelect').append(o);}const a=chosen&&options.find(a=>a.path===chosen.path)||options.at(-1);if(a){$('sourceSelect').value=a.path;await useAsset(a);}else{file=meta=source=null;cuts=[];editingId='';sourceDigest='';savedBatch=null;batchDirty=false;passOrigin='new';pendingPassRequest='';$('cutName').value='1';$('clock').textContent='No source';$('source').textContent='No caption animation loaded.';renderBatch();video.removeAttribute('src');video.load();video.hidden=true;$('empty').hidden=false;$('emptyMessage').textContent='No caption animation saved yet. Import the Gemini animation.';controls();}}
+async function openProject(record,chosen){const d=await api('/api/joke-project?id='+encodeURIComponent(record.id));if(!d.project)throw Error('Open this catalog joke in CapLock once to establish its saved project.');project=d.project;$('projectName').textContent=project.title;$('return').href='../caplock/?v=R15-workflow&project='+encodeURIComponent(project.id);const options=project.assets.filter(a=>(videoMode||a.role==='caption')&&isVideo(a));$('sourceSelect').replaceChildren();for(const a of options){const o=document.createElement('option');o.value=a.path;o.textContent=a.name+(videoMode?'':' · '+captionCutLabel(a));$('sourceSelect').append(o);}const a=chosen&&options.find(a=>a.path===chosen.path)||options.at(-1);if(a){$('sourceSelect').value=a.path;await useAsset(a);}else{file=meta=source=null;cuts=[];editingId='';sourceDigest='';savedBatch=null;batchDirty=false;passOrigin='new';pendingPassRequest='';$('cutName').value='1';$('clock').textContent='No source';$('source').textContent='No caption animation loaded.';renderBatch();video.removeAttribute('src');video.load();video.hidden=true;$('empty').hidden=false;$('emptyMessage').textContent='No caption animation saved yet. Import the Gemini animation.';controls();}}
 const picker=createProjectPicker({api,onPause:pause,hasProject:()=>videoMode||!!project,onOpenProject:openProject,onUseAsset:async(p,a)=>{if(p&&p.id!==project?.id)await openProject(p,a);else await useAsset(a);},onLocal:()=>$('import').click()});
 $('open').onclick=guard(()=>picker.open());$('assets').onclick=guard(()=>picker.open(project?.id));$('sourceSelect').onchange=guard(()=>useAsset(projectAssets(project).find(a=>a.path===$('sourceSelect').value)));$('importCaption').onclick=()=>$('import').click();$('import').onchange=guard(async e=>{const f=e.target.files[0];if(f)await loadSource(f,{name:f.name,kind:'device'});e.target.value='';});
 $('start').onclick=()=>seek(0);$('back').onclick=()=>stepSource(-1);$('next').onclick=()=>stepSource(1);$('back25').onclick=()=>stepSource(-25);$('next25').onclick=()=>stepSource(25);$('goFrame').onclick=()=>{const n=Number($('jumpFrame').value);if(Number.isInteger(n)&&n>=0&&n<meta.times.length)seek(n);else say('Enter a frame from 0 to '+(meta.times.length-1)+'.');};$('jumpFrame').onkeydown=e=>{if(e.key==='Enter')$('goFrame').click();};$('play').onclick=guard(async()=>{pauseInlinePreview();boundaryFocus='';drawBoundaries();previewEnd=null;if(video.paused){if(video.ended){say('End of source. Use Find a frame to move.');return;}await video.play();}else {pause();updateClock();}});video.onplay=()=>$('play').textContent='Pause';video.onpause=()=>{$('play').textContent='Play';updateClock();};video.onended=()=>{if(meta){selectedFrame=meta.times.length-1;updateClock();}};video.ontimeupdate=()=>{updateClock();if(previewEnd!==null&&video.currentTime>=previewEnd){seek(previewLast);}};video.onseeked=updateClock;video.onerror=()=>say('Source cannot play in this browser. Original is unchanged.');
@@ -42,14 +44,14 @@ window.addEventListener('beforeunload',e=>{if(busy){e.preventDefault();e.returnV
 controls();const initial=new URLSearchParams(location.search);if(!inStudio()&&initial.has('project'))guard(async()=>{await openProject({id:initial.get('project')});if(initial.has('asset')){const a=projectAssets(project).find(a=>a.id===initial.get('asset')||a.path===initial.get('asset'));if(a)await useAsset(a);}})();
 
 // Reuse waiting editor tabs without navigating/reloading their unsaved workspace.
-for(const link of document.querySelectorAll('.links a[target]'))link.addEventListener('click',event=>{if(event.button!==0||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;if(link.id==='return'&&videoMode&&cuts.length){event.preventDefault();launchJokeletProjects();return;}const tab=window.open('',link.target);if(!tab)return;event.preventDefault();try{if(tab.location.href==='about:blank'||new URL(tab.location.href).pathname!==new URL(link.href).pathname)tab.location.href=link.href;tab.focus();}catch{tab.location.href=link.href;}});
+for(const link of document.querySelectorAll('.links a[target]'))link.addEventListener('click',event=>{if(event.button!==0||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;if(link.id==='return'&&cuts.length){event.preventDefault();$('finishBatch').click();return;}const tab=window.open('',link.target);if(!tab)return;event.preventDefault();try{if(tab.location.href==='about:blank'||new URL(tab.location.href).pathname!==new URL(link.href).pathname)tab.location.href=link.href;tab.focus();}catch{tab.location.href=link.href;}});
 
 
 function batchControls(){
  $('copyList').disabled=busy||!meta||!cuts.length;
  for(const id of ['addCut','cutName','removeBlue','blue'])$(id).disabled=busy||!meta;
  $('saveBatch').disabled=busy||(!videoMode&&!project)||!meta||!cuts.length;$('saveBatch').textContent=videoMode?(cuts.length?'All '+cuts.length+' · ZIP':'All clips · ZIP'):'Save clips';
- $('finishBatch').disabled=busy||batchDirty||savedBatch?.status!=='complete';
+ $('finishBatch').disabled=busy||!meta||!cuts.length||(!videoMode&&!project);$('finishBatch').textContent='Next → CapLock';$('finishBatch').title=videoMode?'Open these named cuts as separate CapLock caption projects':'Save the caption components and return them to this same CapLock joke project';
  $('newPass').disabled=busy||!project||!meta||savedBatch?.status==='running'||(!cuts.length&&!savedBatch?.clips?.length);$('undo').disabled=busy||!undoCuts.length;$('newCut').hidden=!editingId;$('addCut').textContent=editingId?'Update cut':'Add cut';refreshCutRows();
  
 }
@@ -145,7 +147,17 @@ $('saveBatch').onclick=()=>{if(videoMode&&bundleURL&&bundleLink){bundleLink.clic
  await monitorBatch(parent.id);
 });};
 
-$('finishBatch').onclick=()=>{if(inStudio()){window.parent.postMessage({protocol:'GS-Studio-1',action:'navigate-phase',phase:'captions'},location.origin);return;}if(batchDirty||savedBatch?.status!=='complete'||!source?.id)return;pause();location.href='../caplock/?v=R14-jokelets-compact&project='+encodeURIComponent(project.id)+'&caption='+encodeURIComponent(source.id);};
+$('finishBatch').onclick=async()=>{
+ if(videoMode)return launchJokeletProjects();
+ if(busy||!project||!cuts.length)return;
+ const tab=inStudio()?null:window.open('',returnTarget);
+ try{if(tab?.location.href==='about:blank'){tab.document.body.style.cssText='background:#111a24;color:#edf3fa;font:16px system-ui;padding:24px';tab.document.body.textContent='Saving your caption clips…';}}catch{}
+ if(batchDirty||savedBatch?.status!=='complete')await $('saveBatch').onclick();
+ if(batchDirty||savedBatch?.status!=='complete'||!source?.id){try{if(tab?.location.href==='about:blank')tab.close();}catch{}return;}
+ pause();rememberBatch();
+ if(inStudio()){window.parent.postMessage({protocol:'GS-Studio-1',action:'navigate-phase',phase:'captions'},location.origin);return;}
+ returnCaptions(tab,{project:project.id,caption:source.id});
+};
 
 function refreshSourceList(){
  const select=$('sourceSelect');select.replaceChildren();for(const a of project.assets.filter(a=>a.role==='caption'&&isVideo(a))){const o=document.createElement('option');o.value=a.path;o.textContent=a.name+(videoMode?'':' · '+captionCutLabel(a));select.append(o);}select.value=source?.path||'';
@@ -201,7 +213,7 @@ async function prepareVideoCut(c,onProgress=()=>{}){
  // Paint the visible row state before initializing a codec, even on a busy phone.
  await new Promise(resolve=>{const timer=setTimeout(resolve,100);requestAnimationFrame(()=>requestAnimationFrame(()=>{clearTimeout(timer);resolve();}));});
  try{const output=await cut(file,meta,r.inFrame,r.outFrame,$('videoFormat').value,{signal,onProgress:p=>{job.progress=Math.max(0,Math.min(99,Math.floor(p*100)));onProgress(job.progress);const ui=cutRows.get(c.id);if(ui)refreshCutRow(ui);say('Preparing '+c.name+' · '+job.progress+'%');}});
-  const url=URL.createObjectURL(output.blob),recipe={schema:'GS-ClipLockCut-1',release:'R13',source:{name:source.name,path:source.path||null,sha256:sourceDigest,bytes:file.size},selection:{...output.range,outExclusive:true},output:{...output.verified,format:output.format},audio:meta.audio?'Primary source soundtrack retained.':'Silent source.'};
+  const url=URL.createObjectURL(output.blob),recipe={schema:'GS-ClipLockCut-1',release:'R14',source:{name:source.name,path:source.path||null,sha256:sourceDigest,bytes:file.size},selection:{...output.range,outExclusive:true},output:{...output.verified,format:output.format},audio:meta.audio?'Primary source soundtrack retained.':'Silent source.'};
   const data={...output,url,name:r.name,recipe};videoResults.set(key,data);job.state='ready';job.progress=100;refreshCutRows();return data;
  }catch(e){job.state='error';job.error=signal.aborted?'Cancelled.':e.message||'Preparation failed.';refreshCutRows();throw e;}finally{controller=null;controls();}
 }
@@ -216,7 +228,7 @@ $('cancelVideo').onclick=()=>controller?.abort();
 $('videoFormat').onchange=()=>{clearVideoResults();rangeChanged();rememberBatch();};
 $('loadVideo').onclick=()=>$('videoFile').click();$('loadPhotos').onclick=$('emptyPhotos').onclick=()=>$('videoPhotos').click();const loadLocalVideo=guard(async e=>{const f=e.target.files[0];if(f)await loadSource(f,{name:f.name,kind:'device'});e.target.value='';});$('videoFile').onchange=$('videoPhotos').onchange=loadLocalVideo;
 function applyModeUI(){
- document.body.classList.toggle('video-mode',videoMode);document.title=(videoMode?'Video Clipper':'Caption Clipper')+' · GS-TOOL-CLIPLOCK · R13';$('toolTitle').textContent=videoMode?'Video Clipper':'Caption Clipper';$('loadVideo').hidden=!videoMode;$('loadPhotos').hidden=$('emptyPhotos').hidden=!videoMode;$('videoExport').hidden=!videoMode;$('open').textContent=videoMode?'Saved videos':'Open project';$('emptyMessage').textContent=videoMode?'Load the finished video. Its voice, music and effects stay together.':'Open the joke project and its caption animation.';$('importCaption').textContent=videoMode?'Files':'Import caption animation';$('importCaption').onclick=()=>$(videoMode?'videoFile':'import').click();$('saveBatch').textContent=videoMode?'All clips · ZIP':'Save clips';
+ document.body.classList.toggle('video-mode',videoMode);document.title=(videoMode?'Video Clipper':'Caption Clipper')+' · GS-TOOL-CLIPLOCK · R14';$('toolTitle').textContent=videoMode?'Video Clipper':'Caption Clipper';$('loadVideo').hidden=!videoMode;$('loadPhotos').hidden=$('emptyPhotos').hidden=!videoMode;$('videoExport').hidden=!videoMode;$('open').textContent=videoMode?'Saved videos':'Open project';$('emptyMessage').textContent=videoMode?'Load the finished video. Its voice, music and effects stay together.':'Open the joke project and its caption animation.';$('importCaption').textContent=videoMode?'Files':'Import caption animation';$('importCaption').onclick=()=>$(videoMode?'videoFile':'import').click();$('saveBatch').textContent=videoMode?'All clips · ZIP':'Save clips';
  for(const [id,active]of [['videoMode',videoMode],['captionMode',!videoMode]]){if(active)$(id).setAttribute('aria-current','page');else $(id).removeAttribute('aria-current');}
  const details=$('sourceSelect').closest('details');details.querySelector('summary').textContent=videoMode?'Video source':'Caption source';$('sourceSelect').closest('label').firstChild.textContent=videoMode?'Video ':'Caption animation';details.querySelector('p:last-child').textContent=videoMode?'Video cuts keep their source dimensions, timing and sound. Downloads and cut recipes are separate from cloud project saves.':'Mark on the native caption source frames. Save clips creates silent components at25fps, preserving the original. Drive backup remains queued until verified.';
  const footer=document.querySelector('#projectPicker .picker-footer button');if(footer)footer.textContent=videoMode?'Load video from device':'Import into current project';
@@ -249,7 +261,7 @@ function launchJokeletProjects(){
    return {cut:{...c},origin:normalizeCutOrigin({source:{name:source.name,sha256:sourceDigest,frames:meta.times.length,bytes:file.size},cut:{...c,index:i+1,start:r.start,end:r.end}})};
   });
   const digest=sourceDigest;beginCutQueue(digest,snapshot.map(x=>x.origin));pause();pauseInlinePreview();
-  const url=new URL('../caplock/?v=R14-jokelets-compact&cuts='+digest,location.href),tab=window.open('','gs-caplock-jokelets');
+  const url=new URL('../caplock/?v=R15-workflow&cuts='+digest,location.href),tab=window.open('','gs-caplock-jokelets');
   if(tab){try{if(tab.location.href==='about:blank'||new URL(tab.location.href).pathname!==url.pathname)tab.location.href=url.href;else tab.postMessage({protocol:'GS-JokeletCuts-1',sourceHash:digest},location.origin);tab.focus();}catch{tab.location.href=url.href;}}
   run(async()=>{
    let ready=0;
@@ -268,3 +280,9 @@ function launchJokeletProjects(){
 }
 
 const playerShell=document.querySelector('.gs-player-shell');if(playerShell)new MutationObserver(()=>{if(!playerShell.classList.contains('drawer-closed'))pauseInlinePreview();}).observe(playerShell,{attributes:true,attributeFilter:['class']});
+
+window.addEventListener('message',event=>{
+ if(inStudio()||event.origin!==location.origin||event.data?.protocol!=='GS-CaptionClipper-1')return;
+ const {project:id,asset,returnTo}=event.data;if(typeof id!=='string'||typeof asset!=='string')return;
+ guard(async()=>{if(busy)throw Error('Finish the current clip preparation before opening another animation.');rememberBatch();if(videoMode)await switchMode(false);returnTarget=caplockTarget(returnTo);await openProject({id});const a=project.assets.find(a=>a.id===asset);if(a&&a.id!==source?.id)await useAsset(a);history.replaceState(null,'',location.pathname+'?mode=caption&v=R14-workflow&project='+encodeURIComponent(id)+(asset?'&asset='+encodeURIComponent(asset):'')+'&returnTo='+returnTarget);say('Cut this caption animation, then tap Next → CapLock to return to '+project.title+'.');})();
+});
