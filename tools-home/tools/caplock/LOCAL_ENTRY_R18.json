@@ -48,7 +48,23 @@
       "studio": 41541980536,
       "sxlock": 41541980517
     },
-    "live": "pending Pages publication"
+    "live": {
+      "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/caplock/?v=R18-local",
+      "pagesRun": 41542334932,
+      "pagesStatus": "success",
+      "visibleVersion": "R18",
+      "sourceFile": "Slide_test_3.mp4",
+      "sourceSha256": "9a222183ab6dd71d6a9311aae9946670d8eafcfda4b803da3631af0bcc6b145e",
+      "sourceBytes": 12834951,
+      "width": 540,
+      "height": 960,
+      "loaded": true,
+      "headerHeight": 16,
+      "playButtonHeight": 25,
+      "placedItems": 0,
+      "privateCloudAuthenticationUsed": false,
+      "screenshot": "caplock-r18-slide-loaded.jpg"
+    }
   },
   "rollback": "Restore only changed source files from baseline; keep all media, projects and recovery records."
 }
