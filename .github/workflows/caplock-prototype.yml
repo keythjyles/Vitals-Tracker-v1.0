@@ -58,8 +58,9 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: caplock-r20-caption-background
+          name: caplock-r21-local-passes
           path: |
             /tmp/caplock-fixtures/r19-named-import.png
             /tmp/caplock-fixtures/r20-background.png
+            /tmp/caplock-fixtures/r21-local-pass.png
           if-no-files-found: ignore

@@ -1,3 +1,13 @@
+## CapLock R21 — local video passes, November 2, 2026
+
+Owner correction: save the placed captions into a new video bed, then run CapLock over that video again to add any missing caption or animation. A missing first caption need not be merged back into the old queue. Save, recover & export now offers Save video / Resave video and Use as new bed. The existing compositor renders only placed/visible layers, keeps the complete bed and soundtrack, applies R20 background removal, and downloads a distinct MP4 pass. Resave reuses an unchanged completed output. Starting the next pass archives the editable previous workspace and clears its overlay list so rendered captions are not doubled.
+
+No cloud project, upload or credentials are needed for a loaded local video. The original source and component files remain intact. Download project remains the separate editable JSON save. A key cache includes current media connections, so a different same-name file cannot reuse an old render. Cancellation retains edits; starting a pass requires a requested video download and a render matching the current edits.
+
+For the owner's already-open R20 work, keep that tab open and download its project JSON before switching. The explicit R21 `?recover=local` link restores the saved draft; Reconnect files selects the original bed and caption files together by exact filename/size and preserves the six placements, timing, geometry and background settings. Unrelated selected files are not added as layers. Project JSON alone contains references, not video bytes. Normal unbound launch remains cloud-independent and does not auto-open an unrelated project.
+
+R18 compact geometry, R19 named imports, R20 keying, source cuts, existing cloud/Studio routes and adjacent editing engines remain intact. Schema7 is unchanged. Rollback: `4fddec66cac0c0cec32d6c465315b60d23f3b64b`; retain all video downloads, source files, schema7 projects and recovery archives. Verification: [LOCAL_PASSES_R21.json](tools-home/tools/caplock/LOCAL_PASSES_R21.json). Local 78 Node checks passed; browser/export/deployment receipts are recorded separately.
+
 ## CapLock R20 — automatic caption background removal, November 2, 2026
 
 Owner correction: caption/animation imports must remove a solid background inside CapLock, as AspectLock does. A separate transparent ZIP or external conversion is not a prerequisite. R20 follows AspectLock's scratch-canvas compositing approach, automatically samples a uniform solid edge color on visual imports and applies the same alpha operation during preview and the existing captioned-video export. Genuine alpha input remains unchanged. Original bytes, cut marks, source cadence, bed soundtrack and editable placement are preserved. AspectLock itself is unchanged.

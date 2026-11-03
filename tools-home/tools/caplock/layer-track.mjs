@@ -9,7 +9,7 @@ export class LayerTracks{
   if(generation!==this.generation){el.pause?.();URL.revokeObjectURL(url);throw Error('Import cancelled because project changed');}
   this.detach(clip.id);const wrap=document.createElement('div');wrap.className='media-layer';wrap.dataset.clipId=clip.id;wrap.append(el);let surface;
   if(clip.type!=='audio'){surface=new BackgroundSurface();surface.canvas.className='keyed-frame';surface.canvas.style.display='none';wrap.append(surface.canvas);const resize=document.createElement('button');resize.type='button';resize.className='layer-resize';resize.textContent='↘';resize.setAttribute('aria-label','Resize animation '+clip.name);wrap.append(resize);}wrap.onpointerdown=e=>this.drag(e,clip.id);this.root.append(wrap);
-  const media={el,wrap,url,surface,serial:0};this.media.set(clip.id,media);
+  const media={el,wrap,url,blob,surface,serial:0};this.media.set(clip.id,media);
   el.addEventListener('seeked',()=>{media.serial++;this.paint(media,this.getClips().find(c=>c.id===clip.id)||clip);});
   this.update();return Number.isFinite(el.duration)?el.duration:2;
  }

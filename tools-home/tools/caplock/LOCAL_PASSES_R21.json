@@ -1,0 +1,32 @@
+{
+  "schema": "GS-CapLock-Local-Passes-1",
+  "release": "R21",
+  "baseline": "4fddec66cac0c0cec32d6c465315b60d23f3b64b",
+  "request": "Save existing six caption placements as a new video bed, then add only the missing first caption in another pass.",
+  "workflow": [
+    "Save video",
+    "Use as new bed",
+    "Import only the next caption or animation",
+    "Insert",
+    "Save next video pass"
+  ],
+  "upgradeRecovery": [
+    "Keep R20 tab open and download project JSON",
+    "Open explicit R21 recover=local link",
+    "Reconnect original bed and caption files by exact name/size"
+  ],
+  "preserved": [
+    "original media and source cut frames",
+    "all six saved placements and background settings on recovery",
+    "full bed and soundtrack in saved video",
+    "previous editable workspace archived before new pass",
+    "R18 compact geometry and R20 transparency",
+    "existing cloud/Studio routes and adjacent engines"
+  ],
+  "schemaVersion": 7,
+  "checks": {
+    "nodePassed": 78,
+    "browser": "pending",
+    "deployment": "pending"
+  }
+}

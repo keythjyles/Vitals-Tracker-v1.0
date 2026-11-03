@@ -1,4 +1,5 @@
-import {renderCaptioned} from './composite.mjs?v=20-key';
+import {passFilename,matchLocalFile,localPassKey} from './local-pass.mjs?v=21';
+import {renderCaptioned} from './composite.mjs?v=21-passes';
 import {DEFAULT_CHROMA,detectBackground} from './background.mjs?v=20';
 import {captionJobStatus} from '../../shared/caption-job-status.mjs?v=1';
 import {stageAsset,stageRecord,stageFilename,captionRecipe,stageForName,pendingCaptions} from '../../shared/production-stages.mjs?v=20-key';
@@ -16,7 +17,7 @@ import {captionNumber,numberedCaptionFiles,activeCaption,startCaptionSequence,na
 import {paintMatrix,matrixFrame} from '../../shared/item-matrix.mjs?v=1';
 import {rateOf,fitRate} from './clip-time.mjs?v=4';
 import {words,moveWords,shiftWords,geminiPrompt} from './script.mjs?v=4';
-import {LayerTracks} from './layer-track.mjs?v=20-key';
+import {LayerTracks} from './layer-track.mjs?v=21-passes';
 import {FPS,DEFAULT_STYLE,createProject,phrase,importTranscript,subtitle,timed,effective,validateProject,validateStyle} from './core.mjs?v=20-key';
 const $=id=>document.getElementById(id),v=$('video'),draftKey='gs_caplock_draft_v1',API='https://gs-previewlock-api.onrender.com';
 // Owner lock: built-in text captions cannot be enabled by UI, URL, or restored data.
@@ -24,7 +25,7 @@ const BUILTIN_CAPTIONING_LOCKED=true;
 let projectContext=null;
 let restoring=false,placementBusy=false,cloudSession=null,cloudTimer=null,cloudSaving=false,cloudWrite=Promise.resolve();
 let selectedWords=[],selectedClip=null,editMode='view',libraryTarget='base',projectEpoch=0,dragBefore=null;
-let project=createProject(),selected=null,frame=0,maxFrame=0,undo=[],redo=[],mediaUrl=null,input=null,sink=null,seekRevision=0,mediaRevision=0,library=[],dirty=false,zoom=1,pan={x:0,y:0};
+let project=createProject(),selected=null,frame=0,maxFrame=0,undo=[],redo=[],mediaUrl=null,bedBlob=null,lastVideoPass=null,input=null,sink=null,seekRevision=0,mediaRevision=0,library=[],dirty=false,zoom=1,pan={x:0,y:0};
 const say=s=>$('status').textContent=s, current=()=>project.captions.find(c=>c.id===selected);
 if(!inStudio()&&!window.name)window.name='gs-caplock';
 let importingVideo=false;
@@ -66,7 +67,7 @@ function saveDraft(){if(restoring)return;if(project.captionSequence)project.capt
 function change(fn){const before=JSON.stringify(project);try{fn();for(const old of JSON.parse(before).clips||[]){const now=project.clips.find(c=>c.id===old.id);if(old.locked&&now?.locked&&['inFrame','outFrame','trimInFrame','trimOutFrame','playbackRate','x','y','width','rotation','opacity','volume','loop'].some(k=>old[k]!==now[k]))throw Error('Unlock this caption placement before changing it.');}project.captions.forEach(words);validateProject(project);}catch(e){project=JSON.parse(before);say(e.message);return false;}if(before!==JSON.stringify(project)){undo.push(before);if(undo.length>100)undo.shift();redo=[];saveDraft();}render();return true;}
 function history(from,to){if(!from.length)return;to.push(JSON.stringify(project));project=JSON.parse(from.pop());if(!current())selected=project.captions[0]?.id||null;saveDraft();render();}
 function render(){
- $('projectName').textContent=projectContext?.title||'Joke project';const stageSource=projectContext?.assets?.find(a=>a.path===project.media?.path);$('sourceStage').value=stageSource?stageRecord(projectContext,stageSource)?.stage||'':'';$('bedName').textContent=project.media?.name||'Choose a joke project';
+ $('emptyReconnectFiles').hidden=!project.media||project.media.kind!=='local';$('projectName').textContent=projectContext?.title||'Joke project';const stageSource=projectContext?.assets?.find(a=>a.path===project.media?.path);$('sourceStage').value=stageSource?stageRecord(projectContext,stageSource)?.stage||'':'';$('bedName').textContent=project.media?.name||'Choose a joke project';
  $('timeline').replaceChildren();for(const c of project.captions){const b=document.createElement('button');b.textContent=c.text||'(empty caption)';b.setAttribute('aria-pressed',String(c.id===selected));const small=document.createElement('small');small.textContent=(c.visible?'':'Hidden · ')+(timed(c)?'F'+c.inFrame+'–'+c.outFrame:'UNTIMED')+(Object.keys(c.overrides).length?' · local':'');b.append(small);b.onclick=()=>choose(c.id);$('timeline').append(b);}
  const c=current();$('editor').querySelectorAll('textarea,input,button').forEach(el=>{if(!['undo','redo'].includes(el.id))el.disabled=!c});$('selectedLabel').textContent=c?'Selected phrase '+(project.captions.indexOf(c)+1)+' of '+project.captions.length:'Selected phrase — none';$('text').value=c?.text||'';$('inFrame').value=c?.inFrame??'';$('outFrame').value=c?.outFrame??'';$('duration').textContent=c?(timed(c)?(c.outFrame-c.inFrame)+' frames · '+((c.outFrame-c.inFrame)/FPS).toFixed(3)+' seconds · OUT excluded':'Untimed — mark IN and OUT.')+(c&&!c.visible?' · Hidden':''):'';
  fillStyle(c?effective(project,c):project.globalStyle);$('undo').disabled=!undo.length;$('redo').disabled=!redo.length;$('presets').replaceChildren();for(const name of Object.keys(project.presets)){const o=document.createElement('option');o.value=name;o.textContent=name;$('presets').append(o);}renderScript();renderClips();lockBuiltInCaptioning();draw();
@@ -110,7 +111,7 @@ $('segment').onclick=()=>{try{const result=importTranscript($('transcript').valu
 async function api(path,options={}){const key=localStorage.getItem('gs_previewlock_key');if(!key)throw Error('PreviewLock connection unavailable in this browser. Open the connected PreviewLock library first.');const r=await fetch(API+path,{...options,headers:{Authorization:'Bearer '+key,...options.headers},signal:AbortSignal.timeout(65000)});const d=await r.json();if(!r.ok)throw Error(d.error||'PreviewLock returned '+r.status);return d;}
 async function loadCloud(ref){pause();if(cloudSession&&!ref.path.startsWith('/Grill Sergeant/JokeLab Productions/'+cloudSession.id+'/'))ref=await storeCloudAsset(ref,null);const d=await api('/api/playback?path='+encodeURIComponent(ref.path));const r=await fetch(d.url);if(!r.ok)throw Error('Could not read source media: '+r.status);await loadMedia(await r.blob(),ref);}
 async function loadMedia(blob,ref){
- const rev=++mediaRevision;resetView();setProjectDrawer(false);undo=[];redo=[];pause();++seekRevision;input?.dispose();input=null;sink=null;if(mediaUrl)URL.revokeObjectURL(mediaUrl);mediaUrl=URL.createObjectURL(blob);$('decoded').hidden=true;v.src=mediaUrl;$('empty').hidden=true;$('bedLoader').classList.add('has-media');frame=0;maxFrame=0;say('Inspecting source timing…');
+ const rev=++mediaRevision;bedBlob=blob;resetView();setProjectDrawer(false);undo=[];redo=[];pause();++seekRevision;input?.dispose();input=null;sink=null;if(mediaUrl)URL.revokeObjectURL(mediaUrl);mediaUrl=URL.createObjectURL(blob);$('decoded').hidden=true;v.src=mediaUrl;$('empty').hidden=true;$('bedLoader').classList.add('has-media');frame=0;maxFrame=0;say('Inspecting source timing…');
  try{await new Promise((resolve,reject)=>{v.onloadedmetadata=resolve;v.onerror=()=>reject(Error('Video cannot decode in this browser.'));});if(rev!==mediaRevision)return;
   const M=await import('../sxlock/vendor/mediabunny-1.62.1-gs1.mjs');if(rev!==mediaRevision)return;input=new M.Input({source:new M.BlobSource(blob),formats:M.ALL_FORMATS});const track=await input.getPrimaryVideoTrack();if(!track)throw Error('No video track.');const timestamps=[];let end=0;for await(const packet of new M.EncodedPacketSink(track).packets(undefined,undefined,{metadataOnly:true})){if(rev!==mediaRevision)return;timestamps.push(packet.timestamp);end=Math.max(end,packet.timestamp+packet.duration);}timestamps.sort((a,b)=>a-b);if(!timestamps.length)throw Error('No source frames.');maxFrame=Math.max(0,Math.ceil(end*FPS-1e-5)-1);$('seek').max=maxFrame;
   const cfr25=timestamps.every((t,i)=>Math.abs(t-i/FPS)<.00001);const rate=timestamps.length/end;const ratio=v.videoWidth/v.videoHeight;const geometry=Math.abs(ratio-9/16)<.01?'9:16 source':'Non-9:16 source — contained in portrait, no crop';$('mediaStatus').textContent=`${ref.name} · ${v.videoWidth}×${v.videoHeight} · ${rate.toFixed(3)} source fps · ${cfr25?'25 fps timestamps verified':'Explicit time mapping: F / 25 seconds; source frames repeat or skip'} · ${geometry}.`;
@@ -120,7 +121,7 @@ async function loadMedia(blob,ref){
 }
 $('videoFile').onchange=async e=>{try{const f=e.target.files[0];if(!f)return;const old=project.media;if(old?.kind==='local'&&project.captions.length&&(old.name!==f.name||old.size!==f.size))if(!confirm('This is a different source. Keep existing caption timing with this source?'))return;if(cloudSession){const ref=await storeCloudAsset({name:f.name},f);await loadMedia(f,ref);}else await loadMedia(f,{kind:'local',name:f.name,size:f.size,lastModified:f.lastModified});}catch(error){say('Bed import not saved: '+error.message);}finally{e.target.value='';}};
 $('save').onclick=()=>{project.captions.forEach(words);download('CapLock-project.json',JSON.stringify(project,null,2));dirty=false;$('saveStatus').textContent='Project download requested. Includes captions, styles and media references, not video bytes. Confirm it completed on your device. No cloud write performed.';};
-async function openProject(raw){const p=validateProject(raw);++projectEpoch;restoring=true;$('playerDock').setAttribute('aria-busy','true');try{layers.clear();selectedClip=null;selectedWords=[];editMode='view';pause();++mediaRevision;++seekRevision;input?.dispose();input=null;sink=null;v.removeAttribute('src');v.load();$('decoded').hidden=true;$('empty').hidden=false;$('bedLoader').classList.remove('has-media');project=p;selected=p.captions[0]?.id||null;undo=[];redo=[];frame=0;maxFrame=0;$('seek').max=0;render();for(const c of project.clips)if(c.ref.kind==='previewlock')await loadCloudOverlay(c.ref,c).catch(e=>say('Clip reconnect: '+e.message));if(p.media?.kind==='previewlock'){try{await loadCloud(p.media);}catch(e){say('Project restored; cloud source could not reconnect: '+e.message);}}else say('Project restored. Reselect original video '+(p.media?.name||'')+' to reconnect media.');selectedClip=p.captionSequence?.activeId||p.workspace?.selectedClip||p.clips[0]?.id;layers.selected=selectedClip;frame=p.workspace?.playhead??p.captionSequence?.playhead??0;render();}finally{restoring=false;$('playerDock').setAttribute('aria-busy','false');}saveDraft();}
+async function openProject(raw){const p=validateProject(raw);++projectEpoch;restoring=true;$('playerDock').setAttribute('aria-busy','true');try{layers.clear();selectedClip=null;selectedWords=[];editMode='view';pause();++mediaRevision;++seekRevision;input?.dispose();input=null;sink=null;v.removeAttribute('src');v.load();$('decoded').hidden=true;$('empty').hidden=false;$('bedLoader').classList.remove('has-media');bedBlob=null;project=p;selected=p.captions[0]?.id||null;undo=[];redo=[];frame=0;maxFrame=0;$('seek').max=0;render();for(const c of project.clips)if(c.ref.kind==='previewlock')await loadCloudOverlay(c.ref,c).catch(e=>say('Clip reconnect: '+e.message));if(p.media?.kind==='previewlock'){try{await loadCloud(p.media);}catch(e){say('Project restored; cloud source could not reconnect: '+e.message);}}else say('Project restored. Reselect original video '+(p.media?.name||'')+' to reconnect media.');selectedClip=p.captionSequence?.activeId||p.workspace?.selectedClip||p.clips[0]?.id;layers.selected=selectedClip;frame=p.workspace?.playhead??p.captionSequence?.playhead??0;render();}finally{restoring=false;$('playerDock').setAttribute('aria-busy','false');}saveDraft();}
 $('projectFile').onchange=async e=>{try{const raw=JSON.parse(await e.target.files[0].text());if(dirty&&!confirm('Replace current edit with this project?'))return;await openProject(raw);}catch(e){say('Open failed: '+e.message);}};
 $('recover').onclick=async()=>{try{const raw=localStorage.getItem(draftKey);if(!raw)return say('No browser draft found.');if(dirty&&!confirm('Replace current edit with the browser draft?'))return;await openProject(JSON.parse(raw));}catch(e){say('Recovery failed: '+e.message);}};
 for(const type of ['srt','vtt'])$(type).onclick=()=>{try{download('CapLock-captions.'+type,subtitle(project,type),'text/plain');say(type.toUpperCase()+' download requested. Subtitle files contain timing and text, not the visual design.');}catch(e){say(e.message);}};
@@ -224,7 +225,7 @@ $('overlayLibrary').onclick=()=>openCaptionImport();$('railMove').onclick=()=>{i
 
 window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
 render();showPage('viewer');try{if(localStorage.getItem(draftKey))$('saveStatus').textContent='A previous browser draft is available. Use Recover browser draft; it has not been overwritten.';}catch{$('saveStatus').textContent='Browser recovery storage unavailable. Use project downloads to preserve edits.';}
-const params=new URLSearchParams(location.search);if(params.get('assetPath'))loadCloud({kind:'previewlock',path:params.get('assetPath'),name:params.get('name')||params.get('assetPath').split('/').pop()}).catch(e=>say(e.message));
+const params=new URLSearchParams(location.search);if(params.get('recover')==='local'){try{const raw=localStorage.getItem(draftKey);if(raw)openProject(JSON.parse(raw)).then(()=>say('Saved placements restored. Reconnect files to select the original video and caption files together.')).catch(e=>say('Recovery failed: '+e.message));}catch(e){say('Recovery failed: '+e.message);}}if(params.get('assetPath'))loadCloud({kind:'previewlock',path:params.get('assetPath'),name:params.get('name')||params.get('assetPath').split('/').pop()}).catch(e=>say(e.message));
 
 // Project-folder handoff: numbered cloud caplets are loaded as an unplaced tray.
 async function saveCloudWorkspace(){
@@ -415,4 +416,52 @@ $('produceCaptioned').onclick=async()=>{
   if(inStudio()){window.parent.postMessage({protocol:'GS-Studio-1',action:'navigate-phase',phase:'sound'},location.origin);return;}
   location.href='../sxlock/?v=R31-stages&production='+encodeURIComponent(cloudSession.id)+'&stageAsset='+encodeURIComponent(asset.id);
  }catch(e){button.textContent='Retry → SxLock';say('SX handoff incomplete: '+e.message);}finally{compositeBusy=false;$('cancelComposite').hidden=true;for(const [e,value]of disabled)if(e.id!=='produceCaptioned')e.disabled=value;button.disabled=false;}
+};
+
+
+// Local video passes use the existing compositor. No project upload is required.
+function currentPassKey(){return localPassKey(project,mediaUrl,layers.media,captionRecipe(project));}
+$('cancelLocalVideo').onclick=()=>{compositeCancelled=true;$('localVideoStatus').textContent='Cancelling. Your editable placements are retained.';};
+$('saveVideo').onclick=async()=>{
+ if(compositeBusy)return;pause();const button=$('saveVideo');
+ try{
+  if(!bedBlob||v.readyState<1)throw Error('Reconnect the source video before saving.');
+  const snapshot=validateProject(JSON.parse(JSON.stringify(project))),key=currentPassKey();
+  for(const c of snapshot.clips)if(c.visible&&(!c.captionNumber||c.placed)&&!layers.media.get(c.id)?.blob)throw Error('Reconnect '+c.ref.name+' before saving.');
+  compositeBusy=true;compositeCancelled=false;const controls=[...document.querySelectorAll('button,input,select,textarea')],disabled=controls.map(e=>e.disabled);controls.forEach(e=>e.disabled=true);$('cancelLocalVideo').hidden=false;$('cancelLocalVideo').disabled=false;$('localVideoProgress').hidden=false;
+  try{
+   if(!lastVideoPass||lastVideoPass.key!==key){
+    const bytes=new Map(snapshot.clips.map(c=>[c.id,layers.media.get(c.id)?.blob]));
+    const result=await renderCaptioned({project:snapshot,bed:bedBlob,readAsset:async(ref,c)=>{const blob=bytes.get(c.id);if(!blob)throw Error('Reconnect '+ref.name);return blob;},cancelled:()=>compositeCancelled,onPhase:phase=>{$('localVideoStatus').textContent=phase;},onProgress:progress=>{button.textContent='Saving video '+Math.floor(progress*100)+'%';$('localVideoProgress').value=progress;}});
+    lastVideoPass={key,name:passFilename(snapshot.media?.name),...result};
+   }
+   if(compositeCancelled)throw Error('Video save cancelled.');
+   download(lastVideoPass.name,lastVideoPass.blob,'video/mp4');lastVideoPass.downloadRequested=true;$('localVideoProgress').value=1;$('useSavedVideo').hidden=false;$('localVideoStatus').textContent='Video download requested: '+lastVideoPass.name+'. Use as new bed starts the next pass with an empty overlay list.';
+  }finally{controls.forEach((e,i)=>e.disabled=disabled[i]);$('cancelLocalVideo').hidden=true;compositeBusy=false;button.textContent=lastVideoPass?.key===currentPassKey()?'Resave video':'Save video';}
+ }catch(e){$('localVideoStatus').textContent=e.message;say(e.message);button.textContent='Save video';compositeBusy=false;}
+};
+$('useSavedVideo').onclick=async()=>{
+ if(compositeBusy||!lastVideoPass)return;if(!lastVideoPass.downloadRequested)return say('Save video before starting the next pass.');if(lastVideoPass.key!==currentPassKey())return say('Save video again to include your latest edits before starting the next pass.');
+ const pass=lastVideoPass;
+ try{
+  archiveWorkspace();clearTimeout(cloudTimer);cloudSession=null;projectContext=null;$('saveCloud').hidden=true;
+  await openProject(createProject());const file=new File([pass.blob],pass.name,{type:'video/mp4',lastModified:Date.now()});
+  await loadMedia(file,{kind:'local',name:file.name,size:file.size,lastModified:file.lastModified});
+  lastVideoPass=null;$('useSavedVideo').hidden=true;$('saveVideo').textContent='Save video';$('localVideoProgress').hidden=true;$('localVideoStatus').textContent='New pass ready. The saved video is the bed; add only the next captions or animations.';
+  say('New pass ready. Earlier edits are in Previous workspace. Import the next caption or animation.');
+ }catch(e){say('Could not start the next pass: '+e.message);}
+};
+for(const id of ['emptyReconnectFiles','reconnectMedia'])$(id).onclick=()=>$('reconnectFiles').click();
+$('reconnectFiles').onchange=async e=>{
+ const files=[...e.target.files||[]];if(!files.length)return;pause();const epoch=projectEpoch,playhead=frame;
+ try{
+  let count=0;const bed=matchLocalFile(files,project.media);
+  if(bed){await loadMedia(bed,project.media);if(epoch!==projectEpoch)throw Error('Project changed during reconnect.');}
+  for(const c of [...project.clips]){
+   if(epoch!==projectEpoch)throw Error('Project changed during reconnect.');
+   const file=matchLocalFile(files,c.ref);if(!file)continue;
+   await importLayer(file,c.ref,c);count++;
+  }
+  if(v.src)await seek(playhead);saveDraft();render();say('Reconnected '+(bed?'video and ':'')+count+' layers. Existing placements and timing retained.');
+ }catch(error){say('Reconnect incomplete: '+error.message);}finally{e.target.value='';}
 };

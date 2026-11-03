@@ -14,7 +14,7 @@ export async function renderCaptioned({project,bed,readAsset,cancelled,onProgres
   const track=await source.getPrimaryVideoTrack();if(!track)throw Error('Load the joke video first.');
   const width=Math.max(2,Math.round((await track.getDisplayWidth())/2)*2),height=Math.max(2,Math.round(width*16/9/2)*2),visual=[];
   for(const c of p.clips){
-   if(!c.visible||c.captionNumber&&!c.placed)continue;check();const blob=await readAsset(c.ref);
+   if(!c.visible||c.captionNumber&&!c.placed)continue;check();const blob=await readAsset(c.ref,c);
    if(c.type==='image'){const image=await createImageBitmap(blob);images.push(image);visual.push({c,image,width:image.width,height:image.height,duration:Infinity});continue;}
    if(c.type==='audio'){if(c.volume===0)continue;audioContext||=new AudioContext();const buffer=await audioContext.decodeAudioData(await blob.arrayBuffer());audio.push({c,buffer});continue;}
    const input=new Input({source:new BlobSource(blob),formats:ALL_FORMATS});opened.push(input);const v=await input.getPrimaryVideoTrack();if(!v)throw Error('Animation has no video: '+c.name);
