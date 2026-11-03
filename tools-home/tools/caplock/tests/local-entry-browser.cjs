@@ -17,7 +17,7 @@ module.exports=async(browser,base,alphaBytes)=>{
  const original=await page.evaluate(()=>JSON.parse(localStorage.getItem('gs_caplock_draft_v1')));assert.equal(original.clips.length,2);assert.equal(original.clips[0].placed,true);assert.equal(original.clips[1].placed,false);
  // A failed component must leave the old sequence/placements intact and permit retry.
  const mp4=fs.readFileSync('/tmp/caplock-fixtures/source25.mp4');
- await page.locator('#dockGrip').click();await page.locator('#railImport').click();chooser=page.waitForEvent('filechooser');await page.getByText('Import numbered files',{exact:true}).click();await (await chooser).setFiles([{name:'8 valid.mp4',mimeType:'video/mp4',buffer:mp4},{name:'9 broken.mp4',mimeType:'video/mp4',buffer:Buffer.from('invalid video')}]);
+ if(!await page.locator('.gs-source-drawer').isVisible())await page.locator('#dockGrip').click();await page.locator('#railImport').click();chooser=page.waitForEvent('filechooser');await page.getByText('Import numbered files',{exact:true}).click();await (await chooser).setFiles([{name:'8 valid.mp4',mimeType:'video/mp4',buffer:mp4},{name:'9 broken.mp4',mimeType:'video/mp4',buffer:Buffer.from('invalid video')}]);
  await page.waitForFunction(()=>document.querySelector('#captionImportStatus').textContent.includes('Captions not imported:'));
  assert.deepEqual(await page.evaluate(()=>JSON.parse(localStorage.getItem('gs_caplock_draft_v1'))),original);assert.equal(await page.locator('#captionFiles').inputValue(),'');assert.equal(await page.locator('#captionFiles').isEnabled(),true);
  // Exact descriptive MP4 names and selection order from the owner's Android picker.
@@ -31,7 +31,7 @@ module.exports=async(browser,base,alphaBytes)=>{
  await page.locator('#insertCaption').click();await page.locator('#nextCaption').click();assert.equal(await page.locator('#editActiveCaption').textContent(),'2/7 · '+names[1]);
  const before=await page.evaluate(()=>JSON.parse(localStorage.getItem('gs_caplock_draft_v1')));assert.equal(before.clips.length,9);assert.deepEqual(before.clips.slice(0,2),original.clips);
  // Exercise the actual Photos button/chooser, not the legacy hidden file input.
- await page.locator('#dockGrip').click();chooser=page.waitForEvent('filechooser');await page.locator('#newVideoPhotos').click();await (await chooser).setFiles('/tmp/caplock-fixtures/source30.mp4');
+ if(!await page.locator('.gs-source-drawer').isVisible())await page.locator('#dockGrip').click();chooser=page.waitForEvent('filechooser');await page.locator('#newVideoPhotos').click();await (await chooser).setFiles('/tmp/caplock-fixtures/source30.mp4');
  await page.waitForFunction(()=>document.querySelector('#bedName').textContent==='source30.mp4'&&document.querySelector('#video').readyState>=2&&document.querySelector('#status').textContent.includes('Source loaded from your device'));
  const after=await page.evaluate(()=>JSON.parse(localStorage.getItem('gs_caplock_draft_v1')));assert.deepEqual(after.clips,before.clips);assert.equal(after.media.kind,'local');assert.equal(after.media.name,'source30.mp4');
  const layouts=[];for(const size of [{width:360,height:640},{width:390,height:844}]){
