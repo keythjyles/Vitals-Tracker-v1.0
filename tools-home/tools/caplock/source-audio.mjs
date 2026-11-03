@@ -1,4 +1,4 @@
-import {AudioBufferSink} from '../sxlock/vendor/mediabunny-1.62.1-gs1.mjs';
+import {Input,ALL_FORMATS,BlobSource,AudioBufferSink} from '../sxlock/vendor/mediabunny-1.62.1-gs1.mjs';
 export function percentGain(value){const n=Number(value);if(!Number.isFinite(n)||n<0||n>100)throw Error('Clip audio must be 0–100%.');return n/100;}
 // Preserve decoded audio PTS, gaps and priming, as the existing bed mixer does.
 export async function readSourceAudio(track,check=()=>{}){
@@ -13,3 +13,5 @@ export async function readSourceAudio(track,check=()=>{}){
  }
  return buffer;
 }
+export function audioSignal(buffer){let peak=0,first=Infinity;for(let c=0;c<buffer.numberOfChannels;c++){const data=buffer.getChannelData(c);for(let i=0;i<data.length;i++){const value=Math.abs(data[i]);peak=Math.max(peak,value);if(value>.003&&i/buffer.sampleRate<first)first=i/buffer.sampleRate;}}return{peak,firstSound:Number.isFinite(first)?first:null,silent:peak<.00001};}
+export async function inspectSourceAudio(blob){const input=new Input({formats:ALL_FORMATS,source:new BlobSource(blob)});try{const track=await input.getPrimaryAudioTrack();if(!track)return{hasAudio:false};const buffer=await readSourceAudio(track);return{hasAudio:true,...(buffer?audioSignal(buffer):{peak:0,firstSound:null,silent:true})};}finally{input.dispose();}}

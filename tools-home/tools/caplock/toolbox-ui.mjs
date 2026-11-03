@@ -10,7 +10,7 @@ export function createToolboxUI(o){
  function stopPreview(){cancelAnimationFrame(previewTick);previewTick=null;$('toolboxPreviewVideo').pause();$('toolboxPreviewVideo').removeAttribute('src');$('toolboxPreviewVideo').load();if(previewURL)URL.revokeObjectURL(previewURL);previewURL=null;previewAsset=null;$('toolboxPreview').hidden=true;}
  function render(){
   const list=assets().slice().sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true}));for(const c of p().clips){const m=o.media().get(c.id);if(m?.blob&&c.toolboxId&&!cache.has(c.toolboxId))cache.set(c.toolboxId,m.blob);}
-  $('editActiveCaption').textContent='+ Files';$('editActiveCaption').disabled=busy||!o.ready();$('placementState').textContent='Toolbox · '+list.length;
+  $('editActiveCaption').textContent='+ Files';$('editActiveCaption').disabled=busy||!o.ready();$('placementState').textContent='Toolbox · '+list.length+(o.extendedFrames?.()?' · '+o.extendedFrames()+' frames':'');
   $('insertCaption').textContent='Insert';$('insertCaption').disabled=busy||!o.ready();$('sheetInsertCaption').textContent='Insert another';$('sheetInsertCaption').disabled=busy||!o.ready();
   const items=placed(),index=items.findIndex(c=>c.id===o.selected());$('previousCaption').disabled=index<=0;$('nextCaption').disabled=index<0||index>=items.length-1;
   $('previousCaption').title='Previous placement';$('nextCaption').title='Next placement';$('toItemStart').disabled=!current();$('play').disabled=!o.ready();

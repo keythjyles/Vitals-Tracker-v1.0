@@ -20,3 +20,10 @@ subprocess.run(['ffmpeg','-v','error','-i',str(root/'blue-caption.mp4'),'-vf','s
 
 subprocess.run(['ffmpeg','-v','error','-f','lavfi','-i','color=c=0x0060b8:s=320x180:r=25:d=1','-f','lavfi','-i','sine=frequency=1000:duration=1','-c:v','libx264','-pix_fmt','yuv420p','-c:a','aac','-shortest','-y',str(root/'goat-tone.mp4')],check=True)
 subprocess.run(['ffmpeg','-v','error','-f','lavfi','-i','sine=frequency=1000:duration=1','-c:a','pcm_s16le','-y',str(root/'goat.wav')],check=True)
+
+# Sound begins after the short bed has ended: reproduces the missing goat tail.
+for name,audio in [('late-goat','sine=frequency=1000:duration=1'),('silent-goat','anullsrc=r=48000:cl=stereo:d=1')]:
+    command=['ffmpeg','-v','error','-f','lavfi','-i','color=c=yellow:s=80x80:r=25:d=1','-f','lavfi','-i',audio]
+    if name=='late-goat':
+        command+=['-af',"volume=0:enable='lt(t,0.6)'"]
+    subprocess.run(command+['-c:v','libx264','-pix_fmt','yuv420p','-c:a','aac','-shortest','-y',str(root/f'{name}.mp4')],check=True)

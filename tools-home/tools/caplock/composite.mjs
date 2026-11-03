@@ -1,11 +1,12 @@
 import {BackgroundSurface} from './background.mjs?v=23';
 import {Input,ALL_FORMATS,BlobSource} from '../sxlock/vendor/mediabunny-1.62.1-gs1.mjs';
-import {exportVideo} from '../sxlock/export-engine.mjs?v=27';
+import {exportVideo,inspectVideo} from '../sxlock/export-engine.mjs?v=caplock25';
 import {validateProject} from './core.mjs?v=24';
 import {mediaContainer,mediaType} from '../../shared/production-stages.mjs?v=22';
 import {clipTime} from './clip-time.mjs?v=22';
 import {captionRecipe} from '../../shared/production-stages.mjs?v=22';
-import {readSourceAudio} from './source-audio.mjs?v=24';
+import {readSourceAudio} from './source-audio.mjs?v=25';
+import {compositionFrames} from './composition-time.mjs?v=25';
 
 export async function renderCaptioned({project,bed,readAsset,cancelled,onProgress,onPhase}){
  const p=validateProject(project),recipe=captionRecipe(p),opened=[],audio=[],images=[],videos=[],check=()=>{if(cancelled?.())throw Error('Export cancelled. Editable placements are retained.');};
@@ -23,9 +24,10 @@ export async function renderCaptioned({project,bed,readAsset,cancelled,onProgres
    const v=await input.getPrimaryVideoTrack();if(!v)throw Error('Animation has no video: '+c.name);
    const el=document.createElement('video'),url=URL.createObjectURL(new Blob([blob],{type:mediaType(mediaContainer(await blob.slice(0,12).arrayBuffer()))}));el.muted=true;el.playsInline=true;el.preload='auto';videos.push({el,url});await new Promise((ok,no)=>{el.onloadeddata=ok;el.onerror=()=>no(Error('Animation cannot decode: '+c.name));el.src=url;});visual.push({c,el,width:await v.getDisplayWidth(),height:await v.getDisplayHeight(),duration:await v.computeDuration()});
   }
+  const durationFrames=compositionFrames(p,Math.ceil(((await inspectVideo(track,cancelled)).end-.000002)*25));
   const result=await exportVideo({file:bed,fps:25,size:'original',format:'mp4',soundtrackGain:1,cancelled,onProgress,onPhase,hasEffects:audio.length>0,
    placeEffects:async(ctx,at,end)=>{for(const {c,buffer}of audio){const start=Math.max(at,c.inFrame/25),stop=Math.min(end,c.outFrame/25),time=clipTime(c,start*25,buffer.duration);if(stop<=start||!time.shown)continue;const node=ctx.createBufferSource(),gain=ctx.createGain();node.buffer=buffer;node.playbackRate.value=time.rate;gain.gain.value=c.volume;node.loop=c.loop;node.loopStart=c.trimInFrame/25;node.loopEnd=time.end;node.connect(gain).connect(ctx.destination);node.start(start-at,time.target);node.stop(Math.min(stop-start,c.loop?Infinity:(time.end-time.target)/time.rate)+start-at);}},
-   visual:{width,height,draw:async(canvas,bedSample,timestamp)=>{
+   visual:{width,height,durationFrames,draw:async(canvas,bedSample,timestamp)=>{
     check();const ctx=canvas.getContext('2d',{alpha:false,colorSpace:'srgb'});ctx.globalAlpha=1;ctx.fillStyle='#000';ctx.fillRect(0,0,width,height);
     const b=p.bedTransform,scale=Math.min(width/bedSample.displayWidth,height/bedSample.displayHeight)*b.scale,w=bedSample.displayWidth*scale,h=bedSample.displayHeight*scale;
     bedSample.draw(ctx,b.x/100*width-w/2,b.y/100*height-h/2,w,h);

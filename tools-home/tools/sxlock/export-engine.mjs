@@ -118,8 +118,12 @@ export async function exportVideo({ file, fps = 25, size = 'original', format = 
     const scale = size === '720' ? Math.min(1, 720 / width) : 1;
     const copyVideo = !visual && video.codec === videoCodec && scale === 1 && isCfr(timing.timestamps, fps)
       && Math.abs(timing.end - timing.count / fps) <= 0.000002;
-    const copyAudio = !!audio && audio.codec === audioCodec && soundtrackGain === 1 && !hasEffects;
-    const exactDuration = copyVideo ? timing.end : Math.ceil((timing.end - 0.000002) * fps) / fps;
+    // Optional compositor extent; callers that omit it retain the native source duration.
+    const bedFrames=Math.ceil((timing.end-0.000002)*fps),requestedFrames=visual?.durationFrames;
+    if(requestedFrames!=null&&(!Number.isSafeInteger(requestedFrames)||requestedFrames<bedFrames))throw Error('Invalid composition frame count.');
+    const extending=requestedFrames>bedFrames;
+    const copyAudio = !!audio && audio.codec === audioCodec && soundtrackGain === 1 && !hasEffects && !extending;
+    const exactDuration = extending ? requestedFrames/fps : copyVideo ? timing.end : bedFrames/fps;
     const report = { engine: 'SxLock-R26', fps, width, height, sourceFrames: timing.count,
       duration: exactDuration, hasSourceAudio:!!audio, hasEffects, video: copyVideo ? 'packet-copy' : 'offline-encode',
       audio: copyAudio ? 'packet-copy' : 'sample-mix', sampleRate: SAMPLE_RATE,

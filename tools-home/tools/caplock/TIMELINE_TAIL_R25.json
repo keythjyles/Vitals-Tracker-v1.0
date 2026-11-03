@@ -1,0 +1,38 @@
+{
+  "schema": "GS-CapLock-Timeline-Tail-1",
+  "release": "R25",
+  "baseline": "577f5b310cf7d3c008404c7a4f35721a13d0b13c",
+  "request": "Keep source audio adjustable and extend preview/export to the final placed element OUT.",
+  "userEvidence": {
+    "filename": "18154.mp4",
+    "videoFrames": 295,
+    "fps": 25,
+    "duration": 11.8,
+    "requestedGoatIn": 251,
+    "requestedGoatOutExclusive": 523,
+    "requestedGain": 0.7,
+    "expectedCompositionFrames": 523,
+    "expectedDuration": 20.92,
+    "soundFinding": "No meaningful goat contribution in the surviving interval; the uncut goat source was not supplied or located, so its actual sound content is unverified."
+  },
+  "changes": [
+    "composition extent from visible placed elements plus bed",
+    "independent preview clock after bed EOF",
+    "frozen final bed picture and natural bed soundtrack end",
+    "existing source gain/timing/rate retained beyond bed EOF",
+    "once-per-connected-file audio waveform diagnosis in element settings"
+  ],
+  "sharedEngineChange": "Optional visual.durationFrames hook; only CapLock opts in. Default SxLock paths and UI are preserved and tested.",
+  "schemaVersion": 8,
+  "recovery": "recover=local followed by Reconnect files; retain original media and placements",
+  "checks": {
+    "nodePassed": 64,
+    "browser": null,
+    "branchCI": null,
+    "mainCI": null,
+    "pages": null,
+    "live": null
+  },
+  "sourceCommit": null,
+  "liveUrl": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/caplock/?v=R25-tail&recover=local"
+}
