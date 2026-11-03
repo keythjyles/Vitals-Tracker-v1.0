@@ -27,12 +27,73 @@
   "recovery": "recover=local followed by Reconnect files; retain original media and placements",
   "checks": {
     "nodePassed": 64,
-    "browser": null,
-    "branchCI": null,
-    "mainCI": null,
-    "pages": null,
-    "live": null
+    "browser": {
+      "previewContinuesPastBed": true,
+      "tailPauseResume": true,
+      "previewRms": 0.062112002514707686,
+      "sourceSoundDiagnostic": true,
+      "silentTrackDiagnostic": true,
+      "lateInsertion": true,
+      "editableOut": true,
+      "exportFrames": 30,
+      "exportSeconds": 1.2,
+      "bedToneBeforeEof": 0.12474897684661972,
+      "bedToneAfterEof": 0,
+      "goatToneBeforeSoundStart": 0,
+      "goatToneAfterBedEofAt70Percent": 0.08721785075894148,
+      "bedFinalSourcePixel": [
+        64,
+        100,
+        133,
+        255
+      ],
+      "bedTailPixel": [
+        64,
+        100,
+        133,
+        255
+      ],
+      "overlayFinalPixel": [
+        253,
+        255,
+        4,
+        255
+      ],
+      "errors": []
+    },
+    "branchCI": {
+      "caplock": 41593185821,
+      "cliplock": 41593185820,
+      "studio": 41593185760,
+      "sxlock": 41592690028,
+      "conclusion": "success",
+      "sxlockNote": "Passed on 29b585c9, whose export-engine bytes are identical to 418c1c54."
+    },
+    "mainCI": {
+      "caplock": 41593397112,
+      "cliplock": 41593396946,
+      "studio": 41593397083,
+      "sxlock": 41593397059,
+      "conclusion": "success"
+    },
+    "pages": {
+      "run": 41593396305,
+      "conclusion": "success"
+    },
+    "live": {
+      "visibleRelease": "CapLock \u00b7 GS-TOOL-CAPLOCK \u00b7 R25",
+      "recoveryInitialized": true,
+      "savedPlacementRetainedInIsolatedBrowser": true,
+      "status": "Saved placements restored. Reconnect files to select the original video and caption files together.",
+      "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/caplock/?v=R25-tail&recover=local",
+      "applicationScriptErrors": [],
+      "note": "Isolated cloud browser smoke check; not the owner phone or original goat audio. Only an unrelated Chrome extension metadata error was logged."
+    },
+    "limitations": [
+      "The original goat source and owner phone playback were not available; positive-level settings now inspect that original on connection.",
+      "No additional manual walkthrough repeats after the new tail and existing CI checks passed."
+    ]
   },
-  "sourceCommit": null,
+  "sourceCommit": "418c1c5401ffedd106fcd10136539e2aef69683b",
   "liveUrl": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/caplock/?v=R25-tail&recover=local"
 }
