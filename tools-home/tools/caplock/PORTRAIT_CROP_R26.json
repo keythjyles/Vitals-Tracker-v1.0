@@ -3,7 +3,7 @@
   "release": "R26",
   "baseline": "eef627ec5149ff04298282c7113702dde755140e",
   "request": "Show only the final portrait portion while enlarging or moving an overlay.",
-  "change": "Clip the scene to its9:16 output bounds; use the same black background as the compositor.",
+  "change": "Clip the scene to its 9:16 output bounds; use the same black background as the compositor.",
   "preserved": [
     "source files",
     "layer geometry and independent transforms",
@@ -14,13 +14,44 @@
     "SxLock and AspectLock engines and UI"
   ],
   "checks": {
-    "node": null,
-    "browser": null,
-    "branchCI": null,
-    "mainCI": null,
-    "pages": null,
-    "live": null
+    "node": {
+      "passed": 64
+    },
+    "browser": {
+      "portraitRatio": 0.5625,
+      "enlargedLayerWidth": 370.84375,
+      "portraitWidth": 159.75,
+      "leftMarginHasLayer": false,
+      "rightMarginHasLayer": false,
+      "portraitHasLayer": true,
+      "existingResizePinchRecoveryChecks": true,
+      "errors": []
+    },
+    "branchCI": {
+      "caplock": 41599615588,
+      "cliplock": 41599615535,
+      "studio": 41599615741,
+      "conclusion": "success"
+    },
+    "mainCI": {
+      "caplock": 41599904020,
+      "cliplock": 41599904031,
+      "studio": 41599903997,
+      "conclusion": "success"
+    },
+    "pages": {
+      "run": 41599902765,
+      "conclusion": "success"
+    },
+    "live": {
+      "visibleRelease": "CapLock \u00b7 GS-TOOL-CAPLOCK \u00b7 R26",
+      "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/caplock/?v=R26-portrait&recover=local",
+      "recoveryInitialized": true,
+      "computedSceneOverflow": "clip",
+      "computedSceneBackground": "rgb(0, 0, 0)",
+      "scope": "Isolated browser smoke check; physical phone acceptance belongs to the owner."
+    }
   },
-  "sourceCommit": null,
+  "sourceCommit": "ce55a808f7a014546b9751d3cab76ed0d1acb175",
   "liveUrl": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/caplock/?v=R26-portrait&recover=local"
 }
