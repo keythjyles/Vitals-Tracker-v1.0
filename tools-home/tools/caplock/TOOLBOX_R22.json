@@ -1,0 +1,42 @@
+{
+  "schema": "GS-CapLock-Toolbox-1",
+  "release": "R22",
+  "baseline": "186e224a0ed6e897b8052c97a15e1e3c550c64aa",
+  "request": "Choose and play the correct bed, add reusable caption files, Insert from toolbox, shift IN with OUT, fit whole animation to edited OUT, show native frames.",
+  "schemaVersion": 8,
+  "workflow": [
+    "Choose bed through Files or Photos",
+    "Play to verify the bed",
+    "+ Files adds captions/animations to this bed toolbox",
+    "Insert opens reusable file choices",
+    "Tap a placement to edit IN/OUT and inspect source frame count",
+    "Save video; optionally Use as new bed for another pass"
+  ],
+  "timing": {
+    "productionFps": 25,
+    "sourceFrameCount": "native encoded video samples, not rounded HTML duration",
+    "naturalSpan": "ceil(video duration \u00d725)",
+    "in": "preserves placement span and speed",
+    "out": "full source span / placement span becomes playback speed",
+    "rateRange": [
+      0.1,
+      8
+    ]
+  },
+  "compatibility": "Default manual workspace changes; explicit project/Studio routes retain queue behavior. legacy=1 is the regression compatibility entry.",
+  "preserved": [
+    "original source bytes/cut boundaries",
+    "background removal and existing alpha",
+    "independent placement geometry",
+    "R18 compact player",
+    "R21 saved-video passes",
+    "previous editable workspace archived before selecting a fresh bed",
+    "protected SxLock and AspectLock files unchanged"
+  ],
+  "checks": {
+    "caplockNodePassed": 57,
+    "browser": "pending branch CI",
+    "deployment": "pending"
+  },
+  "phoneAcceptance": "Not claimed; owner chooses and verifies their actual bed."
+}

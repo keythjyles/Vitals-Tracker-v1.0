@@ -1,10 +1,10 @@
 import {BackgroundSurface} from './background.mjs?v=20';
 import {Input,ALL_FORMATS,BlobSource} from '../sxlock/vendor/mediabunny-1.62.1-gs1.mjs';
 import {exportVideo} from '../sxlock/export-engine.mjs?v=27';
-import {validateProject} from './core.mjs?v=20-key';
-import {mediaContainer,mediaType} from '../../shared/production-stages.mjs?v=20-key';
-import {clipTime} from './clip-time.mjs?v=4';
-import {captionRecipe} from '../../shared/production-stages.mjs?v=20-key';
+import {validateProject} from './core.mjs?v=22';
+import {mediaContainer,mediaType} from '../../shared/production-stages.mjs?v=22';
+import {clipTime} from './clip-time.mjs?v=22';
+import {captionRecipe} from '../../shared/production-stages.mjs?v=22';
 
 export async function renderCaptioned({project,bed,readAsset,cancelled,onProgress,onPhase}){
  const p=validateProject(project),recipe=captionRecipe(p),opened=[],audio=[],images=[],videos=[],check=()=>{if(cancelled?.())throw Error('Export cancelled. Editable placements are retained.');};

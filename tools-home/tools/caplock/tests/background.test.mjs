@@ -16,8 +16,8 @@ test('keying clears background, keeps lettering/outline, multiplies existing alp
 });
 test('schema7 saves editable background settings without changing source, timing or legacy state',()=>{
  const p=createProject();p.clips=[{id:'c',name:'1 why did.mp4',type:'video',ref:{kind:'local',name:'1 why did.mp4',path:'',size:100},inFrame:12,outFrame:32,trimInFrame:0,trimOutFrame:20,playbackRate:1,x:50,y:75,width:90,rotation:0,opacity:1,volume:0,visible:true,placed:true,captionNumber:1,loop:false,chroma:{...DEFAULT_CHROMA,color:'#0060b8'}}];
- const q=validateProject(JSON.parse(JSON.stringify(p)));assert.equal(q.version,7);assert.deepEqual(q.clips[0].chroma,p.clips[0].chroma);assert.deepEqual(q.clips[0].ref,p.clips[0].ref);assert.equal(q.clips[0].inFrame,12);assert.equal(q.clips[0].trimOutFrame,20);
- const legacy={...p,version:6,clips:p.clips.map(({chroma,...c})=>c)},recovered=validateProject(legacy);assert.equal(recovered.version,7);assert.equal(recovered.clips[0].chroma,undefined);assert.equal(recovered.clips[0].inFrame,12);
+ const q=validateProject(JSON.parse(JSON.stringify(p)));assert.equal(q.version,8);assert.deepEqual(q.clips[0].chroma,p.clips[0].chroma);assert.deepEqual(q.clips[0].ref,p.clips[0].ref);assert.equal(q.clips[0].inFrame,12);assert.equal(q.clips[0].trimOutFrame,20);
+ const legacy={...p,version:6,clips:p.clips.map(({chroma,...c})=>c)},recovered=validateProject(legacy);assert.equal(recovered.version,8);assert.equal(recovered.clips[0].chroma,undefined);assert.equal(recovered.clips[0].inFrame,12);
  for(const bad of [{enabled:'yes'},{color:'blue'},{similarity:.8},{blend:-1}])assert.throws(()=>validateChroma({...DEFAULT_CHROMA,...bad}));
  const first=JSON.stringify(captionRecipe(q));q.clips[0].chroma.color='#00dd44';assert.notEqual(JSON.stringify(captionRecipe(q)),first);q.clips[0].chroma.enabled=false;assert.equal(JSON.stringify(captionRecipe(q)),JSON.stringify(captionRecipe(recovered)));
 });
