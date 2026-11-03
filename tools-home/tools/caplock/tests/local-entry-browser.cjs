@@ -17,7 +17,7 @@ module.exports=async(browser,base,alphaBytes)=>{
  const original=await page.evaluate(()=>JSON.parse(localStorage.getItem('gs_caplock_draft_v1')));assert.equal(original.clips.length,2);assert.equal(original.clips[0].placed,true);assert.equal(original.clips[1].placed,false);
  // A failed component must leave the old sequence/placements intact and permit retry.
  const mp4=fs.readFileSync('/tmp/caplock-fixtures/source25.mp4');
- await page.locator('#editActiveCaption').click();chooser=page.waitForEvent('filechooser');await page.getByText('Import numbered files',{exact:true}).click();await (await chooser).setFiles([{name:'8 valid.mp4',mimeType:'video/mp4',buffer:mp4},{name:'9 broken.mp4',mimeType:'video/mp4',buffer:Buffer.from('invalid video')}]);
+ await page.locator('#dockGrip').click();await page.locator('#railImport').click();chooser=page.waitForEvent('filechooser');await page.getByText('Import numbered files',{exact:true}).click();await (await chooser).setFiles([{name:'8 valid.mp4',mimeType:'video/mp4',buffer:mp4},{name:'9 broken.mp4',mimeType:'video/mp4',buffer:Buffer.from('invalid video')}]);
  await page.waitForFunction(()=>document.querySelector('#captionImportStatus').textContent.includes('Captions not imported:'));
  assert.deepEqual(await page.evaluate(()=>JSON.parse(localStorage.getItem('gs_caplock_draft_v1'))),original);assert.equal(await page.locator('#captionFiles').inputValue(),'');assert.equal(await page.locator('#captionFiles').isEnabled(),true);
  // Exact descriptive MP4 names and selection order from the owner's Android picker.
