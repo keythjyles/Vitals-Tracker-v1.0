@@ -30,8 +30,85 @@
   ],
   "checks": {
     "nodePassed": 72,
-    "browser": "pending",
-    "deployment": "pending"
+    "caplockCiNodePassed": 48,
+    "browser": {
+      "filesChooser": true,
+      "photosChooser": true,
+      "namedMp4Import": 7,
+      "numericOrder": true,
+      "failedBatchRetainedPriorEdits": true,
+      "retry": true,
+      "progress": true,
+      "insertNext": true,
+      "existingLayersRetained": true,
+      "cloudRequests": 0,
+      "layouts": [
+        {
+          "width": 360,
+          "height": 640,
+          "dock": 359,
+          "header": 16,
+          "roomBelow": 281,
+          "overflow": false
+        },
+        {
+          "width": 390,
+          "height": 844,
+          "dock": 359,
+          "header": 16,
+          "roomBelow": 485,
+          "overflow": false
+        }
+      ],
+      "cloudProjectRegression": true,
+      "focusedLayerRegression": true,
+      "errors": []
+    },
+    "runs": {
+      "caplock": 41555320162,
+      "cliplock": 41555320199,
+      "studio": 41555320148
+    },
+    "deployment": {
+      "pagesRun": 41555547988,
+      "status": "success",
+      "sourceCommit": "c1977141423603c4a7db3f32301e2ff8cb735773"
+    },
+    "live": {
+      "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/caplock/?v=R19-named",
+      "visibleVersion": "R19",
+      "sourceFile": "Slide_test_3.mp4",
+      "sourceSha256": "9a222183ab6dd71d6a9311aae9946670d8eafcfda4b803da3631af0bcc6b145e",
+      "bedReadyState": 4,
+      "r18RejectionReproducedWithOriginalCuts": true,
+      "r19OriginalNamedMp4CutsImported": 7,
+      "selectionOrder": [
+        7,
+        5,
+        6,
+        3,
+        4,
+        1,
+        2
+      ],
+      "active": "1/7 \u00b7 1 why did test 1.mp4",
+      "insertEnabled": true,
+      "placedItems": 0,
+      "message": "7 captions ready. Insert places the first caption; Next selects the following caption.",
+      "localImport": true,
+      "privateCloudAuthenticationUsed": false,
+      "mediaReencoded": false,
+      "alphaProcessingAdded": false,
+      "screenshot": "caplock-r19-seven-ready-20261103.jpg",
+      "physicalSamsungAcceptance": "pending owner use"
+    },
+    "mainRuns": {
+      "caplock": 41555549732,
+      "cliplock": 41555549629,
+      "studio": 41555549708,
+      "conclusion": "success"
+    }
   },
-  "rollback": "Restore changed source files from baseline only; retain media, projects and recovery records."
+  "rollback": "Restore changed source files from baseline only; retain media, projects and recovery records.",
+  "testedSourceCommit": "c1977141423603c4a7db3f32301e2ff8cb735773"
 }
