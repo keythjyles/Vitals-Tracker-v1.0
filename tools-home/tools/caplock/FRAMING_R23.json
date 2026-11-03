@@ -30,13 +30,55 @@
   ],
   "checks": {
     "nodePassed": 58,
-    "browser": "pending",
-    "deployment": "pending"
+    "browser": {
+      "fullPictureFirstAndFinalFrames": true,
+      "wholeFramePixelErrors": [
+        2.0132381687242797,
+        1.5034953703703704
+      ],
+      "frames": 75,
+      "width": 270,
+      "height": 480,
+      "audio": true,
+      "recoveryRetainsCaptions": true,
+      "shiftedBedArchived": true,
+      "overlayMoveCannotShiftBed": true,
+      "explicitBedMoveAndFit": true,
+      "currentFrameMarks": true,
+      "settingsRetainBedFrame": true,
+      "highResolutionPreviewWidth": 540,
+      "errors": []
+    },
+    "deployment": {
+      "pagesRun": 41584224556,
+      "status": "success",
+      "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/caplock/?v=R23-framing&recover=local&fitBed=1",
+      "liveBrowser": {
+        "title": "CapLock \u00b7 GS-TOOL-CAPLOCK \u00b7 R23",
+        "appInitialized": true,
+        "toolboxRestored": true,
+        "placementsRestored": true,
+        "reconnectFilesVisible": true
+      }
+    },
+    "branchCI": {
+      "caplock": 41584033054,
+      "studio": 41584033057,
+      "clipper": 41584033136,
+      "conclusion": "success"
+    },
+    "mainCI": {
+      "caplock": 41584224933,
+      "studio": 41584224949,
+      "clipper": 41584224910,
+      "conclusion": "success"
+    }
   },
   "limits": [
     "Exact saved bed transform was not supplied with the flattened video.",
     "Physical phone acceptance is the owner test.",
     "Existing cropped file is retained; repair requires the original source bed."
   ],
-  "newGeneration": false
+  "newGeneration": false,
+  "sourceCommit": "012b7d573207ab4aa6eebe307574a629644f4f03"
 }
