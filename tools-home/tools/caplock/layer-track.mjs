@@ -4,7 +4,7 @@ import {BackgroundSurface,DEFAULT_CHROMA,detectBackground} from './background.mj
 export class LayerTracks{
  constructor(root,{getClips,getFrame,isPlaying,getStagedId,onSelect,onChange,onStatus,getMode,onDragStart,isFocused}){Object.assign(this,{root,getClips,getFrame,isPlaying,getStagedId,onSelect,onChange,onStatus,getMode,onDragStart,isFocused});this.media=new Map();this.selected=null;this.generation=0;}
  async attach(clip,blob,{autoKey=!!clip.captionNumber&&!clip.chroma}={}){
-  const generation=this.generation,url=URL.createObjectURL(blob),el=document.createElement(clip.type==='image'?'img':clip.type==='audio'?'audio':'video');el.preload='auto';el.playsInline=true;el.muted=clip.type==='video';
+  const generation=this.generation,url=URL.createObjectURL(blob),el=document.createElement(clip.type==='image'?'img':clip.type==='audio'?'audio':'video');el.preload='auto';el.playsInline=true;el.muted=clip.volume===0;el.preservesPitch=false;
   try{await new Promise((ok,no)=>{const timer=setTimeout(()=>no(Error('Caption loading timed out. Select the local file again.')),20000),done=()=>{clearTimeout(timer);ok();};if(clip.type==='image')el.onload=done;else el.onloadeddata=done;el.onerror=()=>{clearTimeout(timer);no(Error('Clip format cannot decode. Choose a supported MP4, WebM or PNG.'));};el.src=url;});if(autoKey&&clip.type!=='audio')clip.chroma=detectBackground(el)||{...DEFAULT_CHROMA,enabled:false};}catch(e){el.pause?.();el.removeAttribute('src');el.load?.();URL.revokeObjectURL(url);throw e;}
   if(generation!==this.generation){el.pause?.();URL.revokeObjectURL(url);throw Error('Import cancelled because project changed');}
   this.detach(clip.id);const wrap=document.createElement('div');wrap.className='media-layer';wrap.dataset.clipId=clip.id;wrap.append(el);let surface;
@@ -20,7 +20,7 @@ export class LayerTracks{
   for(const [id,m] of this.media){const c=clips.find(c=>c.id===id);if(!c){m.wrap.hidden=true;m.el.pause?.();continue;}const duration=m.el.duration;const timing=clipTime(c,frame,duration);const inserted=!c.captionNumber||c.placed;const shown=inserted&&(c.type==='image'?c.visible&&frame>=c.inFrame&&frame<c.outFrame:timing.shown);
    const staged=!playing&&id===this.getStagedId?.();m.wrap.hidden=!(shown||staged);m.wrap.classList.toggle('selected-layer',id===this.selected&&(this.isFocused?.()??true));m.wrap.classList.toggle('locked-layer',!!c.locked);m.wrap.style.cssText=`left:${c.x}%;top:${c.y}%;width:${c.width}%;opacity:${c.opacity};transform:translate(-50%,-50%) rotate(${c.rotation}deg);z-index:${clips.indexOf(c)+1}`;
    if(c.type!=='image'){
-    m.el.volume=c.volume;m.el.muted=c.type==='video'||c.volume===0;const target=timing.target;if(m.el.playbackRate!==timing.rate)m.el.playbackRate=timing.rate;
+    m.el.volume=c.volume;m.el.muted=c.volume===0;const target=timing.target;if(m.el.playbackRate!==timing.rate)m.el.playbackRate=timing.rate;
     if((shown||staged)&&Number.isFinite(target)&&(!playing||Math.abs(m.el.currentTime-target)>.08)){const preview=staged?c.trimInFrame/25:target;if(!m.el.seeking&&Math.abs(m.el.currentTime-preview)>.004)m.el.currentTime=Math.min(preview,Number.isFinite(duration)?Math.max(0,Math.min(duration,timing.end)-.001):preview);}
     if(shown&&playing){if(m.el.paused)m.el.play().catch(()=>this.onStatus('Clip playback blocked or unavailable. Tap Play again.'));}else m.el.pause();
    }

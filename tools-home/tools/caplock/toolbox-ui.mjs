@@ -1,5 +1,5 @@
-import {ensureToolbox,makeToolboxPlacement,assetFrameLabel,shiftPlacementIn,fitPlacementOut,setPlacementSpeed} from './toolbox-core.mjs?v=23';
-import {inspectToolboxFile} from './toolbox-media.mjs?v=23';
+import {ensureToolbox,makeToolboxPlacement,assetFrameLabel,shiftPlacementIn,fitPlacementOut,setPlacementSpeed} from './toolbox-core.mjs?v=24';
+import {inspectToolboxFile} from './toolbox-media.mjs?v=24';
 import {BackgroundSurface} from './background.mjs?v=23';
 const $=id=>document.getElementById(id);
 const signature=async blob=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',await blob.arrayBuffer()))].map(v=>v.toString(16).padStart(2,'0')).join('');
@@ -64,14 +64,14 @@ export function createToolboxUI(o){
  }
  const previewSurface=new BackgroundSurface($('toolboxPreviewCanvas'));
  function paintPreview(){
-  const v=$('toolboxPreviewVideo');if(!previewAsset||v.readyState<2)return;
+  const v=$('toolboxPreviewVideo');if(!previewAsset||previewAsset.type==='audio'||v.readyState<2)return;
   if(previewAsset.chroma?.enabled)previewSurface.draw(v,previewAsset.chroma,{maxWidth:540});
   else{const canvas=previewSurface.canvas;canvas.width=v.videoWidth;canvas.height=v.videoHeight;const ctx=previewSurface.ctx;ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(v,0,0);}
  }
  async function showPreview(id){
   const a=assets().find(a=>a.id===id);if(!a)return;
   try{stopPreview();const blob=await media(a);if(a.type==='image'){$('toolboxStatus').textContent=assetFrameLabel(a)+'. Insert to position this still image.';return;}
-   previewAsset=a;previewURL=URL.createObjectURL(blob);const v=$('toolboxPreviewVideo');v.onloadeddata=()=>{paintPreview();$('toolboxPreview').hidden=false;};v.src=previewURL;$('toolboxPreviewName').textContent=a.name+' · '+assetFrameLabel(a);
+   previewAsset=a;previewURL=URL.createObjectURL(blob);const v=$('toolboxPreviewVideo');v.muted=a.type!=='audio';v.volume=1;$('toolboxPreviewCanvas').hidden=a.type==='audio';v.onloadeddata=()=>{if(previewAsset?.id!==a.id)return;paintPreview();$('toolboxPreview').hidden=false;};v.src=previewURL;$('toolboxPreviewName').textContent=a.name+' · '+assetFrameLabel(a);
   }catch(e){$('toolboxStatus').textContent=e.message;}
  }
  function duration(c){return assetFor(c)?.duration||c.sourceDuration||o.media().get(c.id)?.el.duration;}

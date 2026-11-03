@@ -58,11 +58,12 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: caplock-r23-framing
+          name: caplock-r24-source-audio
           path: |
             /tmp/caplock-fixtures/r19-named-import.png
             /tmp/caplock-fixtures/r20-background.png
             /tmp/caplock-fixtures/r21-local-pass.png
             /tmp/caplock-fixtures/r22-toolbox.png
             /tmp/caplock-fixtures/r23-framing.png
+            /tmp/caplock-fixtures/r24-source-audio.png
           if-no-files-found: ignore

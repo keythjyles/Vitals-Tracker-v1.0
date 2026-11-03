@@ -1,0 +1,40 @@
+{
+  "schema": "GS-CapLock-Source-Audio-1",
+  "release": "R24",
+  "baseline": "46974967c76bdb1cdf5c79123f64b9195bf41696",
+  "request": "Retain source-video sound, muted by default, with adjustable volume so a goat can be layered at the end.",
+  "fixes": [
+    "remove forced video mute when gain is above zero",
+    "mix embedded video audio at saved placement level",
+    "use 0\u2013100 percent entry with \u00b15 percent controls",
+    "preserve source audio timing and rate",
+    "allow standalone sound files in reusable toolbox",
+    "identify files without an audio track"
+  ],
+  "defaults": {
+    "videoGain": 0,
+    "soundFileGain": 1,
+    "bedGain": 1,
+    "gainRange": [
+      0,
+      1
+    ]
+  },
+  "schemaVersion": 8,
+  "checks": {
+    "nodePassed": 61,
+    "browser": "pending",
+    "deployment": "pending"
+  },
+  "preserved": [
+    "original video and sound files",
+    "all caption/animation placements and gains",
+    "framing and current-bed-frame marks",
+    "bed audio timeline",
+    "existing SxLock and AspectLock engines"
+  ],
+  "limitations": [
+    "User goat file was not supplied; verification uses a labeled tone fixture.",
+    "A file with no embedded audio cannot be unmuted into sound."
+  ]
+}

@@ -66,3 +66,6 @@ h1{font-size:20px;margin:4px 0}#viewerPage{padding:0;border:0;background:none}#s
 
 /* R23: current-bed-frame marks beside each element boundary. */
 .item-timing>div{display:flex;gap:3px;align-items:center;margin-top:4px}.item-timing button{flex:none;min-height:34px;padding:3px 5px;font-size:11px}.item-timing input{min-width:0;min-height:34px}#clipBedFrame{color:#ffda8a;font-variant-numeric:tabular-nums}
+
+/* R24: exact percent levels for each source clip, without a touch slider. */
+#clipVolumeRow{grid-column:1/-1}.clip-volume-controls{display:flex;gap:5px;margin-top:4px}.clip-volume-controls button{min-height:34px;font-size:12px;padding:3px 8px}.clip-volume-controls input{flex:1;min-width:0;min-height:34px;text-align:center}

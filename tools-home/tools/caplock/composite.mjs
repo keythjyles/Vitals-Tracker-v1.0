@@ -1,23 +1,26 @@
 import {BackgroundSurface} from './background.mjs?v=23';
 import {Input,ALL_FORMATS,BlobSource} from '../sxlock/vendor/mediabunny-1.62.1-gs1.mjs';
 import {exportVideo} from '../sxlock/export-engine.mjs?v=27';
-import {validateProject} from './core.mjs?v=23';
+import {validateProject} from './core.mjs?v=24';
 import {mediaContainer,mediaType} from '../../shared/production-stages.mjs?v=22';
 import {clipTime} from './clip-time.mjs?v=22';
 import {captionRecipe} from '../../shared/production-stages.mjs?v=22';
+import {readSourceAudio} from './source-audio.mjs?v=24';
 
 export async function renderCaptioned({project,bed,readAsset,cancelled,onProgress,onPhase}){
  const p=validateProject(project),recipe=captionRecipe(p),opened=[],audio=[],images=[],videos=[],check=()=>{if(cancelled?.())throw Error('Export cancelled. Editable placements are retained.');};
  const source=new Input({source:new BlobSource(bed),formats:ALL_FORMATS});opened.push(source);
- let audioContext;
  try{
   const track=await source.getPrimaryVideoTrack();if(!track)throw Error('Load the joke video first.');
   const width=Math.max(2,Math.round((await track.getDisplayWidth())/2)*2),height=Math.max(2,Math.round(width*16/9/2)*2),visual=[];
   for(const c of p.clips){
    if(!c.visible||c.captionNumber&&!c.placed)continue;check();const blob=await readAsset(c.ref,c);
    if(c.type==='image'){const image=await createImageBitmap(blob);images.push(image);visual.push({c,image,width:image.width,height:image.height,duration:Infinity});continue;}
-   if(c.type==='audio'){if(c.volume===0)continue;audioContext||=new AudioContext();const buffer=await audioContext.decodeAudioData(await blob.arrayBuffer());audio.push({c,buffer});continue;}
-   const input=new Input({source:new BlobSource(blob),formats:ALL_FORMATS});opened.push(input);const v=await input.getPrimaryVideoTrack();if(!v)throw Error('Animation has no video: '+c.name);
+   if(c.type==='audio'&&c.volume===0)continue;
+   const input=new Input({source:new BlobSource(blob),formats:ALL_FORMATS});opened.push(input);
+   if(c.volume>0){const track=await input.getPrimaryAudioTrack();if(track){const buffer=await readSourceAudio(track,check);if(buffer)audio.push({c,buffer});}}
+   if(c.type==='audio')continue;
+   const v=await input.getPrimaryVideoTrack();if(!v)throw Error('Animation has no video: '+c.name);
    const el=document.createElement('video'),url=URL.createObjectURL(new Blob([blob],{type:mediaType(mediaContainer(await blob.slice(0,12).arrayBuffer()))}));el.muted=true;el.playsInline=true;el.preload='auto';videos.push({el,url});await new Promise((ok,no)=>{el.onloadeddata=ok;el.onerror=()=>no(Error('Animation cannot decode: '+c.name));el.src=url;});visual.push({c,el,width:await v.getDisplayWidth(),height:await v.getDisplayHeight(),duration:await v.computeDuration()});
   }
   const result=await exportVideo({file:bed,fps:25,size:'original',format:'mp4',soundtrackGain:1,cancelled,onProgress,onPhase,hasEffects:audio.length>0,
@@ -32,5 +35,5 @@ export async function renderCaptioned({project,bed,readAsset,cancelled,onProgres
    }}
   });
   return {...result,recipe};
- }finally{for(const {el,url}of videos){el.pause();el.removeAttribute('src');el.load();URL.revokeObjectURL(url);}for(const input of opened)input.dispose();for(const image of images)image.close();await audioContext?.close();}
+ }finally{for(const {el,url}of videos){el.pause();el.removeAttribute('src');el.load();URL.revokeObjectURL(url);}for(const input of opened)input.dispose();for(const image of images)image.close();}
 }

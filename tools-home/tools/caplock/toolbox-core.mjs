@@ -6,7 +6,8 @@ export function validateToolboxAsset(a){
  if(a.frames!=null&&(!Number.isSafeInteger(a.frames)||a.frames<1))throw Error('Invalid source frame count');
  if(a.duration!=null&&(!Number.isFinite(a.duration)||a.duration<=0))throw Error('Invalid source duration');
  if(a.sha256!=null&&!/^[a-f0-9]{64}$/.test(a.sha256))throw Error('Invalid file fingerprint');
- return {id:a.id,name:String(a.name||a.ref.name||'File'),type:a.type,ref:{kind:a.ref.kind,name:String(a.ref.name||''),path:String(a.ref.path||''),size:Number(a.ref.size)||0},frames:a.frames??null,duration:a.duration??null,...(a.sha256?{sha256:a.sha256}:{}),...(a.chroma?{chroma:validateChroma(a.chroma)}:{})};
+ if(a.hasAudio!=null&&typeof a.hasAudio!=='boolean')throw Error('Invalid sound-track metadata');
+ return {id:a.id,name:String(a.name||a.ref.name||'File'),type:a.type,ref:{kind:a.ref.kind,name:String(a.ref.name||''),path:String(a.ref.path||''),size:Number(a.ref.size)||0},frames:a.frames??null,duration:a.duration??null,...(a.hasAudio!=null?{hasAudio:a.hasAudio}:{}),...(a.sha256?{sha256:a.sha256}:{}),...(a.chroma?{chroma:validateChroma(a.chroma)}:{})};
 }
 export function ensureToolbox(p){
  p.toolbox||=[];
@@ -46,4 +47,4 @@ export function setPlacementSpeed(c,rate,duration=c.sourceDuration){
  if(!Number.isFinite(span)||span<=0)throw Error('Reconnect this file to read its clip length.');
  c.playbackRate=rate;c.outFrame=c.inFrame+Math.max(1,Math.ceil(span*25/rate-1e-6));return c;
 }
-export function assetFrameLabel(a){return a?.frames?(a.type==='image'?'1 still frame':`${a.frames} source frames · ${(a.frames/a.duration).toFixed(2).replace(/\.00$/,'')} fps · ${a.duration.toFixed(3)}s`):'Reconnect to read source frames';}
+export function assetFrameLabel(a){return a?.frames?(a.type==='image'?'1 still frame':a.type==='audio'?`Sound · ${a.duration.toFixed(3)}s · ${a.frames} timeline frames`:`${a.frames} source frames · ${(a.frames/a.duration).toFixed(2).replace(/\.00$/,'')} fps · ${a.duration.toFixed(3)}s`):'Reconnect to read source frames';}
