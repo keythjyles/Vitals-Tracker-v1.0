@@ -3,7 +3,7 @@ module.exports=async(browser,base)=>{
  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),page=await context.newPage(),errors=[];
  page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());await page.goto(base);
  const go=async n=>{await page.locator('[data-for=seek] input').fill(String(n));await page.getByRole('button',{name:'Go to frame',exact:true}).click();};
- await page.locator('#newVideoFile').setInputFiles('/tmp/caplock-fixtures/key-bed.mp4');await page.waitForFunction(()=>!document.querySelector('#play').disabled);
+ await page.locator('#newVideoFile').setInputFiles('/tmp/caplock-fixtures/tail-bed.mp4');await page.waitForFunction(()=>!document.querySelector('#play').disabled);
  await go(5);await page.locator('#toolboxFiles').setInputFiles(['/tmp/caplock-fixtures/late-goat.mp4','/tmp/caplock-fixtures/silent-goat.mp4']);
  await page.waitForFunction(()=>document.querySelector('#toolboxStatus').textContent.includes('2 files in'));
  await page.getByRole('button',{name:'Insert late-goat.mp4',exact:true}).click();await page.waitForFunction(()=>document.querySelector('#itemCount').textContent==='1');
@@ -31,11 +31,11 @@ module.exports=async(browser,base)=>{
    const audio=await i.getPrimaryAudioTrack(),parts=[];for await(const b of new m.AudioBufferSink(audio).buffers())parts.push(b);
    const amplitude=(freq,start,end)=>{let re=0,im=0,count=0;for(const part of parts){const b=part.buffer,data=b.getChannelData(0),from=Math.max(0,Math.ceil((start-part.timestamp)*b.sampleRate)),to=Math.min(data.length,Math.ceil((end-part.timestamp)*b.sampleRate));for(let n=from;n<to;n++){const angle=2*Math.PI*freq*(part.timestamp+n/b.sampleRate);re+=data[n]*Math.cos(angle);im+=data[n]*Math.sin(angle);count++;}}return 2*Math.hypot(re,im)/count;};
    const sink=new m.VideoSampleSink(track),pixel=async(t,x,y)=>{const s=await sink.getSample(t);try{const c=new OffscreenCanvas(180,320),ctx=c.getContext('2d');s.draw(ctx,0,0,180,320);return [...ctx.getImageData(x,y,1,1).data];}finally{s.close();}};
-   return{frames,end,bedBefore:amplitude(440,.08,.3),bedAfter:amplitude(440,.5,.7),goatBefore:amplitude(1000,.5,.7),goatAfter:amplitude(1000,.9,1.15),bedFirst:await pixel(0,2,2),bedLast:await pixel(1.16,2,2),goatLast:await pixel(1.16,90,240)};
+   return{frames,end,bedBefore:amplitude(440,.08,.3),bedAfter:amplitude(440,.5,.7),goatBefore:amplitude(1000,.5,.7),goatAfter:amplitude(1000,.9,1.15),bedFirst:await pixel(0,2,2),bedFinalSource:await pixel(.36,2,2),bedLast:await pixel(1.16,2,2),goatLast:await pixel(1.16,90,240)};
   }finally{i.dispose();}
  },bytes);
  assert.equal(measured.frames,30);assert.ok(Math.abs(measured.end-1.2)<.00001);assert.ok(measured.bedBefore>.08);assert.ok(measured.bedAfter<.003);assert.ok(measured.goatBefore<.003);assert.ok(measured.goatAfter>.07&&measured.goatAfter<.1,JSON.stringify(measured));
- assert.ok(measured.bedFirst.every((n,k)=>Math.abs(n-measured.bedLast[k])<4));assert.ok(measured.goatLast[0]>220&&measured.goatLast[1]>220&&measured.goatLast[2]<30);
+ assert.ok(measured.bedFinalSource.every((n,k)=>Math.abs(n-measured.bedLast[k])<4));assert.ok(Math.abs(measured.bedFirst[0]-measured.bedLast[0])>20);assert.ok(measured.goatLast[0]>220&&measured.goatLast[1]>220&&measured.goatLast[2]<30);
  // A placement wholly past the bed also exposes the gap and OUT remains editable.
  await page.locator('#clipTimeline .item-open').click();await page.locator('#clipStart').fill('15');await page.locator('#clipStart').press('Tab');assert.equal(await page.locator('#clipEnd').inputValue(),'40');assert.equal(await page.locator('#seek').getAttribute('max'),'39');
  await page.locator('#clipEnd').fill('50');await page.locator('#clipEnd').press('Tab');assert.ok(Math.abs(Number(await page.locator('#clipSpeed').inputValue())-25/35)<.0001);assert.equal(await page.locator('#seek').getAttribute('max'),'49');await page.locator('#closeClipProperties').click();

@@ -22,6 +22,7 @@ subprocess.run(['ffmpeg','-v','error','-f','lavfi','-i','color=c=0x0060b8:s=320x
 subprocess.run(['ffmpeg','-v','error','-f','lavfi','-i','sine=frequency=1000:duration=1','-c:a','pcm_s16le','-y',str(root/'goat.wav')],check=True)
 
 # Sound begins after the short bed has ended: reproduces the missing goat tail.
+subprocess.run(['ffmpeg','-v','error','-f','lavfi','-i',"color=c=0x223344:s=180x320:r=25:d=0.4,drawbox=x=0:y=0:w=iw:h=ih:color=0x446688:t=fill:enable='gte(t,0.2)'",'-f','lavfi','-i','sine=frequency=440:duration=0.4','-c:v','libx264','-pix_fmt','yuv420p','-c:a','aac','-shortest','-y',str(root/'tail-bed.mp4')],check=True)
 for name,audio in [('late-goat','sine=frequency=1000:duration=1'),('silent-goat','anullsrc=r=48000:cl=stereo:d=1')]:
     command=['ffmpeg','-v','error','-f','lavfi','-i','color=c=yellow:s=80x80:r=25:d=1','-f','lavfi','-i',audio]
     if name=='late-goat':
