@@ -1,3 +1,11 @@
+## CapLock R20 — automatic caption background removal, November 2, 2026
+
+Owner correction: caption/animation imports must remove a solid background inside CapLock, as AspectLock does. A separate transparent ZIP or external conversion is not a prerequisite. R20 follows AspectLock's scratch-canvas compositing approach, automatically samples a uniform solid edge color on visual imports and applies the same alpha operation during preview and the existing captioned-video export. Genuine alpha input remains unchanged. Original bytes, cut marks, source cadence, bed soundtrack and editable placement are preserved. AspectLock itself is unchanged.
+
+Caption background adjustments live inside each item's properties: remove on/off, sampled color, Auto-detect, tolerance and soft edge. The player retains R18's one-line header and short right rail. Local Files/Photos and named caption imports retain R19's cloud-independent workflow. A nonuniform or transparent border is not guessed to be a solid background; manual color controls remain available.
+
+Project schema7 retains the key settings through drafts, JSON, undo/redo and cloud saves; versions1–6 migrate without changing existing timing/geometry. Older clients reject schema7 rather than discarding keys. The production recipe includes enabled background settings so changing a key invalidates a previous captioned output. Baseline/rollback: `771c5fb364f625ae60f050722688ede4718abff6`; preserve all schema7 JSON, source media, projects and recovery data on rollback. Verification: [CAPTION_BACKGROUND_R20.json](caplock/CAPTION_BACKGROUND_R20.json). Local 75 Node checks passed; browser/export/deployment acceptance is recorded separately.
+
 ## CapLock R19 — named caption file import, November 2, 2026
 
 The device importer now accepts the owner's numbered descriptive names, including `1 why did test 1.mp4` through `7 slide test 1.mp4`, as well as numbered WebM and saved ALP components. Selection order does not matter: the leading component number determines the queue. Original filenames, media bytes, native cut marks, existing placements and the R18 compact/local workspace remain intact.

@@ -1,0 +1,42 @@
+{
+  "schema": "GS-CapLock-Caption-Background-1",
+  "release": "R20",
+  "baseline": "771c5fb364f625ae60f050722688ede4718abff6",
+  "request": "Solid caption backgrounds must become transparent within CapLock, like AspectLock. No separate conversion/ZIP step.",
+  "approach": "Per-frame scratch canvas and alpha compositing in preview and the existing export engine. Detect a uniform solid border color; multiply existing alpha by soft RGB color-key alpha. Clear scratch canvas before every decoded frame.",
+  "defaults": {
+    "automaticOnVisualImport": true,
+    "similarity": 0.18,
+    "blend": 0.04,
+    "existingTransparencyPreserved": true
+  },
+  "editable": [
+    "enabled",
+    "color",
+    "similarity",
+    "blend"
+  ],
+  "preserved": [
+    "original file bytes and native source cadence",
+    "native cut marks and exact placement times",
+    "existing bed, audio and layer transforms",
+    "R18 compact dimensions",
+    "R19 named imports and local loading",
+    "AspectLock and SxLock engines/UI"
+  ],
+  "projectSchema": 7,
+  "legacySchemasRead": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "checks": {
+    "nodePassed": 75,
+    "browser": "pending",
+    "decodedExport": "pending",
+    "deployment": "pending"
+  }
+}

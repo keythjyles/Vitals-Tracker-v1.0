@@ -56,3 +56,5 @@ h1{font-size:20px;margin:4px 0}#viewerPage{padding:0;border:0;background:none}#s
 #bedLoader .video-entry{display:flex;gap:5px;justify-content:center;pointer-events:auto;margin-bottom:6px}#bedLoader #emptyLoadProject{margin-top:2px}#captionImport .actions a{color:#ffd577;align-self:center}#geminiHandoffText{width:100%}
 
 .stage-source{font-size:11px}.stage-source select{font-size:11px;min-height:29px}#compositeProgress{width:100%;height:4px;pointer-events:none}.bedPickerBar{flex-wrap:wrap}#produceCaptioned{font-size:12px;min-height:29px}#cancelComposite{font-size:12px;min-height:29px}
+
+.media-layer .keyed-frame{display:block;width:100%;height:auto;pointer-events:none}#captionBackground .fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}#captionBackground input[type=color]{height:30px;min-height:30px}

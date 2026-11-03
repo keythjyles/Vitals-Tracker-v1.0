@@ -1,8 +1,9 @@
+import {validateChroma} from './background.mjs?v=20';
 export const FPS=25;
 export const DEFAULT_STYLE={font:'Arial',weight:700,size:52,color:'#ffffff',outline:4,shadow:6,background:'#000000',backgroundOpacity:0,align:'center',x:50,y:78,width:86,lineHeight:1.15,animation:'none',emphasis:false};
 export const uid=()=>globalThis.crypto.randomUUID();
 export const phrase=(text,frames={})=>({id:uid(),text,inFrame:null,outFrame:null,visible:true,layer:'caplock.caption',styleRef:'global',overrides:{},...frames});
-export const createProject=()=>({schema:'GS-CapLock-1',version:6,bedTransform:{x:50,y:50,scale:1},editFocus:'bed',fps:FPS,media:null,clips:[],protocol:{text:'',approved:false},nativeCaptions:false,globalStyle:{...DEFAULT_STYLE},presets:{},captions:[]});
+export const createProject=()=>({schema:'GS-CapLock-1',version:7,bedTransform:{x:50,y:50,scale:1},editFocus:'bed',fps:FPS,media:null,clips:[],protocol:{text:'',approved:false},nativeCaptions:false,globalStyle:{...DEFAULT_STYLE},presets:{},captions:[]});
 export const timed=c=>Number.isInteger(c.inFrame)&&Number.isInteger(c.outFrame)&&c.inFrame>=0&&c.outFrame>c.inFrame;
 export const effective=(p,c)=>({...p.globalStyle,...c.overrides});
 export function segment(text){
@@ -33,7 +34,7 @@ export function subtitle(p,type){
  return (type==='vtt'?'WEBVTT\n\n':'')+visible.slice().sort((a,b)=>a.inFrame-b.inFrame).map((c,i)=>(type==='srt'?(i+1)+'\n':'')+stamp(c.inFrame)+' --> '+stamp(c.outFrame)+'\n'+c.text+'\n').join('\n');
 }
 export function validateProject(raw){
- if(raw?.schema!=='GS-CapLock-1'||![1,2,3,4,5,6].includes(raw.version)||raw.fps!==FPS||!Array.isArray(raw.captions)||raw.captions.length>10000)throw Error('Unsupported CapLock project.');
+ if(raw?.schema!=='GS-CapLock-1'||![1,2,3,4,5,6,7].includes(raw.version)||raw.fps!==FPS||!Array.isArray(raw.captions)||raw.captions.length>10000)throw Error('Unsupported CapLock project.');
  const p=createProject();p.globalStyle=validateStyle(raw.globalStyle);p.media=raw.media?{kind:String(raw.media.kind),name:String(raw.media.name||''),path:String(raw.media.path||''),size:Number(raw.media.size)||0,lastModified:Number(raw.media.lastModified)||0}:null;
  if(raw.bedTransform){const b=raw.bedTransform;for(const [k,min,max]of [['x',-100,200],['y',-100,200],['scale',.25,4]])if(!Number.isFinite(b[k])||b[k]<min||b[k]>max)throw Error('Invalid bed transform '+k);p.bedTransform={x:b.x,y:b.y,scale:b.scale};}p.editFocus=['overlay','none'].includes(raw.editFocus)?raw.editFocus:'bed';
  p.protocol={text:String(raw.protocol?.text||''),approved:raw.protocol?.approved===true};p.nativeCaptions=raw.nativeCaptions===true;p.clips=(raw.clips||[]).map(validateClip);if(new Set(p.clips.map(c=>c.id)).size!==p.clips.length)throw Error('Duplicate clip IDs');
@@ -66,6 +67,6 @@ export function validateClip(c){
  if(c.placed!=null&&typeof c.placed!=='boolean')throw Error('Invalid placement state');
  if(c.captionNumber!=null&&(!Number.isInteger(c.captionNumber)||c.captionNumber<1))throw Error('Invalid caption number');
  for(const [k,min,max] of [['x',-100,200],['y',-100,200],['width',5,400],['rotation',-180,180],['opacity',0,1],['volume',0,1]])if(!Number.isFinite(c[k])||c[k]<min||c[k]>max)throw Error('Invalid clip '+k);
- return {id:c.id,name:String(c.name||c.ref.name||'Clip'),phraseId:String(c.phraseId||''),type:c.type,ref:{kind:c.ref.kind,name:String(c.ref.name||''),path:String(c.ref.path||''),size:Number(c.ref.size)||0},inFrame:c.inFrame,outFrame:c.outFrame,trimInFrame:c.trimInFrame,trimOutFrame:c.trimOutFrame??null,playbackRate:c.playbackRate??1,x:c.x,y:c.y,width:c.width,rotation:c.rotation,opacity:c.opacity,volume:c.volume,visible:c.visible!==false,loop:!!c.loop,placed:c.placed??(c.captionNumber?(!!c.locked||c.visible!==false):true),locked:false,...(c.captionNumber?{captionNumber:c.captionNumber}:{})};
+ return {id:c.id,name:String(c.name||c.ref.name||'Clip'),phraseId:String(c.phraseId||''),type:c.type,ref:{kind:c.ref.kind,name:String(c.ref.name||''),path:String(c.ref.path||''),size:Number(c.ref.size)||0},inFrame:c.inFrame,outFrame:c.outFrame,trimInFrame:c.trimInFrame,trimOutFrame:c.trimOutFrame??null,playbackRate:c.playbackRate??1,x:c.x,y:c.y,width:c.width,rotation:c.rotation,opacity:c.opacity,volume:c.volume,visible:c.visible!==false,loop:!!c.loop,placed:c.placed??(c.captionNumber?(!!c.locked||c.visible!==false):true),locked:false,...(c.captionNumber?{captionNumber:c.captionNumber}:{}),...(c.chroma?{chroma:validateChroma(c.chroma)}:{})};
 }
 

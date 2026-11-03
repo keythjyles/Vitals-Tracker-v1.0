@@ -58,6 +58,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: caplock-r19-named-import
-          path: /tmp/caplock-fixtures/r19-named-import.png
+          name: caplock-r20-caption-background
+          path: |
+            /tmp/caplock-fixtures/r19-named-import.png
+            /tmp/caplock-fixtures/r20-background.png
           if-no-files-found: ignore

@@ -1,14 +1,19 @@
 import {clipTime} from './clip-time.mjs?v=3';
+import {BackgroundSurface,DEFAULT_CHROMA,detectBackground} from './background.mjs?v=20';
 /* Independent reusable media-layer preview. Source picture/audio are never rewritten. */
 export class LayerTracks{
  constructor(root,{getClips,getFrame,isPlaying,getStagedId,onSelect,onChange,onStatus,getMode,onDragStart,isFocused}){Object.assign(this,{root,getClips,getFrame,isPlaying,getStagedId,onSelect,onChange,onStatus,getMode,onDragStart,isFocused});this.media=new Map();this.selected=null;this.generation=0;}
- async attach(clip,blob){
+ async attach(clip,blob,{autoKey=!!clip.captionNumber&&!clip.chroma}={}){
   const generation=this.generation,url=URL.createObjectURL(blob),el=document.createElement(clip.type==='image'?'img':clip.type==='audio'?'audio':'video');el.preload='auto';el.playsInline=true;el.muted=clip.type==='video';
-  try{await new Promise((ok,no)=>{if(clip.type==='image')el.onload=ok;else el.onloadedmetadata=ok;el.onerror=()=>no(Error('Clip format cannot decode. Use a browser-supported alpha WebM or transparent PNG.'));el.src=url;});}catch(e){URL.revokeObjectURL(url);throw e;}
+  try{await new Promise((ok,no)=>{const timer=setTimeout(()=>no(Error('Caption loading timed out. Select the local file again.')),20000),done=()=>{clearTimeout(timer);ok();};if(clip.type==='image')el.onload=done;else el.onloadeddata=done;el.onerror=()=>{clearTimeout(timer);no(Error('Clip format cannot decode. Choose a supported MP4, WebM or PNG.'));};el.src=url;});if(autoKey&&clip.type!=='audio')clip.chroma=detectBackground(el)||{...DEFAULT_CHROMA,enabled:false};}catch(e){el.pause?.();el.removeAttribute('src');el.load?.();URL.revokeObjectURL(url);throw e;}
   if(generation!==this.generation){el.pause?.();URL.revokeObjectURL(url);throw Error('Import cancelled because project changed');}
-  this.detach(clip.id);const wrap=document.createElement('div');wrap.className='media-layer';wrap.dataset.clipId=clip.id;wrap.append(el);if(clip.type!=='audio'){const resize=document.createElement('button');resize.type='button';resize.className='layer-resize';resize.textContent='↘';resize.setAttribute('aria-label','Resize animation '+clip.name);wrap.append(resize);}wrap.onpointerdown=e=>this.drag(e,clip.id);this.root.append(wrap);this.media.set(clip.id,{el,wrap,url});this.update();return Number.isFinite(el.duration)?el.duration:2;
+  this.detach(clip.id);const wrap=document.createElement('div');wrap.className='media-layer';wrap.dataset.clipId=clip.id;wrap.append(el);let surface;
+  if(clip.type!=='audio'){surface=new BackgroundSurface();surface.canvas.className='keyed-frame';surface.canvas.style.display='none';wrap.append(surface.canvas);const resize=document.createElement('button');resize.type='button';resize.className='layer-resize';resize.textContent='↘';resize.setAttribute('aria-label','Resize animation '+clip.name);wrap.append(resize);}wrap.onpointerdown=e=>this.drag(e,clip.id);this.root.append(wrap);
+  const media={el,wrap,url,surface,serial:0};this.media.set(clip.id,media);
+  el.addEventListener('seeked',()=>{media.serial++;this.paint(media,this.getClips().find(c=>c.id===clip.id)||clip);});
+  this.update();return Number.isFinite(el.duration)?el.duration:2;
  }
- detach(id){const m=this.media.get(id);if(m){m.el.pause?.();m.el.removeAttribute('src');m.el.load?.();m.wrap.remove();URL.revokeObjectURL(m.url);this.media.delete(id);}}
+ detach(id){const m=this.media.get(id);if(m){this.media.delete(id);if(m.callback!==undefined)m.el.cancelVideoFrameCallback?.(m.callback);m.el.pause?.();m.el.removeAttribute('src');m.el.load?.();m.wrap.remove();URL.revokeObjectURL(m.url);}}
  clear(){this.generation++;for(const id of this.media.keys())this.detach(id);this.selected=null;}
  update(){
   const frame=this.getFrame(),playing=this.isPlaying(),clips=this.getClips();
@@ -19,7 +24,14 @@ export class LayerTracks{
     if((shown||staged)&&Number.isFinite(target)&&(!playing||Math.abs(m.el.currentTime-target)>.08)){const preview=staged?c.trimInFrame/25:target;if(!m.el.seeking&&Math.abs(m.el.currentTime-preview)>.004)m.el.currentTime=Math.min(preview,Number.isFinite(duration)?Math.max(0,Math.min(duration,timing.end)-.001):preview);}
     if(shown&&playing){if(m.el.paused)m.el.play().catch(()=>this.onStatus('Clip playback blocked or unavailable. Tap Play again.'));}else m.el.pause();
    }
+   this.paint(m,c);
   }
+ }
+ paint(m,c){
+  if(!m.surface||!c)return;const keyed=!!c.chroma?.enabled;m.el.style.display=keyed?'none':'';m.surface.canvas.style.display=keyed?'block':'none';
+  if(!keyed||m.wrap.hidden||c.type==='video'&&m.el.readyState<2||m.el.seeking)return;
+  const stamp=JSON.stringify(c.chroma)+'/'+m.serial+'/'+Math.floor((m.el.currentTime||0)*25);if(m.stamp===stamp)return;
+  try{m.surface.draw(m.el,c.chroma);m.surface.canvas.dataset.sourceTime=String(m.el.currentTime||0);m.stamp=stamp;}catch(e){if(m.failed!==stamp){m.failed=stamp;this.onStatus('Caption background removal failed: '+e.message);}}
  }
  drag(e,id){this.onSelect(id);const c=this.getClips().find(c=>c.id===id);if(c?.locked){this.onStatus('Caption placement locked. Use Unlock placement to edit it.');return;}if(this.getMode()!=='move')return;e.stopPropagation();e.preventDefault();this.onDragStart();const box=this.root.getBoundingClientRect(),start={x:e.clientX,y:e.clientY,cx:c.x,cy:c.y};e.currentTarget.setPointerCapture(e.pointerId);const wrap=e.currentTarget;const move=p=>{c.x=Math.max(-100,Math.min(200,start.cx+(p.clientX-start.x)/box.width*100));c.y=Math.max(-100,Math.min(200,start.cy+(p.clientY-start.y)/box.height*100));this.update();};const finish=()=>{wrap.removeEventListener('pointermove',move);wrap.removeEventListener('pointerup',finish);wrap.removeEventListener('pointercancel',finish);this.onChange();};wrap.addEventListener('pointermove',move);wrap.addEventListener('pointerup',finish,{once:true});wrap.addEventListener('pointercancel',finish,{once:true});}
 }

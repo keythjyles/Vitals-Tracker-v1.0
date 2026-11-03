@@ -1,9 +1,10 @@
+import {BackgroundSurface} from './background.mjs?v=20';
 import {Input,ALL_FORMATS,BlobSource} from '../sxlock/vendor/mediabunny-1.62.1-gs1.mjs';
 import {exportVideo} from '../sxlock/export-engine.mjs?v=27';
-import {validateProject} from './core.mjs?v=9';
-import {mediaContainer,mediaType} from '../../shared/production-stages.mjs?v=1';
+import {validateProject} from './core.mjs?v=20-key';
+import {mediaContainer,mediaType} from '../../shared/production-stages.mjs?v=20-key';
 import {clipTime} from './clip-time.mjs?v=4';
-import {captionRecipe} from '../../shared/production-stages.mjs?v=1';
+import {captionRecipe} from '../../shared/production-stages.mjs?v=20-key';
 
 export async function renderCaptioned({project,bed,readAsset,cancelled,onProgress,onPhase}){
  const p=validateProject(project),recipe=captionRecipe(p),opened=[],audio=[],images=[],videos=[],check=()=>{if(cancelled?.())throw Error('Export cancelled. Editable placements are retained.');};
@@ -26,7 +27,7 @@ export async function renderCaptioned({project,bed,readAsset,cancelled,onProgres
     const b=p.bedTransform,scale=Math.min(width/bedSample.displayWidth,height/bedSample.displayHeight)*b.scale,w=bedSample.displayWidth*scale,h=bedSample.displayHeight*scale;
     bedSample.draw(ctx,b.x/100*width-w/2,b.y/100*height-h/2,w,h);
     for(const item of visual){const {c}=item,frame=Math.round(timestamp*25),time=clipTime(c,frame,item.duration);if(c.type==='image'?frame<c.inFrame||frame>=c.outFrame:!time.shown)continue;check();
-     if(item.el){const target=Math.max(0,Math.min(item.duration-.00001,time.target+.000001));if(Math.abs(item.el.currentTime-target)>.0000005){await new Promise((ok,no)=>{const timer=setTimeout(()=>no(Error('Animation seek timed out: '+c.name)),15000);item.el.onseeked=()=>{clearTimeout(timer);ok();};item.el.onerror=()=>{clearTimeout(timer);no(Error('Animation frame unavailable: '+c.name));};item.el.currentTime=target;});}if(item.el.readyState<2)throw Error('Animation frame is not decoded: '+c.name);}const w=width*c.width/100,h=w*item.height/item.width;ctx.save();ctx.translate(c.x/100*width,c.y/100*height);ctx.rotate(c.rotation*Math.PI/180);ctx.globalAlpha=c.opacity;ctx.drawImage(item.el||item.image,-w/2,-h/2,w,h);ctx.restore();
+     if(item.el){const target=Math.max(0,Math.min(item.duration-.00001,time.target+.000001));if(Math.abs(item.el.currentTime-target)>.0000005){await new Promise((ok,no)=>{const timer=setTimeout(()=>no(Error('Animation seek timed out: '+c.name)),15000);item.el.onseeked=()=>{clearTimeout(timer);ok();};item.el.onerror=()=>{clearTimeout(timer);no(Error('Animation frame unavailable: '+c.name));};item.el.currentTime=target;});}if(item.el.readyState<2)throw Error('Animation frame is not decoded: '+c.name);}const w=width*c.width/100,h=w*item.height/item.width;ctx.save();ctx.translate(c.x/100*width,c.y/100*height);ctx.rotate(c.rotation*Math.PI/180);ctx.globalAlpha=c.opacity;const source=item.el||item.image;if(c.chroma?.enabled)item.surface||=new BackgroundSurface();ctx.drawImage(c.chroma?.enabled?item.surface.draw(source,c.chroma):source,-w/2,-h/2,w,h);ctx.restore();
     }
    }}
   });

@@ -1,4 +1,4 @@
-import {createProject} from './core.mjs?v=9';
+import {createProject} from './core.mjs?v=20-key';
 import {startCaptionSequence} from './placement.mjs?v=19-named';
 
 // A new caption pass belongs to the current joke; it must not reset its scene.
