@@ -1,5 +1,17 @@
 // Numbered caption placement. Insertion records an editable layer; navigation never flattens media.
-export const captionNumber=c=>c.captionNumber??Number((/^(\d+)\.[^.]+$/.exec(c.ref?.name||c.name||'')||/\.(\d+)_v\d+\.alp$/i.exec(c.ref?.name||c.name||''))?.[1]||0);
+export function captionNumber(c){
+ const name=(c.ref?.name||c.name||'').trim();
+ const number=Number(c.captionNumber??(/^(\d+)(?=[\s._-])/.exec(name)||/\.(\d+)_v\d+\.alp$/i.exec(name))?.[1]??0);
+ return Number.isSafeInteger(number)&&number>0?number:0;
+}
+export function numberedCaptionFiles(input){
+ const files=[...input].filter(f=>/\.(mp4|webm|alp)$/i.test(f.name));
+ if(!files.length)throw Error('Choose caption videos starting with a number, such as 1 why did.mp4 or 1.webm.');
+ const unnumbered=files.find(f=>!captionNumber(f));
+ if(unnumbered)throw Error('Start each caption filename with its number: '+unnumbered.name);
+ if(new Set(files.map(captionNumber)).size!==files.length)throw Error('Choose one caption batch with unique component numbers.');
+ return files.sort((a,b)=>captionNumber(a)-captionNumber(b));
+}
 export const activeCaption=p=>p.clips.find(c=>c.id===p.captionSequence?.activeId);
 export function startCaptionSequence(p,ids,{source=null,folder='',frame=0}={}){
  const order=ids.map(id=>p.clips.find(c=>c.id===id)).filter(Boolean).sort((a,b)=>captionNumber(a)-captionNumber(b));

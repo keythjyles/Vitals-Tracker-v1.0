@@ -2,7 +2,7 @@ import {renderCaptioned} from './composite.mjs?v=1';
 import {captionJobStatus} from '../../shared/caption-job-status.mjs?v=1';
 import {stageAsset,stageRecord,stageFilename,captionRecipe,stageForName,pendingCaptions} from '../../shared/production-stages.mjs?v=1';
 import {saveProductionStage} from '../../shared/production-client.mjs?v=1';
-import {withCaptionBatch} from './caption-batch.mjs?v=1';
+import {withCaptionBatch} from './caption-batch.mjs?v=19-named';
 import {openVideoProject} from '../../shared/video-project.mjs?v=1';
 import {caplockTarget} from '../../shared/caption-handoff.mjs?v=2';
 import {inStudio,installAdapter} from '../studio/adapter.mjs?v=1';
@@ -11,7 +11,7 @@ import {moduleSession} from '../studio/core.mjs?v=1';
 import {FocusGestures,scaledTarget} from './focus-controls.mjs?v=9';
 import {createProjectPicker} from '../studio/project-picker.mjs?v=6-stages';
 import {fitPortrait,preferredBed} from '../studio/project-index.mjs?v=5-studio';
-import {captionNumber,activeCaption,startCaptionSequence,navigateCaption,moveCaptionDraft,insertCaption} from './placement.mjs?v=10-stages';
+import {captionNumber,numberedCaptionFiles,activeCaption,startCaptionSequence,navigateCaption,moveCaptionDraft,insertCaption} from './placement.mjs?v=19-named';
 import {paintMatrix,matrixFrame} from '../../shared/item-matrix.mjs?v=1';
 import {rateOf,fitRate} from './clip-time.mjs?v=4';
 import {words,moveWords,shiftWords,geminiPrompt} from './script.mjs?v=4';
@@ -205,14 +205,14 @@ for(const [id,key] of [['clipMarkIn','inFrame'],['clipMarkOut','outFrame']])$(id
 $('clipVisible').onclick=()=>change(()=>{if(clipCurrent())clipCurrent().visible=!clipCurrent().visible;});
 $('removeClip').onclick=()=>removeItem(selectedClip);
 for(const [id,delta] of [['clipBack',-1],['clipFront',1]])$(id).onclick=()=>change(()=>{const i=project.clips.indexOf(clipCurrent()),j=i+delta;if(i>=0&&j>=0&&j<project.clips.length)[project.clips[i],project.clips[j]]=[project.clips[j],project.clips[i]];});
-async function importLayer(blob,ref,restore=null){
+async function importLayer(blob,ref,restore=null,{staged=false}={}){
  pause();
  const epoch=projectEpoch;const type=/\.(png|webp)$/i.test(ref.name)?'image':/\.(wav|mp3|m4a|aac|ogg)$/i.test(ref.name)?'audio':'video';
  if(cloudSession&&ref.kind==='local')ref=await storeCloudAsset(ref,blob,type==='audio'?'voice':'animation');
- const reconnect=restore||project.clips.find(c=>c.ref.kind==='local'&&c.ref.name===ref.name&&c.ref.size===ref.size&&!layers.media.has(c.id));
+ const reconnect=restore||(!staged&&project.clips.find(c=>c.ref.kind==='local'&&c.ref.name===ref.name&&c.ref.size===ref.size&&!layers.media.has(c.id)));
  const start=current()?.inFrame??frame;const c=reconnect||{id:crypto.randomUUID(),name:ref.name,phraseId:selected||'',type,ref,inFrame:start,outFrame:start+50,trimInFrame:0,trimOutFrame:null,playbackRate:1,x:50,y:75,width:90,rotation:0,opacity:1,volume:type==='audio'?1:0,visible:true,loop:false};
- let duration;try{duration=await layers.attach(c,blob);}catch(e){if(epoch===projectEpoch)say(e.message);return;}if(epoch!==projectEpoch){layers.detach(c.id);return;}
- if(!reconnect){c.trimOutFrame=Math.max(1,Math.round(duration*25));c.outFrame=timed(current()||{})?current().outFrame:start+Math.max(1,Math.ceil(duration*25));change(()=>{project.clips.push(c);selectedClip=c.id;});}else{selectedClip=c.id;render();}selectClip(c.id);saveDraft();say('Layer connected. Source time maps in seconds to the25fps timeline. Real transparency depends on the imported file; no background is removed.');
+ const duration=await layers.attach(c,blob);if(epoch!==projectEpoch){layers.detach(c.id);throw Error('Import cancelled because project changed.');}
+ if(!reconnect){c.trimOutFrame=Math.max(1,Math.round(duration*25));c.outFrame=timed(current()||{})?current().outFrame:start+Math.max(1,Math.ceil(duration*25));if(staged){c.placed=false;c.locked=false;c.visible=false;return c;}if(!change(()=>{project.clips.push(c);selectedClip=c.id;})){layers.detach(c.id);throw Error('Layer could not be added to this project.');}}else{selectedClip=c.id;render();}selectClip(c.id);saveDraft();say('Layer connected. Source time maps in seconds to the25fps timeline. Real transparency depends on the imported file; no background is removed.');return c;
 }
 $('overlayFile').onchange=async e=>{try{for(const file of e.target.files||[])await importLayer(file,{kind:'local',name:file.name,size:file.size});e.target.value='';if($('captionImport').open)$('captionImport').close();}catch(error){say('Overlay import not saved: '+error.message);}};
 async function loadCloudOverlay(ref,restore=null){pause();if(cloudSession&&!ref.path.startsWith('/Grill Sergeant/JokeLab Productions/'+cloudSession.id+'/'))ref=await storeCloudAsset(ref,null,/\.(wav|mp3|m4a|aac|ogg)$/i.test(ref.name)?'voice':'animation');const d=await api('/api/playback?path='+encodeURIComponent(ref.path));const r=await fetch(d.url);if(!r.ok)throw Error('Clip download failed: '+r.status);await importLayer(await r.blob(),ref,restore);}
@@ -266,7 +266,7 @@ $('itemMatrix').onkeydown=e=>{if(['Home','ArrowLeft','ArrowRight'].includes(e.ke
 
 
 // Finished-caption import and placement queue. Navigation and insertion are separate.
-let importState={project:null,id:'',assetId:'',runtime:null};
+let importState={project:null,id:'',assetId:'',runtime:null},captionImportBusy=false;
 function placedClips(){return project.clips.filter(c=>!c.captionNumber||c.placed);}
 function archiveWorkspace(){const prior=localStorage.getItem(draftKey);if(!prior)return;const archive=JSON.parse(localStorage.getItem('gs_caplock_previous_workspaces')||'[]');archive.push({at:new Date().toISOString(),project:JSON.parse(prior)});localStorage.setItem('gs_caplock_previous_workspaces',JSON.stringify(archive.slice(-20)));}
 function renderPlacement(){
@@ -295,7 +295,7 @@ async function loadCaptionFolder(id){const d=await api('/api/joke-project?id='+e
 async function openCaptionImport(){
  if(!project.media||!v.src){say('Open your joke video with Files or Photos before importing its captions.');return;}
  pause();if(!$('captionImport').open)$('captionImport').showModal();$('savedCaptionControls').hidden=!cloudSession;
- if(!cloudSession){$('captionImportTitle').textContent='Import caption files';$('captionImportStatus').textContent='Choose numbered files from your device. Insert places each caption; Next selects the following caption.';return;}
+ if(!cloudSession){$('captionImportTitle').textContent='Import caption files';$('captionImportStatus').textContent='Choose clips starting with a number, such as 1 why did.mp4 or 1.webm. Insert places each caption; Next selects the following caption.';return;}
  $('captionImportStatus').textContent='Loading the saved caption folder…';
  try{const id=project.workspace?.id||localStorage.getItem('gs_caplock_caption_project')||'dad-00bda89167b4f15850aa1c91';const d=await api('/api/joke-projects');$('captionProject').replaceChildren();for(const p of d.projects){const o=document.createElement('option');o.value=p.id;o.textContent=projectContext?.id===p.id?projectContext.title:p.title||(p.id==='dad-00bda89167b4f15850aa1c91'?'Pebble':p.id);$('captionProject').append(o);}$('captionProject').value=id;await loadCaptionFolder(id);if(!importState.project.assets.find(a=>a.id===importState.assetId)?.cuts)$('captionImportStatus').textContent='Import the blue Gemini video to cut it. Next in Clipper returns the clips to this joke.';}catch(e){$('captionImportStatus').textContent=localStorage.getItem('gs_previewlock_key')?e.message:'Saved caption folders are not connected in this browser. Import numbered files, or open CapLock from your connected clipper.';}
 }
@@ -313,11 +313,24 @@ $('geminiVideoFile').onchange=async e=>{const file=e.target.files[0];if(!file)re
 $('copyGeminiHandoff').onclick=async()=>{try{if(!cloudSession)throw Error('Open a joke project first.');const text=$('geminiJokeText').value.trim();if(!text)throw Error('Add the exact joke text here, or use its saved JokeLab project.');if(text!==projectContext.text){if(dirty){clearTimeout(cloudTimer);await saveCloudWorkspace();}const d=await api('/api/joke-project?id='+encodeURIComponent(cloudSession.id),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({rev:cloudSession.rev,title:projectContext.title,text})});cloudSession.rev=d.rev;projectContext=d.project;importState.project=d.project;}
  const prompt='Create animated captions on a completely flat, solid blue background. Use the exact joke words below, in order, with no added words. Show short readable phrases one at a time, disappearing completely before the next. Keep all lettering safely inside the frame. Use bold lettering and simple fast pop/slide changes; concentrate extra animation on the question mark and punchline. No scenery, props, background shading or narration.\n\n'+text;$('geminiHandoffText').value=prompt;$('geminiHandoffText').hidden=false;try{await navigator.clipboard.writeText(prompt);$('captionImportStatus').textContent='Gemini handoff copied. Create the video in Gemini, then use Import Gemini video here.';}catch{$('geminiHandoffText').focus();$('geminiHandoffText').select();$('captionImportStatus').textContent='Select and copy the handoff below.';}}catch(e){$('captionImportStatus').textContent=e.message;}};
 async function importNumberedFiles(input){
- pause();const files=[...input.files||[]].filter(f=>captionNumber({ref:{name:f.name}})).sort((a,b)=>captionNumber({ref:{name:a.name}})-captionNumber({ref:{name:b.name}}));if(!files.length)throw Error('Choose numbered caption files, such as1.webm,2.webm.');if(new Set(files.map(f=>captionNumber({ref:{name:f.name}}))).size!==files.length)throw Error('Choose one caption batch with unique component numbers.');
- const ids=[];for(const f of files){const before=new Set(project.clips.map(c=>c.id));await importLayer(f,{kind:'local',name:f.name,size:f.size});const c=project.clips.find(c=>!before.has(c.id))||clipCurrent();if(!c||!layers.media.has(c.id))throw Error('Caption media could not reconnect: '+f.name);c.captionNumber=captionNumber(c);c.placed=false;c.locked=false;c.visible=false;ids.push(c.id);}
- change(()=>startCaptionSequence(project,ids,{folder:files[0].webkitRelativePath?.split('/')[0]||'Imported numbered components',frame}));selectedClip=project.captionSequence.activeId;layers.selected=selectedClip;editMode='move';project.editFocus='overlay';$('captionImport').close();render();say('Lowest numbered caption ready. Previous / Next pause; Insert places an editable layer.');input.value='';
+ if(captionImportBusy||!input.files?.length)return;
+ pause();captionImportBusy=true;const pending=[],epoch=projectEpoch,controls=[...$('captionImport').querySelectorAll('input,button,select,textarea')].filter(el=>el.id!=='closeCaptionImport'),disabled=controls.map(el=>el.disabled);
+ controls.forEach(el=>el.disabled=true);$('captionImport').setAttribute('aria-busy','true');
+ try{
+  const files=numberedCaptionFiles(input.files);
+  for(const f of files){
+   $('captionImportStatus').textContent=`Loading ${pending.length+1}/${files.length} · ${f.name}`;
+   const c=await importLayer(f,{kind:'local',name:f.name,size:f.size},null,{staged:true});pending.push(c);c.captionNumber=captionNumber(f);
+  }
+  if(epoch!==projectEpoch)throw Error('Import cancelled because project changed.');
+  if(!change(()=>{project.clips.push(...pending);startCaptionSequence(project,pending.map(c=>c.id),{folder:files[0].webkitRelativePath?.split('/')[0]||'Imported numbered components',frame});project.editFocus='overlay';}))throw Error('Caption batch could not be added to this project.');
+  selectedClip=project.captionSequence.activeId;layers.selected=selectedClip;editMode='move';$('captionImport').close();render();say(`${files.length} captions ready. Insert places the first caption; Next selects the following caption.`);
+ }catch(error){
+  for(const c of pending)layers.detach(c.id);
+  $('captionImportStatus').textContent='Captions not imported: '+error.message;say('Captions not imported: '+error.message);
+ }finally{captionImportBusy=false;input.value='';controls.forEach((el,i)=>el.disabled=disabled[i]);$('captionImport').removeAttribute('aria-busy');}
 }
-for(const id of ['captionFiles','captionFolderFiles'])$(id).onchange=e=>importNumberedFiles(e.target).catch(error=>{$('captionImportStatus').textContent=error.message;});
+for(const id of ['captionFiles','captionFolderFiles'])$(id).onchange=e=>importNumberedFiles(e.target);
 $('overlayLibrary').textContent='Import captions';
 // A clipper link is authoritative; project entry also supports text-only and bed-only workspaces.
 if(!inStudio()&&/^[a-f0-9]{64}$/.test(params.get('cuts')||''))projectPicker.open(null,{sourceHash:params.get('cuts')}).catch(e=>say('Cut list unavailable: '+e.message));

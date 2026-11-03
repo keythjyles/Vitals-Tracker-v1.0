@@ -1,10 +1,24 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {createProject,validateProject} from '../core.mjs';
-import {activeCaption,startCaptionSequence,navigateCaption,insertCaption,moveCaptionDraft} from '../placement.mjs';
+import {captionNumber,numberedCaptionFiles,activeCaption,startCaptionSequence,navigateCaption,insertCaption,moveCaptionDraft} from '../placement.mjs';
 import {LayerTracks} from '../layer-track.mjs';
 import fs from 'node:fs';import vm from 'node:vm';
 const clip=n=>({id:'c'+n,name:n+'.webm',type:'video',ref:{kind:'local',name:n+'.webm',size:12},inFrame:0,outFrame:20,trimInFrame:0,trimOutFrame:20,playbackRate:1,x:50,y:75,width:80,rotation:0,opacity:1,volume:0,visible:false,loop:false});
 function setup(){const p=createProject();p.clips=[clip(10),clip(2),clip(1)];startCaptionSequence(p,p.clips.map(c=>c.id),{folder:'joke/captions',frame:40});return p;}
+const slideNames=['1 why did test 1.mp4','2 the kid test 1.mp4','3 cross the road test 1.mp4','4 question mark test 1.mp4','5 to get test 1.mp4','6 to the other test 1.mp4','7 slide test 1.mp4'];
+test('owner descriptive filenames retain their leading component numbers',()=>{
+ assert.deepEqual(slideNames.map(name=>captionNumber({name})),[1,2,3,4,5,6,7]);
+ for(const name of ['2.webm','02 - the kid.mp4','2_the kid.mp4','2-the-kid.mp4','Slide.2_v01.alp'])assert.equal(captionNumber({ref:{name}}),2,name);
+ assert.equal(captionNumber({captionNumber:7,name:'1 why did.mp4'}),7);
+ for(const name of ['Slide test 1.mp4','0 why did.mp4','1why did.mp4','9007199254740992 clip.mp4'])assert.equal(captionNumber({name}),0,name);
+});
+test('named batch sorts numerically, ignores folder notes and rejects ambiguous batches before import',()=>{
+ const files=[...slideNames.slice().reverse(),'10 extra.mp4','README.txt'].map(name=>({name}));
+ assert.deepEqual(numberedCaptionFiles(files).map(f=>f.name),[...slideNames,'10 extra.mp4']);
+ assert.throws(()=>numberedCaptionFiles([{name:'1 why.mp4'},{name:'1 another.webm'}]),/unique/);
+ assert.throws(()=>numberedCaptionFiles([{name:'1 why.mp4'},{name:'unnumbered.mp4'}]),/unnumbered.mp4/);
+ assert.throws(()=>numberedCaptionFiles([{name:'README.txt'}]),/starting with a number/);
+});
 test('batch begins with lowest actual number and preserves numeric order',()=>{const p=setup();assert.deepEqual(p.captionSequence.clipIds,['c1','c2','c10']);assert.equal(activeCaption(p).name,'1.webm');assert.equal(activeCaption(p).inFrame,40);assert.equal(p.clips.filter(c=>c.locked).length,0);});
 test('next and previous select a component at the frozen bed frame without inserting',()=>{const p=setup();activeCaption(p).x=30;navigateCaption(p,1,40);assert.equal(activeCaption(p).name,'2.webm');assert.equal(activeCaption(p).x,30);assert.equal(p.clips.filter(c=>c.visible||c.locked).length,0);activeCaption(p).x=60;navigateCaption(p,-1,40);assert.equal(activeCaption(p).x,30);assert.equal(activeCaption(p).inFrame,40);assert.equal(navigateCaption(p,-1,40),null);});
 test('insert places exactly one editable caption without advancing or duplicating',()=>{const p=setup();const ids=p.clips.map(c=>c.id);activeCaption(p).x=33;insertCaption(p,75);assert.equal(activeCaption(p).id,'c1');assert.equal(activeCaption(p).inFrame,75);assert.equal(activeCaption(p).outFrame,95);assert.equal(activeCaption(p).placed,true);assert.equal(activeCaption(p).locked,false);assert.equal(insertCaption(p,90),null);navigateCaption(p,1,75);moveCaptionDraft(p,100);navigateCaption(p,-1,100);assert.equal(activeCaption(p).inFrame,75);assert.equal(activeCaption(p).x,33);assert.deepEqual(p.clips.map(c=>c.id),ids);});

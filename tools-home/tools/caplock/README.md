@@ -1,3 +1,11 @@
+## CapLock R19 — named caption file import, November 2, 2026
+
+The device importer now accepts the owner's numbered descriptive names, including `1 why did test 1.mp4` through `7 slide test 1.mp4`, as well as numbered WebM and saved ALP components. Selection order does not matter: the leading component number determines the queue. Original filenames, media bytes, native cut marks, existing placements and the R18 compact/local workspace remain intact.
+
+Import progress and errors appear directly below the caption-sheet heading. A batch becomes editable only after every selected component decodes; a failed batch leaves the prior queue and edits intact, clears the picker for retry and reports the failure. No cloud connection is required for a local workspace. MP4 import retains its existing background; use the already-provided transparent WebM components for alpha overlays.
+
+Baseline/rollback: `7e6ad7d7d3c20271ddcb14e983b12c73f4c5dc2d`. Restore source only; retain all original media, projects and browser recovery data. Verification: [NAMED_IMPORT_R19.json](NAMED_IMPORT_R19.json). The 72 local Node checks passed; browser/deployment receipts are recorded separately.
+
 ## CapLock R18 — local video loading and compact workspace, November 2, 2026
 
 Owner correction: Files and Photos load a device video immediately. A cloud project, upload, setup key and the former 40 MB cloud limit are not prerequisites for manual placement. Import captions opens the numbered local-file picker in a local workspace. Merely having an old PreviewLock connection no longer auto-opens an unrelated cloud joke. Explicit project links, Open project and Studio retain the existing saved-project routes; `?new=cloud-video` retains explicit agent cloud ingress.

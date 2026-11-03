@@ -1,0 +1,37 @@
+{
+  "schema": "GS-CapLock-Named-Import-1",
+  "release": "R19",
+  "baseline": "7e6ad7d7d3c20271ddcb14e983b12c73f4c5dc2d",
+  "problem": "Numbered descriptive MP4 filenames were rejected by the numeric-only basename matcher.",
+  "acceptedExamples": [
+    "1 why did test 1.mp4",
+    "2 the kid test 1.mp4",
+    "3 cross the road test 1.mp4",
+    "4 question mark test 1.mp4",
+    "5 to get test 1.mp4",
+    "6 to the other test 1.mp4",
+    "7 slide test 1.mp4",
+    "1.webm",
+    "Slide.1_v01.alp"
+  ],
+  "behavior": [
+    "numeric queue order independent of picker order",
+    "visible per-file progress and errors at top of import sheet",
+    "commit batch only after all components decode",
+    "failed batch preserves prior edits and allows retry",
+    "local imports require no cloud requests"
+  ],
+  "preserved": [
+    "original names and media bytes",
+    "native cut marks and timing",
+    "prior edits and captions",
+    "R18 compact geometry and local Files/Photos entry",
+    "existing cloud and Studio routes"
+  ],
+  "checks": {
+    "nodePassed": 72,
+    "browser": "pending",
+    "deployment": "pending"
+  },
+  "rollback": "Restore changed source files from baseline only; retain media, projects and recovery records."
+}
