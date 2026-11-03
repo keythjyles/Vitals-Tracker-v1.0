@@ -1,10 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createProject,validateProject} from '../core.mjs';
-import {makeToolboxPlacement,shiftPlacementIn,fitPlacementOut,setPlacementSpeed,packetDuration,assetFrameLabel} from '../toolbox-core.mjs';
+import {isToolboxEntry,makeToolboxPlacement,shiftPlacementIn,fitPlacementOut,setPlacementSpeed,packetDuration,assetFrameLabel} from '../toolbox-core.mjs';
 import {clipTime} from '../clip-time.mjs';
 import {captionRecipe} from '../../../shared/production-stages.mjs';
 const asset=()=>({id:'file-one',name:'1 why did.mp4',type:'video',ref:{kind:'local',name:'1 why did.mp4',size:123},frames:19,duration:19/24,sha256:'a'.repeat(64)});
+test('manual launch uses toolbox; explicit cloud, cutter and Studio handoffs keep their project routes',()=>{
+ for(const query of ['', '?v=R22-toolbox','?recover=local'])assert.equal(isToolboxEntry(query),true);
+ for(const query of ['?project=one','?cuts=source-hash','?assetPath=/bed.mp4','?new=cloud-video','?legacy=1'])assert.equal(isToolboxEntry(query),false);
+ assert.equal(isToolboxEntry('',true),false);
+});
 test('native frame count and full video span survive reusable insertions and JSON',()=>{
  const p=createProject(),a=asset();p.toolbox.push(a);p.clips.push(makeToolboxPlacement(a,10,'first'),makeToolboxPlacement(a,50,'second'));
  assert.equal(p.clips[0].outFrame,30);assert.equal(p.clips[0].sourceFrames,19);assert.equal(p.clips[0].sourceDuration,19/24);assert.equal(p.clips[1].toolboxId,p.clips[0].toolboxId);

@@ -1,4 +1,5 @@
 import {validateChroma} from './background.mjs?v=20';
+export function isToolboxEntry(search,studio=false){const params=new URLSearchParams(search);return !studio&&!['project','cuts','assetPath'].some(key=>params.has(key))&&params.get('new')!=='cloud-video'&&params.get('legacy')!=='1';}
 const refKey=r=>JSON.stringify([r.kind,r.path||'',r.name,r.size]);
 export function validateToolboxAsset(a){
  if(!a||typeof a.id!=='string'||!a.id||!['video','image','audio'].includes(a.type)||!a.ref||!['local','previewlock'].includes(a.ref.kind))throw Error('Invalid toolbox file');

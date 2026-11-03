@@ -1,4 +1,5 @@
 import {createToolboxUI} from './toolbox-ui.mjs?v=22';
+import {isToolboxEntry} from './toolbox-core.mjs?v=22';
 import {passFilename,matchLocalFile,localPassKey} from './local-pass.mjs?v=21';
 import {renderCaptioned} from './composite.mjs?v=22';
 import {DEFAULT_CHROMA,detectBackground} from './background.mjs?v=20';
@@ -23,7 +24,7 @@ import {FPS,DEFAULT_STYLE,createProject,phrase,importTranscript,subtitle,timed,e
 const $=id=>document.getElementById(id),v=$('video'),draftKey='gs_caplock_draft_v1',API='https://gs-previewlock-api.onrender.com';
 // Owner lock: built-in text captions cannot be enabled by UI, URL, or restored data.
 const BUILTIN_CAPTIONING_LOCKED=true;
-const TOOLBOX_MODE=!inStudio()&&!['project','cuts','assetPath'].some(key=>new URLSearchParams(location.search).has(key))&&new URLSearchParams(location.search).get('legacy')!=='1';
+const TOOLBOX_MODE=isToolboxEntry(location.search,inStudio());
 let toolboxUI=null;
 let projectContext=null;
 let restoring=false,placementBusy=false,cloudSession=null,cloudTimer=null,cloudSaving=false,cloudWrite=Promise.resolve();
