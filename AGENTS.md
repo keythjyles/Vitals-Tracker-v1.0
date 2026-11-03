@@ -1,3 +1,9 @@
+## CapLock R26 — portrait preview crop
+
+Owner direction: enlarging or moving an overlay must show only the portion inside the portrait output. The R9 preview allowed layers to paint into the monitor's side margins, although the exporter already clipped them. R26 clips the scene at its exact 9:16 bounds and uses the same black composition background as export. Layer dimensions/position, pinch and size controls, source bytes, timing, sound, toolbox reuse and saved projects remain unchanged. The enlarged layer remains editable within the portrait. SxLock, AspectLock and all media engines are unchanged.
+
+The focused browser check resizes a layer beyond the portrait, confirms its full saved geometry remains, checks that the layer is visible inside but absent from both side margins, and retains existing gesture/recovery checks. No implementation-mirroring unit test or additional manual media walkthrough is added. Verification and deployment: [R26 receipt](tools-home/tools/caplock/PORTRAIT_CROP_R26.json). Rollback: `eef627ec5149ff04298282c7113702dde755140e`; keep source files, schema8 projects and browser recovery archives. Use `recover=local`, then Reconnect files to retain the current edit.
+
 ## CapLock R25 — composition end and source-sound diagnosis
 
 Owner report: the goat has IN 251 / exclusive OUT 523 and Clip audio 70%, but the uploaded `18154.mp4` stops at the bed's 295 frames (11.8 seconds). The composition now ends at the greatest visible placed element OUT or the bed end, whichever is later. For this project that is 523 frames / 20.92 seconds, final visible frame 522. Preview, frame navigation and export share that extent. After bed EOF, hold its final picture and let its soundtrack end naturally; continue animation and sound placements through their OUT. IN/OUT editing, tempo, loop, current geometry and saved gains remain intact. No new source trim or automatic bed loop is introduced.

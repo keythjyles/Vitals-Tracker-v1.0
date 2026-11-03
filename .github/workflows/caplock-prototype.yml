@@ -58,7 +58,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: caplock-r25-timeline-tail
+          name: caplock-r26-portrait-crop
           path: |
             /tmp/caplock-fixtures/r19-named-import.png
             /tmp/caplock-fixtures/r20-background.png
@@ -67,4 +67,5 @@ jobs:
             /tmp/caplock-fixtures/r23-framing.png
             /tmp/caplock-fixtures/r24-source-audio.png
             /tmp/caplock-fixtures/r25-timeline-tail.png
+            /tmp/caplock-fixtures/r26-portrait-crop.png
           if-no-files-found: ignore

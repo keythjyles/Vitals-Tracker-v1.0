@@ -1,0 +1,26 @@
+{
+  "schema": "GS-CapLock-Portrait-Crop-1",
+  "release": "R26",
+  "baseline": "eef627ec5149ff04298282c7113702dde755140e",
+  "request": "Show only the final portrait portion while enlarging or moving an overlay.",
+  "change": "Clip the scene to its9:16 output bounds; use the same black background as the compositor.",
+  "preserved": [
+    "source files",
+    "layer geometry and independent transforms",
+    "pinch and size controls",
+    "timing and audio",
+    "schema8 projects and recovery",
+    "reusable toolbox",
+    "SxLock and AspectLock engines and UI"
+  ],
+  "checks": {
+    "node": null,
+    "browser": null,
+    "branchCI": null,
+    "mainCI": null,
+    "pages": null,
+    "live": null
+  },
+  "sourceCommit": null,
+  "liveUrl": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/caplock/?v=R26-portrait&recover=local"
+}
