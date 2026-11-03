@@ -23,8 +23,48 @@
   "schemaVersion": 8,
   "checks": {
     "nodePassed": 61,
-    "browser": "pending",
-    "deployment": "pending"
+    "browser": {
+      "videoMutedByDefault": true,
+      "percentControls": true,
+      "previewUnmutesAtChosenLevel": true,
+      "sourceSoundFiles": true,
+      "exportLevels": true,
+      "retimedSound": true,
+      "placementBoundaries": true,
+      "mutedAmplitude": 1.6002700039745604e-06,
+      "level25Amplitude": 0.03119441218082997,
+      "level50Amplitude": 0.06255381392420745,
+      "beforePlacementAmplitude": 3.1304158596617167e-06,
+      "afterPlacementAmplitude": 1.4540596856616625e-05,
+      "bedMutedAmplitude": 0.1236878128785233,
+      "bedMixedAmplitude": 0.12359907185688065,
+      "mutedBedPacketsUnchanged": true,
+      "frames": 75,
+      "errors": []
+    },
+    "deployment": {
+      "pagesRun": 41588246191,
+      "status": "success",
+      "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/caplock/?v=R24-audio&recover=local",
+      "liveBrowser": {
+        "visibleRelease": "CapLock \u00b7 GS-TOOL-CAPLOCK \u00b7 R24",
+        "initialized": true,
+        "savedWorkspaceRestored": true,
+        "reconnectFilesVisible": true
+      }
+    },
+    "branchCI": {
+      "caplock": 41588015384,
+      "studio": 41588015308,
+      "clipper": 41588015350,
+      "conclusion": "success"
+    },
+    "mainCI": {
+      "caplock": 41588246402,
+      "studio": 41588248061,
+      "clipper": 41588246364,
+      "conclusion": "success"
+    }
   },
   "preserved": [
     "original video and sound files",
@@ -36,5 +76,6 @@
   "limitations": [
     "User goat file was not supplied; verification uses a labeled tone fixture.",
     "A file with no embedded audio cannot be unmuted into sound."
-  ]
+  ],
+  "sourceCommit": "59df7952aaae8de482f8bde306b857704b9d5e5a"
 }
