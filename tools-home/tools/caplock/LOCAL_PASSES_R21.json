@@ -26,7 +26,53 @@
   "schemaVersion": 7,
   "checks": {
     "nodePassed": 78,
-    "browser": "pending",
-    "deployment": "pending"
-  }
+    "caplockCiNodePassed": 54,
+    "browser": {
+      "sixDeletedFirstPlacementsRecovered": true,
+      "reconnectKeptTimingsAndGeometry": true,
+      "unusedFirstFileNotAdded": true,
+      "exportFrames": 75,
+      "audio": true,
+      "resaveBytesIdentical": true,
+      "newBedHasNoDuplicateLayers": true,
+      "previousEditsArchived": true,
+      "onlyFirstCaptionReady": true,
+      "cloudRequests": 0,
+      "errors": []
+    },
+    "runs": {
+      "caplock": 41567966925,
+      "studio": 41567966868,
+      "cliplock": 41567966878
+    },
+    "mainRuns": {
+      "caplock": 41568266514,
+      "studio": 41568266738,
+      "cliplock": 41568266575,
+      "conclusion": "success"
+    },
+    "deployment": {
+      "pagesRun": 41568265284,
+      "status": "success"
+    },
+    "live": {
+      "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/caplock/?v=R21-passes&recover=local",
+      "visibleVersion": "R21",
+      "r20DraftRecoveredPlacements": 6,
+      "originalFilesReconnected": true,
+      "renderCompleted": true,
+      "downloadRequested": true,
+      "newBed": "Slide_test_3_CapLock_pass_01.mp4",
+      "newBedDuration": 11.8,
+      "newBedWidth": 540,
+      "newBedHeight": 960,
+      "onlyNewOverlay": "1 why did test 1.mp4",
+      "newOverlayPlacedAt": 0,
+      "screenshot": "caplock-r21-new-bed-first-caption-20261103.jpg",
+      "managedBrowserDownloadCapture": "Failed for JSON and MP4 in the managed browser; native Chromium CI downloads completed and the MP4 was decoded/verified. Physical-device download acceptance is left to the owner.",
+      "privateCloudAuthenticationUsed": false
+    },
+    "ownerDirection": "Stop repeated browser validation; deliver the live update for owner testing."
+  },
+  "testedSourceCommit": "9181ea0f31d1f65c9494407dc1d4230ae3a275e5"
 }
