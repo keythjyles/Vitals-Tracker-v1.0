@@ -35,8 +35,93 @@
   ],
   "checks": {
     "nodePassed": 75,
-    "browser": "pending",
-    "decodedExport": "pending",
-    "deployment": "pending"
-  }
+    "stageVerifierPassed": 1,
+    "caplockCiNodePassed": 51,
+    "browser": {
+      "blue": true,
+      "green": true,
+      "originalPixelsIntact": true,
+      "existingAlphaRetained": true,
+      "seekClearsPriorFrame": true,
+      "editableToggle": true,
+      "namedImports": 7,
+      "numericOrder": true,
+      "failedBatchRetainsPriorEdits": true,
+      "retry": true,
+      "filesPhotosChoosers": true,
+      "localCloudRequests": 0,
+      "dockHeight": 359,
+      "headerHeight": 16,
+      "noHorizontalOverflow": true,
+      "errors": []
+    },
+    "decodedExport": {
+      "outputFrames": 10,
+      "audioTrack": true,
+      "backgroundRGBA": [
+        31,
+        51,
+        67,
+        255
+      ],
+      "sourceBedRGB": [
+        34,
+        51,
+        68
+      ],
+      "letterRGBA": [
+        253,
+        255,
+        4,
+        255
+      ],
+      "keyIncludedInRecipe": true
+    },
+    "runs": {
+      "caplock": 41562542381,
+      "studio": 41562542406,
+      "cliplock": 41562542421
+    },
+    "mainRuns": {
+      "caplock": 41562751696,
+      "studio": 41562751692,
+      "cliplock": 41562751680,
+      "conclusion": "success"
+    },
+    "deployment": {
+      "pages": 41562751261,
+      "pagesStatus": "success",
+      "backend": "dep-dbkjtks9v7es73cn9feg",
+      "backendStatus": "live",
+      "backendCommit": "0b75b1784c9681fdbd7b3c0dca83cf8de874cc7c"
+    },
+    "originalCutAnalysis": {
+      "files": 7,
+      "sampledColors": [
+        "#005fb5",
+        "#005eb4",
+        "#005eb5",
+        "#005fb5",
+        "#005fb5",
+        "#005eb5",
+        "#005eb6"
+      ],
+      "allHadTransparentBackgroundAndOpaqueLetterPixels": true
+    },
+    "live": {
+      "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/caplock/?v=R20-key",
+      "visibleVersion": "R20",
+      "bed": "Slide_test_3.mp4",
+      "originalNamedMp4sImported": 7,
+      "automaticallyKeyedVideos": 7,
+      "firstCaptionViewedAtBedFrame": 6,
+      "firstCaptionPlacedAt": 0,
+      "noBlueRectangle": true,
+      "screenshot": "caplock-r20-transparent-caption-20261103.jpg",
+      "privateCloudAuthenticationUsed": false,
+      "originalMediaReencoded": false,
+      "physicalSamsungAcceptance": "pending owner use"
+    }
+  },
+  "testedSourceCommit": "0b75b1784c9681fdbd7b3c0dca83cf8de874cc7c"
 }
