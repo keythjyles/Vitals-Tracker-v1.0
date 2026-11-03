@@ -34,9 +34,51 @@
     "protected SxLock and AspectLock files unchanged"
   ],
   "checks": {
-    "caplockNodePassed": 57,
-    "browser": "pending branch CI",
-    "deployment": "pending"
+    "caplockNodePassed": 58,
+    "browser": {
+      "bedPlayback": true,
+      "nativeFrames": 24,
+      "reusableInsert": true,
+      "deleteAndReinsert": true,
+      "inShiftsOut": true,
+      "outFitsWholeAnimation": true,
+      "slowPreviewLateFrame": true,
+      "cleanBedChange": true,
+      "priorWorkspaceArchived": true,
+      "cloudRequests": 0,
+      "dockHeight": 359,
+      "horizontalOverflow": false,
+      "pageErrors": []
+    },
+    "branchCI": {
+      "caplock": 41577572708,
+      "studio": 41577572682,
+      "clipper": 41577572721,
+      "conclusion": "success"
+    },
+    "mainCI": {
+      "caplock": 41577600515,
+      "studio": 41577600513,
+      "clipper": 41577600634,
+      "conclusion": "success"
+    },
+    "deployment": {
+      "pagesRun": 41577600158,
+      "status": "success",
+      "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/caplock/?v=R22-toolbox",
+      "liveBrowser": {
+        "title": "CapLock \u00b7 GS-TOOL-CAPLOCK \u00b7 R22",
+        "visibleIdentity": "CapLock \u00b7 GS-TOOL-CAPLOCK \u00b7 R22",
+        "source": "No file loaded",
+        "toolboxFiles": 0,
+        "placedItems": 0,
+        "bedFirstControls": true,
+        "oldBedNotAutoRecovered": true
+      }
+    }
   },
-  "phoneAcceptance": "Not claimed; owner chooses and verifies their actual bed."
+  "phoneAcceptance": "Not claimed; owner chooses and verifies their actual bed.",
+  "sourceCommit": "50a79e2bad0606c03b09094ac7bcd617482034dc",
+  "routingRepair": "The cutter source-hash and explicit new=cloud-video entries retain their saved-project queue. Both route regressions pass on sourceCommit.",
+  "validationScope": "Focused R22 browser flow plus existing automated compatibility checks. No manual repeat of the owner\u2019s prior seven-file placement/export work."
 }
