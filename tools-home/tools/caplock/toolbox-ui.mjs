@@ -1,6 +1,6 @@
-import {ensureToolbox,makeToolboxPlacement,assetFrameLabel,shiftPlacementIn,fitPlacementOut,setPlacementSpeed} from './toolbox-core.mjs?v=22';
-import {inspectToolboxFile} from './toolbox-media.mjs?v=22';
-import {BackgroundSurface} from './background.mjs?v=20';
+import {ensureToolbox,makeToolboxPlacement,assetFrameLabel,shiftPlacementIn,fitPlacementOut,setPlacementSpeed} from './toolbox-core.mjs?v=23';
+import {inspectToolboxFile} from './toolbox-media.mjs?v=23';
+import {BackgroundSurface} from './background.mjs?v=23';
 const $=id=>document.getElementById(id);
 const signature=async blob=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',await blob.arrayBuffer()))].map(v=>v.toString(16).padStart(2,'0')).join('');
 export function createToolboxUI(o){
@@ -65,7 +65,7 @@ export function createToolboxUI(o){
  const previewSurface=new BackgroundSurface($('toolboxPreviewCanvas'));
  function paintPreview(){
   const v=$('toolboxPreviewVideo');if(!previewAsset||v.readyState<2)return;
-  if(previewAsset.chroma?.enabled)previewSurface.draw(v,previewAsset.chroma);
+  if(previewAsset.chroma?.enabled)previewSurface.draw(v,previewAsset.chroma,{maxWidth:540});
   else{const canvas=previewSurface.canvas;canvas.width=v.videoWidth;canvas.height=v.videoHeight;const ctx=previewSurface.ctx;ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(v,0,0);}
  }
  async function showPreview(id){

@@ -1,5 +1,5 @@
 import {validateChroma} from './background.mjs?v=20';
-import {validateToolboxAsset} from './toolbox-core.mjs?v=22';
+import {validateToolboxAsset} from './toolbox-core.mjs?v=23';
 export const FPS=25;
 export const DEFAULT_STYLE={font:'Arial',weight:700,size:52,color:'#ffffff',outline:4,shadow:6,background:'#000000',backgroundOpacity:0,align:'center',x:50,y:78,width:86,lineHeight:1.15,animation:'none',emphasis:false};
 export const uid=()=>globalThis.crypto.randomUUID();

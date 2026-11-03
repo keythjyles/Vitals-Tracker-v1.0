@@ -1,6 +1,6 @@
 import {Input,ALL_FORMATS,BlobSource,EncodedPacketSink} from '../sxlock/vendor/mediabunny-1.62.1-gs1.mjs';
-import {DEFAULT_CHROMA,detectBackground} from './background.mjs?v=20';
-import {packetDuration} from './toolbox-core.mjs?v=22';
+import {DEFAULT_CHROMA,detectBackground} from './background.mjs?v=23';
+import {packetDuration} from './toolbox-core.mjs?v=23';
 import {mediaContainer,mediaType} from '../../shared/production-stages.mjs?v=22';
 export async function inspectToolboxFile(blob,name){
  if(/\.(png|webp|jpe?g)$/i.test(name)||blob.type.startsWith('image/')){

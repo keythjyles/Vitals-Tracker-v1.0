@@ -1,0 +1,42 @@
+{
+  "schema": "GS-CapLock-Framing-1",
+  "release": "R23",
+  "baseline": "cb7750392d55de2bde838272bca8566c3d5ca8d2",
+  "ownerEvidence": {
+    "file": "18146.mp4",
+    "width": 540,
+    "height": 960,
+    "frames": 295,
+    "duration": 11.8,
+    "audioDuration": 11.797333,
+    "observedVerticalPictureShiftPixels": 405,
+    "originalProjectJSONProvided": false
+  },
+  "changes": [
+    "isolate caption Move from bed focus",
+    "Fit bed restores full source without changing overlays",
+    "explicit fitBed recovery archives prior geometry",
+    "visible current-frame IN/OUT buttons",
+    "manual properties keep current bed playhead",
+    "540px keyed preview with native-resolution export",
+    "coherent R23 browser-module queries"
+  ],
+  "dataPreserved": [
+    "all toolbox sources",
+    "caption IN/OUT, speed and position",
+    "original bed and soundtrack",
+    "previous draft archive",
+    "schema8 JSON"
+  ],
+  "checks": {
+    "nodePassed": 58,
+    "browser": "pending",
+    "deployment": "pending"
+  },
+  "limits": [
+    "Exact saved bed transform was not supplied with the flattened video.",
+    "Physical phone acceptance is the owner test.",
+    "Existing cropped file is retained; repair requires the original source bed."
+  ],
+  "newGeneration": false
+}

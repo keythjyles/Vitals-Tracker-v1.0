@@ -35,9 +35,9 @@ export function detectBackground(source){
 }
 export class BackgroundSurface{
  constructor(canvas=document.createElement('canvas')){this.canvas=canvas;this.ctx=canvas.getContext('2d',{willReadFrequently:true});}
- draw(source,key){
+ draw(source,key,{maxWidth=Infinity}={}){
   if(!key?.enabled)return source;
-  const width=source.videoWidth||source.naturalWidth||source.width,height=source.videoHeight||source.naturalHeight||source.height;
+  const sourceWidth=source.videoWidth||source.naturalWidth||source.width,sourceHeight=source.videoHeight||source.naturalHeight||source.height,scale=Math.min(1,maxWidth/sourceWidth),width=Math.max(1,Math.round(sourceWidth*scale)),height=Math.max(1,Math.round(sourceHeight*scale));
   if(!width||!height)throw Error('Caption frame is not decoded yet.');
   if(this.canvas.width!==width||this.canvas.height!==height){this.canvas.width=width;this.canvas.height=height;}
   const ctx=this.ctx;ctx.clearRect(0,0,width,height);ctx.drawImage(source,0,0,width,height);

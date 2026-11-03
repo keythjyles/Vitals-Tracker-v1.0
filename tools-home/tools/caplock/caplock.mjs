@@ -1,8 +1,8 @@
-import {createToolboxUI} from './toolbox-ui.mjs?v=22';
-import {isToolboxEntry} from './toolbox-core.mjs?v=22';
+import {createToolboxUI} from './toolbox-ui.mjs?v=23';
+import {isToolboxEntry} from './toolbox-core.mjs?v=23';
 import {passFilename,matchLocalFile,localPassKey} from './local-pass.mjs?v=21';
-import {renderCaptioned} from './composite.mjs?v=22';
-import {DEFAULT_CHROMA,detectBackground} from './background.mjs?v=20';
+import {renderCaptioned} from './composite.mjs?v=23';
+import {DEFAULT_CHROMA,detectBackground} from './background.mjs?v=23';
 import {captionJobStatus} from '../../shared/caption-job-status.mjs?v=1';
 import {stageAsset,stageRecord,stageFilename,captionRecipe,stageForName,pendingCaptions} from '../../shared/production-stages.mjs?v=22';
 import {saveProductionStage} from '../../shared/production-client.mjs?v=1';
@@ -19,8 +19,8 @@ import {captionNumber,numberedCaptionFiles,activeCaption,startCaptionSequence,na
 import {paintMatrix,matrixFrame} from '../../shared/item-matrix.mjs?v=1';
 import {rateOf,fitRate} from './clip-time.mjs?v=22';
 import {words,moveWords,shiftWords,geminiPrompt} from './script.mjs?v=4';
-import {LayerTracks} from './layer-track.mjs?v=22';
-import {FPS,DEFAULT_STYLE,createProject,phrase,importTranscript,subtitle,timed,effective,validateProject,validateStyle} from './core.mjs?v=22';
+import {LayerTracks} from './layer-track.mjs?v=23';
+import {FPS,DEFAULT_STYLE,createProject,phrase,importTranscript,subtitle,timed,effective,validateProject,validateStyle} from './core.mjs?v=23';
 const $=id=>document.getElementById(id),v=$('video'),draftKey='gs_caplock_draft_v1',API='https://gs-previewlock-api.onrender.com';
 // Owner lock: built-in text captions cannot be enabled by UI, URL, or restored data.
 const BUILTIN_CAPTIONING_LOCKED=true;
@@ -78,7 +78,7 @@ function render(){
  fillStyle(c?effective(project,c):project.globalStyle);$('undo').disabled=!undo.length;$('redo').disabled=!redo.length;$('presets').replaceChildren();for(const name of Object.keys(project.presets)){const o=document.createElement('option');o.value=name;o.textContent=name;$('presets').append(o);}renderScript();renderClips();lockBuiltInCaptioning();draw();
 }
 function choose(id){selected=id;render();const c=current();selectedWords=[];renderScript();if(c?.inFrame!==null&&c&&v.src)seek(c.inFrame);}
-function clock(){const t=frame/FPS;$('clock').textContent='F'+frame+' · '+Math.floor(t/60)+':'+(t%60).toFixed(3).padStart(6,'0')+' · 25 fps';$('seek').value=frame;}
+function clock(){const t=frame/FPS;$('clipBedFrame').textContent='Bed F'+frame+' · '+Math.floor(t/60)+':'+(t%60).toFixed(3).padStart(6,'0');$('clock').textContent='F'+frame+' · '+Math.floor(t/60)+':'+(t%60).toFixed(3).padStart(6,'0')+' · 25 fps';$('seek').value=frame;}
 function draw(){
  paintFocus();clock();layers.update();paintMatrix($('itemMatrix'),placedClips(),frame,maxFrame,selectedClip);$('captions').replaceChildren();if(BUILTIN_CAPTIONING_LOCKED||!project.nativeCaptions)return;const c=current();const active=project.captions.filter(x=>x.visible&&timed(x)&&frame>=x.inFrame&&frame<x.outFrame);if(c&&c.visible&&!timed(c))active.push(c);
  for(const c of active){const s=effective(project,c),el=document.createElement('div');el.className='caption';el.textContent=c.text;const alpha=s.backgroundOpacity,hex=s.background;let progress=timed(c)?Math.min(1,(frame-c.inFrame)/5,(c.outFrame-frame)/5):1;progress=Math.max(0,progress);el.style.cssText=`left:${s.x}%;top:${s.y}%;width:${s.width}%;font-family:${s.font};font-weight:${s.emphasis?900:s.weight};font-size:${s.size/5.4}cqw;color:${s.color};text-align:${s.align};line-height:${s.lineHeight};-webkit-text-stroke:${s.outline/5.4}cqw #000;paint-order:stroke fill;text-shadow:0 ${s.shadow/10.8}cqw ${s.shadow/5.4}cqw #000;background:${hex}${Math.round(alpha*255).toString(16).padStart(2,'0')};`;if(s.animation==='fade')el.style.opacity=progress;if(s.animation==='pop')el.style.transform=`translate(-50%,-50%) scale(${.85+.15*progress})`;$('captions').append(el);}
@@ -141,12 +141,12 @@ $('dockGrip').onpointerdown=e=>{drawerStart={y:e.clientY,scroll:window.scrollY};
 $('dockGrip').onpointermove=e=>{if(drawerStart===null)return;const delta=e.clientY-drawerStart.y;if(Math.abs(delta)>30){drawerDragged=true;if(drawerStart.scroll>0){window.scrollTo(0,Math.max(0,drawerStart.scroll-delta));return;}setProjectDrawer(delta>0);}};
 $('dockGrip').onpointerup=()=>{drawerStart=null;};$('dockGrip').onpointercancel=()=>{drawerStart=null;};
 $('dockGrip').onclick=()=>{if(drawerDragged){drawerDragged=false;return;}setProjectDrawer($('playerDock').classList.contains('drawer-closed'));};
-function setFocus(target,id){pause();project.editFocus=target;if(target==='none')editMode='view';if(target==='overlay'&&id)selectClip(id);else renderClips();paintFocus();layers.update();saveDraft();}
+function setFocus(target,id){pause();const priorFocus=project.editFocus;project.editFocus=target;if(target==='none'||TOOLBOX_MODE&&target==='bed'&&priorFocus!=='bed')editMode='view';if(target==='overlay'&&id)selectClip(id);else renderClips();paintFocus();layers.update();saveDraft();}
 function focusedTarget(){if(project.editFocus==='none')return null;const c=clipCurrent();return project.editFocus==='overlay'&&c?{target:c,bed:false}:{target:project.bedTransform,bed:true};}
 function paintFocus(){
  $('bedDeviceLoad').hidden=!v.src;
  const bed=project.bedTransform||{x:50,y:50,scale:1};$('bedSurface').style.transform=`translate(${bed.x-50}%,${bed.y-50}%) scale(${bed.scale})`;$('bedSurface').classList.toggle('focused-bed',project.editFocus==='bed');
- const c=clipCurrent(),overlay=project.editFocus==='overlay'&&!!c;$('focusBed').setAttribute('aria-pressed',String(project.editFocus==='bed'));$('focusOverlay').setAttribute('aria-pressed',String(overlay));$('focusOverlay').disabled=!c;$('focusSize').textContent=project.editFocus==='none'?'No selection':overlay?'Overlay · '+Math.round(c.width)+'%':'Bed · '+Math.round(bed.scale*100)+'%';for(const id of ['focusSmaller','focusLarger','focusReset'])$(id).disabled=project.editFocus==='none'||(overlay&&c.locked);
+ const c=clipCurrent(),overlay=project.editFocus==='overlay'&&!!c;if(TOOLBOX_MODE)$('focusReset').textContent=overlay?'Reset size':'Fit bed';$('focusBed').setAttribute('aria-pressed',String(project.editFocus==='bed'));$('focusOverlay').setAttribute('aria-pressed',String(overlay));$('focusOverlay').disabled=!c;$('focusSize').textContent=project.editFocus==='none'?'No selection':overlay?'Overlay · '+Math.round(c.width)+'%':'Bed · '+Math.round(bed.scale*100)+'%';for(const id of ['focusSmaller','focusLarger','focusReset'])$(id).disabled=project.editFocus==='none'||(overlay&&c.locked);
 }
 function scaleFocused(ratio){pause();const f=focusedTarget();if(!f)return;if(f.target.locked)return say('Unlock this placement before resizing.');change(()=>Object.assign(f.target,scaledTarget(f.target,ratio,{bed:f.bed})));}
 $('clearFocus').onclick=()=>setFocus('none');
@@ -190,7 +190,7 @@ $('showNative').onchange=e=>{if(BUILTIN_CAPTIONING_LOCKED){e.target.checked=fals
 const clipFields={clipStart:'inFrame',clipEnd:'outFrame',clipTrim:'trimInFrame',clipTrimOut:'trimOutFrame',clipSpeed:'playbackRate',clipWidth:'width',clipX:'x',clipY:'y',clipOpacity:'opacity',clipVolume:'volume',clipRotation:'rotation'};
 const clipCurrent=()=>project.clips.find(c=>c.id===selectedClip);
 function selectClip(id){pause();if(!restoring){project.editFocus='overlay';if(project.captionSequence?.clipIds.includes(id))project.captionSequence.activeId=id;}if(id!==selectedClip)editMode='view';selectedClip=id;layers.selected=id;renderClips();paintFocus();layers.update();}
-function openClipProperties(id){selectClip(id);const c=clipCurrent();if(!c)return;if(v.src)seek(c.inFrame);$('clipPropertiesTitle').textContent='Edit · '+c.name;$('viewport').scrollIntoView({block:'start',behavior:'instant'});if(!$('clipProperties').open)$('clipProperties').showModal();}
+function openClipProperties(id){selectClip(id);const c=clipCurrent();if(!c)return;if(v.src&&!TOOLBOX_MODE)seek(c.inFrame);$('clipPropertiesTitle').textContent='Edit · '+c.name;$('viewport').scrollIntoView({block:'start',behavior:'instant'});if(!$('clipProperties').open)$('clipProperties').showModal();}
 function closeClipProperties(){if($('clipProperties').open)$('clipProperties').close();}
 function removeItem(id){pause();change(()=>{project.clips=project.clips.filter(c=>c.id!==id);if(project.captionSequence?.clipIds.includes(id)){const seq=project.captionSequence,index=seq.clipIds.indexOf(id);seq.clipIds=seq.clipIds.filter(x=>x!==id);seq.preparedIds=seq.preparedIds.filter(x=>x!==id);if(!seq.clipIds.length)delete project.captionSequence;else if(seq.activeId===id)seq.activeId=seq.clipIds[Math.min(index,seq.clipIds.length-1)];}if(selectedClip===id){selectedClip=project.clips[0]?.id||null;layers.selected=selectedClip;editMode='view';}});closeClipProperties();}
 function renderClips(){
@@ -230,7 +230,7 @@ $('overlayLibrary').onclick=()=>openCaptionImport();$('railMove').onclick=()=>{i
 
 window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
 render();showPage('viewer');try{if(localStorage.getItem(draftKey))$('saveStatus').textContent='A previous browser draft is available. Use Recover browser draft; it has not been overwritten.';}catch{$('saveStatus').textContent='Browser recovery storage unavailable. Use project downloads to preserve edits.';}
-const params=new URLSearchParams(location.search);if(params.get('recover')==='local'){try{const raw=localStorage.getItem(draftKey);if(raw)openProject(JSON.parse(raw)).then(()=>say('Saved placements restored. Reconnect files to select the original video and caption files together.')).catch(e=>say('Recovery failed: '+e.message));}catch(e){say('Recovery failed: '+e.message);}}if(params.get('assetPath'))loadCloud({kind:'previewlock',path:params.get('assetPath'),name:params.get('name')||params.get('assetPath').split('/').pop()}).catch(e=>say(e.message));
+const params=new URLSearchParams(location.search);if(params.get('recover')==='local'){try{const raw=localStorage.getItem(draftKey);if(raw){if(params.get('fitBed')==='1')archiveWorkspace();openProject(JSON.parse(raw)).then(()=>{if(params.get('fitBed')==='1')change(()=>Object.assign(project.bedTransform,{x:50,y:50,scale:1}));say('Saved placements restored. Reconnect files to select the original video and caption files together.');}).catch(e=>say('Recovery failed: '+e.message));}}catch(e){say('Recovery failed: '+e.message);}}if(params.get('assetPath'))loadCloud({kind:'previewlock',path:params.get('assetPath'),name:params.get('name')||params.get('assetPath').split('/').pop()}).catch(e=>say(e.message));
 
 // Project-folder handoff: numbered cloud caplets are loaded as an unplaced tray.
 async function saveCloudWorkspace(){
