@@ -1,20 +1,22 @@
-# Fax Desk · VT-TOOL-FAX · R1
+# Fax Desk · VT-TOOL-FAX · R2
 
 Open [Vitals Tracker Tools](https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/) → **Fax Desk** → **Open private Fax Desk**. Sign in with the authorized ChatGPT account. The same workspace opens on a phone, tablet, or desktop. The Tools page is public. Fax records and provider settings are available after sign-in.
 
 ## Send a fax
 
-1. Choose **New submission**, enter a short title, and select the destination and provider. Use the fax number on the applicable form or decision notice. The VA preset is a convenience, so verify the filing route when the notice specifies an office.
+1. Choose **New submission**, enter a short title, and select the destination and provider. GotFreeFax free is the default. The provider list puts GotFreeFax prepaid last. Use the fax number on the applicable form or decision notice. The VA preset is a convenience, so verify the filing route when the notice specifies an office.
 2. Save the draft. Choose the final, signed PDF. You can also link to an existing private ChatGPT file for reference. Open that file to obtain the PDF when sending from the browser.
 3. Review the exact fax number and select the confirmation checkbox. Send once. If the result is uncertain, check the existing job and provider email before attempting another send.
 4. Use **Check carrier** when available. The ledger keeps carrier delivery and agency acknowledgment as separate events. When VA confirms association with the correct claim or issue, record that result separately.
 
+For routine faxes, start with the free options. For an urgent or important fax, consider GotFreeFax prepaid. Direct sending skips the free tier’s email confirmation step. Check the carrier result after sending.
+
 | Provider | How it sends | Limits and usage |
 | --- | --- | --- |
-| GotFreeFax prepaid | Sends directly from the desk using a stored account number and PIN | Refresh for live domestic page credits and recent provider jobs. The carrier reports the actual balance. Prepaid credits do not expire. |
 | GotFreeFax free | Starts from the desk. Confirm the specific job with the link in the sender's email. You can paste that link into the desk or open it from email. | Up to 3 pages per fax and 2 free faxes per day, subject to the provider's email and IP limits. The desk shows its own ledger count. |
 | FaxBurner | Sends from the desk when the registered Gmail sender has been connected. Until then use **Prepare email file** and send it from that registered address, or ask ChatGPT to fax from the connected mailbox. | FaxBurner publishes 5 free outbound pages total. The desk shows logged carrier results. Confirm the remaining allowance with FaxBurner. |
 | Other routes | FAXAGE, one-time web fax, a fax machine, and applicable VA portals are available as labeled. | These routes use their own accounts, limits, and receipts. |
+| GotFreeFax prepaid | Sends directly from the desk using a stored account number and PIN | Refresh for live domestic page credits and recent provider jobs. The carrier reports the actual balance. Prepaid credits do not expire. |
 
 The desk validates PDF format and page count and accepts PDFs up to 8 MB. Keep longer VA packets intact. A Gmail send or provider queue notice means the attempt is pending. A final carrier result means transmission completed.
 
