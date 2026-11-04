@@ -1,20 +1,29 @@
-# Fax Desk · VT-TOOL-FAX · R3
+# Fax Desk · VT-TOOL-FAX · R4
 
 Open [Vitals Tracker Tools](https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/) → **Fax Desk** → **Open private Fax Desk**. Sign in with the authorized ChatGPT account. The same workspace opens on a phone, tablet, or desktop. The Tools page is public. Fax records and provider settings are available after sign-in.
 
 ## Send a fax
 
-1. Choose **New submission**, enter a short title, and type the recipient's 10-digit U.S. or Canadian fax number. **Enter a fax number** works for VA and other recipients. The VBA Evidence Intake and Board of Veterans’ Appeals presets fill in their fax numbers. Follow the instructions on the applicable form or decision notice when they specify a destination. GotFreeFax free is the default provider. The provider list puts GotFreeFax prepaid last.
-2. Save the draft. Choose the final, signed PDF. You can also link to an existing private ChatGPT file for reference. Open that file to obtain the PDF when sending from the browser.
-3. Review the exact fax number and select the confirmation checkbox. Send once. If the result is uncertain, check the existing job and provider email before attempting another send.
-4. Use **Check carrier** when available. The ledger keeps carrier delivery and agency acknowledgment as separate events. When VA confirms association with the correct claim or issue, record that result separately.
+1. Open **New fax** and enter the recipient’s 10-digit U.S. or Canadian fax number. **VA fax shortcuts** can fill in the VBA or Board number. Follow the destination on your form or notice when it specifies one.
+2. Choose **Attach files** for PDF documents or images, **Choose photos** for pictures on your device, or **Take photo** to use the camera on a supported phone. Add as many items as needed in the order they should appear. Each photo becomes one fax page. Save Word documents as PDFs first. If a photo format does not open on your device, use a JPG or PNG copy.
+3. Turn on **Create a cover page** if you want one. The optional fields are To, From, Subject, and Message. Fax Desk adds the number, date, and total page count. The cover appears first and counts toward the provider’s page allowance.
+4. Choose **Review fax**. Check the exact number, page count, and the assembled PDF. Download a copy if you want to keep the exact packet. The desk accepts a combined PDF of up to 8 MB. For signed or fillable documents, check the assembled preview for the visible signature and filled fields before sending.
+5. Choose a provider and send. With **GotFreeFax Free**, use the link in the confirmation email to start transmission, or paste it into Fax Desk. A queued result means the provider accepted the attempt. Use **Check carrier** when available to see the final result. If the result is unclear, open the existing job before trying again. The receipt ledger saves the provider result automatically when it can be checked.
 
 For routine faxes, start with the free options. For an urgent or important fax, consider GotFreeFax prepaid. Direct sending skips the free tier’s email confirmation step. Check the carrier result after sending.
+
+### Limits, alternatives and low credit warnings
+
+Review counts every page, including the optional cover. When a packet exceeds the selected provider’s known limit, the desk holds that send and offers a route that can fit. GotFreeFax Free is the first choice when its limits allow. The desk can offer prepaid credits when the live balance covers the packet. That option uses pages you already purchased and requires no new payment. A recommendation changes the provider only when you choose it. Review and send the same packet after switching.
+
+FaxBurner is a possible free alternative when its free plan and the desk’s records suggest enough pages. Verify the allowance with FaxBurner because the ledger can miss activity outside the desk. FAXAGE cost depends on your account plan and transmission time. The desk identifies options it can verify and marks allowances or rates that need checking. [GotFreeFax limits](https://www.gotfreefax.com/how-it-works) · [FaxBurner limits](https://faxburner.com/pricing/) · [FAXAGE pricing](https://www.faxage.com/pricing.php)
+
+For prepaid, the review shows the estimated balance after sending. Fax Desk warns at **10 pages remaining**, including when a proposed fax would bring you to that level or use your last pages. An insufficient balance holds the send. The desk refreshes the account when you review, offers a manual refresh, and checks the live balance again immediately before submitting a prepaid fax.
 
 | Provider | How it sends | Limits and usage |
 | --- | --- | --- |
 | GotFreeFax free | Starts from the desk. Confirm the specific job with the link in the sender's email. You can paste that link into the desk or open it from email. | Up to 3 pages per fax and 2 free faxes per day, subject to the provider's email and IP limits. The desk shows its own ledger count. |
-| FaxBurner | Sends from the desk when the registered Gmail sender has been connected. Until then use **Prepare email file** and send it from that registered address, or ask ChatGPT to fax from the connected mailbox. | FaxBurner publishes 5 free outbound pages total. The desk shows logged carrier results. Confirm the remaining allowance with FaxBurner. |
+| FaxBurner | Sends from the desk when the registered Gmail sender has been connected. Until then use **Other fax methods and filing records** to stage a FaxBurner draft and choose **Prepare email file** and send it from that registered address, or ask ChatGPT to fax from the connected mailbox. | FaxBurner publishes 5 free outbound pages total. The desk shows logged carrier results. Confirm the remaining allowance with FaxBurner. |
 | Other fax routes | FAXAGE, one-time web fax, and a fax machine are available as labeled. | These routes use their own accounts, limits, and receipts. |
 | GotFreeFax prepaid | Sends directly from the desk using a stored account number and PIN | Refresh for live domestic page credits and recent provider jobs. The carrier reports the actual balance. Prepaid credits do not expire. |
 
@@ -22,7 +31,7 @@ The desk validates PDF format and page count and accepts PDFs up to 8 MB. Keep l
 
 ## Record a VA portal filing
 
-Choose **VA portal · record a filing**, select the VA office, and save the draft. The draft links to VA filing guidance for that office. Sign in and file on the applicable VA site, then return to the draft, choose **Portal receipt**, and save the confirmation number or a receipt reference. Saving the draft only creates a ledger entry. Filing and confirmation happen on the VA site.
+Open **Other fax methods and filing records**. Choose **VA portal · record a filing**, select the VA office, and save the draft. The draft links to VA filing guidance for that office. Sign in and file on the applicable VA site, then return to the draft, choose **Portal receipt**, and save the confirmation number or a receipt reference. Saving the draft only creates a ledger entry. Filing and confirmation happen on the VA site.
 
 ## Save or replace provider credentials
 
@@ -34,7 +43,7 @@ For email-file handoff, open the downloaded draft in a mail client that imports 
 
 ## Logs and receipts
 
-Select a record to see the destination, provider, status changes, known page counts and receipt references. The ledger includes entries already saved in Submission Desk. Use **Export** for a JSON copy. Keep receipt links and export files private. Where a provider does not offer a supported live allowance API, ledger usage is labeled separately from the provider's total. The desk does not store PDF bytes after passing them to the selected service.
+Select a record to see the destination, provider, status changes, known page counts and receipt references. The ledger includes entries already saved in Submission Desk. Use **Export** for a JSON copy. Keep receipt links and export files private. Where a provider does not offer a supported live allowance API, ledger usage is labeled separately from the provider's total. The desk prepares the packet in your browser and keeps receipt references and activity. Download the reviewed PDF to keep a copy of the packet, especially if it contains photos taken in the desk.
 
 ## ChatGPT and other platforms
 
