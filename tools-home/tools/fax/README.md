@@ -1,4 +1,4 @@
-# Fax Desk · VT-TOOL-FAX · R4
+# Fax Desk · VT-TOOL-FAX · R5
 
 Open [Vitals Tracker Tools](https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/) → **Fax Desk** → **Open private Fax Desk**. Sign in with the authorized ChatGPT account. The same workspace opens on a phone, tablet, or desktop. The Tools page is public. Fax records and provider settings are available after sign-in.
 
@@ -28,6 +28,16 @@ For prepaid, the review shows the estimated balance after sending. Fax Desk warn
 | GotFreeFax prepaid | Sends directly from the desk using a stored account number and PIN | Refresh for live domestic page credits and recent provider jobs. The carrier reports the actual balance. Prepaid credits do not expire. |
 
 The desk validates PDF format and page count and accepts PDFs up to 8 MB. Keep longer VA packets intact. A Gmail send or provider queue notice means the attempt is pending. A final carrier result means transmission completed.
+
+## Draft a VA evidence statement
+
+1. Add the PDFs or photos you want to submit. Turn on **Draft a VA evidence statement (21-4138)**.
+2. Enter the veteran’s name and a VA file number or the optional one-time SSN to identify the record. Use **Save VA profile** to reuse the name, VA file number and birth date you enter. The profile is encrypted for the signed-in owner. **Forget saved profile** removes it. The separate SSN field stays in the current packet.
+3. Name the issue, add the VA decision date or Board docket reference when helpful, and describe each exhibit. The draft lists the exhibits in attachment order and keeps your wording.
+4. Review the statement text. Leave the signature unchecked for an unsigned draft, or adopt the typed **/s/** signature for this packet. Edits to the statement or exhibits clear signature approval. The generated PDF uses VA’s official two-page 21-4138 and adds continuation pages when needed. [Official 21-4138](https://www.va.gov/forms/21-4138/) · [VBA signature guidance, M21-1 II.i.2.B.2](https://navigatingva.com/law-policy/va-policy/articles/554400000174859/)
+5. Choose **Review evidence packet**. Open the PDF to check the statement and exhibits. Leave the fax number blank for a download, or enter the verified fax destination and use the send controls. Fax Desk requires an adopted signature before sending a generated statement. At the Board fax shortcut, it also requires you to confirm the docket is open to the new evidence.
+
+For an existing modernized Board appeal, check the evidence window. Direct Review uses the existing record. Evidence Submission generally allows evidence with the appeal or within 90 days after the Board receives it. The Hearing docket generally allows evidence at the hearing or within 90 days afterward. Follow any specific directions in your notice. Use the prescribed VA Form 10182 or VA’s online process when starting a Board appeal. [VA’s Board docket guidance](https://www.va.gov/decision-reviews/board-appeal/) · [Official VA Form 10182](https://www.va.gov/forms/10182/)
 
 ## Record a VA portal filing
 
