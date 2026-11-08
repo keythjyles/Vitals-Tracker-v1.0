@@ -4,13 +4,15 @@ import {BackgroundSurface} from './background.mjs?v=23';
 const $=id=>document.getElementById(id);
 const signature=async blob=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',await blob.arrayBuffer()))].map(v=>v.toString(16).padStart(2,'0')).join('');
 export function createToolboxUI(o){
- const cache=new Map();let busy=false,previewURL=null,previewTick=null,previewAsset=null,replacing=null,append=false;
+ const cache=new Map();let busy=false,previewURL=null,previewTick=null,previewAsset=null,replacing=null,position='playhead';
  const p=()=>o.project(),assets=()=>ensureToolbox(p()),current=()=>p().clips.find(c=>c.id===o.selected()),assetFor=c=>assets().find(a=>a.id===c?.toolboxId);
  const placed=()=>{
   const items=p().clips.filter(c=>!c.captionNumber||c.placed);
   return p().canvas?items:items.sort((a,b)=>a.inFrame-b.inFrame);
  };
- const placementFrame=()=>append?o.end():o.frame();
+ const positions=[['toolboxPrepend','prepend'],['toolboxAppend','append']];
+ const placementFrame=()=>position==='prepend'?0:position==='append'?o.end():o.frame();
+ const placementHint=()=>position==='prepend'?'Choose a file to prepend. Existing layers move together.':'Choose a file to insert at F'+placementFrame()+'.';
  function stopPreview(){cancelAnimationFrame(previewTick);previewTick=null;$('toolboxPreviewVideo').pause();$('toolboxPreviewVideo').removeAttribute('src');$('toolboxPreviewVideo').load();if(previewURL)URL.revokeObjectURL(previewURL);previewURL=null;previewAsset=null;$('toolboxPreview').hidden=true;}
  function render(){
   const list=assets().slice().sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true}));for(const c of p().clips){const m=o.media().get(c.id);if(m?.blob&&c.toolboxId&&!cache.has(c.toolboxId))cache.set(c.toolboxId,m.blob);}
@@ -23,9 +25,12 @@ export function createToolboxUI(o){
   $('clipFrameInfo').textContent=c?sourceLabel+` · Span ${c.outFrame-c.inFrame} frames / ${((c.outFrame-c.inFrame)/25).toFixed(3)}s · ${(c.playbackRate??1).toFixed(3)}×`:'';
   if(!$('toolboxDialog').open)return;
   $('toolboxFilesAdd').disabled=busy;$('toolboxList').replaceChildren();
-  $('toolboxAppend').hidden=!!replacing||!p().canvas;
-  $('toolboxAppend').disabled=busy;
-  $('toolboxAppend').setAttribute('aria-pressed',String(append));
+  for(const [id,mode] of positions){
+   const button=$(id);
+   button.hidden=!!replacing||!p().canvas;
+   button.disabled=busy;
+   button.setAttribute('aria-pressed',String(position===mode));
+  }
   const available=replacing?list.filter(a=>a.type==='video'):list;
   for(const a of available){
    const used=items.filter(c=>c.toolboxId===a.id).length,row=document.createElement('div');row.className='toolbox-row'+(used?' used':'');row.dataset.assetId=a.id;
@@ -42,11 +47,11 @@ export function createToolboxUI(o){
   o.pause();
   if(!$('toolboxDialog').open){
    replacing=replacement;
-   append=false;
+   position='playhead';
    $('toolboxDialog').showModal();
   }
   $('toolboxTitle').textContent=replacing?'Replace video':'Toolbox';
-  $('toolboxStatus').textContent=replacing?'Choose a video for this layer.':'Choose a file to insert at F'+placementFrame()+'.';
+  $('toolboxStatus').textContent=replacing?'Choose a video for this layer.':placementHint();
   render();
  }
  function choose(){if(!o.ready())return o.say('Choose your bed video first.');$('toolboxFiles').click();}
@@ -80,11 +85,11 @@ export function createToolboxUI(o){
   if(busy)return;const a=assets().find(a=>a.id===id);if(!a)return;
   busy=true;render();let c;const epoch=o.epoch();
   try{
-   const replacement=replacing,atEnd=append;
+   const replacement=replacing,prepend=position==='prepend',joining=position!=='playhead';
    const blob=await media(a);o.pause();
    c=makeToolboxPlacement(a,replacement?.inFrame??placementFrame(),crypto.randomUUID(),p().canvas?undefined:current());
    if(p().canvas&&a.type==='video')fitVideoPlacement(c,a,p().canvas);
-   if(atEnd&&a.type==='video')c.volume=1;
+   if(joining&&a.type==='video')c.volume=1;
    if(replacement){c.volume=replacement.volume;c.visible=replacement.visible;}
    await o.attach(c,blob);
    if(epoch!==o.epoch())throw Error('Project changed before insertion.');
@@ -93,11 +98,19 @@ export function createToolboxUI(o){
      const index=p().clips.indexOf(replacement);
      if(index<0)throw Error('This layer has changed. Reopen Replace.');
      p().clips.splice(index,1,c);
+    }else if(prepend){
+     const span=c.outFrame-c.inFrame;
+     for(const layer of p().clips)shiftPlacementIn(layer,layer.inFrame+span);
+     for(const caption of p().captions){
+      if(caption.inFrame!==null)caption.inFrame+=span;
+      if(caption.outFrame!==null)caption.outFrame+=span;
+     }
+     p().clips.unshift(c);
     }else p().clips.push(c);
     p().editFocus='overlay';
    }))throw Error('Placement could not be added.');
    $('toolboxDialog').close();o.select(c.id);
-   if(replacement||atEnd)o.seek(c.inFrame);
+   if(replacement||joining)o.seek(c.inFrame);
    o.say(a.name+(replacement?' replaced the selected layer.':' inserted at F'+c.inFrame+'.'));
   }catch(e){if(c&&!p().clips.some(x=>x.id===c.id))o.detach(c.id);$('toolboxStatus').textContent=e.message;o.say(e.message);}finally{busy=false;render();}
  }
@@ -118,7 +131,11 @@ export function createToolboxUI(o){
  $('toolboxPreviewPlay').onclick=()=>{const v=$('toolboxPreviewVideo');if(v.paused){v.play().catch(e=>o.say(e.message));const tick=()=>{paintPreview();if(!v.paused)previewTick=requestAnimationFrame(tick);};tick();}else{v.pause();paintPreview();}};
  $('toolboxPreviewVideo').onended=paintPreview;$('toolboxPreviewVideo').onseeked=paintPreview;
  $('toolboxClose').onclick=()=>$('toolboxDialog').close();$('toolboxDialog').addEventListener('close',()=>{if(!$('toolboxDialog').open){replacing=null;stopPreview();}});
- $('toolboxAppend').onclick=()=>{append=!append;$('toolboxStatus').textContent='Choose a file to insert at F'+placementFrame()+'.';render();};
+ for(const [id,mode] of positions)$(id).onclick=()=>{
+  position=position===mode?'playhead':mode;
+  $('toolboxStatus').textContent=placementHint();
+  render();
+ };
  $('toolboxFilesAdd').onclick=choose;$('toolboxFiles').onchange=e=>add([...e.target.files||[]]);
  $('editActiveCaption').onclick=choose;
  for(const id of ['railImport','overlayLibrary','insertCaption'])$(id).onclick=()=>open();

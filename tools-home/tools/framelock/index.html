@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FrameLock v1.4.1 — Video Trim and Notes</title><style>body{background:#0c1420;color:#f4f7fc;font:16px system-ui;margin:0}main{max-width:640px;margin:auto;padding:14px}section{background:#1a2a3c;padding:14px;border-radius:14px;margin:12px 0}button,input,select,textarea{font:inherit}button{background:#64b3ff;color:#081522;border:0;border-radius:9px;padding:12px;font-weight:700;margin:4px 0}button:disabled{opacity:.4}input,select,textarea{background:#0d1a2b;color:white;border:1px solid #6a829b;border-radius:7px;padding:8px;max-width:100%;box-sizing:border-box}input[type=file]{width:100%}video,canvas{width:100%;max-height:50vh;object-fit:contain;background:black}label{display:block;margin:9px 0}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row>*{flex:1}textarea{width:100%;min-height:145px}.muted{color:#b6c9df;font-size:13px}#status{white-space:pre-wrap;color:#9ce4b2}.danger{color:#ffb7b7}h1{margin-bottom:0}h2{font-size:19px;margin:0 0 8px}.transport{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;padding:7px;background:#24364a;border:2px solid #8296ab;border-radius:12px}.transport button{min-width:0;font-size:19px;background:#405b75;color:white;padding:13px 4px}.speedbox{margin-top:10px;padding:10px;background:#101f31;border:1px solid #6a829b;border-radius:10px}.speedread{font-size:24px;font-weight:800;text-align:center;margin:5px 0}.speedpresets{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}.speedpresets button{padding:8px 2px;background:#405b75;color:white}.speedbox input[type=range]{width:100%;padding:0}html,body{overflow-anchor:none}#notes-workspace{margin:12px 0 6px}#notes-workspace label{font-size:19px;font-weight:700;margin-bottom:6px}.notes-actions{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}.notes-actions button{font-size:16px;min-height:44px;padding:8px 10px}#notes{display:block;min-height:96px;max-height:210px;height:110px;resize:vertical;font-size:20px;line-height:1.4;margin:0}#video{display:block;scroll-margin:8px}#review-workspace .transport{margin-top:8px}
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FrameLock v1.4.2 — Video Trim and Notes</title><style>body{background:#0c1420;color:#f4f7fc;font:16px system-ui;margin:0}main{max-width:640px;margin:auto;padding:14px}section{background:#1a2a3c;padding:14px;border-radius:14px;margin:12px 0}button,input,select,textarea{font:inherit}button{background:#64b3ff;color:#081522;border:0;border-radius:9px;padding:12px;font-weight:700;margin:4px 0}button:disabled{opacity:.4}input,select,textarea{background:#0d1a2b;color:white;border:1px solid #6a829b;border-radius:7px;padding:8px;max-width:100%;box-sizing:border-box}input[type=file]{width:100%}video,canvas{width:100%;max-height:50vh;object-fit:contain;background:black}label{display:block;margin:9px 0}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row>*{flex:1}textarea{width:100%;min-height:145px}.muted{color:#b6c9df;font-size:13px}#status{white-space:pre-wrap;color:#9ce4b2}.danger{color:#ffb7b7}h1{margin-bottom:0}h2{font-size:19px;margin:0 0 8px}.transport{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;padding:7px;background:#24364a;border:2px solid #8296ab;border-radius:12px}.transport button{min-width:0;font-size:19px;background:#405b75;color:white;padding:13px 4px}.speedbox{margin-top:10px;padding:10px;background:#101f31;border:1px solid #6a829b;border-radius:10px}.speedread{font-size:24px;font-weight:800;text-align:center;margin:5px 0}.speedpresets{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}.speedpresets button{padding:8px 2px;background:#405b75;color:white}.speedbox input[type=range]{width:100%;padding:0}html,body{overflow-anchor:none}#notes-workspace{margin:12px 0 6px}#notes-workspace label{font-size:19px;font-weight:700;margin-bottom:6px}.notes-actions{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}.notes-actions button{font-size:16px;min-height:44px;padding:8px 10px}#notes{display:block;min-height:96px;max-height:210px;height:110px;resize:vertical;font-size:20px;line-height:1.4;margin:0}#video{display:block;scroll-margin:8px}#review-workspace .transport{margin-top:8px}
 /* FrameLock phone layout. The shared transport still sets the button sizes. */
 body > .tools-hub-nav {
   box-sizing: border-box;
@@ -79,7 +79,8 @@ main > section:not(#review-workspace),
 .trim-tick { position: absolute; inset-block: 0; width: 3px; transform: translateX(-50%); }
 #trimInTick { background: #ffd27d; }
 #trimOutTick { background: #70edc3; }
-.trim-readout { display: flex; flex-wrap: wrap; gap: 0 6px; padding: 2px 0; }
+.trim-readout { display: flex; flex-wrap: wrap; align-items: center; gap: 0 6px; padding: 2px 0; }
+#trimLast { margin: 0 0 0 auto; padding: 3px 8px; min-height: 28px; }
 #trimInLabel { color: #ffd27d; }
 #trimOutLabel { color: #70edc3; }
 #trimTotal { font-weight: 700; }
@@ -121,11 +122,23 @@ dialog::backdrop { background: #030811b8; }
 dialog label { font-size: 14px; }
 dialog input { display: block; width: 100%; margin-top: 4px; }
 dialog .quiet-action { background: #405b75; color: #fff; }
+#trimDownload {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 10px;
+  border-radius: 6px;
+  background: #efcf8f;
+  color: #182230;
+  font-size: 14px;
+  font-weight: 700;
+}
+#trimDownloadStatus { display: block; margin: 7px 0; }
 </style>
 </head>
 <body>
 <main>
-  <h1>FrameLock <small>GS-TOOL-FRAMELOCK · v1.4.1</small></h1>
+  <h1>FrameLock <small>GS-TOOL-FRAMELOCK · v1.4.2</small></h1>
   <p class="muted">Set In at the first frame to keep and Out at the first frame after the cut.</p>
   <section id="review-workspace" aria-label="Video and notes">
     <input id="file" type="file" accept="video/*,.mp4,.mov,.webm" aria-label="Open video">
@@ -169,6 +182,7 @@ dialog .quiet-action { background: #405b75; color: #fff; }
         <span id="trimInLabel">In —</span>
         <span id="trimOutLabel">Out —</span>
         <output id="trimTotal">—</output>
+        <button type="button" id="trimLast" hidden>Last trim</button>
       </div>
     </div>
     <details id="notes-workspace">
@@ -238,25 +252,29 @@ dialog .quiet-action { background: #405b75; color: #fff; }
     <label>Format <select id="trimFormat"><option value="mp4">MP4</option><option value="webm">WebM</option></select></label>
     <output id="trimSaveStatus" role="status"></output>
     <div class="frame-actions">
-      <button type="submit" id="trimSaveButton">Save</button>
+      <button type="submit" id="trimSaveButton">Prepare trim</button>
       <button type="button" id="trimCancel">Cancel</button>
     </div>
   </form>
 </dialog>
 <dialog id="trimNext" aria-labelledby="trimNextTitle">
-  <h2 id="trimNextTitle">What next?</h2>
+  <h2 id="trimNextTitle">Trim ready</h2>
   <p id="trimSavedName"></p>
   <div class="frame-actions">
+    <a id="trimDownload" download>Download</a>
+    <button type="button" id="trimShare" class="quiet-action" hidden>Share file</button>
+  </div>
+  <output id="trimDownloadStatus" class="muted" role="status"></output>
+  <div class="frame-actions">
     <button type="button" id="trimLoad" aria-label="Load the new export">Load cut</button>
-    <button type="button" id="trimKeep" aria-label="Keep editing the current video" autofocus>Keep editing</button>
+    <button type="button" id="trimKeep" aria-label="Keep editing the current video">Keep editing</button>
     <button type="button" id="trimNew" aria-label="Open a new video">Open video</button>
-    <button type="button" id="trimAgain" class="quiet-action">Download again</button>
   </div>
 </dialog>
 
 <script>window.toolsHubConfig={notesSelector:'#notes',panelInsideSelector:'#notes-workspace'};</script>
 <script src="../../shared/tool-bridge.js?v=1.2"></script>
-<script type="module" src="./framelock.mjs?v=1.4.1"></script>
+<script type="module" src="./framelock.mjs?v=1.4.2"></script>
 <script type="module" src="../../shared/compact-player.mjs?v=framelock-1.4.0"></script>
 </body>
 </html>

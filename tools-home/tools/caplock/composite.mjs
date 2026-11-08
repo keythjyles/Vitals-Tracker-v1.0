@@ -78,7 +78,7 @@ export async function renderCaptioned({project,bed,readAsset,cancelled,onProgres
    placeEffects:async(ctx,at,end)=>{
     for(const {c,buffer,offset} of audio){
      const start=Math.max(at,c.inFrame/FPS),stop=Math.min(end,c.outFrame/FPS);
-     const time=clipTime(c,start*FPS,offset+buffer.duration);
+     const time=clipTime(c,Math.max(c.inFrame,at*FPS),offset+buffer.duration);
      if(stop<=start||!time.shown)continue;
      const node=ctx.createBufferSource(),gain=ctx.createGain();
      node.buffer=buffer;

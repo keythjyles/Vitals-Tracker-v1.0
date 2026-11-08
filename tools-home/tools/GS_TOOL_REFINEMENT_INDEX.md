@@ -1,3 +1,7 @@
+## CapLock R30 and FrameLock v1.4.2
+
+CapLock can prepend a Toolbox clip and move the existing edit together. The export regression covers audio at a shifted frame boundary. FrameLock separates preparing the named cut from downloading it and keeps the result under **Last trim** while the page is open. The phone-sized browser check downloads the prepared file and retries from **Last trim**. [CapLock workflow](caplock/README.md).
+
 ## CapLock R29 — first-play audio
 
 CapLock local preview now follows the active media clock during audible playback. The delayed-start Toolbox regression checks for timeline jumps and seeks. The previous assembly release is commit `eb329fe6f9719aea41dc0ea8033f7f12abd8daeb`. [Workflow and verification](caplock/README.md).

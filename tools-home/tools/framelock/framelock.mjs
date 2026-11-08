@@ -17,6 +17,7 @@ let trimIn = null;
 let trimOut = null;
 let trimJob = null;
 let exportedFile = null;
+let trimDownloadURL = null;
 let edits = [];
 let rec = null;
 let stopRequested = false;
@@ -247,6 +248,9 @@ const trimName = $('trimName');
 const trimFormat = $('trimFormat');
 const saveStatus = $('trimSaveStatus');
 const saveButton = $('trimSaveButton');
+const trimDownload = $('trimDownload');
+const trimShare = $('trimShare');
+const downloadStatus = $('trimDownloadStatus');
 
 function cutFilename(value, format) {
   return clipName(value.replace(/\.(mp4|webm)$/i, '') + '.' + format, format);
@@ -318,11 +322,18 @@ $('trimSaveForm').onsubmit = async event => {
     });
     if (job.signal.aborted) return;
     exportedFile = new File([result.blob], name, {type: result.blob.type});
+    const previousURL = trimDownloadURL;
+    trimDownloadURL = URL.createObjectURL(exportedFile);
+    if (previousURL) setTimeout(() => URL.revokeObjectURL(previousURL), 60000);
+    trimDownload.href = trimDownloadURL;
+    trimDownload.download = name;
+    trimShare.hidden = !navigator.share || !navigator.canShare?.({files: [exportedFile]});
+    $('trimLast').hidden = false;
     $('trimSavedName').textContent = name + ' · ' + result.verified.frames + ' frames · '
       + result.verified.duration.toFixed(3) + ' s';
+    downloadStatus.textContent = 'Tap Download to save this cut.';
     saveDialog.close();
     nextDialog.showModal();
-    download(exportedFile, name);
   } catch (error) {
     if (!job.signal.aborted) saveStatus.textContent = error.message;
   } finally {
@@ -342,12 +353,22 @@ $('trimNew').onclick = () => {
   nextDialog.close();
   fileInput.click();
 };
-$('trimAgain').onclick = () => {
-  if (exportedFile) download(exportedFile, exportedFile.name);
+trimDownload.onclick = () => {
+  downloadStatus.textContent = 'Download requested. Look for this file in Downloads.';
 };
-nextDialog.addEventListener('close', () => {
-  if (!nextDialog.open) exportedFile = null;
-});
+trimShare.onclick = async () => {
+  try {
+    await navigator.share({files: [exportedFile]});
+    downloadStatus.textContent = 'Share handed to your device.';
+  } catch (error) {
+    if (error.name !== 'AbortError') downloadStatus.textContent = 'Sharing unavailable. Use Download.';
+  }
+};
+$('trimLast').onclick = () => {
+  stopReverse();
+  v.pause();
+  if (exportedFile) nextDialog.showModal();
+};
 
 // Keep legacy MP4 frame-rate detection for files the trim engine cannot inspect.
 function boxes(b,end){let out=[];function scan(p,q){while(p+8<=q){let sz=b.getUint32(p),typ=String.fromCharCode(...new Uint8Array(b.buffer,b.byteOffset+p+4,4));let header=8;if(sz===1&&p+16<=q){sz=Number(b.getBigUint64(p+8));header=16}if(!sz)sz=q-p;if(sz<header||p+sz>q)break;out.push({type:typ,start:p+header,end:p+sz});if(['moov','trak','mdia','minf','stbl'].includes(typ))scan(p+header,p+sz);p+=sz}}scan(0,end);return out}
@@ -374,7 +395,7 @@ $('notesDone').onclick=()=>{
 };
 document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseEditorFocus();});
 $('stamp').onclick=()=>{releaseEditorFocus();const n=$('notes');n.value+=`\nFrame ${frame()} | ${cursorTime().toFixed(3)}s | `;n.oninput();n.setSelectionRange(n.value.length,n.value.length);};
-$('copy').onclick=async()=>{const txt=$('notes').value;try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(txt);$('notesStatus').textContent='Notes copied to clipboard';return}throw new Error('Clipboard API unavailable')}catch(e){try{$('notes').focus({preventScroll:true});$('notes').select();$('notes').setSelectionRange(0,txt.length);const ok=document.execCommand('copy');$('notes').setSelectionRange(txt.length,txt.length);if(ok){$('notes').blur();$('notesStatus').textContent='Notes copied to clipboard';return}}catch(_){}$('notesStatus').textContent='Clipboard blocked by this browser. Notes are selected for manual Copy.'}};function download(blob,name){let a=document.createElement('a'),u=URL.createObjectURL(blob);a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),60000)}$('saveNotes').onclick=()=>download(new Blob([`FrameLock v1.4.1 notes\nSource: ${source?.name||'none'}\nFPS: ${fps||'unknown'}\nInsertions:\n${edits.map(e=>JSON.stringify(e)).join('\n')}\n\n${$('notes').value}`],{type:'text/plain'}),'FrameLock_v1.3_Notes.txt');
+$('copy').onclick=async()=>{const txt=$('notes').value;try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(txt);$('notesStatus').textContent='Notes copied to clipboard';return}throw new Error('Clipboard API unavailable')}catch(e){try{$('notes').focus({preventScroll:true});$('notes').select();$('notes').setSelectionRange(0,txt.length);const ok=document.execCommand('copy');$('notes').setSelectionRange(txt.length,txt.length);if(ok){$('notes').blur();$('notesStatus').textContent='Notes copied to clipboard';return}}catch(_){}$('notesStatus').textContent='Clipboard blocked by this browser. Notes are selected for manual Copy.'}};function download(blob,name){let a=document.createElement('a'),u=URL.createObjectURL(blob);a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),60000)}$('saveNotes').onclick=()=>download(new Blob([`FrameLock v1.4.2 notes\nSource: ${source?.name||'none'}\nFPS: ${fps||'unknown'}\nInsertions:\n${edits.map(e=>JSON.stringify(e)).join('\n')}\n\n${$('notes').value}`],{type:'text/plain'}),'FrameLock_v1.3_Notes.txt');
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));function waitSeek(t){return new Promise(resolve=>{if(Math.abs(v.currentTime-t)<.005)return resolve();let done=()=>{v.removeEventListener('seeked',done);resolve()};v.addEventListener('seeked',done,{once:true});v.currentTime=t;setTimeout(done,1200)})}function waitFrame(){return new Promise(r=>{if(v.requestVideoFrameCallback)v.requestVideoFrameCallback(()=>r());else setTimeout(r,20)})}
 $('stop').onclick=()=>{stopRequested=true};$('export').onclick=async()=>{if(trimJob||loading)return;if(!sourceReady()||!fps)return alert('Load an MP4 with detectable FPS first.');if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream)return alert('This browser does not support rendering. Save notes instead.');if(meta.variable)return alert('Variable-frame timing detected. Use saved notes for accurate external export.');if(!edits.length)return alert('Add an insertion first.');stopReverse();selectedFrame=null;let c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;let g=c.getContext('2d'),stream=c.captureStream(0),track=stream.getVideoTracks()[0];let ac=new AudioContext(),dest=ac.createMediaStreamDestination(),media=ac.createMediaElementSource(v);media.connect(dest);media.connect(ac.destination);let combined=new MediaStream([track,...dest.stream.getAudioTracks()]);let mime=['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'].find(x=>MediaRecorder.isTypeSupported(x));if(!mime)return alert('WebM encoding unsupported');let chunks=[];rec=new MediaRecorder(combined,{mimeType:mime});rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};rec.onstop=()=>{if(chunks.length)download(new Blob(chunks,{type:mime}),$('filename').value.replace(/\.mp4$/i,'.webm'));$('status').textContent=stopRequested?'Render stopped; partial export may be incomplete':'Export complete — verify audio and timing';$('export').disabled=false;$('stop').disabled=true;v.pause();ac.close();updateTrim()};stopRequested=false;$('export').disabled=true;$('stop').disabled=false;updateTrim();$('status').textContent='Rendering in real time. Keep this tab open.';v.pause();await ac.resume();rec.start();let n=Math.floor(v.duration*fps),insertMap=new Map();for(const e of edits){let list=insertMap.get(e.at)||[];list.push(e);insertMap.set(e.at,list)}let rendered=0;for(let i=0;i<=n&&!stopRequested;i++){let ins=insertMap.get(i)||[];for(const e of ins){v.pause();for(let j=0;j<e.count&&!stopRequested;j++){g.clearRect(0,0,c.width,c.height);if(e.kind!=='transparent'){g.fillStyle=e.kind==='green'?'#00ff00':'#000000';g.fillRect(0,0,c.width,c.height)}else{g.fillStyle='#000';g.fillRect(0,0,c.width,c.height)}track.requestFrame?.();await sleep(1000/fps);rendered++}}if(i===n)break;await waitSeek(i/fps);await waitFrame();g.drawImage(v,0,0,c.width,c.height);track.requestFrame?.();await sleep(1000/fps);rendered++;if(i%30===0)$('status').textContent=`Rendering ${Math.round(i/n*100)}% · ${rendered} output frames`; }rec.stop()};
