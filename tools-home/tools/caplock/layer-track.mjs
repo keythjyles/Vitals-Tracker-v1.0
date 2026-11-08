@@ -2,7 +2,7 @@ import {clipTime,pictureTime} from './clip-time.mjs?v=28';
 import {BackgroundSurface,DEFAULT_CHROMA,detectBackground} from './background.mjs?v=23';
 /* Independent reusable media-layer preview. Source picture/audio are never rewritten. */
 export class LayerTracks{
- constructor(root,{getClips,getFrame,isPlaying,getStagedId,onSelect,onChange,onStatus,getMode,onDragStart,isFocused}){Object.assign(this,{root,getClips,getFrame,isPlaying,getStagedId,onSelect,onChange,onStatus,getMode,onDragStart,isFocused});this.media=new Map();this.selected=null;this.generation=0;}
+ constructor(root,{getClips,getFrame,getPlayhead,isPlaying,getStagedId,onSelect,onChange,onStatus,getMode,onDragStart,isFocused}){Object.assign(this,{root,getClips,getFrame,getPlayhead,isPlaying,getStagedId,onSelect,onChange,onStatus,getMode,onDragStart,isFocused});this.media=new Map();this.selected=null;this.generation=0;}
  async attach(clip,blob,{autoKey=!!clip.captionNumber&&!clip.chroma}={}){
   const generation=this.generation,url=URL.createObjectURL(blob),el=document.createElement(clip.type==='image'?'img':clip.type==='audio'?'audio':'video');el.preload='auto';el.playsInline=true;el.muted=clip.volume===0;el.preservesPitch=false;
   try{await new Promise((ok,no)=>{const timer=setTimeout(()=>no(Error('Caption loading timed out. Select the local file again.')),20000),done=()=>{clearTimeout(timer);ok();};if(clip.type==='image')el.onload=done;else el.onloadeddata=done;el.onerror=()=>{clearTimeout(timer);no(Error('Clip format cannot decode. Choose a supported MP4, WebM or PNG.'));};el.src=url;});if(autoKey&&clip.type!=='audio')clip.chroma=detectBackground(el)||{...DEFAULT_CHROMA,enabled:false};}catch(e){el.pause?.();el.removeAttribute('src');el.load?.();URL.revokeObjectURL(url);throw e;}
@@ -25,11 +25,12 @@ export class LayerTracks{
     m.surface.canvas.style.transform=transform;
    }
    if(c.type!=='image'){
-    m.el.volume=c.volume;m.el.muted=c.volume===0;const target=staged?timing.start:timing.target;if(m.el.playbackRate!==timing.rate)m.el.playbackRate=timing.rate;
+    const live=playing&&c.sourceTrim&&this.getPlayhead?clipTime(c,this.getPlayhead(),duration):timing;
+    m.el.volume=c.volume;m.el.muted=c.volume===0;const target=staged?timing.start:live.shown?live.target:timing.target;if(m.el.playbackRate!==timing.rate)m.el.playbackRate=timing.rate;
     const seekTo=Math.min(target+(c.sourceTrim&&!playing ? .0005 : 0),Math.max(0,timing.end-.000002));
     const tolerance=playing&&!timing.held&&!m.el.paused ? .08 : .0001;
     if((shown||staged)&&Number.isFinite(seekTo)&&!m.el.seeking&&Math.abs(m.el.currentTime-seekTo)>tolerance)m.el.currentTime=seekTo;
-    if(shown&&playing&&!timing.held){if(m.el.paused)m.el.play().catch(()=>this.onStatus('Clip playback blocked or unavailable. Tap Play again.'));}else m.el.pause();
+    if(shown&&playing&&live.shown&&!timing.held){if(m.el.paused)m.el.play().catch(()=>this.onStatus('Clip playback blocked or unavailable. Tap Play again.'));}else m.el.pause();
    }
    this.paint(m,c);
   }

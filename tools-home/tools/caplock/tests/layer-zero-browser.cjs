@@ -109,7 +109,7 @@ module.exports=async(browser,base)=>{
  assert.equal(result.width,180);
  assert.equal(result.height,320);
  assert.ok(result.audio&&result.rms>.05,JSON.stringify(result));
- assert.ok(result.bottomLeft[0]>220&&result.bottomLeft[1]<25&&result.topRight[0]>220&&result.topRight[1]>220,JSON.stringify(result));
+ assert.ok(result.bottomLeft[0]>220&&result.bottomLeft[1]<45&&result.bottomLeft[2]<30&&result.topRight[0]>220&&result.topRight[1]>220,JSON.stringify(result));
 
  await locator('toolboxFiles').setInputFiles('/tmp/caplock-fixtures/source25.mp4');
  await page.waitForFunction(()=>document.querySelector('#toolboxStatus').textContent.includes('2 files in'));

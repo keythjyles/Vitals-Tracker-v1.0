@@ -56,7 +56,10 @@ export function createToolboxUI(o){
   try{
    for(const file of files){
     $('toolboxStatus').textContent=`Reading ${pending.length+1}/${files.length} · ${file.name}`;
-    const hash=await signature(file),existing=assets().find(a=>a.name===file.name&&(a.sha256===hash||!a.sha256&&a.ref.name===file.name&&a.ref.size===file.size));
+    const hash=await signature(file);
+    let existing=[...assets(),...pending.map(({a})=>a)].find(a=>a.name===file.name&&(a.sha256===hash||!a.sha256&&a.ref.name===file.name&&a.ref.size===file.size));
+    const original=cache.get(existing?.id);
+    if(original&&!existing.sha256&&await signature(original)!==hash)existing=null;
     const meta=await inspectToolboxFile(file,file.name);
     const a={id:existing?.id||crypto.randomUUID(),name:file.name,ref:{kind:'local',name:file.name,size:file.size},...meta,sha256:hash,...(existing?.chroma?{chroma:existing.chroma}:{})};pending.push({a,file});
    }
@@ -70,7 +73,7 @@ export function createToolboxUI(o){
   let blob=cache.get(a.id);
   if(!blob&&a.ref.kind==='previewlock'){const d=await o.api('/api/playback?path='+encodeURIComponent(a.ref.path));const r=await fetch(d.url);if(!r.ok)throw Error('File unavailable: '+a.name);blob=await r.blob();cache.set(a.id,blob);}
   if(!blob)throw Error('Use + Files to reconnect '+a.name+'. Its saved placements stay in the project.');
-  if(!a.duration||!a.frames){const meta=await inspectToolboxFile(blob,a.name);if(!o.change(()=>Object.assign(a,meta,{chroma:a.chroma||meta.chroma})))throw Error('Could not read clip details.');}
+  if(!a.duration||!a.frames||p().canvas&&a.type==='video'&&!a.width){const meta=await inspectToolboxFile(blob,a.name);if(!o.change(()=>Object.assign(a,meta,{chroma:a.chroma||meta.chroma})))throw Error('Could not read clip details.');}
   return blob;
  }
  async function insert(id){
