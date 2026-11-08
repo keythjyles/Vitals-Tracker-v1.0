@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FrameLock v1.4.0 — Video Trim and Notes</title><style>body{background:#0c1420;color:#f4f7fc;font:16px system-ui;margin:0}main{max-width:640px;margin:auto;padding:14px}section{background:#1a2a3c;padding:14px;border-radius:14px;margin:12px 0}button,input,select,textarea{font:inherit}button{background:#64b3ff;color:#081522;border:0;border-radius:9px;padding:12px;font-weight:700;margin:4px 0}button:disabled{opacity:.4}input,select,textarea{background:#0d1a2b;color:white;border:1px solid #6a829b;border-radius:7px;padding:8px;max-width:100%;box-sizing:border-box}input[type=file]{width:100%}video,canvas{width:100%;max-height:50vh;object-fit:contain;background:black}label{display:block;margin:9px 0}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row>*{flex:1}textarea{width:100%;min-height:145px}.muted{color:#b6c9df;font-size:13px}#status{white-space:pre-wrap;color:#9ce4b2}.danger{color:#ffb7b7}h1{margin-bottom:0}h2{font-size:19px;margin:0 0 8px}.transport{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;padding:7px;background:#24364a;border:2px solid #8296ab;border-radius:12px}.transport button{min-width:0;font-size:19px;background:#405b75;color:white;padding:13px 4px}.speedbox{margin-top:10px;padding:10px;background:#101f31;border:1px solid #6a829b;border-radius:10px}.speedread{font-size:24px;font-weight:800;text-align:center;margin:5px 0}.speedpresets{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}.speedpresets button{padding:8px 2px;background:#405b75;color:white}.speedbox input[type=range]{width:100%;padding:0}html,body{overflow-anchor:none}#notes-workspace{margin:12px 0 6px}#notes-workspace label{font-size:19px;font-weight:700;margin-bottom:6px}.notes-actions{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}.notes-actions button{font-size:16px;min-height:44px;padding:8px 10px}#notes{display:block;min-height:96px;max-height:210px;height:110px;resize:vertical;font-size:20px;line-height:1.4;margin:0}#video{display:block;scroll-margin:8px}#review-workspace .transport{margin-top:8px}
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FrameLock v1.4.1 — Video Trim and Notes</title><style>body{background:#0c1420;color:#f4f7fc;font:16px system-ui;margin:0}main{max-width:640px;margin:auto;padding:14px}section{background:#1a2a3c;padding:14px;border-radius:14px;margin:12px 0}button,input,select,textarea{font:inherit}button{background:#64b3ff;color:#081522;border:0;border-radius:9px;padding:12px;font-weight:700;margin:4px 0}button:disabled{opacity:.4}input,select,textarea{background:#0d1a2b;color:white;border:1px solid #6a829b;border-radius:7px;padding:8px;max-width:100%;box-sizing:border-box}input[type=file]{width:100%}video,canvas{width:100%;max-height:50vh;object-fit:contain;background:black}label{display:block;margin:9px 0}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row>*{flex:1}textarea{width:100%;min-height:145px}.muted{color:#b6c9df;font-size:13px}#status{white-space:pre-wrap;color:#9ce4b2}.danger{color:#ffb7b7}h1{margin-bottom:0}h2{font-size:19px;margin:0 0 8px}.transport{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;padding:7px;background:#24364a;border:2px solid #8296ab;border-radius:12px}.transport button{min-width:0;font-size:19px;background:#405b75;color:white;padding:13px 4px}.speedbox{margin-top:10px;padding:10px;background:#101f31;border:1px solid #6a829b;border-radius:10px}.speedread{font-size:24px;font-weight:800;text-align:center;margin:5px 0}.speedpresets{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}.speedpresets button{padding:8px 2px;background:#405b75;color:white}.speedbox input[type=range]{width:100%;padding:0}html,body{overflow-anchor:none}#notes-workspace{margin:12px 0 6px}#notes-workspace label{font-size:19px;font-weight:700;margin-bottom:6px}.notes-actions{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}.notes-actions button{font-size:16px;min-height:44px;padding:8px 10px}#notes{display:block;min-height:96px;max-height:210px;height:110px;resize:vertical;font-size:20px;line-height:1.4;margin:0}#video{display:block;scroll-margin:8px}#review-workspace .transport{margin-top:8px}
 /* FrameLock phone layout. The shared transport still sets the button sizes. */
 body > .tools-hub-nav {
   box-sizing: border-box;
@@ -84,8 +84,8 @@ main > section:not(#review-workspace),
 #trimOutLabel { color: #70edc3; }
 #trimTotal { font-weight: 700; }
 #review-workspace .transport #trimExport:enabled { background: #efcf8f; color: #182230; }
-.frame-actions { display: flex; flex-wrap: wrap; gap: 5px; }
-.frame-actions > button {
+.frame-actions, #notes-workspace .tools-hub-actions { display: flex; flex-wrap: wrap; gap: 5px; }
+.frame-actions > button, #notes-workspace .tools-hub-actions > button {
   flex: 0 0 auto;
   max-width: 7.5rem;
   min-height: 34px;
@@ -96,9 +96,13 @@ main > section:not(#review-workspace),
   line-height: 1.15;
   overflow-wrap: anywhere;
 }
-#notes-workspace label { margin: 0 0 4px; font-size: 15px; }
-#notesStatus, #trimSaveStatus { display: block; margin: 4px 0; color: #9ce4b2; font-size: 13px; }
-#notesStatus:empty, #trimSaveStatus:empty { display: none; }
+#notes-workspace { margin: 6px 16px; }
+#notes-workspace > summary { width: fit-content; padding: 4px 0; cursor: pointer; font-weight: 700; }
+#notes-workspace[open] > summary { margin-bottom: 4px; }
+#notes-workspace .scribe-history, #notes-workspace .tools-hub-inline { margin-top: 6px; }
+#notes-workspace #hub-output { width: 100%; min-height: 70px; }
+#notesStatus, #trimSaveStatus, #notes-workspace #hub-status { display: block; margin: 4px 0; color: #9ce4b2; font-size: 13px; }
+#notesStatus:empty, #trimSaveStatus:empty, #notes-workspace #hub-status:empty { display: none; }
 .speedbox, .frame-secondary { margin: 6px 16px; padding: 8px; }
 .frame-secondary summary, .speedbox summary { cursor: pointer; }
 #historyPanel { margin-top: 8px; }
@@ -121,8 +125,8 @@ dialog .quiet-action { background: #405b75; color: #fff; }
 </head>
 <body>
 <main>
-  <h1>FrameLock <small>GS-TOOL-FRAMELOCK · v1.4.0</small></h1>
-  <p class="muted">Set In at the first frame to keep and Out at the first frame after the cut. Trim saves a separate clip.</p>
+  <h1>FrameLock <small>GS-TOOL-FRAMELOCK · v1.4.1</small></h1>
+  <p class="muted">Set In at the first frame to keep and Out at the first frame after the cut.</p>
   <section id="review-workspace" aria-label="Video and notes">
     <input id="file" type="file" accept="video/*,.mp4,.mov,.webm" aria-label="Open video">
     <video id="video" controls playsinline></video>
@@ -167,8 +171,8 @@ dialog .quiet-action { background: #405b75; color: #fff; }
         <output id="trimTotal">—</output>
       </div>
     </div>
-    <div id="notes-workspace">
-      <label for="notes">Frame notes</label>
+    <details id="notes-workspace">
+      <summary id="scribeSummary">Scribe</summary>
       <div class="frame-actions notes-actions">
         <button type="button" id="stamp" aria-label="Add frame stamp">Stamp</button>
         <button type="button" id="copy" aria-label="Copy notes">Copy</button>
@@ -176,7 +180,19 @@ dialog .quiet-action { background: #405b75; color: #fff; }
       </div>
       <textarea id="notes" rows="3" aria-label="Cut points and frame notes" placeholder="Frame, time, or edit note…"></textarea>
       <output id="notesStatus"></output>
-    </div>
+      <div class="frame-actions scribe-history">
+        <button type="button" id="history" aria-label="Notes history">History</button>
+        <button type="button" id="clearNotes" aria-label="Clear notes box">Clear</button>
+        <button type="button" id="saveNotes" aria-label="Save notes as text">Save TXT</button>
+      </div>
+      <div id="historyPanel" hidden>
+        <label>Saved notes <select id="historyList"></select></label>
+        <div class="frame-actions">
+          <button type="button" id="restoreNotes" aria-label="Restore selected notes">Restore</button>
+          <button type="button" id="closeHistory" aria-label="Close notes history">Close</button>
+        </div>
+      </div>
+    </details>
     <details class="speedbox">
       <summary>Speed</summary>
       <label for="speed">Playback speed</label>
@@ -197,37 +213,20 @@ dialog .quiet-action { background: #405b75; color: #fff; }
       <summary>Insert frames</summary>
       <label>Insert <select id="side"><option value="before">before selected frame</option><option value="after">after selected frame</option></select></label>
       <label>Frames <input id="count" type="number" min="1" max="9000" value="15"></label>
-      <label>Type <select id="kind"><option value="black">Black / blank</option><option value="green">Green</option><option value="transparent">Transparent (preview layer only)</option></select></label>
+      <label>Type <select id="kind"><option value="black">Black / blank</option><option value="green">Green</option><option value="transparent">Transparent (renders black)</option></select></label>
       <p id="gap" class="muted">Duration: —</p>
       <div class="frame-actions">
         <button type="button" id="add" aria-label="Add insertion to edit plan">Add</button>
         <button type="button" id="undo" aria-label="Undo last insertion">Undo</button>
       </div>
       <div id="plan" class="muted">No insertions yet.</div>
-      <p class="muted">Inserted time is silence. The insertion export flattens transparent frames to black.</p>
       <label>Filename <input id="filename" value="FrameLock_v1.3_Inserted_Review.webm"></label>
       <div class="frame-actions">
         <button type="button" id="export" aria-label="Render edited WebM with audio">Render</button>
         <button type="button" id="stop" aria-label="Stop render" disabled>Stop</button>
       </div>
       <div id="status" role="status"></div>
-      <p class="muted">Insertion export renders WebM in real time. Verify the output before use.</p>
     </details>
-  </section>
-  <section class="frame-secondary" aria-label="Notes history and export">
-    <div class="frame-actions">
-      <button type="button" id="history" aria-label="Notes history">History</button>
-      <button type="button" id="clearNotes" aria-label="Clear notes box">Clear</button>
-      <button type="button" id="saveNotes" aria-label="Save notes as text">Save TXT</button>
-    </div>
-    <div id="historyPanel" hidden>
-      <label>Saved notes <select id="historyList"></select></label>
-      <div class="frame-actions">
-        <button type="button" id="restoreNotes" aria-label="Restore selected notes">Restore</button>
-        <button type="button" id="closeHistory" aria-label="Close notes history">Close</button>
-      </div>
-      <p class="muted">History stays in this browser. Save a text copy to keep notes elsewhere.</p>
-    </div>
   </section>
 </main>
 
@@ -255,9 +254,9 @@ dialog .quiet-action { background: #405b75; color: #fff; }
   </div>
 </dialog>
 
-<script>window.toolsHubConfig={notesSelector:'#notes',panelAfterSelector:'#review-workspace'};</script>
-<script src="../../shared/tool-bridge.js?v=1.1"></script>
-<script type="module" src="./framelock.mjs?v=1.4.0"></script>
+<script>window.toolsHubConfig={notesSelector:'#notes',panelInsideSelector:'#notes-workspace'};</script>
+<script src="../../shared/tool-bridge.js?v=1.2"></script>
+<script type="module" src="./framelock.mjs?v=1.4.1"></script>
 <script type="module" src="../../shared/compact-player.mjs?v=framelock-1.4.0"></script>
 </body>
 </html>

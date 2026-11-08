@@ -42,6 +42,12 @@ async function checkFrameLock(page){
   assert.equal(loaded.height,rail.height,'the picture and controls end on the same row');
   assert.ok(rail.height<=315,'paired controls keep the closed player within its previous height');
   const notes=page.locator('#notes');
+  const scribe=page.locator('#scribeSummary');
+  assert.equal(await notes.isVisible(),false,'Scribe starts collapsed');
+  assert.equal(await page.locator('#hub-copy').isVisible(),false,'handoff lives inside Scribe');
+  assert.equal(await page.locator('.tools-hub-panel').count(),0,'no standalone handoff instructions');
+  assert.ok((await scribe.boundingBox()).y>=loaded.y+loaded.height,'Scribe starts below the player');
+  await scribe.click();
   const notesTop=(await notes.boundingBox()).y;
   assert.ok(notesTop>=loaded.y+loaded.height,'notes start below the player');
   assert.ok(page.viewportSize().height-notesTop>=64,'notes have room on a phone with portrait video loaded');
@@ -64,6 +70,15 @@ async function checkFrameLock(page){
   await notes.scrollIntoViewIfNeeded();
   await notes.fill('Test cut note');
   assert.equal(await notes.inputValue(),'Test cut note');
+  await page.context().grantPermissions(['clipboard-read','clipboard-write']);
+  await page.getByRole('button',{name:'Copy handoff',exact:true}).click();
+  await page.getByText('Handoff copied.',{exact:true}).waitFor();
+  const handoff=await page.evaluate(()=>navigator.clipboard.readText());
+  assert.match(handoff,/Test cut note/);
+  assert.match(handoff,/"outFrame": 31/);
+  await page.getByRole('button',{name:'Done typing',exact:true}).click();
+  assert.equal(await notes.isVisible(),false,'Done folds Scribe away');
+  assert.equal(await notes.inputValue(),'Test cut note','closing Scribe keeps notes');
 
   await page.locator('#trimExport').click();
   await page.locator('#trimCancel').click();
@@ -97,7 +112,7 @@ async function checkFrameLock(page){
   await page.getByText('portrait.mp4',{exact:true}).waitFor();
   await page.locator('#trimIn:enabled').waitFor();
   assert.equal(await page.locator('#trimInLabel').textContent(),'In —');
-  console.log(`FrameLock trim at 360x640: ${loaded.height}px matched panels, exact IN/OUT and audible 30-frame download, all three next actions passed.`);
+  console.log(`FrameLock at 360x640: ${loaded.height}px matched panels, collapsed Scribe, clipboard handoff, and audible 30-frame trim with all three next actions passed.`);
  }finally{rmSync(temp,{recursive:true,force:true});}
 }
 
