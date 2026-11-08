@@ -168,11 +168,20 @@ export function mountPlayerShell(tool,config){
   important(picture,{height:height+'px','min-height':'0','max-height':height+'px'});
   const clockHeight=clock&&content.contains(clock)?clock.getBoundingClientRect().height:0,progress=[...content.children].filter(n=>n.tagName==='PROGRESS').reduce((n,p)=>n+p.getBoundingClientRect().height+4,0),screenHeight=Math.max(50,height-clockHeight-progress);
   important(surface,{height:screenHeight+'px','min-height':'0','max-height':screenHeight+'px',width:'100%',margin:'0',padding:'0',flex:'none',overflow:'hidden',background:'#070c12'});
+  if(tool==='framelock'&&media?.videoWidth&&media.videoHeight){
+   // Size the loaded preview independently of the transport.
+   const fittedHeight=Math.floor(picture.clientWidth*media.videoHeight/media.videoWidth);
+   const surfaceHeight=`max(${screenHeight}px, min(${fittedHeight}px, 75dvh))`;
+   const pictureHeight=`calc(${surfaceHeight} + ${clockHeight+progress}px)`;
+   important(picture,{height:pictureHeight,'max-height':pictureHeight});
+   important(surface,{height:surfaceHeight,'max-height':surfaceHeight});
+  }
   if(tool==='aspectlock')important($('stage'),{height:'100%','min-height':'0','max-height':'100%',width:'auto','max-width':'100%','aspect-ratio':'9 / 16',margin:'auto'});
   for(const child of surface.querySelectorAll(':scope>video,:scope>canvas'))important(child,{width:'100%',height:'100%','max-height':'100%','object-fit':'contain'});
   for(const video of surface.querySelectorAll(':scope>video'))important(video,{position:'absolute',inset:'0px','min-width':'0','min-height':'0'});
  }
  sizeControls();sizePicture();new ResizeObserver(sizePicture).observe(right);
+  if(tool==='framelock'&&media)for(const event of ['loadedmetadata','emptied'])media.addEventListener(event,sizePicture);
  let pending=false;new MutationObserver(()=>{if(pending)return;pending=true;queueMicrotask(()=>{pending=false;sizeControls();sizePicture();});}).observe(rail,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden']});
  window.addEventListener('resize',sizePicture);
 }

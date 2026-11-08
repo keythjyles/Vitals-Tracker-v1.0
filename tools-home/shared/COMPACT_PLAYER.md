@@ -1,6 +1,6 @@
 # Locked SxLock player equipment
 
-The owner rejected the earlier R7 layout. Reuse the SxLock R24 component in player-shell.mjs/css. Its frozen profile is 76px rail, 29px rows, 36px paired frame row, 30px frame glyphs and 7px spacing. The monitor follows the natural transport height. Files/projects/modes live in the shared hidden drawer. No native editor may substitute its own dimensions, add a permanent picker header or stretch transport buttons. Preserve native IDs, events, media and edit state.
+The owner rejected the earlier R7 layout. Reuse the SxLock R24 component in player-shell.mjs/css. Its frozen profile is 76px rail, 29px rows, 36px paired frame row, 30px frame glyphs and 7px spacing. The monitor follows the natural transport height. FrameLock v1.3.18 uses the same rail and fits loaded video to the picture column, with a 75dvh cap on the added height. Files/projects/modes live in the shared hidden drawer. No native editor may substitute its own dimensions, add a permanent picker header or stretch transport buttons. Preserve native IDs, events, media and edit state.
 
 The grip uses the established two-stage pull-to-top then pull-to-reveal gesture, with tap as an alternative. The source drawer closes after media loading. Precision picture/overlay gestures do not affect it. Slider protection remains in compact-player.mjs; this file no longer owns player geometry.
 
