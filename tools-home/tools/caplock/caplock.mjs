@@ -23,7 +23,7 @@ import {captionNumber,numberedCaptionFiles,activeCaption,startCaptionSequence,na
 import {paintMatrix,matrixFrame} from '../../shared/item-matrix.mjs?v=1';
 import {rateOf,fitRate} from './clip-time.mjs?v=28';
 import {words,moveWords,shiftWords,geminiPrompt} from './script.mjs?v=4';
-import {LayerTracks} from './layer-track.mjs?v=28';
+import {LayerTracks} from './layer-track.mjs?v=29';
 import {FPS,DEFAULT_STYLE,createProject,phrase,importTranscript,subtitle,timed,effective,validateProject,validateStyle} from './core.mjs?v=28';
 const $=id=>document.getElementById(id),v=$('video'),draftKey='gs_caplock_draft_v1',API='https://gs-previewlock-api.onrender.com';
 // Owner lock: built-in text captions cannot be enabled by UI, URL, or restored data.
@@ -36,7 +36,13 @@ let selectedWords=[],selectedClip=null,editMode='view',libraryTarget='base',proj
 let project=createProject(),selected=null,frame=0,maxFrame=0,undo=[],redo=[],mediaUrl=null,bedBlob=null,lastVideoPass=null,input=null,sink=null,seekRevision=0,mediaRevision=0,library=[],dirty=false,zoom=1,pan={x:0,y:0};
 const tailClock=new TailClock();let bedFrames=0,bedEnd=0,compositionEnded=false;
 const isPlaying=()=>tailClock.running||!v.paused;
-const timelineFrame=()=>tailClock.running?tailClock.current(FPS):v.currentTime*FPS;
+function timelineFrame(){
+ if(!tailClock.running)return v.currentTime*FPS;
+ const sourceFrame=project.canvas?layers.previewFrame():null;
+ if(sourceFrame==null)return tailClock.current(FPS);
+ tailClock.start(sourceFrame);
+ return sourceFrame;
+}
 function syncExtent(){const end=Math.max(0,compositionFrames(project,bedFrames)-1);if(end!==maxFrame)compositionEnded=false;maxFrame=end;$('seek').max=maxFrame;if(frame>maxFrame){pause();frame=maxFrame;}}
 const say=s=>$('status').textContent=s, current=()=>project.captions.find(c=>c.id===selected);
 if(!inStudio()&&!window.name)window.name='gs-caplock';
@@ -97,12 +103,12 @@ function draw(){
  paintFocus();clock();layers.update();paintMatrix($('itemMatrix'),placedClips(),frame,maxFrame,selectedClip);$('captions').replaceChildren();if(BUILTIN_CAPTIONING_LOCKED||!project.nativeCaptions)return;const c=current();const active=project.captions.filter(x=>x.visible&&timed(x)&&frame>=x.inFrame&&frame<x.outFrame);if(c&&c.visible&&!timed(c))active.push(c);
  for(const c of active){const s=effective(project,c),el=document.createElement('div');el.className='caption';el.textContent=c.text;const alpha=s.backgroundOpacity,hex=s.background;let progress=timed(c)?Math.min(1,(frame-c.inFrame)/5,(c.outFrame-frame)/5):1;progress=Math.max(0,progress);el.style.cssText=`left:${s.x}%;top:${s.y}%;width:${s.width}%;font-family:${s.font};font-weight:${s.emphasis?900:s.weight};font-size:${s.size/5.4}cqw;color:${s.color};text-align:${s.align};line-height:${s.lineHeight};-webkit-text-stroke:${s.outline/5.4}cqw #000;paint-order:stroke fill;text-shadow:0 ${s.shadow/10.8}cqw ${s.shadow/5.4}cqw #000;background:${hex}${Math.round(alpha*255).toString(16).padStart(2,'0')};`;if(s.animation==='fade')el.style.opacity=progress;if(s.animation==='pop')el.style.transform=`translate(-50%,-50%) scale(${.85+.15*progress})`;$('captions').append(el);}
 }
-function pause(){if(tailClock.running)frame=Math.max(0,Math.min(maxFrame,Math.floor(tailClock.current(FPS))));tailClock.stop();v.pause();$('play').textContent='▶ Play';layers.update();}
+function pause(){if(tailClock.running)frame=Math.max(0,Math.min(maxFrame,Math.floor(timelineFrame()+1e-5)));tailClock.stop();v.pause();$('play').textContent='▶ Play';layers.update();}
 function startTail(start){++seekRevision;v.pause();frame=Math.min(maxFrame,start);tailClock.start(frame);if(v.readyState>=2){const canvas=$('decoded');canvas.width=v.videoWidth;canvas.height=v.videoHeight;canvas.getContext('2d').drawImage(v,0,0,canvas.width,canvas.height);canvas.hidden=false;}v.currentTime=bedTime(frame,bedEnd,FPS);$('play').textContent='Ⅱ Pause';draw();}
 async function seek(n){pause();frame=Math.max(0,Math.min(project.canvas?maxFrame:maxFrame||Number.MAX_SAFE_INTEGER,Math.round(n)));if(!restoring&&project.captionSequence){moveCaptionDraft(project,frame);saveDraft();}compositionEnded=false;if(project.canvas){draw();return;}const revision=++seekRevision,target=bedTime(frame,bedEnd||v.duration,FPS);v.currentTime=target;draw();if(sink){$('decoded').hidden=true;try{const sample=await sink.getSample(target);if(sample){try{if(revision!==seekRevision)return;const vf=sample.toVideoFrame(),canvas=$('decoded'),ctx=canvas.getContext('2d');canvas.width=v.videoWidth||540;canvas.height=v.videoHeight||960;ctx.drawImage(vf,0,0,canvas.width,canvas.height);vf.close();canvas.dataset.frame=String(frame);canvas.dataset.sourceTime=String(sample.timestamp);canvas.hidden=false;}finally{sample.close();}}}catch(e){$('decoded').hidden=true;say('Exact-frame decode unavailable: '+e.message+'. Native seek is approximate.');}}}
 $('play').onclick=async()=>{try{if(isPlaying()){pause();return;}if(compositionEnded)return say('End of timeline. Use Start or Go to frame.');if(project.canvas){if(!placedClips().some(c=>c.visible&&layers.media.has(c.id)))return say('Add or reconnect a layer to play.');tailClock.start(frame);$('play').textContent='Ⅱ Pause';draw();return;}if(!v.src)return say('Load a video first.');if(bedFrames&&frame>=bedFrames){startTail(frame);return;}++seekRevision;$('decoded').hidden=true;await v.play();$('play').textContent='Ⅱ Pause';}catch(e){say('Playback failed: '+e.message);}};
 v.addEventListener('pause',()=>{if(!isPlaying())$('play').textContent='▶ Play';layers.update();});v.addEventListener('ended',()=>{if(bedFrames&&maxFrame>=bedFrames)startTail(bedFrames);else pause();});
-function playback(){if(isPlaying()){const next=tailClock.running?tailClock.current(FPS):v.currentTime*FPS;frame=Math.max(0,Math.min(maxFrame,Math.floor(next+1e-5)));draw();if(tailClock.running&&next>=maxFrame+1){pause();compositionEnded=true;}}requestAnimationFrame(playback);}requestAnimationFrame(playback);
+function playback(){if(isPlaying()){const next=timelineFrame();frame=Math.max(0,Math.min(maxFrame,Math.floor(next+1e-5)));draw();if(tailClock.running&&next>=maxFrame+1){pause();compositionEnded=true;}}requestAnimationFrame(playback);}requestAnimationFrame(playback);
 $('prev').onclick=()=>seek(frame-1);$('next').onclick=()=>seek(frame+1);$('seek').oninput=()=>seek(Number($('seek').value));$('select').onclick=()=>{const c=project.captions.find(x=>timed(x)&&frame>=x.inFrame&&frame<x.outFrame);if(c)choose(c.id);else say('No timed phrase at this frame. Tap an untimed phrase below.');};
 $('text').onchange=()=>change(()=>{if(current())current().text=$('text').value;});
 function boundary(which){const c=current();if(!c)return say('Select a phrase first.');change(()=>{c[which]=frame;if(c.inFrame!==null&&c.outFrame!==null&&c.outFrame<=c.inFrame)throw Error('OUT must be after IN. OUT is the first excluded frame.');delete c.originalTiming;});}

@@ -1,3 +1,7 @@
+## CapLock R29 — first-play audio
+
+CapLock local preview now follows the active media clock during audible playback. The delayed-start Toolbox regression checks for timeline jumps and seeks. The previous assembly release is commit `eb329fe6f9719aea41dc0ea8033f7f12abd8daeb`. [Workflow and verification](caplock/README.md).
+
 ## CapLock R28 — local layer assembly and trim
 
 The initial local video is a Toolbox source and editable Layer 0. Native source trims are applied per placement. The shared encoder accepts an explicit CapLock canvas and composition duration so removing or replacing Layer 0 still permits a full-resolution export. SxLock uses the existing source-driven engine route. [Workflow and recovery](caplock/README.md).
