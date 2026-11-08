@@ -1,0 +1,35 @@
+{
+  "jobId": "JL-20261108-GS-VACFG-CH02-VOICE-01",
+  "request": {
+    "approved": true,
+    "approvedReferenceId": "pqILh6dY0D1CO7Ckhplb",
+    "automaticRetries": 0,
+    "budget": {
+      "approvalEvidence": "Keyth requested ElevenLabs narration for Chapter 2 of the VA Claims Field Guide and directed use of the established production procedure. One Wendell 4 take using existing included credits within this exact character cap.",
+      "approved": true,
+      "expiresAt": "2026-11-08T22:50:23.004Z",
+      "maxCharacters": 927,
+      "maxCredits": 927,
+      "maxRequests": 1
+    },
+    "canonicalId": "dad-409292c76593b902d3396e7e",
+    "duplicateReview": {
+      "cleared": true,
+      "evidence": "New Chapter 2 explainer. No matching voice job found for this chapter request. Server checks the production ledger and canonical reservation before submitting."
+    },
+    "jobId": "JL-20261108-GS-VACFG-CH02-VOICE-01",
+    "modelId": "eleven_v4",
+    "operation": "voice_generate",
+    "outputFormat": "mp3_44100_192",
+    "schema": "GS-BoundedVoiceRequest-1",
+    "script": "[Firm, warm] Ever leave a VA appointment and remember the one thing you went in to ask? I\u2019m Wendell, the Grill Sergeant. Let\u2019s make a plan.\n\n[Direct] Before a routine visit, I send my VA care team a secure message. Biggest concern first. Can\u2019t message? Bring a note. If it\u2019s urgent, seek care right away.\n\n[Matter-of-fact] For example, my headaches put me in bed. I missed two shifts and my daughter\u2019s game. Say how often, how long recovery takes, and what help you need.\n\nAt the visit, lead with what you wrote. Describe a bad day. Let your helper explain what they saw and did.\n\nAsk, did you order the referral? Who do I call if I don\u2019t hear back?\n\n[Measured] When the note\u2019s ready, read it. Did it capture your limits, help, and plan? Follow up on what\u2019s missing.\n\n[Deliberate] Before. During. After. Pick your next appointment. Write down your top concern.\n\n[Warm] Message me for the free VA Claims Field Guide. Pass it on.",
+    "voiceId": "RBNpu6jPzAoaxZKl9noJ",
+    "voiceSettings": {
+      "stability": 0.5
+    }
+  },
+  "runId": "42528446442",
+  "schema": "GS-VoiceJob-2",
+  "sourceCommit": "aa5f9ee9244e76ccab7edb48c046d32b5a5591e1",
+  "status": "queued"
+}
