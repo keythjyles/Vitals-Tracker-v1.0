@@ -4,7 +4,23 @@ module.exports=async(browser,base)=>{
  page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());await context.route('https://gs-previewlock-api.onrender.com/**',r=>{requests.push(r.request().url());return r.fulfill({status:503,json:{error:'Device-only test'}});});
  await page.goto(base);assert.equal(await page.locator('#play').isDisabled(),true);assert.equal(await page.locator('#editActiveCaption').isDisabled(),true);
  await page.locator('#newVideoFile').setInputFiles('/tmp/caplock-fixtures/source25.mp4');await page.waitForFunction(()=>!document.querySelector('#play').disabled);
- await page.locator('#play').click();assert.equal(await page.locator('.media-layer video').first().evaluate(v=>v.paused),false);await page.locator('#play').click();await page.locator('#toStart').click();
+ const bedVideo=page.locator('.media-layer video').first();
+ await bedVideo.evaluate(video=>{
+  const play=video.play.bind(video);
+  const startup=window.firstBedPlayback={requests:0,seeks:0};
+  const ready=new Promise(resolve=>{startup.release=resolve;});
+  video.play=()=>{startup.requests++;return ready.then(play);};
+  video.addEventListener('seeking',()=>startup.seeks++);
+ });
+ await page.locator('#play').click();
+ await page.waitForTimeout(250);
+ assert.match(await page.locator('#clock').textContent(),/^F0 ·/);
+ assert.deepEqual(await page.evaluate(()=>({requests:firstBedPlayback.requests,seeks:firstBedPlayback.seeks})),{requests:1,seeks:0});
+ await page.evaluate(()=>firstBedPlayback.release());
+ await page.waitForFunction(()=>document.querySelector('.media-layer video').currentTime>=.35);
+ assert.equal(await bedVideo.evaluate(v=>v.paused),false);
+ assert.equal(await page.evaluate(()=>firstBedPlayback.seeks),0);
+ await page.locator('#play').click();await page.locator('#toStart').click();
  let chooser=page.waitForEvent('filechooser');await page.locator('#editActiveCaption').click();await(await chooser).setFiles('/tmp/caplock-fixtures/blue-caption.mp4');await page.waitForFunction(()=>document.querySelector('#toolboxStatus').textContent.includes('2 files in'));
  assert.match(await page.locator('#toolboxList').textContent(),/24 source frames · 24 fps · 1.000s/);assert.equal(await page.locator('#itemCount').textContent(),'1');
  await page.getByRole('button',{name:'Preview blue-caption.mp4',exact:true}).click();await page.locator('#toolboxPreview').waitFor({state:'visible'});await page.locator('#toolboxPreviewPlay').click();await page.waitForFunction(()=>!document.querySelector('#toolboxPreviewVideo').paused);

@@ -1,3 +1,7 @@
+## CapLock R29 — first-play audio
+
+Local preview follows the playing clip’s media clock. A slow decoder can finish starting before the timeline advances, and an audible clip runs continuously between deliberate seeks and loop boundaries. The phone-sized Toolbox test delays the first Play on a freshly loaded video and checks that it starts at frame 0 without a corrective seek.
+
 ## CapLock R28 — Layer 0 and source trimming
 
 Open a local video with **Files** or **Photos**. CapLock registers the full source in the Toolbox and places it at frame 0. The layer matrix lists the compositing order from the bottom up. Open any video row for **Trim**, **Rotate**, **Mirror**, **Flip**, **Fit**, and **Replace**. Replace fits the new source at the selected layer's start and retains the other layers.
