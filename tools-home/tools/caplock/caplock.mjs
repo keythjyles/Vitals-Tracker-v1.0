@@ -3,10 +3,10 @@ import {percentGain,inspectSourceAudio} from './source-audio.mjs?v=25';
 import {createToolboxUI} from './toolbox-ui.mjs?v=25';
 import {isToolboxEntry} from './toolbox-core.mjs?v=24';
 import {passFilename,matchLocalFile,localPassKey} from './local-pass.mjs?v=21';
-import {renderCaptioned} from './composite.mjs?v=25';
+import {renderCaptioned} from './composite.mjs?v=27';
 import {DEFAULT_CHROMA,detectBackground} from './background.mjs?v=23';
 import {captionJobStatus} from '../../shared/caption-job-status.mjs?v=1';
-import {stageAsset,stageRecord,stageFilename,captionRecipe,stageForName,pendingCaptions} from '../../shared/production-stages.mjs?v=22';
+import {stageAsset,stageRecord,stageFilename,captionRecipe,stageForName,pendingCaptions} from '../../shared/production-stages.mjs?v=27';
 import {saveProductionStage} from '../../shared/production-client.mjs?v=1';
 import {withCaptionBatch} from './caption-batch.mjs?v=22';
 import {openVideoProject} from '../../shared/video-project.mjs?v=1';
@@ -21,8 +21,8 @@ import {captionNumber,numberedCaptionFiles,activeCaption,startCaptionSequence,na
 import {paintMatrix,matrixFrame} from '../../shared/item-matrix.mjs?v=1';
 import {rateOf,fitRate} from './clip-time.mjs?v=22';
 import {words,moveWords,shiftWords,geminiPrompt} from './script.mjs?v=4';
-import {LayerTracks} from './layer-track.mjs?v=25';
-import {FPS,DEFAULT_STYLE,createProject,phrase,importTranscript,subtitle,timed,effective,validateProject,validateStyle} from './core.mjs?v=24';
+import {LayerTracks} from './layer-track.mjs?v=27';
+import {FPS,DEFAULT_STYLE,createProject,phrase,importTranscript,subtitle,timed,effective,validateProject,validateStyle} from './core.mjs?v=27';
 const $=id=>document.getElementById(id),v=$('video'),draftKey='gs_caplock_draft_v1',API='https://gs-previewlock-api.onrender.com';
 // Owner lock: built-in text captions cannot be enabled by UI, URL, or restored data.
 const BUILTIN_CAPTIONING_LOCKED=true;
@@ -75,7 +75,7 @@ for(const id of ['newVideoPhotos','emptyVideoPhotos'])$(id).onclick=()=>$('newVi
 for(const id of ['newVideoFile','newVideoPhoto'])$(id).onchange=async e=>{const file=e.target.files[0];if(file)await newVideoProject(file);e.target.value='';};
 function download(name,data,type='application/json'){const u=URL.createObjectURL(new Blob([data],{type})),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),30000);}
 function saveDraft(){if(restoring)return;if(project.captionSequence)project.captionSequence.playhead=frame;dirty=true;if(cloudSession){clearTimeout(cloudTimer);cloudTimer=setTimeout(()=>saveCloudWorkspace().catch(e=>{$('saveStatus').textContent='Dropbox save pending: '+e.message;}),900);} try{localStorage.setItem(draftKey,JSON.stringify(project));$('saveStatus').textContent='Browser draft updated '+new Date().toLocaleTimeString()+(cloudSession?'. Dropbox save queued.':'. Download project to keep a separate copy. Cloud save unavailable.');}catch(e){$('saveStatus').textContent='Draft save failed: '+e.message+' Download your project now.';}}
-function change(fn){const before=JSON.stringify(project);try{fn();for(const old of JSON.parse(before).clips||[]){const now=project.clips.find(c=>c.id===old.id);if(old.locked&&now?.locked&&['inFrame','outFrame','trimInFrame','trimOutFrame','playbackRate','x','y','width','rotation','opacity','volume','loop'].some(k=>old[k]!==now[k]))throw Error('Unlock this caption placement before changing it.');}project.captions.forEach(words);validateProject(project);}catch(e){project=JSON.parse(before);say(e.message);return false;}if(before!==JSON.stringify(project)){undo.push(before);if(undo.length>100)undo.shift();redo=[];saveDraft();}render();return true;}
+function change(fn){const before=JSON.stringify(project);try{fn();for(const old of JSON.parse(before).clips||[]){const now=project.clips.find(c=>c.id===old.id);if(old.locked&&now?.locked&&['inFrame','outFrame','trimInFrame','trimOutFrame','playbackRate','x','y','width','rotation','mirrorX','flipY','opacity','volume','loop'].some(k=>old[k]!==now[k]))throw Error('Unlock this caption placement before changing it.');}project.captions.forEach(words);validateProject(project);}catch(e){project=JSON.parse(before);say(e.message);return false;}if(before!==JSON.stringify(project)){undo.push(before);if(undo.length>100)undo.shift();redo=[];saveDraft();}render();return true;}
 function history(from,to){if(!from.length)return;to.push(JSON.stringify(project));project=JSON.parse(from.pop());if(!current())selected=project.captions[0]?.id||null;saveDraft();render();}
 function render(){
  syncExtent();
@@ -197,6 +197,7 @@ function lockBuiltInCaptioning(){
 }
 $('showNative').onchange=e=>{if(BUILTIN_CAPTIONING_LOCKED){e.target.checked=false;return;}change(()=>{project.nativeCaptions=$('showNative').checked;});};
 const clipFields={clipStart:'inFrame',clipEnd:'outFrame',clipTrim:'trimInFrame',clipTrimOut:'trimOutFrame',clipSpeed:'playbackRate',clipWidth:'width',clipX:'x',clipY:'y',clipOpacity:'opacity',clipVolume:'volume',clipRotation:'rotation'};
+const orientationButtons=[['clipMirror','mirrorX'],['clipFlip','flipY']];
 const clipCurrent=()=>project.clips.find(c=>c.id===selectedClip);
 function selectClip(id){pause();if(!restoring){project.editFocus='overlay';if(project.captionSequence?.clipIds.includes(id))project.captionSequence.activeId=id;}if(id!==selectedClip)editMode='view';selectedClip=id;layers.selected=id;renderClips();paintFocus();layers.update();}
 function openClipProperties(id){selectClip(id);const c=clipCurrent();if(!c)return;if(v.src&&!TOOLBOX_MODE)seek(c.inFrame);$('clipPropertiesTitle').textContent='Edit · '+c.name;$('viewport').scrollIntoView({block:'start',behavior:'instant'});if(!$('clipProperties').open)$('clipProperties').showModal();}
@@ -207,6 +208,12 @@ function renderClips(){
  if(!clipCurrent()){selectedClip=project.clips[0]?.id||null;layers.selected=selectedClip;if(project.editFocus==='overlay')editMode='view';}
  const c=clipCurrent();$('placeClip').hidden=!!c?.captionNumber;$('clipFields').hidden=!c;$('clipModes').hidden=!c;$('clipSettingsActions').hidden=!c;$('clipSelect').replaceChildren();$('clipTimeline').replaceChildren();$('itemCount').textContent=placedClips().length;$('itemEmpty').hidden=!!placedClips().length;$('clipName').value=c?.name||'';const key=c?.chroma||{...DEFAULT_CHROMA,enabled:false};$('captionBackground').hidden=!c||c.type==='audio';$('chromaEnabled').checked=key.enabled;$('chromaColor').value=key.color;$('chromaSimilarity').value=Math.round(key.similarity*100);$('chromaBlend').value=Math.round(key.blend*100);for(const t of placedClips()){const o=document.createElement('option');o.value=t.id;o.textContent=t.name;$('clipSelect').append(o);const row=document.createElement('div');row.className='item-row'+(t.locked?' locked-placement':'');const b=document.createElement('button');b.className='item-open';const title=document.createElement('span');title.textContent=t.name;b.append(title);b.setAttribute('aria-pressed',String(t.id===selectedClip));const small=document.createElement('small');small.textContent=`F${t.inFrame}–${t.outFrame} · ${rateOf(t).toFixed(3)}x${t.sourceFrames?' · '+t.sourceFrames+(t.type==='audio'?' timeline frames':' source frames'):''}${t.locked?' · locked':''}${t.visible?'':' · unplaced / hidden'}${layers.media.has(t.id)?'':' · reconnect media'}`;b.append(small);b.onclick=()=>openClipProperties(t.id);row.append(b);for(const [text,label,fn]of [[t.visible?'◉':'○',(t.visible?'Hide ':'Show ')+t.name,()=>change(()=>{t.visible=!t.visible;})],['↤','Go to start of '+t.name,()=>{selectClip(t.id);seek(t.inFrame);}],['✕','Remove '+t.name,()=>removeItem(t.id)]]){const action=document.createElement('button');action.className='item-action';action.textContent=text;action.setAttribute('aria-label',label);action.onclick=fn;row.append(action);}$('clipTimeline').append(row);}
  $('clipSelect').value=selectedClip||'';for(const [id,key] of Object.entries(clipFields)){$(id).value=c?(key==='volume'?c.volume*100:c[key]??''):'';$(id).disabled=!c||c.locked||(id==='clipRotation'&&editMode!=='rotate');}if(c)$('clipLoop').checked=c.loop;
+ for(const [id,key] of orientationButtons){
+  const button=$(id);if(!button)continue;
+  button.hidden=c?.type==='audio';
+  button.disabled=!c||c.locked||c.type==='audio';
+  button.setAttribute('aria-pressed',String(c?.[key]===true));
+ }
  $('clipVolumeRow').hidden=!c||c.type==='image';const sound=project.toolbox?.find(a=>a.id===c?.toolboxId)?.hasAudio;for(const id of ['clipVolume','clipVolumeDown','clipVolumeUp'])$(id).disabled=!c||c.locked||c.type==='image'||sound===false;$('clipVolumeInfo').textContent=sound===false?'This file has no audio track.':c?.volume?'Clip audio · '+(c.volume*100).toFixed(0)+'%':'Muted · set a volume to hear this clip.';
  renderSourceSound(c);
  $('speedTools').hidden=!c||c.type==='image';$('clipSpeed').closest('label').hidden=c?.type==='image';$('clipSpeedInfo').textContent=c?`Animation ${rateOf(c).toFixed(3)}x · Bed stays1x · Bed IN/OUT unchanged`:'';
@@ -214,6 +221,12 @@ function renderClips(){
  $('unlockClip').hidden=!c?.locked;for(const id of ['applyClip','square','speedDown','speedUp','speedReset','speedFit','placeClip'])$(id).disabled=!!c?.locked;renderPlacement();$('clipStatus').textContent=c?`${c.name} · ${layers.media.has(c.id)?'Media connected':'Reselect this original file to reconnect'} · ${editMode==='rotate'?'Rotate unlocked. Square returns to exactly 0°.':'Rotation locked. Select Rotate to rotate.'}`:'Import transparent WebM animations or PNG graphics. Video clips start muted. Clip audio % controls their original sound.';
 }
 $('clipSelect').onchange=()=>selectClip($('clipSelect').value);for(const [id,mode] of [['viewMode','view'],['moveMode','move'],['rotateMode','rotate']])$(id).onclick=()=>{if(mode!=='view'&&!clipCurrent())return say('Select a clip first.');pause();editMode=mode;renderClips();if(mode!=='view')closeClipProperties();};
+for(const [id,key] of orientationButtons)$(id)?.addEventListener('click',()=>change(()=>{
+ const c=clipCurrent();
+ if(!c||c.locked||c.type==='audio')return;
+ if(c[key])delete c[key];
+ else{c[key]=true;project.version=9;}
+}));
 $('applyClip').onclick=()=>change(()=>{const c=clipCurrent();if(!c)return;c.name=$('clipName').value.trim()||c.name;for(const [id,key] of Object.entries(clipFields))if(key!=='rotation'||editMode==='rotate')c[key]=key==='trimOutFrame'&&$(id).value===''?null:key==='volume'?percentGain($(id).value):Number($(id).value);c.loop=$('clipLoop').checked;});
 $('clipVolume').onchange=()=>$('applyClip').click();for(const [id,delta]of [['clipVolumeDown',-5],['clipVolumeUp',5]])$(id).onclick=()=>{$('clipVolume').value=String(Math.max(0,Math.min(100,Number($('clipVolume').value)+delta)));$('applyClip').click();};
 function applyBackground(){change(()=>{const c=clipCurrent();if(c)c.chroma={enabled:$('chromaEnabled').checked,color:$('chromaColor').value,similarity:Number($('chromaSimilarity').value)/100,blend:Number($('chromaBlend').value)/100};});}

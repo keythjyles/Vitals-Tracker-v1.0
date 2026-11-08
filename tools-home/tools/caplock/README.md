@@ -1,3 +1,9 @@
+## CapLock R27 — mirror and flip layers
+
+Tap a video or image layer's row to open its properties. **Mirror** reverses the layer left to right and **Flip** reverses it top to bottom. Each toggle acts immediately and can be undone independently. The preview and composite apply the orientation about the layer's center before rotation.
+
+Projects with orientation edits use schema 9. Earlier projects open with their original orientation. The local export and the captioned-stage render recipe include both toggles.
+
 ## CapLock R26 — portrait preview crop
 
 Owner direction: enlarging or moving an overlay must show only the portion inside the portrait output. The R9 preview allowed layers to paint into the monitor's side margins, although the exporter already clipped them. R26 clips the scene at its exact 9:16 bounds and uses the same black composition background as export. Layer dimensions/position, pinch and size controls, source bytes, timing, sound, toolbox reuse and saved projects remain unchanged. The enlarged layer remains editable within the portrait. SxLock, AspectLock and all media engines are unchanged.

@@ -9,6 +9,17 @@ test('ready filters follow saved stage receipts and invalidate changed render de
 });
 test('stage filenames are readable, safe and independent of the actual media container',()=>{assert.equal(stageFilename('Slide','captioned',2),'Slide_v02.cap');assert.equal(stageFilename('Slide','alpha',1,2),'Slide.02_v01.alp');assert.equal(mediaContainer(new Uint8Array([0,0,0,0,102,116,121,112])),'mp4');assert.throws(()=>mediaContainer(new Uint8Array([1,2,3])),/not readable/);assert.ok(!stageFilename('../Slide: x','raw').includes('/'));});
 
+test('visible layer orientation invalidates the previous render receipt',()=>{
+ const layer={id:'clip',type:'video',visible:true,ref:{path:'/clip',size:20}};
+ const caplock={media:{path:'/bed',size:50},clips:[layer]},asset={id:'cap',sha256:'hash'};
+ const recipeJSON=JSON.stringify(captionRecipe(caplock));
+ const p={caplock,assets:[asset],production:{records:[{assetId:'cap',sha256:'hash',stage:'captioned',verified:true,recipeJSON}]}};
+ for(const key of ['mirrorX','flipY']){
+  layer[key]=true;assert.equal(stageAsset(p,'captioned'),null);
+  layer[key]=false;assert.equal(stageAsset(p,'captioned').id,'cap');
+ }
+});
+
 test('unfinished active caption trays are explicit and removed pieces do not block completion',()=>{const p={captionSequence:{clipIds:['placed','waiting','removed']},clips:[{id:'placed',placed:true},{id:'waiting',placed:false}]};assert.deepEqual(pendingCaptions(p),['waiting']);p.clips[1].placed=true;assert.deepEqual(pendingCaptions(p),[]);});
 
 import {nextPhase} from '../../tools/studio/core.mjs';

@@ -13,3 +13,14 @@ test('placed timing survives seeking, selecting another caption and returning; e
 test('hidden placed layers remain in the project and deselection survives recovery',()=>{
  const p=createProject();p.clips=[clip(1)];startCaptionSequence(p,['c1'],{frame:20});insertCaption(p,20);p.clips[0].visible=false;p.editFocus='none';const q=validateProject(JSON.parse(JSON.stringify(p)));assert.equal(q.clips[0].placed,true);assert.equal(q.clips[0].visible,false);assert.equal(q.editFocus,'none');assert.equal(q.clips[0].locked,false);
 });
+
+test('layer orientation round trips without rewriting older projects',()=>{
+ const p=createProject();p.clips=[clip(1)];
+ const baseline=validateProject(p);assert.equal(baseline.version,8);
+ p.clips[0].mirrorX=true;p.clips[0].flipY=true;
+ const restored=validateProject(JSON.parse(JSON.stringify(p)));
+ assert.equal(restored.version,9);
+ assert.deepEqual(restored.clips[0],{...baseline.clips[0],mirrorX:true,flipY:true});
+ assert.deepEqual(validateProject(restored),restored);
+ p.clips[0].flipY='true';assert.throws(()=>validateProject(p),/Invalid clip flipY/);
+});
