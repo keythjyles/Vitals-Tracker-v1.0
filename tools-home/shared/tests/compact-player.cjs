@@ -11,13 +11,18 @@ async function saveFrameLockCut(page,name){
  assert.match(await page.locator('#trimSaveRange').textContent(),/30 frames · [\d.]+ s/);
  await page.locator('#trimFormat').selectOption('webm');
  await page.locator('#trimName').fill(name);
+ let requested=0;
+ const observe=()=>requested++;
+ page.on('download',observe);
+ await dialog.getByRole('button',{name:'Prepare trim',exact:true}).click();
+ const ready=page.getByRole('dialog',{name:'Trim ready',exact:true});
+ await ready.waitFor();
+ assert.equal(requested,0,'preparing the cut waits for a Download tap');
  const pending=page.waitForEvent('download');
- await dialog.getByRole('button',{name:'Save',exact:true}).click();
- const download=await pending.catch(async error=>{
-  throw Error(error.message+' '+await page.locator('#trimSaveStatus').textContent());
- });
+ await ready.getByRole('link',{name:'Download',exact:true}).click();
+ const download=await pending;
+ page.off('download',observe);
  assert.equal(download.suggestedFilename(),name+'.webm');
- await page.getByRole('dialog',{name:'What next?',exact:true}).waitFor();
  return download;
 }
 
@@ -83,6 +88,13 @@ async function checkFrameLock(page){
   await page.locator('#trimExport').click();
   await page.locator('#trimCancel').click();
   assert.equal(await page.locator('#trimTotal').textContent(),'30 fr · 1.000 s','cancel keeps the selection');
+  await page.evaluate(()=>{
+   Object.defineProperty(navigator,'canShare',{value:({files})=>files.length===1});
+   Object.defineProperty(navigator,'share',{value:async({files})=>{
+    const [file]=files;
+    window.sharedTrim={name:file.name,size:file.size};
+   }});
+  });
   const download=await saveFrameLockCut(page,'Blue.Angels trim');
   const file=await download.path();
   const probe=JSON.parse(execFileSync('ffprobe',['-v','error','-count_frames','-show_streams','-of','json',file],{encoding:'utf8'}));
@@ -91,10 +103,17 @@ async function checkFrameLock(page){
   assert.ok(probe.streams.some(stream=>stream.codec_type==='audio'),'trim retains the source soundtrack');
   const samples=execFileSync('ffmpeg',['-v','error','-i',file,'-map','0:a:0','-f','s16le','pipe:1']);
   assert.ok(samples.some(value=>value!==0),'exported soundtrack decodes to audible samples');
+  await page.getByRole('button',{name:'Share file',exact:true}).click();
+  assert.equal(await page.evaluate(()=>window.sharedTrim.name),download.suggestedFilename());
   await page.getByRole('button',{name:'Keep editing the current video',exact:true}).click();
   assert.equal(await page.locator('.gs-player-filename').textContent(),'portrait.mp4');
   assert.equal(await page.locator('#trimTotal').textContent(),'30 fr · 1.000 s');
   assert.equal(await notes.inputValue(),'Test cut note');
+  await page.getByRole('button',{name:'Last trim',exact:true}).click();
+  const retry=page.waitForEvent('download');
+  await page.getByRole('link',{name:'Download',exact:true}).click();
+  assert.equal((await retry).suggestedFilename(),download.suggestedFilename());
+  await page.getByRole('button',{name:'Keep editing the current video',exact:true}).click();
 
   await saveFrameLockCut(page,'Reload cut');
   await page.getByRole('button',{name:'Load the new export',exact:true}).click();

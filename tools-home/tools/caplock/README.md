@@ -1,3 +1,7 @@
+## CapLock R30 — prepend a clip
+
+Use **Toolbox → Prepend at start**, then choose a file. CapLock places it at frame 0 and shifts the existing layers and captions by its duration in one undoable edit. Video prepends include their source audio. The export uses the exact timeline frame when a shifted audio clip starts.
+
 ## CapLock R29 — first-play audio
 
 Local preview follows the playing clip’s media clock. A slow decoder can finish starting before the timeline advances, and an audible clip runs continuously between deliberate seeks and loop boundaries. The phone-sized Toolbox test delays the first Play on a freshly loaded video and checks that it starts at frame 0 without a corrective seek.

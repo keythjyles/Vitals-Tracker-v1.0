@@ -20,7 +20,7 @@ module.exports=async(browser,base)=>{
   await locator('saveVideo').click();
   return [...await fs.readFile(await(await download).path())];
  };
- const inspect=async(bytes,checkPixels)=>page.evaluate(async({bytes,checkPixels})=>{
+ const inspect=async(bytes,checkPixels,audioWindow=checkPixels?[.05,.25]:null)=>page.evaluate(async({bytes,checkPixels,audioWindow})=>{
   const vendor='/tools-home/tools/sxlock/vendor/mediabunny-1.62.1-gs1.mjs';
   const m=await import(vendor),input=new m.Input({formats:m.ALL_FORMATS,source:new m.BlobSource(new Blob([new Uint8Array(bytes)]))});
   try{
@@ -29,25 +29,27 @@ module.exports=async(browser,base)=>{
    let frames=0;
    for await(const _ of new m.EncodedPacketSink(track).packets(undefined,undefined,{metadataOnly:true}))frames++;
    const result={frames,width:await track.getDisplayWidth(),height:await track.getDisplayHeight(),duration:await track.computeDuration(),audio:!!audio};
-   if(!checkPixels)return result;
-   const sample=await new m.VideoSampleSink(track).getSample(0),canvas=new OffscreenCanvas(result.width,result.height);
-   const ctx=canvas.getContext('2d');
-   sample.draw(ctx,0,0);
-   sample.close();
-   result.bottomLeft=[...ctx.getImageData(20,280,1,1).data];
-   result.topRight=[...ctx.getImageData(160,40,1,1).data];
+   if(checkPixels){
+    const sample=await new m.VideoSampleSink(track).getSample(0),canvas=new OffscreenCanvas(result.width,result.height);
+    const ctx=canvas.getContext('2d');
+    sample.draw(ctx,0,0);
+    sample.close();
+    result.bottomLeft=[...ctx.getImageData(20,280,1,1).data];
+    result.topRight=[...ctx.getImageData(160,40,1,1).data];
+   }
+   if(!audioWindow)return result;
    let squares=0,n=0;
    for await(const {buffer,timestamp} of new m.AudioBufferSink(audio).buffers()){
     const data=buffer.getChannelData(0);
     for(let i=0;i<data.length;i++){
      const t=timestamp+i/buffer.sampleRate;
-     if(t>=.05&&t<.25){squares+=data[i]**2;n++;}
+     if(t>=audioWindow[0]&&t<audioWindow[1]){squares+=data[i]**2;n++;}
     }
    }
    result.rms=Math.sqrt(squares/n);
    return result;
   }finally{input.dispose();}
- },{bytes,checkPixels});
+ },{bytes,checkPixels,audioWindow});
 
  await locator('newVideoFile').setInputFiles('/tmp/caplock-fixtures/trim-source.mp4');
  await count(1);
@@ -120,6 +122,20 @@ module.exports=async(browser,base)=>{
  assert.equal(second.inFrame,9);
  assert.equal(second.rotation,0);
  assert.equal(second.volume,1);
+ await locator('toolboxFiles').setInputFiles('/tmp/caplock-fixtures/prepend-29.mp4');
+ await page.waitForFunction(()=>document.querySelector('#toolboxStatus').textContent.includes('3 files in'));
+ await locator('toolboxPrepend').click();
+ await page.getByRole('button',{name:'Insert prepend-29.mp4',exact:true}).click();
+ await count(3);
+ const prepended=(await draft()).clips;
+ assert.equal(prepended[0].name,'prepend-29.mp4');
+ assert.deepEqual(prepended.map(c=>[c.inFrame,c.outFrame]),[[0,29],[29,38],[38,113]]);
+ assert.deepEqual(prepended[1].sourceTrim,trimmed.sourceTrim);
+ const joined=await inspect(await save(),false,[1.23,1.40]);
+ assert.equal(joined.frames,113);
+ assert.ok(joined.rms>.05,JSON.stringify(joined));
+ await locator('layerUndo').click();
+ assert.deepEqual((await draft()).clips,[trimmed,second]);
  await row().first().click();
  await locator('replaceVideo').click();
  await page.getByRole('button',{name:'Replace with source25.mp4',exact:true}).click();
@@ -147,6 +163,6 @@ module.exports=async(browser,base)=>{
  const swapped=await inspect(await save(),false);
  assert.deepEqual(swapped,{frames:75,width:180,height:320,duration:3,audio:true});
  assert.deepEqual(errors,[]);
- console.log(JSON.stringify({layerZero:{trimmed:result,reconnectedWithoutOriginalBed:swapped,appendAtExclusiveEnd:true,undoAndReplace:true,errors}}));
+ console.log(JSON.stringify({layerZero:{trimmed:result,reconnectedWithoutOriginalBed:swapped,appendAtExclusiveEnd:true,prependAudio:joined.rms,undoAndReplace:true,errors}}));
  await context.close();
 };

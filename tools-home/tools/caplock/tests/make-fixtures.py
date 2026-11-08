@@ -11,6 +11,8 @@ for fps in (25,30):
     if fps==25:
         command+=['-c:a','aac','-shortest']
     subprocess.run(command+['-y',str(root/f'source{fps}.mp4')],check=True)
+subprocess.run(['ffmpeg','-v','error','-i',str(root/'source25.mp4'),'-an','-frames:v','29',
+    '-c:v','libx264','-y',str(root/'prepend-29.mp4')],check=True)
 for name,color in [('blue','0x0060b8'),('green','0x00dd44')]:
     picture=f"color=c={color}:s=320x180:r=24:d=1,drawbox=x=50:y=50:w=60:h=60:color=yellow:t=fill:enable='lt(t,0.4)',drawbox=x=200:y=50:w=60:h=60:color=yellow:t=fill:enable='gte(t,0.4)'"
     subprocess.run(['ffmpeg','-v','error','-f','lavfi','-i',picture,'-c:v','libx264','-pix_fmt','yuv420p','-y',str(root/f'{name}-caption.mp4')],check=True)
