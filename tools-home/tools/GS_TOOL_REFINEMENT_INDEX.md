@@ -1,3 +1,7 @@
+## CapLock R28 — local layer assembly and trim
+
+The initial local video is a Toolbox source and editable Layer 0. Native source trims are applied per placement. The shared encoder accepts an explicit CapLock canvas and composition duration so removing or replacing Layer 0 still permits a full-resolution export. SxLock uses the existing source-driven engine route. [Workflow and recovery](caplock/README.md).
+
 ## CapLock R26 — portrait preview crop
 
 Owner direction: enlarging or moving an overlay must show only the portion inside the portrait output. The R9 preview allowed layers to paint into the monitor's side margins, although the exporter already clipped them. R26 clips the scene at its exact 9:16 bounds and uses the same black composition background as export. Layer dimensions/position, pinch and size controls, source bytes, timing, sound, toolbox reuse and saved projects remain unchanged. The enlarged layer remains editable within the portrait. SxLock, AspectLock and all media engines are unchanged.

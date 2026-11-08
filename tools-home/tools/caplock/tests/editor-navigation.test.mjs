@@ -11,7 +11,7 @@ test('matrix seeks use the full rectangle, clamp boundaries, and retain integer 
 });
 test('CapLock item settings retain the manual playhead and legacy insertion-frame navigation',()=>{
  const calls=[],els={clipPropertiesTitle:{},viewport:{scrollIntoView:()=>calls.push('scroll')},clipProperties:{open:false,showModal(){this.open=true;calls.push('open');}}};
- const state={TOOLBOX_MODE:false,restoring:false,project:{editFocus:'bed'},paintFocus:()=>{},selectedClip:'old',editMode:'move',layers:{update:()=>calls.push('update')},pause:()=>calls.push('pause'),renderClips:()=>calls.push('render'),clipCurrent:()=>({name:'9.webm',inFrame:120}),seek:n=>calls.push(['seek',n]),v:{src:'bed.mp4'},$:id=>els[id]};
+ const state={TOOLBOX_MODE:false,restoring:false,project:{editFocus:'bed'},paintFocus:()=>{},renderSourceSound:()=>{},selectedClip:'old',editMode:'move',layers:{update:()=>calls.push('update')},pause:()=>calls.push('pause'),renderClips:()=>calls.push('render'),clipCurrent:()=>({name:'9.webm',inFrame:120}),seek:n=>calls.push(['seek',n]),v:{src:'bed.mp4'},$:id=>els[id]};
  vm.createContext(state);vm.runInContext(declaration(cap,'selectClip')+'\n'+declaration(cap,'openClipProperties'),state);state.openClipProperties('new');
  assert.equal(state.selectedClip,'new');assert.equal(state.editMode,'view');assert.equal(calls[0],'pause');assert.ok(calls.find(x=>Array.isArray(x)&&x[0]==='seek'&&x[1]===120));assert.equal(els.clipProperties.open,true);assert.equal(els.clipPropertiesTitle.textContent,'Edit · 9.webm');state.TOOLBOX_MODE=true;calls.length=0;state.openClipProperties('new');assert.equal(calls.some(x=>Array.isArray(x)&&x[0]==='seek'),false);
 });

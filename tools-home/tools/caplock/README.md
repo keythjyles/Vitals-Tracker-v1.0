@@ -1,3 +1,13 @@
+## CapLock R28 — Layer 0 and source trimming
+
+Open a local video with **Files** or **Photos**. CapLock registers the full source in the Toolbox and places it at frame 0. The layer matrix lists the compositing order from the bottom up. Open any video row for **Trim**, **Rotate**, **Mirror**, **Flip**, **Fit**, and **Replace**. Replace fits the new source at the selected layer's start and retains the other layers.
+
+**Toolbox** inserts at the playhead. **Append at end** uses the timeline's exclusive end and starts appended video at full audio level. Ordinary video inserts start muted. The same source can be placed multiple times.
+
+**Trim** opens a source-only player using native frame boundaries. Mark **In** and exclusive **Out** and check the frame and second totals. Apply sets the picture and audio range in one undoable edit, at the layer's current start and speed. The 25 fps project determines its new exclusive end. Save video renders the project once using the original media.
+
+The first source sets the existing portrait canvas dimensions. Canvas size is stored with the project so it can export after the first source is replaced or removed. Older standalone projects convert the original bed into Layer 0 when reconnected, with their previous framing and end hold. Recover existing work through `?recover=local` and **Reconnect files**. Standalone projects and native trims use schema 10. Roll back code to `1be7d81a8c3fa66b8c4c97fc7ae31a0f89c175c1` and keep source files and schema 10 edits intact.
+
 ## CapLock R27 — mirror and flip layers
 
 Tap a video or image layer's row to open its properties. **Mirror** reverses the layer left to right and **Flip** reverses it top to bottom. Each toggle acts immediately and can be undone independently. The preview and composite apply the orientation about the layer's center before rotation.

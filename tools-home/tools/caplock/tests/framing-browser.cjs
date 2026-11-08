@@ -13,16 +13,17 @@ module.exports=async(browser,base)=>{
  await page.locator('#reconnectFiles').setInputFiles(['/tmp/caplock-fixtures/source25.mp4','/tmp/caplock-fixtures/large-caption.mp4']);await page.waitForFunction(()=>document.querySelector('#status').textContent.includes('Reconnected video and 1 layers.'));
  // A gesture on the bed after caption Move cannot inherit the caption's Move mode.
  await page.locator('#focusOverlay').click();await page.locator('#railMove').click();assert.equal(await page.locator('#railMove').getAttribute('aria-pressed'),'true');
- const box=await page.locator('#bedSurface').boundingBox(),x=box.x+box.width*.1,y=box.y+box.height*.3;await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x,y-70);await page.mouse.up();
- q=await draft();assert.deepEqual(q.bedTransform,{x:50,y:50,scale:1});assert.equal(await page.locator('#railMove').getAttribute('aria-pressed'),'false');
- await page.locator('#railMove').click();await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x,y-25);await page.mouse.up();assert.notEqual((await draft()).bedTransform.y,50);
- await page.locator('#focusReset').click();assert.deepEqual((await draft()).bedTransform,{x:50,y:50,scale:1});assert.equal(await page.locator('#itemCount').textContent(),'1');
- assert.equal(await page.locator('.media-layer .keyed-frame').evaluate(c=>c.width),540);
+ const bedId=(await draft()).clips[0].id,bedLayer=page.locator('.media-layer[data-clip-id="'+bedId+'"]');
+ const box=await bedLayer.boundingBox(),x=box.x+box.width*.1,y=box.y+box.height*.3;await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x,y-70);await page.mouse.up();
+ q=await draft();assert.equal(q.clips[0].y,50);assert.equal(await page.locator('#railMove').getAttribute('aria-pressed'),'false');
+ await page.locator('#railMove').click();await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x,y-25);await page.mouse.up();assert.notEqual((await draft()).clips[0].y,50);
+ await page.locator('#focusReset').click();assert.equal((await draft()).clips[0].y,50);assert.equal(await page.locator('#itemCount').textContent(),'2');
+ assert.equal(await page.locator('.media-layer[data-clip-id="caption-one"] .keyed-frame').evaluate(c=>c.width),540);
  // Opening settings retains the bed playhead. Marks use that frame and fit the whole animation.
  const jump=async frame=>{await page.locator('[data-for=seek] input').fill(String(frame));await page.getByRole('button',{name:'Go to frame',exact:true}).click();};
- await jump(25);await page.locator('#clipTimeline .item-open').click();assert.match(await page.locator('#clipBedFrame').textContent(),/Bed F25/);assert.equal(await page.locator('#clipMarkIn').isVisible(),true);assert.equal(await page.locator('#clipMarkOut').isEnabled(),true);
+ await jump(25);await page.locator('#clipTimeline .item-open').last().click();assert.match(await page.locator('#clipBedFrame').textContent(),/Timeline F25/);assert.equal(await page.locator('#clipMarkIn').isVisible(),true);assert.equal(await page.locator('#clipMarkOut').isEnabled(),true);
  await page.locator('#clipMarkIn').click();assert.equal(await page.locator('#clipStart').inputValue(),'25');assert.equal(await page.locator('#clipEnd').inputValue(),'75');await page.locator('#closeClipProperties').click();
- await jump(60);await page.locator('#clipTimeline .item-open').click();assert.match(await page.locator('#clipBedFrame').textContent(),/Bed F60/);await page.locator('#clipMarkOut').click();assert.equal(await page.locator('#clipEnd').inputValue(),'60');assert.ok(Math.abs(Number(await page.locator('#clipSpeed').inputValue())-25/35)<1e-10);await page.locator('#closeClipProperties').click();
+ await jump(60);await page.locator('#clipTimeline .item-open').last().click();assert.match(await page.locator('#clipBedFrame').textContent(),/Timeline F60/);await page.locator('#clipMarkOut').click();assert.equal(await page.locator('#clipEnd').inputValue(),'60');assert.ok(Math.abs(Number(await page.locator('#clipSpeed').inputValue())-25/35)<1e-10);await page.locator('#closeClipProperties').click();
  // Decode the actual exported first and final frames, comparing the complete picture to the source.
  await page.getByText('Save, recover & export',{exact:true}).click();const download=page.waitForEvent('download');await page.locator('#saveVideo').click();const output=fs.readFileSync(await(await download).path());
  const result=await page.evaluate(async({source,output})=>{

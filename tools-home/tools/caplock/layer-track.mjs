@@ -1,4 +1,4 @@
-import {clipTime} from './clip-time.mjs?v=22';
+import {clipTime,pictureTime} from './clip-time.mjs?v=28';
 import {BackgroundSurface,DEFAULT_CHROMA,detectBackground} from './background.mjs?v=23';
 /* Independent reusable media-layer preview. Source picture/audio are never rewritten. */
 export class LayerTracks{
@@ -10,14 +10,14 @@ export class LayerTracks{
   this.detach(clip.id);const wrap=document.createElement('div');wrap.className='media-layer';wrap.dataset.clipId=clip.id;wrap.append(el);let surface;
   if(clip.type!=='audio'){surface=new BackgroundSurface();surface.canvas.className='keyed-frame';surface.canvas.style.display='none';wrap.append(surface.canvas);const resize=document.createElement('button');resize.type='button';resize.className='layer-resize';resize.textContent='↘';resize.setAttribute('aria-label','Resize animation '+clip.name);wrap.append(resize);}wrap.onpointerdown=e=>this.drag(e,clip.id);this.root.append(wrap);
   const media={el,wrap,url,blob,surface,serial:0};this.media.set(clip.id,media);
-  el.addEventListener('seeked',()=>{media.serial++;this.paint(media,this.getClips().find(c=>c.id===clip.id)||clip);});
+  el.addEventListener('seeked',()=>{media.serial++;this.update();});
   this.update();return Number.isFinite(el.duration)?el.duration:2;
  }
  detach(id){const m=this.media.get(id);if(m){this.media.delete(id);if(m.callback!==undefined)m.el.cancelVideoFrameCallback?.(m.callback);m.el.pause?.();m.el.removeAttribute('src');m.el.load?.();m.wrap.remove();URL.revokeObjectURL(m.url);}}
  clear(){this.generation++;for(const id of this.media.keys())this.detach(id);this.selected=null;}
  update(){
   const frame=this.getFrame(),playing=this.isPlaying(),clips=this.getClips();
-  for(const [id,m] of this.media){const c=clips.find(c=>c.id===id);if(!c){m.wrap.hidden=true;m.el.pause?.();continue;}const duration=m.el.duration;const timing=clipTime(c,frame,duration);const inserted=!c.captionNumber||c.placed;const shown=inserted&&(c.type==='image'?c.visible&&frame>=c.inFrame&&frame<c.outFrame:timing.shown);
+  for(const [id,m] of this.media){const c=clips.find(c=>c.id===id);if(!c){m.wrap.hidden=true;m.el.pause?.();continue;}const duration=m.el.duration;const timing=c.type==='video'?pictureTime(c,frame,duration):clipTime(c,frame,duration);const inserted=!c.captionNumber||c.placed;const shown=inserted&&(c.type==='image'?c.visible&&frame>=c.inFrame&&frame<c.outFrame:timing.shown);
    const staged=!playing&&id===this.getStagedId?.();m.wrap.hidden=!(shown||staged);m.wrap.classList.toggle('selected-layer',id===this.selected&&(this.isFocused?.()??true));m.wrap.classList.toggle('locked-layer',!!c.locked);m.wrap.style.cssText=`left:${c.x}%;top:${c.y}%;width:${c.width}%;opacity:${c.opacity};transform:translate(-50%,-50%) rotate(${c.rotation}deg);z-index:${clips.indexOf(c)+1}`;
    if(m.surface){
     const transform=c.mirrorX||c.flipY?`scale(${c.mirrorX?-1:1}, ${c.flipY?-1:1})`:'';
@@ -25,9 +25,11 @@ export class LayerTracks{
     m.surface.canvas.style.transform=transform;
    }
    if(c.type!=='image'){
-    m.el.volume=c.volume;m.el.muted=c.volume===0;const target=timing.target;if(m.el.playbackRate!==timing.rate)m.el.playbackRate=timing.rate;
-    if((shown||staged)&&Number.isFinite(target)&&(!playing||Math.abs(m.el.currentTime-target)>.08)){const preview=staged?c.trimInFrame/25:target;if(!m.el.seeking&&Math.abs(m.el.currentTime-preview)>.004)m.el.currentTime=Math.min(preview,Number.isFinite(duration)?Math.max(0,Math.min(duration,timing.end)-.001):preview);}
-    if(shown&&playing){if(m.el.paused)m.el.play().catch(()=>this.onStatus('Clip playback blocked or unavailable. Tap Play again.'));}else m.el.pause();
+    m.el.volume=c.volume;m.el.muted=c.volume===0;const target=staged?timing.start:timing.target;if(m.el.playbackRate!==timing.rate)m.el.playbackRate=timing.rate;
+    const seekTo=Math.min(target+(c.sourceTrim&&!playing ? .0005 : 0),Math.max(0,timing.end-.000002));
+    const tolerance=playing&&!timing.held&&!m.el.paused ? .08 : .0001;
+    if((shown||staged)&&Number.isFinite(seekTo)&&!m.el.seeking&&Math.abs(m.el.currentTime-seekTo)>tolerance)m.el.currentTime=seekTo;
+    if(shown&&playing&&!timing.held){if(m.el.paused)m.el.play().catch(()=>this.onStatus('Clip playback blocked or unavailable. Tap Play again.'));}else m.el.pause();
    }
    this.paint(m,c);
   }

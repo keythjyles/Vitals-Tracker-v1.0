@@ -28,3 +28,9 @@ for name,audio in [('late-goat','sine=frequency=1000:duration=1'),('silent-goat'
     if name=='late-goat':
         command+=['-af',"volume=0:enable='lt(t,0.6)'"]
     subprocess.run(command+['-c:v','libx264','-pix_fmt','yuv420p','-c:a','aac','-shortest','-y',str(root/f'{name}.mp4')],check=True)
+
+# Non-25 fps, with picture and sound events inside a known native frame range.
+trim_picture = "color=c=navy:s=180x320:r=30:d=1.2,drawbox=x=0:y=0:w=90:h=160:color=red:t=fill:enable='gte(t,0.4)*lt(t,0.8)',drawbox=x=90:y=160:w=90:h=160:color=yellow:t=fill"
+subprocess.run(['ffmpeg','-v','error','-f','lavfi','-i',trim_picture,
+    '-f','lavfi','-i','sine=frequency=1000:duration=1.2','-af',"volume=0:enable='lt(t,0.4)+gte(t,0.8)'",
+    '-c:v','libx264','-pix_fmt','yuv420p','-c:a','aac','-shortest','-y',str(root/'trim-source.mp4')],check=True)

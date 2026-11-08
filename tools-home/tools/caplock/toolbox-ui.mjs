@@ -1,33 +1,54 @@
-import {ensureToolbox,makeToolboxPlacement,assetFrameLabel,shiftPlacementIn,fitPlacementOut,setPlacementSpeed} from './toolbox-core.mjs?v=24';
-import {inspectToolboxFile} from './toolbox-media.mjs?v=24';
+import {ensureToolbox,makeToolboxPlacement,assetFrameLabel,shiftPlacementIn,fitPlacementOut,setPlacementSpeed,fitVideoPlacement} from './toolbox-core.mjs?v=28';
+import {inspectToolboxFile} from './toolbox-media.mjs?v=28';
 import {BackgroundSurface} from './background.mjs?v=23';
 const $=id=>document.getElementById(id);
 const signature=async blob=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',await blob.arrayBuffer()))].map(v=>v.toString(16).padStart(2,'0')).join('');
 export function createToolboxUI(o){
- const cache=new Map();let busy=false,previewURL=null,previewTick=null,previewAsset=null;
+ const cache=new Map();let busy=false,previewURL=null,previewTick=null,previewAsset=null,replacing=null,append=false;
  const p=()=>o.project(),assets=()=>ensureToolbox(p()),current=()=>p().clips.find(c=>c.id===o.selected()),assetFor=c=>assets().find(a=>a.id===c?.toolboxId);
- const placed=()=>p().clips.filter(c=>!c.captionNumber||c.placed).slice().sort((a,b)=>a.inFrame-b.inFrame);
+ const placed=()=>{
+  const items=p().clips.filter(c=>!c.captionNumber||c.placed);
+  return p().canvas?items:items.sort((a,b)=>a.inFrame-b.inFrame);
+ };
+ const placementFrame=()=>append?o.end():o.frame();
  function stopPreview(){cancelAnimationFrame(previewTick);previewTick=null;$('toolboxPreviewVideo').pause();$('toolboxPreviewVideo').removeAttribute('src');$('toolboxPreviewVideo').load();if(previewURL)URL.revokeObjectURL(previewURL);previewURL=null;previewAsset=null;$('toolboxPreview').hidden=true;}
  function render(){
   const list=assets().slice().sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true}));for(const c of p().clips){const m=o.media().get(c.id);if(m?.blob&&c.toolboxId&&!cache.has(c.toolboxId))cache.set(c.toolboxId,m.blob);}
   $('editActiveCaption').textContent='+ Files';$('editActiveCaption').disabled=busy||!o.ready();$('placementState').textContent='Toolbox · '+list.length+(o.extendedFrames?.()?' · '+o.extendedFrames()+' frames':'');
-  $('insertCaption').textContent='Insert';$('insertCaption').disabled=busy||!o.ready();$('sheetInsertCaption').textContent='Insert another';$('sheetInsertCaption').disabled=busy||!o.ready();
+  $('insertCaption').textContent=p().canvas?'Toolbox':'Insert';$('insertCaption').disabled=busy||!o.ready();$('sheetInsertCaption').textContent='Insert another';$('sheetInsertCaption').disabled=busy||!o.ready();
   const items=placed(),index=items.findIndex(c=>c.id===o.selected());$('previousCaption').disabled=index<=0;$('nextCaption').disabled=index<0||index>=items.length-1;
   $('previousCaption').title='Previous placement';$('nextCaption').title='Next placement';$('toItemStart').disabled=!current();$('play').disabled=!o.ready();
-  const c=current(),a=assetFor(c);$('clipFrameInfo').textContent=c?assetFrameLabel(a)+` · Span ${c.outFrame-c.inFrame} frames / ${((c.outFrame-c.inFrame)/25).toFixed(3)}s · ${(c.playbackRate??1).toFixed(3)}×`:'';
+  const c=current(),a=assetFor(c),cut=c?.sourceTrim;
+  const sourceLabel=cut?'Source F'+cut.inFrame+'–'+cut.outFrame+' · '+(cut.end-cut.start).toFixed(3)+'s':assetFrameLabel(a);
+  $('clipFrameInfo').textContent=c?sourceLabel+` · Span ${c.outFrame-c.inFrame} frames / ${((c.outFrame-c.inFrame)/25).toFixed(3)}s · ${(c.playbackRate??1).toFixed(3)}×`:'';
   if(!$('toolboxDialog').open)return;
   $('toolboxFilesAdd').disabled=busy;$('toolboxList').replaceChildren();
-  for(const a of list){
+  $('toolboxAppend').hidden=!!replacing||!p().canvas;
+  $('toolboxAppend').disabled=busy;
+  $('toolboxAppend').setAttribute('aria-pressed',String(append));
+  const available=replacing?list.filter(a=>a.type==='video'):list;
+  for(const a of available){
    const used=items.filter(c=>c.toolboxId===a.id).length,row=document.createElement('div');row.className='toolbox-row'+(used?' used':'');row.dataset.assetId=a.id;
-   const use=document.createElement('button');use.type='button';use.className='toolbox-insert';use.setAttribute('aria-label','Insert '+a.name);use.disabled=busy;
+   const use=document.createElement('button');use.type='button';use.className='toolbox-insert';use.setAttribute('aria-label',(replacing?'Replace with ':'Insert ')+a.name);use.disabled=busy;
    const title=document.createElement('strong');title.textContent=a.name;const info=document.createElement('small');info.textContent=assetFrameLabel(a);use.append(title,info);use.onclick=()=>insert(a.id);
    const badge=document.createElement('span');badge.className='toolbox-use-count';badge.textContent=used?'Used '+used+'×':'Ready';
    const preview=document.createElement('button');preview.type='button';preview.textContent='▶ Preview';preview.setAttribute('aria-label','Preview '+a.name);preview.disabled=busy;preview.onclick=()=>showPreview(a.id);
    row.append(use,badge,preview);$('toolboxList').append(row);
   }
-  $('toolboxEmpty').hidden=!!list.length;
+  $('toolboxEmpty').hidden=!!available.length;
  }
- function open(){if(!o.ready())return o.say('Choose your bed video first. Play it to check it, then add files.');o.pause();if(!$('toolboxDialog').open)$('toolboxDialog').showModal();$('toolboxStatus').textContent='Choose a file to insert at F'+o.frame()+'. Used files stay available.';render();}
+ function open(replacement=null){
+  if(!o.ready())return o.say('Choose your first video to start the project.');
+  o.pause();
+  if(!$('toolboxDialog').open){
+   replacing=replacement;
+   append=false;
+   $('toolboxDialog').showModal();
+  }
+  $('toolboxTitle').textContent=replacing?'Replace video':'Toolbox';
+  $('toolboxStatus').textContent=replacing?'Choose a video for this layer.':'Choose a file to insert at F'+placementFrame()+'.';
+  render();
+ }
  function choose(){if(!o.ready())return o.say('Choose your bed video first.');$('toolboxFiles').click();}
  async function add(files){
   if(busy||!files.length)return;if(!o.ready())return o.say('Choose your bed video first.');
@@ -56,10 +77,25 @@ export function createToolboxUI(o){
   if(busy)return;const a=assets().find(a=>a.id===id);if(!a)return;
   busy=true;render();let c;const epoch=o.epoch();
   try{
-   const blob=await media(a);o.pause();c=makeToolboxPlacement(a,o.frame(),crypto.randomUUID(),current());await o.attach(c,blob);
-   if(epoch!==o.epoch())throw Error('Bed changed before insertion.');
-   if(!o.change(()=>{p().clips.push(c);p().editFocus='overlay';}))throw Error('Placement could not be added.');
-   $('toolboxDialog').close();o.select(c.id);o.say(a.name+' inserted. It remains in the toolbox for another insertion.');
+   const replacement=replacing,atEnd=append;
+   const blob=await media(a);o.pause();
+   c=makeToolboxPlacement(a,replacement?.inFrame??placementFrame(),crypto.randomUUID(),current());
+   if(p().canvas&&a.type==='video')fitVideoPlacement(c,a,p().canvas);
+   if(atEnd&&a.type==='video')c.volume=1;
+   if(replacement){c.volume=replacement.volume;c.visible=replacement.visible;}
+   await o.attach(c,blob);
+   if(epoch!==o.epoch())throw Error('Project changed before insertion.');
+   if(!o.change(()=>{
+    if(replacement){
+     const index=p().clips.indexOf(replacement);
+     if(index<0)throw Error('This layer has changed. Reopen Replace.');
+     p().clips.splice(index,1,c);
+    }else p().clips.push(c);
+    p().editFocus='overlay';
+   }))throw Error('Placement could not be added.');
+   $('toolboxDialog').close();o.select(c.id);
+   if(replacement||atEnd)o.seek(c.inFrame);
+   o.say(a.name+(replacement?' replaced the selected layer.':' inserted at F'+c.inFrame+'.'));
   }catch(e){if(c&&!p().clips.some(x=>x.id===c.id))o.detach(c.id);$('toolboxStatus').textContent=e.message;o.say(e.message);}finally{busy=false;render();}
  }
  const previewSurface=new BackgroundSurface($('toolboxPreviewCanvas'));
@@ -78,9 +114,13 @@ export function createToolboxUI(o){
  function timing(fn){const c=current();if(!c)return;o.pause();o.change(()=>fn(c,duration(c)));}
  $('toolboxPreviewPlay').onclick=()=>{const v=$('toolboxPreviewVideo');if(v.paused){v.play().catch(e=>o.say(e.message));const tick=()=>{paintPreview();if(!v.paused)previewTick=requestAnimationFrame(tick);};tick();}else{v.pause();paintPreview();}};
  $('toolboxPreviewVideo').onended=paintPreview;$('toolboxPreviewVideo').onseeked=paintPreview;
- $('toolboxClose').onclick=()=>$('toolboxDialog').close();$('toolboxDialog').addEventListener('close',stopPreview);
+ $('toolboxClose').onclick=()=>$('toolboxDialog').close();$('toolboxDialog').addEventListener('close',()=>{if(!$('toolboxDialog').open){replacing=null;stopPreview();}});
+ $('toolboxAppend').onclick=()=>{append=!append;$('toolboxStatus').textContent='Choose a file to insert at F'+placementFrame()+'.';render();};
  $('toolboxFilesAdd').onclick=choose;$('toolboxFiles').onchange=e=>add([...e.target.files||[]]);
- $('editActiveCaption').onclick=choose;$('railImport').onclick=open;$('overlayLibrary').onclick=open;$('insertCaption').onclick=open;$('sheetInsertCaption').onclick=()=>{o.closeProperties();open();};
+ $('editActiveCaption').onclick=choose;
+ for(const id of ['railImport','overlayLibrary','insertCaption'])$(id).onclick=()=>open();
+ $('sheetInsertCaption').onclick=()=>{o.closeProperties();open();};
+ $('replaceVideo').onclick=()=>{const c=current();if(c?.type==='video'&&!c.locked){o.closeProperties();open(c);}};
  $('clipStart').onchange=e=>timing(c=>shiftPlacementIn(c,Number(e.target.value)));
  $('clipEnd').onchange=e=>timing((c,d)=>fitPlacementOut(c,Number(e.target.value),d));
  $('clipMarkIn').onclick=()=>timing(c=>shiftPlacementIn(c,o.frame()));$('clipMarkOut').onclick=()=>timing((c,d)=>fitPlacementOut(c,o.frame(),d));
