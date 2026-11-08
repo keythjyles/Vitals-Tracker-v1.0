@@ -3,7 +3,13 @@ export function selection(times,end,inFrame,outFrame){if(!times.length||!Number.
 export function clipName(name,ext){return (String(name||'Clip').replace(/\.[^.]+$/,'').replace(/[\\/<>:"|?*\x00-\x1f]/g,'_').replace(/^\.+/,'').trim().slice(0,110)||'Clip')+'.'+ext;}
 export function cloudResult(receipt,hash,bytes){if(!receipt?.persisted&&!receipt?.reused)throw Error('Cloud save was not acknowledged.');if(receipt.asset?.sha256!==hash||receipt.asset?.size!==bytes||!receipt.asset?.path)throw Error('Cloud byte verification did not match.');return receipt.asset;}
 
-export function constantFrameRate(times,end){if(!times.length)return null;const step=(end-times[0])/times.length;if(!(step>0)||!times.every((t,i)=>Math.abs(t-(times[0]+i*step))<.00001))return null;return 1/step;}
+export function constantFrameRate(times,end,tolerance=.00001){if(!times.length)return null;const step=(end-times[0])/times.length;if(!(step>0)||!times.every((t,i)=>Math.abs(t-(times[0]+i*step))<tolerance))return null;return 1/step;}
+
+export function cutFrameRate(meta,range,allowWebmRounding=false){
+ // WebM stores packet timestamps on a millisecond clock. Leave the packet times intact.
+ const tolerance = allowWebmRounding && meta.format === 'WebM' ? .001001 : undefined;
+ return constantFrameRate(meta.times.slice(range.inFrame,range.outFrame),range.end,tolerance);
+}
 
 
 // Display inside the requested frame, not on its codec/rounded-time boundary.

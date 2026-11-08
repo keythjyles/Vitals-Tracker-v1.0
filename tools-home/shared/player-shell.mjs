@@ -66,6 +66,7 @@ export function mountPlayerShell(tool,config){
  const nativeRange=tool==='previewlock'?$('seekBar'):['framelock','wavlock'].includes(tool)?null:$('seek');
  const nativeWidget=nativeRange?.tagName==='INPUT'?document.querySelector('.gs-precision[data-for="'+nativeRange.id+'"]'):null;
  const framePicture=tool==='framelock'?q('.gs-frame-picture'):null,frameProgress=framePicture?.querySelector('progress'),frameSeek=framePicture?.querySelector('.gs-precision');
+ const frameTimeline=framePicture?.querySelector('#frameTimeline');
  if(nativeRange)stash.append(nativeRange);if(nativeWidget)root.append(nativeWidget);
  const picture=el('div','gs-player-picture'),content=tool==='sxlock'?$('viewerContent'):el('div','gs-player-content');
  const oldSxPicture=tool==='sxlock'?$('viewerDock'):null;
@@ -113,7 +114,7 @@ export function mountPlayerShell(tool,config){
   if(widget){const progress=widget.querySelector('progress'),row=widget.querySelector('.gs-set-row'),error=widget.querySelector('.gs-set-error');if(progress)content.append(progress);if(row){row.classList.add('gs-control-row');widget.replaceChildren(row);rail.append(widget);}if(error){error.classList.add('gs-player-error');root.append(error);}stash.append(primaryRange);}
  }
  if(tool==='framelock'){
-  const progress=frameProgress,seek=frameSeek;if(progress)content.append(progress);if(seek){const row=seek.querySelector('.gs-set-row');if(row){row.classList.add('gs-control-row');seek.replaceChildren(row);rail.append(seek);}}if($('meta'))put($('meta'));
+  const timeline=frameTimeline||frameProgress,seek=frameSeek;if(timeline)content.append(timeline);if(seek){const row=seek.querySelector('.gs-set-row');if(row){row.classList.add('gs-control-row');seek.replaceChildren(row);rail.append(seek);}}if($('meta'))put($('meta'));
  }
  // Right-side source buttons belong in the hidden drawer; editing controls stay put.
  const under=[];if(tool==='caplock')for(const id of ['focusBar','placementBar'])if($(id))under.push($(id));
@@ -169,13 +170,14 @@ export function mountPlayerShell(tool,config){
   const height=tool==='framelock'?railHeight:Math.ceil(railHeight);
   if(height<1)return;
   important(picture,{height:height+'px','min-height':'0','max-height':height+'px'});
-  const clockHeight=clock&&content.contains(clock)?clock.getBoundingClientRect().height:0,progress=[...content.children].filter(n=>n.tagName==='PROGRESS').reduce((n,p)=>n+p.getBoundingClientRect().height+4,0),screenHeight=Math.max(50,height-clockHeight-progress);
+  const clockHeight=clock&&content.contains(clock)?clock.getBoundingClientRect().height:0,progress=frameTimeline?frameTimeline.getBoundingClientRect().height:[...content.children].filter(n=>n.tagName==='PROGRESS').reduce((n,p)=>n+p.getBoundingClientRect().height+4,0),screenHeight=Math.max(50,height-clockHeight-progress);
   important(surface,{height:screenHeight+'px','min-height':'0','max-height':screenHeight+'px',width:'100%',margin:'0',padding:'0',flex:'none',overflow:'hidden',background:'#070c12'});
   if(tool==='aspectlock')important($('stage'),{height:'100%','min-height':'0','max-height':'100%',width:'auto','max-width':'100%','aspect-ratio':'9 / 16',margin:'auto'});
   for(const child of surface.querySelectorAll(':scope>video,:scope>canvas'))important(child,{width:'100%',height:'100%','max-height':'100%','object-fit':'contain'});
   for(const video of surface.querySelectorAll(':scope>video'))important(video,{position:'absolute',inset:'0px','min-width':'0','min-height':'0'});
  }
- sizeControls();sizePicture();new ResizeObserver(sizePicture).observe(right);
+ sizeControls();sizePicture();const pictureObserver=new ResizeObserver(sizePicture);pictureObserver.observe(right);
+ if(frameTimeline)pictureObserver.observe(frameTimeline);
  let pending=false;new MutationObserver(()=>{if(pending)return;pending=true;queueMicrotask(()=>{pending=false;sizeControls();sizePicture();});}).observe(rail,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden']});
  window.addEventListener('resize',sizePicture);
 }

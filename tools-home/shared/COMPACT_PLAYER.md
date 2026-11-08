@@ -4,6 +4,8 @@ The owner rejected the earlier R7 layout. Reuse the SxLock R24 component in play
 
 The grip uses the established two-stage pull-to-top then pull-to-reveal gesture, with tap as an alternative. The source drawer closes after media loading. Precision picture/overlay gestures do not affect it. Slider protection remains in compact-player.mjs; this file no longer owns player geometry.
 
+FrameLock v1.4.0 pairs the transport controls and keeps its read-only timeline and trim totals inside the matched player height. In is the first retained frame. Out is the first frame after the cut, and Go accepts the end boundary. Trim reuses Clipper's verified local exporter. Save As names the download, and Load cut uses those same export bytes. The source and notes stay in place when Keep editing is selected.
+
 Validation must include real phone widths, portrait footage, identical row/pair dimensions, picture/rail alignment, cold-source access, hidden picker after loading, pull/tap source access, source/cut persistence and existing native regressions. Do not call a merely similar viewer a match.
 
 
