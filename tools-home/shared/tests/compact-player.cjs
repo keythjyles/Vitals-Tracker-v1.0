@@ -4,11 +4,30 @@ const {mkdtempSync,rmSync}=require('node:fs');
 const {tmpdir}=require('node:os');
 const {join}=require('node:path');
 
+async function saveFrameLockCut(page,name){
+ await page.getByRole('button',{name:'Trim and save',exact:true}).click();
+ const dialog=page.getByRole('dialog',{name:'Save As',exact:true});
+ await dialog.waitFor();
+ assert.match(await page.locator('#trimSaveRange').textContent(),/30 frames · [\d.]+ s/);
+ await page.locator('#trimFormat').selectOption('webm');
+ await page.locator('#trimName').fill(name);
+ const pending=page.waitForEvent('download');
+ await dialog.getByRole('button',{name:'Save',exact:true}).click();
+ const download=await pending.catch(async error=>{
+  throw Error(error.message+' '+await page.locator('#trimSaveStatus').textContent());
+ });
+ assert.equal(download.suggestedFilename(),name+'.webm');
+ await page.getByRole('dialog',{name:'What next?',exact:true}).waitFor();
+ return download;
+}
+
 async function checkFrameLock(page){
  const temp=mkdtempSync(join(tmpdir(),'framelock-'));
  try{
   const source=join(temp,'portrait.mp4');
-  execFileSync('ffmpeg',['-v','error','-f','lavfi','-i','testsrc2=size=162x288:rate=30:duration=2','-c:v','libx264','-pix_fmt','yuv420p',source]);
+  execFileSync('ffmpeg',['-v','error','-f','lavfi','-i','testsrc2=size=162x288:rate=30:duration=2',
+   '-f','lavfi','-i','sine=frequency=600:sample_rate=48000:duration=2',
+   '-c:v','libx264','-pix_fmt','yuv420p','-c:a','aac',source]);
   const picture=page.locator('.gs-player-picture');
   const emptyHeight=(await picture.boundingBox()).height;
   await page.locator('#file').setInputFiles(source);
@@ -21,16 +40,64 @@ async function checkFrameLock(page){
   assert.equal(loaded.height,emptyHeight,'loading portrait video does not stretch the player');
   assert.equal(loaded.y,rail.y,'the picture and controls start on the same row');
   assert.equal(loaded.height,rail.height,'the picture and controls end on the same row');
+  assert.ok(rail.height<=315,'paired controls keep the closed player within its previous height');
   const notes=page.locator('#notes');
   const notesTop=(await notes.boundingBox()).y;
   assert.ok(notesTop>=loaded.y+loaded.height,'notes start below the player');
   assert.ok(page.viewportSize().height-notesTop>=64,'notes have room on a phone with portrait video loaded');
+  const noteButtons=await page.locator('.notes-actions button').evaluateAll(buttons=>buttons.map(button=>{
+   const {width,top}=button.getBoundingClientRect();return {width,top};
+  }));
+  assert.equal(new Set(noteButtons.map(button=>button.top)).size,1,'note actions fit on one row');
+  assert.ok(noteButtons.every(button=>button.width<=120),'note actions have capped widths');
+
   await page.locator('#forward').click();
   await page.getByText('Frame 1 · 0.033 s',{exact:true}).waitFor();
+  await page.locator('#trimIn').click();
+  await page.locator('#jumpforward').click();
+  await page.getByText('Frame 31 · 1.033 s',{exact:true}).waitFor();
+  await page.locator('#trimOut').click();
+  assert.equal(await page.locator('#trimInLabel').textContent(),'In F1');
+  assert.equal(await page.locator('#trimOutLabel').textContent(),'Out F31');
+  assert.equal(await page.locator('#trimTotal').textContent(),'30 fr · 1.000 s');
+  for(const id of ['trimInTick','trimOutTick','trimBand'])assert.equal(await page.locator('#'+id).isVisible(),true);
   await notes.scrollIntoViewIfNeeded();
   await notes.fill('Test cut note');
   assert.equal(await notes.inputValue(),'Test cut note');
-  console.log(`FrameLock portrait at 360x640: ${loaded.height}px matched panels, ${Math.round(page.viewportSize().height-notesTop)}px visible for notes, exact frame step passed.`);
+
+  await page.locator('#trimExport').click();
+  await page.locator('#trimCancel').click();
+  assert.equal(await page.locator('#trimTotal').textContent(),'30 fr · 1.000 s','cancel keeps the selection');
+  const download=await saveFrameLockCut(page,'Blue.Angels trim');
+  const file=await download.path();
+  const probe=JSON.parse(execFileSync('ffprobe',['-v','error','-count_frames','-show_streams','-of','json',file],{encoding:'utf8'}));
+  const video=probe.streams.find(stream=>stream.codec_type==='video');
+  assert.deepEqual([video.width,video.height,Number(video.nb_read_frames)],[162,288,30]);
+  assert.ok(probe.streams.some(stream=>stream.codec_type==='audio'),'trim retains the source soundtrack');
+  const samples=execFileSync('ffmpeg',['-v','error','-i',file,'-map','0:a:0','-f','s16le','pipe:1']);
+  assert.ok(samples.some(value=>value!==0),'exported soundtrack decodes to audible samples');
+  await page.getByRole('button',{name:'Keep editing the current video',exact:true}).click();
+  assert.equal(await page.locator('.gs-player-filename').textContent(),'portrait.mp4');
+  assert.equal(await page.locator('#trimTotal').textContent(),'30 fr · 1.000 s');
+  assert.equal(await notes.inputValue(),'Test cut note');
+
+  await saveFrameLockCut(page,'Reload cut');
+  await page.getByRole('button',{name:'Load the new export',exact:true}).click();
+  await page.getByText('Reload cut.webm',{exact:true}).waitFor();
+  await page.locator('#trimIn:enabled').waitFor();
+  assert.equal(await page.locator('#trimInLabel').textContent(),'In —');
+  assert.equal(await page.locator('#trimOutLabel').textContent(),'Out —');
+  await page.locator('#trimIn').click();
+  await page.locator('#jumpforward').click();
+  await page.locator('#trimOut').click();
+  await saveFrameLockCut(page,'Open new');
+  const chooser=page.waitForEvent('filechooser');
+  await page.getByRole('button',{name:'Open a new video',exact:true}).click();
+  await (await chooser).setFiles(source);
+  await page.getByText('portrait.mp4',{exact:true}).waitFor();
+  await page.locator('#trimIn:enabled').waitFor();
+  assert.equal(await page.locator('#trimInLabel').textContent(),'In —');
+  console.log(`FrameLock trim at 360x640: ${loaded.height}px matched panels, exact IN/OUT and audible 30-frame download, all three next actions passed.`);
  }finally{rmSync(temp,{recursive:true,force:true});}
 }
 
