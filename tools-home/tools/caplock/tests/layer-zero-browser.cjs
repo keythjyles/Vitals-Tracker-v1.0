@@ -118,10 +118,12 @@ module.exports=async(browser,base)=>{
  await count(2);
  const second=(await draft()).clips[1];
  assert.equal(second.inFrame,9);
+ assert.equal(second.rotation,0);
  assert.equal(second.volume,1);
  await row().first().click();
  await locator('replaceVideo').click();
  await page.getByRole('button',{name:'Replace with source25.mp4',exact:true}).click();
+ await locator('toolboxDialog').waitFor({state:'hidden'});
  assert.deepEqual((await draft()).clips[1],second);
  assert.equal((await draft()).clips[0].ref.name,'source25.mp4');
  await locator('layerUndo').click();

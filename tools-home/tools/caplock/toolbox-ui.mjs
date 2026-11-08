@@ -82,7 +82,7 @@ export function createToolboxUI(o){
   try{
    const replacement=replacing,atEnd=append;
    const blob=await media(a);o.pause();
-   c=makeToolboxPlacement(a,replacement?.inFrame??placementFrame(),crypto.randomUUID(),current());
+   c=makeToolboxPlacement(a,replacement?.inFrame??placementFrame(),crypto.randomUUID(),p().canvas?undefined:current());
    if(p().canvas&&a.type==='video')fitVideoPlacement(c,a,p().canvas);
    if(atEnd&&a.type==='video')c.volume=1;
    if(replacement){c.volume=replacement.volume;c.visible=replacement.visible;}
