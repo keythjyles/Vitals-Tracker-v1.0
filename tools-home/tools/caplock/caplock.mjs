@@ -325,7 +325,6 @@ function renderClips(){
   $('clipSelect').append(option);
   const row=document.createElement('div');
   row.className='item-row'+(t.locked?' locked-placement':'');
-  row.dataset.clipId=t.id;
   const open=document.createElement('button'),title=document.createElement('span'),details=document.createElement('small');
   open.className='item-open';
   title.textContent=(assembly?'Layer '+index+' · ':'')+t.name;

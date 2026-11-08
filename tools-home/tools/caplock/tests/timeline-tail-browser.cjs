@@ -9,7 +9,7 @@ module.exports=async(browser,base)=>{
  const url=new URL(base);url.searchParams.set('recover','local');await page.goto(url.href);
  await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('Saved placements restored.'));
  const go=async n=>{await page.locator('[data-for=seek] input').fill(String(n));await page.getByRole('button',{name:'Go to frame',exact:true}).click();};
- await page.locator('#reconnectFiles').setInputFiles(file);await page.waitForFunction(()=>!document.querySelector('#play').disabled);
+ await page.locator('#reconnectFiles').setInputFiles(file);await page.waitForFunction(()=>document.querySelector('#status').textContent.includes('Reconnected video'));
  await go(5);await page.locator('#toolboxFiles').setInputFiles(['/tmp/caplock-fixtures/late-goat.mp4','/tmp/caplock-fixtures/silent-goat.mp4']);
  await page.waitForFunction(()=>document.querySelector('#toolboxStatus').textContent.includes('3 files in'));
  await page.getByRole('button',{name:'Insert late-goat.mp4',exact:true}).click();await page.waitForFunction(()=>document.querySelector('#itemCount').textContent==='2');
