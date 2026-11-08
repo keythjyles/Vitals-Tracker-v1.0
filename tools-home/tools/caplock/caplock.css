@@ -70,3 +70,24 @@ h1{font-size:20px;margin:4px 0}#viewerPage{padding:0;border:0;background:none}#s
 
 /* R24: exact percent levels for each source clip, without a touch slider. */
 #clipVolumeRow{grid-column:1/-1}.clip-volume-controls{display:flex;gap:5px;margin-top:4px}.clip-volume-controls button{min-height:34px;font-size:12px;padding:3px 8px}.clip-volume-controls input{flex:1;min-width:0;min-height:34px;text-align:center}
+
+/* The source-only trimmer uses a compact picture and right-hand frame controls. */
+#trimDialog{width:min(520px,calc(100% - 20px));max-height:calc(100dvh - 20px);box-sizing:border-box;overflow:auto;padding:8px}
+#trimDialog h2{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:16px}
+#trimControls{margin:0;padding:0;border:0;min-width:0}
+.trim-player{display:grid;grid-template-columns:minmax(0,1fr) 76px;gap:4px}
+#trimVideo{display:block;width:100%;height:clamp(140px,44dvh,360px);object-fit:contain;background:#000}
+.trim-rail{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:32px;align-content:start;gap:4px}
+.trim-rail button,.trim-numbers button{min-height:0;padding:2px 4px;font-size:12px}
+.trim-rail button[data-trim-step="-1"],.trim-rail button[data-trim-step="1"]{font-size:21px}
+#trimPlay{grid-column:1/-1}
+#trimBar{height:10px;margin:4px 0;position:relative;background:#34495b}
+#trimBar i{position:absolute;inset:0 calc(100% - var(--out,0%)) 0 var(--in,0%);background:#74bfb3;border-inline:2px solid #ffda8a}
+#trimBar::after{content:'';position:absolute;left:min(calc(100% - 2px),var(--cursor,0%));height:100%;width:2px;background:#fff}
+.trim-numbers{display:grid;grid-template-columns:1fr 1fr 1.45fr;gap:5px}
+.trim-numbers form{display:flex;gap:3px;align-items:end;margin:0;min-width:0}
+.trim-numbers label{display:block;min-width:0;font-size:11px;margin:0}
+.trim-numbers input{width:100%;min-width:0;min-height:32px;margin:2px 0 0;font-size:16px}
+.trim-numbers button{height:32px}
+#trimPosition,#trimSummary,#trimMessage{display:block;margin:4px 0;font-size:12px}
+#trimSummary{color:#ffda8a}

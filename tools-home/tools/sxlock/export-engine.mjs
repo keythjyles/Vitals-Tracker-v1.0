@@ -99,20 +99,22 @@ function createInput(file) {
 export async function exportVideo({ file, fps = 25, size = 'original', format = 'mp4',
   soundtrackGain = 1, hasEffects = false, placeEffects = async () => {},
   cancelled, onProgress = () => {}, onPhase = () => {}, visual = null }) {
-  if (!(file instanceof Blob)) throw new Error('Load an original video first.');
+  const independent = visual?.independent === true;
+  if (!independent && !(file instanceof Blob)) throw new Error('Load an original video first.');
   if (!Number.isInteger(fps) || fps < 1 || fps > 60) throw new Error('Invalid output frame rate.');
   if (!['original', '720'].includes(size) || !['mp4', 'webm'].includes(format)) throw new Error('Invalid export settings.');
   if (!Number.isFinite(soundtrackGain) || soundtrackGain < 0 || soundtrackGain > 1) throw new Error('Invalid soundtrack level.');
-  const input = createInput(file);
+  const input = file instanceof Blob ? createInput(file) : null;
   let output, videoFrames, succeeded = false;
   try {
     check(cancelled);
     onPhase('Checking original video');
-    const video = await input.getPrimaryVideoTrack();
-    if (!video) throw new Error('Source contains no readable video track.');
-    const audio = await input.getPrimaryAudioTrack();
-    const timing = await inspectVideo(video, cancelled);
-    const width = await video.getDisplayWidth(), height = await video.getDisplayHeight();
+    const video = independent ? null : await input.getPrimaryVideoTrack();
+    if (!independent && !video) throw new Error('Source contains no readable video track.');
+    const audio = await input?.getPrimaryAudioTrack();
+    const timing = independent ? { count: 0, end: 0 } : await inspectVideo(video, cancelled);
+    const width = independent ? visual.width : await video.getDisplayWidth();
+    const height = independent ? visual.height : await video.getDisplayHeight();
     const videoCodec = format === 'mp4' ? 'avc' : 'vp9';
     const audioCodec = format === 'mp4' ? 'aac' : 'opus';
     const scale = size === '720' ? Math.min(1, 720 / width) : 1;
@@ -120,24 +122,24 @@ export async function exportVideo({ file, fps = 25, size = 'original', format = 
       && Math.abs(timing.end - timing.count / fps) <= 0.000002;
     // Optional compositor extent; callers that omit it retain the native source duration.
     const bedFrames=Math.ceil((timing.end-0.000002)*fps),requestedFrames=visual?.durationFrames;
-    if(requestedFrames!=null&&(!Number.isSafeInteger(requestedFrames)||requestedFrames<bedFrames))throw Error('Invalid composition frame count.');
+    if((independent||requestedFrames!=null)&&(!Number.isSafeInteger(requestedFrames)||requestedFrames<Math.max(1,bedFrames)))throw Error('Invalid composition frame count.');
     const extending=requestedFrames>bedFrames;
-    const copyAudio = !!audio && audio.codec === audioCodec && soundtrackGain === 1 && !hasEffects && !extending;
+    const copyAudio = !!audio && audio.codec === audioCodec && soundtrackGain === 1 && !hasEffects && (independent || !extending);
     const exactDuration = extending ? requestedFrames/fps : copyVideo ? timing.end : bedFrames/fps;
     const report = { engine: 'SxLock-R26', fps, width, height, sourceFrames: timing.count,
       duration: exactDuration, hasSourceAudio:!!audio, hasEffects, video: copyVideo ? 'packet-copy' : 'offline-encode',
       audio: copyAudio ? 'packet-copy' : 'sample-mix', sampleRate: SAMPLE_RATE,
-      colorSpace: await video.getColorSpace(), pictureResized: scale !== 1 };
+      colorSpace: await video?.getColorSpace(), pictureResized: scale !== 1 };
     // A true no-op is byte-identical, including codec configuration, colour metadata and encoder delay.
     if (copyVideo && copyAudio && (await input.getFormat()).name === 'MP4' && format === 'mp4') {
       check(cancelled); onProgress(1);
       return { blob: file.slice(0, file.size, 'video/mp4'), report: { ...report, outputFrames: timing.count,
         video: 'file-copy', audio: 'file-copy' } };
     }
-    const decoderConfig = await video.getDecoderConfig();
-    if (!decoderConfig) throw new Error('Source video codec is unsupported.');
+    const decoderConfig = await video?.getDecoderConfig();
+    if (video && !decoderConfig) throw new Error('Source video codec is unsupported.');
     if (!copyVideo) {
-      if (['pq', 'hlg', 'smpte2084', 'arib-std-b67'].includes(report.colorSpace.transfer)) {
+      if (['pq', 'hlg', 'smpte2084', 'arib-std-b67'].includes(report.colorSpace?.transfer)) {
         throw new Error('HDR conversion needs a validated SDR master. The original is preserved.');
       }
       if (!(await canEncodeVideo(videoCodec))) throw new Error('This browser cannot encode this picture change. Use an original-size 25 fps H.264 master.');
@@ -174,7 +176,7 @@ export async function exportVideo({ file, fps = 25, size = 'original', format = 
     let a = copyAudioPackets ? await copyAudioPackets.next() : null;
     let firstVideo = true, firstAudio = true, renderedFrames = 0;
     const totalAudioFrames = Math.round(exactDuration * SAMPLE_RATE);
-    const videoSink = copyVideo ? null : new VideoSampleSink(video);
+    const videoSink = copyVideo || independent ? null : new VideoSampleSink(video);
     if (videoSink) {
       const times = Array.from({ length: Math.round(exactDuration * fps) }, (_, i) => Math.min(i / fps, timing.end - 0.000002));
       videoFrames = videoSink.samplesAtTimestamps(times);
@@ -196,10 +198,10 @@ export async function exportVideo({ file, fps = 25, size = 'original', format = 
         while (nextFrame < Math.round(exactDuration * fps) && nextFrame / fps < end - 0.000002) {
           check(cancelled);
           const timestamp = nextFrame / fps;
-          const sample = (await videoFrames.next()).value;
-          if (!sample) throw new Error('Missing source frame at ' + timestamp.toFixed(3) + 's.');
+          const sample = videoFrames && (await videoFrames.next()).value;
+          if (!independent && !sample) throw new Error('Missing source frame at ' + timestamp.toFixed(3) + 's.');
           try { if(visual){await visual.draw(canvas,sample,timestamp);await videoSource.add(timestamp,1/fps);}else{sample.setTimestamp(timestamp); sample.setDuration(1 / fps); await videoSource.add(sample);} }
-          finally { sample.close(); }
+          finally { sample?.close(); }
           nextFrame++; renderedFrames++;
         }
       }
@@ -260,7 +262,7 @@ export async function exportVideo({ file, fps = 25, size = 'original', format = 
   } finally {
     try { await videoFrames?.return?.(); } catch {}
     if (output && !succeeded) await output.cancel().catch(() => {});
-    input.dispose();
+    input?.dispose();
   }
 }
 

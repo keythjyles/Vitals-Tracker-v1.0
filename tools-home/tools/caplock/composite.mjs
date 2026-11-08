@@ -1,42 +1,142 @@
 import {BackgroundSurface} from './background.mjs?v=23';
-import {Input,ALL_FORMATS,BlobSource} from '../sxlock/vendor/mediabunny-1.62.1-gs1.mjs';
-import {exportVideo,inspectVideo} from '../sxlock/export-engine.mjs?v=caplock25';
-import {validateProject} from './core.mjs?v=27';
-import {captionRecipe,mediaContainer,mediaType} from '../../shared/production-stages.mjs?v=27';
-import {clipTime} from './clip-time.mjs?v=22';
-import {readSourceAudio} from './source-audio.mjs?v=25';
+import {Input,ALL_FORMATS,BlobSource,CanvasSink} from '../sxlock/vendor/mediabunny-1.62.1-gs1.mjs';
+import {exportVideo,inspectVideo} from '../sxlock/export-engine.mjs?v=caplock28';
+import {FPS,validateProject} from './core.mjs?v=28';
+import {captionRecipe} from '../../shared/production-stages.mjs?v=28';
+import {clipRange,clipTime,pictureTime} from './clip-time.mjs?v=28';
+import {readSourceAudio} from './source-audio.mjs?v=28';
 import {compositionFrames} from './composition-time.mjs?v=25';
 
 export async function renderCaptioned({project,bed,readAsset,cancelled,onProgress,onPhase}){
- const p=validateProject(project),recipe=captionRecipe(p),opened=[],audio=[],images=[],videos=[],check=()=>{if(cancelled?.())throw Error('Export cancelled. Editable placements are retained.');};
- const source=new Input({source:new BlobSource(bed),formats:ALL_FORMATS});opened.push(source);
+ const p=validateProject(project),recipe=captionRecipe(p);
+ const opened=[],audio=[],visual=[];
+ const check=()=>{if(cancelled?.())throw Error('Export cancelled. Editable placements are retained.');};
+ const open=blob=>{
+  const input=new Input({source:new BlobSource(blob),formats:ALL_FORMATS});
+  opened.push(input);
+  return input;
+ };
+
  try{
-  const track=await source.getPrimaryVideoTrack();if(!track)throw Error('Load the joke video first.');
-  const width=Math.max(2,Math.round((await track.getDisplayWidth())/2)*2),height=Math.max(2,Math.round(width*16/9/2)*2),visual=[];
-  for(const c of p.clips){
-   if(!c.visible||c.captionNumber&&!c.placed)continue;check();const blob=await readAsset(c.ref,c);
-   if(c.type==='image'){const image=await createImageBitmap(blob);images.push(image);visual.push({c,image,width:image.width,height:image.height,duration:Infinity});continue;}
-   if(c.type==='audio'&&c.volume===0)continue;
-   const input=new Input({source:new BlobSource(blob),formats:ALL_FORMATS});opened.push(input);
-   if(c.volume>0){const track=await input.getPrimaryAudioTrack();if(track){const buffer=await readSourceAudio(track,check);if(buffer)audio.push({c,buffer});}}
-   if(c.type==='audio')continue;
-   const v=await input.getPrimaryVideoTrack();if(!v)throw Error('Animation has no video: '+c.name);
-   const el=document.createElement('video'),url=URL.createObjectURL(new Blob([blob],{type:mediaType(mediaContainer(await blob.slice(0,12).arrayBuffer()))}));el.muted=true;el.playsInline=true;el.preload='auto';videos.push({el,url});await new Promise((ok,no)=>{el.onloadeddata=ok;el.onerror=()=>no(Error('Animation cannot decode: '+c.name));el.src=url;});visual.push({c,el,width:await v.getDisplayWidth(),height:await v.getDisplayHeight(),duration:await v.computeDuration()});
+  let {width,height}=p.canvas||{},bedFrames=0,sourceFile=bed;
+  if(!p.canvas){
+   const track=await open(bed).getPrimaryVideoTrack();
+   if(!track)throw Error('Load the joke video first.');
+   width=Math.max(2,Math.round((await track.getDisplayWidth())/2)*2);
+   height=Math.max(2,Math.round(width*16/9/2)*2);
+   bedFrames=Math.ceil(((await inspectVideo(track,cancelled)).end-.000002)*FPS);
   }
-  const durationFrames=compositionFrames(p,Math.ceil(((await inspectVideo(track,cancelled)).end-.000002)*25));
-  const result=await exportVideo({file:bed,fps:25,size:'original',format:'mp4',soundtrackGain:1,cancelled,onProgress,onPhase,hasEffects:audio.length>0,
-   placeEffects:async(ctx,at,end)=>{for(const {c,buffer}of audio){const start=Math.max(at,c.inFrame/25),stop=Math.min(end,c.outFrame/25),time=clipTime(c,start*25,buffer.duration);if(stop<=start||!time.shown)continue;const node=ctx.createBufferSource(),gain=ctx.createGain();node.buffer=buffer;node.playbackRate.value=time.rate;gain.gain.value=c.volume;node.loop=c.loop;node.loopStart=c.trimInFrame/25;node.loopEnd=time.end;node.connect(gain).connect(ctx.destination);node.start(start-at,time.target);node.stop(Math.min(stop-start,c.loop?Infinity:(time.end-time.target)/time.rate)+start-at);}},
-   visual:{width,height,durationFrames,draw:async(canvas,bedSample,timestamp)=>{
-    check();const ctx=canvas.getContext('2d',{alpha:false,colorSpace:'srgb'});ctx.globalAlpha=1;ctx.fillStyle='#000';ctx.fillRect(0,0,width,height);
-    const b=p.bedTransform,scale=Math.min(width/bedSample.displayWidth,height/bedSample.displayHeight)*b.scale,w=bedSample.displayWidth*scale,h=bedSample.displayHeight*scale;
-    bedSample.draw(ctx,b.x/100*width-w/2,b.y/100*height-h/2,w,h);
-    for(const item of visual){const {c}=item,frame=Math.round(timestamp*25),time=clipTime(c,frame,item.duration);if(c.type==='image'?frame<c.inFrame||frame>=c.outFrame:!time.shown)continue;check();
-     if(item.el){const target=Math.max(0,Math.min(item.duration-.00001,time.target+.000001));if(Math.abs(item.el.currentTime-target)>.0000005){await new Promise((ok,no)=>{const timer=setTimeout(()=>no(Error('Animation seek timed out: '+c.name)),15000);item.el.onseeked=()=>{clearTimeout(timer);ok();};item.el.onerror=()=>{clearTimeout(timer);no(Error('Animation frame unavailable: '+c.name));};item.el.currentTime=target;});}if(item.el.readyState<2)throw Error('Animation frame is not decoded: '+c.name);}const w=width*c.width/100,h=w*item.height/item.width;ctx.save();ctx.translate(c.x/100*width,c.y/100*height);ctx.rotate(c.rotation*Math.PI/180);
-     if(c.mirrorX||c.flipY)ctx.scale(c.mirrorX?-1:1,c.flipY?-1:1);
-     ctx.globalAlpha=c.opacity;const source=item.el||item.image;if(c.chroma?.enabled)item.surface||=new BackgroundSurface();ctx.drawImage(c.chroma?.enabled?item.surface.draw(source,c.chroma):source,-w/2,-h/2,w,h);ctx.restore();
+  const durationFrames=compositionFrames(p,bedFrames);
+  if(!durationFrames)throw Error('Place a visible layer before saving video.');
+  for(const c of p.clips){
+   if(!c.visible||c.captionNumber&&!c.placed||c.type==='audio'&&c.volume===0)continue;
+   check();
+   const blob=await readAsset(c.ref,c);
+   if(c.type==='image'){
+    const image=await createImageBitmap(blob);
+    visual.push({c,image,width:image.width,height:image.height});
+    continue;
+   }
+   const input=open(blob);
+   if(c.volume>0){
+    const track=await input.getPrimaryAudioTrack();
+    if(track){
+     const {start,end}=clipRange(c),audioEnd=await track.computeDuration();
+     const fullSound=p.canvas&&!sourceFile&&c.type==='video'&&c.volume===1&&c.inFrame===0&&c.outFrame===durationFrames
+      &&start===0&&!c.loop&&c.playbackRate===1&&audioEnd<=Math.min(end,durationFrames/FPS)+.000002;
+     if(fullSound)sourceFile=blob;
+     else{
+      const buffer=await readSourceAudio(track,check,c.sourceTrim);
+      if(buffer)audio.push({c,buffer,offset:c.sourceTrim?.start??0});
+     }
+    }
+   }
+   if(c.type==='audio')continue;
+   const track=await input.getPrimaryVideoTrack();
+   if(!track)throw Error('No video track: '+c.name);
+   if(p.canvas&&['pq','hlg','smpte2084','arib-std-b67'].includes((await track.getColorSpace()).transfer)){
+    throw Error('Use an SDR source for '+c.name+' to preserve its color in the composite.');
+   }
+   const duration=await track.computeDuration(),first=await track.getFirstTimestamp();
+   const targets=function*(){
+    for(let frame=c.inFrame;frame<durationFrames;frame++){
+     const time=pictureTime(c,frame,duration);
+     if(!time.shown){
+      if(frame>=c.outFrame)break;
+      continue;
+     }
+     if(time.target>=first-.000001)yield Math.min(time.target+.0000001,time.end-.0000001);
+    }
+   };
+   const samples=new CanvasSink(track,{alpha:true,poolSize:1}).canvasesAtTimestamps(targets());
+   visual.push({c,samples,duration,first,width:await track.getDisplayWidth(),height:await track.getDisplayHeight()});
+  }
+
+  const result=await exportVideo({
+   file:sourceFile,fps:FPS,size:'original',format:'mp4',soundtrackGain:1,cancelled,onProgress,onPhase,
+   hasEffects:audio.length>0,
+   placeEffects:async(ctx,at,end)=>{
+    for(const {c,buffer,offset} of audio){
+     const start=Math.max(at,c.inFrame/FPS),stop=Math.min(end,c.outFrame/FPS);
+     const time=clipTime(c,start*FPS,offset+buffer.duration);
+     if(stop<=start||!time.shown)continue;
+     const node=ctx.createBufferSource(),gain=ctx.createGain();
+     node.buffer=buffer;
+     node.playbackRate.value=time.rate;
+     gain.gain.value=c.volume;
+     node.loop=c.loop;
+     node.loopStart=time.start-offset;
+     node.loopEnd=time.end-offset;
+     node.connect(gain).connect(ctx.destination);
+     node.start(start-at,time.target-offset);
+     const remaining=c.loop?Infinity:(time.end-time.target)/time.rate;
+     node.stop(start-at+Math.min(stop-start,remaining));
+    }
+   },
+   visual:{width,height,durationFrames,independent:!!p.canvas,draw:async(canvas,bedSample,timestamp)=>{
+    check();
+    const ctx=canvas.getContext('2d',{alpha:false,colorSpace:'srgb'});
+    ctx.fillStyle='#000';
+    ctx.fillRect(0,0,width,height);
+    if(bedSample){
+     const b=p.bedTransform,scale=Math.min(width/bedSample.displayWidth,height/bedSample.displayHeight)*b.scale;
+     const w=bedSample.displayWidth*scale,h=bedSample.displayHeight*scale;
+     bedSample.draw(ctx,b.x/100*width-w/2,b.y/100*height-h/2,w,h);
+    }
+    const frame=Math.round(timestamp*FPS);
+    for(const item of visual){
+     const {c}=item;
+     let source=item.image;
+     if(source){
+      if(frame<c.inFrame||frame>=c.outFrame)continue;
+     }else{
+      const time=pictureTime(c,frame,item.duration);
+      if(!time.shown||time.target<item.first-.000001)continue;
+      check();
+      source=(await item.samples.next()).value?.canvas;
+      if(!source)throw Error('Frame unavailable in '+c.name+' at '+time.target.toFixed(3)+' s.');
+     }
+     const w=width*c.width/100,h=w*item.height/item.width;
+     ctx.save();
+     ctx.translate(c.x/100*width,c.y/100*height);
+     ctx.rotate(c.rotation*Math.PI/180);
+     ctx.scale(c.mirrorX?-1:1,c.flipY?-1:1);
+     ctx.globalAlpha=c.opacity;
+     if(c.chroma?.enabled){
+      item.surface||=new BackgroundSurface();
+      source=item.surface.draw(source,c.chroma);
+     }
+     ctx.drawImage(source,-w/2,-h/2,w,h);
+     ctx.restore();
     }
    }}
   });
   return {...result,recipe};
- }finally{for(const {el,url}of videos){el.pause();el.removeAttribute('src');el.load();URL.revokeObjectURL(url);}for(const input of opened)input.dispose();for(const image of images)image.close();}
+ }finally{
+  for(const item of visual){
+   item.image?.close();
+   await item.samples?.return();
+  }
+  for(const input of opened)input.dispose();
+ }
 }
