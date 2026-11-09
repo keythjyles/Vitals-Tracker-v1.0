@@ -1,3 +1,9 @@
+## SxLock R32 — phone sound import
+
+The shared player moved the file input out of **Import sounds** and into the closed source drawer in R31. The disclosure now shows **Choose audio files**, which opens the system picker. Imported files appear in **My sounds**. Use **Save and export → Save project** before switching versions to carry over an open edit.
+
+Runtime fix `241427b6f10e4bc4137ce071d634e6eec540037b` in [PR #20](https://github.com/keythjyles/Vitals-Tracker-v1.0/pull/20). The branch [SxLock media regression](https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/42577917114) and [ClipLock cutter checks](https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/42577917232) passed. The touch test imported a WAV before and after loading video and verified the library entry and empty timeline. Physical Android testing remains open. To roll back, revert the R32 release changes and keep the browser project data and sound files.
+
 ## CapLock R30 and FrameLock v1.4.2
 
 CapLock can prepend a Toolbox clip and move the existing edit together. The export regression covers audio at a shifted frame boundary. FrameLock separates preparing the named cut from downloading it and keeps the result under **Last trim** while the page is open. The phone-sized browser check downloads the prepared file and retries from **Last trim**. [CapLock workflow](caplock/README.md).
