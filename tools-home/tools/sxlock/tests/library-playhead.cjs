@@ -10,10 +10,21 @@ async function main(){
  }).listen(0,'127.0.0.1');await new Promise(r=>server.on('listening',r));
  const proxyUrl=process.env.LIVE_URL&&(process.env.HTTPS_PROXY||process.env.HTTP_PROXY);
  const browser=await chromium.launch({executablePath:process.env.BROWSER_EXECUTABLE||undefined,headless:true,...(proxyUrl?{proxy:{server:proxyUrl}}:{}),args:['--no-sandbox','--disable-dev-shm-usage','--autoplay-policy=no-user-gesture-required']});
- const context=await browser.newContext({viewport:{width:412,height:915},ignoreHTTPSErrors:!!process.env.LIVE_URL});
+ const context=await browser.newContext({viewport:{width:412,height:915},hasTouch:true,isMobile:true,ignoreHTTPSErrors:!!process.env.LIVE_URL});
  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
  const url=process.env.LIVE_URL||'http://127.0.0.1:'+server.address().port+'/tools-home/tools/sxlock/index.html';
  const wav=Buffer.alloc(44+4800*2);wav.write('RIFF');wav.writeUInt32LE(wav.length-8,4);wav.write('WAVEfmt ',8);wav.writeUInt32LE(16,16);wav.writeUInt16LE(1,20);wav.writeUInt16LE(1,22);wav.writeUInt32LE(48000,24);wav.writeUInt32LE(96000,28);wav.writeUInt16LE(2,32);wav.writeUInt16LE(16,34);wav.write('data',36);wav.writeUInt32LE(wav.length-44,40);for(let i=0;i<4800;i++)wav.writeInt16LE(Math.round(1000*Math.sin(i*2*Math.PI*700/48000)),44+i*2);
+ async function importWav(name){
+  await page.getByText('Import sounds',{exact:true}).tap();
+  const [chooser]=await Promise.all([
+   page.waitForEvent('filechooser'),
+   page.getByRole('button',{name:'Choose audio files',exact:true}).tap()
+  ]);
+  assert(chooser.isMultiple());
+  await chooser.setFiles({name,mimeType:'audio/wav',buffer:wav});
+  await page.waitForFunction(name=>[...SxLock.sounds.values()].some(sound=>sound.name===name&&sound.category==='My sounds'),name);
+  await page.waitForFunction(()=>document.getElementById('status').textContent.includes('Imported recordings ready'));
+ }
  try{
   await page.route('https://api.github.com/repos/keythjyles/Vitals-Tracker-v1.0/contents/tools-home/tools/sxlock/sounds/incoming',r=>r.fulfill({json:[{type:'file',name:'Owner_uploaded-cut.WAV',sha:'disposable-test',html_url:'https://github.com/example/sound',download_url:'https://r27-test.invalid/sound.wav'}]}));
   await page.route('https://r27-test.invalid/sound.wav',r=>r.fulfill({contentType:'audio/wav',body:wav}));
@@ -32,8 +43,7 @@ async function main(){
   console.log('BOOT',JSON.stringify(recovered));
   if(!process.env.OBSERVE_ONLY){assert.equal(recovered.custom.length,3);assert.equal(recovered.custom.find(s=>s.id==='custom-legacy').name,'Owner original bee.wav');assert(recovered.custom.every(s=>s.data));assert(recovered.directory);assert(recovered.approved);assert.equal(recovered.clips,0);assert.equal(recovered.source,null);assert.equal(recovered.project.notes,'Current recovery project');
    assert.equal(await page.evaluate(async()=>{const ac=await SxLock.audioContext();return(await SxLock.buffer('custom-legacy',ac)).duration}),.1);
-   await page.locator('#audioFiles').setInputFiles({name:'New sound before video.wav',mimeType:'audio/wav',buffer:wav});
-   await page.waitForFunction(()=>document.getElementById('status').textContent.includes('Imported recordings ready'));
+   await importWav('New sound before video.wav');
    await page.reload();await page.waitForFunction(()=>window.SxLock);await page.evaluate(()=>SxLock.ready);
    assert(await page.evaluate(()=>[...SxLock.sounds.values()].some(s=>s.name==='New sound before video.wav'&&s.data)),'Import without a video was lost');
    // Opening a project must not replace the independent recording library.
@@ -50,6 +60,12 @@ async function main(){
    if(delayedMetadata)await page.evaluate(()=>Object.defineProperty(document.getElementById('video'),'duration',{configurable:true,get:()=>Infinity}));
    await page.locator('#videoFile').setInputFiles(path.join(data,name));
    await page.waitForFunction(()=>document.getElementById('video').readyState>=2&&!document.getElementById('play').disabled);
+   if(!process.env.OBSERVE_ONLY&&name==='fixture_40s.mp4'&&!delayedMetadata){
+    await page.locator('#category').selectOption({label:'My sounds'});
+    await importWav('New sound with video.wav');
+    assert(await page.getByRole('button',{name:'Place New sound with video.wav',exact:true}).isVisible());
+    assert.equal(await page.evaluate(()=>SxLock.snapshot().clips.length),0);
+   }
    await page.locator('#play').click();await page.waitForFunction(()=>document.getElementById('video').currentTime>1.1);
    const first=await page.evaluate(()=>{const v=document.getElementById('video'),s=document.getElementById('seek');return {time:v.currentTime,mediaDuration:String(v.duration),max:Number(s.max),value:Number(s.value),clock:document.getElementById('clock').textContent}});
    transport.push({name,delayedMetadata,first});console.log('FIRST PLAY',name,delayedMetadata?'delayed browser metadata':'native metadata',JSON.stringify(first));
