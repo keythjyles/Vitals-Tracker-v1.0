@@ -1,3 +1,11 @@
+## SxLock R33 — mixed MP4 audio timing
+
+The R32 phone report reached post-export audio duration validation. The Blue Angels source has 1,064 picture frames at 30 fps and a 35.467 s picture timeline. With that source, a test encoder that added three AAC packets reproduced the rejection at 35.541 s. The bundled AAC encoder produced a validated 35.477 s audio end with the original picture packets. Its 1,024-sample priming adjustment keeps the mix aligned at the start.
+
+SxLock now selects the bundled AAC encoder when it encodes an MP4 soundtrack. Duration validation reports both measured and expected end times when it rejects a file. The browser regression exercises the real export and download on a generated 1,064-frame fixture with device AAC advertised. It verifies packet-identical picture and measures the soundtrack against the source at six points.
+
+Runtime fix `f52608caf513baed21f2d63c325cf66aa19e32f1`. Physical Android and the owner's current mix remain to be verified. Revert the R33 release to return to baseline `cab9950ee299910027d489c59f66384ab031e2e4`. Keep the project backup, original video and sound files.
+
 ## SxLock R32 — phone sound import
 
 The shared player moved the file input out of **Import sounds** and into the closed source drawer in R31. The disclosure now shows **Choose audio files**, which opens the system picker. Imported files appear in **My sounds**. Use **Save and export → Save project** before switching versions to carry over an open edit.
