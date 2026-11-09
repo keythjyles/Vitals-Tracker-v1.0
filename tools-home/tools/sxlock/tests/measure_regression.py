@@ -32,13 +32,22 @@ def offsets(ref, out, times):
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('directory',type=Path);args=parser.parse_args();d=args.directory
     report={};source=d/'fixture_40s.mp4';baseline=video_bytes(source)
-    for name in ['C','D','E','F','G','Moved','Deleted','H','UI','AfterCancel']:
+    for name in ['C','D','E','F','G','Moved','Deleted','H','AfterCancel']:
         p=d/(name+'.mp4');meta=probe(p);v=next(s for s in meta['streams'] if s['codec_type']=='video')
         assert video_bytes(p)==baseline, name+' changed video samples'
         assert v['width']==270 and v['height']==480 and v['avg_frame_rate']=='25/1' and int(v['nb_frames'])==1000,name
         measured=offsets(source,p,[.1,7.5,15.5,23.5,31.5,34.52,37.5])
         assert all(abs(m['offset_samples'])<=2 and m['correlation']>.98 for m in measured),(name,measured)
         report[name]={'encoded_video_identical':True,'frames':1000,'fps':25,'audio':measured}
+    phone=d/'fixture_30fps_phone.mp4';mixed=d/'UI.mp4';meta=probe(mixed)
+    picture=next(s for s in meta['streams'] if s['codec_type']=='video')
+    soundtrack=next(s for s in meta['streams'] if s['codec_type']=='audio')
+    assert video_bytes(mixed)==video_bytes(phone),'Phone mix changed video samples'
+    assert picture['avg_frame_rate']=='30/1' and int(picture['nb_frames'])==1064,picture
+    assert abs(float(soundtrack['duration'])-float(picture['duration']))<=1024/48000+1e-6,soundtrack
+    measured=offsets(phone,mixed,[.1,7.5,15.5,23.5,31.5,34])
+    assert all(abs(m['offset_samples'])<=2 and m['correlation']>.98 for m in measured),measured
+    report['UI']={'encoded_video_identical':True,'frames':1064,'fps':30,'audio':measured}
     assert (d/'C.mp4').read_bytes()==source.read_bytes(),'No-op changed file bytes'
     assert (d/'H.mp4').read_bytes()==(d/'E.mp4').read_bytes(),'Repeat export introduced generation loss'
     for name in ['fixture_44100','fixture_audio_offset','fixture_30fps_short_audio']:

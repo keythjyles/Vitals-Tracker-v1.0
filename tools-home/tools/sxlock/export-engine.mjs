@@ -68,17 +68,19 @@ function assertMix(buffer) {
   }
 }
 
-async function ensureAudioEncoder(codec) {
+async function ensureAudioEncoder(codec, useSoftwareAac) {
   if (codec !== 'aac') {
     if (await canEncodeAudio(codec, { sampleRate: SAMPLE_RATE, numberOfChannels: 2 })) return 0;
     throw new Error('This browser cannot encode the selected audio format.');
   }
   // Probe native support directly: canEncodeAudio also sees globally registered custom encoders.
   // An earlier import of this engine must not make the fallback look like a zero-delay native encoder.
-  let native = false;
-  try { native = (await globalThis.AudioEncoder?.isConfigSupported({ codec: 'mp4a.40.2',
-    sampleRate: SAMPLE_RATE, numberOfChannels: 2, bitrate: 256000 }))?.supported; } catch {}
-  if (native) return 0;
+  if (!useSoftwareAac) {
+    let native = false;
+    try { native = (await globalThis.AudioEncoder?.isConfigSupported({ codec: 'mp4a.40.2',
+      sampleRate: SAMPLE_RATE, numberOfChannels: 2, bitrate: 256000 }))?.supported; } catch {}
+    if (native) return 0;
+  }
   // Local pinned fallback, no paid service, network request or native AAC requirement.
   aacFallback ||= import('./vendor/mediabunny-aac-encoder-1.62.1-gs1.mjs').then(m => m.registerAacEncoder());
   await aacFallback;
@@ -98,7 +100,7 @@ function createInput(file) {
  */
 export async function exportVideo({ file, fps = 25, size = 'original', format = 'mp4',
   soundtrackGain = 1, hasEffects = false, placeEffects = async () => {},
-  cancelled, onProgress = () => {}, onPhase = () => {}, visual = null }) {
+  cancelled, onProgress = () => {}, onPhase = () => {}, visual = null, useSoftwareAac = false }) {
   const independent = visual?.independent === true;
   if (!independent && !(file instanceof Blob)) throw new Error('Load an original video first.');
   if (!Number.isInteger(fps) || fps < 1 || fps > 60) throw new Error('Invalid output frame rate.');
@@ -159,7 +161,7 @@ export async function exportVideo({ file, fps = 25, size = 'original', format = 
     let audioSource;
     if (copyAudio) audioSource = new EncodedAudioPacketSource(audioCodec);
     else if (audio || hasEffects) {
-      const priming = await ensureAudioEncoder(audioCodec);
+      const priming = await ensureAudioEncoder(audioCodec, useSoftwareAac);
       report.encoderPrimingSamples = priming;
       audioSource = new AudioBufferSource({ codec: audioCodec, quality: new Quality({ bitrate: 256000 }) },
         { startTimestamp: -priming / SAMPLE_RATE });
@@ -241,9 +243,14 @@ export async function exportVideo({ file, fps = 25, size = 'original', format = 
       const actual = await inspectVideo(resultVideo, cancelled);
       if (actual.count !== renderedFrames || !isCfr(actual.timestamps, fps)
           || Math.abs(actual.end - exactDuration) > 0.0001) throw new Error('Export failed video timing validation.');
-      const resultAudio = await verified.getPrimaryAudioTrack();
-      if (audioSource && (!resultAudio || Math.abs((await resultAudio.computeDuration()) - expectedAudioEnd) > 0.04)) {
-        throw new Error('Export failed audio duration validation.');
+      if (audioSource) {
+        const resultAudio = await verified.getPrimaryAudioTrack();
+        const audioEnd = await resultAudio?.computeDuration();
+        if (!Number.isFinite(audioEnd) || Math.abs(audioEnd - expectedAudioEnd) > 0.04) {
+          const measured = Number.isFinite(audioEnd) ? audioEnd.toFixed(3) + ' s' : 'no readable audio track';
+          throw new Error('Export failed audio duration validation. Expected ' + expectedAudioEnd.toFixed(3) + ' s, got ' + measured + '.');
+        }
+        report.outputAudioEnd = audioEnd;
       }
       report.outputFrames = actual.count;report.composited=!!visual;
       report.outputWidth = await resultVideo.getDisplayWidth();

@@ -106,14 +106,26 @@ async function main(){
   });
   fs.writeFileSync(path.join(data,'regression.json'),JSON.stringify(results,null,2));
   assert.equal(results.C.video,'file-copy');assert.equal(results.H.video,'file-copy');assert.equal(results.E.outputFrames,1000);
-  // Exercise the actual UI export handler, file creation and native download.
-  await page.locator('#videoFile').setInputFiles(path.join(data,'fixture_40s.mp4'));
+  // Start a fresh document so earlier exports have not registered software AAC.
+  // A device can advertise native AAC even when its encoder cannot produce the intended track.
+  await page.reload();
+  await page.waitForFunction(()=>window.SxLock);
+  await page.evaluate(async()=>{
+   await SxLock.ready;
+   window.AudioEncoder=class {
+    static async isConfigSupported(config){return {supported:true,config};}
+    constructor(){throw Error('SxLock mixed MP4 attempted to use the device AAC encoder');}
+   };
+  });
+  await page.locator('#videoFile').setInputFiles(path.join(data,'fixture_30fps_phone.mp4'));
   await page.waitForFunction(()=>document.getElementById('video').readyState>=2&&!document.getElementById('play').disabled);
-  const start=await page.evaluate(async()=>{const c=await SxLock.insert('regression-fx',{start:.101,volume:20});return c.start});
+  const start=await page.evaluate(async()=>{const c=await SxLock.insert('cricket',{start:.101,volume:20});return c.start});
   assert.equal(start,.12);
-  await page.locator('#exportSection').evaluate(el=>el.open=true);
+  await page.locator('#exportSection').evaluate(el=>{el.open=true;el.querySelector('details').open=true;});
+  await page.locator('#fps').selectOption('30');
   await page.locator('#exportVideo').click();
-  await page.waitForFunction(()=>!document.getElementById('result').hidden,null,{timeout:120000});
+  await page.waitForFunction(()=>!document.getElementById('exportVideo').disabled,null,{timeout:120000});
+  assert(await page.locator('#result').isVisible(),await page.locator('#status').textContent());
   const download=page.waitForEvent('download');await page.locator('#download').click();await(await download).saveAs(path.join(data,'UI.mp4'));
   console.log('PASS: engine matrix, cancellation, frame placement and UI export/download');
   }

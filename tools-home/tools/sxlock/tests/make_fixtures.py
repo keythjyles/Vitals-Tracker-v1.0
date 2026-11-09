@@ -15,6 +15,8 @@ run(['-f','lavfi','-i','testsrc2=size=270x480:rate=25:duration=40','-i',str(root
 run(['-f','lavfi','-i','testsrc2=size=540x960:rate=25:duration=4','-i',str(root/'reference.wav'),'-t','4','-c:v','libx264','-threads','2','-preset','fast','-crf','16','-pix_fmt','yuvj420p','-color_range','pc','-colorspace','bt709','-color_trc','bt709','-color_primaries','bt709','-c:a','aac','-b:a','192k','-ar','48000','-movflags','+faststart',str(root/'color_full709.mp4')])
 run(['-i',str(root/'fixture_40s.mp4'),'-t','6','-c:v','copy','-c:a','aac','-ar','44100','-b:a','192k',str(root/'fixture_44100.mp4')])
 run(['-i',str(root/'fixture_40s.mp4'),'-t','6','-r','30','-c:v','libx264','-threads','2','-crf','16','-c:a','copy',str(root/'fixture_30fps.mp4')])
+# Phone report: 1,064 frames at 30 fps with a nonintegral number of AAC packets.
+run(['-f','lavfi','-i','testsrc2=size=270x480:rate=30:duration=35.466667','-i',str(root/'reference.wav'),'-frames:v','1064','-t','35.474','-c:v','libx264','-threads','2','-pix_fmt','yuv420p','-c:a','aac','-b:a','256k',str(root/'fixture_30fps_phone.mp4')])
 run(['-i',str(root/'fixture_40s.mp4'),'-i',str(root/'fixture_40s.mp4'),'-map','0:v:0','-map','1:a:0','-t','6','-af','atrim=start=0:end=5,asetpts=PTS-STARTPTS+1/TB','-c:v','copy','-c:a','aac','-b:a','192k',str(root/'fixture_audio_offset.mp4')])
 print('Created timing, colour, 44.1 kHz, 30 fps and offset fixtures.')
 
