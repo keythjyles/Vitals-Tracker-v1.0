@@ -43,3 +43,32 @@ After E03, “I'm Wendell, the Grill Sergeant,” and the instructional plan rem
 5. Verify actual video frames at every cut, audio at each narration boundary, runtime, and first/last frames before delivery.
 6. Save named review and final outputs to Drive folder `1SqWwugwUMsGpjQQXoIG8EoYTUBTcsSza` and Dropbox `/Grill Sergeant/GS_CH03_PRODUCTION_ASSETS/`; report verified links only.
 7. Approval is binding; candidate vs approved vs review must be explicit.
+
+## Production incident review — framing and continuity (2026-11-11)
+**Status:** Latest centered-pose image is a CANDIDATE, NOT approved; do not pay for HeyGen generation until owner approves the exact source image.
+
+### What failed
+- Original HeyGen framing placed GS too far right. A post-render crop attempted to center the head but clipped an arm and distorted visual balance. Head centering is not body composition.
+- Repeated new images changed beard length, apparent age, hat flag, deck architecture, grill location, and scene dressing despite fixed references.
+- The user specifically removed the hanging American flag, flag-pattern cushion and checkered towel, but these reappeared in generated versions. **The American flag patch on the camouflage cap must remain.**
+- Hands and elbows need a generous motion-safe margin, because HeyGen animation may extend gestures beyond the source silhouette.
+- Some images put GS dangerously close to a flaming grill; the grill belongs to the viewer's LEFT, with GS safely to the RIGHT of it, and the empty butcher-block foreground reserved for product/animation placement.
+- Camera motion and post-cropping cannot repair a bad source composition. Generate/approve the correct pose first.
+
+### Required source-pose acceptance checklist BEFORE any paid generation
+1. Use global GS VA master face, age, short tidy gray-white beard, camo cap WITH US flag patch, black shirt, brown Grill Sergeant apron.
+2. Portrait 9:16; centered full torso with symmetrical shoulders, natural upright spine, head on central axis, hands fully in frame with breathing room on BOTH sides; no awkward body twists.
+3. Frame wide enough for speaking gestures: **do not crop elbows, wrists or hands**; leave at least ~8–10% horizontal safety margins for moving arms. Center torso, not merely face.
+4. Original Chapter 3 sunset/day lakeside deck continuity: fireplace, pergola, lake/dock, wooden cabinets and countertop. No redesign of approved furnishings.
+5. Open cooking grill on viewer's LEFT, physically separated from GS; safe distance from flames.
+6. NO hanging flag, NO flag-patterned cushion, NO checkered towel; flag patch on hat IS mandatory.
+7. Clean clear butcher-block front stage, no props obstructing animation/product space.
+8. Calm, serious, kind expression, restrained natural gestures. No theatrical surprise or flailing.
+9. Compare candidate source against approved global portrait and deck reference side by side, visually inspect every requirement, show ONE candidate to owner. **Only explicit owner approval authorizes paid video generation.**
+10. Original ElevenLabs audio is the sole clock; preserve speed and sync; HeyGen handle padding is trimmed from derivative only. Inspect full resulting video and cuts before delivery.
+
+### Failure prevention
+- Every asset has state: REFERENCE / CANDIDATE / APPROVED_SOURCE / APPROVED_EDIT / REJECTED. Never promote a candidate automatically.
+- If any source frame fails the checklist, STOP before paid rendering. Fix the still image, not the exported video.
+- Approved source files remain immutable; store new versions with descriptive names. Rejected render must not enter master timeline.
+- Before export: inspect opening/middle/end frames and 1-second samples around each cut; verify audio timecodes, speed, arm bounds and character identity.
