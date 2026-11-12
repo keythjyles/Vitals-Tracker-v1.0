@@ -2,7 +2,7 @@
 export const PLAYER_PROFILE=Object.freeze({id:'SxLock-R24',rail:76,row:29,frame:36,gap:7,frameGlyph:30,record:40,secondary:25});
 // Owner-approved button sizes for CapLock and FrameLock.
 export const CAPLOCK_PROFILE=Object.freeze({...PLAYER_PROFILE,id:'CapLock-R18',row:25,frame:32,gap:4});
-const FRAMELOCK_PROFILE=Object.freeze({...PLAYER_PROFILE,id:'FrameLock-SxLock-R24'});
+const FRAMELOCK_PROFILE=Object.freeze({...PLAYER_PROFILE,id:'FrameLock-R26',rail:112,row:44,frame:48,gap:6,frameGlyph:27});
 export function mountPlayerShell(tool,config){
  const profile=tool==='framelock'?FRAMELOCK_PROFILE:tool==='caplock'?CAPLOCK_PROFILE:PLAYER_PROFILE;
  if(typeof document==='undefined'||document.querySelector('.gs-player-shell'))return;
@@ -177,7 +177,7 @@ export function mountPlayerShell(tool,config){
    const frame=paired.has(b)||b.classList.contains('gs-frame-button'),height=frame?profile.frame:b.id==='liveRecord'?profile.record:['liveStop','saveTake'].includes(b.id)?profile.secondary:profile.row;
    important(b,{height:height+'px','min-height':height+'px','max-height':height+'px',padding:frame?'0px':'2px','font-size':frame?profile.frameGlyph+'px':'11px','line-height':frame?'1':'1.1',width:'100%','min-width':'0','max-width':'100%',margin:'0',flex:'none','white-space':'nowrap',overflow:'hidden','text-overflow':'ellipsis','border-radius':'5px'});
   }
-  if(tool==='framelock'){const trimRow=rail.querySelector('.gs-framelock-trim-row');if(trimRow)important(trimRow,{display:'flex',gap:'4px',width:'100%','align-items':'center'});const trim=$('trimExport');if(trim)important(trim,{width:'50px',flex:'1 1 auto'});const label=$('loopSelection')?.closest('label');if(label)important(label,{display:'flex',gap:'2px','align-items':'center',margin:'0',padding:'0','font-size':'10px',flex:'0 0 auto'});const loop=$('loopSelection');if(loop)important(loop,{width:'15px',height:'15px','min-height':'15px','max-height':'15px',padding:'0',margin:'0'});}
+  if(tool==='framelock'){const play=$('playPause');if(play)important(play,{background:'#efcf8f',color:'#182230','font-weight':'800'});const trimRow=rail.querySelector('.gs-framelock-trim-row');if(trimRow)important(trimRow,{display:'flex',gap:'4px',width:'100%','align-items':'center'});const trim=$('trimExport');if(trim)important(trim,{width:'50px',flex:'1 1 auto'});const label=$('loopSelection')?.closest('label');if(label)important(label,{display:'flex',gap:'2px','align-items':'center',margin:'0',padding:'0','font-size':'10px',flex:'0 0 auto'});const loop=$('loopSelection');if(loop)important(loop,{width:'15px',height:'15px','min-height':'15px','max-height':'15px',padding:'0',margin:'0'});}
   for(const row of rail.querySelectorAll('.gs-control-row'))important(row,{display:'flex',gap:'3px',height:profile.row+'px','min-height':profile.row+'px',padding:'0',margin:'0',width:'100%','align-items':'center'});
   for(const field of rail.querySelectorAll('input'))important(field,{'min-width':'0',width:'100%',height:profile.row+'px','min-height':profile.row+'px',padding:'2px','font-size':'11px',margin:'0','border-radius':'5px'});
   for(const b of rail.querySelectorAll('.gs-control-row button'))important(b,{width:'25px',flex:'0 0 25px'});
