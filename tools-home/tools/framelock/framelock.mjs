@@ -264,8 +264,7 @@ function refreshSelectionButtons() {
   for (const id of ['playSelection','restartSelection','loopSelection']) $(id).disabled = !valid;
   $('playSelection').textContent = selectionPlaying && !v.paused ? 'Ⅱ' : '▶ Sel';
   $('restartSelection').textContent = '↺';
-  $('loopSelection').textContent = selectionLooping ? 'Loop ✓' : 'Loop';
-  $('loopSelection').setAttribute('aria-pressed', String(selectionLooping));
+  $('loopSelection').checked = selectionLooping;
 }
 async function playSelected(fromStart = false) {
   const range = trimRange();
@@ -312,8 +311,8 @@ $('playSelection').onclick = () => {
   else void playSelected(false);
 };
 $('restartSelection').onclick = () => { v.pause(); stopSelectionPlayback(); void playSelected(true); };
-$('loopSelection').onclick = () => {
-  selectionLooping = !selectionLooping;
+$('loopSelection').onchange = () => {
+  selectionLooping = $('loopSelection').checked;
   refreshSelectionButtons();
 };
 
