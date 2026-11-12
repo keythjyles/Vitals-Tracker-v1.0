@@ -103,3 +103,10 @@ After E03, “I'm Wendell, the Grill Sergeant,” and the instructional plan rem
 - Transformation: `ffmpeg -i 19310.mp4 -map 0:v:0 -c:v copy -an -movflags +faststart ...`; no video re-encoding; audio stream absent verified with ffprobe.
 - Google Drive: `1oCHt0kJBj2WOhQXL2bni1u-VEvnPK7Mn`, Chapter 3 production folder. Original source remains preserved.
 - Status: **SC08 CLEAN SILENT SOURCE SAVED**, pending approval and cumulative assembly with accepted through-Scene-7 cut. No captions or audio added.
+
+## Element 9 intake — 2026-11-12
+- Scene ID `CH03-INTRO-SC09`; original upload `20261112_021755973.mp4`; canonical `GS_CH03_INTRO_SC09_ACTION_PLAN_SOURCE_20261112_021755973.mp4`.
+- Source 6.041667 seconds, 720×1280, includes audio stream; SHA-256 `1eb51907dfca38c83287b20cd0bd9bae8e930b6b69be3ef325311e0f2407cb31`; 4,184,996 bytes.
+- Verified Drive ID `14boTcKyQUGiMlMP75sz7NIzGcQEwSyUV`, Chapter 3 production folder.
+- Content inspection: older man reviewing information; later laptop patient-message/medication-list interface. Source UI text is not reliable medical guidance; review for visual accuracy before publication.
+- State **RECEIVED / REVIEW PENDING**; no changes to colors, no automatic approval or assembly. Next action: user approval, then silent derivative if requested, then cumulative through Scene 9 with original narration.
