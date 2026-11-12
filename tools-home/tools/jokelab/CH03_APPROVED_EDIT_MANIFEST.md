@@ -82,3 +82,10 @@ After E03, “I'm Wendell, the Grill Sergeant,” and the instructional plan rem
 - **State:** ACCEPTED SOURCE / EDIT NOT YET APPROVED. Never confuse with Gemini Scene 8, which user says is generating.
 - **Edit instruction:** Align to master ElevenLabs narration; trim handle and transition to Scene 8 on a verified audio cue, without dropping/duplicating syllables. Preserve original upload.
 - **Process correction:** Every user-delivered source must immediately be assigned scene ID, canonical filename, content summary, SHA-256, approval state, storage URL, and timeline relationship; update manifest and global ledger before claiming progress.
+
+## Scene 8 intake — 2026-11-12
+- Scene ID: `CH03-INTRO-SC08`; user upload: `20261112_014737170.mp4`; canonical: `GS_CH03_INTRO_SC08_GEMINI_DOCTOR_DOCUMENTATION_SOURCE_20261112_014737170.mp4`.
+- Google Drive file ID: `1A2-P3EFX2bOnHi_5fpKPV1De3BvPRn2J`; folder: `1SqWwugwUMsGpjQQXoIG8EoYTUBTcsSza`.
+- Source SHA-256: `c7aadd29e44dee497baf7235b36f3a98c9ca9c16a34036a222089151d3d38fca`; 6.041667 seconds, 1080x1920, 6,663,161 bytes, H.264/AAC.
+- Visual: doctor documenting symptoms; overlay at 5s: 'Tell your doctor / Get it documented'.
+- Status: SOURCE RECEIVED, REVIEW PENDING; not yet approved or stitched. Preserve upload unmodified. Scene 7 `19306.mp4` remains separate and indexed.
