@@ -110,3 +110,11 @@ After E03, “I'm Wendell, the Grill Sergeant,” and the instructional plan rem
 - Verified Drive ID `14boTcKyQUGiMlMP75sz7NIzGcQEwSyUV`, Chapter 3 production folder.
 - Content inspection: older man reviewing information; later laptop patient-message/medication-list interface. Source UI text is not reliable medical guidance; review for visual accuracy before publication.
 - State **RECEIVED / REVIEW PENDING**; no changes to colors, no automatic approval or assembly. Next action: user approval, then silent derivative if requested, then cumulative through Scene 9 with original narration.
+
+## Scene 8–9 graphics and cumulative review — 2026-11-12
+- Source 8: `GS_CH03_INTRO_SC08_CLEAN_SILENT_19310.mp4`, source 9: `20261112_021755973.mp4`; original source files unchanged.
+- Intermediate: `GS_CH03_INTRO_SC08_SC09_GRAPHICS_REVIEW.mp4`, 12.083 seconds; restrained editorial overlay typography (separate derived video). **REVIEW, NOT APPROVED.**
+- Cumulative master input: user-accepted `19309.mp4` through Scene 7, 48.60 seconds.
+- Cumulative review output: `GS_CH03_INTRO_THRU_SC09_GRAPHICS_REVIEW.mp4`, 60.68 seconds, Drive ID `1uSUTwmYwyxqmKuLbz5lF9Asg-LLziHSi`.
+- Audio: original Part B continuation starting at ~29.678 s after cumulative SC07; last ~1.25 s silence as original narration ends. Exact visual-to-word alignment and transition to closing scene require user review.
+- No color correction, no new HeyGen or Gemini credits. Preserve approved through-SC07 source. Status **PENDING USER APPROVAL**.
