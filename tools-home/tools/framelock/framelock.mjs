@@ -180,7 +180,7 @@ $('reverse').onclick = () => {
 };
 const playPause = $('playPause');
 function refreshPlayButton() {
-  playPause.textContent = v.paused ? '▶' : 'Ⅱ';
+  playPause.textContent = v.paused ? '▶ Play' : 'Ⅱ Pause';
   playPause.setAttribute('aria-label', v.paused ? 'Play video' : 'Pause video');
 }
 playPause.onclick = async () => {
@@ -262,7 +262,7 @@ function stopSelectionPlayback() {
 function refreshSelectionButtons() {
   const valid = !!trimRange() && sourceReady() && !trimJob;
   for (const id of ['playSelection','restartSelection','loopSelection']) $(id).disabled = !valid;
-  $('playSelection').textContent = selectionPlaying && !v.paused ? 'Ⅱ' : '▶ Sel';
+  $('playSelection').textContent = selectionPlaying && !v.paused ? 'Ⅱ Sel' : '▶ Sel';
   $('restartSelection').textContent = '↺';
   $('loopSelection').checked = selectionLooping;
 }
