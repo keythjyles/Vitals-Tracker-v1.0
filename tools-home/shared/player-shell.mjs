@@ -114,11 +114,20 @@ export function mountPlayerShell(tool,config){
   if(widget){const progress=widget.querySelector('progress'),row=widget.querySelector('.gs-set-row'),error=widget.querySelector('.gs-set-error');if(progress)content.append(progress);if(row){row.classList.add('gs-control-row');widget.replaceChildren(row);rail.append(widget);}if(error){error.classList.add('gs-player-error');root.append(error);}stash.append(primaryRange);}
  }
  if(tool==='framelock'){
-  const play=$('playPause'),selection=$('playSelection'),restart=$('restartSelection'),loop=$('loopSelection');
-  const pair=el('div','gs-control-pair gs-framelock-play-pair');
-  if(play&&selection){play.before(pair);pair.append(play,selection);selection.textContent='▶ Sel';selection.setAttribute('aria-label','Play selection');}
-  const replay=el('div','gs-control-pair gs-framelock-repeat-pair');
-  if(restart&&loop){restart.before(replay);replay.append(restart,loop.closest('label'));restart.textContent='↺';restart.setAttribute('aria-label','Restart selection');}
+  // Rebuild the rail as fixed SxLock-style rows; never nest a pair inside another pair.
+  const pair=(cls,ids)=>{const row=el('div','gs-control-pair '+cls);for(const id of ids)if($(id))row.append($(id));return row;};
+  const play=pair('gs-framelock-play-pair',['playPause','playSelection']);
+  const reverse=pair('gs-framelock-repeat-pair',['reverse','restartSelection']);
+  const trimRow=el('div','gs-framelock-trim-row');
+  const loop=$('loopSelection')?.closest('label');
+  if($('trimExport'))trimRow.append($('trimExport'));
+  if(loop)trimRow.append(loop);
+  const jump=pair('gs-framelock-jump-pair',['jumpback','jumpforward']);
+  const step=pair('gs-framelock-step-pair',['back','forward']);
+  const marks=pair('gs-framelock-mark-pair',['trimIn','trimOut']);
+  if($('playSelection')){$('playSelection').textContent='▶ Sel';$('playSelection').setAttribute('aria-label','Play marked selection');}
+  if($('restartSelection')){$('restartSelection').textContent='↺ Start';$('restartSelection').setAttribute('aria-label','Restart marked selection');}
+  rail.replaceChildren(jump,step,play,marks,reverse,trimRow,$('frameGo'));
  }
  if(tool==='framelock'){
   const timeline=frameTimeline||frameProgress,seek=frameSeek;if(timeline)content.append(timeline);if(seek){const row=seek.querySelector('.gs-set-row');if(row){row.classList.add('gs-control-row');seek.replaceChildren(row);rail.append(seek);}}if($('meta'))put($('meta'));
@@ -163,12 +172,12 @@ export function mountPlayerShell(tool,config){
   important(rail,{display:'flex','flex-direction':'column','grid-template-rows':'none',gap:profile.gap+'px',width:profile.rail+'px',height:'auto','min-height':'0','max-height':'none',padding:'0',margin:'0',overflow:'visible'});
   for(const pair of rail.querySelectorAll('.gs-frame-pair,.gs-control-pair,.sx-frame'))important(pair,{display:'grid','grid-template-columns':'1fr 1fr',width:'100%',gap:'5px',height:'auto',margin:'0',padding:'0'});
   for(const group of rail.querySelectorAll('.compactBar,.transport,.buttons'))if(group!==rail&&!group.closest('.gs-control-row'))important(group,{display:'contents'});
-  if(tool==='framelock'){const pair=$('restartSelection')?.parentElement;if(pair?.classList.contains('gs-framelock-repeat-pair'))important(pair,{display:'flex','align-items':'center',gap:'5px'});}
+
   for(const b of rail.querySelectorAll('button')){
    const frame=paired.has(b)||b.classList.contains('gs-frame-button'),height=frame?profile.frame:b.id==='liveRecord'?profile.record:['liveStop','saveTake'].includes(b.id)?profile.secondary:profile.row;
    important(b,{height:height+'px','min-height':height+'px','max-height':height+'px',padding:frame?'0px':'2px','font-size':frame?profile.frameGlyph+'px':'11px','line-height':frame?'1':'1.1',width:'100%','min-width':'0','max-width':'100%',margin:'0',flex:'none','white-space':'nowrap',overflow:'hidden','text-overflow':'ellipsis','border-radius':'5px'});
   }
-  if(tool==='framelock'){const restart=$('restartSelection');if(restart)important(restart,{width:'35px','min-width':'35px','max-width':'35px'});const loop=$('loopSelection');if(loop)important(loop,{width:'17px',height:'17px','min-height':'17px','max-height':'17px',padding:'0',margin:'0'});}
+  if(tool==='framelock'){const trimRow=rail.querySelector('.gs-framelock-trim-row');if(trimRow)important(trimRow,{display:'flex',gap:'4px',width:'100%','align-items':'center'});const trim=$('trimExport');if(trim)important(trim,{width:'50px',flex:'1 1 auto'});const label=$('loopSelection')?.closest('label');if(label)important(label,{display:'flex',gap:'2px','align-items':'center',margin:'0',padding:'0','font-size':'10px',flex:'0 0 auto'});const loop=$('loopSelection');if(loop)important(loop,{width:'15px',height:'15px','min-height':'15px','max-height':'15px',padding:'0',margin:'0'});}
   for(const row of rail.querySelectorAll('.gs-control-row'))important(row,{display:'flex',gap:'3px',height:profile.row+'px','min-height':profile.row+'px',padding:'0',margin:'0',width:'100%','align-items':'center'});
   for(const field of rail.querySelectorAll('input'))important(field,{'min-width':'0',width:'100%',height:profile.row+'px','min-height':profile.row+'px',padding:'2px','font-size':'11px',margin:'0','border-radius':'5px'});
   for(const b of rail.querySelectorAll('.gs-control-row button'))important(b,{width:'25px',flex:'0 0 25px'});
