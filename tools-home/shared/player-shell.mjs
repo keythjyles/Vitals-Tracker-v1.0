@@ -2,7 +2,7 @@
 export const PLAYER_PROFILE=Object.freeze({id:'SxLock-R24',rail:76,row:29,frame:36,gap:7,frameGlyph:30,record:40,secondary:25});
 // Owner-approved button sizes for CapLock and FrameLock.
 export const CAPLOCK_PROFILE=Object.freeze({...PLAYER_PROFILE,id:'CapLock-R18',row:25,frame:32,gap:4});
-const FRAMELOCK_PROFILE=Object.freeze({...PLAYER_PROFILE,id:'FrameLock-1.3.19',row:PLAYER_PROFILE.row*1.75,frame:PLAYER_PROFILE.frame*1.75});
+const FRAMELOCK_PROFILE=Object.freeze({...PLAYER_PROFILE,id:'FrameLock-SxLock-R24'});
 export function mountPlayerShell(tool,config){
  const profile=tool==='framelock'?FRAMELOCK_PROFILE:tool==='caplock'?CAPLOCK_PROFILE:PLAYER_PROFILE;
  if(typeof document==='undefined'||document.querySelector('.gs-player-shell'))return;
