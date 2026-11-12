@@ -89,3 +89,10 @@ After E03, “I'm Wendell, the Grill Sergeant,” and the instructional plan rem
 - Source SHA-256: `c7aadd29e44dee497baf7235b36f3a98c9ca9c16a34036a222089151d3d38fca`; 6.041667 seconds, 1080x1920, 6,663,161 bytes, H.264/AAC.
 - Visual: doctor documenting symptoms; overlay at 5s: 'Tell your doctor / Get it documented'.
 - Status: SOURCE RECEIVED, REVIEW PENDING; not yet approved or stitched. Preserve upload unmodified. Scene 7 `19306.mp4` remains separate and indexed.
+
+## Cumulative intro through Scene 7 — indexed 2026-11-12
+- User-delivered file: `19309.mp4`, duration **48.600 s**, 25,500,458 bytes, SHA-256 `84ce866be05570d0ec1c80a491aa504933ef9687265670cf48105167cfe77e5c`.
+- Canonical: `GS_CH03_INTRO_THRU_SC07_ACCEPTED_19309.mp4`.
+- Verified Google Drive file ID: `1fagV_NcPSKhIUNqrPSFZFpsxAJ5g7hwF`; production folder `1SqWwugwUMsGpjQQXoIG8EoYTUBTcsSza`.
+- State: **USER-ACCEPTED CUMULATIVE REVIEW THROUGH SC07**, not final master. Preserve exact original bytes; Scene 8 remains separate, clean footage pending.
+- On receipt: renamed, backed up, hashed, and entered in global ledger v3. Do not skip cumulative exports or substitute sources.
