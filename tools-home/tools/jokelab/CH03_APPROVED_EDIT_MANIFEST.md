@@ -118,3 +118,10 @@ After E03, “I'm Wendell, the Grill Sergeant,” and the instructional plan rem
 - Cumulative review output: `GS_CH03_INTRO_THRU_SC09_GRAPHICS_REVIEW.mp4`, 60.68 seconds, Drive ID `1uSUTwmYwyxqmKuLbz5lF9Asg-LLziHSi`.
 - Audio: original Part B continuation starting at ~29.678 s after cumulative SC07; last ~1.25 s silence as original narration ends. Exact visual-to-word alignment and transition to closing scene require user review.
 - No color correction, no new HeyGen or Gemini credits. Preserve approved through-SC07 source. Status **PENDING USER APPROVAL**.
+
+## Accepted cumulative intro through Scene 9 — 2026-11-12
+- User uploaded `19320.mp4`; canonical `GS_CH03_INTRO_THRU_SC09_ACCEPTED_19320.mp4`.
+- Exact source: 60.680 seconds, 28,779,137 bytes, SHA-256 `6503494cff93658fd9a488676451f9971558afc81566f83276843581875ae0dd`.
+- Verified Drive ID `1psQ3-KIqMhYAmSz-CtcXH0bPpG06M3ze`, production folder `1SqWwugwUMsGpjQQXoIG8EoYTUBTcsSza`.
+- State: **USER ACCEPTED THROUGH SC09**; user says audio join looks good and video continues ~1 second after final words. Preserve end hold unchanged until outro transition decided. No extra motion graphics, no color grading. Original upload immutable.
+- Previous rejected graphics version is NOT master. Current source of truth is the accepted 19320 copy.
