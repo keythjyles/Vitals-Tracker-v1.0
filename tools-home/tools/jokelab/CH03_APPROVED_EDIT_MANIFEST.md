@@ -72,3 +72,13 @@ After E03, “I'm Wendell, the Grill Sergeant,” and the instructional plan rem
 - If any source frame fails the checklist, STOP before paid rendering. Fix the still image, not the exported video.
 - Approved source files remain immutable; store new versions with descriptive names. Rejected render must not enter master timeline.
 - Before export: inspect opening/middle/end frames and 1-second samples around each cut; verify audio timecodes, speed, arm bounds and character identity.
+
+## Scene 7 handoff — 2026-11-12
+- **Scene ID:** CH03-INTRO-SC07
+- **Original upload:** `19306.mp4` (10.320 s; 15,364,841 bytes; SHA-256 `5e1ff76888a24d32e889805343e06e0b8e2e15459559c234252c40cebafe8d98`)
+- **Canonical filename:** `GS_CH03_INTRO_SC07_WENDELL_SPEAKING_SOURCE_19306.mp4`
+- **Google Drive ID:** `1k2Uc8yFT7d22g4JM30t0a1knaKMwQzI0` (production folder `1SqWwugwUMsGpjQQXoIG8EoYTUBTcsSza`)
+- **Content:** Wendell at established grill/deck, speaking. User says shot is good and clean; spoken content extends through part of “can't know what happ…”
+- **State:** ACCEPTED SOURCE / EDIT NOT YET APPROVED. Never confuse with Gemini Scene 8, which user says is generating.
+- **Edit instruction:** Align to master ElevenLabs narration; trim handle and transition to Scene 8 on a verified audio cue, without dropping/duplicating syllables. Preserve original upload.
+- **Process correction:** Every user-delivered source must immediately be assigned scene ID, canonical filename, content summary, SHA-256, approval state, storage URL, and timeline relationship; update manifest and global ledger before claiming progress.
