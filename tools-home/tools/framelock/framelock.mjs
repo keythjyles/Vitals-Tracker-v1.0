@@ -262,9 +262,9 @@ function stopSelectionPlayback() {
 function refreshSelectionButtons() {
   const valid = !!trimRange() && sourceReady() && !trimJob;
   for (const id of ['playSelection','restartSelection','loopSelection']) $(id).disabled = !valid;
-  $('playSelection').textContent = selectionPlaying && !v.paused ? 'Ⅱ Pause' : '▶ Selection';
-  $('restartSelection').textContent = '↺ Restart';
-  $('loopSelection').textContent = selectionLooping ? 'Loop: On' : 'Loop: Off';
+  $('playSelection').textContent = selectionPlaying && !v.paused ? 'Ⅱ' : '▶ Sel';
+  $('restartSelection').textContent = '↺';
+  $('loopSelection').textContent = selectionLooping ? 'Loop ✓' : 'Loop';
   $('loopSelection').setAttribute('aria-pressed', String(selectionLooping));
 }
 async function playSelected(fromStart = false) {
