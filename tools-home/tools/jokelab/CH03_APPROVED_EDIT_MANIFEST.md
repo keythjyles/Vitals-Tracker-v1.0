@@ -96,3 +96,10 @@ After E03, “I'm Wendell, the Grill Sergeant,” and the instructional plan rem
 - Verified Google Drive file ID: `1fagV_NcPSKhIUNqrPSFZFpsxAJ5g7hwF`; production folder `1SqWwugwUMsGpjQQXoIG8EoYTUBTcsSza`.
 - State: **USER-ACCEPTED CUMULATIVE REVIEW THROUGH SC07**, not final master. Preserve exact original bytes; Scene 8 remains separate, clean footage pending.
 - On receipt: renamed, backed up, hashed, and entered in global ledger v3. Do not skip cumulative exports or substitute sources.
+
+## Scene 8 — silent picture master (2026-11-12)
+- Original upload: `19310.mp4` (6.041667 seconds; contains video and audio), SHA-256 `f45e45edbd1ef63c5ea4dc74c062fd34e30a450a23445b8c4116096659914832`.
+- Derived canonical: `GS_CH03_INTRO_SC08_CLEAN_SILENT_19310.mp4`, SHA-256 `801a88bb189058e75056613581b9c4b0d4fa3aa2b9450c83597a498d992ebaf3`.
+- Transformation: `ffmpeg -i 19310.mp4 -map 0:v:0 -c:v copy -an -movflags +faststart ...`; no video re-encoding; audio stream absent verified with ffprobe.
+- Google Drive: `1oCHt0kJBj2WOhQXL2bni1u-VEvnPK7Mn`, Chapter 3 production folder. Original source remains preserved.
+- Status: **SC08 CLEAN SILENT SOURCE SAVED**, pending approval and cumulative assembly with accepted through-Scene-7 cut. No captions or audio added.
