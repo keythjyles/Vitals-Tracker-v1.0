@@ -70,6 +70,8 @@ async function loadSource(file) {
   if (!file || trimJob || $('export').disabled) return;
   const token = ++loadEpoch;
   stopReverse();
+  stopSelectionPlayback();
+  selectionLooping = false;
   v.pause();
   setSpeed(100);
   source = file;
@@ -183,6 +185,7 @@ function refreshPlayButton() {
 }
 playPause.onclick = async () => {
   if (!sourceReady()) return;
+  stopSelectionPlayback();
   if (!v.paused) v.pause();
   else {
     try { await v.play(); }
@@ -222,6 +225,7 @@ function updateTrim() {
     : v.error ? 'Video could not open'
     : sourceReady() && !timing ? 'Trim unavailable for this file'
     : '';
+  refreshSelectionButtons();
   markPosition('trimInTick', trimIn);
   markPosition('trimOutTick', trimOut);
   const band = $('trimBand');
@@ -234,6 +238,7 @@ function updateTrim() {
 
 function markTrim(boundary) {
   stopReverse();
+  stopSelectionPlayback();
   v.pause();
   if (boundary === 'in') trimIn = Math.min(frame(), frameCount() - 1);
   else trimOut = frame();
@@ -241,6 +246,76 @@ function markTrim(boundary) {
 }
 $('trimIn').onclick = () => markTrim('in');
 $('trimOut').onclick = () => markTrim('out');
+
+
+let selectionPlaying = false;
+let selectionLooping = false;
+let selectionRun = 0;
+let selectionMonitor = null;
+function stopSelectionPlayback() {
+  selectionPlaying = false;
+  selectionRun++;
+  if (selectionMonitor !== null) cancelAnimationFrame(selectionMonitor);
+  selectionMonitor = null;
+  refreshSelectionButtons();
+}
+function refreshSelectionButtons() {
+  const valid = !!trimRange() && sourceReady() && !trimJob;
+  for (const id of ['playSelection','restartSelection','loopSelection']) $(id).disabled = !valid;
+  $('playSelection').textContent = selectionPlaying && !v.paused ? 'Ⅱ Pause' : '▶ Selection';
+  $('restartSelection').textContent = '↺ Restart';
+  $('loopSelection').textContent = selectionLooping ? 'Loop: On' : 'Loop: Off';
+  $('loopSelection').setAttribute('aria-pressed', String(selectionLooping));
+}
+async function playSelected(fromStart = false) {
+  const range = trimRange();
+  if (!range || !sourceReady()) return;
+  stopReverse();
+  const run = ++selectionRun;
+  if (selectionMonitor !== null) cancelAnimationFrame(selectionMonitor);
+  selectionMonitor = null;
+  selectionPlaying = true;
+  if (fromStart || v.currentTime < range.start || v.currentTime >= range.end - 0.025) {
+    v.pause();
+    v.currentTime = range.start;
+    selectedFrame = null;
+  }
+  refreshSelectionButtons();
+  try { await v.play(); } catch (error) {
+    if (run === selectionRun) {
+      stopSelectionPlayback();
+      $('notesStatus').textContent = 'Selection playback failed: ' + error.message;
+    }
+    return;
+  }
+  const monitor = () => {
+    if (run !== selectionRun || !selectionPlaying) return;
+    const selected = trimRange();
+    if (!selected || v.paused) { stopSelectionPlayback(); return; }
+    if (v.currentTime >= selected.end - 0.012 || v.ended) {
+      if (selectionLooping) {
+        v.currentTime = selected.start;
+        selectionMonitor = requestAnimationFrame(monitor);
+      } else {
+        v.pause();
+        v.currentTime = selected.start;
+        stopSelectionPlayback();
+      }
+      return;
+    }
+    selectionMonitor = requestAnimationFrame(monitor);
+  };
+  selectionMonitor = requestAnimationFrame(monitor);
+}
+$('playSelection').onclick = () => {
+  if (selectionPlaying && !v.paused) { v.pause(); stopSelectionPlayback(); }
+  else void playSelected(false);
+};
+$('restartSelection').onclick = () => { v.pause(); stopSelectionPlayback(); void playSelected(true); };
+$('loopSelection').onclick = () => {
+  selectionLooping = !selectionLooping;
+  refreshSelectionButtons();
+};
 
 const saveDialog = $('trimSave');
 const nextDialog = $('trimNext');
