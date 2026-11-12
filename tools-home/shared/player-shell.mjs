@@ -114,6 +114,13 @@ export function mountPlayerShell(tool,config){
   if(widget){const progress=widget.querySelector('progress'),row=widget.querySelector('.gs-set-row'),error=widget.querySelector('.gs-set-error');if(progress)content.append(progress);if(row){row.classList.add('gs-control-row');widget.replaceChildren(row);rail.append(widget);}if(error){error.classList.add('gs-player-error');root.append(error);}stash.append(primaryRange);}
  }
  if(tool==='framelock'){
+  const play=$('playPause'),selection=$('playSelection'),restart=$('restartSelection'),loop=$('loopSelection');
+  const pair=el('div','gs-control-pair gs-framelock-play-pair');
+  if(play&&selection){play.before(pair);pair.append(play,selection);selection.textContent='▶ Sel';selection.setAttribute('aria-label','Play selection');}
+  const replay=el('div','gs-control-pair gs-framelock-repeat-pair');
+  if(restart&&loop){restart.before(replay);replay.append(restart,loop);restart.textContent='↺';restart.setAttribute('aria-label','Restart selection');loop.textContent='Loop';loop.setAttribute('aria-label','Toggle selection loop');}
+ }
+ if(tool==='framelock'){
   const timeline=frameTimeline||frameProgress,seek=frameSeek;if(timeline)content.append(timeline);if(seek){const row=seek.querySelector('.gs-set-row');if(row){row.classList.add('gs-control-row');seek.replaceChildren(row);rail.append(seek);}}if($('meta'))put($('meta'));
  }
  // Right-side source buttons belong in the hidden drawer; editing controls stay put.
