@@ -11,7 +11,7 @@ const sessionKey = 'sxlock-scribe-session';
 const localRows = new Map();
 const cloudRows = new Map();
 let lastDraft = null;
-let dbPromise, syncTask, retryTimer, nextPage, loadingHistory;
+let dbPromise, syncTask, retryTimer, nextPage, loadingHistory, syncError;
 let localError = false, paused = false, displayed = 12;
 
 function database() {
@@ -117,11 +117,13 @@ async function sync() {
    try { await localStore('readwrite', store => store.put(synced)); }
    catch { localError = true; }
   }
+  syncError = null;
   showSyncStatus();
   if (dialog.open) renderHistory();
   if ([...localRows.values()].some(row => row.pending && !row.rejected)) queueSync(0);
  })().catch(error => {
-  showSyncStatus(error.message);
+  syncError = error.message;
+  showSyncStatus();
   if (!paused && navigator.onLine) queueSync(15000);
  }).finally(() => { syncTask = null; });
  return syncTask;
@@ -131,10 +133,10 @@ function showSyncStatus(error) {
  const connected = Boolean(credential()) && !paused;
  const rows = [...localRows.values()];
  const pending = rows.some(row => row.pending && !row.rejected);
- syncStatus.textContent = error || (!connected ? 'Sign in to recover notes across devices.' :
+ syncStatus.textContent = error || syncError || (!connected ? 'Sign in to recover notes across devices.' :
   pending ? 'Some notes are waiting to sync.' : rows.some(row => row.rejected) ? 'Some revisions are available only on this device.' : 'Shared history is connected.');
  $('scribeConnect').hidden = connected;
- $('scribeRetry').hidden = !connected || (!pending && !error);
+ $('scribeRetry').hidden = !connected || (!pending && !error && !syncError);
 }
 
 function renderHistory() {
@@ -261,6 +263,7 @@ $('scribeConnect').addEventListener('click', () => {
   if (!event.data.session) { showSyncStatus(event.data.error || 'Sign-in could not be completed.'); return; }
   localStorage.setItem(sessionKey, event.data.session);
   paused = false;
+  syncError = null;
   showSyncStatus();
   void sync();
   void loadHistory();
