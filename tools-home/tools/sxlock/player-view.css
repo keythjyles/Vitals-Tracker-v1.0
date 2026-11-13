@@ -155,6 +155,23 @@ body.sx-empty .sx-section-dock > .work-area {
   min-height: 54px;
 }
 
+.sx-section-dock > #scribeBox { padding-top: 0; }
+.sx-section-dock > #scribeBox > summary { display: none; }
+.sx-scribe-dock-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.sx-scribe-dock-actions > button {
+  position: static;
+  transform: none;
+  min-height: 44px;
+  padding: 4px 8px;
+  font-size: 13px;
+}
+
 main > .work-area {
   scroll-margin-top: min(var(--sx-player-height, 360px), 70dvh);
 }

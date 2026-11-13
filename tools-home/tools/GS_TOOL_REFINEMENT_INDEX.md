@@ -1,3 +1,9 @@
+## SxLock R37 — docked Scribe placement
+
+The docked note box starts directly below the player. Hide and Undock sit beneath the Scribe actions. Undocking returns the normal Scribe header and Dock button to the original section.
+
+The phone regression checks the note box and control positions, hides and reopens Scribe, and switches docks. The previous release is `e27663c54ae24500b3d9dbca49211a07a08e272e`.
+
 ## SxLock R36 — section docking and preview framing
 
 Sound library, Insertions, Mixer, Scribe, Video, and Save and export can dock below the player one at a time. The panel can fold under Docked, and Undock returns it to its original position. The selected dock is a browser preference. The player fills the available width. Pinch, pan, Fit, Fill, and the height grip adjust preview framing. Playback uses its transport controls.

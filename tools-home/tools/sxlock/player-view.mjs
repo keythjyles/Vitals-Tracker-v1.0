@@ -44,13 +44,16 @@ dockToggle.setAttribute('aria-controls', 'sxDockedSection');
 dockToggle.setAttribute('aria-expanded', 'false');
 dock.id = 'sxDockedSection';
 reference.append(dockToggle);
+const scribeDockActions = document.createElement('div');
+scribeDockActions.className = 'sx-scribe-dock-actions';
 
 const sections = new Map([...document.querySelectorAll('[data-dock]')].map(button => {
  const section = $(button.dataset.dock);
+ const header = button.parentElement;
  const home = document.createComment(` ${section.id} `);
  section.before(home);
  const title = button.getAttribute('aria-label').slice(5);
- return [section.id, {section, button, title, home}];
+ return [section.id, {section, button, header, title, home}];
 }));
 
 let docked = null;
@@ -68,7 +71,8 @@ function updateSize() {
  const progress = surface.nextElementSibling;
  const barHeight = progress?.matches('progress') ? progress.offsetHeight + 4 : 0;
  const viewport = window.innerHeight;
- const dockSpace = dockOpen ? Math.min(220, viewport * 0.46) : 0;
+ const scribeDocked = docked?.section.id === 'scribeBox';
+ const dockSpace = dockOpen ? Math.min(scribeDocked ? 244 : 220, viewport * 0.46) : 0;
  const chrome = sourceGrip.offsetHeight + reference.offsetHeight + grip.offsetHeight;
  const max = Math.max(88, Math.floor(viewport - dockSpace - chrome - barHeight - 4));
  const height = clamp(requestedHeight ?? transport - barHeight, 88, max);
@@ -83,17 +87,28 @@ function updateSize() {
 
 function showDock(open) {
  dockOpen = open;
+ const scribeOpen = open && docked?.section.id === 'scribeBox';
+ if (scribeOpen) scribeDockActions.prepend(dockToggle);
+ else if (dockToggle.parentElement !== reference) reference.append(dockToggle);
+ dockToggle.textContent = scribeOpen ? 'Hide' : 'Docked';
  dock.hidden = !open;
  dockToggle.setAttribute('aria-expanded', String(open));
  document.body.classList.toggle('sx-has-dock', open);
  updateSize();
 }
 
-dockToggle.onclick = () => showDock(!dockOpen);
+dockToggle.onclick = () => {
+ showDock(!dockOpen);
+ dockToggle.focus({preventScroll: true});
+};
 
 function setDock(id, focus = false, savedOpen) {
  const previous = docked?.button;
  if (docked) {
+  if (docked.section.id === 'scribeBox') {
+   docked.header.append(docked.button);
+   scribeDockActions.remove();
+  }
   docked.home.after(docked.section);
   docked.section.open = wasOpen;
   docked.button.textContent = 'Dock';
@@ -107,6 +122,10 @@ function setDock(id, focus = false, savedOpen) {
   docked.button.textContent = 'Undock';
   docked.button.setAttribute('aria-label', `Undock ${docked.title}`);
   docked.button.setAttribute('aria-pressed', 'true');
+  if (id === 'scribeBox') {
+   scribeDockActions.append(docked.button);
+   docked.section.append(scribeDockActions);
+  }
   dock.append(docked.section);
   dock.scrollTop = 0;
  }
@@ -126,6 +145,11 @@ for (const {section, button} of sections.values()) {
   setDock(id, true);
  };
 }
+
+const scribe = $('scribeBox');
+scribe.addEventListener('toggle', () => {
+ if (docked?.section === scribe && !scribe.open) scribe.open = true;
+});
 
 function pictureBounds() {
  const {width, height} = surface.getBoundingClientRect();
