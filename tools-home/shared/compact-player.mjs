@@ -1,5 +1,5 @@
 import {installControlHelp} from './control-help.mjs?v=2';
-import {mountPlayerShell} from './player-shell.mjs?v=12';
+import {mountPlayerShell} from './player-shell.mjs?v=13';
 /** Shared UI adapter; never stores or rewrites media or native edit records. */
 export const COMPACT_PLAYER_VERSION='6';
 export function explicitValue(value,min,max){const n=Number(value);if(String(value).trim()===''||!Number.isFinite(n)||n<min||n>max)throw Error('Enter a value from '+min+' to '+max+'.');return n;}

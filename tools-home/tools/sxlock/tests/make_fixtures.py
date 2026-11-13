@@ -23,3 +23,5 @@ print('Created timing, colour, 44.1 kHz, 30 fps and offset fixtures.')
 run(['-i',str(root/'fixture_30fps.mp4'),'-af','atrim=end=5.88','-c:v','copy','-c:a','aac','-b:a','192k',str(root/'fixture_30fps_short_audio.mp4')])
 # A local WebM with no declared container duration exercises first-play timing.
 run(['-i',str(root/'fixture_40s.mp4'),'-t','3','-an','-c:v','libvpx','-deadline','realtime','-cpu-used','8','-live','1',str(root/'fixture_no_duration.webm')])
+# A wide preview tests fit, fill and gesture framing independently of the export fixtures.
+run(['-f','lavfi','-i','testsrc2=size=640x360:rate=25:duration=5','-f','lavfi','-i','sine=frequency=480:sample_rate=48000:duration=5','-c:v','libx264','-threads','2','-pix_fmt','yuv420p','-c:a','aac','-movflags','+faststart',str(root/'fixture_landscape.mp4')])

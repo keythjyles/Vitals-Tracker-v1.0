@@ -6,7 +6,8 @@ async function main(){
  const server=http.createServer((q,s)=>{
   const file=path.resolve(repo,decodeURIComponent(new URL(q.url,'http://test').pathname).slice(1));
   if(!file.startsWith(repo+path.sep)){s.writeHead(403);s.end();return;}
-  try{s.setHeader('Content-Type',/\.m?js$/.test(file)?'text/javascript':file.endsWith('.html')?'text/html':file.endsWith('.json')?'application/json':'application/octet-stream');s.end(fs.readFileSync(file));}catch{s.writeHead(404);s.end();}
+  const types={'.js':'text/javascript','.mjs':'text/javascript','.css':'text/css','.html':'text/html','.json':'application/json'};
+  try{s.setHeader('Content-Type',types[path.extname(file)]||'application/octet-stream');s.end(fs.readFileSync(file));}catch{s.writeHead(404);s.end();}
  }).listen(0,'127.0.0.1');await new Promise(r=>server.on('listening',r));
  const proxyUrl=process.env.LIVE_URL&&(process.env.HTTPS_PROXY||process.env.HTTP_PROXY);
  const browser=await chromium.launch({executablePath:process.env.BROWSER_EXECUTABLE||undefined,headless:true,...(proxyUrl?{proxy:{server:proxyUrl}}:{}),args:['--no-sandbox','--disable-dev-shm-usage','--autoplay-policy=no-user-gesture-required']});
@@ -86,17 +87,18 @@ async function main(){
    await page.locator('#videoFile').setInputFiles(path.join(data,'fixture_40s.mp4'));
    await page.waitForFunction(()=>document.getElementById('video').readyState>=2&&!document.getElementById('play').disabled);
    await page.getByRole('button',{name:'Show file picker'}).click();
-   await page.getByText('SxLock · GS-TOOL-SXLOCK · R35',{exact:true}).waitFor();
+   await page.getByText('SxLock · GS-TOOL-SXLOCK · R36',{exact:true}).waitFor();
    await page.evaluate(()=>window.scrollTo(0,10));
    await page.locator('.gs-source-drawer').waitFor({state:'hidden'});
    await page.evaluate(()=>window.scrollTo(0,0));
    const geometry=await page.evaluate(()=>{
     const box=selector=>document.querySelector(selector).getBoundingClientRect();
-    return {referenceGap:box('.sx-reference').top-box('#editorDock').bottom,
+    return {referenceGap:box('.sx-reference').top-box('#editorDock').bottom,playerLeft:box('#editorDock').left,playerRight:box('#editorDock').right,viewport:innerWidth,
      sections:['#soundSection','#mixerSection','#scribeBox','#exportSection','.sx-footer'].map(selector=>box(selector).top),
      filename:document.querySelector('.gs-player-filename').textContent};
    });
    assert(geometry.referenceGap<=2&&geometry.filename==='fixture_40s.mp4');
+   assert(geometry.playerLeft<=1&&geometry.playerRight>=geometry.viewport-1,'The player reaches both edges: '+JSON.stringify(geometry));
    assert(geometry.sections.every((top,i)=>i===0||top>geometry.sections[i-1]),'The original mobile module order is preserved');
    assert.equal(await page.locator('#notes').isVisible(),false,'Scribe starts collapsed');
    assert.equal(await page.locator('#saveTake').textContent(),'Save take');
@@ -135,6 +137,69 @@ async function main(){
    await entry.waitFor();
    await entry.getByRole('button',{name:'Restore'}).tap();
    assert.equal(await page.locator('#notes').inputValue(),'[F228 | 0:09.120 | 25 fps] Keep this stroke 📝');
+   await page.getByRole('button',{name:'Dock Scribe'}).tap();
+   const dock=page.locator('.sx-section-dock');
+   await dock.locator('#scribeBox').waitFor();
+   assert.equal(await dock.locator('#notes').inputValue(),'[F228 | 0:09.120 | 25 fps] Keep this stroke 📝');
+   const dockToggle=page.getByRole('button',{name:'Toggle docked Scribe'});
+   await dockToggle.tap();
+   assert.equal(await dock.isVisible(),false);
+   await dockToggle.tap();
+   assert.equal(await dock.locator('#notes').inputValue(),'[F228 | 0:09.120 | 25 fps] Keep this stroke 📝');
+   await page.getByRole('button',{name:'Dock Mixer'}).tap();
+   await dock.locator('#mixerSection').waitFor();
+   assert.equal(await dock.locator('#scribeBox').count(),0);
+   await page.reload();
+   await dock.locator('#mixerSection').waitFor();
+   await page.getByRole('button',{name:'Undock Mixer'}).tap();
+   assert.equal(await dock.isVisible(),false);
+   for(const label of ['Sound library','Insertions','Video','Save and export']){
+    await page.getByRole('button',{name:'Dock '+label,exact:true}).tap();
+    await dock.getByRole('button',{name:'Undock '+label,exact:true}).tap();
+    assert.equal(await dock.isVisible(),false);
+   }
+   await page.locator('#videoFile').setInputFiles(path.join(data,'fixture_landscape.mp4'));
+   await page.waitForFunction(()=>{const video=document.getElementById('video');return video.readyState>=2&&video.videoWidth>video.videoHeight&&!document.getElementById('play').disabled});
+   await page.evaluate(()=>window.scrollTo(0,0));
+   const view=page.getByRole('button',{name:'View',exact:true});
+   await view.tap();
+   const viewSheet=page.getByRole('dialog',{name:'Preview view'});
+   const zoom=()=>page.locator('#video').evaluate(video=>Number(video.style.getPropertyValue('--sx-zoom')));
+   const height=()=>page.locator('.viewer').evaluate(surface=>surface.clientHeight);
+   const defaultHeight=await height();
+   await viewSheet.getByRole('button',{name:'Shorter'}).tap();
+   assert(await height()<defaultHeight);
+   await viewSheet.getByRole('button',{name:'Taller'}).tap();
+   await viewSheet.getByRole('button',{name:'Fill'}).tap();
+   assert(await zoom()>1);
+   await viewSheet.getByRole('button',{name:'Zoom out'}).tap();
+   await viewSheet.getByRole('button',{name:'Fit'}).tap();
+   assert.equal(await zoom(),1);
+   assert.equal(await height(),defaultHeight);
+   await viewSheet.getByRole('button',{name:'Close preview view'}).tap();
+   await page.locator('#play').tap();
+   await page.waitForFunction(()=>!document.getElementById('video').paused);
+   const picture=await page.locator('.viewer').boundingBox();
+   const cx=Math.round(picture.x+picture.width/2),cy=Math.round(picture.y+picture.height/2);
+   await page.touchscreen.tap(cx,cy);
+   const touch=await context.newCDPSession(page);
+   const pinch=offset=>[{id:1,x:cx-offset,y:cy},{id:2,x:cx+offset,y:cy}];
+   await touch.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:pinch(20)});
+   await touch.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:pinch(58)});
+   await touch.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+   assert(await zoom()>2,'Pinch zooms the landscape picture');
+   await touch.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{id:1,x:cx,y:cy}]});
+   await touch.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{id:1,x:cx+40,y:cy}]});
+   await touch.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+   assert(await page.locator('#video').evaluate(video=>parseFloat(video.style.getPropertyValue('--sx-pan-x')))>0,'A drag pans the zoomed picture');
+   const resizeGrip=await page.locator('#sxResize').boundingBox();
+   await page.mouse.move(resizeGrip.x+resizeGrip.width/2,resizeGrip.y+resizeGrip.height/2);
+   await page.mouse.down();await page.mouse.move(resizeGrip.x+resizeGrip.width/2,resizeGrip.y+resizeGrip.height/2+44,{steps:4});await page.mouse.up();
+   assert(await height()>defaultHeight,'The grip resizes the preview');
+   assert.equal(await viewSheet.isVisible(),false);
+   assert(await page.locator('#video').evaluate(video=>!video.paused),'Picture gestures leave playback running');
+   await page.locator('#stop').tap();
+   console.log('PASS full-width player, docking and restoration, landscape zoom/pan, and resize during playback');
    console.log('PASS phone layout, module order, Tools menu, frame mark, Clear and Scribe recovery after reload');
   }
   assert.deepEqual(errors,[]);fs.writeFileSync(path.join(data,process.env.OBSERVE_ONLY?'library-playhead-baseline.json':'library-playhead.json'),JSON.stringify({recovered,transport,pageErrors:errors},null,2));

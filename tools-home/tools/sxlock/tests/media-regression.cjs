@@ -119,6 +119,11 @@ async function main(){
   });
   await page.locator('#videoFile').setInputFiles(path.join(data,'fixture_30fps_phone.mp4'));
   await page.waitForFunction(()=>document.getElementById('video').readyState>=2&&!document.getElementById('play').disabled);
+  await page.getByRole('button',{name:'View',exact:true}).click();
+  const view=page.getByRole('dialog',{name:'Preview view'});
+  await view.getByRole('button',{name:'Zoom in'}).click();
+  await view.getByRole('button',{name:'Shorter'}).click();
+  await view.getByRole('button',{name:'Close preview view'}).click();
   const start=await page.evaluate(async()=>{const c=await SxLock.insert('cricket',{start:.101,volume:20});return c.start});
   assert.equal(start,.12);
   await page.locator('#exportSection').evaluate(el=>{el.open=true;el.querySelector('details').open=true;});

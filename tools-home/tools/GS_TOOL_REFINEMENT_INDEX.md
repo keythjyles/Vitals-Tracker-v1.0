@@ -1,3 +1,9 @@
+## SxLock R36 — section docking and preview framing
+
+Sound library, Insertions, Mixer, Scribe, Video, and Save and export can dock below the player one at a time. The panel can fold under Docked, and Undock returns it to its original position. The selected dock is a browser preference. The player fills the available width. Pinch, pan, Fit, Fill, and the height grip adjust preview framing. Playback uses its transport controls.
+
+The phone-sized regression checks the player edges, all dockable panels, dock recovery across reload, landscape pinch and drag, height controls, and continued playback during picture gestures. Media regressions compare the exported picture and audio to the source. Rollback baseline is `f3b079849ddd4d2cb9cdedfc9ba58e40a140b7e5`. Preserve project and Scribe records during rollback.
+
 ## SxLock R35 — restore module order and tidy controls
 
 On phones, Scribe is a collapsible panel after Mixer and before Save and export. It scrolls with the page. Its six actions use two aligned rows, with Mark frame below the text box. The footer has Library only and Tools. Tools opens a list of production links. The microphone controls read Stop rec and Save take.
