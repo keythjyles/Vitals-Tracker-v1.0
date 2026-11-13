@@ -57,11 +57,11 @@
     },
     {
       "tool": "sxlock",
-      "source_version": "R35",
+      "source_version": "R36",
       "hosted_path": "tools/sxlock/index.html",
       "description": "Place and mix effects with frame-accurate review and recoverable Scribe history.",
       "verification": "tools/GS_TOOL_REFINEMENT_INDEX.md",
-      "changes": "Restores Scribe to its original module position, aligns its controls, and puts production links under Tools.",
+      "changes": "Adds section docking and full-width preview framing controls for zoom, pan and height.",
       "tool_id": "GS-TOOL-SXLOCK",
       "navigation": [
         "sound-scrubber",

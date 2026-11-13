@@ -1,6 +1,10 @@
-## SxLock R35
+## SxLock R36
 
-**Start** returns to frame zero and stays paused. **Stop** holds the current frame. The source name and frame readout sit under the sticky player. The source grip opens the title and file controls, which close when the page scrolls. On phones, scroll past Sound library and Mixer to open Scribe. Its six actions sit in two aligned rows below the text box. **Tools** at the bottom opens the production links. **Save take** downloads the latest microphone recording.
+**Start** returns to frame zero and stays paused. **Stop** holds the current frame. The source name and frame readout sit under the sticky player. The source grip opens the title and project shortcuts, which close when the page scrolls. The Video panel includes the file picker and source frame rate. On phones, scroll past Sound library and Mixer to open Scribe. Its six actions sit in two aligned rows below the text box. **Tools** at the bottom opens the production links. **Save take** downloads the latest microphone recording.
+
+Tap **Dock** on Sound library, Insertions, Mixer, Scribe, Video, or Save and export to keep that section under the player. One section docks at a time. **Docked** folds the section out of view, and **Undock** returns it to its previous location and open or closed state. Your browser remembers the selected section.
+
+Pinch the picture to zoom and drag it to pan. Use the grip below the filename and frame readout to resize the preview. **View** offers Fit, Fill, zoom, and height controls. Fit restores the full picture and default height. Playback stays on the transport buttons. The preview framing is for inspection, and exports use the source framing.
 
 **Clear** keeps the current note in **History**. History shows saved revisions with their source names and dates, and **Restore** puts the selected text back in Scribe. R34 copies notes from surviving local project snapshots and imports notes when an older project file is opened. When offline, the browser keeps revisions and retries sync when SxLock reconnects. Devices with an existing PreviewLock connection use it automatically. On another device, open **History** and choose **Sign in with Google** using the Grill Sergeant account. The shared store is the existing private Dropbox workspace at `Grill Sergeant/SxLock Scribe History`.
 
@@ -23,9 +27,9 @@ The video duration is read from the original video track's packet timestamps bef
 
 ## Use
 
-1. Load the original video. Tap the picture to pause.
+1. Load the original video. Use Play mix or Stop to control playback.
 2. Step backward/forward one frame. Source frame rate is under Soundtrack & frame rate (default 25); select the actual source rate.
-3. Hold the video for 500 ms (right-click or keyboard M also works) to open the categorized sound menu. A compact library button opens the same menu with that sound selected.
+3. Tap + Effect, right-click the video, or press M to open the categorized sound menu. A compact library button opens the same menu with that sound selected.
 4. Hear the recording, set volume, start, play length and optional Source IN. Loop repeats Source IN through the end of the recording until the selected play length ends. Press Add/Apply to commit. Overlaps are independent.
 5. Tap a placed effect to edit it at its saved frame. Duplicate or remove from its compact row.
 6. Keep ideas in Scribe. Copy notes/full handoff, Save/Load projects, and export video or WAV. Imported recordings travel inside project JSON. The original video is reselected separately.
