@@ -13,6 +13,20 @@ const sheet = $('sxViewSheet');
 const settingsKey = 'sxlock-docked-section';
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
+const playerDockToggle = document.createElement('button');
+playerDockToggle.type = 'button';
+playerDockToggle.className = 'sx-player-dock-toggle';
+playerDockToggle.textContent = 'Undock player';
+playerDockToggle.onclick = () => {
+ const undocked = player.classList.toggle('sx-player-undocked');
+ player.style.setProperty('position', undocked ? 'static' : 'sticky', 'important');
+ playerDockToggle.textContent = undocked ? 'Dock player' : 'Undock player';
+ player.gsPlayer.setDrawer(false);
+ updateSize();
+ sourceGrip.focus({preventScroll: true});
+};
+player.querySelector('.gs-source-drawer').prepend(playerDockToggle);
+
 const view = document.createElement('button');
 view.type = 'button';
 view.className = 'sx-view-button';
@@ -72,7 +86,7 @@ function updateSize() {
  const barHeight = progress?.matches('progress') ? progress.offsetHeight + 4 : 0;
  const viewport = window.innerHeight;
  const scribeDocked = docked?.section.id === 'scribeBox';
- const dockSpace = dockOpen ? Math.min(scribeDocked ? 244 : 220, viewport * 0.46) : 0;
+ const dockSpace = dockOpen && !player.classList.contains('sx-player-undocked') ? Math.min(scribeDocked ? 244 : 220, viewport * 0.46) : 0;
  const chrome = sourceGrip.offsetHeight + reference.offsetHeight + grip.offsetHeight;
  const max = Math.max(88, Math.floor(viewport - dockSpace - chrome - barHeight - 4));
  const height = clamp(requestedHeight ?? transport - barHeight, 88, max);
@@ -81,7 +95,7 @@ function updateSize() {
  player.style.setProperty('--sx-preview-height', `${height}px`);
  player.style.setProperty('--sx-workspace-height', `${workspaceHeight}px`);
  player.style.setProperty('--sx-player-height', `${workspaceHeight + chrome}px`);
- dock.style.maxHeight = `${dockSpace}px`;
+ dock.style.maxHeight = dockSpace ? `${dockSpace}px` : '';
  renderView();
 }
 
