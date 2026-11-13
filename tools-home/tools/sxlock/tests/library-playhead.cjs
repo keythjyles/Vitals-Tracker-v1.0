@@ -98,6 +98,13 @@ async function main(){
    });
    assert(geometry.referenceGap<=2&&geometry.scribeGap<=4&&geometry.markGap>=0&&geometry.markBottom<geometry.viewport);
    assert(geometry.linksAtBottom&&geometry.filename==='fixture_40s.mp4');
+   await page.locator('#notes').focus();
+   await page.setViewportSize({width:360,height:380});
+   await page.waitForFunction(()=>document.getElementById('scribeMark').getBoundingClientRect().bottom<=innerHeight);
+   const keyboardLayout=await page.evaluate(()=>({reference:document.querySelector('.sx-reference').getBoundingClientRect().bottom,notes:document.getElementById('notes').getBoundingClientRect().top}));
+   assert(keyboardLayout.reference>0&&Math.abs(keyboardLayout.notes-keyboardLayout.reference)<=4);
+   await page.setViewportSize({width:412,height:915});
+   await page.evaluate(()=>window.scrollTo(0,0));
    const go=page.getByRole('spinbutton',{name:'Go to seconds'});
    await go.fill('9.12');await page.getByRole('button',{name:'Go to time'}).click();
    await page.waitForFunction(()=>document.getElementById('clock').textContent.includes('F228'));

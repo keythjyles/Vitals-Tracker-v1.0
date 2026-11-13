@@ -76,6 +76,19 @@ function capture(text = notes.value) {
  return draft.saved;
 }
 
+function keepScribeVisible() {
+ if (document.activeElement !== notes) return;
+ const player = document.querySelector('.gs-player-shell');
+ if (!player) return;
+ const viewport = window.visualViewport?.height || window.innerHeight;
+ const markRow = $('scribeMark').parentElement;
+ const spaceNeeded = markRow.getBoundingClientRect().bottom - notes.getBoundingClientRect().top + 8;
+ const offset = Math.min(0, Math.floor(viewport - player.offsetHeight - spaceNeeded));
+ player.style.setProperty('--sx-sticky-top', `${offset}px`);
+ const overflow = markRow.getBoundingClientRect().bottom - viewport + 8;
+ if (overflow > 0) window.scrollBy(0, overflow);
+}
+
 async function remember(entry) {
  const row = {...entry, pending: true};
  localRows.set(entry.id, row);
@@ -217,9 +230,17 @@ notes.addEventListener('input', () => {
  void capture();
  if (!notes.value.trim()) lastDraft = null;
 });
+notes.addEventListener('focus', () => requestAnimationFrame(keepScribeVisible));
+notes.addEventListener('blur', () => requestAnimationFrame(() => {
+ if (document.activeElement !== notes) document.querySelector('.gs-player-shell')?.style.removeProperty('--sx-sticky-top');
+}));
+window.visualViewport?.addEventListener('resize', keepScribeVisible);
+window.addEventListener('resize', keepScribeVisible);
 document.addEventListener('sxlock-before-scribe-replace', () => { if (notes.value.trim()) void capture(); lastDraft = null; });
 document.addEventListener('sxlock-scribe-restored', () => { if (notes.value.trim()) void capture(); });
-$('scribeMark').addEventListener('click', () => {
+const mark = $('scribeMark');
+mark.addEventListener('pointerdown', event => { if (document.activeElement === notes) event.preventDefault(); });
+mark.addEventListener('click', () => {
  if (!video.getAttribute('src')) { status.textContent = 'Load a video to mark a frame.'; return; }
  const fps = Number($('sourceFps').value) || 25;
  const time = video.currentTime || 0;
