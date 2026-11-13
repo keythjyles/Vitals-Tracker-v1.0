@@ -1,3 +1,9 @@
+## SxLock R39 — visible Scribe cursor
+
+The focused Scribe box has a gold outline and a blinking gold insertion cursor. Browsers that support cursor shape display a block. The browser's reduced-motion preference keeps the cursor steady where its blink can be controlled.
+
+The phone-sized browser check covers the insertion point, both blink phases, typing, focus loss, and reduced motion in Scribe. The previous release is `10aad045e2f5b61f48c24b1da3a9fbe0cddc9372`.
+
 ## SxLock R38 — player dock toggle
 
 SxLock opens with the player docked. Its pull-down contains one toggle. Undock player lets the player and its attached section scroll with the page. Dock player pins them again.
