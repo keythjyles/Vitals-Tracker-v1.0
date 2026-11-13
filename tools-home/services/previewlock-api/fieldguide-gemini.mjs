@@ -31,7 +31,16 @@ export async function handleFieldGuideGemini(req, res, url) {
   const ready = process.env.GEMINI_FG01_ONE_SHOT === 'true' &&
     Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_FG01_OPERATOR_TOKEN_SHA256);
   if (req.method === 'GET') {
-    const state = !ready ? 'operator_required' : reservationId ? 'operator_ready' : 'awaiting_reservation';
+    const state = !ready ? (reservationId ? 'closed' : 'operator_required') : reservationId ? 'operator_ready' : 'awaiting_reservation';
+    if (state === 'closed') {
+      try {
+        const record = JSON.parse(await driveFile(reservationId, { minBytes: 1, maxBytes: 12000 }));
+        if (record.job === JOB) {
+          return respond(res, 200, { job: JOB, preset: PRESET, state, imageProduced: record.imageProduced === true,
+            providerStatus: Number.isInteger(record.providerStatus) ? record.providerStatus : undefined });
+        }
+      } catch { /* The closed test remains unavailable while its receipt is inaccessible. */ }
+    }
     return respond(res, 200, { job: JOB, preset: PRESET, state });
   }
   if (req.method !== 'POST') return respond(res, 405, { error: 'method_not_allowed' });

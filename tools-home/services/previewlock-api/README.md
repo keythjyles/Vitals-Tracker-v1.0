@@ -6,6 +6,8 @@ The owner authorized one Gemini image request with a $1 ceiling and no automatic
 
 Deployment baseline before the storage-route change is `56ca4ac5bccdca399c095c34854d7aa63db8de30`. Preserve the private master, the original Dropbox records, and the Drive receipt. Do not replay an uncertain provider request. The test result and its state are tracked in the private Drive receipt.
 
+The live test ran on `249479d7331a3fe7d07579ef758dce9b6bea3746`. Gemini returned HTTP 429 `RESOURCE_EXHAUSTED` and produced no image. AI Studio showed zero image-generation quota on the Gemini project's free tier. The verified private receipt records the result, and the paid route is closed. The status page reads the receipt server-side and reports only the test state and provider status.
+
 ## Production-stage receipts — November 2, 2026
 
 The existing service adds `/api/joke-project/stage` and verifies saved bytes, container, alpha, frames, audio, current render recipe and project-local parents before appending an optional production receipt. Stage assets use `role=stage`; existing originals are preserved. This release requires the same main-branch service deployment, with no settings or credentials changed. [Protocol and rollback](../../tools/studio/PRODUCTION_STAGES_R16.md). Earlier notes remain historical.

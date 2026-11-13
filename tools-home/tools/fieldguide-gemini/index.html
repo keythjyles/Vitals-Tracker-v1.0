@@ -1,7 +1,73 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GS Field Guide · Graphic Cluster</title><style>body{font:16px system-ui;background:#111b16;color:#f7ead1;max-width:680px;margin:auto;padding:18px}h2{margin-bottom:5px}label{display:block;margin:12px 0}input{width:100%;font:inherit;padding:10px;box-sizing:border-box;border-radius:5px;border:1px solid #b3b3b3}button{padding:12px;font:inherit;background:#e7b75c;border:0;border-radius:7px;font-weight:700}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#253129;padding:12px}small{color:#c8bea9}</style><h2>Field Guide · FG-01</h2><p>Enter the thought cluster and frame cues. The approved reference is loaded from global assets automatically.</p><div id="words"></div><label>Exit frame<input id="exit" type="number" value="231"></label><button id="check">Check status</button> <button id="generate">Generate graphic once</button><p><small>One authorized test. No automatic retries. This version will report if the approved global master has not yet been registered.</small></p><pre id="result">Ready.</pre><script>
-const words=['SUFFERING','while','FIGHTING','over','CLAIMS'],frames=[115,144,160,188,209],container=document.getElementById('words');
-words.forEach((w,i)=>{const l=document.createElement('label');l.textContent='Element '+(i+1);const x=document.createElement('input');x.id='w'+i;x.value=w;const f=document.createElement('input');f.id='f'+i;f.type='number';f.value=frames[i];f.setAttribute('aria-label','Start frame for '+w);l.append(x,f);container.append(l)});
-const endpoint='https://gs-previewlock-api.onrender.com/api/fieldguide/fg01',out=document.getElementById('result');
-document.getElementById('check').onclick=async()=>{try{const r=await fetch(endpoint);out.textContent=JSON.stringify(await r.json(),null,2)}catch(e){out.textContent=e.message}};
-document.getElementById('generate').onclick=async()=>{const cluster=words.map((_,i)=>document.getElementById('w'+i).value.trim()),cues=frames.map((_,i)=>Number(document.getElementById('f'+i).value));cues.push(Number(document.getElementById('exit').value));if(cluster.some(x=>!x)||cues.some(x=>!Number.isInteger(x))){out.textContent='Complete all words and frame numbers';return}if(!confirm('Submit the single authorized FG-01 Gemini request? No automatic retry.'))return;document.getElementById('generate').disabled=true;try{const r=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({job:'GS-FG01-GEMINI-ONE-USD-20261112',preset:'FG-01',cluster,frames:cues})});out.textContent=JSON.stringify(await r.json(),null,2)}catch(e){out.textContent='Unknown submission status. Do not retry: '+e.message}};
-</script></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GS Field Guide · GS-TOOL-FIELDGUIDE-GEMINI · R1</title>
+  <style>
+    body { font: 16px system-ui; background: #111b16; color: #f7ead1; max-width: 680px; margin: auto; padding: 18px; }
+    h1 { font-size: 1.6rem; margin-bottom: .25rem; }
+    .identity { color: #c8bea9; margin-top: 0; }
+    label { display: block; margin: 12px 0; }
+    input { width: 100%; font: inherit; padding: 10px; box-sizing: border-box; border-radius: 5px; border: 1px solid #b3b3b3; }
+    button { padding: 12px; font: inherit; background: #e7b75c; border: 0; border-radius: 7px; font-weight: 700; color: #111b16; }
+    button:disabled { opacity: .75; }
+    a { color: #f5d28e; }
+    #result { background: #253129; padding: 12px; }
+  </style>
+</head>
+<body>
+  <h1>GS Field Guide · FG-01</h1>
+  <p class="identity">GS-TOOL-FIELDGUIDE-GEMINI · R1</p>
+  <div id="words"></div>
+  <label>Exit frame<input id="exit" type="number" value="231" readonly></label>
+  <button id="check" type="button">Check test status</button>
+  <p id="result" role="status" aria-live="polite">Checking the FG-01 test.</p>
+  <p><a href="https://gs-previewlock-api.onrender.com/oauth/google/status">Check private Drive connection</a></p>
+  <script>
+    const words = ['SUFFERING', 'while', 'FIGHTING', 'over', 'CLAIMS'];
+    const frames = [115, 144, 160, 188, 209];
+    const container = document.getElementById('words');
+    words.forEach((word, index) => {
+      const label = document.createElement('label');
+      const text = document.createElement('input');
+      const frame = document.createElement('input');
+      label.textContent = 'Element ' + (index + 1);
+      text.value = word;
+      text.readOnly = true;
+      text.setAttribute('aria-label', 'Text for element ' + (index + 1));
+      frame.type = 'number';
+      frame.value = frames[index];
+      frame.readOnly = true;
+      frame.setAttribute('aria-label', 'Start frame for element ' + (index + 1));
+      label.append(text, frame);
+      container.append(label);
+    });
+    const button = document.getElementById('check');
+    const result = document.getElementById('result');
+    async function checkStatus() {
+      button.disabled = true;
+      try {
+        const response = await fetch('https://gs-previewlock-api.onrender.com/api/fieldguide/fg01', { cache: 'no-store' });
+        if (!response.ok) throw Error();
+        const status = await response.json();
+        if (status.state === 'closed' && status.providerStatus === 429) {
+          result.textContent = 'Test closed. Gemini returned HTTP 429 and produced no image.';
+        } else if (status.state === 'closed' && status.imageProduced) {
+          result.textContent = 'Test complete. The image is saved in private Drive.';
+        } else if (status.state === 'closed') {
+          result.textContent = 'The FG-01 test is closed. Check the private receipt for the outcome.';
+        } else {
+          result.textContent = 'The FG-01 test is submitted by the operator.';
+        }
+      } catch {
+        result.textContent = 'Could not load the FG-01 test status. Try Check test status again.';
+      } finally {
+        button.disabled = false;
+      }
+    }
+    button.addEventListener('click', checkStatus);
+    checkStatus();
+  </script>
+</body>
+</html>
