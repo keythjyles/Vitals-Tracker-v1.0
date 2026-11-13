@@ -5,6 +5,7 @@ import {listAssets} from './asset-catalog.mjs';
 import {geminiConfiguration,geminiHealth,checkGeminiAccess,handleGeminiPreflight} from './gemini-preflight.mjs';
 import {handleJokeLab} from './jokelab-state.mjs';
 import {handleGeminiCollaboration} from './gemini-collaboration.mjs';
+import {handleFieldGuideGemini} from './fieldguide-gemini.mjs';
 import {runExperiment,handleExperimentRead} from './gemini-experiment.mjs';
 import {handleOwnerNotes} from './gemini-owner-notes.mjs';
 import {handleAudio} from './audio-store.mjs';
@@ -69,6 +70,7 @@ const server=http.createServer(async(req,res)=>{
    if(await handleAudio(req,res,u,t))return;
    if(await handleJokeLab(req,res,u,t))return;
    if(await handleGeminiCollaboration(req,res,u,t))return;
+   if(await handleFieldGuideGemini(req,res,u,t))return;
    if(await handleOwnerNotes(req,res,u,t))return;
    if(await handleExperimentRead(req,res,u,t))return;
    if(await handleGeminiPreflight(req,res,u))return;
