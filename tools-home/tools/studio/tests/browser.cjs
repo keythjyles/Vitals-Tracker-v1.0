@@ -12,6 +12,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises'),{creat
  p.studio={bedAssetId:'bed-a',modules:{}};
  p.assets.push({id:'bed-b',role:'bed',name:'bed2.mp4',path:root+'/video/bed2.mp4',size:bed.length,sha256:hash(bed)});
  let rev=0,renderCalls=0,studioWrites=0,createCalls=0,created=null;
+ const scribeEntries=new Map();
  const browser=await chromium.launch({headless:true,args:['--autoplay-policy=no-user-gesture-required']});
  try{
  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());await context.addInitScript(()=>localStorage.setItem('gs_previewlock_key','disposable-fixture-only'));
@@ -30,6 +31,10 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises'),{creat
   else if(u.pathname==='/api/playback')d={url:'http://127.0.0.1:8768/studio-fixture/'+encodeURIComponent(u.searchParams.get('path').split('/').pop())};
   else if(u.pathname==='/api/joke-projects')d={projects:[{id}],has_more:false};
   else if(u.pathname==='/api/assets')d={entries:[],has_more:false};
+  else if(u.pathname==='/api/scribe-history'){
+   if(method==='POST'){const note=r.request().postDataJSON();scribeEntries.set(note.id,note);d={id:note.id,persisted:true};}
+   else d={entries:[...scribeEntries.values()],next:null};
+  }
   else {status=400;d={error:'Unexpected fixture route '+u.pathname};}
   await r.fulfill({status,headers,contentType:'application/json',body:JSON.stringify(d)});
  });
@@ -44,7 +49,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises'),{creat
  tool=await enter('cut');assert.match(await tool.locator('#cutList').textContent(),/Question/);assert.equal(renderCalls,0);assert.equal(source.cuts.clips.length,1);
  tool=await enter('captions');assert.equal(await tool.locator('#itemCount').textContent(),'1');assert.equal(await tool.locator('#video').evaluate(v=>v.paused),true);
  tool=await enter('scene');await tool.locator('#editAdded').click();await tool.locator('[data-for=x] input').fill('539');await tool.locator('[data-for=x] button').click();await tool.locator('#closeItemProperties').click();
- tool=await enter('sound');await tool.locator('#addEffect').click();await tool.locator('#sheetSearch').fill('Cricket');await tool.locator('#effectSheet').getByRole('button',{name:'Place Cricket chirps',exact:true}).click();await tool.locator('#applyEffect').click();await tool.locator('#scribeBox summary').click();await tool.locator('#notes').fill('Saved sound direction');
+ tool=await enter('sound');await tool.locator('#addEffect').click();await tool.locator('#sheetSearch').fill('Cricket');await tool.locator('#effectSheet').getByRole('button',{name:'Place Cricket chirps',exact:true}).click();await tool.locator('#applyEffect').click();await tool.getByRole('textbox',{name:'Scribe notes'}).fill('Saved sound direction');
  tool=await enter('review');assert.equal(await tool.locator('#player').evaluate(v=>v.paused),true);assert.match(await tool.locator('#message').textContent(),/Source preview/);
  tool=await enter('scene');assert.equal(await tool.locator('#x').inputValue(),'539');
  tool=await enter('sound');assert.equal(await tool.locator('#notes').inputValue(),'Saved sound direction');assert.equal(p.studio.modules.sound.session.state.clips.length,1);assert.equal(await tool.locator('#video').evaluate(v=>v.paused),true);

@@ -21,7 +21,7 @@ export function mountPlayerShell(tool,config){
  const root=(tool==='cliplock'?workspace.closest('.dock'):tool==='caplock'?$('playerDock'):null)||el('section','');
  if(!root.isConnected)workspace.before(root);
  root.classList.add('gs-player-shell');root.dataset.playerProfile=profile.id;
- important(root,{position:'sticky',top:'0px','z-index':'20',order:'-10',margin:'0',padding:'0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left))',background:'#101924','border-radius':'0','box-sizing':'border-box'});
+ important(root,{position:'sticky',top:tool==='sxlock'?'var(--sx-sticky-top, 0px)':'0px','z-index':'20',order:'-10',margin:'0',padding:'0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left))',background:'#101924','border-radius':'0','box-sizing':'border-box'});
  let grip=tool==='caplock'?$('dockGrip'):null,drawer=tool==='caplock'?$('pickerDrawer'):null;
  grip=grip||el('button','');grip.type='button';grip.classList.add('gs-source-grip');grip.setAttribute('aria-controls',drawer?.id||'gsSourceDrawer');
  drawer=drawer||el('div','');if(!drawer.id)drawer.id='gsSourceDrawer';drawer.classList.add('gs-source-drawer');
@@ -35,7 +35,7 @@ export function mountPlayerShell(tool,config){
  const filename=el('div','gs-player-filename');filename.textContent='No file loaded';filename.setAttribute('aria-label','Source filename');
  const sourceLabels={cliplock:'#source',sxlock:'#videoName',caplock:'#bedName',aspectlock:'#baseChosen',previewlock:'#fileName',framelock:'#meta',wavlock:'#source'};
  const sourceLabel=q(sourceLabels[tool]);let chosenName='';
- const syncFilename=()=>{const loaded=!!media?.getAttribute('src'),label=sourceLabel?.textContent?.trim().split(' · ')[0];filename.textContent=loaded?(label||chosenName||'Video loaded'):'No file loaded';filename.title=filename.textContent;};
+ const syncFilename=()=>{const loaded=!!media?.getAttribute('src'),label=tool==='sxlock'?sourceLabel?.dataset.expected:sourceLabel?.textContent?.trim().split(' · ')[0];filename.textContent=loaded?(label||chosenName||'Video loaded'):'No file loaded';filename.title=filename.textContent;};
  if(sourceLabel)new MutationObserver(syncFilename).observe(sourceLabel,{childList:true,subtree:true,characterData:true});
  const sourceInput=$(['framelock','previewlock','wavlock'].includes(tool)?'file':'videoFile');sourceInput?.addEventListener('change',e=>{chosenName=e.target.files?.[0]?.name||chosenName;},true);
  if(media)for(const name of ['loadedmetadata','emptied','loadstart'])media.addEventListener(name,syncFilename);
@@ -78,7 +78,7 @@ export function mountPlayerShell(tool,config){
  }
  else picture.append(content);
  content.classList.add('gs-player-content');important(content,{display:'flex','flex-direction':'column',height:'100%','min-height':'0',padding:'0',gap:'0'});
- if(clock)content.append(clock);content.append(surface);
+ if(clock&&tool!=='sxlock')content.append(clock);content.append(surface);
  surface.classList.add('gs-player-surface');clock?.classList.add('gs-player-clock');
  const transportWrapper=tool==='sxlock'?rail.closest('.sticky'):rail;
  rail.classList.add('gs-rail-stack');if(transportWrapper!==rail)important(transportWrapper,{position:'static',margin:'0',padding:'0',width:profile.rail+'px'});
@@ -139,6 +139,9 @@ export function mountPlayerShell(tool,config){
  if(tool==='caplock'){
   const line=el('div','gs-player-line');identity.title=identity.textContent;line.append(grip,identity,filename);if(clock)line.append(clock);
   root.replaceChildren(line,drawer,workspace,...under,stash,...root.querySelectorAll(':scope>.gs-player-error'));
+ }else if(tool==='sxlock'){
+  const reference=el('div','sx-reference');reference.setAttribute('aria-label','Video and frame information');reference.append(filename,clock);
+  root.replaceChildren(grip,drawer,workspace,reference,stash,...root.querySelectorAll(':scope>.gs-player-error'));
  }else root.replaceChildren(grip,drawer,identity,filename,workspace,...under,...(existingName?[existingName]:[]),stash,...root.querySelectorAll(':scope>.gs-player-error'));
  // Keep now-empty source wrappers from taking a row above or under the monitor.
  if(tool==='cliplock')q('#frameTools .jump')?.remove();
@@ -153,12 +156,13 @@ export function mountPlayerShell(tool,config){
  new MutationObserver(()=>applyDrawer(!root.classList.contains('drawer-closed'))).observe(root,{attributes:true,attributeFilter:['class']});
  const scrollNode=tool==='cliplock'?q('.work'):document.scrollingElement;
  const scrollPosition=()=>tool==='cliplock'?(scrollNode?.scrollTop||0):window.scrollY;
+ if(tool==='sxlock')window.addEventListener('scroll',()=>{if(window.scrollY>0&&!root.classList.contains('drawer-closed'))setDrawer(false);},{passive:true});
  const scrollTo=value=>{if(tool==='cliplock'&&scrollNode)scrollNode.scrollTop=value;else window.scrollTo(0,value);};
  let drag=null,dragged=false;
  grip.addEventListener('pointerdown',e=>{e.stopImmediatePropagation();drag={y:e.clientY,scroll:scrollPosition()};dragged=false;grip.setPointerCapture(e.pointerId);},true);
  grip.addEventListener('pointermove',e=>{if(!drag)return;e.stopImmediatePropagation();const dy=e.clientY-drag.y;if(Math.abs(dy)>30){dragged=true;if(drag.scroll>0){scrollTo(Math.max(0,drag.scroll-dy));return;}setDrawer(dy>0);}},true);
  for(const name of ['pointerup','pointercancel'])grip.addEventListener(name,e=>{e.stopImmediatePropagation();drag=null;},true);
- grip.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();if(dragged){dragged=false;return;}setDrawer(root.classList.contains('drawer-closed'));},true);
+ grip.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();if(dragged){dragged=false;return;}if(tool==='sxlock'&&scrollPosition()>0)scrollTo(0);setDrawer(root.classList.contains('drawer-closed'));},true);
  if(media){media.addEventListener('loadedmetadata',()=>setDrawer(false));media.addEventListener('loadstart',()=>{if(media.getAttribute('src'))setDrawer(false);});}
  setDrawer(false);
  if(media&&!surface.querySelector('.gs-empty-load,#bedLoader,#empty')){

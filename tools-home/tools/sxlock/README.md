@@ -1,3 +1,9 @@
+## SxLock R34
+
+**Start** returns to frame zero and stays paused. **Stop** holds the current frame. The source name and frame readout sit under the sticky player. The source grip opens the title and file controls, which close when the page scrolls. Scribe sits directly under the player with **Mark frame**, **Clear**, and **History** below the text box. The tool links are at the page bottom.
+
+**Clear** keeps the current note in **History**. History shows saved revisions with their source names and dates, and **Restore** puts the selected text back in Scribe. R34 copies notes from surviving local project snapshots and imports notes when an older project file is opened. When offline, the browser keeps revisions and retries sync when SxLock reconnects. Devices with an existing PreviewLock connection use it automatically. On another device, open **History** and choose **Sign in with Google** using the Grill Sergeant account. The shared store is the existing private Dropbox workspace at `Grill Sergeant/SxLock Scribe History`.
+
 ## Verified production stages — November 2, 2026
 
 CapLock R16 now produces a captioned composite and opens the same single-joke project in SxLock R31. SxLock saves the editable sound pass and verified jokelet. Clipper R15 remains optional; Studio R2 skips cutting in its normal joke route. Stage-aware lists default to ready inputs with Show all files off. Originals, layers, captions and prior versions are retained. The locked player equipment is unchanged. [Operation, file extensions, rebuild contract and rollback](../studio/PRODUCTION_STAGES_R16.md). Earlier release sections remain historical.
