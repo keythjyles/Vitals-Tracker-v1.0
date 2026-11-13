@@ -340,7 +340,38 @@ main{padding:0 6px 10px;display:flex;flex-direction:column}
 
 })();
 </script>
-<script src="mp4-duration.js?v=24"></script></script><script src="../../shared/effect-classification.js?v=1"></script><script src="../../shared/approved-effects.js?v=2"></script><script src="sxlock.js?v=33"></script><script src="../../shared/caplock-launch.js?v=1" defer></script><script type="module" src="../../shared/compact-player.mjs?v=3"></script></body></html>
+<script src="mp4-duration.js?v=24"></script></script><script src="../../shared/effect-classification.js?v=1"></script><script src="../../shared/approved-effects.js?v=2"></script><script src="sxlock.js?v=33"></script><style>
+/* R34: fixed-under-picture reference strip, also visible with Scribe open. */
+#sxReferenceStrip{display:flex;align-items:center;justify-content:space-between;gap:5px;padding:3px 5px;background:#101924;border:1px solid #40556b;border-radius:5px;font:600 12px/1.25 system-ui;color:#f2cc84}
+#sxReferenceStrip .sx-ref-file{min-width:0;max-width:45%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#e6edf4}
+#sxReferenceStrip .sx-ref-clock{font-variant-numeric:tabular-nums;white-space:nowrap}
+#sxMarkRow{display:flex;align-items:center;gap:7px;margin:4px 0}
+#sxMarkRow button{min-height:40px;flex:0 0 auto;font-weight:700}
+#sxMarkRow small{font-size:12px;color:#cbd8e4}
+</style>
+<script>
+/* R34: owner-requested review controls. Does not alter mixer/export/recording engine. */
+(function(){
+ const video=document.getElementById('video'),viewer=document.querySelector('#viewerDock .viewer'),clock=document.getElementById('clock'),notes=document.getElementById('notes'),scribe=document.getElementById('scribeBox');
+ const back=document.getElementById('back'),forward=document.getElementById('forward'),fps=document.getElementById('sourceFps'),file=document.getElementById('videoFile');
+ if(!video||!viewer||!clock||!notes||!scribe||!back||!forward)return;
+ const strip=document.createElement('div');strip.id='sxReferenceStrip';strip.setAttribute('aria-label','Video and frame information');
+ const fileText=document.createElement('span');fileText.className='sx-ref-file';fileText.textContent='No video loaded';
+ const timeText=document.createElement('span');timeText.className='sx-ref-clock';timeText.textContent='F0 · 0:00.000';
+ strip.append(fileText,timeText);viewer.insertAdjacentElement('afterend',strip);
+ const markRow=document.createElement('div');markRow.id='sxMarkRow';
+ const mark=document.createElement('button');mark.type='button';mark.className='primary';mark.textContent='◆ Mark frame';mark.setAttribute('aria-label','Insert current frame marker into Scribe notes');
+ const hint=document.createElement('small');hint.textContent='Mark inserts frame + time; then type your note.';
+ markRow.append(mark,hint);notes.before(markRow);
+ const fmt=t=>{const m=Math.floor(t/60);return m+':'+(t%60).toFixed(3).padStart(6,'0')};
+ function update(){const f=Number(fps.value)||25,t=video.currentTime||0;timeText.textContent='F'+Math.round(t*f)+' · '+fmt(t)+' · '+f+' fps';const name=file.files&&file.files[0]?.name||document.getElementById('videoName')?.dataset?.expected||document.getElementById('videoName')?.textContent||'No video loaded';fileText.textContent=name;fileText.title=name}
+ ['timeupdate','seeked','loadedmetadata','durationchange'].forEach(ev=>video.addEventListener(ev,update));fps.addEventListener('change',update);file.addEventListener('change',update);update();
+ mark.addEventListener('click',()=>{const f=Number(fps.value)||25,t=video.currentTime||0,n=Math.round(t*f);const line='[F'+n+' | '+fmt(t)+' | '+f+' fps] ';const old=notes.value;const at=notes.selectionStart??old.length;const pre=old.slice(0,at),post=old.slice(at);const sep=pre&&!pre.endsWith('\n')?'\n':'';notes.value=pre+sep+line+post;notes.dispatchEvent(new Event('input',{bubbles:true}));scribe.open=true;notes.focus();const pos=(pre+sep+line).length;notes.setSelectionRange(pos,pos);hint.textContent='Marked F'+n+' — type your note.';});
+ // Distinguish one tap (1 frame) from two rapid taps (10 frames total).
+ // Reuse the engine's own frame step handler for both, preserving its editing behavior.
+ for(const button of [back,forward]){const original=button.onclick;if(typeof original!=='function')continue;let pending=null;button.onclick=function(e){if(pending){clearTimeout(pending);pending=null;for(let i=0;i<10;i++)original.call(button,e);return}pending=setTimeout(()=>{pending=null;original.call(button,e)},260)};button.title=(button===back?'Back':'Forward')+' 1 frame; double tap 10 frames';button.setAttribute('aria-label',button.title)}
+})();
+</script><script src="../../shared/caplock-launch.js?v=1" defer></script><script type="module" src="../../shared/compact-player.mjs?v=3"></script></body></html>
 
 
 
