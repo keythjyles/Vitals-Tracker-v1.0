@@ -1,3 +1,9 @@
+## SxLock R35 — restore module order and tidy controls
+
+On phones, Scribe is a collapsible panel after Mixer and before Save and export. It scrolls with the page. Its six actions use two aligned rows, with Mark frame below the text box. The footer has Library only and Tools. Tools opens a list of production links. The microphone controls read Stop rec and Save take.
+
+The regression checks module order, Scribe layout at 320px, the Tools menu, and note recovery after Clear and reload. Rollback baseline is `a53a3f97db9c321f81927a44b8e9980b9e7391ba`. Keep Scribe history and project data during rollback.
+
 ## SxLock R34 — mobile transport and Scribe history
 
 Start sits above recording and transport controls and returns to frame zero paused. Stop holds the current frame. The player shows the source name, playhead and frame directly above Scribe. The source drawer contains the tool identity. The tool navigation is at the page bottom.

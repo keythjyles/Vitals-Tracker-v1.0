@@ -86,40 +86,56 @@ async function main(){
    await page.locator('#videoFile').setInputFiles(path.join(data,'fixture_40s.mp4'));
    await page.waitForFunction(()=>document.getElementById('video').readyState>=2&&!document.getElementById('play').disabled);
    await page.getByRole('button',{name:'Show file picker'}).click();
-   await page.getByText('SxLock · GS-TOOL-SXLOCK · R34',{exact:true}).waitFor();
+   await page.getByText('SxLock · GS-TOOL-SXLOCK · R35',{exact:true}).waitFor();
    await page.evaluate(()=>window.scrollTo(0,10));
    await page.locator('.gs-source-drawer').waitFor({state:'hidden'});
    await page.evaluate(()=>window.scrollTo(0,0));
    const geometry=await page.evaluate(()=>{
     const box=selector=>document.querySelector(selector).getBoundingClientRect();
-    return {referenceGap:box('.sx-reference').top-box('#editorDock').bottom,scribeGap:box('#notes').top-box('.sx-reference').bottom,
-     markGap:box('#scribeMark').top-box('#notes').bottom,markBottom:box('#scribeMark').bottom,viewport:innerHeight,
-     linksAtBottom:document.querySelector('main').lastElementChild.matches('nav.audio-tool-nav'),filename:document.querySelector('.gs-player-filename').textContent};
+    return {referenceGap:box('.sx-reference').top-box('#editorDock').bottom,
+     sections:['#soundSection','#mixerSection','#scribeBox','#exportSection','.sx-footer'].map(selector=>box(selector).top),
+     filename:document.querySelector('.gs-player-filename').textContent};
    });
-   assert(geometry.referenceGap<=2&&geometry.scribeGap<=4&&geometry.markGap>=0&&geometry.markBottom<geometry.viewport);
-   assert(geometry.linksAtBottom&&geometry.filename==='fixture_40s.mp4');
-   await page.locator('#notes').focus();
-   await page.setViewportSize({width:360,height:380});
-   await page.waitForFunction(()=>document.getElementById('scribeMark').getBoundingClientRect().bottom<=innerHeight);
-   const keyboardLayout=await page.evaluate(()=>({reference:document.querySelector('.sx-reference').getBoundingClientRect().bottom,notes:document.getElementById('notes').getBoundingClientRect().top}));
-   assert(keyboardLayout.reference>0&&Math.abs(keyboardLayout.notes-keyboardLayout.reference)<=4);
+   assert(geometry.referenceGap<=2&&geometry.filename==='fixture_40s.mp4');
+   assert(geometry.sections.every((top,i)=>i===0||top>geometry.sections[i-1]),'The original mobile module order is preserved');
+   assert.equal(await page.locator('#notes').isVisible(),false,'Scribe starts collapsed');
+   assert.equal(await page.locator('#saveTake').textContent(),'Save take');
+   await page.setViewportSize({width:320,height:640});
+   await page.getByRole('button',{name:'Tools',exact:true}).tap();
+   const toolLinks=page.getByRole('dialog',{name:'Tools'});
+   assert.deepEqual(await toolLinks.getByRole('link').allTextContents(),['Sound Scrubber','WavLock','CapLock','AspectLock','PreviewLock','All tools']);
+   await toolLinks.getByRole('button',{name:'Close tools'}).tap();
+   assert.equal(await toolLinks.isVisible(),false);
    await page.setViewportSize({width:412,height:915});
    await page.evaluate(()=>window.scrollTo(0,0));
    const go=page.getByRole('spinbutton',{name:'Go to seconds'});
    await go.fill('9.12');await page.getByRole('button',{name:'Go to time'}).click();
    await page.waitForFunction(()=>document.getElementById('clock').textContent.includes('F228'));
+   await page.locator('#scribeBox summary').tap();
+   await page.setViewportSize({width:320,height:640});
+   const scribeLayout=await page.locator('#scribeBox').evaluate(scribe=>{
+    const buttons=[...scribe.querySelectorAll('.scribe-actions button')].map(button=>button.getBoundingClientRect().toJSON());
+    return {position:getComputedStyle(scribe).position,notesBottom:scribe.querySelector('#notes').getBoundingClientRect().bottom,buttons};
+   });
+   assert.equal(scribeLayout.position,'static');
+   assert(scribeLayout.buttons[0].top>scribeLayout.notesBottom);
+   assert.equal(new Set(scribeLayout.buttons.map(button=>button.top)).size,2);
+   assert.equal(new Set(scribeLayout.buttons.map(button=>button.left)).size,3);
+   assert(scribeLayout.buttons.every(button=>button.height>=44&&button.right<=320));
+   await page.setViewportSize({width:412,height:915});
    await page.getByRole('button',{name:'Mark frame'}).tap();
    assert.equal(await page.locator('#notes').inputValue(),'[F228 | 0:09.120 | 25 fps] ');
    await page.locator('#notes').fill('[F228 | 0:09.120 | 25 fps] Keep this stroke 📝');
    await page.getByRole('button',{name:'Clear',exact:true}).tap();
    await page.waitForFunction(()=>document.getElementById('notes').value==='');
    await page.reload();
+   await page.locator('#scribeBox summary').tap();
    await page.getByRole('button',{name:'History',exact:true}).tap();
    const entry=page.locator('#scribeEntries li').filter({hasText:'Keep this stroke 📝'});
    await entry.waitFor();
    await entry.getByRole('button',{name:'Restore'}).tap();
    assert.equal(await page.locator('#notes').inputValue(),'[F228 | 0:09.120 | 25 fps] Keep this stroke 📝');
-   console.log('PASS phone layout, title drawer, frame mark, Clear and Scribe recovery after reload');
+   console.log('PASS phone layout, module order, Tools menu, frame mark, Clear and Scribe recovery after reload');
   }
   assert.deepEqual(errors,[]);fs.writeFileSync(path.join(data,process.env.OBSERVE_ONLY?'library-playhead-baseline.json':'library-playhead.json'),JSON.stringify({recovered,transport,pageErrors:errors},null,2));
   console.log(process.env.OBSERVE_ONLY?'Recorded baseline observations':'PASS library recovery, independent import, project switch, delete and first-play seek');

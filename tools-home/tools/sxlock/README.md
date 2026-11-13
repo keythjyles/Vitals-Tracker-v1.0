@@ -1,6 +1,6 @@
-## SxLock R34
+## SxLock R35
 
-**Start** returns to frame zero and stays paused. **Stop** holds the current frame. The source name and frame readout sit under the sticky player. The source grip opens the title and file controls, which close when the page scrolls. Scribe sits directly under the player with **Mark frame**, **Clear**, and **History** below the text box. The tool links are at the page bottom.
+**Start** returns to frame zero and stays paused. **Stop** holds the current frame. The source name and frame readout sit under the sticky player. The source grip opens the title and file controls, which close when the page scrolls. On phones, scroll past Sound library and Mixer to open Scribe. Its six actions sit in two aligned rows below the text box. **Tools** at the bottom opens the production links. **Save take** downloads the latest microphone recording.
 
 **Clear** keeps the current note in **History**. History shows saved revisions with their source names and dates, and **Restore** puts the selected text back in Scribe. R34 copies notes from surviving local project snapshots and imports notes when an older project file is opened. When offline, the browser keeps revisions and retries sync when SxLock reconnects. Devices with an existing PreviewLock connection use it automatically. On another device, open **History** and choose **Sign in with Google** using the Grill Sergeant account. The shared store is the existing private Dropbox workspace at `Grill Sergeant/SxLock Scribe History`.
 

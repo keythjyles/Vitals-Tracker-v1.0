@@ -57,11 +57,11 @@
     },
     {
       "tool": "sxlock",
-      "source_version": "R34",
+      "source_version": "R35",
       "hosted_path": "tools/sxlock/index.html",
       "description": "Place and mix effects with frame-accurate review and recoverable Scribe history.",
       "verification": "tools/GS_TOOL_REFINEMENT_INDEX.md",
-      "changes": "Start and Stop hold the intended frame, and Scribe keeps recoverable revisions in the shared history.",
+      "changes": "Restores Scribe to its original module position, aligns its controls, and puts production links under Tools.",
       "tool_id": "GS-TOOL-SXLOCK",
       "navigation": [
         "sound-scrubber",

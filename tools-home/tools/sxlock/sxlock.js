@@ -14,7 +14,7 @@ let clips=[],ctx,master,bedGain,analyser,sourceNode,videoFile=null,videoURL=null
 const scheduled=new Set(),compressed=new Map(),PCM_BUDGET=24*1024*1024,COMPRESSED_BUDGET=8*1024*1024,LOOKAHEAD=8;
 let cleanupExport=null,exportPhase=null;
 const savedCustom=new Set(),savedVideos=new Set(),savedRecordings=new Set();let videoRef=null,recoveryQueue=Promise.resolve(),recoveryRevision=0,recoveryPending=0,restoredPlayhead=0;
-const health={version:"R34",errors:[]};try{health.errors=JSON.parse(localStorage.getItem(KEY+"-health")||"null")?.errors?.slice(-12)||[]}catch{}
+const health={version:"R35",errors:[]};try{health.errors=JSON.parse(localStorage.getItem(KEY+"-health")||"null")?.errors?.slice(-12)||[]}catch{}
 let sourceDuration=0,sourceReady=Promise.resolve(),sourceLoadToken=0;
 const num=(v,min=0,max=Infinity)=>Math.max(min,Math.min(max,Number(v)||0));
 const stamp=t=>`${Math.floor(t/60)}:${(t%60).toFixed(3).padStart(6,'0')}`;
@@ -307,7 +307,7 @@ async function startLiveTake(){
    if(t.cancelled){t.recorder.stop();return;}
    t.start=t.withVideo?video.currentTime:0;t.fps=num($('sourceFps').value,1,120);t.startedAt=new Date().toISOString();t.clock=performance.now();t.pausedMs=0;t.pauseAt=null;t.state='recording';updateLiveControls();$('liveElapsed').textContent='0:00';
    t.timer=setInterval(()=>{const elapsed=((t.pauseAt??performance.now())-t.clock-t.pausedMs)/1000;$('liveElapsed').textContent=stamp(elapsed);if(elapsed>=600)stopLiveTake()},200);
-   message('Recording microphone separately. Tap Rec to pause; Stop saves to My sounds.');
+   message('Recording microphone. Tap Rec to pause or Stop rec to save to My sounds.');
   };
   t.stream.getAudioTracks().forEach(track=>track.addEventListener('ended',()=>{t.error='Microphone disconnected.';stopLiveTake()},{once:true}));
   video.playbackRate=1;t.recorder.start(1000);
@@ -321,13 +321,13 @@ async function finishLiveTake(t){
  lastTake=new File([blob],name,{type:blob.type});
  const data=new Uint8Array(await blob.arrayBuffer()),ac=await audioContext(),b=await ac.decodeAudioData(data.slice().buffer),id='custom-'+uid();
  const length=b.duration;
- if(length<.05){releaseLiveTake(t);return message('Take was too short to place. Use ↓ Take to save its audio.');}
+ if(length<.05){releaseLiveTake(t);return message('Take was too short to place. Use Save take to download its audio.');}
  sounds.set(id,{id,name,category:'My sounds',duration:b.duration,builtin:false,origin:'microphone',mimeType:blob.type,capture:{recordedAt:t.startedAt,mode:t.withVideo?'video-sync':'standalone',sourceVideo:t.withVideo?videoFile?.name:null,startSeconds:t.withVideo?t.start:null,endSeconds:t.withVideo?t.end:null,recordedDurationSeconds:b.duration,startFrame:t.withVideo?Math.round(t.start*t.fps):null,sourceFps:t.withVideo?t.fps:null,microphoneOnly:true},data:to64(data),buffer:b,_lastUse:++cacheClock});
  // Store audio before committing its placement metadata.
  let saveError=null;try{await saveCustom()}catch(e){saveError=e;recordIssue('save-live-audio',e)}
  if(t.withVideo)clips.push({id:uid(),soundId:id,start:t.start,offset:0,duration:Math.min(length,Math.max(0,duration()-t.start)),volume:100,enabled:true,loop:false});
  releaseLiveTake(t);renderCategories();renderLibrary();renderClips();flushProject();trimDecoded(id);
- message(saveError?'Audio captured, but browser audio storage failed. Save project or ↓ Take now.':(t.error?t.error+' ':'')+(t.withVideo?'Recording placed as an editable timeline insertion at '+stamp(t.start)+'. Select its insertion to trim, move, or change volume.':'Audio saved to My sounds; load a video to place it on the timeline.'));
+ message(saveError?'Audio captured, but browser audio storage failed. Save the project or use Save take now.':(t.error?t.error+' ':'')+(t.withVideo?'Recording placed as an editable timeline insertion at '+stamp(t.start)+'. Select its insertion to trim, move, or change volume.':'Audio saved to My sounds; load a video to place it on the timeline.'));
 }
 $('liveRecord').onclick=guard(async()=>{if(!liveTake)return startLiveTake();const t=liveTake;if(t.state==='recording'&&t.recorder?.state==='recording'){t.recorder.pause();t.pauseAt=performance.now();t.state='paused';updateLiveControls();message('Microphone paused; video playback unchanged.')}else if(t.state==='paused'&&t.recorder?.state==='paused'){t.pausedMs+=performance.now()-t.pauseAt;t.pauseAt=null;t.recorder.resume();t.state='recording';updateLiveControls();message('Microphone resumed.')}});$('liveStop').onclick=stopLiveTake;$('saveTake').onclick=()=>lastTake&&download(lastTake,lastTake.name);
 /* Bed transport is independent of microphone recorder. */
