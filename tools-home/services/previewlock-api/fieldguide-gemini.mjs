@@ -1,10 +1,11 @@
+import {driveFile} from './drive-private.mjs';
 // Field Guide FG-01: one explicitly authorized, non-retrying Gemini image test.
 // Existing PreviewLock authentication and Dropbox token are supplied by server.js.
 import {createHash} from 'node:crypto';
 const JOB='GS-FG01-GEMINI-ONE-USD-20261112';
 const LEDGER='/Grill Sergeant/Field Guide/FG01/gemini-one-dollar-test.json';
 const IMAGE='/Grill Sergeant/Field Guide/FG01/gemini-one-dollar-result.png';
-const MASTER='/Grill Sergeant/Field Guide/FG01/approved-master.png';
+const MASTER='1JiPRsOsiLZzZZXIHgzgey2pDHmYJh1cW';
 const PRESET='FG-01';
 const respond=(res,status,data)=>{res.writeHead(status,{'content-type':'application/json','cache-control':'no-store','access-control-allow-origin':'https://keythjyles.github.io'});res.end(JSON.stringify(data));return true};
 const auth=t=>({authorization:'Bearer '+t});
@@ -32,11 +33,9 @@ export async function handleFieldGuideGemini(req,res,u,token){
  let raw='';for await(const chunk of req){raw+=chunk;if(Buffer.byteLength(raw)>12000)return respond(res,413,{error:'request_too_large'})}
  let data;try{data=JSON.parse(raw)}catch{return respond(res,400,{error:'invalid_json'})}
  if(data?.job!==JOB||data?.preset!==PRESET||!Array.isArray(data?.cluster)||data.cluster.length!==5||data.cluster.some((v,i)=>typeof v!=='string'||v.length>100||!v.trim())||!Array.isArray(data?.frames)||data.frames.length!==6||data.frames.some(n=>!Number.isInteger(n)||n<0))return respond(res,400,{error:'invalid_cluster_or_cues'});
- // Retrieve the canonical reference from our asset library, not from a per-request upload.
- const ref=await fetch('https://content.dropboxapi.com/2/files/download',{method:'POST',headers:{...auth(token),'dropbox-api-arg':JSON.stringify({path:MASTER})}});
- if(!ref.ok)return respond(res,424,{error:'approved_master_not_registered',assetPath:MASTER,message:'Register approved master once in global assets; no generation or budget reservation performed'});
- const reference=Buffer.from(await ref.arrayBuffer());if(reference.length<5000||reference.length>7500000)return respond(res,424,{error:'approved_master_invalid'});
- const referenceBase64=reference.toString('base64');
+ // Canonical private Google Drive master. No per-request upload and no public link.
+ let reference;try{reference=await driveFile(MASTER)}catch{return respond(res,424,{error:'private_drive_not_connected_or_master_unavailable',driveFileId:MASTER,message:'Complete private Google OAuth setup before generation; no budget reserved'})}
+  const referenceBase64=reference.toString('base64');
   const model='gemini-2.5-flash-image';
  const instruction='Use this exact five-element cluster in order: '+data.cluster.join(' / ')+'. Frame markers: '+data.frames.join(', ')+'. Create ONLY the typography artwork, with a perfectly uniform solid chroma blue (#0000FF) background. The attached approved reference is the visual authority. Five centered independent elements as provided in the cluster. The first, third and fifth elements must be identical-size bright opaque cream bold condensed uppercase with rich dimensional dark shadow. The second and fourth elements must be flowing connected gold cursive, tight to the adjacent headlines, each with short symmetric gold rules that NEVER cross letters. Match the reference exactly in visual weight, optical spacing, relative widths and alignment. No human, no apron, no photography, no other text, no decorative extras. Output one premium-quality clean graphic, portrait aspect ratio.';
  const reserved={schema:'GS-FG01-OneShot-1',job:JOB,status:'reserved_uncertain_until_verified',reservedUsd:1,attempts:1,model,preset:PRESET,cluster:data.cluster,frames:data.frames,referenceSha256:createHash('sha256').update(reference).digest('hex'),createdAt:new Date().toISOString(),autoRetry:false};
