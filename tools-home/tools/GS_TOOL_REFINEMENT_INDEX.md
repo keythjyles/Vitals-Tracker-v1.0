@@ -1,3 +1,9 @@
+## SxLock R38 — player dock toggle
+
+SxLock opens with the player docked. Its pull-down contains one toggle. Undock player lets the player and its attached section scroll with the page. Dock player pins them again.
+
+The phone regression checks both states, scrolling a docked Sound library in the page flow, and the docked default on reload. The previous release is `245cff9c8e3bbe4a604278b62efc7da141089757`.
+
 ## SxLock R37 — docked Scribe placement
 
 The docked note box starts directly below the player. Hide and Undock sit beneath the Scribe actions. Undocking returns the normal Scribe header and Dock button to the original section.

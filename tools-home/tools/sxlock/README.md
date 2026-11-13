@@ -1,6 +1,6 @@
-## SxLock R37
+## SxLock R38
 
-**Start** returns to frame zero and stays paused. **Stop** holds the current frame. The source name and frame readout sit under the sticky player. The source grip opens the title and project shortcuts, which close when the page scrolls. The Video panel includes the file picker and source frame rate. On phones, scroll past Sound library and Mixer to open Scribe. Its six actions sit in two aligned rows below the text box. **Tools** at the bottom opens the production links. **Save take** downloads the latest microphone recording.
+**Start** returns to frame zero and stays paused. **Stop** holds the current frame. The source name and frame readout sit under the sticky player. The source grip opens the title and project shortcuts. The player starts docked. In the pull-down, choose **Undock player** to scroll the player and any attached section with the page. Return to the pull-down and choose **Dock player** to pin it again. The Video panel includes the file picker and source frame rate. On phones, scroll past Sound library and Mixer to open Scribe. Its six actions sit in two aligned rows below the text box. **Tools** at the bottom opens the production links. **Save take** downloads the latest microphone recording.
 
 Tap **Dock** on Sound library, Insertions, Mixer, Scribe, Video, or Save and export to keep that section under the player. One section docks at a time. **Docked** folds the section out of view, and **Undock** returns it to its previous location and open or closed state. Your browser remembers the selected section. Docked Scribe starts with the note box immediately below the player. Hide and Undock sit below the note actions.
 
