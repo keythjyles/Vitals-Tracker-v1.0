@@ -45,16 +45,16 @@
     {
       "tool": "sxlock",
       "hosted_path": "tools/sxlock/index.html",
-      "source_version": "R31",
+      "source_version": "R34",
       "tool_id": "GS-TOOL-SXLOCK",
-      "description": "Open verified captioned joke projects, place effects with the native editor, then save an editable sound pass and rendered jokelet.",
+      "description": "Place and mix effects with frame-accurate review and recoverable Scribe history.",
       "navigation": [
         "sound-scrubber",
         "sxlock",
         "wavlock",
         "tools"
       ],
-      "verification": "tools/studio/PRODUCTION_STAGES_R16.json"
+      "verification": "tools/GS_TOOL_REFINEMENT_INDEX.md"
     },
     {
       "tool": "wavlock",

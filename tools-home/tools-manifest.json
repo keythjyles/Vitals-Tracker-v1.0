@@ -57,11 +57,11 @@
     },
     {
       "tool": "sxlock",
-      "source_version": "R31",
+      "source_version": "R34",
       "hosted_path": "tools/sxlock/index.html",
-      "description": "Open verified captioned joke projects, place effects with the native editor, then save an editable sound pass and rendered jokelet.",
-      "verification": "tools/studio/PRODUCTION_STAGES_R16.json",
-      "changes": "31 additions with provenance and decode checks; credit-required entries explicitly marked; large playable rows and synonym/tag search.",
+      "description": "Place and mix effects with frame-accurate review and recoverable Scribe history.",
+      "verification": "tools/GS_TOOL_REFINEMENT_INDEX.md",
+      "changes": "Start and Stop hold the intended frame, and Scribe keeps recoverable revisions in the shared history.",
       "tool_id": "GS-TOOL-SXLOCK",
       "navigation": [
         "sound-scrubber",

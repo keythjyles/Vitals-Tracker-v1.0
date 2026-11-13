@@ -71,8 +71,48 @@ async function main(){
    transport.push({name,delayedMetadata,first});console.log('FIRST PLAY',name,delayedMetadata?'delayed browser metadata':'native metadata',JSON.stringify(first));
    if(!process.env.OBSERVE_ONLY){assert(first.max>2.5);assert(first.value<first.max*.5);assert(Math.abs(first.value-first.time)<.2);}
    if(delayedMetadata)await page.evaluate(()=>delete document.getElementById('video').duration);
-   await page.locator('#restart').click();await page.waitForFunction(()=>document.getElementById('video').currentTime>.3&&document.getElementById('video').currentTime<.9);
    await page.locator('#stop').click();
+   if(!process.env.OBSERVE_ONLY){
+    const stopped=await page.locator('#video').evaluate(v=>({time:v.currentTime,paused:v.paused}));
+    assert(stopped.paused&&stopped.time>=first.time,'Stop holds the current frame');
+   }
+   await page.locator('#restart').click();
+   if(!process.env.OBSERVE_ONLY){
+    await page.waitForFunction(()=>{const v=document.getElementById('video');return v.paused&&!v.seeking&&v.currentTime===0});
+    assert.equal(await page.locator('#sxSideControls > button').first().getAttribute('id'),'restart');
+   }
+  }
+  if(!process.env.OBSERVE_ONLY){
+   await page.locator('#videoFile').setInputFiles(path.join(data,'fixture_40s.mp4'));
+   await page.waitForFunction(()=>document.getElementById('video').readyState>=2&&!document.getElementById('play').disabled);
+   await page.getByRole('button',{name:'Show file picker'}).click();
+   await page.getByText('SxLock · GS-TOOL-SXLOCK · R34',{exact:true}).waitFor();
+   await page.evaluate(()=>window.scrollTo(0,10));
+   await page.locator('.gs-source-drawer').waitFor({state:'hidden'});
+   await page.evaluate(()=>window.scrollTo(0,0));
+   const geometry=await page.evaluate(()=>{
+    const box=selector=>document.querySelector(selector).getBoundingClientRect();
+    return {referenceGap:box('.sx-reference').top-box('#editorDock').bottom,scribeGap:box('#notes').top-box('.sx-reference').bottom,
+     markGap:box('#scribeMark').top-box('#notes').bottom,markBottom:box('#scribeMark').bottom,viewport:innerHeight,
+     linksAtBottom:document.querySelector('main').lastElementChild.matches('nav.audio-tool-nav'),filename:document.querySelector('.gs-player-filename').textContent};
+   });
+   assert(geometry.referenceGap<=2&&geometry.scribeGap<=4&&geometry.markGap>=0&&geometry.markBottom<geometry.viewport);
+   assert(geometry.linksAtBottom&&geometry.filename==='fixture_40s.mp4');
+   const go=page.getByRole('spinbutton',{name:'Go to seconds'});
+   await go.fill('9.12');await page.getByRole('button',{name:'Go to time'}).click();
+   await page.waitForFunction(()=>document.getElementById('clock').textContent.includes('F228'));
+   await page.getByRole('button',{name:'Mark frame'}).tap();
+   assert.equal(await page.locator('#notes').inputValue(),'[F228 | 0:09.120 | 25 fps] ');
+   await page.locator('#notes').fill('[F228 | 0:09.120 | 25 fps] Keep this stroke 📝');
+   await page.getByRole('button',{name:'Clear',exact:true}).tap();
+   await page.waitForFunction(()=>document.getElementById('notes').value==='');
+   await page.reload();
+   await page.getByRole('button',{name:'History',exact:true}).tap();
+   const entry=page.locator('#scribeEntries li').filter({hasText:'Keep this stroke 📝'});
+   await entry.waitFor();
+   await entry.getByRole('button',{name:'Restore'}).tap();
+   assert.equal(await page.locator('#notes').inputValue(),'[F228 | 0:09.120 | 25 fps] Keep this stroke 📝');
+   console.log('PASS phone layout, title drawer, frame mark, Clear and Scribe recovery after reload');
   }
   assert.deepEqual(errors,[]);fs.writeFileSync(path.join(data,process.env.OBSERVE_ONLY?'library-playhead-baseline.json':'library-playhead.json'),JSON.stringify({recovered,transport,pageErrors:errors},null,2));
   console.log(process.env.OBSERVE_ONLY?'Recorded baseline observations':'PASS library recovery, independent import, project switch, delete and first-play seek');

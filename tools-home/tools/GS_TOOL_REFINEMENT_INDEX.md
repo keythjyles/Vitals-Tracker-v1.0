@@ -1,3 +1,11 @@
+## SxLock R34 — mobile transport and Scribe history
+
+Start sits above recording and transport controls and returns to frame zero paused. Stop holds the current frame. The player shows the source name, playhead and frame directly above Scribe. The source drawer contains the tool identity. The tool navigation is at the page bottom.
+
+Scribe retains edited text and frame marks as append-only revisions. Clear archives the active note and History restores it. Shared revisions use the authenticated PreviewLock Dropbox bridge. The browser queues local writes and migrates surviving project notes. Google sign-in grants access to Scribe history on a fresh device. The R34 contract is in the [SxLock README](sxlock/README.md).
+
+Verification covers phone-sized layout, reload and restore, Stop and Start, audio imports, the media export matrix, and backend storage conflict and authentication tests. Rollback baseline is `779a4387258104335c83ae5d8f6899506f625cc1`. Retain the Dropbox Scribe records and browser storage during rollback.
+
 ## SxLock R33 — mixed MP4 audio timing
 
 The R32 phone report reached post-export audio duration validation. The Blue Angels source has 1,064 picture frames at 30 fps and a 35.467 s picture timeline. With that source, a test encoder that added three AAC packets reproduced the rejection at 35.541 s. The bundled AAC encoder produced a validated 35.477 s audio end with the original picture packets. Its 1,024-sample priming adjustment keeps the mix aligned at the start.
