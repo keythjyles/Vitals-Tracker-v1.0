@@ -57,11 +57,11 @@
     },
     {
       "tool": "sxlock",
-      "source_version": "R38",
+      "source_version": "R39",
       "hosted_path": "tools/sxlock/index.html",
       "description": "Place and mix effects with frame-accurate review and recoverable Scribe history.",
       "verification": "tools/GS_TOOL_REFINEMENT_INDEX.md",
-      "changes": "Adds a player dock toggle in the source pull-down.",
+      "changes": "Adds a bright, blinking cursor and a focus outline to Scribe.",
       "tool_id": "GS-TOOL-SXLOCK",
       "navigation": [
         "sound-scrubber",

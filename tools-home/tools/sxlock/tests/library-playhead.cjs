@@ -87,7 +87,7 @@ async function main(){
    await page.locator('#videoFile').setInputFiles(path.join(data,'fixture_40s.mp4'));
    await page.waitForFunction(()=>document.getElementById('video').readyState>=2&&!document.getElementById('play').disabled);
    await page.getByRole('button',{name:'Show file picker'}).click();
-   await page.getByText('SxLock · GS-TOOL-SXLOCK · R38',{exact:true}).waitFor();
+   await page.getByText('SxLock · GS-TOOL-SXLOCK · R39',{exact:true}).waitFor();
    await page.evaluate(()=>window.scrollTo(0,10));
    await page.locator('.gs-source-drawer').waitFor({state:'hidden'});
    await page.evaluate(()=>window.scrollTo(0,0));
@@ -127,6 +127,7 @@ async function main(){
    await page.setViewportSize({width:412,height:915});
    await page.getByRole('button',{name:'Mark frame'}).tap();
    assert.equal(await page.locator('#notes').inputValue(),'[F228 | 0:09.120 | 25 fps] ');
+   assert(await page.locator('#notes').evaluate(notes=>notes.matches(':focus')),'Mark frame focuses Scribe for typing');
    await page.locator('#notes').fill('[F228 | 0:09.120 | 25 fps] Keep this stroke 📝');
    await page.getByRole('button',{name:'Clear',exact:true}).tap();
    await page.waitForFunction(()=>document.getElementById('notes').value==='');
