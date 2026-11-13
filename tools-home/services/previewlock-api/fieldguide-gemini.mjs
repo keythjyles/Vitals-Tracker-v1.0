@@ -1,52 +1,148 @@
-import {driveFile} from './drive-private.mjs';
-// Field Guide FG-01: one explicitly authorized, non-retrying Gemini image test.
-// Existing PreviewLock authentication and Dropbox token are supplied by server.js.
-import {createHash} from 'node:crypto';
-const JOB='GS-FG01-GEMINI-ONE-USD-20261112';
-const LEDGER='/Grill Sergeant/Field Guide/FG01/gemini-one-dollar-test.json';
-const IMAGE='/Grill Sergeant/Field Guide/FG01/gemini-one-dollar-result.png';
-const MASTER='1JiPRsOsiLZzZZXIHgzgey2pDHmYJh1cW';
-const PRESET='FG-01';
-const respond=(res,status,data)=>{res.writeHead(status,{'content-type':'application/json','cache-control':'no-store','access-control-allow-origin':'https://keythjyles.github.io'});res.end(JSON.stringify(data));return true};
-const auth=t=>({authorization:'Bearer '+t});
-async function read(path,t){
- const r=await fetch('https://content.dropboxapi.com/2/files/download',{method:'POST',headers:{...auth(t),'dropbox-api-arg':JSON.stringify({path})}});
- if(r.ok)return {body:await r.json(),rev:JSON.parse(r.headers.get('dropbox-api-result')||'{}').rev};
- if(r.status===409&&(await r.text()).includes('not_found'))return null;
- throw Error('ledger_unavailable');
+import { createHash, timingSafeEqual } from 'node:crypto';
+import { driveFile, FG01_MASTER_ID } from './drive-private.mjs';
+
+const JOB = 'GS-FG01-GEMINI-ONE-USD-20261112';
+const PRESET = 'FG-01';
+const MODEL = 'gemini-2.5-flash-image';
+const CLUSTER = ['SUFFERING', 'while', 'FIGHTING', 'over', 'CLAIMS'];
+const FRAMES = [115, 144, 160, 188, 209, 231];
+const MAX_OUTPUT_BYTES = 15_000_000;
+const PNG_SIGNATURE = Buffer.from('89504e470d0a1a0a', 'hex');
+const hash = bytes => createHash('sha256').update(bytes).digest('hex');
+const equal = (left, right) => Boolean(left) && left.length === right.length && timingSafeEqual(left, right);
+const same = (value, expected) => Array.isArray(value) && value.length === expected.length && value.every((item, i) => item === expected[i]);
+let claimed = false;
+
+function respond(res, status, data) {
+  res.writeHead(status, {
+    'content-type': 'application/json',
+    'cache-control': 'no-store',
+    'access-control-allow-origin': 'https://keythjyles.github.io',
+  });
+  res.end(JSON.stringify(data));
 }
-async function put(path,bytes,t){
- const folder=path.slice(0,path.lastIndexOf('/'));const mk=await fetch('https://api.dropboxapi.com/2/files/create_folder_v2',{method:'POST',headers:{...auth(t),'content-type':'application/json'},body:JSON.stringify({path:folder,autorename:false})});
- if(!mk.ok&&!(await mk.text()).includes('conflict'))throw Error('folder_error');
- const r=await fetch('https://content.dropboxapi.com/2/files/upload',{method:'POST',headers:{...auth(t),'content-type':'application/octet-stream','dropbox-api-arg':JSON.stringify({path,mode:{'.tag':'add'},autorename:false,strict_conflict:true,mute:true})},body:bytes});
- if(!r.ok)throw Error('write_or_duplicate_error');return await r.json();
+
+function geminiEndpoint(operation = '') {
+  return 'https://generativelanguage.googleapis.com/v1beta/models/' + MODEL + operation;
 }
-export async function handleFieldGuideGemini(req,res,u,token){
- if(u.pathname!=='/api/fieldguide/fg01')return false;
- if(req.method==='GET'){try{return respond(res,200,{job:JOB,preset:PRESET,referencePath:MASTER,ledger:(await read(LEDGER,token))?.body||null})}catch{return respond(res,502,{error:'ledger_unavailable'})}}
- if(req.method!=='POST')return respond(res,405,{error:'method_not_allowed'});
- if(process.env.GEMINI_FG01_ONE_SHOT!=='true')return respond(res,423,{error:'one_shot_disabled'});
- if(!process.env.GEMINI_API_KEY)return respond(res,503,{error:'gemini_not_configured'});
- // Exactly one request is allowed. A pending ledger permanently blocks duplicate submissions.
- let existing;try{existing=await read(LEDGER,token)}catch{return respond(res,502,{error:'ledger_unavailable'})}
- if(existing)return respond(res,409,{error:'already_reserved_no_retry',ledger:existing.body});
- let raw='';for await(const chunk of req){raw+=chunk;if(Buffer.byteLength(raw)>12000)return respond(res,413,{error:'request_too_large'})}
- let data;try{data=JSON.parse(raw)}catch{return respond(res,400,{error:'invalid_json'})}
- if(data?.job!==JOB||data?.preset!==PRESET||!Array.isArray(data?.cluster)||data.cluster.length!==5||data.cluster.some((v,i)=>typeof v!=='string'||v.length>100||!v.trim())||!Array.isArray(data?.frames)||data.frames.length!==6||data.frames.some(n=>!Number.isInteger(n)||n<0))return respond(res,400,{error:'invalid_cluster_or_cues'});
- // Canonical private Google Drive master. No per-request upload and no public link.
- let reference;try{reference=await driveFile(MASTER)}catch{return respond(res,424,{error:'private_drive_not_connected_or_master_unavailable',driveFileId:MASTER,message:'Complete private Google OAuth setup before generation; no budget reserved'})}
-  const referenceBase64=reference.toString('base64');
-  const model='gemini-2.5-flash-image';
- const instruction='Use this exact five-element cluster in order: '+data.cluster.join(' / ')+'. Frame markers: '+data.frames.join(', ')+'. Create ONLY the typography artwork, with a perfectly uniform solid chroma blue (#0000FF) background. The attached approved reference is the visual authority. Five centered independent elements as provided in the cluster. The first, third and fifth elements must be identical-size bright opaque cream bold condensed uppercase with rich dimensional dark shadow. The second and fourth elements must be flowing connected gold cursive, tight to the adjacent headlines, each with short symmetric gold rules that NEVER cross letters. Match the reference exactly in visual weight, optical spacing, relative widths and alignment. No human, no apron, no photography, no other text, no decorative extras. Output one premium-quality clean graphic, portrait aspect ratio.';
- const reserved={schema:'GS-FG01-OneShot-1',job:JOB,status:'reserved_uncertain_until_verified',reservedUsd:1,attempts:1,model,preset:PRESET,cluster:data.cluster,frames:data.frames,referenceSha256:createHash('sha256').update(reference).digest('hex'),createdAt:new Date().toISOString(),autoRetry:false};
- try{await put(LEDGER,Buffer.from(JSON.stringify(reserved)),token)}catch{return respond(res,409,{error:'reservation_failed_or_exists'})}
- try{
-  const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent',{method:'POST',headers:{'x-goog-api-key':process.env.GEMINI_API_KEY,'content-type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:instruction},{inline_data:{mime_type:'image/png',data:referenceBase64}}]}],generationConfig:{responseModalities:['IMAGE'],imageConfig:{aspectRatio:'9:16'}}}),signal:AbortSignal.timeout(120000)});
-  if(!r.ok)return respond(res,502,{error:'provider_failed_no_retry',providerStatus:r.status,job:JOB});
-  const body=await r.json();const part=(body.candidates||[]).flatMap(c=>c.content?.parts||[]).find(p=>p.inlineData?.data||p.inline_data?.data);
-  const encoded=part?.inlineData?.data||part?.inline_data?.data;if(!encoded)return respond(res,502,{error:'no_image_returned_no_retry',job:JOB});
-  const bytes=Buffer.from(encoded,'base64');if(bytes.length>15000000)return respond(res,502,{error:'output_too_large'});
-  const saved=await put(IMAGE,bytes,token);
-  return respond(res,200,{status:'image_saved',job:JOB,dropboxPath:IMAGE,sha256:createHash('sha256').update(bytes).digest('hex'),bytes:bytes.length,dropboxId:saved.id,approval:'pending'});
- }catch{return respond(res,502,{error:'request_or_save_uncertain_no_retry',job:JOB})}
+
+export async function handleFieldGuideGemini(req, res, url) {
+  const reservationId = process.env.GEMINI_FG01_DRIVE_RESERVATION_ID;
+  const ready = process.env.GEMINI_FG01_ONE_SHOT === 'true' &&
+    Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_FG01_OPERATOR_TOKEN_SHA256);
+  if (req.method === 'GET') {
+    const state = !ready ? 'operator_required' : reservationId ? 'operator_ready' : 'awaiting_reservation';
+    return respond(res, 200, { job: JOB, preset: PRESET, state });
+  }
+  if (req.method !== 'POST') return respond(res, 405, { error: 'method_not_allowed' });
+  if (!ready) return respond(res, 423, { error: 'one_shot_disabled' });
+  if (req.headers.origin) return respond(res, 403, { error: 'operator_required' });
+
+  const operator = req.headers.authorization?.match(/^Bearer ([a-f0-9]{64})$/)?.[1];
+  const expected = Buffer.from(process.env.GEMINI_FG01_OPERATOR_TOKEN_SHA256, 'hex');
+  const supplied = operator && createHash('sha256').update(operator).digest();
+  if (!equal(supplied, expected)) return respond(res, 401, { error: 'unauthorized' });
+
+  // A signed operator can check the exact image model and private source without starting generation.
+  if (url.searchParams.get('preflight') === '1') {
+    try {
+      const reference = await driveFile(FG01_MASTER_ID);
+      if (!reference.subarray(0, 8).equals(PNG_SIGNATURE)) {
+        return respond(res, 424, { error: 'approved_master_invalid' });
+      }
+      const model = await fetch(geminiEndpoint(), {
+        headers: { 'x-goog-api-key': process.env.GEMINI_API_KEY },
+        signal: AbortSignal.timeout(15000),
+      });
+      if (!model.ok) return respond(res, 424, { error: 'image_model_unavailable', providerStatus: model.status });
+      const { supportedGenerationMethods } = await model.json();
+      if (!supportedGenerationMethods?.includes('generateContent')) {
+        return respond(res, 424, { error: 'image_generation_unavailable' });
+      }
+      return respond(res, 200, { job: JOB, model: MODEL, referenceSha256: hash(reference), referenceBytes: reference.length });
+    } catch {
+      return respond(res, 502, { error: 'preflight_failed' });
+    }
+  }
+
+  if (!reservationId) return respond(res, 424, { error: 'private_drive_reservation_required' });
+  let raw = '';
+  for await (const chunk of req) {
+    raw += chunk;
+    if (Buffer.byteLength(raw) > 12000) return respond(res, 413, { error: 'request_too_large' });
+  }
+  let data;
+  try { data = JSON.parse(raw); } catch { return respond(res, 400, { error: 'invalid_json' }); }
+  if (data?.job !== JOB || data?.preset !== PRESET || !same(data.cluster, CLUSTER) || !same(data.frames, FRAMES)) {
+    return respond(res, 400, { error: 'invalid_cluster_or_cues' });
+  }
+
+  let reference;
+  try {
+    reference = await driveFile(FG01_MASTER_ID);
+    if (!reference.subarray(0, 8).equals(PNG_SIGNATURE)) return respond(res, 424, { error: 'approved_master_invalid' });
+    const reservation = JSON.parse(await driveFile(reservationId, { minBytes: 1, maxBytes: 12000 }));
+    if (reservation.job !== JOB || reservation.status !== 'reserved_uncertain_until_verified' ||
+        reservation.reservedUsd !== 1 || reservation.attempts !== 1 || reservation.autoRetry !== false ||
+        reservation.model !== MODEL || !same(reservation.cluster, CLUSTER) || !same(reservation.frames, FRAMES) ||
+        reservation.referenceSha256 !== hash(reference)) {
+      return respond(res, 424, { error: 'reservation_mismatch' });
+    }
+  } catch {
+    return respond(res, 424, { error: 'private_drive_reservation_or_master_unavailable' });
+  }
+  if (claimed) return respond(res, 409, { error: 'already_reserved_no_retry' });
+  claimed = true;
+
+  const instruction = 'Use this exact five-element cluster in order: ' + CLUSTER.join(' / ') +
+    '. Frame markers: ' + FRAMES.join(', ') +
+    '. Create ONLY the typography artwork, with a perfectly uniform solid chroma blue (#0000FF) background. ' +
+    'The attached approved reference is the visual authority. Five centered independent elements as provided in the cluster. ' +
+    'The first, third and fifth elements must be identical-size bright opaque cream bold condensed uppercase with rich dimensional dark shadow. ' +
+    'The second and fourth elements must be flowing connected gold cursive, tight to the adjacent headlines, each with short symmetric gold rules that NEVER cross letters. ' +
+    'Match the reference exactly in visual weight, optical spacing, relative widths and alignment. ' +
+    'No human, no apron, no photography, no other text, no decorative extras. Output one premium-quality clean graphic, portrait aspect ratio.';
+  try {
+    const response = await fetch(geminiEndpoint(':generateContent'), {
+      method: 'POST',
+      headers: { 'x-goog-api-key': process.env.GEMINI_API_KEY, 'content-type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: instruction }, { inlineData: { mimeType: 'image/png', data: reference.toString('base64') } }] }],
+        generationConfig: { candidateCount: 1, responseModalities: ['IMAGE'], imageConfig: { aspectRatio: '9:16' } },
+      }),
+      signal: AbortSignal.timeout(120000),
+    });
+    if (!response.ok) {
+      const { error } = await response.json().catch(() => ({}));
+      const providerCode = /^[A-Z_]{3,40}$/.test(error?.status) ? error.status : undefined;
+      return respond(res, 502, { error: 'provider_failed_no_retry', providerStatus: response.status, providerCode, job: JOB });
+    }
+    const result = await response.json();
+    const parts = (result.candidates || []).flatMap(candidate => candidate.content?.parts || []);
+    const part = parts.find(item => !item.thought && (item.inlineData?.data || item.inline_data?.data));
+    if (!part) return respond(res, 502, { error: 'no_image_returned_no_retry', job: JOB });
+    const image = part.inlineData || part.inline_data;
+    const bytes = Buffer.from(image.data, 'base64');
+    const mime = image.mimeType || image.mime_type;
+    const png = bytes.subarray(0, 8).equals(PNG_SIGNATURE);
+    const jpeg = bytes.subarray(0, 3).equals(Buffer.from('ffd8ff', 'hex'));
+    if (bytes.length > MAX_OUTPUT_BYTES || !((mime === 'image/png' && png) || (mime === 'image/jpeg' && jpeg))) {
+      return respond(res, 502, { error: 'output_image_invalid_no_retry', job: JOB });
+    }
+
+    res.writeHead(200, {
+      'content-type': mime,
+      'content-length': bytes.length,
+      'cache-control': 'no-store',
+      'x-content-type-options': 'nosniff',
+      'x-gs-sha256': hash(bytes),
+      'x-gs-model': MODEL,
+      'x-gs-response-id': String(result.responseId || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 120),
+      'x-gs-input-tokens': String(Number(result.usageMetadata?.promptTokenCount) || 0),
+      'x-gs-output-tokens': String(Number(result.usageMetadata?.candidatesTokenCount) || 0),
+    });
+    res.end(bytes);
+  } catch {
+    return respond(res, 502, { error: 'request_uncertain_no_retry', job: JOB });
+  }
 }

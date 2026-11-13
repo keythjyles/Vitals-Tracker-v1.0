@@ -63,10 +63,9 @@ const server=http.createServer(async(req,res)=>{
   }catch{return send(res,502,{error:'dropbox_authorization_failed'})}
  }
  if(req.method==='OPTIONS'){res.writeHead(204,{'access-control-allow-origin':'*','access-control-allow-headers':'authorization,content-type,x-asset-name,x-audio-id,x-audio-name,x-audio-info,x-audio-sha256','access-control-allow-methods':'GET,POST,OPTIONS'});return res.end()}
- // Dedicated public, fixed-purpose, one-shot FG01 submission. Does not expose PreviewLock admin access.
+ // FG-01 uses the private Drive master and a separately authenticated test operator.
  if(u.pathname==='/api/fieldguide/fg01'){
-  if(!KEY||!SECRET||!REFRESH)return send(res,503,{error:'dropbox_not_configured'});
-  try{return await handleFieldGuideGemini(req,res,u,await token())}catch{return send(res,502,{error:'fieldguide_unavailable'})}
+  try{return await handleFieldGuideGemini(req,res,u)}catch{return send(res,502,{error:'fieldguide_unavailable'})}
  }
  if(u.pathname.startsWith('/api/')){
   if(!eq(req.headers.authorization?.replace(/^Bearer /,''),ADMIN))return send(res,401,{error:'unauthorized'});
@@ -77,7 +76,6 @@ const server=http.createServer(async(req,res)=>{
    if(await handleAudio(req,res,u,t))return;
    if(await handleJokeLab(req,res,u,t))return;
    if(await handleGeminiCollaboration(req,res,u,t))return;
-   if(await handleFieldGuideGemini(req,res,u,t))return;
    if(await handleOwnerNotes(req,res,u,t))return;
    if(await handleExperimentRead(req,res,u,t))return;
    if(await handleGeminiPreflight(req,res,u))return;

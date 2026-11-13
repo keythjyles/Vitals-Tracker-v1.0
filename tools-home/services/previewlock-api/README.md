@@ -1,3 +1,11 @@
+## Field Guide FG-01 — private Drive and Gemini test
+
+The approved FG-01 PNG is in `Grill Sergeant / GS_GLOBAL_ASSETS`. The deployed [Drive status page](https://gs-previewlock-api.onrender.com/oauth/google/status) verified an actual download after the Google Drive API was enabled in the OAuth project's Cloud settings. The source and its sharing settings remain private.
+
+The owner authorized one Gemini image request with a $1 ceiling and no automatic retry. Use the approved cluster `SUFFERING / while / FIGHTING / over / CLAIMS` and frames `115 / 144 / 160 / 188 / 209 / 231`. The backend must verify the private Drive source and a receipt bound to its SHA-256 before generation. Use the connected Drive account to persist the reservation and the returned image in the private asset folder. Save and verify the provider bytes and final receipt before describing the test as complete. This operator-assisted test does not establish unattended Drive writes.
+
+Deployment baseline before the storage-route change is `56ca4ac5bccdca399c095c34854d7aa63db8de30`. Preserve the private master, the original Dropbox records, and the Drive receipt. Do not replay an uncertain provider request. The test result and its state are tracked in the private Drive receipt.
+
 ## Production-stage receipts — November 2, 2026
 
 The existing service adds `/api/joke-project/stage` and verifies saved bytes, container, alpha, frames, audio, current render recipe and project-local parents before appending an optional production receipt. Stage assets use `role=stage`; existing originals are preserved. This release requires the same main-branch service deployment, with no settings or credentials changed. [Protocol and rollback](../../tools/studio/PRODUCTION_STAGES_R16.md). Earlier notes remain historical.

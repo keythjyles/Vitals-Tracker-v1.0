@@ -19,14 +19,14 @@ async function driveError(response){
  const reason=reasons.find(value=>driveErrorReasons.has(value));
  return 'drive_asset_http_'+response.status+(reason?'_'+reason:'');
 }
-export async function driveFile(fileId){
+export async function driveFile(fileId,{minBytes=1000,maxBytes=10000000}={}){
  if(!googleDriveReady())throw Error('private_drive_not_connected');
  const body=new URLSearchParams({client_id:process.env.GOOGLE_OAUTH_CLIENT_ID,client_secret:process.env.GOOGLE_OAUTH_CLIENT_SECRET,refresh_token:process.env.GOOGLE_DRIVE_REFRESH_TOKEN,grant_type:'refresh_token'});
  const auth=await fetch('https://oauth2.googleapis.com/token',{method:'POST',body,signal:AbortSignal.timeout(15000)});
  if(!auth.ok)throw Error('drive_refresh_failed');const data=await auth.json();
  const r=await fetch('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(fileId)+'?alt=media&supportsAllDrives=true',{headers:{authorization:'Bearer '+data.access_token},signal:AbortSignal.timeout(30000)});
  if(!r.ok)throw Error(await driveError(r));const bytes=Buffer.from(await r.arrayBuffer());
- if(bytes.length<1000||bytes.length>10000000)throw Error('drive_asset_size_invalid');
+ if(bytes.length<minBytes||bytes.length>maxBytes)throw Error('drive_asset_size_invalid');
  return bytes;
 }
 export async function googleOAuthRoutes(req,res,u){
