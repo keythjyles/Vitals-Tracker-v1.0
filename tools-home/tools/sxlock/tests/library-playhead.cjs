@@ -87,7 +87,7 @@ async function main(){
    await page.locator('#videoFile').setInputFiles(path.join(data,'fixture_40s.mp4'));
    await page.waitForFunction(()=>document.getElementById('video').readyState>=2&&!document.getElementById('play').disabled);
    await page.getByRole('button',{name:'Show file picker'}).click();
-   await page.getByText('SxLock · GS-TOOL-SXLOCK · R36',{exact:true}).waitFor();
+   await page.getByText('SxLock · GS-TOOL-SXLOCK · R37',{exact:true}).waitFor();
    await page.evaluate(()=>window.scrollTo(0,10));
    await page.locator('.gs-source-drawer').waitFor({state:'hidden'});
    await page.evaluate(()=>window.scrollTo(0,0));
@@ -140,6 +140,14 @@ async function main(){
    await page.getByRole('button',{name:'Dock Scribe'}).tap();
    const dock=page.locator('.sx-section-dock');
    await dock.locator('#scribeBox').waitFor();
+   assert.equal(await dock.locator('#scribeBox > summary').isVisible(),false);
+   assert.equal(await page.locator('.sx-reference .sx-docked-button').count(),0);
+   const dockLayout=await page.evaluate(()=>{
+    const box=selector=>document.querySelector(selector).getBoundingClientRect();
+    return {gap:box('#notes').top-box('#sxResize').bottom,actionsBottom:box('#scribeBox .scribe-actions').bottom,undockTop:box('#scribeBox [data-dock]').top};
+   });
+   assert(dockLayout.gap>=0&&dockLayout.gap<=2,'The note box starts directly after the player');
+   assert(dockLayout.undockTop>dockLayout.actionsBottom,'Undock is below the Scribe buttons');
    assert.equal(await dock.locator('#notes').inputValue(),'[F228 | 0:09.120 | 25 fps] Keep this stroke 📝');
    const dockToggle=page.getByRole('button',{name:'Toggle docked Scribe'});
    await dockToggle.tap();
@@ -149,6 +157,7 @@ async function main(){
    await page.getByRole('button',{name:'Dock Mixer'}).tap();
    await dock.locator('#mixerSection').waitFor();
    assert.equal(await dock.locator('#scribeBox').count(),0);
+   assert.equal(await page.locator('#scribeBox > summary').getByRole('button',{name:'Dock Scribe'}).count(),1);
    await page.reload();
    await dock.locator('#mixerSection').waitFor();
    await page.getByRole('button',{name:'Undock Mixer'}).tap();
