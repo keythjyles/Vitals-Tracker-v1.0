@@ -1,3 +1,13 @@
+## SxLock R40 and Sound Scrubber R14.11 — project Toolbox and sound intake
+
+SxLock starts with the modules collapsed and the player docked. Pulling down from the source grip opens project controls. Start toggles playback and Pause keeps the current position. At the end of the composition, Start returns to zero. Scribe keeps Mark frame and a More menu below the note. Insertion arrows follow timeline order.
+
+Toolbox links recording and project assets to the current edit. Standalone drafts use the verified IndexedDB project snapshot on reload. The Studio sound checkpoint carries toolbox references alongside the existing bed and sound references. Audio cues remain reusable. Caption animations, video clips, images and camera layers can be overlaid or appended at the project end. Camera capture uses a muted bed and stores the raw camera video as a separate layer. Save Rec opens the latest recording's naming and raw download controls. Browser recovery and an explicit cloud project checkpoint have separate save states.
+
+Sound Scrubber R14.11 adds the [1,000-candidate manifest](sound-scrubber/intake/SX-INTAKE-20261114-1000.json). It has 565 human reactions, 129 medical sounds, and 306 weather sounds. The first 12 are Chapter 3 gasp picks. No intake items were approved. The existing Commons search and verified Dropbox approval path remain active. A picker approval uses the same review ledger and adds that sound to the calling SxLock Toolbox. Placement is explicit. Freesound Dataset WAVs are fetched by range and checked against their archive CRC; their individual credits apply. The direct-download CC0 files and designed effects carry their source and type.
+
+Rollback baseline is `14bd7cdec69fc3cec5ca6affbcd298f6e4f2be8e`. Keep existing project and audio stores. Desktop Chromium tests use phone-sized viewports and fixture approvals/capture. Owner phone and authenticated cloud approval still require real use.
+
 ## SxLock R39 — visible Scribe cursor
 
 The focused Scribe box has a gold outline and a blinking gold insertion cursor. Browsers that support cursor shape display a block. The browser's reduced-motion preference keeps the cursor steady where its blink can be controlled.

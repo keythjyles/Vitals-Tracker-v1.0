@@ -100,7 +100,7 @@ function createInput(file) {
  */
 export async function exportVideo({ file, fps = 25, size = 'original', format = 'mp4',
   soundtrackGain = 1, hasEffects = false, placeEffects = async () => {},
-  cancelled, onProgress = () => {}, onPhase = () => {}, visual = null, useSoftwareAac = false }) {
+  cancelled, onProgress = () => {}, onPhase = () => {}, visual = null, extension = null, useSoftwareAac = false }) {
   const independent = visual?.independent === true;
   if (!independent && !(file instanceof Blob)) throw new Error('Load an original video first.');
   if (!Number.isInteger(fps) || fps < 1 || fps > 60) throw new Error('Invalid output frame rate.');
@@ -120,10 +120,10 @@ export async function exportVideo({ file, fps = 25, size = 'original', format = 
     const videoCodec = format === 'mp4' ? 'avc' : 'vp9';
     const audioCodec = format === 'mp4' ? 'aac' : 'opus';
     const scale = size === '720' ? Math.min(1, 720 / width) : 1;
-    const copyVideo = !visual && video.codec === videoCodec && scale === 1 && isCfr(timing.timestamps, fps)
+    const copyVideo = !visual && !extension && video.codec === videoCodec && scale === 1 && isCfr(timing.timestamps, fps)
       && Math.abs(timing.end - timing.count / fps) <= 0.000002;
     // Optional compositor extent; callers that omit it retain the native source duration.
-    const bedFrames=Math.ceil((timing.end-0.000002)*fps),requestedFrames=visual?.durationFrames;
+    const bedFrames=Math.ceil((timing.end-0.000002)*fps),requestedFrames=visual?.durationFrames??extension?.durationFrames;
     if((independent||requestedFrames!=null)&&(!Number.isSafeInteger(requestedFrames)||requestedFrames<Math.max(1,bedFrames)))throw Error('Invalid composition frame count.');
     const extending=requestedFrames>bedFrames;
     const copyAudio = !!audio && audio.codec === audioCodec && soundtrackGain === 1 && !hasEffects && (independent || !extending);

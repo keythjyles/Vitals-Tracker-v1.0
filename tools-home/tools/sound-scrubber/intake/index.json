@@ -1,6 +1,6 @@
 {
   "schema": "SoundScrubberIntakeIndex-1",
-  "updatedLocalDate": "2026-11-06",
+  "updatedLocalDate": "2026-11-14",
   "batches": [
     {
       "batchId": "gs-sx-20261027-am-01",
@@ -89,8 +89,16 @@
       "createdLocalDate": "2026-11-06",
       "status": "PENDING",
       "liveQueueImported": false
+    },
+    {
+      "batchId": "SX-INTAKE-20261114-1000",
+      "path": "tools-home/tools/sound-scrubber/intake/SX-INTAKE-20261114-1000.json",
+      "candidateCount": 1000,
+      "createdLocalDate": "2026-11-14",
+      "status": "PENDING",
+      "liveQueueImported": false
     }
   ],
-  "totalCandidates": 64,
+  "totalCandidates": 1069,
   "notes": "New index created because repository intake/index.json was absent at inspection; previous browser-only intake/review records were not overwritten."
 }

@@ -1,3 +1,11 @@
+## SxLock R40
+
+**Start / Pause** controls the mix. The timeline stays at its end until Start is tapped again. The source grip opens the project controls. Modules start closed. Scribe's Mark frame button and More menu sit below the note field. In Insertions, ↑ and ↓ select the previous or next cue in timeline order.
+
+Open **Toolbox** to keep a project's sounds, transparent clips, images and supporting files together. **Find sounds online** opens Sound Scrubber over the active project. Audition, then Approve and add. **Done** returns to Toolbox. **Use** opens that sound's timing and mix controls.
+
+**Rec** captures a voice layer. Tap it again or pause the bed playback to finish and save the raw take. **Save Rec** opens the recording settings. **Camera overlay** inside Toolbox records a separate camera video while the bed plays muted. The initial layer opacity is 50%. Toolbox supports explicit overlay and EOF append of local video and image assets. Overlay video audio is muted. Standalone working files recover in the same browser. A Studio project checkpoint stores its actual files through the existing project connection.
+
 ## SxLock R39
 
 **Start** returns to frame zero and stays paused. **Stop** holds the current frame. The source name and frame readout sit under the sticky player. The source grip opens the title and project shortcuts. The player starts docked. In the pull-down, choose **Undock player** to scroll the player and any attached section with the page. Return to the pull-down and choose **Dock player** to pin it again. The Video panel includes the file picker and source frame rate. On phones, scroll past Sound library and Mixer to open Scribe. Its six actions sit in two aligned rows below the text box. **Tools** at the bottom opens the production links. **Save take** downloads the latest microphone recording.

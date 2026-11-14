@@ -43,7 +43,7 @@ if(typeof document!=='undefined'){
  for(const id of config.frames){const button=$('#'+id);if(!button)continue;const backward=/back|prev|minus/i.test(id);button.classList.add('gs-frame-button');button.textContent=backward?'−':'+';if(!button.getAttribute('aria-label'))button.setAttribute('aria-label',backward?'Previous frame':'Next frame');button.title=backward?'Back one frame':'Forward one frame';}
  document.addEventListener('click',e=>{const b=e.target.closest('button');if(e.isTrusted&&b?.classList.contains('gs-frame-button')&&!b.disabled&&tool!=='cliplock')hapticClick();},true);
  // End-of-source Play cannot silently restart a precision workspace.
- if(nativeVideo){document.addEventListener('click',e=>{if(e.target.closest('#play,#playPause')&&nativeVideo.ended&&nativeVideo.paused){e.preventDefault();e.stopImmediatePropagation();}},true);}
+ if(nativeVideo&&tool!=='sxlock'){document.addEventListener('click',e=>{if(e.target.closest('#play,#playPause')&&nativeVideo.ended&&nativeVideo.paused){e.preventDefault();e.stopImmediatePropagation();}},true);}
  const adapters=new Map();
  function protectRange(range){
   if(adapters.has(range)||range.closest('[inert]'))return;
