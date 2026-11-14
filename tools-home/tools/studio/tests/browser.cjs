@@ -13,7 +13,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises'),{creat
  p.assets.push({id:'bed-b',role:'bed',name:'bed2.mp4',path:root+'/video/bed2.mp4',size:bed.length,sha256:hash(bed)});
  let rev=0,renderCalls=0,studioWrites=0,createCalls=0,created=null;
  const scribeEntries=new Map();
- const browser=await chromium.launch({headless:true,args:['--autoplay-policy=no-user-gesture-required']});
+ const browser=await chromium.launch({executablePath:process.env.BROWSER_EXECUTABLE||undefined,headless:true,args:['--autoplay-policy=no-user-gesture-required']});
  try{
  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());await context.addInitScript(()=>localStorage.setItem('gs_previewlock_key','disposable-fixture-only'));
  await context.route('**/data/jokelab/library.json',r=>r.fulfill({json:{jokes:[{id,text:p.text,sources:[]},{id:'dad-brand-new',text:'New joke selected before any video exists.',sources:[]}]}}));
