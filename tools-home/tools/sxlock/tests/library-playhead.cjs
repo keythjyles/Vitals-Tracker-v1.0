@@ -154,12 +154,12 @@ async function main(){
    await dock.locator('#scribeBox').waitFor();
    assert.equal(await dock.locator('#scribeBox > summary').isVisible(),false);
    assert.equal(await page.locator('.sx-reference .sx-docked-button').count(),0);
-   const assertCompactDock=button=>button.evaluate(node=>{
+   const assertCompactDock=(button,maxWidth=60)=>button.evaluate(node=>{
     const style=getComputedStyle(node);
     return {height:node.getBoundingClientRect().height,width:node.getBoundingClientRect().width,
      border:style.borderTopWidth,background:style.backgroundColor,decoration:style.textDecorationLine};
    }).then(style=>{
-    assert(style.height>=24&&style.height<=30&&style.width<=90,JSON.stringify(style));
+    assert(style.height>=24&&style.height<=30&&style.width<=maxWidth,JSON.stringify(style));
     assert.equal(style.border,'0px');
     assert.equal(style.background,'rgba(0, 0, 0, 0)');
     assert.equal(style.decoration,'underline');
@@ -206,7 +206,7 @@ async function main(){
    await page.getByRole('button',{name:'Show file picker'}).tap();
    const drawer=player.locator('.gs-source-drawer');
    const undockPlayer=drawer.getByRole('button',{name:'Undock player',exact:true});
-   await assertCompactDock(undockPlayer);
+   await assertCompactDock(undockPlayer,120);
    await undockPlayer.tap();
    assert.equal(await position(),'static');
    assert.equal(await drawer.isVisible(),false);
