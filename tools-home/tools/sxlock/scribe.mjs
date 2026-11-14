@@ -1,6 +1,8 @@
-const $ = id => document.getElementById(id);
-const notes = $('notes');
-const video = $('video');
+import {frameStamp} from '../../shared/frame-stamp.mjs?v=1';
+
+export async function setupScribe({prefix = '', getPosition, getSource, recoveredNotes, noteBox, beforeMark} = {}) {
+const $ = id => document.getElementById(prefix + id);
+const notes = noteBox || $('notes');
 const dialog = $('scribeHistorySheet');
 const list = $('scribeEntries');
 const status = $('scribeStatus');
@@ -63,7 +65,7 @@ function queueSync(delay = 850) {
 }
 
 function capture(text = notes.value) {
- const source = $('videoName').dataset.expected || null;
+ const source = getSource() || null;
  if (!text.trim() || lastDraft?.text === text && lastDraft.video === source) return lastDraft?.saved || Promise.resolve(true);
  const now = Date.now();
  const entry = {id: `${now}-${crypto.randomUUID().replaceAll('-', '')}`, at: new Date(now).toISOString(), video: source, text};
@@ -168,7 +170,7 @@ function renderHistory() {
   restore.addEventListener('click', async () => {
    if (!await capture()) return;
    notes.value = entry.text;
-   lastDraft = {text: entry.text, video: $('videoName').dataset.expected || null, saved: Promise.resolve(true)};
+   lastDraft = {text: entry.text, video: getSource() || null, saved: Promise.resolve(true)};
    notes.dispatchEvent(new Event('input', {bubbles: true}));
    dialog.close();
    notes.setSelectionRange(notes.value.length, notes.value.length);
@@ -196,8 +198,7 @@ async function loadHistory(earlier = false) {
 }
 
 async function importSavedNotes() {
- await window.SxLock.ready;
- const saved = window.SxLock.recoveredScribes();
+ const saved = await recoveredNotes?.() || [];
  const existing = new Set([...localRows.values()].map(row => JSON.stringify([row.video, row.text])));
  for (const {notes: text, video: name, savedAt} of [...saved].reverse()) {
   if (typeof text !== 'string' || !text.trim()) continue;
@@ -217,18 +218,18 @@ notes.addEventListener('input', () => {
  void capture();
  if (!notes.value.trim()) lastDraft = null;
 });
-document.addEventListener('sxlock-before-scribe-replace', () => { if (notes.value.trim()) void capture(); lastDraft = null; });
-document.addEventListener('sxlock-scribe-restored', () => { if (notes.value.trim()) void capture(); });
+if (!prefix) {
+ document.addEventListener('sxlock-before-scribe-replace', () => { if (notes.value.trim()) void capture(); lastDraft = null; });
+ document.addEventListener('sxlock-scribe-restored', () => { if (notes.value.trim()) void capture(); });
+}
 const mark = $('scribeMark');
 mark.addEventListener('pointerdown', event => { if (document.activeElement === notes) event.preventDefault(); });
 mark.addEventListener('click', () => {
- if (!video.getAttribute('src')) { status.textContent = 'Load a video to mark a frame.'; return; }
- const fps = Number($('sourceFps').value) || 25;
- const time = window.SxLock?.currentTime() ?? (video.currentTime || 0);
- const frame = Math.round(time * fps);
- const ms = Math.round(time * 1000);
- const clock = `${Math.floor(ms / 60000)}:${(ms % 60000 / 1000).toFixed(3).padStart(6, '0')}`;
- const marker = `[F${frame} | ${clock} | ${fps} fps] `;
+ beforeMark?.();
+ const position = getPosition();
+ if (!position) { status.textContent = 'Load a video to mark a frame.'; return; }
+ const {frame} = position;
+ const marker = frameStamp(position);
  const start = notes.selectionStart;
  const prefix = notes.value.slice(0, start);
  const insert = (prefix && !prefix.endsWith('\n') ? '\n' : '') + marker;
@@ -250,7 +251,9 @@ $('scribeHistory').addEventListener('click', () => {
  showSyncStatus();
  dialog.showModal();
  void sync();
- void loadHistory();
+ void localStore('readonly', store => store.getAll()).then(rows => {
+  for (const row of rows) if (!localRows.has(row.id)) localRows.set(row.id, row);
+ }).catch(() => {}).finally(() => { if (dialog.open) void loadHistory(); });
 });
 $('scribeClose').addEventListener('click', () => dialog.close());
 $('scribeEarlier').addEventListener('click', () => { displayed += 12; void loadHistory(true); });
@@ -288,3 +291,21 @@ try {
 void importSavedNotes().catch(() => { status.textContent = 'Some older Scribe notes could not be copied into History.'; });
 if (localError && !status.textContent) status.textContent = 'Scribe storage on this device is unavailable.';
 queueSync(0);
+}
+
+if (typeof document !== 'undefined' && document.getElementById('scribeHistorySheet')) {
+ const video = document.getElementById('video');
+ await setupScribe({
+  getSource: () => document.getElementById('videoName').dataset.expected,
+  getPosition() {
+   if (!video.getAttribute('src')) return null;
+   const fps = Number(document.getElementById('sourceFps').value) || 25;
+   const time = window.SxLock?.currentTime() ?? video.currentTime;
+   return {frame: Math.round(time * fps), time, fps};
+  },
+  async recoveredNotes() {
+   await window.SxLock.ready;
+   return window.SxLock.recoveredScribes();
+  },
+ });
+}

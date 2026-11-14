@@ -12,7 +12,7 @@
     {
       "tool": "framelock",
       "source_file": "FrameLock_v1.3.12_CLEAN_MANUAL_25FPS.html",
-      "source_version": "1.4.8",
+      "source_version": "1.4.9",
       "source_sha256": "ca182c8155d6dd650ecb5dee3e7d1af288b8f667a61b618464e7183224b999f0",
       "hub_revision": "hub.1",
       "source_preserved": "tool-sources/FrameLock_v1.3.12_CLEAN_MANUAL_25FPS.html",
@@ -23,7 +23,7 @@
     {
       "tool": "motionlock",
       "source_file": "v0.1.5_MotionLock.html",
-      "source_version": "0.1.7",
+      "source_version": "0.1.8",
       "source_sha256": "660703a6916804f38926b7f098d825ffca0a5d6321502bcf4e5bc3abfa3d97c5",
       "hub_revision": "hub.1",
       "source_preserved": "tool-sources/v0.1.5_MotionLock.html",
@@ -57,7 +57,7 @@
     },
     {
       "tool": "sxlock",
-      "source_version": "R41",
+      "source_version": "R42",
       "hosted_path": "tools/sxlock/index.html",
       "description": "Place and mix effects with frame-accurate review and recoverable Scribe history.",
       "verification": "tools/GS_TOOL_REFINEMENT_INDEX.md",
@@ -97,7 +97,7 @@
     {
       "tool": "caplock",
       "tool_id": "GS-TOOL-CAPLOCK",
-      "source_version": "R31",
+      "source_version": "R32",
       "hosted_path": "tools/caplock/index.html",
       "description": "Device-first video and reusable layers with browser recovery. Optional saved Dropbox projects and existing Drive backup.",
       "navigation": [
@@ -112,14 +112,14 @@
     {
       "tool": "aspectlock",
       "tool_id": "GS-TOOL-ASPECTLOCK",
-      "source_version": "R31",
+      "source_version": "R32",
       "hosted_path": "tools/aspectlock/index.html",
       "description": "Single-animation compositor with compact fixed right controls, placement matrix, added-item row and tap-to-edit property sheet; paused seeking."
     },
     {
       "tool": "cliplock",
       "tool_id": "GS-TOOL-CLIPLOCK",
-      "source_version": "R16",
+      "source_version": "R17",
       "hosted_path": "tools/cliplock/index.html",
       "description": "Optional cutter for joke videos or Gemini caption animations; saved components carry verified production stages.",
       "verification": "tools/cliplock/CAPTION_RECOVERY_R16.json",

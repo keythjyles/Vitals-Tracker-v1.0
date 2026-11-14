@@ -3,16 +3,21 @@
 export const DEFAULT_CHROMA=Object.freeze({enabled:true,color:'#0a77d4',similarity:.18,blend:.04});
 export function validateChroma(raw){
  if(!raw||typeof raw.enabled!=='boolean'||!/^#[0-9a-f]{6}$/i.test(raw.color)||!Number.isFinite(raw.similarity)||raw.similarity<.01||raw.similarity>.5||!Number.isFinite(raw.blend)||raw.blend<0||raw.blend>.2)throw Error('Invalid caption background settings');
- return {enabled:raw.enabled,color:raw.color.toLowerCase(),similarity:raw.similarity,blend:raw.blend};
+ const checked = {enabled:raw.enabled,color:raw.color.toLowerCase(),similarity:raw.similarity,blend:raw.blend};
+ if(raw.backgroundOpacity!==undefined){
+  if(!Number.isFinite(raw.backgroundOpacity)||raw.backgroundOpacity<0||raw.backgroundOpacity>1)throw Error('Invalid background opacity');
+  checked.backgroundOpacity=raw.backgroundOpacity;
+ }
+ return checked;
 }
 const rgb=color=>[1,3,5].map(i=>parseInt(color.slice(i,i+2),16)),distance=(r,g,b)=>Math.sqrt(r*r+g*g+b*b)/441.6729559300637;
 export function removeBackground(pixels,key){
- if(!key?.enabled)return pixels;
- const [kr,kg,kb]=rgb(key.color),softness=key.blend;
+ if(!key?.enabled||key.backgroundOpacity===1)return pixels;
+ const [kr,kg,kb]=rgb(key.color),softness=key.blend,bg=key.backgroundOpacity??0;
  for(let i=0;i<pixels.length;i+=4){
   if(!pixels[i+3])continue;
   const d=distance(pixels[i]-kr,pixels[i+1]-kg,pixels[i+2]-kb),alpha=softness?Math.max(0,Math.min(1,(d-key.similarity)/softness)):Number(d>key.similarity);
-  pixels[i+3]=Math.round(pixels[i+3]*alpha);
+  pixels[i+3]=Math.round(pixels[i+3]*(bg+(1-bg)*alpha));
  }
  return pixels;
 }

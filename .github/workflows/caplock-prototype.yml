@@ -30,6 +30,7 @@ jobs:
             /tools-home/tools/sxlock/*.json
             /tools-home/tools/sxlock/vendor/
             /tools-home/tools/aspectlock/
+            /tools-home/tools/sxlock/scribe.mjs
             /tools-home/tools/previewlock/*.html
             /tools-home/tools/previewlock/*.js
             /tools-home/tools/previewlock/*.mjs
@@ -42,7 +43,7 @@ jobs:
       - run: sudo apt-get update -qq && sudo apt-get install -y ffmpeg
       - run: npm install --prefix /tmp/cap-browser --no-audit --no-fund playwright@1.62.1
       - run: node /tmp/cap-browser/node_modules/playwright/cli.js install --with-deps chromium
-      - run: node --test tools-home/tools/caplock/tests/*.test.mjs
+      - run: node --test tools-home/tools/caplock/tests/*.test.mjs tools-home/tools/aspectlock/*.test.mjs
       - run: python tools-home/tools/caplock/tests/make-fixtures.py
       - run: |
           python -m http.server 8766 --bind 0.0.0.0 > /tmp/cap-server.log 2>&1 &

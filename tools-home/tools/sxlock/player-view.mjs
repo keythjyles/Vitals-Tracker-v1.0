@@ -1,4 +1,4 @@
-import '../../shared/compact-player.mjs?v=9-sxlock';
+import '../../shared/compact-player.mjs?v=32';
 
 const $ = id => document.getElementById(id);
 const player = document.querySelector('.gs-player-shell');

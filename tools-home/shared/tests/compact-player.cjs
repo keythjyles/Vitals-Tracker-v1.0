@@ -63,10 +63,10 @@ async function checkFrameLock(page){
   assert.ok(noteButtons.every(button=>button.width<=120),'note actions have capped widths');
 
   await page.locator('#forward').click();
-  await page.getByText('Frame 1 · 0.033 s',{exact:true}).waitFor();
+  await page.getByText('F1 · 0:00.033 · 30 fps',{exact:true}).waitFor();
   await page.locator('#trimIn').click();
   await page.locator('#jumpforward').click();
-  await page.getByText('Frame 31 · 1.033 s',{exact:true}).waitFor();
+  await page.getByText('F31 · 0:01.033 · 30 fps',{exact:true}).waitFor();
   await page.locator('#trimOut').click();
   assert.equal(await page.locator('#trimInLabel').textContent(),'In F1');
   assert.equal(await page.locator('#trimOutLabel').textContent(),'Out F31');
@@ -139,7 +139,13 @@ async function checkFrameLock(page){
  const pages=['cliplock/?mode=video','caplock/','sxlock/','aspectlock/','previewlock/cloud-test.html','framelock/','motionlock/','wavlock/'];
  for(const path of pages){const frameLock=path==='framelock/',capLock=path==='caplock/';const page=await browser.newPage({viewport:frameLock?{width:360,height:640}:{width:390,height:740},isMobile:true,hasTouch:true}),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('http://127.0.0.1:8767/tools-home/tools/'+path);await page.waitForSelector('.gs-player-shell');await page.waitForFunction(()=>[...document.querySelectorAll('input[type=range]:not([hidden])')].every(e=>e.hasAttribute('data-gs-protected-range')||e.closest('[inert]')));await page.waitForTimeout(200);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,path+' fits phone width');
-  assert.equal(await page.locator('input[type=range]').evaluateAll(es=>es.some(e=>getComputedStyle(e).display!=='none'&&e.getBoundingClientRect().width>0)),false,path+' has no draggable ranges');
+  assert.equal(await page.locator('input[type=range]:not([data-gs-continuous])').evaluateAll(es=>es.some(e=>getComputedStyle(e).display!=='none'&&e.getBoundingClientRect().width>0)),false,path+' has no draggable ranges');
+  if(path!=='wavlock/'&&path!=='sxlock/'){
+   const ref=page.locator('.gs-video-reference');
+   assert.equal(await ref.getByRole('button',{name:'Scribe',exact:true}).count(),1,path+' has Scribe beside the readout');
+   const player=await page.locator('.gs-player-workspace').boundingBox();
+   assert.ok((await ref.boundingBox()).y>=player.y+player.height-1,path+' puts the readout below the picture');
+  }
   const layout=await page.evaluate(()=>{const workspace=document.querySelector('.gs-player-workspace'),rail=document.querySelector('.gs-player-rail'),stage=document.querySelector('.gs-player-picture');if(!workspace||!rail||!stage)return null;const r=rail.getBoundingClientRect(),s=stage.getBoundingClientRect();return {right:r.left>=s.right-1,rail:r.width,stage:s.width,left:s.left,rightEdge:r.right,viewport:innerWidth};});if(layout){assert.equal(layout.right,true,path+' transport hugs right');assert.equal(layout.rail,frameLock?112:76,path+' uses its saved rail width');if(path==='sxlock/'){assert.ok(layout.left<=1&&layout.rightEdge>=layout.viewport-1,'SxLock uses the full phone width');}else{assert.ok(layout.left>=16,path+' has a left inset');assert.ok(layout.rightEdge<=layout.viewport-16,path+' clears Samsung edge controls');}}
   assert.equal(await page.locator('.gs-source-drawer').isVisible(),false,path+' hides source controls');
   const heights=await page.locator('.gs-rail-stack button').evaluateAll(es=>es.filter(e=>e.getBoundingClientRect().height>0).map(e=>({id:e.id,h:e.getBoundingClientRect().height,frame:e.classList.contains('gs-frame-button')})));
