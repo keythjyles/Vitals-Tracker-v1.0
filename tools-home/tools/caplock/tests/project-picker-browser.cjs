@@ -2,7 +2,10 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises'),{creat
 module.exports=async(browser,base,alphaBytes)=>{
  const ctx=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),page=await ctx.newPage(),errors=[];
  page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- const root='/Grill Sergeant/JokeLab Productions',first='dad-00bda89167b4f15850aa1c91',other='dad-bed-only',legacy='dad-legacy-one',bedBytes=await fs.readFile('/tmp/caplock-fixtures/source25.mp4'),hash=createHash('sha256').update(bedBytes).digest('hex');let imports=0,writes=0;const cloudRequests=[];
+ const root='/Grill Sergeant/JokeLab Productions',first='dad-00bda89167b4f15850aa1c91',other='dad-bed-only',legacy='dad-legacy-one',bedBytes=await fs.readFile('/tmp/caplock-fixtures/source25.mp4'),hash=createHash('sha256').update(bedBytes).digest('hex');let imports=0,writes=0;
+ const cloudRequests=[];
+ let unblockTitle;
+ const titleReady=new Promise(resolve=>{unblockTitle=resolve;});
  const projects=new Map([[first,{id:first,title:'Pebble saved project',text:'Exact saved joke.',assets:[{id:'bed-a',name:'first.mp4',path:root+'/'+first+'/video/first.mp4',role:'bed'}]}],[other,{id:other,title:'Second bed-only project',text:'Second exact text.',assets:[{id:'bed-b',name:'second.mp4',path:root+'/'+other+'/video/second.mp4',role:'bed'},{id:'anim-b',name:'reaction.webm',path:root+'/'+other+'/animations/reaction.webm',role:'animation'},{id:'outro-b',name:'outro.mp4',path:root+'/'+other+'/outro/outro.mp4',role:'outro'}]}]]);
  await ctx.addInitScript(()=>localStorage.setItem('gs_previewlock_key','disposable-fixture-only'));
  await ctx.route('**/jokelab/PRODUCTION_LEDGER.json',r=>r.fulfill({json:{existingGroups:[{canonicalId:legacy,title:'Legacy original',assets:[{id:'legacy-video',src:'media/legacy.mp4',sha256:hash}]}]}}));
@@ -11,10 +14,13 @@ module.exports=async(browser,base,alphaBytes)=>{
  await ctx.route('https://gs-previewlock-api.onrender.com/**',async route=>{
   const u=new URL(route.request().url()),id=u.searchParams.get('id'),headers={'access-control-allow-origin':'*','access-control-allow-headers':'authorization,content-type'};
   if(route.request().method()==='OPTIONS')return route.fulfill({status:204,headers});cloudRequests.push([u.pathname,id]);let body,status=200,p=projects.get(id);
-  if(u.pathname==='/api/joke-projects')body={projects:[...projects.keys()].map(id=>({id,title:projects.get(id)?.title,path:root+'/'+id})),has_more:false};
+  if(u.pathname==='/api/joke-projects')body={projects:[...projects.keys()].map(id=>({id,...(id===other?{}:{title:projects.get(id)?.title}),path:root+'/'+id})),has_more:false};
   else if(u.pathname==='/api/assets')body={entries:[{'.tag':'file',name:'outside.mp4',path_display:'/Grill Sergeant/Animation Lab/outside.mp4'}],has_more:false};
   else if(u.pathname==='/api/joke-project'&&route.request().method()==='POST'){const d=JSON.parse(route.request().postData());assert.equal(d.text,'Exact catalog joke text.');p={id,title:d.title,text:d.text,assets:[]};projects.set(id,p);body={project:p,rev:'1'};writes++;}
-  else if(u.pathname==='/api/joke-project')body={project:p||null,rev:p?'1':null};
+  else if(u.pathname==='/api/joke-project'){
+   if(id===other)await titleReady;
+   body={project:p||null,rev:p?'1':null};
+  }
   else if(u.pathname==='/api/joke-project/asset'){assert.equal(createHash('sha256').update(route.request().postDataBuffer()).digest('hex'),hash);const a={id:'imported-original',name:u.searchParams.get('name'),role:'bed',path:root+'/'+id+'/video/legacy.mp4',sha256:hash};p.assets.push(a);imports++;body={project:p,asset:a,rev:'1'};}
   else if(u.pathname==='/api/joke-project/caplock'&&route.request().method()==='POST'){p.caplock=JSON.parse(route.request().postData()).session;body={rev:'1',persisted:true};}
   else if(u.pathname==='/api/playback')body={url:new URL('/picker-fixture/'+u.searchParams.get('path').split('/').pop(),base).href};
@@ -27,8 +33,11 @@ module.exports=async(browser,base,alphaBytes)=>{
  await page.setViewportSize({width:390,height:844});await page.evaluate(()=>window.scrollTo(0,document.body.scrollHeight));const sticky=await page.locator('#playerDock').boundingBox();assert.ok(sticky.y>=-.5&&sticky.y<2);assert.equal(await page.locator('#dockGrip').isVisible(),true);
  // Opening the cloud list does not read project manifests or fetch preview URLs.
  cloudRequests.length=0;
- if(!await page.locator('#pickerDrawer').isVisible())await page.locator('#dockGrip').click();await page.locator('#bedLoad').click();await page.locator('#projectPicker').waitFor({state:'visible'});assert.equal(await page.locator('#productionShowAll').isChecked(),false);await page.locator('#productionShowAll').check();await page.getByRole('heading',{name:'Second bed-only project',exact:true}).waitFor();
- assert.deepEqual(cloudRequests,[['/api/joke-projects',null]]);
+ if(!await page.locator('#pickerDrawer').isVisible())await page.locator('#dockGrip').click();await page.locator('#bedLoad').click();await page.locator('#projectPicker').waitFor({state:'visible'});assert.equal(await page.locator('#productionShowAll').isChecked(),false);await page.locator('#productionShowAll').check();
+ await page.getByRole('heading',{name:other,exact:true}).waitFor();
+ assert.ok(cloudRequests.every(([path])=>path==='/api/joke-projects'||path==='/api/joke-project'));
+ unblockTitle();
+ await page.getByRole('heading',{name:'Second bed-only project',exact:true}).waitFor();
  assert.equal(await page.locator('#projectPickerList video').count(),0);
  await page.getByRole('button',{name:'List',exact:true}).click();assert.match(await page.locator('#projectPickerList').getAttribute('class'),/list/);await page.getByRole('button',{name:'Grid',exact:true}).click();
  const row=page.locator('[data-project-id="'+other+'"]');await row.getByRole('button',{name:'Assets',exact:true}).click();await page.getByText('Second exact text.',{exact:true}).waitFor({state:'attached'});assert.equal(await page.locator('#projectPickerDetail video').count(),3);
@@ -54,6 +63,6 @@ module.exports=async(browser,base,alphaBytes)=>{
  await (await chooser).setFiles('/tmp/caplock-fixtures/source25.mp4');
  await p.waitForFunction(()=>document.querySelector('#video').readyState>=2);
  await noAuth.close();
- console.log(JSON.stringify({projectPicker:{cloudBrowseFetchesNamesOnly:true,localFileAvailableFromCloudError:true,gridListPreview:true,allProjectAssets:true,textOnlyAndBedOnlySupported:true,legacyIdentityHashImportAndReuse:true,stickyBedControl:true,centeredContainedAtThreeSizes:sizes,visibleConnectionFailure:true,errors}}));
+ console.log(JSON.stringify({projectPicker:{cloudBrowseBeforeTitlesArrive:true,cloudPreviewsOnDemand:true,localFileAvailableFromCloudError:true,gridListPreview:true,allProjectAssets:true,textOnlyAndBedOnlySupported:true,legacyIdentityHashImportAndReuse:true,stickyBedControl:true,centeredContainedAtThreeSizes:sizes,visibleConnectionFailure:true,errors}}));
 };
 

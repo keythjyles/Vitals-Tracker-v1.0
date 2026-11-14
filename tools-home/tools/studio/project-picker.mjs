@@ -16,6 +16,7 @@ export function createProjectPicker({api,onOpenProject,onUseAsset,onLocal,onPaus
  const path=el('p',PROJECT_ROOT,'picker-path'),status=el('p','','picker-status');status.id='projectPickerStatus';status.setAttribute('role','status');
  const results=el('div',undefined,'picker-list');results.id='projectPickerList';
  const detail=el('div',undefined,'picker-detail');detail.hidden=true;detail.id='projectPickerDetail';
+ const knownTitles=new Map();
  const footer=el('div',undefined,'picker-footer');footer.append(button(localLabel,()=>{dialog.close();onLocal();}));
  dialog.append(heading,tools,path,status,results,detail,footer);document.body.append(dialog);
  let mode='grid',epoch=0,projects=new Map(),catalog=null,listing=null,entries=null,current=null,previews=new Map(),previewEpoch=0;
@@ -53,7 +54,7 @@ export function createProjectPicker({api,onOpenProject,onUseAsset,onLocal,onPaus
  }
  async function load(force=false){
   const token=++epoch;current=null;path.textContent=PROJECT_ROOT;search.placeholder='Search your joke projects';title.textContent=sourceFilter?'Caption a jokelet':deferAssets?'Cloud projects':'Open project · your jokes';home.textContent=sourceFilter?'All projects':'Joke projects';message(sourceFilter?'Receiving cuts from Clipper…':'Loading your joke projects…');
-  if(force){listing=null;entries=null;previews.clear();}
+  if(force){listing=null;entries=null;previews.clear();knownTitles.clear();}
   if(sourceFilter&&extraProjects){
    const extras=await extraProjects(sourceFilter);if(token!==epoch)return;
    projects=new Map(extras.map(p=>[p.id,p]));path.textContent=[...projects.values()][0]?.cutOriginLocal?.source.name||'Clipper cuts';render();cutCountMessage();return;
@@ -66,14 +67,35 @@ export function createProjectPicker({api,onOpenProject,onUseAsset,onLocal,onPaus
    if(cloudResult.value.has_more&&!deferAssets){try{const all=await api('/api/assets');if(all.has_more)throw Error('Incomplete cloud folder listing');folders=projectFolders(all.entries);}catch(e){message('Folder list incomplete: '+e.message,true);}}
    if(token!==epoch)return;
    if(cloudResult.value.has_more&&deferAssets)message('Showing the first page. Other folders can find additional projects.',true);
-   for(const f of folders){const prior=projects.get(f.id)||{id:f.id,title:(deferAssets&&f.title)||f.id,assets:[]};projects.set(f.id,{...prior,path:f.path||PROJECT_ROOT+'/'+f.id,saved:true});}
+   for(const f of folders){const prior=projects.get(f.id)||{id:f.id,title:(deferAssets&&(f.title||knownTitles.get(f.id)))||f.id,assets:[]};projects.set(f.id,{...prior,path:f.path||PROJECT_ROOT+'/'+f.id,saved:true});}
   }else{listing=null;message('Saved project connection unavailable: '+cloudResult.reason.message+' Your catalog previews remain available.',true);}
   if(extraProjects){try{const extras=await extraProjects();if(token!==epoch)return;projects=new Map([...extras.map(p=>[p.id,{...projects.get(p.id),...p}]),...[...projects].filter(([id])=>!extras.some(p=>p.id===id))]);}catch(e){message('Cut list unavailable: '+e.message,true);}}
   render();if(cloudResult.status==='fulfilled'&&!status.classList.contains('error'))message(deferAssets?'Select a project or open Other folders.':module?'Ready for this stage · Show all files reveals other stages and ordinary imports.':projects.size+' joke projects · choose Open project to load the bed and saved work.');
-  if(deferAssets)return;
-  // Read at most three manifests at once; render incrementally without blocking the picker.
-  const pending=[...projects.values()].filter(p=>p.saved);let index=0;
-  await Promise.all(Array.from({length:Math.min(3,pending.length)},async()=>{while(index<pending.length){const p=pending[index++];try{const d=await api('/api/joke-project?id='+encodeURIComponent(p.id));if(token!==epoch)return;if(d.project){projects.set(p.id,{...p,...d.project,saved:true});const old=results.querySelector('[data-project-id="'+p.id+'"]');const item=projects.get(p.id);if(allowed(item)){if(old)old.replaceWith(card(item));else if(!search.value||item.title?.toLowerCase().includes(search.value.toLowerCase()))results.append(card(item));}else old?.remove();}}catch(e){if(token===epoch)message('Some saved projects could not load: '+e.message,true);}}}));
+  // Hydrate missing names in the background. Media previews stay in the selected project.
+  const pending=[...projects.values()].filter(p=>p.saved&&(!deferAssets||p.title===p.id));
+  let index=0;
+  const hydrate=Promise.all(Array.from({length:Math.min(3,pending.length)},async()=>{
+   while(index<pending.length){
+    const p=pending[index++];
+    try{
+     const d=await api('/api/joke-project?id='+encodeURIComponent(p.id));
+     if(token!==epoch)return;
+     if(!d.project)continue;
+     if(deferAssets){
+      if(!d.project.title)continue;
+      knownTitles.set(p.id,d.project.title);
+     }
+     const item={...(projects.get(p.id)||p),...(deferAssets?{title:d.project.title}:d.project),saved:true};
+     projects.set(p.id,item);
+     const old=results.querySelector('[data-project-id="'+p.id+'"]');
+     const query=search.value.trim().toLowerCase();
+     if(allowed(item)&&(item.title+' '+item.id).toLowerCase().includes(query)){
+      if(old)old.replaceWith(card(item));else results.append(card(item));
+     }else old?.remove();
+    }catch(e){if(token===epoch)message('Some saved projects could not load: '+e.message,true);}
+   }
+  }));
+  if(!deferAssets)await hydrate;
  }
  function cutCountMessage(){if(openingProject)return;const ready=[...projects.values()].filter(p=>['ready','saved'].includes(p.cutState)).length;message(projects.size?ready+' of '+projects.size+' jokelets ready · choose Open project.':'Open Clipper and tap CapLock to send your saved cuts.');}
  async function refreshExtras(){
@@ -90,14 +112,14 @@ export function createProjectPicker({api,onOpenProject,onUseAsset,onLocal,onPaus
  }
  async function showProject(id){
   stop();let p=projects.get(id);if(!p)return;
-  const token=deferAssets?++epoch:epoch;
+  const token=epoch;
   current=id;
   detail.replaceChildren();detail.hidden=true;
   if(p.saved&&(p.stagedCut||deferAssets&&!p.assetsLoaded)){
    message('Loading assets for '+(p.title||p.id)+'…');
    try{
     const d=await api('/api/joke-project?id='+encodeURIComponent(id));
-    if(token!==epoch||!dialog.open)return;
+    if(token!==epoch||!dialog.open||current!==id)return;
     if(d.project){p={...p,...d.project,...(deferAssets?{assetsLoaded:true}:{})};projects.set(id,p);}
    }catch(e){if(token===epoch)message('Project assets unavailable: '+e.message,true);return;}
   }

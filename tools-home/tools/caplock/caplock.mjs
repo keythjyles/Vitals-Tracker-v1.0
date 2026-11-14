@@ -59,7 +59,7 @@ function timelineFrame(){
 function syncExtent(){const end=Math.max(0,compositionFrames(project,bedFrames)-1);if(end!==maxFrame)compositionEnded=false;maxFrame=end;$('seek').max=maxFrame;if(frame>maxFrame){pause();frame=maxFrame;}}
 const say=s=>$('status').textContent=s, current=()=>project.captions.find(c=>c.id===selected);
 if(!inStudio()&&!window.name)window.name='gs-caplock';
-let importingVideo=false;
+let importingVideo=false,sourceSelection=0;
 function lockSourceButtons(busy){
  importingVideo=busy;
  for(const id of videoSourceButtons)$(id).disabled=busy;
@@ -80,6 +80,7 @@ async function loadDeviceVideo(file,{throwOnError=false}={}){
   return;
  }
  lockSourceButtons(true);
+ ++sourceSelection;
  pause();
  const epoch=projectEpoch;
  try{
@@ -563,7 +564,8 @@ async function storeCloudAsset(ref,file,role='bed'){
 $('saveCloud').onclick=()=>saveCloudWorkspace().catch(e=>{$('saveStatus').textContent='Save failed: '+e.message;});
 $('placeClip').onclick=()=>change(()=>{const c=clipCurrent();if(!c)return;const length=c.outFrame-c.inFrame;c.inFrame=frame;c.outFrame=frame+length;c.visible=true;});
 async function openJokeWorkspace(id,assetId){
- pause();if(cloudSession&&dirty){clearTimeout(cloudTimer);await saveCloudWorkspace();}await cloudWrite.catch(()=>{});const d=await api('/api/joke-project/caplock?id='+encodeURIComponent(id)+'&asset='+encodeURIComponent(assetId));archiveWorkspace(cloudPreviousKey,cloudDraftKey);cloudSession=null;clearTimeout(cloudTimer);
+ const selection=sourceSelection;
+ pause();if(cloudSession&&dirty){clearTimeout(cloudTimer);await saveCloudWorkspace();}await cloudWrite.catch(()=>{});const d=await api('/api/joke-project/caplock?id='+encodeURIComponent(id)+'&asset='+encodeURIComponent(assetId));if(selection!==sourceSelection)throw Error('A device file was selected while the cloud project was opening.');archiveWorkspace(cloudPreviousKey,cloudDraftKey);cloudSession=null;clearTimeout(cloudTimer);
  let next=withCaptionBatch(d.session,d.project,d.asset);const savedFocus=d.session?.captionSequence?.source?.cutId===d.asset.cuts.id&&d.session.version>=5?d.session.editFocus:'overlay';
  projectContext=d.project;await openProject(next);cloudSession={id,asset:assetId,rev:d.rev};showPage('viewer');selectedClip=project.captionSequence.activeId;layers.selected=selectedClip;editMode=savedFocus==='none'?'view':'move';project.editFocus=savedFocus;render();await seek(next.workspace?.playhead||0);$('saveCloud').hidden=false;localStorage.setItem('gs_studio_project',id);localStorage.setItem('gs_caplock_caption_project',id);localStorage.setItem('gs_caplock_caption_asset',assetId);importState={project:d.project,id,assetId};renderCaptionImport();await saveCloudWorkspace();say('Caption components ready in '+d.project.title+'. Previous / Next choose a caption; Insert places it.');
 }
@@ -599,9 +601,11 @@ const projectPicker=createProjectPicker({
  }
 });
 async function openJokeletProject(record,chosenBed,progress){
+ const selection=sourceSelection;
  if(record.stagedCut){
   if(cloudSession&&dirty){clearTimeout(cloudTimer);await saveCloudWorkspace();}await cloudWrite.catch(()=>{});
   record=await publishCutProject(api,record.id,progress);
+  if(selection!==sourceSelection)throw Error('A device file was selected while the cloud project was opening.');
  }
  return openFullJokeProject(record,chosenBed,progress);
 }
@@ -724,6 +728,7 @@ else if(!inStudio()&&params.get('project')&&params.get('caption'))openJokeWorksp
 else if(!inStudio()&&params.get('project'))openFullJokeProject({id:params.get('project')}).catch(e=>say('Saved joke project unavailable: '+e.message));
 
 async function openFullJokeProject(record,chosenBed=null,progress=say){
+ const selection=sourceSelection;
  pause();if(cloudSession&&dirty){clearTimeout(cloudTimer);await saveCloudWorkspace();}await cloudWrite;
  let d=await api('/api/joke-project?id='+encodeURIComponent(record.id));
  if(!d.project){
@@ -737,6 +742,7 @@ async function openFullJokeProject(record,chosenBed=null,progress=say){
   const hash=[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(n=>n.toString(16).padStart(2,'0')).join('');if(hash!==a.sha256)throw Error('Original hash changed: '+a.name+'. No replacement imported.');
   d=await api('/api/joke-project/asset?id='+encodeURIComponent(record.id)+'&role=bed&name='+encodeURIComponent(a.name),{method:'POST',headers:{'content-type':'application/octet-stream'},body:bytes});
  }
+ if(selection!==sourceSelection)throw Error('A device file was selected while the cloud project was opening.');
  const p=d.project,assetId=p.caplock?.workspace?.assetId||p.assets.filter(a=>a.role==='caption'&&a.cuts?.status==='complete').at(-1)?.id;
  if(assetId&&p.assets.some(a=>a.id===assetId&&a.cuts?.status==='complete'))await openJokeWorkspace(p.id,assetId);
  else{
