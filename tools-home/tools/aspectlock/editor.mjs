@@ -1,12 +1,13 @@
 import {addColorWheel} from '../../shared/color-wheel.mjs?v=1';
 import {paintMatrix} from "../../shared/item-matrix.mjs?v=1";
-import {beginVideoLoad,loadVideoSource,clearVideoSource} from "./media-source.mjs?v=32";
+import {beginVideoLoad,loadVideoSource,clearVideoSource} from "./media-source.mjs?v=33";
 import {Composition,WIDTH,HEIGHT,FPS,lastFrame,frameAt,placementAt,fitRect} from "./composition.mjs?v=32";
 import {setupPinnedSections} from "../../shared/pinned-sections.mjs?v=32";
-import {setupToolbox} from "./toolbox.mjs?v=32";
+import {setupToolbox} from "./toolbox.mjs?v=33";
 import {formatFrameTime,writeFrameClock,frameStepControl} from "../../shared/frame-stamp.mjs?v=2";
 import {detectBackground} from "../caplock/background.mjs?v=32";
-const API='https://gs-previewlock-api.onrender.com',key=localStorage.getItem('gs_previewlock_key')||'',Q=id=>document.getElementById(id),C=Q('output'),ctx=C.getContext('2d',{willReadFrequently:true}),stage=Q('stage'),bv=Q('bv'),ov=Q('ov'),work=Q('workPicture'),wc=work.getContext('2d'),compositor=new Composition();
+const VERSION = 'R33';
+const API='https://gs-previewlock-api.onrender.com',key=localStorage.getItem('gs_previewlock_key')||'',Q=id=>document.getElementById(id),C=Q('output'),ctx=C.getContext('2d'),stage=Q('stage'),bv=Q('bv'),ov=Q('ov'),work=Q('workPicture'),wc=work.getContext('2d'),compositor=new Composition();
 let pickerTarget='base', manualVideoSelection=false;function formatBytes(n){return n?(n/1048576).toFixed(1)+' MB':'Size unknown'}function renderLibrary(){const search=Q('assetSearch').value.trim().toLowerCase(),sort=Q('assetSort').value;let arr=items.filter(f=>f.name.toLowerCase().includes(search));arr.sort((a,b)=>sort==='name'?a.name.localeCompare(b.name):sort==='nameDesc'?b.name.localeCompare(a.name):sort==='size'?(b.size||b.file?.size||0)-(a.size||a.file?.size||0):sort==='old'?String(a.server_modified||a.client_modified||'').localeCompare(String(b.server_modified||b.client_modified||'')):String(b.server_modified||b.client_modified||'').localeCompare(String(a.server_modified||a.client_modified||'')));Q('assetCount').textContent=arr.length+' cloud videos';const box=Q('assetResults');box.replaceChildren();for(const f of arr){const pickValue=new URLSearchParams(location.search).get('studio')==='1'&&parent!==window?f.path_display:f.name;const card=document.createElement('div');card.className='assetCard'+(Q(pickerTarget).value===pickValue?' selected':'');const thumb=document.createElement('div');thumb.className='assetThumb';thumb.textContent='▶ Video preview';const title=document.createElement('div');title.className='assetName';title.textContent=f.name;const meta=document.createElement('div');meta.className='assetMeta';meta.textContent=[formatBytes(f.size||f.file?.size),f.server_modified||f.client_modified||''].filter(Boolean).join(' · ');const actions=document.createElement('div');actions.className='assetActions';const preview=document.createElement('button');preview.textContent='▶ Preview';preview.onclick=async()=>{preview.disabled=true;preview.textContent='Loading…';try{const p=await api('/api/playback?path='+encodeURIComponent(f.path_display));const video=document.createElement('video');video.className='assetPreview';video.controls=true;video.playsInline=true;video.preload='metadata';video.src=p.url;video.style.display='block';card.append(video);video.play().catch(()=>{});preview.textContent='▶ Play'}catch(e){preview.textContent='Preview failed';report(e.message)}finally{preview.disabled=false}};const choose=document.createElement('button');choose.textContent='Use this video';choose.onclick=async()=>{const id=pickerTarget;Q('assetDialog').close();await chooseCloudVideo(id,pickValue)};actions.append(preview,choose);card.append(thumb,title,meta,actions);box.append(card)}}function openLibrary(id) {
   pickerTarget = id;
   Q('libraryTitle').textContent = id === 'base' ? 'Choose bed video' : 'Choose animation overlay';
@@ -46,10 +47,10 @@ async function loadFile(name, video) {
  const file = items.find(item => item.path_display === name || item.name.toLowerCase() === name.toLowerCase());
  if (!file) throw new Error('Cloud video not found: ' + name);
  const signal = beginVideoLoad(video);
- const playback = await api('/api/playback?path=' + encodeURIComponent(file.path_display));
- if (signal.aborted) return null;
  Q('pause').click();
  overlayPreview = false;
+ const playback = await api('/api/playback?path=' + encodeURIComponent(file.path_display));
+ if (signal.aborted) return null;
  if (!await loadVideoSource(video, playback.url, file.name, signal)) return null;
  refreshLoadedVideo(video);
  return file;
@@ -71,7 +72,7 @@ function markVideoSelection(id, name, cloudValue) {
 function placeLoadedOverlay(at) {
  startFrame = at;
  ({x,y,width:w} = fitRect(ratio));
- if (ov.readyState >= 1 && bv.readyState >= 1) seekBedFrame(startFrame);
+ syncOverlay();
  showTiming();
  update();
 }
@@ -151,7 +152,7 @@ function keySettings() {
 }
 function spec() {
  return {
-  tool: 'AspectLock', toolId: 'GS-TOOL-ASPECTLOCK', version: 'R32',
+  tool: 'AspectLock', toolId: 'GS-TOOL-ASPECTLOCK', version: VERSION,
   base: Q('base').value, overlay: Q('overlay').value, canvas: {width: WIDTH, height: HEIGHT},
   portraitPerspective: {x: bx, y: by, width: bw, finalOutput: 'fixed 9:16 viewport'},
   overlayTransform: {...overlayRect(), aspectRatio: ratio},
@@ -207,6 +208,10 @@ function sceneFor(bed = bv, animation = ov, active = overlayActive, maxWidth = W
  return {bed, bedRect: bedRect(), overlay, overlayRect: overlayRect(), opacity, order: Q('order').value};
 }
 
+function outsideOutput({x, y, width, height}) {
+ return x < 0 || y < 0 || x + width > WIDTH || y + height > HEIGHT;
+}
+
 function drawPicture() {
  if (stage.clientWidth < 1 || stage.clientHeight < 1) return;
  const left = stage.clientWidth / 2 - WIDTH * displayScale / 2 + viewX;
@@ -225,7 +230,7 @@ function drawPicture() {
  wc.setTransform(dpr, 0, 0, dpr, 0, 0);
  wc.fillStyle = '#080d14';
  wc.fillRect(0, 0, stage.clientWidth, stage.clientHeight);
- if (Q('showOutside').checked) {
+ if (Q('showOutside').checked && (outsideOutput(scene.bedRect) || (scene.overlay && outsideOutput(scene.overlayRect)))) {
   wc.save();
   wc.translate(left, top);
   wc.scale(displayScale, displayScale);
@@ -257,12 +262,18 @@ function updateClock() {
 let lastDraw = -Infinity;
 function draw(now = performance.now()) {
  raf = requestAnimationFrame(draw);
- if (now - lastDraw < 30 || document.hidden || !bv.getAttribute('src') && !ov.getAttribute('src')) return;
+ if (now - lastDraw < 30 || document.hidden || (bv.paused && ov.paused)) return;
  lastDraw = now;
+ paintPlayback();
+}
+function paintPlayback() {
  syncOverlay();
  updateClock();
  drawPicture();
  paintAddedMatrix();
+}
+for (const video of [bv, ov]) {
+ for (const event of ['loadeddata', 'seeked', 'pause', 'ended']) video.addEventListener(event, paintPlayback);
 }
 function sound() {
  bv.muted = Q('baseAudio').value !== 'on';
@@ -373,24 +384,33 @@ Q('clearStart').onclick = () => {
  seekBedFrame(0);
  update();
 };
-Q('play').onclick = async () => {
- if (rendering || bv.readyState < 2) return;
+async function playPreview(video, name) {
+ const source = video.getAttribute('src');
+ try { await video.play(); }
+ catch (error) {
+  if (error.name !== 'AbortError' && video.getAttribute('src') === source) {
+   report('Could not play the ' + name + '. ' + error.message);
+  }
+ }
+}
+Q('play').onclick = () => {
+ if (rendering || bv.readyState < 1) return;
+ toolbox.stopPreview();
  overlayPreview = false;
- try { await bv.play(); }
- catch (error) { report(error.message); }
+ return playPreview(bv, 'bed');
 };
 Q('pause').onclick = () => { bv.pause(); ov.pause(); };
 Q('editorScribe').addEventListener('toggle', () => { if (Q('editorScribe').open) Q('pause').click(); });
 bv.addEventListener('pause', () => { if (!overlayPreview) ov.pause(); });
-Q('playOverlay').onclick = async () => {
- if (rendering || ov.readyState < 2) return;
+Q('playOverlay').onclick = () => {
+ if (rendering || ov.readyState < 1) return;
+ toolbox.stopPreview();
  Q('pause').click();
  overlayPreview = true;
  if (ov.currentTime < trimInTime() || ov.currentTime >= trimOutTime()) ov.currentTime = trimInTime();
  ov.playbackRate = 1;
  syncOverlay();
- try { await ov.play(); }
- catch (error) { report(error.message); }
+ return playPreview(ov, 'animation');
 };
 Q('pauseOverlay').onclick = () => { ov.pause(); };
 Q('overlayZero').onclick = () => {
@@ -469,9 +489,12 @@ Q('editBase').onclick = editBed;
 Q('editBedView').onclick = editBed;
 let viewZoom=1,viewX=0,viewY=0,viewMode=false,viewGesture=null,displayScale=1;
 const viewPointers=new Map();
+function previewFitScale(width = WIDTH, height = HEIGHT) {
+ // Leave room for the blue outline while using the available monitor height.
+ return Math.max(.0001, Math.min((stage.clientWidth - 8) / width, (stage.clientHeight - 8) / height));
+}
 function showView() {
- const available = Math.min(stage.clientWidth / WIDTH, stage.clientHeight / HEIGHT);
- displayScale = Math.max(.0001, available * .84 * viewZoom);
+ displayScale = previewFitScale() * viewZoom;
  const scene = Q('stageScene');
  scene.style.left = (stage.clientWidth - WIDTH * displayScale) / 2 + viewX + 'px';
  scene.style.top = (stage.clientHeight - HEIGHT * displayScale) / 2 + viewY + 'px';
@@ -497,8 +520,8 @@ Q('viewReset').onclick = () => {
  if (ov.readyState >= 1 && Q('showOutside').checked) rects.push(overlayRect());
  const left = Math.min(...rects.map(rect => rect.x)), top = Math.min(...rects.map(rect => rect.y));
  const right = Math.max(...rects.map(rect => rect.x + rect.width)), bottom = Math.max(...rects.map(rect => rect.y + rect.height));
- const fit = Math.min(stage.clientWidth / WIDTH, stage.clientHeight / HEIGHT) * .84;
- viewZoom = fit ? Math.max(.25, Math.min(1, stage.clientWidth * .88 / ((right - left) * fit), stage.clientHeight * .88 / ((bottom - top) * fit))) : 1;
+ const fit = previewFitScale();
+ viewZoom = Math.max(.25, Math.min(1, previewFitScale(right - left, bottom - top) / fit));
  viewX = (WIDTH / 2 - (left + right) / 2) * fit * viewZoom;
  viewY = (HEIGHT / 2 - (top + bottom) / 2) * fit * viewZoom;
  showView();
@@ -510,7 +533,7 @@ stage.addEventListener('pointerdown',e=>{if(!viewMode)return;e.preventDefault();
 stage.addEventListener('pointermove',e=>{if(!viewPointers.has(e.pointerId)||!viewGesture)return;e.preventDefault();viewPointers.set(e.pointerId,viewPoint(e));const ps=[...viewPointers.values()],a=ps[0],b=ps[1]||a,g=viewGesture,cx=(a.x+b.x)/2,cy=(a.y+b.y)/2;viewZoom=g.d&&ps.length>1?Math.max(.25,Math.min(4,g.z*Math.hypot(b.x-a.x,b.y-a.y)/g.d)):g.z;const f=viewZoom/g.z;viewX=(cx-stage.clientWidth/2)-(g.x-stage.clientWidth/2-g.tx)*f;viewY=(cy-stage.clientHeight/2)-(g.y-stage.clientHeight/2-g.ty)*f;showView()});
 for(const ev of ['pointerup','pointercancel','lostpointercapture'])stage.addEventListener(ev,e=>{viewPointers.delete(e.pointerId);startViewGesture()});
 stage.addEventListener('wheel',e=>{if(!viewMode)return;e.preventDefault();const p=viewPoint(e);zoomView(viewZoom*Math.exp(-e.deltaY*.0015),p.x,p.y)},{passive:false});
-window.addEventListener('resize',()=>{showView();update()});
+window.addEventListener('resize',showView);
 Q('stageNav').append(...Q('railButtons').children); Q('railButtons').remove();
 const pointers=new Map();let gesture=null;
 function applyGesture(){if(!gesture)return;const pts=[...pointers.values()],g=gesture,scale=1/displayScale;if(pts.length>=2&&g.distance){const d=Math.hypot(pts[1].x-pts[0].x,pts[1].y-pts[0].y),factor=d/g.distance;if(g.mode==='base'){bw=Math.max(85,Math.min(WIDTH*3,g.w*factor));bx=g.x+(g.w-bw)/2;by=g.y+(g.w-bw)*8/9}else{w=Math.max(70,Math.min(1600,g.w*factor));x=g.x+(g.w-w)/2;y=g.y+(g.w-w)/ratio/2}}else if(pts.length===1){const p=pts[0],dx=(p.x-g.startX)*scale,dy=(p.y-g.startY)*scale;if(g.resize){if(g.mode==='base')bw=Math.max(85,Math.min(WIDTH*3,g.w+dx));else w=Math.max(70,Math.min(1600,g.w+dx))}else if(g.mode==='base'){bx=g.x+dx;by=g.y+dy}else{x=g.x+dx;y=g.y+dy}}update()}
@@ -553,14 +576,15 @@ Q('render').onclick = async () => {
 const keyModeFromUrl = () => ['green','blue','custom','alpha','off'].includes(params.get('key')) ? params.get('key') : null;
 function restoreSettings(saved, transformLegacy = true) {
  const bed = saved.portraitPerspective, overlay = saved.overlayTransform;
- const useLegacy = transformLegacy && saved.version !== 'R32' && bed?.width > 0;
+ const fixedViewport = saved.version === 'R32' || saved.version === VERSION;
+ const useLegacy = transformLegacy && !fixedViewport && bed?.width > 0;
  const scale = useLegacy ? WIDTH / bed.width : 1;
  if (overlay) {
   x = (overlay.x - (useLegacy ? bed.x : 0)) * scale;
   y = (overlay.y - (useLegacy ? bed.y : 0)) * scale;
   w = overlay.width * scale;
  }
- if (bed && saved.version === 'R32') { bx = bed.x; by = bed.y; bw = bed.width; }
+ if (bed && fixedViewport) { bx = bed.x; by = bed.y; bw = bed.width; }
  Q('order').value = saved.layerOrder || 'overlay';
  editMode = 'view';
  Q('keyMode').value = saved.blueRemoval === 'on' ? 'blue' : saved.blueRemoval || 'green';
@@ -657,7 +681,7 @@ function newEdit(keepBed) {
  detach('overlay');
  if (!keepBed) detach('base');
  overlayActive = overlayPreview = overlayAudible = false;
- restoreSettings({version:'R32', blueRemoval:keyModeFromUrl() || 'green', portraitPerspective:{x:0,y:0,width:WIDTH}, overlayTransform:{x:40,y:350,width:460}});
+ restoreSettings({version:VERSION, blueRemoval:keyModeFromUrl() || 'green', portraitPerspective:{x:0,y:0,width:WIDTH}, overlayTransform:{x:40,y:350,width:460}});
  Q('viewReset').click();
  if (keepBed) seekBedFrame(0);
  if (Q('newEditDialog').open) Q('newEditDialog').close();
