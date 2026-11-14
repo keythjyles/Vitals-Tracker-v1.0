@@ -10,6 +10,8 @@ import {googleOAuthRoutes,googleDriveReady} from './drive-private.mjs';
 import {runExperiment,handleExperimentRead} from './gemini-experiment.mjs';
 import {handleOwnerNotes} from './gemini-owner-notes.mjs';
 import {handleAudio} from './audio-store.mjs';
+import {audioDriveAuth} from './audio-drive-auth.mjs';
+import {handleDriveAudio} from './audio-drive-store.mjs';
 import {handleScribe} from './scribe-store.mjs';
 import {scribeAuth} from './scribe-auth.mjs';
 import {randomBytes,createHash,timingSafeEqual} from 'node:crypto';
@@ -21,6 +23,7 @@ const REFRESH=process.env.DROPBOX_REFRESH_TOKEN||'';
 const ADMIN=process.env.PREVIEWLOCK_SETUP_KEY||'';
 const states=new Map();
 const scribe=scribeAuth({key:ADMIN,clientId:process.env.GOOGLE_OAUTH_CLIENT_ID,clientSecret:process.env.GOOGLE_OAUTH_CLIENT_SECRET});
+const audioDrive=audioDriveAuth({key:ADMIN,clientId:process.env.GOOGLE_OAUTH_CLIENT_ID,clientSecret:process.env.GOOGLE_OAUTH_CLIENT_SECRET});
 const send=(r,s,o)=>{r.writeHead(s,{'content-type':'application/json','cache-control':'no-store','access-control-allow-origin':'*'});r.end(JSON.stringify(o));};
 const eq=(a,b)=>{if(!a||!b)return false;let x=Buffer.from(a),y=Buffer.from(b);return x.length===y.length&&timingSafeEqual(x,y)};
 let tokenValue='',tokenExpiry=0,tokenPending=null;
@@ -33,8 +36,9 @@ async function token(){
 async function metadata(path,t){const r=await fetch('https://api.dropboxapi.com/2/files/get_metadata',{method:'POST',headers:{authorization:'Bearer '+t,'content-type':'application/json'},body:JSON.stringify({path})});if(!r.ok)throw Error('Dropbox metadata failed');return r.json()}
 const server=http.createServer(async(req,res)=>{
  const u=new URL(req.url||'/',BASE);
- if(req.method==='GET'&&['/','/health'].includes(u.pathname))return send(res,200,{service:'gs-previewlock-api',status:'ok',assetCatalogVersion:2,jokeProjectVersion:1,cutJokeletVersion:1,productionStagesVersion:1,contentReviewVersion:1,jokeLabProductionVersion:1,gemini:geminiHealth(),audioSaveVersion:1,audioDeleteVersion:1,audioClassificationVersion:1,scribeHistoryVersion:1,dropboxReady:Boolean(KEY&&SECRET&&REFRESH),privateDriveReady:googleDriveReady()});
+ if(req.method==='GET'&&['/','/health'].includes(u.pathname))return send(res,200,{service:'gs-previewlock-api',status:'ok',assetCatalogVersion:2,jokeProjectVersion:1,cutJokeletVersion:1,productionStagesVersion:1,contentReviewVersion:1,jokeLabProductionVersion:1,gemini:geminiHealth(),audioSaveVersion:1,audioDriveVersion:1,audioDriveConfigured:audioDrive.configured,audioDeleteVersion:1,audioClassificationVersion:1,scribeHistoryVersion:1,dropboxReady:Boolean(KEY&&SECRET&&REFRESH),privateDriveReady:googleDriveReady()});
  if(await scribe.route(req,res,u))return;
+ if(await audioDrive.route(req,res,u))return;
  if(await googleOAuthRoutes(req,res,u))return;
  if(req.method==='GET'&&u.pathname==='/setup'){
   res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-store','referrer-policy':'no-referrer','x-content-type-options':'nosniff'});
@@ -73,6 +77,9 @@ const server=http.createServer(async(req,res)=>{
  }
  if(u.pathname.startsWith('/api/')){
   const credential=req.headers.authorization?.replace(/^Bearer /,'');
+  if(/^\/api\/audio-drive-(?:save|record|original|rename|delete|classify)$/.test(u.pathname)){
+   return await handleDriveAudio(req,res,u,audioDrive,credential);
+  }
   const isScribe=u.pathname==='/api/scribe-history';
   if(!eq(credential,ADMIN)&&!(isScribe&&scribe.verify(credential)))return send(res,401,{error:'unauthorized'});
   if(!KEY||!SECRET||!REFRESH)return send(res,503,{error:'dropbox_not_configured'});

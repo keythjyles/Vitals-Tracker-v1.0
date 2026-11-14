@@ -1,3 +1,11 @@
+## R14.12 direct Google Drive saves
+
+New approvals keep the original audio or the explicitly recorded take in the browser and publish the approval to the local library. The cloud copy goes straight to the existing [Sound Effects folder](https://drive.google.com/drive/folders/1H269DHSY2hYwD7SKhmCmh2uAmBCh9LDy). **Connect Google Drive** requests file-level access through the existing Google project and verifies the selected folder and owner account. The browser holds an encrypted session for later saves.
+
+Drive stores each new audio file with its source, name and license provenance in its private metadata. The service looks up the stable ID before saving, checks the stored filename, byte count and SHA-256 and reuses a verified original on retry. Cloud errors leave the local approval available, with a retry above the review queue.
+
+The Dropbox-to-Drive workflow below remains the reference for legacy Dropbox originals and existing deletion and mirror jobs. New approvals use the direct Drive endpoints.
+
 # Sound Scrubber audio preservation — R12
 
 **GS audio tools master work index:** [`GS_TOOL_REFINEMENT_INDEX.md`](../GS_TOOL_REFINEMENT_INDEX.md). This is the single authoritative record for current step status, release reconciliation, SxLock preservation lock, verification, and rollback. This document retains historical technical detail; do not infer that an old heading is the current release.
