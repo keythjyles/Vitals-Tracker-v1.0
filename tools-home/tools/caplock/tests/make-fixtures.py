@@ -1,6 +1,8 @@
 """Generate disposable portrait fixtures; no user media or providers."""
 from pathlib import Path
 import subprocess
+import sys
+shared_fixture = Path(__file__).resolve().parents[3] / 'shared/tests/make-alpha-color-fixture.py'
 root=Path('/tmp/caplock-fixtures')
 root.mkdir(exist_ok=True)
 for fps in (25,30):
@@ -37,22 +39,5 @@ subprocess.run(['ffmpeg','-v','error','-f','lavfi','-i',trim_picture,
     '-f','lavfi','-i','sine=frequency=1000:duration=1.2','-af',"volume=0:enable='lt(t,0.4)+gte(t,0.8)'",
     '-c:v','libx264','-pix_fmt','yuv420p','-c:a','aac','-shortest','-y',str(root/'trim-source.mp4')],check=True)
 
-# Full-range alpha samples exercise the GS1 decode fix before CapLock flattens the frame.
-width, height = 160, 288
-colors = [(18, 26, 36), (206, 134, 73), (240, 213, 162), (27, 81, 57),
-          (146, 44, 32), (112, 140, 184), (220, 220, 220), (25, 25, 25)]
-patches = bytearray(width * height * 4)
-for y in range(height):
-    for x in range(width):
-        offset = 4 * (y * width + x)
-        patches[offset:offset + 4] = bytes((*colors[(y // 72) * 2 + x // 80], 0 if x < 8 else 255))
-subprocess.run(['ffmpeg', '-v', 'error', '-f', 'rawvideo', '-pixel_format', 'rgba',
-    '-video_size', f'{width}x{height}', '-framerate', '25', '-i', 'pipe:',
-    '-vf', 'scale=out_color_matrix=bt709:out_range=full,format=yuva420p',
-    '-c:v', 'libvpx-vp9', '-lossless', '1', '-auto-alt-ref', '0',
-    '-color_range', 'pc', '-colorspace', 'bt709', '-color_primaries', 'bt709',
-    '-color_trc', 'iec61966-2-1', '-y', str(root / 'alpha-untagged.webm')],
-    input=bytes(patches) * 10, check=True)
-subprocess.run(['ffmpeg', '-v', 'error', '-i', str(root / 'alpha-untagged.webm'), '-map', '0:v:0',
-    '-c', 'copy', '-color_range', 'pc', '-colorspace', 'bt709', '-color_primaries', 'bt709',
-    '-color_trc', 'iec61966-2-1', '-y', str(root / 'full-range-alpha.webm')], check=True)
+# Shared with SxLock to exercise the same full-range alpha decode path.
+subprocess.run([sys.executable, str(shared_fixture), str(root)], check=True)
