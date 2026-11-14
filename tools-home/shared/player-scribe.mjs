@@ -32,7 +32,12 @@ export function mountPlayerScribe(reference, {tool, clock, media, source, sectio
  if (!section) {
   heading.textContent = 'Scribe';
   panel.append(heading);
-  reference.closest('.gs-player-shell').after(panel);
+  const player = reference.closest('.gs-player-shell');
+  if (tool === 'cliplock') {
+   const list = document.querySelector('.work [aria-label="Queued cuts"]');
+   if (list) list.after(panel);
+   else player.after(panel);
+  } else player.after(panel);
  }
  panel.insertAdjacentHTML('beforeend', '<textarea id="gs-notes" rows="3" aria-label="Scribe notes" placeholder="Write a note…"></textarea><div class="gs-scribe-actions"><button type="button" id="gs-scribeMark">Mark frame</button><button type="button" id="gs-copyNotes">Copy notes</button><details><summary>More</summary><div class="gs-scribe-actions"><button type="button" id="gs-scribeHistory">History</button><button type="button" id="gs-scribeClear">Clear</button></div></details></div><p id="gs-scribeStatus" role="status"></p>');
  document.body.insertAdjacentHTML('beforeend', '<dialog id="gs-scribeHistorySheet" class="gs-scribe-history" aria-labelledby="gs-scribeHistoryTitle"><div class="gs-scribe-actions"><strong id="gs-scribeHistoryTitle">Scribe history</strong><button type="button" id="gs-scribeClose">Close</button></div><p id="gs-scribeSync" role="status"></p><div class="gs-scribe-actions"><button type="button" id="gs-scribeRetry" hidden>Sync now</button><button type="button" id="gs-scribeConnect" hidden>Sign in with Google</button></div><ol id="gs-scribeEntries"></ol><button type="button" id="gs-scribeEarlier" hidden>Earlier notes</button></dialog>');
