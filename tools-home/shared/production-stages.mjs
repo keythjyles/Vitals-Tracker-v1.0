@@ -17,7 +17,7 @@ export function captionRecipe(p){
    ...Object.fromEntries(keys.map(k=>[k,c[k]??null])),ref:{path:c.ref.path,size:c.ref.size},
    ...(c.sourceDuration?{sourceDuration:c.sourceDuration}:{}),...(c.sourceTrim?{sourceTrim:c.sourceTrim}:{}),
    ...(c.holdLastFrame?{holdLastFrame:true}:{}),...(c.mirrorX===true?{mirrorX:true}:{}),...(c.flipY===true?{flipY:true}:{}),
-   ...(c.chroma?.enabled?{chroma:{enabled:true,color:c.chroma.color,similarity:c.chroma.similarity,blend:c.chroma.blend}}:{})
+   ...(c.chroma?.enabled?{chroma:{enabled:true,color:c.chroma.color,similarity:c.chroma.similarity,blend:c.chroma.blend,...(c.chroma.backgroundOpacity?{backgroundOpacity:c.chroma.backgroundOpacity}:{})}}:{})
   }))};
 }
 export function soundRecipe(session){if(!session?.state)return null;const s=session.state;return {schema:'GS-SoundRender-1',bed:session.bed?{id:session.bed.id,sha256:session.bed.sha256,path:session.bed.path}:null,sourceFps:s.sourceFps,videoVolume:s.videoVolume,mixer:s.mixer,export:s.export,...(s.toolbox?.visual?.length?{visual:s.toolbox.visual.map(item=>({...item}))}:{}),clips:s.clips,soundRefs:session.soundRefs||{},sounds:s.sounds,recordings:s.recordings};}

@@ -1,3 +1,4 @@
+import {writeFrameClock} from '../../shared/frame-stamp.mjs?v=1';
 import {clipName,constantFrameRate,cutFrameRate,frameAt,frameSeekTime,selection} from '../cliplock/core.mjs?v=4';
 
 const $ = id => document.getElementById(id);
@@ -39,9 +40,9 @@ function cursorTime() {
 }
 
 function update() {
-  $('position').textContent = sourceReady()
-    ? 'Frame ' + frame() + ' · ' + cursorTime().toFixed(3) + ' s'
-    : 'Frame —';
+  const clock = $('position');
+  if (sourceReady() && fps) writeFrameClock(clock,{frame:frame(),time:cursorTime(),fps:Number(fps.toFixed(3))});
+  else { delete clock.dataset.frame; clock.textContent = 'F—'; }
   const end = timing?.end ?? v.duration;
   $('frameProgress').value = end > 0 ? Math.min(1, v.currentTime / end) : 0;
   const count = Math.max(1, parseInt($('count').value, 10) || 1);

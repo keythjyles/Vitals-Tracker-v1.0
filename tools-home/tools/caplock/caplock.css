@@ -117,3 +117,16 @@ h1{font-size:20px;margin:4px 0}#viewerPage{padding:0;border:0;background:none}#s
 #projectPicker .picker-header h2 { margin-inline-end: auto; }
 #projectPickerList .picker-card[data-cloud-text] { display: block; }
 #projectPicker .picker-card p { overflow-wrap: anywhere; }
+
+/* Keep the name and actions readable at phone width. */
+#clipProperties .item-heading{gap:6px;flex-wrap:wrap}
+#clipPropertiesTitle{flex:1 0 100%;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.color-opacity{min-width:0}
+.color-opacity input[type=range]{display:block;width:100%;padding:0;accent-color:#f0cf84;touch-action:pan-y}
+.opacity-ends{display:flex;justify-content:space-between;gap:5px}
+#captionBackground #chromaColor{width:48px;height:35px;padding:2px;vertical-align:middle}
+#clipProperties .item-heading .appearance-actions{display:flex;gap:5px}
+.cap-dockable>summary{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.cap-dockable>summary button{padding:3px 8px;min-height:28px;font-size:12px}
+#capPinnedSections{max-height:min(26dvh,210px);overflow:auto;overscroll-behavior:contain}
+#capPinnedSections>details{margin:2px 0}

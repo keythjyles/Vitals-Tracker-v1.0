@@ -1,0 +1,41 @@
+main{padding-top:4px}
+#stageNav{height:auto;align-content:start}
+#stageNav button{touch-action:manipulation}
+#stage{width:100%;height:100%;overflow:hidden;background:#080d14;touch-action:none}
+#workPicture{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#stageScene{position:absolute;inset:auto;margin:0;transform:none;pointer-events:none}
+#viewportEdge,#bedEdge{position:absolute;pointer-events:none;inset:0}
+#viewportEdge{border:1px solid #f5f0df;z-index:6}
+#bedEdge{border:2px solid #48b6ff;z-index:7}
+#baseEdit{border:0;pointer-events:auto}
+#stage.viewMode #baseEdit,#stage.viewMode #dragSurface{pointer-events:none!important}
+#status{margin:3px 0;min-height:1em;line-height:1.25}
+.aspect-section{margin:5px 0;padding:6px 8px;background:#152637;border:1px solid #42627c;border-radius:7px;scroll-margin-top:var(--aspect-player-height,200px)}
+.aspect-section>summary{display:flex;justify-content:space-between;align-items:center;gap:7px;font-weight:700;cursor:pointer}
+.aspect-section button,#itemProperties button{padding:4px 7px;min-height:30px}
+.aspect-section summary button{min-height:27px;padding:2px 8px;font-size:12px}
+.aspect-section fieldset{margin:0;padding:0;border:0;min-width:0}
+.aspect-section .compactBar{display:flex;flex-wrap:wrap;gap:5px;margin:5px 0}
+.timing-grid{display:grid;grid-template-columns:1fr auto 1fr auto;gap:5px;align-items:end}
+.timing-grid label,.timing-grid input{min-width:0;width:100%}
+.timing-grid input{padding:5px}
+#pinnedSections{max-height:min(26dvh,210px);overflow:auto;overscroll-behavior:contain}
+#pinnedSections>details{margin:2px 0}
+#editorScribe textarea{min-height:55px}
+#toolboxItems{display:grid;gap:5px}
+.toolbox-row{display:flex;align-items:center;flex-wrap:wrap;gap:4px;border-bottom:1px solid #42627c;padding:4px 0}
+.toolbox-row strong{flex:1 1 100%;overflow-wrap:anywhere}
+#toolboxPreview{display:block;max-width:100%;max-height:200px;margin-top:5px}
+#itemPropertiesTitle{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin-right:auto}
+#itemProperties .item-heading{position:sticky;top:-10px;background:#152637;z-index:2}
+.opacity-control,.key-controls{grid-column:1/-1}
+.opacity-control input,.key-controls input[type=range]{display:block;width:100%;accent-color:#f1cf80;touch-action:pan-y;padding:0}
+.range-labels{display:flex;justify-content:space-between}
+.key-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.key-controls input[type=color]{width:48px;height:30px;padding:2px}
+#newEditDialog{width:min(90%,500px);color:#f1f5fa;background:#152637;border:1px solid #718da6;border-radius:8px}
+#newEditDialog::backdrop{background:#0008}
+#goFrame{font-variant-numeric:tabular-nums}
+#bedEdge{border:0;outline:2px solid #48b6ff;outline-offset:1px}
+#stageNav #railToolbox{color:#172231;background:#eacb86;font-weight:700}
+#stageNav #goFrame{padding-left:3px}

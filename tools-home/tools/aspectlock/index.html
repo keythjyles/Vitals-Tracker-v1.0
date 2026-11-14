@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AspectLock R31</title><style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AspectLock R32</title><style>
 *{box-sizing:border-box}body{margin:0;background:#0b1420;color:#e7f1fa;font:15px system-ui}header{padding:12px 14px;background:#152637;border-bottom:1px solid #344d63}h1{font-size:20px;margin:0}small,.hint{color:#a9c0d1}main{max-width:740px;margin:auto;padding:12px}button,select,input{font:inherit;background:#263d52;border:1px solid #54718a;border-radius:7px;color:white;padding:10px}button{cursor:pointer}button:disabled{opacity:.45}.bar{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin:10px 0}.bar button{flex:1}.stageWrap{background:#05080c;padding:8px;display:flex;justify-content:center;touch-action:pan-y}.stage{position:relative;width:min(100%,225px,38dvh * 9 / 16);aspect-ratio:9/16;overflow:hidden;background:#111c2b;touch-action:none;border:1px solid #54718a}.stage canvas{display:block;width:100%;height:100%}.bounds{position:absolute;border:2px dashed #ffd16a;pointer-events:none}.handle{position:absolute;width:26px;height:26px;border:2px solid white;background:#f5b73d;border-radius:6px;right:-13px;bottom:-13px;pointer-events:auto;touch-action:none}.dragSurface{position:absolute;touch-action:none;cursor:move}.baseEdit{position:absolute;border:2px solid #55d8ff;touch-action:none;cursor:move}.baseEdit .handle{background:#55d8ff}.stageNote{font-size:12px;color:#b9d0e3;margin:6px 0}.status{font-size:13px;color:#b9d0e3;min-height:20px;overflow-wrap:anywhere}.controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}.controls label{display:flex;flex-direction:column;gap:4px;font-size:13px}.controls input[type=range]{width:100%;padding:0}.controls select{width:100%}video{display:none}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#122233;padding:9px;border-radius:6px;font-size:12px}details{margin:10px 0}#seek{display:block;width:100%;padding:0;margin:0;height:18px;accent-color:#86c8f5}.stageWrap{padding-bottom:0}.stageFooter{width:min(100%,225px,38dvh * 9 / 16);margin:0 auto 6px}.helpInline{margin:0}.helpInline summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;border:1px solid #54718a;border-radius:50%;width:34px;height:34px;font-weight:700}.helpInline summary::-webkit-details-marker{display:none}#position{font-variant-numeric:tabular-nums}a{color:#9dd4ff} .pill{border-radius:20px} .topnote{margin:8px 0;font-size:13px} .transport{margin:3px 0;display:flex;align-items:center;gap:6px}.transport label{font-size:12px;min-width:65px;color:#c9dfef}.transport input[type=range]{flex:1;min-width:0;padding:0;height:24px;accent-color:#86c8f5}.transport output{font-size:11px;min-width:72px;text-align:right;font-variant-numeric:tabular-nums}.compactBar{display:flex;gap:5px;margin:4px 0}.compactBar button{flex:1;min-width:0;padding:8px 3px;font-size:13px;line-height:1.15}.stageNote{margin:2px 0 4px}.stageWrap{padding:3px}.topnote{display:none} .pickerBtn{width:100%;text-align:left;min-height:64px;overflow-wrap:anywhere;background:#203c53}.pickerBtn span{display:block;font-size:12px;color:#bde4fa;margin-top:4px}#assetDialog{background:#0e1b29;color:#edf6ff;border:1px solid #54718a;border-radius:12px;width:min(96vw,740px);max-height:90dvh;padding:12px}#assetDialog::backdrop{background:#000c}.libraryHead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}.libraryHead strong{font-size:21px}#assetSearch{width:100%;font-size:19px;padding:14px}.librarySort{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:10px 0}.librarySort select{max-width:180px}.assetResults{overflow-y:auto;max-height:62dvh;display:grid;gap:9px}.assetCard{border:1px solid #42627c;border-radius:10px;padding:10px;background:#172c40}.assetCard .assetName{font-size:15px;overflow-wrap:anywhere;font-weight:650}.assetMeta{font-size:12px;color:#b7cfe0;margin:5px 0}.assetActions{display:flex;gap:8px}.assetActions button{flex:1;min-height:44px}.assetPreview{display:block!important;width:100%;max-height:240px;background:#000;margin-top:9px;border-radius:6px}.assetThumb{width:100%;height:105px;background:#09131d;display:flex;align-items:center;justify-content:center;color:#9fb7c8;font-size:13px;margin-bottom:7px}.assetCard.selected{border:2px solid #79caff} .stageScene{position:absolute;inset:0;transform-origin:0 0}.viewMode .stageScene>*{pointer-events:none!important}.viewMode{cursor:grab}.viewMode:active{cursor:grabbing}
 /* Precision controls stay compact, right aligned and fully visible. */
 .stageWorkspace{--player-height:max(46dvh,288px);display:grid;grid-template-columns:minmax(0,1fr) 82px;gap:5px;align-items:start}
@@ -17,304 +17,99 @@ main{max-width:980px}
 .item-row{display:grid;grid-template-columns:minmax(0,1fr) 36px;gap:4px;margin:3px 0}.item-row button{min-height:38px;padding:4px 6px;font-size:13px;min-width:0}.item-open{text-align:left}.item-open span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.item-open small{display:block;font-size:11px}
 .asset-pickers{gap:5px;margin-top:4px}.asset-pickers .pickerBtn{min-height:36px;font-size:12px;padding:5px}.asset-pickers .pickerBtn span{font-size:10px;margin-top:0}.asset-pickers>label{font-size:11px}
 #itemProperties{position:fixed;inset:auto 0 0;margin:0 auto;width:min(100%,980px);max-width:100%;max-height:58dvh;overflow:auto;border:1px solid #718da6;border-radius:12px 12px 0 0;padding:10px;background:#152637;color:#edf3fa}#itemProperties::backdrop{background:#0003}.item-heading{display:flex;align-items:center;justify-content:space-between;gap:6px}.item-heading button{min-height:32px;padding:4px 8px;font-size:12px}
-</style></head><body>
-<header><h1>AspectLock <small>GS-TOOL-ASPECTLOCK · R31</small></h1><div class="topnote">Double exposure & sizing lab · Portrait base + any-aspect video overlay · No automatic character motion</div></header>
+</style><link rel="stylesheet" href="./editor.css?v=32"></head><body>
+<header><h1>AspectLock <small>GS-TOOL-ASPECTLOCK · R32</small></h1></header>
 <main><div id="status" class="status">Choose a bed video or animation.</div>
-<div class="stageWorkspace"><nav id="stageNav" aria-label="Playback and frame controls"></nav><div class="stageWrap"><div class="stage" id="stage"><div id="stageScene" class="stageScene"><canvas id="output" width="540" height="960"></canvas><div id="dragSurface" class="dragSurface"><div id="bounds" class="bounds"><span id="handle" class="handle" aria-label="Resize video overlay"></span></div></div><div id="baseEdit" class="baseEdit" hidden><span id="baseHandle" class="handle" aria-label="Resize portrait for perspective only"></span></div></div></div></div>
-</div><div class="transport"><label for="seek">Bed</label><input id="seek" type="range" min="0" max="1000" value="0"><output id="position">0:00.000</output></div><section id="addedItems"><h2>Added items · <span id="addedCount">0</span></h2><canvas id="itemMatrix" width="1000" height="80" tabindex="0" role="slider" aria-label="Added animation timeline · seek paused" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0"></canvas><div id="addedOverlay" class="item-row" hidden><button id="editAdded" type="button" class="item-open"><span id="addedName"></span><small id="addedTiming"></small></button><button id="jumpAdded" type="button" aria-label="Go to animation start">↤</button></div><p id="addedEmpty" class="hint">Choose an animation, then tap its row to edit.</p><div class="controls asset-pickers"><label>Base video<button type="button" id="pickBase" class="pickerBtn">Choose bed video <span id="baseChosen"></span></button><select id="base" style="display:none" aria-label="Selected bed video"></select></label><label>Overlay video<button type="button" id="pickOverlay" class="pickerBtn">Choose animation <span id="overlayChosen"></span></button><select id="overlay" style="display:none" aria-label="Selected animation"></select></label>
-</div></section><dialog id="itemProperties" aria-labelledby="itemPropertiesTitle"><div class="item-heading"><h2 id="itemPropertiesTitle">Edit animation</h2><button id="closeItemProperties" type="button">✕ Close</button></div><div class="compactBar"><button id="sheetItemStart" type="button">↤ Item start</button><button id="sheetBack" type="button">−1 frame</button><button id="sheetForward" type="button">+1 frame</button></div><details id="overlayTrimPanel"><summary>Trim added video · base never trimmed</summary><div class="compactBar"><button type="button" id="trimIn">Set IN at overlay frame</button><button type="button" id="trimOut">Set OUT at overlay frame</button><button type="button" id="trimClear">Reset overlay trim</button></div><div id="trimInfo" class="hint" role="status">Full overlay selected</div><p class="hint">One boundary per tap. Source remains unchanged. IN and OUT are frame-aligned at 25 fps.</p></details><div class="compactBar"><button id="editOverlay">Edit overlay</button><button id="fitOverlay" type="button">Fit overlay to portrait</button><button id="editBase">Edit base perspective</button><button id="reset">Reset placement</button><details class="helpInline"><summary aria-label="Instructions" title="Instructions">ⓘ</summary><p>Play or scrub each video independently. Pause bed at the intended entrance and tap Set animation start here. The output remains full 9:16; resizing portrait is only for perspective.</p></details></div>
+<div class="stageWorkspace"><nav id="stageNav" aria-label="Playback and frame controls"></nav><div class="stageWrap"><div class="stage" id="stage"><canvas id="workPicture" aria-label="Composition preview"></canvas><div id="stageScene" class="stageScene"><canvas id="output" width="540" height="960" hidden></canvas><div id="viewportEdge" aria-hidden="true"></div><div id="bedEdge" aria-hidden="true"></div><div id="dragSurface" class="dragSurface"><div id="bounds" class="bounds"><span id="handle" class="handle" aria-label="Resize video overlay"></span></div></div><div id="baseEdit" class="baseEdit" hidden><span id="baseHandle" class="handle" aria-label="Resize portrait for perspective only"></span></div></div></div></div>
+</div><div class="transport"><progress id="bedProgress" max="1" value="0" aria-label="Bed position"></progress><output id="position">F—</output></div><section id="addedItems"><div class="item-heading"><h2>Insertions · <span id="addedCount">0</span></h2><button type="button" id="startOver">Start over</button></div><canvas id="itemMatrix" width="1000" height="80" tabindex="0" role="slider" aria-label="Added animation timeline · seek paused" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0"></canvas><div id="addedOverlay" class="item-row" hidden><button id="editAdded" type="button" class="item-open" title="Edit framing, opacity and background."><span id="addedName"></span><small id="addedTiming"></small></button><button id="jumpAdded" type="button" aria-label="Go to animation start">↤</button></div><p id="addedEmpty" class="hint">Choose an animation in Toolbox.</p><div class="controls asset-pickers"><button id="pinPlayer" type="button" aria-pressed="true">Unpin player</button><button type="button" id="newEdit">Start over</button><label>Base video<button type="button" id="pickBase" class="pickerBtn">Choose bed video <span id="baseChosen"></span></button><select id="base" style="display:none" aria-label="Selected bed video"></select></label><label>Overlay video<button type="button" id="pickOverlay" class="pickerBtn">Choose animation <span id="overlayChosen"></span></button><select id="overlay" style="display:none" aria-label="Selected animation"></select></label>
+</div></section><dialog id="itemProperties" aria-labelledby="itemPropertiesTitle"><div class="item-heading"><h2 id="itemPropertiesTitle">Edit animation</h2><button id="closeItemProperties" type="button">✕ Close</button></div><div class="compactBar"><button id="sheetItemStart" type="button">Go to IN</button>
+<button id="sheetBack" type="button" title="Previous frame. Double-tap to go back 25 frames.">−1</button><button id="sheetForward" type="button" title="Next frame. Double-tap to go forward 25 frames.">+1</button>
+<button id="editOverlay" type="button">Move animation</button><button id="fitOverlay" type="button">Fit animation</button>
+<button id="editBase" type="button">Move bed</button><button id="reset" type="button">Reset framing</button></div>
 <div class="controls">
 <label>Overlay width <span id="widthText">540 px</span><input id="width" type="range" min="100" max="2000" value="540"></label>
 <label>Overlay X <span id="xText">0 px</span><input id="x" type="range" min="-1200" max="540" value="0"></label>
 <label>Overlay Y <span id="yText">640 px</span><input id="y" type="range" min="-500" max="960" value="640"></label>
-<label>Perspective layer<select id="order"><option value="overlay">Overlay on top (normal)</option><option value="base">Base on top (edit only)</option></select></label>
-<label>Background removal<select id="keyMode"><option value="green">Green screen (original MP4)</option><option value="blue">Blue screen (R9 legacy)</option><option value="alpha">Existing transparency (WebM)</option><option value="off">Off (original frame)</option></select></label>
-<label>Key tolerance <span id="toleranceText">70</span><input id="tolerance" type="range" min="10" max="150" value="70"></label>
-<label><span>Original source audio</span><select id="baseAudio"><option value="on">Keep / play</option><option value="off">Mute</option></select></label>
-<label><span>Gemini cartoon SFX track</span><select id="overlayAudio"><option value="off">Preserve, muted in preview</option><option value="on">Play with source</option></select></label>
+<label>Layer order<select id="order"><option value="overlay">Overlay on top (normal)</option><option value="base">Bed on top</option></select></label>
+<label class="opacity-control">Animation opacity <output id="opacityValue" for="opacity">100%</output><input id="opacity" type="range" min="0" max="100" value="100" data-gs-continuous><span class="range-labels"><small>Transparent</small><small>Opaque</small></span></label>
+<label>Background removal<select id="keyMode"><option value="green">Green screen</option><option value="blue">Blue screen</option><option value="custom">Pick a color</option><option value="alpha">Use source transparency</option><option value="off">Keep background</option></select></label>
+<label id="presetTolerance">Key tolerance <span id="toleranceText">70</span><input id="tolerance" type="range" min="10" max="150" value="70"></label>
+<div id="keyColorTools" class="key-controls">
+ <label>Background color <input id="keyColor" type="color" value="#0a77d4"></label><button type="button" id="sampleKey">Sample clip</button>
+ <label>Color tolerance <output id="keyRangeValue">18%</output><input id="keyRange" type="range" min="1" max="50" value="18" data-gs-continuous></label>
+ <label>Edge softness <output id="keyEdgeValue">4%</output><input id="keyEdge" type="range" min="0" max="20" value="4" data-gs-continuous></label>
+ <label class="opacity-control">Background opacity <output id="keyBackgroundValue">0%</output><input id="keyBackground" type="range" min="0" max="100" value="0" data-gs-continuous><span class="range-labels"><small>Transparent</small><small>Opaque</small></span></label>
 </div>
-</dialog><div class="compactBar"><button id="viewStage" type="button">Move whole stage</button><button id="viewReset" type="button">Fit stage</button></div><div class="transport"><label for="viewZoom">View zoom</label><input id="viewZoom" type="range" min="100" max="400" value="100"><output id="viewZoomText">100%</output></div><p class="stageNote">Whole-stage view: pinch to zoom and drag beneath the fixed window. View changes do not change the exported composition.</p>
+<label><span>Original source audio</span><select id="baseAudio"><option value="on">Keep / play</option><option value="off">Mute</option></select></label>
+<label><span>Animation audio</span><select id="overlayAudio"><option value="off">Mute animation</option><option value="on">Play with source</option></select></label>
+</div>
+</dialog>
+<div id="pinnedSections" hidden></div>
+<details id="aspectTiming" class="aspect-section" data-pin-section>
+ <summary><span>Animation timing</span><button type="button" data-pin aria-label="Pin animation timing" aria-pressed="false">Pin</button></summary>
+ <div id="startInfo" class="status">Choose an animation to set its timing.</div>
+ <fieldset id="timingControls" disabled>
+  <div class="timing-grid">
+   <label>Bed IN <input id="bedIn" type="number" min="0" step="1" inputmode="numeric"></label><button type="button" id="markStart" title="Start the animation at the paused bed frame.">IN here</button>
+   <label>Bed OUT <input id="bedOut" type="number" min="1" step="1" inputmode="numeric"></label><button type="button" id="markEnd" title="Make this the first frame without the animation.">OUT here</button>
+  </div>
+  <div class="compactBar">
+   <button type="button" id="applyTiming">Apply IN/OUT</button><button type="button" id="fitTiming">Fit source to IN/OUT</button><button type="button" id="clearStart">Full clip at F0</button>
+  </div>
+  <output id="timingError" class="status" role="status"></output>
+  <details id="overlayTrimPanel">
+   <summary>Animation source trim</summary>
+   <div class="transport"><label for="overlaySeek">Animation source time</label><input id="overlaySeek" type="range" min="0" max="1000" value="0"><output id="overlayPosition">0:00.000</output><button id="playOverlay" type="button" title="Play or pause the animation source while the bed is paused.">▶ Animation</button><button id="pauseOverlay" type="button" hidden>Pause animation</button><button id="overlayZero" type="button" title="Show the first selected frame of the animation source.">Source start</button></div>
+   <div class="compactBar"><button type="button" id="trimIn">Set source IN</button><button type="button" id="trimOut">Set source OUT</button><button type="button" id="trimClear">Reset source trim</button></div>
+   <div id="trimInfo" class="hint"></div>
+  </details>
+ </fieldset>
+</details>
+<details id="aspectToolbox" class="aspect-section" data-pin-section>
+ <summary><span>Toolbox</span><button type="button" data-pin aria-label="Pin Toolbox" aria-pressed="false">Pin</button></summary>
+ <div class="compactBar"><button id="toolboxAdd" type="button">Add device videos</button><button id="toolboxCloud" type="button">Choose animation</button></div>
+ <input id="toolboxFiles" type="file" accept="video/*,.mp4,.mov,.webm" multiple hidden>
+ <p id="toolboxEmpty" class="hint">Add clips you want to preview or place.</p>
+ <div id="toolboxItems"></div><video id="toolboxPreview" controls playsinline hidden></video><p id="toolboxStatus" class="status" role="status"></p>
+</details>
+<details id="editorScribe" class="aspect-section" data-pin-section><summary><span>Scribe</span><button type="button" data-pin aria-label="Pin Scribe" aria-pressed="false">Pin</button></summary></details>
+<details id="aspectView" class="aspect-section" data-pin-section>
+<summary><span>View</span><button type="button" data-pin aria-label="Pin view controls" aria-pressed="false">Pin</button></summary>
+<div class="compactBar"><button id="viewStage" type="button" aria-pressed="false">Pan preview</button><button id="viewReset" type="button">Fit preview</button></div><div class="transport"><label for="viewZoom">View zoom</label><input id="viewZoom" type="range" min="25" max="400" value="100"><output id="viewZoomText">100%</output></div><div class="compactBar"><button type="button" id="editBedView">Move bed</button><button type="button" id="fitBed">Fit bed to output</button><label><input type="checkbox" id="showOutside" checked> Show outside output</label></div>
+ <p class="stageNote">Blue outlines the bed. The bright rectangle is the output. Shaded areas stay outside the export.</p>
+</details>
 
-<div class="transport"><label for="overlaySeek">Animation</label><input id="overlaySeek" type="range" min="0" max="1000" value="0"><output id="overlayPosition">0:00.000</output></div>
-<div class="compactBar"><button id="play">▶ Bed</button><button id="pause">Ⅱ Bed</button><button id="playOverlay">▶ Animation</button><button id="pauseOverlay">Ⅱ Animation</button></div>
-<div class="compactBar"><button id="backFrame">−1 frame</button><button id="forwardFrame">+1 frame</button><button id="markStart">Set animation start here</button></div>
-<div id="startInfo" class="status">Animation starts at frame 0</div>
-<div class="compactBar"><button id="bedZero">Bed ↤ 0</button><button id="overlayZero">Animation ↤ 0</button><button id="clearStart">Start at frame 0</button></div>
-<div class="bar"><button id="render" type="button">Render video</button></div>
+
+<div id="railButtons">
+ <button id="play" type="button" title="Play or pause the bed and the placed animation.">▶ Play</button><button id="pause" type="button" hidden>Pause bed</button>
+ <button id="bedZero" type="button" title="Go to the first bed frame and stay paused.">↤ Start</button>
+ <div class="gs-frame-pair"><button id="backFrame" type="button" title="Previous frame. Double-tap to go back 25 frames.">−1</button><button id="forwardFrame" type="button" title="Next frame. Double-tap to go forward 25 frames.">+1</button></div>
+ <div class="gs-control-pair"><button id="back25" type="button" aria-label="Back 25 frames">−25</button><button id="forward25" type="button" aria-label="Forward 25 frames">+25</button></div>
+ <div class="gs-control-row"><input id="goFrame" type="number" min="0" step="1" inputmode="numeric" placeholder="Frame" aria-label="Bed frame to go to" title="Enter the exact bed frame."><button id="jumpFrame" type="button" aria-label="Go to frame">Go</button></div>
+ <button id="railMove" type="button" aria-pressed="false" title="Drag or pinch the animation.">Move</button><button id="railTiming" type="button" title="Set the first and last frames for this animation.">Timing</button>
+ <button id="railToolbox" type="button" title="Add, preview or place videos.">Toolbox</button>
+
+</div>
+<details id="aspectExport" class="aspect-section" data-pin-section>
+<summary><span>Save and export</span><button type="button" data-pin aria-label="Pin save and export" aria-pressed="false">Pin</button></summary>
+<div class="bar"><button id="render" type="button">Render video</button><button id="save" type="button">Save edit</button><button id="restoreEdit" type="button">Restore saved edit</button><button id="copy" type="button">Copy settings</button><button id="frame" type="button">Save frame image</button><button id="resetFromExport" type="button">Start over</button></div>
 <section id="renderResult" hidden style="border:1px solid #54718a;border-radius:12px;padding:12px;margin:10px 0;background:#17293b">
 <strong>Rendered video — ready to save</strong>
 <video id="resultVideo" controls playsinline style="display:block;width:100%;max-height:55vh;margin:10px auto;background:black"></video>
-<label style="display:block;margin:8px 0">File name <input id="outputName" style="width:100%" value="GS_EP4_AspectLock_R6"></label>
+<label style="display:block;margin:8px 0">File name <input id="outputName" style="width:100%" value="AspectLock_Render"></label>
 <div class="bar"><button id="downloadVideo">Download / Save as</button><button id="shareVideo">Share / Save to device</button></div>
 <div id="renderInfo" class="status"></div>
-</section><div class="bar"><button id="save">Save alignment</button><button id="copy">Copy instructions</button><button id="frame">Save frame image</button></div>
-<details><summary>Alignment specification</summary><pre id="spec"></pre></details>
-<div class="hint">Drag the dashed overlay rectangle to position it; drag its lower-right handle to resize without changing aspect ratio. Both source audio tracks remain untouched. SFX playback can be toggled independently. Saved alignment is stored on this device and can be copied for the render workflow. Render exports WebM to avoid browser MP4 duration/index corruption. Do not rename WebM to MP4; transcode only through a validated MP4 encoder. Source files are unchanged. Cartoon SFX remain separately preserved in the Gemini original.</div>
+</section>
+<details><summary>Alignment settings</summary><pre id="spec"></pre></details>
+</details>
+<dialog id="newEditDialog" aria-labelledby="newEditTitle">
+ <h2 id="newEditTitle">Start over</h2><p>Files stay in Toolbox. Use Save edit first to return to this placement later.</p>
+ <div class="compactBar"><button id="keepBed" type="button">Keep bed · clear animation</button><button id="emptyEdit" type="button">Start empty</button><button id="cancelNew" type="button">Cancel</button></div>
+</dialog>
 <dialog id="assetDialog" aria-label="Choose video"><div class="libraryHead"><strong id="libraryTitle">Choose video</strong><button type="button" id="closeLibrary">✕ Close</button></div>
 <button type="button" id="pickDeviceVideo" hidden>Choose from device</button>
 <input id="deviceVideo" type="file" accept="video/*,.mp4,.webm,.mov" hidden>
 <p id="cloudVideoStatus" class="hint" hidden>Connect PreviewLock to browse cloud videos.</p>
 <input id="assetSearch" type="search" placeholder="Search filenames…" aria-label="Search videos"><div class="librarySort"><label>Sort <select id="assetSort"><option value="new">Newest first</option><option value="old">Oldest first</option><option value="name">Filename A–Z</option><option value="nameDesc">Filename Z–A</option><option value="size">Largest first</option></select></label><span id="assetCount"></span></div><div id="assetResults" class="assetResults"></div></dialog><video id="bv" playsinline preload="auto" crossorigin="anonymous"></video><video id="ov" playsinline preload="auto" crossorigin="anonymous"></video>
-</main><script type="module">
-import {paintMatrix,matrixFrame} from "../../shared/item-matrix.mjs?v=1";
-import {beginVideoLoad,loadVideoSource} from "./media-source.mjs?v=31";
-const API='https://gs-previewlock-api.onrender.com',key=localStorage.getItem('gs_previewlock_key')||'',Q=id=>document.getElementById(id),C=Q('output'),ctx=C.getContext('2d',{willReadFrequently:true}),stage=Q('stage'),bv=Q('bv'),ov=Q('ov'),scratch=document.createElement('canvas'),sc=scratch.getContext('2d',{willReadFrequently:true});
-let pickerTarget='base', manualVideoSelection=false;function formatBytes(n){return n?(n/1048576).toFixed(1)+' MB':'Size unknown'}function renderLibrary(){const search=Q('assetSearch').value.trim().toLowerCase(),sort=Q('assetSort').value;let arr=items.filter(f=>f.name.toLowerCase().includes(search));arr.sort((a,b)=>sort==='name'?a.name.localeCompare(b.name):sort==='nameDesc'?b.name.localeCompare(a.name):sort==='size'?(b.size||b.file?.size||0)-(a.size||a.file?.size||0):sort==='old'?String(a.server_modified||a.client_modified||'').localeCompare(String(b.server_modified||b.client_modified||'')):String(b.server_modified||b.client_modified||'').localeCompare(String(a.server_modified||a.client_modified||'')));Q('assetCount').textContent=arr.length+' cloud videos';const box=Q('assetResults');box.replaceChildren();for(const f of arr){const pickValue=new URLSearchParams(location.search).get('studio')==='1'&&parent!==window?f.path_display:f.name;const card=document.createElement('div');card.className='assetCard'+(Q(pickerTarget).value===pickValue?' selected':'');const thumb=document.createElement('div');thumb.className='assetThumb';thumb.textContent='▶ Video preview';const title=document.createElement('div');title.className='assetName';title.textContent=f.name;const meta=document.createElement('div');meta.className='assetMeta';meta.textContent=[formatBytes(f.size||f.file?.size),f.server_modified||f.client_modified||''].filter(Boolean).join(' · ');const actions=document.createElement('div');actions.className='assetActions';const preview=document.createElement('button');preview.textContent='▶ Preview';preview.onclick=async()=>{preview.disabled=true;preview.textContent='Loading…';try{const p=await api('/api/playback?path='+encodeURIComponent(f.path_display));const video=document.createElement('video');video.className='assetPreview';video.controls=true;video.playsInline=true;video.preload='metadata';video.src=p.url;video.style.display='block';card.append(video);video.play().catch(()=>{});preview.textContent='▶ Play'}catch(e){preview.textContent='Preview failed';report(e.message)}finally{preview.disabled=false}};const choose=document.createElement('button');choose.textContent='Use this video';choose.onclick=async()=>{const id=pickerTarget;Q('assetDialog').close();await chooseCloudVideo(id,pickValue)};actions.append(preview,choose);card.append(thumb,title,meta,actions);box.append(card)}}function openLibrary(id) {
-  pickerTarget = id;
-  Q('libraryTitle').textContent = id === 'base' ? 'Choose bed video' : 'Choose animation overlay';
-  Q('pickDeviceVideo').hidden = inStudio;
-  Q('cloudVideoStatus').hidden = Boolean(key) || inStudio;
-  Q('assetSearch').value = '';
-  renderLibrary();
-  Q('assetDialog').showModal();
-  Q(inStudio ? 'assetSearch' : 'pickDeviceVideo').focus();
-}
-Q('pickBase').onclick=()=>openLibrary('base');Q('pickOverlay').onclick=()=>openLibrary('overlay');Q('closeLibrary').onclick=()=>Q('assetDialog').close();Q('assetSearch').oninput=renderLibrary;Q('assetSort').onchange=renderLibrary;let trimInFrame=0,trimOutFrame=null;
-const trimInTime=()=>trimInFrame/25,trimOutTime=()=>Math.min(ov.duration||Infinity,(trimOutFrame===null?Infinity:trimOutFrame/25)),trimLength=()=>Math.max(0,trimOutTime()-trimInTime());
-function trimLabel(){const end=trimOutTime();Q("trimInfo").textContent="Overlay IN frame "+trimInFrame+" ("+trimInTime().toFixed(3)+"s) · OUT "+(Number.isFinite(end)?"frame "+Math.round(end*25)+" ("+end.toFixed(3)+"s)":"source end")+" · "+(Number.isFinite(trimLength())?trimLength().toFixed(3)+"s selected":"awaiting video");}
-let startFrame=0,overlayActive=false,overlayPreview=false,x=40,y=345,w=460,ratio=16/9,bx=95,by=45,bw=350,editMode="overlay",playing=false,items=[],raf=0,drag=null,canSample=true;
-const params=new URLSearchParams(location.search);
-const inStudio = params.get('studio') === '1' && parent !== window;
-const names=[params.get('base')||'GS_EP4_MINT_TRUCK_COMPOSITE_readyfornextpass.webm',params.get('overlay')||'HeyGen-Video-1793044979820.mp4'];let renderedBlob=null,renderedExt='mp4',renderedUrl=null;function fileName(){const stem=Q('outputName').value.trim().replace(/\.(mp4|webm)$/i,'').replace(/[\\/:*?"<>|]/g,'_')||'AspectLock_Render';return stem+'.'+renderedExt}
-Q('downloadVideo').onclick=()=>{if(!renderedBlob)return;const a=document.createElement('a');a.href=renderedUrl;a.download=fileName();document.body.append(a);a.click();a.remove();report('Download requested: '+fileName()+'. Check your browser Downloads if no save dialog appears.')};
-Q('shareVideo').onclick=async()=>{if(!renderedBlob)return;const f=new File([renderedBlob],fileName(),{type:renderedBlob.type});try{if(navigator.canShare?.({files:[f]})){await navigator.share({files:[f],title:fileName()})}else{Q('downloadVideo').click();Q('renderInfo').textContent='Sharing files is not supported by this browser; download instead.'}}catch(e){if(e.name!=='AbortError')Q('renderInfo').textContent='Share unavailable: '+e.message}};
-function report(t){Q('status').textContent=t}
-async function api(path){let r=await fetch(API+path,{headers:{Authorization:'Bearer '+key}});if(!r.ok)throw Error('Library request failed '+r.status);return r.json()}
-function refreshLoadedVideo(video) {
-  if (video === ov) {
-    ratio = video.videoWidth / video.videoHeight || 16 / 9;
-    trimInFrame = 0;
-    trimOutFrame = null;
-    Q('width').max = '2000';
-    trimLabel();
-  }
-  update();
-}
-async function loadFile(name, video) {
-  const file = items.find(item => item.path_display === name || item.name.toLowerCase() === name.toLowerCase());
-  if (!file) throw new Error('Cloud video not found: ' + name);
-  const signal = beginVideoLoad(video);
-  const playback = await api('/api/playback?path=' + encodeURIComponent(file.path_display));
-  if (signal.aborted) return null;
-  Q('pause').click();
-  overlayPreview = false;
-  if (!await loadVideoSource(video, playback.url, file.name, signal)) return null;
-  refreshLoadedVideo(video);
-  return file;
-}
-function markVideoSelection(id, name, cloudValue) {
-  const select = Q(id);
-  select.querySelector('[data-device-video]')?.remove();
-  if (cloudValue === undefined) {
-    const option = new Option(name, name);
-    option.dataset.deviceVideo = '';
-    select.add(option);
-    option.selected = true;
-  } else {
-    select.value = cloudValue;
-  }
-  Q(id + 'Chosen').textContent = name;
-  update();
-}
-async function chooseCloudVideo(id, value) {
-  manualVideoSelection = true;
-  report('Loading ' + value + '…');
-  try {
-    const file = await loadFile(value, id === 'base' ? bv : ov);
-    if (!file) return;
-    markVideoSelection(id, file.name, value);
-    report('Loaded ' + file.name);
-  } catch (error) {
-    report(error.message);
-  }
-}
-Q('pickDeviceVideo').onclick = () => Q('deviceVideo').click();
-Q('deviceVideo').onchange = async event => {
-  const input = event.currentTarget;
-  const file = input.files[0];
-  const id = pickerTarget;
-  input.value = '';
-  if (!file) return;
-  manualVideoSelection = true;
-  Q('assetDialog').close();
-  Q('pause').click();
-  overlayPreview = false;
-  const video = id === 'base' ? bv : ov;
-  const signal = beginVideoLoad(video);
-  const url = URL.createObjectURL(file);
-  let loaded = false;
-  report('Loading ' + file.name + '…');
-  try {
-    loaded = await loadVideoSource(video, url, file.name, signal);
-    if (!loaded) return;
-    markVideoSelection(id, file.name);
-    refreshLoadedVideo(video);
-    sound();
-    report('Loaded from device: ' + file.name);
-  } catch (error) {
-    report(error.message);
-  } finally {
-    if (!loaded) URL.revokeObjectURL(url);
-  }
-};
-
-function update(){refreshAdded();const scale=Q('stageScene').clientWidth/540,h=w/ratio;const el=Q('dragSurface');el.style.zIndex='5';el.style.left=(x*scale)+'px';el.style.top=(y*scale)+'px';el.style.width=(w*scale)+'px';el.style.height=(h*scale)+'px';Q('bounds').style.cssText='width:100%;height:100%';const be=Q('baseEdit');be.style.left=(bx*scale)+'px';be.style.top=(by*scale)+'px';be.style.width=(bw*scale)+'px';be.style.height=(bw*16/9*scale)+'px';be.hidden=editMode!=='base';Q('dragSurface').style.pointerEvents=editMode==='base'?'none':'auto';Q('dragSurface').style.visibility=editMode==='base'||ov.readyState<1||bv.readyState<1?'hidden':'visible';if(Q('stageNote'))Q('stageNote').textContent=editMode==='base'?'Portrait perspective editing only — final output stays full-screen 9:16. Switch back to overlay to finish.':'Play bed, pause at the intended entrance, then set overlay start. Pinch the overlay box to position. Source aspect ratio is preserved.';Q('width').value=Math.min(2000,Math.max(100,w));Q('x').value=x;Q('y').value=y;Q('widthText').textContent=Math.round(w)+' px';Q('xText').textContent=Math.round(x)+' px';Q('yText').textContent=Math.round(y)+' px';Q('toleranceText').textContent=Q('tolerance').value;Q('spec').textContent=JSON.stringify(spec(),null,2)}
-function spec(){return {tool:'AspectLock',toolId:'GS-TOOL-ASPECTLOCK',version:'R31',base:Q('base').value,overlay:Q('overlay').value,canvas:{width:540,height:960},portraitPerspective:{x:Math.round(bx),y:Math.round(by),width:Math.round(bw),finalOutput:'full-frame 9:16; perspective transform excluded'},overlayTransform:{x:Math.round(x),y:Math.round(y),width:Math.round(w),height:Math.round(w/ratio),aspectRatio:ratio},layerOrder:Q('order').value,blueRemoval:Q('keyMode').value,tolerance:Number(Q('tolerance').value),audio:{source:Q('baseAudio').value,cartoonSfx:Q('overlayAudio').value},startFrame:startFrame,overlayTrim:{inFrame:trimInFrame,outFrame:trimOutFrame,frameRate:25},sourceMotion:'unchanged'} }
-function drawVideo(video,dx,dy,dw,dh){if(video.readyState>=2)ctx.drawImage(video,dx,dy,dw,dh)}
-function draw(){syncOverlay();Q('overlayPosition').textContent=ov.currentTime.toFixed(3)+' s';if(!Q('overlaySeek').matches(':active'))Q('overlaySeek').value=Math.round(1000*ov.currentTime/(ov.duration||1));ctx.fillStyle='#000';ctx.fillRect(0,0,540,960);const top=Q('order').value==='overlay';if(top)drawVideo(bv,bx,by,bw,bw*16/9);overlayDraw();if(!top)drawVideo(bv,bx,by,bw,bw*16/9);if(playing&&bv.readyState>=2){Q('seek').value=Math.round(1000*bv.currentTime/(bv.duration||1));Q('position').textContent=bv.currentTime.toFixed(3)+' s'}paintAddedMatrix();raf=requestAnimationFrame(draw)}
-function overlayDraw(){if(!overlayActive||ov.readyState<2)return;const h=w/ratio;const mode=Q('keyMode').value;if(mode==='off'){drawVideo(ov,x,y,w,h);return}const tw=ov.videoWidth,th=ov.videoHeight;if(!tw||!th)return;try{if(scratch.width!==tw||scratch.height!==th){scratch.width=tw;scratch.height=th}sc.clearRect(0,0,tw,th);sc.drawImage(ov,0,0,tw,th);if(mode==='alpha'){ctx.drawImage(scratch,x,y,w,h);return}const d=sc.getImageData(0,0,tw,th),a=d.data,tol=Number(Q('tolerance').value)/100;for(let i=0;i<a.length;i+=4){const r=a[i],g=a[i+1],b=a[i+2];if(mode==='green'){const dominance=g-Math.max(r,b);const chroma=g/(r+g+b+1);const strength=Math.max(0,Math.min(1,(dominance-(18+tol*35))/(35+tol*45)));const greenHue=g>r*1.16&&g>b*1.10&&chroma>.40;if(greenHue){a[i+3]=Math.round(a[i+3]*(1-strength));if(a[i+3]>0){a[i]=Math.min(255,Math.round(r+(g-r)*strength*.10));a[i+1]=Math.max(0,Math.round(g*(1-strength*.25)))}}}else if(mode==='blue'){const dominance=b-Math.max(r,g);const blueHue=b>r*1.17&&b>g*1.08&&b>70;if(blueHue)a[i+3]=Math.max(0,Math.min(255,255-(dominance+tol*100)*2.6))}}sc.putImageData(d,0,0);ctx.drawImage(scratch,x,y,w,h)}catch(e){if(canSample){report('Background removal failed: '+e.message);canSample=false}drawVideo(ov,x,y,w,h)}}
-function sound(){bv.muted=Q('baseAudio').value!=='on';ov.muted=Q('overlayAudio').value!=='on'||!overlayActive}
-function syncOverlay(){if(overlayPreview){overlayActive=true;sound();return}const local=bv.currentTime-startFrame/25,target=trimInTime()+local;overlayActive=local>=0&&target<trimOutTime()&&trimLength()>0;if(!overlayActive){ov.pause();if(ov.currentTime<trimInTime()||ov.currentTime>=trimOutTime())ov.currentTime=trimInTime()}else{if(Math.abs(ov.currentTime-target)>.18)ov.currentTime=Math.max(trimInTime(),Math.min(target,trimOutTime()-.01));if(playing&&!bv.paused&&ov.paused)ov.play().catch(()=>{})}sound()}
-function setStart(f){overlayPreview=false;startFrame=Math.max(0,Math.round(f));Q('startInfo').textContent='Overlay begins at frame '+startFrame+' · '+(startFrame/25).toFixed(3)+' s';syncOverlay();update()}
-Q('backFrame').onclick=()=>{Q('pause').click();bv.currentTime=Math.max(0,(Math.round(bv.currentTime*25)-1)/25);syncOverlay();Q('position').textContent=bv.currentTime.toFixed(3)+' s'};
-Q('forwardFrame').onclick=()=>{Q('pause').click();bv.currentTime=Math.min(bv.duration||0,(Math.round(bv.currentTime*25)+1)/25);syncOverlay();Q('position').textContent='Frame '+Math.round(bv.currentTime*25)+' · '+bv.currentTime.toFixed(3)+' s'};
-Q('bedZero').onclick=()=>{Q('pause').click();bv.currentTime=0;syncOverlay()};
-Q('playOverlay').onclick=async()=>{overlayPreview=true;overlayActive=true;sound();try{await ov.play();report('Animation playing independently; bed unchanged.')}catch(e){report('Animation playback: '+e.message)}};
-Q('pauseOverlay').onclick=()=>{ov.pause();overlayPreview=true;overlayActive=true;report('Animation paused at '+ov.currentTime.toFixed(3)+' s')};
-Q('overlayZero').onclick=()=>{Q('pause').click();ov.currentTime=trimInTime();overlayPreview=true;overlayActive=true};
-Q('markStart').onclick=()=>{Q('pause').click();setStart(Math.round(bv.currentTime*25));report('Overlay start marked. Press Play to preview from this position.')};
-Q('clearStart').onclick=()=>{Q('pause').click();setStart(0)};
-Q('play').onclick=async()=>{overlayPreview=false;playing=true;syncOverlay();try{await bv.play();syncOverlay()}catch(e){report('Tap Play again to enable playback: '+e.message)}};
-Q('pause').onclick=()=>{playing=false;bv.pause();ov.pause()};
-Q('trimIn').onclick=()=>{const frame=Math.round(ov.currentTime*25);if(frame>=Math.round(trimOutTime()*25)){report('IN must precede OUT');return;}trimInFrame=frame;trimLabel();syncOverlay();update()};
-Q('trimOut').onclick=()=>{const frame=Math.round(ov.currentTime*25);if(frame<=trimInFrame){report('OUT must follow IN');return;}trimOutFrame=frame;trimLabel();syncOverlay();update()};
-Q('trimClear').onclick=()=>{trimInFrame=0;trimOutFrame=null;trimLabel();syncOverlay();update()};
-Q('overlaySeek').oninput=()=>{Q('pause').click();overlayPreview=true;overlayActive=true;ov.pause();ov.currentTime=Number(Q('overlaySeek').value)/1000*(ov.duration||0);sound()};
-Q('seek').oninput=()=>{Q('pause').click();overlayPreview=false;const f=Number(Q('seek').value)/1000;bv.currentTime=f*(bv.duration||0);syncOverlay()};
-Q('fitOverlay').onclick=()=>{if(!ov.videoWidth||!ov.videoHeight){report('Load an overlay video first');return;}w=Math.min(540,960*ratio);x=(540-w)/2;y=(960-w/ratio)/2;Q('width').max='2000';update();report('Overlay fitted to portrait canvas without cropping or distortion')};
-Q('reset').onclick=()=>{x=124;y=297;w=334;bx=173;by=119;bw=217;editMode='overlay';Q('order').value='overlay';update()};
-for(const id of ['width','x','y'])Q(id).oninput=()=>{if(id==='width')w=Number(Q(id).value);if(id==='x')x=Number(Q(id).value);if(id==='y')y=Number(Q(id).value);update()};
-for(const id of ['order','keyMode','tolerance','baseAudio','overlayAudio'])Q(id).onchange=()=>{if(id==='order'){editMode=Q('order').value==='base'?'base':'overlay'}sound();update()};Q('editOverlay').onclick=()=>{Q('itemProperties').close();setViewMode(false);editMode='overlay';Q('order').value='overlay';update()};Q('editBase').onclick=()=>{Q('itemProperties').close();setViewMode(false);editMode='base';Q('order').value='base';update()};
-let viewZoom=1,viewX=0,viewY=0,viewMode=false,viewGesture=null;
-const viewPointers=new Map();
-function showView(){Q('stageScene').style.transform='translate('+viewX+'px,'+viewY+'px) scale('+viewZoom+')';Q('viewZoom').value=Math.round(viewZoom*100);Q('viewZoomText').textContent=Math.round(viewZoom*100)+'%'}
-function setViewMode(on){viewMode=on;stage.classList.toggle('viewMode',on);Q('viewStage').textContent=on?'✓ Moving whole stage':'Move whole stage';viewPointers.clear();viewGesture=null}
-function zoomView(z,cx=stage.clientWidth/2,cy=stage.clientHeight/2){z=Math.max(1,Math.min(4,z));const f=z/viewZoom;const dx=cx-stage.clientWidth/2,dy=cy-stage.clientHeight/2;viewX=dx-(dx-viewX)*f;viewY=dy-(dy-viewY)*f;viewZoom=z;showView()}
-Q('viewStage').onclick=()=>setViewMode(!viewMode);
-Q('viewReset').onclick=()=>{viewZoom=1;viewX=0;viewY=0;showView()};
-Q('viewZoom').oninput=()=>zoomView(Number(Q('viewZoom').value)/100);
-function viewPoint(e){const r=stage.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
-function startViewGesture(){const ps=[...viewPointers.values()];if(!ps.length){viewGesture=null;return}const a=ps[0],b=ps[1]||a;viewGesture={x:(a.x+b.x)/2,y:(a.y+b.y)/2,d:ps.length>1?Math.hypot(b.x-a.x,b.y-a.y):0,z:viewZoom,tx:viewX,ty:viewY}}
-stage.addEventListener('pointerdown',e=>{if(!viewMode)return;e.preventDefault();stage.setPointerCapture(e.pointerId);viewPointers.set(e.pointerId,viewPoint(e));startViewGesture()});
-stage.addEventListener('pointermove',e=>{if(!viewPointers.has(e.pointerId)||!viewGesture)return;e.preventDefault();viewPointers.set(e.pointerId,viewPoint(e));const ps=[...viewPointers.values()],a=ps[0],b=ps[1]||a,g=viewGesture,cx=(a.x+b.x)/2,cy=(a.y+b.y)/2;viewZoom=g.d&&ps.length>1?Math.max(1,Math.min(4,g.z*Math.hypot(b.x-a.x,b.y-a.y)/g.d)):g.z;const f=viewZoom/g.z;viewX=(cx-stage.clientWidth/2)-(g.x-stage.clientWidth/2-g.tx)*f;viewY=(cy-stage.clientHeight/2)-(g.y-stage.clientHeight/2-g.ty)*f;showView()});
-for(const ev of ['pointerup','pointercancel','lostpointercapture'])stage.addEventListener(ev,e=>{viewPointers.delete(e.pointerId);startViewGesture()});
-stage.addEventListener('wheel',e=>{if(!viewMode)return;e.preventDefault();const p=viewPoint(e);zoomView(viewZoom*Math.exp(-e.deltaY*.0015),p.x,p.y)},{passive:false});
-window.addEventListener('resize',()=>{showView();update()});
-const sideNav=Q('stageNav');const transportButtons=Q('play').closest('.compactBar'),frameButtons=Q('backFrame').closest('.compactBar'),zeroButtons=Q('bedZero').closest('.compactBar');sideNav.append(transportButtons,frameButtons,zeroButtons);
-const pointers=new Map();let gesture=null;
-function applyGesture(){if(!gesture)return;const pts=[...pointers.values()],g=gesture,scale=540/Q('stageScene').clientWidth/viewZoom;if(pts.length>=2&&g.distance){const d=Math.hypot(pts[1].x-pts[0].x,pts[1].y-pts[0].y),factor=d/g.distance;if(g.mode==='base'){bw=Math.max(85,Math.min(520,g.w*factor));bx=g.x+(g.w-bw)/2;by=g.y+(g.w-bw)*8/9}else{w=Math.max(70,Math.min(1600,g.w*factor));x=g.x+(g.w-w)/2;y=g.y+(g.w-w)/ratio/2}}else if(pts.length===1){const p=pts[0],dx=(p.x-g.startX)*scale,dy=(p.y-g.startY)*scale;if(g.resize){if(g.mode==='base')bw=Math.max(85,Math.min(520,g.w+dx));else w=Math.max(70,Math.min(1600,g.w+dx))}else if(g.mode==='base'){bx=g.x+dx;by=g.y+dy}else{x=g.x+dx;y=g.y+dy}}update()}
-function initGesture(el,mode){el.addEventListener('pointerdown',e=>{e.preventDefault();if(viewMode||mode!==editMode)return;el.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});const pts=[...pointers.values()];gesture={mode,resize:e.target.id==='handle'||e.target.id==='baseHandle',x:mode==='base'?bx:x,y:mode==='base'?by:y,w:mode==='base'?bw:w,startX:e.clientX,startY:e.clientY,distance:pts.length>=2?Math.hypot(pts[1].x-pts[0].x,pts[1].y-pts[0].y):0}});el.addEventListener('pointermove',e=>{if(!pointers.has(e.pointerId))return;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===2&&gesture&&!gesture.distance){const pts=[...pointers.values()];gesture={...gesture,x:mode==='base'?bx:x,y:mode==='base'?by:y,w:mode==='base'?bw:w,distance:Math.hypot(pts[1].x-pts[0].x,pts[1].y-pts[0].y)}}applyGesture()});for(const event of ['pointerup','pointercancel','lostpointercapture'])el.addEventListener(event,e=>{pointers.delete(e.pointerId);gesture=null})}
-initGesture(Q('dragSurface'),'overlay');initGesture(Q('baseEdit'),'base');
-Q('render').onclick=async()=>{
- const btn=Q('render');if(btn.disabled)return;
- const mime=['video/webm;codecs=vp8,opus','video/webm;codecs=vp9,opus','video/webm'].find(t=>MediaRecorder.isTypeSupported(t));
- if(!mime){report('This browser does not support video recording.');return}
- const duration=bv.duration;Q('position').textContent='0:00.000 / '+duration.toFixed(3)+' s';if(!Number.isFinite(duration)||duration<=0){report('Source video duration unavailable');return}
- btn.disabled=true;Q('pause').click();const oldBase=bv.currentTime,oldOverlay=ov.currentTime;
- const renderCanvas=document.createElement('canvas');renderCanvas.width=540;renderCanvas.height=960;
- const rc=renderCanvas.getContext('2d');const ac=new AudioContext();const dest=ac.createMediaStreamDestination();
- const bSource=ac.createMediaElementSource(bv),oSource=ac.createMediaElementSource(ov);
- const bg=ac.createGain(),og=ac.createGain();bSource.connect(bg);oSource.connect(og);bg.connect(dest);og.connect(dest);
- bg.gain.value=Q('baseAudio').value==='on'?1:0;og.gain.value=0;
- bv.muted=false;ov.muted=false;
- const videoStream=renderCanvas.captureStream(25);
- const stream=new MediaStream([...videoStream.getVideoTracks(),...dest.stream.getAudioTracks()]);
- const parts=[];let recorder;
- try{recorder=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:3500000,audioBitsPerSecond:128000})}
- catch(e){report('Recorder unavailable: '+e.message);btn.disabled=false;await ac.close();return}
- const completed=new Promise((resolve,reject)=>{recorder.ondataavailable=e=>{if(e.data.size)parts.push(e.data)};recorder.onerror=e=>reject(e.error||Error('Recording failed'));recorder.onstop=resolve});
- const renderFrame=()=>{const local=bv.currentTime-startFrame/25,target=trimInTime()+local;overlayActive=local>=0&&target<trimOutTime()&&trimLength()>0;og.gain.value=overlayActive&&Q('overlayAudio').value==='on'?1:0;if(overlayActive&&ov.paused)ov.play().catch(()=>{});if(!overlayActive)ov.pause();rc.fillStyle='#000';rc.fillRect(0,0,540,960);
- const scale=540/bw,ox=(x-bx)*scale,oy=(y-by)*scale,ow=w*scale,oh=w/ratio*scale;
- const drawBase=()=>{if(bv.readyState>=2)rc.drawImage(bv,0,0,540,960)};
- const drawOverlay=()=>{if(!overlayActive||ov.readyState<2)return;if(Q('keyMode').value==='off'){rc.drawImage(ov,ox,oy,ow,oh);return}
- const tw=ov.videoWidth,th=ov.videoHeight;if(scratch.width!==tw||scratch.height!==th){scratch.width=tw;scratch.height=th}
- sc.drawImage(ov,0,0,tw,th);const data=sc.getImageData(0,0,tw,th),arr=data.data,tol=Number(Q('tolerance').value);
- for(let i=0;i<arr.length;i+=4){const b=arr[i+2],r=arr[i],g=arr[i+1];if(b>r*1.17&&b>g*1.08&&b>70)arr[i+3]=Math.max(0,Math.min(255,255-(b-Math.max(r,g)+tol)*2.6))}
- sc.putImageData(data,0,0);rc.drawImage(scratch,ox,oy,ow,oh)};
- drawBase();drawOverlay()};
- let tick,stopped=false;
- try{
- bv.currentTime=0;ov.currentTime=trimInTime();await Promise.all([bv,ov].map(v=>v.seeking?new Promise(ok=>v.addEventListener('seeked',ok,{once:true})):Promise.resolve()));
- await ac.resume();renderFrame();recorder.start(1000);await bv.play();if(startFrame===0)await ov.play();
- report('Rendering full source in real time. Keep this tab open.');
- tick=setInterval(()=>{renderFrame();if(overlayActive&&Math.abs(ov.currentTime-(trimInTime()+bv.currentTime-startFrame/25))>.10)ov.currentTime=Math.max(trimInTime(),Math.min(trimOutTime()-.01,trimInTime()+bv.currentTime-startFrame/25));report('Rendering '+bv.currentTime.toFixed(1)+' / '+duration.toFixed(1)+' seconds');if(bv.ended||bv.currentTime>=duration-.015){clearInterval(tick);stopped=true;recorder.stop()}},40);
- await completed;renderedExt=mime.includes('mp4')?'mp4':'webm';renderedBlob=new Blob(parts,{type:mime});if(renderedUrl)URL.revokeObjectURL(renderedUrl);renderedUrl=URL.createObjectURL(renderedBlob);Q('resultVideo').src=renderedUrl;Q('renderResult').hidden=false;Q('renderInfo').textContent=renderedExt.toUpperCase()+' · '+(renderedBlob.size/1048576).toFixed(1)+' MB · Choose a name, then Download or Share.';Q('renderResult').scrollIntoView({behavior:'smooth',block:'start'});report('WebM render complete. Verify full duration in player before publishing. Originals unchanged.');
- }catch(e){report('Render failed: '+e.message)}finally{clearInterval(tick);if(recorder.state!=='inactive')recorder.stop();bv.pause();ov.pause();stream.getTracks().forEach(t=>t.stop());await ac.close();btn.disabled=false}
-};
-Q('save').onclick=()=>{localStorage.setItem('aspectlock_ep4_alignment_r1',JSON.stringify(spec()));report('Alignment saved on this device')};
-Q('copy').onclick=async()=>{const t=JSON.stringify(spec(),null,2);try{await navigator.clipboard.writeText(t);report('Alignment instructions copied')}catch(e){report('Copy unavailable; open Alignment specification and select text')}};
-Q('frame').onclick=()=>{const a=document.createElement('a');a.href=C.toDataURL('image/png');a.download='AspectLock_alignment_frame.png';a.click()};
-async function start() {
-  const keyMode = params.get('key');
-  if (['green', 'blue', 'alpha', 'off'].includes(keyMode)) Q('keyMode').value = keyMode;
-  update();
-  draw();
-  if (!key) return;
-  try {
-    const data = await api('/api/assets');
-    items = (data.entries || []).filter(file => file['.tag'] === 'file' && /\.(mp4|webm|mov)$/i.test(file.name));
-    for (const id of ['base', 'overlay']) {
-      const select = Q(id);
-      const active = select.selectedOptions[0];
-      for (const file of items) select.add(new Option(file.name, file.name));
-      if (active) active.selected = true;
-      else select.selectedIndex = -1;
-      select.onchange = () => chooseCloudVideo(id, Q(id).value);
-    }
-    if (Q('assetDialog').open) renderLibrary();
-    if (manualVideoSelection || params.get('source') === 'device') return;
-    const bed = await loadFile(names[0], bv);
-    if (!bed) return;
-    markVideoSelection('base', bed.name, names[0]);
-    if (manualVideoSelection) return;
-    try {
-      const overlay = await loadFile(names[1], ov);
-      if (!overlay) return;
-      markVideoSelection('overlay', overlay.name, names[1]);
-      if (manualVideoSelection) return;
-    } catch (error) {
-      if (!manualVideoSelection) report('Overlay could not decode: ' + names[1] + '. Choose a compatible video.');
-      return;
-    }
-    const saved=localStorage.getItem('aspectlock_ep4_alignment_r1');if(saved){const p=JSON.parse(saved);if(p.base===names[0]&&p.overlay===names[1]){x=p.overlayTransform.x;y=p.overlayTransform.y;w=p.overlayTransform.width;if(p.portraitPerspective){bx=p.portraitPerspective.x;by=p.portraitPerspective.y;bw=p.portraitPerspective.width}Q('order').value='overlay';editMode='overlay';Q('keyMode').value=({on:'blue',off:'off',green:'green',blue:'blue',alpha:'alpha'}[p.blueRemoval]||'green');Q('tolerance').value=p.tolerance;Q('baseAudio').value=p.audio.source;Q('overlayAudio').value=p.audio.cartoonSfx}}if(params.get('preset')==='timmy351'){x=150;y=295;w=413;bx=173;by=119;bw=217;Q('order').value='overlay';editMode='overlay';Q('keyMode').value='blue';Q('tolerance').value='70';Q('baseAudio').value='on';Q('overlayAudio').value='off';Q('outputName').value='GS_EP4_TIMMY_ONLY_ALIGNED_v01';}else if(params.has('overlay')){Q('overlayAudio').value='off';Q('outputName').value='GS_EP4_MINT_TRUCK_COMPOSITE_REVIEW_v01'}if(/\.webm$/i.test(names[1]))Q('keyMode').value='alpha';else if(/SCISSORS_CHASE_GEMINI_SOURCE/i.test(names[1]))Q('keyMode').value='green';if(/HeyGen-Video-1793044979820/i.test(names[1])){Q('keyMode').value='blue';Q('outputName').value='GS_EP4_SMART_GRILL_COMPOSITE_REVIEW_v01'}if (['green', 'blue', 'alpha', 'off'].includes(keyMode)) Q('keyMode').value = keyMode;
-    setStart(params.has('start')?Math.round(Number(params.get('start'))*25):(params.get('preset')==='timmy351'?351:976));
-    sound();
-    update();
-    report('Connected. Both videos ready. Drag or resize the overlay.');
-  } catch (error) {
-    if (!manualVideoSelection && params.get('source') !== 'device') report(error.message);
-  }
-}
-
-
-function addedPlacement(){return {id:'overlay',name:Q('overlay').value||names[1],inFrame:startFrame,outFrame:startFrame+Math.max(1,Math.round((Number.isFinite(trimLength())?trimLength():0)*25)),visible:true};}
-function paintAddedMatrix(){paintMatrix(Q('itemMatrix'),ov.readyState>=1?[addedPlacement()]:[],Math.round(bv.currentTime*25),Math.max(1,Math.round((Number.isFinite(bv.duration)?bv.duration:0)*25)),'overlay');}
-function refreshAdded(){const loaded=ov.readyState>=1;Q('addedOverlay').hidden=!loaded;Q('addedEmpty').hidden=loaded;Q('addedCount').textContent=loaded?'1':'0';if(loaded){const item=addedPlacement();Q('addedName').textContent=item.name;Q('addedTiming').textContent='F'+item.inFrame+'–'+item.outFrame+' · tap to edit';}paintAddedMatrix();}
-function seekBedFrame(frame){Q('pause').click();overlayPreview=false;if(bv.readyState>=1)bv.currentTime=Math.max(0,Math.min(frame/25,Math.max(0,bv.duration-.001)));syncOverlay();Q('position').textContent=bv.currentTime.toFixed(3)+' s';paintAddedMatrix();}
-Q('editAdded').onclick=()=>{seekBedFrame(startFrame);Q('itemPropertiesTitle').textContent='Edit · '+addedPlacement().name;Q('stage').scrollIntoView({block:'start',behavior:'instant'});Q('itemProperties').showModal();};
-Q('jumpAdded').onclick=()=>seekBedFrame(startFrame);Q('sheetItemStart').onclick=()=>seekBedFrame(startFrame);Q('sheetBack').onclick=()=>Q('backFrame').click();Q('sheetForward').onclick=()=>Q('forwardFrame').click();Q('closeItemProperties').onclick=()=>Q('itemProperties').close();
-Q('itemMatrix').onpointerdown=e=>seekBedFrame(matrixFrame(e.clientX,e.currentTarget.getBoundingClientRect(),Number(e.currentTarget.dataset.endFrame)||1));
-Q('itemMatrix').onkeydown=e=>{if(['Home','ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();seekBedFrame(e.key==='Home'?0:Math.round(bv.currentTime*25)+(e.key==='ArrowLeft'?-1:1));}};
-window.addEventListener('DOMContentLoaded',()=>{const nav=document.querySelector('nav[aria-label="Caption production tools"]');if(nav)Q('addedItems').after(nav);},{once:true});
-
-if (!inStudio) start();
-
-import('../studio/adapter.mjs?v=1').then(({installAdapter})=>import('../studio/core.mjs?v=1').then(({moduleSession,preferredBed})=>{
- installAdapter('scene',{
-  busy:()=>Q('render').disabled,
-  pause:()=>{playing=false;bv.pause();ov.pause();},
-  async open({project:p,session}){
-   items=p.assets.filter(a=>/\.(mp4|webm|mov)$/i.test(a.name)).map(a=>({...a,path_display:a.path}));
-   for(const id of ['base','overlay']){Q(id).replaceChildren();for(const a of items){const o=document.createElement('option');o.value=a.path;o.textContent=a.name;Q(id).append(o);}Q(id).onchange=async()=>{try{await loadFile(Q(id).value,id==='base'?bv:ov);Q(id+'Chosen').textContent=items.find(a=>a.path===Q(id).value)?.name||'';}catch(e){report(e.message);}};}
-   const base=(p.studio?.bedAssetId?preferredBed(p):null)||items.find(a=>a.path===session?.spec?.base)||preferredBed(p);
-   const overlay=items.find(a=>a.path===session?.spec?.overlay)||items.find(a=>['animation','reaction','broll'].includes(a.role));
-   if(base){Q('base').value=base.path;await loadFile(base.path,bv);Q('baseChosen').textContent=base.name;}
-   if(overlay){Q('overlay').value=overlay.path;await loadFile(overlay.path,ov);Q('overlayChosen').textContent=overlay.name;}else{Q('overlay').value='';Q('overlayChosen').textContent='Choose an animation from this joke';}
-   if(session?.spec){const a=session.spec;x=a.overlayTransform.x;y=a.overlayTransform.y;w=a.overlayTransform.width;bx=a.portraitPerspective.x;by=a.portraitPerspective.y;bw=a.portraitPerspective.width;trimInFrame=a.overlayTrim.inFrame;trimOutFrame=a.overlayTrim.outFrame;startFrame=a.startFrame;Q('order').value=a.layerOrder;Q('keyMode').value=a.blueRemoval;Q('tolerance').value=a.tolerance;Q('baseAudio').value=a.audio.source;Q('overlayAudio').value=a.audio.cartoonSfx;viewZoom=session.view?.zoom||1;viewX=session.view?.x||0;viewY=session.view?.y||0;Q('outputName').value=session.outputName||p.title+'_scene';}
-   bv.currentTime=session?.time||0;playing=false;bv.pause();ov.pause();sound();trimLabel();showView();update();if(!raf)draw();report(p.title+' · scene pass · playback paused');
-  },
-  checkpoint:({project:p})=>moduleSession('scene',p.id,{spec:spec(),time:bv.currentTime,view:{zoom:viewZoom,x:viewX,y:viewY},outputName:Q('outputName').value})
- });
-}));
-</script><script src="../../shared/caplock-launch.js?v=1" defer></script><script type="module" src="../../shared/compact-player.mjs?v=3"></script></body></html>
+</main><script type="module" src="./editor.mjs?v=32"></script><script src="../../shared/caplock-launch.js?v=1" defer></script><script type="module" src="../../shared/compact-player.mjs?v=32"></script></body></html>
 

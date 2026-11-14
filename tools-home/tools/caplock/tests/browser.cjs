@@ -35,9 +35,9 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');const asse
  await aspectPage.route('**/ci-media/**',async route=>{const alpha=route.request().url().endsWith('.webm'),body=alpha?Buffer.from(bytes):await fs.readFile('/tmp/caplock-fixtures/source25.mp4'),range=route.request().headers().range,match=/bytes=(\d+)-(\d*)/.exec(range||'');if(match){const start=Number(match[1]),end=match[2]?Math.min(Number(match[2]),body.length-1):body.length-1;return route.fulfill({status:206,headers:{'accept-ranges':'bytes','content-range':`bytes ${start}-${end}/${body.length}`},contentType:alpha?'video/webm':'video/mp4',body:body.subarray(start,end+1)});}await route.fulfill({status:200,headers:{'accept-ranges':'bytes'},contentType:alpha?'video/webm':'video/mp4',body});});
  await aspectPage.goto(base.split('?')[0].replace('/caplock/','/aspectlock/')+'?base=source25.mp4&overlay=alpha-test.webm&start=0.4&key=alpha');await aspectPage.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('Connected.'));
  assert.equal(await aspectPage.locator('#addedCount').textContent(),'1');assert.equal(await aspectPage.locator('#addedName').textContent(),'alpha-test.webm');assert.equal(await aspectPage.locator('#bv').evaluate(v=>v.paused),true);assert.equal(await aspectPage.locator('#ov').evaluate(v=>v.paused),true);
- await aspectPage.locator('#editAdded').click();console.log('Aspect item seek',await aspectPage.locator('#bv').evaluate(v=>({time:v.currentTime,duration:v.duration,ready:v.readyState,seeking:v.seeking,start:document.querySelector('#startInfo').textContent})));assert.equal(await aspectPage.locator('#itemProperties').evaluate(e=>e.open),true);await aspectPage.waitForFunction(()=>{const v=document.querySelector('#bv');return !v.seeking&&Math.abs(v.currentTime-.4)<.001;});await aspectPage.locator('#x').focus();await aspectPage.keyboard.press('ArrowRight');await aspectPage.locator('#closeItemProperties').click();
+ await aspectPage.locator('#jumpAdded').click();await aspectPage.locator('#editAdded').click();console.log('Aspect item seek',await aspectPage.locator('#bv').evaluate(v=>({time:v.currentTime,duration:v.duration,ready:v.readyState,seeking:v.seeking,start:document.querySelector('#startInfo').textContent})));assert.equal(await aspectPage.locator('#itemProperties').evaluate(e=>e.open),true);await aspectPage.waitForFunction(()=>{const v=document.querySelector('#bv');return !v.seeking&&Math.abs(v.currentTime-.4)<.001;});await aspectPage.locator('#x').focus();await aspectPage.keyboard.press('ArrowRight');await aspectPage.locator('#closeItemProperties').click();
  await aspectPage.locator('#play').click();await aspectPage.locator('#bedZero').click();assert.equal(await aspectPage.locator('#bv').evaluate(v=>v.paused),true);assert.equal(await aspectPage.locator('#ov').evaluate(v=>v.paused),true);assert.equal(await aspectPage.locator('#bv').evaluate(v=>v.currentTime),0);await aspectPage.locator('#jumpAdded').click();await aspectPage.waitForFunction(()=>{const v=document.querySelector('#bv');return !v.seeking&&Math.abs(v.currentTime-.4)<.001;});
- for(const viewport of [{width:390,height:844},{width:360,height:640},{width:720,height:390}]){await aspectPage.setViewportSize(viewport);const geometry=await aspectPage.locator('#stageNav').evaluate(n=>({h:n.clientHeight,s:n.scrollHeight,count:n.querySelectorAll('button').length,inside:[...n.querySelectorAll('button')].every(b=>b.getBoundingClientRect().bottom<=n.getBoundingClientRect().bottom+.1)}));assert.equal(geometry.h,geometry.s);assert.equal(geometry.count,11);assert.equal(geometry.inside,true);}
+ for(const viewport of [{width:390,height:844},{width:360,height:640},{width:720,height:390}]){await aspectPage.setViewportSize(viewport);const geometry=await aspectPage.locator('#stageNav').evaluate(n=>({h:n.clientHeight,s:n.scrollHeight,count:n.querySelectorAll('button:not([hidden])').length,inside:[...n.querySelectorAll('button:not([hidden])')].every(b=>b.getBoundingClientRect().bottom<=n.getBoundingClientRect().bottom+.1)}));assert.equal(geometry.h,geometry.s);assert.equal(geometry.count,10);assert.equal(geometry.inside,true);}
  const localAspect=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
  localAspect.on('pageerror',e=>aspectErrors.push(e.message));
  await localAspect.goto(base.split('?')[0].replace('/caplock/','/aspectlock/')+'?source=device&key=blue');
@@ -49,6 +49,18 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');const asse
  };
  await pickLocal(localAspect.getByRole('button',{name:'Choose bed',exact:true}),'/tmp/caplock-fixtures/source25.mp4');
  await localAspect.waitForFunction(()=>document.querySelector('#baseChosen').textContent==='source25.mp4');
+ const stepForward=localAspect.locator('#forwardFrame'),stepBack=localAspect.locator('#backFrame');
+ const readBedFrame=async()=>Number(await localAspect.locator('#position').getAttribute('data-frame'));
+ await stepForward.click();
+ await stepForward.click();
+ assert.equal(await readBedFrame(),2,'separate clicks advance one frame each');
+ await stepForward.dblclick({delay:45});
+ assert.equal(await readBedFrame(),27,'double-click advances 25 frames from the starting frame');
+ const backBox=await stepBack.boundingBox();
+ const tapBack=()=>localAspect.touchscreen.tap(backBox.x+backBox.width/2,backBox.y+backBox.height/2);
+ await tapBack();
+ await tapBack();
+ assert.equal(await readBedFrame(),2,'double-tap reverses 25 frames from the starting frame');
  await localAspect.locator('.gs-source-grip').click();
  await pickLocal(localAspect.locator('#pickOverlay'),{name:'local-overlay.webm',mimeType:'video/webm',buffer:Buffer.from(bytes)});
  await localAspect.waitForFunction(()=>document.querySelector('#addedName').textContent==='local-overlay.webm');

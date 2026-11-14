@@ -46,3 +46,14 @@ export async function loadVideoSource(video, url, name, signal) {
   video.pause();
   return true;
 }
+
+export function clearVideoSource(video) {
+  beginVideoLoad(video);
+  const active = video.getAttribute('src');
+  const saved = sources.get(video);
+  video.pause();
+  video.removeAttribute('src');
+  video.load();
+  for (const url of new Set([active, saved])) if (url?.startsWith('blob:')) URL.revokeObjectURL(url);
+  sources.delete(video);
+}

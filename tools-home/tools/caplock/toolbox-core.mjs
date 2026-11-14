@@ -1,4 +1,4 @@
-import {validateChroma} from './background.mjs?v=20';
+import {validateChroma} from './background.mjs?v=32';
 import {clipRange} from './clip-time.mjs?v=28';
 export function isToolboxEntry(search,studio=false){const params=new URLSearchParams(search);return !studio&&!['project','cuts','assetPath'].some(key=>params.has(key))&&params.get('new')!=='cloud-video'&&params.get('legacy')!=='1';}
 const refKey=r=>JSON.stringify([r.kind,r.path||'',r.name,r.size]);

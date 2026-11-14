@@ -21,3 +21,11 @@ test('schema7 saves editable background settings without changing source, timing
  for(const bad of [{enabled:'yes'},{color:'blue'},{similarity:.8},{blend:-1}])assert.throws(()=>validateChroma({...DEFAULT_CHROMA,...bad}));
  const first=JSON.stringify(captionRecipe(q));q.clips[0].chroma.color='#00dd44';assert.notEqual(JSON.stringify(captionRecipe(q)),first);q.clips[0].chroma.enabled=false;assert.equal(JSON.stringify(captionRecipe(q)),JSON.stringify(captionRecipe(recovered)));
 });
+
+test('background opacity affects keyed pixels while retaining foreground and original alpha',()=>{
+ const pixels=new Uint8ClampedArray([10,119,212,255,255,240,100,255,10,119,212,128]);
+ const key={...DEFAULT_CHROMA,backgroundOpacity:.5};
+ assert.deepEqual([...removeBackground(pixels,key)].filter((_,i)=>i%4===3),[128,255,64]);
+ assert.equal(validateChroma(key).backgroundOpacity,.5);
+ assert.throws(()=>validateChroma({...key,backgroundOpacity:1.1}));
+});

@@ -1,3 +1,5 @@
+import {mountPlayerScribe} from './player-scribe.mjs?v=32';
+
 /** Locked SxLock equipment. Editors supply nodes and behavior, never new sizing. */
 export const PLAYER_PROFILE=Object.freeze({id:'SxLock-R24',rail:76,row:29,frame:36,gap:7,frameGlyph:30,record:40,secondary:25});
 // Owner-approved button sizes for CapLock and FrameLock.
@@ -35,13 +37,14 @@ export function mountPlayerShell(tool,config){
  const filename=el('div','gs-player-filename');filename.textContent='No file loaded';filename.setAttribute('aria-label','Source filename');
  const sourceLabels={cliplock:'#source',sxlock:'#videoName',caplock:'#bedName',aspectlock:'#baseChosen',previewlock:'#fileName',framelock:'#meta',wavlock:'#source'};
  const sourceLabel=q(sourceLabels[tool]);let chosenName='';
+ const sourceReady=()=>tool==='caplock'?sourceLabel?.dataset.sourceConnected==='true':!!media?.getAttribute('src');
  const syncFilename=()=>{
-  const connected=tool==='caplock'?sourceLabel?.dataset.sourceConnected==='true':!!media?.getAttribute('src');
-  const label=tool==='sxlock'?sourceLabel?.dataset.expected:sourceLabel?.textContent?.trim().split(' · ')[0];
+  const connected=sourceReady();
+  const label=sourceLabel?.dataset.expected || (tool==='sxlock' ? '' : sourceLabel?.textContent?.trim().split(' · ')[0]);
   filename.textContent=connected?(label||chosenName||'Video loaded'):'No file loaded';
   filename.title=filename.textContent;
  };
- if(sourceLabel)new MutationObserver(syncFilename).observe(sourceLabel,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['data-source-connected']});
+ if(sourceLabel)new MutationObserver(syncFilename).observe(sourceLabel,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['data-source-connected','data-expected']});
  const sourceInput=$(['framelock','previewlock','wavlock'].includes(tool)?'file':'videoFile');sourceInput?.addEventListener('change',e=>{chosenName=e.target.files?.[0]?.name||chosenName;},true);
  if(media)for(const name of ['loadedmetadata','emptied','loadstart'])media.addEventListener(name,syncFilename);
  syncFilename();
@@ -55,7 +58,7 @@ export function mountPlayerShell(tool,config){
  }
  if(tool==='sxlock')selectIntoDrawer('#sxLaunch,#sxVersion,.title-row,main>#toolIdentity,main>.small,main>#recoveryStatus');
  if(tool==='caplock')for(const id of ['bedLoad','railImport'])put($(id));
- if(tool==='aspectlock'){selectIntoDrawer('body>header,.asset-pickers');put($('overlaySeek')?.closest('.transport'));}
+ if(tool==='aspectlock')selectIntoDrawer('body>header,.asset-pickers');
  if(tool==='previewlock'){
   const library=$('libraryBar')?.closest('section');if(library)put(library);for(const id of ['importPanel','settings','renameSection','connectionControl','viewerInfo','savedCopy'])put($(id));
   const top=$('top');if(top){const fields=[...top.children].filter(n=>n!==clock);for(const n of fields)put(n);important(top,{display:'none'});}
@@ -68,10 +71,12 @@ export function mountPlayerShell(tool,config){
   const label=input.closest('label');if(label){put(label);continue;}
   const previous=input.previousElementSibling;if(previous?.tagName==='LABEL')put(previous);put(input);
  }
- const nativeRange=tool==='previewlock'?$('seekBar'):['framelock','wavlock'].includes(tool)?null:$('seek');
+ const nativeRange=tool==='previewlock'?$('seekBar'):tool==='aspectlock'?$('bedProgress'):['framelock','wavlock'].includes(tool)?null:$('seek');
+ const pauseEditor=tool==='caplock'?$('scribePause'):null;
  const nativeWidget=nativeRange?.tagName==='INPUT'?document.querySelector('.gs-precision[data-for="'+nativeRange.id+'"]'):null;
  const framePicture=tool==='framelock'?q('.gs-frame-picture'):null,frameProgress=framePicture?.querySelector('progress'),frameSeek=framePicture?.querySelector('.gs-precision');
  const frameTimeline=framePicture?.querySelector('#frameTimeline');
+ if(pauseEditor)stash.append(pauseEditor);
  if(nativeRange)stash.append(nativeRange);if(nativeWidget)root.append(nativeWidget);
  const picture=el('div','gs-player-picture'),content=tool==='sxlock'?$('viewerContent'):el('div','gs-player-content');
  const oldSxPicture=tool==='sxlock'?$('viewerDock'):null;
@@ -83,7 +88,8 @@ export function mountPlayerShell(tool,config){
  }
  else picture.append(content);
  content.classList.add('gs-player-content');important(content,{display:'flex','flex-direction':'column',height:'100%','min-height':'0',padding:'0',gap:'0'});
- if(clock&&tool!=='sxlock')content.append(clock);content.append(surface);
+ const hasVideoReadout = Boolean(clock && media && tool !== 'wavlock' && tool !== 'sxlock');
+ if(clock&&tool!=='sxlock'&&!hasVideoReadout)content.append(clock);content.append(surface);
  surface.classList.add('gs-player-surface');clock?.classList.add('gs-player-clock');
  const transportWrapper=tool==='sxlock'?rail.closest('.sticky'):rail;
  rail.classList.add('gs-rail-stack');if(transportWrapper!==rail)important(transportWrapper,{position:'static',margin:'0',padding:'0',width:profile.rail+'px'});
@@ -92,6 +98,12 @@ export function mountPlayerShell(tool,config){
  workspace.replaceChildren(picture,right);workspace.classList.add('gs-player-workspace');
  important(workspace,{display:'grid','grid-template-columns':'minmax(0,1fr) '+profile.rail+'px',gap:'4px','align-items':'start',position:'static',margin:'0',padding:'0',height:'auto','min-height':'0','max-height':'none',order:'0'});
  important(picture,{'min-width':'0',margin:'0',padding:'0',overflow:'hidden'});
+ if(tool==='motionlock'){
+  const panel=el('div','gs-motion-choices');
+  panel.setAttribute('aria-label','Motion and B-roll choices');
+  panel.append(...rail.querySelectorAll(':scope>.rail'));
+  rail.append(panel);
+ }
  const frameIds=(config.frames||[]).filter(id=>$(id)&&rail.contains($(id)));
  const paired=new Set();
  for(let i=0;i+1<frameIds.length;i+=2){const back=$(frameIds[i]),forward=$(frameIds[i+1]);if(back.parentElement===forward.parentElement&&back.parentElement!==rail&&back.parentElement.children.length===2)back.parentElement.classList.add('gs-frame-pair');else{const pair=el('div','gs-frame-pair');back.before(pair);pair.append(back,forward);}paired.add(back);paired.add(forward);}
@@ -141,13 +153,26 @@ export function mountPlayerShell(tool,config){
  const under=[];if(tool==='caplock')for(const id of ['focusBar','placementBar'])if($(id))under.push($(id));
  if(tool==='motionlock'){const status=q('.status');if(status&&!content.contains(status)){content.prepend(status);}const shuttle=q('.shuttle-wrap');if(shuttle)important(shuttle,{display:'none'});}
  const existingName=tool==='cliplock'?q('.batch-add'):null;
+ let videoReference;
+ if(hasVideoReadout){
+  videoReference=el('div','gs-video-reference');
+  videoReference.setAttribute('aria-label','Video and frame information');
+  videoReference.append(filename,clock);
+ }
+ const afterPicture=videoReference?[videoReference]:[];
+ const beforePicture=videoReference?[]:[filename];
  if(tool==='caplock'){
-  const line=el('div','gs-player-line');identity.title=identity.textContent;line.append(grip,identity,filename);if(clock)line.append(clock);
-  root.replaceChildren(line,drawer,workspace,...under,stash,...root.querySelectorAll(':scope>.gs-player-error'));
+  const line=el('div','gs-player-line');identity.title=identity.textContent;line.append(grip,identity);
+  root.replaceChildren(line,drawer,workspace,...afterPicture,...under,stash,...root.querySelectorAll(':scope>.gs-player-error'));
  }else if(tool==='sxlock'){
   const reference=el('div','sx-reference');reference.setAttribute('aria-label','Video and frame information');reference.append(filename,clock);
   root.replaceChildren(grip,drawer,workspace,reference,stash,...root.querySelectorAll(':scope>.gs-player-error'));
- }else root.replaceChildren(grip,drawer,identity,filename,workspace,...under,...(existingName?[existingName]:[]),stash,...root.querySelectorAll(':scope>.gs-player-error'));
+ }else root.replaceChildren(grip,drawer,identity,...beforePicture,workspace,...afterPicture,...under,...(existingName?[existingName]:[]),stash,...root.querySelectorAll(':scope>.gs-player-error'));
+ if(videoReference)mountPlayerScribe(videoReference,{
+  tool,clock,media,sourceReady,section:['aspectlock','caplock'].includes(tool)?$('editorScribe'):null,
+  pauseEditor:pauseEditor?()=>pauseEditor.click():null,
+  source:()=>sourceReady() ? sourceLabel?.dataset.expected||sourceLabel?.textContent?.trim().split(' · ')[0]||chosenName : '',
+ });
  // Keep now-empty source wrappers from taking a row above or under the monitor.
  if(tool==='cliplock')q('#frameTools .jump')?.remove();
  if(tool==='aspectlock')important($('stage')?.parentElement,{padding:'0',margin:'0'});
@@ -201,7 +226,8 @@ export function mountPlayerShell(tool,config){
   const clockHeight=clock&&content.contains(clock)?clock.getBoundingClientRect().height:0,progress=frameTimeline?frameTimeline.getBoundingClientRect().height:[...content.children].filter(n=>n.tagName==='PROGRESS').reduce((n,p)=>n+p.getBoundingClientRect().height+4,0),screenHeight=Math.max(50,height-clockHeight-progress);
   const previewHeight=tool==='sxlock'?`var(--sx-preview-height, ${screenHeight}px)`:`${screenHeight}px`;
   important(surface,{height:previewHeight,'min-height':'0','max-height':previewHeight,width:'100%',margin:'0',padding:'0',flex:'none',overflow:'hidden',background:'#070c12'});
-  if(tool==='aspectlock')important($('stage'),{height:'100%','min-height':'0','max-height':'100%',width:'auto','max-width':'100%','aspect-ratio':'9 / 16',margin:'auto'});
+  if(tool==='motionlock')important(surface,{'max-height':'none'});
+  if(tool==='aspectlock')important($('stage'),{height:'100%','min-height':'0','max-height':'100%',width:'100%','max-width':'100%',margin:'auto'});
   for(const child of surface.querySelectorAll(':scope>video,:scope>canvas'))important(child,{width:'100%',height:'100%','max-height':'100%','object-fit':'contain'});
   for(const video of surface.querySelectorAll(':scope>video'))important(video,{position:'absolute',inset:'0px','min-width':'0','min-height':'0'});
  }

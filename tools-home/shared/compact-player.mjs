@@ -1,5 +1,5 @@
 import {installControlHelp} from './control-help.mjs?v=2';
-import {mountPlayerShell} from './player-shell.mjs?v=14';
+import {mountPlayerShell} from './player-shell.mjs?v=32';
 /** Shared UI adapter; never stores or rewrites media or native edit records. */
 export const COMPACT_PLAYER_VERSION='6';
 export function explicitValue(value,min,max){const n=Number(value);if(String(value).trim()===''||!Number.isFinite(n)||n<min||n>max)throw Error('Enter a value from '+min+' to '+max+'.');return n;}
@@ -8,14 +8,14 @@ if(typeof document!=='undefined'){
  const tool=location.pathname.match(/\/tools\/([^/]+)/)?.[1]||'';
  document.body.classList.add('gs-compact');document.body.dataset.gsTool=tool;
  const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
- const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./compact-player.css?v=2',import.meta.url).href;document.head.append(css);const shellCSS=document.createElement('link');shellCSS.rel='stylesheet';shellCSS.href=new URL('./player-shell.css?v=3',import.meta.url).href;document.head.append(shellCSS);
+ const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./compact-player.css?v=2',import.meta.url).href;document.head.append(css);const shellCSS=document.createElement('link');shellCSS.rel='stylesheet';shellCSS.href=new URL('./player-shell.css?v=32',import.meta.url).href;document.head.append(shellCSS);
  const configs={
   cliplock:{workspace:'.player-workspace',stage:'.picture',rail:'.transport',clock:'#clock',video:'#video',frames:['back','next']},
-  caplock:{workspace:'.workspace',stage:'#viewport',rail:'.rail',clock:'.readout',video:'#video',frames:['prev','next','sheetBack','sheetForward'],ranges:{seek:'frame'}},
-  aspectlock:{workspace:'.stageWorkspace',stage:'.stageWrap',rail:'#stageNav',clock:'#position',video:'#bv',frames:['backFrame','forwardFrame','sheetBack','sheetForward'],ranges:{seek:'normalized',overlaySeek:'normalized'},otherVideo:{overlaySeek:'#ov'}},
+  caplock:{workspace:'.workspace',stage:'#viewport',rail:'.rail',clock:'#clock',video:'#video',frames:['prev','next','sheetBack','sheetForward'],ranges:{seek:'frame'}},
+  aspectlock:{workspace:'.stageWorkspace',stage:'.stageWrap',rail:'#stageNav',clock:'#position',video:'#bv',frames:['backFrame','forwardFrame','sheetBack','sheetForward'],ranges:{overlaySeek:'normalized'},otherVideo:{overlaySeek:'#ov'}},
   sxlock:{workspace:'#editorDock',stage:'.viewer',rail:'#sxSideControls',clock:'#clock',video:'#video',frames:['back','forward','sheetBack','sheetForward'],ranges:{seek:'seconds'}},
   previewlock:{workspace:'.stageWorkspace',stage:'#viewerShell',rail:'#previewControls',clock:'#clock',video:'#player',frames:['minus1','plus1'],ranges:{seekBar:'normalized'}},
-  motionlock:{workspace:'.player-row',stage:'.stage',rail:'.gs-motion-controls',clock:'.status',video:'#sourceVideo',frames:['prev','next'],ranges:{seek:'normalized'}},
+  motionlock:{workspace:'.player-row',stage:'.stage',rail:'.gs-motion-controls',clock:'#clock',video:'#sourceVideo',frames:['prev','next'],ranges:{seek:'normalized'}},
   framelock:{workspace:'.gs-viewer',stage:'.gs-frame-picture',rail:'.gs-frame-transport',clock:'#position',video:'#video',frames:['back','forward']},
   wavlock:{frames:[]}
  };
@@ -35,18 +35,19 @@ if(typeof document!=='undefined'){
  if(nativeVideo&&['framelock','motionlock'].includes(tool)){
   const stage=$(config.stage),input=$('input[type=file]');if(stage&&input){const load=document.createElement('button');load.type='button';load.className='gs-empty-load';load.textContent='Load video';load.onclick=()=>input.click();stage.append(load);const show=()=>load.hidden=!!nativeVideo.getAttribute('src');for(const name of ['loadedmetadata','emptied','loadstart'])nativeVideo.addEventListener(name,show);show();}
  }
- if(tool==='aspectlock')for(const [playId,pauseId,mediaId,title]of [['play','pause','bv','Bed'],['playOverlay','pauseOverlay','ov','Animation']]){
+ if(tool==='aspectlock')for(const [playId,pauseId,mediaId,title]of [['play','pause','bv','Play'],['playOverlay','pauseOverlay','ov','Animation']]){
   const play=$('#'+playId),pause=$('#'+pauseId),media=$('#'+mediaId);if(!play||!pause||!media)continue;pause.hidden=true;
   document.addEventListener('click',e=>{if(e.target.closest('#'+playId)&&!media.paused){e.preventDefault();e.stopImmediatePropagation();pause.click();}},true);
   const label=()=>play.textContent=(media.paused?'▶ ':'Ⅱ ')+title;media.addEventListener('play',label);media.addEventListener('pause',label);label();
  }
- for(const id of config.frames){const button=$('#'+id);if(!button)continue;const backward=/back|prev|minus/i.test(id);button.classList.add('gs-frame-button');button.textContent=backward?'−':'+';if(!button.getAttribute('aria-label'))button.setAttribute('aria-label',backward?'Previous frame':'Next frame');button.title=backward?'Back one frame':'Forward one frame';}
+ for(const id of config.frames){const button=$('#'+id);if(!button)continue;const backward=/back|prev|minus/i.test(id);button.classList.add('gs-frame-button');button.textContent=backward?'−':'+';if(!button.getAttribute('aria-label'))button.setAttribute('aria-label',backward?'Previous frame':'Next frame');if(!button.title)button.title=backward?'Back one frame':'Forward one frame';}
  document.addEventListener('click',e=>{const b=e.target.closest('button');if(e.isTrusted&&b?.classList.contains('gs-frame-button')&&!b.disabled&&tool!=='cliplock')hapticClick();},true);
  // End-of-source Play cannot silently restart a precision workspace.
  if(nativeVideo&&tool!=='sxlock'){document.addEventListener('click',e=>{if(e.target.closest('#play,#playPause')&&nativeVideo.ended&&nativeVideo.paused){e.preventDefault();e.stopImmediatePropagation();}},true);}
  const adapters=new Map();
  function protectRange(range){
   if(adapters.has(range)||range.closest('[inert]'))return;
+  if(range.hasAttribute('data-gs-continuous'))return;
   const mode=config.ranges?.[range.id]||'setting',temporal=mode!=='setting',media=$(config.otherVideo?.[range.id]||config.video||'video'),name=range.getAttribute('aria-label')||range.labels?.[0]?.textContent?.trim()||range.id||'Value';
   const wrapper=document.createElement('span');wrapper.className='gs-precision';wrapper.dataset.for=range.id;
   const progress=document.createElement('progress');progress.className='gs-progress';progress.max=1;progress.value=0;progress.setAttribute('aria-label',name+' (read-only)');
