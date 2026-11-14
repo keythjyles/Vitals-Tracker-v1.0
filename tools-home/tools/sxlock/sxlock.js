@@ -177,10 +177,10 @@ const soundNames=Object.assign(Object.create(null),readSoundNames());
 function displaySoundName(sound){return Object.hasOwn(soundNames,sound.id)&&typeof soundNames[sound.id]==='string'?soundNames[sound.id]:sound.name}
 function applySoundNames(){for(const sound of sounds.values())sound.name=displaySoundName(sound)}
 
-async function renameSound(id){
+async function renameSound(id,value){
  const sound=sounds.get(id);
  if(!sound||recording||exportBusy)return;
- const proposed=window.prompt('Sound name',sound.name);
+ const proposed=value??window.prompt('Sound name',sound.name);
  if(proposed===null)return;
  let name=proposed.trim();
  if(!name||name.length>170||/[\\/<>:"|?*\x00-\x1f]/.test(name))throw Error('Enter a sound name without slashes or control characters.');
@@ -532,13 +532,11 @@ $('recordingRename').onclick=guard(async()=>{
   field.value=name;status.textContent='Name saved.';refreshToolbox();
   return;
  }
- const previous=sound.name;
- sound.name=name;savedCustom.delete(sound.id);button.disabled=true;
+ button.disabled=true;
  try{
-  await saveCustom();await flushProject();
-  field.value=name;status.textContent='Name saved.';
-  renderLibrary();renderClips();refreshToolbox();
- }catch(error){sound.name=previous;status.textContent=error.message;}
+  await renameSound(sound.id,name);
+  field.value=sound.name;status.textContent='Name saved.';
+ }catch(error){status.textContent=error.message;}
  finally{button.disabled=false;}
 });
 
