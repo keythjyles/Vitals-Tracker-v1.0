@@ -69,20 +69,35 @@ async function main(){
    await fetch('/results/Alpha.webm',{method:'POST',body:alpha});
    const alphaOut=await render('Alpha',alpha,[cue(.2,.04)]);
    async function display(blob){
-    const v=document.createElement('video');v.muted=true;v.src=URL.createObjectURL(blob);document.body.append(v);
-    await new Promise((r,j)=>{v.onloadeddata=r;v.onerror=()=>j(Error('Colour test video failed'))});
-    await new Promise(r=>{v.onseeked=r;v.currentTime=.2});const c=document.createElement('canvas');c.width=width;c.height=height;const g=c.getContext('2d',{colorSpace:'srgb'});g.drawImage(v,0,0);const pixels=g.getImageData(0,0,width,height).data;v.remove();URL.revokeObjectURL(v.src);return pixels;
+    const v=document.createElement('video'),url=URL.createObjectURL(blob);
+    v.muted=true;
+    v.preload='auto';
+    v.style.cssText='position:fixed;top:0;left:0;z-index:100;width:160px;height:288px';
+    document.body.append(v);
+    try{
+     await new Promise((resolve,reject)=>{
+      v.onloadeddata=resolve;
+      v.onerror=()=>reject(Error('Colour test video failed'));
+      v.src=url;
+     });
+     await new Promise(resolve=>{v.onseeked=resolve;v.currentTime=.16;});
+     const c=document.createElement('canvas');
+     c.width=width;c.height=height;
+     const g=c.getContext('2d',{colorSpace:'srgb'});
+     g.drawImage(v,0,0);
+     return g.getImageData(0,0,width,height).data;
+    }finally{v.remove();URL.revokeObjectURL(url);}
    }
    const ref=await display(alpha),encoded=await display(alphaOut),m=await import('./vendor/mediabunny-1.62.1-gs1.mjs');
    const alphaInput=new m.Input({formats:m.ALL_FORMATS,source:new m.BlobSource(alpha)}),track=await alphaInput.getPrimaryVideoTrack();
-   const sample=await new m.VideoSampleSink(track).getSample(.2),frame=sample.toVideoFrame();
+   const sample=await new m.VideoSampleSink(track).getSample(.16),frame=sample.toVideoFrame();
    if(!frame.format.includes('A'))throw Error('Colour fixture lacks the alpha-merge path');
    const c=document.createElement('canvas');c.width=width;c.height=height;const g=c.getContext('2d',{colorSpace:'srgb'});g.drawImage(frame,0,0);const decoded=g.getImageData(0,0,width,height).data;
    function compare(p,{opaqueOnly=false}={}){
     let absolute=0,count=0;
     const sum=[0,0,0];
     for(let i=0;i<p.length;i+=4){
-     if(opaqueOnly&&ref[i+3]!==255)continue;
+     if(opaqueOnly&&decoded[i+3]!==255)continue;
      for(let channel=0;channel<3;channel++){
       const delta=p[i+channel]-ref[i+channel];
       absolute+=Math.abs(delta);
@@ -93,7 +108,10 @@ async function main(){
     return {mae:absolute/(count*3),meanRGB:sum.map(value=>value/count)};
    }
    const color=await track.getColorSpace();
-   if(!color.fullRange||color.primaries!=='bt709'||ref[(36*width+120)*4]<160||ref[(36*width+3)*4+3]>0)throw Error('Full-range alpha test fixture is invalid.');
+   const transparentAlpha=decoded[(36*width+3)*4+3],colorRed=ref[(36*width+120)*4];
+   if(!color.fullRange||color.primaries!=='bt709'||colorRed<160||transparentAlpha!==0){
+    throw Error('Full-range alpha test fixture is invalid: '+JSON.stringify({color,colorRed,transparentAlpha}));
+   }
    // The H.264 export is opaque. Compare its color where picture pixels are visible.
    results.AlphaColour={source:color,decoded:compare(decoded),encoded:compare(encoded,{opaqueOnly:true}),format:frame.format};
    frame.close();sample.close();alphaInput.dispose();
