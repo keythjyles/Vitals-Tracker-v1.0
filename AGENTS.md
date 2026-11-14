@@ -1,3 +1,7 @@
+## GS video tools change control
+
+Read the [GS video tools master plan](tools-home/GS_VIDEO_TOOLS_MASTER_PLAN.md) and the app's own `AGENTS.md` before changing AspectLock, CapLock, SxLock, Clipper, FrameLock, MotionLock, PreviewLock or their shared equipment. The plan defines the shared controls, each tool's job, the scope of owner approval, and the release and recovery record.
+
 ## CapLock R26 — portrait preview crop
 
 Owner direction: enlarging or moving an overlay must show only the portion inside the portrait output. The R9 preview allowed layers to paint into the monitor's side margins, although the exporter already clipped them. R26 clips the scene at its exact 9:16 bounds and uses the same black composition background as export. Layer dimensions/position, pinch and size controls, source bytes, timing, sound, toolbox reuse and saved projects remain unchanged. The enlarged layer remains editable within the portrait. SxLock, AspectLock and all media engines are unchanged.

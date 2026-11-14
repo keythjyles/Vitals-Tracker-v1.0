@@ -114,6 +114,11 @@ CapLock R16 now produces a captioned composite and opens the same single-joke pr
 - [Timmy Production Handoff](tools-home/assets/timmy/PRODUCTION_HANDOFF.md)
 - Preserve approved references, transparent masters, and provenance. Do not regenerate or substitute an approved character by assumption.
 
+### Video tools and Field Guide graphics
+
+- Read the [GS video tools master plan](tools-home/GS_VIDEO_TOOLS_MASTER_PLAN.md) and the relevant app notes.
+- Use the agreed SxLock equipment as the reference and follow the plan's change approval and recovery procedure.
+
 ### Video review, media delivery, and publishing
 - [PreviewLock README](tools-home/tools/previewlock/README.md)
 - Read the media preservation, approval, publishing, and Google Drive/Dropbox rules in [AGENTS.md](AGENTS.md).

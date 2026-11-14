@@ -2,6 +2,8 @@
 
 November 14, 2026. The inventory covers the [Tools directory](https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/) and the editor paths it opens. Source comparison is based on `0f0e4a11cc44b754160a8309cf52f08d34c6f816`. The audit uses SxLock R40 as the reference. The CapLock R31 and Tools R2 changes are included in this review.
 
+For ownership, shared controls and approval of system changes, read the [GS video tools master plan](GS_VIDEO_TOOLS_MASTER_PLAN.md).
+
 ## Editing and production
 
 | Tool | Purpose and capabilities | How it works | What to carry forward |
