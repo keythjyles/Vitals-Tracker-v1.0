@@ -45,7 +45,7 @@
     {
       "tool": "sxlock",
       "hosted_path": "tools/sxlock/index.html",
-      "source_version": "R41",
+      "source_version": "R42",
       "tool_id": "GS-TOOL-SXLOCK",
       "description": "Place and mix effects with frame-accurate review and recoverable Scribe history.",
       "navigation": [

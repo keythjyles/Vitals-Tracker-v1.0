@@ -1,3 +1,7 @@
+## SxLock R42 — compact docking controls
+
+The six section Dock buttons, the player's Dock toggle and the docked section controls use underlined text with a 26 px minimum target height. Docked Scribe keeps Hide and Undock below the note actions. Release baseline `56787be10a95f028648be072b6b16731e58c5aa1`.
+
 ## Sound Scrubber R14.12 and SxLock R41 — Drive saves and direct renaming
 
 In Sound Scrubber, tap the filename to rename a candidate before deciding. Play toggles playback. The compact red REC button captures playback, names the WAV from the chosen filename and approves it in the same action. Approval keeps the audio on this browser, removes the row from review and publishes it to the SxLock and WavLock libraries. A failed capture leaves the decision available.

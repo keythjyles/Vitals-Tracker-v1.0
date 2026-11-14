@@ -1,3 +1,7 @@
+## SxLock R42
+
+Dock and Undock use compact, underlined text on the right. Docked Scribe keeps Hide and Undock below the note actions.
+
 ## SxLock R41
 
 Tap the sound name in the library, Toolbox, recordings list or audition and insertion panel to edit it. The name follows the sound across this browser's projects. Recovered and imported recordings keep the edited name in their saved metadata.
