@@ -573,12 +573,15 @@ discoverySheet.addEventListener('close',()=>{
  const item=discovery;
  discovery=null;
  pendingSelection.clear();
- scrubberFrame.removeAttribute('src');
  if(!item)return;
  if(item.picked){
+  scrubberFrame.contentWindow?.postMessage({protocol:'gs-sound-scrubber-picker',token:item.token,state:'park'},location.origin);
   if(item.draftWasOpen&&$('effectSheet').open)$('effectSheet').close();
   toolbox.open();
- }else if(item.returnTo?.id==='toolboxSheet')toolbox.open();
+ }else{
+  scrubberFrame.removeAttribute('src');
+  if(item.returnTo?.id==='toolboxSheet')toolbox.open();
+ }
 });
 window.addEventListener('message',event=>{
  const data=event.data;

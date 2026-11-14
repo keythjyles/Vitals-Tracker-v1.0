@@ -290,7 +290,7 @@ function recordingWav(buffer){
 }
 async function decodeRecording(blob){const Context=window.AudioContext||window.webkitAudioContext;if(!Context)throw Error('Audio conversion unavailable in this browser');const context=new Context();try{return recordingWav(await context.decodeAudioData(await blob.arrayBuffer()))}finally{await context.close()}}
 async function stagePlayback(id,v,blob){
- const old=await audioOp(id).catch(()=>null)||localFiles.get(id);
+ const old=await audioOp(id).catch(()=>null)||localFiles.get(id)||(activePreviewFile?.id===id?activePreviewFile.file:null);
  if(old&&!await audioOp(id+':capture-original').catch(()=>null))await audioOp(id+':capture-original',old);
  const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await blob.arrayBuffer())),x=>x.toString(16).padStart(2,'0')).join('');
  const predecessor=v.cloudReceipts?.dropbox?.verified&&v.cloudAssetId&&v.sha256
@@ -308,6 +308,7 @@ async function recordPlayback(id,data){
  if(approving.has(id)||deleting.has(id))return;
  if(!reviewDB[id])reviewDB[id]={...data,status:'pending',created:Date.now()};const v=reviewDB[id],audio=$('preview');
  const state={id,stop:()=>{}};captureState=state;refreshInlineLists(id);
+ notifyPicker('start',id);
  let stream,recorder,timer,ended,failed,started=false,recording=null;
  try{
   if(typeof MediaRecorder!=='function'||typeof (audio.captureStream||audio.mozCaptureStream)!=='function')throw Error('This browser cannot record playback. Use the phone screen recorder, then import its video above.');
@@ -330,6 +331,7 @@ async function recordPlayback(id,data){
  }catch(e){const message=e.message||'Playback capture unavailable.';$('status').textContent=message+(/phone screen recorder/i.test(message)?'':' Use the phone screen recorder and import its video.')}
  finally{clearTimeout(timer);audio.removeEventListener('ended',ended);audio.removeEventListener('error',failed);if(started&&recorder.state!=='inactive')recorder.stop();stream?.getTracks().forEach(t=>t.stop());audio.pause();captureState=null;refreshInlineLists(id)}
  if(recording&&v.captureSource&&v.status==='pending')await approveInline(id,v,recording);
+ else notifyPicker('error',id);
 }
 
 const approving=new Set();
@@ -360,7 +362,7 @@ async function approveInline(id,data,captured){
   delete v.captureOffered;
   if(!saveDB()){v.status='pending';throw Error('Browser storage is full. Keep this tab open and retry.')}
   notifyPicker('approved',id);
-  $('status').textContent=(captured?'Recorded and approved: ':'Approved: ')+v.name;
+ $('status').textContent=(captured?'Recorded and approved: ':'Approved: ')+v.name;
   flushDriveQueue();
  }catch(e){v.saveError=e.message;v.reviewState='failed';v.failedAt=Date.now();saveDB();$('status').textContent=e.message;notifyPicker('error',id);}
  finally{approving.delete(id);if(v.reviewState==='failed')restoreRedo(id);else refreshInlineLists(playingId||decisionCursor.id)}
@@ -527,6 +529,12 @@ const params=new URLSearchParams(location.search);
 if(params.get('picker')&&window.parent!==window){
  pickerToken=params.get('picker');
  document.body.classList.add('sx-picker');
+ window.addEventListener('message',event=>{
+  const data=event.data;
+  if(event.origin!==location.origin||event.source!==window.parent||data?.protocol!=='gs-sound-scrubber-picker'||
+     data.token!==pickerToken||data.state!=='park')return;
+  $('preview').pause();$('reviewAudio').pause();
+ });
 }
 $('loadReviewBatch').onclick=()=>loadIntakeBatch();
 $('chapter3Gasps').onclick=async()=>{
@@ -544,6 +552,6 @@ flushDriveQueue();
 if(params.get('q')){$('q').value=params.get('q');search(true);}
 (params.get('batch')?loadIntakeBatch(params.get('batch')):Promise.resolve())
  .then(resumeUnverifiedSaves).then(async()=>{
-  for(const [id,v]of Object.entries(reviewDB))if(v.status==='deleting')await deleteInline(id);
+ for(const [id,v]of Object.entries(reviewDB))if(v.status==='deleting')await deleteInline(id);
  }).then(syncCloudReceipts);
 </script></body></html>

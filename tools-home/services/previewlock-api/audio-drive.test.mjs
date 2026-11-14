@@ -83,6 +83,25 @@ test('retry after Drive commits an interrupted upload reuses the existing copy',
  assert.equal(storage.calls.filter(call => call.path.startsWith('/upload')).length, 1);
 });
 
+test('audio over 5 MiB uses a Drive upload session with the original bytes', async () => {
+ const data = Buffer.alloc(6 * 1024 * 1024);
+ const contentSha = checksum(data);
+ const db = driveAudioClient('drive-fixture', async (url, options) => {
+  const parsed = new URL(url);
+  if (options.method === 'POST') {
+   assert.equal(parsed.searchParams.get('uploadType'), 'resumable');
+   assert.equal(options.headers['x-upload-content-length'], String(data.length));
+   assert.deepEqual(JSON.parse(options.body).parents, [DRIVE_LIBRARY_FOLDER]);
+   return new Response('', {headers: {location: 'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&upload_id=fixture'}});
+  }
+  assert.equal(options.method, 'PUT');
+  assert.equal(parsed.searchParams.get('upload_id'), 'fixture');
+  assert.equal(checksum(options.body), contentSha);
+  return Response.json({id: fileId});
+ });
+ assert.equal((await db.create({...input, sha256: contentSha}, data)).id, fileId);
+});
+
 test('Drive authorization selects only Sound Effects, checks the owner, and returns an encrypted refresh session', async () => {
  const calls = [];
  const config = {key: 'test-key', clientId: 'test-client', clientSecret: 'test-secret'};

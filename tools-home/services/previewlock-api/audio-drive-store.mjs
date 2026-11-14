@@ -55,6 +55,16 @@ export function driveAudioClient(token, fetcher = fetch) {
     name: record.name, mimeType: mimeTypes[extension(record.name)], parents: [DRIVE_LIBRARY_FOLDER],
     description: JSON.stringify(record), appProperties: {gsSoundId: record.assetId, sha256: record.sha256},
    };
+   if (data.length > 5 * 1024 * 1024) {
+    const session = await request(upload + fileQuery + '&uploadType=resumable', {
+     method: 'POST', body: JSON.stringify(metadata), headers: {'content-type': 'application/json',
+      'x-upload-content-type': metadata.mimeType, 'x-upload-content-length': String(data.length)},
+    });
+    const target = new URL(session.headers.get('location') || upload);
+    if (target.origin !== 'https://www.googleapis.com' || target.pathname !== '/upload/drive/v3/files' ||
+        !target.searchParams.get('upload_id')) throw new AudioError(502, 'Google Drive did not start the upload. Retry this sound.');
+    return (await request(target, {method: 'PUT', headers: {'content-type': metadata.mimeType}, body: data})).json();
+   }
    const boundary = 'gs-sound-' + randomUUID();
    const body = Buffer.concat([
     Buffer.from(`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n--${boundary}\r\nContent-Type: ${metadata.mimeType}\r\n\r\n`),
