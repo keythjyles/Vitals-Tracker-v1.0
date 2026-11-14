@@ -1,3 +1,9 @@
+## R14.11 — Chapter 3 and 1,000 sound candidates
+
+Open the Scrubber and choose **Load 1,000 candidates**. **Chapter 3 gasps** opens twelve short-list entries first. Review candidates by category or search. Normal online searches continue to use Wikimedia Commons. The review intake also includes individual Creative Commons recordings from the [FSD50K release](https://doi.org/10.5281/zenodo.4060432), plus CC0 medical sounds and labeled designed effects.
+
+For an FSD50K candidate, the player extracts and verifies one WAV entry from the official ZIP release. Browse and audition do not write to the approved library. Approve uses the established verified Dropbox save and Drive mirror. Inside the SxLock picker, the same action adds the approved sound to that project's Toolbox.
+
 # Sound Scrubber · GS-TOOL-SOUND-SCRUBBER · R14
 
 **GS audio tools master work index:** [`GS_TOOL_REFINEMENT_INDEX.md`](../GS_TOOL_REFINEMENT_INDEX.md). This is the single authoritative record for current step status, release reconciliation, SxLock preservation lock, verification, and rollback. This document retains historical technical detail; do not infer that an old heading is the current release.

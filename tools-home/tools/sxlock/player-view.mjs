@@ -1,4 +1,4 @@
-import '../../shared/compact-player.mjs?v=8';
+import '../../shared/compact-player.mjs?v=9-sxlock';
 
 const $ = id => document.getElementById(id);
 const player = document.querySelector('.gs-player-shell');
@@ -145,7 +145,7 @@ function setDock(id, focus = false, savedOpen) {
  }
  dockToggle.hidden = !docked;
  if (docked) dockToggle.setAttribute('aria-label', `Toggle docked ${docked.title}`);
- showDock(Boolean(docked));
+ showDock(Boolean(docked) && focus);
  try { localStorage.setItem(settingsKey, JSON.stringify({id: docked?.section.id, wasOpen})); } catch {}
  if (focus) (docked?.button || previous).focus({preventScroll: Boolean(docked)});
 }
@@ -302,12 +302,12 @@ for (const name of ['loadedmetadata', 'emptied']) video.addEventListener(name, (
  resetPicture();
  updateSize();
 });
-const observer = new ResizeObserver(updateSize);
+const observer = new ResizeObserver(() => requestAnimationFrame(updateSize));
 observer.observe(rail);
 observer.observe(reference);
 window.addEventListener('resize', updateSize);
 
 let savedDock;
 try { savedDock = JSON.parse(localStorage.getItem(settingsKey) || 'null'); } catch {}
-if (sections.has(savedDock?.id)) setDock(savedDock.id, false, savedDock.wasOpen);
+if (sections.has(savedDock?.id)) setDock(savedDock.id, false, false);
 else updateSize();

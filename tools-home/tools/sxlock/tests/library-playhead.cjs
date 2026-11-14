@@ -7,15 +7,20 @@ async function main(){
   const file=path.resolve(repo,decodeURIComponent(new URL(q.url,'http://test').pathname).slice(1));
   if(!file.startsWith(repo+path.sep)){s.writeHead(403);s.end();return;}
   const types={'.js':'text/javascript','.mjs':'text/javascript','.css':'text/css','.html':'text/html','.json':'application/json'};
-  try{s.setHeader('Content-Type',types[path.extname(file)]||'application/octet-stream');s.end(fs.readFileSync(file));}catch{s.writeHead(404);s.end();}
+  try{
+   const pathToFile=fs.statSync(file).isDirectory()?path.join(file,'index.html'):file;
+   s.setHeader('Content-Type',types[path.extname(pathToFile)]||'application/octet-stream');
+   s.end(fs.readFileSync(pathToFile));
+  }catch{s.writeHead(404);s.end();}
  }).listen(0,'127.0.0.1');await new Promise(r=>server.on('listening',r));
  const proxyUrl=process.env.LIVE_URL&&(process.env.HTTPS_PROXY||process.env.HTTP_PROXY);
- const browser=await chromium.launch({executablePath:process.env.BROWSER_EXECUTABLE||undefined,headless:true,...(proxyUrl?{proxy:{server:proxyUrl}}:{}),args:['--no-sandbox','--disable-dev-shm-usage','--autoplay-policy=no-user-gesture-required']});
+ const browser=await chromium.launch({executablePath:process.env.BROWSER_EXECUTABLE||undefined,headless:true,...(proxyUrl?{proxy:{server:proxyUrl}}:{}),args:['--no-sandbox','--disable-dev-shm-usage','--autoplay-policy=no-user-gesture-required','--use-fake-ui-for-media-stream','--use-fake-device-for-media-stream']});
  const context=await browser.newContext({viewport:{width:412,height:915},hasTouch:true,isMobile:true,ignoreHTTPSErrors:!!process.env.LIVE_URL});
  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
  const url=process.env.LIVE_URL||'http://127.0.0.1:'+server.address().port+'/tools-home/tools/sxlock/index.html';
  const wav=Buffer.alloc(44+4800*2);wav.write('RIFF');wav.writeUInt32LE(wav.length-8,4);wav.write('WAVEfmt ',8);wav.writeUInt32LE(16,16);wav.writeUInt16LE(1,20);wav.writeUInt16LE(1,22);wav.writeUInt32LE(48000,24);wav.writeUInt32LE(96000,28);wav.writeUInt16LE(2,32);wav.writeUInt16LE(16,34);wav.write('data',36);wav.writeUInt32LE(wav.length-44,40);for(let i=0;i<4800;i++)wav.writeInt16LE(Math.round(1000*Math.sin(i*2*Math.PI*700/48000)),44+i*2);
  async function importWav(name){
+  await page.locator('#soundSection').evaluate(section=>{section.open=true;});
   await page.getByText('Import sounds',{exact:true}).tap();
   const [chooser]=await Promise.all([
    page.waitForEvent('filechooser'),
@@ -52,6 +57,7 @@ async function main(){
    await page.locator('#loadProject').setInputFiles({name:'project.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(project))});
    await page.waitForFunction(()=>document.getElementById('status').textContent==='Project and stored assets restored.');
    assert(await page.evaluate(()=>SxLock.sounds.has('custom-legacy')));
+   await page.locator('#soundSection').evaluate(section=>{section.open=true;});
    await page.locator('#manageSounds').evaluate(el=>el.open=true);page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'Delete forever Owner original bee.wav',exact:true}).click();
    await page.waitForFunction(()=>!SxLock.sounds.has('custom-legacy'));
    await page.reload();await page.waitForFunction(()=>window.SxLock);await page.evaluate(()=>SxLock.ready);assert(!(await page.evaluate(()=>SxLock.sounds.has('custom-legacy'))),'A deleted sound returned from a backup');
@@ -62,6 +68,7 @@ async function main(){
    await page.locator('#videoFile').setInputFiles(path.join(data,name));
    await page.waitForFunction(()=>document.getElementById('video').readyState>=2&&!document.getElementById('play').disabled);
    if(!process.env.OBSERVE_ONLY&&name==='fixture_40s.mp4'&&!delayedMetadata){
+    await page.locator('#soundSection').evaluate(section=>{section.open=true;});
     await page.locator('#category').selectOption({label:'My sounds'});
     await importWav('New sound with video.wav');
     assert(await page.getByRole('button',{name:'Place New sound with video.wav',exact:true}).isVisible());
@@ -72,22 +79,23 @@ async function main(){
    transport.push({name,delayedMetadata,first});console.log('FIRST PLAY',name,delayedMetadata?'delayed browser metadata':'native metadata',JSON.stringify(first));
    if(!process.env.OBSERVE_ONLY){assert(first.max>2.5);assert(first.value<first.max*.5);assert(Math.abs(first.value-first.time)<.2);}
    if(delayedMetadata)await page.evaluate(()=>delete document.getElementById('video').duration);
-   await page.locator('#stop').click();
+   await page.locator('#play').click();
    if(!process.env.OBSERVE_ONLY){
     const stopped=await page.locator('#video').evaluate(v=>({time:v.currentTime,paused:v.paused}));
-    assert(stopped.paused&&stopped.time>=first.time,'Stop holds the current frame');
+    assert(stopped.paused&&stopped.time>=first.time,'Pause holds the current frame');
    }
+   await page.locator('#viewerSection').evaluate(section=>{section.open=true;});
    await page.locator('#restart').click();
    if(!process.env.OBSERVE_ONLY){
     await page.waitForFunction(()=>{const v=document.getElementById('video');return v.paused&&!v.seeking&&v.currentTime===0});
-    assert.equal(await page.locator('#sxSideControls > button').first().getAttribute('id'),'restart');
+    assert.equal(await page.locator('#sxSideControls > button').first().getAttribute('id'),'play');
    }
   }
   if(!process.env.OBSERVE_ONLY){
    await page.locator('#videoFile').setInputFiles(path.join(data,'fixture_40s.mp4'));
    await page.waitForFunction(()=>document.getElementById('video').readyState>=2&&!document.getElementById('play').disabled);
    await page.getByRole('button',{name:'Show file picker'}).click();
-   await page.getByText('SxLock · GS-TOOL-SXLOCK · R39',{exact:true}).waitFor();
+   await page.getByText('SxLock · GS-TOOL-SXLOCK · R40',{exact:true}).waitFor();
    await page.evaluate(()=>window.scrollTo(0,10));
    await page.locator('.gs-source-drawer').waitFor({state:'hidden'});
    await page.evaluate(()=>window.scrollTo(0,0));
@@ -101,7 +109,7 @@ async function main(){
    assert(geometry.playerLeft<=1&&geometry.playerRight>=geometry.viewport-1,'The player reaches both edges: '+JSON.stringify(geometry));
    assert(geometry.sections.every((top,i)=>i===0||top>geometry.sections[i-1]),'The original mobile module order is preserved');
    assert.equal(await page.locator('#notes').isVisible(),false,'Scribe starts collapsed');
-   assert.equal(await page.locator('#saveTake').textContent(),'Save take');
+   assert.equal(await page.locator('#saveTake').textContent(),'Save Rec');
    await page.setViewportSize({width:320,height:640});
    await page.getByRole('button',{name:'Tools',exact:true}).tap();
    const toolLinks=page.getByRole('dialog',{name:'Tools'});
@@ -113,26 +121,29 @@ async function main(){
    const go=page.getByRole('spinbutton',{name:'Go to seconds'});
    await go.fill('9.12');await page.getByRole('button',{name:'Go to time'}).click();
    await page.waitForFunction(()=>document.getElementById('clock').textContent.includes('F228'));
-   await page.locator('#scribeBox summary').tap();
+   await page.locator('#scribeBox > summary').tap();
    await page.setViewportSize({width:320,height:640});
    const scribeLayout=await page.locator('#scribeBox').evaluate(scribe=>{
-    const buttons=[...scribe.querySelectorAll('.scribe-actions button')].map(button=>button.getBoundingClientRect().toJSON());
-    return {position:getComputedStyle(scribe).position,notesBottom:scribe.querySelector('#notes').getBoundingClientRect().bottom,buttons};
+    const buttons=[...scribe.querySelectorAll('.scribe-actions > button, #scribeActions > summary')].map(button=>button.getBoundingClientRect().toJSON());
+    const notes=scribe.querySelector('#notes').getBoundingClientRect();
+    return {position:getComputedStyle(scribe).position,notesBottom:notes.bottom,notesHeight:notes.height,buttons};
    });
    assert.equal(scribeLayout.position,'static');
    assert(scribeLayout.buttons[0].top>scribeLayout.notesBottom);
-   assert.equal(new Set(scribeLayout.buttons.map(button=>button.top)).size,2);
-   assert.equal(new Set(scribeLayout.buttons.map(button=>button.left)).size,3);
-   assert(scribeLayout.buttons.every(button=>button.height>=44&&button.right<=320));
+   assert(Math.abs(scribeLayout.buttons[0].top-scribeLayout.buttons[1].top)<3);
+   assert.equal(scribeLayout.buttons.length,2);
+   assert(scribeLayout.notesHeight>=110&&scribeLayout.buttons.every(button=>button.height<=34&&button.right<=320));
    await page.setViewportSize({width:412,height:915});
    await page.getByRole('button',{name:'Mark frame'}).tap();
    assert.equal(await page.locator('#notes').inputValue(),'[F228 | 0:09.120 | 25 fps] ');
    assert(await page.locator('#notes').evaluate(notes=>notes.matches(':focus')),'Mark frame focuses Scribe for typing');
    await page.locator('#notes').fill('[F228 | 0:09.120 | 25 fps] Keep this stroke 📝');
+   await page.locator('#scribeActions summary').tap();
    await page.getByRole('button',{name:'Clear',exact:true}).tap();
    await page.waitForFunction(()=>document.getElementById('notes').value==='');
    await page.reload();
-   await page.locator('#scribeBox summary').tap();
+   await page.locator('#scribeBox > summary').tap();
+   await page.locator('#scribeActions summary').tap();
    await page.getByRole('button',{name:'History',exact:true}).tap();
    const entry=page.locator('#scribeEntries li').filter({hasText:'Keep this stroke 📝'});
    await entry.waitFor();
@@ -160,6 +171,9 @@ async function main(){
    assert.equal(await dock.locator('#scribeBox').count(),0);
    assert.equal(await page.locator('#scribeBox > summary').getByRole('button',{name:'Dock Scribe'}).count(),1);
    await page.reload();
+   await page.getByRole('button',{name:'Toggle docked Mixer'}).waitFor();
+   assert.equal(await dock.isVisible(),false);
+   await page.getByRole('button',{name:'Toggle docked Mixer'}).tap();
    await dock.locator('#mixerSection').waitFor();
    await page.getByRole('button',{name:'Undock Mixer'}).tap();
    assert.equal(await dock.isVisible(),false);
@@ -232,9 +246,113 @@ async function main(){
    assert(await height()>defaultHeight,'The grip resizes the preview');
    assert.equal(await viewSheet.isVisible(),false);
    assert(await page.locator('#video').evaluate(video=>!video.paused),'Picture gestures leave playback running');
-   await page.locator('#stop').tap();
+   await page.locator('#play').tap();
    console.log('PASS full-width player, docking and restoration, landscape zoom/pan, and resize during playback');
    console.log('PASS phone layout, module order, Tools menu, frame mark, Clear and Scribe recovery after reload');
+   await page.locator('#videoFile').setInputFiles(path.join(data,'fixture_40s.mp4'));
+   await page.waitForFunction(()=>document.getElementById('video').readyState>=2&&!document.getElementById('play').disabled);
+
+   assert.equal(await page.evaluate(()=>getComputedStyle(document.documentElement).overscrollBehaviorY),'none');
+   await page.evaluate(()=>{document.getElementById('video').currentTime=SxLock.duration()-.18;});
+   await page.waitForFunction(()=>!document.getElementById('video').seeking&&document.getElementById('video').paused);
+   await page.evaluate(()=>document.getElementById('play').click());
+   try {await page.waitForFunction(()=>document.getElementById('video').paused&&SxLock.currentTime()===SxLock.duration(),null,{timeout:5000});}
+   catch(error){console.error('EOF state',await page.evaluate(()=>({playhead:SxLock.currentTime(),duration:SxLock.duration(),time:video.currentTime,playing:!video.paused,ended:video.ended,status:document.getElementById('status').textContent,disabled:play.disabled,drawer:document.querySelector('.gs-source-drawer').style.display,errors:SxLock.diagnostics().errors})));throw error;}
+   console.log('PASS player settles at EOF');
+   const eos=await page.evaluate(()=>SxLock.currentTime());
+   assert.equal(eos,await page.evaluate(()=>SxLock.duration()));
+   await page.evaluate(()=>document.getElementById('play').click());
+   await page.waitForFunction(()=>!document.getElementById('video').paused&&SxLock.currentTime()<1);
+   await page.locator('#play').click();
+   await page.locator('#openToolbox').click();
+   await page.locator('#toolboxFiles').setInputFiles([
+    {name:'chapter3-note.txt',mimeType:'text/plain',buffer:Buffer.from('Hold the pause before the gasp')},
+    {name:'toolbox-clip.webm',mimeType:'video/webm',buffer:fs.readFileSync(path.join(data,'fixture_no_duration.webm'))},
+    {name:'test-cue.wav',mimeType:'audio/wav',buffer:wav},
+   ]);
+   const toolbox=page.getByRole('dialog',{name:'Toolbox'});
+   await toolbox.getByRole('button',{name:'Preview chapter3-note.txt'}).tap();
+   await toolbox.getByText('Hold the pause before the gasp').waitFor();
+   await toolbox.getByRole('button',{name:'Place test-cue.wav'}).waitFor();
+   const heldFrame=await page.evaluate(()=>SxLock.currentTime());
+   await context.route('https://gs-previewlock-api.onrender.com/api/audio-save',async route=>{
+    const request=route.request(),headers=request.headers(),body=request.postDataBuffer();
+    assert.equal(headers['x-audio-sha256'],require('node:crypto').createHash('sha256').update(body).digest('hex'));
+    const fileName=decodeURIComponent(headers['x-audio-name']);
+    await route.fulfill({headers:{'access-control-allow-origin':'*'},json:{sha256:headers['x-audio-sha256'],
+     cloudSaveStatus:'partial',cloudReceipts:{dropbox:{verified:true,id:'test-original',rev:'test-revision',
+      bytes:body.length,path:'/Grill Sergeant/Sound Effects/fixture/'+fileName},drive:{verified:false}}}});
+   });
+   await page.evaluate(()=>localStorage.setItem('gs_previewlock_key','isolated-test'));
+   await toolbox.getByRole('button',{name:'Find sounds online'}).tap();
+   const scrubber=page.frameLocator('#scrubberFrame');
+   await scrubber.getByRole('button',{name:'Chapter 3 gasps'}).tap();
+   await scrubber.getByRole('button',{name:'Approve and add Young male gasping, surprised startled.wav',exact:true}).waitFor();
+   assert.equal(await scrubber.locator('#queueCount').textContent(),'1000');
+   assert.equal(await page.evaluate(()=>[...SxLock.sounds.keys()].filter(id=>/^scrubber-freesound:/.test(id)).length),0);
+   await scrubber.locator('#queueFilter').selectOption('Medical');
+   await scrubber.locator('#queueQuery').fill('blood pressure');
+   const bp='Blood pressure monitor.mp3';
+   await scrubber.getByRole('button',{name:'Play '+bp,exact:true}).tap();
+   await scrubber.getByRole('button',{name:'Pause '+bp,exact:true}).waitFor();
+   await scrubber.getByRole('button',{name:'Approve and add '+bp,exact:true}).tap();
+   await page.locator('#discoveryStatus').getByText(bp+' added to Toolbox.').waitFor();
+   await page.getByRole('button',{name:'Return to SxLock'}).tap();
+   await toolbox.getByRole('button',{name:'Place '+bp}).waitFor();
+   assert.equal(await page.evaluate(()=>SxLock.currentTime()),heldFrame);
+   assert.equal(await page.evaluate(()=>SxLock.snapshot().clips.length),0);
+   await toolbox.getByRole('button',{name:'Close Toolbox'}).tap();
+   const preRec=await page.evaluate(()=>SxLock.currentTime());
+   await page.evaluate(()=>localStorage.removeItem('gs_previewlock_key'));
+   await page.locator('#liveRecord').tap();
+   await page.locator('#liveIndicator').waitFor();
+   await page.waitForFunction(start=>SxLock.currentTime()>start+.35,preRec);
+   await page.locator('#play').tap();
+   await page.waitForFunction(()=>!document.getElementById('saveTake').disabled);
+   await page.locator('#saveTake').tap();
+   await page.locator('#recordingName').fill('Chapter 3 test voice');
+   await page.getByRole('button',{name:'Save name'}).tap();
+   await page.getByText('Name saved.',{exact:true}).waitFor();
+   await page.getByRole('button',{name:'Close recording settings'}).tap();
+   await page.waitForFunction(()=>document.getElementById('recoveryStatus').textContent.startsWith('Saved locally'));
+   await page.reload();
+   await page.waitForFunction(()=>window.SxLock);
+   await page.evaluate(()=>SxLock.ready);
+   assert.equal(await page.locator('main > .work-area[open]').count(),0);
+   await page.locator('#openToolbox').click();
+   const recName=await page.evaluate(()=>[...SxLock.sounds.values()].find(sound=>sound.name.startsWith('Chapter 3 test voice'))?.name);
+   assert.match(recName||'',/^Chapter 3 test voice\.(webm|m4a|ogg)$/);
+   await toolbox.getByRole('button',{name:'Edit recording '+recName}).waitFor();
+   await toolbox.getByRole('button',{name:'Preview chapter3-note.txt'}).waitFor();
+   await toolbox.getByRole('button',{name:'Close Toolbox'}).tap();
+   console.log('PASS EOF restart, collapsed modules, Toolbox media recovery, candidate queue, and autosaved voice recording');
+   await page.locator('#viewerSection').evaluate(el=>el.open=true);
+   await page.locator('#restart').click();
+   await page.locator('#openToolbox').click();
+   const clipName='toolbox-clip.webm';
+   await toolbox.getByRole('button',{name:'Overlay '+clipName}).click();
+   await page.waitForFunction(()=>SxLock.snapshot().toolbox.visual.length===1);
+   assert.equal(await page.evaluate(()=>SxLock.snapshot().toolbox.visual[0].opacity),.5);
+   const bedEnd=await page.evaluate(()=>video.duration);
+   await toolbox.getByRole('button',{name:'Append '+clipName}).click();
+   await page.waitForFunction(()=>SxLock.snapshot().toolbox.visual.length===2);
+   assert.equal(await page.evaluate(()=>SxLock.snapshot().toolbox.visual[1].start),bedEnd);
+   await toolbox.getByRole('button',{name:'Close Toolbox'}).click();
+   await page.locator('#play').evaluate(button=>button.click());
+   await page.waitForFunction(end=>SxLock.currentTime()>end+.25,bedEnd);
+   await page.locator('#play').evaluate(button=>button.click());
+   await page.locator('#restart').evaluate(button=>button.click());
+   await page.locator('#openToolbox').click();
+   await toolbox.getByRole('button',{name:'Camera overlay',exact:true}).click();
+   await page.getByRole('button',{name:'Record video',exact:true}).click();
+   await page.waitForFunction(()=>!document.getElementById('video').paused&&SxLock.currentTime()>.35);
+   await page.getByRole('button',{name:'Stop camera recording',exact:true}).click();
+   await page.waitForFunction(()=>!document.getElementById('cameraSheet').open&&!document.getElementById('saveTake').disabled);
+   assert.equal(await page.evaluate(()=>SxLock.snapshot().toolbox.visual.length),3);
+   await page.locator('#saveTake').click();
+   assert.match(await page.locator('#recordingName').inputValue(),/_Cam_/);
+   await page.getByRole('button',{name:'Close recording settings'}).click();
+   console.log('PASS visual overlay, exact video append, camera capture and Save Rec');
   }
   assert.deepEqual(errors,[]);fs.writeFileSync(path.join(data,process.env.OBSERVE_ONLY?'library-playhead-baseline.json':'library-playhead.json'),JSON.stringify({recovered,transport,pageErrors:errors},null,2));
   console.log(process.env.OBSERVE_ONLY?'Recorded baseline observations':'PASS library recovery, independent import, project switch, delete and first-play seek');

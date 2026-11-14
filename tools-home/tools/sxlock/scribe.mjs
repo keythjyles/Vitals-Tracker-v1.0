@@ -224,7 +224,7 @@ mark.addEventListener('pointerdown', event => { if (document.activeElement === n
 mark.addEventListener('click', () => {
  if (!video.getAttribute('src')) { status.textContent = 'Load a video to mark a frame.'; return; }
  const fps = Number($('sourceFps').value) || 25;
- const time = video.currentTime || 0;
+ const time = window.SxLock?.currentTime() ?? (video.currentTime || 0);
  const frame = Math.round(time * fps);
  const ms = Math.round(time * 1000);
  const clock = `${Math.floor(ms / 60000)}:${(ms % 60000 / 1000).toFixed(3).padStart(6, '0')}`;
