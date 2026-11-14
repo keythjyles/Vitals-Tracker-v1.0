@@ -44,7 +44,7 @@ if(STUDIO){
 }
 let toolboxUI=null;
 let projectContext=null;
-let restoring=false,placementBusy=false,cloudSession=null,cloudTimer=null,cloudSaving=false,cloudWrite=Promise.resolve();
+let localDraftAvailable=false,restoring=false,placementBusy=false,cloudSession=null,cloudTimer=null,cloudSaving=false,cloudWrite=Promise.resolve();
 let selectedWords=[],selectedClip=null,editMode='view',libraryTarget='base',projectEpoch=0,dragBefore=null;
 let project=createProject(),selected=null,frame=0,maxFrame=0,undo=[],redo=[],mediaUrl=null,bedBlob=null,lastVideoPass=null,input=null,sink=null,seekRevision=0,mediaRevision=0,library=[],dirty=false,zoom=1,pan={x:0,y:0};
 const tailClock=new TailClock();let bedFrames=0,bedEnd=0,compositionEnded=false;
@@ -137,7 +137,9 @@ function saveDraft(){
   cloudTimer=setTimeout(()=>saveCloudWorkspace().catch(e=>{$('saveStatus').textContent='Dropbox save pending: '+e.message;}),900);
  }
  try{
-  localStorage.setItem(draftSlot(),JSON.stringify(project));
+  const slot=draftSlot();
+  localStorage.setItem(slot,JSON.stringify(project));
+  if(slot===draftKey)localDraftAvailable=true;
   $('saveStatus').textContent=cloudSession?'Draft saved on this device. Dropbox save queued.':'Draft saved on this device.';
  }catch(e){$('saveStatus').textContent='Draft save failed. Download the project to keep your edits. '+e.message;}
 }
@@ -152,6 +154,7 @@ function render(){
  const stageSource=projectContext?.assets?.find(a=>a.path===project.media?.path);
  $('bedLoader').classList.toggle('has-media',hasPicture);
  $('emptyReconnectFiles').hidden=!localRefs;
+ $('resumeDraft').hidden=!TOOLBOX_MODE||!localDraftAvailable||localRefs||!!projectContext;
  $('projectAssets').hidden=!projectContext;
  $('sourceStageControl').hidden=!stageSource;
  $('sourceStage').value=stageSource?stageRecord(projectContext,stageSource)?.stage||'':'';
@@ -523,9 +526,10 @@ $('overlayLibrary').onclick=()=>openCaptionImport();$('railMove').onclick=()=>{i
 window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
 render();showPage('viewer');
 try{
+ localDraftAvailable=!!localStorage.getItem(draftKey);
  if(localStorage.getItem(draftSlot())){
-  $('resumeDraft').hidden=!TOOLBOX_MODE;
   $('saveStatus').textContent='A draft is available on this device.';
+  render();
  }
 }catch{$('saveStatus').textContent='Browser recovery storage unavailable. Download your project to save edits.';}
 if(params.get('recover')==='local'){try{const raw=localStorage.getItem(draftKey);if(raw){if(params.get('fitBed')==='1')archiveWorkspace();openProject(JSON.parse(raw)).then(()=>{if(params.get('fitBed')==='1')change(()=>{
