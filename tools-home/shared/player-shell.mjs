@@ -35,8 +35,13 @@ export function mountPlayerShell(tool,config){
  const filename=el('div','gs-player-filename');filename.textContent='No file loaded';filename.setAttribute('aria-label','Source filename');
  const sourceLabels={cliplock:'#source',sxlock:'#videoName',caplock:'#bedName',aspectlock:'#baseChosen',previewlock:'#fileName',framelock:'#meta',wavlock:'#source'};
  const sourceLabel=q(sourceLabels[tool]);let chosenName='';
- const syncFilename=()=>{const loaded=!!media?.getAttribute('src'),label=tool==='sxlock'?sourceLabel?.dataset.expected:sourceLabel?.textContent?.trim().split(' · ')[0];filename.textContent=loaded?(label||chosenName||'Video loaded'):'No file loaded';filename.title=filename.textContent;};
- if(sourceLabel)new MutationObserver(syncFilename).observe(sourceLabel,{childList:true,subtree:true,characterData:true});
+ const syncFilename=()=>{
+  const connected=tool==='caplock'?sourceLabel?.dataset.sourceConnected==='true':!!media?.getAttribute('src');
+  const label=tool==='sxlock'?sourceLabel?.dataset.expected:sourceLabel?.textContent?.trim().split(' · ')[0];
+  filename.textContent=connected?(label||chosenName||'Video loaded'):'No file loaded';
+  filename.title=filename.textContent;
+ };
+ if(sourceLabel)new MutationObserver(syncFilename).observe(sourceLabel,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['data-source-connected']});
  const sourceInput=$(['framelock','previewlock','wavlock'].includes(tool)?'file':'videoFile');sourceInput?.addEventListener('change',e=>{chosenName=e.target.files?.[0]?.name||chosenName;},true);
  if(media)for(const name of ['loadedmetadata','emptied','loadstart'])media.addEventListener(name,syncFilename);
  syncFilename();

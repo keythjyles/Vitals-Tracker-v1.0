@@ -1,9 +1,9 @@
 name: CapLock prototype checks
 on:
   pull_request:
-    paths: ['tools-home/shared/compact-player*','tools-home/shared/player-shell*','tools-home/shared/control-help*','tools-home/tools/caplock/**', 'tools-home/tools/studio/**', 'tools-home/shared/caplock-launch.js', 'tools-home/shared/cut-passes.mjs', '.github/workflows/caplock-prototype.yml']
+    paths: ['tools-home/index.html','tools-home/assets/tools-directory.*','tools-home/shared/compact-player*','tools-home/shared/player-shell*','tools-home/shared/control-help*','tools-home/tools/caplock/**', 'tools-home/tools/studio/**', 'tools-home/shared/caplock-launch.js', 'tools-home/shared/cut-passes.mjs', '.github/workflows/caplock-prototype.yml']
   push:
-    paths: ['tools-home/shared/compact-player*','tools-home/shared/player-shell*','tools-home/shared/control-help*','tools-home/tools/caplock/**', 'tools-home/tools/studio/**', 'tools-home/shared/caplock-launch.js', 'tools-home/shared/cut-passes.mjs', '.github/workflows/caplock-prototype.yml']
+    paths: ['tools-home/index.html','tools-home/assets/tools-directory.*','tools-home/shared/compact-player*','tools-home/shared/player-shell*','tools-home/shared/control-help*','tools-home/tools/caplock/**', 'tools-home/tools/studio/**', 'tools-home/shared/caplock-launch.js', 'tools-home/shared/cut-passes.mjs', '.github/workflows/caplock-prototype.yml']
 permissions:
   contents: read
 jobs:
@@ -16,8 +16,7 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             /tools-home/index.html
-            /tools-home/assets/hub.js
-            /tools-home/assets/style.css
+            /tools-home/assets/tools-directory.*
             /tools-home/shared/
             /tools-home/tools/cliplock/engine.mjs
             /tools-home/tools/cliplock/core.mjs

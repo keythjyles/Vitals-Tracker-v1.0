@@ -91,3 +91,29 @@ h1{font-size:20px;margin:4px 0}#viewerPage{padding:0;border:0;background:none}#s
 .trim-numbers button{height:32px}
 #trimPosition,#trimSummary,#trimMessage{display:block;margin:4px 0;font-size:12px}
 #trimSummary{color:#ffda8a}
+
+/* Source controls stay in the empty player or its drawer. */
+#bedLoader .video-entry {
+ flex-wrap: wrap;
+ max-width: 100%;
+ padding-inline: 4px;
+}
+#bedLoader button {
+ background: #24384c;
+ color: #edf3fa;
+ min-height: 44px;
+ padding: 6px 8px;
+ font-size: 14px;
+}
+#bedLoader button.device-video, .bed-source-actions .device-video {
+ background: #efcd87;
+ color: #142333;
+}
+.bed-source-actions { display: flex; flex-wrap: wrap; gap: 4px; }
+#bedLoader #empty { margin: 2px 6px; }
+#bedLoader #empty:empty, #status:empty { display: none; }
+#status { margin: 5px 0; padding: 4px 8px; }
+#projectPicker .picker-header { flex-wrap: wrap; }
+#projectPicker .picker-header h2 { margin-inline-end: auto; }
+#projectPickerList .picker-card[data-cloud-text] { display: block; }
+#projectPicker .picker-card p { overflow-wrap: anywhere; }

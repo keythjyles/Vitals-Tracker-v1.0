@@ -16,7 +16,7 @@ export function createToolboxUI(o){
  function stopPreview(){cancelAnimationFrame(previewTick);previewTick=null;$('toolboxPreviewVideo').pause();$('toolboxPreviewVideo').removeAttribute('src');$('toolboxPreviewVideo').load();if(previewURL)URL.revokeObjectURL(previewURL);previewURL=null;previewAsset=null;$('toolboxPreview').hidden=true;}
  function render(){
   const list=assets().slice().sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true}));for(const c of p().clips){const m=o.media().get(c.id);if(m?.blob&&c.toolboxId&&!cache.has(c.toolboxId))cache.set(c.toolboxId,m.blob);}
-  $('editActiveCaption').textContent='+ Files';$('editActiveCaption').disabled=busy||!o.ready();$('placementState').textContent='Toolbox · '+list.length+(o.extendedFrames?.()?' · '+o.extendedFrames()+' frames':'');
+  $('editActiveCaption').textContent='Add files';$('editActiveCaption').disabled=busy||!o.ready();$('placementState').textContent='Toolbox · '+list.length+(o.extendedFrames?.()?' · '+o.extendedFrames()+' frames':'');
   $('insertCaption').textContent=p().canvas?'Toolbox':'Insert';$('insertCaption').disabled=busy||!o.ready();$('sheetInsertCaption').textContent='Insert another';$('sheetInsertCaption').disabled=busy||!o.ready();
   const items=placed(),index=items.findIndex(c=>c.id===o.selected());$('previousCaption').disabled=index<=0;$('nextCaption').disabled=index<0||index>=items.length-1;
   $('previousCaption').title='Previous placement';$('nextCaption').title='Next placement';$('toItemStart').disabled=!current();$('play').disabled=!o.ready();
@@ -70,14 +70,26 @@ export function createToolboxUI(o){
    }
    if(epoch!==o.epoch())throw Error('Bed changed during file selection.');
    if(!o.change(()=>{for(const {a}of pending){const i=p().toolbox.findIndex(old=>old.id===a.id);if(i<0)p().toolbox.push(a);else p().toolbox[i]=a;}}))throw Error('Toolbox files could not be saved.');
-   for(const {a,file}of pending)cache.set(a.id,file);
+   for(const {a,file}of pending)remember(a,file);
    $('toolboxStatus').textContent=`${assets().length} files in this bed’s toolbox. Tap a file to insert it; it stays reusable.`;o.say('Toolbox ready. Insert lets you choose any file, as often as needed.');
   }catch(e){$('toolboxStatus').textContent=e.message;o.say(e.message);}finally{busy=false;$('toolboxFiles').value='';render();}
  }
+ function remember(asset,blob){
+  cache.set(asset.id,blob);
+  if(asset.ref.kind==='local')o.rememberLocal?.(asset.id,blob);
+ }
+ async function cached(asset){
+  const existing=cache.get(asset.id);
+  if(existing)return existing;
+  if(asset.ref.kind!=='local')return null;
+  const blob=await o.readLocal?.(asset);
+  if(blob)cache.set(asset.id,blob);
+  return blob;
+ }
  async function media(a){
-  let blob=cache.get(a.id);
+  let blob=await cached(a);
   if(!blob&&a.ref.kind==='previewlock'){const d=await o.api('/api/playback?path='+encodeURIComponent(a.ref.path));const r=await fetch(d.url);if(!r.ok)throw Error('File unavailable: '+a.name);blob=await r.blob();cache.set(a.id,blob);}
-  if(!blob)throw Error('Use + Files to reconnect '+a.name+'. Its saved placements stay in the project.');
+  if(!blob)throw Error('Use Add files to reconnect '+a.name+'. Its saved placements stay in the project.');
   if(!a.duration||!a.frames||p().canvas&&a.type==='video'&&!a.width){const meta=await inspectToolboxFile(blob,a.name);if(!o.change(()=>Object.assign(a,meta,{chroma:a.chroma||meta.chroma})))throw Error('Could not read clip details.');}
   return blob;
  }
@@ -148,7 +160,7 @@ export function createToolboxUI(o){
  for(const [id,delta]of [['speedDown',-.01],['speedUp',.01]])$(id).onclick=()=>timing((c,d)=>setPlacementSpeed(c,Math.max(.1,Math.min(8,Math.round(((c.playbackRate??1)+delta)*1000)/1000)),d));
  $('speedReset').onclick=()=>timing((c,d)=>setPlacementSpeed(c,1,d));$('speedFit').onclick=()=>timing((c,d)=>fitPlacementOut(c,c.outFrame,d));
  for(const [id,delta]of [['previousCaption',-1],['nextCaption',1]])$(id).onclick=()=>{const items=placed(),index=items.findIndex(c=>c.id===o.selected()),c=items[index+delta];if(c){o.pause();o.select(c.id);o.seek(c.inFrame);}};
- return {render,open,add,cache,reset(){stopPreview();cache.clear();if($('toolboxDialog').open)$('toolboxDialog').close();},frameLabel(c){return assetFrameLabel(assetFor(c));},async reconnect(files){
-  for(const a of assets()){for(const f of files){if(f.name!==a.ref.name||f.size!==a.ref.size)continue;const hash=await signature(f);if(a.sha256&&hash!==a.sha256)throw Error('Different file contents: '+f.name+'. Choose the original file.');const meta=await inspectToolboxFile(f,f.name);Object.assign(a,meta,{chroma:a.chroma||meta.chroma,sha256:hash});cache.set(a.id,f);break;}}render();
+ return {render,open,add,remember,cached,reset(){stopPreview();cache.clear();if($('toolboxDialog').open)$('toolboxDialog').close();},frameLabel(c){return assetFrameLabel(assetFor(c));},async reconnect(files){
+  for(const a of assets()){for(const f of files){if(f.name!==a.ref.name||f.size!==a.ref.size)continue;const hash=await signature(f);if(a.sha256&&hash!==a.sha256)throw Error('Different file contents: '+f.name+'. Choose the original file.');const meta=await inspectToolboxFile(f,f.name);Object.assign(a,meta,{chroma:a.chroma||meta.chroma,sha256:hash});remember(a,f);break;}}render();
  }};
 }
