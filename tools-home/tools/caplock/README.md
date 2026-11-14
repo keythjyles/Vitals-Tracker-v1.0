@@ -1,3 +1,13 @@
+# CapLock R31
+
+- **Open video file** opens the browser’s file picker for a video on the device. **Photos** opens the video picker. The first video appears as editable Layer 0. Add caption animations, pictures or sounds with **Add files**. Choose an item in **Toolbox** to place it.
+- **Resume draft** reopens the most recent standalone draft in this browser. Imported Layer 0 and toolbox files have local copies for this workflow. Use **Reconnect files** when the originals are missing from browser storage or when opening an older project. **Download project** saves the editable recipe and references. **Save video** exports the composition.
+- The handle above the player exposes the file controls after loading. **Cloud projects** opens the Dropbox working catalog. CapLock lists project names first and fetches missing titles in the background. Media loads when you open a project or its assets. The connected Drive backup is tracked separately. Files from Google Drive can also be selected through the system Files picker where that provider is enabled.
+- In **GS Studio**, **Open local editor** opens standalone CapLock in a new tab. Use the Studio **Joke** phase to import media into the shared project. The saved-project caption sheet displays the device import first and opens the saved caption browser under **Saved cloud captions**.
+- Direct project, Clipper and PreviewLock handoffs still use the receiving project’s identity. The existing **Next → SxLock** action renders the placed cloud-project layers and uses the verified captioned stage.
+
+Verification uses the existing CapLock browser suite with additional coverage for the actual device chooser, Layer 0 filename, media recovery and lazy cloud browsing. [Tools and export audit](../../TOOL_REGISTRY.md).
+
 ## CapLock R30 — prepend a clip
 
 Use **Toolbox → Prepend at start**, then choose a file. CapLock places it at frame 0 and shifts the existing layers and captions by its duration in one undoable edit. Video prepends include their source audio. The export uses the exact timeline frame when a shifted audio clip starts.

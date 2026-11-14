@@ -51,10 +51,13 @@ module.exports=async(browser,base)=>{
   }finally{input.dispose();}
  },{bytes,checkPixels,audioWindow});
 
- await locator('newVideoFile').setInputFiles('/tmp/caplock-fixtures/trim-source.mp4');
+ const chooser=page.waitForEvent('filechooser');
+ await page.getByRole('button',{name:'Open video file',exact:true}).click();
+ await (await chooser).setFiles('/tmp/caplock-fixtures/trim-source.mp4');
  await count(1);
  await page.waitForFunction(()=>!document.querySelector('#insertCaption').disabled);
  assert.match(await row().first().textContent(),/Layer 0 · trim-source.mp4/);
+ assert.equal(await page.locator('.gs-player-filename').textContent(),'trim-source.mp4');
  const initial=await draft(),baseId=initial.clips[0].id;
  assert.equal(initial.toolbox.length,1);
  assert.equal(initial.clips[0].toolboxId,initial.toolbox[0].id);
@@ -154,15 +157,15 @@ module.exports=async(browser,base)=>{
  await locator('clipStart').press('Tab');
  await locator('closeClipProperties').click();
 
- const recover=new URL(base);recover.searchParams.set('recover','local');
- await page.goto(recover.href);
- await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('Saved placements restored.'));
- await locator('reconnectFiles').setInputFiles('/tmp/caplock-fixtures/source25.mp4');
- await page.waitForFunction(()=>document.querySelector('#status').textContent.includes('Reconnected 1 layers.'));
+ await page.goto(base);
+ await locator('resumeDraft').click();
+ await page.waitForFunction(()=>document.querySelector('#status').textContent==='Project restored from this device.');
+ assert.equal(await page.locator('.gs-player-filename').textContent(),'source25.mp4');
+ assert.equal(await locator('emptyReconnectFiles').isVisible(),false);
  await page.getByText('Save, recover & export',{exact:true}).click();
  const swapped=await inspect(await save(),false);
  assert.deepEqual(swapped,{frames:75,width:180,height:320,duration:3,audio:true});
  assert.deepEqual(errors,[]);
- console.log(JSON.stringify({layerZero:{trimmed:result,reconnectedWithoutOriginalBed:swapped,appendAtExclusiveEnd:true,prependAudio:joined.rms,undoAndReplace:true,errors}}));
+ console.log(JSON.stringify({layerZero:{trimmed:result,resumedWithoutReselectingSources:swapped,appendAtExclusiveEnd:true,prependAudio:joined.rms,undoAndReplace:true,errors}}));
  await context.close();
 };

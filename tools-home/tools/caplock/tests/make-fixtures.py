@@ -1,6 +1,8 @@
 """Generate disposable portrait fixtures; no user media or providers."""
 from pathlib import Path
 import subprocess
+import sys
+shared_fixture = Path(__file__).resolve().parents[3] / 'shared/tests/make-alpha-color-fixture.py'
 root=Path('/tmp/caplock-fixtures')
 root.mkdir(exist_ok=True)
 for fps in (25,30):
@@ -36,3 +38,6 @@ trim_picture = "color=c=navy:s=180x320:r=30:d=1.2,drawbox=x=0:y=0:w=90:h=160:col
 subprocess.run(['ffmpeg','-v','error','-f','lavfi','-i',trim_picture,
     '-f','lavfi','-i','sine=frequency=1000:duration=1.2','-af',"volume=0:enable='lt(t,0.4)+gte(t,0.8)'",
     '-c:v','libx264','-pix_fmt','yuv420p','-c:a','aac','-shortest','-y',str(root/'trim-source.mp4')],check=True)
+
+# Shared with SxLock to exercise the same full-range alpha decode path.
+subprocess.run([sys.executable, str(shared_fixture), str(root)], check=True)

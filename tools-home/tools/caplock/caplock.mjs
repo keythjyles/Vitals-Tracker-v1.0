@@ -1,6 +1,7 @@
 import {compositionFrames,bedTime,TailClock} from './composition-time.mjs?v=25';
 import {percentGain,inspectSourceAudio} from './source-audio.mjs?v=28';
-import {createToolboxUI} from './toolbox-ui.mjs?v=30';
+import {createToolboxUI} from './toolbox-ui.mjs?v=31';
+import {rememberLocalMedia,readLocalMedia} from './local-media.mjs?v=31';
 import {isToolboxEntry,makeToolboxPlacement,fitVideoPlacement,setPlacementSpeed} from './toolbox-core.mjs?v=28';
 import {inspectToolboxFile} from './toolbox-media.mjs?v=28';
 import {createTrimDialog} from './trim-dialog.mjs?v=28';
@@ -17,7 +18,7 @@ import {inStudio,installAdapter} from '../studio/adapter.mjs?v=1';
 import {listCutProjects,readCutVideo,publishCutProject,watchCutProjects} from '../../shared/cut-jokelets.mjs?v=3';
 import {moduleSession} from '../studio/core.mjs?v=1';
 import {FocusGestures,scaledTarget} from './focus-controls.mjs?v=9';
-import {createProjectPicker} from '../studio/project-picker.mjs?v=6-stages';
+import {createProjectPicker} from '../studio/project-picker.mjs?v=7-local-first';
 import {fitPortrait,preferredBed} from '../studio/project-index.mjs?v=5-studio';
 import {captionNumber,numberedCaptionFiles,activeCaption,startCaptionSequence,navigateCaption,moveCaptionDraft,insertCaption} from './placement.mjs?v=19-named';
 import {paintMatrix,matrixFrame} from '../../shared/item-matrix.mjs?v=1';
@@ -25,13 +26,25 @@ import {rateOf,fitRate} from './clip-time.mjs?v=28';
 import {words,moveWords,shiftWords,geminiPrompt} from './script.mjs?v=4';
 import {LayerTracks} from './layer-track.mjs?v=29';
 import {FPS,DEFAULT_STYLE,createProject,phrase,importTranscript,subtitle,timed,effective,validateProject,validateStyle} from './core.mjs?v=28';
-const $=id=>document.getElementById(id),v=$('video'),draftKey='gs_caplock_draft_v1',API='https://gs-previewlock-api.onrender.com';
+const $=id=>document.getElementById(id),v=$('video'),API='https://gs-previewlock-api.onrender.com';
 // Owner lock: built-in text captions cannot be enabled by UI, URL, or restored data.
 const BUILTIN_CAPTIONING_LOCKED=true;
-const TOOLBOX_MODE=isToolboxEntry(location.search,inStudio());
+const params=new URLSearchParams(location.search);
+const STUDIO=inStudio(),CLOUD_VIDEO=params.get('new')==='cloud-video';
+const TOOLBOX_MODE=isToolboxEntry(location.search,STUDIO);
+const draftKey='gs_caplock_draft_v1',cloudDraftKey='gs_caplock_cloud_draft_v1';
+const previousKey='gs_caplock_previous_workspaces',cloudPreviousKey='gs_caplock_cloud_previous_workspaces';
+const videoSourceButtons=['newVideoFiles','newVideoPhotos','emptyVideoFiles','emptyVideoPhotos'];
+if(STUDIO){
+ for(const id of ['newVideoFiles','emptyVideoFiles']){
+  $(id).textContent='Open local editor';
+  $(id).onclick=()=>window.open('./','_blank','noopener');
+ }
+ for(const id of ['newVideoPhotos','emptyVideoPhotos'])$(id).hidden=true;
+}
 let toolboxUI=null;
 let projectContext=null;
-let restoring=false,placementBusy=false,cloudSession=null,cloudTimer=null,cloudSaving=false,cloudWrite=Promise.resolve();
+let localDraftAvailable=false,restoring=false,placementBusy=false,cloudSession=null,cloudTimer=null,cloudSaving=false,cloudWrite=Promise.resolve();
 let selectedWords=[],selectedClip=null,editMode='view',libraryTarget='base',projectEpoch=0,dragBefore=null;
 let project=createProject(),selected=null,frame=0,maxFrame=0,undo=[],redo=[],mediaUrl=null,bedBlob=null,lastVideoPass=null,input=null,sink=null,seekRevision=0,mediaRevision=0,library=[],dirty=false,zoom=1,pan={x:0,y:0};
 const tailClock=new TailClock();let bedFrames=0,bedEnd=0,compositionEnded=false;
@@ -46,53 +59,110 @@ function timelineFrame(){
 function syncExtent(){const end=Math.max(0,compositionFrames(project,bedFrames)-1);if(end!==maxFrame)compositionEnded=false;maxFrame=end;$('seek').max=maxFrame;if(frame>maxFrame){pause();frame=maxFrame;}}
 const say=s=>$('status').textContent=s, current=()=>project.captions.find(c=>c.id===selected);
 if(!inStudio()&&!window.name)window.name='gs-caplock';
-let importingVideo=false;
-async function newVideoProject(file){
- if(!inStudio()&&new URLSearchParams(location.search).get('new')!=='cloud-video')return loadDeviceVideo(file);
- if(importingVideo)return;importingVideo=true;pause();
- for(const id of ['newVideoFiles','newVideoPhotos','emptyVideoFiles','emptyVideoPhotos'])$(id).disabled=true;
- try{
-  if(cloudSession&&dirty){clearTimeout(cloudTimer);await saveCloudWorkspace();}await cloudWrite.catch(()=>{});
-  if(file.size>40*1024*1024)throw Error('Choose a video under the existing 40 MB project-file limit.');
-  say('Reading '+file.name+'…');const {inspect}=await import('../cliplock/engine.mjs?v=2'),meta=await inspect(file);
-  const record=await openVideoProject(api,file,meta,say);await openFullJokeProject(record);const importedStage=stageForName(file.name);if(importedStage==='raw')await tagCurrentSource('raw');
-  say(record.title+' is now its own caption project. Import its Gemini animation when ready.');return record;
- }catch(e){say('Video project not opened: '+e.message);}finally{importingVideo=false;for(const id of ['newVideoFiles','newVideoPhotos','emptyVideoFiles','emptyVideoPhotos'])$(id).disabled=false;}
+let importingVideo=false,sourceSelection=0;
+function lockSourceButtons(busy){
+ importingVideo=busy;
+ for(const id of videoSourceButtons)$(id).disabled=busy;
 }
-async function loadDeviceVideo(file){
- if(importingVideo)return;importingVideo=true;pause();
- for(const id of ['newVideoFiles','newVideoPhotos','emptyVideoFiles','emptyVideoPhotos'])$(id).disabled=true;
+async function newVideoProject(file){
+ if(file.size>40*1024*1024)throw Error('Choose a video under the existing 40 MB project-file limit.');
+ say('Reading '+file.name+'…');
+ const {inspect}=await import('../cliplock/engine.mjs?v=2'),meta=await inspect(file);
+ const record=await openVideoProject(api,file,meta,say);
+ await openFullJokeProject(record);
+ if(stageForName(file.name)==='raw')await tagCurrentSource('raw');
+ say(record.title+' is now its own caption project. Import its Gemini animation when ready.');
+ return record;
+}
+async function loadDeviceVideo(file,{throwOnError=false}={}){
+ if(importingVideo||restoring){
+  if(throwOnError)throw Error('The editor is busy. Try the file again.');
+  return;
+ }
+ lockSourceButtons(true);
+ ++sourceSelection;
+ pause();
+ const epoch=projectEpoch;
  try{
+  if(CLOUD_VIDEO){
+   if(cloudSession&&dirty){clearTimeout(cloudTimer);await saveCloudWorkspace();}
+   await cloudWrite.catch(()=>{});
+   return await newVideoProject(file);
+  }
   const ref={kind:'local',name:file.name,size:file.size,lastModified:file.lastModified};
-  const initial=TOOLBOX_MODE?await inspectBed(file,ref):null;
+  const initial=await inspectBed(file,ref);
+  if(epoch!==projectEpoch)throw Error('The project changed while reading the file. Choose the video again.');
   // Preserve the current edit before detaching from cloud autosave. Device loading
   // must never depend on authentication, an upload, or a project reservation.
-  if(TOOLBOX_MODE||project.media||project.clips.length||project.captions.length){
-   try{archiveWorkspace();}catch{/* Loading a device file also works when browser recovery storage is full. */}
+  try{archiveWorkspace();}catch{
+   if(project.media||project.clips.length||project.captions.length)throw Error('Download the current project before opening another video. This browser could not archive it.');
   }
+  const startFresh=TOOLBOX_MODE||!!cloudSession;
   clearTimeout(cloudTimer);cloudSession=null;projectContext=null;delete project.workspace;$('saveCloud').hidden=true;
-  if(TOOLBOX_MODE){await openProject(createProject());lastVideoPass=null;$('useSavedVideo').hidden=true;$('saveVideo').textContent='Save video';$('localVideoProgress').hidden=true;$('localVideoStatus').textContent='';}
+  if(startFresh)await openProject(createProject());
+  lastVideoPass=null;
+  $('useSavedVideo').hidden=true;
+  $('saveVideo').textContent='Save video';
+  $('localVideoProgress').hidden=true;
+  $('localVideoStatus').textContent='';
   $('projectName').textContent='Local video';$('bedName').textContent=file.name;
-  if(initial)await addEditableBed(file,ref,initial);
+  if(TOOLBOX_MODE)await addEditableBed(file,ref,initial);
   else{
    await loadMedia(file,ref);
    if(project.media===ref)say('Source loaded from your device. Import numbered caption files, then Insert and Next.');
   }
- }catch(e){say('Video not loaded: '+e.message);}finally{
-  importingVideo=false;for(const id of ['newVideoFiles','newVideoPhotos','emptyVideoFiles','emptyVideoPhotos'])$(id).disabled=false;render();
+ }catch(e){if(throwOnError)throw e;say('Video not loaded: '+e.message);}finally{
+  lockSourceButtons(false);
+  render();
  }
 }
-for(const id of ['newVideoFiles','emptyVideoFiles'])$(id).onclick=()=>$('newVideoFile').click();
-for(const id of ['newVideoPhotos','emptyVideoPhotos'])$(id).onclick=()=>$('newVideoPhoto').click();
-for(const id of ['newVideoFile','newVideoPhoto'])$(id).onchange=async e=>{const file=e.target.files[0];if(file)await newVideoProject(file);e.target.value='';};
+if(!STUDIO){
+ for(const id of ['newVideoFiles','emptyVideoFiles'])$(id).onclick=()=>$('newVideoFile').click();
+ for(const id of ['newVideoPhotos','emptyVideoPhotos'])$(id).onclick=()=>$('newVideoPhoto').click();
+}
+for(const id of ['newVideoFile','newVideoPhoto'])$(id).onchange=e=>{
+ const file=e.target.files[0];
+ e.target.value='';
+ if(file&&!STUDIO)void loadDeviceVideo(file);
+};
 function download(name,data,type='application/json'){const u=URL.createObjectURL(new Blob([data],{type})),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),30000);}
-function saveDraft(){if(restoring)return;if(project.captionSequence)project.captionSequence.playhead=frame;dirty=true;if(cloudSession){clearTimeout(cloudTimer);cloudTimer=setTimeout(()=>saveCloudWorkspace().catch(e=>{$('saveStatus').textContent='Dropbox save pending: '+e.message;}),900);} try{localStorage.setItem(draftKey,JSON.stringify(project));$('saveStatus').textContent='Browser draft updated '+new Date().toLocaleTimeString()+(cloudSession?'. Dropbox save queued.':'. Download project to keep a separate copy. Cloud save unavailable.');}catch(e){$('saveStatus').textContent='Draft save failed: '+e.message+' Download your project now.';}}
+const draftSlot=()=>STUDIO||project.workspace||project.media?.kind==='previewlock'?cloudDraftKey:draftKey;
+const archiveSlot=()=>draftSlot()===cloudDraftKey?cloudPreviousKey:previousKey;
+function saveDraft(){
+ if(restoring)return;
+ if(project.captionSequence)project.captionSequence.playhead=frame;
+ if(project.workspace)project.workspace.playhead=frame;
+ dirty=true;
+ if(cloudSession){
+  clearTimeout(cloudTimer);
+  cloudTimer=setTimeout(()=>saveCloudWorkspace().catch(e=>{$('saveStatus').textContent='Dropbox save pending: '+e.message;}),900);
+ }
+ try{
+  const slot=draftSlot();
+  localStorage.setItem(slot,JSON.stringify(project));
+  if(slot===draftKey)localDraftAvailable=true;
+  $('saveStatus').textContent=cloudSession?'Draft saved on this device. Dropbox save queued.':'Draft saved on this device.';
+ }catch(e){$('saveStatus').textContent='Draft save failed. Download the project to keep your edits. '+e.message;}
+}
 function change(fn){const before=JSON.stringify(project);try{fn();for(const old of JSON.parse(before).clips||[]){const now=project.clips.find(c=>c.id===old.id);if(old.locked&&now?.locked&&['inFrame','outFrame','trimInFrame','trimOutFrame','playbackRate','x','y','width','rotation','mirrorX','flipY','opacity','volume','loop'].some(k=>old[k]!==now[k]))throw Error('Unlock this caption placement before changing it.');}project.captions.forEach(words);validateProject(project);}catch(e){project=JSON.parse(before);say(e.message);return false;}if(before!==JSON.stringify(project)){undo.push(before);if(undo.length>100)undo.shift();redo=[];saveDraft();}render();return true;}
 function history(from,to){if(!from.length)return;to.push(JSON.stringify(project));project=JSON.parse(from.pop());if(!current())selected=project.captions[0]?.id||null;saveDraft();render();}
 function render(){
  syncExtent();
- $('emptyReconnectFiles').hidden=!project.media||project.media.kind!=='local';$('projectName').textContent=projectContext?.title||(project.canvas?'Local video':'Joke project');const stageSource=projectContext?.assets?.find(a=>a.path===project.media?.path);$('sourceStage').value=stageSource?stageRecord(projectContext,stageSource)?.stage||'':'';$('bedName').textContent=project.canvas?(project.clips[0]?.name||'Empty timeline'):project.media?.name||'Choose a joke project';
- if(project.canvas)$('bedLoader').classList.add('has-media');
+ const localRefs=project.media?.kind==='local'||project.clips.some(c=>c.ref.kind==='local');
+ const firstLayer=project.canvas&&project.clips[0];
+ const hasPicture=firstLayer?project.clips.some(c=>c.type==='video'&&layers.media.has(c.id)):!!bedBlob;
+ const connected=firstLayer?layers.media.has(firstLayer.id):hasPicture;
+ const stageSource=projectContext?.assets?.find(a=>a.path===project.media?.path);
+ $('bedLoader').classList.toggle('has-media',hasPicture);
+ $('emptyReconnectFiles').hidden=!localRefs;
+ $('resumeDraft').hidden=!TOOLBOX_MODE||!localDraftAvailable||localRefs||!!projectContext;
+ $('projectAssets').hidden=!projectContext;
+ $('sourceStageControl').hidden=!stageSource;
+ $('sourceStage').value=stageSource?stageRecord(projectContext,stageSource)?.stage||'':'';
+ $('projectName').textContent=projectContext?.title||(project.canvas||project.media?'Local video':'Local editor');
+ $('bedName').textContent=firstLayer?.ref.name||project.media?.name||'No video loaded';
+ $('bedName').dataset.sourceConnected=String(connected);
+ $('empty').textContent=localRefs?'Reconnect the original files to resume.':'';
  $('timeline').replaceChildren();for(const c of project.captions){const b=document.createElement('button');b.textContent=c.text||'(empty caption)';b.setAttribute('aria-pressed',String(c.id===selected));const small=document.createElement('small');small.textContent=(c.visible?'':'Hidden · ')+(timed(c)?'F'+c.inFrame+'–'+c.outFrame:'UNTIMED')+(Object.keys(c.overrides).length?' · local':'');b.append(small);b.onclick=()=>choose(c.id);$('timeline').append(b);}
  const c=current();$('editor').querySelectorAll('textarea,input,button').forEach(el=>{if(!['undo','redo'].includes(el.id))el.disabled=!c});$('selectedLabel').textContent=c?'Selected phrase '+(project.captions.indexOf(c)+1)+' of '+project.captions.length:'Selected phrase — none';$('text').value=c?.text||'';$('inFrame').value=c?.inFrame??'';$('outFrame').value=c?.outFrame??'';$('duration').textContent=c?(timed(c)?(c.outFrame-c.inFrame)+' frames · '+((c.outFrame-c.inFrame)/FPS).toFixed(3)+' seconds · OUT excluded':'Untimed — mark IN and OUT.')+(c&&!c.visible?' · Hidden':''):'';
  fillStyle(c?effective(project,c):project.globalStyle);$('undo').disabled=!undo.length;$('redo').disabled=!redo.length;$('presets').replaceChildren();for(const name of Object.keys(project.presets)){const o=document.createElement('option');o.value=name;o.textContent=name;$('presets').append(o);}renderScript();renderClips();lockBuiltInCaptioning();draw();
@@ -158,7 +228,7 @@ async function addEditableBed(blob,ref,meta){
  if(epoch!==projectEpoch){layers.detach(clip.id);throw Error('Project changed while reading the video.');}
  if(existing)Object.assign(existing,asset);
  else project.toolbox.push(asset);
- toolboxUI?.cache.set(asset.id,blob);
+ toolboxUI?.remember(asset,blob);
  project.canvas=canvas;
  project.version=10;
  project.media=null;
@@ -168,7 +238,7 @@ async function addEditableBed(blob,ref,meta){
  render();
  saveDraft();
  await seek(0);
- say('Source loaded as Layer 0. Open its row to edit it, or open the Toolbox to place another clip.');
+ say(ref.name+' opened as Layer 0. Use Add files to bring in captions, animations or sound.');
 }
 async function loadMedia(blob,ref){
  if(TOOLBOX_MODE&&!cloudSession&&ref.kind==='local'&&!project.canvas){
@@ -184,11 +254,64 @@ async function loadMedia(blob,ref){
  }catch(e){if(rev!==mediaRevision)return;if(v.error||v.readyState<1){$('empty').hidden=false;$('bedLoader').classList.remove('has-media');$('mediaStatus').textContent='Import failed: '+e.message;say('Video could not be decoded. Original source and caption project remain unchanged.');render();return;}project.media=ref;bedEnd=Number.isFinite(v.duration)?v.duration:0;bedFrames=Math.ceil(bedEnd*FPS);syncExtent();$('mediaStatus').textContent='Native browser preview only; precise source timing not verified. '+e.message;saveDraft();say('Video loaded with approximate seeking. Exact decode unavailable.');}
  render();
 }
-$('videoFile').onchange=async e=>{try{const f=e.target.files[0];if(!f)return;if(TOOLBOX_MODE){await newVideoProject(f);return;}const old=project.media;if(old?.kind==='local'&&project.captions.length&&(old.name!==f.name||old.size!==f.size))if(!confirm('This is a different source. Keep existing caption timing with this source?'))return;if(cloudSession){const ref=await storeCloudAsset({name:f.name},f);await loadMedia(f,ref);}else await loadMedia(f,{kind:'local',name:f.name,size:f.size,lastModified:f.lastModified});}catch(error){say('Bed import not saved: '+error.message);}finally{e.target.value='';}};
+$('videoFile').onchange=async e=>{try{const f=e.target.files[0];if(!f)return;if(TOOLBOX_MODE){await loadDeviceVideo(f);return;}const old=project.media;if(old?.kind==='local'&&project.captions.length&&(old.name!==f.name||old.size!==f.size))if(!confirm('This is a different source. Keep existing caption timing with this source?'))return;if(cloudSession){const ref=await storeCloudAsset({name:f.name},f);await loadMedia(f,ref);}else await loadMedia(f,{kind:'local',name:f.name,size:f.size,lastModified:f.lastModified});}catch(error){say('Bed import not saved: '+error.message);}finally{e.target.value='';}};
 $('save').onclick=()=>{project.captions.forEach(words);download('CapLock-project.json',JSON.stringify(project,null,2));dirty=false;$('saveStatus').textContent='Project download requested. Includes captions, styles and media references, not video bytes. Confirm it completed on your device. No cloud write performed.';};
-async function openProject(raw){const p=validateProject(raw);++projectEpoch;restoring=true;$('playerDock').setAttribute('aria-busy','true');try{trimUI.close();closeClipProperties();toolboxUI?.reset();layers.clear();selectedClip=null;selectedWords=[];editMode='view';pause();++mediaRevision;++seekRevision;input?.dispose();input=null;sink=null;if(mediaUrl)URL.revokeObjectURL(mediaUrl);mediaUrl=null;v.removeAttribute('src');v.load();$('decoded').hidden=true;$('empty').hidden=false;$('bedLoader').classList.remove('has-media');bedBlob=null;project=p;selected=p.captions[0]?.id||null;undo=[];redo=[];frame=0;maxFrame=0;bedFrames=0;bedEnd=0;compositionEnded=false;$('seek').max=0;render();for(const c of project.clips)if(c.ref.kind==='previewlock')await loadCloudOverlay(c.ref,c).catch(e=>say('Clip reconnect: '+e.message));if(p.media?.kind==='previewlock'){try{await loadCloud(p.media);}catch(e){say('Project restored; cloud source could not reconnect: '+e.message);}}else say(p.canvas?'Project restored. Use Reconnect files to attach the source videos.':'Project restored. Reselect original video '+(p.media?.name||'')+' to reconnect media.');selectedClip=p.captionSequence?.activeId||p.workspace?.selectedClip||p.clips[0]?.id;layers.selected=selectedClip;frame=p.workspace?.playhead??p.captionSequence?.playhead??0;render();}finally{restoring=false;$('playerDock').setAttribute('aria-busy','false');}saveDraft();}
+async function openProject(raw){
+ const p=validateProject(raw),epoch=++projectEpoch;
+ restoring=true;
+ $('playerDock').setAttribute('aria-busy','true');
+ try{
+  trimUI.close();closeClipProperties();toolboxUI?.reset();layers.clear();
+  selectedClip=null;selectedWords=[];editMode='view';pause();
+  ++mediaRevision;++seekRevision;input?.dispose();input=null;sink=null;
+  if(mediaUrl)URL.revokeObjectURL(mediaUrl);
+  mediaUrl=null;
+  v.removeAttribute('src');v.load();$('decoded').hidden=true;
+  $('empty').hidden=false;
+  bedBlob=null;project=p;selected=p.captions[0]?.id||null;undo=[];redo=[];
+  frame=0;maxFrame=0;bedFrames=0;bedEnd=0;compositionEnded=false;
+  $('seek').max=0;
+  render();
+  let mediaError='';
+  for(const c of p.clips){
+   try{
+    if(c.ref.kind==='previewlock')await loadCloudOverlay(c.ref,c);
+    else if(toolboxUI&&p.canvas){
+     const asset=p.toolbox.find(a=>a.id===c.toolboxId);
+     const blob=asset&&await toolboxUI.cached(asset);
+     if(epoch!==projectEpoch)return;
+     if(blob)await layers.attach(c,blob,{autoKey:false});
+    }
+   }catch(e){mediaError=e.message;}
+   if(epoch!==projectEpoch)return;
+  }
+  if(p.media?.kind==='previewlock'){
+   try{await loadCloud(p.media);}catch(e){mediaError=e.message;}
+  }
+  if(epoch!==projectEpoch)return;
+  selectedClip=p.captionSequence?.activeId||p.workspace?.selectedClip||p.clips[0]?.id;
+  layers.selected=selectedClip;
+  frame=p.workspace?.playhead??p.captionSequence?.playhead??0;
+  render();
+  const missing=p.clips.some(c=>c.ref.kind==='local'&&!layers.media.has(c.id))||p.media?.kind==='local'&&!bedBlob;
+  say(mediaError?'Project restored. Media could not reconnect: '+mediaError:
+   missing?'Project restored. Use Reconnect files to select the originals.':
+   p.canvas?'Project restored from this device.':'Project restored.');
+ }finally{
+  if(epoch===projectEpoch){restoring=false;$('playerDock').setAttribute('aria-busy','false');}
+ }
+ saveDraft();
+}
+
 $('projectFile').onchange=async e=>{try{const raw=JSON.parse(await e.target.files[0].text());if(dirty&&!confirm('Replace current edit with this project?'))return;await openProject(raw);}catch(e){say('Open failed: '+e.message);}};
-$('recover').onclick=async()=>{try{const raw=localStorage.getItem(draftKey);if(!raw)return say('No browser draft found.');if(dirty&&!confirm('Replace current edit with the browser draft?'))return;await openProject(JSON.parse(raw));}catch(e){say('Recovery failed: '+e.message);}};
+$('recover').onclick=async()=>{
+ try{
+  const raw=localStorage.getItem(draftSlot());
+  if(!raw)return say('No browser draft found.');
+  if(dirty&&!confirm('Replace current edit with the browser draft?'))return;
+  await openProject(JSON.parse(raw));
+ }catch(e){say('Recovery failed: '+e.message);}
+};
 for(const type of ['srt','vtt'])$(type).onclick=()=>{try{download('CapLock-captions.'+type,subtitle(project,type),'text/plain');say(type.toUpperCase()+' download requested. Subtitle files contain timing and text, not the visual design.');}catch(e){say(e.message);}};
 function transform(){$('scene').style.transform='translate(0px,0px) scale(1)';}
 function fitScene(){const r=$('viewport').getBoundingClientRect(),size=fitPortrait(r.width,r.height);$('scene').style.width=size.width+'px';$('scene').style.height=size.height+'px';}
@@ -402,12 +525,21 @@ async function loadCloudOverlay(ref,restore=null){pause();if(cloudSession&&!ref.
 $('overlayLibrary').onclick=()=>openCaptionImport();$('railMove').onclick=()=>{if(project.editFocus==='bed'){pause();editMode=editMode==='move'?'view':'move';renderClips();return;}if(editMode==='move')$('viewMode').click();else $('moveMode').click();};$('railRotate').onclick=()=>{if(project.editFocus==='bed')return say('Select an overlay to rotate it.');if(editMode==='rotate')$('viewMode').click();else $('rotateMode').click();};
 
 window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
-render();showPage('viewer');try{if(localStorage.getItem(draftKey))$('saveStatus').textContent='A previous browser draft is available. Use Recover browser draft; it has not been overwritten.';}catch{$('saveStatus').textContent='Browser recovery storage unavailable. Use project downloads to preserve edits.';}
-const params=new URLSearchParams(location.search);if(params.get('recover')==='local'){try{const raw=localStorage.getItem(draftKey);if(raw){if(params.get('fitBed')==='1')archiveWorkspace();openProject(JSON.parse(raw)).then(()=>{if(params.get('fitBed')==='1')change(()=>{
+render();showPage('viewer');
+try{
+ localDraftAvailable=!!localStorage.getItem(draftKey);
+ if(localStorage.getItem(draftSlot())){
+  $('saveStatus').textContent='A draft is available on this device.';
+  render();
+ }
+}catch{$('saveStatus').textContent='Browser recovery storage unavailable. Download your project to save edits.';}
+if(params.get('recover')==='local'){try{const raw=localStorage.getItem(draftKey);if(raw){if(params.get('fitBed')==='1')archiveWorkspace();openProject(JSON.parse(raw)).then(()=>{if(params.get('fitBed')==='1')change(()=>{
  const bed=project.clips[0],source=project.toolbox.find(a=>a.id===bed?.toolboxId);
  if(project.canvas&&bed?.type==='video'&&source?.width)fitVideoPlacement(bed,source,project.canvas);
  else if(!project.canvas)Object.assign(project.bedTransform,{x:50,y:50,scale:1});
- });say('Saved placements restored. Reconnect files to select the original video and caption files together.');}).catch(e=>say('Recovery failed: '+e.message));}}catch(e){say('Recovery failed: '+e.message);}}if(params.get('assetPath'))loadCloud({kind:'previewlock',path:params.get('assetPath'),name:params.get('name')||params.get('assetPath').split('/').pop()}).catch(e=>say(e.message));
+ });
+ const missing=project.clips.some(c=>c.ref.kind==='local'&&!layers.media.has(c.id))||project.media?.kind==='local'&&!bedBlob;
+ say(missing?'Saved placements restored. Reconnect files to select the originals.':'Saved placements restored from this device.');}).catch(e=>say('Recovery failed: '+e.message));}}catch(e){say('Recovery failed: '+e.message);}}if(params.get('assetPath'))loadCloud({kind:'previewlock',path:params.get('assetPath'),name:params.get('name')||params.get('assetPath').split('/').pop()}).catch(e=>say(e.message));
 
 // Project-folder handoff: numbered cloud caplets are loaded as an unplaced tray.
 async function saveCloudWorkspace(){
@@ -416,23 +548,64 @@ async function saveCloudWorkspace(){
  cloudWrite=cloudWrite.catch(()=>{}).then(async()=>{if(cloudSession!==session)return;cloudSaving=true;try{project.workspace={id:session.id,assetId:session.asset,playhead:frame,selectedClip:selectedClip||''};const snapshot=JSON.stringify(project);const d=await api('/api/joke-project/caplock?id='+encodeURIComponent(session.id),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({rev:session.rev,session:JSON.parse(snapshot)})});if(cloudSession!==session)return;session.rev=d.rev;if(d.project)projectContext=d.project;if(snapshot===JSON.stringify(project))dirty=false;$('saveStatus').textContent='CapLock workspace saved in Dropbox. Drive backup queued.';}finally{cloudSaving=false;}});return cloudWrite;
 }
 async function storeCloudAsset(ref,file,role='bed'){
- clearTimeout(cloudTimer);cloudWrite=cloudWrite.catch(()=>{}).then(async()=>{const route='/api/joke-project/asset?id='+encodeURIComponent(cloudSession.id)+'&role='+encodeURIComponent(role)+'&name='+encodeURIComponent(ref.name)+(file?'':'&source='+encodeURIComponent(ref.path));const d=await api(route,{method:'POST',...(file?{headers:{'content-type':'application/octet-stream'},body:file}:{})});cloudSession.rev=d.rev;if(d.project)projectContext=d.project;return {kind:'previewlock',name:d.asset.name,path:d.asset.path,size:d.asset.size};});return cloudWrite;
+ const session=cloudSession;
+ clearTimeout(cloudTimer);
+ cloudWrite=cloudWrite.catch(()=>{}).then(async()=>{
+  if(!session||cloudSession!==session)throw Error('The project changed before the asset could be saved.');
+  const route='/api/joke-project/asset?id='+encodeURIComponent(session.id)+'&role='+encodeURIComponent(role)+'&name='+encodeURIComponent(ref.name)+(file?'':'&source='+encodeURIComponent(ref.path));
+  const d=await api(route,{method:'POST',...(file?{headers:{'content-type':'application/octet-stream'},body:file}:{})});
+  if(cloudSession!==session)throw Error('The project changed while the asset was saving.');
+  session.rev=d.rev;
+  if(d.project)projectContext=d.project;
+  return {kind:'previewlock',name:d.asset.name,path:d.asset.path,size:d.asset.size};
+ });
+ return cloudWrite;
 }
 $('saveCloud').onclick=()=>saveCloudWorkspace().catch(e=>{$('saveStatus').textContent='Save failed: '+e.message;});
 $('placeClip').onclick=()=>change(()=>{const c=clipCurrent();if(!c)return;const length=c.outFrame-c.inFrame;c.inFrame=frame;c.outFrame=frame+length;c.visible=true;});
 async function openJokeWorkspace(id,assetId){
- pause();if(cloudSession&&dirty){clearTimeout(cloudTimer);await saveCloudWorkspace();}await cloudWrite.catch(()=>{});const d=await api('/api/joke-project/caplock?id='+encodeURIComponent(id)+'&asset='+encodeURIComponent(assetId));cloudSession=null;clearTimeout(cloudTimer);
- archiveWorkspace();let next=withCaptionBatch(d.session,d.project,d.asset);const savedFocus=d.session?.captionSequence?.source?.cutId===d.asset.cuts.id&&d.session.version>=5?d.session.editFocus:'overlay';
- projectContext=d.project;await openProject(next);cloudSession={id,asset:assetId,rev:d.rev};showPage('viewer');selectedClip=project.captionSequence.activeId;layers.selected=selectedClip;editMode=savedFocus==='none'?'view':'move';project.editFocus=savedFocus;render();await seek(next.workspace?.playhead||0);$('saveCloud').hidden=false;localStorage.setItem('gs_studio_project',id);localStorage.setItem('gs_caplock_caption_project',id);localStorage.setItem('gs_caplock_caption_asset',assetId);importState={project:d.project,id,assetId};renderCaptionImport();loadCaptionSource(d.asset.path).catch(e=>{$('captionImportStatus').textContent='Original preview unavailable: '+e.message;});await saveCloudWorkspace();say('Caption components ready in '+d.project.title+'. Previous / Next choose a caption; Insert places it.');
+ const selection=sourceSelection;
+ pause();if(cloudSession&&dirty){clearTimeout(cloudTimer);await saveCloudWorkspace();}await cloudWrite.catch(()=>{});const d=await api('/api/joke-project/caplock?id='+encodeURIComponent(id)+'&asset='+encodeURIComponent(assetId));if(selection!==sourceSelection)throw Error('A device file was selected while the cloud project was opening.');archiveWorkspace(cloudPreviousKey,cloudDraftKey);cloudSession=null;clearTimeout(cloudTimer);
+ let next=withCaptionBatch(d.session,d.project,d.asset);const savedFocus=d.session?.captionSequence?.source?.cutId===d.asset.cuts.id&&d.session.version>=5?d.session.editFocus:'overlay';
+ projectContext=d.project;await openProject(next);cloudSession={id,asset:assetId,rev:d.rev};showPage('viewer');selectedClip=project.captionSequence.activeId;layers.selected=selectedClip;editMode=savedFocus==='none'?'view':'move';project.editFocus=savedFocus;render();await seek(next.workspace?.playhead||0);$('saveCloud').hidden=false;localStorage.setItem('gs_studio_project',id);localStorage.setItem('gs_caplock_caption_project',id);localStorage.setItem('gs_caplock_caption_asset',assetId);importState={project:d.project,id,assetId};renderCaptionImport();await saveCloudWorkspace();say('Caption components ready in '+d.project.title+'. Previous / Next choose a caption; Insert places it.');
 }
-$('previousWorkspace').onclick=async()=>{try{const list=JSON.parse(localStorage.getItem('gs_caplock_previous_workspaces')||'[]');const last=list.pop();if(!last)return say('No earlier workspace archived.');cloudSession=null;projectContext=null;await openProject(last.project);localStorage.setItem('gs_caplock_previous_workspaces',JSON.stringify(list));showPage('viewer');say('Earlier workspace restored. Its cloud references remain in the project.');}catch(e){say(e.message);}};
+$('previousWorkspace').onclick=async()=>{
+ try{
+  const key=archiveSlot(),list=JSON.parse(localStorage.getItem(key)||'[]'),last=list.pop();
+  if(!last)return say('No earlier workspace archived.');
+  cloudSession=null;projectContext=null;clearTimeout(cloudTimer);$('saveCloud').hidden=true;
+  await openProject(last.project);
+  localStorage.setItem(key,JSON.stringify(list));
+  showPage('viewer');
+  say('Earlier workspace restored.');
+ }catch(e){say(e.message);}
+};
 
 
-const projectPicker=createProjectPicker({api,onPause:pause,onOpenProject:openJokeletProject,onLocal:()=>$('videoFile').click(),hasProject:()=>!!project.media||!!project.workspace,extraProjects:listCutProjects,extraMedia:readCutVideo,module:'captions',onUseAsset:async(p,a)=>{if(!p){const d=await api('/api/playback?path='+encodeURIComponent(a.path)),r=await fetch(d.url);if(!r.ok)throw Error('Video could not be read.');const p=await newVideoProject(new File([await r.blob()],a.name));if(!p)throw Error('The selected video project could not be opened.');return p;}if(p&&p.id!==cloudSession?.id)await openFullJokeProject(p);const ref={kind:'previewlock',name:a.name,path:a.path,size:a.size};if(a.role==='bed'||!p)await loadCloud(ref);else await loadCloudOverlay(ref);}});
+const projectPicker=createProjectPicker({
+ api,onPause:pause,onOpenProject:openJokeletProject,onLocal:()=>$('newVideoFiles').click(),
+ showLocal:true,localLabel:'Open video file',deferAssets:true,
+ hasProject:()=>!!project.media||!!project.canvas||!!project.workspace,
+ extraProjects:listCutProjects,extraMedia:readCutVideo,module:'captions',
+ async onUseAsset(p,a){
+  if(!p){
+   const d=await api('/api/playback?path='+encodeURIComponent(a.path));
+   const r=await fetch(d.url);
+   if(!r.ok)throw Error('Video could not be read.');
+   const blob=await r.blob();
+   return await loadDeviceVideo(new File([blob],a.name,{type:blob.type}),{throwOnError:true});
+  }
+  if(p.id!==cloudSession?.id)await openFullJokeProject(p);
+  const ref={kind:'previewlock',name:a.name,path:a.path,size:a.size};
+  if(a.role==='bed')await loadCloud(ref);else await loadCloudOverlay(ref);
+ }
+});
 async function openJokeletProject(record,chosenBed,progress){
+ const selection=sourceSelection;
  if(record.stagedCut){
   if(cloudSession&&dirty){clearTimeout(cloudTimer);await saveCloudWorkspace();}await cloudWrite.catch(()=>{});
   record=await publishCutProject(api,record.id,progress);
+  if(selection!==sourceSelection)throw Error('A device file was selected while the cloud project was opening.');
  }
  return openFullJokeProject(record,chosenBed,progress);
 }
@@ -442,6 +615,7 @@ window.addEventListener('message',event=>{if(inStudio()||event.origin!==location
 $('bedDeviceLoad').onclick=()=>projectPicker.open();
 $('emptyLoadProject').onclick=()=>projectPicker.open();
 $('projectAssets').onclick=()=>projectPicker.open(project.workspace?.id);
+$('resumeDraft').onclick=()=>$('recover').click();
 $('toStart').onclick=()=>seek(0);
 $('toItemStart').onclick=()=>seek(clipCurrent()?.inFrame||0);
 $('sheetItemStart').onclick=()=>seek(clipCurrent()?.inFrame||0);
@@ -455,7 +629,14 @@ $('itemMatrix').onkeydown=e=>{if(['Home','ArrowLeft','ArrowRight'].includes(e.ke
 // Finished-caption import and placement queue. Navigation and insertion are separate.
 let importState={project:null,id:'',assetId:'',runtime:null},captionImportBusy=false;
 function placedClips(){const clips=project.clips.filter(c=>!c.captionNumber||c.placed);return TOOLBOX_MODE&&!project.canvas?clips.sort((a,b)=>a.inFrame-b.inFrame):clips;}
-function archiveWorkspace(){const prior=localStorage.getItem(draftKey);if(!prior)return;const archive=JSON.parse(localStorage.getItem('gs_caplock_previous_workspaces')||'[]');archive.push({at:new Date().toISOString(),project:JSON.parse(prior)});localStorage.setItem('gs_caplock_previous_workspaces',JSON.stringify(archive.slice(-20)));}
+function archiveWorkspace(key=archiveSlot(),slot=draftSlot()){
+ const prior=localStorage.getItem(slot);
+ if(!prior)return;
+ const archive=JSON.parse(localStorage.getItem(key)||'[]');
+ if(JSON.stringify(archive.at(-1)?.project)===prior)return;
+ archive.push({at:new Date().toISOString(),project:JSON.parse(prior)});
+ localStorage.setItem(key,JSON.stringify(archive.slice(-20)));
+}
 function renderPlacement(){
  if(TOOLBOX_MODE&&toolboxUI){toolboxUI.render();return;}
  const seq=project.captionSequence,c=activeCaption(project),index=seq?.clipIds.indexOf(seq.activeId)??-1;
@@ -477,19 +658,40 @@ async function loadCaptionSource(path){const d=await api('/api/playback?path='+e
 function renderCaptionImport(){
  const p=importState.project,select=$('captionBatch');$('captionImportTitle').textContent=p?'Captions · '+p.title:'Import created captions';$('geminiJokeText').value=p?.text||'';select.replaceChildren();for(const a of p?.assets.filter(a=>a.role==='caption')||[]){const o=document.createElement('option');o.value=a.id;const state=captionJobStatus(a.cuts,importState.runtime?.[a.id]);o.textContent=a.name+(a.cuts?' · '+state.saved+'/'+state.total+' saved'+(state.stopped?' · stopped':''):' · not clipped');select.append(o);}
  if(!p?.assets.some(a=>a.id===importState.assetId))importState.assetId=p?.assets.filter(a=>a.role==='caption'&&a.cuts?.status==='complete').at(-1)?.id||select.options[0]?.value||'';
- select.value=importState.assetId;const a=p?.assets.find(a=>a.id===importState.assetId),state=captionJobStatus(a?.cuts,importState.runtime?.[a?.id]);$('captionFolder').textContent=a?a.path.slice(0,a.path.lastIndexOf('/')):'/Grill Sergeant/JokeLab Productions';$('captionComponents').textContent=a?.cuts?.clips?.slice().sort((a,b)=>a.number-b.number).map(c=>c.name||c.number+'.webm').join(' · ')||'Finish clipping this animation before placement.';$('loadCaptionBatch').disabled=!state.complete;$('openCaptionClipper').textContent=state.stopped?'Resume clips':state.running?'View save progress':'Cut saved animation';if(a?.cuts)$('captionImportStatus').textContent=state.message;
+ select.value=importState.assetId;const a=p?.assets.find(a=>a.id===importState.assetId),state=captionJobStatus(a?.cuts,importState.runtime?.[a?.id]);$('captionFolder').textContent=a?a.path.slice(0,a.path.lastIndexOf('/')):'/Grill Sergeant/JokeLab Productions';$('captionComponents').textContent=a?.cuts?.clips?.slice().sort((a,b)=>a.number-b.number).map(c=>c.name||c.number+'.webm').join(' · ')||'Finish clipping this animation before placement.';$('loadCaptionBatch').disabled=!state.complete;$('openCaptionClipper').textContent=state.stopped?'Resume clips':state.running?'View save progress':'Cut saved animation';$('savedCaptionStatus').textContent=a?.cuts?state.message:'';
 }
 async function loadCaptionFolder(id){const d=await api('/api/joke-project?id='+encodeURIComponent(id));if(!d.project)throw Error('This joke folder has no saved caption project.');importState={project:d.project,id,assetId:importState.id===id?importState.assetId:'',runtime:d.cutRuntime};renderCaptionImport();const a=d.project.assets.find(a=>a.id===importState.assetId);if(a)await loadCaptionSource(a.path);}
-async function openCaptionImport(){
- if(!project.media||!v.src){say('Open your joke video with Files or Photos before importing its captions.');return;}
- pause();if(!$('captionImport').open)$('captionImport').showModal();$('savedCaptionControls').hidden=!cloudSession;
- if(!cloudSession){$('captionImportTitle').textContent='Import caption files';$('captionImportStatus').textContent='Choose clips starting with a number, such as 1 why did.mp4 or 1.webm. Insert places each caption; Next selects the following caption.';return;}
- $('captionImportStatus').textContent='Loading the saved caption folder…';
- try{const id=project.workspace?.id||localStorage.getItem('gs_caplock_caption_project')||'dad-00bda89167b4f15850aa1c91';const d=await api('/api/joke-projects');$('captionProject').replaceChildren();for(const p of d.projects){const o=document.createElement('option');o.value=p.id;o.textContent=projectContext?.id===p.id?projectContext.title:p.title||(p.id==='dad-00bda89167b4f15850aa1c91'?'Pebble':p.id);$('captionProject').append(o);}$('captionProject').value=id;await loadCaptionFolder(id);if(!importState.project.assets.find(a=>a.id===importState.assetId)?.cuts)$('captionImportStatus').textContent='Import the blue Gemini video to cut it. Next in Clipper returns the clips to this joke.';}catch(e){$('captionImportStatus').textContent=localStorage.getItem('gs_previewlock_key')?e.message:'Saved caption folders are not connected in this browser. Import numbered files, or open CapLock from your connected clipper.';}
+function openCaptionImport(){
+ if(!project.media||!v.src){say('Open a video before importing its captions.');return;}
+ pause();
+ $('captionImportTitle').textContent='Import caption files';
+ $('captionImportStatus').textContent='Choose numbered clips, then use Insert and Next to place them.';
+ $('savedCaptionControls').open=false;
+ $('savedCaptionControls').hidden=!cloudSession;
+ if(!$('captionImport').open)$('captionImport').showModal();
 }
+$('savedCaptionControls').ontoggle=async e=>{
+ if(!e.target.open||!cloudSession)return;
+ const session=cloudSession,id=session.id;
+ $('savedCaptionStatus').textContent='Loading saved captions…';
+ try{
+  const {projects}=await api('/api/joke-projects');
+  if(cloudSession!==session||!e.target.open)return;
+  const folders=new Map([[id,{id,title:projectContext?.title||id}],...projects.filter(p=>p.id!==id).map(p=>[p.id,p])]);
+  $('captionProject').replaceChildren(...[...folders.values()].map(p=>new Option(p.title||p.id,p.id)));
+  $('captionProject').value=id;
+  await loadCaptionFolder(id);
+  if(!importState.project.assets.find(a=>a.id===importState.assetId)?.cuts)$('savedCaptionStatus').textContent='Import the Gemini animation to cut it.';
+ }catch(error){$('savedCaptionStatus').textContent=error.message;}
+};
 $('closeCaptionImport').onclick=()=>$('captionImport').close();$('captionImport').addEventListener('close',()=>$('captionSourcePreview').pause());
 $('captionProject').onchange=async()=>{try{const id=$('captionProject').value;if(id!==project.workspace?.id)await openFullJokeProject({id});await loadCaptionFolder(id);}catch(e){$('captionImportStatus').textContent=e.message;}};
-$('captionBatch').onchange=()=>{importState.assetId=$('captionBatch').value;renderCaptionImport();const a=importState.project.assets.find(a=>a.id===importState.assetId);if(a)loadCaptionSource(a.path).catch(e=>{$('captionImportStatus').textContent=e.message;});};
+$('captionBatch').onchange=()=>{importState.assetId=$('captionBatch').value;renderCaptionImport();const a=importState.project.assets.find(a=>a.id===importState.assetId);if(a&&$('captionSourceDetails').open)loadCaptionSource(a.path).catch(e=>{$('savedCaptionStatus').textContent=e.message;});};
+$('captionSourceDetails').ontoggle=()=>{
+ if(!$('captionSourceDetails').open){$('captionSourcePreview').pause();return;}
+ const a=importState.project?.assets.find(a=>a.id===importState.assetId);
+ if(a)loadCaptionSource(a.path).catch(e=>{$('savedCaptionStatus').textContent=e.message;});
+};
 $('refreshCaptionFolder').onclick=()=>loadCaptionFolder(importState.id||$('captionProject').value).catch(e=>{$('captionImportStatus').textContent=e.message;});
 $('loadCaptionBatch').onclick=async()=>{const button=$('loadCaptionBatch');button.disabled=true;try{$('captionImport').close();say('Loading saved source and numbered caption components…');await openJokeWorkspace(importState.id,importState.assetId);}catch(e){say('Caption import incomplete: '+e.message);}finally{button.disabled=false;}};
 function captionClipperURL(asset){const id=project.workspace?.id||importState.id;if(!id)throw Error('Open a joke video or project first.');return new URL('../cliplock/?mode=caption&v=R16-recovery&project='+encodeURIComponent(id)+(asset?'&asset='+encodeURIComponent(asset.id):'')+'&returnTo='+caplockTarget(window.name),location.href);}
@@ -526,6 +728,7 @@ else if(!inStudio()&&params.get('project')&&params.get('caption'))openJokeWorksp
 else if(!inStudio()&&params.get('project'))openFullJokeProject({id:params.get('project')}).catch(e=>say('Saved joke project unavailable: '+e.message));
 
 async function openFullJokeProject(record,chosenBed=null,progress=say){
+ const selection=sourceSelection;
  pause();if(cloudSession&&dirty){clearTimeout(cloudTimer);await saveCloudWorkspace();}await cloudWrite;
  let d=await api('/api/joke-project?id='+encodeURIComponent(record.id));
  if(!d.project){
@@ -539,10 +742,11 @@ async function openFullJokeProject(record,chosenBed=null,progress=say){
   const hash=[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(n=>n.toString(16).padStart(2,'0')).join('');if(hash!==a.sha256)throw Error('Original hash changed: '+a.name+'. No replacement imported.');
   d=await api('/api/joke-project/asset?id='+encodeURIComponent(record.id)+'&role=bed&name='+encodeURIComponent(a.name),{method:'POST',headers:{'content-type':'application/octet-stream'},body:bytes});
  }
+ if(selection!==sourceSelection)throw Error('A device file was selected while the cloud project was opening.');
  const p=d.project,assetId=p.caplock?.workspace?.assetId||p.assets.filter(a=>a.role==='caption'&&a.cuts?.status==='complete').at(-1)?.id;
  if(assetId&&p.assets.some(a=>a.id===assetId&&a.cuts?.status==='complete'))await openJokeWorkspace(p.id,assetId);
  else{
-  cloudSession=null;clearTimeout(cloudTimer);archiveWorkspace();const next=p.caplock||createProject();if(!next.media){const bed=preferredBed(p);if(bed)next.media={kind:'previewlock',name:bed.name,path:bed.path,size:bed.size};}next.workspace={...next.workspace,id:p.id,assetId:assetId||'',playhead:next.workspace?.playhead||0};projectContext=p;await openProject(next);cloudSession={id:p.id,asset:assetId||'',rev:d.rev};importState={project:p,id:p.id,assetId:assetId||''};renderCaptionImport();await seek(next.workspace.playhead);$('saveCloud').hidden=false;
+  archiveWorkspace(cloudPreviousKey,cloudDraftKey);cloudSession=null;clearTimeout(cloudTimer);const next=p.caplock?structuredClone(p.caplock):createProject();if(!next.media){const bed=preferredBed(p);if(bed)next.media={kind:'previewlock',name:bed.name,path:bed.path,size:bed.size};}next.workspace={...next.workspace,id:p.id,assetId:assetId||'',playhead:next.workspace?.playhead||0};projectContext=p;await openProject(next);cloudSession={id:p.id,asset:assetId||'',rev:d.rev};importState={project:p,id:p.id,assetId:assetId||''};renderCaptionImport();await seek(next.workspace.playhead);$('saveCloud').hidden=false;
  }
  if(chosenBed){const bed=p.assets.find(a=>a.path===chosenBed.path||a.sha256===chosenBed.sha256);if(bed&&project.media?.path!==bed.path)await loadCloud({kind:'previewlock',name:bed.name,path:bed.path,size:bed.size});}
  localStorage.setItem('gs_studio_project',p.id);showPage('viewer');render();say(p.title+' project loaded · '+p.assets.length+' saved assets available in Assets. Playback stays paused.');
@@ -566,10 +770,7 @@ installAdapter('captions',{
  }
 });
 
-if(inStudio()){for(const id of ['bedLoad','emptyLoadProject','projectAssets'])$(id).onclick=()=>window.parent.postMessage({protocol:'GS-Studio-1',action:'navigate-phase',phase:'joke'},location.origin);$('captionProject').onchange=()=>{if(cloudSession){$('captionProject').value=cloudSession.id;loadCaptionFolder(cloudSession.id).catch(e=>say(e.message));}};$('openCaptionClipper').onclick=()=>window.parent.postMessage({protocol:'GS-Studio-1',action:'navigate-phase',phase:'cut'},location.origin);}
-
-
-if(inStudio())for(const id of ['newVideoFiles','newVideoPhotos','emptyVideoFiles','emptyVideoPhotos'])$(id).hidden=true;
+if(STUDIO){for(const id of ['bedLoad','bedDeviceLoad','emptyLoadProject','projectAssets'])$(id).onclick=()=>window.parent.postMessage({protocol:'GS-Studio-1',action:'navigate-phase',phase:'joke'},location.origin);$('captionProject').onchange=()=>{if(cloudSession){$('captionProject').value=cloudSession.id;loadCaptionFolder(cloudSession.id).catch(e=>say(e.message));}};$('openCaptionClipper').onclick=()=>window.parent.postMessage({protocol:'GS-Studio-1',action:'navigate-phase',phase:'cut'},location.origin);}
 
 // Explicit source classification and the verified captioned-video handoff.
 async function tagCurrentSource(stage){if(!cloudSession||!project.media?.path)throw Error('Open a saved joke video first.');if(dirty){clearTimeout(cloudTimer);await saveCloudWorkspace();}const a=projectContext.assets.find(a=>a.path===project.media.path);if(!a)throw Error('The source is not saved in this project.');const d=await saveProductionStage(api,cloudSession.id,a,stage);cloudSession.rev=d.rev;projectContext=d.project;render();say('Source marked '+stage+'. Future ready lists use its saved stage.');}
@@ -653,9 +854,10 @@ $('reconnectFiles').onchange=async e=>{
 // The manual workspace uses a per-bed file toolbox; each insertion is independent.
 if(TOOLBOX_MODE){
  toolboxUI=createToolboxUI({project:()=>project,selected:()=>selectedClip,media:()=>layers.media,ready:()=>!importingVideo&&(!!project.canvas||!!project.media&&!!bedBlob&&v.readyState>=1),
-  frame:()=>frame,end:()=>compositionFrames(project,bedFrames),extendedFrames:()=>project.canvas?compositionFrames(project):bedFrames&&maxFrame>=bedFrames?maxFrame+1:0,epoch:()=>projectEpoch,pause:()=>{if(isPlaying())frame=Math.min(maxFrame,Math.round(timelineFrame()));pause();draw();},say,change,api,
+  frame:()=>frame,rememberLocal:(id,blob)=>{void rememberLocalMedia(id,blob).catch(()=>{$('saveStatus').textContent='This browser could not keep a media copy. Keep the original file to reconnect.';});},
+  readLocal:asset=>readLocalMedia(asset).catch(()=>null),
+  end:()=>compositionFrames(project,bedFrames),extendedFrames:()=>project.canvas?compositionFrames(project):bedFrames&&maxFrame>=bedFrames?maxFrame+1:0,epoch:()=>projectEpoch,pause:()=>{if(isPlaying())frame=Math.min(maxFrame,Math.round(timelineFrame()));pause();draw();},say,change,api,
   attach:(c,blob)=>layers.attach(c,blob,{autoKey:false}),detach:id=>layers.detach(id),select:id=>{selectClip(id);editMode='move';project.editFocus='overlay';render();},seek,closeProperties:closeClipProperties});
- $('empty').textContent='Choose your bed video, then Play to check it.';
  $('clipTrim').closest('label').hidden=true;$('clipTrimOut').closest('label').hidden=true;
  render();
 }

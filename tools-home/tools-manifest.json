@@ -12,7 +12,7 @@
     {
       "tool": "framelock",
       "source_file": "FrameLock_v1.3.12_CLEAN_MANUAL_25FPS.html",
-      "source_version": "1.3.17",
+      "source_version": "1.4.8",
       "source_sha256": "ca182c8155d6dd650ecb5dee3e7d1af288b8f667a61b618464e7183224b999f0",
       "hub_revision": "hub.1",
       "source_preserved": "tool-sources/FrameLock_v1.3.12_CLEAN_MANUAL_25FPS.html",
@@ -34,7 +34,7 @@
     {
       "tool": "mixer",
       "source_file": "GS_FIRESIDE_WOLF_CUE_MIXER_v2.3_LIGHTWEIGHT.html",
-      "source_version": "2.3",
+      "source_version": "2.5",
       "source_sha256": "509a521f133eb36112419bca7ae20616124f41448f12de865daf1e0a3a8ad6a3",
       "hub_revision": "hub.1",
       "source_preserved": "tool-sources/GS_FIRESIDE_WOLF_CUE_MIXER_v2.3_LIGHTWEIGHT.html",
@@ -57,11 +57,11 @@
     },
     {
       "tool": "sxlock",
-      "source_version": "R39",
+      "source_version": "R40",
       "hosted_path": "tools/sxlock/index.html",
       "description": "Place and mix effects with frame-accurate review and recoverable Scribe history.",
       "verification": "tools/GS_TOOL_REFINEMENT_INDEX.md",
-      "changes": "Adds a bright, blinking cursor and a focus outline to Scribe.",
+      "changes": "Project Toolbox, named recordings and standalone draft recovery.",
       "tool_id": "GS-TOOL-SXLOCK",
       "navigation": [
         "sound-scrubber",
@@ -73,7 +73,7 @@
     {
       "tool": "sound-scrubber",
       "tool_id": "GS-TOOL-SOUND-SCRUBBER",
-      "source_version": "R14",
+      "source_version": "R14.11",
       "hosted_path": "tools/sound-scrubber/index.html",
       "description": "Sound acquisition and owner quality control: search, inline Play / Approve / Reject, filename-tap rename, pending/approved/held/culled review states.",
       "workflow": "Scrubber approval → instant shared Approved effects → WavLock Use or SxLock Play/Use/Add. Actual originals already cached for immediate use; verified Dropbox fallback when cache is unavailable. Drive backup remains queued.",
@@ -97,16 +97,17 @@
     {
       "tool": "caplock",
       "tool_id": "GS-TOOL-CAPLOCK",
-      "source_version": "R17",
+      "source_version": "R31",
       "hosted_path": "tools/caplock/index.html",
-      "description": "Individual joke caption projects with preserved Gemini originals, editable layers and verified composite Next to SxLock.",
+      "description": "Device-first video and reusable layers with browser recovery. Optional saved Dropbox projects and existing Drive backup.",
       "navigation": [
         "tools",
         "aspectlock",
         "sxlock",
         "previewlock"
       ],
-      "verification": "tools/cliplock/CAPTION_RECOVERY_R16.json"
+      "operator_guide": "tools/caplock/README.md",
+      "verification": "tools/caplock/tests/browser.cjs"
     },
     {
       "tool": "aspectlock",

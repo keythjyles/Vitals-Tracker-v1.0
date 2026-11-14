@@ -1,3 +1,9 @@
+## CapLock R31 and Tools R2 — device files and export audit
+
+CapLock opens local video through the native device picker. Layer 0 appears in the source readout. Local toolbox media is kept with the browser draft; the existing project JSON and reconnect routes can recover older work. Cloud projects list folder metadata on demand, and open the chosen project or assets separately. Studio links to standalone CapLock for a device-only edit.
+
+The Tools directory now presents one main entry per tool. The [tools and media export audit](../TOOL_REGISTRY.md) records each tool’s purpose, the actual preview and export methods, the SxLock interaction reference, and where the GS1 color repair and AAC timing correction are exercised. Rollback baseline is `0f0e4a11cc44b754160a8309cf52f08d34c6f816`. Device media and draft records are retained on rollback.
+
 ## SxLock R40 and Sound Scrubber R14.11 — project Toolbox and sound intake
 
 SxLock starts with the modules collapsed and the player docked. Pulling down from the source grip opens project controls. Start toggles playback and Pause keeps the current position. At the end of the composition, Start returns to zero. Scribe keeps Mark frame and a More menu below the note. Insertion arrows follow timeline order.
