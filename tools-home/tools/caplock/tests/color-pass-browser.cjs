@@ -60,11 +60,15 @@ module.exports = async (browser, base) => {
    }
 
    const reference = await pixels(source);
+   const point = (x, y) => [...reference.slice((y * width + x) * 4, (y * width + x) * 4 + 3)];
+   const transparentCorner = point(3, 36);
+   const colorPatch = point(120, 36);
    const first = await render(source, 'first.webm');
    const second = await render(first.blob, 'second.mp4');
    const firstPixels = await pixels(first.blob);
    const secondPixels = await pixels(second.blob);
    return {
+    transparentCorner, colorPatch,
     firstPass: patches(reference, firstPixels),
     secondPass: patches(reference, secondPixels),
     repeatChange: patches(firstPixels, secondPixels),
@@ -72,6 +76,8 @@ module.exports = async (browser, base) => {
    };
   }, bytes);
   assert.deepEqual(compare.frames, [10, 10]);
+  assert.ok(compare.transparentCorner.every(channel => channel < 5), JSON.stringify(compare));
+  assert.ok(compare.colorPatch[0] > 160 && compare.colorPatch[1] > 90 && compare.colorPatch[2] < 120, JSON.stringify(compare));
   const within = (patches, limit) => patches.every(patch => patch.every(value => Math.abs(value) <= limit));
   assert.ok(within(compare.firstPass, 6), JSON.stringify(compare));
   assert.ok(within(compare.secondPass, 8), JSON.stringify(compare));
