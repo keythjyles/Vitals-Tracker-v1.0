@@ -78,12 +78,26 @@ async function main(){
    const sample=await new m.VideoSampleSink(track).getSample(.2),frame=sample.toVideoFrame();
    if(!frame.format.includes('A'))throw Error('Colour fixture lacks the alpha-merge path');
    const c=document.createElement('canvas');c.width=width;c.height=height;const g=c.getContext('2d',{colorSpace:'srgb'});g.drawImage(frame,0,0);const decoded=g.getImageData(0,0,width,height).data;
-   function compare(p){let abs=0;const sum=[0,0,0];for(let i=0;i<p.length;i++){if(i%4===3)continue;const e=p[i]-ref[i];sum[i%4]+=e;abs+=Math.abs(e)}return {mae:abs/(width*height*3),meanRGB:sum.map(v=>v/(width*height))}}
+   function compare(p,{opaqueOnly=false}={}){
+    let absolute=0,count=0;
+    const sum=[0,0,0];
+    for(let i=0;i<p.length;i+=4){
+     if(opaqueOnly&&ref[i+3]!==255)continue;
+     for(let channel=0;channel<3;channel++){
+      const delta=p[i+channel]-ref[i+channel];
+      absolute+=Math.abs(delta);
+      sum[channel]+=delta;
+     }
+     count++;
+    }
+    return {mae:absolute/(count*3),meanRGB:sum.map(value=>value/count)};
+   }
    const color=await track.getColorSpace();
    if(!color.fullRange||color.primaries!=='bt709'||ref[(36*width+120)*4]<160||ref[(36*width+3)*4+3]>0)throw Error('Full-range alpha test fixture is invalid.');
-   results.AlphaColour={source:color,decoded:compare(decoded),encoded:compare(encoded),format:frame.format};
+   // The H.264 export is opaque. Compare its color where picture pixels are visible.
+   results.AlphaColour={source:color,decoded:compare(decoded),encoded:compare(encoded,{opaqueOnly:true}),format:frame.format};
    frame.close();sample.close();alphaInput.dispose();
-   if(results.AlphaColour.decoded.mae>.1||results.AlphaColour.encoded.meanRGB.some(v=>Math.abs(v)>1.5)||results.AlphaColour.encoded.mae>4)throw Error('AspectLock alpha WebM colour changed: '+JSON.stringify(results.AlphaColour));
+   if(results.AlphaColour.decoded.mae>.1||results.AlphaColour.encoded.meanRGB.some(v=>Math.abs(v)>1.5)||results.AlphaColour.encoded.mae>4)throw Error('Alpha WebM colour changed: '+JSON.stringify(results.AlphaColour));
    // Cancellation must not offer a partial file or alter the next job.
    let cancel=false;
    try{await engine.exportVideo({file,hasEffects:true,cancelled:()=>cancel,onProgress:()=>{cancel=true}});throw Error('Cancellation was ignored');}
