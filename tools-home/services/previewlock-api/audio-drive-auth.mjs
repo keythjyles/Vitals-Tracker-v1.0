@@ -48,6 +48,7 @@ export function audioDriveAuth({key, clientId, clientSecret, fetcher = fetch}) {
  }
 
  async function accessToken(session) {
+  if (!session) throw new AudioError(401, 'Connect Google Drive to save approved sounds.');
   if (cached?.session === session && cached.until > Date.now()) return cached.token;
   if (pending?.session === session) return pending.promise;
   const refreshToken = unseal(session);

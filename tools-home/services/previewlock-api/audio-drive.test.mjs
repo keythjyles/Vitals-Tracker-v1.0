@@ -136,6 +136,7 @@ test('Drive authorization selects only Sound Effects, checks the owner, and retu
   assert.equal(options.body.get('refresh_token'), 'test-private-refresh-token');
   return Response.json({access_token: 'refreshed-access'});
  }});
+ await assert.rejects(restarted.accessToken(undefined), {status: 401});
  assert.equal(await restarted.accessToken(session), 'refreshed-access');
  await assert.rejects(restarted.accessToken(session.replace(/\..{8}/, '.AAAAAAAA')), /Connect Google Drive/);
  assert.equal(calls.length, 3);
