@@ -57,7 +57,7 @@
     },
     {
       "tool": "sxlock",
-      "source_version": "R40",
+      "source_version": "R41",
       "hosted_path": "tools/sxlock/index.html",
       "description": "Place and mix effects with frame-accurate review and recoverable Scribe history.",
       "verification": "tools/GS_TOOL_REFINEMENT_INDEX.md",
@@ -73,10 +73,10 @@
     {
       "tool": "sound-scrubber",
       "tool_id": "GS-TOOL-SOUND-SCRUBBER",
-      "source_version": "R14.11",
+      "source_version": "R14.12",
       "hosted_path": "tools/sound-scrubber/index.html",
-      "description": "Sound acquisition and owner quality control: search, inline Play / Approve / Reject, filename-tap rename, pending/approved/held/culled review states.",
-      "workflow": "Scrubber approval → instant shared Approved effects → WavLock Use or SxLock Play/Use/Add. Actual originals already cached for immediate use; verified Dropbox fallback when cache is unavailable. Drive backup remains queued.",
+      "description": "Search, play, rename and approve sounds. REC captures playback and approves the named take.",
+      "workflow": "Approval makes the cached sound available in SxLock and WavLock. Google Drive saves the original or named take in the background.",
       "navigation": {
         "sxlock": "tools/sxlock/",
         "wavlock": "tools/wavlock/",
@@ -84,14 +84,14 @@
         "behavior": "Reuse a live named same-origin tool tab without reloading its editor; otherwise open that tool. Keep original tab open."
       },
       "storage": {
-        "originals": "Verified Dropbox audio-save through existing authenticated PreviewLock service.",
-        "drive": "Queued daily connected-Drive mirror; Saved requires matching verified receipts from both providers.",
+        "originals": "Google Drive Sound Effects folder through owner-authorized file access.",
+        "drive": "Direct original upload with verified SHA-256 and byte count.",
         "protocol": "tools/sound-scrubber/AUDIO_SAVE.md",
-        "review_cache": "Browser-local review and rejection ledger; cache is recovery only, not cloud backup."
+        "review_cache": "Browser review, approval and audio cache with retryable Drive saves."
       },
       "operator_guide": "tools/sound-scrubber/README.md",
-      "changes": "Approval instantly populates SxLock and WavLock Approved effects in the same browser, including already-open sessions; rename/reject updates the library; timelines stay unchanged.",
-      "verification": "Navigation links, JavaScript syntax and unchanged editor/review script checks; live browser navigation checked separately. Physical Android test not claimed.",
+      "changes": "Adds direct Drive saves and one-action REC approval.",
+      "verification": "Provider and Android-width browser fixtures cover approval, Drive save and SxLock handoff.",
       "integration_scope": "Same-origin browser/profile. Shared review ledger + IndexedDB original, storage events/BroadcastChannel, initial/focus refresh; no reload or manual download/import. This is not a cross-device catalog synchronizer."
     },
     {

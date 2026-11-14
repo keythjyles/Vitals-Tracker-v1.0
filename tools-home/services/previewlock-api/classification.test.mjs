@@ -57,7 +57,7 @@ test('managed deletion accepts matching classification metadata, rejects another
 test('SxLock category synchronization retains decoded buffers and placed cue decisions',()=>{
  const renderCalls=[],sounds=new Map(),clips=[{soundId:'scrubber-commons:1',start:2.5,offset:.25,duration:1.2,volume:35,loop:true}],buffer={fixture:true};
  sounds.set('scrubber-commons:1',{id:'scrubber-commons:1',sha256:'a'.repeat(64),origin:'scrubber',buffer});
- const info={dataset:{},textContent:'124 hosted sounds'},c=vm.createContext({sounds,clips,toolbox:null,refreshToolbox(){},$:()=>info,renderCategories:()=>renderCalls.push('categories'),renderLibrary:()=>renderCalls.push('library'),renderClips:()=>renderCalls.push('clips')});
+ const info={dataset:{},textContent:'124 hosted sounds'},c=vm.createContext({sounds,clips,toolbox:null,displaySoundName:sound=>sound.name,refreshToolbox(){},$:()=>info,renderCategories:()=>renderCalls.push('categories'),renderLibrary:()=>renderCalls.push('library'),renderClips:()=>renderCalls.push('clips')});
  vm.runInContext(sx.slice(sx.indexOf('function approvalCredit('),sx.indexOf('libraryReady.then(()=>window.GSApprovedEffects')),c);
  c.entries=[{id:'scrubber-commons:1',sourceId:'commons:1',name:'Acheta.ogg',sha256:'a'.repeat(64),category:'Animals & nature',subcategory:'Insects',tags:['crickets'],aliases:['chirping']}];
  vm.runInContext('syncApprovedEffects(entries)',c);assert.equal(sounds.get('scrubber-commons:1').category,'Animals & nature');assert.equal(sounds.get('scrubber-commons:1').buffer,buffer);assert(sounds.get('scrubber-commons:1').tags.includes('crickets'));assert.equal(clips[0].start,2.5);assert.equal(clips[0].volume,35);assert(clips[0].loop);assert(renderCalls.includes('categories'));

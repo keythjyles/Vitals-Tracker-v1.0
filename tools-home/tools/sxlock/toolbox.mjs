@@ -1,5 +1,5 @@
 export function setupToolbox({
- openSound, previewSound, editRecording, importAudio, getSound, useCount, persist, pause, stopPreview, busy, visual, editVideoRecording,
+ openSound, previewSound, editRecording, importAudio, getSound, useCount, persist, pause, stopPreview, busy, visual, editVideoRecording, soundNameButton,
 }) {
  const $ = id => document.getElementById(id);
  const sheet = $('toolboxSheet'), host = $('toolboxItems'), preview = $('toolboxPreview'), placed = $('visualPlacements');
@@ -48,9 +48,10 @@ export function setupToolbox({
   return element;
  }
  function row(title, actions) {
-  const element = document.createElement('div'), name = document.createElement('strong');
+  const element = document.createElement('div');
   element.className = 'sx-toolbox-row';
-  name.textContent = title;
+  const name = typeof title === 'string' ? document.createElement('strong') : title;
+  if(typeof title === 'string')name.textContent = title;
   element.append(name, ...actions);
   return element;
  }
@@ -67,7 +68,9 @@ export function setupToolbox({
     button('Remove', () => {soundIds.delete(id);render();persist();}, 'Remove '+sound.name+' from Toolbox'),
    ];
    if (sound.origin === 'microphone') actions.splice(2, 0, button('Edit', () => {sheet.close();editRecording(id);}, 'Edit recording '+sound.name));
-   host.append(row(sound.name+(used?' · used '+used+'×':''),actions));
+   const name=soundNameButton(sound);
+   if(used)name.append(document.createTextNode(' · used '+used+'×'));
+   host.append(row(name,actions));
   }
   for (const [id, file] of files) {
    const actions = [

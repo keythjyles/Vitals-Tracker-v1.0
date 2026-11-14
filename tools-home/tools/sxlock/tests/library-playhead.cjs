@@ -274,16 +274,32 @@ async function main(){
    await toolbox.getByRole('button',{name:'Preview chapter3-note.txt'}).tap();
    await toolbox.getByText('Hold the pause before the gasp').waitFor();
    await toolbox.getByRole('button',{name:'Place test-cue.wav'}).waitFor();
+   await toolbox.getByRole('button',{name:'Place test-cue.wav'}).tap();
+   const audition=page.locator('#effectSheet');
+   await audition.getByRole('button',{name:'Rename test-cue.wav',exact:true}).waitFor();
+   const startBeforeRename=await audition.locator('#effectStart').inputValue();
+   const originalCue=await page.evaluate(()=>[...SxLock.sounds.values()].find(sound=>sound.name==='test-cue.wav').id);
+   page.once('dialog',dialog=>dialog.accept('Soft test cue'));
+   await audition.getByRole('button',{name:'Rename test-cue.wav',exact:true}).tap();
+   await audition.getByRole('button',{name:'Rename Soft test cue.wav',exact:true}).waitFor();
+   assert.equal(await audition.locator('#effectStart').inputValue(),startBeforeRename);
+   assert.equal(await page.evaluate(id=>SxLock.sounds.get(id).name,originalCue),'Soft test cue.wav');
+   assert.equal(await page.evaluate(()=>SxLock.snapshot().clips.length),0);
+   await audition.locator('#closeSheet').tap();
+   await page.locator('#openToolbox').tap();
+   await toolbox.getByRole('button',{name:'Place Soft test cue.wav'}).waitFor();
    const heldFrame=await page.evaluate(()=>SxLock.currentTime());
-   await context.route('https://gs-previewlock-api.onrender.com/api/audio-save',async route=>{
+   let driveUpload=null;
+   await context.route('https://gs-previewlock-api.onrender.com/api/audio-drive-save',async route=>{
     const request=route.request(),headers=request.headers(),body=request.postDataBuffer();
     assert.equal(headers['x-audio-sha256'],require('node:crypto').createHash('sha256').update(body).digest('hex'));
     const fileName=decodeURIComponent(headers['x-audio-name']);
-    await route.fulfill({headers:{'access-control-allow-origin':'*'},json:{sha256:headers['x-audio-sha256'],
-     cloudSaveStatus:'partial',cloudReceipts:{dropbox:{verified:true,id:'test-original',rev:'test-revision',
-      bytes:body.length,path:'/Grill Sergeant/Sound Effects/fixture/'+fileName},drive:{verified:false}}}});
+    driveUpload=fileName;
+    await route.fulfill({headers:{'access-control-allow-origin':'*'},json:{
+     assetId:headers['x-audio-id'],name:fileName,sha256:headers['x-audio-sha256'],persisted:true,
+     recordPath:'test-drive-file',cloudReceipts:{drive:{verified:true,provider:'drive',fileId:'test-drive-file',bytes:body.length,sha256:headers['x-audio-sha256']}}}});
    });
-   await page.evaluate(()=>localStorage.setItem('gs_previewlock_key','isolated-test'));
+   await page.evaluate(()=>localStorage.setItem('gs_sound_drive_session','isolated-test'));
    await toolbox.getByRole('button',{name:'Find sounds online'}).tap();
    const scrubber=page.frameLocator('#scrubberFrame');
    await scrubber.getByRole('button',{name:'Chapter 3 gasps'}).tap();
@@ -297,13 +313,16 @@ async function main(){
    await scrubber.getByRole('button',{name:'Pause '+bp,exact:true}).waitFor();
    await scrubber.getByRole('button',{name:'Approve and add '+bp,exact:true}).tap();
    await page.locator('#discoveryStatus').getByText(bp+' added to Toolbox.').waitFor();
+   await page.waitForFunction(()=>Object.values(JSON.parse(localStorage.getItem('sx-scrubber-review-v2'))).some(sound=>
+    sound.name==='Blood pressure monitor.mp3'&&sound.cloudSaveStatus==='verified'));
+   assert.equal(driveUpload,bp);
    await page.getByRole('button',{name:'Return to SxLock'}).tap();
    await toolbox.getByRole('button',{name:'Place '+bp}).waitFor();
    assert.equal(await page.evaluate(()=>SxLock.currentTime()),heldFrame);
    assert.equal(await page.evaluate(()=>SxLock.snapshot().clips.length),0);
    await toolbox.getByRole('button',{name:'Close Toolbox'}).tap();
    const preRec=await page.evaluate(()=>SxLock.currentTime());
-   await page.evaluate(()=>localStorage.removeItem('gs_previewlock_key'));
+   await page.evaluate(()=>localStorage.removeItem('gs_sound_drive_session'));
    await page.locator('#liveRecord').tap();
    await page.locator('#liveIndicator').waitFor();
    await page.waitForFunction(start=>SxLock.currentTime()>start+.35,preRec);

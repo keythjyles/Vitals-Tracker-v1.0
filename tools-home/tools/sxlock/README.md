@@ -1,3 +1,7 @@
+## SxLock R41
+
+Tap the sound name in the library, Toolbox, recordings list or audition and insertion panel to edit it. The name follows the sound across this browser's projects. Recovered and imported recordings keep the edited name in their saved metadata.
+
 ## SxLock R40
 
 **Start / Pause** controls the mix. The timeline stays at its end until Start is tapped again. The source grip opens the project controls. Modules start closed. Scribe's Mark frame button and More menu sit below the note field. In Insertions, ↑ and ↓ select the previous or next cue in timeline order.

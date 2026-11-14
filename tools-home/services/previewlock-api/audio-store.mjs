@@ -2,8 +2,9 @@ import {createHash,randomUUID} from 'node:crypto';
 export const AUDIO_ROOT='/Grill Sergeant/Sound Effects';
 export const DRIVE_LIBRARY_FOLDER='1H269DHSY2hYwD7SKhmCmh2uAmBCh9LDy';
 export const AUDIO_DELETE_ROOT='/Grill Sergeant/Sound Effect Deletions';
-const MAX=100*1024*1024;
+export const MAX_AUDIO_BYTES=100*1024*1024;
 const ID=/^(commons-\d{1,14}|local-[a-f0-9]{64}|check-[a-f0-9]{8,64})$/;
+export const validAudioAssetId=assetId=>typeof assetId==='string'&&ID.test(assetId);
 export function validName(name){return typeof name==='string'&&/^[^\\/<>:"|?*\x00-\x1f]{1,170}\.(ogg|oga|opus|wav|mp3|flac|m4a)$/i.test(name)}
 export function contentHash(data){const chunks=[];for(let i=0;i<data.length;i+=4*1024*1024)chunks.push(createHash('sha256').update(data.subarray(i,i+4*1024*1024)).digest());return createHash('sha256').update(Buffer.concat(chunks)).digest('hex')}
 export function validAudio(data,name){const ext=name.split('.').pop().toLowerCase(),s=data.toString('ascii',0,12);return data.length>=12&&(ext==='wav'?s.startsWith('RIFF')&&s.slice(8,12)==='WAVE':['ogg','oga','opus'].includes(ext)?s.startsWith('OggS'):ext==='flac'?s.startsWith('fLaC'):ext==='m4a'?s.slice(4,8)==='ftyp':ext==='mp3'&&(s.startsWith('ID3')||(data[0]===255&&(data[1]&224)===224)))}
@@ -21,11 +22,24 @@ export function dropboxClient(token,fetcher=fetch){
  }
 }
 function verify(meta,data){if(!meta?.id||!meta.rev||meta.size!==data.length||meta.content_hash!==contentHash(data))throw new AudioError(502,'Dropbox audio verification failed');return {verified:true,id:meta.id,path:meta.path_display,rev:meta.rev,bytes:meta.size,contentHash:meta.content_hash,verifiedAt:new Date().toISOString()}}
-export async function saveAudio(db,{assetId,name,data,info={},sha256}){
- if(!ID.test(assetId)||!validName(name))throw new AudioError(400,'Invalid audio identity or filename');
- if(data.length>MAX)throw new AudioError(413,'Audio exceeds 100 MB');
+export function validateAudioSave({assetId,name,data,sha256}){
+ if(!validAudioAssetId(assetId)||!validName(name))throw new AudioError(400,'Invalid audio identity or filename');
+ if(data.length>MAX_AUDIO_BYTES)throw new AudioError(413,'Audio exceeds 100 MB');
  if(!validAudio(data,name))throw new AudioError(415,'Audio format does not match filename');
- const hash=createHash('sha256').update(data).digest('hex');if(hash!==sha256)throw new AudioError(422,'Audio SHA-256 mismatch');
+ if(createHash('sha256').update(data).digest('hex')!==sha256||assetId.startsWith('local-')&&assetId!=='local-'+sha256)throw new AudioError(422,'Audio SHA-256 mismatch');
+}
+export function audioSaveInput(headers,data){
+ let info,name;
+ try{
+  info=JSON.parse(decodeURIComponent(String(headers['x-audio-info']||'%7B%7D')));
+  name=decodeURIComponent(String(headers['x-audio-name']||''));
+ }catch{throw new AudioError(400,'Invalid audio filename or metadata')}
+ if(!info||typeof info!=='object'||Array.isArray(info)||JSON.stringify(info).length>10000)throw new AudioError(400,'Invalid audio metadata');
+ return {assetId:String(headers['x-audio-id']||''),name,sha256:String(headers['x-audio-sha256']||''),info,data};
+}
+export async function saveAudio(db,input){
+ validateAudioSave(input);
+ const {assetId,name,data,info={},sha256:hash}=input;
  await requireNoDeletion(db,assetId,true);
  const folder=AUDIO_ROOT+'/'+assetId,recordPath=folder+'/asset.json';
  await db.folder(AUDIO_ROOT);await db.folder(folder);
@@ -153,13 +167,10 @@ export async function handleAudio(req,res,url,token){
  if(req.headers.origin&&req.headers.origin!=='https://keythjyles.github.io'){send(403,{error:'origin_not_allowed'});return true}
  if(active){send(409,{error:'Another audio save is finishing. Retry this sound.'});return true}active=true;
  try{
-  const parts=[];let size=0;for await(const c of req){size+=c.length;if(size>(url.pathname.endsWith('save')?MAX:url.pathname.endsWith('classify')?10000:4096))throw new AudioError(413,'Audio request too large');parts.push(c)}
+  const parts=[];let size=0;for await(const c of req){size+=c.length;if(size>(url.pathname.endsWith('save')?MAX_AUDIO_BYTES:url.pathname.endsWith('classify')?10000:4096))throw new AudioError(413,'Audio request too large');parts.push(c)}
   const data=Buffer.concat(parts),db=dropboxClient(token);let result;
   if(!url.pathname.endsWith('save')){let input;try{input=JSON.parse(data.toString())}catch{throw new AudioError(400,'Invalid audio request JSON')}if(!input||typeof input!=='object'||Array.isArray(input))throw new AudioError(400,'Invalid audio request');result=url.pathname.endsWith('delete')?await deleteAudio(db,input):url.pathname.endsWith('classify')?await classifyAudio(db,input):await renameAudio(db,input)}
-  else{let info={};try{info=JSON.parse(decodeURIComponent(String(req.headers['x-audio-info']||'%7B%7D')))}catch{throw new AudioError(400,'Invalid audio metadata')}
-   if(!info||typeof info!=='object'||Array.isArray(info)||JSON.stringify(info).length>10000)throw new AudioError(400,'Invalid audio metadata');
-   result=await saveAudio(db,{assetId:String(req.headers['x-audio-id']||''),name:decodeURIComponent(String(req.headers['x-audio-name']||'')),sha256:String(req.headers['x-audio-sha256']||''),info,data});
-  }
+  else result=await saveAudio(db,audioSaveInput(req.headers,data));
   send(200,result);
  }catch(e){send(e.status||502,{error:e instanceof AudioError?e.message:url.pathname.endsWith('delete')?'Audio deletion incomplete; retry to verify destinations.':'Audio save failed; original preserved. Retry safely.'})}finally{active=false}
  return true;

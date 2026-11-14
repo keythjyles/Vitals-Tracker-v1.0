@@ -1,3 +1,13 @@
+## Sound Scrubber R14.12 and SxLock R41 — Drive saves and direct renaming
+
+In Sound Scrubber, tap the filename to rename a candidate before deciding. Play toggles playback. The compact red REC button captures playback, names the WAV from the chosen filename and approves it in the same action. Approval keeps the audio on this browser, removes the row from review and publishes it to the SxLock and WavLock libraries. A failed capture leaves the decision available.
+
+New approvals save directly to the existing Google Drive Sound Effects folder. Connect Google Drive grants file access to that folder and starts any queued saves. The service verifies Drive file identity, byte count and SHA-256. A Drive failure keeps the approved local audio and exposes a retry outside the review rows. The older Dropbox library and mirror continue to serve legacy records.
+
+In SxLock, tap any sound name in Search, Sound library, Toolbox, Recordings or the audition and insertion panel. The new name is saved by sound ID on the device, with recovered and imported recordings also updated in IndexedDB. Older project placements continue to resolve by ID. A rename can be made while auditioning and preserves the open insertion draft.
+
+Release baseline `10e8a4fd213e02162fb84cbc4c364d317b2e9933`. [Approval and Drive connection](sound-scrubber/AUDIO_SAVE.md).
+
 ## CapLock R31 and Tools R2 — device files and export audit
 
 CapLock opens local video through the native device picker. Layer 0 appears in the source readout. Local toolbox media is kept with the browser draft; the existing project JSON and reconnect routes can recover older work. Cloud projects list folder metadata on demand, and open the chosen project or assets separately. Studio links to standalone CapLock for a device-only edit.

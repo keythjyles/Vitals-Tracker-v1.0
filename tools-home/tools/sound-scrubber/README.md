@@ -1,3 +1,9 @@
+## R14.12 — Drive saves and REC
+
+Tap any candidate name to rename it. **Play** toggles Play/Pause. **Approve** removes the candidate from review once its audio is kept on this device. When available, the red **REC** button records the playback, names the WAV and approves it in one action. The selected name is used for the recording. Both actions add the sound to SxLock and WavLock on the same browser.
+
+Choose **Connect Google Drive** when prompted and allow access to the existing Sound Effects folder. Approved audio stays available during cloud saves. **Retry Drive saves** resumes an interrupted upload. [Save and recovery details](AUDIO_SAVE.md).
+
 ## R14.11 — Chapter 3 and 1,000 sound candidates
 
 Open the Scrubber and choose **Load 1,000 candidates**. **Chapter 3 gasps** opens twelve short-list entries first. Review candidates by category or search. Normal online searches continue to use Wikimedia Commons. The review intake also includes individual Creative Commons recordings from the [FSD50K release](https://doi.org/10.5281/zenodo.4060432), plus CC0 medical sounds and labeled designed effects.
