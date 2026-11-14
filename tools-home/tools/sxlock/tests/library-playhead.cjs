@@ -282,6 +282,10 @@ async function main(){
    page.once('dialog',dialog=>dialog.accept('Soft test cue'));
    await audition.getByRole('button',{name:'Rename test-cue.wav',exact:true}).tap();
    await audition.getByRole('button',{name:'Rename Soft test cue.wav',exact:true}).waitFor();
+   assert.equal(await page.evaluate(id=>{
+    const custom=JSON.parse(localStorage.getItem('sxlock-sound-names-v1'));
+    return custom[id];
+   },originalCue),'Soft test cue.wav');
    assert.equal(await audition.locator('#effectStart').inputValue(),startBeforeRename);
    assert.equal(await page.evaluate(id=>SxLock.sounds.get(id).name,originalCue),'Soft test cue.wav');
    assert.equal(await page.evaluate(()=>SxLock.snapshot().clips.length),0);
@@ -331,7 +335,7 @@ async function main(){
    await page.locator('#saveTake').tap();
    await page.locator('#recordingName').fill('Chapter 3 test voice');
    await page.getByRole('button',{name:'Save name'}).tap();
-   await page.getByText('Name saved.',{exact:true}).waitFor();
+   await page.locator('#recordingSheet').getByText('Name saved.',{exact:true}).waitFor();
    await page.getByRole('button',{name:'Close recording settings'}).tap();
    await page.waitForFunction(()=>document.getElementById('recoveryStatus').textContent.startsWith('Saved locally'));
    await page.reload();
