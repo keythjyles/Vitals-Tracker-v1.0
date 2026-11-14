@@ -11,26 +11,40 @@ module.exports = async (browser, base) => {
    const {createProject} = await import(moduleURL('./core.mjs'));
    const {makeToolboxPlacement} = await import(moduleURL('./toolbox-core.mjs'));
    const {renderCaptioned} = await import(moduleURL('./composite.mjs'));
+   const mediaURL = new URL('../sxlock/vendor/mediabunny-1.62.1-gs1.mjs', location.href).href;
+   const m = await import(mediaURL);
    const width = 160, height = 288;
    const source = new Blob([new Uint8Array(sourceBytes)], {type: 'video/webm'});
 
    async function pixels(file) {
     const url = URL.createObjectURL(file);
     const video = document.createElement('video');
+    video.muted = true;
+    video.preload = 'auto';
+    document.body.append(video);
     try {
      await new Promise((resolve, reject) => {
       video.onloadeddata = resolve;
       video.onerror = () => reject(Error('Could not decode the color test frame.'));
       video.src = url;
      });
-     const canvas = new OffscreenCanvas(width, height);
-     const ctx = canvas.getContext('2d', {alpha: false, colorSpace: 'srgb'});
+     await new Promise(resolve => {
+      video.onseeked = resolve;
+      video.currentTime = .16;
+     });
+     const canvas = document.createElement('canvas');
+     canvas.width = width;
+     canvas.height = height;
+     const ctx = canvas.getContext('2d', {colorSpace: 'srgb'});
+     ctx.fillStyle = '#000';
+     ctx.fillRect(0, 0, width, height);
      ctx.drawImage(video, 0, 0);
      return ctx.getImageData(0, 0, width, height).data;
     } finally {
      video.pause();
      video.removeAttribute('src');
      video.load();
+     video.remove();
      URL.revokeObjectURL(url);
     }
    }
@@ -59,6 +73,19 @@ module.exports = async (browser, base) => {
     return averages;
    }
 
+   const media = new m.Input({formats: m.ALL_FORMATS, source: new m.BlobSource(source)});
+   let colorSpace, alpha;
+   try {
+    const track = await media.getPrimaryVideoTrack();
+    colorSpace = await track.getColorSpace();
+    const sample = await new m.VideoSampleSink(track).getSample(.16);
+    const frame = sample.toVideoFrame();
+    alpha = frame.format.includes('A');
+    frame.close();
+    sample.close();
+   } finally {
+    media.dispose();
+   }
    const reference = await pixels(source);
    const point = (x, y) => [...reference.slice((y * width + x) * 4, (y * width + x) * 4 + 3)];
    const transparentCorner = point(3, 36);
@@ -68,7 +95,7 @@ module.exports = async (browser, base) => {
    const firstPixels = await pixels(first.blob);
    const secondPixels = await pixels(second.blob);
    return {
-    transparentCorner, colorPatch,
+    transparentCorner, colorPatch, colorSpace, alpha,
     firstPass: patches(reference, firstPixels),
     secondPass: patches(reference, secondPixels),
     repeatChange: patches(firstPixels, secondPixels),
@@ -76,6 +103,8 @@ module.exports = async (browser, base) => {
    };
   }, bytes);
   assert.deepEqual(compare.frames, [10, 10]);
+  assert.equal(compare.colorSpace.fullRange, true);
+  assert.equal(compare.alpha, true);
   assert.ok(compare.transparentCorner.every(channel => channel < 5), JSON.stringify(compare));
   assert.ok(compare.colorPatch[0] > 160 && compare.colorPatch[1] > 90 && compare.colorPatch[2] < 120, JSON.stringify(compare));
   const within = (patches, limit) => patches.every(patch => patch.every(value => Math.abs(value) <= limit));
