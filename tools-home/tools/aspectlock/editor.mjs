@@ -275,7 +275,7 @@ function syncOverlay() {
   sound();
   return;
  }
- const position = ov.readyState >= 1 ? placementAt(bv.currentTime, timing()) : null;
+ const position = bv.readyState >= 1 && ov.readyState >= 1 ? placementAt(bv.currentTime, timing()) : null;
  overlayActive = !!position;
  overlayAudible = !!position?.audible;
  if (!position) {
