@@ -95,7 +95,7 @@ async function main(){
    await page.locator('#videoFile').setInputFiles(path.join(data,'fixture_40s.mp4'));
    await page.waitForFunction(()=>document.getElementById('video').readyState>=2&&!document.getElementById('play').disabled);
    await page.getByRole('button',{name:'Show file picker'}).click();
-   await page.getByText('SxLock · GS-TOOL-SXLOCK · R41',{exact:true}).waitFor();
+   await page.getByText('SxLock · GS-TOOL-SXLOCK · R42',{exact:true}).waitFor();
    await page.evaluate(()=>window.scrollTo(0,10));
    await page.locator('.gs-source-drawer').waitFor({state:'hidden'});
    await page.evaluate(()=>window.scrollTo(0,0));
@@ -154,6 +154,17 @@ async function main(){
    await dock.locator('#scribeBox').waitFor();
    assert.equal(await dock.locator('#scribeBox > summary').isVisible(),false);
    assert.equal(await page.locator('.sx-reference .sx-docked-button').count(),0);
+   const assertCompactDock=button=>button.evaluate(node=>{
+    const style=getComputedStyle(node);
+    return {height:node.getBoundingClientRect().height,width:node.getBoundingClientRect().width,
+     border:style.borderTopWidth,background:style.backgroundColor,decoration:style.textDecorationLine};
+   }).then(style=>{
+    assert(style.height>=24&&style.height<=30&&style.width<=90,JSON.stringify(style));
+    assert.equal(style.border,'0px');
+    assert.equal(style.background,'rgba(0, 0, 0, 0)');
+    assert.equal(style.decoration,'underline');
+   });
+   await assertCompactDock(dock.getByRole('button',{name:'Undock Scribe',exact:true}));
    const dockLayout=await page.evaluate(()=>{
     const box=selector=>document.querySelector(selector).getBoundingClientRect();
     return {gap:box('#notes').top-box('#sxResize').bottom,actionsBottom:box('#scribeBox .scribe-actions').bottom,undockTop:box('#scribeBox [data-dock]').top};
@@ -162,6 +173,7 @@ async function main(){
    assert(dockLayout.undockTop>dockLayout.actionsBottom,'Undock is below the Scribe buttons');
    assert.equal(await dock.locator('#notes').inputValue(),'[F228 | 0:09.120 | 25 fps] Keep this stroke 📝');
    const dockToggle=page.getByRole('button',{name:'Toggle docked Scribe'});
+   await assertCompactDock(dockToggle);
    await dockToggle.tap();
    assert.equal(await dock.isVisible(),false);
    await dockToggle.tap();
@@ -178,8 +190,12 @@ async function main(){
    await page.getByRole('button',{name:'Undock Mixer'}).tap();
    assert.equal(await dock.isVisible(),false);
    for(const label of ['Sound library','Insertions','Video','Save and export']){
-    await page.getByRole('button',{name:'Dock '+label,exact:true}).tap();
-    await dock.getByRole('button',{name:'Undock '+label,exact:true}).tap();
+    const dockButton=page.getByRole('button',{name:'Dock '+label,exact:true});
+    await assertCompactDock(dockButton);
+    await dockButton.tap();
+    const undockButton=dock.getByRole('button',{name:'Undock '+label,exact:true});
+    await assertCompactDock(undockButton);
+    await undockButton.tap();
     assert.equal(await dock.isVisible(),false);
    }
    await page.getByRole('button',{name:'Dock Sound library',exact:true}).tap();
@@ -189,7 +205,9 @@ async function main(){
    await page.evaluate(()=>window.scrollTo(0,0));
    await page.getByRole('button',{name:'Show file picker'}).tap();
    const drawer=player.locator('.gs-source-drawer');
-   await drawer.getByRole('button',{name:'Undock player',exact:true}).tap();
+   const undockPlayer=drawer.getByRole('button',{name:'Undock player',exact:true});
+   await assertCompactDock(undockPlayer);
+   await undockPlayer.tap();
    assert.equal(await position(),'static');
    assert.equal(await drawer.isVisible(),false);
    assert.equal(await dock.evaluate(node=>getComputedStyle(node).overflowY),'visible');
