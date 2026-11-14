@@ -38,7 +38,24 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');const asse
  await aspectPage.locator('#editAdded').click();console.log('Aspect item seek',await aspectPage.locator('#bv').evaluate(v=>({time:v.currentTime,duration:v.duration,ready:v.readyState,seeking:v.seeking,start:document.querySelector('#startInfo').textContent})));assert.equal(await aspectPage.locator('#itemProperties').evaluate(e=>e.open),true);await aspectPage.waitForFunction(()=>{const v=document.querySelector('#bv');return !v.seeking&&Math.abs(v.currentTime-.4)<.001;});await aspectPage.locator('#x').focus();await aspectPage.keyboard.press('ArrowRight');await aspectPage.locator('#closeItemProperties').click();
  await aspectPage.locator('#play').click();await aspectPage.locator('#bedZero').click();assert.equal(await aspectPage.locator('#bv').evaluate(v=>v.paused),true);assert.equal(await aspectPage.locator('#ov').evaluate(v=>v.paused),true);assert.equal(await aspectPage.locator('#bv').evaluate(v=>v.currentTime),0);await aspectPage.locator('#jumpAdded').click();await aspectPage.waitForFunction(()=>{const v=document.querySelector('#bv');return !v.seeking&&Math.abs(v.currentTime-.4)<.001;});
  for(const viewport of [{width:390,height:844},{width:360,height:640},{width:720,height:390}]){await aspectPage.setViewportSize(viewport);const geometry=await aspectPage.locator('#stageNav').evaluate(n=>({h:n.clientHeight,s:n.scrollHeight,count:n.querySelectorAll('button').length,inside:[...n.querySelectorAll('button')].every(b=>b.getBoundingClientRect().bottom<=n.getBoundingClientRect().bottom+.1)}));assert.equal(geometry.h,geometry.s);assert.equal(geometry.count,11);assert.equal(geometry.inside,true);}
- assert.deepEqual(aspectErrors,[]);console.log(JSON.stringify({aspectLock:{addedRow:true,propertiesSheet:true,pausedNavigation:true,threeViewportRailChecks:true,errors:aspectErrors}}));
+ const localAspect=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+ localAspect.on('pageerror',e=>aspectErrors.push(e.message));
+ await localAspect.goto(base.split('?')[0].replace('/caplock/','/aspectlock/')+'?source=device&key=blue');
+ const pickLocal=async (button,file)=>{
+  await button.click();
+  const chooser=localAspect.waitForEvent('filechooser');
+  await localAspect.getByRole('button',{name:'Choose from device'}).click();
+  await (await chooser).setFiles(file);
+ };
+ await pickLocal(localAspect.getByRole('button',{name:'Choose bed',exact:true}),'/tmp/caplock-fixtures/source25.mp4');
+ await localAspect.waitForFunction(()=>document.querySelector('#baseChosen').textContent==='source25.mp4');
+ await localAspect.locator('.gs-source-grip').click();
+ await pickLocal(localAspect.locator('#pickOverlay'),{name:'local-overlay.webm',mimeType:'video/webm',buffer:Buffer.from(bytes)});
+ await localAspect.waitForFunction(()=>document.querySelector('#addedName').textContent==='local-overlay.webm');
+ assert.equal(await localAspect.locator('#keyMode').inputValue(),'blue');
+ assert.deepEqual(await localAspect.locator('#bv,#ov').evaluateAll(videos=>videos.map(video=>video.currentSrc.startsWith('blob:')&&video.paused&&video.readyState>=2)),[true,true]);
+ await localAspect.close();
+ assert.deepEqual(aspectErrors,[]);console.log(JSON.stringify({aspectLock:{devicePicker:true,addedRow:true,propertiesSheet:true,pausedNavigation:true,threeViewportRailChecks:true,errors:aspectErrors}}));
  await require('./local-pass-browser.cjs')(browser,base);await require('./background-browser.cjs')(browser,base);await require('./local-entry-browser.cjs')(browser,base,bytes);await require('./placement-browser.cjs')(browser,base,bytes);await require('./project-picker-browser.cjs')(browser,base,bytes);await require('./focus-browser.cjs')(browser,base,bytes);await require('./toolbox-browser.cjs')(browser,cleanBase);await require('./framing-browser.cjs')(browser,cleanBase);await require('./source-audio-browser.cjs')(browser,cleanBase);
  await require('./directory-browser.cjs')(browser,cleanBase);
  await browser.close();
