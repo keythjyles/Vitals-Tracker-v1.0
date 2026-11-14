@@ -49,6 +49,18 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');const asse
  };
  await pickLocal(localAspect.getByRole('button',{name:'Choose bed',exact:true}),'/tmp/caplock-fixtures/source25.mp4');
  await localAspect.waitForFunction(()=>document.querySelector('#baseChosen').textContent==='source25.mp4');
+ const stepForward=localAspect.locator('#forwardFrame'),stepBack=localAspect.locator('#backFrame');
+ const readBedFrame=async()=>Number(await localAspect.locator('#position').getAttribute('data-frame'));
+ await stepForward.click();
+ await stepForward.click();
+ assert.equal(await readBedFrame(),2,'separate clicks advance one frame each');
+ await stepForward.dblclick({delay:45});
+ assert.equal(await readBedFrame(),27,'double-click advances 25 frames from the starting frame');
+ const backBox=await stepBack.boundingBox();
+ const tapBack=()=>localAspect.touchscreen.tap(backBox.x+backBox.width/2,backBox.y+backBox.height/2);
+ await tapBack();
+ await tapBack();
+ assert.equal(await readBedFrame(),2,'double-tap reverses 25 frames from the starting frame');
  await localAspect.locator('.gs-source-grip').click();
  await pickLocal(localAspect.locator('#pickOverlay'),{name:'local-overlay.webm',mimeType:'video/webm',buffer:Buffer.from(bytes)});
  await localAspect.waitForFunction(()=>document.querySelector('#addedName').textContent==='local-overlay.webm');

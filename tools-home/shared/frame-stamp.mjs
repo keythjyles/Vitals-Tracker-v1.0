@@ -15,11 +15,15 @@ export function writeFrameClock(clock, {frame, time, fps}, label = '') {
 }
 
 export function frameStepControl(button, {getFrame, seek, direction}) {
- let first;
+ let previous;
  button.addEventListener('click', event => {
   const frame = getFrame();
-  const double = event.detail > 0 && first && event.timeStamp - first.time < 350;
-  seek(double ? first.frame + direction * 25 : frame + direction);
-  first = !double && event.detail > 0 ? {frame, time:event.timeStamp} : null;
+  const touch = event.pointerType === 'touch';
+  const double = previous && frame === previous.landed && touch === previous.touch &&
+   (event.detail === 2 || (touch && event.detail > 0 && event.timeStamp - previous.time < 350));
+  seek(double ? previous.start + direction * 25 : frame + direction);
+  previous = !double && event.detail > 0
+   ? {start: frame, landed: getFrame(), touch, time: event.timeStamp}
+   : null;
  });
 }

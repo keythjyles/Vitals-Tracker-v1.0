@@ -1,4 +1,4 @@
-import {setupScribe} from '../tools/sxlock/scribe.mjs?v=42';
+import {setupScribe} from '../tools/sxlock/scribe-history.mjs?v=42';
 
 export function mountPlayerScribe(reference, {tool, clock, media, source, section, sourceReady, pauseEditor}) {
  const pause = () => {
