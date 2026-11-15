@@ -69,5 +69,51 @@ module.exports = async function checkInsertAndNames(page, bedName, overlayFile, 
  assert.equal(await $('addedName').textContent(), namedOverlay);
  assert.equal(await $('bedIn').inputValue(), String(placement));
  assert.equal(await readFrame(), placement);
- console.log('AspectLock Insert pauses and steps by one frame. The renamed clips and saved placement survived reload.');
+
+ // A full Toolbox has both a page scroll and, when pinned, a separate list scroll.
+ await insert.tap();
+ const filler = Array.from({length:12}, (_, i) => ({
+  name:`Clip list fixture ${i + 1}.mp4`,mimeType:'video/mp4',buffer:Buffer.from('List entry only'),
+ }));
+ await $('toolboxFiles').setInputFiles(filler);
+ await $('toolboxItems').getByRole('button', {name:'Rename Clip list fixture 12.mp4',exact:true}).waitFor({state:'attached'});
+ const position = () => page.evaluate(() => ({
+  page:window.scrollY,
+  list:document.getElementById('pinnedSections').scrollTop,
+  player:document.querySelector('.gs-player-shell').offsetHeight,
+ }));
+ await page.evaluate(() => window.scrollTo(0, 800));
+ await page.waitForFunction(() => window.scrollY >= 795);
+ const scrolled = await position();
+ await insert.tap();
+ assert.deepEqual(await position(), scrolled, 'reopening Insert must leave a scrolled clip list in place');
+ const stepVisible = await $('insertForward').evaluate(button => {
+  const {x,y,width,height} = button.getBoundingClientRect();
+  return button.contains(document.elementFromPoint(x + width / 2, y + height / 2));
+ });
+ assert.equal(stepVisible, true);
+
+ const untouchedRow = await $('toolboxItems').getByRole('button',{name:'Rename Clip list fixture 12.mp4',exact:true}).elementHandle();
+ await $('aspectBedName').getByRole('button',{name:'Rename ' + namedBed,exact:true}).tap();
+ assert.deepEqual(await position(), scrolled, 'the name field must fit the existing player row');
+ await $('aspectBedName').getByRole('textbox').fill('Chapter 3 bed');
+ await $('aspectBedName').getByRole('button',{name:'Save',exact:true}).tap();
+ await $('aspectBedName').getByRole('button',{name:'Rename Chapter 3 bed',exact:true}).waitFor();
+ assert.deepEqual(await position(), scrolled, 'saving a name must keep the view in place');
+ assert.equal(await untouchedRow.evaluate(row => row.isConnected), true);
+ assert.equal(await readFrame(), placement);
+
+ await page.evaluate(() => window.scrollTo(0, 0));
+ await insert.tap();
+ await $('aspectToolbox').getByRole('button',{name:'Pin Toolbox',exact:true}).tap();
+ await page.evaluate(() => {
+  document.getElementById('pinnedSections').scrollTop = 320;
+  window.scrollTo(0, 200);
+ });
+ await page.waitForFunction(() => document.getElementById('pinnedSections').scrollTop >= 300);
+ const pinned = await position();
+ await insert.tap();
+ assert.deepEqual(await position(), pinned, 'Insert must keep both scroll positions when the Toolbox is pinned');
+ assert.equal(await readFrame(), placement);
+ console.log('AspectLock Insert and rename kept the paused frame and the scroll position. Saved names and placement survived reload.');
 };

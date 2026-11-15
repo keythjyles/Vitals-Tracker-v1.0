@@ -26,17 +26,17 @@ export function clipName({file, label}) {
 export function setupToolbox({onSelect, onRename, currentFiles, currentBed, pause, allowDevice}) {
  const $ = id => document.getElementById(id);
  const items = new Map();
+ const labelRows = new Map();
  let previewUrl, bedName;
  const showError = error => { $('toolboxStatus').textContent = error.message; };
  const ready = filesTransaction('readonly', store => store.getAll()).then(rows => {
   for (const row of rows) if (!items.has(row.id)) items.set(row.id, row);
  }).catch(() => { $('toolboxStatus').textContent = 'The saved Toolbox could not be opened on this device.'; });
 
- function action(label, callback, name) {
+ function action(label, callback) {
   const button = document.createElement('button');
   button.type = 'button';
   button.textContent = label;
-  if (name) button.setAttribute('aria-label', name);
   button.onclick = async () => {
    try { await callback(); }
    catch (error) { showError(error); }
@@ -71,15 +71,20 @@ export function setupToolbox({onSelect, onRename, currentFiles, currentBed, paus
   return updated;
  }
 
- function nameEditor(entry, inPlayer = false) {
-  const title = clipName(entry);
+ function nameEditor(entry) {
   const box = document.createElement('div');
   box.className = 'aspect-clip-name';
-  const button = action(title, edit, 'Rename ' + title);
+  const button = action('', edit);
   button.className = 'aspect-name-button';
   button.title = 'Tap to rename';
   box.append(button);
+  function setLabel(label) {
+   button.textContent = label;
+   button.setAttribute('aria-label', 'Rename ' + label);
+  }
+  setLabel(clipName(entry));
   function edit() {
+   const title = button.textContent;
    const form = document.createElement('form');
    const input = document.createElement('input');
    input.type = 'text';
@@ -108,28 +113,34 @@ export function setupToolbox({onSelect, onRename, currentFiles, currentBed, paus
     event.preventDefault();
     if (save.disabled) return;
     const label = input.value.trim();
-    if (!label) { showNameError('Enter a video name.'); input.focus(); return; }
+    if (!label) { showNameError('Enter a video name.'); input.focus({preventScroll: true}); return; }
     if (label === title) { close(); return; }
     error.hidden = true;
     input.readOnly = save.disabled = cancel.disabled = true;
+    let updated;
     try {
-     const updated = await rename(entry.id, label);
-     const restoreFocus = form.contains(document.activeElement);
-     onRename(updated);
-     render(restoreFocus ? entry.id : null, inPlayer);
+     updated = await rename(entry.id, label);
     } catch {
      showNameError('Could not save the name. Try again.');
      input.focus({preventScroll: true});
+     return;
     } finally {
      input.readOnly = save.disabled = cancel.disabled = false;
     }
+    labelRows.get(entry.id)?.(label);
+    if (bedName?.entry?.id === entry.id) {
+     bedName.entry = updated;
+     bedName.editor.setLabel(label);
+    }
+    onRename(updated);
+    close();
    };
    form.append(input, save, cancel, error);
    box.replaceChildren(form);
    input.focus({preventScroll: true});
    input.select();
   }
-  return box;
+  return {box, setLabel};
  }
 
  function attachBedName(original) {
@@ -140,31 +151,31 @@ export function setupToolbox({onSelect, onRename, currentFiles, currentBed, paus
   renderBedName();
  }
 
- function renderBedName(focus = false) {
+ function renderBedName() {
   if (!bedName) return;
   const entry = items.get(currentBed());
   bedName.original.hidden = Boolean(entry);
   bedName.slot.hidden = !entry;
   if (entry !== bedName.entry) {
    bedName.entry = entry;
-   bedName.slot.replaceChildren(...(entry ? [nameEditor(entry, true)] : []));
+   bedName.editor = entry ? nameEditor(entry) : null;
+   bedName.slot.replaceChildren(...(bedName.editor ? [bedName.editor.box] : []));
   }
-  if (focus) bedName.slot.querySelector('.aspect-name-button')?.focus({preventScroll: true});
  }
 
- function render(focusId, inPlayer = false) {
+ function render() {
   const host = $('toolboxItems');
   host.replaceChildren();
+  labelRows.clear();
   const inUse = currentFiles();
   for (const entry of allowDevice ? items.values() : []) {
    const {id, file} = entry;
-   const label = clipName(entry);
    const row = document.createElement('div');
    row.className = 'toolbox-row';
    const name = nameEditor(entry);
    const use = target => async () => {
     stopPreview();
-    await onSelect(target, entry);
+    await onSelect(target, items.get(id));
    };
    const remove = action('Remove', async () => {
     if (currentFiles().includes(id)) throw Error('This file is in the current edit.');
@@ -172,21 +183,32 @@ export function setupToolbox({onSelect, onRename, currentFiles, currentBed, paus
     stopPreview();
     items.delete(id);
     render();
-   }, 'Remove ' + label + ' from Toolbox');
+   });
    remove.disabled = inUse.includes(id);
-   row.append(name, action('Preview', () => {
+   const preview = action('Preview', () => {
     pause();
     stopPreview();
     const video = $('toolboxPreview');
     previewUrl = URL.createObjectURL(file);
     video.src = previewUrl;
     video.hidden = false;
-   }, 'Preview ' + label), action('Use as bed', use('base'), 'Use ' + label + ' as bed'), action('Overlay here', use('overlay'), 'Overlay ' + label + ' at current frame'), remove);
+   });
+   const bed = action('Use as bed', use('base'));
+   const overlay = action('Overlay here', use('overlay'));
+   const setLabel = label => {
+    name.setLabel(label);
+    preview.setAttribute('aria-label', 'Preview ' + label);
+    bed.setAttribute('aria-label', 'Use ' + label + ' as bed');
+    overlay.setAttribute('aria-label', 'Overlay ' + label + ' at current frame');
+    remove.setAttribute('aria-label', 'Remove ' + label + ' from Toolbox');
+   };
+   setLabel(clipName(entry));
+   labelRows.set(id, setLabel);
+   row.append(name.box, preview, bed, overlay, remove);
    host.append(row);
-   if (id === focusId && !inPlayer) name.querySelector('button').focus({preventScroll: true});
   }
   $('toolboxEmpty').hidden = items.size > 0;
-  renderBedName(inPlayer && focusId === currentBed());
+  renderBedName();
  }
 
  async function add(file) {

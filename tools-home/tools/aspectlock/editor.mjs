@@ -3,7 +3,7 @@ import {paintMatrix} from "../../shared/item-matrix.mjs?v=1";
 import {beginVideoLoad,loadVideoSource,clearVideoSource} from "./media-source.mjs?v=33";
 import {Composition,WIDTH,HEIGHT,FPS,lastFrame,frameAt,placementAt,fitRect} from "./composition.mjs?v=32";
 import {setupPinnedSections} from "../../shared/pinned-sections.mjs?v=32";
-import {clipName,setupToolbox} from "./toolbox.mjs?v=34";
+import {clipName,setupToolbox} from "./toolbox.mjs?v=35";
 import {formatFrameTime,writeFrameClock,frameStepControl} from "../../shared/frame-stamp.mjs?v=2";
 import {detectBackground} from "../caplock/background.mjs?v=32";
 const RECIPE_VERSION = 'R33';
@@ -739,23 +739,36 @@ const toolbox = setupToolbox({
   for (const id of ['base','overlay']) {
    if (localFiles[id] === entry.id) markVideoSelection(id, entry.file.name, undefined, label);
   }
-  report('Name saved.');
  },
 });
 Q('toolboxAdd').disabled = inStudio;
 Q('restoreEdit').hidden = inStudio;
 Q('toolboxCloud').onclick = () => openLibrary('overlay');
-function openSection(id, block = 'nearest') {
+Q('railTiming').onclick = () => {
  Q('pause').click();
- const panel = Q(id);
+ const panel = Q('aspectTiming');
  panel.open = true;
- panel.scrollIntoView({block});
-}
-Q('railToolbox').onclick = () => {
- openSection('aspectToolbox', 'start');
- updateClock();
+ panel.scrollIntoView({block:'nearest'});
 };
-Q('railTiming').onclick = () => openSection('aspectTiming');
+Q('railToolbox').onclick = () => {
+ Q('pause').click();
+ const panel = Q('aspectToolbox');
+ panel.open = true;
+ updateClock();
+ if (Q('pinnedSections').contains(panel)) return;
+
+ const controls = Q('insertPoint').getBoundingClientRect();
+ const player = stage.closest('.gs-player-shell');
+ const top = Math.max(0, player?.getBoundingClientRect().bottom ?? 0);
+ const viewport = window.visualViewport;
+ const bottom = viewport ? viewport.offsetTop + viewport.height : innerHeight;
+ const room = bottom - top - controls.height;
+ if (room <= 0) return;
+ const clipRoom = Math.min(72, room);
+ if (controls.top < top - 1 || controls.bottom + clipRoom > bottom + 1) {
+  panel.scrollIntoView({block:'start'});
+ }
+};
 Q('editAdded').onclick = () => {
  Q('pause').click();
  // At another frame, preserve the bed cursor and show the animation's first selected frame for appearance editing.
