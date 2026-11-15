@@ -1,5 +1,5 @@
 import {installControlHelp} from './control-help.mjs?v=2';
-import {mountPlayerShell} from './player-shell.mjs?v=32';
+import {mountPlayerShell} from './player-shell.mjs?v=33';
 /** Shared UI adapter; never stores or rewrites media or native edit records. */
 export const COMPACT_PLAYER_VERSION='6';
 export function explicitValue(value,min,max){const n=Number(value);if(String(value).trim()===''||!Number.isFinite(n)||n<min||n>max)throw Error('Enter a value from '+min+' to '+max+'.');return n;}
@@ -11,9 +11,9 @@ if(typeof document!=='undefined'){
  const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./compact-player.css?v=2',import.meta.url).href;document.head.append(css);const shellCSS=document.createElement('link');shellCSS.rel='stylesheet';shellCSS.href=new URL('./player-shell.css?v=32',import.meta.url).href;document.head.append(shellCSS);
  const configs={
   cliplock:{workspace:'.player-workspace',stage:'.picture',rail:'.transport',clock:'#clock',video:'#video',frames:['back','next']},
-  caplock:{workspace:'.workspace',stage:'#viewport',rail:'.rail',clock:'#clock',video:'#video',frames:['prev','next','sheetBack','sheetForward'],ranges:{seek:'frame'}},
-  aspectlock:{workspace:'.stageWorkspace',stage:'.stageWrap',rail:'#stageNav',clock:'#position',video:'#bv',frames:['backFrame','forwardFrame','sheetBack','sheetForward'],ranges:{overlaySeek:'normalized'},otherVideo:{overlaySeek:'#ov'}},
-  sxlock:{workspace:'#editorDock',stage:'.viewer',rail:'#sxSideControls',clock:'#clock',video:'#video',frames:['back','forward','sheetBack','sheetForward'],ranges:{seek:'seconds'}},
+  caplock:{workspace:'.workspace',stage:'#viewport',rail:'.rail',clock:'#clock',video:'#video',start:'toStart',frames:['prev','next','sheetBack','sheetForward'],ranges:{seek:'frame'}},
+  aspectlock:{workspace:'.stageWorkspace',stage:'.stageWrap',rail:'#stageNav',clock:'#position',video:'#bv',start:'bedZero',frames:['backFrame','forwardFrame','sheetBack','sheetForward'],ranges:{overlaySeek:'normalized'},otherVideo:{overlaySeek:'#ov'}},
+  sxlock:{workspace:'#editorDock',stage:'.viewer',rail:'#sxSideControls',clock:'#clock',video:'#video',start:'restart',frames:['back','forward','sheetBack','sheetForward'],ranges:{seek:'seconds'}},
   previewlock:{workspace:'.stageWorkspace',stage:'#viewerShell',rail:'#previewControls',clock:'#clock',video:'#player',frames:['minus1','plus1'],ranges:{seekBar:'normalized'}},
   motionlock:{workspace:'.player-row',stage:'.stage',rail:'.gs-motion-controls',clock:'#clock',video:'#sourceVideo',frames:['prev','next'],ranges:{seek:'normalized'}},
   framelock:{workspace:'.gs-viewer',stage:'.gs-frame-picture',rail:'.gs-frame-transport',clock:'#position',video:'#video',frames:['back','forward']},

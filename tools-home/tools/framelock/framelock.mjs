@@ -60,7 +60,7 @@ function refreshSource() {
     $('meta').textContent = source.name + ' · ' + message;
   }
   const canStep = sourceReady() && !!fps;
-  for (const id of ['back','forward','jumpback','jumpforward','reverse','frameNumber','goFrame']) $(id).disabled = !canStep;
+  for (const id of ['start','back','forward','jumpback','jumpforward','reverse','frameNumber','goFrame']) $(id).disabled = !canStep;
   $('playPause').disabled = !sourceReady();
   $('frameNumber').max = frameCount();
   update();
@@ -139,6 +139,11 @@ $('back').onclick = () => step(-1);
 $('forward').onclick = () => step(1);
 $('jumpback').onclick = () => step(-30);
 $('jumpforward').onclick = () => step(30);
+$('start').onclick = () => {
+  stopReverse();
+  stopSelectionPlayback();
+  seekFrame(0);
+};
 $('frameGo').addEventListener('toggle', () => {
   if ($('frameGo').open) $('frameNumber').value = frame();
 });

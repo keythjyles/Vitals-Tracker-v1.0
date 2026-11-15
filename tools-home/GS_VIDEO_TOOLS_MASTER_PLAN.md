@@ -21,6 +21,7 @@ The [tool registry](TOOL_REGISTRY.md) documents entry points, versions and rende
 ## Shared editing behavior
 
 - Keep compact right-hand transport and accessible Files/Photos access. When media is loaded, put the filename and frame/time/fps readout at the bottom of the player with Scribe. Reuse the real SxLock behavior and shared components. Capture the source and the paused frame with each note. Keep existing note history recoverable.
+- Put **Start** at the top of the main transport and **Play** directly below it. Start pauses at the first source or composition frame. Play toggles playback.
 - AspectLock and CapLock should use the same terms and controls for Toolbox, frame navigation, background color, and layer and background opacity. A single step moves one frame. A double-tap on a step button moves 25 frames from the starting frame. Dedicated 25-frame controls and numeric frame entry make the same moves available without a gesture. Keep pinned sections and temporary view state separate from the edit.
 - **Insert** in the right-hand controls pauses at the current frame and opens the existing Toolbox for placement. The **Toolbox** control below the player gives access to the same clips.
 - Identify whether a frame belongs to the source or composition. Chapter 3 and the AspectLock/CapLock composition clocks use 25 fps. Native source cutters retain the source frame rate. IN is the first included frame. OUT is the first clear frame. When a timestamp and an F-number disagree in a production cue, use the F-number.

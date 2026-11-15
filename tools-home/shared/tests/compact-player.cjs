@@ -45,7 +45,7 @@ async function checkFrameLock(page){
   assert.equal(loaded.height,emptyHeight,'loading portrait video does not stretch the player');
   assert.equal(loaded.y,rail.y,'the picture and controls start on the same row');
   assert.equal(loaded.height,rail.height,'the picture and controls end on the same row');
-  assert.ok(rail.height<=320,'paired controls leave room below the closed player');
+  assert.ok(rail.height<=370,'paired controls and Start leave room below the closed player');
   const notes=page.locator('#notes');
   const scribe=page.locator('#scribeSummary');
   assert.equal(await notes.isVisible(),false,'Scribe starts collapsed');
@@ -135,7 +135,7 @@ async function checkFrameLock(page){
  }finally{rmSync(temp,{recursive:true,force:true});}
 }
 
-(async()=>{const browser=await chromium.launch({headless:true});try{
+(async()=>{const browser=await chromium.launch({executablePath:process.env.BROWSER_EXECUTABLE||undefined,headless:true});try{
  const pages=['cliplock/?mode=video','caplock/','sxlock/','aspectlock/','previewlock/cloud-test.html','framelock/','motionlock/','wavlock/'];
  for(const path of pages){const frameLock=path==='framelock/',capLock=path==='caplock/';const page=await browser.newPage({viewport:frameLock?{width:360,height:640}:{width:390,height:740},isMobile:true,hasTouch:true}),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('http://127.0.0.1:8767/tools-home/tools/'+path);await page.waitForSelector('.gs-player-shell');await page.waitForFunction(()=>[...document.querySelectorAll('input[type=range]:not([hidden]):not([data-gs-continuous])')].every(e=>e.hasAttribute('data-gs-protected-range')||e.closest('[inert]')));await page.waitForTimeout(200);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,path+' fits phone width');
@@ -148,6 +148,11 @@ async function checkFrameLock(page){
   }
   const layout=await page.evaluate(()=>{const workspace=document.querySelector('.gs-player-workspace'),rail=document.querySelector('.gs-player-rail'),stage=document.querySelector('.gs-player-picture');if(!workspace||!rail||!stage)return null;const r=rail.getBoundingClientRect(),s=stage.getBoundingClientRect();return {right:r.left>=s.right-1,rail:r.width,stage:s.width,left:s.left,rightEdge:r.right,viewport:innerWidth};});if(layout){assert.equal(layout.right,true,path+' transport hugs right');assert.equal(layout.rail,frameLock?112:76,path+' uses its saved rail width');if(path==='sxlock/'){assert.ok(layout.left<=1&&layout.rightEdge>=layout.viewport-1,'SxLock uses the full phone width');}else{assert.ok(layout.left>=16,path+' has a left inset');assert.ok(layout.rightEdge<=layout.viewport-16,path+' clears Samsung edge controls');}}
   assert.equal(await page.locator('.gs-source-drawer').isVisible(),false,path+' hides source controls');
+  const startId=path==='aspectlock/'?'bedZero':capLock?'toStart':path==='sxlock/'?'restart':'start';
+  const start=page.locator('#'+startId),play=page.locator(frameLock?'#playPause':'#play');
+  const railTop=(await page.locator('.gs-rail-stack').boundingBox()).y;
+  assert.equal((await start.boundingBox()).y,railTop,path+' has Start as the top control');
+  assert.ok((await start.boundingBox()).y<(await play.boundingBox()).y,path+' has Play below Start');
   const heights=await page.locator('.gs-rail-stack button').evaluateAll(es=>es.filter(e=>e.getBoundingClientRect().height>0).map(e=>({id:e.id,h:e.getBoundingClientRect().height,frame:e.classList.contains('gs-frame-button')})));
   const rowHeight=frameLock?44:capLock?25:29;
   const frameHeight=frameLock?48:capLock?32:36;

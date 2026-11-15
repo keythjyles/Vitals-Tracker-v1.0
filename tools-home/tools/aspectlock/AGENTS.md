@@ -23,3 +23,7 @@ Keep the insertion controls visible while the list scrolls. Open Insert in place
 ## R36 clip backgrounds
 
 The animation properties use **Keep**, **Replace** and **Transparent** like CapLock. Color sampling and replacement use the same rendering code. Existing green and blue presets can also supply the source mask. Store the background treatment separately from layer opacity and use it for preview and export. R35 rollback revision `109f62a8355682cf394a39518f62a6c1372648b1`.
+
+## R37 frame readout and appearance controls
+
+On a paused seek, keep the last picture and its frame number until the requested bed and active animation are decoded. Update the preview, frame clock and insertion cue together. Consecutive step commands use the latest requested frame. Start is above Play and appearance buttons wrap to fit the phone. R36 rollback revision `8f93dac918b30885dde8c261207ae8aedc3719ad`.

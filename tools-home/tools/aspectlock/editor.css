@@ -44,6 +44,30 @@ main{padding-top:4px}
 #toolboxPreview{display:block;max-width:100%;max-height:200px;margin-top:5px}
 #itemPropertiesTitle{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin-right:auto}
 #itemProperties .item-heading{position:sticky;top:-10px;background:#152637;z-index:2}
+#closeItemProperties{flex:none;white-space:nowrap}
+#itemProperties > .compactBar {
+ flex-wrap:wrap;
+}
+#itemProperties > .compactBar > button {
+ flex:1 0 auto;
+ max-width:100%;
+ min-height:38px;
+ padding:4px 6px;
+ white-space:normal;
+ overflow-wrap:anywhere;
+}
+#itemProperties > .compactBar > .gs-frame-button {
+ flex:0 0 40px;
+}
+.animation-source-transport {
+ display:grid;
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ align-items:center;
+ gap:5px;
+ margin:4px 0;
+}
+.animation-source-transport > output {text-align:right;font-variant-numeric:tabular-nums}
+.animation-source-transport > :is(input,.gs-precision) {grid-column:1/-1}
 .opacity-control,.key-controls{grid-column:1/-1}
 .clip-background-settings{grid-column:1/-1;margin:0}
 .clip-background-settings summary{cursor:pointer;font-weight:700}

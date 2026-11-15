@@ -15,7 +15,7 @@ export function mountPlayerShell(tool,config){
  if(tool==='wavlock'){
   surface=$('wave');clock=$('clock');media=$('audio');if(!surface)return;
   workspace=el('div','gs-viewer');surface.closest('section').before(workspace);rail=el('nav','');workspace.append(surface,rail);
-  for(const id of ['play','prev','next','markIn','markOut','preview','goIn','goOut','clearSelection','reset','export'])if($(id))rail.append($(id));
+  for(const id of ['start','play','prev','next','markIn','markOut','preview','goIn','goOut','clearSelection','reset','export'])if($(id))rail.append($(id));
   if(media)media.controls=false;
  }
  if(!workspace||!surface||!rail)return;
@@ -108,7 +108,6 @@ export function mountPlayerShell(tool,config){
  const paired=new Set();
  for(let i=0;i+1<frameIds.length;i+=2){const back=$(frameIds[i]),forward=$(frameIds[i+1]);if(back.parentElement===forward.parentElement&&back.parentElement!==rail&&back.parentElement.children.length===2)back.parentElement.classList.add('gs-frame-pair');else{const pair=el('div','gs-frame-pair');back.before(pair);pair.append(back,forward);}paired.add(back);paired.add(forward);}
  if(tool==='cliplock'){
-  const order=['play','start'];for(let i=order.length-1;i>=0;i--)if($(order[i]))rail.prepend($(order[i]));
   for(const [mark,field,label]of [['markIn','in','IN'],['markOut','out','OUT']]){const row=el('div','gs-control-row');$(mark).textContent=label;row.append($(mark),$(field));rail.append(row);}
   if($('back25')&&$('next25')){const bulk=el('div','gs-control-pair');bulk.append($('back25'),$('next25'));rail.querySelector('.gs-frame-pair').after(bulk);}
   const jump=el('div','gs-control-row gs-jump-row');jump.append($('jumpFrame'),$('goFrame'));const pair=rail.querySelector('.gs-control-pair')||rail.querySelector('.gs-frame-pair');pair.after(jump);
@@ -118,7 +117,7 @@ export function mountPlayerShell(tool,config){
  }
  if(tool==='wavlock'){
   for(const [mark,field,label]of [['markIn','in','IN'],['markOut','out','OUT']]){const row=el('div','gs-control-row');$(mark).textContent=label;row.append($(mark),$(field));rail.append(row);}
-  const pair=el('div','gs-control-pair');pair.append($('prev'),$('next'));rail.prepend(pair);if($('play'))rail.prepend($('play'));
+  const pair=el('div','gs-control-pair');pair.append($('prev'),$('next'));rail.prepend(pair);
   const sourceLine=$('source');if(sourceLine)put(sourceLine);$('export').textContent='Save WAV';
   const row=el('div','gs-control-row'),field=el('input',''),go=el('button','');field.type='number';field.min='0';field.step='.001';field.inputMode='decimal';field.value='0';field.setAttribute('aria-label','Go to seconds');go.type='button';go.textContent='Go';go.onclick=()=>{const n=Number(field.value);if(Number.isFinite(n)&&n>=0&&n<=media.duration){media.pause();media.currentTime=n;}};row.append(field,go);rail.append(row);
   surface.dataset.gsReadonlyTimeline='true';for(const name of ['click','pointerdown'])surface.addEventListener(name,e=>e.stopImmediatePropagation(),true);
@@ -143,9 +142,11 @@ export function mountPlayerShell(tool,config){
   const step=pair('gs-framelock-step-pair',['back','forward']);
   const marks=pair('gs-framelock-mark-pair',['trimIn','trimOut']);
   if($('playSelection')){$('playSelection').textContent='▶ Sel';$('playSelection').setAttribute('aria-label','Play marked selection');}
-  if($('restartSelection')){$('restartSelection').textContent='↺ Start';$('restartSelection').setAttribute('aria-label','Restart marked selection');}
-  rail.replaceChildren(jump,step,play,marks,reverse,trimRow,$('frameGo'));
+  if($('restartSelection'))$('restartSelection').setAttribute('aria-label','Restart marked selection');
+  rail.replaceChildren($('start'),play,jump,step,marks,reverse,trimRow,$('frameGo'));
  }
+ const start = $(config.start || 'start');
+ if (tool !== 'framelock' && start && $('play')) rail.prepend(start, $('play'));
  if(tool==='framelock'){
   const timeline=frameTimeline||frameProgress,seek=frameSeek;if(timeline)content.append(timeline);if(seek){const row=seek.querySelector('.gs-set-row');if(row){row.classList.add('gs-control-row');seek.replaceChildren(row);rail.append(seek);}}if($('meta'))put($('meta'));
  }

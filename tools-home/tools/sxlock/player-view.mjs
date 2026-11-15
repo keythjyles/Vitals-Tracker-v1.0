@@ -1,4 +1,4 @@
-import '../../shared/compact-player.mjs?v=32';
+import '../../shared/compact-player.mjs?v=33';
 
 const $ = id => document.getElementById(id);
 const player = document.querySelector('.gs-player-shell');
