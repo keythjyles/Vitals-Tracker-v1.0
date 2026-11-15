@@ -16,14 +16,15 @@ test('CapLock item settings retain the manual playhead and legacy insertion-fram
  assert.equal(state.selectedClip,'new');assert.equal(state.editMode,'view');assert.equal(calls[0],'pause');assert.ok(calls.find(x=>Array.isArray(x)&&x[0]==='seek'&&x[1]===120));assert.equal(els.clipProperties.open,true);assert.equal(els.clipPropertiesTitle.textContent,'Edit · 9.webm');state.TOOLBOX_MODE=true;calls.length=0;state.openClipProperties('new');assert.equal(calls.some(x=>Array.isArray(x)&&x[0]==='seek'),false);
 });
 test('AspectLock returning to a bed frame pauses both media and never initiates playback',()=>{
- let pauses=0,syncs=0;
- const bv={readyState:4,duration:10,currentTime:7};
- const state={bv,FPS:25,lastFrame:duration=>duration*25-1,overlayPreview:true,Q:id=>id==='pause'?{click:()=>pauses++}:{},syncOverlay:()=>syncs++,updateClock:()=>{},paintAddedMatrix:()=>{}};
+ let bedPauses=0,overlayPauses=0;
+ const bv={readyState:4,duration:10,currentTime:7,pause:()=>bedPauses++};
+ const ov={pause:()=>overlayPauses++};
+ const state={bv,ov,FPS:25,lastFrame:duration=>duration*25-1,overlayPreview:true,requestedBedFrame:null,paintPlayback:()=>{}};
  const start=aspect.indexOf('function seekBedFrame('),end=aspect.indexOf('for (const [id,direction]',start);
  vm.createContext(state);vm.runInContext(aspect.slice(start,end),state);
- state.seekBedFrame(0);assert.equal(pauses,1);assert.equal(bv.currentTime,0);assert.equal(state.overlayPreview,false);assert.equal(syncs,1);
- state.seekBedFrame(125);assert.equal(bv.currentTime,5);assert.equal(pauses,2);
- state.seekBedFrame(250);assert.equal(bv.currentTime,9.96);
+ state.seekBedFrame(0);assert.equal(bedPauses,1);assert.equal(overlayPauses,1);assert.equal(bv.currentTime,0);assert.equal(state.overlayPreview,false);
+ state.seekBedFrame(125);assert.equal(bv.currentTime,5);assert.equal(state.requestedBedFrame,125);
+ state.seekBedFrame(250);assert.equal(bv.currentTime,9.96);assert.equal(state.requestedBedFrame,249);
 });
 
 test('clip reconnection cannot change the saved caption selection or deselected focus',()=>{

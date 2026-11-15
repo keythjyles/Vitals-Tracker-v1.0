@@ -645,8 +645,8 @@ $('restart').onclick=()=>{pauseForEdit();if(videoFile)seekProject(0);};
 $('back').onclick=()=>frameStep(-1);$('forward').onclick=()=>frameStep(1);$('seek').oninput=()=>{if(!recording&&!liveTake){pauseForEdit();seekProject($('seek').value);saveLocal();}};$('timeline').onpointerdown=e=>{if(recording||!videoFile)return;const r=e.currentTarget.getBoundingClientRect();seekProject((e.clientX-r.left)/r.width*duration())};
 function updateTransport(){
  const playing=mixPlaying();
- $('play').textContent=playing?'Ⅱ Pause':'▶ Start';
- $('play').setAttribute('aria-label',playing?'Pause':'Start');
+ $('play').textContent=playing?'Ⅱ Pause':'▶ Play';
+ $('play').setAttribute('aria-label',playing?'Pause':'Play');
 }
 video.addEventListener('play',updateTransport);
 video.addEventListener('pause',()=>{updateTransport();if(liveTake?.withVideo&&liveTake.state==='recording')stopLiveTake();});video.addEventListener('play',guard(schedule));video.addEventListener('pause',stopEffects);video.addEventListener('seeking',()=>{

@@ -88,14 +88,14 @@ async function main(){
    await page.locator('#restart').click();
    if(!process.env.OBSERVE_ONLY){
     await page.waitForFunction(()=>{const v=document.getElementById('video');return v.paused&&!v.seeking&&v.currentTime===0});
-    assert.equal(await page.locator('#sxSideControls > button').first().getAttribute('id'),'play');
+    assert.deepEqual(await page.locator('#sxSideControls > button').evaluateAll(nodes=>nodes.slice(0,2).map(node=>node.id)),['restart','play']);
    }
   }
   if(!process.env.OBSERVE_ONLY){
    await page.locator('#videoFile').setInputFiles(path.join(data,'fixture_40s.mp4'));
    await page.waitForFunction(()=>document.getElementById('video').readyState>=2&&!document.getElementById('play').disabled);
    await page.getByRole('button',{name:'Show file picker'}).click();
-   await page.getByText('SxLock · GS-TOOL-SXLOCK · R42',{exact:true}).waitFor();
+   await page.getByText('SxLock · GS-TOOL-SXLOCK · R43',{exact:true}).waitFor();
    await page.evaluate(()=>window.scrollTo(0,10));
    await page.locator('.gs-source-drawer').waitFor({state:'hidden'});
    await page.evaluate(()=>window.scrollTo(0,0));

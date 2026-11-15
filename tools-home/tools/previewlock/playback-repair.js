@@ -4,7 +4,7 @@
  window.gsPreviewSelection=()=>({path:typeof path==='string'?path:'',name:$('fileName').textContent,currentTime:v.currentTime,source:v.currentSrc});
  $('caplockLink').onclick=()=>window.open('../caplock/?v=R4.2','gs-caplock');$('toolsLink').onclick=()=>window.open('../../','gs-audio-tools');
  const status=text=>$('playbackStatus').textContent=text;
- const controls=['play','stop','minus5','minus1','plus1','plus5'];
+ const controls=['start','play','stop','minus5','minus1','plus1','plus5'];
  const enable=on=>controls.forEach(id=>$(id).disabled=!on);
  const requested=()=>new URLSearchParams(location.search).get('open')||sessionStorage.getItem('previewlock_pending_open')||'';
  const safeName=name=>name&&!/[\\/\x00-\x1f]/.test(name)&&/\.mp4$/i.test(name);
@@ -35,9 +35,10 @@
  };
  $('retryPlayback').onclick=()=>{if(selectedAsset)select(selectedAsset);else load();};
  $('play').setAttribute('aria-label','Play or pause video');$('stop').setAttribute('aria-label','Pause video');
+ $('start').onclick=()=>{if(v.readyState>=1){v.pause();v.currentTime=0;}};
  for(const [id,label] of [['minus5','Back five frames'],['minus1','Back one frame'],['plus1','Forward one frame'],['plus5','Forward five frames']])$(id).setAttribute('aria-label',label);
  $('play').onclick=()=>v.paused?playVideo():v.pause();
- v.addEventListener('play',()=>{$('play').textContent='Ⅱ';status('')});v.addEventListener('pause',()=>{$('play').textContent='▶'});
+ v.addEventListener('play',()=>{$('play').textContent='Ⅱ Pause';status('')});v.addEventListener('pause',()=>{$('play').textContent='▶ Play'});
  v.addEventListener('loadeddata',()=>{enable(true);if(v.paused)status('Video ready — tap Play.');else status('')});
  v.addEventListener('error',()=>{if(v.getAttribute('src'))status('Video playback failed. Tap Reload or Open saved video.');});
  // Device preview is local-only; it does not upload or replace a cloud original.

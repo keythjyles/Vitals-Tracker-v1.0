@@ -1,4 +1,6 @@
-# CapLock R33
+# CapLock R34
+
+Start is at the top of the player rail and rewinds the paused composition to F0. Play sits directly below it.
 
 Open a visual layer and expand **Background**. **Keep** shows the original backdrop. **Replace** fills the keyed or already transparent area with a chosen color. **Transparent** reveals the lower layers. **Background opacity** adjusts the backdrop and **Layer opacity** fades the full layer. Sample the clip or pick the source color to match when needed. Preview and export both read the saved settings. R32 rollback revision `109f62a8355682cf394a39518f62a6c1372648b1`.
 

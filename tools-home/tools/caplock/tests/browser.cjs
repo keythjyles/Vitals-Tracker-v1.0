@@ -50,17 +50,17 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');const asse
  await pickLocal(localAspect.getByRole('button',{name:'Choose bed',exact:true}),'/tmp/caplock-fixtures/source25.mp4');
  await localAspect.waitForFunction(()=>document.querySelector('#baseChosen').textContent==='source25.mp4');
  const stepForward=localAspect.locator('#forwardFrame'),stepBack=localAspect.locator('#backFrame');
- const readBedFrame=async()=>Number(await localAspect.locator('#position').getAttribute('data-frame'));
+ const waitForBedFrame=frame=>localAspect.locator('#position[data-frame="'+frame+'"]').waitFor();
  await stepForward.click();
  await stepForward.click();
- assert.equal(await readBedFrame(),2,'separate clicks advance one frame each');
+ await waitForBedFrame(2);
  await stepForward.dblclick({delay:45});
- assert.equal(await readBedFrame(),27,'double-click advances 25 frames from the starting frame');
+ await waitForBedFrame(27);
  const backBox=await stepBack.boundingBox();
  const tapBack=()=>localAspect.touchscreen.tap(backBox.x+backBox.width/2,backBox.y+backBox.height/2);
  await tapBack();
  await tapBack();
- assert.equal(await readBedFrame(),2,'double-tap reverses 25 frames from the starting frame');
+ await waitForBedFrame(2);
  const ply=localAspect.locator('#play');
  const fit=await localAspect.evaluate(()=>{
   const monitor=document.querySelector('#stage').getBoundingClientRect();
@@ -101,6 +101,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');const asse
  assert.equal(await localAspect.locator('#bedIn').inputValue(),'0','placement keeps the frame selected before loading');
  await ply.tap();
  assert.equal(await localAspect.locator('#keyMode').inputValue(),'blue');
+ await localAspect.waitForFunction(()=>[...document.querySelectorAll('#bv,#ov')].every(video=>video.paused&&!video.seeking&&video.readyState>=2));
  assert.deepEqual(await localAspect.locator('#bv,#ov').evaluateAll(videos=>videos.map(video=>video.currentSrc.startsWith('blob:')&&video.paused&&video.readyState>=2)),[true,true]);
  await require('../../aspectlock/insert-browser.cjs')(localAspect,'source25.mp4','/tmp/caplock-fixtures/blue-caption.mp4','blue-caption.mp4');
  await localAspect.close();
@@ -108,6 +109,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');const asse
  await require('./local-pass-browser.cjs')(browser,base);await require('./background-browser.cjs')(browser,base);await require('./local-entry-browser.cjs')(browser,base,bytes);await require('./placement-browser.cjs')(browser,base,bytes);await require('./project-picker-browser.cjs')(browser,base,bytes);await require('./focus-browser.cjs')(browser,base,bytes);await require('./toolbox-browser.cjs')(browser,cleanBase);await require('./framing-browser.cjs')(browser,cleanBase);await require('./source-audio-browser.cjs')(browser,cleanBase);
  await require('./directory-browser.cjs')(browser,cleanBase);
  await require('../../aspectlock/background-browser.cjs')(browser,cleanBase);
+ await require('../../aspectlock/frame-seek-browser.cjs')(browser,cleanBase);
  await browser.close();
 
 })().catch(e=>{console.error(e);process.exit(1)});

@@ -24,6 +24,7 @@ let pickerTarget='base', manualVideoSelection=false;function formatBytes(n){retu
 Q('pickBase').onclick=()=>openLibrary('base');Q('pickOverlay').onclick=()=>openLibrary('overlay');Q('closeLibrary').onclick=()=>Q('assetDialog').close();Q('assetSearch').oninput=renderLibrary;Q('assetSort').onchange=renderLibrary;let trimInFrame=0,trimOutFrame=null;
 const trimInTime=()=>trimInFrame/FPS,trimOutTime=()=>Math.min(ov.duration||0,trimOutFrame===null?Infinity:trimOutFrame/FPS),trimLength=()=>Math.max(0,trimOutTime()-trimInTime());
 let startFrame=0,endFrame=null,playbackRate=1,overlayActive=false,overlayAudible=false,overlayPreview=false;
+let requestedBedFrame = null, paintedBedFrame = null;
 let x=40,y=350,w=460,ratio=16/9,bx=0,by=0,bw=WIDTH,editMode='view',items=[],raf=0,canSample=true,rendering=false;
 const localFiles = {}, localMedia = {};
 const params=new URLSearchParams(location.search);
@@ -238,7 +239,7 @@ function update() {
  Q('render').disabled = !hasBed || rendering;
  refreshAdded();
  Q('spec').textContent = JSON.stringify(spec(), null, 2);
- drawPicture();
+ paintPlayback();
 }
 
 function sceneFor(bed = bv, animation = ov, active = overlayActive, maxWidth = WIDTH, painter = compositor) {
@@ -258,7 +259,7 @@ function outsideOutput({x, y, width, height}) {
 }
 
 function drawPicture() {
- if (stage.clientWidth < 1 || stage.clientHeight < 1) return;
+ if (stage.clientWidth < 1 || stage.clientHeight < 1) return false;
  const left = stage.clientWidth / 2 - WIDTH * displayScale / 2 + viewX;
  const top = stage.clientHeight / 2 - HEIGHT * displayScale / 2 + viewY;
  const scene = sceneFor();
@@ -285,16 +286,18 @@ function drawPicture() {
   wc.fillRect(0, 0, stage.clientWidth, stage.clientHeight);
  }
  wc.drawImage(C, left, top, WIDTH * displayScale, HEIGHT * displayScale);
+ return true;
 }
 
-function bedFrame() { return bv.readyState >= 1 ? frameAt(bv.currentTime, bv.duration) : 0; }
+function bedFrame() { return paintedBedFrame ?? 0; }
+function stepFrame() { return requestedBedFrame ?? bedFrame(); }
 function timing() {
  const limit = bv.readyState >= 1 ? lastFrame(bv.duration) + 1 : Infinity;
  const naturalOut = startFrame + Math.max(1, Math.ceil(trimLength() * FPS / playbackRate - 1e-6));
  return {inFrame: startFrame, outFrame: Math.min(limit, endFrame ?? naturalOut), trimIn: trimInTime(), trimOut: trimOutTime(), rate: playbackRate};
 }
 function updateClock() {
- if (bv.readyState >= 1) {
+ if (paintedBedFrame !== null) {
   const frame = bedFrame();
   let clock = Q('position');
   if (clock.dataset.frame !== String(frame)) writeFrameClock(clock, {frame, time: frame / FPS, fps: FPS});
@@ -314,9 +317,17 @@ function draw(now = performance.now()) {
  paintPlayback();
 }
 function paintPlayback() {
- syncOverlay();
+ // A seek changes currentTime immediately. Keep the previous picture and its
+ // clock together until the bed and any active animation have decoded.
+ const hasBed = bv.readyState >= 2;
+ if (bv.getAttribute('src') && (!hasBed || bv.seeking)) return;
+ const frame = hasBed ? (bv.paused && requestedBedFrame !== null ? requestedBedFrame : frameAt(bv.currentTime, bv.duration)) : null;
+ syncOverlay(bv.paused ? (frame ?? 0) / FPS : bv.currentTime);
+ if (bv.paused && overlayActive && (ov.seeking || ov.readyState < 2)) return;
+ if (!drawPicture()) return;
+ paintedBedFrame = frame;
+ requestedBedFrame = null;
  updateClock();
- drawPicture();
  paintAddedMatrix();
 }
 for (const video of [bv, ov]) {
@@ -326,21 +337,21 @@ function sound() {
  bv.muted = Q('baseAudio').value !== 'on';
  ov.muted = Q('overlayAudio').value !== 'on' || !overlayAudible;
 }
-function syncOverlay() {
+function syncOverlay(bedTime = bv.currentTime) {
  if (overlayPreview) {
   overlayActive = ov.readyState >= 1;
   overlayAudible = overlayActive;
   sound();
   return;
  }
- const position = bv.readyState >= 1 && ov.readyState >= 1 ? placementAt(bv.currentTime, timing()) : null;
+ const position = bv.readyState >= 1 && ov.readyState >= 1 ? placementAt(bedTime, timing()) : null;
  overlayActive = !!position;
  overlayAudible = !!position?.audible;
  if (!position) {
   if (!ov.paused) ov.pause();
  } else {
   if (ov.playbackRate !== playbackRate) ov.playbackRate = playbackRate;
-  const tolerance = bv.paused ? .004 : .10;
+  const tolerance = bv.paused ? .000001 : .10;
   if (!ov.seeking && Math.abs(ov.currentTime - position.time) > tolerance) ov.currentTime = position.time;
   if (!bv.paused && position.audible && ov.paused) ov.play().catch(() => {});
   if ((bv.paused || !position.audible) && !ov.paused) ov.pause();
@@ -386,22 +397,22 @@ function enterTiming() {
 }
 
 function seekBedFrame(frame) {
- Q('pause').click();
- overlayPreview = false;
  if (bv.readyState < 1) return;
- const target = Math.max(0, Math.min(lastFrame(bv.duration), frame));
- bv.currentTime = target / FPS;
- syncOverlay();
- updateClock();
- paintAddedMatrix();
+ bv.pause();
+ ov.pause();
+ overlayPreview = false;
+ requestedBedFrame = Math.max(0, Math.min(lastFrame(bv.duration), frame));
+ const time = requestedBedFrame / FPS;
+ if (Math.abs(bv.currentTime - time) > .000001) bv.currentTime = time;
+ paintPlayback();
 }
 for (const [id,direction] of [['backFrame',-1],['forwardFrame',1],['sheetBack',-1],['sheetForward',1]]) {
- frameStepControl(Q(id),{getFrame:bedFrame,seek:seekBedFrame,direction});
+ frameStepControl(Q(id),{getFrame:stepFrame,seek:seekBedFrame,direction});
 }
-Q('insertBack').onclick = () => seekBedFrame(bedFrame() - 1);
-Q('insertForward').onclick = () => seekBedFrame(bedFrame() + 1);
-Q('back25').onclick = () => seekBedFrame(bedFrame() - 25);
-Q('forward25').onclick = () => seekBedFrame(bedFrame() + 25);
+Q('insertBack').onclick = () => seekBedFrame(stepFrame() - 1);
+Q('insertForward').onclick = () => seekBedFrame(stepFrame() + 1);
+Q('back25').onclick = () => seekBedFrame(stepFrame() - 25);
+Q('forward25').onclick = () => seekBedFrame(stepFrame() + 25);
 Q('bedZero').onclick = () => seekBedFrame(0);
 Q('jumpFrame').onclick = () => {
  const frame = Number(Q('goFrame').value);
@@ -448,7 +459,14 @@ Q('play').onclick = () => {
  overlayPreview = false;
  return playPreview(bv, 'bed');
 };
-Q('pause').onclick = () => { bv.pause(); ov.pause(); };
+Q('pause').onclick = () => {
+ if (!bv.paused && paintedBedFrame !== null) {
+  seekBedFrame(paintedBedFrame);
+  return;
+ }
+ bv.pause();
+ ov.pause();
+};
 Q('editorScribe').addEventListener('toggle', () => { if (Q('editorScribe').open) Q('pause').click(); });
 bv.addEventListener('pause', () => { if (!overlayPreview) ov.pause(); });
 Q('playOverlay').onclick = () => {
@@ -526,7 +544,7 @@ Q('sampleKey').onclick = () => {
 };
 function moveAnimation() {
  if (ov.readyState < 1) { report('Choose an animation in Toolbox.'); return; }
- if (!placementAt(bv.currentTime,timing())) Q('overlayZero').click();
+ if (!placementAt(bedFrame() / FPS,timing())) Q('overlayZero').click();
  if (Q('itemProperties').open) Q('itemProperties').close();
  setViewMode(false);
  editMode = 'overlay';
@@ -730,6 +748,7 @@ function detach(id) {
  Q(id).selectedIndex = -1;
  Q(id + 'Chosen').textContent = '';
  if (id === 'base') {
+  requestedBedFrame = paintedBedFrame = null;
   delete Q('baseChosen').dataset.expected;
   toolbox.renderBedName();
   const clock = Q('position');
@@ -800,15 +819,11 @@ Q('railTiming').onclick = () => {
  panel.scrollIntoView({block:'nearest'});
 };
 const insertPanel = Q('aspectToolbox');
-function pauseAtInsertion() {
- Q('pause').click();
- updateClock();
-}
 insertPanel.querySelector('summary').addEventListener('click', event => {
- if (!insertPanel.open && !event.target.closest('button')) pauseAtInsertion();
+ if (!insertPanel.open && !event.target.closest('button')) Q('pause').click();
 });
 Q('railToolbox').onclick = () => {
- pauseAtInsertion();
+ Q('pause').click();
  insertPanel.open = true;
  if (Q('pinnedSections').contains(insertPanel)) return;
 
@@ -827,7 +842,7 @@ Q('railToolbox').onclick = () => {
 Q('editAdded').onclick = () => {
  Q('pause').click();
  // At another frame, preserve the bed cursor and show the animation's first selected frame for appearance editing.
- if (!placementAt(bv.currentTime, timing())) Q('overlayZero').click();
+ if (!placementAt(bedFrame() / FPS, timing())) Q('overlayZero').click();
  Q('itemPropertiesTitle').textContent = addedPlacement().name;
  Q('itemPropertiesTitle').title = addedPlacement().name;
  Q('itemProperties').showModal();
@@ -836,8 +851,6 @@ Q('jumpAdded').onclick = () => seekBedFrame(startFrame);
 Q('sheetItemStart').onclick = () => seekBedFrame(startFrame);
 Q('closeItemProperties').onclick = () => Q('itemProperties').close();
 Q('itemProperties').addEventListener('close', () => { ov.pause(); });
-bv.addEventListener('seeked', updateClock);
-bv.addEventListener('pause', updateClock);
 function addedPlacement() {
  return {id:'overlay', name:Q('overlayChosen').textContent || Q('overlay').value, ...timing(), visible:true};
 }
@@ -951,6 +964,6 @@ if (inStudio) Promise.all([import('../studio/adapter.mjs?v=1'), import('../studi
    if (!raf) draw();
    report(project.title + ' · scene pass · paused');
   },
-  checkpoint: ({project}) => moduleSession('scene',project.id,{spec:spec(),time:bv.currentTime,view:{zoom:viewZoom,x:viewX,y:viewY},outputName:Q('outputName').value}),
+  checkpoint: ({project}) => moduleSession('scene',project.id,{spec:spec(),time:bedFrame()/FPS,view:{zoom:viewZoom,x:viewX,y:viewY},outputName:Q('outputName').value}),
  });
 });

@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 module.exports = async function checkInsertAndNames(page, bedName, overlayFile, overlayName) {
  const $ = id => page.locator('#' + id);
  const readFrame = () => page.evaluate(() => Number(document.getElementById('position').dataset.frame));
+ const waitForFrame = frame => page.locator('#position[data-frame="'+frame+'"]').waitFor();
  const readMedia = () => $('bv').evaluate(video => [video.currentSrc, video.currentTime, video.paused]);
  const rename = async (scope, from, to) => {
   await scope.getByRole('button', {name: 'Rename ' + from, exact:true}).tap();
@@ -20,6 +21,7 @@ module.exports = async function checkInsertAndNames(page, bedName, overlayFile, 
  const insert = page.getByRole('button', {name:'Insert', exact:true});
  await $('aspectToolbox').locator(':scope > summary').tap();
  assert.equal(await $('aspectToolbox').evaluate(panel => panel.open), true);
+ await page.waitForFunction(()=>document.getElementById('bv').paused&&!document.getElementById('bv').seeking);
  const held = await readMedia();
  const stoppedFrame = await readFrame();
  assert.equal(held[2], true);
@@ -29,9 +31,10 @@ module.exports = async function checkInsertAndNames(page, bedName, overlayFile, 
  assert.deepEqual(await readMedia(),held,'both openings must use the same paused playhead');
  await $('insertForward').tap();
  await $('insertForward').tap();
- assert.equal(await readFrame(), stoppedFrame + 2, 'each tap must move exactly one frame');
+ await waitForFrame(stoppedFrame + 2);
  await $('insertBack').tap();
  const placement = stoppedFrame + 1;
+ await waitForFrame(placement);
  assert.equal(await $('insertFrame').textContent(), 'Insert at F' + placement);
  assert.equal(await readFrame(), placement);
  assert.equal((await readMedia())[2], true);
@@ -70,7 +73,7 @@ module.exports = async function checkInsertAndNames(page, bedName, overlayFile, 
  assert.equal(await $('aspectBedName').locator('button').textContent(), namedBed);
  assert.equal(await $('addedName').textContent(), namedOverlay);
  assert.equal(await $('bedIn').inputValue(), String(placement));
- assert.equal(await readFrame(), placement);
+ await waitForFrame(placement);
 
  // A full Toolbox has both a page scroll and, when pinned, a separate list scroll.
  await insert.tap();
