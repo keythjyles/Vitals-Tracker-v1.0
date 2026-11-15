@@ -3,10 +3,10 @@ import {paintMatrix} from "../../shared/item-matrix.mjs?v=1";
 import {beginVideoLoad,loadVideoSource,clearVideoSource} from "./media-source.mjs?v=33";
 import {Composition,WIDTH,HEIGHT,FPS,lastFrame,frameAt,placementAt,fitRect} from "./composition.mjs?v=32";
 import {setupPinnedSections} from "../../shared/pinned-sections.mjs?v=32";
-import {setupToolbox} from "./toolbox.mjs?v=33";
+import {clipName,setupToolbox} from "./toolbox.mjs?v=34";
 import {formatFrameTime,writeFrameClock,frameStepControl} from "../../shared/frame-stamp.mjs?v=2";
 import {detectBackground} from "../caplock/background.mjs?v=32";
-const VERSION = 'R33';
+const RECIPE_VERSION = 'R33';
 const API='https://gs-previewlock-api.onrender.com',key=localStorage.getItem('gs_previewlock_key')||'',Q=id=>document.getElementById(id),C=Q('output'),ctx=C.getContext('2d'),stage=Q('stage'),bv=Q('bv'),ov=Q('ov'),work=Q('workPicture'),wc=work.getContext('2d'),compositor=new Composition();
 let pickerTarget='base', manualVideoSelection=false;function formatBytes(n){return n?(n/1048576).toFixed(1)+' MB':'Size unknown'}function renderLibrary(){const search=Q('assetSearch').value.trim().toLowerCase(),sort=Q('assetSort').value;let arr=items.filter(f=>f.name.toLowerCase().includes(search));arr.sort((a,b)=>sort==='name'?a.name.localeCompare(b.name):sort==='nameDesc'?b.name.localeCompare(a.name):sort==='size'?(b.size||b.file?.size||0)-(a.size||a.file?.size||0):sort==='old'?String(a.server_modified||a.client_modified||'').localeCompare(String(b.server_modified||b.client_modified||'')):String(b.server_modified||b.client_modified||'').localeCompare(String(a.server_modified||a.client_modified||'')));Q('assetCount').textContent=arr.length+' cloud videos';const box=Q('assetResults');box.replaceChildren();for(const f of arr){const pickValue=new URLSearchParams(location.search).get('studio')==='1'&&parent!==window?f.path_display:f.name;const card=document.createElement('div');card.className='assetCard'+(Q(pickerTarget).value===pickValue?' selected':'');const thumb=document.createElement('div');thumb.className='assetThumb';thumb.textContent='▶ Video preview';const title=document.createElement('div');title.className='assetName';title.textContent=f.name;const meta=document.createElement('div');meta.className='assetMeta';meta.textContent=[formatBytes(f.size||f.file?.size),f.server_modified||f.client_modified||''].filter(Boolean).join(' · ');const actions=document.createElement('div');actions.className='assetActions';const preview=document.createElement('button');preview.textContent='▶ Preview';preview.onclick=async()=>{preview.disabled=true;preview.textContent='Loading…';try{const p=await api('/api/playback?path='+encodeURIComponent(f.path_display));const video=document.createElement('video');video.className='assetPreview';video.controls=true;video.playsInline=true;video.preload='metadata';video.src=p.url;video.style.display='block';card.append(video);video.play().catch(()=>{});preview.textContent='▶ Play'}catch(e){preview.textContent='Preview failed';report(e.message)}finally{preview.disabled=false}};const choose=document.createElement('button');choose.textContent='Use this video';choose.onclick=async()=>{const id=pickerTarget;Q('assetDialog').close();await chooseCloudVideo(id,pickValue)};actions.append(preview,choose);card.append(thumb,title,meta,actions);box.append(card)}}function openLibrary(id) {
   pickerTarget = id;
@@ -55,18 +55,25 @@ async function loadFile(name, video) {
  refreshLoadedVideo(video);
  return file;
 }
-function markVideoSelection(id, name, cloudValue) {
+function markVideoSelection(id, name, cloudValue, label = name) {
  const select = Q(id);
  select.querySelector('[data-device-video]')?.remove();
  if (cloudValue === undefined) {
-  const option = new Option(name, name);
+  const option = new Option(label, name);
   option.dataset.deviceVideo = '';
   select.add(option);
-  select.value = name;
+  option.selected = true;
  } else {
   select.value = cloudValue;
  }
- Q(id + 'Chosen').textContent = name;
+ const chosen = Q(id + 'Chosen');
+ if (id === 'base') {
+  // Scribe stays bound to the imported source name when its display label changes.
+  if (cloudValue === undefined) chosen.dataset.expected = name;
+  else delete chosen.dataset.expected;
+  toolbox.renderBedName();
+ }
+ chosen.textContent = label;
  update();
 }
 function placeLoadedOverlay(at) {
@@ -93,8 +100,10 @@ async function chooseCloudVideo(id, value) {
   report(error.message);
  }
 }
-async function loadLocalVideo(id, {file, id: savedId}, at = bedFrame()) {
+async function loadLocalVideo(id, source, at = bedFrame()) {
  if (rendering) throw Error('Wait for the render to finish.');
+ const {file, id: savedId} = source;
+ const label = clipName(source);
  manualVideoSelection = true;
  Q('pause').click();
  overlayPreview = false;
@@ -102,21 +111,22 @@ async function loadLocalVideo(id, {file, id: savedId}, at = bedFrame()) {
  const signal = beginVideoLoad(video);
  const url = URL.createObjectURL(file);
  let loaded = false;
- report('Loading ' + file.name + '…');
+ report('Loading ' + label + '…');
  try {
   loaded = await loadVideoSource(video, url, file.name, signal);
   if (!loaded) return false;
   delete localFiles[id];
   localMedia[id] = file;
   refreshLoadedVideo(video);
-  markVideoSelection(id, file.name);
+  markVideoSelection(id, file.name, undefined, label);
   if (id === 'overlay') placeLoadedOverlay(at);
   sound();
-  const asset = savedId ? {id: savedId, file} : await toolbox.add(file);
+  const asset = savedId ? (await toolbox.get(savedId) ?? source) : await toolbox.add(file);
   if (video.getAttribute('src') === url) {
    localFiles[id] = asset.id;
+   if (clipName(asset) !== label) markVideoSelection(id, file.name, undefined, clipName(asset));
    toolbox.render();
-   report('Loaded from device: ' + file.name);
+   report('Loaded from device: ' + clipName(asset));
   }
   return video.getAttribute('src') === url;
  } finally {
@@ -152,7 +162,7 @@ function keySettings() {
 }
 function spec() {
  return {
-  tool: 'AspectLock', toolId: 'GS-TOOL-ASPECTLOCK', version: VERSION,
+  tool: 'AspectLock', toolId: 'GS-TOOL-ASPECTLOCK', version: RECIPE_VERSION,
   base: Q('base').value, overlay: Q('overlay').value, canvas: {width: WIDTH, height: HEIGHT},
   portraitPerspective: {x: bx, y: by, width: bw, finalOutput: 'fixed 9:16 viewport'},
   overlayTransform: {...overlayRect(), aspectRatio: ratio},
@@ -187,7 +197,7 @@ function update() {
  Q('keyEdge').disabled = mode !== 'custom';
  Q('sampleKey').disabled = !hasOverlay;
  for (const [id,output,suffix] of [['opacity','opacityValue','%'],['keyRange','keyRangeValue','%'],['keyEdge','keyEdgeValue','%'],['keyBackground','keyBackgroundValue','%']]) Q(output).textContent = Q(id).value + suffix;
- for (const id of ['bedZero','backFrame','forwardFrame','back25','forward25','goFrame','jumpFrame','play']) Q(id).disabled = !hasBed;
+ for (const id of ['bedZero','backFrame','forwardFrame','back25','forward25','goFrame','jumpFrame','play','insertBack','insertForward']) Q(id).disabled = !hasBed;
  Q('goFrame').max = hasBed ? lastFrame(bv.duration) : 0;
  Q('timingControls').disabled = !hasOverlay || !hasBed || rendering;
  Q('render').disabled = !hasBed || rendering;
@@ -253,6 +263,8 @@ function updateClock() {
   const frame = bedFrame();
   let clock = Q('position');
   if (clock.dataset.frame !== String(frame)) writeFrameClock(clock, {frame, time: frame / FPS, fps: FPS});
+  const insertion = 'Insert at F' + frame;
+  if (Q('insertFrame').textContent !== insertion) Q('insertFrame').textContent = insertion;
   Q('bedProgress').value = bv.currentTime / bv.duration;
  }
  const pos = formatFrameTime(ov.currentTime || 0);
@@ -351,6 +363,8 @@ function seekBedFrame(frame) {
 for (const [id,direction] of [['backFrame',-1],['forwardFrame',1],['sheetBack',-1],['sheetForward',1]]) {
  frameStepControl(Q(id),{getFrame:bedFrame,seek:seekBedFrame,direction});
 }
+Q('insertBack').onclick = () => seekBedFrame(bedFrame() - 1);
+Q('insertForward').onclick = () => seekBedFrame(bedFrame() + 1);
 Q('back25').onclick = () => seekBedFrame(bedFrame() - 25);
 Q('forward25').onclick = () => seekBedFrame(bedFrame() + 25);
 Q('bedZero').onclick = () => seekBedFrame(0);
@@ -576,7 +590,7 @@ Q('render').onclick = async () => {
 const keyModeFromUrl = () => ['green','blue','custom','alpha','off'].includes(params.get('key')) ? params.get('key') : null;
 function restoreSettings(saved, transformLegacy = true) {
  const bed = saved.portraitPerspective, overlay = saved.overlayTransform;
- const fixedViewport = saved.version === 'R32' || saved.version === VERSION;
+ const fixedViewport = saved.version === 'R32' || saved.version === RECIPE_VERSION;
  const useLegacy = transformLegacy && !fixedViewport && bed?.width > 0;
  const scale = useLegacy ? WIDTH / bed.width : 1;
  if (overlay) {
@@ -667,9 +681,12 @@ function detach(id) {
  Q(id).selectedIndex = -1;
  Q(id + 'Chosen').textContent = '';
  if (id === 'base') {
+  delete Q('baseChosen').dataset.expected;
+  toolbox.renderBedName();
   const clock = Q('position');
   delete clock.dataset.frame;
   clock.textContent = 'F—';
+  Q('insertFrame').textContent = 'Insert at F—';
   Q('bedProgress').value = 0;
  }
 }
@@ -681,7 +698,7 @@ function newEdit(keepBed) {
  detach('overlay');
  if (!keepBed) detach('base');
  overlayActive = overlayPreview = overlayAudible = false;
- restoreSettings({version:VERSION, blueRemoval:keyModeFromUrl() || 'green', portraitPerspective:{x:0,y:0,width:WIDTH}, overlayTransform:{x:40,y:350,width:460}});
+ restoreSettings({version:RECIPE_VERSION, blueRemoval:keyModeFromUrl() || 'green', portraitPerspective:{x:0,y:0,width:WIDTH}, overlayTransform:{x:40,y:350,width:460}});
  Q('viewReset').click();
  if (keepBed) seekBedFrame(0);
  if (Q('newEditDialog').open) Q('newEditDialog').close();
@@ -709,6 +726,7 @@ Q('startOver').onclick = askNewEdit;
 
 const toolbox = setupToolbox({
  pause: () => Q('pause').click(),
+ currentBed: () => localFiles.base,
  currentFiles: () => {
   let saved;
   try { saved = JSON.parse(localStorage.getItem(savedEditKey) || 'null')?.files; } catch {}
@@ -716,17 +734,27 @@ const toolbox = setupToolbox({
  },
  allowDevice: !inStudio,
  onSelect: (id, source) => loadLocalVideo(id, source),
+ onRename: entry => {
+  const label = clipName(entry);
+  for (const id of ['base','overlay']) {
+   if (localFiles[id] === entry.id) markVideoSelection(id, entry.file.name, undefined, label);
+  }
+  report('Name saved.');
+ },
 });
 Q('toolboxAdd').disabled = inStudio;
 Q('restoreEdit').hidden = inStudio;
 Q('toolboxCloud').onclick = () => openLibrary('overlay');
-function openSection(id) {
+function openSection(id, block = 'nearest') {
  Q('pause').click();
  const panel = Q(id);
  panel.open = true;
- panel.scrollIntoView({block:'nearest'});
+ panel.scrollIntoView({block});
 }
-Q('railToolbox').onclick = () => openSection('aspectToolbox');
+Q('railToolbox').onclick = () => {
+ openSection('aspectToolbox', 'start');
+ updateClock();
+};
 Q('railTiming').onclick = () => openSection('aspectTiming');
 Q('editAdded').onclick = () => {
  Q('pause').click();
@@ -743,7 +771,7 @@ Q('itemProperties').addEventListener('close', () => { ov.pause(); });
 bv.addEventListener('seeked', updateClock);
 bv.addEventListener('pause', updateClock);
 function addedPlacement() {
- return {id:'overlay', name:Q('overlay').value || Q('overlayChosen').textContent, ...timing(), visible:true};
+ return {id:'overlay', name:Q('overlayChosen').textContent || Q('overlay').value, ...timing(), visible:true};
 }
 let paintedMatrix;
 function paintAddedMatrix() {
@@ -816,6 +844,7 @@ window.addEventListener('DOMContentLoaded', () => {
  if (nav) Q('aspectExport').after(nav);
  const player = document.querySelector('.gs-player-shell');
  if (player) {
+  if (!inStudio) toolbox.attachBedName(player.querySelector('.gs-player-filename'));
   player.append(Q('pinnedSections'), Q('status'));
   setupPinnedSections({host:Q('pinnedSections'), player, key:'aspectlock-pinned-section', togglePlayer:Q('pinPlayer')});
   new ResizeObserver(() => { document.body.style.setProperty('--aspect-player-height', player.offsetHeight + 'px'); }).observe(player);

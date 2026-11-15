@@ -102,6 +102,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');const asse
  await ply.tap();
  assert.equal(await localAspect.locator('#keyMode').inputValue(),'blue');
  assert.deepEqual(await localAspect.locator('#bv,#ov').evaluateAll(videos=>videos.map(video=>video.currentSrc.startsWith('blob:')&&video.paused&&video.readyState>=2)),[true,true]);
+ await require('../../aspectlock/insert-browser.cjs')(localAspect,'source25.mp4','/tmp/caplock-fixtures/blue-caption.mp4','blue-caption.mp4');
  await localAspect.close();
  assert.deepEqual(aspectErrors,[]);console.log(JSON.stringify({aspectLock:{devicePicker:true,addedRow:true,propertiesSheet:true,pausedNavigation:true,threeViewportRailChecks:true,errors:aspectErrors}}));
  await require('./local-pass-browser.cjs')(browser,base);await require('./background-browser.cjs')(browser,base);await require('./local-entry-browser.cjs')(browser,base,bytes);await require('./placement-browser.cjs')(browser,base,bytes);await require('./project-picker-browser.cjs')(browser,base,bytes);await require('./focus-browser.cjs')(browser,base,bytes);await require('./toolbox-browser.cjs')(browser,cleanBase);await require('./framing-browser.cjs')(browser,cleanBase);await require('./source-audio-browser.cjs')(browser,cleanBase);
