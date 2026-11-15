@@ -24,7 +24,19 @@ main{padding-top:4px}
 #editorScribe textarea{min-height:55px}
 #toolboxItems{display:grid;gap:5px}
 .toolbox-row{display:flex;align-items:center;flex-wrap:wrap;gap:4px;border-bottom:1px solid #42627c;padding:4px 0}
-.toolbox-row strong{flex:1 1 100%;overflow-wrap:anywhere}
+.toolbox-row .aspect-clip-name{flex:1 1 100%;min-width:0}
+.aspect-name-button{display:block;max-width:100%;min-width:0;padding:0;background:transparent;border:0;text-align:left;color:#e7f1fa;text-decoration:underline dotted;text-underline-offset:3px;overflow-wrap:anywhere}
+.toolbox-row .aspect-name-button{padding:2px 0;font-weight:650}
+#aspectBedName{min-width:0}
+#aspectBedName .aspect-name-button{font-size:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:29px}
+.gs-video-reference:has(#aspectBedName form) #aspectBedName{grid-column:1/-1}
+.aspect-clip-name form{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:4px;align-items:center}
+.aspect-clip-name input{width:100%;min-width:0;padding:4px 6px}
+.aspect-clip-name form button{min-height:30px;padding:4px 7px}
+.aspect-clip-name form small{grid-column:1/-1;color:#ffcfb0}
+.insert-point{display:grid;grid-template-columns:38px minmax(0,1fr) 38px;align-items:center;gap:6px;margin:5px 0;font-variant-numeric:tabular-nums}
+.insert-point output{text-align:center}
+.insert-point button{min-height:34px;touch-action:manipulation}
 #toolboxPreview{display:block;max-width:100%;max-height:200px;margin-top:5px}
 #itemPropertiesTitle{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin-right:auto}
 #itemProperties .item-heading{position:sticky;top:-10px;background:#152637;z-index:2}

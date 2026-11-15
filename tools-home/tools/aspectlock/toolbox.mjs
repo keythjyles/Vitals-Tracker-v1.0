@@ -19,10 +19,14 @@ async function filesTransaction(mode, action) {
  });
 }
 
-export function setupToolbox({onSelect, currentFiles, pause, allowDevice}) {
+export function clipName({file, label}) {
+ return label ?? file.name;
+}
+
+export function setupToolbox({onSelect, onRename, currentFiles, currentBed, pause, allowDevice}) {
  const $ = id => document.getElementById(id);
  const items = new Map();
- let previewUrl;
+ let previewUrl, bedName;
  const showError = error => { $('toolboxStatus').textContent = error.message; };
  const ready = filesTransaction('readonly', store => store.getAll()).then(rows => {
   for (const row of rows) if (!items.has(row.id)) items.set(row.id, row);
@@ -51,18 +55,116 @@ export function setupToolbox({onSelect, currentFiles, pause, allowDevice}) {
   previewUrl = null;
  }
 
- function render() {
+ async function rename(id, label) {
+  let updated;
+  await filesTransaction('readwrite', store => {
+   const request = store.get(id);
+   request.onsuccess = () => {
+    if (!request.result) return;
+    updated = {...request.result, label};
+    store.put(updated);
+   };
+   return request;
+  });
+  if (!updated) throw Error('This video is missing from the saved Toolbox.');
+  items.set(id, updated);
+  return updated;
+ }
+
+ function nameEditor(entry, inPlayer = false) {
+  const title = clipName(entry);
+  const box = document.createElement('div');
+  box.className = 'aspect-clip-name';
+  const button = action(title, edit, 'Rename ' + title);
+  button.className = 'aspect-name-button';
+  button.title = 'Tap to rename';
+  box.append(button);
+  function edit() {
+   const form = document.createElement('form');
+   const input = document.createElement('input');
+   input.type = 'text';
+   input.value = title;
+   input.autocomplete = 'off';
+   input.setAttribute('aria-label', 'Video name');
+   const save = document.createElement('button');
+   save.type = 'submit';
+   save.textContent = 'Save';
+   const cancel = action('Cancel', close);
+   const error = document.createElement('small');
+   error.setAttribute('role', 'alert');
+   error.hidden = true;
+   function close() {
+    box.replaceChildren(button);
+    button.focus({preventScroll: true});
+   }
+   function showNameError(message) {
+    error.textContent = message;
+    error.hidden = false;
+   }
+   form.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && !save.disabled) { event.preventDefault(); close(); }
+   });
+   form.onsubmit = async event => {
+    event.preventDefault();
+    if (save.disabled) return;
+    const label = input.value.trim();
+    if (!label) { showNameError('Enter a video name.'); input.focus(); return; }
+    if (label === title) { close(); return; }
+    error.hidden = true;
+    input.readOnly = save.disabled = cancel.disabled = true;
+    try {
+     const updated = await rename(entry.id, label);
+     const restoreFocus = form.contains(document.activeElement);
+     onRename(updated);
+     render(restoreFocus ? entry.id : null, inPlayer);
+    } catch {
+     showNameError('Could not save the name. Try again.');
+     input.focus({preventScroll: true});
+    } finally {
+     input.readOnly = save.disabled = cancel.disabled = false;
+    }
+   };
+   form.append(input, save, cancel, error);
+   box.replaceChildren(form);
+   input.focus({preventScroll: true});
+   input.select();
+  }
+  return box;
+ }
+
+ function attachBedName(original) {
+  const slot = document.createElement('div');
+  slot.id = 'aspectBedName';
+  original.after(slot);
+  bedName = {original, slot};
+  renderBedName();
+ }
+
+ function renderBedName(focus = false) {
+  if (!bedName) return;
+  const entry = items.get(currentBed());
+  bedName.original.hidden = Boolean(entry);
+  bedName.slot.hidden = !entry;
+  if (entry !== bedName.entry) {
+   bedName.entry = entry;
+   bedName.slot.replaceChildren(...(entry ? [nameEditor(entry, true)] : []));
+  }
+  if (focus) bedName.slot.querySelector('.aspect-name-button')?.focus({preventScroll: true});
+ }
+
+ function render(focusId, inPlayer = false) {
   const host = $('toolboxItems');
   host.replaceChildren();
   const inUse = currentFiles();
-  for (const {id, file} of allowDevice ? items.values() : []) {
+  for (const entry of allowDevice ? items.values() : []) {
+   const {id, file} = entry;
+   const label = clipName(entry);
    const row = document.createElement('div');
    row.className = 'toolbox-row';
-   const name = document.createElement('strong');
-   name.textContent = file.name;
+   const name = nameEditor(entry);
    const use = target => async () => {
     stopPreview();
-    await onSelect(target, {id, file});
+    await onSelect(target, entry);
    };
    const remove = action('Remove', async () => {
     if (currentFiles().includes(id)) throw Error('This file is in the current edit.');
@@ -70,7 +172,7 @@ export function setupToolbox({onSelect, currentFiles, pause, allowDevice}) {
     stopPreview();
     items.delete(id);
     render();
-   }, 'Remove ' + file.name + ' from Toolbox');
+   }, 'Remove ' + label + ' from Toolbox');
    remove.disabled = inUse.includes(id);
    row.append(name, action('Preview', () => {
     pause();
@@ -79,10 +181,12 @@ export function setupToolbox({onSelect, currentFiles, pause, allowDevice}) {
     previewUrl = URL.createObjectURL(file);
     video.src = previewUrl;
     video.hidden = false;
-   }, 'Preview ' + file.name), action('Use as bed', use('base'), 'Use ' + file.name + ' as bed'), action('Overlay here', use('overlay'), 'Overlay ' + file.name + ' at current frame'), remove);
+   }, 'Preview ' + label), action('Use as bed', use('base'), 'Use ' + label + ' as bed'), action('Overlay here', use('overlay'), 'Overlay ' + label + ' at current frame'), remove);
    host.append(row);
+   if (id === focusId && !inPlayer) name.querySelector('button').focus({preventScroll: true});
   }
   $('toolboxEmpty').hidden = items.size > 0;
+  renderBedName(inPlayer && focusId === currentBed());
  }
 
  async function add(file) {
@@ -115,5 +219,5 @@ export function setupToolbox({onSelect, currentFiles, pause, allowDevice}) {
  $('aspectToolbox').addEventListener('toggle', () => { if (!$('aspectToolbox').open) stopPreview(); });
  void ready.then(render);
 
- return {add, render, stopPreview, async get(id) { await ready; return items.get(id); }};
+ return {add, render, attachBedName, renderBedName, stopPreview, async get(id) { await ready; return items.get(id); }};
 }
