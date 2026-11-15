@@ -61,9 +61,45 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');const asse
  await tapBack();
  await tapBack();
  assert.equal(await readBedFrame(),2,'double-tap reverses 25 frames from the starting frame');
+ const ply=localAspect.locator('#play');
+ const fit=await localAspect.evaluate(()=>{
+  const monitor=document.querySelector('#stage').getBoundingClientRect();
+  const output=document.querySelector('#stageScene').getBoundingClientRect();
+  return {margin:monitor.height-output.height,ratio:output.width/output.height};
+ });
+ assert.ok(fit.margin<=12&&Math.abs(fit.ratio-9/16)<.002,'the portrait uses the available monitor height');
+ await localAspect.locator('#goFrame').fill('25');
+ await localAspect.locator('#jumpFrame').tap();
+ await localAspect.evaluate(()=>{
+  Object.defineProperty(document.getElementById('bv'),'readyState',{value:HTMLMediaElement.HAVE_METADATA,configurable:true});
+ });
+ await ply.tap();
+ await localAspect.evaluate(()=>delete document.getElementById('bv').readyState);
+ await localAspect.waitForFunction(()=>document.getElementById('bv').currentTime>1.14);
+ await ply.tap();
+ await localAspect.locator('#bedZero').click();
+ // Hold the animation's load completion until playback has resumed.
+ await localAspect.evaluate(()=>{
+  document.addEventListener('loadeddata', function hold(event) {
+   if(event.target.id!=='ov')return;
+   event.stopImmediatePropagation();
+   document.removeEventListener('loadeddata',hold,true);
+   window.finishOverlayLoad=()=>event.target.dispatchEvent(new Event('loadeddata'));
+  },true);
+ });
  await localAspect.locator('.gs-source-grip').click();
  await pickLocal(localAspect.locator('#pickOverlay'),{name:'local-overlay.webm',mimeType:'video/webm',buffer:Buffer.from(bytes)});
+ await localAspect.waitForFunction(()=>window.finishOverlayLoad);
+ await ply.tap();
+ await localAspect.waitForFunction(()=>document.getElementById('bv').currentTime>.15);
+ await localAspect.evaluate(()=>window.finishOverlayLoad());
  await localAspect.waitForFunction(()=>document.querySelector('#addedName').textContent==='local-overlay.webm');
+ await localAspect.waitForFunction(()=>{
+  const bed=document.getElementById('bv');
+  return !bed.paused&&bed.currentTime>.3;
+ });
+ assert.equal(await localAspect.locator('#bedIn').inputValue(),'0','placement keeps the frame selected before loading');
+ await ply.tap();
  assert.equal(await localAspect.locator('#keyMode').inputValue(),'blue');
  assert.deepEqual(await localAspect.locator('#bv,#ov').evaluateAll(videos=>videos.map(video=>video.currentSrc.startsWith('blob:')&&video.paused&&video.readyState>=2)),[true,true]);
  await localAspect.close();

@@ -109,9 +109,11 @@ export function setupToolbox({onSelect, currentFiles, pause, allowDevice}) {
    catch (error) { showError(error); }
   }
  };
- $('toolboxPreview').addEventListener('play', pause);
+ $('toolboxPreview').addEventListener('play', event => {
+  if (!event.currentTarget.hidden && !event.currentTarget.paused) pause();
+ });
  $('aspectToolbox').addEventListener('toggle', () => { if (!$('aspectToolbox').open) stopPreview(); });
  void ready.then(render);
 
- return {add, render, async get(id) { await ready; return items.get(id); }};
+ return {add, render, stopPreview, async get(id) { await ready; return items.get(id); }};
 }

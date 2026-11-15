@@ -43,7 +43,6 @@ export async function loadVideoSource(video, url, name, signal) {
   if (signal.aborted) return false;
   sources.set(video, url);
   if (previous?.startsWith('blob:')) URL.revokeObjectURL(previous);
-  video.pause();
   return true;
 }
 
