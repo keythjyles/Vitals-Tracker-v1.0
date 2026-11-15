@@ -8,6 +8,15 @@ export function stageAccepts(p,a,module){if(a.parent&&a.cutPassId&&p.assets.find
 export function stageStale(p,r){if(r.stage==='captioned')return r.recipeJSON!==JSON.stringify(captionRecipe(p.caplock));if(r.stage==='jokelet'){const bed=stageAsset(p,'captioned');return !bed||!r.parents?.some(a=>a.id===bed.id&&a.sha256===bed.sha256)||r.recipeJSON!==JSON.stringify(soundRecipe(p.studio?.modules?.sound?.session));}return false;}
 export function stageAsset(p,stage){const records=[...(p?.production?.records||[])].reverse();for(const r of records){if(r.stage===stage&&r.verified&&!stageStale(p,r)){const a=p.assets.find(a=>a.id===r.assetId&&a.sha256===r.sha256);if(a)return {...a,production:r};}}return null;}
 export function moduleReady(p,module){return (p.assets||[]).some(a=>stageAccepts(p,a,module))||module==='captions'&&(!!p.caplock||p.cutOrigin?.state==='ready')||module==='cut'&&(p.assets||[]).some(a=>a.role==='caption');}
+function captionBackgroundRecipe(key){
+ if(!key?.enabled)return {};
+ const {color,similarity,blend,backgroundOpacity,sourceAlpha,replacement}=key;
+ return {chroma:{enabled:true,color,similarity,blend,
+  ...(backgroundOpacity||(replacement?.enabled&&backgroundOpacity===0)?{backgroundOpacity}:{}),
+  ...(sourceAlpha?{sourceAlpha:true}:{}),
+  ...(replacement?.enabled?{replacement:{enabled:true,color:replacement.color}}:{}),
+ }};
+}
 export function captionRecipe(p){
  if(!p)return null;
  const keys=['id','type','inFrame','outFrame','trimInFrame','trimOutFrame','playbackRate','x','y','width','rotation','opacity','volume','loop'];
@@ -17,7 +26,7 @@ export function captionRecipe(p){
    ...Object.fromEntries(keys.map(k=>[k,c[k]??null])),ref:{path:c.ref.path,size:c.ref.size},
    ...(c.sourceDuration?{sourceDuration:c.sourceDuration}:{}),...(c.sourceTrim?{sourceTrim:c.sourceTrim}:{}),
    ...(c.holdLastFrame?{holdLastFrame:true}:{}),...(c.mirrorX===true?{mirrorX:true}:{}),...(c.flipY===true?{flipY:true}:{}),
-   ...(c.chroma?.enabled?{chroma:{enabled:true,color:c.chroma.color,similarity:c.chroma.similarity,blend:c.chroma.blend,...(c.chroma.backgroundOpacity?{backgroundOpacity:c.chroma.backgroundOpacity}:{})}}:{})
+   ...captionBackgroundRecipe(c.chroma)
   }))};
 }
 export function soundRecipe(session){if(!session?.state)return null;const s=session.state;return {schema:'GS-SoundRender-1',bed:session.bed?{id:session.bed.id,sha256:session.bed.sha256,path:session.bed.path}:null,sourceFps:s.sourceFps,videoVolume:s.videoVolume,mixer:s.mixer,export:s.export,...(s.toolbox?.visual?.length?{visual:s.toolbox.visual.map(item=>({...item}))}:{}),clips:s.clips,soundRefs:session.soundRefs||{},sounds:s.sounds,recordings:s.recordings};}

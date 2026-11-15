@@ -31,7 +31,12 @@ module.exports=async(browser,base)=>{
  await page.locator('#clipTimeline .item-open').last().click();assert.match(await page.locator('#clipFrameInfo').textContent(),/24 source frames/);await page.locator('#clipStart').fill('10');await page.locator('#clipStart').press('Tab');assert.equal(await page.locator('#clipEnd').inputValue(),'35');
  await page.locator('#clipEnd').fill('60');await page.locator('#clipEnd').press('Tab');assert.equal(await page.locator('#clipSpeed').inputValue(),'0.5');await page.locator('#closeClipProperties').click();
  await page.locator('[data-for=seek] input').fill('55');await page.getByRole('button',{name:'Go to frame',exact:true}).click();await page.waitForFunction(()=>{const c=document.querySelector('.media-layer:not([hidden]) .keyed-frame[data-source-time]');return c&&c.getContext('2d').getImageData(230,80,1,1).data[3]===255;});
+ assert.equal(await page.locator('#insertCaption').textContent(),'Insert');
+ await page.locator('#placementBar').getByRole('button',{name:'Toolbox',exact:true}).tap();
+ assert.match(await page.locator('#toolboxStatus').textContent(),/insert at F55/);
+ await page.locator('#toolboxClose').tap();
  await page.locator('#insertCaption').click();assert.equal(await page.locator('.toolbox-row.used').count(),2);await page.getByRole('button',{name:'Insert blue-caption.mp4',exact:true}).click();await page.waitForFunction(()=>document.querySelector('#itemCount').textContent==='3');
+ assert.equal((await draft()).clips[2].inFrame,55);
  await page.screenshot({path:'/tmp/caplock-fixtures/r22-toolbox.png',fullPage:true});
  const layout=await page.locator('#playerDock').evaluate(e=>({height:e.getBoundingClientRect().height,overflow:document.documentElement.scrollWidth>innerWidth}));assert.ok(layout.height<=370,JSON.stringify(layout));assert.equal(layout.overflow,false);
  await page.locator('#newVideoPhoto').setInputFiles('/tmp/caplock-fixtures/source30.mp4');await page.waitForFunction(()=>document.querySelector('#bedName').textContent==='source30.mp4'&&!document.querySelector('#play').disabled);

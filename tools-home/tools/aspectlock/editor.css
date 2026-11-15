@@ -45,6 +45,12 @@ main{padding-top:4px}
 #itemPropertiesTitle{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin-right:auto}
 #itemProperties .item-heading{position:sticky;top:-10px;background:#152637;z-index:2}
 .opacity-control,.key-controls{grid-column:1/-1}
+.clip-background-settings{grid-column:1/-1;margin:0}
+.clip-background-settings summary{cursor:pointer;font-weight:700}
+.clip-background-modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:5px 0}
+.clip-background-modes button{min-width:0;padding:4px}
+.clip-background-modes button[aria-pressed="true"]{background:#eacb86;color:#172231;border-color:#f6d99b;font-weight:700}
+.key-color-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:end;gap:5px}
 .opacity-control input,.key-controls input[type=range]{display:block;width:100%;accent-color:#f1cf80;touch-action:pan-y;padding:0}
 .range-labels{display:flex;justify-content:space-between}
 .key-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}

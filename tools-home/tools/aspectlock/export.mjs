@@ -1,7 +1,7 @@
 import {Input,ALL_FORMATS,BlobSource,CanvasSink} from '../sxlock/vendor/mediabunny-1.62.1-gs1.mjs';
 import {exportVideo,inspectVideo} from '../sxlock/export-engine.mjs?v=caplock28';
 import {readSourceAudio} from '../caplock/source-audio.mjs?v=28';
-import {Composition,WIDTH,HEIGHT,FPS,placementAt} from './composition.mjs?v=32';
+import {Composition,WIDTH,HEIGHT,FPS,placementAt} from './composition.mjs?v=36';
 
 export async function renderAspect({bed, animation, scene, key, range, audio, onPhase, onProgress}) {
  const inputs = [];

@@ -3,16 +3,16 @@ import {setupPinnedSections} from '../../shared/pinned-sections.mjs?v=32';
 import {writeFrameClock,frameStepControl} from '../../shared/frame-stamp.mjs?v=2';
 import {compositionFrames,bedTime,TailClock} from './composition-time.mjs?v=25';
 import {percentGain,inspectSourceAudio} from './source-audio.mjs?v=28';
-import {createToolboxUI} from './toolbox-ui.mjs?v=32';
+import {createToolboxUI} from './toolbox-ui.mjs?v=33';
 import {rememberLocalMedia,readLocalMedia} from './local-media.mjs?v=31';
-import {isToolboxEntry,makeToolboxPlacement,fitVideoPlacement,setPlacementSpeed} from './toolbox-core.mjs?v=32';
+import {isToolboxEntry,makeToolboxPlacement,fitVideoPlacement,setPlacementSpeed} from './toolbox-core.mjs?v=33';
 import {inspectToolboxFile} from './toolbox-media.mjs?v=28';
 import {createTrimDialog} from './trim-dialog.mjs?v=28';
 import {passFilename,matchLocalFile,localPassKey} from './local-pass.mjs?v=21';
-import {renderCaptioned} from './composite.mjs?v=32';
-import {DEFAULT_CHROMA,detectBackground} from './background.mjs?v=32';
+import {renderCaptioned} from './composite.mjs?v=33';
+import {DEFAULT_CHROMA,DEFAULT_REPLACEMENT_COLOR,detectBackground} from './background.mjs?v=33';
 import {captionJobStatus} from '../../shared/caption-job-status.mjs?v=1';
-import {stageAsset,stageRecord,stageFilename,captionRecipe,stageForName,pendingCaptions} from '../../shared/production-stages.mjs?v=32';
+import {stageAsset,stageRecord,stageFilename,captionRecipe,stageForName,pendingCaptions} from '../../shared/production-stages.mjs?v=33';
 import {saveProductionStage} from '../../shared/production-client.mjs?v=1';
 import {withCaptionBatch} from './caption-batch.mjs?v=22';
 import {openVideoProject} from '../../shared/video-project.mjs?v=1';
@@ -27,8 +27,8 @@ import {captionNumber,numberedCaptionFiles,activeCaption,startCaptionSequence,na
 import {paintMatrix,matrixFrame} from '../../shared/item-matrix.mjs?v=1';
 import {rateOf,fitRate} from './clip-time.mjs?v=28';
 import {words,moveWords,shiftWords,geminiPrompt} from './script.mjs?v=4';
-import {LayerTracks} from './layer-track.mjs?v=32';
-import {FPS,DEFAULT_STYLE,createProject,phrase,importTranscript,subtitle,timed,effective,validateProject,validateStyle} from './core.mjs?v=32';
+import {LayerTracks} from './layer-track.mjs?v=33';
+import {FPS,DEFAULT_STYLE,createProject,phrase,importTranscript,subtitle,timed,effective,validateProject,validateStyle} from './core.mjs?v=33';
 const $=id=>document.getElementById(id),v=$('video'),API='https://gs-previewlock-api.onrender.com';
 // Owner lock: built-in text captions cannot be enabled by UI, URL, or restored data.
 const BUILTIN_CAPTIONING_LOCKED=true;
@@ -394,6 +394,8 @@ function lockBuiltInCaptioning(){
 }
 $('showNative').onchange=e=>{if(BUILTIN_CAPTIONING_LOCKED){e.target.checked=false;return;}change(()=>{project.nativeCaptions=$('showNative').checked;});};
 const gainFields = new Set(['volume','opacity']);
+const backgroundButtons = {keep:'chromaKeep',replace:'chromaReplace',transparent:'chromaTransparent'};
+const backgroundMode = key => !key.enabled ? 'keep' : key.replacement?.enabled ? 'replace' : 'transparent';
 const clipFields={clipStart:'inFrame',clipEnd:'outFrame',clipTrim:'trimInFrame',clipTrimOut:'trimOutFrame',clipSpeed:'playbackRate',clipWidth:'width',clipX:'x',clipY:'y',clipOpacity:'opacity',clipVolume:'volume',clipRotation:'rotation'};
 const orientationButtons=[['clipMirror','mirrorX'],['clipFlip','flipY']];
 const clipCurrent=()=>project.clips.find(c=>c.id===selectedClip);
@@ -450,16 +452,8 @@ function renderClips(){
  $('itemCount').textContent=placed.length;
  $('itemEmpty').hidden=!!placed.length;
  $('clipName').value=c?.name||'';
- const key=c?.chroma||{...DEFAULT_CHROMA,enabled:false};
- $('captionBackground').hidden=!c||c.type==='audio';
- $('chromaEnabled').checked=key.enabled;
- $('chromaColor').value=key.color;
- $('chromaSimilarity').value=Math.round(key.similarity*100);
- $('chromaBlend').value=Math.round(key.blend*100);
- $('chromaOpacity').value=Math.round((key.backgroundOpacity??0)*100);
- $('chromaOpacityValue').textContent=$('chromaOpacity').value+'%';
+ renderBackground(c);
  $('clipOpacityValue').textContent=Math.round((c?.opacity??1)*100)+'%';
- for(const id of ['chromaEnabled','chromaColor','chromaAuto','chromaOpacity','chromaSimilarity','chromaBlend'])$(id).disabled=!c||!!c.locked||c.type==='audio';
  for(const [index,t] of placed.entries()){
   const option=document.createElement('option');
   option.value=t.id;
@@ -511,19 +505,43 @@ for(const [id,key] of orientationButtons)$(id)?.addEventListener('click',()=>cha
  else{c[key]=true;project.version=Math.max(project.version,9);}
 }));
 $('applyClip').onclick=()=>change(()=>{const c=clipCurrent();if(!c)return;c.name=$('clipName').value.trim()||c.name;for(const [id,key] of Object.entries(clipFields))if((key!=='rotation'||editMode==='rotate')&&(!['trimInFrame','trimOutFrame'].includes(key)||!c.sourceTrim))c[key]=key==='trimOutFrame'&&$(id).value===''?null:gainFields.has(key)?percentGain($(id).value):Number($(id).value);c.loop=$('clipLoop').checked;});
+function renderBackground(clip) {
+ const key=clip?.chroma||{...DEFAULT_CHROMA,enabled:false};
+ const mode=backgroundMode(key);
+ const unavailable=!clip||clip.type==='audio';
+ $('captionBackground').hidden=unavailable;
+ for(const [value,id] of Object.entries(backgroundButtons)){
+  $(id).setAttribute('aria-pressed',String(mode===value));
+  $(id).disabled=unavailable||!!clip?.locked;
+ }
+ $('chromaOptions').hidden=mode==='keep';
+ $('chromaReplacementRow').hidden=mode!=='replace';
+ $('chromaSourceAlpha').hidden=!key.sourceAlpha;
+ $('chromaEdges').hidden=!!key.sourceAlpha;
+ $('chromaOpacityRow').hidden=!!key.sourceAlpha&&mode!=='replace';
+ $('chromaColor').value=key.color;
+ $('chromaReplacementColor').value=key.replacement?.color??DEFAULT_REPLACEMENT_COLOR;
+ $('chromaSimilarity').value=Math.round(key.similarity*100);
+ $('chromaBlend').value=Math.round(key.blend*100);
+ $('chromaOpacity').value=Math.round((key.backgroundOpacity??Number(mode==='replace'))*100);
+ $('chromaOpacityValue').textContent=$('chromaOpacity').value+'%';
+ for(const id of ['chromaColor','chromaReplacementColor','chromaAuto','chromaOpacity','chromaSimilarity','chromaBlend'])$(id).disabled=unavailable||!!clip?.locked||mode==='keep';
+}
+
 // Preview while dragging and commit only once for undo and recovery.
 function previewOpacity(id,output,property){
  const field=$(id);
+ const editable = clip => clip&&!clip.locked&&(property==='opacity'||clip.chroma?.enabled);
  let active;
  field.oninput=()=>{
   const clip=clipCurrent();
-  if(!clip||clip.locked)return;
+  if(!editable(clip))return;
   if(active?.clip!==clip){
    active={clip,original:property==='opacity'?clip.opacity:clip.chroma};
   }
   const value=percentGain(field.value);
   if(property==='opacity')clip.opacity=value;
-  else clip.chroma={...(clip.chroma||DEFAULT_CHROMA),enabled:true,backgroundOpacity:value};
+  else clip.chroma={...clip.chroma,backgroundOpacity:value};
   $(output).textContent=Math.round(value*100)+'%';
   layers.update();
  };
@@ -534,34 +552,77 @@ function previewOpacity(id,output,property){
    else active.clip.chroma=active.original;
    active=null;
   }
-  if(!clip||clip.locked)return;
+  if(!editable(clip))return;
   change(()=>{
    if(property==='opacity')clip.opacity=value;
-   else clip.chroma={...(clip.chroma||DEFAULT_CHROMA),enabled:true,backgroundOpacity:value};
+   else clip.chroma={...clip.chroma,backgroundOpacity:value};
   });
  };
 }
 previewOpacity('clipOpacity','clipOpacityValue','opacity');
 previewOpacity('chromaOpacity','chromaOpacityValue','backgroundOpacity');
 $('clipVolume').onchange=()=>$('applyClip').click();for(const [id,delta]of [['clipVolumeDown',-5],['clipVolumeUp',5]])$(id).onclick=()=>{$('clipVolume').value=String(Math.max(0,Math.min(100,Number($('clipVolume').value)+delta)));$('applyClip').click();};
-function applyBackground(){change(()=>{const c=clipCurrent();if(c)c.chroma={enabled:$('chromaEnabled').checked,color:$('chromaColor').value,similarity:Number($('chromaSimilarity').value)/100,blend:Number($('chromaBlend').value)/100,backgroundOpacity:percentGain($('chromaOpacity').value)};});}
-for(const id of ['chromaEnabled','chromaColor','chromaSimilarity','chromaBlend'])$(id).onchange=()=>{if(id!=='chromaEnabled')$('chromaEnabled').checked=true;applyBackground();};
-let keyPreview;
-$('chromaColor').oninput=()=>{
+function sampleClipBackground(clip){
+ const source=layers.media.get(clip.id)?.el;
+ return source ? detectBackground(source,{includeAlpha:true}) : null;
+}
+
+for(const [mode,id] of Object.entries(backgroundButtons))$(id).onclick=()=>{
  const clip=clipCurrent();
- if(!clip||clip.locked)return;
- keyPreview ||= {clip,original:clip.chroma};
- clip.chroma={...(clip.chroma||DEFAULT_CHROMA),enabled:true,color:$('chromaColor').value};
- $('chromaEnabled').checked=true;
- layers.update();
+ if(!clip||clip.locked||clip.type==='audio')return;
+ const previous=clip.chroma||{...DEFAULT_CHROMA,enabled:false};
+ if(mode==='keep'){
+  change(()=>{clip.chroma={...previous,enabled:false};});
+  return;
+ }
+ const replace=mode==='replace';
+ if(replace&&backgroundMode(previous)==='replace')return;
+ let sampled;
+ if(!previous.enabled&&previous.backgroundOpacity===undefined){
+  try{sampled=sampleClipBackground(clip);}catch{/* The source color can still be picked. */}
+ }
+ const replacement=replace||previous.replacement ? {
+  enabled:replace,color:previous.replacement?.color??DEFAULT_REPLACEMENT_COLOR,
+ } : undefined;
+ change(()=>{
+  clip.chroma={...(sampled||previous),enabled:true,backgroundOpacity:Number(replace),...(replacement?{replacement}:{})};
+ });
 };
-$('chromaColor').onchange=()=>{
- if(keyPreview){keyPreview.clip.chroma=keyPreview.original;keyPreview=null;}
- $('chromaEnabled').checked=true;
- applyBackground();
+
+for(const [id,property] of [['chromaSimilarity','similarity'],['chromaBlend','blend']])$(id).onchange=()=>{
+ const clip=clipCurrent();
+ if(clip?.chroma?.enabled&&!clip.locked)change(()=>{clip.chroma[property]=Number($(id).value)/100;});
 };
-addColorWheel($('chromaColor'));
-$('chromaAuto').onclick=()=>{const c=clipCurrent(),m=layers.media.get(c?.id);if(!c||!m)return;try{const key=detectBackground(m.el);if(!key)return say('No uniform solid background detected. Choose its color in Caption background.');change(()=>{c.chroma=key;});say('Solid background detected and removed.');}catch(e){say('Background detection failed: '+e.message);}};
+
+function bindBackgroundColor(id, update){
+ const field=$(id);
+ let preview;
+ field.oninput=()=>{
+  const clip=clipCurrent();
+  if(!clip?.chroma?.enabled||clip.locked)return;
+  if(preview?.clip!==clip)preview={clip,original:clip.chroma};
+  clip.chroma=update(clip.chroma,field.value);
+  layers.update();
+ };
+ field.onchange=()=>{
+  if(preview){preview.clip.chroma=preview.original;preview=null;}
+  const clip=clipCurrent();
+  if(clip?.chroma?.enabled&&!clip.locked)change(()=>{clip.chroma=update(clip.chroma,field.value);});
+ };
+ addColorWheel(field);
+}
+bindBackgroundColor('chromaColor',(key,color)=>({...key,color,sourceAlpha:false}));
+bindBackgroundColor('chromaReplacementColor',(key,color)=>({...key,replacement:{enabled:true,color}}));
+
+$('chromaAuto').onclick=()=>{
+ const clip=clipCurrent();
+ if(!clip?.chroma?.enabled||clip.locked)return;
+ try{
+  const key=sampleClipBackground(clip);
+  if(!key)return say('Choose the source color to match.');
+  change(()=>{clip.chroma={...clip.chroma,color:key.color,sourceAlpha:!!key.sourceAlpha};});
+ }catch(error){say('Could not sample the background. '+error.message);}
+};
 $('clipSpeed').onchange=()=>change(()=>{if(clipCurrent())clipCurrent().playbackRate=Number($('clipSpeed').value);});
  for(const [id,delta] of [['speedDown',-.01],['speedUp',.01]])$(id).onclick=()=>change(()=>{const c=clipCurrent();if(c)c.playbackRate=Math.min(8,Math.max(.1,Math.round((rateOf(c)+delta)*1000)/1000));});
  $('speedReset').onclick=()=>change(()=>{if(clipCurrent())clipCurrent().playbackRate=1;});
@@ -781,7 +842,12 @@ async function importNumberedFiles(input){
  }finally{captionImportBusy=false;input.value='';controls.forEach((el,i)=>el.disabled=disabled[i]);$('captionImport').removeAttribute('aria-busy');}
 }
 for(const id of ['captionFiles','captionFolderFiles'])$(id).onchange=e=>importNumberedFiles(e.target);
-$('overlayLibrary').textContent='Import captions';
+if(TOOLBOX_MODE){
+ const toolboxButton=$('overlayLibrary');
+ toolboxButton.textContent='Toolbox';
+ toolboxButton.hidden=false;
+ $('placementState').before(toolboxButton);
+}else $('overlayLibrary').textContent='Import captions';
 // A clipper link is authoritative; project entry also supports text-only and bed-only workspaces.
 if(!inStudio()&&/^[a-f0-9]{64}$/.test(params.get('cuts')||''))projectPicker.open(null,{sourceHash:params.get('cuts')}).catch(e=>say('Cut list unavailable: '+e.message));
 else if(!inStudio()&&params.get('project')&&params.get('caption'))openJokeWorkspace(params.get('project'),params.get('caption')).catch(e=>say('Caption handoff: '+e.message));

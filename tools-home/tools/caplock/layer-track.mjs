@@ -1,5 +1,5 @@
 import {clipTime,pictureTime} from './clip-time.mjs?v=28';
-import {BackgroundSurface,DEFAULT_CHROMA,detectBackground} from './background.mjs?v=32';
+import {BackgroundSurface,DEFAULT_CHROMA,detectBackground} from './background.mjs?v=33';
 /* Independent reusable media-layer preview. Source picture/audio are never rewritten. */
 export class LayerTracks{
  constructor(root,{getClips,getFrame,getPlayhead,isPlaying,getStagedId,onSelect,onChange,onStatus,getMode,onDragStart,isFocused}){Object.assign(this,{root,getClips,getFrame,getPlayhead,isPlaying,getStagedId,onSelect,onChange,onStatus,getMode,onDragStart,isFocused});this.media=new Map();this.selected=null;this.generation=0;}

@@ -6,6 +6,7 @@ const solid=(r,g,b,a=255)=>new Uint8ClampedArray(Array.from({length:64*64},()=>[
 test('solid blue, green and other solid backgrounds are detected from pixels; alpha and nonuniform edges stay intact',()=>{
  for(const color of [[0,96,184],[0,221,68],[245,245,245],[0,0,0]]){const p=solid(...color),key=inferBackground(p,64,64);assert.ok(key?.enabled);assert.equal(key.color,'#'+color.map(v=>v.toString(16).padStart(2,'0')).join(''));}
  assert.equal(inferBackground(solid(0,0,0,0),64,64),null);
+ assert.equal(inferBackground(solid(0,0,0,0),64,64,{includeAlpha:true}).sourceAlpha,true);
  const split=solid(0,96,184);for(let y=0;y<64;y++)for(let x=32;x<64;x++){const i=(y*64+x)*4;split[i]=255;split[i+1]=230;split[i+2]=0;}assert.equal(inferBackground(split,64,64),null);
 });
 test('keying clears background, keeps lettering/outline, multiplies existing alpha and supports soft/hard edges',()=>{
@@ -28,4 +29,20 @@ test('background opacity affects keyed pixels while retaining foreground and ori
  assert.deepEqual([...removeBackground(pixels,key)].filter((_,i)=>i%4===3),[128,255,64]);
  assert.equal(validateChroma(key).backgroundOpacity,.5);
  assert.throws(()=>validateChroma({...key,backgroundOpacity:1.1}));
+});
+
+test('replacement color round-trips and changes the export recipe only when active',()=>{
+ const key={...DEFAULT_CHROMA,sourceAlpha:true,backgroundOpacity:0,replacement:{enabled:true,color:'#7347C2'}};
+ const checked=validateChroma(key);
+ assert.deepEqual(checked.replacement,{enabled:true,color:'#7347c2'});
+ assert.equal(checked.sourceAlpha,true);
+ assert.throws(()=>validateChroma({...key,replacement:{enabled:true,color:'red'}}));
+ const p={clips:[{id:'one',type:'video',visible:true,ref:{path:'/animation',size:100},chroma:checked}]};
+ assert.deepEqual(captionRecipe(p).clips[0].chroma,checked);
+ p.clips[0].chroma.replacement.enabled=false;
+ const masked=captionRecipe(p);
+ p.clips[0].chroma.replacement.color='#aabbcc';
+ assert.deepEqual(captionRecipe(p),masked);
+ p.clips[0].chroma.enabled=false;
+ assert.equal(captionRecipe(p).clips[0].chroma,undefined);
 });

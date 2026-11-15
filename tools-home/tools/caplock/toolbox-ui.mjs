@@ -1,23 +1,23 @@
-import {ensureToolbox,makeToolboxPlacement,assetFrameLabel,shiftPlacementIn,fitPlacementOut,setPlacementSpeed,fitVideoPlacement} from './toolbox-core.mjs?v=32';
+import {ensureToolbox,makeToolboxPlacement,assetFrameLabel,shiftPlacementIn,fitPlacementOut,setPlacementSpeed,fitVideoPlacement} from './toolbox-core.mjs?v=33';
 import {inspectToolboxFile} from './toolbox-media.mjs?v=28';
-import {BackgroundSurface} from './background.mjs?v=32';
+import {BackgroundSurface} from './background.mjs?v=33';
 const $=id=>document.getElementById(id);
 const signature=async blob=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',await blob.arrayBuffer()))].map(v=>v.toString(16).padStart(2,'0')).join('');
 export function createToolboxUI(o){
- const cache=new Map();let busy=false,previewURL=null,previewTick=null,previewAsset=null,replacing=null,position='playhead';
+ const cache=new Map();let busy=false,previewURL=null,previewTick=null,previewAsset=null,replacing=null,position='playhead',insertFrame=0;
  const p=()=>o.project(),assets=()=>ensureToolbox(p()),current=()=>p().clips.find(c=>c.id===o.selected()),assetFor=c=>assets().find(a=>a.id===c?.toolboxId);
  const placed=()=>{
   const items=p().clips.filter(c=>!c.captionNumber||c.placed);
   return p().canvas?items:items.sort((a,b)=>a.inFrame-b.inFrame);
  };
  const positions=[['toolboxPrepend','prepend'],['toolboxAppend','append']];
- const placementFrame=()=>position==='prepend'?0:position==='append'?o.end():o.frame();
+ const placementFrame=()=>position==='prepend'?0:position==='append'?o.end():insertFrame;
  const placementHint=()=>position==='prepend'?'Choose a file to prepend. Existing layers move together.':'Choose a file to insert at F'+placementFrame()+'.';
  function stopPreview(){cancelAnimationFrame(previewTick);previewTick=null;$('toolboxPreviewVideo').pause();$('toolboxPreviewVideo').removeAttribute('src');$('toolboxPreviewVideo').load();if(previewURL)URL.revokeObjectURL(previewURL);previewURL=null;previewAsset=null;$('toolboxPreview').hidden=true;}
  function render(){
   const list=assets().slice().sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true}));for(const c of p().clips){const m=o.media().get(c.id);if(m?.blob&&c.toolboxId&&!cache.has(c.toolboxId))cache.set(c.toolboxId,m.blob);}
   $('editActiveCaption').textContent='Add files';$('editActiveCaption').disabled=busy||!o.ready();$('placementState').textContent='Toolbox · '+list.length+(o.extendedFrames?.()?' · '+o.extendedFrames()+' frames':'');
-  $('insertCaption').textContent=p().canvas?'Toolbox':'Insert';$('insertCaption').disabled=busy||!o.ready();$('sheetInsertCaption').textContent='Insert another';$('sheetInsertCaption').disabled=busy||!o.ready();
+  $('insertCaption').textContent='Insert';$('insertCaption').disabled=$('overlayLibrary').disabled=busy||!o.ready();$('sheetInsertCaption').textContent='Insert another';$('sheetInsertCaption').disabled=busy||!o.ready();
   const items=placed(),index=items.findIndex(c=>c.id===o.selected());$('previousCaption').disabled=index<=0;$('nextCaption').disabled=index<0||index>=items.length-1;
   $('previousCaption').title='Previous placement';$('nextCaption').title='Next placement';$('toItemStart').disabled=!current();$('play').disabled=!o.ready();
   const c=current(),a=assetFor(c),cut=c?.sourceTrim;
@@ -48,6 +48,7 @@ export function createToolboxUI(o){
   if(!$('toolboxDialog').open){
    replacing=replacement;
    position='playhead';
+   insertFrame=o.frame();
    $('toolboxDialog').showModal();
   }
   $('toolboxTitle').textContent=replacing?'Replace video':'Toolbox';
