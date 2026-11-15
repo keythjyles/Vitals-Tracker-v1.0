@@ -27,14 +27,18 @@ main{padding-top:4px}
 .toolbox-row .aspect-clip-name{flex:1 1 100%;min-width:0}
 .aspect-name-button{display:block;max-width:100%;min-width:0;padding:0;background:transparent;border:0;text-align:left;color:#e7f1fa;text-decoration:underline dotted;text-underline-offset:3px;overflow-wrap:anywhere}
 .toolbox-row .aspect-name-button{padding:2px 0;font-weight:650}
-#aspectBedName{min-width:0}
+#aspectBedName{min-width:0;min-height:29px}
 #aspectBedName .aspect-name-button{font-size:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:29px}
-.gs-video-reference:has(#aspectBedName form) #aspectBedName{grid-column:1/-1}
+.gs-video-reference:has(#aspectBedName form){position:relative}
+.gs-video-reference:has(#aspectBedName form) > :is(.gs-player-clock,.gs-scribe-button){visibility:hidden}
 .aspect-clip-name form{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:4px;align-items:center}
+#aspectBedName form{position:absolute;inset:0 0 auto;z-index:1;background:#101924}
 .aspect-clip-name input{width:100%;min-width:0;padding:4px 6px}
 .aspect-clip-name form button{min-height:30px;padding:4px 7px}
 .aspect-clip-name form small{grid-column:1/-1;color:#ffcfb0}
 .insert-point{display:grid;grid-template-columns:38px minmax(0,1fr) 38px;align-items:center;gap:6px;margin:5px 0;font-variant-numeric:tabular-nums}
+#aspectToolbox .insert-point{position:sticky;top:var(--aspect-player-height,0px);z-index:1;background:#152637}
+#pinnedSections #aspectToolbox .insert-point,main:has(#pinPlayer[aria-pressed="false"]) #aspectToolbox .insert-point{top:0}
 .insert-point output{text-align:center}
 .insert-point button{min-height:34px;touch-action:manipulation}
 #toolboxPreview{display:block;max-width:100%;max-height:200px;margin-top:5px}
