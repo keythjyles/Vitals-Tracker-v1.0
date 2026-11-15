@@ -1,4 +1,4 @@
-import {BackgroundSurface} from '../caplock/background.mjs?v=32';
+import {BackgroundSurface,fillReplacement} from '../caplock/background.mjs?v=33';
 
 export const WIDTH = 540;
 export const HEIGHT = 960;
@@ -34,12 +34,13 @@ export class Composition {
 
  overlayFrame(video, key, maxWidth) {
   if (video.readyState !== undefined && (video.readyState < 2 || video.seeking)) return null;
-  if (key.mode === 'off' || key.mode === 'alpha' || key.backgroundOpacity === 1) return video;
-  const cacheKey = [video.currentSrc, video.currentTime, maxWidth, key.mode, key.color, key.similarity, key.blend, key.backgroundOpacity, key.tolerance].join('|');
+  const replace = !!key.replacement?.enabled;
+  if (key.mode === 'off' || (!replace && (key.mode === 'alpha' || key.backgroundOpacity === 1))) return video;
+  const cacheKey = [video.currentSrc, video.currentTime, maxWidth, key.mode, key.color, key.similarity, key.blend, key.backgroundOpacity, key.tolerance, replace ? key.replacement.color : ''].join('|');
   if (video.currentSrc && this.#cached === cacheKey) return this.#surface.canvas;
   this.#cached = '';
-  if (key.mode === 'custom') {
-   this.#surface.draw(video, key, {maxWidth});
+  if (key.mode === 'custom' || key.mode === 'alpha') {
+   this.#surface.draw(video, {...key,sourceAlpha:key.mode === 'alpha'}, {maxWidth});
   } else {
    // Keep the original green and blue presets for saved AspectLock alignments.
    const nativeWidth = video.videoWidth || video.width, nativeHeight = video.videoHeight || video.height;
@@ -54,7 +55,7 @@ export class Composition {
    ctx.clearRect(0, 0, width, height);
    ctx.drawImage(video, 0, 0, width, height);
    const image = ctx.getImageData(0, 0, width, height);
-   const tolerance = key.tolerance / 100, amount = 1 - key.backgroundOpacity;
+   const tolerance = key.tolerance / 100, amount = replace ? 1 : 1 - key.backgroundOpacity;
    const data = image.data;
    for (let i = 0; i < data.length; i += 4) {
     const r = data[i], g = data[i + 1], b = data[i + 2];
@@ -70,6 +71,7 @@ export class Composition {
     }
    }
    ctx.putImageData(image, 0, 0);
+   fillReplacement(ctx,key);
   }
   this.#cached = cacheKey;
   return this.#surface.canvas;

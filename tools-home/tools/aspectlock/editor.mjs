@@ -1,12 +1,15 @@
 import {addColorWheel} from '../../shared/color-wheel.mjs?v=1';
 import {paintMatrix} from "../../shared/item-matrix.mjs?v=1";
 import {beginVideoLoad,loadVideoSource,clearVideoSource} from "./media-source.mjs?v=33";
-import {Composition,WIDTH,HEIGHT,FPS,lastFrame,frameAt,placementAt,fitRect} from "./composition.mjs?v=32";
+import {Composition,WIDTH,HEIGHT,FPS,lastFrame,frameAt,placementAt,fitRect} from "./composition.mjs?v=36";
 import {setupPinnedSections} from "../../shared/pinned-sections.mjs?v=32";
 import {clipName,setupToolbox} from "./toolbox.mjs?v=35";
 import {formatFrameTime,writeFrameClock,frameStepControl} from "../../shared/frame-stamp.mjs?v=2";
-import {detectBackground} from "../caplock/background.mjs?v=32";
+import {DEFAULT_REPLACEMENT_COLOR,detectBackground} from "../caplock/background.mjs?v=33";
 const RECIPE_VERSION = 'R33';
+const keySourceModes = ['green','blue','custom','alpha'];
+const backgroundButtons = {keep:'keyKeep',replace:'keyReplace',transparent:'keyTransparent'};
+let lastKeySource = 'green', replaceBackground = false;
 const API='https://gs-previewlock-api.onrender.com',key=localStorage.getItem('gs_previewlock_key')||'',Q=id=>document.getElementById(id),C=Q('output'),ctx=C.getContext('2d'),stage=Q('stage'),bv=Q('bv'),ov=Q('ov'),work=Q('workPicture'),wc=work.getContext('2d'),compositor=new Composition();
 let pickerTarget='base', manualVideoSelection=false;function formatBytes(n){return n?(n/1048576).toFixed(1)+' MB':'Size unknown'}function renderLibrary(){const search=Q('assetSearch').value.trim().toLowerCase(),sort=Q('assetSort').value;let arr=items.filter(f=>f.name.toLowerCase().includes(search));arr.sort((a,b)=>sort==='name'?a.name.localeCompare(b.name):sort==='nameDesc'?b.name.localeCompare(a.name):sort==='size'?(b.size||b.file?.size||0)-(a.size||a.file?.size||0):sort==='old'?String(a.server_modified||a.client_modified||'').localeCompare(String(b.server_modified||b.client_modified||'')):String(b.server_modified||b.client_modified||'').localeCompare(String(a.server_modified||a.client_modified||'')));Q('assetCount').textContent=arr.length+' cloud videos';const box=Q('assetResults');box.replaceChildren();for(const f of arr){const pickValue=new URLSearchParams(location.search).get('studio')==='1'&&parent!==window?f.path_display:f.name;const card=document.createElement('div');card.className='assetCard'+(Q(pickerTarget).value===pickValue?' selected':'');const thumb=document.createElement('div');thumb.className='assetThumb';thumb.textContent='▶ Video preview';const title=document.createElement('div');title.className='assetName';title.textContent=f.name;const meta=document.createElement('div');meta.className='assetMeta';meta.textContent=[formatBytes(f.size||f.file?.size),f.server_modified||f.client_modified||''].filter(Boolean).join(' · ');const actions=document.createElement('div');actions.className='assetActions';const preview=document.createElement('button');preview.textContent='▶ Preview';preview.onclick=async()=>{preview.disabled=true;preview.textContent='Loading…';try{const p=await api('/api/playback?path='+encodeURIComponent(f.path_display));const video=document.createElement('video');video.className='assetPreview';video.controls=true;video.playsInline=true;video.preload='metadata';video.src=p.url;video.style.display='block';card.append(video);video.play().catch(()=>{});preview.textContent='▶ Play'}catch(e){preview.textContent='Preview failed';report(e.message)}finally{preview.disabled=false}};const choose=document.createElement('button');choose.textContent='Use this video';choose.onclick=async()=>{const id=pickerTarget;Q('assetDialog').close();await chooseCloudVideo(id,pickValue)};actions.append(preview,choose);card.append(thumb,title,meta,actions);box.append(card)}}function openLibrary(id) {
   pickerTarget = id;
@@ -79,6 +82,16 @@ function markVideoSelection(id, name, cloudValue, label = name) {
 function placeLoadedOverlay(at) {
  startFrame = at;
  ({x,y,width:w} = fitRect(ratio));
+ const preset = keyModeFromUrl();
+ if (preset) setKeySource(preset);
+ else {
+  let sample;
+  try { sample = detectBackground(ov,{includeAlpha:true}); } catch {/* Keep the source if it cannot be sampled yet. */}
+  applyBackgroundSample(sample);
+ }
+ replaceBackground = false;
+ Q('keyBackground').value = 0;
+ Q('keyReplacementColor').value = DEFAULT_REPLACEMENT_COLOR;
  syncOverlay();
  showTiming();
  update();
@@ -157,8 +170,21 @@ function bedRect() {
 function overlayRect() {
  return {x, y, width: w, height: w / ratio};
 }
+function setKeySource(mode) {
+ Q('keyMode').value = mode;
+ if (keySourceModes.includes(mode)) lastKeySource = mode;
+}
+function applyBackgroundSample(sample) {
+ if (sample) Q('keyColor').value = sample.color;
+ setKeySource(sample ? (sample.sourceAlpha ? 'alpha' : 'custom') : 'off');
+}
 function keySettings() {
- return {mode: Q('keyMode').value, enabled: true, color: Q('keyColor').value, similarity: Number(Q('keyRange').value) / 100, blend: Number(Q('keyEdge').value) / 100, backgroundOpacity: Number(Q('keyBackground').value) / 100, tolerance: Number(Q('tolerance').value)};
+ const mode=Q('keyMode').value;
+ const color=Q('keyReplacementColor').value;
+ return {mode,enabled:mode!=='off',color:Q('keyColor').value,similarity:Number(Q('keyRange').value)/100,blend:Number(Q('keyEdge').value)/100,backgroundOpacity:Number(Q('keyBackground').value)/100,tolerance:Number(Q('tolerance').value),
+  ...(mode==='off'?{sourceMode:lastKeySource}:{}),
+  ...(replaceBackground||color!==DEFAULT_REPLACEMENT_COLOR?{replacement:{enabled:replaceBackground,color}}:{}),
+ };
 }
 function spec() {
  return {
@@ -190,11 +216,20 @@ function update() {
  }
  Q('toleranceText').textContent = Q('tolerance').value;
  const mode = Q('keyMode').value;
+ const treatment = mode==='off'?'keep':replaceBackground?'replace':'transparent';
+ for (const [value,id] of Object.entries(backgroundButtons)) {
+  Q(id).setAttribute('aria-pressed',String(treatment===value));
+  Q(id).disabled = !hasOverlay;
+ }
+ Q('keyColorTools').hidden = mode === 'off';
+ Q('keyReplacementRow').hidden = treatment !== 'replace';
+ Q('keyReplacementColor').disabled = !hasOverlay || treatment !== 'replace';
+ Q('keyMode').disabled = !hasOverlay;
  Q('presetTolerance').hidden = !['blue','green'].includes(mode);
  Q('keyColor').disabled = !hasOverlay;
- Q('keyRange').disabled = mode !== 'custom';
- Q('keyBackground').disabled = !hasOverlay || mode === 'off' || mode === 'alpha';
- Q('keyEdge').disabled = mode !== 'custom';
+ Q('keyRangeRow').hidden = Q('keyEdgeRow').hidden = mode !== 'custom';
+ Q('keyOpacityControl').hidden = mode === 'alpha' && treatment !== 'replace';
+ Q('keyBackground').disabled = !hasOverlay || Q('keyOpacityControl').hidden;
  Q('sampleKey').disabled = !hasOverlay;
  for (const [id,output,suffix] of [['opacity','opacityValue','%'],['keyRange','keyRangeValue','%'],['keyEdge','keyEdgeValue','%'],['keyBackground','keyBackgroundValue','%']]) Q(output).textContent = Q(id).value + suffix;
  for (const id of ['bedZero','backFrame','forwardFrame','back25','forward25','goFrame','jumpFrame','play','insertBack','insertForward']) Q(id).disabled = !hasBed;
@@ -466,16 +501,26 @@ for (const id of ['width','x','y']) Q(id).oninput = () => {
  update();
 };
 for (const id of ['order','tolerance','baseAudio','overlayAudio','showOutside']) Q(id).onchange = () => { sound(); update(); };
-Q('keyMode').onchange = update;
-for (const id of ['opacity','keyRange','keyEdge','keyBackground']) Q(id).oninput = update;
-Q('keyColor').oninput = () => { Q('keyMode').value = 'custom'; update(); };
+Q('keyMode').onchange = () => { setKeySource(Q('keyMode').value); update(); };
+for (const [mode,id] of Object.entries(backgroundButtons)) Q(id).onclick = () => {
+ if (mode==='keep') setKeySource('off');
+ else {
+  if (mode==='replace' && replaceBackground && Q('keyMode').value!=='off') return;
+  if (Q('keyMode').value==='off') setKeySource(lastKeySource);
+  replaceBackground = mode === 'replace';
+  Q('keyBackground').value = replaceBackground ? 100 : 0;
+ }
+ update();
+};
+for (const id of ['opacity','keyRange','keyEdge','keyBackground','keyReplacementColor']) Q(id).oninput = update;
+Q('keyColor').oninput = () => { setKeySource('custom'); update(); };
 addColorWheel(Q('keyColor'));
+addColorWheel(Q('keyReplacementColor'));
 Q('sampleKey').onclick = () => {
  try {
-  const sample = detectBackground(ov);
+  const sample = detectBackground(ov,{includeAlpha:true});
   if (!sample) throw Error('No uniform background found. Select its color.');
-  Q('keyColor').value = sample.color;
-  Q('keyMode').value = 'custom';
+  applyBackgroundSample(sample);
   update();
  } catch (error) { report(error.message); }
 };
@@ -568,7 +613,7 @@ Q('render').onclick = async () => {
  try {
   report('Preparing the 25 fps export…');
   const [{renderAspect}, bed, animation] = await Promise.all([
-   import('./export.mjs?v=32'), mediaBytes('base',bv), ov.readyState >= 2 ? mediaBytes('overlay',ov) : null,
+   import('./export.mjs?v=36'), mediaBytes('base',bv), ov.readyState >= 2 ? mediaBytes('overlay',ov) : null,
   ]);
   let phase = 'Preparing export';
   const result = await renderAspect({bed,animation,scene,key:settings.key,range,audio:settings.audio,
@@ -587,7 +632,7 @@ Q('render').onclick = async () => {
  } catch (error) { report('Render failed: ' + error.message); }
  finally { rendering = false; update(); }
 };
-const keyModeFromUrl = () => ['green','blue','custom','alpha','off'].includes(params.get('key')) ? params.get('key') : null;
+const keyModeFromUrl = () => [...keySourceModes,'off'].includes(params.get('key')) ? params.get('key') : null;
 function restoreSettings(saved, transformLegacy = true) {
  const bed = saved.portraitPerspective, overlay = saved.overlayTransform;
  const fixedViewport = saved.version === 'R32' || saved.version === RECIPE_VERSION;
@@ -601,7 +646,11 @@ function restoreSettings(saved, transformLegacy = true) {
  if (bed && fixedViewport) { bx = bed.x; by = bed.y; bw = bed.width; }
  Q('order').value = saved.layerOrder || 'overlay';
  editMode = 'view';
- Q('keyMode').value = saved.blueRemoval === 'on' ? 'blue' : saved.blueRemoval || 'green';
+ lastKeySource = keySourceModes.includes(saved.key?.sourceMode) ? saved.key.sourceMode : 'green';
+ const savedSource = saved.blueRemoval === 'on' ? 'blue' : saved.blueRemoval;
+ setKeySource([...keySourceModes,'off'].includes(savedSource) ? savedSource : 'green');
+ replaceBackground = saved.key?.replacement?.enabled === true;
+ Q('keyReplacementColor').value = saved.key?.replacement?.color || DEFAULT_REPLACEMENT_COLOR;
  Q('tolerance').value = saved.tolerance ?? 70;
  Q('opacity').value = Math.round(100 * (saved.opacity ?? 1));
  Q('keyColor').value = saved.key?.color || '#0a77d4';
@@ -750,12 +799,18 @@ Q('railTiming').onclick = () => {
  panel.open = true;
  panel.scrollIntoView({block:'nearest'});
 };
-Q('railToolbox').onclick = () => {
+const insertPanel = Q('aspectToolbox');
+function pauseAtInsertion() {
  Q('pause').click();
- const panel = Q('aspectToolbox');
- panel.open = true;
  updateClock();
- if (Q('pinnedSections').contains(panel)) return;
+}
+insertPanel.querySelector('summary').addEventListener('click', event => {
+ if (!insertPanel.open && !event.target.closest('button')) pauseAtInsertion();
+});
+Q('railToolbox').onclick = () => {
+ pauseAtInsertion();
+ insertPanel.open = true;
+ if (Q('pinnedSections').contains(insertPanel)) return;
 
  const controls = Q('insertPoint').getBoundingClientRect();
  const player = stage.closest('.gs-player-shell');
@@ -766,7 +821,7 @@ Q('railToolbox').onclick = () => {
  if (room <= 0) return;
  const clipRoom = Math.min(72, room);
  if (controls.top < top - 1 || controls.bottom + clipRoom > bottom + 1) {
-  panel.scrollIntoView({block:'start'});
+  insertPanel.scrollIntoView({block:'start'});
  }
 };
 Q('editAdded').onclick = () => {
@@ -809,7 +864,7 @@ function refreshAdded() {
 }
 
 async function start() {
- Q('keyMode').value = keyModeFromUrl() || 'green';
+ setKeySource(keyModeFromUrl() || 'green');
  if (!raf) draw();
  update();
  if (!key) return;
@@ -842,8 +897,7 @@ async function start() {
    y = (295 - 119) * scale;
    w = 413 * scale;
   }
-  if (!saved && (/\.webm$/i.test(names[1]))) Q('keyMode').value = 'alpha';
-  if (keyModeFromUrl()) Q('keyMode').value = keyModeFromUrl();
+  if (keyModeFromUrl()) setKeySource(keyModeFromUrl());
   if (params.has('start')) startFrame = Math.max(0, Math.round(Number(params.get('start')) * FPS) || 0);
   else if (params.get('preset') === 'timmy351') startFrame = 351;
   showTiming();

@@ -18,13 +18,15 @@ module.exports = async function checkInsertAndNames(page, bedName, overlayFile, 
  await $('play').tap();
  await page.waitForFunction(() => document.getElementById('bv').currentTime > 1.04);
  const insert = page.getByRole('button', {name:'Insert', exact:true});
- await insert.tap();
+ await $('aspectToolbox').locator(':scope > summary').tap();
  assert.equal(await $('aspectToolbox').evaluate(panel => panel.open), true);
  const held = await readMedia();
  const stoppedFrame = await readFrame();
  assert.equal(held[2], true);
  assert.equal(stoppedFrame, Math.floor(held[1] * 25 + .001));
  assert.equal(await $('insertFrame').textContent(), 'Insert at F' + stoppedFrame);
+ await insert.tap();
+ assert.deepEqual(await readMedia(),held,'both openings must use the same paused playhead');
  await $('insertForward').tap();
  await $('insertForward').tap();
  assert.equal(await readFrame(), stoppedFrame + 2, 'each tap must move exactly one frame');

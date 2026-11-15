@@ -9,3 +9,5 @@ Match AspectLock for common playback, Toolbox, Scribe, opacity and keying contro
 Follow the master plan's approval process for changes to established behavior. When an approved change affects another tool or a shared contract, update the affected notes and verify those paths in the same work.
 
 See the [CapLock behavior and release notes](README.md).
+
+R33 uses the same **Keep**, **Replace** and **Transparent** controls as AspectLock. The background mode affects the selected visual layer and is stored with its key settings. Layer opacity is a separate control. Use the same source color match and replacement rendering in preview, local saves and caption handoffs.

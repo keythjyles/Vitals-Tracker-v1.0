@@ -17,7 +17,7 @@ module.exports=async(browser,base)=>{
  await page.locator('#clipTimeline .item-open').last().click();await page.locator('#clipVolume').fill('70');await page.locator('#clipVolume').press('Tab');
  await page.waitForFunction(()=>document.querySelector('#clipVolumeInfo').textContent.includes('source sound starts near'));
  const firstSound=Number((await page.locator('#clipVolumeInfo').textContent()).match(/near ([0-9.]+)s/)[1]);assert.ok(firstSound>.55&&firstSound<.65);
- await page.locator('#captionBackground summary').click();await page.locator('#chromaEnabled').uncheck();await page.locator('#applyClip').click();await page.locator('#closeClipProperties').click();
+ await page.locator('#captionBackground summary').click();await page.locator('#chromaKeep').click();await page.locator('#applyClip').click();await page.locator('#closeClipProperties').click();
  await go(0);await page.locator('#play').click();
  await page.waitForFunction(()=>Number(document.querySelector('#seek').value)>=11&&document.querySelector('.media-layer video').paused);
  assert.equal(await page.locator('.media-layer video').last().evaluate(v=>v.paused),false);

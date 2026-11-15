@@ -19,3 +19,7 @@ Insert opens the Toolbox and pauses the bed at its current playhead. The panel s
 ## R35 viewport stability
 
 Keep the insertion controls visible while the list scrolls. Open Insert in place when its controls are visible or the Toolbox is pinned. Editing the bed name fits the existing player row. Saving a name updates its existing row in the clip list and leaves the scroll position and playhead in place. R34 rollback revision `c446e6ece63a0a8aa36761d79eff4c7af2ae8373`.
+
+## R36 clip backgrounds
+
+The animation properties use **Keep**, **Replace** and **Transparent** like CapLock. Color sampling and replacement use the same rendering code. Existing green and blue presets can also supply the source mask. Store the background treatment separately from layer opacity and use it for preview and export. R35 rollback revision `109f62a8355682cf394a39518f62a6c1372648b1`.

@@ -1,4 +1,8 @@
-# CapLock R31
+# CapLock R33
+
+Open a visual layer and expand **Background**. **Keep** shows the original backdrop. **Replace** fills the keyed or already transparent area with a chosen color. **Transparent** reveals the lower layers. **Background opacity** adjusts the backdrop and **Layer opacity** fades the full layer. Sample the clip or pick the source color to match when needed. Preview and export both read the saved settings. R32 rollback revision `109f62a8355682cf394a39518f62a6c1372648b1`.
+
+## CapLock R31 — device-first editor
 
 - **Open video file** opens the browser’s file picker for a video on the device. **Photos** opens the video picker. The first video appears as editable Layer 0. Add caption animations, pictures or sounds with **Add files**. Choose an item in **Toolbox** to place it.
 - **Resume draft** reopens the most recent standalone draft in this browser. Imported Layer 0 and toolbox files have local copies for this workflow. Use **Reconnect files** when the originals are missing from browser storage or when opening an older project. **Download project** saves the editable recipe and references. **Save video** exports the composition.

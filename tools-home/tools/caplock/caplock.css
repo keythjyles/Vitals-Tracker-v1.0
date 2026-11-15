@@ -25,6 +25,9 @@ h1{font-size:20px;margin:4px 0}#viewerPage{padding:0;border:0;background:none}#s
 #clipProperties{position:fixed;inset:auto 0 0;margin:0 auto;width:min(100%,760px);max-width:100%;max-height:58dvh;overflow:auto;border:1px solid #718da6;border-radius:12px 12px 0 0;padding:10px;background:#182635;color:#edf3fa}
 #clipProperties::backdrop{background:#0003}#clipProperties .actions{justify-content:flex-end}#clipProperties .actions button{min-height:34px}#clipProperties label{font-size:12px}
 #clipSelect{display:none}#clipProperties label:has(#clipSelect){display:none}#clipProperties #clipName{font-size:16px}
+.clip-background-modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:5px 0}
+.clip-background-modes button{min-width:0;min-height:34px;padding:4px}
+.clip-background-modes button[aria-pressed="true"]{background:#eacb86;color:#172231;border-color:#f6d99b;font-weight:700}
 
 
 /* R6 caption placement: clock above picture; scrubber flush below it. */

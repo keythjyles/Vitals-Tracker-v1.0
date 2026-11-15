@@ -24,7 +24,27 @@ module.exports=async(browser,base)=>{
  await page.locator('#closeClipProperties').click();await page.locator('#layerUndo').click();assert.deepEqual(await previewScale(),[-1,-1]);
  await page.locator('#layerRedo').click();assert.deepEqual(await previewScale(),[1,-1]);
  await page.locator('#nextCaption').click();p=await pixel();assert.equal(p.corner[3],0);assert.equal(p.left[3],255,'green background removed on next caption');
- await page.locator('#editActiveCaption').click();await page.locator('#captionBackground summary').click();await page.locator('#chromaEnabled').uncheck();assert.equal(await page.locator('.media-layer:not([hidden]) video').last().isVisible(),true);await page.locator('#chromaEnabled').check();assert.equal(await page.locator('.media-layer:not([hidden]) .keyed-frame').last().isVisible(),true);await page.locator('#closeClipProperties').click();
+ await page.locator('#editActiveCaption').click();
+ await page.locator('#captionBackground summary').click();
+ await page.locator('#chromaKeep').click();
+ assert.equal(await page.locator('.media-layer:not([hidden]) video').last().isVisible(),true);
+ await page.locator('#chromaReplace').click();
+ await page.locator('#chromaReplacementColor').fill('#a03ed0');
+ assert.deepEqual((await pixel()).corner,[160,62,208,255]);
+ assert.equal((await pixel()).left[3],255);
+ await page.locator('#clipOpacity').fill('65');
+ await page.locator('#chromaOpacity').fill('40');
+ assert.equal((await pixel()).corner[3],102);
+ assert.equal(await page.locator('#clipOpacity').inputValue(),'65');
+ await page.locator('#chromaTransparent').click();
+ assert.equal((await pixel()).corner[3],0);
+ assert.equal(await page.locator('#clipOpacity').inputValue(),'65');
+ await page.locator('#chromaReplace').click();
+ assert.deepEqual((await pixel()).corner,[160,62,208,255]);
+ const replacedDraft=await page.evaluate(()=>JSON.parse(localStorage.getItem('gs_caplock_draft_v1')));
+ assert.deepEqual(replacedDraft.clips[1].chroma.replacement,{enabled:true,color:'#a03ed0'});
+ assert.equal(replacedDraft.clips[1].opacity,.65);
+ await page.locator('#closeClipProperties').click();
  // Exercise the same compositor/export engine used by Next → SxLock, then decode its actual MP4.
  const exported=await page.evaluate(async({bedBytes,clipBytes,orientation})=>{
   const {createProject}=await import('/tools-home/tools/caplock/core.mjs?v=20-key'),{renderCaptioned}=await import('/tools-home/tools/caplock/composite.mjs?v=20-key'),m=await import('/tools-home/tools/sxlock/vendor/mediabunny-1.62.1-gs1.mjs');
@@ -39,7 +59,12 @@ module.exports=async(browser,base)=>{
   }
   const regular=await renderPixels();
   Object.assign(p.clips[0],orientation);
-  return {...regular,oriented:await renderPixels()};
+  const oriented=await renderPixels();
+  p.clips[0].chroma.replacement={enabled:true,color:'#a03ed0'};
+  const replaced=await renderPixels();
+  p.clips[0].chroma.enabled=false;
+  const kept=await renderPixels();
+  return {...regular,oriented,replaced,kept};
  },{bedBytes:[...fs.readFileSync('/tmp/caplock-fixtures/key-bed.mp4')],clipBytes:[...fs.readFileSync('/tmp/caplock-fixtures/blue-caption.mp4')],orientation:{mirrorX,flipY}});
  assert.equal(exported.report.outputFrames,25);assert.equal(exported.audio,true);assert.ok(Math.abs(exported.bg[0]-34)<10&&Math.abs(exported.bg[1]-51)<10&&Math.abs(exported.bg[2]-68)<10,JSON.stringify(exported));assert.ok(exported.letter[0]>180&&exported.letter[1]>180&&exported.letter[2]<70,JSON.stringify(exported));assert.equal(exported.recipe.clips[0].chroma.enabled,true);
  const oriented=exported.oriented;
@@ -50,6 +75,11 @@ module.exports=async(browser,base)=>{
  for(const sample of [oriented.letter,oriented.mirrorOnly,oriented.flipOnly]){
   assert.ok(sample.slice(0,3).every((channel,i)=>Math.abs(channel-exported.bg[i])<10),'vacated pixels reveal the bed');
  }
+ assert.ok(exported.replaced.bg.slice(0,3).every((channel,i)=>Math.abs(channel-[160,62,208][i])<12),JSON.stringify(exported.replaced.bg));
+ assert.ok(yellow(exported.replaced.both));
+ assert.equal(exported.replaced.audio,true);
+ assert.deepEqual(exported.replaced.recipe.clips[0].chroma.replacement,{enabled:true,color:'#a03ed0'});
+ assert.ok(exported.kept.bg[2]>150&&exported.kept.bg[0]<25,JSON.stringify(exported.kept.bg));
  console.log('CapLock orientation verified in preview and decoded MP4, including layer undo and redo.');
  await page.screenshot({path:'/tmp/caplock-fixtures/r20-background.png',fullPage:true});assert.deepEqual(errors,[]);assert.deepEqual(requests,[]);console.log(JSON.stringify({captionBackground:{blue:true,green:true,originalPixelsIntact:true,existingAlphaInMainSuite:true,seekClearsPriorFrame:true,editableToggle:true,localCloudRequests:0,exportFrames:25,exportAudio:true,exportPixels:exported.bg,letterPixels:exported.letter,errors}}));await context.close();
 };

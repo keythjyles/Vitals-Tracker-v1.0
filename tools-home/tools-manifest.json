@@ -97,7 +97,7 @@
     {
       "tool": "caplock",
       "tool_id": "GS-TOOL-CAPLOCK",
-      "source_version": "R32",
+      "source_version": "R33",
       "hosted_path": "tools/caplock/index.html",
       "description": "Device-first video and reusable layers with browser recovery. Optional saved Dropbox projects and existing Drive backup.",
       "navigation": [
@@ -112,7 +112,7 @@
     {
       "tool": "aspectlock",
       "tool_id": "GS-TOOL-ASPECTLOCK",
-      "source_version": "R35",
+      "source_version": "R36",
       "hosted_path": "tools/aspectlock/index.html",
       "description": "Single-animation compositor with compact fixed right controls, placement matrix, added-item row and tap-to-edit property sheet; paused seeking."
     },
