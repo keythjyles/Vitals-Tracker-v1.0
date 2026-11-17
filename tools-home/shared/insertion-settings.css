@@ -1,0 +1,144 @@
+.gs-insertion-settings {
+ position:fixed;
+ inset:auto 0 var(--insertion-bottom, 0px);
+ z-index:80;
+ box-sizing:border-box;
+ width:min(100%, 720px);
+ max-width:100%;
+ max-height:min(55dvh, 480px, var(--insertion-room, 320px));
+ margin:0 auto;
+ padding:0 8px max(8px, env(safe-area-inset-bottom));
+ overflow:auto;
+ overscroll-behavior:contain;
+ border:1px solid #7892a9;
+ border-radius:12px 12px 0 0;
+ color:#f0f5fa;
+ background:#152637;
+ box-shadow:0 -5px 20px #050a1360;
+}
+.gs-insertion-settings [hidden] {display:none!important}
+.gs-insertion-settings > h2 {
+ position:absolute;
+ clip-path:inset(50%);
+ width:1px;
+ height:1px;
+ overflow:hidden;
+ white-space:nowrap;
+}
+.gs-insertion-header, .gs-insertion-nav, .gs-insertion-range, .gs-insertion-edge {
+ display:grid;
+ align-items:center;
+ gap:5px;
+}
+.gs-insertion-header {
+ position:sticky;
+ top:0;
+ z-index:2;
+ grid-template-columns:minmax(0,1fr) auto auto;
+ padding:7px 0 5px;
+ background:#152637;
+}
+.gs-insertion-nav {grid-template-columns:auto 35px minmax(46px,1fr) 35px auto;margin:1px 0 5px}
+.gs-insertion-nav output {
+ display:block;
+ text-align:center;
+ color:#ffdf95;
+ font-size:15px;
+ font-weight:700;
+ font-variant-numeric:tabular-nums;
+}
+.gs-insertion-range {grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.gs-insertion-edge {grid-template-columns:auto minmax(0,1fr) auto}
+.gs-insertion-edge label {font-size:12px;font-weight:700}
+.gs-insertion-settings :is(.gs-insertion-header,.gs-insertion-nav,.gs-insertion-edge) :is(button,input) {
+ box-sizing:border-box;
+ min-width:0;
+ min-height:36px;
+ padding:3px 6px;
+ font-size:13px;
+}
+.gs-insertion-header input, .gs-insertion-edge input {width:100%;font-variant-numeric:tabular-nums}
+.gs-insertion-edge input::-webkit-inner-spin-button {appearance:none}
+.gs-insertion-nav :is([data-insertion="back"],[data-insertion="forward"]) {font-size:21px!important;line-height:1}
+.gs-insertion-nav [aria-pressed="true"], .gs-insertion-edge button, .gs-place-clip {
+ background:#f0d18d;
+ border-color:#f5deb1;
+ color:#182331;
+ font-weight:700;
+}
+.gs-insertion-feedback {
+ min-height:16px;
+ margin:4px 0;
+ color:#c5d5e5;
+ font-size:12px;
+}
+.gs-insertion-feedback [data-insertion="status"] {display:block;color:#ffcfaa}
+.gs-insertion-feedback [data-insertion="status"]:empty {display:none}
+.gs-insertion-section {margin-top:6px;padding-top:5px;border-top:1px solid #45617a}
+.gs-insertion-section > summary {cursor:pointer;font-weight:650}
+.gs-insertion-outline {outline:2px dashed #ffdb68;outline-offset:-2px}
+.gs-insertion-handle {
+ position:absolute;
+ inset:auto 0 0 auto;
+ display:grid;
+ place-items:center;
+ width:28px;
+ height:28px;
+ min-height:0;
+ padding:0;
+ border:1px solid #fff4c6;
+ border-radius:5px;
+ background:#efc657;
+ color:#172332;
+ font-size:18px;
+ line-height:1;
+ cursor:nwse-resize;
+ touch-action:none;
+}
+
+.gs-clip-choice {
+ display:grid;
+ grid-template-columns:60px minmax(0,1fr) auto;
+ grid-template-areas:'preview name place' 'preview actions actions';
+ align-items:center;
+ gap:4px 6px;
+ padding:5px 0;
+ border-bottom:1px solid #45617a;
+}
+.gs-clip-thumbnail {
+ grid-area:preview;
+ display:grid;
+ place-items:center;
+ width:60px;
+ height:43px;
+ overflow:hidden;
+ border:1px solid #54718a;
+ border-radius:4px;
+ background:#0b151f;
+ color:#c5d5e5;
+ font-size:11px;
+}
+.gs-clip-thumbnail img {display:block;width:100%;height:100%;object-fit:contain}
+.gs-clip-choice > .gs-clip-name {grid-area:name}
+.gs-clip-choice > .gs-place-clip {grid-area:place;white-space:nowrap}
+.gs-clip-choice > .gs-clip-actions {grid-area:actions;display:flex;flex-wrap:wrap;gap:4px}
+.gs-clip-name {min-width:0}
+.gs-clip-name > button {
+ width:100%;
+ max-width:100%;
+ min-width:0;
+ padding:2px 0;
+ border:0;
+ background:transparent;
+ color:inherit;
+ text-align:left;
+ text-decoration:underline dotted;
+ text-underline-offset:3px;
+ overflow-wrap:anywhere;
+}
+.gs-clip-choice .gs-clip-name > button::after {content:' ✎'}
+.gs-clip-choice:has(.gs-clip-name form) {grid-template-areas:'preview name name' 'preview actions place'}
+.gs-clip-name form {display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:4px}
+.gs-clip-name input {width:100%;min-width:0;padding:4px 5px}
+.gs-clip-name form button {padding:4px 5px}
+.gs-clip-name form small {grid-column:1/-1;color:#ffcfaa}

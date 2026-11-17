@@ -6,6 +6,8 @@ The grip uses the established two-stage pull-to-top then pull-to-reveal gesture,
 
 The first transport button is Start, followed by Play. Use each editor's own rewind and playback controls so source trimming, selections, and project state stay bound to its native player.
 
+`insertion-settings.mjs` and its stylesheet lay out the name, current frame, placement marks and motion controls for AspectLock, CapLock and SxLock visual layers. Open the settings beside the active player so it can still receive pointer input. IN moves the placement as a whole. OUT fits the selected media span by setting playback speed for time-based media and hold length for stills. Each app keeps its own source-trim controls, timeline clock and saved placement. `clip-picker.mjs` supplies the inline name field and generates thumbnails from visible files in the Toolbox.
+
 FrameLock v1.4.0 pairs the transport controls and keeps its read-only timeline and trim totals inside the matched player height. In is the first retained frame. Out is the first frame after the cut, and Go accepts the end boundary. Trim reuses Clipper's verified local exporter. Save As names the download, and Load cut uses those same export bytes. The source and notes stay in place when Keep editing is selected.
 
 Validation must include real phone widths, portrait footage, identical row/pair dimensions, picture/rail alignment, cold-source access, hidden picker after loading, pull/tap source access, source/cut persistence and existing native regressions. Do not call a merely similar viewer a match.

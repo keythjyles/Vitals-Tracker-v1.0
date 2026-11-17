@@ -1,3 +1,4 @@
+import {fitInsertionRate} from '../../shared/insertion-settings.mjs?v=1';
 import {validateChroma} from './background.mjs?v=33';
 import {clipRange} from './clip-time.mjs?v=28';
 export function isToolboxEntry(search,studio=false){const params=new URLSearchParams(search);return !studio&&!['project','cuts','assetPath'].some(key=>params.has(key))&&params.get('new')!=='cloud-video'&&params.get('legacy')!=='1';}
@@ -33,14 +34,13 @@ export function makeToolboxPlacement(asset,frame,id,previous){
  return {id,toolboxId:asset.id,name:asset.name,phraseId:'',type:asset.type,ref:{...asset.ref},inFrame:frame,outFrame:frame+span,trimInFrame:0,trimOutFrame:asset.type==='image'?null:span,playbackRate:1,x:previous?.x??50,y:previous?.y??75,width:previous?.width??90,rotation:previous?.rotation??0,opacity:previous?.opacity??1,volume:asset.type==='audio'?1:0,visible:true,placed:true,locked:false,loop:false,...(asset.frames?{sourceFrames:asset.frames}:{}),...(asset.type!=='image'?{sourceDuration:duration}:{}),...(asset.chroma?{chroma:{...asset.chroma}}:{})};
 }
 export function shiftPlacementIn(c,value){
- if(!Number.isInteger(value)||value<0)throw Error('IN must be a nonnegative frame.');
+ if(!Number.isSafeInteger(value)||value<0)throw Error('IN must be a nonnegative frame.');
  const span=c.outFrame-c.inFrame;c.inFrame=value;c.outFrame=value+span;return c;
 }
 export function fitPlacementOut(c,value,duration=c.sourceDuration){
- if(!Number.isInteger(value)||value<=c.inFrame)throw Error('OUT must follow IN.');
+ if(!Number.isSafeInteger(value)||value<=c.inFrame)throw Error('OUT must follow IN.');
  if(c.type==='image'){c.outFrame=value;return c;}
- const {start,end}=clipRange(c,duration),rate=(end-start)*25/(value-c.inFrame);
- if(!Number.isFinite(rate)||rate<.1||rate>8)throw Error('Choose an OUT that fits the complete clip at 0.1× to 8×.');
+ const {start,end}=clipRange(c,duration),rate=fitInsertionRate(end-start,(value-c.inFrame)/25);
  c.outFrame=value;c.playbackRate=rate;if(duration)c.sourceDuration=duration;return c;
 }
 export function setPlacementSpeed(c,rate,duration=c.sourceDuration){

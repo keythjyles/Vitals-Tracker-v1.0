@@ -1,4 +1,5 @@
-import {ensureToolbox,makeToolboxPlacement,assetFrameLabel,shiftPlacementIn,fitPlacementOut,setPlacementSpeed,fitVideoPlacement} from './toolbox-core.mjs?v=33';
+import {clipNameControl, clipThumbnail} from '../../shared/clip-picker.mjs?v=1';
+import {ensureToolbox,makeToolboxPlacement,assetFrameLabel,shiftPlacementIn,fitPlacementOut,setPlacementSpeed,fitVideoPlacement} from './toolbox-core.mjs?v=35';
 import {inspectToolboxFile} from './toolbox-media.mjs?v=28';
 import {BackgroundSurface} from './background.mjs?v=33';
 const $=id=>document.getElementById(id);
@@ -33,12 +34,21 @@ export function createToolboxUI(o){
   }
   const available=replacing?list.filter(a=>a.type==='video'):list;
   for(const a of available){
-   const used=items.filter(c=>c.toolboxId===a.id).length,row=document.createElement('div');row.className='toolbox-row'+(used?' used':'');row.dataset.assetId=a.id;
-   const use=document.createElement('button');use.type='button';use.className='toolbox-insert';use.setAttribute('aria-label',(replacing?'Replace with ':'Insert ')+a.name);use.disabled=busy;
-   const title=document.createElement('strong');title.textContent=a.name;const info=document.createElement('small');info.textContent=assetFrameLabel(a);use.append(title,info);use.onclick=()=>insert(a.id);
+   const used=items.filter(c=>c.toolboxId===a.id).length,row=document.createElement('div');row.className='toolbox-row gs-clip-choice'+(used?' used':'');row.dataset.assetId=a.id;
+   const use=document.createElement('button');use.type='button';use.className='gs-place-clip';use.textContent=replacing?'Replace':'Place here';use.setAttribute('aria-label',(replacing?'Replace with ':'Insert ')+a.name);use.disabled=busy;
+   use.title=assetFrameLabel(a);use.onclick=()=>insert(a.id);
+   const name=clipNameControl(a.name,label=>{
+    const prior=a.name;
+    if(!o.change(()=>{
+     a.name=label;
+     for(const c of items)if(c.toolboxId===a.id&&c.name===prior)c.name=label;
+    }))throw Error('Could not save the file name.');
+   });
    const badge=document.createElement('span');badge.className='toolbox-use-count';badge.textContent=used?'Used '+used+'×':'Ready';
    const preview=document.createElement('button');preview.type='button';preview.textContent='▶ Preview';preview.setAttribute('aria-label','Preview '+a.name);preview.disabled=busy;preview.onclick=()=>showPreview(a.id);
-   row.append(use,badge,preview);$('toolboxList').append(row);
+   const info=document.createElement('small');info.className='toolbox-file-info';info.textContent=assetFrameLabel(a);
+   const actions=document.createElement('div');actions.className='gs-clip-actions';actions.append(preview,badge,info);
+   row.append(clipThumbnail(a.type,()=>cached(a)),name.box,use,actions);$('toolboxList').append(row);
   }
   $('toolboxEmpty').hidden=!!available.length;
  }
@@ -63,11 +73,11 @@ export function createToolboxUI(o){
    for(const file of files){
     $('toolboxStatus').textContent=`Reading ${pending.length+1}/${files.length} · ${file.name}`;
     const hash=await signature(file);
-    let existing=[...assets(),...pending.map(({a})=>a)].find(a=>a.name===file.name&&(a.sha256===hash||!a.sha256&&a.ref.name===file.name&&a.ref.size===file.size));
+    let existing=[...assets(),...pending.map(({a})=>a)].find(a=>a.ref.name===file.name&&(a.sha256===hash||!a.sha256&&a.ref.size===file.size));
     const original=cache.get(existing?.id);
     if(original&&!existing.sha256&&await signature(original)!==hash)existing=null;
     const meta=await inspectToolboxFile(file,file.name);
-    const a={id:existing?.id||crypto.randomUUID(),name:file.name,ref:{kind:'local',name:file.name,size:file.size},...meta,sha256:hash,...(existing?.chroma?{chroma:existing.chroma}:{})};pending.push({a,file});
+    const a={id:existing?.id||crypto.randomUUID(),name:existing?.name||file.name,ref:{kind:'local',name:file.name,size:file.size},...meta,sha256:hash,...(existing?.chroma?{chroma:existing.chroma}:{})};pending.push({a,file});
    }
    if(epoch!==o.epoch())throw Error('Bed changed during file selection.');
    if(!o.change(()=>{for(const {a}of pending){const i=p().toolbox.findIndex(old=>old.id===a.id);if(i<0)p().toolbox.push(a);else p().toolbox[i]=a;}}))throw Error('Toolbox files could not be saved.');
@@ -154,9 +164,6 @@ export function createToolboxUI(o){
  for(const id of ['railImport','overlayLibrary','insertCaption'])$(id).onclick=()=>open();
  $('sheetInsertCaption').onclick=()=>{o.closeProperties();open();};
  $('replaceVideo').onclick=()=>{const c=current();if(c?.type==='video'&&!c.locked){o.closeProperties();open(c);}};
- $('clipStart').onchange=e=>timing(c=>shiftPlacementIn(c,Number(e.target.value)));
- $('clipEnd').onchange=e=>timing((c,d)=>fitPlacementOut(c,Number(e.target.value),d));
- $('clipMarkIn').onclick=()=>timing(c=>shiftPlacementIn(c,o.frame()));$('clipMarkOut').onclick=()=>timing((c,d)=>fitPlacementOut(c,o.frame(),d));
  $('clipSpeed').onchange=e=>timing((c,d)=>setPlacementSpeed(c,Number(e.target.value),d));
  for(const [id,delta]of [['speedDown',-.01],['speedUp',.01]])$(id).onclick=()=>timing((c,d)=>setPlacementSpeed(c,Math.max(.1,Math.min(8,Math.round(((c.playbackRate??1)+delta)*1000)/1000)),d));
  $('speedReset').onclick=()=>timing((c,d)=>setPlacementSpeed(c,1,d));$('speedFit').onclick=()=>timing((c,d)=>fitPlacementOut(c,c.outFrame,d));

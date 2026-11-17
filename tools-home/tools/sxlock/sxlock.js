@@ -394,10 +394,10 @@ async function wavExport(effectsOnly){const dur=duration();if(!effectsOnly&&!vid
 const guard=fn=>async(...args)=>{try{await fn(...args)}catch(e){recordIssue('action',e);message(e.message||String(e))}};
 let selectedClipId=null;
 let visualLayer,camera,activeCamera=false,lastVideoTakeId=null,videoRecordingSettingsId=null;
-const toolboxReady=Promise.all([import('./toolbox.mjs?v=41'),import('./visual-placement.mjs?v=40'),import('./camera-recorder.mjs?v=40')]).then(([{setupToolbox},{setupVisualPlacement},{setupCameraRecorder}])=>{
+const toolboxReady=Promise.all([import('./toolbox.mjs?v=44'),import('./visual-placement.mjs?v=44'),import('./camera-recorder.mjs?v=40')]).then(([{setupToolbox},{setupVisualPlacement},{setupCameraRecorder}])=>{
  visualLayer=setupVisualPlacement({
   stage:$('video').parentElement,video,playhead:currentTime,duration,playing:mixPlaying,
-  fps:()=>num($('sourceFps').value,1,120),edit:seekProject,changed:()=>{refreshToolbox();flushProject();},
+  fps:()=>num($('sourceFps').value,1,120),edit:seekProject,pause:pauseForEdit,canEdit:()=>!recording&&!activeCamera&&!liveTake&&!exportBusy,changed:()=>{refreshToolbox();flushProject();},
   fileById:id=>toolbox?.files().get(id),
  });
   camera=setupCameraRecorder({
@@ -486,7 +486,7 @@ function openVideoRecordingSettings(id){
 }
 $('recordingOpacity').onclick=guard(async()=>{
  const item=visualLayer.placements().find(p=>p.fileId===videoRecordingSettingsId);
- if(item)visualLayer.update(item.id);
+ if(item){$('recordingSheet').close();visualLayer.openSettings(item.id);}
 });
 function openRecordingSettings(id){
  const sound=sounds.get(id);

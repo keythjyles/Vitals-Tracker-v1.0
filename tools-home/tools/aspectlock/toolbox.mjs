@@ -1,3 +1,5 @@
+import {clipNameControl, clipThumbnail} from '../../shared/clip-picker.mjs?v=1';
+
 let database;
 
 function openFiles() {
@@ -71,76 +73,18 @@ export function setupToolbox({onSelect, onRename, currentFiles, currentBed, paus
   return updated;
  }
 
+ async function renameClip(id, label) {
+  const updated = await rename(id, label);
+  labelRows.get(id)?.(label);
+  if (bedName?.entry?.id === id) {
+   bedName.entry = updated;
+   bedName.editor.setLabel(label);
+  }
+  onRename(updated);
+ }
+
  function nameEditor(entry) {
-  const box = document.createElement('div');
-  box.className = 'aspect-clip-name';
-  const button = action('', edit);
-  button.className = 'aspect-name-button';
-  button.title = 'Tap to rename';
-  box.append(button);
-  function setLabel(label) {
-   button.textContent = label;
-   button.setAttribute('aria-label', 'Rename ' + label);
-  }
-  setLabel(clipName(entry));
-  function edit() {
-   const title = button.textContent;
-   const form = document.createElement('form');
-   const input = document.createElement('input');
-   input.type = 'text';
-   input.value = title;
-   input.autocomplete = 'off';
-   input.setAttribute('aria-label', 'Video name');
-   const save = document.createElement('button');
-   save.type = 'submit';
-   save.textContent = 'Save';
-   const cancel = action('Cancel', close);
-   const error = document.createElement('small');
-   error.setAttribute('role', 'alert');
-   error.hidden = true;
-   function close() {
-    box.replaceChildren(button);
-    button.focus({preventScroll: true});
-   }
-   function showNameError(message) {
-    error.textContent = message;
-    error.hidden = false;
-   }
-   form.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && !save.disabled) { event.preventDefault(); close(); }
-   });
-   form.onsubmit = async event => {
-    event.preventDefault();
-    if (save.disabled) return;
-    const label = input.value.trim();
-    if (!label) { showNameError('Enter a video name.'); input.focus({preventScroll: true}); return; }
-    if (label === title) { close(); return; }
-    error.hidden = true;
-    input.readOnly = save.disabled = cancel.disabled = true;
-    let updated;
-    try {
-     updated = await rename(entry.id, label);
-    } catch {
-     showNameError('Could not save the name. Try again.');
-     input.focus({preventScroll: true});
-     return;
-    } finally {
-     input.readOnly = save.disabled = cancel.disabled = false;
-    }
-    labelRows.get(entry.id)?.(label);
-    if (bedName?.entry?.id === entry.id) {
-     bedName.entry = updated;
-     bedName.editor.setLabel(label);
-    }
-    onRename(updated);
-    close();
-   };
-   form.append(input, save, cancel, error);
-   box.replaceChildren(form);
-   input.focus({preventScroll: true});
-   input.select();
-  }
-  return {box, setLabel};
+  return clipNameControl(clipName(entry), label => renameClip(entry.id, label));
  }
 
  function attachBedName(original) {
@@ -168,10 +112,10 @@ export function setupToolbox({onSelect, onRename, currentFiles, currentBed, paus
   host.replaceChildren();
   labelRows.clear();
   const inUse = currentFiles();
-  for (const entry of allowDevice ? items.values() : []) {
+  for (const entry of allowDevice ? [...items.values()].reverse() : []) {
    const {id, file} = entry;
    const row = document.createElement('div');
-   row.className = 'toolbox-row';
+   row.className = 'toolbox-row gs-clip-choice';
    const name = nameEditor(entry);
    const use = target => async () => {
     stopPreview();
@@ -194,7 +138,8 @@ export function setupToolbox({onSelect, onRename, currentFiles, currentBed, paus
     video.hidden = false;
    });
    const bed = action('Use as bed', use('base'));
-   const overlay = action('Overlay here', use('overlay'));
+   const overlay = action('Place here', use('overlay'));
+   overlay.className = 'gs-place-clip';
    const setLabel = label => {
     name.setLabel(label);
     preview.setAttribute('aria-label', 'Preview ' + label);
@@ -204,7 +149,10 @@ export function setupToolbox({onSelect, onRename, currentFiles, currentBed, paus
    };
    setLabel(clipName(entry));
    labelRows.set(id, setLabel);
-   row.append(name.box, preview, bed, overlay, remove);
+   const actions = document.createElement('div');
+   actions.className = 'gs-clip-actions';
+   actions.append(preview, bed, remove);
+   row.append(clipThumbnail('video', () => file), name.box, overlay, actions);
    host.append(row);
   }
   $('toolboxEmpty').hidden = items.size > 0;
@@ -241,5 +189,5 @@ export function setupToolbox({onSelect, onRename, currentFiles, currentBed, paus
  $('aspectToolbox').addEventListener('toggle', () => { if (!$('aspectToolbox').open) stopPreview(); });
  void ready.then(render);
 
- return {add, render, attachBedName, renderBedName, stopPreview, async get(id) { await ready; return items.get(id); }};
+ return {add, render, renameClip, attachBedName, renderBedName, stopPreview, async get(id) { await ready; return items.get(id); }};
 }

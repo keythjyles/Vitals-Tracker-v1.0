@@ -1,9 +1,10 @@
 import {addColorWheel} from '../../shared/color-wheel.mjs?v=1';
+import {fitInsertionRate, mountInsertionSettings} from '../../shared/insertion-settings.mjs?v=1';
 import {paintMatrix} from "../../shared/item-matrix.mjs?v=1";
 import {beginVideoLoad,loadVideoSource,clearVideoSource} from "./media-source.mjs?v=33";
 import {Composition,WIDTH,HEIGHT,FPS,lastFrame,frameAt,placementAt,fitRect} from "./composition.mjs?v=36";
 import {setupPinnedSections} from "../../shared/pinned-sections.mjs?v=32";
-import {clipName,setupToolbox} from "./toolbox.mjs?v=35";
+import {clipName,setupToolbox} from "./toolbox.mjs?v=38";
 import {formatFrameTime,writeFrameClock,frameStepControl} from "../../shared/frame-stamp.mjs?v=2";
 import {DEFAULT_REPLACEMENT_COLOR,detectBackground} from "../caplock/background.mjs?v=33";
 const RECIPE_VERSION = 'R33';
@@ -43,6 +44,7 @@ function refreshLoadedVideo(video) {
   endFrame = null;
   playbackRate = 1;
   ov.playbackRate = 1;
+  Q('insertionError').textContent = '';
   showTiming();
  }
  update();
@@ -191,6 +193,7 @@ function spec() {
  return {
   tool: 'AspectLock', toolId: 'GS-TOOL-ASPECTLOCK', version: RECIPE_VERSION,
   base: Q('base').value, overlay: Q('overlay').value, canvas: {width: WIDTH, height: HEIGHT},
+  ...(!localMedia.overlay && Q('overlayChosen').textContent ? {overlayLabel: Q('overlayChosen').textContent} : {}),
   portraitPerspective: {x: bx, y: by, width: bw, finalOutput: 'fixed 9:16 viewport'},
   overlayTransform: {...overlayRect(), aspectRatio: ratio},
   layerOrder: Q('order').value, blueRemoval: Q('keyMode').value, tolerance: Number(Q('tolerance').value),
@@ -211,6 +214,7 @@ function update() {
  Q('dragSurface').style.pointerEvents = editMode === 'overlay' ? 'auto' : 'none';
  Q('railMove').disabled = !hasOverlay || !hasBed;
  Q('railMove').setAttribute('aria-pressed',String(editMode === 'overlay' && !viewMode));
+ Q('editOverlay').setAttribute('aria-pressed', Q('railMove').getAttribute('aria-pressed'));
  for (const [id,value] of [['width',w],['x',x],['y',y]]) {
   Q(id).value = value;
   Q(id + 'Text').textContent = Math.round(value) + ' px';
@@ -236,6 +240,7 @@ function update() {
  for (const id of ['bedZero','backFrame','forwardFrame','back25','forward25','goFrame','jumpFrame','play','insertBack','insertForward']) Q(id).disabled = !hasBed;
  Q('goFrame').max = hasBed ? lastFrame(bv.duration) : 0;
  Q('timingControls').disabled = !hasOverlay || !hasBed || rendering;
+ for (const id of ['insertionIn','insertionOut','insertionMarkIn','insertionMarkOut']) Q(id).disabled = Q('timingControls').disabled;
  Q('render').disabled = !hasBed || rendering;
  refreshAdded();
  Q('spec').textContent = JSON.stringify(spec(), null, 2);
@@ -301,6 +306,7 @@ function updateClock() {
   const frame = bedFrame();
   let clock = Q('position');
   if (clock.dataset.frame !== String(frame)) writeFrameClock(clock, {frame, time: frame / FPS, fps: FPS});
+  Q('insertionFrame').textContent = 'F' + frame;
   const insertion = 'Insert at F' + frame;
   if (Q('insertFrame').textContent !== insertion) Q('insertFrame').textContent = insertion;
   Q('bedProgress').value = bv.currentTime / bv.duration;
@@ -363,6 +369,11 @@ function showTiming() {
  const current = timing();
  Q('bedIn').value = ov.readyState >= 1 ? startFrame : '';
  Q('bedOut').value = ov.readyState >= 1 && Number.isFinite(current.outFrame) ? current.outFrame : '';
+ Q('insertionIn').value = Q('bedIn').value;
+ Q('insertionOut').value = Q('bedOut').value;
+ Q('insertionSpan').textContent = Q('bedOut').value
+  ? (current.outFrame - startFrame) + ' frames · ' + Number(playbackRate.toFixed(3)) + '× · OUT is the first clear frame'
+  : '';
  Q('startInfo').textContent = ov.readyState >= 1
   ? 'F' + startFrame + ' to F' + current.outFrame + ' · OUT is the first clear frame · ' + playbackRate.toFixed(3) + '×'
   : 'Choose an animation to set its timing.';
@@ -382,6 +393,7 @@ function setTiming(inFrame, outFrame, rate = playbackRate) {
  playbackRate = rate;
  overlayPreview = false;
  Q('timingError').textContent = '';
+ Q('insertionError').textContent = '';
  showTiming();
  syncOverlay();
  update();
@@ -389,6 +401,25 @@ function setTiming(inFrame, outFrame, rate = playbackRate) {
 function editTiming(action) {
  try { action(); }
  catch (error) { Q('timingError').textContent = error.message; }
+}
+function editInsertionTiming(edge, frame) {
+ try {
+  if (rendering) throw Error('Wait for the render to finish.');
+  if (edge === 'in') {
+   const current = timing();
+   setTiming(frame, frame + current.outFrame - current.inFrame);
+  } else {
+   if (!Number.isSafeInteger(frame) || frame <= startFrame) throw Error('OUT must follow IN.');
+   setTiming(startFrame, frame, fitInsertionRate(trimLength(), (frame - startFrame) / FPS));
+  }
+ } catch (error) {
+  showTiming();
+  Q('insertionError').textContent = error.message;
+ }
+}
+for (const [edge, suffix] of [['in','In'],['out','Out']]) {
+ Q('insertion' + suffix).onchange = event => editInsertionTiming(edge, event.target.valueAsNumber);
+ Q('insertionMark' + suffix).onclick = () => editInsertionTiming(edge, bedFrame());
 }
 function enterTiming() {
  const inFrame = Q('bedIn').value === '' ? NaN : Number(Q('bedIn').value);
@@ -545,17 +576,15 @@ Q('sampleKey').onclick = () => {
 function moveAnimation() {
  if (ov.readyState < 1) { report('Choose an animation in Toolbox.'); return; }
  if (!placementAt(bedFrame() / FPS,timing())) Q('overlayZero').click();
- if (Q('itemProperties').open) Q('itemProperties').close();
  setViewMode(false);
  editMode = 'overlay';
- Q('order').value = 'overlay';
  update();
 }
 Q('railMove').onclick = () => {
  if (editMode === 'overlay' && !viewMode) { editMode = 'view'; overlayPreview = false; update(); }
  else moveAnimation();
 };
-Q('editOverlay').onclick = moveAnimation;
+Q('editOverlay').onclick = () => Q('railMove').click();
 function editBed() {
  if (Q('itemProperties').open) Q('itemProperties').close();
  setViewMode(false);
@@ -682,6 +711,7 @@ function restoreSettings(saved, transformLegacy = true) {
  playbackRate = saved.playbackRate ?? 1;
  trimInFrame = saved.overlayTrim?.inFrame ?? 0;
  trimOutFrame = saved.overlayTrim?.outFrame ?? null;
+ if (!localMedia.overlay && typeof saved.overlayLabel === 'string' && ov.readyState >= 1) Q('overlayChosen').textContent = saved.overlayLabel;
  showTiming();
  sound();
 }
@@ -812,11 +842,17 @@ const toolbox = setupToolbox({
 Q('toolboxAdd').disabled = inStudio;
 Q('restoreEdit').hidden = inStudio;
 Q('toolboxCloud').onclick = () => openLibrary('overlay');
-Q('railTiming').onclick = () => {
+function openTimingPanel() {
  Q('pause').click();
  const panel = Q('aspectTiming');
  panel.open = true;
  panel.scrollIntoView({block:'nearest'});
+}
+Q('railTiming').onclick = openTimingPanel;
+Q('openInsertionTrim').onclick = () => {
+ Q('itemProperties').close();
+ Q('overlayTrimPanel').open = true;
+ openTimingPanel();
 };
 const insertPanel = Q('aspectToolbox');
 insertPanel.querySelector('summary').addEventListener('click', event => {
@@ -839,18 +875,33 @@ Q('railToolbox').onclick = () => {
   insertPanel.scrollIntoView({block:'start'});
  }
 };
+const openInsertionSettings = mountInsertionSettings(Q('itemProperties'));
 Q('editAdded').onclick = () => {
  Q('pause').click();
- // At another frame, preserve the bed cursor and show the animation's first selected frame for appearance editing.
- if (!placementAt(bedFrame() / FPS, timing())) Q('overlayZero').click();
- Q('itemPropertiesTitle').textContent = addedPlacement().name;
- Q('itemPropertiesTitle').title = addedPlacement().name;
- Q('itemProperties').showModal();
+ overlayPreview = false;
+ setViewMode(false);
+ editMode = 'overlay';
+ Q('insertionName').value = addedPlacement().name;
+ Q('insertionError').textContent = '';
+ update();
+ openInsertionSettings();
+};
+Q('renameInsertion').onclick = async () => {
+ const field = Q('insertionName'), button = Q('renameInsertion');
+ const label = field.value.trim();
+ if (!label) { Q('insertionError').textContent = 'Enter a video name.'; field.focus(); return; }
+ button.disabled = field.readOnly = true;
+ try {
+  if (localFiles.overlay) await toolbox.renameClip(localFiles.overlay, label);
+  else { Q('overlayChosen').textContent = label; update(); }
+  field.value = addedPlacement().name;
+  Q('insertionError').textContent = '';
+ } catch (error) { Q('insertionError').textContent = error.message; }
+ finally { button.disabled = field.readOnly = false; }
 };
 Q('jumpAdded').onclick = () => seekBedFrame(startFrame);
 Q('sheetItemStart').onclick = () => seekBedFrame(startFrame);
-Q('closeItemProperties').onclick = () => Q('itemProperties').close();
-Q('itemProperties').addEventListener('close', () => { ov.pause(); });
+Q('itemProperties').addEventListener('close', () => { overlayPreview = false; ov.pause(); paintPlayback(); });
 function addedPlacement() {
  return {id:'overlay', name:Q('overlayChosen').textContent || Q('overlay').value, ...timing(), visible:true};
 }
@@ -871,7 +922,9 @@ function refreshAdded() {
  if (loaded) {
   const item = addedPlacement();
   Q('addedName').textContent = item.name;
-  Q('addedTiming').textContent = 'F' + item.inFrame + '–F' + item.outFrame + ' · Edit appearance';
+  Q('addedTiming').textContent = 'Edit insertion · IN F' + item.inFrame + ' · OUT F' + item.outFrame;
+  const name = Q('insertionName');
+  if (name.dataset.savedName !== item.name) name.value = name.dataset.savedName = item.name;
  }
  paintAddedMatrix();
 }

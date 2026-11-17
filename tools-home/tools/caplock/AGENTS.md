@@ -11,3 +11,5 @@ Follow the master plan's approval process for changes to established behavior. W
 See the [CapLock behavior and release notes](README.md).
 
 R33 uses the same **Keep**, **Replace** and **Transparent** controls as AspectLock. The background mode affects the selected visual layer and is stored with its key settings. Layer opacity is a separate control. Use the same source color match and replacement rendering in preview, local saves and caption handoffs.
+
+R35 uses the shared insertion settings layout for placement timing, renaming and Move / size. Mark IN shifts the current placement and Mark OUT uses the established fit calculation. The Source trim button opens the existing source editor. Toolbox names and thumbnails identify imported assets. The project retains each original file reference and frame range.

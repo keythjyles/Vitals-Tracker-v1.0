@@ -1,3 +1,5 @@
+import {clipNameControl, clipThumbnail} from '../../shared/clip-picker.mjs?v=1';
+
 export function setupToolbox({
  openSound, previewSound, editRecording, importAudio, getSound, useCount, persist, pause, stopPreview, busy, visual, editVideoRecording, soundNameButton,
 }) {
@@ -92,10 +94,29 @@ export function setupToolbox({
    }
    if(cameraIds.has(id))actions.push(button('Edit',()=>{sheet.close();editVideoRecording(id);},'Edit camera recording '+file.name));
    if(visual.isVisual(file)){
-    actions.push(button('Overlay',()=>visual.place(id,file,'overlay'),'Overlay '+file.name));
+    const name=clipNameControl(file.name,async label=>{
+     const extension=file.name.match(/\.[^.]+$/)?.[0]||'';
+     const next=label.toLowerCase().endsWith(extension.toLowerCase())?label:label+extension;
+     files.set(id,new File([file],next,{type:file.type,lastModified:file.lastModified}));
+     visual.renameFile(id,next,file.name);
+     await persist();
+     render();
+     return next;
+    });
+    const place=button('Place here',()=>visual.place(id,file,'overlay'),'Overlay '+file.name);
+    place.className='gs-place-clip';
     actions.push(button('Append',()=>visual.place(id,file,'append'),'Append '+file.name));
+    const other=document.createElement('div');
+    other.className='gs-clip-actions';
+    other.append(...actions);
+    const kind=file.type.startsWith('image/')||/\.(png|webp|jpg|jpeg|gif|avif)$/i.test(file.name)?'image':'video';
+    const clip=row(name.box,[place,other]);
+    clip.classList.add('gs-clip-choice');
+    clip.prepend(clipThumbnail(kind,()=>file));
+    host.append(clip);
+   } else {
+    host.append(row(file.name, actions));
    }
-   host.append(row(file.name, actions));
   }
   for (const [id,file] of missing) {
    host.append(row(file.name+' · reconnect', [
@@ -105,8 +126,8 @@ export function setupToolbox({
   if (!host.children.length) host.textContent = 'Add files or find sounds online.';
   placed.replaceChildren();
   for (const item of visual.placements()) {
-   placed.append(row(item.name+' · '+item.start.toFixed(3)+' s · '+Math.round(item.opacity*100)+'%',[
-    button('Opacity',()=>visual.update(item.id),'Change opacity for '+item.name),
+   placed.append(row(item.name+' · '+item.start.toFixed(3)+' s',[
+    button('Edit insertion',()=>{sheet.close();visual.openSettings(item.id);},'Edit insertion '+item.name),
     button('Remove layer',()=>visual.remove(item.id),'Remove layer '+item.name),
    ]));
   }
@@ -114,7 +135,7 @@ export function setupToolbox({
  function open() {
   if (busy()) return;
   pause();
-  $('toolboxStatus').textContent = '';
+  $('toolboxStatus').textContent = 'Choose a file to place at the paused frame.';
   if (!sheet.open) sheet.showModal();
   render();
  }
@@ -139,7 +160,7 @@ export function setupToolbox({
     await persist();
    } catch (error) {failures.push(file.name+' — '+error.message);}
   }
-  $('toolboxStatus').textContent = failures.join(' · ');
+  $('toolboxStatus').textContent = failures.join(' · ') || 'Tap Place here to add a video or image at the paused frame.';
   render();
  };
  sheet.addEventListener('close', () => {clearPreview();stopPreview();});
