@@ -1,3 +1,11 @@
+## Sound Scrubber R14.14 — clear during an active decision
+
+The owner's R14.13 screenshot showed 931 candidates and “Finish the current recording or decision, then clear all.” That guard blocked clearing whenever an approval, deletion or playback capture was unfinished. R14.14 removes the guard. Clear all cancels unfinished approvals and capture immediately, empties the decision slate and removes its audio/metadata without a history or blacklist. Completed library approvals and already-started managed cloud cleanup remain in their existing workflows.
+
+Late source downloads, capture decoding, interrupted-save lookups and approval callbacks cannot repopulate the slate, overwrite the new decision, release a newer operation's lock or write cleared audio back into the cache. Recording cancellation releases its tracks; its old completion cannot interrupt a new capture. SxLock, WavLock, cloud endpoints and source catalogs are unchanged.
+
+42 frontend state tests pass, including slow approvals completing successfully or failing after Clear, reusing the same ID for a new decision, a stuck cloud deletion alongside 1,000 candidates, active recording cancellation, late audio decoding and interrupted-save recovery after clearing. Full page-script syntax and diff checks pass. Browser and deployment verification are recorded separately. Rollback: revert this release's source changes while retaining approved library audio; cleared candidates have no recovery archive.
+
 ## Sound Scrubber R14.13 — clear the decision slate
 
 **Clear all** deletes every undecided candidate and current search result, including filtered and unrendered rows. It removes their browser audio, captured originals, metadata and old rejection IDs. There is no archive, undo snapshot, deletion list or search ban. Clear stops playback, resets the search/filter controls and cancels old search/intake responses so they cannot refill the slate. An explicit new search or batch load may find those sounds again.
@@ -5,7 +13,6 @@
 Approved sounds leave review immediately and stay in the reusable audio libraries. The approved-count banner and lingering approved filename are removed. Audio backup controls live inside the collapsed Search scope & licensing section. Existing library approvals and unfinished save/delete transactions remain available to their existing background workflows; Clear all creates no cloud deletion job.
 
 36 frontend state checks passed, including a 1,000-candidate clear, cached/orphan audio cleanup, no retained candidate history, reload, rediscovery, old-response cancellation and approval disappearance. The actual browser preview loaded 1,000 candidates, filtered them out, cleared the whole slate and reloaded at zero. Physical Android and authenticated provider operations are not claimed. Baseline/rollback: `2db992d6d8ce06be60b4bc815c12d15b2d07ec4b`; source rollback must retain approved audio/library records. A software rollback cannot restore cleared candidates.
-
 
 Deployment verified November 17, 2026: code `4c407e31d4a75f1898830149ef38157453bffcbf`; GitHub Pages run `44162443866` succeeded, as did Studio `44162445396` and ClipLock `44162445437`. The published R14.13 loaded 1,000 candidates, cleared to zero, retained zero after reload, returned fresh Commons search results, and cleared those results and the search field again. The public page was left empty with Clear all visible. This is browser verification; no physical-phone or authenticated cloud deletion was performed.
 

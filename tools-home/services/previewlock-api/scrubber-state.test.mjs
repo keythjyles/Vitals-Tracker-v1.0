@@ -321,3 +321,73 @@ test('deleting a batch candidate keeps no rejection record and permits immediate
  s.run("enqueue('discard',{name:'found-again.wav'})");assert.equal(s.state().discard.status,'pending');
 });
 
+for(const outcome of ['success','failure'])test('Clear all cancels a slow approval and ignores its late '+outcome,async()=>{
+ const s=setup({discard:sound,keep:{...sound,status:'approved'}});let resolveSource,rejectSource;
+ s.context.source=()=>new Promise((ok,bad)=>{resolveSource=ok;rejectSource=bad});s.run('candidateBlob=source');
+ const old=s.run("approveInline('discard',reviewDB.discard)");
+ while(!resolveSource)await new Promise(r=>setImmediate(r));
+ const finishOld=resolveSource,failOld=rejectSource;
+ assert.equal(s.run('approving.size'),1);
+ await s.run('clearSlate()');assert.deepEqual(Object.keys(s.state()),['keep']);assert.equal(s.run('approving.size'),0);
+ s.run("enqueue('discard',{name:'new-decision.wav'})");
+ const next=s.run("approveInline('discard',reviewDB.discard)");
+ while(resolveSource===finishOld)await new Promise(r=>setImmediate(r));
+ const finishNext=resolveSource;
+ const activeStatus=s.nodes.get('status').textContent;
+ // The old response must not remove the new decision's lock or cache its audio.
+ if(outcome==='success')finishOld(wav());else failOld(Error('late old source failure'));
+ await old;
+ assert.equal(s.run("approving.has('discard')"),true);assert.equal(s.blobs.has('discard'),false);
+ assert.equal(s.nodes.get('status').textContent,activeStatus);
+ finishNext(wav());await next;assert.equal(s.state().discard.status,'approved');
+});
+
+test('a stuck managed deletion never blocks clearing the other 1,000 candidates',async()=>{
+ const initial=Object.fromEntries(Array.from({length:1000},(_,i)=>['discard:'+i,{...sound,name:'discard-'+i+'.wav'}]));
+ initial.deleting={...sound,status:'approved',cloudAssetId:'commons-12',sha256:saved.sha256};
+ const s=setup(initial);let finish;let calls=0;
+ s.request(()=>{calls++;return new Promise(resolve=>{finish=resolve})});
+ const deletion=s.run("deleteInline('deleting')");while(!finish)await new Promise(r=>setImmediate(r));
+ await s.run('clearSlate()');
+ assert.equal(s.nodes.get('queueCount').textContent,0);assert.deepEqual(Object.keys(s.state()),['deleting']);assert.equal(calls,1);
+ assert.equal(s.nodes.get('status').textContent,'Slate cleared. Search for a new sound.');
+ finish({persisted:true,assetId:'commons-12',requestId:'delete-1',complete:false,destinations:{dropbox:{verified:true},drive:{verified:false}}});await deletion;
+ assert.equal(s.nodes.get('queueCount').textContent,0);assert(!JSON.stringify(s.state()).includes('discard'));
+});
+
+function captureFixture(s){
+ let stops=0;
+ s.context.stream={getAudioTracks:()=>[{stop(){stops++}}],getTracks:()=>[{stop(){stops++}}]};
+ s.context.MediaStream=class {};
+ s.context.MediaRecorder=class {state='inactive';start(){this.state='recording'}stop(){this.state='inactive';this.ondataavailable?.({data:wav()});this.onstop?.()}};
+ s.run("const audio=$('preview');audio.duration=.2;audio.captureStream=()=>stream;audio.play=async()=>{};playInline=async()=>{}");
+ return ()=>stops;
+}
+test('Clear all cancels active recording without approving a take or retaining candidate audio',async()=>{
+ const s=setup({discard:sound});const stops=captureFixture(s);
+ const recording=s.run("recordPlayback('discard',reviewDB.discard)");
+ while(!s.run('captureState?.cancel'))await new Promise(r=>setImmediate(r));
+ await s.run('clearSlate()');await recording;
+ assert.equal(s.run('captureState'),null);assert.equal(s.blobs.size,0);assert.deepEqual(s.state(),{});assert(stops()>0);
+ assert.equal(s.nodes.get('status').textContent,'Slate cleared. Search for a new sound.');
+ assert(!s.events.some(event=>event.discard?.status==='approved'));
+});
+test('a recording decoded after Clear all cannot recreate cached audio or disturb the next capture',async()=>{
+ const s=setup({discard:sound});captureFixture(s);let finishDecode;
+ s.context.decode=()=>new Promise(resolve=>{finishDecode=resolve});s.run('decodeRecording=decode');
+ const recording=s.run("recordPlayback('discard',reviewDB.discard)");
+ while(!s.run('captureState?.cancel'))await new Promise(r=>setImmediate(r));
+ s.run('captureState.stop()');while(!finishDecode)await new Promise(r=>setImmediate(r));
+ await s.run('clearSlate()');s.run("captureState={id:'new-capture'}");finishDecode(wav());await recording;
+ assert.deepEqual(s.state(),{});assert.equal(s.blobs.size,0);assert.equal(s.run('captureState.id'),'new-capture');
+ assert.equal(s.nodes.get('status').textContent,'Slate cleared. Search for a new sound.');
+});
+test('late interrupted-save recovery cannot bring a cleared candidate back',async()=>{
+ const s=setup({discard:{...sound,reviewState:'save_unverified',cloudAssetId:'commons-12',sha256:saved.sha256}});let fail;
+ s.request(()=>new Promise((_,reject)=>{fail=reject}));const recovery=s.run('resumeUnverifiedSaves()');
+ while(!fail)await new Promise(r=>setImmediate(r));
+ await s.run('clearSlate()');fail(Object.assign(Error('not found'),{status:404}));await recovery;
+ assert.deepEqual(s.state(),{});assert.equal(s.nodes.get('queueCount').textContent,0);
+ assert.equal(s.nodes.get('status').textContent,'Slate cleared. Search for a new sound.');
+});
+

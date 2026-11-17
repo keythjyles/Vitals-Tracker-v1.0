@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Sound Scrubber R14.13</title><style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Sound Scrubber R14.14</title><style>
 :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#101a27;color:#eef3f9;font:15px system-ui}main{max-width:700px;margin:auto;padding:10px 10px 80px}h1{font-size:20px;margin:0 0 6px}p{font-size:12px;color:#9fb2c7;margin:5px 0 10px}button,input,select{font:inherit;min-height:42px;border-radius:7px;border:1px solid #59738a;background:#24384e;color:#fff;padding:6px 10px}button{cursor:pointer}button:disabled{opacity:.4}.gold{background:#f0cc85;color:#1b2632;font-weight:700}input{min-width:0;width:100%}.search{display:grid;grid-template-columns:1fr auto;gap:6px}.controls{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0}.controls button{min-height:34px;font-size:12px;padding:5px 8px}.row{border-bottom:1px solid #354c63;padding:8px 0;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;align-items:center}.name{font-size:13px;overflow-wrap:anywhere}.meta{font-size:10px;color:#a5b7c9}.actions{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}.actions button,.actions a{min-height:34px;min-width:38px;font-size:12px;padding:7px;text-decoration:none;color:white;background:#29425b;border:1px solid #59738a;border-radius:6px}.source-links{grid-column:1/-1;display:flex;gap:8px;justify-content:flex-end}.source-links a,.source-links button{font-size:11px;min-height:28px;padding:4px 8px;background:#24384e;color:#d9e5f2;border:1px solid #59738a;border-radius:5px;text-decoration:none}.actions button{min-height:38px}.actions button:disabled{opacity:.65}details{border:1px solid #3a536d;border-radius:8px;margin:8px 0;padding:6px}summary{cursor:pointer;font-weight:700}#status{font-size:12px;color:#f0cc85;margin:9px 0}audio{width:100%;height:35px}a{color:#f0cc85}small{font-size:10px}#review{margin:10px 0;padding:10px;border:1px solid #55718d;border-radius:9px;background:#1b2b3e}#review[hidden]{display:none}#review .pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}#review label{font-size:12px}#review input[type=number]{width:100%}#review .controls button{flex:1}#queue .row{grid-template-columns:1fr auto}#queue button{font-size:12px}#queue details{margin:4px 0}#queue summary{font-size:13px}#local{width:100%;font-size:12px}#reviewTitle{font-size:13px;overflow-wrap:anywhere}#reviewAudio{width:100%}
 /* R9: dense rows, with one compact control strip at the far right. */
 main{padding-left:4px;padding-right:4px;overflow-anchor:none}
@@ -40,14 +40,14 @@ body.sx-picker main{padding-bottom:10px}
 #driveSaveControls[hidden]{display:none}
 #driveSaveStatus{flex:1 1 100%;margin:0}
 #queue .actions .record-inline,#results .actions .record-inline{color:#fff;background:#a32130;border-color:#f37680;font-size:11px;font-weight:800}
-</style></head><body><main><nav class="audio-tool-nav" aria-label="Audio tools" data-audio-tool="sound-scrubber"><a href="../sxlock/" target="gs-audio-sxlock">SxLock</a><a href="../wavlock/" target="gs-audio-wavlock">WavLock</a><a href="../../" target="gs-audio-tools">Tools</a></nav><script src="../../shared/audio-tool-nav.js?v=1" defer></script><h1>Sound Scrubber <small>GS-TOOL-SOUND-SCRUBBER · R14.13</small></h1><p>Search online or audition the review queue.</p><div class="search"><input id="q" placeholder="Search real sounds, e.g. fart, car braking" aria-label="Search sounds"><button class="gold" id="go">Scrub</button></div><details id="soundTypes"><summary>Sound types</summary><select id="presets" aria-label="Sound type"><option value="">Choose a sound type</option></select></details><details><summary>Search scope &amp; licensing</summary><p>Online search uses Wikimedia Commons. Review batches also include Creative Commons audio from other catalogs. Approve saves the selected recording for SxLock and WavLock.</p><label><input type="checkbox" id="restrict" style="width:auto;min-height:auto"> Optional search filter: CC0 / Public domain only</label><div id="driveSaveControls" class="controls" hidden><button id="connectDrive" type="button">Connect Google Drive</button><button id="retryDrive" type="button" hidden>Retry Drive saves</button><p id="driveSaveStatus" role="status"></p></div><div class="controls"><button id="exportManifest">Export review manifest</button></div></details><details open><summary>Review queue · <span id="queueCount">0</span></summary><div class="controls queue-clear"><button id="clearSlate" class="gold" type="button" title="Delete every undecided candidate, its cached audio and search results">Clear all</button></div><p>Tap the filename to rename. ▶ Play/Pause · REC record and approve · ✓ Approve · × Delete.</p><label>Import audio or screen recording<input id="local" type="file" accept="audio/*,video/mp4,video/webm,video/quicktime" multiple></label><div id="queueTools">
+</style></head><body><main><nav class="audio-tool-nav" aria-label="Audio tools" data-audio-tool="sound-scrubber"><a href="../sxlock/" target="gs-audio-sxlock">SxLock</a><a href="../wavlock/" target="gs-audio-wavlock">WavLock</a><a href="../../" target="gs-audio-tools">Tools</a></nav><script src="../../shared/audio-tool-nav.js?v=1" defer></script><h1>Sound Scrubber <small>GS-TOOL-SOUND-SCRUBBER · R14.14</small></h1><p>Search online or audition the review queue.</p><div class="search"><input id="q" placeholder="Search real sounds, e.g. fart, car braking" aria-label="Search sounds"><button class="gold" id="go">Scrub</button></div><details id="soundTypes"><summary>Sound types</summary><select id="presets" aria-label="Sound type"><option value="">Choose a sound type</option></select></details><details><summary>Search scope &amp; licensing</summary><p>Online search uses Wikimedia Commons. Review batches also include Creative Commons audio from other catalogs. Approve saves the selected recording for SxLock and WavLock.</p><label><input type="checkbox" id="restrict" style="width:auto;min-height:auto"> Optional search filter: CC0 / Public domain only</label><div id="driveSaveControls" class="controls" hidden><button id="connectDrive" type="button">Connect Google Drive</button><button id="retryDrive" type="button" hidden>Retry Drive saves</button><p id="driveSaveStatus" role="status"></p></div><div class="controls"><button id="exportManifest">Export review manifest</button></div></details><details open><summary>Review queue · <span id="queueCount">0</span></summary><div class="controls queue-clear"><button id="clearSlate" class="gold" type="button" title="Delete every undecided candidate, its cached audio and search results">Clear all</button></div><p>Tap the filename to rename. ▶ Play/Pause · REC record and approve · ✓ Approve · × Delete.</p><label>Import audio or screen recording<input id="local" type="file" accept="audio/*,video/mp4,video/webm,video/quicktime" multiple></label><div id="queueTools">
  <button id="loadReviewBatch" type="button">Load 1,000 candidates</button>
  <button id="chapter3Gasps" type="button">Chapter 3 gasps</button>
  <select id="queueFilter" aria-label="Review category"><option value="">All candidates</option><option>Human reactions</option><option>Medical</option><option>Weather &amp; ambience</option></select>
  <input id="queueQuery" type="search" aria-label="Search review queue" placeholder="Search review queue">
  </div><div id="queue"></div><button id="queueMore" type="button" hidden>Show more candidates</button></details><section id="review" hidden><b id="reviewTitle">Review</b><p id="reviewLicense"></p><audio id="reviewAudio" controls preload="metadata"></audio><div class="pair"><label>In (seconds)<input id="trimIn" type="number" min="0" step=".01" value="0"></label><label>Out (seconds)<input id="trimOut" type="number" min="0" step=".01" value="0"></label></div><div class="controls"><button id="playTrim">▶ Play selection</button><button id="setIn">Set In</button><button id="setOut">Set Out</button><button id="saveTrim">Save trim</button></div><div class="controls"><button id="approve" class="gold">✓ Approve</button><button id="cull">Delete</button></div><div class="controls"><button id="downloadTrim">Export trimmed WAV</button><button id="closeReview">Close</button></div><p id="reviewStatus"></p></section><div id="status">Choose a category or enter a search.</div><div id="results"></div><button id="more" hidden class="gold">More results</button><audio id="preview" preload="none"></audio></main><script src="../../shared/effect-classification.js?v=1"></script><script src="../../shared/approved-effects.js?v=3"></script><script src="candidate-audio.js?v=1"></script><script>
 const terms=['Farts','Burps','Sneezes','Coughs','Laughs','Gasp','Crying','Heart monitor beep','Ambulance','Hail','Hurricane','Tornado siren','Lightning','Sniffles','Yawns','Roosters','Ducks','Geese','Cats','Dogs','Cars','Tires squeal','Brakes','Engines','Motorcycles','Trucks','Jets','Propeller planes','Helicopters','Drones','Fire','Crickets','Gongs','Bells','Whooshes','Footsteps','Water','Wind','Rain','Thunder','Crowds','Doors','Kitchen'];
-const $=id=>document.getElementById(id);const audioStore=new Promise((ok,bad)=>{const q=indexedDB.open('scrubber-saved-audio',1);q.onupgradeneeded=()=>q.result.createObjectStore('sounds');q.onsuccess=()=>ok(q.result);q.onerror=()=>bad(q.error)});async function audioOp(id,blob){const db=await audioStore;return new Promise((ok,bad)=>{const tx=db.transaction('sounds',blob?'readwrite':'readonly');const req=blob?tx.objectStore('sounds').put(blob,id):tx.objectStore('sounds').get(id);let result;req.onsuccess=()=>{result=req.result};req.onerror=()=>bad(req.error);tx.oncomplete=()=>ok(result);tx.onerror=()=>bad(tx.error);tx.onabort=()=>bad(tx.error||Error('Audio cache transaction aborted'))})}const DBKEY='sx-scrubber-review-v2';const REJECTKEY='sx-scrubber-rejected-v1';let rejected={};try{rejected=JSON.parse(localStorage.getItem(REJECTKEY)||'{}')}catch{}function rejectSound(id){delete rejected[id];try{if(Object.keys(rejected).length)localStorage.setItem(REJECTKEY,JSON.stringify(rejected));else localStorage.removeItem(REJECTKEY)}catch{}delete reviewDB[id];saveDB();renderQueue();if(selected===id){$('reviewAudio').pause();$('review').hidden=true;selected=null}}function legacyRenameSound(id,fallback){const next=prompt('Sound name',reviewDB[id]?.name||fallback);if(next===null||!next.trim())return;if(!reviewDB[id])return;reviewDB[id].name=next.trim();saveDB();renderQueue();document.querySelectorAll('[data-sound-id]').forEach(el=>{if(el.dataset.soundId===id)el.firstChild.textContent=next.trim()})}let reviewDB={};try{reviewDB=JSON.parse(localStorage.getItem(DBKEY)||'{}')}catch{}for(const v of Object.values(reviewDB)){if(v.status==='held'||v.reviewState==='held'){v.status='pending';v.reviewState='pending';v.heldAt=0}if(v.reviewState==='saving'){v.reviewState='save_unverified';v.saveError='';}}try{localStorage.setItem(DBKEY,JSON.stringify(reviewDB))}catch{}let selected=null,localFiles=new Map(),previewStop=null;function saveDB(){try{const latest=JSON.parse(localStorage.getItem(DBKEY)||'{}');for(const [id,v]of Object.entries(reviewDB)){const c=latest[id];if(c?.classification&&c.sha256===v.sha256){v.classification=c.classification;v.classificationPending=c.classificationPending}}localStorage.setItem(DBKEY,JSON.stringify(reviewDB));window.GSApprovedEffects?.publish();return true}catch{$('reviewStatus').textContent='Browser storage full. Export manifest.';return false}}function enqueue(id,data){if(rejected[id])return;if(!reviewDB[id]){reviewDB[id]={...data,status:'pending',start:0,end:null,created:Date.now()};saveDB()}renderQueue()}
+const $=id=>document.getElementById(id);const audioStore=new Promise((ok,bad)=>{const q=indexedDB.open('scrubber-saved-audio',1);q.onupgradeneeded=()=>q.result.createObjectStore('sounds');q.onsuccess=()=>ok(q.result);q.onerror=()=>bad(q.error)});async function audioOp(id,blob,version){const db=await audioStore;if(blob&&version!==undefined&&version!==slateVersion)throw Error('Review operation cancelled');return new Promise((ok,bad)=>{const tx=db.transaction('sounds',blob?'readwrite':'readonly');const req=blob?tx.objectStore('sounds').put(blob,id):tx.objectStore('sounds').get(id);let result;req.onsuccess=()=>{result=req.result};req.onerror=()=>bad(req.error);tx.oncomplete=()=>ok(result);tx.onerror=()=>bad(tx.error);tx.onabort=()=>bad(tx.error||Error('Audio cache transaction aborted'))})}const DBKEY='sx-scrubber-review-v2';const REJECTKEY='sx-scrubber-rejected-v1';let rejected={};try{rejected=JSON.parse(localStorage.getItem(REJECTKEY)||'{}')}catch{}function rejectSound(id){delete rejected[id];try{if(Object.keys(rejected).length)localStorage.setItem(REJECTKEY,JSON.stringify(rejected));else localStorage.removeItem(REJECTKEY)}catch{}delete reviewDB[id];saveDB();renderQueue();if(selected===id){$('reviewAudio').pause();$('review').hidden=true;selected=null}}function legacyRenameSound(id,fallback){const next=prompt('Sound name',reviewDB[id]?.name||fallback);if(next===null||!next.trim())return;if(!reviewDB[id])return;reviewDB[id].name=next.trim();saveDB();renderQueue();document.querySelectorAll('[data-sound-id]').forEach(el=>{if(el.dataset.soundId===id)el.firstChild.textContent=next.trim()})}let reviewDB={};try{reviewDB=JSON.parse(localStorage.getItem(DBKEY)||'{}')}catch{}for(const v of Object.values(reviewDB)){if(v.status==='held'||v.reviewState==='held'){v.status='pending';v.reviewState='pending';v.heldAt=0}if(v.reviewState==='saving'){v.reviewState='save_unverified';v.saveError='';}}try{localStorage.setItem(DBKEY,JSON.stringify(reviewDB))}catch{}let selected=null,localFiles=new Map(),previewStop=null;function saveDB(){try{const latest=JSON.parse(localStorage.getItem(DBKEY)||'{}');for(const [id,v]of Object.entries(reviewDB)){const c=latest[id];if(c?.classification&&c.sha256===v.sha256){v.classification=c.classification;v.classificationPending=c.classificationPending}}localStorage.setItem(DBKEY,JSON.stringify(reviewDB));window.GSApprovedEffects?.publish();return true}catch{$('reviewStatus').textContent='Browser storage full. Export manifest.';return false}}function enqueue(id,data){if(rejected[id])return;if(!reviewDB[id]){reviewDB[id]={...data,status:'pending',start:0,end:null,created:Date.now()};saveDB()}renderQueue()}
 /* R8: one inline review row; original recordings and owner decisions remain separate. */
 let playingId=null,playVersion=0,playingObjectURL=null,captureState=null;
 const searchRows=new Map();
@@ -92,17 +92,20 @@ function cloudSaved(v){return v.storageProvider==='drive'?v.cloudReceipts?.drive
 function rowState(id,fallback){return reviewDB[id]||fallback}
 async function clearSlate(){
  if(clearingSlate)return;
- if(captureState||approving.size||deleting.size){$('status').textContent='Finish the current recording or decision, then clear all.';return;}
- // Only library approvals and unfinished save/delete transactions survive.
+ // Library approvals and existing managed deletions survive; unfinished
+ // approvals and captures are cancelled, without blocking the slate reset.
  // Cleared candidates have no archive, rejection IDs or undo snapshot.
  const kept=Object.fromEntries(Object.entries(reviewDB).filter(([,v])=>
-  ['approved','deleting'].includes(v.status)||['saved','saving','save_unverified'].includes(v.reviewState)));
+  ['approved','deleting'].includes(v.status)));
  try{
   localStorage.setItem(DBKEY,JSON.stringify(kept));
   localStorage.removeItem(REJECTKEY);
  }catch(error){$('status').textContent='Could not clear browser records: '+error.message;return;}
  clearingSlate=true;$('clearSlate').disabled=true;
  ++slateVersion;searchAbort?.abort();batchAbort?.abort();
+ if(captureState){captureState.cancelled=true;try{(captureState.cancel||captureState.stop)()}catch{}captureState=null;}
+ for(const id of approving)notifyPicker('error',id);
+ approving.clear();
  searchAbort=null;batchAbort=null;busy=false;pendingBatchId='';
  reviewDB=kept;rejected={};searchRows.clear();seen.clear();offset=0;last='';remainingQueue=100;
  decisionOrder.queue=[];decisionOrder.results=[];decisionCursor={id:null,surface:'queue',index:0};
@@ -152,6 +155,7 @@ async function playInline(id,data){
  }
  const version=++playVersion;activePreviewFile=null;audio.pause();if(playingObjectURL){URL.revokeObjectURL(playingObjectURL);playingObjectURL=null}
  let file=await audioOp(id).catch(()=>null)||localFiles.get(id);
+ if(version!==playVersion)return;
  if(!file&&data.archive){
   $('status').textContent='Loading original WAV…';
   file=await candidateBlob(data);
@@ -161,7 +165,7 @@ async function playInline(id,data){
  if(file){activePreviewFile={id,file};playingObjectURL=URL.createObjectURL(file);audio.src=playingObjectURL}else if(data.url)audio.src=data.url;else throw Error('Original audio unavailable');
  audio.onloadedmetadata=()=>{const v=reviewDB[id];if(v&&Number.isFinite(audio.duration)){v.duration=audio.duration;saveDB()}audio.currentTime=Math.min(data.start||0,audio.duration||0)};
  audio.ontimeupdate=()=>{if(data.end!==null&&Number.isFinite(data.end)&&audio.currentTime>=data.end)audio.pause()};
- await audio.play();$('status').textContent='Playing '+data.name;syncPlayButtons();
+ await audio.play();if(version!==playVersion)return;$('status').textContent='Playing '+data.name;syncPlayButtons();
 }
 async function renameInline(id,data){
  if(!reviewDB[id]){reviewDB[id]={...data,status:'pending',start:0,end:null,created:Date.now()}}
@@ -312,17 +316,19 @@ function connectDrive(){
 }
 
 async function resumeUnverifiedSaves(){
+ const version=slateVersion;
  for(const [id,v]of Object.entries(reviewDB)){
   if(v.reviewState!=='save_unverified')continue;
   let failed='';
   if(!v.cloudAssetId||!v.sha256)failed='The upload had not started before the page closed.';
   else{
    try{const record=await audioRequest('/api/audio-record?assetId='+encodeURIComponent(v.cloudAssetId));
+    if(version!==slateVersion||reviewDB[id]!==v)continue;
     if(record.sha256!==v.sha256||record.bytes!==v.storedBytes||record.name!==v.name||record.cloudReceipts?.dropbox?.verified!==true)failed='The stored original could not be verified.';
     else{v.status='approved';v.reviewState='saved';v.cloudReceipts=record.cloudReceipts;v.cloudSaveStatus=record.cloudSaveStatus;saveDB();refreshInlineLists(playingId||decisionCursor.id)}
    }catch(error){if(error.status===404)failed='No completed save was found.';else continue}
   }
-  if(failed){v.reviewState='failed';v.saveError=failed;v.failedAt=Date.now();saveDB();restoreRedo(id)}
+  if(version===slateVersion&&reviewDB[id]===v&&failed){v.reviewState='failed';v.saveError=failed;v.failedAt=Date.now();saveDB();restoreRedo(id)}
  }
 }
 function safeCaptureName(name){return (String(name).replace(/\.[^.]+$/,'').replace(/[\\/<>:"|?*\x00-\x1f]/g,'_').slice(0,145)||'recording')+'_recorded.wav'}
@@ -338,47 +344,55 @@ function recordingWav(buffer){
  return new Blob([bytes],{type:'audio/wav'});
 }
 async function decodeRecording(blob){const Context=window.AudioContext||window.webkitAudioContext;if(!Context)throw Error('Audio conversion unavailable in this browser');const context=new Context();try{return recordingWav(await context.decodeAudioData(await blob.arrayBuffer()))}finally{await context.close()}}
-async function stagePlayback(id,v,blob){
+async function stagePlayback(id,v,blob,version=slateVersion){
+ const current=()=>version===slateVersion&&reviewDB[id]===v;
  const old=await audioOp(id).catch(()=>null)||localFiles.get(id)||(activePreviewFile?.id===id?activePreviewFile.file:null);
- if(old&&!await audioOp(id+':capture-original').catch(()=>null))await audioOp(id+':capture-original',old);
+ if(!current())return false;
+ if(old&&!await audioOp(id+':capture-original').catch(()=>null))await audioOp(id+':capture-original',old,version);
  const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await blob.arrayBuffer())),x=>x.toString(16).padStart(2,'0')).join('');
+ if(!current())return false;
  const predecessor=v.cloudReceipts?.dropbox?.verified&&v.cloudAssetId&&v.sha256
   ?{assetId:v.cloudAssetId,sha256:v.sha256,name:v.name,bytes:v.storedBytes,contentHash:v.cloudReceipts.dropbox.contentHash,receiptVerified:true}
   :null;
- await audioOp(id,blob);localFiles.set(id,blob);
+ await audioOp(id,blob,version);if(!current())return false;localFiles.set(id,blob);
  v.captureSource={method:'browser-playback-recording',sourceName:v.name,sourceURL:v.url||'',sourceAssetId:v.cloudAssetId||null,capturedAt:new Date().toISOString()};
  if(predecessor&&predecessor.assetId!=='local-'+hash)v.managedPredecessors=[...(v.managedPredecessors||[]).filter(p=>p.assetId!==predecessor.assetId),predecessor];
  v.originalName=v.originalName||v.name;v.name=safeCaptureName(v.name);v.sha256=hash;v.cloudAssetId='local-'+hash;v.storedBytes=blob.size;v.cloudReceipts={};delete v.cloudRecordPath;delete v.dropboxContentHash;delete v.captureOffered;delete v.driveRequested;v.storageProvider='drive';v.cloudSaveStatus='not_saved';v.status='pending';v.reviewState='pending';v.saveError='';v.start=0;v.end=null;
  if(playingId===id){$('preview').pause();$('preview').removeAttribute('src');playingId=null;if(playingObjectURL){URL.revokeObjectURL(playingObjectURL);playingObjectURL=null}}
  saveDB();
+ return true;
 }
 async function recordPlayback(id,data){
  if(captureState){if(captureState.id===id)captureState.stop();return}
  if(approving.has(id)||deleting.has(id))return;
  if(!reviewDB[id])reviewDB[id]={...data,status:'pending',created:Date.now()};const v=reviewDB[id],audio=$('preview');
- const state={id,stop:()=>{}};captureState=state;refreshInlineLists(id);
+ const version=slateVersion,state={id,stop:()=>{},cancelled:false};
+ const current=()=>version===slateVersion&&!state.cancelled&&reviewDB[id]===v;
+ captureState=state;refreshInlineLists(id);
  notifyPicker('start',id);
  let stream,recorder,timer,ended,failed,started=false,recording=null;
  try{
   if(typeof MediaRecorder!=='function'||typeof (audio.captureStream||audio.mozCaptureStream)!=='function')throw Error('This browser cannot record playback. Use the phone screen recorder, then import its video above.');
-  playingId=null;await playInline(id,{...v,start:0,end:null});audio.pause();audio.currentTime=0;audio.ontimeupdate=null;
+  playingId=null;await playInline(id,{...v,start:0,end:null});if(!current())return;audio.pause();audio.currentTime=0;audio.ontimeupdate=null;
   stream=(audio.captureStream||audio.mozCaptureStream).call(audio);if(!stream.getAudioTracks().length)throw Error('No capturable audio. Use the phone screen recorder and import its video.');
   const audioStream=new MediaStream(stream.getAudioTracks()),chunks=[];recorder=new MediaRecorder(audioStream);let resolveCapture,rejectCapture;
   const finished=new Promise((resolve,reject)=>{resolveCapture=resolve;rejectCapture=reject});finished.catch(()=>{});
   state.stop=()=>{if(recorder.state!=='inactive')recorder.stop();audio.pause()};
+  state.cancel=()=>{state.cancelled=true;rejectCapture(Error('Playback capture cancelled'));state.stop()};
   recorder.ondataavailable=e=>{if(e.data?.size)chunks.push(e.data)};
   recorder.onerror=()=>rejectCapture(Error('Playback recording failed. Use the phone screen recorder and import its video.'));
   recorder.onstop=()=>resolveCapture(new Blob(chunks,{type:recorder.mimeType||'audio/webm'}));
   ended=()=>state.stop();failed=()=>rejectCapture(Error('Playback stopped with an error; recording not saved'));
   audio.addEventListener('ended',ended,{once:true});audio.addEventListener('error',failed,{once:true});recorder.start(250);started=true;
   timer=setTimeout(()=>state.stop(),Math.min(600000,Math.max(1000,(Number.isFinite(audio.duration)?audio.duration:600)*1000+1000)));
-  await audio.play();$('status').textContent='Recording and approving… Tap ■ to finish early.';refreshInlineLists(id);
-  const raw=await finished;if(!raw.size)throw Error('Empty recording. Use the phone screen recorder and import its video.');
+  await audio.play();if(!current())return;$('status').textContent='Recording and approving… Tap ■ to finish early.';refreshInlineLists(id);
+  const raw=await finished;if(!current())return;if(!raw.size)throw Error('Empty recording. Use the phone screen recorder and import its video.');
   const take=await decodeRecording(raw);
-  await stagePlayback(id,v,take);
+  if(!current()||!await stagePlayback(id,v,take,version))return;
   recording=take;
- }catch(e){const message=e.message||'Playback capture unavailable.';$('status').textContent=message+(/phone screen recorder/i.test(message)?'':' Use the phone screen recorder and import its video.')}
- finally{clearTimeout(timer);audio.removeEventListener('ended',ended);audio.removeEventListener('error',failed);if(started&&recorder.state!=='inactive')recorder.stop();stream?.getTracks().forEach(t=>t.stop());audio.pause();captureState=null;refreshInlineLists(id)}
+ }catch(e){if(current()){const message=e.message||'Playback capture unavailable.';$('status').textContent=message+(/phone screen recorder/i.test(message)?'':' Use the phone screen recorder and import its video.')}}
+ finally{clearTimeout(timer);audio.removeEventListener('ended',ended);audio.removeEventListener('error',failed);if(started&&recorder.state!=='inactive')recorder.stop();stream?.getTracks().forEach(t=>t.stop());if(captureState===state){audio.pause();captureState=null;refreshInlineLists(id)}}
+ if(!current())return;
  if(recording&&v.captureSource&&v.status==='pending')await approveInline(id,v,recording);
  else notifyPicker('error',id);
 }
@@ -387,23 +401,28 @@ const approving=new Set();
 async function approveInline(id,data,captured){
  if(approving.has(id)||captureState||deleting.has(id)||reviewDB[id]?.status==='deleting')return;
  if(!reviewDB[id])reviewDB[id]={...data,status:'pending',start:0,end:null,created:Date.now()};
- const v=reviewDB[id],previewFile=activePreviewFile?.id===id?activePreviewFile.file:null;
+ const version=slateVersion,v=reviewDB[id],previewFile=activePreviewFile?.id===id?activePreviewFile.file:null;
+ const current=()=>version===slateVersion&&reviewDB[id]===v;
  if(v.status==='approved')return;
  notifyPicker('start',id);prepareDecision(id);approving.add(id);v.saveError='';v.reviewState='saving';v.heldAt=0;saveDB();refreshInlineLists(id);
  try{
   let blob=captured||await audioOp(id).catch(()=>null)||localFiles.get(id)||previewFile;
+  if(!current())return;
   if(!blob){
    try{blob=await candidateBlob(v)}
    catch(error){v.captureOffered=true;throw error}
   }
+  if(!current())return;
   if(!blob.size||blob.size>64*1024*1024)throw Error('Sound must be between 1 byte and 64 MB.');
   const name=audioFilename(v.name);
   if(!await matchesAudioFormat(blob,name)){v.captureOffered=true;throw Error('The audio format does not match its filename. Use REC to record playback.')}
   const hash=await audioHash(blob);
+  if(!current())return;
   const canonicalId=captured||v.cloudAssetId?.startsWith('local-')||!/^commons:\d+$/.test(id)
    ?'local-'+hash:id.replace(':','-');
   const existing=Object.values(reviewDB).find(entry=>entry!==v&&entry.status==='approved'&&entry.storageProvider==='drive'&&entry.cloudAssetId===canonicalId&&entry.sha256===hash);
-  await audioOp(id,blob);
+  await audioOp(id,blob,version);
+  if(!current())return;
   Object.assign(v,{originalName:v.originalName||v.name,name:existing?.name||name,sha256:hash,cloudAssetId:canonicalId,
    approvedAt:v.approvedAt||new Date().toISOString(),storedBytes:blob.size,storageProvider:'drive',
    cloudSaveStatus:existing?.cloudSaveStatus||'queued',status:'approved',reviewState:'saved',saveError:''});
@@ -413,8 +432,8 @@ async function approveInline(id,data,captured){
   notifyPicker('approved',id);
  $('status').textContent='';
   flushDriveQueue();
- }catch(e){v.saveError=e.message;v.reviewState='failed';v.failedAt=Date.now();saveDB();$('status').textContent=e.message;notifyPicker('error',id);}
- finally{approving.delete(id);if(v.reviewState==='failed')restoreRedo(id);else refreshInlineLists(playingId||decisionCursor.id)}
+ }catch(e){if(current()){v.saveError=e.message;v.reviewState='failed';v.failedAt=Date.now();saveDB();$('status').textContent=e.message;notifyPicker('error',id);}}
+ finally{if(current()){approving.delete(id);if(v.reviewState==='failed')restoreRedo(id);else refreshInlineLists(playingId||decisionCursor.id)}}
 }
 
 const deleting=new Set();
@@ -466,7 +485,7 @@ function soundRow(id,data){
  };
  info.append(name);
  const actions=document.createElement('div');actions.className='actions';
- const play=document.createElement('button');play.textContent='▶';play.disabled=!!captureState;play.dataset.playId=id;play.dataset.soundName=v.name;play.setAttribute('aria-label','Play '+v.name);play.onclick=()=>playInline(id,rowState(id,v)).catch(e=>{$('status').textContent='Playback failed: '+e.message});
+ const play=document.createElement('button');play.textContent='▶';play.disabled=!!captureState;play.dataset.playId=id;play.dataset.soundName=v.name;play.setAttribute('aria-label','Play '+v.name);play.onclick=()=>{const version=slateVersion;return playInline(id,rowState(id,v)).catch(e=>{if(version===slateVersion)$('status').textContent='Playback failed: '+e.message})};
  const approve=document.createElement('button');approve.textContent=approving.has(id)?'…':'✓';approve.title=v.status==='approved'?'Approved':pickerToken?'Approve and add to SxLock':'Approve';approve.className='approve-inline';approve.setAttribute('aria-label',(v.status==='approved'?'Approved ':pickerToken?'Approve and add ':'Approve ')+v.name);approve.disabled=!!captureState||approving.has(id)||(cloudSaved(v)&&v.reviewState!=='failed');approve.onclick=()=>approveInline(id,v);
  const remove=document.createElement('button');remove.textContent=deleting.has(id)?'…':'✕';remove.setAttribute('aria-label','Delete '+v.name);remove.title='Delete from intake';remove.disabled=!!captureState||deleting.has(id)||approving.has(id);remove.onclick=()=>deleteInline(id);
  if(isDeletion)actions.append(play);else actions.append(play,approve);

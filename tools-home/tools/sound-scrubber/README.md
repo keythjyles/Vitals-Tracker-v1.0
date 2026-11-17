@@ -1,3 +1,11 @@
+## Sound Scrubber R14.14 — clear during an active decision
+
+The owner's R14.13 screenshot showed 931 candidates and “Finish the current recording or decision, then clear all.” That guard blocked clearing whenever an approval, deletion or playback capture was unfinished. R14.14 removes the guard. Clear all cancels unfinished approvals and capture immediately, empties the decision slate and removes its audio/metadata without a history or blacklist. Completed library approvals and already-started managed cloud cleanup remain in their existing workflows.
+
+Late source downloads, capture decoding, interrupted-save lookups and approval callbacks cannot repopulate the slate, overwrite the new decision, release a newer operation's lock or write cleared audio back into the cache. Recording cancellation releases its tracks; its old completion cannot interrupt a new capture. SxLock, WavLock, cloud endpoints and source catalogs are unchanged.
+
+42 frontend state tests pass, including slow approvals completing successfully or failing after Clear, reusing the same ID for a new decision, a stuck cloud deletion alongside 1,000 candidates, active recording cancellation, late audio decoding and interrupted-save recovery after clearing. Full page-script syntax and diff checks pass. Browser and deployment verification are recorded separately. Rollback: revert this release's source changes while retaining approved library audio; cleared candidates have no recovery archive.
+
 ## Sound Scrubber R14.13 — clear the decision slate
 
 **Clear all** deletes every undecided candidate and current search result, including filtered and unrendered rows. It removes their browser audio, captured originals, metadata and old rejection IDs. There is no archive, undo snapshot, deletion list or search ban. Clear stops playback, resets the search/filter controls and cancels old search/intake responses so they cannot refill the slate. An explicit new search or batch load may find those sounds again.
