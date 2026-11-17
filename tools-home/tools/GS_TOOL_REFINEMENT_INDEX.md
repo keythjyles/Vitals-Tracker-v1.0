@@ -6,6 +6,9 @@ Approved sounds leave review immediately and stay in the reusable audio librarie
 
 36 frontend state checks passed, including a 1,000-candidate clear, cached/orphan audio cleanup, no retained candidate history, reload, rediscovery, old-response cancellation and approval disappearance. The actual browser preview loaded 1,000 candidates, filtered them out, cleared the whole slate and reloaded at zero. Physical Android and authenticated provider operations are not claimed. Baseline/rollback: `2db992d6d8ce06be60b4bc815c12d15b2d07ec4b`; source rollback must retain approved audio/library records. A software rollback cannot restore cleared candidates.
 
+
+Deployment verified November 17, 2026: code `4c407e31d4a75f1898830149ef38157453bffcbf`; GitHub Pages run `44162443866` succeeded, as did Studio `44162445396` and ClipLock `44162445437`. The published R14.13 loaded 1,000 candidates, cleared to zero, retained zero after reload, returned fresh Commons search results, and cleared those results and the search field again. The public page was left empty with Clear all visible. This is browser verification; no physical-phone or authenticated cloud deletion was performed.
+
 ## WavLock R1.8 — waveform editor and saved clips
 
 The audio editor uses a short, full-width waveform with its controls below. Pinch to zoom, drag the zoomed view to pan, tap to seek, and use Fit to see the whole source. Open audio file sits in the empty bed. Pull down or tap the grip to show the hidden file picker. Shared Scribe opens below the player.
