@@ -205,36 +205,19 @@ html, body { overscroll-behavior-y: none; }
 #saveTake:not(:disabled) { background: var(--accent); color: #17212c; font-weight: 750; }
 
 #scribeBox #notes { display: block; height: 116px; min-height: 76px; }
-#scribeBox .scribe-actions {
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-end;
-  gap: 4px;
-  max-width: none;
-  margin: 4px 0;
-}
-#scribeBox .scribe-actions button,
-#scribeBox #scribeActions > summary {
-  min-height: 30px;
-  width: auto;
-  padding: 3px 8px;
-  font-size: 13px;
-}
-#scribeBox #scribeActions {
-  position: relative;
-  padding: 0;
-  margin: 0;
-  border-radius: 6px;
-}
-#scribeActions > summary { cursor: pointer; box-sizing: border-box; }
-.scribe-more {
-  display: grid;
-  grid-template-columns: repeat(2, max-content);
-  gap: 3px;
-  padding: 4px;
-}
-#scribeActions[open] .scribe-more { border-top: 1px solid #40556b; }
 
+.mix-live-level { display: block; font-size: 12px; }
+#mixCuesSection { margin-top: 6px; }
+#mixCuesSection > summary { font-weight: 650; cursor: pointer; }
+#mixCuesSection > button, #mixCueEditor, .mix-cue-row { margin-top: 6px; }
+.mix-cue-fields, .mix-cue-row { display: grid; gap: 5px; }
+.mix-cue-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.mix-cue-fields label { font-size: 14px; }
+.mix-cue-fields input { display: block; width: 100%; min-width: 0; }
+.mix-cue-row { border-top: 1px solid #45617a; padding-top: 5px; font-size: 14px; }
+.mix-cue-row > div { display: flex; flex-wrap: wrap; gap: 5px; }
+.mix-cue-row button { min-height: 30px; padding: 3px 8px; font-size: 13px; }
+#mixCueStatus { color: #ffcfaa; }
 .sx-item-nav {
   display: flex;
   justify-content: flex-end;

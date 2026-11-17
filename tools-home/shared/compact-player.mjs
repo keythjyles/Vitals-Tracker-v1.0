@@ -1,5 +1,5 @@
 import {installControlHelp} from './control-help.mjs?v=2';
-import {mountPlayerShell} from './player-shell.mjs?v=33';
+import {mountPlayerShell} from './player-shell.mjs?v=34';
 /** Shared UI adapter; never stores or rewrites media or native edit records. */
 export const COMPACT_PLAYER_VERSION='6';
 export function explicitValue(value,min,max){const n=Number(value);if(String(value).trim()===''||!Number.isFinite(n)||n<min||n>max)throw Error('Enter a value from '+min+' to '+max+'.');return n;}
@@ -8,7 +8,7 @@ if(typeof document!=='undefined'){
  const tool=location.pathname.match(/\/tools\/([^/]+)/)?.[1]||'';
  document.body.classList.add('gs-compact');document.body.dataset.gsTool=tool;
  const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
- const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./compact-player.css?v=2',import.meta.url).href;document.head.append(css);const shellCSS=document.createElement('link');shellCSS.rel='stylesheet';shellCSS.href=new URL('./player-shell.css?v=32',import.meta.url).href;document.head.append(shellCSS);
+ const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./compact-player.css?v=2',import.meta.url).href;document.head.append(css);const shellCSS=document.createElement('link');shellCSS.rel='stylesheet';shellCSS.href=new URL('./player-shell.css?v=34',import.meta.url).href;document.head.append(shellCSS);
  const configs={
   cliplock:{workspace:'.player-workspace',stage:'.picture',rail:'.transport',clock:'#clock',video:'#video',frames:['back','next']},
   caplock:{workspace:'.workspace',stage:'#viewport',rail:'.rail',clock:'#clock',video:'#video',start:'toStart',frames:['prev','next','sheetBack','sheetForward'],ranges:{seek:'frame'}},

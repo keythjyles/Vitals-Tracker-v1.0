@@ -1,5 +1,5 @@
 import {fitInsertionRate, mountInsertionSettings} from '../../shared/insertion-settings.mjs?v=1';
-import {mixClipAudio, mountClipAudio, validClipGain} from '../../shared/clip-audio.mjs?v=1';
+import {fadeGainAt, mixClipAudio, mountClipAudio, savedFades, scheduleClipGain, validClipGain} from '../../shared/clip-audio.mjs?v=2';
 import {scaledTarget} from '../caplock/focus-controls.mjs?v=25';
 import {hasSourceAudio, readSourceAudio} from '../caplock/source-audio.mjs?v=36';
 import {ALL_FORMATS, BlobSource, Input, VideoSampleSink} from './vendor/mediabunny-1.62.1-gs1.mjs';
@@ -37,7 +37,7 @@ export function setupVisualPlacement({stage,video,playhead,duration,playing,fps,
   read() {
    if(!selected || !isVideo(fileById(selected.fileId)))return null;
    return {
-    volume:selected.volume??0, previousVolume:selected.previousVolume, hasAudio:selectedHasAudio, editable:canEdit(),
+    ...selected, volume:selected.volume??0, fps:fps(), hasAudio:selectedHasAudio, editable:canEdit(),
    };
   },
   write(settings) {changeSetting(item=>Object.assign(item,settings));},
@@ -129,7 +129,19 @@ export function setupVisualPlacement({stage,video,playhead,duration,playing,fps,
    if(node.tagName!=='VIDEO')continue;
    const volume = active && canHear() ? p.volume??0 : 0;
    if(volume>0 && isPlaying && !entry.audio)entry.audio=connectAudio(node);
-   if(entry.audio)entry.audio.gain.value=volume;
+   if(entry.audio){
+    const plan=[volume,isPlaying,p.start,p.duration,p.fadeIn,p.fadeOut].join('|');
+    if(entry.audioPlan!==plan){
+     const {gain,clock}=entry.audio;
+     const now=clock(), end=p.start+p.duration;
+     gain.cancelScheduledValues(now);
+     if(isPlaying&&volume>0){
+      scheduleClipGain(gain,{...p,volume},p.start,end,time,end,now);
+      gain.setValueAtTime(0,now+Math.max(0,end-time));
+     }else gain.setValueAtTime(volume*fadeGainAt(p,p.start,end,time),now);
+     entry.audioPlan=plan;
+    }
+   }
    node.muted=volume===0;
    if(!active){node.pause();continue;}
    if(node.preload==='metadata')node.preload='auto';
@@ -303,7 +315,8 @@ export function setupVisualPlacement({stage,video,playhead,duration,playing,fps,
   placements=Array.isArray(saved)?saved.filter(p=>typeof p?.id==='string'&&typeof p.fileId==='string'&&typeof p.name==='string'
    &&Number.isFinite(p.start)&&p.start>=0&&Number.isFinite(p.duration)&&p.duration>0
    &&Number.isFinite(p.opacity)&&p.opacity>=0&&p.opacity<=1).map(p=>{
-    const item={...p};
+    const {fadeIn,fadeOut,...item}=p;
+    Object.assign(item,savedFades(p));
     if(!Number.isFinite(item.sourceDuration)||rateOf(item)<.1||rateOf(item)>8)delete item.sourceDuration;
     for(const key of ['volume','previousVolume'])if(!validClipGain(item[key]))delete item[key];
     for(const [key,min,max] of [['x',-100,200],['y',-100,200],['width',5,400]]){
@@ -328,7 +341,7 @@ export function setupVisualPlacement({stage,video,playhead,duration,playing,fps,
     const end = Math.min(item.sourceDuration??item.duration,await track.computeDuration());
     if(end<=0)continue;
     const buffer = await readSourceAudio(track,check,{start:0,end});
-    if(buffer)tracks.push({buffer,start:item.start,end:item.start+item.duration,rate:rateOf(item),volume:item.volume});
+    if(buffer)tracks.push({buffer,start:item.start,end:item.start+item.duration,rate:rateOf(item),volume:item.volume,...savedFades(item)});
    } finally {
     input.dispose();
    }

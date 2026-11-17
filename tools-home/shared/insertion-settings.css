@@ -162,3 +162,6 @@
 .gs-clip-audio-level {grid-template-columns:auto minmax(0,1fr) auto}
 .gs-clip-audio-controls :is(input, button) {min-width:0;min-height:36px}
 .gs-clip-audio-slider input {display:block;width:100%;padding:0;accent-color:#f0cf84;touch-action:pan-y}
+.gs-audio-fades {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:4px}
+.gs-audio-fades input {display:block;width:100%;min-width:0;min-height:34px;margin-top:3px}
+.gs-audio-fades small {color:#b7cadd}

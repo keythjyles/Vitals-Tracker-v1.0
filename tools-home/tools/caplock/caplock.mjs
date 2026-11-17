@@ -1,20 +1,20 @@
-import {mountClipAudio} from '../../shared/clip-audio.mjs?v=1';
+import {mountClipAudio} from '../../shared/clip-audio.mjs?v=2';
 import {mountInsertionSettings} from '../../shared/insertion-settings.mjs?v=1';
 import {addColorWheel} from '../../shared/color-wheel.mjs?v=1';
 import {setupPinnedSections} from '../../shared/pinned-sections.mjs?v=32';
 import {writeFrameClock,frameStepControl} from '../../shared/frame-stamp.mjs?v=2';
 import {compositionFrames,bedTime,TailClock} from './composition-time.mjs?v=25';
 import {percentGain,inspectSourceAudio} from './source-audio.mjs?v=28';
-import {createToolboxUI} from './toolbox-ui.mjs?v=36';
+import {createToolboxUI} from './toolbox-ui.mjs?v=37';
 import {rememberLocalMedia,readLocalMedia} from './local-media.mjs?v=31';
 import {isToolboxEntry,makeToolboxPlacement,fitVideoPlacement,setPlacementSpeed,shiftPlacementIn,fitPlacementOut} from './toolbox-core.mjs?v=35';
 import {inspectToolboxFile} from './toolbox-media.mjs?v=28';
 import {createTrimDialog} from './trim-dialog.mjs?v=28';
 import {passFilename,matchLocalFile,localPassKey} from './local-pass.mjs?v=21';
-import {renderCaptioned} from './composite.mjs?v=33';
+import {renderCaptioned} from './composite.mjs?v=37';
 import {DEFAULT_CHROMA,DEFAULT_REPLACEMENT_COLOR,detectBackground} from './background.mjs?v=33';
 import {captionJobStatus} from '../../shared/caption-job-status.mjs?v=1';
-import {stageAsset,stageRecord,stageFilename,captionRecipe,stageForName,pendingCaptions} from '../../shared/production-stages.mjs?v=33';
+import {stageAsset,stageRecord,stageFilename,captionRecipe,stageForName,pendingCaptions} from '../../shared/production-stages.mjs?v=34';
 import {saveProductionStage} from '../../shared/production-client.mjs?v=1';
 import {withCaptionBatch} from './caption-batch.mjs?v=22';
 import {openVideoProject} from '../../shared/video-project.mjs?v=1';
@@ -23,14 +23,14 @@ import {inStudio,installAdapter} from '../studio/adapter.mjs?v=1';
 import {listCutProjects,readCutVideo,publishCutProject,watchCutProjects} from '../../shared/cut-jokelets.mjs?v=3';
 import {moduleSession} from '../studio/core.mjs?v=1';
 import {FocusGestures,scaledTarget} from './focus-controls.mjs?v=9';
-import {createProjectPicker} from '../studio/project-picker.mjs?v=7-local-first';
+import {createProjectPicker} from '../studio/project-picker.mjs?v=8-audio';
 import {fitPortrait,preferredBed} from '../studio/project-index.mjs?v=5-studio';
 import {captionNumber,numberedCaptionFiles,activeCaption,startCaptionSequence,navigateCaption,moveCaptionDraft,insertCaption} from './placement.mjs?v=19-named';
 import {paintMatrix,matrixFrame} from '../../shared/item-matrix.mjs?v=1';
 import {rateOf,fitRate} from './clip-time.mjs?v=28';
 import {words,moveWords,shiftWords,geminiPrompt} from './script.mjs?v=4';
-import {LayerTracks} from './layer-track.mjs?v=35';
-import {FPS,DEFAULT_STYLE,createProject,phrase,importTranscript,subtitle,timed,effective,validateProject,validateStyle} from './core.mjs?v=36';
+import {LayerTracks} from './layer-track.mjs?v=37';
+import {FPS,DEFAULT_STYLE,createProject,phrase,importTranscript,subtitle,timed,effective,validateProject,validateStyle} from './core.mjs?v=37';
 const $=id=>document.getElementById(id),v=$('video'),API='https://gs-previewlock-api.onrender.com';
 // Owner lock: built-in text captions cannot be enabled by UI, URL, or restored data.
 const BUILTIN_CAPTIONING_LOCKED=true;
@@ -408,7 +408,7 @@ const refreshClipAudio = mountClipAudio($('clipVolumeRow'), {
   if (!clip || clip.type === 'image') return null;
   const media = layers.media.get(clip.id);
   const hasAudio = project.toolbox?.find(asset => asset.id === clip.toolboxId)?.hasAudio ?? media?.audioInfo?.hasAudio;
-  return {volume:clip.volume, previousVolume:clip.previousVolume, editable:!clip.locked, hasAudio};
+  return {...clip, fps:FPS, duration:(clip.outFrame-clip.inFrame)/FPS, editable:!clip.locked, hasAudio};
  },
  write(settings) {
   const clip = clipCurrent();

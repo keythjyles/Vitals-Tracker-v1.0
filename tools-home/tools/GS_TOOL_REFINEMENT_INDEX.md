@@ -1,5 +1,10 @@
 ## Sound Scrubber R14.12 and SxLock R41 — Drive saves and direct renaming
 
+## SxLock R46 audio fades and mix cues
+
+Add per-insertion fades and editable Video audio and Effects cues from the playhead. Preview and export use the same timeline gain. Scribe keeps its primary actions below the note field across the video tools. For the specification, see [production issue #42](https://github.com/keythjyles/Vitals-Tracker-v1.0/issues/42). Rollback revision `3e5b257c2601c453747bb7891087762d5958d213`.
+
+
 In Sound Scrubber, tap the filename to rename a candidate before deciding. Play toggles playback. The compact red REC button captures playback, names the WAV from the chosen filename and approves it in the same action. Approval keeps the audio on this browser, removes the row from review and publishes it to the SxLock and WavLock libraries. A failed capture leaves the decision available.
 
 New approvals save directly to the existing Google Drive Sound Effects folder. Connect Google Drive grants file access to that folder and starts any queued saves. The service verifies Drive file identity, byte count and SHA-256. A Drive failure keeps the approved local audio and exposes a retry outside the review rows. The older Dropbox library and mirror continue to serve legacy records.

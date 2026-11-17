@@ -9,3 +9,5 @@ The shared player can open the existing Scribe notes from its frame and file rea
 Follow the master plan's approval process for changes to established behavior. When an approved change affects another tool or a shared contract, update the affected notes and verify those paths in the same work.
 
 See the [shared player contract](../../shared/COMPACT_PLAYER.md).
+
+v1.4.11 puts Clear, Copy and Mark frame below the note field. History, Save TXT and Done appear in the second row. Rollback revision `3e5b257c2601c453747bb7891087762d5958d213`.

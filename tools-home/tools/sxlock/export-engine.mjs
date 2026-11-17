@@ -99,7 +99,7 @@ function createInput(file) {
  * That callback cannot access/move the original soundtrack source.
  */
 export async function exportVideo({ file, fps = 25, size = 'original', format = 'mp4',
-  soundtrackGain = 1, hasEffects = false, placeEffects = async () => {},
+  soundtrackGain = 1, soundtrackEnvelope, hasEffects = false, placeEffects = async () => {},
   cancelled, onProgress = () => {}, onPhase = () => {}, visual = null, extension = null, useSoftwareAac = false }) {
   const independent = visual?.independent === true;
   if (!independent && !(file instanceof Blob)) throw new Error('Load an original video first.');
@@ -126,7 +126,7 @@ export async function exportVideo({ file, fps = 25, size = 'original', format = 
     const bedFrames=Math.ceil((timing.end-0.000002)*fps),requestedFrames=visual?.durationFrames??extension?.durationFrames;
     if((independent||requestedFrames!=null)&&(!Number.isSafeInteger(requestedFrames)||requestedFrames<Math.max(1,bedFrames)))throw Error('Invalid composition frame count.');
     const extending=requestedFrames>bedFrames;
-    const copyAudio = !!audio && audio.codec === audioCodec && soundtrackGain === 1 && !hasEffects && (independent || !extending);
+    const copyAudio = !!audio && audio.codec === audioCodec && soundtrackGain === 1 && !soundtrackEnvelope && !hasEffects && (independent || !extending);
     const exactDuration = extending ? requestedFrames/fps : copyVideo ? timing.end : bedFrames/fps;
     const report = { engine: 'SxLock-R26', fps, width, height, sourceFrames: timing.count,
       duration: exactDuration, hasSourceAudio:!!audio, hasEffects, video: copyVideo ? 'packet-copy' : 'offline-encode',
@@ -168,7 +168,7 @@ export async function exportVideo({ file, fps = 25, size = 'original', format = 
     }
     if (audioSource) output.addAudioTrack(audioSource);
     onPhase('Preparing soundtrack');
-    const original = !copyAudio && soundtrackGain > 0 ? await decodeSoundtrack(audio, exactDuration, cancelled) : null;
+    const original = !copyAudio && (soundtrackGain > 0 || soundtrackEnvelope) ? await decodeSoundtrack(audio, exactDuration, cancelled) : null;
     await output.start();
     const videoPackets = copyVideo ? new EncodedPacketSink(video).packets() : null;
     const copyAudioPackets = copyAudio ? new EncodedPacketSink(audio).packets() : null;
@@ -217,7 +217,9 @@ export async function exportVideo({ file, fps = 25, size = 'original', format = 
         const offline = new OfflineAudioContext(2, length, SAMPLE_RATE);
         if (original && at < original.duration) {
           const source = offline.createBufferSource(), gain = offline.createGain();
-          source.buffer = original; gain.gain.value = soundtrackGain;
+          source.buffer = original;
+          if (soundtrackEnvelope) soundtrackEnvelope(gain.gain, at, end);
+          else gain.gain.value = soundtrackGain;
           source.connect(gain).connect(offline.destination);
           source.start(0, at, Math.min(length / SAMPLE_RATE, original.duration - at));
         }

@@ -35,3 +35,7 @@ Tap an insertion to edit its name, view the paused bed frame and mark or type IN
 ## R39 insertion audio
 
 Open **Audio** in insertion settings to mute the overlay or set its level. **Sound on** restores the prior level. Bed audio is a separate control in the same section. Saved edits keep both settings and continue to read earlier on/off overlay settings. Preview and the WebM mix follow the overlay's placement, source trim and rate. Rollback is `fee523aa67c127f233e8e6143b1f3531ac1be190`.
+
+## R40 clip audio and file picker
+
+Use **Bed settings → Audio** for the bed's level and fades. Insertions use **Edit insertion → Audio**. The picker lists names and opens a preview only when requested. **Collapse** closes the Toolbox at the current frame. Rollback revision `3e5b257c2601c453747bb7891087762d5958d213`.

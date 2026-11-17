@@ -2,7 +2,7 @@ import {PHASES,LABELS,canonicalId,validProjectId,moduleSession,moduleRevision,ne
 import {api,assetBlob,storeAsset} from './adapter.mjs?v=1';
 import {projectAssets} from './project-index.mjs?v=5-studio';
 import {captionCutLabel} from '../../shared/cut-passes.mjs?v=4';
-import {createProjectPicker} from './project-picker.mjs?v=6-stages';
+import {createProjectPicker} from './project-picker.mjs?v=8-audio';
 const $=id=>document.getElementById(id),origin=location.origin;
 let project=null,phase='joke',loadedRevision=0,child=null,working=false,ledger=null,pendingSave=null,installPrompt=null,epoch=0,jokeDirty=false,jokeBase=null,pendingBedId=null;
 const urls={cut:'../cliplock/?studio=1&v=R15-stages',captions:'../caplock/?studio=1&v=R16-stages',scene:'../aspectlock/?studio=1',sound:'../sxlock/?studio=1&v=R31-stages',review:'../previewlock/cloud-test.html?studio=1'};

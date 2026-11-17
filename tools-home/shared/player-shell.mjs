@@ -1,4 +1,4 @@
-import {mountPlayerScribe} from './player-scribe.mjs?v=32';
+import {mountPlayerScribe} from './player-scribe.mjs?v=34';
 
 /** Locked SxLock equipment. Editors supply nodes and behavior, never new sizing. */
 export const PLAYER_PROFILE=Object.freeze({id:'SxLock-R24',rail:76,row:29,frame:36,gap:7,frameGlyph:30,record:40,secondary:25});
