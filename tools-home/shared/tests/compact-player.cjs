@@ -141,6 +141,54 @@ async function checkFrameLock(page){
  }finally{rmSync(temp,{recursive:true,force:true});}
 }
 
+async function checkWavLock(page){
+ const dir=mkdtempSync(join(tmpdir(),'wavlock-'));
+ try{
+  const path=join(dir,'source.mp3');
+  execFileSync('ffmpeg',['-v','error','-f','lavfi','-i','sine=frequency=640:duration=4','-c:a','libmp3lame',path]);
+  const open=page.getByRole('button',{name:'Open audio file',exact:true});
+  assert.ok((await open.boundingBox()).y<(await page.locator('.gs-player-workspace').boundingBox()).y);
+  assert.equal(await page.locator('#wavlockEffects').evaluate(node=>node.open),false);
+  const picker=page.waitForEvent('filechooser');
+  await open.click();
+  await (await picker).setFiles(path);
+  await page.waitForFunction(()=>document.querySelector('.gs-player-filename').textContent==='source.mp3'&&document.querySelector('#audio').readyState>=2);
+
+  for(const [name,start,end] of [['First',.375,1.125],['Second',1.625,3.25]]){
+   await page.locator('#in').fill(String(start));
+   await page.locator('#out').fill(String(end));
+   await page.getByRole('textbox',{name:'Clip name',exact:true}).fill(name);
+   const pending=page.waitForEvent('download');
+   await page.getByRole('button',{name:'Save WAV',exact:true}).click();
+   const download=await pending;
+   assert.equal(download.suggestedFilename(),name+'.wav');
+   const seconds=execFileSync('ffprobe',['-v','error','-show_entries','format=duration','-of','csv=p=0',await download.path()],{encoding:'utf8'});
+   assert.ok(Math.abs(Number(seconds)-(end-start))<.0001,'WAV cut matches the selection');
+
+   await page.getByRole('button',{name:'Scribe',exact:true}).click();
+   const notes=page.getByRole('textbox',{name:'Scribe notes',exact:true});
+   await notes.fill(name+' clip note');
+   await page.getByRole('button',{name:'Mark time',exact:true}).click();
+   assert.match(await notes.inputValue(),new RegExp('\\[Audio .* \\| IN .* \\| OUT .* \\| '+name+'\\]'));
+   await page.getByRole('button',{name:'Clear',exact:true}).click();
+   await page.waitForFunction(()=>document.querySelector('#gs-scribeStatus').textContent==='Note kept in History.');
+   await page.getByRole('button',{name:'Scribe',exact:true}).click();
+  }
+  await page.reload();
+  await page.locator('#file').setInputFiles(path);
+  await page.waitForFunction(()=>document.querySelector('.gs-player-filename').textContent==='source.mp3'&&document.querySelector('#audio').readyState>=2);
+  await page.getByRole('button',{name:'Scribe',exact:true}).click();
+  await page.getByRole('button',{name:'History',exact:true}).click();
+  const history=page.getByRole('dialog',{name:'Scribe history'});
+  await history.locator('li pre').filter({hasText:'| Second]'}).waitFor();
+  await history.locator('li').filter({hasText:'| First]'}).getByRole('button',{name:'Restore'}).click();
+  assert.equal(await page.locator('#in').inputValue(),'0.375');
+  assert.equal(await page.locator('#out').inputValue(),'1.125');
+  assert.equal(await page.locator('#name').inputValue(),'First');
+  console.log('WavLock: cold phone file picker, two exact WAV cuts, and shared Scribe range restore passed.');
+ }finally{rmSync(dir,{recursive:true,force:true});}
+}
+
 (async()=>{const browser=await chromium.launch({executablePath:process.env.BROWSER_EXECUTABLE||undefined,headless:true});try{
  const pages=['cliplock/?mode=video','caplock/','sxlock/','aspectlock/','previewlock/cloud-test.html','framelock/','motionlock/','wavlock/'];
  for(const path of pages){const frameLock=path==='framelock/',capLock=path==='caplock/';const page=await browser.newPage({viewport:frameLock?{width:360,height:640}:{width:390,height:740},isMobile:true,hasTouch:true}),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('http://127.0.0.1:8767/tools-home/tools/'+path);await page.waitForSelector('.gs-player-shell');await page.waitForFunction(()=>[...document.querySelectorAll('input[type=range]:not([hidden]):not([data-gs-continuous])')].every(e=>e.hasAttribute('data-gs-protected-range')||e.closest('[inert]')));await page.waitForTimeout(200);
@@ -169,6 +217,7 @@ async function checkFrameLock(page){
   for(const b of heights)assert.equal(b.h,b.frame?frameHeight:b.id==='liveRecord'?40:['liveStop','saveTake'].includes(b.id)?25:rowHeight,path+' locks single-row height for '+b.id);
   const pair=page.locator('.gs-frame-pair');if(await pair.count()){const r=await pair.first().evaluate(e=>[...e.children].map(n=>n.getBoundingClientRect().top));assert.equal(new Set(r).size,1,path+' frame buttons share one row');}await page.getByRole('button',{name:'Show file picker',exact:true}).click();assert.equal(await page.locator('.gs-source-drawer').isVisible(),true);await page.getByRole('button',{name:'Hide file picker',exact:true}).click();assert.equal(await page.locator('.gs-source-drawer').isVisible(),false);
   if(frameLock)await checkFrameLock(page);
+  if(path==='wavlock/')await checkWavLock(page);
   assert.deepEqual(errors,[],path+' initializes without script errors');await page.close();
  }console.log('Eight editors share the locked SxLock rail, paired frame buttons, matching monitor and hidden file drawer.');
  }finally{await browser.close();}})().catch(e=>{console.error(e);process.exit(1);});

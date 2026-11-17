@@ -14,7 +14,7 @@ For ownership, shared controls and approval of system changes, read the [GS vide
 | [FrameLock 1.4.11](tools/framelock/) | Frame review, precise trim, stamped notes and frame correction plans | [Frame controller](tools/framelock/framelock.mjs) inspects source timing and uses Clipper for Trim/Save As. The separate Render path captures a canvas and audio with MediaRecorder. AnchorLock is the established fixed-anchor correction method within the FrameLock workflow. | Keep source-frame notes, source-timed trim and anchor adjustments. Test the corrected-render path independently. Keep existing Trim verification through Clipper. |
 | [AspectLock R41](tools/aspectlock/) | Frame a 9:16 scene, align a visual overlay, and manage its timing, background and audio | Compact device or cloud selection, inline clip names, automatic 25 fps OUT with manual speed fitting, independent picture and audio fades, and fixed 9:16 WebM composite export using the SxLock engine. | Preserve native source playback and the bed clock, existing WebM alpha input, saved placements, and the difference between the fixed output and the editor view. |
 | [MotionLock 0.1.9](tools/motionlock/) | Mark hard cuts, Z levels, pans and B-roll events | Local video and canvas preview with a timed event plan and handoff. The tool records the motion recipe. | Reuse transport and time readout. Keep the motion timeline and Z/B-roll controls. Validate downstream application of the plan. |
-| [WavLock R1.6](tools/wavlock/) | Trim and preview audio and approved effects | Web Audio decode, waveform selection and PCM WAV encoding. The approved-effects bridge can supply cached sound bytes. | Keep audio time, selection, gain and waveform controls. Check sample boundaries and format independently of video. |
+| [WavLock R1.7](tools/wavlock/) | Open device audio, mark and preview cuts, save WAVs and take Scribe notes | Web Audio decode and PCM WAV encoding. Shared Scribe marks audio time, IN/OUT and clip name. Approved effects load when opened. | Check phone file access, sample boundaries and shared Scribe history. |
 | [Sound Scrubber R14.12](tools/sound-scrubber/) | Find, audition, rename, approve and reject candidate sounds | Audio list and same-browser approval ledger. New approvals save to the existing Google Drive Sound Effects folder. WavLock and SxLock use the shared effects bridge. | Share file and status treatment where useful. Keep discovery and audition controls on the list. |
 | [Audio Cue Mixer 2.6](tools/mixer/) | Audition multiple timed audio tracks against a video and save cue settings | Native media tracks synchronized to the video during preview. Exports a JSON cue plan. | Keep accessible as a shortcut. Its HTML media synchronization is a preview method. |
 | [PreviewLock R34 cloud](tools/previewlock/cloud-test.html) | Review saved media, inspect frame/time and open editor handoffs | Authenticated PreviewLock backend indexes Dropbox and supplies playback URLs. The player displays the stored source or review copy. | Keep explicit source identity and existing direct-open URLs. Check decoded playback against source before attributing an export defect to the viewer. |
@@ -70,11 +70,11 @@ Tools home: https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/
 ## WavLock — verified in repository
 - Live: https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/wavlock/
 - Source: tools-home/tools/wavlock/index.html
-- Version shown in source: v1.0
-- Function: phone-friendly WAV/audio editor. Touch waveform to seek; IN/OUT marks; +/- 0.1s; preview selection; export 16-bit PCM WAV. Source unchanged.
+- Version shown in source: R1.7
+- Function: phone-friendly audio editor. Set IN/OUT from the playhead, enter seconds, step by 0.1 seconds, preview a selection and export 16-bit PCM WAV. Scribe History can restore a marked range for the open source.
 - Tested in 2026-10-20 production history: 55.719-second source; exported Leftovers.wav, 4.851 seconds at 48 kHz mono.
 - Bee source for current work: 134813__zedkah__bee-beat.wav (2.437s), provided in ChatGPT conversation 2026-10-24. Do not assume it is uploaded to GitHub/Drive.
-- Opening a source: visit WavLock and select the original file in the device file picker. Existing WavLock has no verified remote preload interface.
+- Opening a source: tap **Open audio file** at the top and choose the original on the device. Open **Approved effects** to browse the sound library.
 
 ## SxLock — verified in repository
 - Live: https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/sxlock/

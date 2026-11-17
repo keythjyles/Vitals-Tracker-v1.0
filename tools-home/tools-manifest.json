@@ -44,9 +44,9 @@
     },
     {
       "tool": "wavlock",
-      "source_version": "R1.6",
+      "source_version": "R1.7",
       "hosted_path": "tools/wavlock/index.html",
-      "description": "Live searchable Approved effects list with Preview/Use, plus existing precision cutter, file import and WAV export.",
+      "description": "Open device audio, preview and save precise WAV cuts, and mark time and clip ranges in shared Scribe. Approved effects open on demand.",
       "tool_id": "GS-TOOL-WAVLOCK",
       "navigation": [
         "sound-scrubber",

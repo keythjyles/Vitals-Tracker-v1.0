@@ -1,3 +1,9 @@
+## WavLock R1.7 — device audio and shared Scribe
+
+Open audio file is the first action. Approved effects open on demand with search, preview and Use. Name each IN/OUT selection and download it as a WAV. Shared Scribe keeps Clear, Copy, Mark time and History. A mark can record the paused time, active range and clip name. Restoring that note can restore the audio position and range for the open source.
+
+The compact-player browser check covers the top picker, two WAV downloads and shared History recovery after reload. Rollback revision `6580889048d17a035c457ba8a24303d4bae315ee`. Retain the source, WAV downloads and Scribe history during rollback.
+
 ## Sound Scrubber R14.12 and SxLock R41 — Drive saves and direct renaming
 
 ## SxLock R46 audio fades and mix cues

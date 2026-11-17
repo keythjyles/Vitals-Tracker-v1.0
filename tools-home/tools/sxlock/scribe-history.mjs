@@ -1,6 +1,11 @@
 import {frameStamp} from '../../shared/frame-stamp.mjs?v=1';
 
-export async function setupScribe({prefix = '', getPosition, getSource, recoveredNotes, noteBox, beforeMark} = {}) {
+const frameMark = position => ({text: frameStamp(position), confirmation: `Marked F${position.frame}.`});
+
+export async function setupScribe({
+ prefix = '', getPosition, getSource, recoveredNotes, noteBox, beforeMark,
+ formatMark = frameMark, restoreMark, missingPosition = 'Load a video to mark a frame.',
+} = {}) {
 const $ = id => document.getElementById(prefix + id);
 const notes = noteBox || $('notes');
 const dialog = $('scribeHistorySheet');
@@ -174,7 +179,7 @@ function renderHistory() {
    notes.dispatchEvent(new Event('input', {bubbles: true}));
    dialog.close();
    notes.setSelectionRange(notes.value.length, notes.value.length);
-   status.textContent = 'Note restored.';
+   status.textContent = restoreMark?.(entry) || 'Note restored.';
   });
   item.append(label, text, restore);
   list.append(item);
@@ -227,16 +232,15 @@ mark.addEventListener('pointerdown', event => { if (document.activeElement === n
 mark.addEventListener('click', () => {
  beforeMark?.();
  const position = getPosition();
- if (!position) { status.textContent = 'Load a video to mark a frame.'; return; }
- const {frame} = position;
- const marker = frameStamp(position);
+ if (!position) { status.textContent = missingPosition; return; }
+ const {text: marker, confirmation} = formatMark(position);
  const start = notes.selectionStart;
  const prefix = notes.value.slice(0, start);
  const insert = (prefix && !prefix.endsWith('\n') ? '\n' : '') + marker;
  notes.setRangeText(insert, start, start, 'end');
  notes.dispatchEvent(new Event('input', {bubbles: true}));
  notes.focus({preventScroll: true});
- status.textContent = `Marked F${frame}.`;
+ status.textContent = confirmation;
 });
 $('scribeClear').addEventListener('click', async () => {
  if (!notes.value) return;
