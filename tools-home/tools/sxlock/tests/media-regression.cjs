@@ -18,7 +18,7 @@ async function main(){
   if(baseline&&!fs.existsSync(file))file=path.resolve(repo,relative);
   try{const st=fs.statSync(file);let start=0,end=st.size-1;
    if(q.headers.range){const m=q.headers.range.match(/bytes=(\d+)-(\d*)/);start=Number(m[1]);if(m[2])end=Number(m[2]);s.statusCode=206;s.setHeader('Content-Range',`bytes ${start}-${end}/${st.size}`);}
-   s.setHeader('Content-Type',/\.m?js$/.test(file)?'text/javascript':file.endsWith('.html')?'text/html':file.endsWith('.json')?'application/json':file.endsWith('.mp4')?'video/mp4':'application/octet-stream');
+   s.setHeader('Content-Type',/\.m?js$/.test(file)?'text/javascript':file.endsWith('.html')?'text/html':file.endsWith('.css')?'text/css':file.endsWith('.json')?'application/json':file.endsWith('.mp4')?'video/mp4':'application/octet-stream');
    s.setHeader('Content-Length',end-start+1);s.setHeader('Accept-Ranges','bytes');fs.createReadStream(file,{start,end}).pipe(s);
   }catch{s.writeHead(404);s.end('not found');}
  }).listen(0,'127.0.0.1');
@@ -180,8 +180,6 @@ async function main(){
   await audio.getByRole('button',{name:'No sound',exact:true}).click();
   assert.equal(await clip.evaluate(video=>video.muted),true);
   await control('visualClose').click();
-  const closeToolbox=soundPage.getByRole('button',{name:'Close Toolbox',exact:true});
-  if(await closeToolbox.isVisible())await closeToolbox.click();
   await control('exportSection').locator(':scope > summary').click();
   const save=async(id,name)=>{
    await control(id).click();
@@ -198,7 +196,6 @@ async function main(){
   assert.equal(await control('visualVolume').inputValue(),'25');
   await control('visualGoIn').click();
   await control('visualClose').click();
-  if(await closeToolbox.isVisible())await closeToolbox.click();
   await control('play').click();
   await soundPage.waitForFunction(()=>{const v=document.querySelector('.sx-visual-item video');return !v.paused&&!v.muted&&v.playbackRate>1;});
   await control('play').click();
