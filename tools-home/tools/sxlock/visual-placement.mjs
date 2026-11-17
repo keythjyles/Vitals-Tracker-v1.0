@@ -1,5 +1,7 @@
 import {fitInsertionRate, mountInsertionSettings} from '../../shared/insertion-settings.mjs?v=1';
+import {mixClipAudio, mountClipAudio, validClipGain} from '../../shared/clip-audio.mjs?v=1';
 import {scaledTarget} from '../caplock/focus-controls.mjs?v=25';
+import {hasSourceAudio, readSourceAudio} from '../caplock/source-audio.mjs?v=36';
 import {ALL_FORMATS, BlobSource, Input, VideoSampleSink} from './vendor/mediabunny-1.62.1-gs1.mjs';
 
 const EPS = .000001;
@@ -20,7 +22,7 @@ function pictureRect(item, width, height, sourceWidth, sourceHeight) {
  return {x:shape.x/100*width-w/2, y:shape.y/100*height-h/2, w, h};
 }
 
-export function setupVisualPlacement({stage,video,playhead,duration,playing,fps,edit,pause,canEdit,changed,fileById}) {
+export function setupVisualPlacement({stage,video,playhead,duration,playing,fps,edit,pause,canEdit,canHear,connectAudio,changed,fileById}) {
  const $ = id=>document.getElementById(id);
  const layer = document.createElement('div');
  layer.className = 'sx-visual-layer';
@@ -28,8 +30,31 @@ export function setupVisualPlacement({stage,video,playhead,duration,playing,fps,
  const panel = $('visualSettings');
  const showSettings = mountInsertionSettings(panel);
  let placements = [], entries = [], request = 0, selected = null, moving = false;
- let drag;
+ let drag, selectedHasAudio;
  const currentFrame = ()=>Math.round(playhead()*fps());
+ const refreshClipAudio = mountClipAudio($('visualAudio'), {
+  prefix:'visual',
+  read() {
+   if(!selected || !isVideo(fileById(selected.fileId)))return null;
+   return {
+    volume:selected.volume??0, previousVolume:selected.previousVolume, hasAudio:selectedHasAudio, editable:canEdit(),
+   };
+  },
+  write(settings) {changeSetting(item=>Object.assign(item,settings));},
+ });
+ $('visualAudio').addEventListener('toggle',inspectSelectedAudio);
+
+ async function inspectSelectedAudio() {
+  const item = selected, file = item && fileById(item.fileId);
+  if(!$('visualAudio').open || !isVideo(file))return;
+  try {
+   const hasAudio = await hasSourceAudio(file);
+   if(selected===item){
+    selectedHasAudio=hasAudio;
+    refreshClipAudio();
+   }
+  } catch { /* Keep sound controls available when track metadata is unavailable. */ }
+ }
 
  function sceneRect() {
   const rect = video.getBoundingClientRect();
@@ -42,6 +67,7 @@ export function setupVisualPlacement({stage,video,playhead,duration,playing,fps,
  }
  function discardMedia() {
   for(const entry of entries){
+   entry.audio?.disconnect();
    entry.node.pause?.();
    entry.node.removeAttribute('src');
    entry.node.load?.();
@@ -65,7 +91,7 @@ export function setupVisualPlacement({stage,video,playhead,duration,playing,fps,
    handle.setAttribute('aria-label','Resize insertion');
    handle.hidden = true;
    const url = URL.createObjectURL(file);
-   if(isVideo(file))Object.assign(node,{muted:true,playsInline:true,preload:'metadata'});
+   if(isVideo(file))Object.assign(node,{muted:true,playsInline:true,preload:'metadata',preservesPitch:false});
    node.addEventListener(isVideo(file)?'loadedmetadata':'load',sync);
    node.src = url;
    wrap.append(node,handle);
@@ -82,10 +108,11 @@ export function setupVisualPlacement({stage,video,playhead,duration,playing,fps,
    if($('visualFrame').textContent!==frame)$('visualFrame').textContent=frame;
   }
   if(!entries.length || !video.videoWidth)return;
-  const time = playhead(), isPlaying = playing(), scene = sceneRect();
+  const time = playhead(), isPlaying = playing()&&!video.seeking, scene = sceneRect();
   if(!scene.width || !scene.height)return;
   const host = stage.getBoundingClientRect();
-  for(const {placement:p,node,wrap,handle} of entries){
+  for(const entry of entries){
+   const {placement:p,node,wrap,handle} = entry;
    const [w,h] = sourceSize(node);
    const active = activeAt(p,time), editable = active && moving && selected === p && !isPlaying;
    wrap.hidden = !active || !w || !h;
@@ -100,6 +127,10 @@ export function setupVisualPlacement({stage,video,playhead,duration,playing,fps,
     wrap.style.height = bounds.h+'px';
    }
    if(node.tagName!=='VIDEO')continue;
+   const volume = active && canHear() ? p.volume??0 : 0;
+   if(volume>0 && isPlaying && !entry.audio)entry.audio=connectAudio(node);
+   if(entry.audio)entry.audio.gain.value=volume;
+   node.muted=volume===0;
    if(!active){node.pause();continue;}
    if(node.preload==='metadata')node.preload='auto';
    const rate = rateOf(p), target = Math.min(Math.max(0,node.duration-EPS),sourceAt(p,time));
@@ -178,17 +209,20 @@ export function setupVisualPlacement({stage,video,playhead,duration,playing,fps,
   $('visualOpacity').value = item.opacity*100;
   $('visualOpacityValue').textContent = Math.round(item.opacity*100)+'%';
   $('visualMove').setAttribute('aria-pressed',String(moving));
+  refreshClipAudio();
  }
  function openSettings(id) {
   const item = placements.find(p=>p.id===id);
   if(!item || !canEdit())return;
   pause();
   selected = item;
+  selectedHasAudio = undefined;
   moving = true;
   $('visualName').value = item.name;
   $('visualSettingsStatus').textContent = '';
   refreshSettings();
   showSettings();
+  void inspectSelectedAudio();
   sync();
  }
  function changeSetting(action) {
@@ -255,6 +289,7 @@ export function setupVisualPlacement({stage,video,playhead,duration,playing,fps,
  panel.addEventListener('close',()=>{
   selected=null;
   moving=false;
+  refreshClipAudio();
   sync();
  });
  function remove(id){
@@ -270,12 +305,40 @@ export function setupVisualPlacement({stage,video,playhead,duration,playing,fps,
    &&Number.isFinite(p.opacity)&&p.opacity>=0&&p.opacity<=1).map(p=>{
     const item={...p};
     if(!Number.isFinite(item.sourceDuration)||rateOf(item)<.1||rateOf(item)>8)delete item.sourceDuration;
+    for(const key of ['volume','previousVolume'])if(!validClipGain(item[key]))delete item[key];
     for(const [key,min,max] of [['x',-100,200],['y',-100,200],['width',5,400]]){
      if(!Number.isFinite(item[key])||item[key]<min||item[key]>max)delete item[key];
     }
     return item;
    }):[];
   reconnect();
+ }
+ async function prepareAudioMix(check) {
+  const tracks = [];
+  for(const item of placements){
+   if(!(item.volume>0))continue;
+   check();
+   const file = fileById(item.fileId);
+   if(!file)throw Error('Reconnect '+item.name+' in Toolbox before exporting.');
+   if(!isVideo(file))continue;
+   const input = new Input({source:new BlobSource(file),formats:ALL_FORMATS});
+   try {
+    const track = await input.getPrimaryAudioTrack();
+    if(!track)continue;
+    const end = Math.min(item.sourceDuration??item.duration,await track.computeDuration());
+    if(end<=0)continue;
+    const buffer = await readSourceAudio(track,check,{start:0,end});
+    if(buffer)tracks.push({buffer,start:item.start,end:item.start+item.duration,rate:rateOf(item),volume:item.volume});
+   } finally {
+    input.dispose();
+   }
+  }
+  return {
+   hasAudio:tracks.length>0,
+   place(context,from,to) {
+    for(const track of tracks)mixClipAudio(context,track.buffer,track,from,to);
+   },
+  };
  }
  async function prepareFrameRender(outputFps,size,outputDuration) {
   if(!placements.length)return null;
@@ -331,5 +394,5 @@ export function setupVisualPlacement({stage,video,playhead,duration,playing,fps,
  function renameFile(id,name,oldName){
   for(const item of placements)if(item.fileId===id&&(oldName===undefined||item.name===oldName))item.name=name;
  }
- return {isVisual,place,restore,renameFile,reconnect,sync,outlet,placements:()=>placements,openSettings,remove,prepareFrameRender};
+ return {isVisual,place,restore,renameFile,reconnect,sync,outlet,placements:()=>placements,openSettings,remove,prepareFrameRender,prepareAudioMix};
 }

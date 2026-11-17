@@ -14,7 +14,7 @@ module.exports=async(browser,base)=>{
  await page.waitForFunction(()=>document.querySelector('#toolboxStatus').textContent.includes('3 files in'));
  await page.getByRole('button',{name:'Insert late-goat.mp4',exact:true}).click();await page.waitForFunction(()=>document.querySelector('#itemCount').textContent==='2');
  assert.equal(await page.locator('#seek').getAttribute('max'),'29');assert.match(await page.locator('#placementState').textContent(),/30 frames/);
- await page.locator('#clipTimeline .item-open').last().click();await page.locator('#clipVolume').fill('70');await page.locator('#clipVolume').press('Tab');
+ await page.locator('#clipTimeline .item-open').last().click();await page.locator('#clipVolumeRow > summary').tap();await page.locator('#clipVolume').fill('70');await page.locator('#clipVolume').press('Tab');
  await page.waitForFunction(()=>document.querySelector('#clipVolumeInfo').textContent.includes('source sound starts near'));
  const firstSound=Number((await page.locator('#clipVolumeInfo').textContent()).match(/near ([0-9.]+)s/)[1]);assert.ok(firstSound>.55&&firstSound<.65);
  await page.locator('#captionBackground summary').click();await page.locator('#chromaKeep').click();await page.locator('#applyClip').click();await page.locator('#closeClipProperties').click();

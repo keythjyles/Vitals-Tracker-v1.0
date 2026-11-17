@@ -1,3 +1,4 @@
+import {mountClipAudio, validClipGain} from '../../shared/clip-audio.mjs?v=1';
 import {addColorWheel} from '../../shared/color-wheel.mjs?v=1';
 import {fitInsertionRate, mountInsertionSettings} from '../../shared/insertion-settings.mjs?v=1';
 import {paintMatrix} from "../../shared/item-matrix.mjs?v=1";
@@ -27,6 +28,31 @@ const trimInTime=()=>trimInFrame/FPS,trimOutTime=()=>Math.min(ov.duration||0,tri
 let startFrame=0,endFrame=null,playbackRate=1,overlayActive=false,overlayAudible=false,overlayPreview=false;
 let requestedBedFrame = null, paintedBedFrame = null;
 let x=40,y=350,w=460,ratio=16/9,bx=0,by=0,bw=WIDTH,editMode='view',items=[],raf=0,canSample=true,rendering=false;
+let overlaySound = {volume:0}, overlayHasAudio;
+const refreshInsertionAudio = mountClipAudio(Q('insertionAudio'), {
+ prefix:'insertion',
+ read:() => ov.readyState >= 1 ? {...overlaySound, editable:!rendering, hasAudio:overlayHasAudio} : null,
+ write(settings) {
+  overlaySound = settings;
+  sound();
+  update();
+ },
+});
+ov.preservesPitch = false;
+async function inspectInsertionAudio() {
+ const file = localMedia.overlay;
+ if (!file || !Q('insertionAudio').open) return;
+ const url = ov.src;
+ try {
+  const {hasSourceAudio} = await import('../caplock/source-audio.mjs?v=36');
+  const hasAudio = await hasSourceAudio(file);
+  if (file === localMedia.overlay && url === ov.src) {
+   overlayHasAudio = hasAudio;
+   refreshInsertionAudio();
+  }
+ } catch { /* The audio controls remain usable when track metadata is unavailable. */ }
+}
+Q('insertionAudio').addEventListener('toggle', inspectInsertionAudio);
 const localFiles = {}, localMedia = {};
 const params=new URLSearchParams(location.search);
 const inStudio = params.get('studio') === '1' && parent !== window;
@@ -44,6 +70,8 @@ function refreshLoadedVideo(video) {
   endFrame = null;
   playbackRate = 1;
   ov.playbackRate = 1;
+  overlaySound = {volume:0};
+  overlayHasAudio = undefined;
   Q('insertionError').textContent = '';
   showTiming();
  }
@@ -135,7 +163,10 @@ async function loadLocalVideo(id, source, at = bedFrame()) {
   localMedia[id] = file;
   refreshLoadedVideo(video);
   markVideoSelection(id, file.name, undefined, label);
-  if (id === 'overlay') placeLoadedOverlay(at);
+  if (id === 'overlay') {
+   placeLoadedOverlay(at);
+   void inspectInsertionAudio();
+  }
   sound();
   const asset = savedId ? (await toolbox.get(savedId) ?? source) : await toolbox.add(file);
   if (video.getAttribute('src') === url) {
@@ -198,7 +229,7 @@ function spec() {
   overlayTransform: {...overlayRect(), aspectRatio: ratio},
   layerOrder: Q('order').value, blueRemoval: Q('keyMode').value, tolerance: Number(Q('tolerance').value),
   key: keySettings(), opacity: Number(Q('opacity').value) / 100,
-  audio: {source: Q('baseAudio').value, cartoonSfx: Q('overlayAudio').value},
+  audio: {source: Q('baseAudio').value, cartoonSfx: overlaySound.volume>0?'on':'off', ...overlaySound},
   startFrame, outFrame: endFrame, playbackRate, overlayTrim: {inFrame: trimInFrame, outFrame: trimOutFrame, frameRate: FPS},
   sourceMotion: 'unchanged',
  };
@@ -243,6 +274,7 @@ function update() {
  for (const id of ['insertionIn','insertionOut','insertionMarkIn','insertionMarkOut']) Q(id).disabled = Q('timingControls').disabled;
  Q('render').disabled = !hasBed || rendering;
  refreshAdded();
+ refreshInsertionAudio();
  Q('spec').textContent = JSON.stringify(spec(), null, 2);
  paintPlayback();
 }
@@ -341,7 +373,8 @@ for (const video of [bv, ov]) {
 }
 function sound() {
  bv.muted = Q('baseAudio').value !== 'on';
- ov.muted = Q('overlayAudio').value !== 'on' || !overlayAudible;
+ ov.volume = overlaySound.volume;
+ ov.muted = overlaySound.volume === 0 || !overlayAudible;
 }
 function syncOverlay(bedTime = bv.currentTime) {
  if (overlayPreview) {
@@ -549,7 +582,7 @@ for (const id of ['width','x','y']) Q(id).oninput = () => {
  if (id === 'y') y = value;
  update();
 };
-for (const id of ['order','tolerance','baseAudio','overlayAudio','showOutside']) Q(id).onchange = () => { sound(); update(); };
+for (const id of ['order','tolerance','baseAudio','showOutside']) Q(id).onchange = () => { sound(); update(); };
 Q('keyMode').onchange = () => { setKeySource(Q('keyMode').value); update(); };
 for (const [mode,id] of Object.entries(backgroundButtons)) Q(id).onclick = () => {
  if (mode==='keep') setKeySource('off');
@@ -660,7 +693,7 @@ Q('render').onclick = async () => {
  try {
   report('Preparing the 25 fps export…');
   const [{renderAspect}, bed, animation] = await Promise.all([
-   import('./export.mjs?v=36'), mediaBytes('base',bv), ov.readyState >= 2 ? mediaBytes('overlay',ov) : null,
+   import('./export.mjs?v=39'), mediaBytes('base',bv), ov.readyState >= 2 ? mediaBytes('overlay',ov) : null,
   ]);
   let phase = 'Preparing export';
   const result = await renderAspect({bed,animation,scene,key:settings.key,range,audio:settings.audio,
@@ -705,7 +738,10 @@ function restoreSettings(saved, transformLegacy = true) {
  Q('keyEdge').value = Math.round(100 * (saved.key?.blend ?? .04));
  Q('keyBackground').value = Math.round(100 * (saved.key?.backgroundOpacity ?? 0));
  Q('baseAudio').value = saved.audio?.source || 'on';
- Q('overlayAudio').value = saved.audio?.cartoonSfx || 'off';
+ overlaySound = {
+  volume: validClipGain(saved.audio?.volume) ? saved.audio.volume : Number(saved.audio?.cartoonSfx === 'on'),
+  previousVolume: validClipGain(saved.audio?.previousVolume) ? saved.audio.previousVolume : undefined,
+ };
  startFrame = saved.startFrame ?? 0;
  endFrame = saved.outFrame ?? null;
  playbackRate = saved.playbackRate ?? 1;

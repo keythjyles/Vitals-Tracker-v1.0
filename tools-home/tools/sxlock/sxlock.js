@@ -14,7 +14,7 @@ let clips=[],ctx,master,bedGain,analyser,sourceNode,videoFile=null,videoURL=null
 const scheduled=new Set(),compressed=new Map(),PCM_BUDGET=24*1024*1024,COMPRESSED_BUDGET=8*1024*1024,LOOKAHEAD=8;
 let cleanupExport=null,exportPhase=null;
 const savedCustom=new Set(),savedVideos=new Set(),savedRecordings=new Set();let videoRef=null,recoveryQueue=Promise.resolve(),recoveryRevision=0,recoveryPending=0,restoredPlayhead=0;
-const health={version:"R41",errors:[]};try{health.errors=JSON.parse(localStorage.getItem(KEY+"-health")||"null")?.errors?.slice(-12)||[]}catch{}
+const health={version:"R45",errors:[]};try{health.errors=JSON.parse(localStorage.getItem(KEY+"-health")||"null")?.errors?.slice(-12)||[]}catch{}
 let sourceDuration=0,sourceReady=Promise.resolve(),sourceLoadToken=0;
 const num=(v,min=0,max=Infinity)=>Math.max(min,Math.min(max,Number(v)||0));
 const stamp=t=>`${Math.floor(t/60)}:${(t%60).toFixed(3).padStart(6,'0')}`;
@@ -293,11 +293,12 @@ async function playTail(){
  tailAnchor=ac.currentTime-(tailTime??sourceEnd());
  tailPlaying=true;
  updateTransport();
+ visualLayer?.sync();
  await schedule();
 }
 
 let playRequest=0,playingRequest=-1;
-function pauseForEdit(){playRequest++;stopTail();video.pause();stopEffects();stopAuditions();updateTransport();}
+function pauseForEdit(){playRequest++;stopTail();video.pause();stopEffects();stopAuditions();updateTransport();visualLayer?.sync();}
 function frameStep(delta){if(recording||liveTake||!videoFile||!(duration()>0))return;pauseForEdit();const fps=num($('sourceFps').value,1,120),frame=Math.round(currentTime()*fps)+delta,maxFrame=Math.max(0,Math.ceil(duration()*fps)-1);seekProject(Math.max(0,Math.min(maxFrame,frame))/fps);if(draft){draft.start=currentTime();$('effectStart').value=draft.start.toFixed(3)}}
 function openSheet(id=null,clipId=null){if(recording||liveTake)return;setLibraryOnly(false);pauseForEdit();const existing=clips.find(c=>c.id===clipId);draft=existing?{...existing,editId:clipId}:{id:uid(),soundId:null,start:currentTime(),offset:0,duration:1,volume:65,enabled:true,loop:false};if(existing){selectedClipId=existing.id;updateInsertionNavigation();if(videoFile&&duration()>0)seekProject(existing.start);}$('sheetTitle').textContent=existing?'Edit effect':'Add effect';$('sheetStatus').textContent='';$('sheetSearch').value='';$('sheetCategory').value='all';$('sheetBrowse').hidden=false;$('sheetEditor').hidden=true;if(!$('effectSheet').open)$('effectSheet').showModal();renderLibrary();if(id)chooseSound(id,!!existing)}
 let chooseToken=0;
@@ -370,14 +371,15 @@ async function videoExport(){
  const fps=num($('fps').value,1,60),tail=duration();
  const extension=tail>sourceEnd()?{durationFrames:Math.ceil((tail-.000002)*fps)}:null;
  $('progress').hidden=false;$('progress').value=0;
+ const sound=await visualLayer?.prepareAudioMix(checkAudioExport);
  const visual=await visualLayer?.prepareFrameRender(fps,$('size').value,tail);
  let result;
  try{result=await engine.exportVideo({file:videoFile,fps,extension,visual,size:$('size').value,
   format:$('format').value.startsWith('video/webm')?'webm':'mp4',soundtrackGain:num($('bed').value,0,100)/100,
   // Use the bundled AAC encoder with known priming for mixed MP4s.
-  hasEffects:selected.length>0,useSoftwareAac:true,cancelled:()=>cancelled,
+  hasEffects:selected.length>0||sound?.hasAudio===true,useSoftwareAac:true,cancelled:()=>cancelled,
   onPhase:phase=>{savePhase(phase);message(phase+'…');},onProgress:value=>{$('progress').value=value;},
-  placeEffects:async(offline,at,end)=>{for(const c of selected){
+  placeEffects:async(offline,at,end)=>{sound?.place(offline,at,end);for(const c of selected){
    if(c.start>=end||c.start+c.duration<=at)continue;
    const b=await buffer(c.soundId,ac);if(cancelled)throw Error('Export cancelled.');
    placeSource(offline,c,b,offline.destination,at,0,end);
@@ -390,14 +392,76 @@ async function videoExport(){
 function wav(buffer){const ch=buffer.numberOfChannels,n=buffer.length,sr=buffer.sampleRate,data=new ArrayBuffer(44+n*ch*2),v=new DataView(data);let p=0;const str=s=>{for(const c of s)v.setUint8(p++,c.charCodeAt(0))},u16=x=>{v.setUint16(p,x,true);p+=2},u32=x=>{v.setUint32(p,x,true);p+=4};str('RIFF');u32(data.byteLength-8);str('WAVEfmt ');u32(16);u16(1);u16(ch);u32(sr);u32(sr*ch*2);u16(ch*2);u16(16);str('data');u32(n*ch*2);for(let i=0;i<n;i++)for(let c=0;c<ch;c++){const x=Math.max(-1,Math.min(1,buffer.getChannelData(c)[i]));v.setInt16(p,x<0?x*32768:x*32767,true);p+=2}return new Blob([data],{type:'audio/wav'})}
 function pcm16(buffer){const channels=buffer.numberOfChannels,out=new Uint8Array(buffer.length*channels*2),view=new DataView(out.buffer),data=Array.from({length:channels},(_,c)=>buffer.getChannelData(c));let p=0;for(let i=0;i<buffer.length;i++)for(let c=0;c<channels;c++){const sample=data[c][i];if(!Number.isFinite(sample)||Math.abs(sample)>1)throw Error('Mix exceeds full scale. Lower overlapping volumes. No normalization was applied.');view.setInt16(p,sample<0?sample*32768:sample*32767,true);p+=2}return out}
 function wavHeader(frames,channels=2){const header=new ArrayBuffer(44),v=new DataView(header);let p=0;const str=s=>{for(const c of s)v.setUint8(p++,c.charCodeAt(0))},u16=x=>{v.setUint16(p,x,true);p+=2},u32=x=>{v.setUint32(p,x,true);p+=4};str('RIFF');u32(36+frames*channels*2);str('WAVEfmt ');u32(16);u16(1);u16(channels);u32(SR);u32(SR*channels*2);u16(channels*2);u16(16);str('data');u32(frames*channels*2);return header}
-async function wavExport(effectsOnly){const dur=duration();if(!effectsOnly&&!videoFile)throw Error('Load the original video first.');if(dur>1800)throw Error('WAV exports are limited to 30 minutes.');const ac=await audioContext();pauseForEdit();await prepareExportFiles();let original=null;if(!effectsOnly){const estimate=videoFile.size*2+dur*SR*2*4;if(estimate>256*1024*1024)throw Error('This soundtrack is too large for safe phone WAV decoding. Use finished video export.');savePhase('Decoding original soundtrack');try{original=await ac.decodeAudioData(await videoFile.arrayBuffer())}catch{throw Error('This browser cannot decode the video soundtrack for WAV. Use video export or effects-only WAV.')}}const frames=Math.ceil(dur*SR),chunkFrames=8*SR,parts=[wavHeader(frames)];$('progress').hidden=false;try{for(let first=0;first<frames;first+=chunkFrames){if(cancelled)throw Error('Export cancelled. Saved placements are preserved.');savePhase('Rendering WAV');const length=Math.min(chunkFrames,frames-first),at=first/SR,end=(first+length)/SR;let offline=new OfflineAudioContext(2,length,SR);if(original&&at<original.duration){const n=offline.createBufferSource(),g=offline.createGain();n.buffer=original;g.gain.value=num($('bed').value,0,100)/100;n.connect(g).connect(offline.destination);n.start(0,at,Math.min(length/SR,original.duration-at))}for(const c of clips){if(!c.enabled||c.start>=end||c.start+c.duration<=at)continue;const b=await buffer(c.soundId,ac);placeSource(offline,c,b,offline.destination,at,0,end)}let rendered=await offline.startRendering();parts.push(pcm16(rendered));rendered=null;offline=null;$('progress').value=(first+length)/frames;message('Rendering WAV · '+Math.round((first+length)/frames*100)+'%');await new Promise(r=>setTimeout(r,0));trimDecoded()}if(cancelled)throw Error('Export cancelled. Saved placements are preserved.');finishExport(new Blob(parts,{type:'audio/wav'}),'wav')}finally{original=null;parts.length=0}}
+function checkAudioExport(){
+ if(cancelled)throw Error('Export cancelled. Saved placements are preserved.');
+}
+async function wavExport(effectsOnly){
+ const dur=duration(), bedVolume=num($('bed').value,0,100)/100;
+ if(!effectsOnly&&!videoFile)throw Error('Load the original video first.');
+ if(dur>1800)throw Error('WAV exports are limited to 30 minutes.');
+ const ac=await audioContext();
+ pauseForEdit();
+ await prepareExportFiles();
+ const sound=effectsOnly?null:await visualLayer?.prepareAudioMix(checkAudioExport);
+ let original=null;
+ if(!effectsOnly&&bedVolume>0){
+  const {hasSourceAudio}=await import('../caplock/source-audio.mjs?v=36');
+  if(await hasSourceAudio(videoFile)){
+   const estimate=videoFile.size*2+dur*SR*2*4;
+   if(estimate>256*1024*1024)throw Error('This soundtrack is too large for safe phone WAV decoding. Use finished video export.');
+   savePhase('Decoding original soundtrack');
+   try{original=await ac.decodeAudioData(await videoFile.arrayBuffer());}
+   catch{throw Error('This browser cannot decode the video soundtrack for WAV. Use video export or effects-only WAV.');}
+  }
+ }
+ const frames=Math.ceil(dur*SR), chunkFrames=8*SR, parts=[wavHeader(frames)];
+ $('progress').hidden=false;
+ try{
+  for(let first=0;first<frames;first+=chunkFrames){
+   checkAudioExport();
+   savePhase('Rendering WAV');
+   const length=Math.min(chunkFrames,frames-first),at=first/SR,end=(first+length)/SR;
+   const offline=new OfflineAudioContext(2,length,SR);
+   if(original&&at<original.duration){
+    const source=offline.createBufferSource(), gain=offline.createGain();
+    source.buffer=original;
+    gain.gain.value=bedVolume;
+    source.connect(gain).connect(offline.destination);
+    source.start(0,at,Math.min(length/SR,original.duration-at));
+   }
+   sound?.place(offline,at,end);
+   for(const c of clips){
+    if(!c.enabled||c.start>=end||c.start+c.duration<=at)continue;
+    const b=await buffer(c.soundId,ac);
+    placeSource(offline,c,b,offline.destination,at,0,end);
+   }
+   parts.push(pcm16(await offline.startRendering()));
+   $('progress').value=(first+length)/frames;
+   message('Rendering WAV · '+Math.round((first+length)/frames*100)+'%');
+   await new Promise(resolve=>setTimeout(resolve,0));
+   trimDecoded();
+  }
+  checkAudioExport();
+  finishExport(new Blob(parts,{type:'audio/wav'}),'wav');
+ }finally{
+  original=null;
+  parts.length=0;
+ }
+}
 const guard=fn=>async(...args)=>{try{await fn(...args)}catch(e){recordIssue('action',e);message(e.message||String(e))}};
 let selectedClipId=null;
 let visualLayer,camera,activeCamera=false,lastVideoTakeId=null,videoRecordingSettingsId=null;
-const toolboxReady=Promise.all([import('./toolbox.mjs?v=44'),import('./visual-placement.mjs?v=44'),import('./camera-recorder.mjs?v=40')]).then(([{setupToolbox},{setupVisualPlacement},{setupCameraRecorder}])=>{
+const toolboxReady=Promise.all([import('./toolbox.mjs?v=44'),import('./visual-placement.mjs?v=45'),import('./camera-recorder.mjs?v=40')]).then(([{setupToolbox},{setupVisualPlacement},{setupCameraRecorder}])=>{
  visualLayer=setupVisualPlacement({
   stage:$('video').parentElement,video,playhead:currentTime,duration,playing:mixPlaying,
   fps:()=>num($('sourceFps').value,1,120),edit:seekProject,pause:pauseForEdit,canEdit:()=>!recording&&!activeCamera&&!liveTake&&!exportBusy,changed:()=>{refreshToolbox();flushProject();},
+  canHear:()=>!activeCamera,
+  connectAudio(node) {
+   if(!ctx)return;
+   const source=ctx.createMediaElementSource(node), level=ctx.createGain();
+   source.connect(level).connect(master);
+   return {gain:level.gain,disconnect(){source.disconnect();level.disconnect();}};
+  },
   fileById:id=>toolbox?.files().get(id),
  });
   camera=setupCameraRecorder({
@@ -648,11 +712,12 @@ function updateTransport(){
  $('play').textContent=playing?'Ⅱ Pause':'▶ Play';
  $('play').setAttribute('aria-label',playing?'Pause':'Play');
 }
-video.addEventListener('play',updateTransport);
-video.addEventListener('pause',()=>{updateTransport();if(liveTake?.withVideo&&liveTake.state==='recording')stopLiveTake();});video.addEventListener('play',guard(schedule));video.addEventListener('pause',stopEffects);video.addEventListener('seeking',()=>{
+video.addEventListener('play',()=>{updateTransport();visualLayer?.sync();});
+video.addEventListener('pause',()=>{updateTransport();visualLayer?.sync();if(liveTake?.withVideo&&liveTake.state==='recording')stopLiveTake();});video.addEventListener('play',guard(schedule));video.addEventListener('pause',stopEffects);video.addEventListener('seeking',()=>{
  if(!tailPlaying&&video.currentTime<sourceEnd()-.0005)sourceFinished=false;
  stopEffects();
-});video.addEventListener('seeked',guard(schedule));video.addEventListener('seeked',()=>{if(!recording)saveLocal()});video.addEventListener('pause',()=>{if(!recording)saveLocal()});const finishSourcePlayback=guard(async pausePicture=>{
+ visualLayer?.sync();
+});video.addEventListener('seeked',guard(schedule));video.addEventListener('seeked',()=>{visualLayer?.sync();if(!recording)saveLocal()});video.addEventListener('pause',()=>{if(!recording)saveLocal()});const finishSourcePlayback=guard(async pausePicture=>{
  if(sourceFinished)return;
  sourceFinished=true;
  if(pausePicture)video.pause();

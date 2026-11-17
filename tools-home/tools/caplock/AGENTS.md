@@ -13,3 +13,5 @@ See the [CapLock behavior and release notes](README.md).
 R33 uses the same **Keep**, **Replace** and **Transparent** controls as AspectLock. The background mode affects the selected visual layer and is stored with its key settings. Layer opacity is a separate control. Use the same source color match and replacement rendering in preview, local saves and caption handoffs.
 
 R35 uses the shared insertion settings layout for placement timing, renaming and Move / size. Mark IN shifts the current placement and Mark OUT uses the established fit calculation. The Source trim button opens the existing source editor. Toolbox names and thumbnails identify imported assets. The project retains each original file reference and frame range.
+
+R36 uses the shared **Audio** section for media insertions. It recalls the last audible level when sound is turned back on. Earlier projects keep their saved levels. The existing source-audio diagnostics and offline mix still read the selected clip. Rollback is `fee523aa67c127f233e8e6143b1f3531ac1be190`.

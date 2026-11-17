@@ -1,5 +1,13 @@
 import {Input,ALL_FORMATS,BlobSource,AudioBufferSink} from '../sxlock/vendor/mediabunny-1.62.1-gs1.mjs';
 export function percentGain(value){const n=Number(value);if(!Number.isFinite(n)||n<0||n>100)throw Error('Clip audio must be 0–100%.');return n/100;}
+const audioTracks = new WeakMap();
+export function hasSourceAudio(blob) {
+ if (!audioTracks.has(blob)) {
+  const input = new Input({formats:ALL_FORMATS,source:new BlobSource(blob)});
+  audioTracks.set(blob,input.getPrimaryAudioTrack().then(Boolean).finally(() => input.dispose()));
+ }
+ return audioTracks.get(blob);
+}
 // Preserve decoded audio PTS, gaps and priming, as the existing bed mixer does.
 export async function readSourceAudio(track,check=()=>{},range){
  const start=range?.start??0,end=range?.end??await track.computeDuration();

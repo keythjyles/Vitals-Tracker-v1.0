@@ -1,10 +1,11 @@
+import {mountClipAudio} from '../../shared/clip-audio.mjs?v=1';
 import {mountInsertionSettings} from '../../shared/insertion-settings.mjs?v=1';
 import {addColorWheel} from '../../shared/color-wheel.mjs?v=1';
 import {setupPinnedSections} from '../../shared/pinned-sections.mjs?v=32';
 import {writeFrameClock,frameStepControl} from '../../shared/frame-stamp.mjs?v=2';
 import {compositionFrames,bedTime,TailClock} from './composition-time.mjs?v=25';
 import {percentGain,inspectSourceAudio} from './source-audio.mjs?v=28';
-import {createToolboxUI} from './toolbox-ui.mjs?v=35';
+import {createToolboxUI} from './toolbox-ui.mjs?v=36';
 import {rememberLocalMedia,readLocalMedia} from './local-media.mjs?v=31';
 import {isToolboxEntry,makeToolboxPlacement,fitVideoPlacement,setPlacementSpeed,shiftPlacementIn,fitPlacementOut} from './toolbox-core.mjs?v=35';
 import {inspectToolboxFile} from './toolbox-media.mjs?v=28';
@@ -29,7 +30,7 @@ import {paintMatrix,matrixFrame} from '../../shared/item-matrix.mjs?v=1';
 import {rateOf,fitRate} from './clip-time.mjs?v=28';
 import {words,moveWords,shiftWords,geminiPrompt} from './script.mjs?v=4';
 import {LayerTracks} from './layer-track.mjs?v=35';
-import {FPS,DEFAULT_STYLE,createProject,phrase,importTranscript,subtitle,timed,effective,validateProject,validateStyle} from './core.mjs?v=33';
+import {FPS,DEFAULT_STYLE,createProject,phrase,importTranscript,subtitle,timed,effective,validateProject,validateStyle} from './core.mjs?v=36';
 const $=id=>document.getElementById(id),v=$('video'),API='https://gs-previewlock-api.onrender.com';
 // Owner lock: built-in text captions cannot be enabled by UI, URL, or restored data.
 const BUILTIN_CAPTIONING_LOCKED=true;
@@ -394,12 +395,26 @@ function lockBuiltInCaptioning(){
  $('showNative').checked=false;$('captions').replaceChildren();
 }
 $('showNative').onchange=e=>{if(BUILTIN_CAPTIONING_LOCKED){e.target.checked=false;return;}change(()=>{project.nativeCaptions=$('showNative').checked;});};
-const gainFields = new Set(['volume','opacity']);
+const gainFields = new Set(['opacity']);
 const backgroundButtons = {keep:'chromaKeep',replace:'chromaReplace',transparent:'chromaTransparent'};
 const backgroundMode = key => !key.enabled ? 'keep' : key.replacement?.enabled ? 'replace' : 'transparent';
-const clipFields={clipStart:'inFrame',clipEnd:'outFrame',clipTrim:'trimInFrame',clipTrimOut:'trimOutFrame',clipSpeed:'playbackRate',clipWidth:'width',clipX:'x',clipY:'y',clipOpacity:'opacity',clipVolume:'volume',clipRotation:'rotation'};
+const clipFields={clipStart:'inFrame',clipEnd:'outFrame',clipTrim:'trimInFrame',clipTrimOut:'trimOutFrame',clipSpeed:'playbackRate',clipWidth:'width',clipX:'x',clipY:'y',clipOpacity:'opacity',clipRotation:'rotation'};
 const orientationButtons=[['clipMirror','mirrorX'],['clipFlip','flipY']];
 const clipCurrent=()=>project.clips.find(c=>c.id===selectedClip);
+const refreshClipAudio = mountClipAudio($('clipVolumeRow'), {
+ prefix:'clip',
+ read() {
+  const clip = clipCurrent();
+  if (!clip || clip.type === 'image') return null;
+  const media = layers.media.get(clip.id);
+  const hasAudio = project.toolbox?.find(asset => asset.id === clip.toolboxId)?.hasAudio ?? media?.audioInfo?.hasAudio;
+  return {volume:clip.volume, previousVolume:clip.previousVolume, editable:!clip.locked, hasAudio};
+ },
+ write(settings) {
+  const clip = clipCurrent();
+  if (clip) change(() => Object.assign(clip, settings));
+ },
+});
 const trimUI=createTrimDialog((clip,range,timing)=>{
  if(clipCurrent()!==clip||clip.locked)return false;
  pause();
@@ -514,11 +529,12 @@ function renderClips(){
   button.disabled=!c||c.locked||c.type==='audio';
   button.setAttribute('aria-pressed',String(c?.[key]===true));
  }
- $('clipVolumeRow').hidden=!c||c.type==='image';const sound=project.toolbox?.find(a=>a.id===c?.toolboxId)?.hasAudio;for(const id of ['clipVolume','clipVolumeDown','clipVolumeUp'])$(id).disabled=!c||c.locked||c.type==='image'||sound===false;$('clipVolumeInfo').textContent=sound===false?'This file has no audio track.':c?.volume?'Clip audio · '+(c.volume*100).toFixed(0)+'%':'Muted · set a volume to hear this clip.';
+ $('clipVolumeInfo').textContent = '';
+ refreshClipAudio();
  if($('clipProperties').open)renderSourceSound(c);
  $('speedTools').hidden=!c||c.type==='image';$('clipSpeed').closest('label').hidden=c?.type==='image';$('clipSpeedInfo').textContent=c?`Playback ${rateOf(c).toFixed(3)}×`:'';
  for(const [id,mode] of [['viewMode','view'],['moveMode','move'],['rotateMode','rotate']])$(id).setAttribute('aria-pressed',String(editMode===mode));$('layerRoot').className='edit-'+editMode;$('railMove').setAttribute('aria-pressed',String(editMode==='move'));$('railRotate').setAttribute('aria-pressed',String(editMode==='rotate'));
- $('unlockClip').hidden=!c?.locked;for(const id of ['applyClip','square','speedDown','speedUp','speedReset','speedFit','placeClip'])$(id).disabled=!!c?.locked;renderPlacement();$('clipStatus').textContent=c?`${c.name} · ${layers.media.has(c.id)?'Media connected':'Reselect this original file to reconnect'} · ${editMode==='rotate'?'Rotate unlocked. Square returns to exactly 0°.':'Rotation locked. Select Rotate to rotate.'}`:'Import transparent WebM animations or PNG graphics. Video clips start muted. Clip audio % controls their original sound.';
+ $('unlockClip').hidden=!c?.locked;for(const id of ['applyClip','square','speedDown','speedUp','speedReset','speedFit','placeClip'])$(id).disabled=!!c?.locked;renderPlacement();$('clipStatus').textContent=c?`${c.name} · ${layers.media.has(c.id)?'Media connected':'Reselect this original file to reconnect'} · ${editMode==='rotate'?'Rotate unlocked. Square returns to exactly 0°.':'Rotation locked. Select Rotate to rotate.'}`:'Import transparent WebM animations or PNG graphics. Overlays start muted. Open Audio to use their original sound.';
 }
 $('clipSelect').onchange=()=>selectClip($('clipSelect').value);for(const [id,mode] of [['viewMode','view'],['moveMode','move'],['rotateMode','rotate']])$(id).onclick=()=>{if(mode!=='view'&&!clipCurrent())return say('Select a clip first.');pause();editMode=mode;renderClips();if(mode==='rotate'&&!project.canvas)closeClipProperties();};
 for(const [id,key] of orientationButtons)$(id)?.addEventListener('click',()=>change(()=>{
@@ -616,7 +632,6 @@ function previewOpacity(id,output,property){
 }
 previewOpacity('clipOpacity','clipOpacityValue','opacity');
 previewOpacity('chromaOpacity','chromaOpacityValue','backgroundOpacity');
-$('clipVolume').onchange=()=>$('applyClip').click();for(const [id,delta]of [['clipVolumeDown',-5],['clipVolumeUp',5]])$(id).onclick=()=>{$('clipVolume').value=String(Math.max(0,Math.min(100,Number($('clipVolume').value)+delta)));$('applyClip').click();};
 function sampleClipBackground(clip){
  const source=layers.media.get(clip.id)?.el;
  return source ? detectBackground(source,{includeAlpha:true}) : null;

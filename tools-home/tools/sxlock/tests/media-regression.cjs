@@ -18,7 +18,7 @@ async function main(){
   if(baseline&&!fs.existsSync(file))file=path.resolve(repo,relative);
   try{const st=fs.statSync(file);let start=0,end=st.size-1;
    if(q.headers.range){const m=q.headers.range.match(/bytes=(\d+)-(\d*)/);start=Number(m[1]);if(m[2])end=Number(m[2]);s.statusCode=206;s.setHeader('Content-Range',`bytes ${start}-${end}/${st.size}`);}
-   s.setHeader('Content-Type',/\.m?js$/.test(file)?'text/javascript':file.endsWith('.html')?'text/html':file.endsWith('.json')?'application/json':file.endsWith('.mp4')?'video/mp4':'application/octet-stream');
+   s.setHeader('Content-Type',/\.m?js$/.test(file)?'text/javascript':file.endsWith('.html')?'text/html':file.endsWith('.css')?'text/css':file.endsWith('.json')?'application/json':file.endsWith('.mp4')?'video/mp4':'application/octet-stream');
    s.setHeader('Content-Length',end-start+1);s.setHeader('Accept-Ranges','bytes');fs.createReadStream(file,{start,end}).pipe(s);
   }catch{s.writeHead(404);s.end('not found');}
  }).listen(0,'127.0.0.1');
@@ -152,6 +152,82 @@ async function main(){
   assert(await page.locator('#result').isVisible(),await page.locator('#status').textContent());
   const download=page.waitForEvent('download');await page.locator('#download').click();await(await download).saveAs(path.join(data,'UI.mp4'));
   console.log('PASS: engine matrix, cancellation, frame placement and UI export/download');
+  // Exercise the Toolbox insertion through the preview and both mixed exports.
+  const soundPage=await browser.newPage({acceptDownloads:true});
+  await soundPage.goto(base+'/repo/tools-home/tools/sxlock/index.html');
+  await soundPage.waitForFunction(()=>window.SxLock);
+  await soundPage.evaluate(()=>SxLock.ready);
+  const control=id=>soundPage.locator('#'+id);
+  await control('videoFile').setInputFiles(path.join(data,'fixture_landscape.mp4'));
+  await soundPage.waitForFunction(()=>document.getElementById('video').readyState>=2&&!document.getElementById('play').disabled);
+  await control('bed').evaluate(slider=>{slider.value=0;slider.dispatchEvent(new Event('input',{bubbles:true}));});
+  await control('openToolbox').click();
+  await control('toolboxFiles').setInputFiles(path.join(data,'color_full709.mp4'));
+  await soundPage.getByRole('button',{name:'Overlay color_full709.mp4',exact:true}).click();
+  await soundPage.getByRole('button',{name:'Edit insertion color_full709.mp4',exact:true}).first().click();
+  await control('visualIn').fill('25');
+  await control('visualIn').press('Tab');
+  await control('visualOut').fill('75');
+  await control('visualOut').press('Tab');
+  await control('visualGoIn').click();
+  const audio=control('visualAudio'), clip=soundPage.locator('.sx-visual-item video');
+  assert.equal(await audio.locator('summary').textContent(),'Audio · No sound');
+  assert.equal(await clip.evaluate(video=>video.muted),true);
+  await audio.locator('summary').click();
+  await control('visualVolume').fill('25');
+  await control('visualVolume').press('Tab');
+  await soundPage.waitForFunction(()=>!document.querySelector('.sx-visual-item video').muted);
+  await audio.getByRole('button',{name:'No sound',exact:true}).click();
+  assert.equal(await clip.evaluate(video=>video.muted),true);
+  await control('visualClose').click();
+  await control('exportSection').locator(':scope > summary').click();
+  const save=async(id,name)=>{
+   await control(id).click();
+   await soundPage.waitForFunction(button=>!document.getElementById(button).disabled,id,{timeout:30000});
+   assert(await control('result').isVisible(),await control('status').textContent());
+   const ready=soundPage.waitForEvent('download');
+   await control('download').click();
+   await (await ready).saveAs(path.join(data,name));
+  };
+  await save('exportWav','overlay-muted.wav');
+  await control('openToolbox').click();
+  await soundPage.getByRole('button',{name:'Edit insertion color_full709.mp4',exact:true}).first().click();
+  await audio.getByRole('button',{name:'Sound on',exact:true}).click();
+  assert.equal(await control('visualVolume').inputValue(),'25');
+  await control('visualGoIn').click();
+  await control('visualClose').click();
+  await control('play').click();
+  await soundPage.waitForFunction(()=>{const v=document.querySelector('.sx-visual-item video');return !v.paused&&!v.muted&&v.playbackRate>1;});
+  await control('play').click();
+  await save('exportWav','overlay-mixed.wav');
+  await save('exportVideo','overlay-mixed.mp4');
+  const levels=await soundPage.evaluate(async files=>{
+   const m=await import('./vendor/mediabunny-1.62.1-gs1.mjs');
+   return Promise.all(files.map(async name=>{
+    const blob=await (await fetch('/fixtures/'+name)).blob();
+    const input=new m.Input({formats:m.ALL_FORMATS,source:new m.BlobSource(blob)});
+    const track=await input.getPrimaryAudioTrack();
+    const peaks=[0,0,0];
+    try{
+     for await(const {buffer,timestamp} of new m.AudioBufferSink(track).buffers()){
+      const data=buffer.getChannelData(0);
+      for(let i=0;i<data.length;i++){
+       const t=timestamp+i/buffer.sampleRate;
+       const region=t<.8?0:t>1.2&&t<2.8?1:t>3.2?2:-1;
+       if(region>=0)peaks[region]=Math.max(peaks[region],Math.abs(data[i]));
+      }
+     }
+     return peaks;
+    }finally{input.dispose();}
+   }));
+  },['overlay-muted.wav','overlay-mixed.wav','overlay-mixed.mp4']);
+  assert.deepEqual(levels[0],[0,0,0]);
+  for(const [before,active,after] of levels.slice(1)){
+   assert.ok(before<.003&&active>.018&&active<.045&&after<.003,JSON.stringify(levels));
+  }
+  await soundPage.close();
+  console.log('PASS SxLock visual insertion audio in preview, mixed WAV and finished video');
+
   }
   if(process.env.TEST_BASELINE==='1'){
    await page.goto(base+'/baseline/tools-home/tools/sxlock/index.html');

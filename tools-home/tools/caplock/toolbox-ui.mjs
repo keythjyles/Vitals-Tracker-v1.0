@@ -113,7 +113,7 @@ export function createToolboxUI(o){
    c=makeToolboxPlacement(a,replacement?.inFrame??placementFrame(),crypto.randomUUID(),p().canvas?undefined:current());
    if(p().canvas&&a.type==='video')fitVideoPlacement(c,a,p().canvas);
    if(joining&&a.type==='video')c.volume=1;
-   if(replacement){c.volume=replacement.volume;c.visible=replacement.visible;}
+   if(replacement){c.volume=replacement.volume;c.previousVolume=replacement.previousVolume;c.visible=replacement.visible;}
    await o.attach(c,blob);
    if(epoch!==o.epoch())throw Error('Project changed before insertion.');
    if(!o.change(()=>{
