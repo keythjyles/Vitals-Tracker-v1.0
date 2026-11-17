@@ -1,0 +1,51 @@
+{
+  "schema": "SoundScrubberIntake-1",
+  "batchId": "gs-sx-20261117-am-01",
+  "localDate": "2026-11-17",
+  "timezone": "America/Chicago",
+  "candidateCount": 2,
+  "discoverySource": "Wikimedia Commons source/licensing pages and exact original audio targets",
+  "reviewStatus": "PENDING",
+  "liveQueueImported": false,
+  "notes": "Metadata-only. No audio audition, paid generation, owner approval, SxLock import or completed cloud save. Source URL and license verified; private owner decisions not inferred.",
+  "candidates": [
+    {
+      "candidateId": "gs-sx-20261117-01",
+      "name": "Grunt of pain.ogg",
+      "category": "Human reactions / exertion / grunt",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Grunt_of_pain.ogg",
+      "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/b/ba/Grunt_of_pain.ogg",
+      "license": "Public domain — PDSounds author dedication",
+      "author": "gregoryweir",
+      "durationSeconds": 0.3,
+      "sourceDescription": "A short cartoonish low grunt of pain or effort, not clinical evidence of an actual patient's distress",
+      "previewUrl": "https://commons.wikimedia.org/wiki/File:Grunt_of_pain.ogg",
+      "licenseUrl": "https://commons.wikimedia.org/wiki/File:Grunt_of_pain.ogg#Licensing",
+      "source": "Wikimedia Commons file description, original audio link and license checked 2026-11-17",
+      "status": "PENDING",
+      "ownerApproved": false,
+      "importedToLiveQueue": false,
+      "audioAuditioned": false,
+      "dedupeCheck": "Exact filename checked against prior indexed batches including 1000-entry November 14 archive; private renamed/held/rejected review ledger not exhaustively accessible"
+    },
+    {
+      "candidateId": "gs-sx-20261117-02",
+      "name": "Crying newborn baby.ogg",
+      "category": "Human reactions / infant / crying",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Crying_newborn_baby.ogg",
+      "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/2/2b/Crying_newborn_baby.ogg",
+      "license": "CC0 1.0",
+      "author": "the_yura",
+      "durationSeconds": 23.1,
+      "sourceDescription": "Newborn infant crying; Commons-hosted Freesound original",
+      "previewUrl": "https://commons.wikimedia.org/wiki/File:Crying_newborn_baby.ogg",
+      "licenseUrl": "https://commons.wikimedia.org/wiki/File:Crying_newborn_baby.ogg#Licensing",
+      "source": "Wikimedia Commons file description, original audio link and license checked 2026-11-17",
+      "status": "PENDING",
+      "ownerApproved": false,
+      "importedToLiveQueue": false,
+      "audioAuditioned": false,
+      "dedupeCheck": "Exact filename checked against prior indexed batches including 1000-entry November 14 archive; private renamed/held/rejected review ledger not exhaustively accessible"
+    }
+  ]
+}
