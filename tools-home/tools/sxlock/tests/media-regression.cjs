@@ -170,13 +170,15 @@ async function main(){
   await control('visualOut').fill('75');
   await control('visualOut').press('Tab');
   await control('visualGoIn').click();
+  await soundPage.waitForFunction(()=>Math.abs(SxLock.currentTime()-1)<.000001&&!document.getElementById('video').seeking);
   const audio=control('visualAudio'), clip=soundPage.locator('.sx-visual-item video');
   assert.equal(await audio.locator('summary').textContent(),'Audio · No sound');
   assert.equal(await clip.evaluate(video=>video.muted),true);
   await audio.locator('summary').click();
   await control('visualVolume').fill('25');
   await control('visualVolume').press('Tab');
-  await soundPage.waitForFunction(()=>!document.querySelector('.sx-visual-item video').muted);
+  assert.equal(await soundPage.evaluate(()=>SxLock.snapshot().toolbox.visual[0].volume),.25);
+  assert.equal(await clip.evaluate(video=>video.muted),false);
   await audio.getByRole('button',{name:'No sound',exact:true}).click();
   assert.equal(await clip.evaluate(video=>video.muted),true);
   await control('visualClose').click();
@@ -225,8 +227,94 @@ async function main(){
   for(const [before,active,after] of levels.slice(1)){
    assert.ok(before<.003&&active>.018&&active<.045&&after<.003,JSON.stringify(levels));
   }
-  await soundPage.close();
   console.log('PASS SxLock visual insertion audio in preview, mixed WAV and finished video');
+  await soundPage.evaluate(async()=>{
+   const context=await SxLock.audioContext(), tone=context.createBuffer(1,4*48000,48000);
+   const samples=tone.getChannelData(0);
+   for(let i=0;i<samples.length;i++)samples[i]=Math.sin(i/48000*2*Math.PI*1500)*.08;
+   SxLock.sounds.set('cue-fixture',{id:'cue-fixture',name:'Mix cue test tone',origin:'import',buffer:tone,builtin:true});
+   await SxLock.insert('cue-fixture',{start:0,volume:100});
+  });
+  await control('insertionSection').evaluate(section=>section.open=true);
+  await control('clips').locator('.clip-open').first().click();
+  await control('effectAudioFades').locator('summary').click();
+  for(const id of ['effectFadeIn','effectFadeOut']){
+   await control(id).fill('1');
+   await control(id).press('Tab');
+  }
+  await control('applyEffect').click();
+  const go=soundPage.getByRole('spinbutton',{name:'Go to seconds'});
+  await go.fill('1');
+  await soundPage.getByRole('button',{name:'Go to time'}).click();
+  await soundPage.waitForFunction(()=>document.getElementById('clock').textContent.endsWith('F25'));
+  await control('mixerSection').evaluate(section=>section.open=true);
+  await control('mixCuesSection').locator('summary').click();
+  await control('addMixCue').click();
+  assert.equal(await control('mixCuePosition').inputValue(),'25');
+  await control('mixCueTransition').fill('50');
+  await control('mixCueBed').fill('100');
+  const saveCue=soundPage.getByRole('button',{name:'Save cue',exact:true});
+  await saveCue.click();
+  await control('addMixCue').click();
+  await control('mixCuePosition').fill('50');
+  await control('mixCueTransition').fill('25');
+  await control('mixCueBed').fill('25');
+  await control('mixCueEffects').fill('50');
+  await saveCue.click();
+  await soundPage.getByRole('button',{name:'Go to cue at F50',exact:true}).click();
+  await soundPage.waitForFunction(()=>document.getElementById('clock').textContent.endsWith('F50'));
+  assert.equal(await control('bedTimelineLevel').textContent(),'At playhead · 50%');
+  assert.equal(await control('effectsTimelineLevel').textContent(),'At playhead · 100%');
+  await save('exportWav','cue-mix.wav');
+  await save('exportFx','cue-effects.wav');
+  await save('exportVideo','cue-mix.mp4');
+  const cueMix=await soundPage.evaluate(async names=>{
+   const m=await import('./vendor/mediabunny-1.62.1-gs1.mjs');
+   const times=[.5,1.5,2.5,3.5], frequencies=[480,1500];
+   return Promise.all(names.map(async name=>{
+    const blob=await (await fetch('/fixtures/'+name)).blob();
+    const input=new m.Input({formats:m.ALL_FORMATS,source:new m.BlobSource(blob)});
+    const stats=times.map(()=>frequencies.map(()=>[0,0,0]));
+    try {
+     const track=await input.getPrimaryAudioTrack();
+     for await(const {buffer,timestamp} of new m.AudioBufferSink(track).buffers()){
+      const samples=buffer.getChannelData(0), sr=buffer.sampleRate;
+      for(const [i,at] of times.entries()){
+       const from=Math.max(0,Math.ceil((at-.035-timestamp)*sr));
+       const to=Math.min(samples.length,Math.ceil((at+.035-timestamp)*sr));
+       for(let n=from;n<to;n++){
+        for(const [j,f] of frequencies.entries()){
+         const phase=(timestamp+n/sr)*f*2*Math.PI, totals=stats[i][j];
+         totals[0]+=samples[n]*Math.cos(phase);
+         totals[1]+=samples[n]*Math.sin(phase);
+         totals[2]++;
+        }
+       }
+      }
+     }
+     return stats.map(pair=>pair.map(([re,im,count])=>2*Math.hypot(re,im)/count));
+    } finally {input.dispose();}
+   }));
+  },['cue-mix.wav','cue-effects.wav','cue-mix.mp4']);
+  for(const [index,levels] of cueMix.entries()){
+   const bed=index===1?[0,0,0,0]:[0,.03125,.046875,.03125];
+   const effects=[.04,.08,.06,.02];
+   for(let i=0;i<levels.length;i++){
+    assert.ok(Math.abs(levels[i][0]-bed[i])<.009,JSON.stringify(cueMix));
+    assert.ok(Math.abs(levels[i][1]-effects[i])<.009,JSON.stringify(cueMix));
+   }
+  }
+  await soundPage.waitForFunction(()=>document.getElementById('recoveryStatus').textContent.startsWith('Saved locally'));
+  await soundPage.reload();
+  await soundPage.waitForFunction(()=>window.SxLock);
+  await soundPage.evaluate(()=>SxLock.ready);
+  const restored=await soundPage.evaluate(()=>SxLock.snapshot());
+  assert.equal(restored.mixCues.length,2);
+  assert.deepEqual(restored.mixCues.map(({start,transition,bed,effects})=>[start,transition,bed,effects]),[[1,2,100,undefined],[2,1,25,50]]);
+  assert.equal(restored.clips.find(clip=>clip.soundId==='cue-fixture').fadeIn,1);
+  assert.equal(restored.clips.find(clip=>clip.soundId==='cue-fixture').fadeOut,1);
+  await soundPage.close();
+  console.log('PASS SxLock cue seek, interrupted ramp, insertion fades, project recovery and decoded exports');
 
   }
   if(process.env.TEST_BASELINE==='1'){

@@ -1,6 +1,6 @@
-import {mixClipAudio, validClipGain} from '../../shared/clip-audio.mjs?v=1';
+import {mixClipAudio, savedFades, scheduleClipGain, validClipGain} from '../../shared/clip-audio.mjs?v=2';
 import {Input,ALL_FORMATS,BlobSource,CanvasSink} from '../sxlock/vendor/mediabunny-1.62.1-gs1.mjs';
-import {exportVideo,inspectVideo} from '../sxlock/export-engine.mjs?v=caplock28';
+import {exportVideo,inspectVideo} from '../sxlock/export-engine.mjs?v=46';
 import {readSourceAudio} from '../caplock/source-audio.mjs?v=36';
 import {Composition,WIDTH,HEIGHT,FPS,placementAt} from './composition.mjs?v=36';
 
@@ -15,6 +15,7 @@ export async function renderAspect({bed, animation, scene, key, range, audio, on
  };
  const painter = new Composition();
  let baseFrames, overlays, animationAudio;
+ const bedSound = {...savedFades(audio.bed), volume:validClipGain(audio.bed?.volume) ? audio.bed.volume : Number(audio.source === 'on')};
  const volume = validClipGain(audio.volume) ? audio.volume : Number(audio.cartoonSfx === 'on');
  try {
   const {video:bedVideo} = await track(bed);
@@ -45,11 +46,15 @@ export async function renderAspect({bed, animation, scene, key, range, audio, on
   };
   baseFrames = new CanvasSink(bedVideo,{alpha:false,poolSize:1}).canvasesAtTimestamps(timestamps());
   return await exportVideo({
-   file:bed, format:'webm', fps:FPS, soundtrackGain:Number(audio.source === 'on'), hasEffects:!!animationAudio,onPhase,onProgress,
+   file:bed, format:'webm', fps:FPS, soundtrackGain:bedSound.volume,
+   soundtrackEnvelope:bedSound.volume>0 && (bedSound.fadeIn || bedSound.fadeOut)
+    ? (gain,from,to)=>scheduleClipGain(gain,bedSound,0,total/FPS,from,to)
+    : undefined,
+   hasEffects:!!animationAudio,onPhase,onProgress,
    placeEffects(ctx,from,to) {
     if (!animationAudio) return;
     mixClipAudio(ctx,animationAudio,{
-     start:range.inFrame/FPS, end:range.outFrame/FPS, rate:range.rate, volume,
+     start:range.inFrame/FPS, end:range.outFrame/FPS, rate:range.rate, volume, ...savedFades(audio),
     },from,to);
    },
    visual:{width:WIDTH,height:HEIGHT,durationFrames:total,independent:true,async draw(canvas,unused,timestamp) {

@@ -13,3 +13,5 @@ See the [audio tools master index](../GS_TOOL_REFINEMENT_INDEX.md).
 R44 opens the shared settings from Edit insertion in the Toolbox visual list and from camera overlay settings. Visual IN shifts the insertion and OUT fits the same source across its new timeline span. The preview and visual compositor use the same geometry and time mapping. Optional placement fields retain the fit and rate on recovery. Sound effect and recording controls continue to use their native editors.
 
 R45 offers **Audio** for video insertions and camera overlays. Start muted, then enable and set the clip's level in insertion settings. The preview, finished video and mixed WAV use the same saved gain, span and rate. Older visual placements retain muted playback. Rollback is `fee523aa67c127f233e8e6143b1f3531ac1be190`.
+
+R46 adds clip fades and **Mixer → Mix cues**. The video bed and Effects have independent timeline levels, with optional transition durations. Preview, finished video and WAV use the saved cues. Scribe shows Clear, Copy and Mark frame together below the note field. Rollback revision `3e5b257c2601c453747bb7891087762d5958d213`.

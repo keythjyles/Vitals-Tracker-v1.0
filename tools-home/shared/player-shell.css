@@ -54,7 +54,12 @@ body.gs-compact[data-gs-tool=cliplock].video-mode .cut-row{grid-template-columns
 .gs-player-scribe textarea:focus{outline:2px solid #efcf8f;outline-offset:1px}
 .gs-scribe-actions{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:5px}
 .gs-scribe-actions button{min-height:29px;padding:3px 7px;font-size:12px}
-.gs-scribe-actions details{margin:0}
+.gs-scribe-primary,.gs-scribe-secondary{max-width:calc(100vw - 24px);gap:6px;margin-top:5px}
+.gs-scribe-primary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch}
+.gs-scribe-primary button{min-width:0;min-height:38px;padding:3px 6px;font-size:14px;font-weight:650}
+.gs-scribe-primary [data-scribe-mark]{background:#f0cf84;color:#15212c;border-color:#f5deb1}
+.gs-scribe-secondary{display:flex;flex-wrap:wrap;align-items:center}
+.gs-scribe-secondary button{min-height:29px;padding:3px 7px;font-size:12px}
 .gs-player-scribe p:empty{display:none}
 .gs-scribe-history{width:min(92vw,640px);max-height:75dvh;overflow:auto}
 .gs-scribe-history pre{white-space:pre-wrap;overflow-wrap:anywhere}

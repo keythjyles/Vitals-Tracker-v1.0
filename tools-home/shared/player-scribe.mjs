@@ -39,7 +39,15 @@ export function mountPlayerScribe(reference, {tool, clock, media, source, sectio
    else player.after(panel);
   } else player.after(panel);
  }
- panel.insertAdjacentHTML('beforeend', '<textarea id="gs-notes" rows="3" aria-label="Scribe notes" placeholder="Write a note…"></textarea><div class="gs-scribe-actions"><button type="button" id="gs-scribeMark">Mark frame</button><button type="button" id="gs-copyNotes">Copy notes</button><details><summary>More</summary><div class="gs-scribe-actions"><button type="button" id="gs-scribeHistory">History</button><button type="button" id="gs-scribeClear">Clear</button></div></details></div><p id="gs-scribeStatus" role="status"></p>');
+ panel.insertAdjacentHTML('beforeend', `
+  <textarea id="gs-notes" rows="3" aria-label="Scribe notes" placeholder="Write a note…"></textarea>
+  <div class="gs-scribe-primary">
+   <button type="button" id="gs-scribeClear">Clear</button>
+   <button type="button" id="gs-copyNotes" aria-label="Copy notes">Copy</button>
+   <button type="button" id="gs-scribeMark" data-scribe-mark>Mark frame</button>
+  </div>
+  <div class="gs-scribe-secondary"><button type="button" id="gs-scribeHistory">History</button></div>
+  <p id="gs-scribeStatus" role="status"></p>`);
  document.body.insertAdjacentHTML('beforeend', '<dialog id="gs-scribeHistorySheet" class="gs-scribe-history" aria-labelledby="gs-scribeHistoryTitle"><div class="gs-scribe-actions"><strong id="gs-scribeHistoryTitle">Scribe history</strong><button type="button" id="gs-scribeClose">Close</button></div><p id="gs-scribeSync" role="status"></p><div class="gs-scribe-actions"><button type="button" id="gs-scribeRetry" hidden>Sync now</button><button type="button" id="gs-scribeConnect" hidden>Sign in with Google</button></div><ol id="gs-scribeEntries"></ol><button type="button" id="gs-scribeEarlier" hidden>Earlier notes</button></dialog>');
  const notes = document.getElementById('gs-notes');
  const status = document.getElementById('gs-scribeStatus');

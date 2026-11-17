@@ -1,8 +1,9 @@
+import {scheduleClipGain} from '../../shared/clip-audio.mjs?v=2';
 import {BackgroundSurface} from './background.mjs?v=33';
 import {Input,ALL_FORMATS,BlobSource,CanvasSink} from '../sxlock/vendor/mediabunny-1.62.1-gs1.mjs';
-import {exportVideo,inspectVideo} from '../sxlock/export-engine.mjs?v=caplock28';
-import {FPS,validateProject} from './core.mjs?v=33';
-import {captionRecipe} from '../../shared/production-stages.mjs?v=33';
+import {exportVideo,inspectVideo} from '../sxlock/export-engine.mjs?v=46';
+import {FPS,validateProject} from './core.mjs?v=37';
+import {captionRecipe} from '../../shared/production-stages.mjs?v=34';
 import {clipRange,clipTime,pictureTime} from './clip-time.mjs?v=28';
 import {readSourceAudio} from './source-audio.mjs?v=28';
 import {compositionFrames} from './composition-time.mjs?v=25';
@@ -42,7 +43,7 @@ export async function renderCaptioned({project,bed,readAsset,cancelled,onProgres
     const track=await input.getPrimaryAudioTrack();
     if(track){
      const {start,end}=clipRange(c),audioEnd=await track.computeDuration();
-     const fullSound=p.canvas&&!sourceFile&&c.type==='video'&&c.volume===1&&c.inFrame===0&&c.outFrame===durationFrames
+     const fullSound=p.canvas&&!sourceFile&&c.type==='video'&&c.volume===1&&!c.fadeIn&&!c.fadeOut&&c.inFrame===0&&c.outFrame===durationFrames
       &&start===0&&!c.loop&&c.playbackRate===1&&audioEnd<=Math.min(end,durationFrames/FPS)+.000002;
      if(fullSound)sourceFile=blob;
      else{
@@ -83,14 +84,15 @@ export async function renderCaptioned({project,bed,readAsset,cancelled,onProgres
      const node=ctx.createBufferSource(),gain=ctx.createGain();
      node.buffer=buffer;
      node.playbackRate.value=time.rate;
-     gain.gain.value=c.volume;
      node.loop=c.loop;
      node.loopStart=time.start-offset;
      node.loopEnd=time.end-offset;
      node.connect(gain).connect(ctx.destination);
      node.start(start-at,time.target-offset);
      const remaining=c.loop?Infinity:(time.end-time.target)/time.rate;
-     node.stop(start-at+Math.min(stop-start,remaining));
+     const until=start+Math.min(stop-start,remaining);
+     scheduleClipGain(gain.gain,c,c.inFrame/FPS,c.outFrame/FPS,start,until,start-at);
+     node.stop(until-at);
     }
    },
    visual:{width,height,durationFrames,independent:!!p.canvas,draw:async(canvas,bedSample,timestamp)=>{

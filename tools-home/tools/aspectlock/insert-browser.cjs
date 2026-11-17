@@ -120,5 +120,11 @@ module.exports = async function checkInsertAndNames(page, bedName, overlayFile, 
  await insert.tap();
  assert.deepEqual(await position(), pinned, 'Insert must keep both scroll positions when the Toolbox is pinned');
  assert.equal(await readFrame(), placement);
+ await $('collapseToolbox').tap();
+ await $('insertPoint').waitFor({state:'hidden'});
+ assert.equal(await $('aspectToolbox').evaluate(panel=>panel.open),false);
+ await insert.tap();
+ await $('insertPoint').waitFor();
+ assert.equal(await readFrame(), placement);
  console.log('AspectLock Insert and rename kept the paused frame and the scroll position. Saved names and placement survived reload.');
 };

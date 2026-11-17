@@ -38,6 +38,26 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');const asse
  await aspectPage.locator('#jumpAdded').click();await aspectPage.locator('#editAdded').click();console.log('Aspect item seek',await aspectPage.locator('#bv').evaluate(v=>({time:v.currentTime,duration:v.duration,ready:v.readyState,seeking:v.seeking,start:document.querySelector('#startInfo').textContent})));assert.equal(await aspectPage.locator('#itemProperties').evaluate(e=>e.open),true);await aspectPage.waitForFunction(()=>{const v=document.querySelector('#bv');return !v.seeking&&Math.abs(v.currentTime-.4)<.001;});await aspectPage.locator('#x').focus();await aspectPage.keyboard.press('ArrowRight');await aspectPage.locator('#closeItemProperties').click();
  await aspectPage.locator('#play').click();await aspectPage.locator('#bedZero').click();assert.equal(await aspectPage.locator('#bv').evaluate(v=>v.paused),true);assert.equal(await aspectPage.locator('#ov').evaluate(v=>v.paused),true);assert.equal(await aspectPage.locator('#bv').evaluate(v=>v.currentTime),0);await aspectPage.locator('#jumpAdded').click();await aspectPage.waitForFunction(()=>{const v=document.querySelector('#bv');return !v.seeking&&Math.abs(v.currentTime-.4)<.001;});
  for(const viewport of [{width:390,height:844},{width:360,height:640},{width:720,height:390}]){await aspectPage.setViewportSize(viewport);const geometry=await aspectPage.locator('#stageNav').evaluate(n=>({h:n.clientHeight,s:n.scrollHeight,count:n.querySelectorAll('button:not([hidden])').length,inside:[...n.querySelectorAll('button:not([hidden])')].every(b=>b.getBoundingClientRect().bottom<=n.getBoundingClientRect().bottom+.1)}));assert.equal(geometry.h,geometry.s);assert.equal(geometry.count,10);assert.equal(geometry.inside,true);}
+ await aspectPage.setViewportSize({width:360,height:760});
+ await aspectPage.locator('.gs-source-grip').tap();
+ await aspectPage.locator('#pickBase').tap();
+ const picker=aspectPage.locator('#assetDialog');
+ assert.equal(await picker.locator('input[type=search],.assetThumb,.assetPreview').count(),0);
+ assert.equal(await picker.locator('.assetName').count(),2);
+ const cloudRow=name=>picker.locator('.assetCard').filter({hasText:name});
+ await cloudRow('source25.mp4').getByRole('button',{name:'Preview',exact:true}).tap();
+ await cloudRow('source25.mp4').locator('video.assetPreview').waitFor();
+ await cloudRow('alpha-test.webm').getByRole('button',{name:'Preview',exact:true}).tap();
+ await cloudRow('alpha-test.webm').locator('video.assetPreview').waitFor();
+ assert.equal(await picker.locator('video.assetPreview').count(),1);
+ await cloudRow('alpha-test.webm').getByRole('button',{name:'Hide preview',exact:true}).tap();
+ assert.equal(await picker.locator('video.assetPreview').count(),0);
+ await picker.locator('#closeLibrary').tap();
+ await aspectPage.getByRole('button',{name:'Scribe',exact:true}).tap();
+ const scribe=aspectPage.locator('#editorScribe');
+ const actions=scribe.locator('.gs-scribe-primary > button');
+ assert.deepEqual(await actions.allTextContents(),['Clear','Copy','Mark frame']);
+ await actions.last().waitFor();
  const localAspect=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
  localAspect.on('pageerror',e=>aspectErrors.push(e.message));
  await localAspect.goto(base.split('?')[0].replace('/caplock/','/aspectlock/')+'?source=device&key=blue');

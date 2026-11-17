@@ -95,7 +95,7 @@ async function main(){
    await page.locator('#videoFile').setInputFiles(path.join(data,'fixture_40s.mp4'));
    await page.waitForFunction(()=>document.getElementById('video').readyState>=2&&!document.getElementById('play').disabled);
    await page.getByRole('button',{name:'Show file picker'}).click();
-   await page.getByText('SxLock · GS-TOOL-SXLOCK · R45',{exact:true}).waitFor();
+   await page.getByText('SxLock · GS-TOOL-SXLOCK · R46',{exact:true}).waitFor();
    await page.evaluate(()=>window.scrollTo(0,10));
    await page.locator('.gs-source-drawer').waitFor({state:'hidden'});
    await page.evaluate(()=>window.scrollTo(0,0));
@@ -124,26 +124,27 @@ async function main(){
    await page.locator('#scribeBox > summary').tap();
    await page.setViewportSize({width:320,height:640});
    const scribeLayout=await page.locator('#scribeBox').evaluate(scribe=>{
-    const buttons=[...scribe.querySelectorAll('.scribe-actions > button, #scribeActions > summary')].map(button=>button.getBoundingClientRect().toJSON());
+    const buttons=[...scribe.querySelectorAll('.gs-scribe-primary > button')].map(button=>button.getBoundingClientRect().toJSON());
     const notes=scribe.querySelector('#notes').getBoundingClientRect();
-    return {position:getComputedStyle(scribe).position,notesBottom:notes.bottom,notesHeight:notes.height,buttons};
+    const primary=[...scribe.querySelectorAll('.gs-scribe-primary > button')].map(button=>button.textContent);
+    const secondary=[...scribe.querySelectorAll('.gs-scribe-secondary > button')].map(button=>button.getBoundingClientRect().toJSON());
+    return {position:getComputedStyle(scribe).position,notesBottom:notes.bottom,notesHeight:notes.height,buttons,primary,secondary};
    });
    assert.equal(scribeLayout.position,'static');
    assert(scribeLayout.buttons[0].top>scribeLayout.notesBottom);
    assert(Math.abs(scribeLayout.buttons[0].top-scribeLayout.buttons[1].top)<3);
-   assert.equal(scribeLayout.buttons.length,2);
-   assert(scribeLayout.notesHeight>=110&&scribeLayout.buttons.every(button=>button.height<=34&&button.right<=320));
+   assert.deepEqual(scribeLayout.primary,['Clear','Copy','Mark frame']);
+   assert(scribeLayout.buttons.every(button=>Math.abs(button.top-scribeLayout.buttons[0].top)<3&&button.right<=320),JSON.stringify(scribeLayout));
+   assert(scribeLayout.notesHeight>=110&&scribeLayout.secondary.every(button=>button.top>scribeLayout.buttons[0].bottom&&button.height<scribeLayout.buttons[0].height&&button.right<=320),JSON.stringify(scribeLayout));
    await page.setViewportSize({width:412,height:915});
    await page.getByRole('button',{name:'Mark frame'}).tap();
    assert.equal(await page.locator('#notes').inputValue(),'[F228 | 0:09.120 | 25 fps] ');
    assert(await page.locator('#notes').evaluate(notes=>notes.matches(':focus')),'Mark frame focuses Scribe for typing');
    await page.locator('#notes').fill('[F228 | 0:09.120 | 25 fps] Keep this stroke 📝');
-   await page.locator('#scribeActions summary').tap();
    await page.getByRole('button',{name:'Clear',exact:true}).tap();
    await page.waitForFunction(()=>document.getElementById('notes').value==='');
    await page.reload();
    await page.locator('#scribeBox > summary').tap();
-   await page.locator('#scribeActions summary').tap();
    await page.getByRole('button',{name:'History',exact:true}).tap();
    const entry=page.locator('#scribeEntries li').filter({hasText:'Keep this stroke 📝'});
    await entry.waitFor();
@@ -156,7 +157,7 @@ async function main(){
    assert.equal(await page.locator('.sx-reference .sx-docked-button').count(),0);
    const dockLayout=await page.evaluate(()=>{
     const box=selector=>document.querySelector(selector).getBoundingClientRect();
-    return {gap:box('#notes').top-box('#sxResize').bottom,actionsBottom:box('#scribeBox .scribe-actions').bottom,undockTop:box('#scribeBox [data-dock]').top};
+    return {gap:box('#notes').top-box('#sxResize').bottom,actionsBottom:box('#scribeBox .gs-scribe-secondary').bottom,undockTop:box('#scribeBox [data-dock]').top};
    });
    assert(dockLayout.gap>=0&&dockLayout.gap<=2,'The note box starts directly after the player');
    assert(dockLayout.undockTop>dockLayout.actionsBottom,'Undock is below the Scribe buttons');

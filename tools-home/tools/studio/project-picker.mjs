@@ -1,4 +1,4 @@
-import {moduleReady,stageAccepts,stageAsset,stageRecord,stageLabel,STAGES} from '../../shared/production-stages.mjs?v=1';
+import {moduleReady,stageAccepts,stageAsset,stageRecord,stageLabel,STAGES} from '../../shared/production-stages.mjs?v=34';
 import {captionCutLabel} from '../../shared/cut-passes.mjs?v=4';
 import {PROJECT_ROOT,indexedJokes,projectFolders,projectAssets,preferredBed,isVideo} from './project-index.mjs?v=5-studio';
 const el=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;};

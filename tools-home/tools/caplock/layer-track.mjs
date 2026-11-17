@@ -1,3 +1,5 @@
+import {fadeGainAt} from '../../shared/clip-audio.mjs?v=2';
+import {FPS} from './core.mjs?v=37';
 import {clipTime,pictureTime} from './clip-time.mjs?v=28';
 import {BackgroundSurface,DEFAULT_CHROMA,detectBackground} from './background.mjs?v=33';
 /* Independent reusable media-layer preview. Source picture/audio are never rewritten. */
@@ -34,7 +36,7 @@ export class LayerTracks{
    }
    if(c.type!=='image'){
     const el=m.el,live=playing?clipTime(c,playhead,duration):timing;
-    el.volume=c.volume;
+    el.volume=c.volume*fadeGainAt(c,c.inFrame/FPS,c.outFrame/FPS,playhead/FPS);
     el.muted=c.volume===0;
     if(el.playbackRate!==timing.rate)el.playbackRate=timing.rate;
     const active=shown&&playing&&live.shown&&!timing.held;

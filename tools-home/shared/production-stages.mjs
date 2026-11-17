@@ -24,12 +24,13 @@ export function captionRecipe(p){
   bed:p.bedTransform||{x:50,y:50,scale:1},...(p.canvas?{canvas:{width:p.canvas.width,height:p.canvas.height}}:{}),
   clips:(p.clips||[]).filter(c=>c.visible&&(!c.captionNumber||c.placed)).map(c=>({
    ...Object.fromEntries(keys.map(k=>[k,c[k]??null])),ref:{path:c.ref.path,size:c.ref.size},
+   ...(c.fadeIn>0?{fadeIn:c.fadeIn}:{}),...(c.fadeOut>0?{fadeOut:c.fadeOut}:{}),
    ...(c.sourceDuration?{sourceDuration:c.sourceDuration}:{}),...(c.sourceTrim?{sourceTrim:c.sourceTrim}:{}),
    ...(c.holdLastFrame?{holdLastFrame:true}:{}),...(c.mirrorX===true?{mirrorX:true}:{}),...(c.flipY===true?{flipY:true}:{}),
    ...captionBackgroundRecipe(c.chroma)
   }))};
 }
-export function soundRecipe(session){if(!session?.state)return null;const s=session.state;return {schema:'GS-SoundRender-1',bed:session.bed?{id:session.bed.id,sha256:session.bed.sha256,path:session.bed.path}:null,sourceFps:s.sourceFps,videoVolume:s.videoVolume,mixer:s.mixer,export:s.export,...(s.toolbox?.visual?.length?{visual:s.toolbox.visual.map(item=>({...item}))}:{}),clips:s.clips,soundRefs:session.soundRefs||{},sounds:s.sounds,recordings:s.recordings};}
+export function soundRecipe(session){if(!session?.state)return null;const s=session.state;return {schema:'GS-SoundRender-1',bed:session.bed?{id:session.bed.id,sha256:session.bed.sha256,path:session.bed.path}:null,sourceFps:s.sourceFps,videoVolume:s.videoVolume,mixer:s.mixer,...(s.mixCues?.length?{mixCues:s.mixCues}:{}),export:s.export,...(s.toolbox?.visual?.length?{visual:s.toolbox.visual.map(item=>({...item}))}:{}),clips:s.clips,soundRefs:session.soundRefs||{},sounds:s.sounds,recordings:s.recordings};}
 export function mediaContainer(bytes){const b=bytes instanceof Uint8Array?bytes:new Uint8Array(bytes);if(b[0]===0x1a&&b[1]===0x45&&b[2]===0xdf&&b[3]===0xa3)return 'webm';if(String.fromCharCode(...b.slice(4,8))==='ftyp')return 'mp4';throw Error('The file is not readable MP4 or WebM media. Renaming is not conversion.');}
 export const mediaType=format=>format==='mp4'?'video/mp4':format==='webm'?'video/webm':'application/octet-stream';
 

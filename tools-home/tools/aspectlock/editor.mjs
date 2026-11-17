@@ -1,4 +1,4 @@
-import {mountClipAudio, validClipGain} from '../../shared/clip-audio.mjs?v=1';
+import {fadeGainAt, mountClipAudio, savedFades, validClipGain} from '../../shared/clip-audio.mjs?v=2';
 import {addColorWheel} from '../../shared/color-wheel.mjs?v=1';
 import {fitInsertionRate, mountInsertionSettings} from '../../shared/insertion-settings.mjs?v=1';
 import {paintMatrix} from "../../shared/item-matrix.mjs?v=1";
@@ -13,47 +13,157 @@ const keySourceModes = ['green','blue','custom','alpha'];
 const backgroundButtons = {keep:'keyKeep',replace:'keyReplace',transparent:'keyTransparent'};
 let lastKeySource = 'green', replaceBackground = false;
 const API='https://gs-previewlock-api.onrender.com',key=localStorage.getItem('gs_previewlock_key')||'',Q=id=>document.getElementById(id),C=Q('output'),ctx=C.getContext('2d'),stage=Q('stage'),bv=Q('bv'),ov=Q('ov'),work=Q('workPicture'),wc=work.getContext('2d'),compositor=new Composition();
-let pickerTarget='base', manualVideoSelection=false;function formatBytes(n){return n?(n/1048576).toFixed(1)+' MB':'Size unknown'}function renderLibrary(){const search=Q('assetSearch').value.trim().toLowerCase(),sort=Q('assetSort').value;let arr=items.filter(f=>f.name.toLowerCase().includes(search));arr.sort((a,b)=>sort==='name'?a.name.localeCompare(b.name):sort==='nameDesc'?b.name.localeCompare(a.name):sort==='size'?(b.size||b.file?.size||0)-(a.size||a.file?.size||0):sort==='old'?String(a.server_modified||a.client_modified||'').localeCompare(String(b.server_modified||b.client_modified||'')):String(b.server_modified||b.client_modified||'').localeCompare(String(a.server_modified||a.client_modified||'')));Q('assetCount').textContent=arr.length+' cloud videos';const box=Q('assetResults');box.replaceChildren();for(const f of arr){const pickValue=new URLSearchParams(location.search).get('studio')==='1'&&parent!==window?f.path_display:f.name;const card=document.createElement('div');card.className='assetCard'+(Q(pickerTarget).value===pickValue?' selected':'');const thumb=document.createElement('div');thumb.className='assetThumb';thumb.textContent='▶ Video preview';const title=document.createElement('div');title.className='assetName';title.textContent=f.name;const meta=document.createElement('div');meta.className='assetMeta';meta.textContent=[formatBytes(f.size||f.file?.size),f.server_modified||f.client_modified||''].filter(Boolean).join(' · ');const actions=document.createElement('div');actions.className='assetActions';const preview=document.createElement('button');preview.textContent='▶ Preview';preview.onclick=async()=>{preview.disabled=true;preview.textContent='Loading…';try{const p=await api('/api/playback?path='+encodeURIComponent(f.path_display));const video=document.createElement('video');video.className='assetPreview';video.controls=true;video.playsInline=true;video.preload='metadata';video.src=p.url;video.style.display='block';card.append(video);video.play().catch(()=>{});preview.textContent='▶ Play'}catch(e){preview.textContent='Preview failed';report(e.message)}finally{preview.disabled=false}};const choose=document.createElement('button');choose.textContent='Use this video';choose.onclick=async()=>{const id=pickerTarget;Q('assetDialog').close();await chooseCloudVideo(id,pickValue)};actions.append(preview,choose);card.append(thumb,title,meta,actions);box.append(card)}}function openLibrary(id) {
-  pickerTarget = id;
-  Q('libraryTitle').textContent = id === 'base' ? 'Choose bed video' : 'Choose animation overlay';
-  Q('pickDeviceVideo').hidden = inStudio;
-  Q('cloudVideoStatus').hidden = Boolean(key) || inStudio;
-  Q('assetSearch').value = '';
-  renderLibrary();
-  Q('assetDialog').showModal();
-  Q(inStudio ? 'assetSearch' : 'pickDeviceVideo').focus();
+let pickerTarget = 'base', manualVideoSelection = false, assetPreview;
+function closeAssetPreview() {
+ if (!assetPreview) return;
+ const {button, video} = assetPreview;
+ assetPreview = null;
+ if (video) {
+  video.pause();
+  video.removeAttribute('src');
+  video.load();
+  video.remove();
+ }
+ button.disabled = false;
+ button.textContent = 'Preview';
+ button.setAttribute('aria-expanded','false');
 }
-Q('pickBase').onclick=()=>openLibrary('base');Q('pickOverlay').onclick=()=>openLibrary('overlay');Q('closeLibrary').onclick=()=>Q('assetDialog').close();Q('assetSearch').oninput=renderLibrary;Q('assetSort').onchange=renderLibrary;let trimInFrame=0,trimOutFrame=null;
+async function previewAsset(file, row, button) {
+ const wasOpen = assetPreview?.button === button;
+ closeAssetPreview();
+ Q('libraryMessage').textContent = '';
+ if (wasOpen) return;
+ const current = assetPreview = {button};
+ button.disabled = true;
+ button.textContent = 'Loading…';
+ try {
+  const playback = await api('/api/playback?path=' + encodeURIComponent(file.path_display));
+  if (assetPreview !== current || !Q('assetDialog').open) return;
+  const video = current.video = document.createElement('video');
+  video.className = 'assetPreview';
+  video.controls = video.playsInline = true;
+  video.preload = 'metadata';
+  video.addEventListener('error', () => {
+   if (assetPreview !== current) return;
+   closeAssetPreview();
+   Q('libraryMessage').textContent = 'Could not preview ' + file.name + '.';
+  });
+  row.append(video);
+  video.src = playback.url;
+  button.textContent = 'Hide preview';
+  button.setAttribute('aria-expanded','true');
+  video.play().catch(() => {});
+ } catch (error) {
+  if (assetPreview === current) {
+   closeAssetPreview();
+   Q('libraryMessage').textContent = error.message;
+  }
+ } finally {
+  button.disabled = false;
+ }
+}
+function renderLibrary() {
+ closeAssetPreview();
+ Q('libraryMessage').textContent = '';
+ const sort = Q('assetSort').value;
+ const modified = file => file.server_modified || file.client_modified || '';
+ const order = {
+  name: (a,b)=>a.name.localeCompare(b.name),
+  nameDesc: (a,b)=>b.name.localeCompare(a.name),
+  size: (a,b)=>(b.size||b.file?.size||0)-(a.size||a.file?.size||0),
+  old: (a,b)=>modified(a).localeCompare(modified(b)),
+  new: (a,b)=>modified(b).localeCompare(modified(a)),
+ };
+ const videos = [...items].sort(order[sort]);
+ Q('assetCount').textContent = videos.length + ' cloud videos';
+ const box = Q('assetResults');
+ box.replaceChildren();
+ for (const file of videos) {
+  const value = inStudio ? file.path_display : file.name;
+  const row = document.createElement('div');
+  row.className = 'assetCard';
+  row.classList.toggle('selected', Q(pickerTarget).value === value);
+  const name = document.createElement('div');
+  name.className = 'assetName';
+  name.textContent = file.name;
+  const actions = document.createElement('div');
+  actions.className = 'assetActions';
+  const preview = document.createElement('button');
+  preview.type = 'button';
+  preview.textContent = 'Preview';
+  preview.setAttribute('aria-expanded','false');
+  preview.onclick = () => previewAsset(file, row, preview);
+  const choose = document.createElement('button');
+  choose.type = 'button';
+  choose.textContent = 'Use this video';
+  choose.onclick = async () => {
+   const target = pickerTarget;
+   Q('assetDialog').close();
+   await chooseCloudVideo(target,value);
+  };
+  actions.append(preview,choose);
+  row.append(name,actions);
+  box.append(row);
+ }
+}
+function openLibrary(id) {
+ pickerTarget = id;
+ Q('libraryTitle').textContent = id === 'base' ? 'Choose bed video' : 'Choose animation overlay';
+ Q('pickDeviceVideo').hidden = inStudio;
+ Q('cloudVideoStatus').hidden = Boolean(key) || inStudio;
+ renderLibrary();
+ Q('assetDialog').showModal();
+ Q(inStudio ? 'closeLibrary' : 'pickDeviceVideo').focus();
+}
+Q('pickBase').onclick = () => openLibrary('base');
+Q('pickOverlay').onclick = () => openLibrary('overlay');
+Q('closeLibrary').onclick = () => Q('assetDialog').close();
+Q('assetDialog').addEventListener('close', closeAssetPreview);
+Q('assetSort').onchange = renderLibrary;
+let trimInFrame=0,trimOutFrame=null;
 const trimInTime=()=>trimInFrame/FPS,trimOutTime=()=>Math.min(ov.duration||0,trimOutFrame===null?Infinity:trimOutFrame/FPS),trimLength=()=>Math.max(0,trimOutTime()-trimInTime());
 let startFrame=0,endFrame=null,playbackRate=1,overlayActive=false,overlayAudible=false,overlayPreview=false;
 let requestedBedFrame = null, paintedBedFrame = null;
 let x=40,y=350,w=460,ratio=16/9,bx=0,by=0,bw=WIDTH,editMode='view',items=[],raf=0,canSample=true,rendering=false;
-let overlaySound = {volume:0}, overlayHasAudio;
-const refreshInsertionAudio = mountClipAudio(Q('insertionAudio'), {
- prefix:'insertion',
- read:() => ov.readyState >= 1 ? {...overlaySound, editable:!rendering, hasAudio:overlayHasAudio} : null,
- write(settings) {
-  overlaySound = settings;
-  sound();
-  update();
- },
-});
+let overlaySound = {volume:0}, bedSound = {volume:1};
+const audioTracks = {};
+const localFiles = {}, localMedia = {};
+const bedAudioLength = () => Number.isFinite(bv.duration) ? (lastFrame(bv.duration) + 1) / FPS : 0;
+const audioSettings = {
+ base: {section:Q('bedAudio'), video:bv, prefix:'bed', duration:bedAudioLength, get:()=>bedSound},
+ overlay: {section:Q('insertionAudio'), video:ov, prefix:'insertion', duration:()=>{
+  const range = timing();
+  return (range.outFrame - range.inFrame) / FPS;
+ }, get:()=>overlaySound},
+};
+for (const [id, config] of Object.entries(audioSettings)) {
+ const {section, video, prefix, duration, get} = config;
+ config.refresh = mountClipAudio(section, {
+  prefix,
+  read:() => video.readyState >= 1 ? {...get(), duration:duration(), fps:FPS, editable:!rendering, hasAudio:audioTracks[id]} : null,
+  write(settings) {
+   Object.assign(get(), settings);
+   sound();
+   update();
+  },
+ });
+ section.addEventListener('toggle', () => inspectAudio(id));
+}
 ov.preservesPitch = false;
-async function inspectInsertionAudio() {
- const file = localMedia.overlay;
- if (!file || !Q('insertionAudio').open) return;
- const url = ov.src;
+async function inspectAudio(id) {
+ const {section,video,refresh} = audioSettings[id];
+ const file = localMedia[id];
+ if (!file || !section.open) return;
+ const url = video.src;
  try {
   const {hasSourceAudio} = await import('../caplock/source-audio.mjs?v=36');
   const hasAudio = await hasSourceAudio(file);
-  if (file === localMedia.overlay && url === ov.src) {
-   overlayHasAudio = hasAudio;
-   refreshInsertionAudio();
+  if (file === localMedia[id] && url === video.src) {
+   audioTracks[id] = hasAudio;
+   refresh();
   }
- } catch { /* The audio controls remain usable when track metadata is unavailable. */ }
+ } catch { /* Keep audio editable if track metadata is unavailable. */ }
 }
-Q('insertionAudio').addEventListener('toggle', inspectInsertionAudio);
-const localFiles = {}, localMedia = {};
 const params=new URLSearchParams(location.search);
 const inStudio = params.get('studio') === '1' && parent !== window;
 const names=[params.get('base')||'GS_EP4_MINT_TRUCK_COMPOSITE_readyfornextpass.webm',params.get('overlay')||'HeyGen-Video-1793044979820.mp4'];let renderedBlob=null,renderedExt='mp4',renderedUrl=null;function fileName(){const stem=Q('outputName').value.trim().replace(/\.(mp4|webm)$/i,'').replace(/[\\/:*?"<>|]/g,'_')||'AspectLock_Render';return stem+'.'+renderedExt}
@@ -71,9 +181,12 @@ function refreshLoadedVideo(video) {
   playbackRate = 1;
   ov.playbackRate = 1;
   overlaySound = {volume:0};
-  overlayHasAudio = undefined;
+  delete audioTracks.overlay;
   Q('insertionError').textContent = '';
   showTiming();
+ } else {
+  bedSound = {volume:1};
+  delete audioTracks.base;
  }
  update();
 }
@@ -163,10 +276,8 @@ async function loadLocalVideo(id, source, at = bedFrame()) {
   localMedia[id] = file;
   refreshLoadedVideo(video);
   markVideoSelection(id, file.name, undefined, label);
-  if (id === 'overlay') {
-   placeLoadedOverlay(at);
-   void inspectInsertionAudio();
-  }
+  if (id === 'overlay') placeLoadedOverlay(at);
+  void inspectAudio(id);
   sound();
   const asset = savedId ? (await toolbox.get(savedId) ?? source) : await toolbox.add(file);
   if (video.getAttribute('src') === url) {
@@ -229,7 +340,7 @@ function spec() {
   overlayTransform: {...overlayRect(), aspectRatio: ratio},
   layerOrder: Q('order').value, blueRemoval: Q('keyMode').value, tolerance: Number(Q('tolerance').value),
   key: keySettings(), opacity: Number(Q('opacity').value) / 100,
-  audio: {source: Q('baseAudio').value, cartoonSfx: overlaySound.volume>0?'on':'off', ...overlaySound},
+  audio: {source:bedSound.volume>0?'on':'off', cartoonSfx:overlaySound.volume>0?'on':'off', bed:{...bedSound}, ...overlaySound},
   startFrame, outFrame: endFrame, playbackRate, overlayTrim: {inFrame: trimInFrame, outFrame: trimOutFrame, frameRate: FPS},
   sourceMotion: 'unchanged',
  };
@@ -274,7 +385,8 @@ function update() {
  for (const id of ['insertionIn','insertionOut','insertionMarkIn','insertionMarkOut']) Q(id).disabled = Q('timingControls').disabled;
  Q('render').disabled = !hasBed || rendering;
  refreshAdded();
- refreshInsertionAudio();
+ Q('aspectBedSettings').hidden = !hasBed;
+ for (const {refresh} of Object.values(audioSettings)) refresh();
  Q('spec').textContent = JSON.stringify(spec(), null, 2);
  paintPlayback();
 }
@@ -371,19 +483,21 @@ function paintPlayback() {
 for (const video of [bv, ov]) {
  for (const event of ['loadeddata', 'seeked', 'pause', 'ended']) video.addEventListener(event, paintPlayback);
 }
-function sound() {
- bv.muted = Q('baseAudio').value !== 'on';
- ov.volume = overlaySound.volume;
+function sound(time = bv.currentTime, range) {
+ bv.volume = bedSound.volume * fadeGainAt(bedSound,0,bedAudioLength(),time);
+ bv.muted = bedSound.volume === 0;
+ ov.volume = overlaySound.volume * (range ? fadeGainAt(overlaySound,range.inFrame/FPS,range.outFrame/FPS,time) : 1);
  ov.muted = overlaySound.volume === 0 || !overlayAudible;
 }
 function syncOverlay(bedTime = bv.currentTime) {
  if (overlayPreview) {
   overlayActive = ov.readyState >= 1;
   overlayAudible = overlayActive;
-  sound();
+  sound(bedTime);
   return;
  }
- const position = bv.readyState >= 1 && ov.readyState >= 1 ? placementAt(bedTime, timing()) : null;
+ const range = timing();
+ const position = bv.readyState >= 1 && ov.readyState >= 1 ? placementAt(bedTime, range) : null;
  overlayActive = !!position;
  overlayAudible = !!position?.audible;
  if (!position) {
@@ -395,7 +509,7 @@ function syncOverlay(bedTime = bv.currentTime) {
   if (!bv.paused && position.audible && ov.paused) ov.play().catch(() => {});
   if ((bv.paused || !position.audible) && !ov.paused) ov.pause();
  }
- sound();
+ sound(bedTime,position ? range : undefined);
 }
 
 function showTiming() {
@@ -582,7 +696,7 @@ for (const id of ['width','x','y']) Q(id).oninput = () => {
  if (id === 'y') y = value;
  update();
 };
-for (const id of ['order','tolerance','baseAudio','showOutside']) Q(id).onchange = () => { sound(); update(); };
+for (const id of ['order','tolerance','showOutside']) Q(id).onchange = () => { sound(); update(); };
 Q('keyMode').onchange = () => { setKeySource(Q('keyMode').value); update(); };
 for (const [mode,id] of Object.entries(backgroundButtons)) Q(id).onclick = () => {
  if (mode==='keep') setKeySource('off');
@@ -693,7 +807,7 @@ Q('render').onclick = async () => {
  try {
   report('Preparing the 25 fps export…');
   const [{renderAspect}, bed, animation] = await Promise.all([
-   import('./export.mjs?v=39'), mediaBytes('base',bv), ov.readyState >= 2 ? mediaBytes('overlay',ov) : null,
+   import('./export.mjs?v=40'), mediaBytes('base',bv), ov.readyState >= 2 ? mediaBytes('overlay',ov) : null,
   ]);
   let phase = 'Preparing export';
   const result = await renderAspect({bed,animation,scene,key:settings.key,range,audio:settings.audio,
@@ -737,11 +851,13 @@ function restoreSettings(saved, transformLegacy = true) {
  Q('keyRange').value = Math.round(100 * (saved.key?.similarity ?? .18));
  Q('keyEdge').value = Math.round(100 * (saved.key?.blend ?? .04));
  Q('keyBackground').value = Math.round(100 * (saved.key?.backgroundOpacity ?? 0));
- Q('baseAudio').value = saved.audio?.source || 'on';
- overlaySound = {
-  volume: validClipGain(saved.audio?.volume) ? saved.audio.volume : Number(saved.audio?.cartoonSfx === 'on'),
-  previousVolume: validClipGain(saved.audio?.previousVolume) ? saved.audio.previousVolume : undefined,
- };
+ const readSound = (settings, fallback) => ({
+  volume: validClipGain(settings?.volume) ? settings.volume : fallback,
+  previousVolume: validClipGain(settings?.previousVolume) ? settings.previousVolume : undefined,
+  ...savedFades(settings),
+ });
+ bedSound = readSound(saved.audio?.bed, Number(saved.audio?.source !== 'off'));
+ overlaySound = readSound(saved.audio, Number(saved.audio?.cartoonSfx === 'on'));
  startFrame = saved.startFrame ?? 0;
  endFrame = saved.outFrame ?? null;
  playbackRate = saved.playbackRate ?? 1;
@@ -810,6 +926,7 @@ function detach(id) {
  clearVideoSource(id === 'base' ? bv : ov);
  delete localFiles[id];
  delete localMedia[id];
+ delete audioTracks[id];
  Q(id).querySelector('[data-device-video]')?.remove();
  Q(id).selectedIndex = -1;
  Q(id + 'Chosen').textContent = '';
@@ -832,7 +949,7 @@ function newEdit(keepBed) {
  detach('overlay');
  if (!keepBed) detach('base');
  overlayActive = overlayPreview = overlayAudible = false;
- restoreSettings({version:RECIPE_VERSION, blueRemoval:keyModeFromUrl() || 'green', portraitPerspective:{x:0,y:0,width:WIDTH}, overlayTransform:{x:40,y:350,width:460}});
+ restoreSettings({version:RECIPE_VERSION, audio:keepBed?{bed:bedSound}:undefined, blueRemoval:keyModeFromUrl() || 'green', portraitPerspective:{x:0,y:0,width:WIDTH}, overlayTransform:{x:40,y:350,width:460}});
  Q('viewReset').click();
  if (keepBed) seekBedFrame(0);
  if (Q('newEditDialog').open) Q('newEditDialog').close();
@@ -891,6 +1008,12 @@ Q('openInsertionTrim').onclick = () => {
  openTimingPanel();
 };
 const insertPanel = Q('aspectToolbox');
+Q('collapseToolbox').onclick = event => {
+ event.preventDefault();
+ insertPanel.open = false;
+ insertPanel.querySelector('summary').focus();
+};
+insertPanel.addEventListener('toggle', () => { if (!insertPanel.open) toolbox.stopPreview(); });
 insertPanel.querySelector('summary').addEventListener('click', event => {
  if (!insertPanel.open && !event.target.closest('button')) Q('pause').click();
 });
