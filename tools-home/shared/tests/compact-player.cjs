@@ -215,6 +215,7 @@ async function checkWavLock(page){
    const notes=page.getByRole('textbox',{name:'Scribe notes',exact:true});
    await notes.fill(name+' clip note');
    await page.getByRole('button',{name:'Mark time',exact:true}).click();
+   assert.match(await page.locator('#gs-scribeStatus').textContent(),/^Marked /,'mark confirms the paused audio time');
    assert.match(await notes.inputValue(),new RegExp('\\[Audio .* \\| IN .* \\| OUT .* \\| '+name+'\\]'));
    await page.getByRole('button',{name:'Clear',exact:true}).click();
    await page.waitForFunction(()=>document.querySelector('#gs-scribeStatus').textContent==='Note kept in History.');

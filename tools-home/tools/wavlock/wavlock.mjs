@@ -573,7 +573,8 @@ mountPlayerScribe($('scribeActions'), {
   formatMark({time, selection}) {
     const at = stamp(time);
     const hasCut = selection && (selection.start > 0 || selection.end < buffer.duration);
-    const cut = hasCut ? ' | IN ' + stamp(selection.start) + ' | OUT ' + stamp(selection.end) + ' | ' + clipName() : '';
+    const name = cutName().replace(/[\[\]\r\n]/g, ' ');
+    const cut = hasCut ? ' | IN ' + stamp(selection.start) + ' | OUT ' + stamp(selection.end) + ' | ' + name : '';
     return {text: '[Audio ' + at + cut + '] ', confirmation: 'Marked ' + at + '.'};
   },
   restoreMark(entry) {
