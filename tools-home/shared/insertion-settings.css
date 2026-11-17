@@ -142,3 +142,23 @@
 .gs-clip-name input {width:100%;min-width:0;padding:4px 5px}
 .gs-clip-name form button {padding:4px 5px}
 .gs-clip-name form small {grid-column:1/-1;color:#ffcfaa}
+
+.gs-clip-audio-controls {
+ display:grid;
+ gap:5px;
+ margin:6px 0;
+}
+.gs-clip-audio-modes, .gs-clip-audio-level {
+ display:grid;
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:5px;
+}
+.gs-clip-audio-modes button[aria-pressed="true"] {
+ color:#182331;
+ background:#f0d18d;
+ border-color:#f5deb1;
+ font-weight:700;
+}
+.gs-clip-audio-level {grid-template-columns:auto minmax(0,1fr) auto}
+.gs-clip-audio-controls :is(input, button) {min-width:0;min-height:36px}
+.gs-clip-audio-slider input {display:block;width:100%;padding:0;accent-color:#f0cf84;touch-action:pan-y}

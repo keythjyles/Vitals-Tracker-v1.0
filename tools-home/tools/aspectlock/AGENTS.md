@@ -31,3 +31,7 @@ On a paused seek, keep the last picture and its frame number until the requested
 ## R38 insertion settings
 
 Tap an insertion to edit its name, view the paused bed frame and mark or type IN/OUT. The settings stay open while the yellow dashed outline moves and resizes the animation. OUT fits the selected source span and is exclusive. Source trim opens the existing source controls. In Toolbox, Add video shows a thumbnail and editable name, and Place here uses the indicated bed frame. Saved device names travel with each Toolbox ID and cloud labels can be saved in the local edit. Rollback is `bb01ce180129414f5d4df026299fc57f8bbac9d7`.
+
+## R39 insertion audio
+
+Open **Audio** in insertion settings to mute the overlay or set its level. **Sound on** restores the prior level. Bed audio is a separate control in the same section. Saved edits keep both settings and continue to read earlier on/off overlay settings. Preview and the WebM mix follow the overlay's placement, source trim and rate. Rollback is `fee523aa67c127f233e8e6143b1f3531ac1be190`.

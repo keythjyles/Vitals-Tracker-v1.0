@@ -87,5 +87,65 @@ module.exports = async function checkBackground(browser, caplockURL) {
   assert.deepEqual(alpha.aspectlock,expected);
   assert.deepEqual(errors,[]);
   console.log('AspectLock Keep, Replace and Transparent verified in the phone preview, saved edit and decoded WebM.');
+  await page.goto(new URL('../aspectlock/?source=device',caplockURL).href);
+  await page.getByRole('button',{name:'Choose bed',exact:true}).tap();
+  const audioBed = page.waitForEvent('filechooser');
+  await $('pickDeviceVideo').tap();
+  await (await audioBed).setFiles('/tmp/caplock-fixtures/source25.mp4');
+  await page.waitForFunction(()=>document.getElementById('status').textContent.startsWith('Loaded from device:'));
+  await $('railToolbox').tap();
+  await $('toolboxFiles').setInputFiles('/tmp/caplock-fixtures/goat-tone.mp4');
+  await page.getByRole('button',{name:'Overlay goat-tone.mp4 at current frame',exact:true}).tap();
+  await $('editAdded').tap();
+  await $('insertionIn').fill('10');
+  await $('insertionIn').press('Tab');
+  await $('sheetItemStart').tap();
+  await page.waitForFunction(()=>document.getElementById('position').dataset.frame==='10');
+  const audio = $('insertionAudio');
+  assert.equal(await audio.locator('summary').textContent(),'Audio · No sound');
+  await audio.locator('summary').tap();
+  await $('baseAudio').selectOption('off');
+  await $('insertionVolume').fill('25');
+  await $('insertionVolume').press('Tab');
+  assert.equal(await $('ov').evaluate(video=>video.volume),0.25);
+  await audio.getByRole('button',{name:'No sound',exact:true}).tap();
+  assert.equal(await $('ov').evaluate(video=>video.muted),true);
+  await $('closeItemProperties').tap();
+  await save.tap();
+  await $('save').tap();
+  await page.reload();
+  await save.tap();
+  await $('restoreEdit').tap();
+  await page.waitForFunction(()=>document.getElementById('status').textContent==='Saved edit restored.');
+  await $('editAdded').tap();
+  await audio.locator('summary').tap();
+  assert.equal(await $('insertionVolume').inputValue(),'0');
+  await audio.getByRole('button',{name:'Sound on',exact:true}).tap();
+  assert.equal(await $('insertionVolume').inputValue(),'25');
+  await $('closeItemProperties').tap();
+  await $('render').tap();
+  await page.waitForFunction(()=>document.getElementById('resultVideo').readyState>=2,{},{timeout:30000});
+  const levels = await $('resultVideo').evaluate(async video=>{
+   const m = await import('../sxlock/vendor/mediabunny-1.62.1-gs1.mjs');
+   const blob = await (await fetch(video.src)).blob();
+   const input = new m.Input({formats:m.ALL_FORMATS, source:new m.BlobSource(blob)});
+   try {
+    const track = await input.getPrimaryAudioTrack();
+    const peaks = [0,0,0];
+    for await (const {buffer,timestamp} of new m.AudioBufferSink(track).buffers()) {
+     const samples = buffer.getChannelData(0);
+     for(let i=0;i<samples.length;i++){
+      const t=timestamp+i/buffer.sampleRate;
+      const region=t<.25?0:t>.6&&t<1.2?1:t>1.6?2:-1;
+      if(region>=0)peaks[region]=Math.max(peaks[region],Math.abs(samples[i]));
+     }
+    }
+    return peaks;
+   } finally {input.dispose();}
+  });
+  assert.ok(levels[1]>.02&&levels[1]<.05&&levels[0]<.003&&levels[2]<.003,JSON.stringify(levels));
+  assert.deepEqual(errors,[]);
+  console.log('PASS AspectLock insertion mute, saved level, audio boundaries and WebM sound');
+
  } finally {await page.close();}
 };

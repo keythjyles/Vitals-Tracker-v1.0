@@ -70,9 +70,6 @@ h1{font-size:20px;margin:4px 0}#viewerPage{padding:0;border:0;background:none}#s
 /* R23: current-bed-frame marks beside each element boundary. */
 #clipBedFrame{color:#ffda8a;font-variant-numeric:tabular-nums}
 
-/* R24: exact percent levels for each source clip, without a touch slider. */
-#clipVolumeRow{grid-column:1/-1}.clip-volume-controls{display:flex;gap:5px;margin-top:4px}.clip-volume-controls button{min-height:34px;font-size:12px;padding:3px 8px}.clip-volume-controls input{flex:1;min-width:0;min-height:34px;text-align:center}
-
 /* The source-only trimmer uses a compact picture and right-hand frame controls. */
 #trimDialog{width:min(520px,calc(100% - 20px));max-height:calc(100dvh - 20px);box-sizing:border-box;overflow:auto;padding:8px}
 #trimDialog h2{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:16px}

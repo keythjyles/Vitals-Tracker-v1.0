@@ -1,6 +1,7 @@
+import {mixClipAudio, validClipGain} from '../../shared/clip-audio.mjs?v=1';
 import {Input,ALL_FORMATS,BlobSource,CanvasSink} from '../sxlock/vendor/mediabunny-1.62.1-gs1.mjs';
 import {exportVideo,inspectVideo} from '../sxlock/export-engine.mjs?v=caplock28';
-import {readSourceAudio} from '../caplock/source-audio.mjs?v=28';
+import {readSourceAudio} from '../caplock/source-audio.mjs?v=36';
 import {Composition,WIDTH,HEIGHT,FPS,placementAt} from './composition.mjs?v=36';
 
 export async function renderAspect({bed, animation, scene, key, range, audio, onPhase, onProgress}) {
@@ -14,6 +15,7 @@ export async function renderAspect({bed, animation, scene, key, range, audio, on
  };
  const painter = new Composition();
  let baseFrames, overlays, animationAudio;
+ const volume = validClipGain(audio.volume) ? audio.volume : Number(audio.cartoonSfx === 'on');
  try {
   const {video:bedVideo} = await track(bed);
   const {end} = await inspectVideo(bedVideo);
@@ -29,7 +31,7 @@ export async function renderAspect({bed, animation, scene, key, range, audio, on
     }
    };
    overlays = new CanvasSink(video,{alpha:true,poolSize:1}).canvasesAtTimestamps(frames());
-   if (audio.cartoonSfx === 'on') {
+   if (volume > 0) {
     const sound = await input.getPrimaryAudioTrack();
     if (sound) {
      const {trimIn:start,trimOut:out} = range;
@@ -46,15 +48,9 @@ export async function renderAspect({bed, animation, scene, key, range, audio, on
    file:bed, format:'webm', fps:FPS, soundtrackGain:Number(audio.source === 'on'), hasEffects:!!animationAudio,onPhase,onProgress,
    placeEffects(ctx,from,to) {
     if (!animationAudio) return;
-    const start = Math.max(from,range.inFrame/FPS);
-    const end = Math.min(to,range.outFrame/FPS,range.inFrame/FPS + animationAudio.duration/range.rate);
-    if (end <= start) return;
-    const node = ctx.createBufferSource();
-    node.buffer = animationAudio;
-    node.playbackRate.value = range.rate;
-    node.connect(ctx.destination);
-    node.start(start-from,(start-range.inFrame/FPS)*range.rate);
-    node.stop(end-from);
+    mixClipAudio(ctx,animationAudio,{
+     start:range.inFrame/FPS, end:range.outFrame/FPS, rate:range.rate, volume,
+    },from,to);
    },
    visual:{width:WIDTH,height:HEIGHT,durationFrames:total,independent:true,async draw(canvas,unused,timestamp) {
     const bed = (await baseFrames.next()).value?.canvas;
