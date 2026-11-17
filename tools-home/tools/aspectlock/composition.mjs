@@ -12,15 +12,31 @@ export function frameAt(time, duration) {
  return Math.min(lastFrame(duration), Math.max(0, Math.floor(time * FPS + .001)));
 }
 
+export function placedOutFrame(inFrame, sourceLength, rate, bedEnd, manualOut) {
+ if (!(Number.isFinite(sourceLength) && sourceLength > 0) || inFrame >= bedEnd) return null;
+ const frames = Math.max(1, Math.ceil(sourceLength * FPS / rate - 1e-6));
+ const outFrame = Math.min(bedEnd, manualOut ?? inFrame + frames);
+ return outFrame > inFrame ? outFrame : null;
+}
+
 export function placementAt(time, timing) {
  const {inFrame, outFrame, trimIn, trimOut, rate} = timing;
  const elapsed = time - inFrame / FPS;
- if (elapsed < -1e-6 || time >= outFrame / FPS - 1e-6 || trimOut <= trimIn) return null;
+ if (outFrame === null || elapsed < -1e-6 || time >= outFrame / FPS - 1e-6 || trimOut <= trimIn) return null;
  const sourceTime = trimIn + Math.max(0, elapsed) * rate;
  return {
   time: sourceTime < trimOut ? sourceTime : Math.max(trimIn, trimOut - .00001),
   audible: sourceTime < trimOut,
  };
+}
+
+export function pictureOpacityAt(settings, inFrame, outFrame, frame) {
+ const span = Math.max(1, outFrame - inFrame - 1);
+ const fadeIn = Math.min(span, Math.round((settings?.fadeIn || 0) * FPS));
+ const fadeOut = Math.min(span, Math.round((settings?.fadeOut || 0) * FPS));
+ const incoming = fadeIn ? (frame - inFrame) / fadeIn : 1;
+ const outgoing = fadeOut ? (outFrame - 1 - frame) / fadeOut : 1;
+ return Math.max(0, Math.min(1, incoming, outgoing));
 }
 
 export function fitRect(ratio) {
@@ -77,17 +93,15 @@ export class Composition {
   return this.#surface.canvas;
  }
 
- draw(ctx, {bed, bedRect, overlay, overlayRect, opacity, order}) {
-  const draw = (source, rect) => {
-   if (source) ctx.drawImage(source, rect.x, rect.y, rect.width, rect.height);
+ draw(ctx, {bed, bedRect, overlay, overlayRect, opacity, order, bedOpacity = 1}) {
+  const draw = (source, rect, alpha) => {
+   if (!source || alpha === 0) return;
+   ctx.globalAlpha = alpha;
+   ctx.drawImage(source, rect.x, rect.y, rect.width, rect.height);
   };
-  const drawOverlay = () => {
-   ctx.globalAlpha = opacity;
-   draw(overlay, overlayRect);
-   ctx.globalAlpha = 1;
-  };
-  if (order === 'base') drawOverlay();
-  draw(bed.readyState === undefined || bed.readyState >= 2 ? bed : null, bedRect);
-  if (order !== 'base') drawOverlay();
+  if (order === 'base') draw(overlay, overlayRect, opacity);
+  if (bed.readyState === undefined || bed.readyState >= 2) draw(bed, bedRect, bedOpacity);
+  if (order !== 'base') draw(overlay, overlayRect, opacity);
+  ctx.globalAlpha = 1;
  }
 }

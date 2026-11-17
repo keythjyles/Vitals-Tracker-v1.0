@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AspectLock R40</title><style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AspectLock R41</title><style>
 *{box-sizing:border-box}body{margin:0;background:#0b1420;color:#e7f1fa;font:15px system-ui}header{padding:12px 14px;background:#152637;border-bottom:1px solid #344d63}h1{font-size:20px;margin:0}small,.hint{color:#a9c0d1}main{max-width:740px;margin:auto;padding:12px}button,select,input{font:inherit;background:#263d52;border:1px solid #54718a;border-radius:7px;color:white;padding:10px}button{cursor:pointer}button:disabled{opacity:.45}.bar{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin:10px 0}.bar button{flex:1}.stageWrap{background:#05080c;padding:8px;display:flex;justify-content:center;touch-action:pan-y}.stage{position:relative;width:min(100%,225px,38dvh * 9 / 16);aspect-ratio:9/16;overflow:hidden;background:#111c2b;touch-action:none;border:1px solid #54718a}.stage canvas{display:block;width:100%;height:100%}.handle{position:absolute;width:26px;height:26px;border:2px solid white;background:#f5b73d;border-radius:6px;right:-13px;bottom:-13px;pointer-events:auto;touch-action:none}.dragSurface{position:absolute;touch-action:none;cursor:move}.baseEdit{position:absolute;border:2px solid #55d8ff;touch-action:none;cursor:move}.baseEdit .handle{background:#55d8ff}.stageNote{font-size:12px;color:#b9d0e3;margin:6px 0}.status{font-size:13px;color:#b9d0e3;min-height:20px;overflow-wrap:anywhere}.controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}.controls label{display:flex;flex-direction:column;gap:4px;font-size:13px}.controls input[type=range]{width:100%;padding:0}.controls select{width:100%}video{display:none}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#122233;padding:9px;border-radius:6px;font-size:12px}details{margin:10px 0}#seek{display:block;width:100%;padding:0;margin:0;height:18px;accent-color:#86c8f5}.stageWrap{padding-bottom:0}.stageFooter{width:min(100%,225px,38dvh * 9 / 16);margin:0 auto 6px}.helpInline{margin:0}.helpInline summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;border:1px solid #54718a;border-radius:50%;width:34px;height:34px;font-weight:700}.helpInline summary::-webkit-details-marker{display:none}#position{font-variant-numeric:tabular-nums}a{color:#9dd4ff} .pill{border-radius:20px} .topnote{margin:8px 0;font-size:13px} .transport{margin:3px 0;display:flex;align-items:center;gap:6px}.transport label{font-size:12px;min-width:65px;color:#c9dfef}.transport input[type=range]{flex:1;min-width:0;padding:0;height:24px;accent-color:#86c8f5}.transport output{font-size:11px;min-width:72px;text-align:right;font-variant-numeric:tabular-nums}.compactBar{display:flex;gap:5px;margin:4px 0}.compactBar button{flex:1;min-width:0;padding:8px 3px;font-size:13px;line-height:1.15}.stageNote{margin:2px 0 4px}.stageWrap{padding:3px}.topnote{display:none} .pickerBtn{width:100%;text-align:left;min-height:64px;overflow-wrap:anywhere;background:#203c53}.pickerBtn span{display:block;font-size:12px;color:#bde4fa;margin-top:4px}#assetDialog{background:#0e1b29;color:#edf6ff;border:1px solid #54718a;border-radius:12px;width:min(96vw,740px);max-height:90dvh;padding:12px}#assetDialog::backdrop{background:#000c}.libraryHead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}.libraryHead strong{font-size:21px}.librarySort{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:10px 0}.librarySort select{max-width:180px}.assetResults{overflow-y:auto;max-height:62dvh;display:grid;gap:9px}.assetCard{border:1px solid #42627c;border-radius:8px;padding:6px 8px;background:#172c40}.assetCard .assetName{font-size:15px;overflow-wrap:anywhere;font-weight:650}.assetActions{display:flex;justify-content:flex-end;gap:6px;margin-top:4px}.assetActions button{min-height:36px;padding:3px 8px;font-size:13px}.assetPreview{display:block!important;width:100%;max-height:240px;background:#000;margin-top:9px;border-radius:6px}.assetCard.selected{border-color:#79caff} .stageScene{position:absolute;inset:0;transform-origin:0 0}.viewMode .stageScene>*{pointer-events:none!important}.viewMode{cursor:grab}.viewMode:active{cursor:grabbing}
 /* Precision controls stay compact, right aligned and fully visible. */
 .stageWorkspace{--player-height:max(46dvh,288px);display:grid;grid-template-columns:minmax(0,1fr) 82px;gap:5px;align-items:start}
@@ -16,14 +16,14 @@ main{max-width:980px}
 #itemMatrix{display:block;width:100%;height:80px;background:#0c1621;touch-action:none;border-radius:5px;margin:3px 0}
 .item-row{display:grid;grid-template-columns:minmax(0,1fr) 36px;gap:4px;margin:3px 0}.item-row button{min-height:38px;padding:4px 6px;font-size:13px;min-width:0}.item-open{text-align:left}.item-open span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.item-open small{display:block;font-size:11px}
 .asset-pickers{gap:5px;margin-top:4px}.asset-pickers .pickerBtn{min-height:36px;font-size:12px;padding:5px}.asset-pickers .pickerBtn span{font-size:10px;margin-top:0}.asset-pickers>label{font-size:11px}
-#libraryMessage:empty,#aspectToolbox:not([open]) #collapseToolbox{display:none}.toolbox-actions{display:flex;gap:5px}
+#libraryMessage:empty{display:none}
 .item-heading{display:flex;align-items:center;justify-content:space-between;gap:6px}.item-heading button{min-height:32px;padding:4px 8px;font-size:12px}
-</style><link rel="stylesheet" href="./editor.css?v=38"><link rel="stylesheet" href="../../shared/insertion-settings.css?v=3"></head><body>
-<header><h1>AspectLock <small>GS-TOOL-ASPECTLOCK · R40</small></h1></header>
+</style><link rel="stylesheet" href="./editor.css?v=41"><link rel="stylesheet" href="../../shared/insertion-settings.css?v=3"></head><body>
+<header><h1>AspectLock <small>GS-TOOL-ASPECTLOCK · R41</small></h1></header>
 <main><div id="status" class="status">Choose a bed video or animation.</div>
 <div class="stageWorkspace"><nav id="stageNav" aria-label="Playback and frame controls"></nav><div class="stageWrap"><div class="stage" id="stage"><canvas id="workPicture" aria-label="Composition preview"></canvas><div id="stageScene" class="stageScene"><canvas id="output" width="540" height="960" hidden></canvas><div id="viewportEdge" aria-hidden="true"></div><div id="bedEdge" aria-hidden="true"></div><div id="dragSurface" class="dragSurface"><div id="bounds" class="gs-insertion-outline"><button id="handle" class="gs-insertion-handle" type="button" aria-label="Resize insertion">↘</button></div></div><div id="baseEdit" class="baseEdit" hidden><span id="baseHandle" class="handle" aria-label="Resize portrait for perspective only"></span></div></div></div></div>
-</div><div class="transport"><progress id="bedProgress" max="1" value="0" aria-label="Bed position"></progress><output id="position">F—</output></div><section id="addedItems"><div class="item-heading"><h2>Insertions · <span id="addedCount">0</span></h2><button type="button" id="startOver">Start over</button></div><canvas id="itemMatrix" width="1000" height="80" tabindex="0" role="slider" aria-label="Added animation timeline · seek paused" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0"></canvas><div id="addedOverlay" class="item-row" hidden><button id="editAdded" type="button" class="item-open" title="Edit framing, opacity and background."><span id="addedName"></span><small id="addedTiming"></small></button><button id="jumpAdded" type="button" aria-label="Go to animation start">↤</button></div><p id="addedEmpty" class="hint">Choose an animation in Toolbox.</p><div class="controls asset-pickers"><button id="pinPlayer" type="button" aria-pressed="true">Unpin player</button><button type="button" id="newEdit">Start over</button><label>Base video<button type="button" id="pickBase" class="pickerBtn">Choose bed video <span id="baseChosen"></span></button><select id="base" style="display:none" aria-label="Selected bed video"></select></label><label>Overlay video<button type="button" id="pickOverlay" class="pickerBtn">Choose animation <span id="overlayChosen"></span></button><select id="overlay" style="display:none" aria-label="Selected animation"></select></label>
-</div></section><dialog id="itemProperties" class="gs-insertion-settings" aria-labelledby="itemPropertiesTitle">
+</div><div class="transport"><progress id="bedProgress" max="1" value="0" aria-label="Bed position"></progress><output id="position">F—</output></div><details id="addedItems" open><summary class="item-heading"><h2>Insertions · <span id="addedCount">0</span></h2><button type="button" id="startOver">Start over</button></summary><canvas id="itemMatrix" width="1000" height="80" tabindex="0" role="slider" aria-label="Added animation timeline · seek paused" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0"></canvas><div id="addedOverlay" class="item-row" hidden><button id="editAdded" type="button" class="item-open" title="Edit insertion timing, picture and audio."><span id="addedName"></span><small id="addedTiming"></small></button><button id="jumpAdded" type="button" aria-label="Go to animation start">↤</button></div><p id="addedEmpty" class="hint">Choose an animation in Toolbox.</p></details><div class="controls asset-pickers"><button id="pinPlayer" type="button" aria-pressed="true">Unpin player</button><button type="button" id="newEdit">Start over</button><label>Base video<button type="button" id="pickBase" class="pickerBtn">Choose bed video <span id="baseChosen"></span></button><select id="base" style="display:none" aria-label="Selected bed video"></select></label><label>Overlay video<button type="button" id="pickOverlay" class="pickerBtn">Choose animation <span id="overlayChosen"></span></button><select id="overlay" style="display:none" aria-label="Selected animation"></select></label>
+</div><dialog id="itemProperties" class="gs-insertion-settings" aria-labelledby="itemPropertiesTitle">
 <h2 id="itemPropertiesTitle">Edit insertion</h2>
 <input id="insertionName" type="text" autocomplete="off" aria-label="Insertion name" data-insertion="name">
 <button id="renameInsertion" type="button" data-insertion="rename">Save name</button>
@@ -35,10 +35,12 @@ main{max-width:980px}
 <button id="editOverlay" type="button" data-insertion="move" aria-pressed="false">Move / size</button>
 <input id="insertionIn" type="number" min="0" step="1" inputmode="numeric" data-insertion="in">
 <button id="insertionMarkIn" type="button" data-insertion="mark-in" title="Move the insertion to the current frame">Mark IN</button>
-<input id="insertionOut" type="number" min="1" step="1" inputmode="numeric" data-insertion="out" title="First frame with no insertion">
+<input id="insertionOut" type="number" min="1" step="1" inputmode="numeric" data-insertion="out" title="First frame with no insertion. Changing OUT adjusts speed.">
 <button id="insertionMarkOut" type="button" data-insertion="mark-out" title="Fit the clip to end before the current frame">Mark OUT</button>
 <output id="insertionSpan" data-insertion="summary"></output>
 <output id="insertionError" data-insertion="status" role="status"></output>
+<details id="insertionPicture" class="gs-insertion-section"><summary>Picture fades</summary></details>
+<details id="insertionAudio" class="gs-insertion-section"><summary>Audio</summary></details>
 <div class="compactBar gs-insertion-section">
  <button id="fitOverlay" type="button">Fit animation</button>
  <button id="editBase" type="button">Move bed</button>
@@ -73,13 +75,11 @@ main{max-width:980px}
  </div>
 </details>
 </div>
-<details id="insertionAudio" class="gs-insertion-section">
-<summary>Audio</summary>
-</details>
 </dialog>
 <div id="pinnedSections" hidden></div>
 <details id="aspectBedSettings" class="aspect-section" data-pin-section hidden>
  <summary><span>Bed settings</span><button type="button" data-pin aria-label="Pin Bed settings" aria-pressed="false">Pin</button></summary>
+ <details id="bedPicture" class="gs-insertion-section"><summary>Picture fades</summary></details>
  <details id="bedAudio" class="gs-insertion-section"><summary>Audio</summary></details>
 </details>
 <details id="aspectTiming" class="aspect-section" data-pin-section>
@@ -88,10 +88,10 @@ main{max-width:980px}
  <fieldset id="timingControls" disabled>
   <div class="timing-grid">
    <label>Bed IN <input id="bedIn" type="number" min="0" step="1" inputmode="numeric"></label><button type="button" id="markStart" title="Start the animation at the paused bed frame.">IN here</button>
-   <label>Bed OUT <input id="bedOut" type="number" min="1" step="1" inputmode="numeric"></label><button type="button" id="markEnd" title="Make this the first frame without the animation.">OUT here</button>
+   <label>Bed OUT <input id="bedOut" type="number" min="1" step="1" inputmode="numeric"></label><button type="button" id="markEnd" title="Adjust the speed so the current frame is the first without the animation.">OUT here</button>
   </div>
   <div class="compactBar">
-   <button type="button" id="applyTiming">Apply IN/OUT</button><button type="button" id="fitTiming">Fit source to IN/OUT</button><button type="button" id="clearStart">Full clip at F0</button>
+   <button type="button" id="clearStart">Full clip at F0</button>
   </div>
   <output id="timingError" class="status" role="status"></output>
   <details id="overlayTrimPanel">
@@ -103,7 +103,7 @@ main{max-width:980px}
  </fieldset>
 </details>
 <details id="aspectToolbox" class="aspect-section" data-pin-section>
- <summary><span>Toolbox</span><span class="toolbox-actions"><button type="button" id="collapseToolbox" aria-label="Collapse Toolbox">▴ Collapse</button><button type="button" data-pin aria-label="Pin Toolbox" aria-pressed="false">Pin</button></span></summary>
+ <summary><span>Toolbox</span><button type="button" data-pin aria-label="Pin Toolbox" aria-pressed="false">Pin</button></summary>
  <div class="insert-point" id="insertPoint" role="group" aria-label="Insertion frame">
   <button id="insertBack" class="gs-frame-button" type="button" aria-label="Previous insertion frame" title="Back one frame." disabled>−</button>
   <output id="insertFrame" aria-live="off">Insert at F—</output>
@@ -128,7 +128,7 @@ main{max-width:980px}
  <div class="gs-frame-pair"><button id="backFrame" type="button" title="Previous frame. Double-tap to go back 25 frames.">−1</button><button id="forwardFrame" type="button" title="Next frame. Double-tap to go forward 25 frames.">+1</button></div>
  <div class="gs-control-pair"><button id="back25" type="button" aria-label="Back 25 frames">−25</button><button id="forward25" type="button" aria-label="Forward 25 frames">+25</button></div>
  <div class="gs-control-row"><input id="goFrame" type="number" min="0" step="1" inputmode="numeric" placeholder="Frame" aria-label="Bed frame to go to" title="Enter the exact bed frame."><button id="jumpFrame" type="button" aria-label="Go to frame">Go</button></div>
- <button id="railMove" type="button" aria-pressed="false" title="Drag or pinch the animation.">Move</button><button id="railTiming" type="button" title="Set the first and last frames for this animation.">Timing</button>
+ <button id="railMove" type="button" aria-pressed="false" title="Drag or pinch the animation.">Move</button><button id="railTiming" type="button" title="Set the first included frame and the first clear frame.">Timing</button>
  <button id="railToolbox" type="button" aria-controls="aspectToolbox" title="Pause at the current frame and open the clips.">Insert</button>
 
 </div>
@@ -153,5 +153,5 @@ main{max-width:980px}
 <input id="deviceVideo" type="file" accept="video/*,.mp4,.webm,.mov" hidden>
 <p id="cloudVideoStatus" class="hint" hidden>Connect PreviewLock to browse cloud videos.</p>
 <p id="libraryMessage" role="status"></p><div class="librarySort"><label>Sort <select id="assetSort"><option value="new">Newest first</option><option value="old">Oldest first</option><option value="name">Filename A–Z</option><option value="nameDesc">Filename Z–A</option><option value="size">Largest first</option></select></label><span id="assetCount"></span></div><div id="assetResults" class="assetResults"></div></dialog><video id="bv" playsinline preload="auto" crossorigin="anonymous"></video><video id="ov" playsinline preload="auto" crossorigin="anonymous"></video>
-</main><script type="module" src="./editor.mjs?v=40"></script><script src="../../shared/caplock-launch.js?v=1" defer></script><script type="module" src="../../shared/compact-player.mjs?v=34"></script></body></html>
+</main><script type="module" src="./editor.mjs?v=41"></script><script src="../../shared/caplock-launch.js?v=1" defer></script><script type="module" src="../../shared/compact-player.mjs?v=34"></script></body></html>
 

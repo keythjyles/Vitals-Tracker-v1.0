@@ -38,7 +38,7 @@ export function scheduleClipGain(gain, settings, start, end, from, to, anchor = 
  }
 }
 
-export function mountAudioFades(container, {prefix, read, write}) {
+export function mountFadeDurations(container, {prefix, read, write}) {
  const row = document.createElement('div');
  row.className = 'gs-audio-fades';
  row.innerHTML = `
@@ -76,6 +76,8 @@ export function mountAudioFades(container, {prefix, read, write}) {
  return refresh;
 }
 
+export {mountFadeDurations as mountAudioFades};
+
 export function mountClipAudio(section, {prefix, read, write, label = 'Audio'}) {
  const summary = section.querySelector('summary');
  const controls = document.createElement('div');
@@ -94,7 +96,7 @@ export function mountClipAudio(section, {prefix, read, write, label = 'Audio'}) 
    <button id="${prefix}VolumeUp" type="button" aria-label="Raise clip audio by 5 percent">+5%</button>
   </div>`;
  summary.after(controls);
- const refreshFades = mountAudioFades(controls, {prefix, read, write});
+ const refreshFades = mountFadeDurations(controls, {prefix, read, write});
  const off = controls.querySelector('[data-sound="off"]');
  const on = controls.querySelector('[data-sound="on"]');
  const slider = controls.querySelector('input[type="range"]');

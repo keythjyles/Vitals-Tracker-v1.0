@@ -10,6 +10,15 @@ module.exports = async function checkBackground(browser, caplockURL) {
   return [[10,350],[130,460]].map(([x,y])=>[...ctx.getImageData(x,y,1,1).data]);
  });
  const near = (actual, expected, tolerance=10) => expected.every((n,i)=>Math.abs(actual[i]-n)<=tolerance);
+ async function go(frame) {
+  await $('goFrame').fill(String(frame));
+  await $('jumpFrame').tap();
+  await page.locator('#position[data-frame="'+frame+'"]').waitFor();
+ }
+ async function setFrames(id, count) {
+  await $(id).fill(String(count));
+  await $(id).press('Tab');
+ }
  try {
   await page.goto(new URL('../aspectlock/?source=device',caplockURL).href);
   await page.getByRole('button',{name:'Choose bed',exact:true}).tap();
@@ -46,7 +55,22 @@ module.exports = async function checkBackground(browser, caplockURL) {
   await $('keyReplace').tap();
   assert.equal(await $('keyReplacementColor').inputValue(),'#a03ed0');
   await $('opacity').fill('100');
+  await $('insertionPicture').locator('summary').tap();
+  await setFrames('insertionPictureFadeIn',4);
+  await setFrames('insertionPictureFadeOut',4);
+  assert.deepEqual((await pixels())[0],bed,'picture fade leaves the bed visible at IN');
   await $('closeItemProperties').tap();
+  await $('aspectBedSettings').locator(':scope > summary').tap();
+  await $('bedPicture').locator('summary').tap();
+  await setFrames('bedPictureFadeIn',2);
+  await setFrames('bedPictureFadeOut',2);
+  assert.deepEqual((await pixels())[0],[0,0,0,255]);
+  await go(2);
+  const midpoint = bed.slice(0,3).map((value,i)=>(value+replacement[i])/2);
+  assert.ok(near((await pixels())[0],midpoint,2));
+  await go(9);
+  assert.deepEqual((await pixels())[0],[0,0,0,255]);
+  await go(4);
   const save = $('aspectExport').locator(':scope > summary');
   await save.tap();
   await $('save').tap();
@@ -63,16 +87,28 @@ module.exports = async function checkBackground(browser, caplockURL) {
   assert.deepEqual(marker,foreground);
   await $('render').tap();
   await page.waitForFunction(()=>document.getElementById('resultVideo').readyState>=2,{},{timeout:30000});
-  const decoded=await $('resultVideo').evaluate(video=>{
+  const decoded=await $('resultVideo').evaluate(async video=>{
    const canvas=document.createElement('canvas');canvas.width=video.videoWidth;canvas.height=video.videoHeight;
-   const ctx=canvas.getContext('2d');ctx.drawImage(video,0,0);
-   return [[10,350],[130,460]].map(([x,y])=>[...ctx.getImageData(x,y,1,1).data]);
+   const ctx=canvas.getContext('2d');
+   const frames=[];
+   for (const frame of [0,2,4,9]) {
+    if (frame) await new Promise(resolve=>{
+     video.addEventListener('seeked',resolve,{once:true});
+     video.currentTime=frame/25;
+    });
+    ctx.drawImage(video,0,0);
+    frames.push([[10,350],[130,460]].map(([x,y])=>[...ctx.getImageData(x,y,1,1).data]));
+   }
+   return frames;
   });
-  assert.ok(near(decoded[0],[160,62,208],12),JSON.stringify(decoded));
-  assert.ok(near(decoded[1],[255,240,0],14),JSON.stringify(decoded));
+  assert.ok(near(decoded[0][0],[0,0,0],4),JSON.stringify(decoded));
+  assert.ok(near(decoded[1][0],midpoint,12),JSON.stringify(decoded));
+  assert.ok(near(decoded[2][0],[160,62,208],12),JSON.stringify(decoded));
+  assert.ok(near(decoded[2][1],[255,240,0],14),JSON.stringify(decoded));
+  assert.ok(near(decoded[3][0],[0,0,0],4),JSON.stringify(decoded));
   const alpha = await page.evaluate(async()=>{
    const {BackgroundSurface,detectBackground}=await import('../caplock/background.mjs?v=33');
-   const {Composition}=await import('./composition.mjs?v=36');
+   const {Composition}=await import('./composition.mjs?v=41');
    const source=document.createElement('canvas');source.width=source.height=64;
    const ctx=source.getContext('2d');ctx.fillStyle='#0a77d4';ctx.fillRect(20,20,20,20);
    const key={...detectBackground(source,{includeAlpha:true}),backgroundOpacity:1,replacement:{enabled:true,color:'#a03ed0'}};
@@ -86,7 +122,7 @@ module.exports = async function checkBackground(browser, caplockURL) {
   assert.deepEqual(alpha.caplock,expected);
   assert.deepEqual(alpha.aspectlock,expected);
   assert.deepEqual(errors,[]);
-  console.log('AspectLock Keep, Replace and Transparent verified in the phone preview, saved edit and decoded WebM.');
+  console.log('AspectLock backgrounds and separate bed and clip picture fades match in preview, restored edit and decoded WebM.');
   await page.goto(new URL('../aspectlock/?source=device',caplockURL).href);
   await page.getByRole('button',{name:'Choose bed',exact:true}).tap();
   const audioBed = page.waitForEvent('filechooser');

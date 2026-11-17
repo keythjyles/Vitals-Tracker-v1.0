@@ -44,6 +44,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');const asse
  const picker=aspectPage.locator('#assetDialog');
  assert.equal(await picker.locator('input[type=search],.assetThumb,.assetPreview').count(),0);
  assert.equal(await picker.locator('.assetName').count(),2);
+ assert.ok(await picker.locator('.assetCard').evaluateAll(rows=>rows.every(row=>row.offsetHeight<=52)));
  const cloudRow=name=>picker.locator('.assetCard').filter({hasText:name});
  await cloudRow('source25.mp4').getByRole('button',{name:'Preview',exact:true}).tap();
  await cloudRow('source25.mp4').locator('video.assetPreview').waitFor();
@@ -53,8 +54,9 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');const asse
  await cloudRow('alpha-test.webm').getByRole('button',{name:'Hide preview',exact:true}).tap();
  assert.equal(await picker.locator('video.assetPreview').count(),0);
  await picker.locator('#closeLibrary').tap();
- await aspectPage.getByRole('button',{name:'Scribe',exact:true}).tap();
+ assert.equal(await aspectPage.locator('.gs-video-reference .gs-scribe-button').isVisible(),false);
  const scribe=aspectPage.locator('#editorScribe');
+ await scribe.locator(':scope > summary').tap();
  const actions=scribe.locator('.gs-scribe-primary > button');
  assert.deepEqual(await actions.allTextContents(),['Clear','Copy','Mark frame']);
  await actions.last().waitFor();
