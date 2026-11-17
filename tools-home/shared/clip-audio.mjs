@@ -47,7 +47,7 @@ export function mountAudioFades(container, {prefix, read, write}) {
  container.append(row);
  const fields = [...row.querySelectorAll('input')];
  const keys = ['fadeIn','fadeOut'];
- function refresh() {
+ function refresh(committed = false) {
   const state = read();
   const fps = state?.fps || 1;
   const limit = Math.max(0, state?.duration || 0);
@@ -56,7 +56,7 @@ export function mountAudioFades(container, {prefix, read, write}) {
    const digits = state?.fps ? 0 : 3;
    input.step = state?.fps ? '1' : '.001';
    input.max = Number((limit * fps).toFixed(digits));
-   input.value = Number((parts[index] * fps).toFixed(digits));
+   if (committed || document.activeElement !== input) input.value = Number((parts[index] * fps).toFixed(digits));
    input.disabled = !state?.editable || limit === 0 || state.hasAudio === false;
    input.previousElementSibling.textContent = state?.fps ? '(frames)' : '(sec)';
   });
@@ -70,7 +70,7 @@ export function mountAudioFades(container, {prefix, read, write}) {
     const time = (state.fps ? Math.round(value) : value) / fps;
     write({[keys[index]]: Math.min(time, state.duration)});
    }
-   refresh();
+   refresh(true);
   };
  });
  return refresh;
@@ -103,7 +103,7 @@ export function mountClipAudio(section, {prefix, read, write, label = 'Audio'}) 
  const up = controls.querySelector('#' + prefix + 'VolumeUp');
  const percent = volume => Math.round(volume * 1000) / 10;
 
- function refresh() {
+ function refresh(committed = false) {
   const state = read();
   section.hidden = !state;
   const unavailable = state?.hasAudio === false;
@@ -113,7 +113,8 @@ export function mountClipAudio(section, {prefix, read, write, label = 'Audio'}) 
   controls.hidden = unavailable;
   off.setAttribute('aria-pressed', String(!audible));
   on.setAttribute('aria-pressed', String(audible));
-  slider.value = level.value = percent(volume);
+  if (committed || document.activeElement !== slider) slider.value = percent(volume);
+  if (committed || document.activeElement !== level) level.value = percent(volume);
   for (const item of [off, on, slider, level, down, up]) item.disabled = !state?.editable || unavailable;
   refreshFades();
  }
@@ -124,7 +125,7 @@ export function mountClipAudio(section, {prefix, read, write, label = 'Audio'}) 
    const previousVolume = volume || state.volume || state.previousVolume;
    write({volume, previousVolume});
   }
-  refresh();
+  refresh(true);
  }
 
  off.onclick = () => setVolume(0);

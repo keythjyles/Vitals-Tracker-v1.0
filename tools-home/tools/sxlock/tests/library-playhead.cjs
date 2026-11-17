@@ -134,8 +134,8 @@ async function main(){
    assert(scribeLayout.buttons[0].top>scribeLayout.notesBottom);
    assert(Math.abs(scribeLayout.buttons[0].top-scribeLayout.buttons[1].top)<3);
    assert.deepEqual(scribeLayout.primary,['Clear','Copy','Mark frame']);
-   assert(scribeLayout.buttons.every(button=>Math.abs(button.top-scribeLayout.buttons[0].top)<3&&button.right<=320));
-   assert(scribeLayout.notesHeight>=110&&scribeLayout.secondary.every(button=>button.top>scribeLayout.buttons[0].bottom&&button.height<scribeLayout.buttons[0].height&&button.right<=320));
+   assert(scribeLayout.buttons.every(button=>Math.abs(button.top-scribeLayout.buttons[0].top)<3&&button.right<=320),JSON.stringify(scribeLayout));
+   assert(scribeLayout.notesHeight>=110&&scribeLayout.secondary.every(button=>button.top>scribeLayout.buttons[0].bottom&&button.height<scribeLayout.buttons[0].height&&button.right<=320),JSON.stringify(scribeLayout));
    await page.setViewportSize({width:412,height:915});
    await page.getByRole('button',{name:'Mark frame'}).tap();
    assert.equal(await page.locator('#notes').inputValue(),'[F228 | 0:09.120 | 25 fps] ');

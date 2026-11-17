@@ -170,13 +170,15 @@ async function main(){
   await control('visualOut').fill('75');
   await control('visualOut').press('Tab');
   await control('visualGoIn').click();
+  await soundPage.waitForFunction(()=>Math.abs(SxLock.currentTime()-1)<.000001&&!document.getElementById('video').seeking);
   const audio=control('visualAudio'), clip=soundPage.locator('.sx-visual-item video');
   assert.equal(await audio.locator('summary').textContent(),'Audio · No sound');
   assert.equal(await clip.evaluate(video=>video.muted),true);
   await audio.locator('summary').click();
   await control('visualVolume').fill('25');
   await control('visualVolume').press('Tab');
-  await soundPage.waitForFunction(()=>!document.querySelector('.sx-visual-item video').muted);
+  assert.equal(await soundPage.evaluate(()=>SxLock.snapshot().toolbox.visual[0].volume),.25);
+  assert.equal(await clip.evaluate(video=>video.muted),false);
   await audio.getByRole('button',{name:'No sound',exact:true}).click();
   assert.equal(await clip.evaluate(video=>video.muted),true);
   await control('visualClose').click();

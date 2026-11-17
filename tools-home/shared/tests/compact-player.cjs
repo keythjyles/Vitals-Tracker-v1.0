@@ -56,11 +56,17 @@ async function checkFrameLock(page){
   const notesTop=(await notes.boundingBox()).y;
   assert.ok(notesTop>=loaded.y+loaded.height,'notes start below the player');
   assert.ok(page.viewportSize().height-notesTop>=64,'notes have room on a phone with portrait video loaded');
-  const noteButtons=await page.locator('.notes-actions button').evaluateAll(buttons=>buttons.map(button=>{
-   const {width,top}=button.getBoundingClientRect();return {width,top};
+  const noteButtons=await page.locator('#notes-workspace .gs-scribe-primary button').evaluateAll(buttons=>buttons.map(button=>{
+   const {right,top,height}=button.getBoundingClientRect();
+   return {name:button.textContent,right,top,height};
   }));
+  const notesBottom=await notes.evaluate(field=>field.getBoundingClientRect().bottom);
+  assert.deepEqual(noteButtons.map(button=>button.name),['Clear','Copy','Mark frame']);
   assert.equal(new Set(noteButtons.map(button=>button.top)).size,1,'note actions fit on one row');
-  assert.ok(noteButtons.every(button=>button.width<=120),'note actions have capped widths');
+  assert.ok(noteButtons.every(button=>button.top>=notesBottom&&button.right<=page.viewportSize().width));
+  const secondary=await page.locator('#notes-workspace .gs-scribe-secondary button').evaluateAll(buttons=>buttons.map(button=>button.getBoundingClientRect().height));
+  assert.equal(secondary.length,3);
+  assert.ok(secondary.every(height=>height<noteButtons[0].height));
 
   await page.locator('#forward').click();
   await page.getByText('F1 · 0:00.033 · 30 fps',{exact:true}).waitFor();
