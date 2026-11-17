@@ -6,6 +6,9 @@ Late source downloads, capture decoding, interrupted-save lookups and approval c
 
 42 frontend state tests pass, including slow approvals completing successfully or failing after Clear, reusing the same ID for a new decision, a stuck cloud deletion alongside 1,000 candidates, active recording cancellation, late audio decoding and interrupted-save recovery after clearing. Full page-script syntax and diff checks pass. Browser and deployment verification are recorded separately. Rollback: revert this release's source changes while retaining approved library audio; cleared candidates have no recovery archive.
 
+
+R14.14 deployment verified: code `2093339c24725a7462e2dcf45ac080520237e773`; Pages `44186364999`, Studio `44186367007` and ClipLock `44186367115` all succeeded. A disposable browser fixture using the shipped script held one approval and one managed deletion open at once: Clear all removed the 1,000 candidates immediately, kept zero visible rows, and ignored the released old approval. No provider request was sent by that fixture. The actual published R14.14 then loaded 1,000 candidates, cleared to zero and reloaded with zero rows. A live-page inspection timeout was recovered with a fresh tab. Physical Android and live provider deletion are not claimed. Rollback source baseline: `fb90b7678d2bebdf0df15f060278c30b1d972790`; keep approved library audio.
+
 ## Sound Scrubber R14.13 — clear the decision slate
 
 **Clear all** deletes every undecided candidate and current search result, including filtered and unrendered rows. It removes their browser audio, captured originals, metadata and old rejection IDs. There is no archive, undo snapshot, deletion list or search ban. Clear stops playback, resets the search/filter controls and cancels old search/intake responses so they cannot refill the slate. An explicit new search or batch load may find those sounds again.
