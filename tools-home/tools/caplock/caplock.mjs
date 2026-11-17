@@ -1,11 +1,12 @@
+import {mountInsertionSettings} from '../../shared/insertion-settings.mjs?v=1';
 import {addColorWheel} from '../../shared/color-wheel.mjs?v=1';
 import {setupPinnedSections} from '../../shared/pinned-sections.mjs?v=32';
 import {writeFrameClock,frameStepControl} from '../../shared/frame-stamp.mjs?v=2';
 import {compositionFrames,bedTime,TailClock} from './composition-time.mjs?v=25';
 import {percentGain,inspectSourceAudio} from './source-audio.mjs?v=28';
-import {createToolboxUI} from './toolbox-ui.mjs?v=33';
+import {createToolboxUI} from './toolbox-ui.mjs?v=35';
 import {rememberLocalMedia,readLocalMedia} from './local-media.mjs?v=31';
-import {isToolboxEntry,makeToolboxPlacement,fitVideoPlacement,setPlacementSpeed} from './toolbox-core.mjs?v=33';
+import {isToolboxEntry,makeToolboxPlacement,fitVideoPlacement,setPlacementSpeed,shiftPlacementIn,fitPlacementOut} from './toolbox-core.mjs?v=35';
 import {inspectToolboxFile} from './toolbox-media.mjs?v=28';
 import {createTrimDialog} from './trim-dialog.mjs?v=28';
 import {passFilename,matchLocalFile,localPassKey} from './local-pass.mjs?v=21';
@@ -27,7 +28,7 @@ import {captionNumber,numberedCaptionFiles,activeCaption,startCaptionSequence,na
 import {paintMatrix,matrixFrame} from '../../shared/item-matrix.mjs?v=1';
 import {rateOf,fitRate} from './clip-time.mjs?v=28';
 import {words,moveWords,shiftWords,geminiPrompt} from './script.mjs?v=4';
-import {LayerTracks} from './layer-track.mjs?v=33';
+import {LayerTracks} from './layer-track.mjs?v=35';
 import {FPS,DEFAULT_STYLE,createProject,phrase,importTranscript,subtitle,timed,effective,validateProject,validateStyle} from './core.mjs?v=33';
 const $=id=>document.getElementById(id),v=$('video'),API='https://gs-previewlock-api.onrender.com';
 // Owner lock: built-in text captions cannot be enabled by UI, URL, or restored data.
@@ -171,7 +172,7 @@ function render(){
  fillStyle(c?effective(project,c):project.globalStyle);$('undo').disabled=!undo.length;$('redo').disabled=!redo.length;$('presets').replaceChildren();for(const name of Object.keys(project.presets)){const o=document.createElement('option');o.value=name;o.textContent=name;$('presets').append(o);}renderScript();renderClips();lockBuiltInCaptioning();draw();
 }
 function choose(id){selected=id;render();const c=current();selectedWords=[];renderScript();if(c?.inFrame!==null&&c&&v.src)seek(c.inFrame);}
-function clock(){const t=frame/FPS;$('clipBedFrame').textContent=(project.canvas||maxFrame>=bedFrames&&bedFrames?'Timeline F':'Bed F')+frame+' · '+Math.floor(t/60)+':'+(t%60).toFixed(3).padStart(6,'0');writeFrameClock($('clock'),{frame,time:t,fps:FPS});$('seek').value=frame;}
+function clock(){const t=frame/FPS;$('clipInsertionFrame').textContent='F'+frame;$('clipBedFrame').textContent=(project.canvas||maxFrame>=bedFrames&&bedFrames?'Timeline F':'Bed F')+frame+' · '+Math.floor(t/60)+':'+(t%60).toFixed(3).padStart(6,'0');writeFrameClock($('clock'),{frame,time:t,fps:FPS});$('seek').value=frame;}
 function draw(){
  paintFocus();clock();layers.update();paintMatrix($('itemMatrix'),placedClips(),frame,maxFrame,selectedClip);$('captions').replaceChildren();if(BUILTIN_CAPTIONING_LOCKED||!project.nativeCaptions)return;const c=current();const active=project.captions.filter(x=>x.visible&&timed(x)&&frame>=x.inFrame&&frame<x.outFrame);if(c&&c.visible&&!timed(c))active.push(c);
  for(const c of active){const s=effective(project,c),el=document.createElement('div');el.className='caption';el.textContent=c.text;const alpha=s.backgroundOpacity,hex=s.background;let progress=timed(c)?Math.min(1,(frame-c.inFrame)/5,(c.outFrame-frame)/5):1;progress=Math.max(0,progress);el.style.cssText=`left:${s.x}%;top:${s.y}%;width:${s.width}%;font-family:${s.font};font-weight:${s.emphasis?900:s.weight};font-size:${s.size/5.4}cqw;color:${s.color};text-align:${s.align};line-height:${s.lineHeight};-webkit-text-stroke:${s.outline/5.4}cqw #000;paint-order:stroke fill;text-shadow:0 ${s.shadow/10.8}cqw ${s.shadow/5.4}cqw #000;background:${hex}${Math.round(alpha*255).toString(16).padStart(2,'0')};`;if(s.animation==='fade')el.style.opacity=progress;if(s.animation==='pop')el.style.transform=`translate(-50%,-50%) scale(${.85+.15*progress})`;$('captions').append(el);}
@@ -423,7 +424,20 @@ function fitSelectedVideo(){
 }
 $('clipFit').onclick=fitSelectedVideo;
 function selectClip(id){pause();if(!restoring){project.editFocus='overlay';if(project.captionSequence?.clipIds.includes(id))project.captionSequence.activeId=id;}if(id!==selectedClip)editMode='view';selectedClip=id;layers.selected=id;renderClips();paintFocus();layers.update();}
-function openClipProperties(id){selectClip(id);const c=clipCurrent();if(!c)return;if(v.src&&!TOOLBOX_MODE)seek(c.inFrame);$('clipPropertiesTitle').textContent=(project.canvas?'Layer '+placedClips().indexOf(c)+' · ':'Edit · ')+c.name;$('viewport').scrollIntoView({block:'start',behavior:'instant'});if(!$('clipProperties').open)$('clipProperties').showModal();renderSourceSound(c);}
+const openInsertionSettings = mountInsertionSettings($('clipProperties'));
+function openClipProperties(id) {
+ selectClip(id);
+ const clip = clipCurrent();
+ if (!clip) return;
+ if (v.src && !TOOLBOX_MODE) seek(clip.inFrame);
+ $('clipTimingError').textContent = '';
+ if (clip.type !== 'audio' && !clip.locked && editMode !== 'rotate') {
+  editMode = 'move';
+  renderClips();
+ }
+ openInsertionSettings();
+ renderSourceSound(clip);
+}
 function closeClipProperties(){if($('clipProperties').open)$('clipProperties').close();}
 function removeItem(id){pause();change(()=>{project.clips=project.clips.filter(c=>c.id!==id);if(project.captionSequence?.clipIds.includes(id)){const seq=project.captionSequence,index=seq.clipIds.indexOf(id);seq.clipIds=seq.clipIds.filter(x=>x!==id);seq.preparedIds=seq.preparedIds.filter(x=>x!==id);if(!seq.clipIds.length)delete project.captionSequence;else if(seq.activeId===id)seq.activeId=seq.clipIds[Math.min(index,seq.clipIds.length-1)];}if(selectedClip===id){selectedClip=project.clips[0]?.id||null;layers.selected=selectedClip;editMode='view';}});closeClipProperties();}
 function renderSourceSound(c){const m=layers.media.get(c?.id);if(!c||!m||c.volume<=0||c.type==='image')return;if(!m.audioInfo&&!m.audioError&&!m.audioReading){m.audioReading=true;inspectSourceAudio(m.blob).then(info=>m.audioInfo=info).catch(e=>m.audioError=e.message).finally(()=>{m.audioReading=false;if(layers.media.get(c.id)===m&&clipCurrent()?.id===c.id)renderClips();});}const info=m.audioInfo;if(m.audioReading)$('clipVolumeInfo').textContent='Checking source audio…';else if(m.audioError)$('clipVolumeInfo').textContent='Source audio check: '+m.audioError;else if(info?.hasAudio===false)$('clipVolumeInfo').textContent='This file has no audio track.';else if(info?.silent)$('clipVolumeInfo').textContent='This file’s audio track is silent.';else if(info?.peak<.001)$('clipVolumeInfo').textContent='Very quiet source audio · '+Math.round(c.volume*100)+'%';else if(info?.firstSound>=.2)$('clipVolumeInfo').textContent='Clip audio · '+Math.round(c.volume*100)+'% · source sound starts near '+info.firstSound.toFixed(2)+'s';}
@@ -451,7 +465,16 @@ function renderClips(){
  $('clipTimeline').replaceChildren();
  $('itemCount').textContent=placed.length;
  $('itemEmpty').hidden=!!placed.length;
- $('clipName').value=c?.name||'';
+ const name = $('clipName');
+ if (name.dataset.clipId !== c?.id || name.dataset.savedName !== c?.name) {
+  name.dataset.clipId = c?.id || '';
+  name.value = name.dataset.savedName = c?.name || '';
+ }
+ $('moveMode').hidden = c?.type === 'audio';
+ $('moveMode').disabled = !c || c.locked;
+ $('saveClipName').disabled = name.disabled = !c;
+ for (const id of ['clipMarkIn','clipMarkOut']) $(id).disabled = !c || c.locked;
+ $('clipPlacementSummary').textContent = c ? (c.outFrame - c.inFrame) + ' frames · ' + Number(rateOf(c).toFixed(3)) + '× · OUT is the first clear frame' : '';
  renderBackground(c);
  $('clipOpacityValue').textContent=Math.round((c?.opacity??1)*100)+'%';
  for(const [index,t] of placed.entries()){
@@ -497,14 +520,46 @@ function renderClips(){
  for(const [id,mode] of [['viewMode','view'],['moveMode','move'],['rotateMode','rotate']])$(id).setAttribute('aria-pressed',String(editMode===mode));$('layerRoot').className='edit-'+editMode;$('railMove').setAttribute('aria-pressed',String(editMode==='move'));$('railRotate').setAttribute('aria-pressed',String(editMode==='rotate'));
  $('unlockClip').hidden=!c?.locked;for(const id of ['applyClip','square','speedDown','speedUp','speedReset','speedFit','placeClip'])$(id).disabled=!!c?.locked;renderPlacement();$('clipStatus').textContent=c?`${c.name} · ${layers.media.has(c.id)?'Media connected':'Reselect this original file to reconnect'} · ${editMode==='rotate'?'Rotate unlocked. Square returns to exactly 0°.':'Rotation locked. Select Rotate to rotate.'}`:'Import transparent WebM animations or PNG graphics. Video clips start muted. Clip audio % controls their original sound.';
 }
-$('clipSelect').onchange=()=>selectClip($('clipSelect').value);for(const [id,mode] of [['viewMode','view'],['moveMode','move'],['rotateMode','rotate']])$(id).onclick=()=>{if(mode!=='view'&&!clipCurrent())return say('Select a clip first.');pause();editMode=mode;renderClips();if(mode==='move'||mode==='rotate'&&!project.canvas)closeClipProperties();};
+$('clipSelect').onchange=()=>selectClip($('clipSelect').value);for(const [id,mode] of [['viewMode','view'],['moveMode','move'],['rotateMode','rotate']])$(id).onclick=()=>{if(mode!=='view'&&!clipCurrent())return say('Select a clip first.');pause();editMode=mode;renderClips();if(mode==='rotate'&&!project.canvas)closeClipProperties();};
 for(const [id,key] of orientationButtons)$(id)?.addEventListener('click',()=>change(()=>{
  const c=clipCurrent();
  if(!c||c.locked||c.type==='audio')return;
  if(c[key])delete c[key];
  else{c[key]=true;project.version=Math.max(project.version,9);}
 }));
-$('applyClip').onclick=()=>change(()=>{const c=clipCurrent();if(!c)return;c.name=$('clipName').value.trim()||c.name;for(const [id,key] of Object.entries(clipFields))if((key!=='rotation'||editMode==='rotate')&&(!['trimInFrame','trimOutFrame'].includes(key)||!c.sourceTrim))c[key]=key==='trimOutFrame'&&$(id).value===''?null:gainFields.has(key)?percentGain($(id).value):Number($(id).value);c.loop=$('clipLoop').checked;});
+$('saveClipName').onclick = () => {
+ const clip = clipCurrent(), name = $('clipName').value.trim();
+ if (!clip) return;
+ if (!name) { $('clipTimingError').textContent = 'Enter an insertion name.'; $('clipName').focus(); return; }
+ if (change(() => { clip.name = name; })) $('clipTimingError').textContent = '';
+};
+$('applyClip').onclick=()=>change(()=>{
+ const c=clipCurrent();
+ if(!c)return;
+ c.name=$('clipName').value.trim()||c.name;
+ for(const [id,key] of Object.entries(clipFields)){
+  if(key==='inFrame'||key==='outFrame'||key==='rotation'&&editMode!=='rotate')continue;
+  if(['trimInFrame','trimOutFrame'].includes(key)&&(c.sourceTrim||TOOLBOX_MODE))continue;
+  c[key]=key==='trimOutFrame'&&$(id).value===''?null:gainFields.has(key)?percentGain($(id).value):Number($(id).value);
+ }
+ c.loop=$('clipLoop').checked;
+});
+function editInsertionTiming(edge, value) {
+ const clip = clipCurrent();
+ if (!clip || clip.locked) return;
+ pause();
+ const sourceDuration = project.toolbox?.find(a => a.id === clip.toolboxId)?.duration
+  || clip.sourceDuration || layers.media.get(clip.id)?.el.duration;
+ const changed = change(() => edge === 'in'
+  ? shiftPlacementIn(clip, value)
+  : fitPlacementOut(clip, value, sourceDuration));
+ $('clipTimingError').textContent = changed ? '' : $('status').textContent;
+ if (!changed) renderClips();
+}
+for (const [edge, field, mark] of [['in','clipStart','clipMarkIn'],['out','clipEnd','clipMarkOut']]) {
+ $(field).onchange = event => editInsertionTiming(edge, event.target.valueAsNumber);
+ $(mark).onclick = () => editInsertionTiming(edge, frame);
+}
 function renderBackground(clip) {
  const key=clip?.chroma||{...DEFAULT_CHROMA,enabled:false};
  const mode=backgroundMode(key);
@@ -628,7 +683,6 @@ $('clipSpeed').onchange=()=>change(()=>{if(clipCurrent())clipCurrent().playbackR
  $('speedReset').onclick=()=>change(()=>{if(clipCurrent())clipCurrent().playbackRate=1;});
  $('speedFit').onclick=()=>change(()=>{const c=clipCurrent();if(c)c.playbackRate=fitRate(c,layers.media.get(c.id)?.el.duration);});
  $('square').onclick=()=>change(()=>{if(clipCurrent())clipCurrent().rotation=0;});
-for(const [id,key] of [['clipMarkIn','inFrame'],['clipMarkOut','outFrame']])$(id).onclick=()=>{if(!clipCurrent())return say('Select an animation clip first.');change(()=>{clipCurrent()[key]=frame;});};
 $('clipVisible').onclick=()=>change(()=>{if(clipCurrent())clipCurrent().visible=!clipCurrent().visible;});
 $('removeClip').onclick=()=>removeItem(selectedClip);
 for(const [id,delta] of [['clipBack',-1],['clipFront',1]])$(id).onclick=()=>change(()=>{const i=project.clips.indexOf(clipCurrent()),j=i+delta;if(i>=0&&j>=0&&j<project.clips.length)[project.clips[i],project.clips[j]]=[project.clips[j],project.clips[i]];});

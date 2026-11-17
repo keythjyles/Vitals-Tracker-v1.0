@@ -27,3 +27,7 @@ The animation properties use **Keep**, **Replace** and **Transparent** like CapL
 ## R37 frame readout and appearance controls
 
 On a paused seek, keep the last picture and its frame number until the requested bed and active animation are decoded. Update the preview, frame clock and insertion cue together. Consecutive step commands use the latest requested frame. Start is above Play and appearance buttons wrap to fit the phone. R36 rollback revision `8f93dac918b30885dde8c261207ae8aedc3719ad`.
+
+## R38 insertion settings
+
+Tap an insertion to edit its name, view the paused bed frame and mark or type IN/OUT. The settings stay open while the yellow dashed outline moves and resizes the animation. OUT fits the selected source span and is exclusive. Source trim opens the existing source controls. In Toolbox, Add video shows a thumbnail and editable name, and Place here uses the indicated bed frame. Saved device names travel with each Toolbox ID and cloud labels can be saved in the local edit. Rollback is `bb01ce180129414f5d4df026299fc57f8bbac9d7`.

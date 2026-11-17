@@ -22,9 +22,8 @@ h1{font-size:20px;margin:4px 0}#viewerPage{padding:0;border:0;background:none}#s
 #clipTimeline .item-action{min-height:38px;padding:3px;font-size:15px}
 .item-heading{display:flex;justify-content:space-between;align-items:center;gap:7px}.item-heading h2{margin:0}.item-heading button{min-height:32px;padding:4px 8px;font-size:12px}
 #itemMatrix{display:block;width:100%;height:90px;background:#0c1621;border-radius:5px;touch-action:none;margin:3px 0}
-#clipProperties{position:fixed;inset:auto 0 0;margin:0 auto;width:min(100%,760px);max-width:100%;max-height:58dvh;overflow:auto;border:1px solid #718da6;border-radius:12px 12px 0 0;padding:10px;background:#182635;color:#edf3fa}
-#clipProperties::backdrop{background:#0003}#clipProperties .actions{justify-content:flex-end}#clipProperties .actions button{min-height:34px}#clipProperties label{font-size:12px}
-#clipSelect{display:none}#clipProperties label:has(#clipSelect){display:none}#clipProperties #clipName{font-size:16px}
+#clipProperties .actions{justify-content:flex-end}#clipProperties .actions button{min-height:34px}#clipProperties label{font-size:12px}
+#clipSelect{display:none}#clipProperties label:has(#clipSelect){display:none}
 .clip-background-modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:5px 0}
 .clip-background-modes button{min-width:0;min-height:34px;padding:4px}
 .clip-background-modes button[aria-pressed="true"]{background:#eacb86;color:#172231;border-color:#f6d99b;font-weight:700}
@@ -47,14 +46,14 @@ h1{font-size:20px;margin:4px 0}#viewerPage{padding:0;border:0;background:none}#s
 #focusBar{display:flex;align-items:center;justify-content:flex-end;gap:3px;min-height:32px;padding:2px 0}#focusBar button{min-height:28px;height:28px;padding:2px 6px;font-size:11px}#focusSize{font-size:11px;min-width:74px;text-align:center;color:#ffe0a0}#focusBed{margin-right:0}#focusOverlay{margin-right:auto}#playerDock>.readout{min-height:20px;font-size:12px}
 /* R26: the portrait composition clips enlarged layers, matching the export. */
 #scene{overflow:hidden;overflow:clip;background:#000;transform:none!important}#bedSurface{position:absolute;width:100%;height:100%;left:0;top:0;transform-origin:center;z-index:0;touch-action:none}#bedSurface.focused-bed{outline:1px dashed #80b8db;outline-offset:1px}#layerRoot{overflow:visible}#viewport{overflow:hidden}#bedLoader button{pointer-events:auto;min-height:44px;background:#efcd87;color:#142333;font-weight:600}#bedLoader.has-media{display:none}#bedLoader p{position:static;margin:5px;font-size:12px}
-.layer-resize{position:absolute;right:-7px;bottom:-7px;width:20px;height:20px;min-height:20px;padding:0;border:2px solid #ffda8a;background:#24384c;border-radius:3px;touch-action:none;font-size:14px;line-height:14px;z-index:2}.media-layer:not(.selected-layer) .layer-resize{display:none}.media-layer.locked-layer .layer-resize{display:none}#scene #video,#scene #decoded{width:100%;height:100%}
+.layer-resize{z-index:2}.media-layer:not(.selected-layer) .layer-resize{display:none}.media-layer.locked-layer .layer-resize{display:none}#scene #video,#scene #decoded{width:100%;height:100%}
 @media(max-height:480px){.workspace{--player-height:250px}#focusBar{min-height:28px}#focusBar button{height:25px;min-height:25px}#placementBar{margin:0}}
 
 /* Let the dock's containing block include save/export and the rest of the page. */
 #viewerPage{display:contents}
 
 /* R9: editable placements, stable controls and an explicit deselection action. */
-#pickerDrawer{transition:none}.item-row{grid-template-columns:minmax(0,1fr) 32px 32px 32px}#focusBar #clearFocus{min-width:34px}#focusBar{gap:2px}#clipProperties .item-heading{position:sticky;top:-10px;z-index:4;background:#182635;padding:4px 0}#clipProperties .item-heading h2{flex:1;min-width:0}
+#pickerDrawer{transition:none}.item-row{grid-template-columns:minmax(0,1fr) 32px 32px 32px}#focusBar #clearFocus{min-width:34px}#focusBar{gap:2px}
 
 
 #bedLoader .video-entry{display:flex;gap:5px;justify-content:center;pointer-events:auto;margin-bottom:6px}#bedLoader #emptyLoadProject{margin-top:2px}#captionImport .actions a{color:#ffd577;align-self:center}#geminiHandoffText{width:100%}
@@ -66,10 +65,10 @@ h1{font-size:20px;margin:4px 0}#viewerPage{padding:0;border:0;background:none}#s
 /* R22: reusable per-bed files, independent placements; keep the compact dock. */
 #toolboxDialog{width:min(580px,calc(100vw - 24px));max-height:80dvh;overflow:auto;box-sizing:border-box}
 #toolboxDialog .item-heading{position:sticky;top:-10px;background:#182635;z-index:2;gap:5px}#toolboxTitle{flex:1;font-size:18px}#toolboxDialog button{min-height:32px;padding:5px 8px;font-size:12px}
-#toolboxStatus,#clipFrameInfo{font-size:12px;line-height:1.4}#toolboxList{display:grid;gap:7px}.toolbox-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px;border:1px solid #4c657a;border-radius:7px;padding:5px;background:#1c3243}.toolbox-row.used{border-color:#66b39e;background:#173a37}.toolbox-row .toolbox-insert{grid-column:1/-1;text-align:left;white-space:normal;overflow-wrap:anywhere}.toolbox-insert strong,.toolbox-insert small{display:block}.toolbox-insert small{font-size:11px;margin-top:4px;font-weight:400;color:#b6cbd8}.toolbox-use-count{font-size:11px;align-self:center;padding:3px;color:#ffe09d}#toolboxPreviewCanvas{display:block;width:100%;max-height:220px;object-fit:contain;background:repeating-conic-gradient(#344756 0% 25%,#152634 0% 50%) 0 /16px 16px}#toolboxPreviewName{font-size:12px}
+#toolboxStatus,#clipFrameInfo{font-size:12px;line-height:1.4}#toolboxList{display:grid;gap:7px}.toolbox-row{gap:4px;border:1px solid #4c657a;border-radius:7px;padding:5px;background:#1c3243}.toolbox-row.used{border-color:#66b39e;background:#173a37}.toolbox-row .toolbox-use-count{font-size:11px;align-self:center;padding:3px;color:#ffe09d}#toolboxPreviewCanvas{display:block;width:100%;max-height:220px;object-fit:contain;background:repeating-conic-gradient(#344756 0% 25%,#152634 0% 50%) 0 /16px 16px}#toolboxPreviewName{font-size:12px}
 
 /* R23: current-bed-frame marks beside each element boundary. */
-.item-timing>div{display:flex;gap:3px;align-items:center;margin-top:4px}.item-timing button{flex:none;min-height:34px;padding:3px 5px;font-size:11px}.item-timing input{min-width:0;min-height:34px}#clipBedFrame{color:#ffda8a;font-variant-numeric:tabular-nums}
+#clipBedFrame{color:#ffda8a;font-variant-numeric:tabular-nums}
 
 /* R24: exact percent levels for each source clip, without a touch slider. */
 #clipVolumeRow{grid-column:1/-1}.clip-volume-controls{display:flex;gap:5px;margin-top:4px}.clip-volume-controls button{min-height:34px;font-size:12px;padding:3px 8px}.clip-volume-controls input{flex:1;min-width:0;min-height:34px;text-align:center}
@@ -122,14 +121,13 @@ h1{font-size:20px;margin:4px 0}#viewerPage{padding:0;border:0;background:none}#s
 #projectPicker .picker-card p { overflow-wrap: anywhere; }
 
 /* Keep the name and actions readable at phone width. */
-#clipProperties .item-heading{gap:6px;flex-wrap:wrap}
-#clipPropertiesTitle{flex:1 0 100%;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .color-opacity{min-width:0}
 .color-opacity input[type=range]{display:block;width:100%;padding:0;accent-color:#f0cf84;touch-action:pan-y}
 .opacity-ends{display:flex;justify-content:space-between;gap:5px}
 #captionBackground #chromaColor{width:48px;height:35px;padding:2px;vertical-align:middle}
-#clipProperties .item-heading .appearance-actions{display:flex;gap:5px}
 .cap-dockable>summary{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .cap-dockable>summary button{padding:3px 8px;min-height:28px;font-size:12px}
 #capPinnedSections{max-height:min(26dvh,210px);overflow:auto;overscroll-behavior:contain}
 #capPinnedSections>details{margin:2px 0}
+#layerRoot.edit-move .selected-layer{outline:2px dashed #ffdb68;outline-offset:-2px}
+.toolbox-file-info{color:#bbd0e2;font-size:11px}

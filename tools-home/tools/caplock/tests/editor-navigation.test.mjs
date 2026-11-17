@@ -5,15 +5,20 @@ import vm from 'node:vm';
 import {matrixFrame} from '../../../shared/item-matrix.mjs';
 const cap=fs.readFileSync(new URL('../caplock.mjs',import.meta.url),'utf8');
 const aspect=fs.readFileSync(new URL('../../aspectlock/editor.mjs',import.meta.url),'utf8');
-function declaration(source,name){return source.split('\n').find(line=>line.startsWith('function '+name+'('));}
+function declaration(source,name){
+ const lines=source.split('\n'),start=lines.findIndex(line=>line.startsWith('function '+name+'('));
+ if(lines[start].endsWith('}'))return lines[start];
+ const end=lines.findIndex((line,i)=>i>start&&line==='}');
+ return lines.slice(start,end+1).join('\n');
+}
 test('matrix seeks use the full rectangle, clamp boundaries, and retain integer frames',()=>{
  const rect={left:100,width:400};assert.equal(matrixFrame(100,rect,240),0);assert.equal(matrixFrame(300,rect,240),120);assert.equal(matrixFrame(500,rect,240),240);assert.equal(matrixFrame(0,rect,240),0);assert.equal(matrixFrame(900,rect,240),240);
 });
 test('CapLock item settings retain the manual playhead and legacy insertion-frame navigation',()=>{
- const calls=[],els={clipPropertiesTitle:{},viewport:{scrollIntoView:()=>calls.push('scroll')},clipProperties:{open:false,showModal(){this.open=true;calls.push('open');}}};
- const state={TOOLBOX_MODE:false,restoring:false,project:{editFocus:'bed'},paintFocus:()=>{},renderSourceSound:()=>{},selectedClip:'old',editMode:'move',layers:{update:()=>calls.push('update')},pause:()=>calls.push('pause'),renderClips:()=>calls.push('render'),clipCurrent:()=>({name:'9.webm',inFrame:120}),seek:n=>calls.push(['seek',n]),v:{src:'bed.mp4'},$:id=>els[id]};
+ const calls=[],els={clipTimingError:{}};
+ const state={TOOLBOX_MODE:false,restoring:false,project:{editFocus:'bed'},paintFocus:()=>{},renderSourceSound:()=>{},selectedClip:'old',editMode:'move',layers:{update:()=>calls.push('update')},pause:()=>calls.push('pause'),renderClips:()=>calls.push('render'),clipCurrent:()=>({name:'9.webm',type:'video',inFrame:120}),openInsertionSettings:()=>calls.push('open'),seek:n=>calls.push(['seek',n]),v:{src:'bed.mp4'},$:id=>els[id]};
  vm.createContext(state);vm.runInContext(declaration(cap,'selectClip')+'\n'+declaration(cap,'openClipProperties'),state);state.openClipProperties('new');
- assert.equal(state.selectedClip,'new');assert.equal(state.editMode,'view');assert.equal(calls[0],'pause');assert.ok(calls.find(x=>Array.isArray(x)&&x[0]==='seek'&&x[1]===120));assert.equal(els.clipProperties.open,true);assert.equal(els.clipPropertiesTitle.textContent,'Edit · 9.webm');state.TOOLBOX_MODE=true;calls.length=0;state.openClipProperties('new');assert.equal(calls.some(x=>Array.isArray(x)&&x[0]==='seek'),false);
+ assert.equal(state.selectedClip,'new');assert.equal(state.editMode,'move');assert.equal(calls[0],'pause');assert.deepEqual(calls.find(Array.isArray),['seek',120]);assert.ok(calls.includes('open'));state.TOOLBOX_MODE=true;calls.length=0;state.openClipProperties('new');assert.equal(calls.some(Array.isArray),false);
 });
 test('AspectLock returning to a bed frame pauses both media and never initiates playback',()=>{
  let bedPauses=0,overlayPauses=0;
