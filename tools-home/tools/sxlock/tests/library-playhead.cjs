@@ -157,7 +157,7 @@ async function main(){
    assert.equal(await page.locator('.sx-reference .sx-docked-button').count(),0);
    const dockLayout=await page.evaluate(()=>{
     const box=selector=>document.querySelector(selector).getBoundingClientRect();
-    return {gap:box('#notes').top-box('#sxResize').bottom,actionsBottom:box('#scribeBox .scribe-actions').bottom,undockTop:box('#scribeBox [data-dock]').top};
+    return {gap:box('#notes').top-box('#sxResize').bottom,actionsBottom:box('#scribeBox .gs-scribe-secondary').bottom,undockTop:box('#scribeBox [data-dock]').top};
    });
    assert(dockLayout.gap>=0&&dockLayout.gap<=2,'The note box starts directly after the player');
    assert(dockLayout.undockTop>dockLayout.actionsBottom,'Undock is below the Scribe buttons');
