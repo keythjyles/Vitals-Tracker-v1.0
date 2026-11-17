@@ -4,28 +4,28 @@ const measuredDurations = new WeakMap();
 
 export function mediaDuration(video) {
   if (video.readyState < 1) return 0;
-  if (Number.isFinite(video.duration) && video.duration > 0) return video.duration;
   const measured = measuredDurations.get(video);
-  return measured?.url === video.currentSrc ? measured.duration : 0;
+  if (measured && measured.url === video.currentSrc) return measured.duration;
+  return Number.isFinite(video.duration) && video.duration > 0 ? video.duration : 0;
 }
 
-export async function measureDuration(video, signal, file) {
-  if (mediaDuration(video) || signal.aborted) return false;
+export async function measureDuration(video, signal, {name, file}) {
+  // A durationless WebM may report its final timestamp without the last packet's duration.
+  if (signal.aborted || (!/\.webm$/i.test(name) && file?.type !== 'video/webm' && mediaDuration(video))) return;
   const url = video.currentSrc;
   const {ALL_FORMATS, BlobSource, Input, UrlSource} = await import('../sxlock/vendor/mediabunny-1.62.1-gs1.mjs');
-  if (signal.aborted || video.currentSrc !== url || mediaDuration(video)) return false;
-  // Some WebM files have no duration header. Read their picture packet timestamps.
+  if (signal.aborted || video.currentSrc !== url) return;
   const source = file ? new BlobSource(file) : new UrlSource(url, {getRetryDelay: () => null});
   const input = new Input({source, formats:ALL_FORMATS});
   const stop = () => input.dispose();
   signal.addEventListener('abort', stop, {once:true});
   try {
     const track = await input.getPrimaryVideoTrack();
-    const duration = await track?.computeDuration();
-    if (signal.aborted || video.currentSrc !== url || mediaDuration(video)) return false;
+    const declared = await track?.getDurationFromMetadata();
+    const duration = declared > 0 ? declared : await track?.computeDuration();
+    if (signal.aborted || video.currentSrc !== url) return;
     if (!Number.isFinite(duration) || duration <= 0) throw Error('The file has no readable picture duration.');
     measuredDurations.set(video, {url, duration});
-    return true;
   } finally {
     signal.removeEventListener('abort', stop);
     if (!signal.aborted) input.dispose();

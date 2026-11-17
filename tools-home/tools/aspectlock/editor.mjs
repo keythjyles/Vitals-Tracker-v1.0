@@ -206,10 +206,10 @@ function refreshLoadedVideo(video) {
  }
  update();
 }
-async function refreshDuration(video, signal, file) {
+async function inspectDuration(video, signal, media) {
  const url = video.currentSrc;
  try {
-  if (await measureDuration(video, signal, file)) update();
+  await measureDuration(video, signal, media);
  } catch (error) {
   if (signal.aborted || video.currentSrc !== url || mediaDuration(video)) return;
   report('Could not determine ' + (video === bv ? 'bed' : 'clip') + ' duration. ' + error.message);
@@ -224,9 +224,10 @@ async function loadFile(name, video) {
  const playback = await api('/api/playback?path=' + encodeURIComponent(file.path_display));
  if (signal.aborted) return null;
  if (!await loadVideoSource(video, playback.url, file.name, signal)) return null;
+ await inspectDuration(video, signal, {name:file.name});
+ if (signal.aborted) return null;
  refreshLoadedVideo(video);
- await refreshDuration(video, signal);
- return signal.aborted ? null : file;
+ return file;
 }
 function markVideoSelection(id, name, cloudValue, label = name) {
  const select = Q(id);
@@ -298,16 +299,16 @@ async function loadLocalVideo(id, source, at = bedFrame()) {
  try {
   loaded = await loadVideoSource(video, url, file.name, signal);
   if (!loaded) return false;
+  await inspectDuration(video, signal, {name:file.name, file});
+  if (signal.aborted) return false;
   delete localFiles[id];
   localMedia[id] = file;
   refreshLoadedVideo(video);
   markVideoSelection(id, file.name, undefined, label);
   if (id === 'overlay') placeLoadedOverlay(at);
-  const durationReady = refreshDuration(video, signal, file);
   void inspectAudio(id);
   sound();
   const asset = savedId ? (await toolbox.get(savedId) ?? source) : await toolbox.add(file);
-  await durationReady;
   if (!signal.aborted && video.getAttribute('src') === url) {
    localFiles[id] = asset.id;
    if (clipName(asset) !== label) markVideoSelection(id, file.name, undefined, clipName(asset));

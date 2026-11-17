@@ -12,6 +12,8 @@ The shared **Audio** section shows the selected insertion's sound state while co
 
 Keep **Clear**, **Copy**, and **Mark frame** on one row directly below each Scribe editor. Put History and the tool's other existing actions in a smaller row. FrameLock uses its original notes and history handlers.
 
+AspectLock opens Scribe from its named section below the player. Its readout shows the filename and frame clock. The section arrow indicates whether the notes are expanded.
+
 FrameLock v1.4.0 pairs the transport controls and keeps its read-only timeline and trim totals inside the matched player height. In is the first retained frame. Out is the first frame after the cut, and Go accepts the end boundary. Trim reuses Clipper's verified local exporter. Save As names the download, and Load cut uses those same export bytes. The source and notes stay in place when Keep editing is selected.
 
 Validation must include real phone widths, portrait footage, identical row/pair dimensions, picture/rail alignment, cold-source access, hidden picker after loading, pull/tap source access, source/cut persistence and existing native regressions. Do not call a merely similar viewer a match.
