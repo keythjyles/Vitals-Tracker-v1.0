@@ -16,6 +16,8 @@ main{padding-top:4px}
 .aspect-section{margin:5px 0;padding:6px 8px;background:#152637;border:1px solid #42627c;border-radius:7px;scroll-margin-top:var(--aspect-player-height,200px)}
 .aspect-section>summary{display:flex;justify-content:space-between;align-items:center;gap:7px;font-weight:700;cursor:pointer}
 .aspect-section button,#itemProperties button{padding:4px 7px;min-height:30px}
+#itemProperties .compactBar{flex-wrap:wrap}
+#itemProperties .compactBar>button{flex:1 0 auto;max-width:100%;min-height:36px}
 .aspect-section summary button{min-height:27px;padding:2px 8px;font-size:12px}
 .aspect-section fieldset{margin:0;padding:0;border:0;min-width:0}
 .aspect-section .compactBar{display:flex;flex-wrap:wrap;gap:5px;margin:5px 0}
