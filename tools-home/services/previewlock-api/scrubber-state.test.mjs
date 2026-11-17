@@ -7,12 +7,13 @@ const code=html.slice(html.indexOf('const terms='),html.indexOf("$('preview').ad
 function setup(initial={}){
  let failDelete=false,failWrite=false;
  const storage=new Map([['sx-scrubber-review-v2',JSON.stringify(initial)],['gs_previewlock_key','test']]),blobs=new Map(),nodes=new Map(),events=[];
- const node=()=>({children:[],dataset:{},setAttribute(){},append(...v){this.children.push(...v)},prepend(...v){this.children.unshift(...v)},replaceChildren(){this.children=[]},querySelectorAll(){return []},contains(){return false},getBoundingClientRect(){return {top:0,bottom:44}},pause(){},removeAttribute(){},addEventListener(){},removeEventListener(){}});
- const context=vm.createContext({console,Blob,URL,URLSearchParams,setTimeout,clearTimeout,crypto:webcrypto,Promise,Map,Set,Date,Uint8Array,Number,Array,Error,JSON,encodeURIComponent,structuredClone,
+ const node=()=>({children:[],dataset:{},value:'',setAttribute(){},append(...v){this.children.push(...v)},prepend(...v){this.children.unshift(...v)},replaceChildren(){this.children=[]},querySelectorAll(){return []},contains(){return false},getBoundingClientRect(){return {top:0,bottom:44}},pause(){},load(){},removeAttribute(){},addEventListener(){},removeEventListener(){}});
+ const context=vm.createContext({console,Blob,URL,URLSearchParams,AbortController,setTimeout,clearTimeout,crypto:webcrypto,Promise,Map,Set,Date,Uint8Array,Number,Array,Error,JSON,encodeURIComponent,structuredClone,
+  location:{href:'https://example.test/tools/sound-scrubber/?v=R14.13&batch=SX-INTAKE-20261114-1000&q=old'},history:{replaceState(_state,_title,url){context.location.href=String(url)}},
   document:{getElementById(id){if(!nodes.has(id))nodes.set(id,node());return nodes.get(id)},createElement:node,querySelectorAll(){return []},querySelector:node},
   window:{scrollY:0,scrollBy(){},scrollTo(){},GSApprovedEffects:{publish(){events.push(JSON.parse(storage.get('sx-scrubber-review-v2')))},async audioFetch(path,options){const response=await context.fetch(path,options);if(!response.ok)throw Error((await response.json()).error);return response}}},
   localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},
-  indexedDB:{open(){const q={};queueMicrotask(()=>{q.result={transaction(){const tx={objectStore(){return {get(id){const r={};queueMicrotask(()=>{r.result=blobs.get(id);r.onsuccess?.();tx.oncomplete?.()});return r},put(b,id){const r={};queueMicrotask(()=>{if(failWrite){tx.error=Error('disk unavailable');tx.onabort?.();return}blobs.set(id,b);r.onsuccess?.();tx.oncomplete?.()});return r},delete(id){queueMicrotask(()=>{if(failDelete){tx.error=Error('disk unavailable');tx.onabort?.()}else{blobs.delete(id);tx.oncomplete?.()}})}}}};return tx}};q.onsuccess()});return q}},
+  indexedDB:{open(){const q={};queueMicrotask(()=>{q.result={transaction(){const tx={objectStore(){return {get(id){const r={};queueMicrotask(()=>{r.result=blobs.get(id);r.onsuccess?.();tx.oncomplete?.()});return r},put(b,id){const r={};queueMicrotask(()=>{if(failWrite){tx.error=Error('disk unavailable');tx.onabort?.();return}blobs.set(id,b);r.onsuccess?.();tx.oncomplete?.()});return r},delete(id){queueMicrotask(()=>{if(failDelete){tx.error=Error('disk unavailable');tx.onabort?.()}else{blobs.delete(id);tx.oncomplete?.()}})},openCursor(){const request={},keys=[...blobs.keys()],removed=[];let index=0;const next=()=>queueMicrotask(()=>{if(failDelete){tx.error=Error('disk unavailable');tx.onabort?.();return}const key=keys[index++];request.result=key===undefined?null:{key,delete(){removed.push(key)},continue:next};request.onsuccess?.();if(key===undefined){for(const id of removed)blobs.delete(id);tx.oncomplete?.()}});next();return request}}}};return tx}};q.onsuccess()});return q}},
   fetch:async()=>{throw Error('unexpected network')},prompt:()=>null,
  });
  vm.runInContext(code,context);
@@ -245,5 +246,78 @@ test('every rendered decision offers Approve; even a stale pending record with a
 });
 
 test('fresh search also suppresses records that cannot offer Approve',async()=>{
- const s=setup({'commons:12':{...sound,cloudReceipts:{dropbox:{verified:true}}}});s.run("let offset=0,busy=false,last='',seen=new Set()");s.run(html.slice(html.indexOf('const esc='),html.indexOf("$('go').onclick")));s.run("$('q').value='cricket'");s.context.fetch=async()=>({ok:true,json:async()=>({query:{pages:{one:{pageid:12,title:'File:saved.wav',imageinfo:[{url:'https://example.invalid/a.wav',mime:'audio/wav'}]},two:{pageid:13,title:'File:pending.wav',imageinfo:[{url:'https://example.invalid/b.wav',mime:'audio/wav'}]}}}})});await s.run('search(true)');assert.deepEqual(s.nodes.get('results').children.map(r=>r.dataset.soundRow),['commons:13']);
+ const s=setup({'commons:12':{...sound,cloudReceipts:{dropbox:{verified:true}}}});s.run(html.slice(html.indexOf('const esc='),html.indexOf("$('go').onclick")));s.run("$('q').value='cricket'");s.context.fetch=async()=>({ok:true,json:async()=>({query:{pages:{one:{pageid:12,title:'File:saved.wav',imageinfo:[{url:'https://example.invalid/a.wav',mime:'audio/wav'}]},two:{pageid:13,title:'File:pending.wav',imageinfo:[{url:'https://example.invalid/b.wav',mime:'audio/wav'}]}}}})});await s.run('search(true)');assert.deepEqual(s.nodes.get('results').children.map(r=>r.dataset.soundRow),['commons:13']);
 });
+
+test('Clear all erases the entire thousand-candidate slate and cached audio, with no retained history',async()=>{
+ const initial=Object.fromEntries(Array.from({length:1000},(_,i)=>['discard:'+i,{...sound,name:'discard-'+i+'.wav',category:i%2?'Medical':'Human reactions'}]));
+ initial.keep={...sound,name:'kept.wav',status:'approved',reviewState:'saved'};
+ const s=setup(initial),original=wav();
+ for(const id of ['discard:0','discard:999','discard:0:capture-original','orphan','keep','keep:capture-original'])s.blobs.set(id,original);
+ s.storage.set('sx-scrubber-rejected-v1',JSON.stringify({'discard:1001':'old-batch'}));
+ s.run("rejected={'discard:1001':'old-batch'};searchRows.set('discard:search',{name:'search.wav',status:'pending'});localFiles.set('discard:0',new Blob(['discard']));$('queueFilter').value='Medical';$('queueQuery').value='one match';$('q').value='old';selected='discard:0';playingId='discard:0'");
+ await s.run('clearSlate()');
+ assert.deepEqual(Object.keys(s.state()),['keep']);
+ assert.deepEqual([...s.blobs.keys()],['keep','keep:capture-original']);
+ assert.equal(s.blobs.get('keep'),original);
+ assert.equal(s.storage.has('sx-scrubber-rejected-v1'),false);
+ assert.deepEqual([...s.storage.keys()],['sx-scrubber-review-v2','gs_previewlock_key']);
+ assert(![...s.storage.values()].join('').includes('discard'));
+ assert.equal(s.run('searchRows.size+localFiles.size+seen.size'),0);
+ assert.equal(s.run('selected'),null);assert.equal(s.run('playingId'),null);
+ assert.equal(s.nodes.get('review').hidden,true);assert.equal(s.nodes.get('queueCount').textContent,0);
+ for(const id of ['q','queueFilter','queueQuery','presets','local'])assert.equal(s.nodes.get(id).value,'');
+ assert.equal(s.context.location.href,'https://example.test/tools/sound-scrubber/?v=R14.13');
+ const reload=setup(s.state());reload.run('renderQueue()');assert.equal(reload.nodes.get('queueCount').textContent,0);
+ s.run("enqueue('discard:0',{name:'found-again.wav'})");assert.equal(s.state()['discard:0'].status,'pending');
+});
+
+test('an old online search cannot repopulate the cleared slate or overwrite a new search',async()=>{
+ const s=setup();s.run(html.slice(html.indexOf('const esc='),html.indexOf("$('go').onclick")));
+ let finishOld;const oldResult=new Promise(resolve=>{finishOld=resolve});
+ const page=id=>({query:{pages:{[id]:{pageid:id,title:'File:sound.wav',imageinfo:[{url:'https://example.invalid/s.wav',mime:'audio/wav'}]}}}});
+ s.context.fetch=async()=>({ok:true,json:()=>oldResult});s.run("$('q').value='old'");
+ const old=s.run('search(true)');await s.run('clearSlate()');
+ s.context.fetch=async()=>({ok:true,json:async()=>page(2)});s.run("$('q').value='new'");await s.run('search(true)');
+ finishOld(page(1));await old;
+ assert.deepEqual(Array.from(s.run('Array.from(searchRows.keys())')),['commons:2']);
+ assert.equal(s.run('busy'),false);assert.equal(s.nodes.get('go').disabled,false);
+});
+
+test('clearing during batch loading prevents the old thousand-candidate response from returning',async()=>{
+ const s=setup();s.run(html.slice(html.indexOf("const intakeId="),html.indexOf('const params=')));
+ let finish;const response=new Promise(resolve=>{finish=resolve});
+ s.context.fetch=()=>response;
+ const loading=s.run('loadIntakeBatch()');await s.run('clearSlate()');
+ finish({ok:true,json:async()=>({schema:'SoundScrubberIntake-1',batchId:'SX-INTAKE-20261114-1000',count:1,sounds:[{id:'discard:old',...sound}]})});
+ await loading;assert.deepEqual(s.state(),{});assert.equal(s.run('pendingBatchId'),'');
+ assert.equal(s.nodes.get('loadReviewBatch').disabled,false);
+ assert.equal(s.nodes.get('status').textContent,'Slate cleared. Search for a new sound.');
+});
+
+test('cache cleanup failure is visible and a second clear removes orphaned audio without a deletion ledger',async()=>{
+ const s=setup({discard:sound});s.blobs.set('discard',wav());s.failDeletion(true);
+ await s.run('clearSlate()');assert.deepEqual(s.state(),{});assert(s.blobs.has('discard'));
+ assert.match(s.nodes.get('status').textContent,/audio cleanup failed/);
+ assert(![...s.storage.values()].join('').includes('discard'));
+ s.failDeletion(false);await s.run('clearSlate()');assert.equal(s.blobs.size,0);
+});
+
+test('approved decisions disappear from the screen while their reusable library audio remains',async()=>{
+ const s=setup({'commons:12':sound,'commons:13':{...sound,name:'next.wav'}});s.blobs.set('commons:12',wav());
+ await s.run("approveInline('commons:12',reviewDB['commons:12'])");
+ assert.equal(s.state()['commons:12'].status,'approved');assert(s.blobs.has('commons:12'));
+ assert.equal(s.nodes.get('queueCount').textContent,1);
+ assert.deepEqual(s.nodes.get('queue').children.map(row=>row.dataset.soundRow),['commons:13']);
+ assert.equal(s.nodes.get('status').textContent,'');
+ assert(!html.includes('approved on this device'));
+ assert(html.indexOf('id="driveSaveControls"')<html.indexOf('<summary>Review queue'));
+});
+
+test('deleting a batch candidate keeps no rejection record and permits immediate rediscovery',async()=>{
+ const s=setup({discard:{...sound,batchId:'SX-INTAKE-20261114-1000'}});s.blobs.set('discard',wav());
+ await s.run("deleteInline('discard')");
+ assert.deepEqual(s.state(),{});assert.equal(s.blobs.size,0);assert.equal(s.storage.has('sx-scrubber-rejected-v1'),false);
+ s.run("enqueue('discard',{name:'found-again.wav'})");assert.equal(s.state().discard.status,'pending');
+});
+

@@ -1,3 +1,11 @@
+## Sound Scrubber R14.13 — clear the decision slate
+
+**Clear all** deletes every undecided candidate and current search result, including filtered and unrendered rows. It removes their browser audio, captured originals, metadata and old rejection IDs. There is no archive, undo snapshot, deletion list or search ban. Clear stops playback, resets the search/filter controls and cancels old search/intake responses so they cannot refill the slate. An explicit new search or batch load may find those sounds again.
+
+Approved sounds leave review immediately and stay in the reusable audio libraries. The approved-count banner and lingering approved filename are removed. Audio backup controls live inside the collapsed Search scope & licensing section. Existing library approvals and unfinished save/delete transactions remain available to their existing background workflows; Clear all creates no cloud deletion job.
+
+36 frontend state checks passed, including a 1,000-candidate clear, cached/orphan audio cleanup, no retained candidate history, reload, rediscovery, old-response cancellation and approval disappearance. The actual browser preview loaded 1,000 candidates, filtered them out, cleared the whole slate and reloaded at zero. Physical Android and authenticated provider operations are not claimed. Baseline/rollback: `2db992d6d8ce06be60b4bc815c12d15b2d07ec4b`; source rollback must retain approved audio/library records. A software rollback cannot restore cleared candidates.
+
 ## WavLock R1.8 — waveform editor and saved clips
 
 The audio editor uses a short, full-width waveform with its controls below. Pinch to zoom, drag the zoomed view to pan, tap to seek, and use Fit to see the whole source. Open audio file sits in the empty bed. Pull down or tap the grip to show the hidden file picker. Shared Scribe opens below the player.
@@ -720,5 +728,6 @@ Behavior commit `34262bb6142c1282975d4d536d5bb99fc26ddf5a`:43 Node tests and ful
 Historical lock instructions below are superseded by this correction.
 
 ---
+
 
 

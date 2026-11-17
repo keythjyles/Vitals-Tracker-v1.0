@@ -1,3 +1,11 @@
+## Sound Scrubber R14.13 — clear the decision slate
+
+**Clear all** deletes every undecided candidate and current search result, including filtered and unrendered rows. It removes their browser audio, captured originals, metadata and old rejection IDs. There is no archive, undo snapshot, deletion list or search ban. Clear stops playback, resets the search/filter controls and cancels old search/intake responses so they cannot refill the slate. An explicit new search or batch load may find those sounds again.
+
+Approved sounds leave review immediately and stay in the reusable audio libraries. The approved-count banner and lingering approved filename are removed. Audio backup controls live inside the collapsed Search scope & licensing section. Existing library approvals and unfinished save/delete transactions remain available to their existing background workflows; Clear all creates no cloud deletion job.
+
+36 frontend state checks passed, including a 1,000-candidate clear, cached/orphan audio cleanup, no retained candidate history, reload, rediscovery, old-response cancellation and approval disappearance. The actual browser preview loaded 1,000 candidates, filtered them out, cleared the whole slate and reloaded at zero. Physical Android and authenticated provider operations are not claimed. Baseline/rollback: `2db992d6d8ce06be60b4bc815c12d15b2d07ec4b`; source rollback must retain approved audio/library records. A software rollback cannot restore cleared candidates.
+
 ## R14.12 — Drive saves and REC
 
 Tap any candidate name to rename it. **Play** toggles Play/Pause. **Approve** removes the candidate from review once its audio is kept on this device. When available, the red **REC** button records the playback, names the WAV and approves it in one action. The selected name is used for the recording. Both actions add the sound to SxLock and WavLock on the same browser.
@@ -105,3 +113,4 @@ Baseline main `d6119539195b0faf2025ad9a93b297da3a4cb19a`; isolated branch `sound
 
 
 Validation before release: all 48 automated state/provider/classification checks passed. Includes 50 scientific-name cricket approvals, category/tag search, AI/owner precedence, offline edits, cloud-refresh deletion races, identity-bound AI receipts, owner-only metadata writes, safe receipt deletion, preservation of decoded buffers and placed cue decisions, and prior review/capture/cloud regressions. Full Scrubber inline script and changed JavaScript parse. Live deployment/browser/cloud checks follow separately.
+
