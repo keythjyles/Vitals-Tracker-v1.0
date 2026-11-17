@@ -39,3 +39,11 @@ Open **Audio** in insertion settings to mute the overlay or set its level. **Sou
 ## R40 clip audio and file picker
 
 Use **Bed settings → Audio** for the bed's level and fades. Insertions use **Edit insertion → Audio**. The picker lists names and opens a preview only when requested. **Collapse** closes the Toolbox at the current frame. Rollback revision `3e5b257c2601c453747bb7891087762d5958d213`.
+
+## R41 placement, picture fades and section controls
+
+Set or mark IN to calculate OUT from the full source selection at its current speed. The visible span ends at the bed's boundary when it runs out of room. Moving the insertion earlier recovers the full span. Edit or mark the exclusive OUT to fit the source selection to the new span. The edit sheet and Animation timing apply these same rules.
+
+**Picture fades** and **Audio** appear near IN and OUT in Edit insertion and in Bed settings. Each fade has its own duration in 25 fps frames. Zero turns a fade off. The bed picture fades to black, or reveals a layer beneath it. An insertion picture fade reduces the layer's opacity and reveals the underlying picture. Audio fades use the shared clip controls and follow the placed audio in preview and export. Both fade types are saved in the R33 recipe.
+
+An up arrow closes an open section and a down arrow opens a closed one. Insertions has its own arrow. Open Scribe from its section. In the picker, Preview and Use sit beside each filename and open a video only on request. The R40 rollback revision is `275cccbacb784f731ff12e4e0ef089c442f7604e`.

@@ -148,7 +148,11 @@ async function checkFrameLock(page){
   assert.equal(await page.locator('input[type=range]:not([data-gs-continuous])').evaluateAll(es=>es.some(e=>getComputedStyle(e).display!=='none'&&e.getBoundingClientRect().width>0)),false,path+' has no draggable ranges');
   if(path!=='wavlock/'&&path!=='sxlock/'){
    const ref=page.locator('.gs-video-reference');
-   assert.equal(await ref.getByRole('button',{name:'Scribe',exact:true}).count(),1,path+' has Scribe beside the readout');
+   const shortcut=ref.getByRole('button',{name:'Scribe',exact:true});
+   if(path==='aspectlock/'){
+    assert.equal(await shortcut.count(),0,'AspectLock opens Scribe from its section');
+    assert.equal(await page.locator('#editorScribe > summary').isVisible(),true);
+   }else assert.equal(await shortcut.count(),1,path+' has Scribe beside the readout');
    const player=await page.locator('.gs-player-workspace').boundingBox();
    assert.ok((await ref.boundingBox()).y>=player.y+player.height-1,path+' puts the readout below the picture');
   }

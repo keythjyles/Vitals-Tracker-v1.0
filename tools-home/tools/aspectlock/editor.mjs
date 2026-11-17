@@ -1,9 +1,9 @@
-import {fadeGainAt, mountClipAudio, savedFades, validClipGain} from '../../shared/clip-audio.mjs?v=2';
+import {fadeGainAt, mountClipAudio, mountFadeDurations, savedFades, validClipGain} from '../../shared/clip-audio.mjs?v=3';
 import {addColorWheel} from '../../shared/color-wheel.mjs?v=1';
 import {fitInsertionRate, mountInsertionSettings} from '../../shared/insertion-settings.mjs?v=1';
 import {paintMatrix} from "../../shared/item-matrix.mjs?v=1";
-import {beginVideoLoad,loadVideoSource,clearVideoSource} from "./media-source.mjs?v=33";
-import {Composition,WIDTH,HEIGHT,FPS,lastFrame,frameAt,placementAt,fitRect} from "./composition.mjs?v=36";
+import {beginVideoLoad,loadVideoSource,clearVideoSource,mediaDuration,measureDuration} from "./media-source.mjs?v=41";
+import {Composition,WIDTH,HEIGHT,FPS,lastFrame,frameAt,placedOutFrame,placementAt,pictureOpacityAt,fitRect} from "./composition.mjs?v=41";
 import {setupPinnedSections} from "../../shared/pinned-sections.mjs?v=32";
 import {clipName,setupToolbox} from "./toolbox.mjs?v=38";
 import {formatFrameTime,writeFrameClock,frameStepControl} from "../../shared/frame-stamp.mjs?v=2";
@@ -95,7 +95,8 @@ function renderLibrary() {
   preview.onclick = () => previewAsset(file, row, preview);
   const choose = document.createElement('button');
   choose.type = 'button';
-  choose.textContent = 'Use this video';
+  choose.textContent = 'Use';
+  choose.setAttribute('aria-label','Use this video');
   choose.onclick = async () => {
    const target = pickerTarget;
    Q('assetDialog').close();
@@ -121,23 +122,29 @@ Q('closeLibrary').onclick = () => Q('assetDialog').close();
 Q('assetDialog').addEventListener('close', closeAssetPreview);
 Q('assetSort').onchange = renderLibrary;
 let trimInFrame=0,trimOutFrame=null;
-const trimInTime=()=>trimInFrame/FPS,trimOutTime=()=>Math.min(ov.duration||0,trimOutFrame===null?Infinity:trimOutFrame/FPS),trimLength=()=>Math.max(0,trimOutTime()-trimInTime());
+const trimInTime = () => trimInFrame / FPS;
+const trimOutTime = () => Math.min(mediaDuration(ov), trimOutFrame === null ? Infinity : trimOutFrame / FPS);
+const trimLength = () => Math.max(0, trimOutTime() - trimInTime());
 let startFrame=0,endFrame=null,playbackRate=1,overlayActive=false,overlayAudible=false,overlayPreview=false;
 let requestedBedFrame = null, paintedBedFrame = null;
 let x=40,y=350,w=460,ratio=16/9,bx=0,by=0,bw=WIDTH,editMode='view',items=[],raf=0,canSample=true,rendering=false;
 let overlaySound = {volume:0}, bedSound = {volume:1};
+let overlayPicture = {}, bedPicture = {};
 const audioTracks = {};
 const localFiles = {}, localMedia = {};
-const bedAudioLength = () => Number.isFinite(bv.duration) ? (lastFrame(bv.duration) + 1) / FPS : 0;
-const audioSettings = {
- base: {section:Q('bedAudio'), video:bv, prefix:'bed', duration:bedAudioLength, get:()=>bedSound},
+function bedFrameCount() {
+ const duration = mediaDuration(bv);
+ return duration ? lastFrame(duration) + 1 : 0;
+}
+const clipSettings = {
+ base: {section:Q('bedAudio'), video:bv, prefix:'bed', duration:()=>bedFrameCount()/FPS, get:()=>bedSound, picture:()=>bedPicture},
  overlay: {section:Q('insertionAudio'), video:ov, prefix:'insertion', duration:()=>{
   const range = timing();
-  return (range.outFrame - range.inFrame) / FPS;
- }, get:()=>overlaySound},
+  return range.outFrame === null ? 0 : (range.outFrame - range.inFrame) / FPS;
+ }, get:()=>overlaySound, picture:()=>overlayPicture},
 };
-for (const [id, config] of Object.entries(audioSettings)) {
- const {section, video, prefix, duration, get} = config;
+for (const [id, config] of Object.entries(clipSettings)) {
+ const {section, video, prefix, duration, get, picture} = config;
  config.refresh = mountClipAudio(section, {
   prefix,
   read:() => video.readyState >= 1 ? {...get(), duration:duration(), fps:FPS, editable:!rendering, hasAudio:audioTracks[id]} : null,
@@ -147,11 +154,19 @@ for (const [id, config] of Object.entries(audioSettings)) {
    update();
   },
  });
+ config.refreshPicture = mountFadeDurations(Q(prefix + 'Picture'), {
+  prefix:prefix + 'Picture',
+  read:() => ({...picture(), duration:duration(), fps:FPS, editable:!rendering && video.readyState >= 1}),
+  write(settings) {
+   Object.assign(picture(), settings);
+   update();
+  },
+ });
  section.addEventListener('toggle', () => inspectAudio(id));
 }
 ov.preservesPitch = false;
 async function inspectAudio(id) {
- const {section,video,refresh} = audioSettings[id];
+ const {section,video,refresh} = clipSettings[id];
  const file = localMedia[id];
  if (!file || !section.open) return;
  const url = video.src;
@@ -181,14 +196,24 @@ function refreshLoadedVideo(video) {
   playbackRate = 1;
   ov.playbackRate = 1;
   overlaySound = {volume:0};
+  overlayPicture = {};
   delete audioTracks.overlay;
   Q('insertionError').textContent = '';
-  showTiming();
  } else {
   bedSound = {volume:1};
+  bedPicture = {};
   delete audioTracks.base;
  }
  update();
+}
+async function inspectDuration(video, signal, media) {
+ const url = video.currentSrc;
+ try {
+  await measureDuration(video, signal, media);
+ } catch (error) {
+  if (signal.aborted || video.currentSrc !== url || mediaDuration(video)) return;
+  report('Could not determine ' + (video === bv ? 'bed' : 'clip') + ' duration. ' + error.message);
+ }
 }
 async function loadFile(name, video) {
  const file = items.find(item => item.path_display === name || item.name.toLowerCase() === name.toLowerCase());
@@ -199,6 +224,8 @@ async function loadFile(name, video) {
  const playback = await api('/api/playback?path=' + encodeURIComponent(file.path_display));
  if (signal.aborted) return null;
  if (!await loadVideoSource(video, playback.url, file.name, signal)) return null;
+ await inspectDuration(video, signal, {name:file.name});
+ if (signal.aborted) return null;
  refreshLoadedVideo(video);
  return file;
 }
@@ -272,6 +299,8 @@ async function loadLocalVideo(id, source, at = bedFrame()) {
  try {
   loaded = await loadVideoSource(video, url, file.name, signal);
   if (!loaded) return false;
+  await inspectDuration(video, signal, {name:file.name, file});
+  if (signal.aborted) return false;
   delete localFiles[id];
   localMedia[id] = file;
   refreshLoadedVideo(video);
@@ -280,13 +309,13 @@ async function loadLocalVideo(id, source, at = bedFrame()) {
   void inspectAudio(id);
   sound();
   const asset = savedId ? (await toolbox.get(savedId) ?? source) : await toolbox.add(file);
-  if (video.getAttribute('src') === url) {
+  if (!signal.aborted && video.getAttribute('src') === url) {
    localFiles[id] = asset.id;
    if (clipName(asset) !== label) markVideoSelection(id, file.name, undefined, clipName(asset));
    toolbox.render();
    report('Loaded from device: ' + clipName(asset));
   }
-  return video.getAttribute('src') === url;
+  return !signal.aborted && video.getAttribute('src') === url;
  } finally {
   if (!loaded) URL.revokeObjectURL(url);
  }
@@ -341,6 +370,7 @@ function spec() {
   layerOrder: Q('order').value, blueRemoval: Q('keyMode').value, tolerance: Number(Q('tolerance').value),
   key: keySettings(), opacity: Number(Q('opacity').value) / 100,
   audio: {source:bedSound.volume>0?'on':'off', cartoonSfx:overlaySound.volume>0?'on':'off', bed:{...bedSound}, ...overlaySound},
+  picture: {bed:savedFades(bedPicture), overlay:savedFades(overlayPicture)},
   startFrame, outFrame: endFrame, playbackRate, overlayTrim: {inFrame: trimInFrame, outFrame: trimOutFrame, frameRate: FPS},
   sourceMotion: 'unchanged',
  };
@@ -380,13 +410,17 @@ function update() {
  Q('sampleKey').disabled = !hasOverlay;
  for (const [id,output,suffix] of [['opacity','opacityValue','%'],['keyRange','keyRangeValue','%'],['keyEdge','keyEdgeValue','%'],['keyBackground','keyBackgroundValue','%']]) Q(output).textContent = Q(id).value + suffix;
  for (const id of ['bedZero','backFrame','forwardFrame','back25','forward25','goFrame','jumpFrame','play','insertBack','insertForward']) Q(id).disabled = !hasBed;
- Q('goFrame').max = hasBed ? lastFrame(bv.duration) : 0;
- Q('timingControls').disabled = !hasOverlay || !hasBed || rendering;
+ Q('goFrame').max = lastFrame(mediaDuration(bv));
+ Q('timingControls').disabled = !mediaDuration(ov) || !bedFrameCount() || rendering;
  for (const id of ['insertionIn','insertionOut','insertionMarkIn','insertionMarkOut']) Q(id).disabled = Q('timingControls').disabled;
  Q('render').disabled = !hasBed || rendering;
+ showTiming();
  refreshAdded();
  Q('aspectBedSettings').hidden = !hasBed;
- for (const {refresh} of Object.values(audioSettings)) refresh();
+ for (const {refresh, refreshPicture} of Object.values(clipSettings)) {
+  refresh();
+  refreshPicture();
+ }
  Q('spec').textContent = JSON.stringify(spec(), null, 2);
  paintPlayback();
 }
@@ -407,11 +441,16 @@ function outsideOutput({x, y, width, height}) {
  return x < 0 || y < 0 || x + width > WIDTH || y + height > HEIGHT;
 }
 
-function drawPicture() {
+function drawPicture(frame) {
  if (stage.clientWidth < 1 || stage.clientHeight < 1) return false;
  const left = stage.clientWidth / 2 - WIDTH * displayScale / 2 + viewX;
  const top = stage.clientHeight / 2 - HEIGHT * displayScale / 2 + viewY;
  const scene = sceneFor();
+ scene.bedOpacity = pictureOpacityAt(bedPicture, 0, bedFrameCount(), frame);
+ if (scene.overlay && !overlayPreview) {
+  const range = timing();
+  scene.opacity *= pictureOpacityAt(overlayPicture, range.inFrame, range.outFrame, frame);
+ }
  ctx.fillStyle = '#000';
  ctx.fillRect(0, 0, WIDTH, HEIGHT);
  compositor.draw(ctx, scene);
@@ -441,9 +480,9 @@ function drawPicture() {
 function bedFrame() { return paintedBedFrame ?? 0; }
 function stepFrame() { return requestedBedFrame ?? bedFrame(); }
 function timing() {
- const limit = bv.readyState >= 1 ? lastFrame(bv.duration) + 1 : Infinity;
- const naturalOut = startFrame + Math.max(1, Math.ceil(trimLength() * FPS / playbackRate - 1e-6));
- return {inFrame: startFrame, outFrame: Math.min(limit, endFrame ?? naturalOut), trimIn: trimInTime(), trimOut: trimOutTime(), rate: playbackRate};
+ const trimIn = trimInTime(), trimOut = trimOutTime();
+ const outFrame = placedOutFrame(startFrame, trimOut - trimIn, playbackRate, bedFrameCount() || Infinity, endFrame);
+ return {inFrame:startFrame, outFrame, trimIn, trimOut, rate:playbackRate};
 }
 function updateClock() {
  if (paintedBedFrame !== null) {
@@ -453,11 +492,12 @@ function updateClock() {
   Q('insertionFrame').textContent = 'F' + frame;
   const insertion = 'Insert at F' + frame;
   if (Q('insertFrame').textContent !== insertion) Q('insertFrame').textContent = insertion;
-  Q('bedProgress').value = bv.currentTime / bv.duration;
+  const duration = mediaDuration(bv);
+  Q('bedProgress').value = duration ? bv.currentTime / duration : 0;
  }
  const pos = formatFrameTime(ov.currentTime || 0);
  if (Q('overlayPosition').textContent !== pos) Q('overlayPosition').textContent = pos;
- if (!Q('overlaySeek').matches(':active')) Q('overlaySeek').value = Math.round(1000 * ov.currentTime / (ov.duration || 1));
+ if (!Q('overlaySeek').matches(':active')) Q('overlaySeek').value = Math.round(1000 * ov.currentTime / (mediaDuration(ov) || 1));
 }
 let lastDraw = -Infinity;
 function draw(now = performance.now()) {
@@ -471,10 +511,10 @@ function paintPlayback() {
  // clock together until the bed and any active animation have decoded.
  const hasBed = bv.readyState >= 2;
  if (bv.getAttribute('src') && (!hasBed || bv.seeking)) return;
- const frame = hasBed ? (bv.paused && requestedBedFrame !== null ? requestedBedFrame : frameAt(bv.currentTime, bv.duration)) : null;
+ const frame = hasBed ? (bv.paused && requestedBedFrame !== null ? requestedBedFrame : frameAt(bv.currentTime, mediaDuration(bv) || Infinity)) : null;
  syncOverlay(bv.paused ? (frame ?? 0) / FPS : bv.currentTime);
  if (bv.paused && overlayActive && (ov.seeking || ov.readyState < 2)) return;
- if (!drawPicture()) return;
+ if (!drawPicture(frame ?? 0)) return;
  paintedBedFrame = frame;
  requestedBedFrame = null;
  updateClock();
@@ -482,9 +522,12 @@ function paintPlayback() {
 }
 for (const video of [bv, ov]) {
  for (const event of ['loadeddata', 'seeked', 'pause', 'ended']) video.addEventListener(event, paintPlayback);
+ video.addEventListener('durationchange', () => {
+  if (video.readyState >= 1) update();
+ });
 }
 function sound(time = bv.currentTime, range) {
- bv.volume = bedSound.volume * fadeGainAt(bedSound,0,bedAudioLength(),time);
+ bv.volume = bedSound.volume * fadeGainAt(bedSound,0,bedFrameCount()/FPS,time);
  bv.muted = bedSound.volume === 0;
  ov.volume = overlaySound.volume * (range ? fadeGainAt(overlaySound,range.inFrame/FPS,range.outFrame/FPS,time) : 1);
  ov.muted = overlaySound.volume === 0 || !overlayAudible;
@@ -512,28 +555,39 @@ function syncOverlay(bedTime = bv.currentTime) {
  sound(bedTime,position ? range : undefined);
 }
 
-function showTiming() {
+function showTiming(committed = false) {
  const current = timing();
- Q('bedIn').value = ov.readyState >= 1 ? startFrame : '';
- Q('bedOut').value = ov.readyState >= 1 && Number.isFinite(current.outFrame) ? current.outFrame : '';
- Q('insertionIn').value = Q('bedIn').value;
- Q('insertionOut').value = Q('bedOut').value;
- Q('insertionSpan').textContent = Q('bedOut').value
-  ? (current.outFrame - startFrame) + ' frames · ' + Number(playbackRate.toFixed(3)) + '× · OUT is the first clear frame'
-  : '';
- Q('startInfo').textContent = ov.readyState >= 1
-  ? 'F' + startFrame + ' to F' + current.outFrame + ' · OUT is the first clear frame · ' + playbackRate.toFixed(3) + '×'
-  : 'Choose an animation to set its timing.';
- Q('trimInfo').textContent = ov.readyState >= 1
+ const loaded = ov.readyState >= 1;
+ for (const [ids, value] of [
+  [['bedIn','insertionIn'], loaded ? startFrame : ''],
+  [['bedOut','insertionOut'], current.outFrame ?? ''],
+ ]) {
+  for (const id of ids) if (committed || document.activeElement !== Q(id)) Q(id).value = value;
+ }
+ const frames = current.outFrame === null ? 0 : current.outFrame - startFrame;
+ const fullOut = placedOutFrame(startFrame, current.trimOut - current.trimIn, playbackRate, Infinity, endFrame);
+ const info = frames
+  ? frames + (frames === 1 ? ' frame' : ' frames') + ' · ' + Number(playbackRate.toFixed(3)) + '× · ' +
+    (current.outFrame < fullOut ? 'Limited by bed length' : 'OUT is the first clear frame')
+  : !loaded ? 'Choose an animation to set its timing.'
+    : !mediaDuration(ov) ? 'Reading clip duration…' : 'The clip has no frames in this placement.';
+ Q('insertionSpan').textContent = info;
+ Q('startInfo').textContent = frames ? 'F' + startFrame + ' to F' + current.outFrame + ' · ' + info : info;
+ Q('trimInfo').textContent = mediaDuration(ov)
   ? 'Source ' + formatFrameTime(trimInTime()) + ' to ' + formatFrameTime(trimOutTime())
   : '';
 }
 
-function setTiming(inFrame, outFrame, rate = playbackRate) {
- const limit = lastFrame(bv.duration) + 1;
- if (![inFrame,outFrame].every(Number.isSafeInteger) || inFrame < 0 || outFrame <= inFrame || outFrame > limit) {
-  throw Error('Enter IN and OUT frames within the bed. OUT must follow IN.');
+function setTiming(inFrame, outFrame = null) {
+ if (rendering) throw Error('Wait for the render to finish.');
+ const limit = bedFrameCount();
+ if (!Number.isSafeInteger(inFrame) || inFrame < 0 || inFrame >= limit) {
+  throw Error('Choose an IN within the bed.');
  }
+ if (outFrame !== null && (!Number.isSafeInteger(outFrame) || outFrame <= inFrame || outFrame > limit)) {
+  throw Error('Choose an OUT after IN through F' + limit + '.');
+ }
+ const rate = outFrame === null ? playbackRate : fitInsertionRate(trimLength(), (outFrame - inFrame) / FPS);
  Q('pause').click();
  startFrame = inFrame;
  endFrame = outFrame;
@@ -541,45 +595,35 @@ function setTiming(inFrame, outFrame, rate = playbackRate) {
  overlayPreview = false;
  Q('timingError').textContent = '';
  Q('insertionError').textContent = '';
- showTiming();
- syncOverlay();
  update();
 }
-function editTiming(action) {
+function editTiming(action, errorId = 'timingError') {
  try { action(); }
- catch (error) { Q('timingError').textContent = error.message; }
+ catch (error) { Q(errorId).textContent = error.message; }
 }
-function editInsertionTiming(edge, frame) {
- try {
-  if (rendering) throw Error('Wait for the render to finish.');
-  if (edge === 'in') {
-   const current = timing();
-   setTiming(frame, frame + current.outFrame - current.inFrame);
-  } else {
-   if (!Number.isSafeInteger(frame) || frame <= startFrame) throw Error('OUT must follow IN.');
-   setTiming(startFrame, frame, fitInsertionRate(trimLength(), (frame - startFrame) / FPS));
-  }
- } catch (error) {
-  showTiming();
-  Q('insertionError').textContent = error.message;
- }
+function editInsertionTiming(edge, frame, errorId) {
+ editTiming(() => edge === 'in' ? setTiming(frame) : setTiming(startFrame, frame), errorId);
+ showTiming(true);
 }
-for (const [edge, suffix] of [['in','In'],['out','Out']]) {
- Q('insertion' + suffix).onchange = event => editInsertionTiming(edge, event.target.valueAsNumber);
- Q('insertionMark' + suffix).onclick = () => editInsertionTiming(edge, bedFrame());
-}
-function enterTiming() {
- const inFrame = Q('bedIn').value === '' ? NaN : Number(Q('bedIn').value);
- const outFrame = Q('bedOut').value === '' ? NaN : Number(Q('bedOut').value);
- return [inFrame, outFrame];
+for (const [edge, fieldId, buttonId, errorId] of [
+ ['in','insertionIn','insertionMarkIn','insertionError'],
+ ['out','insertionOut','insertionMarkOut','insertionError'],
+ ['in','bedIn','markStart','timingError'],
+ ['out','bedOut','markEnd','timingError'],
+]) {
+ const field = Q(fieldId);
+ field.onchange = () => editInsertionTiming(edge, field.valueAsNumber, errorId);
+ field.onkeydown = event => { if (event.key === 'Enter') field.blur(); };
+ Q(buttonId).onclick = () => editInsertionTiming(edge, bedFrame(), errorId);
 }
 
 function seekBedFrame(frame) {
- if (bv.readyState < 1) return;
+ const duration = mediaDuration(bv);
+ if (!duration) return;
  bv.pause();
  ov.pause();
  overlayPreview = false;
- requestedBedFrame = Math.max(0, Math.min(lastFrame(bv.duration), frame));
+ requestedBedFrame = Math.max(0, Math.min(lastFrame(duration), frame));
  const time = requestedBedFrame / FPS;
  if (Math.abs(bv.currentTime - time) > .000001) bv.currentTime = time;
  paintPlayback();
@@ -594,31 +638,20 @@ Q('forward25').onclick = () => seekBedFrame(stepFrame() + 25);
 Q('bedZero').onclick = () => seekBedFrame(0);
 Q('jumpFrame').onclick = () => {
  const frame = Number(Q('goFrame').value);
- if (Q('goFrame').value === '' || !Number.isSafeInteger(frame) || frame < 0 || frame > lastFrame(bv.duration)) {
-  report('Enter a frame from 0 to ' + lastFrame(bv.duration) + '.');
+ const end = lastFrame(mediaDuration(bv));
+ if (Q('goFrame').value === '' || !Number.isSafeInteger(frame) || frame < 0 || frame > end) {
+  report('Enter a frame from 0 to ' + end + '.');
   return;
  }
  seekBedFrame(frame);
 };
 Q('goFrame').onkeydown = event => { if (event.key === 'Enter') Q('jumpFrame').click(); };
-Q('markStart').onclick = () => editTiming(() => {
- const current = timing(), from = bedFrame();
- setTiming(from, Math.min(lastFrame(bv.duration) + 1, from + Math.max(1, current.outFrame - startFrame)));
-});
-Q('markEnd').onclick = () => editTiming(() => setTiming(startFrame, bedFrame()));
-Q('applyTiming').onclick = () => editTiming(() => setTiming(...enterTiming()));
-Q('fitTiming').onclick = () => editTiming(() => {
- const [from, to] = enterTiming();
- const rate = trimLength() * FPS / (to - from);
- if (!(rate >= .1 && rate <= 8)) throw Error('Fit requires a speed between 0.1× and 8×.');
- setTiming(from, to, rate);
-});
 Q('clearStart').onclick = () => {
  startFrame = 0;
  endFrame = null;
  playbackRate = 1;
  Q('timingError').textContent = '';
- showTiming();
+ Q('insertionError').textContent = '';
  seekBedFrame(0);
  update();
 };
@@ -671,14 +704,13 @@ for (const id of ['trimIn','trimOut','trimClear']) Q(id).onclick = () => editTim
  if (id === 'trimOut' && frame <= trimInFrame) throw Error('Source OUT must follow IN.');
  if (id !== 'trimOut') trimInFrame = id === 'trimClear' ? 0 : frame;
  if (id !== 'trimIn') trimOutFrame = id === 'trimClear' ? null : frame;
- showTiming();
  update();
 });
 Q('overlaySeek').oninput = () => {
  if (ov.readyState < 1) return;
  Q('pause').click();
  overlayPreview = true;
- ov.currentTime = Number(Q('overlaySeek').value) / 1000 * ov.duration;
+ ov.currentTime = Number(Q('overlaySeek').value) / 1000 * mediaDuration(ov);
  syncOverlay();
 };
 Q('fitOverlay').onclick = () => {
@@ -805,12 +837,13 @@ Q('render').onclick = async () => {
  update();
  const settings = spec(), range = timing(), scene = sceneFor(bv, ov, false);
  try {
+  if (ov.readyState >= 2 && !mediaDuration(ov)) throw Error('Wait for the clip duration or choose it again.');
   report('Preparing the 25 fps export…');
   const [{renderAspect}, bed, animation] = await Promise.all([
-   import('./export.mjs?v=40'), mediaBytes('base',bv), ov.readyState >= 2 ? mediaBytes('overlay',ov) : null,
+   import('./export.mjs?v=41'), mediaBytes('base',bv), range.outFrame !== null ? mediaBytes('overlay',ov) : null,
   ]);
   let phase = 'Preparing export';
-  const result = await renderAspect({bed,animation,scene,key:settings.key,range,audio:settings.audio,
+  const result = await renderAspect({bed,animation,scene,key:settings.key,range,audio:settings.audio,picture:settings.picture,
    onPhase: text => { phase = text; report(text); },
    onProgress: progress => report(phase + ' · ' + Math.round(progress*100) + '%'),
   });
@@ -858,6 +891,8 @@ function restoreSettings(saved, transformLegacy = true) {
  });
  bedSound = readSound(saved.audio?.bed, Number(saved.audio?.source !== 'off'));
  overlaySound = readSound(saved.audio, Number(saved.audio?.cartoonSfx === 'on'));
+ bedPicture = savedFades(saved.picture?.bed);
+ overlayPicture = savedFades(saved.picture?.overlay);
  startFrame = saved.startFrame ?? 0;
  endFrame = saved.outFrame ?? null;
  playbackRate = saved.playbackRate ?? 1;
@@ -949,7 +984,12 @@ function newEdit(keepBed) {
  detach('overlay');
  if (!keepBed) detach('base');
  overlayActive = overlayPreview = overlayAudible = false;
- restoreSettings({version:RECIPE_VERSION, audio:keepBed?{bed:bedSound}:undefined, blueRemoval:keyModeFromUrl() || 'green', portraitPerspective:{x:0,y:0,width:WIDTH}, overlayTransform:{x:40,y:350,width:460}});
+ restoreSettings({
+  version:RECIPE_VERSION,
+  ...(keepBed ? {audio:{bed:bedSound}, picture:{bed:bedPicture}} : {}),
+  blueRemoval:keyModeFromUrl() || 'green', portraitPerspective:{x:0,y:0,width:WIDTH},
+  overlayTransform:{x:40,y:350,width:460},
+ });
  Q('viewReset').click();
  if (keepBed) seekBedFrame(0);
  if (Q('newEditDialog').open) Q('newEditDialog').close();
@@ -973,7 +1013,7 @@ function askNewEdit() {
 }
 Q('newEdit').onclick = askNewEdit;
 Q('resetFromExport').onclick = askNewEdit;
-Q('startOver').onclick = askNewEdit;
+Q('startOver').onclick = event => { event.preventDefault(); askNewEdit(); };
 
 const toolbox = setupToolbox({
  pause: () => Q('pause').click(),
@@ -1008,15 +1048,12 @@ Q('openInsertionTrim').onclick = () => {
  openTimingPanel();
 };
 const insertPanel = Q('aspectToolbox');
-Q('collapseToolbox').onclick = event => {
- event.preventDefault();
- insertPanel.open = false;
- insertPanel.querySelector('summary').focus();
-};
 insertPanel.addEventListener('toggle', () => { if (!insertPanel.open) toolbox.stopPreview(); });
-insertPanel.querySelector('summary').addEventListener('click', event => {
- if (!insertPanel.open && !event.target.closest('button')) Q('pause').click();
-});
+for (const panel of [insertPanel,Q('editorScribe')]) {
+ panel.querySelector('summary').addEventListener('click', event => {
+  if (!panel.open && !event.target.closest('button')) Q('pause').click();
+ });
+}
 Q('railToolbox').onclick = () => {
  Q('pause').click();
  insertPanel.open = true;
@@ -1067,11 +1104,11 @@ function addedPlacement() {
 let paintedMatrix;
 function paintAddedMatrix() {
  const item = ov.readyState >= 1 && addedPlacement();
- const frame = bedFrame(), frames = bv.readyState >= 1 ? lastFrame(bv.duration) + 1 : 1;
+ const frame = bedFrame(), frames = bedFrameCount() || 1;
  const signature = [frame, frames, item?.name, item?.inFrame, item?.outFrame].join('|');
  if (signature === paintedMatrix) return;
  paintedMatrix = signature;
- paintMatrix(Q('itemMatrix'), item ? [item] : [], frame, frames, 'overlay');
+ paintMatrix(Q('itemMatrix'), item && item.outFrame !== null ? [item] : [], frame, frames, 'overlay');
 }
 function refreshAdded() {
  const loaded = ov.readyState >= 1;
@@ -1081,7 +1118,8 @@ function refreshAdded() {
  if (loaded) {
   const item = addedPlacement();
   Q('addedName').textContent = item.name;
-  Q('addedTiming').textContent = 'Edit insertion · IN F' + item.inFrame + ' · OUT F' + item.outFrame;
+  Q('addedTiming').textContent = 'Edit insertion · IN F' + item.inFrame +
+   (item.outFrame === null ? '' : ' · OUT F' + item.outFrame);
   const name = Q('insertionName');
   if (name.dataset.savedName !== item.name) name.value = name.dataset.savedName = item.name;
  }

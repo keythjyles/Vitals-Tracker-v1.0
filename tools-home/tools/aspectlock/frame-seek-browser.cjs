@@ -53,15 +53,15 @@ module.exports = async function checkFrameSeek(browser, caplockURL) {
   await $('back25').tap();
   await waitForFrame(473,'black');
 
-  await $('insertBack').tap();
-  await waitForFrame(472,'red');
-  await $('toolboxFiles').setInputFiles('/tmp/caplock-fixtures/blue-caption.mp4');
-  const candidate = $('toolboxItems').locator('.gs-clip-choice').filter({hasText:'blue-caption.mp4'});
+  await go(502,'green');
+  await $('toolboxFiles').setInputFiles('/tmp/caplock-fixtures/blue-caption-live.webm');
+  const candidate = $('toolboxItems').locator('.gs-clip-choice').filter({hasText:'blue-caption-live.webm'});
   await candidate.locator('.gs-clip-thumbnail img').waitFor();
-  await page.getByRole('button',{name:'Overlay blue-caption.mp4 at current frame',exact:true}).tap();
-  await page.waitForFunction(()=>document.getElementById('addedName').textContent==='blue-caption.mp4');
+  await page.getByRole('button',{name:'Overlay blue-caption-live.webm at current frame',exact:true}).tap();
+  await page.waitForFunction(()=>document.getElementById('addedTiming').textContent.endsWith('IN F502 · OUT F503'));
   await $('editAdded').tap();
-  assert.equal(await $('insertionFrame').textContent(),'F472');
+  assert.equal(await $('insertionFrame').textContent(),'F502');
+  assert.match(await $('insertionSpan').textContent(),/1 frame · 1× · Limited by bed length/);
   assert.deepEqual(await $('bounds').evaluate(node=>[node.offsetWidth>1,getComputedStyle(node).outlineStyle]),[true,'dashed']);
   await $('insertionIn').fill('440');
   await $('insertionIn').press('Tab');
@@ -77,13 +77,15 @@ module.exports = async function checkFrameSeek(browser, caplockURL) {
   assert.equal(settings.outFrame,470);
   assert.equal(settings.playbackRate,1.25);
   assert.deepEqual(settings.overlayTrim,trim);
-  await $('insertionIn').fill('472');
-  await $('insertionIn').press('Tab');
   await $('closeItemProperties').tap();
-  await go(472,'red');
+  await go(460,'red');
   await $('railTiming').tap();
-  await $('bedOut').fill('473');
-  await $('applyTiming').tap();
+  await $('markStart').tap();
+  assert.equal(await $('bedOut').inputValue(),'480','Mark IN keeps the selected speed and calculates OUT');
+  await $('bedOut').fill('485');
+  await $('bedOut').press('Enter');
+  assert.match(await $('startInfo').textContent(),/F460 to F485 · 25 frames · 1×/);
+  await go(472,'red');
   await $('editAdded').tap();
   for (const width of [320, 360, 393]) {
    await page.setViewportSize({width,height:740});
@@ -99,6 +101,6 @@ module.exports = async function checkFrameSeek(browser, caplockURL) {
   await $('bedZero').tap();
   await waitForFrame(0,'red');
   assert.deepEqual(errors, []);
-  console.log('AspectLock Go, rail, Toolbox and appearance steps show the black picture only at F473.');
+  console.log('AspectLock resolves a WebM duration, restores its full span when IN moves and retimes on OUT. The black picture stays at F473.');
  } finally { await page.close(); }
 };

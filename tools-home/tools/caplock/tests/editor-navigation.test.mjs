@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import {matrixFrame} from '../../../shared/item-matrix.mjs';
+import {mediaDuration} from '../../aspectlock/media-source.mjs';
 const cap=fs.readFileSync(new URL('../caplock.mjs',import.meta.url),'utf8');
 const aspect=fs.readFileSync(new URL('../../aspectlock/editor.mjs',import.meta.url),'utf8');
 function declaration(source,name){
@@ -24,7 +25,7 @@ test('AspectLock returning to a bed frame pauses both media and never initiates 
  let bedPauses=0,overlayPauses=0;
  const bv={readyState:4,duration:10,currentTime:7,pause:()=>bedPauses++};
  const ov={pause:()=>overlayPauses++};
- const state={bv,ov,FPS:25,lastFrame:duration=>duration*25-1,overlayPreview:true,requestedBedFrame:null,paintPlayback:()=>{}};
+ const state={bv,ov,FPS:25,lastFrame:duration=>duration*25-1,mediaDuration,overlayPreview:true,requestedBedFrame:null,paintPlayback:()=>{}};
  const start=aspect.indexOf('function seekBedFrame('),end=aspect.indexOf('for (const [id,direction]',start);
  vm.createContext(state);vm.runInContext(aspect.slice(start,end),state);
  state.seekBedFrame(0);assert.equal(bedPauses,1);assert.equal(overlayPauses,1);assert.equal(bv.currentTime,0);assert.equal(state.overlayPreview,false);

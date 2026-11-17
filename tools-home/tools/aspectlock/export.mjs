@@ -1,10 +1,10 @@
-import {mixClipAudio, savedFades, scheduleClipGain, validClipGain} from '../../shared/clip-audio.mjs?v=2';
+import {mixClipAudio, savedFades, scheduleClipGain, validClipGain} from '../../shared/clip-audio.mjs?v=3';
 import {Input,ALL_FORMATS,BlobSource,CanvasSink} from '../sxlock/vendor/mediabunny-1.62.1-gs1.mjs';
 import {exportVideo,inspectVideo} from '../sxlock/export-engine.mjs?v=46';
 import {readSourceAudio} from '../caplock/source-audio.mjs?v=36';
-import {Composition,WIDTH,HEIGHT,FPS,placementAt} from './composition.mjs?v=36';
+import {Composition,WIDTH,HEIGHT,FPS,placementAt,pictureOpacityAt} from './composition.mjs?v=41';
 
-export async function renderAspect({bed, animation, scene, key, range, audio, onPhase, onProgress}) {
+export async function renderAspect({bed, animation, scene, key, range, audio, picture, onPhase, onProgress}) {
  const inputs = [];
  const track = async blob => {
   const input = new Input({source:new BlobSource(blob),formats:ALL_FORMATS});
@@ -21,7 +21,7 @@ export async function renderAspect({bed, animation, scene, key, range, audio, on
   const {video:bedVideo} = await track(bed);
   const {end} = await inspectVideo(bedVideo);
   const total = Math.ceil((end - .000002) * FPS);
-  if (animation) {
+  if (animation && range.outFrame > range.inFrame) {
    const {input,video} = await track(animation);
    const duration = await video.computeDuration();
    range = {...range,trimOut:Math.min(range.trimOut,duration),outFrame:Math.min(range.outFrame,total)};
@@ -69,7 +69,12 @@ export async function renderAspect({bed, animation, scene, key, range, audio, on
     const ctx = canvas.getContext('2d',{alpha:false,colorSpace:'srgb'});
     ctx.fillStyle = '#000';
     ctx.fillRect(0,0,WIDTH,HEIGHT);
-    painter.draw(ctx,{...scene,bed,overlay});
+    const frame = Math.round(timestamp * FPS);
+    painter.draw(ctx,{
+     ...scene,bed,overlay,
+     bedOpacity:pictureOpacityAt(picture?.bed,0,total,frame),
+     opacity:overlay ? scene.opacity * pictureOpacityAt(picture?.overlay,range.inFrame,range.outFrame,frame) : scene.opacity,
+    });
    }},
   });
  } finally {
