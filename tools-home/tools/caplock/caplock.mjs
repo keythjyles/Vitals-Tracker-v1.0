@@ -466,8 +466,8 @@ function renderClips(){
  $('itemCount').textContent=placed.length;
  $('itemEmpty').hidden=!!placed.length;
  const name = $('clipName');
- if (name.dataset.clipId !== c?.id || name.dataset.savedName !== c?.name) {
-  name.dataset.clipId = c?.id || '';
+ if (name.dataset.insertionId !== c?.id || name.dataset.savedName !== c?.name) {
+  name.dataset.insertionId = c?.id || '';
   name.value = name.dataset.savedName = c?.name || '';
  }
  $('moveMode').hidden = c?.type === 'audio';

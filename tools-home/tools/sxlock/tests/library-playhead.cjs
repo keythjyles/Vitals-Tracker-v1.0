@@ -356,10 +356,6 @@ async function main(){
    await toolbox.getByRole('button',{name:'Overlay '+clipName}).click();
    await page.waitForFunction(()=>SxLock.snapshot().toolbox.visual.length===1);
    assert.equal(await page.evaluate(()=>SxLock.snapshot().toolbox.visual[0].opacity),.5);
-   const bedEnd=await page.evaluate(()=>video.duration);
-   await toolbox.getByRole('button',{name:'Append '+clipName}).click();
-   await page.waitForFunction(()=>SxLock.snapshot().toolbox.visual.length===2);
-   assert.equal(await page.evaluate(()=>SxLock.snapshot().toolbox.visual[1].start),bedEnd);
    const beforeVisual=await page.evaluate(()=>SxLock.snapshot().toolbox.visual[0]);
    await toolbox.getByRole('button',{name:'Edit insertion '+clipName,exact:true}).first().click();
    await page.locator('#visualGoIn').click();
@@ -379,6 +375,12 @@ async function main(){
    await page.locator('#visualRename').click();
    assert.equal(await page.evaluate(()=>SxLock.snapshot().toolbox.visual[0].name),'Named overlay');
    await page.locator('#visualClose').click();
+   const bedEnd=await page.evaluate(()=>video.duration);
+   await page.locator('#openToolbox').click();
+   await toolbox.getByRole('button',{name:'Append '+clipName}).click();
+   await page.waitForFunction(()=>SxLock.snapshot().toolbox.visual.length===2);
+   assert.equal(await page.evaluate(()=>SxLock.snapshot().toolbox.visual[1].start),bedEnd);
+   await toolbox.getByRole('button',{name:'Close Toolbox'}).click();
    await page.locator('#play').evaluate(button=>button.click());
    await page.waitForFunction(end=>SxLock.currentTime()>end+.25,bedEnd);
    await page.locator('#play').evaluate(button=>button.click());
