@@ -1,3 +1,9 @@
+## WavLock R1.8 — waveform editor and saved clips
+
+The audio editor uses a short, full-width waveform with its controls below. Pinch to zoom, drag the zoomed view to pan, tap to seek, and use Fit to see the whole source. Open audio file sits in the empty bed. Pull down or tap the grip to show the hidden file picker. Shared Scribe opens below the player.
+
+Save WAV downloads the audio range and keeps a named cut on the device. Tap its name to edit IN/OUT, use Play to audition the cut, or rename it inline. Update WAV replaces the selected cut. New cut starts a separate selection. On reload the list can reopen the stored source. The phone browser check covers the picker, pinch and pan, clip export and edit, reload, playback and shared Scribe recovery. Rollback revision `71c1c97fbd39861078d31a3b0b3e2e340789132a`. Keep original audio, WAV downloads, saved cuts and Scribe history during rollback.
+
 ## WavLock R1.7 — device audio and shared Scribe
 
 Open audio file is the first action. Approved effects open on demand with search, preview and Use. Name each IN/OUT selection and download it as a WAV. Shared Scribe keeps Clear, Copy, Mark time and History. A mark can record the paused time, active range and clip name. Restoring that note can restore the audio position and range for the open source.

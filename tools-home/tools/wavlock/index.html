@@ -3,79 +3,78 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>WavLock · GS-TOOL-WAVLOCK · R1.7</title>
-<style>
-body{margin:0;background:#0d1724;color:#f6f8ff;font:19px system-ui}
-main{max-width:740px;margin:auto;padding:12px max(16px,env(safe-area-inset-right)) 16px max(16px,env(safe-area-inset-left))}
-section,details{background:#1d3044;border-radius:9px;padding:10px;margin:8px 0}
-button{font:700 16px system-ui;padding:8px 12px;border:0;border-radius:6px;background:#81c5ff;color:#071724;margin:0}
-button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid #ffda8a;outline-offset:2px}
-input{font:16px system-ui}
-input:not([type=file]){width:100%;min-width:0;box-sizing:border-box;padding:7px;background:#0b1829;color:white;border:1px solid #92a9bf;border-radius:6px}
-input[type=file]{max-width:100%}
-canvas{width:100%;height:180px;background:#07111c}
-audio{width:100%}
-a{color:#a9d8ff}
-summary{cursor:pointer;min-height:34px}
-.wavlock-actions{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px}
-.wavlock-actions button{min-height:44px}
-#openAudio{background:#f0cf84;color:#15212c}
-#status{margin:4px 0 0;font-size:14px;color:#a4edb5;overflow-wrap:anywhere}
-#status:empty,#editorScribe:not([open]),#wave>.gs-empty-load{display:none!important}
-#editorScribe{scroll-margin-top:8px}
-.audio-tool-nav{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:3px;padding:5px 0;font:13px/1.2 system-ui}
-.audio-tool-nav a{display:inline-flex;align-items:center;min-height:32px;padding:4px 7px;border:1px solid #59738a;border-radius:5px;color:#ffda8a;background:#20364b;text-decoration:none}
-.wavlock-name{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px;font-size:14px}
-#clock{font-size:25px;font-weight:800;font-variant-numeric:tabular-nums}
-#approvedList .approved-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:4px;align-items:center;border-bottom:1px solid #354c63;padding:4px 0}
-#approvedList .approved-row span{font-size:14px;overflow-wrap:anywhere}
-#approvedList button{font-size:13px;min-height:36px;padding:4px 8px}
-#approvedSearch{max-width:100%}
-#approvedStatus{font-size:13px;margin:5px 0}
-</style>
+<title>WavLock · GS-TOOL-WAVLOCK · R1.8</title>
+<link rel="stylesheet" href="../../shared/player-shell.css?v=34">
+<link rel="stylesheet" href="./wavlock.css?v=1.8">
 <script src="../../shared/audio-tool-nav.js?v=1" defer></script>
-<script type="module" src="./wavlock.mjs?v=1.7"></script>
+<script type="module" src="./wavlock.mjs?v=1.8"></script>
 </head>
 <body>
 <main>
-  <div id="audioActions" class="wavlock-actions">
-    <button id="openAudio" type="button">Open audio file</button>
-  </div>
-  <div><p id="status" role="status"></p></div>
-  <nav class="audio-tool-nav" aria-label="Audio tools" data-audio-tool="wavlock">
-    <a href="../sxlock/" target="gs-audio-sxlock">SxLock</a>
-    <a href="../sound-scrubber/" target="gs-audio-sound-scrubber">Sound Scrubber</a>
-    <a href="../../" target="gs-audio-tools">Tools</a>
-  </nav>
-  <details id="editorScribe"><summary>Scribe</summary></details>
-  <h1>WavLock <small>GS-TOOL-WAVLOCK · R1.7</small></h1>
-  <section aria-label="Audio source">
-    <label for="file">Device audio</label>
-    <input id="file" type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.flac,.ogg,.opus">
-    <p id="source">No audio loaded.</p>
-    <audio id="audio" preload="metadata" controls></audio>
-  </section>
+  <h1>WavLock · GS-TOOL-WAVLOCK · R1.8</h1>
   <section id="audioEditor" aria-label="Audio editor">
-    <canvas id="wave" width="1200" height="280" role="img" aria-label="Audio waveform"></canvas>
-    <p id="clock">00:00.000 / 00:00.000</p>
-    <button id="start" type="button" title="Go to the start of the audio and stay paused.">↤ Start</button>
-    <button id="play" type="button">Play / Pause</button>
-    <button id="prev" type="button">−0.1s</button>
-    <button id="next" type="button">+0.1s</button>
-    <button id="markIn" type="button" aria-label="Mark IN">IN</button>
-    <input id="in" type="number" aria-label="IN seconds" inputmode="decimal" min="0" step=".001" value="0">
-    <button id="markOut" type="button" aria-label="Mark OUT">OUT</button>
-    <input id="out" type="number" aria-label="OUT seconds" inputmode="decimal" min="0" step=".001" value="0">
-    <button id="preview" type="button">Play selection</button>
-    <button id="goIn" type="button">Go IN</button>
-    <button id="goOut" type="button">Go OUT</button>
-    <button id="clearSelection" type="button" aria-label="Clear selection">Clear cut</button>
-    <button id="reset" type="button">Reset editor</button>
-    <button id="export" type="button">Save WAV</button>
+    <button id="fileGrip" type="button" aria-label="Show file picker" aria-expanded="false" aria-controls="audioPicker">⌄</button>
+    <div id="audioPicker" class="audio-picker" hidden>
+      <label for="file">Device audio</label>
+      <input id="file" type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.flac,.ogg,.opus">
+    </div>
+    <audio id="audio" preload="metadata"></audio>
+    <div id="waveView" class="wave-view">
+      <canvas id="wave" role="img" aria-label="Audio waveform. Tap to seek. Pinch to zoom."></canvas>
+      <div id="waveSelection" class="wave-selection" hidden></div>
+      <div id="wavePlayhead" class="wave-playhead" hidden></div>
+      <div id="waveAxis" class="wave-axis" aria-hidden="true" hidden><span id="waveFrom"></span><span id="waveTo"></span></div>
+      <button id="openAudio" type="button">Open audio file</button>
+    </div>
+    <div class="audio-reference">
+      <span id="source" aria-label="Source filename">No file loaded</span>
+      <span id="clock">00:00.000 / 00:00.000</span>
+    </div>
+    <fieldset id="editControls" aria-label="Audio controls" disabled>
+      <div class="audio-transport">
+        <button id="start" type="button" title="Go to the start and pause">Start</button>
+        <button id="play" type="button" aria-label="Play / Pause">Play</button>
+        <button id="prev" type="button">−0.1s</button>
+        <button id="next" type="button">+0.1s</button>
+        <button id="preview" type="button" title="Play selection">Play cut</button>
+      </div>
+      <div class="audio-marks">
+        <div>
+          <button id="markIn" type="button" aria-label="Mark IN">IN</button>
+          <input id="in" type="number" aria-label="IN seconds" inputmode="decimal" min="0" step=".001" value="0">
+        </div>
+        <div>
+          <button id="markOut" type="button" aria-label="Mark OUT">OUT</button>
+          <input id="out" type="number" aria-label="OUT seconds" inputmode="decimal" min="0" step=".001" value="0">
+        </div>
+        <button id="fitWave" type="button" title="Fit the full waveform">Fit</button>
+      </div>
+      <div class="audio-save">
+        <input id="name" type="text" autocomplete="off" aria-label="Clip name" placeholder="Clip name" maxlength="120">
+        <button id="export" type="button">Save WAV</button>
+        <button id="clearSelection" type="button" title="Start a new cut">New cut</button>
+      </div>
+      <details id="audioMore">
+        <summary>More controls</summary>
+        <div class="audio-transport audio-secondary">
+          <button id="goIn" type="button">Go IN</button>
+          <button id="goOut" type="button">Go OUT</button>
+          <button id="reset" type="button">Reset editor</button>
+        </div>
+        <div class="audio-jump">
+          <input id="jumpTime" type="number" aria-label="Go to seconds" inputmode="decimal" min="0" step=".001" placeholder="Seconds">
+          <button id="goTime" type="button">Go</button>
+        </div>
+      </details>
+    </fieldset>
+    <p id="status" role="status"></p>
   </section>
-  <section class="wavlock-name">
-    <label for="name">Clip name</label>
-    <input id="name" type="text" autocomplete="off">
+  <div id="scribeActions"></div>
+  <details id="editorScribe"><summary>Scribe</summary></details>
+  <section id="savedClips" aria-labelledby="savedClipsTitle">
+    <h2 id="savedClipsTitle">Saved clips</h2>
+    <p id="clipStatus" role="status"></p>
+    <ul id="clipList"></ul>
   </section>
   <details id="wavlockEffects">
     <summary>Approved effects <span id="approvedCount" hidden></span></summary>
@@ -83,6 +82,11 @@ summary{cursor:pointer;min-height:34px}
     <div id="approvedList"></div>
     <p id="approvedStatus" role="status"></p>
   </details>
+  <nav class="audio-tool-nav" aria-label="Audio tools" data-audio-tool="wavlock">
+    <a href="../sxlock/" target="gs-audio-sxlock">SxLock</a>
+    <a href="../sound-scrubber/" target="gs-audio-sound-scrubber">Sound Scrubber</a>
+    <a href="../../" target="gs-audio-tools">Tools</a>
+  </nav>
 </main>
 </body>
 </html>

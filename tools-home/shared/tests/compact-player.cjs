@@ -146,55 +146,115 @@ async function checkWavLock(page){
  try{
   const path=join(dir,'source.mp3');
   execFileSync('ffmpeg',['-v','error','-f','lavfi','-i','sine=frequency=640:duration=4','-c:a','libmp3lame',path]);
+  await page.goto('http://127.0.0.1:8767/tools-home/tools/wavlock/');
   const open=page.getByRole('button',{name:'Open audio file',exact:true});
-  assert.ok((await open.boundingBox()).y<(await page.locator('.gs-player-workspace').boundingBox()).y);
+  const waveform=page.locator('#waveView');
+  const box=await waveform.boundingBox(), prompt=await open.boundingBox();
+  assert.ok(box.height<165&&box.width>310,'the waveform fills the short phone bed');
+  assert.ok(prompt.y>=box.y&&prompt.y+prompt.height<=box.y+box.height,'the initial opener sits inside the waveform bed');
+  assert.ok((await page.locator('#start').boundingBox()).y>=box.y+box.height,'transport sits below the waveform');
+  assert.ok((await page.locator('#scribeActions').boundingBox()).y>box.y+box.height,'Scribe sits below the player');
+  assert.equal(await page.locator('#audioPicker').isVisible(),false);
   assert.equal(await page.locator('#wavlockEffects').evaluate(node=>node.open),false);
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+
+  const touch=await page.context().newCDPSession(page);
+  const finger=(x,y,id)=>({x:Math.round(x),y:Math.round(y),id});
+  const send=(type,touchPoints=[])=>touch.send('Input.dispatchTouchEvent',{type,touchPoints});
+  const grip=await page.locator('#fileGrip').boundingBox();
+  await send('touchStart',[finger(grip.x+grip.width/2,grip.y+grip.height/2,1)]);
+  await send('touchMove',[finger(grip.x+grip.width/2,grip.y+grip.height/2+40,1)]);
+  await send('touchEnd');
+  assert.equal(await page.locator('#audioPicker').isVisible(),true,'pulling the grip reveals the picker');
+  await page.getByRole('button',{name:'Hide file picker',exact:true}).click();
+  assert.equal(await page.locator('#audioPicker').isVisible(),false);
+
   const picker=page.waitForEvent('filechooser');
   await open.click();
   await (await picker).setFiles(path);
-  await page.waitForFunction(()=>document.querySelector('.gs-player-filename').textContent==='source.mp3'&&document.querySelector('#audio').readyState>=2);
+  await page.waitForFunction(()=>document.querySelector('#source').textContent==='source.mp3'&&document.querySelector('#audio').readyState>=2);
+  assert.equal(await open.isVisible(),false);
+  const center=box.x+box.width/2,y=box.y+box.height/2;
+  const pinch=radius=>[finger(center-radius,y,1),finger(center+radius,y,2)];
+  const originalTo=await page.locator('#waveTo').textContent();
+  await send('touchStart',pinch(23));
+  for(const radius of [34,49,65,79])await send('touchMove',pinch(radius));
+  await send('touchEnd');
+  await page.waitForFunction(()=>document.querySelector('#waveFrom').textContent!=='00:00.000');
+  assert.notEqual(await page.locator('#waveTo').textContent(),originalTo);
+  assert.equal(await page.locator('#audio').evaluate(node=>node.currentTime),0,'pinching leaves the playhead in place');
 
+  const beforePan=await page.locator('#waveFrom').textContent();
+  await send('touchStart',[finger(center,y,1)]);
+  await send('touchMove',[finger(center+55,y,1)]);
+  await send('touchEnd');
+  assert.notEqual(await page.locator('#waveFrom').textContent(),beforePan,'one finger pans a zoomed waveform');
+  await send('touchStart',pinch(79));
+  for(const radius of [64,50,35,20])await send('touchMove',pinch(radius));
+  await send('touchEnd');
+  assert.equal(await page.locator('#waveTo').textContent(),originalTo,'pinching inward restores the wide view');
+  await page.getByRole('button',{name:'Fit',exact:true}).click();
+  assert.equal(await page.locator('#waveFrom').textContent(),'00:00.000');
+
+  async function expectWav(button,label,duration){
+   const pending=page.waitForEvent('download');
+   await button.click();
+   const download=await pending;
+   assert.equal(download.suggestedFilename(),label+'.wav');
+   const seconds=execFileSync('ffprobe',['-v','error','-show_entries','format=duration','-of','csv=p=0',await download.path()],{encoding:'utf8'});
+   assert.ok(Math.abs(Number(seconds)-duration)<.0001,'WAV cut matches the selection');
+  }
+  const scribe=page.locator('#scribeActions').getByRole('button',{name:'Scribe',exact:true});
   for(const [name,start,end] of [['First',.375,1.125],['Second',1.625,3.25]]){
    await page.locator('#in').fill(String(start));
    await page.locator('#out').fill(String(end));
    await page.getByRole('textbox',{name:'Clip name',exact:true}).fill(name);
-   const pending=page.waitForEvent('download');
-   await page.getByRole('button',{name:'Save WAV',exact:true}).click();
-   const download=await pending;
-   assert.equal(download.suggestedFilename(),name+'.wav');
-   const seconds=execFileSync('ffprobe',['-v','error','-show_entries','format=duration','-of','csv=p=0',await download.path()],{encoding:'utf8'});
-   assert.ok(Math.abs(Number(seconds)-(end-start))<.0001,'WAV cut matches the selection');
-
-   await page.getByRole('button',{name:'Scribe',exact:true}).click();
+   await expectWav(page.getByRole('button',{name:'Save WAV',exact:true}),name,end-start);
+   await page.getByRole('button',{name:'Edit '+name,exact:true}).waitFor();
+   await scribe.click();
    const notes=page.getByRole('textbox',{name:'Scribe notes',exact:true});
    await notes.fill(name+' clip note');
    await page.getByRole('button',{name:'Mark time',exact:true}).click();
    assert.match(await notes.inputValue(),new RegExp('\\[Audio .* \\| IN .* \\| OUT .* \\| '+name+'\\]'));
    await page.getByRole('button',{name:'Clear',exact:true}).click();
    await page.waitForFunction(()=>document.querySelector('#gs-scribeStatus').textContent==='Note kept in History.');
-   await page.getByRole('button',{name:'Scribe',exact:true}).click();
+   await scribe.click();
   }
+  await page.getByRole('button',{name:'Rename Second',exact:true}).click();
+  await page.getByRole('textbox',{name:'New clip name',exact:true}).fill('Second chorus');
+  await page.getByRole('button',{name:'Save name',exact:true}).click();
+  await page.getByRole('button',{name:'Edit Second chorus',exact:true}).waitFor();
+
   await page.reload();
-  await page.locator('#file').setInputFiles(path);
-  await page.waitForFunction(()=>document.querySelector('.gs-player-filename').textContent==='source.mp3'&&document.querySelector('#audio').readyState>=2);
-  await page.getByRole('button',{name:'Scribe',exact:true}).click();
+  await page.getByRole('button',{name:'Edit First',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('#source').textContent==='source.mp3'&&document.querySelector('#audio').readyState>=2);
+  assert.equal(await page.locator('#in').inputValue(),'0.375');
+  assert.equal(await page.locator('#out').inputValue(),'1.125');
+  assert.equal(await page.locator('#name').inputValue(),'First');
+  await page.locator('#out').fill('1.375');
+  await expectWav(page.getByRole('button',{name:'Update WAV',exact:true}),'First',1);
+  await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('Saved First'));
+  assert.equal(await page.locator('#clipList .saved-cut').count(),2,'editing updates the original row');
+  const play=page.getByRole('button',{name:'Play or pause Second chorus',exact:true});
+  await play.click();
+  await page.waitForFunction(()=>!document.querySelector('#audio').paused&&document.querySelector('#audio').currentTime>=1.625);
+  await page.waitForFunction(()=>document.querySelector('#audio').paused&&Math.abs(document.querySelector('#audio').currentTime-3.25)<.02);
+  await scribe.click();
   await page.getByRole('button',{name:'History',exact:true}).click();
   const history=page.getByRole('dialog',{name:'Scribe history'});
   await history.locator('li pre').filter({hasText:'| Second]'}).waitFor();
   await history.locator('li').filter({hasText:'| First]'}).getByRole('button',{name:'Restore'}).click();
-  assert.equal(await page.locator('#in').inputValue(),'0.375');
-  assert.equal(await page.locator('#out').inputValue(),'1.125');
-  assert.equal(await page.locator('#name').inputValue(),'First');
-  console.log('WavLock: cold phone file picker, two exact WAV cuts, and shared Scribe range restore passed.');
+  assert.equal(await page.locator('#out').inputValue(),'1.125','the earlier note restores its own original range');
+  console.log('WavLock phone layout, drawer, two-finger zoom, saved clip edits and playback, WAV timing, and shared Scribe recovery passed.');
  }finally{rmSync(dir,{recursive:true,force:true});}
 }
 
 (async()=>{const browser=await chromium.launch({executablePath:process.env.BROWSER_EXECUTABLE||undefined,headless:true});try{
- const pages=['cliplock/?mode=video','caplock/','sxlock/','aspectlock/','previewlock/cloud-test.html','framelock/','motionlock/','wavlock/'];
+ const pages=['cliplock/?mode=video','caplock/','sxlock/','aspectlock/','previewlock/cloud-test.html','framelock/','motionlock/'];
  for(const path of pages){const frameLock=path==='framelock/',capLock=path==='caplock/';const page=await browser.newPage({viewport:frameLock?{width:360,height:640}:{width:390,height:740},isMobile:true,hasTouch:true}),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('http://127.0.0.1:8767/tools-home/tools/'+path);await page.waitForSelector('.gs-player-shell');await page.waitForFunction(()=>[...document.querySelectorAll('input[type=range]:not([hidden]):not([data-gs-continuous])')].every(e=>e.hasAttribute('data-gs-protected-range')||e.closest('[inert]')));await page.waitForTimeout(200);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,path+' fits phone width');
   assert.equal(await page.locator('input[type=range]:not([data-gs-continuous])').evaluateAll(es=>es.some(e=>getComputedStyle(e).display!=='none'&&e.getBoundingClientRect().width>0)),false,path+' has no draggable ranges');
-  if(path!=='wavlock/'&&path!=='sxlock/'){
+  if(path!=='sxlock/'){
    const ref=page.locator('.gs-video-reference');
    const shortcut=ref.getByRole('button',{name:'Scribe',exact:true});
    if(path==='aspectlock/'){
@@ -217,7 +277,12 @@ async function checkWavLock(page){
   for(const b of heights)assert.equal(b.h,b.frame?frameHeight:b.id==='liveRecord'?40:['liveStop','saveTake'].includes(b.id)?25:rowHeight,path+' locks single-row height for '+b.id);
   const pair=page.locator('.gs-frame-pair');if(await pair.count()){const r=await pair.first().evaluate(e=>[...e.children].map(n=>n.getBoundingClientRect().top));assert.equal(new Set(r).size,1,path+' frame buttons share one row');}await page.getByRole('button',{name:'Show file picker',exact:true}).click();assert.equal(await page.locator('.gs-source-drawer').isVisible(),true);await page.getByRole('button',{name:'Hide file picker',exact:true}).click();assert.equal(await page.locator('.gs-source-drawer').isVisible(),false);
   if(frameLock)await checkFrameLock(page);
-  if(path==='wavlock/')await checkWavLock(page);
   assert.deepEqual(errors,[],path+' initializes without script errors');await page.close();
- }console.log('Eight editors share the locked SxLock rail, paired frame buttons, matching monitor and hidden file drawer.');
+ }
+ const wavPage=await browser.newPage({viewport:{width:360,height:640},isMobile:true,hasTouch:true,acceptDownloads:true});
+ const wavErrors=[];wavPage.on('pageerror',error=>wavErrors.push(error.message));
+ await checkWavLock(wavPage);
+ assert.deepEqual(wavErrors,[],'WavLock audio editor has no script errors');
+ await wavPage.close();
+ console.log('Seven video editors share the locked SxLock player.');
  }finally{await browser.close();}})().catch(e=>{console.error(e);process.exit(1);});

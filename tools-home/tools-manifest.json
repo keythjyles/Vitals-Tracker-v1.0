@@ -44,9 +44,9 @@
     },
     {
       "tool": "wavlock",
-      "source_version": "R1.7",
+      "source_version": "R1.8",
       "hosted_path": "tools/wavlock/index.html",
-      "description": "Open device audio, preview and save precise WAV cuts, and mark time and clip ranges in shared Scribe. Approved effects open on demand.",
+      "description": "Pinch and pan the audio waveform, save and reopen named WAV cuts, and mark ranges in shared Scribe.",
       "tool_id": "GS-TOOL-WAVLOCK",
       "navigation": [
         "sound-scrubber",
