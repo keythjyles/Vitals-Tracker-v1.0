@@ -1,3 +1,9 @@
+## Drive Manager R1 — direct Drive access from Vitals and Tools
+
+Owner requested one accessible file manager after repeated missing/trashed-folder links. The existing Render service serves a phone-friendly Drive browser with current paths, whole-Drive search, sort, pinned folders, explicit file changes, resumable uploads and original-folder restoration. The existing Google client receives a separate full-Drive offline grant; encrypted HttpOnly credentials survive service restarts and refresh access without routine logins. Google consent remains required for the broader permission. No new service or plan is introduced. Sound, video, source assets and existing OAuth flows are preserved.
+
+All 108 service tests pass, including nine focused Drive provider-fixture tests. Browser fixture checks passed for inherited Trash restoration, original IDs, report renaming, connection retention on reload and a 390px phone layout. The owner's live Google grant remains a separate verification step. [Operation and rollback](drive-manager/README.md). Source baseline `215c8adbdaf5248d862236c00044c84206ff0ba5`.
+
 ## Sound Scrubber R14.14 — clear during an active decision
 
 The owner's R14.13 screenshot showed 931 candidates and “Finish the current recording or decision, then clear all.” That guard blocked clearing whenever an approval, deletion or playback capture was unfinished. R14.14 removes the guard. Clear all cancels unfinished approvals and capture immediately, empties the decision slate and removes its audio/metadata without a history or blacklist. Completed library approvals and already-started managed cloud cleanup remain in their existing workflows.

@@ -2,6 +2,16 @@
   "version": "1.3",
   "tools": [
     {
+      "tool": "drive-manager",
+      "tool_id": "VT-DRIVE-MANAGER",
+      "source_version": "R1",
+      "hosted_path": "tools/drive-manager/index.html",
+      "description": "Browse and search Google Drive, rename and move files, upload with progress, and restore the original items from Trash.",
+      "operator_guide": "tools/drive-manager/README.md",
+      "backend": "services/previewlock-api/drive-manager.mjs",
+      "authentication": "One Google offline full-Drive grant, encrypted HttpOnly browser session, automatic token refresh."
+    },
+    {
       "tool": "studio",
       "tool_id": "GS-TOOL-STUDIO",
       "source_version": "R2",

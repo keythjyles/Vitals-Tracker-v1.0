@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+ <meta name="theme-color" content="#102337">
+ <title>Drive Manager · VT-DRIVE-MANAGER · R1</title>
+ <link rel="manifest" href="/drive/manifest.webmanifest">
+ <link rel="icon" href="/drive/icon.svg" type="image/svg+xml">
+ <link rel="stylesheet" href="/drive/manager.css?v=1">
+ <script type="module" src="/drive/manager.mjs?v=1"></script>
+</head>
+<body>
+ <a class="skip" href="#files">Skip to files</a>
+ <header class="header">
+  <div><h1>Drive Manager</h1><span class="identity">VT-DRIVE-MANAGER · R1</span></div>
+  <nav aria-label="Your tools"><a href="https://keythjyles.github.io/Vitals-Tracker-v1.0/">Vitals</a><a href="https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/">Tools</a></nav>
+ </header>
+ <section class="account"><span id="accountText" role="status">Checking your connection…</span><a id="connect" class="button primary" href="/drive/connect" hidden>Connect Google Drive</a><button id="disconnect" class="small" hidden>Disconnect</button></section>
+ <p id="notice" class="notice" role="status" hidden></p>
+ <div class="layout" id="workspace" hidden>
+  <aside>
+   <nav class="views" aria-label="Drive views">
+    <button data-view="folder" class="active">My Drive</button><button data-view="recent">Recent</button><button data-view="starred">Starred</button><button data-view="shared">Shared with me</button><button data-view="trash">Trash</button>
+   </nav>
+   <details class="pins"><summary>Pinned folders</summary><div id="pins"></div><button id="pinCurrent" class="small">Pin this folder</button></details>
+  </aside>
+  <main id="files" tabindex="-1">
+   <form id="searchForm" class="search"><label class="sr-only" for="query">Search all Drive files and folders</label><input id="query" type="search" placeholder="Find any file or folder" autocomplete="off"><button type="submit" class="primary">Search</button><button type="button" id="clearSearch" hidden>Clear</button></form>
+   <div class="location-bar"><nav id="breadcrumbs" aria-label="Folder path"></nav><button id="copyLocation" class="small" title="Copy a link to this exact folder">Copy link</button></div>
+   <div id="trashWarning" class="warning" hidden><p id="trashWarningText"></p><button id="restoreLocation" class="primary">Restore original folder</button></div>
+   <div class="toolbar"><h2 id="viewTitle">My Drive</h2><div class="actions"><label class="sort">Sort <select id="sort"><option value="name">Name</option><option value="modified">Newest first</option><option value="oldest">Oldest first</option><option value="type">File type</option><option value="size">Largest first</option></select></label><button id="refresh">Refresh</button><button id="newFolder">New folder</button><button id="upload" class="primary">Upload</button><input id="uploadInput" type="file" multiple hidden></div></div>
+   <div class="list-heading"><label><input id="selectAll" type="checkbox"> Select <span id="selectLabel">files</span></label><span id="count" role="status"></span></div>
+   <div id="error" class="error" role="alert" hidden></div>
+   <div id="fileList" role="list" aria-label="Files and folders"></div>
+   <p id="empty" class="empty" hidden></p><button id="more" class="more" hidden>Load more</button>
+   <section id="uploadPanel" class="upload-panel" hidden aria-label="Upload progress"><h3>Uploads</h3><p id="uploadTarget"></p><div id="uploadJobs"></div></section>
+   <details class="activity"><summary>Recent changes on this device</summary><div id="activity"></div></details>
+  </main>
+ </div>
+ <section id="connectInfo" class="connect-info" hidden><h2>Your Drive, in one place</h2><p>Browse folders, find files, rename or move them, and restore originals from Trash.</p><p>Approve Google access once. This browser keeps its connection and renews access in the background. File contents stay in your Google Drive.</p><a class="button primary" href="/drive/connect">Connect Google Drive</a></section>
+ <div id="selection" class="selection" hidden><strong id="selectedCount"></strong><button id="moveSelected">Move</button><button id="restoreSelected" class="primary" hidden>Restore</button><button id="trashSelected" class="danger">Move to Trash</button><button id="clearSelected">Clear</button></div>
+ <dialog id="dialog"><div class="dialog-header"><h2 id="dialogTitle"></h2><button id="dialogClose" aria-label="Close dialog">Close</button></div><div id="dialogBody"></div><div id="dialogActions" class="dialog-actions"></div></dialog>
+ <div id="toast" class="toast" role="status" hidden></div>
+</body>
+</html>

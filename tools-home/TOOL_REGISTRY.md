@@ -1,5 +1,9 @@
 # Tools and media export audit
 
+## Drive Manager R1
+
+[Drive Manager](tools/drive-manager/) is available from Vitals Tracker and the Tools directory. It uses the existing private Render backend for current Drive listings, full-file search, real folder paths, explicit move/rename/copy/upload controls, and restoration of original IDs from Trash. Google grants offline full-Drive access once; the encrypted browser session renews access without routine sign-in. [Connection, verification and rollback](tools/drive-manager/README.md). It does not reorganize files on load or change media editors.
+
 November 14, 2026. The inventory covers the [Tools directory](https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/) and the editor paths it opens. Source comparison is based on `0f0e4a11cc44b754160a8309cf52f08d34c6f816`. The audit uses SxLock R40 as the reference. The CapLock R31 and Tools R2 changes are included in this review.
 
 For ownership, shared controls and approval of system changes, read the [GS video tools master plan](GS_VIDEO_TOOLS_MASTER_PLAN.md).
