@@ -1,0 +1,51 @@
+{
+  "schema": "SoundScrubberIntake-1",
+  "batchId": "gs-sx-20261122-am-01",
+  "localDate": "2026-11-22",
+  "timezone": "America/Chicago",
+  "candidateCount": 2,
+  "discoverySource": "Wikimedia Commons file pages examined 2026-11-22; original URL, author and public-domain license verified; duplicate Barking of a dog.ogg rejected by Dropbox source copy match",
+  "reviewStatus": "PENDING",
+  "liveQueueImported": false,
+  "notes": "Only metadata-linked pending candidates. No listening, cloud audio save, SxLock insertion or owner approval. Renamed/private browser review histories not comprehensively accessible.",
+  "candidates": [
+    {
+      "candidateId": "gs-sx-20261122-01",
+      "name": "Rain.ogg",
+      "category": "Nature / weather / rainfall",
+      "source": "Wikimedia Commons",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Rain.ogg",
+      "previewUrl": "https://commons.wikimedia.org/wiki/File:Rain.ogg",
+      "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/3/3d/Rain.ogg",
+      "license": "Public domain (author dedication)",
+      "licenseUrl": "https://commons.wikimedia.org/wiki/File:Rain.ogg#Licensing",
+      "author": "ジダネ",
+      "durationSeconds": 10,
+      "sourceDescription": "Rainfall recording from Japan, original own-work sound",
+      "status": "PENDING",
+      "ownerApproved": false,
+      "importedToLiveQueue": false,
+      "audioAuditioned": false,
+      "dedupeCheck": "Not among 86 earlier indexed manifest candidates; Dropbox Sound Effects exact filename search returned zero on 2026-11-22; unseen browser-review history unverified"
+    },
+    {
+      "candidateId": "gs-sx-20261122-02",
+      "name": "Rain against the window.ogg",
+      "category": "Nature / weather / rain and wind at window",
+      "source": "Wikimedia Commons (PDSounds archive)",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Rain_against_the_window.ogg",
+      "previewUrl": "https://commons.wikimedia.org/wiki/File:Rain_against_the_window.ogg",
+      "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/4/41/Rain_against_the_window.ogg",
+      "license": "Public domain (PDSounds)",
+      "licenseUrl": "https://commons.wikimedia.org/wiki/File:Rain_against_the_window.ogg#Licensing",
+      "author": "cori",
+      "durationSeconds": 82,
+      "sourceDescription": "Rain lashing a window with strong seaside wind gusts on an English summer day, recorded from windowsill",
+      "status": "PENDING",
+      "ownerApproved": false,
+      "importedToLiveQueue": false,
+      "audioAuditioned": false,
+      "dedupeCheck": "Not among 86 earlier indexed manifest candidates; Dropbox Sound Effects exact filename search returned zero on 2026-11-22; unseen browser-review history unverified"
+    }
+  ]
+}
