@@ -10,11 +10,60 @@
   ],
   "verification": {
     "local": "14 background/project tests and syntax passed",
-    "browser": "in progress",
+    "browser": "Published R38: actual default Layer 0 + foreground workflow, automatic green sampling, explicit Green screen preset, 0% background opacity, MP4 download completed. Independent FFprobe and decoded-pixel check passed.",
     "ci": "pending",
-    "deployment": "pending",
+    "deployment": {
+      "pages_run": 45152759707,
+      "result": "success",
+      "live_url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/caplock/?v=R38-green&recover=local"
+    },
     "ownerSource": "not available in this workspace",
-    "physicalAndroid": "not verified"
+    "physicalAndroid": "not verified",
+    "branch_ci": {
+      "caplock": 45152247185,
+      "studio": 45152247254,
+      "cliplock": 45152247164,
+      "result": "all passed; 73 code checks plus full browser media/export/recovery suite"
+    },
+    "live_export": {
+      "width": 180,
+      "height": 320,
+      "fps": 25,
+      "video_frames": 25,
+      "has_audio": true,
+      "pixels": {
+        "screen": [
+          32,
+          49,
+          68
+        ],
+        "finger": [
+          213,
+          153,
+          109
+        ],
+        "camera": [
+          5,
+          0,
+          0
+        ],
+        "room": [
+          164,
+          103,
+          49
+        ]
+      }
+    },
+    "main_ci": {
+      "caplock_run": 45152760180,
+      "caplock": "running; package installation at last observation",
+      "cliplock_run": 45152760021,
+      "cliplock": "passed",
+      "studio_run": 45152759940,
+      "studio": "passed"
+    }
   },
-  "rollback": "Restore source from baseline while preserving project JSON, browser recovery data and original media."
+  "rollback": "Restore source from baseline while preserving project JSON, browser recovery data and original media.",
+  "source_commit": "5f6284bf6e559debe2d931cf0614b3e70f09bad9",
+  "next_action": "Open the R38 recovery link in the owner browser. Select the phone-scene layer, Background > Transparent > Green screen, background opacity 0%. Retain the card underneath and its finger-aligned timing. The supplied screenshot shows the card ending at F300 and the phone at F400; keep the card visible for the required full span."
 }
