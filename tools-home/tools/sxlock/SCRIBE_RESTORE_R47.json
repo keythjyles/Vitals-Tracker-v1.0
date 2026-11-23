@@ -31,13 +31,59 @@
       "primary_actions_at_320px": "passed",
       "hide_reopen": "passed",
       "history_restore": "passed",
-      "source_bound_frame_mark": "pending",
-      "source_bound_reload": "pending"
+      "source_bound_frame_mark": {
+        "result": "passed",
+        "source": "Scribe_R47_fixture.mp4 (synthetic)",
+        "fps": 25,
+        "frame": 169,
+        "time": 6.76,
+        "mark": "[F169 | 0:06.760 | 25 fps]"
+      },
+      "source_bound_reload": "passed after native asynchronous project/media restore",
+      "copy_notes": "passed",
+      "playback_pause": "passed: opening Scribe used native Pause; current time remained 6.768s (F169)",
+      "other_docked_section": "passed: reopened Scribe from Mixer without changing the note"
     },
-    "ci": "pending",
+    "ci": [
+      {
+        "id": 45122550168,
+        "name": "SxLock media regression",
+        "result": "success",
+        "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/45122550168"
+      },
+      {
+        "id": 45122550281,
+        "name": "GS Studio checks",
+        "result": "success",
+        "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/45122550281"
+      },
+      {
+        "id": 45122550250,
+        "name": "ClipLock cutter checks",
+        "result": "success",
+        "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/45122550250"
+      }
+    ],
     "deployment": "pending",
     "physical_android": "not performed",
-    "live_cloud_sync": "not performed"
+    "live_cloud_sync": "not performed",
+    "first_branch_run": {
+      "id": 45120688120,
+      "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/45120688120",
+      "result": "failed: added assertion read note before asynchronous project restoration completed",
+      "engine_matrix": "passed",
+      "node_checks": {
+        "passed": 113,
+        "failed": 0
+      },
+      "correction": "Wait for the expected restored note before asserting; no product change."
+    },
+    "branch_node_checks": {
+      "passed": 113,
+      "failed": 0
+    },
+    "branch_media_engine_matrix": "passed, including visual/source sound, fades, mix cues, project recovery, exports and measurements"
   },
-  "rollback": "Revert R47 source changes to baseline, retaining original media, browser projects and all Scribe records."
+  "rollback": "Revert R47 source changes to baseline, retaining original media, browser projects and all Scribe records.",
+  "tested_commit": "23b267e122730e1da419691c82300ab68e89c379"
 }

@@ -1,3 +1,9 @@
+## SxLock R47 — restore direct Scribe access
+
+Owner request: restore the important Scribe tool and compare it with the other editors. The shared editors expose a named Scribe button; native SxLock had moved its section into a hidden dock and collapsed it on every reload. A permanent gold Scribe button now opens the original editor below the player. Preserve frame marks, Clear/Copy, History and handoff controls, existing saved notes, and source-bound projects. Remember Scribe's visibility; legacy dock preferences reopen Scribe. Other modules remain collapsed on launch.
+
+Branch `sxlock-r47-restore-scribe`, baseline/rollback `c6729268a8ea4344d5ecdbb97d326eba777832c3`. Five local duration/mix checks and JavaScript syntax checks passed. The browser preview verified named access, 320px primary actions, exact F169 / 6.760s marking, Copy, native Pause, source-bound reload, History recovery and reopening from Mixer. Branch `23b267e122730e1da419691c82300ab68e89c379` passed SxLock media regression 45122550168 (113 Node checks, media exports and phone/dock/recovery regression), Studio 45122550281 and ClipLock 45122550250. The first added reload assertion ran before asynchronous recovery; its corrected wait passed. Deployment remains pending. [Release receipt](sxlock/SCRIBE_RESTORE_R47.json). Preserve original media, projects and Scribe records on rollback.
+
 ## Drive Manager R1 — direct Drive access from Vitals and Tools
 
 Owner requested one accessible file manager after repeated missing/trashed-folder links. The existing Render service serves a phone-friendly Drive browser with current paths, whole-Drive search, sort, pinned folders, explicit file changes, resumable uploads and original-folder restoration. The existing Google client receives a separate full-Drive offline grant; encrypted HttpOnly credentials survive service restarts and refresh access without routine logins. Google consent remains required for the broader permission. No new service or plan is introduced. Sound, video, source assets and existing OAuth flows are preserved.
@@ -747,13 +753,3 @@ Behavior commit `34262bb6142c1282975d4d536d5bb99fc26ddf5a`:43 Node tests and ful
 Historical lock instructions below are superseded by this correction.
 
 ---
-
-
-
-
-## SxLock R47 — restore direct Scribe access
-
-Owner request: restore the important Scribe tool and compare it with the other editors. The shared editors expose a named Scribe button; native SxLock had moved its section into a hidden dock and collapsed it on every reload. A permanent gold Scribe button now opens the original editor below the player. Preserve frame marks, Clear/Copy, History and handoff controls, existing saved notes, and source-bound projects. Remember Scribe's visibility; legacy dock preferences reopen Scribe. Other modules remain collapsed on launch.
-
-Branch `sxlock-r47-restore-scribe`, baseline/rollback `c6729268a8ea4344d5ecdbb97d326eba777832c3`. Five existing duration/mix checks and JavaScript syntax checks passed. The browser preview verified named access, 320px primary actions, hide/reopen and local History recovery. Source-bound media, CI and deployment checks are in progress; do not infer them from those results. [Release receipt](sxlock/SCRIBE_RESTORE_R47.json). Preserve original media, projects and Scribe records on rollback.
-
