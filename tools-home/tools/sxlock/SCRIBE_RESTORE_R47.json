@@ -64,7 +64,16 @@
         "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/45122550250"
       }
     ],
-    "deployment": "pending",
+    "deployment": {
+      "result": "success",
+      "pages_run_id": 45122946670,
+      "pages_url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/45122946670",
+      "live_url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/sxlock/?v=47",
+      "visible_release": "R47",
+      "legacy_scribe_dock": "reopened visibly on the actual public page",
+      "hide_and_named_reopen": "passed",
+      "open_scribe_after_reload": "passed"
+    },
     "physical_android": "not performed",
     "live_cloud_sync": "not performed",
     "first_branch_run": {
@@ -82,8 +91,32 @@
       "passed": 113,
       "failed": 0
     },
-    "branch_media_engine_matrix": "passed, including visual/source sound, fades, mix cues, project recovery, exports and measurements"
+    "branch_media_engine_matrix": "passed, including visual/source sound, fades, mix cues, project recovery, exports and measurements",
+    "main_checks": [
+      {
+        "id": 45122946751,
+        "name": "SxLock media regression",
+        "status": "completed",
+        "result": "success",
+        "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/45122946751"
+      },
+      {
+        "id": 45122946818,
+        "name": "GS Studio checks",
+        "status": "completed",
+        "result": "success",
+        "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/45122946818"
+      },
+      {
+        "id": 45122946771,
+        "name": "ClipLock cutter checks",
+        "status": "completed",
+        "result": "success",
+        "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/45122946771"
+      }
+    ]
   },
   "rollback": "Revert R47 source changes to baseline, retaining original media, browser projects and all Scribe records.",
-  "tested_commit": "23b267e122730e1da419691c82300ab68e89c379"
+  "tested_commit": "23b267e122730e1da419691c82300ab68e89c379",
+  "deployed_code_commit": "dfb07308502d35372935c38b4206a3d56558a7fa"
 }
