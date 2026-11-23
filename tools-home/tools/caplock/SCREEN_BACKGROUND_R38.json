@@ -1,0 +1,20 @@
+{
+  "release": "CapLock R38",
+  "branch": "caplock-r38-phone-green-screen",
+  "baseline": "5562cc9c1cf4b971b5d2f4cfded2181d21cba37c",
+  "request": "Make the green phone screen transparent above the scrolling card, preserving finger occlusion.",
+  "changes": [
+    "Opt-in internal green/blue screen detection for explicit background commands.",
+    "Direct Green screen and Blue screen key presets, with 0% background opacity.",
+    "Same existing alpha rendering in preview and export; original media and saved timing retained."
+  ],
+  "verification": {
+    "local": "14 background/project tests and syntax passed",
+    "browser": "in progress",
+    "ci": "pending",
+    "deployment": "pending",
+    "ownerSource": "not available in this workspace",
+    "physicalAndroid": "not verified"
+  },
+  "rollback": "Restore source from baseline while preserving project JSON, browser recovery data and original media."
+}

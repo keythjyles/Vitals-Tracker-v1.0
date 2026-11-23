@@ -1,5 +1,7 @@
 # CapLock operating notes
 
+R38: explicit Transparent/Sample clip can find an internal green or blue screen when scene edges are not uniform. Green screen and Blue screen directly choose the key and 0% background opacity. Ordinary import detection remains edge-only. Preserve the existing saved edit and original media; see SCREEN_BACKGROUND_R38.json for evidence and rollback.
+
 Read the [GS video tools master plan](../../GS_VIDEO_TOOLS_MASTER_PLAN.md) and the [root operating rules](../../../AGENTS.md) before editing this app.
 
 Assemble multiple independent caption, graphic and media placements. Keep Layer 0, source trim, the editable timeline and the existing CapLock project and export paths.
@@ -17,3 +19,4 @@ R35 uses the shared insertion settings layout for placement timing, renaming and
 R36 uses the shared **Audio** section for media insertions. It recalls the last audible level when sound is turned back on. Earlier projects keep their saved levels. The existing source-audio diagnostics and offline mix still read the selected clip. Rollback is `fee523aa67c127f233e8e6143b1f3531ac1be190`.
 
 R37 adds frame-based audio fades at each placement edge and uses the saved envelope for both preview and MP4 export. Rollback revision `3e5b257c2601c453747bb7891087762d5958d213`.
+

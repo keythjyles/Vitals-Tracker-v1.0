@@ -5,14 +5,14 @@ import {setupPinnedSections} from '../../shared/pinned-sections.mjs?v=32';
 import {writeFrameClock,frameStepControl} from '../../shared/frame-stamp.mjs?v=2';
 import {compositionFrames,bedTime,TailClock} from './composition-time.mjs?v=25';
 import {percentGain,inspectSourceAudio} from './source-audio.mjs?v=28';
-import {createToolboxUI} from './toolbox-ui.mjs?v=37';
+import {createToolboxUI} from './toolbox-ui.mjs?v=38';
 import {rememberLocalMedia,readLocalMedia} from './local-media.mjs?v=31';
-import {isToolboxEntry,makeToolboxPlacement,fitVideoPlacement,setPlacementSpeed,shiftPlacementIn,fitPlacementOut} from './toolbox-core.mjs?v=35';
+import {isToolboxEntry,makeToolboxPlacement,fitVideoPlacement,setPlacementSpeed,shiftPlacementIn,fitPlacementOut} from './toolbox-core.mjs?v=38';
 import {inspectToolboxFile} from './toolbox-media.mjs?v=28';
 import {createTrimDialog} from './trim-dialog.mjs?v=28';
 import {passFilename,matchLocalFile,localPassKey} from './local-pass.mjs?v=21';
-import {renderCaptioned} from './composite.mjs?v=37';
-import {DEFAULT_CHROMA,DEFAULT_REPLACEMENT_COLOR,detectBackground} from './background.mjs?v=33';
+import {renderCaptioned} from './composite.mjs?v=38';
+import {DEFAULT_CHROMA,DEFAULT_REPLACEMENT_COLOR,detectBackground} from './background.mjs?v=38';
 import {captionJobStatus} from '../../shared/caption-job-status.mjs?v=1';
 import {stageAsset,stageRecord,stageFilename,captionRecipe,stageForName,pendingCaptions} from '../../shared/production-stages.mjs?v=34';
 import {saveProductionStage} from '../../shared/production-client.mjs?v=1';
@@ -29,8 +29,8 @@ import {captionNumber,numberedCaptionFiles,activeCaption,startCaptionSequence,na
 import {paintMatrix,matrixFrame} from '../../shared/item-matrix.mjs?v=1';
 import {rateOf,fitRate} from './clip-time.mjs?v=28';
 import {words,moveWords,shiftWords,geminiPrompt} from './script.mjs?v=4';
-import {LayerTracks} from './layer-track.mjs?v=37';
-import {FPS,DEFAULT_STYLE,createProject,phrase,importTranscript,subtitle,timed,effective,validateProject,validateStyle} from './core.mjs?v=37';
+import {LayerTracks} from './layer-track.mjs?v=38';
+import {FPS,DEFAULT_STYLE,createProject,phrase,importTranscript,subtitle,timed,effective,validateProject,validateStyle} from './core.mjs?v=38';
 const $=id=>document.getElementById(id),v=$('video'),API='https://gs-previewlock-api.onrender.com';
 // Owner lock: built-in text captions cannot be enabled by UI, URL, or restored data.
 const BUILTIN_CAPTIONING_LOCKED=true;
@@ -596,7 +596,7 @@ function renderBackground(clip) {
  $('chromaBlend').value=Math.round(key.blend*100);
  $('chromaOpacity').value=Math.round((key.backgroundOpacity??Number(mode==='replace'))*100);
  $('chromaOpacityValue').textContent=$('chromaOpacity').value+'%';
- for(const id of ['chromaColor','chromaReplacementColor','chromaAuto','chromaOpacity','chromaSimilarity','chromaBlend'])$(id).disabled=unavailable||!!clip?.locked||mode==='keep';
+ for(const id of ['chromaColor','chromaReplacementColor','chromaAuto','chromaGreen','chromaBlue','chromaOpacity','chromaSimilarity','chromaBlend'])$(id).disabled=unavailable||!!clip?.locked||mode==='keep';
 }
 
 // Preview while dragging and commit only once for undo and recovery.
@@ -634,7 +634,7 @@ previewOpacity('clipOpacity','clipOpacityValue','opacity');
 previewOpacity('chromaOpacity','chromaOpacityValue','backgroundOpacity');
 function sampleClipBackground(clip){
  const source=layers.media.get(clip.id)?.el;
- return source ? detectBackground(source,{includeAlpha:true}) : null;
+ return source ? detectBackground(source,{includeAlpha:true,includeScreens:true}) : null;
 }
 
 for(const [mode,id] of Object.entries(backgroundButtons))$(id).onclick=()=>{
@@ -657,6 +657,15 @@ for(const [mode,id] of Object.entries(backgroundButtons))$(id).onclick=()=>{
  change(()=>{
   clip.chroma={...(sampled||previous),enabled:true,backgroundOpacity:Number(replace),...(replacement?{replacement}:{})};
  });
+ if(!sampled&&!previous.enabled&&previous.backgroundOpacity===undefined)say('Choose Green screen, Blue screen, or the source color to remove.');
+};
+
+for(const [id,color] of [['chromaGreen','#00dd00'],['chromaBlue','#0060ff']])$(id).onclick=()=>{
+ const clip=clipCurrent();
+ if(!clip||clip.locked||clip.type==='audio')return;
+ const previous=clip.chroma||DEFAULT_CHROMA;
+ change(()=>{clip.chroma={...previous,enabled:true,sourceAlpha:false,color,backgroundOpacity:0,replacement:previous.replacement?{...previous.replacement,enabled:false}:undefined};});
+ say('Screen color removed. Lower layers show through; the finger stays in front.');
 };
 
 for(const [id,property] of [['chromaSimilarity','similarity'],['chromaBlend','blend']])$(id).onchange=()=>{
@@ -1064,3 +1073,4 @@ window.addEventListener('DOMContentLoaded', () => {
  player.append($('capPinnedSections'));
  setupPinnedSections({host:$('capPinnedSections'),player,key:'caplock-pinned-section'});
 }, {once:true});
+

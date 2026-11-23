@@ -42,10 +42,45 @@ export function inferBackground(pixels,width,height,{includeAlpha=false}={}){
  if(samples.filter(p=>distance(...p.map((v,k)=>v-median[k]))<.045).length<samples.length*.9)return null;
  return {...DEFAULT_CHROMA,color:'#'+median.map(v=>v.toString(16).padStart(2,'0')).join('')};
 }
+// Only used after an explicit background command. A screen inside a filmed
+// scene does not reach the frame's edges, unlike a caption's solid backdrop.
+export function inferChromaScreen(pixels,width,height){
+ const bins=new Map();
+ for(let i=0;i<pixels.length;i+=4){
+  const [r,g,b,a]=pixels.subarray(i,i+4);
+  if(a<250||!((g>=140&&g>2*r+24&&g>2*b+24)||(b>=140&&b>2*r+24&&b>1.5*g+24)))continue;
+  const bin=(r>>5)*64+(g>>5)*8+(b>>5),group=bins.get(bin)||[];
+  group.push(i/4);bins.set(bin,group);
+ }
+ const minimum=Math.max(16,Math.ceil(width*height*.015));
+ let best=null;
+ for(const group of bins.values()){
+  if(group.length<minimum)continue;
+  const members=new Set(group);let largest=[];
+  while(members.size){
+   const queue=[members.values().next().value];members.delete(queue[0]);
+   for(let n=0;n<queue.length;n++){
+    const at=queue[n],x=at%width,y=Math.floor(at/width);
+    for(const next of [x>0?at-1:-1,x<width-1?at+1:-1,y>0?at-width:-1,y<height-1?at+width:-1]){
+     if(members.delete(next))queue.push(next);
+    }
+   }
+   if(queue.length>largest.length)largest=queue;
+  }
+  if(largest.length<minimum||best&&largest.length<=best.length)continue;
+  best=largest;
+ }
+ if(!best)return null;
+ const median=[0,1,2].map(channel=>best.map(at=>pixels[at*4+channel]).sort((a,b)=>a-b)[Math.floor(best.length/2)]);
+ return {...DEFAULT_CHROMA,color:'#'+median.map(v=>v.toString(16).padStart(2,'0')).join(''),similarity:.1};
+}
 export function detectBackground(source,options){
  const canvas=document.createElement('canvas');canvas.width=64;canvas.height=64;
  const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.clearRect(0,0,64,64);ctx.drawImage(source,0,0,64,64);
- return inferBackground(ctx.getImageData(0,0,64,64).data,64,64,options);
+ const pixels=ctx.getImageData(0,0,64,64).data;
+ const border=inferBackground(pixels,64,64,options);
+ if(border?.sourceAlpha)return border;
+ return (options?.includeScreens?inferChromaScreen(pixels,64,64):null)||border;
 }
 export function fillReplacement(ctx,key){
  if(!key.replacement?.enabled)return;
@@ -73,3 +108,4 @@ export class BackgroundSurface{
   return this.canvas;
  }
 }
+

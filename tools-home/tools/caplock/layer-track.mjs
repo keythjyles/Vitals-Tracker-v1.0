@@ -1,7 +1,7 @@
 import {fadeGainAt} from '../../shared/clip-audio.mjs?v=2';
-import {FPS} from './core.mjs?v=37';
+import {FPS} from './core.mjs?v=38';
 import {clipTime,pictureTime} from './clip-time.mjs?v=28';
-import {BackgroundSurface,DEFAULT_CHROMA,detectBackground} from './background.mjs?v=33';
+import {BackgroundSurface,DEFAULT_CHROMA,detectBackground} from './background.mjs?v=38';
 /* Independent reusable media-layer preview. Source picture/audio are never rewritten. */
 export class LayerTracks{
  constructor(root,{getClips,getFrame,getPlayhead,isPlaying,getStagedId,onSelect,onChange,onStatus,getMode,onDragStart,isFocused}){Object.assign(this,{root,getClips,getFrame,getPlayhead,isPlaying,getStagedId,onSelect,onChange,onStatus,getMode,onDragStart,isFocused});this.media=new Map();this.selected=null;this.generation=0;}
@@ -83,4 +83,5 @@ export class LayerTracks{
  }
  drag(e,id){this.onSelect(id);const c=this.getClips().find(c=>c.id===id);if(c?.locked){this.onStatus('Caption placement locked. Use Unlock placement to edit it.');return;}if(this.getMode()!=='move')return;e.stopPropagation();e.preventDefault();this.onDragStart();const box=this.root.getBoundingClientRect(),start={x:e.clientX,y:e.clientY,cx:c.x,cy:c.y};e.currentTarget.setPointerCapture(e.pointerId);const wrap=e.currentTarget;const move=p=>{c.x=Math.max(-100,Math.min(200,start.cx+(p.clientX-start.x)/box.width*100));c.y=Math.max(-100,Math.min(200,start.cy+(p.clientY-start.y)/box.height*100));this.update();};const finish=()=>{wrap.removeEventListener('pointermove',move);wrap.removeEventListener('pointerup',finish);wrap.removeEventListener('pointercancel',finish);this.onChange();};wrap.addEventListener('pointermove',move);wrap.addEventListener('pointerup',finish,{once:true});wrap.addEventListener('pointercancel',finish,{once:true});}
 }
+
 

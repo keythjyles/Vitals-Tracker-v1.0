@@ -1,5 +1,5 @@
 import {fitInsertionRate} from '../../shared/insertion-settings.mjs?v=1';
-import {validateChroma} from './background.mjs?v=33';
+import {validateChroma} from './background.mjs?v=38';
 import {clipRange} from './clip-time.mjs?v=28';
 export function isToolboxEntry(search,studio=false){const params=new URLSearchParams(search);return !studio&&!['project','cuts','assetPath'].some(key=>params.has(key))&&params.get('new')!=='cloud-video'&&params.get('legacy')!=='1';}
 const refKey=r=>JSON.stringify([r.kind,r.path||'',r.name,r.size]);
@@ -57,3 +57,4 @@ export function fitVideoPlacement(c,asset,canvas){
  return c;
 }
 export function assetFrameLabel(a){return a?.frames?(a.type==='image'?'1 still frame':a.type==='audio'?`Sound · ${a.duration.toFixed(3)}s · ${a.frames} timeline frames`:`${a.frames} source frames · ${(a.frames/a.duration).toFixed(2).replace(/\.00$/,'')} fps · ${a.duration.toFixed(3)}s`):'Reconnect to read source frames';}
+

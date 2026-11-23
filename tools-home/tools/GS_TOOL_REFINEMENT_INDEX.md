@@ -1,3 +1,10 @@
+## R38 — phone green-screen transparency
+
+The owner reported an opaque green phone screen over a scrolling card. The sampler previously looked only at frame edges, failed on the surrounding room, and retained the default blue key. Explicit Transparent and Sample clip now detect a substantial connected flat green/blue patch inside the frame. Ordinary imports retain the established edge-only detection. Green screen and Blue screen controls repair an existing wrong key directly; they set background opacity to 0% and retain layer opacity, geometry, timing and source files. The existing per-frame alpha compositor keeps the finger above the card in both preview and MP4 export.
+
+Source baseline/rollback: `5562cc9c1cf4b971b5d2f4cfded2181d21cba37c`. Saved project schema is unchanged. Recover the existing edit with `recover=local`, then reconnect original files if needed. No source generation or new paid render is required. Local checks: 14 background/project checks passed, plus module syntax. Branch/browser/deployment results are recorded separately in `SCREEN_BACKGROUND_R38.json`. Physical Android and the owner's actual source video remain unverified until the owner opens the revised tool.
+
+
 ## SxLock R47 — restore direct Scribe access
 
 Owner request: restore the important Scribe tool and compare it with the other editors. The shared editors expose a named Scribe button; native SxLock had moved its section into a hidden dock and collapsed it on every reload. A permanent gold Scribe button now opens the original editor below the player. Preserve frame marks, Clear/Copy, History and handoff controls, existing saved notes, and source-bound projects. Remember Scribe's visibility; legacy dock preferences reopen Scribe. Other modules remain collapsed on launch.
@@ -753,3 +760,4 @@ Behavior commit `34262bb6142c1282975d4d536d5bb99fc26ddf5a`:43 Node tests and ful
 Historical lock instructions below are superseded by this correction.
 
 ---
+

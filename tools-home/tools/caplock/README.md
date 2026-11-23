@@ -1,3 +1,10 @@
+## R38 — phone green-screen transparency
+
+The owner reported an opaque green phone screen over a scrolling card. The sampler previously looked only at frame edges, failed on the surrounding room, and retained the default blue key. Explicit Transparent and Sample clip now detect a substantial connected flat green/blue patch inside the frame. Ordinary imports retain the established edge-only detection. Green screen and Blue screen controls repair an existing wrong key directly; they set background opacity to 0% and retain layer opacity, geometry, timing and source files. The existing per-frame alpha compositor keeps the finger above the card in both preview and MP4 export.
+
+Source baseline/rollback: `5562cc9c1cf4b971b5d2f4cfded2181d21cba37c`. Saved project schema is unchanged. Recover the existing edit with `recover=local`, then reconnect original files if needed. No source generation or new paid render is required. Local checks: 14 background/project checks passed, plus module syntax. Branch/browser/deployment results are recorded separately in `SCREEN_BACKGROUND_R38.json`. Physical Android and the owner's actual source video remain unverified until the owner opens the revised tool.
+
+
 # CapLock R34
 
 Start is at the top of the player rail and rewinds the paused composition to F0. Play sits directly below it.
@@ -340,4 +347,5 @@ Next: deterministic separate caption pass using the same caption layout/animatio
 ## Shared studio direction
 
 The owner now requires a project-centered studio and robust visual project picker; CapLock/AspectLock are specialized modules. Read [STUDIO_DIRECTION.md](../studio/STUDIO_DIRECTION.md). Shell and unified picker are planned, not deployed by R6. Preserve general animation/graphic/audio ingress as well as caption placement.
+
 

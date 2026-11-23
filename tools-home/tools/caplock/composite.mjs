@@ -1,8 +1,8 @@
 import {scheduleClipGain} from '../../shared/clip-audio.mjs?v=2';
-import {BackgroundSurface} from './background.mjs?v=33';
+import {BackgroundSurface} from './background.mjs?v=38';
 import {Input,ALL_FORMATS,BlobSource,CanvasSink} from '../sxlock/vendor/mediabunny-1.62.1-gs1.mjs';
 import {exportVideo,inspectVideo} from '../sxlock/export-engine.mjs?v=46';
-import {FPS,validateProject} from './core.mjs?v=37';
+import {FPS,validateProject} from './core.mjs?v=38';
 import {captionRecipe} from '../../shared/production-stages.mjs?v=34';
 import {clipRange,clipTime,pictureTime} from './clip-time.mjs?v=28';
 import {readSourceAudio} from './source-audio.mjs?v=28';
@@ -142,3 +142,4 @@ export async function renderCaptioned({project,bed,readAsset,cancelled,onProgres
   for(const input of opened)input.dispose();
  }
 }
+

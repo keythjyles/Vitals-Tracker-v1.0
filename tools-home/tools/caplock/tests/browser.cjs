@@ -128,13 +128,14 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');const asse
  await require('../../aspectlock/insert-browser.cjs')(localAspect,'source25.mp4','/tmp/caplock-fixtures/blue-caption.mp4','blue-caption.mp4');
  await localAspect.close();
  assert.deepEqual(aspectErrors,[]);console.log(JSON.stringify({aspectLock:{devicePicker:true,addedRow:true,propertiesSheet:true,pausedNavigation:true,threeViewportRailChecks:true,errors:aspectErrors}}));
- await require('./local-pass-browser.cjs')(browser,base);await require('./background-browser.cjs')(browser,base);await require('./local-entry-browser.cjs')(browser,base,bytes);await require('./placement-browser.cjs')(browser,base,bytes);await require('./project-picker-browser.cjs')(browser,base,bytes);await require('./focus-browser.cjs')(browser,base,bytes);await require('./toolbox-browser.cjs')(browser,cleanBase);await require('./framing-browser.cjs')(browser,cleanBase);await require('./source-audio-browser.cjs')(browser,cleanBase);
+ await require('./local-pass-browser.cjs')(browser,base);await require('./background-browser.cjs')(browser,base);await require('./screen-background-browser.cjs')(browser,base);await require('./local-entry-browser.cjs')(browser,base,bytes);await require('./placement-browser.cjs')(browser,base,bytes);await require('./project-picker-browser.cjs')(browser,base,bytes);await require('./focus-browser.cjs')(browser,base,bytes);await require('./toolbox-browser.cjs')(browser,cleanBase);await require('./framing-browser.cjs')(browser,cleanBase);await require('./source-audio-browser.cjs')(browser,cleanBase);
  await require('./directory-browser.cjs')(browser,cleanBase);
  await require('../../aspectlock/background-browser.cjs')(browser,cleanBase);
  await require('../../aspectlock/frame-seek-browser.cjs')(browser,cleanBase);
  await browser.close();
 
 })().catch(e=>{console.error(e);process.exit(1)});
+
 
 
 

@@ -1,7 +1,7 @@
 import {clipNameControl, clipThumbnail} from '../../shared/clip-picker.mjs?v=1';
 import {ensureToolbox,makeToolboxPlacement,assetFrameLabel,shiftPlacementIn,fitPlacementOut,setPlacementSpeed,fitVideoPlacement} from './toolbox-core.mjs?v=35';
 import {inspectToolboxFile} from './toolbox-media.mjs?v=28';
-import {BackgroundSurface} from './background.mjs?v=33';
+import {BackgroundSurface} from './background.mjs?v=38';
 const $=id=>document.getElementById(id);
 const signature=async blob=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',await blob.arrayBuffer()))].map(v=>v.toString(16).padStart(2,'0')).join('');
 export function createToolboxUI(o){
@@ -172,3 +172,4 @@ export function createToolboxUI(o){
   for(const a of assets()){for(const f of files){if(f.name!==a.ref.name||f.size!==a.ref.size)continue;const hash=await signature(f);if(a.sha256&&hash!==a.sha256)throw Error('Different file contents: '+f.name+'. Choose the original file.');const meta=await inspectToolboxFile(f,f.name);Object.assign(a,meta,{chroma:a.chroma||meta.chroma,sha256:hash});remember(a,f);break;}}render();
  }};
 }
+

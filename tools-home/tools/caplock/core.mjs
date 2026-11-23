@@ -1,5 +1,5 @@
 import {savedFades,validClipGain} from '../../shared/clip-audio.mjs?v=2';
-import {validateChroma} from './background.mjs?v=33';
+import {validateChroma} from './background.mjs?v=38';
 import {validateToolboxAsset} from './toolbox-core.mjs?v=33';
 export const FPS=25;
 export const DEFAULT_STYLE={font:'Arial',weight:700,size:52,color:'#ffffff',outline:4,shadow:6,background:'#000000',backgroundOpacity:0,align:'center',x:50,y:78,width:86,lineHeight:1.15,animation:'none',emphasis:false};
@@ -90,4 +90,5 @@ export function validateClip(c){
  for(const [k,min,max] of [['x',-100,200],['y',-100,200],['width',5,400],['rotation',-180,180],['opacity',0,1],['volume',0,1]])if(!Number.isFinite(c[k])||c[k]<min||c[k]>max)throw Error('Invalid clip '+k);
  return {id:c.id,name:String(c.name||c.ref.name||'Clip'),phraseId:String(c.phraseId||''),type:c.type,ref:{kind:c.ref.kind,name:String(c.ref.name||''),path:String(c.ref.path||''),size:Number(c.ref.size)||0},inFrame:c.inFrame,outFrame:c.outFrame,trimInFrame:c.trimInFrame,trimOutFrame:c.trimOutFrame??null,playbackRate:c.playbackRate??1,x:c.x,y:c.y,width:c.width,rotation:c.rotation,opacity:c.opacity,volume:c.volume,...savedFades(c),...(validClipGain(c.previousVolume)&&c.previousVolume>0?{previousVolume:c.previousVolume}:{}),visible:c.visible!==false,loop:!!c.loop,placed:c.placed??(c.captionNumber?(!!c.locked||c.visible!==false):true),locked:false,...(sourceTrim?{sourceTrim}:{}),...(c.type==='video'&&c.holdLastFrame===true?{holdLastFrame:true}:{}),...(c.mirrorX?{mirrorX:true}:{}),...(c.flipY?{flipY:true}:{}),...(c.toolboxId?{toolboxId:c.toolboxId}:{}),...(c.sourceFrames?{sourceFrames:c.sourceFrames}:{}),...(c.sourceDuration?{sourceDuration:c.sourceDuration}:{}),...(c.captionNumber?{captionNumber:c.captionNumber}:{}),...(c.chroma?{chroma:validateChroma(c.chroma)}:{})};
 }
+
 

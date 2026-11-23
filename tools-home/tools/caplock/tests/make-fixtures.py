@@ -50,3 +50,15 @@ subprocess.run(['ffmpeg','-v','error','-f','lavfi','-i',trim_picture,
 
 # Shared with SxLock to exercise the same full-range alpha decode path.
 subprocess.run([sys.executable, str(shared_fixture), str(root)], check=True)
+
+
+
+# A chroma screen is internal to a room, with an opaque finger crossing it.
+phone = ("color=c=0xa06432:s=180x320:r=25:d=1,"
+    "drawbox=x=90:y=0:w=90:h=320:color=0x78502d:t=fill,"
+    "drawbox=x=40:y=55:w=100:h=230:color=black:t=fill,"
+    "drawbox=x=44:y=59:w=92:h=222:color=0x00d900:t=fill,"
+    "drawbox=x=86:y=62:w=8:h=8:color=black:t=fill,"
+    "drawbox=x=90:y=190:w=20:h=65:color=0xd2966e:t=fill")
+subprocess.run(['ffmpeg','-v','error','-f','lavfi','-i',phone,
+    '-c:v','libx264','-crf','12','-pix_fmt','yuv420p','-y',str(root/'phone-screen.mp4')],check=True)

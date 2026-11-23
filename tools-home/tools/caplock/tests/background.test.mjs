@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {DEFAULT_CHROMA,inferBackground,removeBackground,validateChroma} from '../background.mjs';
+import {DEFAULT_CHROMA,inferBackground,inferChromaScreen,removeBackground,validateChroma} from '../background.mjs';
 import {createProject,validateProject} from '../core.mjs';
 import {captionRecipe} from '../../../shared/production-stages.mjs';
 const solid=(r,g,b,a=255)=>new Uint8ClampedArray(Array.from({length:64*64},()=>[r,g,b,a]).flat());
@@ -45,4 +45,34 @@ test('replacement color round-trips and changes the export recipe only when acti
  assert.deepEqual(captionRecipe(p),masked);
  p.clips[0].chroma.enabled=false;
  assert.equal(captionRecipe(p).clips[0].chroma,undefined);
+});
+
+
+
+test('an internal green phone screen keys out while the finger, camera hole and room remain opaque',()=>{
+ const width=64,height=64,pixels=solid(130,90,50);
+ const put=(x,y,color)=>pixels.set([...color,255],(y*width+x)*4);
+ // Nonuniform scene edges deliberately defeat the old border-only sampler.
+ for(let y=0;y<height;y++)for(let x=0;x<width;x++)put(x,y,[90+x,55+y,30]);
+ for(let y=15;y<56;y++)for(let x=18;x<46;x++)put(x,y,[2,217,0]);
+ for(let y=36;y<53;y++)for(let x=33;x<39;x++)put(x,y,[210,150,110]);
+ put(31,18,[0,0,0]);
+ assert.equal(inferBackground(pixels,width,height),null);
+ const key=inferChromaScreen(pixels,width,height);
+ assert.equal(key.color,'#02d900');
+ removeBackground(pixels,key);
+ const alpha=(x,y)=>pixels[(y*width+x)*4+3];
+ assert.equal(alpha(25,30),0,'the card underneath is visible in the screen');
+ assert.equal(alpha(35,45),255,'the finger occludes the card');
+ assert.equal(alpha(31,18),255,'the camera hole is retained');
+ assert.equal(alpha(4,4),255,'the scene is retained');
+});
+
+test('screen detection needs a substantial connected flat patch and supports blue screens',()=>{
+ const pixels=solid(120,90,60);
+ for(let y=0;y<64;y+=2)for(let x=0;x<64;x+=2)pixels.set([0,220,0,255],(y*64+x)*4);
+ assert.equal(inferChromaScreen(pixels,64,64),null,'scattered green detail is not a screen');
+ for(let y=20;y<50;y++)for(let x=20;x<45;x++)pixels.set([0,70,240,255],(y*64+x)*4);
+ assert.equal(inferChromaScreen(pixels,64,64).color,'#0046f0');
+ assert.equal(inferChromaScreen(solid(0,220,0,0),64,64),null);
 });
