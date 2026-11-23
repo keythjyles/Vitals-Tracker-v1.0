@@ -14,6 +14,8 @@ The shared **Audio** section shows the selected insertion's sound state while co
 
 Keep **Clear**, **Copy**, and **Mark frame** on one row directly below each Scribe editor. Put History and the tool's other existing actions in a smaller row. FrameLock uses its original notes and history handlers.
 
+SxLock R47 keeps its native Scribe and a permanently named Scribe button beside the player readout. Docking or hiding the note must never remove that access. Its native dock controller restores Scribe visibility across reload, including the legacy hidden-dock repair. Other adapters continue using their established Scribe access and storage.
+
 AspectLock opens Scribe from its named section below the player. Its readout shows the filename and frame clock. The section arrow indicates whether the notes are expanded.
 
 FrameLock v1.4.0 pairs the transport controls and keeps its read-only timeline and trim totals inside the matched player height. In is the first retained frame. Out is the first frame after the cut, and Go accepts the end boundary. Trim reuses Clipper's verified local exporter. Save As names the download, and Load cut uses those same export bytes. The source and notes stay in place when Keep editing is selected.
@@ -22,3 +24,4 @@ Validation must include real phone widths, portrait footage, identical row/pair 
 
 
 R9 owner refinement: keep at least 16px inside both screen edges (including safe-area insets), show the source filename in one compact row, and annotate interactive controls with hover/focus/touch-hold help. Hold-to-help must consume the following tap so it cannot mark, step, delete or download. R11 corrects the earlier interpretation: Clipper keeps visible editable IN/OUT boxes beside the corresponding current-frame mark buttons, using WavLock's existing 29px compact row pattern. Never move these number boxes into the drawer or replace them with a button label. Its extra 25-frame row uses the unchanged 29px row profile, not large single-frame glyph styling. Preserve Photos and general Files routes separately; the browser/OS owns provider selection.
+

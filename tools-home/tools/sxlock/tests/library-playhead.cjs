@@ -95,7 +95,7 @@ async function main(){
    await page.locator('#videoFile').setInputFiles(path.join(data,'fixture_40s.mp4'));
    await page.waitForFunction(()=>document.getElementById('video').readyState>=2&&!document.getElementById('play').disabled);
    await page.getByRole('button',{name:'Show file picker'}).click();
-   await page.getByText('SxLock · GS-TOOL-SXLOCK · R46',{exact:true}).waitFor();
+   await page.getByText('SxLock · GS-TOOL-SXLOCK · R47',{exact:true}).waitFor();
    await page.evaluate(()=>window.scrollTo(0,10));
    await page.locator('.gs-source-drawer').waitFor({state:'hidden'});
    await page.evaluate(()=>window.scrollTo(0,0));
@@ -109,6 +109,8 @@ async function main(){
    assert(geometry.playerLeft<=1&&geometry.playerRight>=geometry.viewport-1,'The player reaches both edges: '+JSON.stringify(geometry));
    assert(geometry.sections.every((top,i)=>i===0||top>geometry.sections[i-1]),'The original mobile module order is preserved');
    assert.equal(await page.locator('#notes').isVisible(),false,'Scribe starts collapsed');
+   const scribeButton=page.getByRole('button',{name:'Scribe',exact:true});
+   assert(await scribeButton.isVisible(),'Scribe always has a named button beside the readout');
    assert.equal(await page.locator('#saveTake').textContent(),'Save Rec');
    await page.setViewportSize({width:320,height:640});
    await page.getByRole('button',{name:'Tools',exact:true}).tap();
@@ -165,12 +167,27 @@ async function main(){
    const dockToggle=page.getByRole('button',{name:'Toggle docked Scribe'});
    await dockToggle.tap();
    assert.equal(await dock.isVisible(),false);
-   await dockToggle.tap();
+   assert(await scribeButton.isVisible(),'Hidden docked Scribe keeps its named button');
+   await scribeButton.tap();
    assert.equal(await dock.locator('#notes').inputValue(),'[F228 | 0:09.120 | 25 fps] Keep this stroke 📝');
+   await page.reload();
+   await dock.waitFor({state:'visible'});
+   assert.equal(await dock.locator('#notes').inputValue(),'[F228 | 0:09.120 | 25 fps] Keep this stroke 📝','Open Scribe and its note survive reload');
+   await scribeButton.tap();
+   await page.reload();
+   await page.getByRole('button',{name:'Scribe',exact:true}).waitFor();
+   assert.equal(await dock.isVisible(),false,'An explicit Hide survives reload');
+   await page.evaluate(()=>{const saved=JSON.parse(localStorage.getItem('sxlock-docked-section'));delete saved.open;localStorage.setItem('sxlock-docked-section',JSON.stringify(saved));});
+   await page.reload();
+   await dock.waitFor({state:'visible'});
+   assert.equal(await dock.locator('#notes').inputValue(),'[F228 | 0:09.120 | 25 fps] Keep this stroke 📝','Legacy hidden Scribe reopens without changing the note');
    await page.getByRole('button',{name:'Dock Mixer'}).tap();
    await dock.locator('#mixerSection').waitFor();
    assert.equal(await dock.locator('#scribeBox').count(),0);
    assert.equal(await page.locator('#scribeBox > summary').getByRole('button',{name:'Dock Scribe'}).count(),1);
+   await scribeButton.tap();
+   assert(await dock.locator('#notes').isVisible(),'Scribe remains reachable while another section is docked');
+   await page.getByRole('button',{name:'Dock Mixer'}).tap();
    await page.reload();
    await page.getByRole('button',{name:'Toggle docked Mixer'}).waitFor();
    assert.equal(await dock.isVisible(),false);
@@ -403,3 +420,4 @@ async function main(){
  }finally{await browser.close();await new Promise(r=>server.close(r));}
 }
 main().catch(e=>{console.error(e);process.exit(1)});
+

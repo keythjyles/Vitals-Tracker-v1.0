@@ -750,3 +750,10 @@ Historical lock instructions below are superseded by this correction.
 
 
 
+
+## SxLock R47 — restore direct Scribe access
+
+Owner request: restore the important Scribe tool and compare it with the other editors. The shared editors expose a named Scribe button; native SxLock had moved its section into a hidden dock and collapsed it on every reload. A permanent gold Scribe button now opens the original editor below the player. Preserve frame marks, Clear/Copy, History and handoff controls, existing saved notes, and source-bound projects. Remember Scribe's visibility; legacy dock preferences reopen Scribe. Other modules remain collapsed on launch.
+
+Branch `sxlock-r47-restore-scribe`, baseline/rollback `c6729268a8ea4344d5ecdbb97d326eba777832c3`. Five existing duration/mix checks and JavaScript syntax checks passed. The browser preview verified named access, 320px primary actions, hide/reopen and local History recovery. Source-bound media, CI and deployment checks are in progress; do not infer them from those results. [Release receipt](sxlock/SCRIBE_RESTORE_R47.json). Preserve original media, projects and Scribe records on rollback.
+

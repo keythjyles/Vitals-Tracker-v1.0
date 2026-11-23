@@ -15,3 +15,6 @@ R44 opens the shared settings from Edit insertion in the Toolbox visual list and
 R45 offers **Audio** for video insertions and camera overlays. Start muted, then enable and set the clip's level in insertion settings. The preview, finished video and mixed WAV use the same saved gain, span and rate. Older visual placements retain muted playback. Rollback is `fee523aa67c127f233e8e6143b1f3531ac1be190`.
 
 R46 adds clip fades and **Mixer → Mix cues**. The video bed and Effects have independent timeline levels, with optional transition durations. Preview, finished video and WAV use the saved cues. Scribe shows Clear, Copy and Mark frame together below the note field. Rollback revision `3e5b257c2601c453747bb7891087762d5958d213`.
+
+R47 restores direct Scribe access. Keep the named gold **Scribe** button beside the player readout in every dock state. It opens the original editor below the player and uses the native Pause action while playing. Save Scribe's open/hidden preference; legacy saved Scribe docks without that preference reopen visibly. Other modules still start collapsed. Keep the original note/history storage and primary/secondary actions. Source filename and clock use two compact lines so Scribe stays reachable at 320px. Baseline/rollback: `c6729268a8ea4344d5ecdbb97d326eba777832c3`; retain projects, source media and Scribe records.
+

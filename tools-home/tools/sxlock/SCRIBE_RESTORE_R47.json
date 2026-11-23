@@ -1,0 +1,43 @@
+{
+  "release": "SxLock R47",
+  "branch": "sxlock-r47-restore-scribe",
+  "baseline": "c6729268a8ea4344d5ecdbb97d326eba777832c3",
+  "authorized_request": "Restore Scribe and compare with the other tools.",
+  "cause": "Saved Scribe was moved out of the module list and unconditionally hidden on reload behind Docked.",
+  "changes": [
+    "Permanent named gold Scribe button beside player readout",
+    "Native Scribe editor opens under player, including from a different dock",
+    "Existing native Pause is used when opening during playback",
+    "Preserve Scribe visibility; reopen legacy Scribe preferences lacking visibility",
+    "Original frame mark, note, history and handoff handlers and storage retained",
+    "Filename and clock wrap to two compact lines at phone widths"
+  ],
+  "unchanged": [
+    "Native transport dimensions",
+    "Media, mixing, recording and export logic",
+    "Other editors",
+    "Projects and Scribe storage schemas"
+  ],
+  "verification": {
+    "local": {
+      "duration_and_mix_checks": {
+        "passed": 5,
+        "failed": 0
+      },
+      "syntax_and_diff": "passed"
+    },
+    "browser_preview": {
+      "named_access": "passed",
+      "primary_actions_at_320px": "passed",
+      "hide_reopen": "passed",
+      "history_restore": "passed",
+      "source_bound_frame_mark": "pending",
+      "source_bound_reload": "pending"
+    },
+    "ci": "pending",
+    "deployment": "pending",
+    "physical_android": "not performed",
+    "live_cloud_sync": "not performed"
+  },
+  "rollback": "Revert R47 source changes to baseline, retaining original media, browser projects and all Scribe records."
+}

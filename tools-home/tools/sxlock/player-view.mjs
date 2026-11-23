@@ -36,6 +36,22 @@ view.setAttribute('aria-controls', sheet.id);
 view.onclick = () => sheet.showModal();
 reference.append(view);
 
+// Keep the native Scribe as easy to reach as the shared editors' Scribe.
+const readout = document.createElement('div');
+readout.className = 'sx-source-readout';
+readout.append(...reference.querySelectorAll('.gs-player-filename, .gs-player-clock'));
+reference.prepend(readout);
+const scribeToggle = document.createElement('button');
+scribeToggle.type = 'button';
+scribeToggle.id = 'sxScribe';
+scribeToggle.className = 'sx-view-button sx-scribe-button';
+scribeToggle.textContent = 'Scribe';
+scribeToggle.setAttribute('data-scribe-control', '');
+scribeToggle.setAttribute('aria-controls', 'scribeBox');
+scribeToggle.setAttribute('aria-expanded', 'false');
+scribeToggle.title = 'Open or hide Scribe below the player';
+reference.append(scribeToggle);
+
 const grip = document.createElement('button');
 grip.type = 'button';
 grip.id = 'sxResize';
@@ -101,22 +117,26 @@ function updateSize() {
 
 function showDock(open) {
  dockOpen = open;
- const scribeOpen = open && docked?.section.id === 'scribeBox';
+ const scribeDocked = docked?.section.id === 'scribeBox';
+ const scribeOpen = open && scribeDocked;
  if (scribeOpen) scribeDockActions.prepend(dockToggle);
  else if (dockToggle.parentElement !== reference) reference.append(dockToggle);
- dockToggle.textContent = scribeOpen ? 'Hide' : 'Docked';
+ dockToggle.textContent = scribeOpen ? 'Hide' : docked?.title || 'Docked';
+ dockToggle.hidden = !docked || (scribeDocked && !open);
  dock.hidden = !open;
  dockToggle.setAttribute('aria-expanded', String(open));
  document.body.classList.toggle('sx-has-dock', open);
+ updateScribeToggle();
+ try { localStorage.setItem(settingsKey, JSON.stringify({id: docked?.section.id, wasOpen, open: dockOpen})); } catch {}
  updateSize();
 }
 
 dockToggle.onclick = () => {
  showDock(!dockOpen);
- dockToggle.focus({preventScroll: true});
+ (dockToggle.hidden ? scribeToggle : dockToggle).focus({preventScroll: true});
 };
 
-function setDock(id, focus = false, savedOpen) {
+function setDock(id, focus = false, savedOpen, open = focus) {
  const previous = docked?.button;
  if (docked) {
   if (docked.section.id === 'scribeBox') {
@@ -145,8 +165,7 @@ function setDock(id, focus = false, savedOpen) {
  }
  dockToggle.hidden = !docked;
  if (docked) dockToggle.setAttribute('aria-label', `Toggle docked ${docked.title}`);
- showDock(Boolean(docked) && focus);
- try { localStorage.setItem(settingsKey, JSON.stringify({id: docked?.section.id, wasOpen})); } catch {}
+ showDock(Boolean(docked) && open);
  if (focus) (docked?.button || previous).focus({preventScroll: Boolean(docked)});
 }
 
@@ -161,8 +180,20 @@ for (const {section, button} of sections.values()) {
 }
 
 const scribe = $('scribeBox');
+function updateScribeToggle() {
+ const visible = $('scribeBox').open && (docked?.section.id !== 'scribeBox' || dockOpen);
+ scribeToggle.setAttribute('aria-expanded', String(visible));
+}
+scribeToggle.onclick = () => {
+ if (document.body.classList.contains('library-only')) $('libraryOnly').click();
+ const opening = docked?.section !== scribe || !dockOpen;
+ if (opening && $('play').getAttribute('aria-label') === 'Pause' && !$('play').disabled) $('play').click();
+ if (docked?.section === scribe) showDock(opening);
+ else setDock('scribeBox', false, undefined, true);
+};
 scribe.addEventListener('toggle', () => {
  if (docked?.section === scribe && !scribe.open) scribe.open = true;
+ updateScribeToggle();
 });
 
 function pictureBounds() {
@@ -309,5 +340,6 @@ window.addEventListener('resize', updateSize);
 
 let savedDock;
 try { savedDock = JSON.parse(localStorage.getItem(settingsKey) || 'null'); } catch {}
-if (sections.has(savedDock?.id)) setDock(savedDock.id, false, false);
+if (sections.has(savedDock?.id)) setDock(savedDock.id, false, savedDock.wasOpen, savedDock.id === 'scribeBox' && savedDock.open !== false);
 else updateSize();
+

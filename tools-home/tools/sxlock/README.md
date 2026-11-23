@@ -111,3 +111,12 @@ Baseline main `d6119539195b0faf2025ad9a93b297da3a4cb19a`; isolated branch `sound
 
 Validation before release: all 48 automated state/provider/classification checks passed. Includes 50 scientific-name cricket approvals, category/tag search, AI/owner precedence, offline edits, cloud-refresh deletion races, identity-bound AI receipts, owner-only metadata writes, safe receipt deletion, preservation of decoded buffers and placed cue decisions, and prior review/capture/cloud regressions. Full Scrubber inline script and changed JavaScript parse. Live deployment/browser/cloud checks follow separately.
 
+
+# R47 — direct Scribe access and dock recovery
+
+**Scribe** is always named beside the player readout. Tap it to open the existing note editor directly below the player, even while another section is docked. Opening it during playback uses the existing Pause control and holds the current frame. Clear, Copy and Mark frame remain immediately below the note; History, Copy handoff and To ChatGPT remain underneath.
+
+The previous dock controller moved Scribe out of the section list, then hid it on every reload behind a generic Docked button. R47 preserves Scribe's visible/hidden choice and reopens legacy saved Scribe docks that lack that choice. Explicit Hide remains respected and the named button remains available. Other sections retain their collapsed-on-launch behavior. No note/history key, project schema or media engine changes.
+
+The source name and clock occupy two compact lines at the bottom of the player so the named Scribe control fits at 320px. Baseline/rollback: `c6729268a8ea4344d5ecdbb97d326eba777832c3`; keep original media, saved projects and all Scribe history. Branch: `sxlock-r47-restore-scribe`. Verification is recorded in [SCRIBE_RESTORE_R47.json](SCRIBE_RESTORE_R47.json).
+

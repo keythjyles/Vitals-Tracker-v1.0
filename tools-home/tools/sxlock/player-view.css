@@ -46,6 +46,17 @@ main > .gs-player-shell { border: 0; overflow-anchor: none; }
   padding: 0;
 }
 
+.sx-source-readout { display: grid; min-width: 0; }
+.sx-source-readout > * { min-width: 0; }
+
+#sxScribe {
+  min-height: 36px;
+  font-size: 14px;
+  font-weight: 750;
+  background: var(--accent);
+  color: #17212c;
+}
+
 .gs-player-shell .sx-reference:has(.sx-docked-button:not([hidden])) {
   grid-template-columns: minmax(0, 1fr) auto auto auto;
 }
@@ -300,3 +311,4 @@ html, body { overscroll-behavior-y: none; }
   background: transparent;
 }
 .sx-camera-preview video + video { opacity: .5; }
+
