@@ -172,6 +172,7 @@ async function main(){
    assert.equal(await dock.locator('#notes').inputValue(),'[F228 | 0:09.120 | 25 fps] Keep this stroke 📝');
    await page.reload();
    await dock.waitFor({state:'visible'});
+   await page.waitForFunction(()=>document.getElementById('notes').value==='[F228 | 0:09.120 | 25 fps] Keep this stroke 📝');
    assert.equal(await dock.locator('#notes').inputValue(),'[F228 | 0:09.120 | 25 fps] Keep this stroke 📝','Open Scribe and its note survive reload');
    await scribeButton.tap();
    await page.reload();
@@ -180,6 +181,7 @@ async function main(){
    await page.evaluate(()=>{const saved=JSON.parse(localStorage.getItem('sxlock-docked-section'));delete saved.open;localStorage.setItem('sxlock-docked-section',JSON.stringify(saved));});
    await page.reload();
    await dock.waitFor({state:'visible'});
+   await page.waitForFunction(()=>document.getElementById('notes').value==='[F228 | 0:09.120 | 25 fps] Keep this stroke 📝');
    assert.equal(await dock.locator('#notes').inputValue(),'[F228 | 0:09.120 | 25 fps] Keep this stroke 📝','Legacy hidden Scribe reopens without changing the note');
    await page.getByRole('button',{name:'Dock Mixer'}).tap();
    await dock.locator('#mixerSection').waitFor();
