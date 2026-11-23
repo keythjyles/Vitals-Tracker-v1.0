@@ -1,0 +1,53 @@
+{
+  "schema": "SoundScrubberIntake-1",
+  "batchId": "gs-sx-20261123-am-01",
+  "localDate": "2026-11-23",
+  "timezone": "America/Chicago",
+  "candidateCount": 2,
+  "discoverySource": "Wikimedia Commons license and attribution pages verified Nov23; GitHub prior batches and title-search dedup completed",
+  "reviewStatus": "PENDING",
+  "liveQueueImported": false,
+  "notes": "Owner must audition and approve. No actual sound downloads, imported audio, automatic classification, SxLock placement or implied rights clearance beyond source license metadata. Direct media binary URLs not separately verified; download link points to Commons page.",
+  "candidates": [
+    {
+      "source": "Wikimedia Commons",
+      "status": "PENDING",
+      "ownerApproved": false,
+      "importedToLiveQueue": false,
+      "audioAuditioned": false,
+      "dedupeCheck": "Not found across 18 GitHub auxiliary batches + 1000-candidate Nov14 manifest; no matching Dropbox exact-title search result on Nov23; private browser decision history not available",
+      "downloadNote": "Download control on linked Wikimedia Commons source page; no independent binary URL HEAD confirmation",
+      "candidateId": "gs-sx-20261123-01",
+      "name": "Horror laugh.ogg",
+      "category": "Comedy / human reaction / sinister laughter",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Horror_laugh.ogg",
+      "previewUrl": "https://commons.wikimedia.org/wiki/File:Horror_laugh.ogg",
+      "downloadUrl": "https://commons.wikimedia.org/wiki/File:Horror_laugh.ogg",
+      "license": "CC BY 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+      "author": "klankbeeld",
+      "durationSeconds": 7,
+      "sourceDescription": "Short horror-themed laugh, imported from Freesound; attribution required"
+    },
+    {
+      "source": "Wikimedia Commons",
+      "status": "PENDING",
+      "ownerApproved": false,
+      "importedToLiveQueue": false,
+      "audioAuditioned": false,
+      "dedupeCheck": "Not found across 18 GitHub auxiliary batches + 1000-candidate Nov14 manifest; no matching Dropbox exact-title search result on Nov23; private browser decision history not available",
+      "downloadNote": "Download control on linked Wikimedia Commons source page; no independent binary URL HEAD confirmation",
+      "candidateId": "gs-sx-20261123-02",
+      "name": "Menschen-Lachen.ogg",
+      "category": "Comedy / human reaction / spontaneous laughter",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Menschen-Lachen.ogg",
+      "previewUrl": "https://commons.wikimedia.org/wiki/File:Menschen-Lachen.ogg",
+      "downloadUrl": "https://commons.wikimedia.org/wiki/File:Menschen-Lachen.ogg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "author": "Geckomove",
+      "durationSeconds": 4.8,
+      "sourceDescription": "Spontaneous human laughter, own work; attribution and share-alike conditions"
+    }
+  ]
+}
