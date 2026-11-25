@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {newProject,Action,CameraTouch,stateAt,addSample,pathDocument,importDocument,drawScene,snapSquare} from '../core.mjs';
+import {newProject,Action,CameraTouch,CameraJoystick,stateAt,addSample,pathDocument,importDocument,drawScene,snapSquare} from '../core.mjs';
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-8,`${a} != ${b}`);
 test('independent durations: rotation holds at four, zoom at nine, Action ends at twelve source seconds',()=>{
  const p=newProject();p.settings.zoom.end=3;p.settings.rotation.enabled=true;p.settings.rotation.degrees=90;const a=new Action(p,0,30);
@@ -96,4 +96,38 @@ test('square snapping accounts for the opening stage angle',()=>{
 test('older saved settings retain their programmed rotation and gain the default snap option',()=>{
  const p=newProject();delete p.settings.rotation.enabled;delete p.settings.rotation.snap;p.settings.rotation.degrees=45;
  const restored=importDocument(p,newProject());assert.equal(restored.settings.rotation.enabled,true);assert.equal(restored.settings.rotation.snap,true);assert.deepEqual(restored.path,p.path);
+});
+
+test('quarter sensitivity retains single-pixel fractions and reacquires without a jump',()=>{
+ const s={x:0,y:0,z:1,r:0},g=new CameraTouch({read:()=>s,sensitivity:()=>.25,translate:(x,y)=>{s.x+=x;s.y+=y;},rotate:()=>{}});
+ g.down(1,10,20);g.move(1,11,20,200,400);near(s.x*200,.25);near(s.y,0);
+ g.up(1);g.down(2,1000,-900);near(s.x*200,.25);g.move(2,1001,-899,200,400);near(s.x*200,.5);near(s.y*400,.25);
+});
+test('fine touch direction accounts for zoom/rotation while secondary rotation keeps its full range',()=>{
+ const s={x:0,y:0,z:2,r:90},g=new CameraTouch({read:()=>s,sensitivity:()=>.125,translate:(x,y)=>{s.x+=x;s.y+=y;},rotate:r=>s.r+=r});
+ g.down(1,0,0);g.move(1,8,0,200,400);near(s.x,0);near(s.y,1/800);
+ g.down(2,108,0);g.move(2,8,100,200,400);near(s.r,180);near(s.z,2);near(s.y,1/800);
+});
+test('joystick center is still, travel follows source time at every performance speed, release holds pose',()=>{
+ for(const speed of [1,.5,.25,.125]){
+  const s={x:0,y:0,z:1,r:0},j=new CameraJoystick({read:()=>s,translate:(x,y)=>{s.x+=x;s.y+=y;},speed:()=>.1});
+  j.reset(0);j.set(2,0,32);j.advance(1,200,400);near(s.x,0);
+  j.set(32,0,32);
+  for(let wall=0;wall<8/speed;wall+=.25){const t=Math.min(9,1+(wall+.25)*speed);j.advance(t,200,400);}
+  near(s.x,.8);near(s.y,0);near(s.z,1);near(s.r,0);
+  j.reset(9);j.advance(12,200,400);near(s.x,.8);
+  j.reset();j.set(32,0,32);j.advance(100,200,400);near(s.x,.8); // new acquisition never integrates the gap
+ }
+});
+test('joystick diagonal speed is bounded, and rotation/zoom preserve screen direction without edge limits',()=>{
+ const s={x:50,y:-80,z:2,r:90},j=new CameraJoystick({read:()=>s,translate:(x,y)=>{s.x+=x;s.y+=y;},speed:()=>.2});
+ j.reset(0);j.set(300,300,32);j.advance(2,200,400);
+ near(Math.hypot(s.x-50,(s.y+80)*2),.2);assert.ok(s.x<50&&s.y>-80);near(s.z,2);near(s.r,90);
+});
+test('fine direction controls save with a project while old paths and projects retain exact recorded poses',()=>{
+ const p=newProject();p.controls={touchGain:.125,joystick:true,joystickSpeed:.23};const a=new Action(p,0,30);a.state.x=.000000125;a.update(2);
+ assert.deepEqual(importDocument(p,newProject()),p);
+ const old=structuredClone(p);delete old.controls;const restored=importDocument(old,newProject());assert.deepEqual(restored.path,p.path);near(restored.controls.touchGain,.25);
+ const destination=newProject();destination.controls.touchGain=.5;assert.deepEqual(importDocument(pathDocument(p),destination).controls,destination.controls);
+ assert.throws(()=>importDocument({...p,controls:{...p.controls,joystickSpeed:Infinity}},p));
 });

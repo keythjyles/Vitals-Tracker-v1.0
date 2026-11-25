@@ -1,4 +1,4 @@
-import {newProject,initialCamera,stateAt,Action,CameraTouch,drawScene,pathDocument,importDocument,clamp,snapSquare} from './core.mjs?v=2';
+import {newProject,initialCamera,stateAt,Action,CameraTouch,CameraJoystick,drawScene,pathDocument,importDocument,clamp,snapSquare} from './core.mjs?v=3';
 import {inspectSource,renderCamera} from './render.mjs?v=1';
 import {mountPlayerScribe} from '../../shared/player-scribe.mjs?v=34';
 import {mountClipAudio,fadeGainAt} from '../../shared/clip-audio.mjs?v=3';
@@ -6,11 +6,12 @@ import {PLAYER_PROFILE} from '../../shared/player-shell.mjs?v=34';
 
 const $=id=>document.getElementById(id),video=$('sourceVideo'),canvas=$('picture'),ctx=canvas.getContext('2d',{alpha:false,colorSpace:'srgb'}),view=$('viewport');
 const KEY='gs-camlock-project-v1'+(new URLSearchParams(location.search).get('qa')==='acceptance'?'-qa':''),COPY=v=>JSON.parse(JSON.stringify(v));
-const VERSION='V1.1',DOCK_KEY=KEY+'-player-docked';
+const VERSION='V1.2',DOCK_KEY=KEY+'-player-docked';
 let project=newProject(),file=null,sourceURL=null,camera=initialCamera(),action=null,reverseTimer=null,busy=false,renderResult=null,renderURL=null,cancelled=false;
 let loading=0,playRequest=0,raf=0,sampleTimer=null,lastTime=0,stageGesture=null,stagePoints=new Map(),dirty=false;
 let playerDocked=true,topMenuOpen=false;
 let cardPanels=[],wizard=null;
+let joystickPointer=null;const joystickKeys=new Set();
 const say=text=>$('status').textContent=text;
 const error=e=>{say(e.message||String(e));console.error(e);};
 const guard=fn=>(...args)=>Promise.resolve().then(()=>fn(...args)).catch(error);
@@ -25,7 +26,7 @@ function jsonDownload(value,suffix){download(new Blob([JSON.stringify(value,null
 function sourceReady(){return !!file&&video.readyState>=2;}
 function audioPreview(){video.muted=active()&&$('mutePerformance').checked;const start=project.start,end=reviewedEnd();video.volume=clamp(project.audio.volume*fadeGainAt(project.audio,start,end,video.currentTime||start),0,1);}
 function updateControls(){
- const recording=active(),touching=touch.size>0,ready=sourceReady();
+ const recording=active(),touching=touch.size>0||joystickPointer!==null||joystickKeys.size>0,ready=sourceReady();
  for(const b of $('rail').querySelectorAll('button'))b.disabled=busy||!ready;
  $('action').disabled=busy||!ready||!project.stage.locked||recording&&touching||$('settingsCard').open;
  $('wizard').disabled=busy||!ready||recording;
@@ -44,6 +45,8 @@ function updateControls(){
  $('modeLabel').textContent=!ready?'LOAD SOURCE':wizard?'WIZARD SETUP':project.stage.locked?($('touchArmed').checked&&!$('settingsCard').open?'HOT · TOUCH TO START':'CAMERA READY'):'STAGE SETUP';
  $('play').textContent=!video.paused&&!recording?'Ⅱ Pause':'▶ Play';
  $('emptyLoad').hidden=!!file||busy;
+ $('joystick').hidden=!ready||!project.stage.locked||!project.controls.joystick||!!wizard||$('settingsCard').open;
+ $('joystick').disabled=busy;
  for(const input of document.querySelectorAll('[data-stage],#aspect,#outputWidth,#outputHeight,#opening,#openingHere'))input.disabled=project.stage.locked;
  document.querySelector('[data-stage="r"]').disabled=project.stage.locked||!project.settings.rotation.enabled;
  audioRefresh?.();
@@ -62,6 +65,7 @@ function syncFields(){
  for(const el of document.querySelectorAll('[data-stage]')){const value=project.stage[el.dataset.stage];if(el.type==='checkbox')el.checked=value;else el.value=value;}
  for(const [id,value] of Object.entries({outputWidth:project.stage.width,outputHeight:project.stage.height,opening:project.start,zoomEnd:project.settings.zoom.end,zoomDuration:project.settings.zoom.duration,zoomCurve:project.settings.zoom.curve,rotationDegrees:Math.abs(project.settings.rotation.degrees),rotationDirection:Math.sign(project.settings.rotation.degrees)||1,rotationDuration:project.settings.rotation.duration,rotationCurve:project.settings.rotation.curve,actionDuration:project.settings.duration,speed:project.performanceSpeed,fps:project.fps}))$(id).value=value;
  $('rotationEnabled').checked=!!project.settings.rotation.enabled;$('rotationSnap').checked=project.settings.rotation.snap!==false;
+ $('touchSensitivity').value=project.controls.touchGain;$('joystickEnabled').checked=project.controls.joystick;$('joystickSpeed').value=project.controls.joystickSpeed*100;
  $('zoomEnd').value=Number((project.settings.zoom.end*100).toFixed(3));$('zoomMove').value=project.settings.zoom.end===1?'hold':project.settings.zoom.end>1?'push':'pull';
  const ratio=project.stage.width/project.stage.height;$('aspect').value=Object.keys(ratios).find(k=>Math.abs(ratios[k][0]/ratios[k][1]-ratio)<.0001)||'custom';
  fitCanvas();updateControls();
@@ -69,8 +73,9 @@ function syncFields(){
 function stopReverse(){clearInterval(reverseTimer);reverseTimer=null;$('reverse').setAttribute('aria-pressed','false');}
 function stop(){
  ++playRequest;stopReverse();clearInterval(sampleTimer);sampleTimer=null;
+ if(active())sample();
  if(action){camera=action.stop(Math.max(lastTime,Math.min(video.currentTime,action.end)));action=null;invalidate();}
- video.pause();video.playbackRate=1;touch.clear();stagePoints.clear();updateControls();audioPreview();redraw();persist();
+ video.pause();video.playbackRate=1;touch.clear();resetJoystick();stagePoints.clear();updateControls();audioPreview();redraw();persist();
 }
 function seek(t){
  if(active()||busy||!file)return;
@@ -84,17 +89,18 @@ async function begin(){
  const at=video.currentTime;
  if(at<project.start-1e-4||at>=endpoint()-1e-6)throw Error('Go to a source time inside the Action range first.');
  const previousPath=project.path,previousSegments=COPY(project.segments);
- action=new Action(project,at,project.source.duration);camera={...action.state};lastTime=at;invalidate();
+ action=new Action(project,at,project.source.duration);camera={...action.state};lastTime=at;joystick.reset(at);invalidate();
  const request=++playRequest;video.playbackRate=project.performanceSpeed;audioPreview();updateControls();
  // Source time is still the only trajectory clock. Keep sampling if canvas rAF is throttled.
  clearInterval(sampleTimer);sampleTimer=setInterval(sample,1000/60);
- try{await video.play();if(request!==playRequest)video.pause();else{say('Action · first finger directs; second rotates. Lift freely, then Pause to edit.');loop();}}
- catch(e){if(request===playRequest){clearInterval(sampleTimer);sampleTimer=null;action=null;project.path=previousPath;project.segments=previousSegments;video.playbackRate=1;updateControls();}throw e;}
+ try{await video.play();if(request!==playRequest)video.pause();else{say('Action · direct with touch or joystick. Lift freely, then Pause to edit.');loop();}}
+ catch(e){if(request===playRequest){clearInterval(sampleTimer);sampleTimer=null;action=null;resetJoystick();project.path=previousPath;project.segments=previousSegments;video.playbackRate=1;updateControls();}throw e;}
 }
 function sample(){
  if(!active())return;
- const t=Math.max(lastTime,Math.min(video.currentTime,action.end));lastTime=t;camera=action.update(t);
- if(!action.active){clearInterval(sampleTimer);sampleTimer=null;video.pause();const end=action.end;action=null;touch.clear();video.playbackRate=1;video.currentTime=end;audioPreview();updateControls();persist();say('Action complete · '+project.path.length+' camera samples. Play to review or Render.');}
+ const t=Math.max(lastTime,Math.min(video.currentTime,action.end));lastTime=t;
+ const rect=view.getBoundingClientRect();joystick.advance(t,rect.width,rect.height);camera=action.update(t);
+ if(!action.active){clearInterval(sampleTimer);sampleTimer=null;video.pause();const end=action.end;action=null;touch.clear();resetJoystick();video.playbackRate=1;video.currentTime=end;audioPreview();updateControls();persist();say('Action complete · '+project.path.length+' camera samples. Play to review or Render.');}
 }
 function loop(){cancelAnimationFrame(raf);function tick(){if(active())sample();else if(!video.paused&&video.currentTime>=reviewedEnd()-1e-5){video.pause();updateControls();}
   audioPreview();redraw();if(active()||!video.paused)raf=requestAnimationFrame(tick);
@@ -105,13 +111,36 @@ async function play(){
  if(video.currentTime>=reviewedEnd()-1e-5){say('At the end. Press Start or choose a frame to review.');return;}
  video.playbackRate=1;audioPreview();await video.play();updateControls();loop();
 }
-const touch=new CameraTouch({read:()=>action?.state||camera,rotationEnabled:()=>!!project.settings.rotation.enabled,translate:(dx,dy)=>{if(active()){action.state.x+=dx;action.state.y+=dy;}},rotate:degrees=>{if(active())action.rotate(degrees,Math.max(lastTime,video.currentTime));}});
+function translateCamera(dx,dy){if(active()){action.state.x+=dx;action.state.y+=dy;}}
+const touch=new CameraTouch({read:()=>action?.state||camera,sensitivity:()=>project.controls.touchGain,rotationEnabled:()=>!!project.settings.rotation.enabled,translate:translateCamera,rotate:degrees=>{if(active())action.rotate(degrees,Math.max(lastTime,video.currentTime));}});
+const joystick=new CameraJoystick({read:()=>action?.state||camera,translate:translateCamera,speed:()=>project.controls.joystickSpeed});
+function paintJoystick(){const radius=$('joystick').clientWidth*.32;$('joystickKnob').style.transform=`translate(${joystick.x*radius}px,${joystick.y*radius}px)`;}
+function resetJoystick(){joystickPointer=null;joystickKeys.clear();joystick.reset();paintJoystick();}
+function joystickReady(){
+ if(busy||!sourceReady()||!project.stage.locked||!project.controls.joystick||touch.size||wizard||$('settingsCard').open)return false;
+ if(!active()){if(!$('touchArmed').checked||!video.paused)return false;void begin().catch(error);}
+ return active();
+}
+function moveJoystick(e){const rect=$('joystick').getBoundingClientRect();joystick.set(e.clientX-rect.left-rect.width/2,e.clientY-rect.top-rect.height/2,rect.width*.32);paintJoystick();}
+$('joystick').addEventListener('pointerdown',e=>{
+ e.preventDefault();e.stopPropagation();if(e.button>0||joystickPointer!==null||joystickKeys.size||!joystickReady())return;
+ sample();if(!active())return;joystickPointer=e.pointerId;try{$('joystick').setPointerCapture(e.pointerId);}catch{}moveJoystick(e);updateControls();
+});
+$('joystick').addEventListener('pointermove',e=>{e.stopPropagation();if(e.pointerId!==joystickPointer)return;e.preventDefault();sample();if(active())moveJoystick(e);});
+function releaseJoystick(e){e.stopPropagation();if(e.pointerId!==joystickPointer)return;sample();resetJoystick();updateControls();}
+for(const type of ['pointerup','pointercancel','lostpointercapture'])$('joystick').addEventListener(type,releaseJoystick);
+const joystickArrows={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]};
+function keyJoystick(){const vector=[...joystickKeys].reduce((sum,key)=>sum.map((n,i)=>n+joystickArrows[key][i]),[0,0]);joystick.set(...vector,1);paintJoystick();}
+$('joystick').addEventListener('keydown',e=>{e.stopPropagation();if(!joystickArrows[e.key])return;e.preventDefault();if(joystickPointer!==null||!joystickReady())return;sample();if(active()){joystickKeys.add(e.key);keyJoystick();updateControls();}});
+$('joystick').addEventListener('keyup',e=>{e.stopPropagation();if(!joystickArrows[e.key])return;e.preventDefault();sample();joystickKeys.delete(e.key);keyJoystick();updateControls();});
+$('joystick').addEventListener('blur',()=>{if(joystickKeys.size){sample();resetJoystick();updateControls();}});
+window.addEventListener('blur',()=>{if(joystickPointer!==null||joystickKeys.size){sample();resetJoystick();updateControls();}});
 const point=e=>({x:e.clientX,y:e.clientY});
 function rebaseStage(){
  const [a,b]=stagePoints.values();stageGesture=a?{stage:COPY(project.stage),a:{...a},mid:b?{x:(a.x+b.x)/2,y:(a.y+b.y)/2}:{...a},distance:b?Math.hypot(b.x-a.x,b.y-a.y):0,angle:b?Math.atan2(b.y-a.y,b.x-a.x):0}:null;
 }
 view.addEventListener('pointerdown',e=>{
- if(e.target.closest('button')||busy||!sourceReady()||e.button>0)return;e.preventDefault();try{view.setPointerCapture(e.pointerId);}catch{}
+ if(e.target.closest('button')||busy||!sourceReady()||e.button>0||joystickPointer!==null||joystickKeys.size)return;e.preventDefault();try{view.setPointerCapture(e.pointerId);}catch{}
  if(project.stage.locked){
   if(!active()&&(!$('touchArmed').checked||!video.paused||wizard||$('settingsCard').open))return;
   if(!active())void begin().catch(error);
@@ -123,7 +152,7 @@ view.addEventListener('pointermove',e=>{
  if(busy)return;
  const rect=view.getBoundingClientRect();
  if(project.stage.locked&&active()){
-  if(!touch.points.has(e.pointerId))return;e.preventDefault();touch.move(e.pointerId,e.clientX,e.clientY,rect.width,rect.height);sample();redraw();
+  if(!touch.points.has(e.pointerId))return;e.preventDefault();sample();if(!active())return;touch.move(e.pointerId,e.clientX,e.clientY,rect.width,rect.height);sample();redraw();
  }else if(!project.stage.locked&&stagePoints.has(e.pointerId)&&stageGesture){
   e.preventDefault();stagePoints.set(e.pointerId,point(e));const [a,b]=stagePoints.values(),g=stageGesture,mid=b?{x:(a.x+b.x)/2,y:(a.y+b.y)/2}:a;
   project.stage.x=g.stage.x+(mid.x-g.mid.x)/rect.width;project.stage.y=g.stage.y+(mid.y-g.mid.y)/rect.height;
@@ -201,6 +230,11 @@ function settingsChanged(){
 for(const id of ['zoomEnd','zoomDuration','zoomCurve','rotationEnabled','rotationSnap','rotationDegrees','rotationDirection','rotationDuration','rotationCurve','actionDuration','speed','fps'])$(id).onchange=guard(settingsChanged);
 $('zoomMove').onchange=guard(()=>{const move=$('zoomMove').value,value=$('zoomEnd').valueAsNumber;if(move==='hold')$('zoomEnd').value=100;else if(move==='push'&&value<=100)$('zoomEnd').value=150;else if(move==='pull'&&value>=100)$('zoomEnd').value=70;settingsChanged();});
 $('touchArmed').onchange=updateControls;$('mutePerformance').onchange=audioPreview;
+for(const id of ['touchSensitivity','joystickEnabled','joystickSpeed'])$(id).onchange=guard(()=>{
+ const touchGain=Number($('touchSensitivity').value),joystickSpeed=$('joystickSpeed').valueAsNumber/100;
+ if(![1,.5,.25,.125].includes(touchGain)||!Number.isFinite(joystickSpeed)||joystickSpeed<.01||joystickSpeed>2){syncFields();throw Error('Choose a valid touch sensitivity and joystick speed from 1% to 200%.');}
+ project.controls={touchGain,joystick:$('joystickEnabled').checked,joystickSpeed};resetJoystick();updateControls();persist();
+});
 $('format').onchange=()=>{invalidate();persist();};
 let audioRefresh=mountClipAudio($('audio'),{prefix:'cam',read:()=>({...project.audio,editable:!busy&&!active(),hasAudio:project.source?.hasAudio,duration:Math.max(0,reviewedEnd()-project.start)}),write:value=>{Object.assign(project.audio,value);invalidate();audioPreview();persist();audioRefresh();},label:'Audio'});
 mountPlayerScribe($('reference'),{tool:'camlock',clock:$('clock'),media:video,source:()=>project.source?.name||'',sourceElement:$('sourceName'),section:$('scribe'),sourceReady,pauseEditor:stop,

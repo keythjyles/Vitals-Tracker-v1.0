@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
- <meta name="theme-color" content="#101924"><title>CamLock · GS-TOOL-CAMLOCK · V1.1</title>
- <link rel="stylesheet" href="../../shared/player-shell.css?v=34"><link rel="stylesheet" href="./camlock.css?v=2">
- <script type="module" src="./app.mjs?v=2"></script>
+ <meta name="theme-color" content="#101924"><title>CamLock · GS-TOOL-CAMLOCK · V1.2</title>
+ <link rel="stylesheet" href="../../shared/player-shell.css?v=34"><link rel="stylesheet" href="./camlock.css?v=3">
+ <script type="module" src="./app.mjs?v=3"></script>
 </head>
 <body>
  <main>
   <div id="sourceDrawer" role="region" aria-label="Top menu" hidden>
-   <div class="title"><a href="../../" aria-label="Tools home">‹ Tools</a><h1>CamLock <small>GS-TOOL-CAMLOCK · V1.1</small></h1></div>
+   <div class="title"><a href="../../" aria-label="Tools home">‹ Tools</a><h1>CamLock <small>GS-TOOL-CAMLOCK · V1.2</small></h1></div>
    <div class="row" role="group" aria-label="Player docking"><button id="dockPlayer" aria-pressed="true">Dock player</button><button id="unlockPlayer" aria-pressed="false">Unlock player</button></div>
    <div class="row"><button data-section="stage">Opening composition</button><button data-section="audio">Audio</button></div>
    <div class="row"><button id="loadSource">Load source</button><button id="openDocument">Open project / path / stage</button></div>
@@ -24,6 +24,7 @@
      <button id="emptyLoad">Load source video</button>
      <div id="recording" hidden aria-hidden="true">● RECORDING</div>
      <span id="modeLabel">STAGE SETUP</span>
+     <button id="joystick" class="joystick" hidden aria-label="Camera joystick. Hold and move to direct; release to stop. Arrow keys also direct the camera."><span class="joystick-cross" aria-hidden="true"></span><span id="joystickKnob" aria-hidden="true"></span></button>
     </div>
     <nav id="rail" aria-label="Camera controls">
      <button id="start" title="Pause at the opening source timestamp">↤ Start</button>
@@ -32,6 +33,7 @@
      <button id="action" class="gold" title="Record a camera performance">● Action</button>
      <button id="lockStage" title="Lock the opening composition">Lock stage</button>
      <button id="wizard" title="Set the opening, effect and duration, then arm the viewport">Wizard</button>
+     <button data-section="direction">Direction</button>
      <button data-section="magnification">Push / Pull</button>
      <button data-section="rotation">Rotation</button>
      <button data-section="duration">Duration</button>
@@ -40,7 +42,7 @@
      <button id="export" disabled>Export</button>
     </nav>
    </div>
-   <div id="reference"><span id="playerIdentity">CamLock · GS-TOOL-CAMLOCK · V1.1</span><span id="sourceName">No source</span><span id="clock">F0 · 0.000s · 25fps</span></div>
+   <div id="reference"><span id="playerIdentity">CamLock · GS-TOOL-CAMLOCK · V1.2</span><span id="sourceName">No source</span><span id="clock">F0 · 0.000s · 25fps</span></div>
    <progress id="timeline" max="1" value="0" aria-label="Source position (read-only)"></progress>
    <div class="transport" aria-label="Frame navigation">
     <button id="back25" title="Back 25 frames">−25</button><button id="back" aria-label="Previous frame; double tap 25 frames">−</button>
@@ -78,6 +80,11 @@
     <label>Rotation time (seconds) <input id="rotationDuration" type="number" min="0.01" step="any" value="4"></label>
     <label>Speed pattern <select id="rotationCurve"><option value="constant">Steady speed</option><option value="accelerating">Start slow, speed up</option><option value="decelerating">Start fast, slow down</option><option value="ease">Start and end gently</option></select></label>
    </div><p>Turn Rotation on to enable programmed and second-finger rotation. Snap to square catches angles within 5° of each 90° position; switch it off for free rotation. Finger separation never changes magnification during Action.</p></details>
+   <details id="direction"><summary>Camera direction</summary><div class="fields">
+    <label>Touch sensitivity <select id="touchSensitivity"><option value="1">Full · 1 pixel → 1 pixel</option><option value="0.5">½ · 1 pixel → ½ pixel</option><option value="0.25" selected>¼ · 1 pixel → ¼ pixel</option><option value="0.125">⅛ · 1 pixel → ⅛ pixel</option></select></label>
+    <label><input id="joystickEnabled" type="checkbox"> Show joystick</label>
+    <label>Joystick speed (% of picture width / second) <input id="joystickSpeed" type="number" min="1" max="200" step="1" value="10"></label>
+   </div><p>Lower touch sensitivity gives finer direction without smoothing. It does not change stage setup, push / pull, or rotation.</p><p>Hold the joystick and move away from its center to travel. A small movement is slow; farther is faster. Release to stop camera travel while Action continues. Use either viewport touch or the joystick for each gesture. Slow performance speed gives you more time for the same source-timed move.</p></details>
    <details id="duration"><summary>Action duration and performance speed</summary><div class="fields">
     <label>Action length (seconds) <input id="actionDuration" type="number" min="0.04" max="86400" step="any" value="12"></label>
     <label>Performance speed <select id="speed"><option value="1">1×</option><option value="0.5">½×</option><option value="0.25">¼×</option><option value="0.125">⅛×</option></select></label>
