@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
- <meta name="theme-color" content="#101924"><title>CamLock · GS-TOOL-CAMLOCK · V1.2</title>
- <link rel="stylesheet" href="../../shared/player-shell.css?v=34"><link rel="stylesheet" href="./camlock.css?v=3">
- <script type="module" src="./app.mjs?v=3"></script>
+ <meta name="theme-color" content="#101924"><title>CamLock · GS-TOOL-CAMLOCK · V1.3</title>
+ <link rel="stylesheet" href="../../shared/player-shell.css?v=34"><link rel="stylesheet" href="./camlock.css?v=4">
+ <script type="module" src="./app.mjs?v=4"></script>
 </head>
 <body>
  <main>
   <div id="sourceDrawer" role="region" aria-label="Top menu" hidden>
-   <div class="title"><a href="../../" aria-label="Tools home">‹ Tools</a><h1>CamLock <small>GS-TOOL-CAMLOCK · V1.2</small></h1></div>
+   <div class="title"><a href="../../" aria-label="Tools home">‹ Tools</a><h1>CamLock <small>GS-TOOL-CAMLOCK · V1.3</small></h1></div>
    <div class="row" role="group" aria-label="Player docking"><button id="dockPlayer" aria-pressed="true">Dock player</button><button id="unlockPlayer" aria-pressed="false">Unlock player</button></div>
    <div class="row"><button data-section="stage">Opening composition</button><button data-section="audio">Audio</button></div>
    <div class="row"><button id="loadSource">Load source</button><button id="openDocument">Open project / path / stage</button></div>
@@ -42,7 +42,7 @@
      <button id="export" disabled>Export</button>
     </nav>
    </div>
-   <div id="reference"><span id="playerIdentity">CamLock · GS-TOOL-CAMLOCK · V1.2</span><span id="sourceName">No source</span><span id="clock">F0 · 0.000s · 25fps</span></div>
+   <div id="reference"><span id="playerIdentity">CamLock · GS-TOOL-CAMLOCK · V1.3</span><span id="sourceName">No source</span><span id="sourceTiming" class="source-timing">Length — · Elapsed — · Remaining —</span><span id="clock">F0 · 0.000s · 25fps</span></div>
    <progress id="timeline" max="1" value="0" aria-label="Source position (read-only)"></progress>
    <div class="transport" aria-label="Frame navigation">
     <button id="back25" title="Back 25 frames">−25</button><button id="back" aria-label="Previous frame; double tap 25 frames">−</button>
@@ -55,7 +55,7 @@
   <button id="cancelRender" hidden>Cancel render</button>
   <div id="settings" hidden>
    <details id="scribe"><summary>Scribe</summary></details>
-   <details id="stage"><summary>Stage setup</summary><div class="fields">
+   <details id="stage"><summary>Stage setup</summary><div id="wizardOpeningControls" hidden><button id="wizardOpeningLock" aria-pressed="true">Unlock opening</button><p id="openingLockHint">Opening settings are locked. Unlock only to change them.</p></div><div class="fields">
     <label>Horizontal <input data-stage="x" type="number" step="any" value="0"></label>
     <label>Vertical <input data-stage="y" type="number" step="any" value="0"></label>
     <label>Scale × <input data-stage="scale" type="number" min="0.001" step="any" value="1"></label>
@@ -90,7 +90,11 @@
     <label>Performance speed <select id="speed"><option value="1">1×</option><option value="0.5">½×</option><option value="0.25">¼×</option><option value="0.125">⅛×</option></select></label>
     <label><input id="mutePerformance" type="checkbox" checked> Mute while performing</label>
     <label><input id="touchArmed" type="checkbox" checked> Touch starts Action</label>
-   </div><p>Action continues after individual movements finish and when your fingers leave the screen. Pause before navigating.</p></details>
+   </div><p>Action continues after individual movements finish and when your fingers leave the screen. Its length controls camera recording. Rendering keeps the entire source unless Trim output is enabled.</p>
+   <details id="trimOptions"><summary>Trim output (optional)</summary><label><input id="trimEnabled" type="checkbox"> Trim output</label><div class="fields">
+    <label>Trim IN (source seconds) <input id="trimStart" type="number" min="0" step="any" value="0" disabled></label>
+    <label>Trim OUT (source seconds) <input id="trimEnd" type="number" min="0" step="any" value="0" disabled></label>
+   </div><div class="row"><button id="trimInHere" disabled>Set IN here</button><button id="trimOutHere" disabled>Set OUT here</button><button id="clearTrim" disabled>Use entire source</button></div><p id="outputRangeInfo">Output: entire source.</p><p>Trimming changes the output range and keeps every saved camera instruction. Turn Trim output off to restore the whole video.</p></details></details>
    <details id="audio"><summary>Audio</summary></details>
    <details id="save"><summary>Save, open and export</summary><div class="row">
     <button id="saveStage">Save stage</button><button id="savePath">Save camera path</button><button id="saveProject">Save project</button><button id="openSaved">Open saved</button>
@@ -103,7 +107,7 @@
    <details id="help"><summary>Camera controls</summary><p>Wizard guides opening composition, effect and duration, then arms the viewport. Each settings button opens a popup card. The first finger directs the camera: move down and the picture moves up. With Rotation on, a second finger rotates around the first. Lift either or both fingers freely; Action continues. If the primary finger lifts, the remaining finger becomes the direction controller without a jump.</p><p>Pause, navigate to a correction point, then start Action to replace only the path from that time onward. Navigation preserves the path. Raw movement uses linear interpolation with no smoothing.</p><p>Play toggles normal review; REV toggles frame-by-frame reverse. Frame buttons step one frame, or 25 on a double tap. The player docks flush to the top. Pull its top handle down to reveal the menu, including Dock player and Unlock player. Pull upward to close the menu. Camera touches do not open it.</p></details>
   </div>
   <dialog id="settingsCard" class="settings-card" aria-labelledby="cardTitle">
-   <div class="card-heading"><strong id="cardTitle">Settings</strong><button id="closeSettings" aria-label="Close settings card">Close</button></div>
+   <div class="card-header"><div class="card-heading"><strong id="cardTitle">Settings</strong><button id="closeSettings" aria-label="Close settings card">Close</button></div><div id="wizardReadout" hidden><p id="wizardSourceName"></p><p id="wizardSourceTiming"></p><p id="wizardClock"></p><p id="wizardOutputRange"></p></div></div>
    <div id="wizardQuestion" hidden><p id="wizardStep"></p><h2 id="wizardPrompt"></h2><p id="wizardHint"></p></div>
    <label id="wizardEffectBox" hidden>Camera effect <select id="wizardEffect"><option value="direction">Direction only</option><option value="push">Push in</option><option value="pull">Pull out</option><option value="rotate">Rotation</option><option value="combined">Combined movement</option></select></label>
    <div id="cardBody"></div>

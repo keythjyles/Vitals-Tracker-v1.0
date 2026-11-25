@@ -1,0 +1,52 @@
+{
+  "tool": "GS-TOOL-CAMLOCK",
+  "release": "V1.3",
+  "date": "2026-11-25",
+  "branch": "camlock-v1.3-wizard-full-source",
+  "base_and_rollback": "18d6b6ddd99d4c449be6354748776b2868d33548",
+  "owner_direction": [
+    "Lock wizard opening values unless explicitly unlocked",
+    "Raise wizard panel and keep its live source timing visible",
+    "Show source length, elapsed, remaining, frame and time below the clip",
+    "Render entire source unless explicitly trimmed"
+  ],
+  "camera_tests": {
+    "passed": 31,
+    "failed": 0
+  },
+  "browser_tests": {
+    "status": "passed",
+    "checks": 29,
+    "receipt": "tests/BROWSER_ACCEPTANCE_V1_3.json"
+  },
+  "media_proof": {
+    "source_seconds": 4,
+    "source_frames": 100,
+    "camera_action_source_start": 0.4,
+    "camera_action_seconds": 1.2,
+    "default_output_seconds": 4,
+    "default_output_frames": 100,
+    "explicit_trim_source_seconds": [
+      0.4,
+      1.6
+    ],
+    "trimmed_output_frames": 30,
+    "audio_synchronized_in_both_outputs": true,
+    "decoded_prefix_and_tail_frames_match": true
+  },
+  "native_browser": {
+    "explicit_unlock_and_relock": true,
+    "wizard_cancellation": true
+  },
+  "preservation": [
+    "original source frames and audio",
+    "complete raw paths and prior stage compositions",
+    "Scribe and its history",
+    "shared and adjacent production editors"
+  ],
+  "limits": [
+    "Simulated touch in 320/390/430px iframe, not physical Android or iOS.",
+    "Authenticated Scribe cloud synchronization not exercised."
+  ],
+  "release_verification": "This checkpoint records prepublication evidence. Commit-specific GitHub checks, Pages deployment and live-page verification are recorded in the release pull request."
+}

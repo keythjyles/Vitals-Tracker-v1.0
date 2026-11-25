@@ -1,12 +1,12 @@
-import {newProject,initialCamera,stateAt,Action,CameraTouch,CameraJoystick,drawScene,pathDocument,importDocument,clamp,snapSquare} from './core.mjs?v=3';
-import {inspectSource,renderCamera} from './render.mjs?v=1';
+import {newProject,initialCamera,stateAt,Action,CameraTouch,CameraJoystick,drawScene,pathDocument,importDocument,clamp,snapSquare,clipRange} from './core.mjs?v=4';
+import {inspectSource,renderCamera} from './render.mjs?v=2';
 import {mountPlayerScribe} from '../../shared/player-scribe.mjs?v=34';
 import {mountClipAudio,fadeGainAt} from '../../shared/clip-audio.mjs?v=3';
 import {PLAYER_PROFILE} from '../../shared/player-shell.mjs?v=34';
 
 const $=id=>document.getElementById(id),video=$('sourceVideo'),canvas=$('picture'),ctx=canvas.getContext('2d',{alpha:false,colorSpace:'srgb'}),view=$('viewport');
 const KEY='gs-camlock-project-v1'+(new URLSearchParams(location.search).get('qa')==='acceptance'?'-qa':''),COPY=v=>JSON.parse(JSON.stringify(v));
-const VERSION='V1.2',DOCK_KEY=KEY+'-player-docked';
+const VERSION='V1.3',DOCK_KEY=KEY+'-player-docked';
 let project=newProject(),file=null,sourceURL=null,camera=initialCamera(),action=null,reverseTimer=null,busy=false,renderResult=null,renderURL=null,cancelled=false;
 let loading=0,playRequest=0,raf=0,sampleTimer=null,lastTime=0,stageGesture=null,stagePoints=new Map(),dirty=false;
 let playerDocked=true,topMenuOpen=false;
@@ -18,13 +18,23 @@ const guard=fn=>(...args)=>Promise.resolve().then(()=>fn(...args)).catch(error);
 const active=()=>!!action?.active;
 const frame=()=>Math.floor((video.currentTime||0)*project.fps+1e-5);
 const endpoint=()=>Math.min(project.source?.duration||0,project.start+project.settings.duration);
-const reviewedEnd=()=>Math.min(endpoint(),project.path.at(-1)?.t??endpoint());
+const reviewedEnd=()=>clipRange(project).end;
+const seconds=t=>Math.max(0,t).toFixed(3)+'s';
+function outputRangeText(){const r=clipRange(project);return project.trim?'Output: '+seconds(r.duration)+' · trim '+seconds(r.start)+'–'+seconds(r.end):'Output: entire source · '+seconds(r.duration);}
+function updateReadouts(){
+ const t=video.currentTime||0,total=project.source?.duration||0;
+ const timing=project.source?'Length '+seconds(total)+' · Elapsed '+seconds(t)+' · Remaining '+seconds(total-t):'Length — · Elapsed — · Remaining —';
+ $('clock').textContent='F'+frame()+' · '+seconds(t)+' · '+project.fps+'fps';
+ $('clock').dataset.frame=frame();$('clock').dataset.time=t;$('clock').dataset.fps=project.fps;
+ $('sourceTiming').textContent=timing;$('wizardSourceTiming').textContent=timing;$('wizardClock').textContent=$('clock').textContent;
+ $('wizardSourceName').textContent=project.source?.name||'No source';$('outputRangeInfo').textContent=$('wizardOutputRange').textContent=outputRangeText();
+}
 function persist(){project.release=VERSION;project.scribe=$('gs-notes')?.value||'';try{localStorage.setItem(KEY,JSON.stringify(project));dirty=false;}catch{say('Draft storage is full. Save project before closing.');}}
 function invalidate(){dirty=true;if(renderResult){renderResult=null;if(renderURL)URL.revokeObjectURL(renderURL);renderURL=null;$('renderInfo').textContent='Camera edit changed. Render again to export this version.';}updateControls();}
 function download(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),60000);}
 function jsonDownload(value,suffix){download(new Blob([JSON.stringify(value,null,2)],{type:'application/json'}),'CamLock_'+suffix+'_V01.json');}
 function sourceReady(){return !!file&&video.readyState>=2;}
-function audioPreview(){video.muted=active()&&$('mutePerformance').checked;const start=project.start,end=reviewedEnd();video.volume=clamp(project.audio.volume*fadeGainAt(project.audio,start,end,video.currentTime||start),0,1);}
+function audioPreview(){video.muted=active()&&$('mutePerformance').checked;const {start,end}=clipRange(project);video.volume=clamp(project.audio.volume*fadeGainAt(project.audio,start,end,video.currentTime||0),0,1);}
 function updateControls(){
  const recording=active(),touching=touch.size>0||joystickPointer!==null||joystickKeys.size>0,ready=sourceReady();
  for(const b of $('rail').querySelectorAll('button'))b.disabled=busy||!ready;
@@ -49,14 +59,19 @@ function updateControls(){
  $('joystick').disabled=busy;
  for(const input of document.querySelectorAll('[data-stage],#aspect,#outputWidth,#outputHeight,#opening,#openingHere'))input.disabled=project.stage.locked;
  document.querySelector('[data-stage="r"]').disabled=project.stage.locked||!project.settings.rotation.enabled;
+ $('wizardOpeningControls').hidden=!wizard||wizard.step!==0;
+ $('wizardOpeningLock').textContent=project.stage.locked?'Unlock opening':'Lock opening';$('wizardOpeningLock').setAttribute('aria-pressed',String(project.stage.locked));
+ $('openingLockHint').textContent=project.stage.locked?'Opening settings are locked. Keep them, or unlock to adjust.':'Opening unlocked. Adjust the composition, then lock it again or continue.';
+ $('wizardReadout').hidden=!wizard;
+ $('trimEnabled').disabled=busy||recording||!ready;
+ for(const id of ['trimStart','trimEnd','trimInHere','trimOutHere','clearTrim'])$(id).disabled=busy||recording||!ready||!project.trim;
  audioRefresh?.();
 }
 function redraw(){
  if(video.seeking)return;
- if(!active())camera=stateAt(project.path,video.currentTime||project.start);
+ if(!active())camera=stateAt(project.path,video.currentTime||0);
  drawScene(ctx,sourceReady()?video:null,project.stage,camera,canvas.width,canvas.height);
- const t=video.currentTime||0;$('clock').textContent='F'+frame()+' · '+t.toFixed(3)+'s · '+project.fps+'fps';
- $('clock').dataset.frame=frame();$('clock').dataset.time=t;$('clock').dataset.fps=project.fps;
+ const t=video.currentTime||0;updateReadouts();
  $('timeline').value=project.source?.duration?t/project.source.duration:0;
  if(document.activeElement!==$('goFrame'))$('goFrame').value=frame();
 }
@@ -66,6 +81,7 @@ function syncFields(){
  for(const [id,value] of Object.entries({outputWidth:project.stage.width,outputHeight:project.stage.height,opening:project.start,zoomEnd:project.settings.zoom.end,zoomDuration:project.settings.zoom.duration,zoomCurve:project.settings.zoom.curve,rotationDegrees:Math.abs(project.settings.rotation.degrees),rotationDirection:Math.sign(project.settings.rotation.degrees)||1,rotationDuration:project.settings.rotation.duration,rotationCurve:project.settings.rotation.curve,actionDuration:project.settings.duration,speed:project.performanceSpeed,fps:project.fps}))$(id).value=value;
  $('rotationEnabled').checked=!!project.settings.rotation.enabled;$('rotationSnap').checked=project.settings.rotation.snap!==false;
  $('touchSensitivity').value=project.controls.touchGain;$('joystickEnabled').checked=project.controls.joystick;$('joystickSpeed').value=project.controls.joystickSpeed*100;
+ $('trimEnabled').checked=!!project.trim;const range=clipRange(project);$('trimStart').value=range.start;$('trimEnd').value=range.end;
  $('zoomEnd').value=Number((project.settings.zoom.end*100).toFixed(3));$('zoomMove').value=project.settings.zoom.end===1?'hold':project.settings.zoom.end>1?'push':'pull';
  const ratio=project.stage.width/project.stage.height;$('aspect').value=Object.keys(ratios).find(k=>Math.abs(ratios[k][0]/ratios[k][1]-ratio)<.0001)||'custom';
  fitCanvas();updateControls();
@@ -109,6 +125,7 @@ async function play(){
  if(!sourceReady()||busy||active())return;
  stopReverse();if(!video.paused){video.pause();updateControls();return;}
  if(video.currentTime>=reviewedEnd()-1e-5){say('At the end. Press Start or choose a frame to review.');return;}
+ if(video.currentTime<clipRange(project).start)seek(clipRange(project).start);
  video.playbackRate=1;audioPreview();await video.play();updateControls();loop();
 }
 function translateCamera(dx,dy){if(active()){action.state.x+=dx;action.state.y+=dy;}}
@@ -217,7 +234,7 @@ for(const button of document.querySelectorAll('[data-section]'))button.onclick=(
 const ratios={'9:16':[1080,1920],'16:9':[1920,1080],'1:1':[1080,1080],'4:5':[1080,1350]};
 for(const el of document.querySelectorAll('[data-stage]'))el.onchange=()=>{if(project.stage.locked)return;const value=el.type==='checkbox'?el.checked:el.valueAsNumber;if(typeof value==='number'&&(!Number.isFinite(value)||el.dataset.stage==='scale'&&value<=0)){syncFields();return;}project.stage[el.dataset.stage]=value;invalidate();redraw();persist();};
 $('aspect').onchange=()=>{if(project.stage.locked)return;const size=ratios[$('aspect').value];if(size){[project.stage.width,project.stage.height]=size;invalidate();syncFields();persist();}};
-for(const id of ['outputWidth','outputHeight'])$(id).onchange=guard(()=>{const width=$('outputWidth').valueAsNumber,height=$('outputHeight').valueAsNumber;if(![width,height].every(n=>Number.isInteger(n)&&n>=2&&n<=7680&&n%2===0)){syncFields();throw Error('Output dimensions must be even whole numbers from 2 to 7680.');}project.stage.width=width;project.stage.height=height;invalidate();syncFields();persist();});
+for(const id of ['outputWidth','outputHeight'])$(id).onchange=guard(()=>{if(project.stage.locked)return;const width=$('outputWidth').valueAsNumber,height=$('outputHeight').valueAsNumber;if(![width,height].every(n=>Number.isInteger(n)&&n>=2&&n<=7680&&n%2===0)){syncFields();throw Error('Output dimensions must be even whole numbers from 2 to 7680.');}project.stage.width=width;project.stage.height=height;invalidate();syncFields();persist();});
 function setOpening(t){if(project.stage.locked)return;if(!Number.isFinite(t)||t<0||t>=project.source?.duration)throw Error('Choose an opening inside the source.');project.start=t;invalidate();syncFields();seek(t);persist();}
 $('opening').onchange=guard(()=>setOpening($('opening').valueAsNumber));$('openingHere').onclick=guard(()=>setOpening(video.currentTime));
 function settingsChanged(){
@@ -230,13 +247,23 @@ function settingsChanged(){
 for(const id of ['zoomEnd','zoomDuration','zoomCurve','rotationEnabled','rotationSnap','rotationDegrees','rotationDirection','rotationDuration','rotationCurve','actionDuration','speed','fps'])$(id).onchange=guard(settingsChanged);
 $('zoomMove').onchange=guard(()=>{const move=$('zoomMove').value,value=$('zoomEnd').valueAsNumber;if(move==='hold')$('zoomEnd').value=100;else if(move==='push'&&value<=100)$('zoomEnd').value=150;else if(move==='pull'&&value>=100)$('zoomEnd').value=70;settingsChanged();});
 $('touchArmed').onchange=updateControls;$('mutePerformance').onchange=audioPreview;
+function trimChanged(){
+ if(active()||busy||!sourceReady())return;
+ const start=$('trimStart').valueAsNumber,end=$('trimEnd').valueAsNumber;
+ if($('trimEnabled').checked&&(!Number.isFinite(start)||!Number.isFinite(end)||start<0||end<=start||end>project.source.duration+1e-7)){syncFields();throw Error('Trim IN must be before OUT, inside the source video.');}
+ project.trim=$('trimEnabled').checked?{start,end}:null;invalidate();syncFields();audioPreview();persist();
+}
+for(const id of ['trimEnabled','trimStart','trimEnd'])$(id).onchange=guard(trimChanged);
+$('trimInHere').onclick=guard(()=>{$('trimStart').value=video.currentTime;trimChanged();});
+$('trimOutHere').onclick=guard(()=>{$('trimEnd').value=video.currentTime;trimChanged();});
+$('clearTrim').onclick=guard(()=>{$('trimEnabled').checked=false;trimChanged();});
 for(const id of ['touchSensitivity','joystickEnabled','joystickSpeed'])$(id).onchange=guard(()=>{
  const touchGain=Number($('touchSensitivity').value),joystickSpeed=$('joystickSpeed').valueAsNumber/100;
  if(![1,.5,.25,.125].includes(touchGain)||!Number.isFinite(joystickSpeed)||joystickSpeed<.01||joystickSpeed>2){syncFields();throw Error('Choose a valid touch sensitivity and joystick speed from 1% to 200%.');}
  project.controls={touchGain,joystick:$('joystickEnabled').checked,joystickSpeed};resetJoystick();updateControls();persist();
 });
 $('format').onchange=()=>{invalidate();persist();};
-let audioRefresh=mountClipAudio($('audio'),{prefix:'cam',read:()=>({...project.audio,editable:!busy&&!active(),hasAudio:project.source?.hasAudio,duration:Math.max(0,reviewedEnd()-project.start)}),write:value=>{Object.assign(project.audio,value);invalidate();audioPreview();persist();audioRefresh();},label:'Audio'});
+let audioRefresh=mountClipAudio($('audio'),{prefix:'cam',read:()=>({...project.audio,editable:!busy&&!active(),hasAudio:project.source?.hasAudio,duration:clipRange(project).duration}),write:value=>{Object.assign(project.audio,value);invalidate();audioPreview();persist();audioRefresh();},label:'Audio'});
 mountPlayerScribe($('reference'),{tool:'camlock',clock:$('clock'),media:video,source:()=>project.source?.name||'',sourceElement:$('sourceName'),section:$('scribe'),sourceReady,pauseEditor:stop,
  getPosition:()=>file?{frame:frame(),time:video.currentTime,fps:project.fps}:null,restoreMark:position=>seek(position.time??position.frame/project.fps)});
 $('reference').querySelector('.gs-scribe-button').onclick=()=>openSettingsCard('scribe');
@@ -247,7 +274,7 @@ function restoreCardPanels(){for(const panel of cardPanels){panel.open=false;$('
 function showCardPanels(ids){restoreCardPanels();for(const id of ids){const panel=$(id);panel.open=true;$('cardBody').append(panel);cardPanels.push(panel);}}
 function showSettingsCard(){if(!$('settingsCard').open)$('settingsCard').show();updateControls();}
 function closeSettingsCard(completed=false){
- if(wizard&&!completed){const previous=wizard.previous;project.stage=previous.stage;project.settings=previous.settings;project.start=previous.start;project.performanceSpeed=previous.speed;$('touchArmed').checked=previous.armed;wizard=null;syncFields();seek(previous.time);persist();}
+ if(wizard&&!completed){const previous=wizard.previous;project.stage=previous.stage;project.settings=previous.settings;project.start=previous.start;project.trim=previous.trim;project.performanceSpeed=previous.speed;$('touchArmed').checked=previous.armed;wizard=null;syncFields();seek(previous.time);persist();}
  wizard=null;restoreCardPanels();$('settingsCard').close();$('settingsCard').classList.remove('wizard-mode');updateControls();
 }
 function openSettingsCard(id){
@@ -259,18 +286,18 @@ $('closeSettings').onclick=$('settingsDone').onclick=()=>closeSettingsCard();
 $('settingsCard').addEventListener('cancel',e=>{e.preventDefault();closeSettingsCard();});
 $('settingsCard').addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();closeSettingsCard();}});
 const wizardSteps=[
- {prompt:'How should the video open?',hint:'Drag the video into its opening composition and choose its starting time.',panels:['stage']},
+ {prompt:'How should the video open?',hint:'Opening settings are locked to prevent accidental changes. Unlock opening only if you want to adjust them.',panels:['stage']},
  {prompt:'What camera effect do you want?',hint:'Choose the movement, then adjust its magnification or enabled rotation.',panels:['magnification','rotation']},
- {prompt:'How long should Action last?',hint:'Set the source-video duration and performance speed. Arm camera makes the viewport hot.',panels:['duration']},
+ {prompt:'How long should Action last?',hint:'Choose the camera recording length and performance speed. Output keeps the entire source unless you explicitly enable Trim output.',panels:['duration']},
 ];
 function showWizardStep(){
  const step=wizardSteps[wizard.step];$('cardTitle').textContent='CamLock wizard';$('wizardStep').textContent=['Opening','Effect','Duration'][wizard.step]+' · '+(wizard.step+1)+' of 3';$('wizardPrompt').textContent=step.prompt;$('wizardHint').textContent=step.hint;
  $('wizardQuestion').hidden=false;$('wizardEffectBox').hidden=wizard.step!==1;$('wizardBack').hidden=false;$('wizardBack').disabled=wizard.step===0;$('wizardNext').hidden=false;$('wizardNext').textContent=wizard.step===2?'Arm camera':'Next';$('settingsDone').hidden=true;
- project.stage.locked=wizard.step!==0;showCardPanels(step.panels);$('settingsCard').classList.add('wizard-mode');showSettingsCard();syncFields();
+ project.stage.locked=wizard.step!==0||!wizard.openingUnlocked;showCardPanels(step.panels);$('settingsCard').classList.add('wizard-mode');showSettingsCard();syncFields();
 }
 $('wizard').onclick=()=>{
  if(!sourceReady()||busy||active())return;stop();closeSettingsCard();
- wizard={step:0,previous:{stage:COPY(project.stage),settings:COPY(project.settings),start:project.start,speed:project.performanceSpeed,armed:$('touchArmed').checked,time:video.currentTime}};
+ wizard={step:0,openingUnlocked:false,previous:{stage:COPY(project.stage),settings:COPY(project.settings),start:project.start,trim:COPY(project.trim),speed:project.performanceSpeed,armed:$('touchArmed').checked,time:video.currentTime}};
  const z=project.settings.zoom.end,r=project.settings.rotation.enabled;$('wizardEffect').value=r?(z===1?'rotate':'combined'):(z===1?'direction':z>1?'push':'pull');
  seek(project.start);showWizardStep();
 };
@@ -284,7 +311,8 @@ $('wizardEffect').onchange=guard(()=>{
  if(effect==='rotate'&&Number($('rotationDegrees').value)===0)$('rotationDegrees').value=90;
  settingsChanged();
 });
-$('wizardBack').onclick=()=>{if(wizard&&wizard.step>0){wizard.step--;showWizardStep();}};
+$('wizardOpeningLock').onclick=()=>{if(wizard?.step!==0)return;wizard.openingUnlocked=!wizard.openingUnlocked;project.stage.locked=!wizard.openingUnlocked;touch.clear();stagePoints.clear();syncFields();};
+$('wizardBack').onclick=()=>{if(wizard&&wizard.step>0){wizard.step--;wizard.openingUnlocked=false;showWizardStep();}};
 $('wizardNext').onclick=guard(async()=>{
  if(!wizard)return;
  for(const input of $('cardBody').querySelectorAll('input'))if(!input.disabled&&!input.reportValidity())return;

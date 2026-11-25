@@ -2,7 +2,7 @@ import {Input,ALL_FORMATS,BlobSource,CanvasSink} from '../sxlock/vendor/mediabun
 import {exportVideo,inspectVideo} from '../sxlock/export-engine.mjs?v=46';
 import {readSourceAudio} from '../caplock/source-audio.mjs?v=36';
 import {mixClipAudio} from '../../shared/clip-audio.mjs?v=3';
-import {drawScene,stateAt} from './core.mjs?v=1';
+import {drawScene,stateAt,clipRange} from './core.mjs?v=4';
 
 export async function inspectSource(file) {
  const input=new Input({source:new BlobSource(file),formats:ALL_FORMATS});
@@ -17,8 +17,9 @@ export async function renderCamera({file,project,format='mp4',onProgress,onPhase
  const check=()=>{if(cancelled())throw Error('Render cancelled. Camera instructions are preserved.');};
  try{
   const video=await input.getPrimaryVideoTrack();if(!video)throw Error('Source video is unavailable.');
-  const start=project.start,end=Math.min(project.source.duration,project.path.at(-1).t,project.start+project.settings.duration);
-  const count=Math.ceil((end-start)*project.fps-1e-6);if(count<1)throw Error('Record at least one output frame.');
+  const {start,end}=clipRange(project);
+  if(!Number.isFinite(start)||!Number.isFinite(end)||start<0||end>project.source.duration+1e-7||end<=start)throw Error('Choose a valid output range inside the source.');
+  const count=Math.ceil((end-start)*project.fps-1e-6);if(count<1)throw Error('Choose at least one output frame.');
   const times=function*(){for(let i=0;i<count;i++)yield Math.min(start+i/project.fps+1e-7,end-1e-7);};
   frames=new CanvasSink(video,{alpha:true,poolSize:1}).canvasesAtTimestamps(times());
   const audio=await input.getPrimaryAudioTrack();let sound;
@@ -32,6 +33,6 @@ export async function renderCamera({file,project,format='mp4',onProgress,onPhase
     }
    }
   });
-  result.report.camlock={start,end:start+count/project.fps,coordinates:project.coordinates,samples:project.path.length,performanceSpeed:project.performanceSpeed,renderSpeed:1};return result;
+  result.report.camlock={start,end:start+count/project.fps,trimmed:!!project.trim,sourceDuration:project.source.duration,coordinates:project.coordinates,samples:project.path.length,performanceSpeed:project.performanceSpeed,renderSpeed:1};return result;
  }finally{await frames?.return();input.dispose();}
 }
