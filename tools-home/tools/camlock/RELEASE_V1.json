@@ -67,7 +67,72 @@
     "Save and Export are file downloads, not verified cloud backups."
   ],
   "deployment": {
-    "status": "pending",
-    "note": "Record actual commit and Pages deployment in the release commit/PR or a subsequent receipt update."
+    "status": "verified",
+    "merge_commit": "07344163faa7c097ba1f1340106f4211edb5ec23",
+    "pages_run": 45684671481,
+    "conclusion": "success",
+    "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/camlock/",
+    "tools_directory": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/",
+    "browser_verified": {
+      "visible_version": "CamLock · GS-TOOL-CAMLOCK · V1.0",
+      "initialized": true,
+      "tools_directory_version": "R4",
+      "directory_search_and_entry": true
+    },
+    "note": "Code, branch/main CI and public page verified separately. Receipt-only subsequent commits do not change the tested application."
+  },
+  "code_commit": "cf7a331489c900fb265480243dc5cd652e3e0849",
+  "pull_request": "https://github.com/keythjyles/Vitals-Tracker-v1.0/pull/45",
+  "github_checks": {
+    "branch": [
+      {
+        "id": 45684055227,
+        "name": "CamLock camera checks",
+        "event": "pull_request",
+        "conclusion": "success",
+        "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/45684055227"
+      },
+      {
+        "id": 45684055093,
+        "name": "CapLock prototype checks",
+        "event": "pull_request",
+        "conclusion": "success",
+        "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/45684055093"
+      },
+      {
+        "id": 45684049084,
+        "name": "CamLock camera checks",
+        "event": "push",
+        "conclusion": "success",
+        "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/45684049084"
+      },
+      {
+        "id": 45684049000,
+        "name": "CapLock prototype checks",
+        "event": "push",
+        "conclusion": "success",
+        "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/45684049000"
+      }
+    ],
+    "main": [
+      {
+        "id": 45684671985,
+        "name": "CamLock camera checks",
+        "conclusion": "success",
+        "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/45684671985"
+      },
+      {
+        "id": 45684671481,
+        "name": "pages build and deployment",
+        "conclusion": "success",
+        "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/45684671481"
+      },
+      {
+        "id": 45684672007,
+        "name": "CapLock prototype checks",
+        "conclusion": "success",
+        "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/45684672007"
+      }
+    ]
   }
 }
