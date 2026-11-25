@@ -1,4 +1,4 @@
-// CamLock V1.3. World positions use viewport widths/heights; camera is independent of stage.
+// CamLock V1.4. World positions use viewport widths/heights; camera is independent of stage.
 export const SCHEMA = 'CamLockProject-1.0';
 export const COORDINATES = Object.freeze({version:1,origin:'viewport-center',x:'viewport-width',y:'viewport-height',z:'multiplier-of-locked-stage',r:'unwrapped-camera-degrees-clockwise',time:'absolute-source-seconds',interpolation:'linear-no-overshoot'});
 export const clamp = (n,a,b) => Math.max(a,Math.min(b,n));
@@ -12,7 +12,7 @@ export function ease(name,p) {
  return p;
 }
 export function newProject() {
- return {schema:SCHEMA,tool:'GS-TOOL-CAMLOCK',release:'V1.3',createdAt:new Date().toISOString(),source:null,trim:null,
+ return {schema:SCHEMA,tool:'GS-TOOL-CAMLOCK',release:'V1.4',createdAt:new Date().toISOString(),source:null,trim:null,
   coordinates:{...COORDINATES},stage:{x:0,y:0,scale:1,r:0,mirror:false,flip:false,width:1080,height:1920,locked:false},
   start:0,settings:{duration:12,zoom:{end:1,duration:9,curve:'constant'},rotation:{enabled:false,snap:true,degrees:0,duration:4,curve:'constant'}},
   controls:{touchGain:.25,joystick:false,joystickSpeed:.1},

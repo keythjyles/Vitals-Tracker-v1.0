@@ -148,7 +148,7 @@ document.getElementById('run').onclick=async()=>{
   let joystickError=0;for(let i=0;i<jp.length;i+=4)for(let c=0;c<3;c++)joystickError+=Math.abs(jp[i+c]-je[i+c]);joystickError/=180*320*3;
   assert(joystickError<12,'Joystick render differs from recorded path or includes control overlay');log('Joystick performance renders from its exact saved path with no joystick overlay',{meanChannelError:joystickError,frames:joystickRender.report.outputFrames});
   const report={status:'passed',checks:rows,limitations:['Simulated touch in 320/390/430px iframe, not physical Android or iOS.','Authenticated Scribe cloud synchronization not exercised.']};results.textContent=JSON.stringify(report,null,2);window.camlockAcceptance=report;
-  document.getElementById('getReport').hidden=false;document.getElementById('getReport').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'}));a.download='CamLock_Browser_Acceptance_V1_3.json';a.click();};
+  document.getElementById('getReport').hidden=false;document.getElementById('getReport').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'}));a.download='CamLock_Browser_Acceptance_V1_4.json';a.click();};
  }catch(e){const report={status:'failed',checks:rows,error:e.stack||e.message};window.camlockAcceptance=report;results.textContent=JSON.stringify(report,null,2);console.error(e);}
  finally{for(const input of inputs)input.dispose();document.getElementById('run').disabled=false;}
 };

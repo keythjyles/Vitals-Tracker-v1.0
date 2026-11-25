@@ -1,4 +1,4 @@
-import {newProject,initialCamera,stateAt,Action,CameraTouch,CameraJoystick,drawScene,pathDocument,importDocument,clamp,snapSquare,clipRange} from './core.mjs?v=4';
+import {newProject,initialCamera,stateAt,Action,CameraTouch,CameraJoystick,drawScene,pathDocument,importDocument,clamp,snapSquare,clipRange} from './core.mjs?v=5';
 import {inspectSource,renderCamera} from './render.mjs?v=2';
 import {mountPlayerScribe} from '../../shared/player-scribe.mjs?v=34';
 import {mountClipAudio,fadeGainAt} from '../../shared/clip-audio.mjs?v=3';
@@ -6,7 +6,7 @@ import {PLAYER_PROFILE} from '../../shared/player-shell.mjs?v=34';
 
 const $=id=>document.getElementById(id),video=$('sourceVideo'),canvas=$('picture'),ctx=canvas.getContext('2d',{alpha:false,colorSpace:'srgb'}),view=$('viewport');
 const KEY='gs-camlock-project-v1'+(new URLSearchParams(location.search).get('qa')==='acceptance'?'-qa':''),COPY=v=>JSON.parse(JSON.stringify(v));
-const VERSION='V1.3',DOCK_KEY=KEY+'-player-docked';
+const VERSION='V1.4',DOCK_KEY=KEY+'-player-docked';
 let project=newProject(),file=null,sourceURL=null,camera=initialCamera(),action=null,reverseTimer=null,busy=false,renderResult=null,renderURL=null,cancelled=false;
 let loading=0,playRequest=0,raf=0,sampleTimer=null,lastTime=0,stageGesture=null,stagePoints=new Map(),dirty=false;
 let playerDocked=true,topMenuOpen=false;
@@ -59,7 +59,7 @@ function updateControls(){
  $('joystick').disabled=busy;
  for(const input of document.querySelectorAll('[data-stage],#aspect,#outputWidth,#outputHeight,#opening,#openingHere'))input.disabled=project.stage.locked;
  document.querySelector('[data-stage="r"]').disabled=project.stage.locked||!project.settings.rotation.enabled;
- $('wizardOpeningControls').hidden=!wizard||wizard.step!==0;
+ $('wizardOpeningControls').hidden=wizard?wizard.step!==0:!cardPanels.includes($('stage'));
  $('wizardOpeningLock').textContent=project.stage.locked?'Unlock opening':'Lock opening';$('wizardOpeningLock').setAttribute('aria-pressed',String(project.stage.locked));
  $('openingLockHint').textContent=project.stage.locked?'Opening settings are locked. Keep them, or unlock to adjust.':'Opening unlocked. Adjust the composition, then lock it again or continue.';
  $('wizardReadout').hidden=!wizard;
@@ -271,7 +271,7 @@ $('scribe').addEventListener('toggle',()=>{try{localStorage.setItem('gs-camlock-
 $('gs-notes').addEventListener('input',()=>{project.scribe=$('gs-notes').value;persist();});
 
 function restoreCardPanels(){for(const panel of cardPanels){panel.open=false;$('settings').append(panel);}cardPanels=[];}
-function showCardPanels(ids){restoreCardPanels();for(const id of ids){const panel=$(id);panel.open=true;$('cardBody').append(panel);cardPanels.push(panel);}}
+function showCardPanels(ids){restoreCardPanels();for(const id of ids){const panel=$(id);panel.open=!['stage','rotation'].includes(id);$('cardBody').append(panel);cardPanels.push(panel);}}
 function showSettingsCard(){if(!$('settingsCard').open)$('settingsCard').show();updateControls();}
 function closeSettingsCard(completed=false){
  if(wizard&&!completed){const previous=wizard.previous;project.stage=previous.stage;project.settings=previous.settings;project.start=previous.start;project.trim=previous.trim;project.performanceSpeed=previous.speed;$('touchArmed').checked=previous.armed;wizard=null;syncFields();seek(previous.time);persist();}
@@ -279,6 +279,7 @@ function closeSettingsCard(completed=false){
 }
 function openSettingsCard(id){
  if(busy||active())return;stop();closeSettingsCard();$('cardTitle').textContent=$(id).querySelector('summary').textContent;
+ if(id==='stage'){project.stage.locked=true;touch.clear();stagePoints.clear();persist();}
  $('wizardQuestion').hidden=true;$('wizardEffectBox').hidden=true;$('wizardBack').hidden=true;$('wizardNext').hidden=true;$('settingsDone').hidden=false;
  showCardPanels([id]);showSettingsCard();
 }
@@ -311,7 +312,11 @@ $('wizardEffect').onchange=guard(()=>{
  if(effect==='rotate'&&Number($('rotationDegrees').value)===0)$('rotationDegrees').value=90;
  settingsChanged();
 });
-$('wizardOpeningLock').onclick=()=>{if(wizard?.step!==0)return;wizard.openingUnlocked=!wizard.openingUnlocked;project.stage.locked=!wizard.openingUnlocked;touch.clear();stagePoints.clear();syncFields();};
+$('wizardOpeningLock').onclick=()=>{
+ if(wizard?wizard.step!==0:!cardPanels.includes($('stage')))return;
+ project.stage.locked=!project.stage.locked;if(wizard)wizard.openingUnlocked=!project.stage.locked;
+ $('stage').open=!project.stage.locked;touch.clear();stagePoints.clear();syncFields();if(!wizard)persist();
+};
 $('wizardBack').onclick=()=>{if(wizard&&wizard.step>0){wizard.step--;wizard.openingUnlocked=false;showWizardStep();}};
 $('wizardNext').onclick=guard(async()=>{
  if(!wizard)return;

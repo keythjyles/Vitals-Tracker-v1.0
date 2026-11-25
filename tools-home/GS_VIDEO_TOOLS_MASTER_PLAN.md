@@ -77,3 +77,7 @@ Owner testing finds the camera model working and requests finer manual direction
 ## CamLock V1.3 — safe wizard and whole-source output
 
 Owner direction locks the first wizard screen unless explicitly unlocked and moves its card near the top. Source length, elapsed/remaining time and current frame/source time remain visible in both player and wizard. Render the entire source with the recorded treatment by default. Only explicit output trim IN/OUT may shorten it; Action opening/duration and the last path sample do not trim. Hold endpoint camera poses while the source continues. Keep original media, exact paths, cancellation recovery and all shared/adjacent tool code intact. Base/rollback: `18d6b6ddd99d4c449be6354748776b2868d33548`. [Operation and evidence](tools/camlock/README.md).
+
+## CamLock V1.4 — collapsed settings
+
+Opening parameters start locked and collapsed in Wizard and the manual opening card. Keep Unlock opening outside the disclosure; unlocking expands and relocking collapses it. Rotation settings start collapsed in Wizard and their dedicated popup. Preserve all values, source timing, mathematical paths, whole-source rendering and shared tool code. [Evidence and rollback](tools/camlock/RELEASE_V1_4.json).
