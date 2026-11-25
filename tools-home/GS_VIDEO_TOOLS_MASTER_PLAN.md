@@ -8,6 +8,7 @@ Use SxLock's established player for the tasks all video viewers share. CapLock a
 
 | Tool | Job | Source notes |
 | --- | --- | --- |
+| CamLock | Perform a touch-directed virtual camera move against a locked stage; save source-timed instructions and render the original. | [CamLock](tools/camlock/AGENTS.md) |
 | AspectLock | Frame one animation against a bed, key its background, and set its source trim, scale, placement and timing. | [AspectLock](tools/aspectlock/AGENTS.md) |
 | CapLock | Assemble and adjust multiple editable caption, animation, image, video and audio layers on a composition. | [CapLock](tools/caplock/AGENTS.md) |
 | SxLock | Place effects, record and mix sound for an edit. Its player and Scribe are the reference for shared controls. | [SxLock](tools/sxlock/AGENTS.md) |
@@ -56,3 +57,11 @@ Keep the template reusable for multi-line groups, graphic-only inserts, and late
 
 See [root operating rules](../AGENTS.md), [AI onboarding](../AI_MUST_READ.md), and the [shared player contract](shared/COMPACT_PLAYER.md) for the existing system instructions.
 
+
+## CamLock V1.0 — November 25, 2026
+
+Owner handoff authorizes a new touch-performance camera tool alongside the existing editors. CamLock keeps the stage separate from source-timed T/X/Y/Z/R instructions, permits black space, and branches only the subsequent path when Action resumes. First finger directs, second rotates; lifting the primary promotes the remaining finger without a jump. Programmed zoom/rotation have independent endpoints; master Action duration controls the stop.
+
+The new adapter consumes the existing Scribe/history, clip audio controls, pinned decoder and SxLock offline export engine without modifying them. Exports render source frames, then download/share as separate files. Tools R4 and both manifests register the new entry. Save stage/path/project downloads remain distinct from media render/export and cloud backup.
+
+Implementation branch: `camlock-v1`; base/rollback: `7b4d955e739f08a7169bf5ec3679df9f8ba9507c`. See [operation, test receipts and limitations](tools/camlock/README.md). Browser tests use real encoded source media and simulated touch at 320/390/430px, plus standalone native pointer input and an actual MP4 download. Physical Android/iOS and authenticated Scribe cloud sync are separate. No original media or existing editor source is changed.
