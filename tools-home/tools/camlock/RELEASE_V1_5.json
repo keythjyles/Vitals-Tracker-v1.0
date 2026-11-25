@@ -1,0 +1,44 @@
+{
+  "tool": "GS-TOOL-CAMLOCK",
+  "release": "V1.5",
+  "date": "2026-11-25",
+  "branch": "camlock-v1.5-play-touch-insert",
+  "base_and_rollback": "da104a17ae4119f3bc8f04401b4fa88a2dc28926",
+  "scope": [
+    "Armed Play leaves instructions untouched until bed contact",
+    "Contact inserts Action at current source time without seek/restart/jump",
+    "Independent programmed/master durations start at live contact",
+    "Saved segment origin preserves paused correction and JSON recovery",
+    "Disarmed touch leaves review unchanged"
+  ],
+  "camera_tests": {
+    "passed": 35,
+    "failed": 0
+  },
+  "browser_tests": {
+    "status": "passed",
+    "checks": 31,
+    "receipt": "tests/BROWSER_ACCEPTANCE_V1_5.json"
+  },
+  "insertion_proof": {
+    "name": "Armed Play waits for bed touch; insertion starts in place with full durations and no seek",
+    "pass": true,
+    "contact": 2.136154,
+    "end": 3.336153
+  },
+  "native_browser": {
+    "play_showed_armed_touch_to_insert": true,
+    "native_bed_contact_changed_action_to_pause": true
+  },
+  "preservation": [
+    "Opening composition and source timestamp",
+    "Raw earlier path instructions",
+    "Original source video and audio",
+    "Scribe/history, shared renderer and adjacent tools"
+  ],
+  "limits": [
+    "Simulated touch in 320/390/430px iframe, not physical Android or iOS.",
+    "Authenticated Scribe cloud synchronization not exercised."
+  ],
+  "release_verification": "Commit-specific GitHub checks, Pages deployment and live verification are recorded in the release pull request."
+}

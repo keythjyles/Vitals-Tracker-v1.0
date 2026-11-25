@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
- <meta name="theme-color" content="#101924"><title>CamLock · GS-TOOL-CAMLOCK · V1.4</title>
- <link rel="stylesheet" href="../../shared/player-shell.css?v=34"><link rel="stylesheet" href="./camlock.css?v=5">
- <script type="module" src="./app.mjs?v=5"></script>
+ <meta name="theme-color" content="#101924"><title>CamLock · GS-TOOL-CAMLOCK · V1.5</title>
+ <link rel="stylesheet" href="../../shared/player-shell.css?v=34"><link rel="stylesheet" href="./camlock.css?v=6">
+ <script type="module" src="./app.mjs?v=6"></script>
 </head>
 <body>
  <main>
   <div id="sourceDrawer" role="region" aria-label="Top menu" hidden>
-   <div class="title"><a href="../../" aria-label="Tools home">‹ Tools</a><h1>CamLock <small>GS-TOOL-CAMLOCK · V1.4</small></h1></div>
+   <div class="title"><a href="../../" aria-label="Tools home">‹ Tools</a><h1>CamLock <small>GS-TOOL-CAMLOCK · V1.5</small></h1></div>
    <div class="row" role="group" aria-label="Player docking"><button id="dockPlayer" aria-pressed="true">Dock player</button><button id="unlockPlayer" aria-pressed="false">Unlock player</button></div>
    <div class="row"><button data-section="stage">Opening composition</button><button data-section="audio">Audio</button></div>
    <div class="row"><button id="loadSource">Load source</button><button id="openDocument">Open project / path / stage</button></div>
@@ -19,7 +19,7 @@
   <section id="player" aria-label="Camera workspace">
    <button id="dockHandle" aria-label="Pull down to reveal top menu" aria-controls="sourceDrawer" aria-expanded="false"><span></span></button>
    <div class="monitor">
-    <div id="viewport" tabindex="0" aria-label="Camera viewport. Lock the stage, then touch to start Action. One finger directs; a second rotates.">
+    <div id="viewport" tabindex="0" aria-label="Camera viewport. Lock the stage, then touch to start Action. Armed Play runs the bed until contact inserts Action. One finger directs; a second rotates.">
      <canvas id="picture" width="540" height="960"></canvas>
      <button id="emptyLoad">Load source video</button>
      <div id="recording" hidden aria-hidden="true">● RECORDING</div>
@@ -42,7 +42,7 @@
      <button id="export" disabled>Export</button>
     </nav>
    </div>
-   <div id="reference"><span id="playerIdentity">CamLock · GS-TOOL-CAMLOCK · V1.4</span><span id="sourceName">No source</span><span id="sourceTiming" class="source-timing">Length — · Elapsed — · Remaining —</span><span id="clock">F0 · 0.000s · 25fps</span></div>
+   <div id="reference"><span id="playerIdentity">CamLock · GS-TOOL-CAMLOCK · V1.5</span><span id="sourceName">No source</span><span id="sourceTiming" class="source-timing">Length — · Elapsed — · Remaining —</span><span id="clock">F0 · 0.000s · 25fps</span></div>
    <progress id="timeline" max="1" value="0" aria-label="Source position (read-only)"></progress>
    <div class="transport" aria-label="Frame navigation">
     <button id="back25" title="Back 25 frames">−25</button><button id="back" aria-label="Previous frame; double tap 25 frames">−</button>
@@ -89,7 +89,7 @@
     <label>Action length (seconds) <input id="actionDuration" type="number" min="0.04" max="86400" step="any" value="12"></label>
     <label>Performance speed <select id="speed"><option value="1">1×</option><option value="0.5">½×</option><option value="0.25">¼×</option><option value="0.125">⅛×</option></select></label>
     <label><input id="mutePerformance" type="checkbox" checked> Mute while performing</label>
-    <label><input id="touchArmed" type="checkbox" checked> Touch starts Action</label>
+    <label><input id="touchArmed" type="checkbox" checked> Touch starts / inserts Action</label>
    </div><p>Action continues after individual movements finish and when your fingers leave the screen. Its length controls camera recording. Rendering keeps the entire source unless Trim output is enabled.</p>
    <details id="trimOptions"><summary>Trim output (optional)</summary><label><input id="trimEnabled" type="checkbox"> Trim output</label><div class="fields">
     <label>Trim IN (source seconds) <input id="trimStart" type="number" min="0" step="any" value="0" disabled></label>
@@ -104,7 +104,7 @@
     <label>Output fps <select id="fps"><option>24</option><option selected>25</option><option>30</option><option>50</option><option>60</option></select></label>
    </div><div class="row"><button id="share" disabled>Share rendered video</button><button id="reviewRender" disabled>Review render</button></div>
    <p id="renderInfo">Render applies your saved path to the original frames at normal speed.</p></details>
-   <details id="help"><summary>Camera controls</summary><p>Wizard guides opening composition, effect and duration, then arms the viewport. Each settings button opens a popup card. The first finger directs the camera: move down and the picture moves up. With Rotation on, a second finger rotates around the first. Lift either or both fingers freely; Action continues. If the primary finger lifts, the remaining finger becomes the direction controller without a jump.</p><p>Pause, navigate to a correction point, then start Action to replace only the path from that time onward. Navigation preserves the path. Raw movement uses linear interpolation with no smoothing.</p><p>Play toggles normal review; REV toggles frame-by-frame reverse. Frame buttons step one frame, or 25 on a double tap. The player docks flush to the top. Pull its top handle down to reveal the menu, including Dock player and Unlock player. Pull upward to close the menu. Camera touches do not open it.</p></details>
+   <details id="help"><summary>Camera controls</summary><p>Wizard guides opening composition, effect and duration, then arms the viewport. Each settings button opens a popup card. With the camera armed, Play runs the bed at normal speed; touching it inserts Action at that source time. The first finger directs the camera: move down and the picture moves up. With Rotation on, a second finger rotates around the first. Lift either or both fingers freely; Action continues. If the primary finger lifts, the remaining finger becomes the direction controller without a jump.</p><p>Pause, navigate to a correction point, then start Action to replace only the path from that time onward. Navigation preserves the path. Raw movement uses linear interpolation with no smoothing.</p><p>Play toggles normal review; REV toggles frame-by-frame reverse. Frame buttons step one frame, or 25 on a double tap. The player docks flush to the top. Pull its top handle down to reveal the menu, including Dock player and Unlock player. Pull upward to close the menu. Camera touches do not open it.</p></details>
   </div>
   <dialog id="settingsCard" class="settings-card" aria-labelledby="cardTitle">
    <div class="card-header"><div class="card-heading"><strong id="cardTitle">Settings</strong><button id="closeSettings" aria-label="Close settings card">Close</button></div><div id="wizardReadout" hidden><p id="wizardSourceName"></p><p id="wizardSourceTiming"></p><p id="wizardClock"></p><p id="wizardOutputRange"></p></div></div>

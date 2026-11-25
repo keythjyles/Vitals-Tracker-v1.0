@@ -48,6 +48,22 @@ document.getElementById('run').onclick=async()=>{
   const completedWizard=app.snapshot();$('wizard').click();assert($('outputWidth').disabled&&app.snapshot().stage.locked,'Repeated wizard did not relock opening');
   $('wizardNext').click();await delay(0);$('wizardNext').click();await delay(0);$('trimEnabled').checked=true;$('trimEnabled').dispatchEvent(new w.Event('change',{bubbles:true}));await delay(0);await field('trimStart',.2);await field('trimEnd',2);
   $('closeSettings').click();assert(JSON.stringify(app.snapshot().stage)===JSON.stringify(completedWizard.stage)&&app.snapshot().trim===null,'Wizard cancel did not restore stage and output range');await wait(()=>!v.seeking);log('Wizard cancellation restores the opening and any tentative trim');
+  app.seek(2);await wait(()=>!v.seeking);const beforeInsert=app.snapshot(),untouchedPath=JSON.stringify(beforeInsert.path);let insertionSeeks=0,insertionPauses=0;
+  const countSeek=()=>insertionSeeks++,countPause=()=>insertionPauses++;v.addEventListener('seeking',countSeek);v.addEventListener('pause',countPause);
+  $('play').click();await wait(()=>!v.paused&&v.currentTime>2.12);
+  assert(!app.active()&&$('recording').hidden&&JSON.stringify(app.snapshot().path)===untouchedPath,'Armed Play recorded before bed contact');assert(v.playbackRate===1&&$('modeLabel').textContent.includes('TOUCH TO INSERT'),'Armed playback status/rate incorrect');
+  const contact=v.currentTime,contactPose=app.camera();pointer('pointerdown',701,60,60);await wait(app.active);
+  const inserted=app.snapshot().segments.at(-1),firstInserted=app.snapshot().path.find(s=>close(s.t,inserted.start,1e-7));
+  assert(close(inserted.start,contact,.04)&&close(inserted.origin,inserted.start),'Insertion did not start at current source contact time');assert(close(app.snapshot().start,beforeInsert.start),'Live insertion changed opening timestamp');
+  assert(close(firstInserted.x,contactPose.x)&&close(firstInserted.y,contactPose.y)&&close(firstInserted.z,contactPose.z)&&close(firstInserted.r,contactPose.r),'Contact jumped the inherited camera pose');
+  assert(!v.paused&&insertionSeeks===0&&insertionPauses===0&&v.playbackRate===.5,'Insertion restarted or sought the bed');
+  pointer('pointermove',701,65,70);pointer('pointerup',701,65,70);await wait(()=>!app.active(),12000);
+  assert(close(v.currentTime,inserted.start+1.2,.025),'Live insertion did not retain its full master duration');
+  v.removeEventListener('seeking',countSeek);v.removeEventListener('pause',countPause);log('Armed Play waits for bed touch; insertion starts in place with full durations and no seek',{contact:inserted.start,end:v.currentTime});
+  d.querySelector('[data-section="duration"]').click();$('touchArmed').checked=false;$('touchArmed').dispatchEvent(new w.Event('change',{bubbles:true}));$('settingsDone').click();app.seek(2);await wait(()=>!v.seeking);
+  const disarmedPath=JSON.stringify(app.snapshot().path);$('play').click();await wait(()=>!v.paused&&v.currentTime>2.1);pointer('pointerdown',702,60,60);pointer('pointermove',702,80,80);pointer('pointerup',702,80,80);
+  assert(!app.active()&&!v.paused&&JSON.stringify(app.snapshot().path)===disarmedPath,'Disarmed bed touch recorded or interrupted review');$('play').click();await wait(()=>v.paused);
+  d.querySelector('[data-section="duration"]').click();$('touchArmed').checked=true;$('touchArmed').dispatchEvent(new w.Event('change',{bubbles:true}));$('settingsDone').click();$('start').click();await wait(()=>!v.seeking);log('Disarmed Play remains review-only when the bed is touched');
   d.querySelector('[data-section="magnification"]').click();assert($('settingsCard').open&&$('magnification').parentElement===$('cardBody'),'Push/Pull did not open in popup');
   const card=$('settingsCard').getBoundingClientRect();assert(card.top>=0&&card.bottom<=w.innerHeight+1,'Settings card is hidden below the player');assert($('zoomEnd').value==='140','Ending size is not shown as percent');
   $('settingsDone').click();log('Push/Pull card overlays the player with percent, seconds and plain speed choices');
@@ -148,7 +164,7 @@ document.getElementById('run').onclick=async()=>{
   let joystickError=0;for(let i=0;i<jp.length;i+=4)for(let c=0;c<3;c++)joystickError+=Math.abs(jp[i+c]-je[i+c]);joystickError/=180*320*3;
   assert(joystickError<12,'Joystick render differs from recorded path or includes control overlay');log('Joystick performance renders from its exact saved path with no joystick overlay',{meanChannelError:joystickError,frames:joystickRender.report.outputFrames});
   const report={status:'passed',checks:rows,limitations:['Simulated touch in 320/390/430px iframe, not physical Android or iOS.','Authenticated Scribe cloud synchronization not exercised.']};results.textContent=JSON.stringify(report,null,2);window.camlockAcceptance=report;
-  document.getElementById('getReport').hidden=false;document.getElementById('getReport').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'}));a.download='CamLock_Browser_Acceptance_V1_4.json';a.click();};
+  document.getElementById('getReport').hidden=false;document.getElementById('getReport').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'}));a.download='CamLock_Browser_Acceptance_V1_5.json';a.click();};
  }catch(e){const report={status:'failed',checks:rows,error:e.stack||e.message};window.camlockAcceptance=report;results.textContent=JSON.stringify(report,null,2);console.error(e);}
  finally{for(const input of inputs)input.dispose();document.getElementById('run').disabled=false;}
 };

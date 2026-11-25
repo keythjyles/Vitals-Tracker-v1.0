@@ -153,3 +153,25 @@ test('invalid explicit trims cannot replace a saved camera project',()=>{
  for(const trim of [{start:-1,end:2},{start:2,end:2},{start:3,end:1},{start:0,end:11},{start:0,end:Infinity}])assert.throws(()=>importDocument({...p,trim},p));
  assert.equal(p.trim,null);
 });
+
+test('live insertion starts all independent durations at the contact timestamp without moving the opening',()=>{
+ const p=newProject();p.source={duration:20};p.start=.4;p.settings.duration=2;p.settings.zoom={end:2,duration:1,curve:'constant'};p.settings.rotation={enabled:true,snap:true,degrees:90,duration:.5,curve:'constant'};
+ const a=new Action(p,10,20,{insert:true});near(a.origin,10);near(a.end,12);near(p.start,.4);assert.deepEqual(a.update(10),{x:0,y:0,z:1,r:0});
+ const middle=a.update(10.5);near(middle.z,1.5);near(middle.r,90);assert.ok(a.active);near(a.update(11).z,2);assert.ok(a.active);a.update(12);assert.equal(a.active,false);
+ assert.deepEqual(clipRange(p),{start:0,end:20,duration:20});near(p.segments[0].origin,10);
+});
+test('live insertion inherits the exact current pose and preserves every earlier instruction',()=>{
+ const p=newProject();p.settings.duration=4;const a=new Action(p,0,30);for(const t of [1,2,3,4]){a.state.x=t/10;a.update(t);}
+ const before=structuredClone(p.path),inherited=stateAt(before,2.5),b=new Action(p,2.5,30,{insert:true});
+ assert.deepEqual(b.state,inherited);near(b.end,6.5);assert.deepEqual(p.path.slice(0,-1),before.filter(s=>s.t<2.5));assert.equal(p.path.at(-1).t,2.5);assert.ok(!p.path.some(s=>s.t>2.5));
+});
+test('paused correction and saved-project recovery retain a live insertion source-time origin',()=>{
+ const p=newProject();p.source={duration:20};p.start=.4;p.settings.duration=4;p.settings.zoom={end:3,duration:2,curve:'constant'};p.settings.rotation={enabled:true,snap:true,degrees:180,duration:2,curve:'constant'};
+ const a=new Action(p,10,20,{insert:true});a.stop(11);const saved=importDocument(p,newProject()),before=stateAt(saved.path,11),b=new Action(saved,11,20);
+ assert.deepEqual(b.state,before);near(b.origin,10);near(b.end,14);const end=b.update(12);near(end.z,3);near(end.r,180);assert.ok(b.active);
+ const reused=importDocument(pathDocument(saved),newProject()),c=new Action(reused,12,20);near(c.origin,10);near(c.end,14);near(c.update(13).r,180);
+});
+test('an insertion at source EOF fails without deleting existing camera instructions',()=>{
+ const p=newProject();const a=new Action(p,0,20);a.stop(2);const before=structuredClone(p);
+ assert.throws(()=>new Action(p,20,20,{insert:true}));assert.deepEqual(p,before);
+});
