@@ -1,0 +1,33 @@
+{
+  "tool": "GS-TOOL-CAMLOCK",
+  "release": "V1.4",
+  "date": "2026-11-25",
+  "branch": "camlock-v1.4-collapsed-settings",
+  "base_and_rollback": "e672f23722c6896d7abc2f1b6a00453dadc6fd48",
+  "scope": [
+    "Opening parameters locked and collapsed by default",
+    "Unlock outside disclosure; expand on unlock, collapse on relock",
+    "Rotation collapsed in wizard and dedicated popup"
+  ],
+  "camera_tests": {
+    "passed": 31,
+    "failed": 0
+  },
+  "browser_tests": {
+    "status": "passed",
+    "scope": "focused native UI check",
+    "checks": 6,
+    "receipt": "tests/BROWSER_ACCEPTANCE_V1_4.json"
+  },
+  "preservation": [
+    "Existing stage and rotation settings",
+    "All camera trajectories and source media",
+    "Whole-source rendering, audio and explicit trims",
+    "Scribe and all adjacent/shared production engines"
+  ],
+  "limits": [
+    "Desktop browser input; physical Android/iOS not verified.",
+    "V1.3 media/export checks remain the last media verification; camera and renderer behavior are unchanged."
+  ],
+  "release_verification": "Commit-specific GitHub checks, Pages deployment and live verification are recorded in the release pull request."
+}

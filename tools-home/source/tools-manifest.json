@@ -1,14 +1,14 @@
 {
-  "version": "1.6",
+  "version": "1.7",
   "tools": [
     {
       "tool": "camlock",
       "tool_id": "GS-TOOL-CAMLOCK",
-      "source_version": "V1.3",
+      "source_version": "V1.4",
       "hosted_path": "tools/camlock/index.html",
       "description": "Perform unrestricted camera direction with fine touch or joystick, a protected setup wizard, source-time path editing and whole-source MP4/WebM rendering unless explicitly trimmed.",
       "operator_guide": "tools/camlock/README.md",
-      "verification": "tools/camlock/tests/BROWSER_ACCEPTANCE_V1_3.json"
+      "verification": "tools/camlock/tests/BROWSER_ACCEPTANCE_V1_4.json"
     },
     {
       "tool": "drive-manager",

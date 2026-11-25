@@ -1,0 +1,43 @@
+{
+  "status": "passed",
+  "scope": "Focused native-browser interface verification using the original encoded CamLock_Source_Fixture.mp4. No new automated test logic or repeat media exports.",
+  "checks": [
+    {
+      "name": "Wizard opening defaults locked and collapsed",
+      "pass": true,
+      "collapsed": true,
+      "fieldsVisible": false,
+      "fieldsEnabled": false,
+      "collapsedRowHeight": 31
+    },
+    {
+      "name": "Unlock opening expands and enables fields",
+      "pass": true,
+      "opened": true,
+      "enabled": true
+    },
+    {
+      "name": "Relock collapses and disables opening fields",
+      "pass": true,
+      "collapsed": true,
+      "fieldsVisible": false,
+      "fieldsEnabled": false
+    },
+    {
+      "name": "Wizard rotation starts collapsed and expands on request",
+      "pass": true
+    },
+    {
+      "name": "Dedicated Rotation popup starts collapsed with fields hidden",
+      "pass": true
+    },
+    {
+      "name": "Manual opening popup starts locked and collapsed with unlock visible",
+      "pass": true
+    }
+  ],
+  "limitations": [
+    "Desktop browser input; physical Android/iOS not verified.",
+    "V1.3 media/export checks remain the last media verification; camera and renderer behavior are unchanged."
+  ]
+}
