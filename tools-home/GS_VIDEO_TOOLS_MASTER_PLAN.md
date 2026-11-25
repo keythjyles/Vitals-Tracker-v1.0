@@ -81,3 +81,7 @@ Owner direction locks the first wizard screen unless explicitly unlocked and mov
 ## CamLock V1.4 — collapsed settings
 
 Opening parameters start locked and collapsed in Wizard and the manual opening card. Keep Unlock opening outside the disclosure; unlocking expands and relocking collapses it. Rotation settings start collapsed in Wizard and their dedicated popup. Preserve all values, source timing, mathematical paths, whole-source rendering and shared tool code. [Evidence and rollback](tools/camlock/RELEASE_V1_4.json).
+
+## CamLock V1.5 — armed bed-contact insertion
+
+Armed Play runs the source normally and records nothing until video-bed contact. Contact inserts Action at the current source timestamp without a seek, restart or pose jump; programmed and master durations start at contact. Keep each segment's absolute origin for paused correction and saved-project/path recovery. Preserve the opening composition/timestamp, all earlier camera instructions, whole-source rendering, audio and existing tools. Disarmed touches leave review unchanged. [Verification and rollback](tools/camlock/RELEASE_V1_5.json).

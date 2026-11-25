@@ -1,4 +1,4 @@
-// CamLock V1.4. World positions use viewport widths/heights; camera is independent of stage.
+// CamLock V1.5. World positions use viewport widths/heights; camera is independent of stage.
 export const SCHEMA = 'CamLockProject-1.0';
 export const COORDINATES = Object.freeze({version:1,origin:'viewport-center',x:'viewport-width',y:'viewport-height',z:'multiplier-of-locked-stage',r:'unwrapped-camera-degrees-clockwise',time:'absolute-source-seconds',interpolation:'linear-no-overshoot'});
 export const clamp = (n,a,b) => Math.max(a,Math.min(b,n));
@@ -12,7 +12,7 @@ export function ease(name,p) {
  return p;
 }
 export function newProject() {
- return {schema:SCHEMA,tool:'GS-TOOL-CAMLOCK',release:'V1.4',createdAt:new Date().toISOString(),source:null,trim:null,
+ return {schema:SCHEMA,tool:'GS-TOOL-CAMLOCK',release:'V1.5',createdAt:new Date().toISOString(),source:null,trim:null,
   coordinates:{...COORDINATES},stage:{x:0,y:0,scale:1,r:0,mirror:false,flip:false,width:1080,height:1920,locked:false},
   start:0,settings:{duration:12,zoom:{end:1,duration:9,curve:'constant'},rotation:{enabled:false,snap:true,degrees:0,duration:4,curve:'constant'}},
   controls:{touchGain:.25,joystick:false,joystickSpeed:.1},
@@ -43,19 +43,22 @@ export function addSample(path,t,state) {
  if(last&&Math.abs(t-last.t)<1e-9)path[path.length-1]=item;else path.push(item);
 }
 export class Action {
- constructor(project,at,sourceEnd) {
-  this.project=project;this.start=clamp(at,project.start,sourceEnd);
-  this.end=Math.min(sourceEnd,project.start+project.settings.duration);
-  if(this.start>=this.end-1e-7)throw Error('Go to an earlier source frame before Action.');
+ constructor(project,at,sourceEnd,{insert=false}={}) {
+  if(!finite(at)||!finite(sourceEnd)||sourceEnd<=0)throw Error('Choose a valid source time before Action.');
+  const previous=project.segments.findLast(s=>s.start<=at+1e-7);
+  this.project=project;this.start=clamp(at,0,sourceEnd);
+  this.origin=insert?this.start:finite(previous?.origin)?previous.origin:project.start;
+  this.end=Math.min(sourceEnd,this.origin+project.settings.duration);
+  if(this.start<this.origin-1e-7||this.start>=this.end-1e-7)throw Error('Choose a source time inside the Action range, or Play and touch to insert here.');
   this.base=stateAt(project.path,this.start);this.state={...this.base};this.settings=clone(project.settings);
   this.manual=0;this.rawManual=0;this.manualTouched=false;this.active=true;
   // Only Action truncates. Navigation and review never mutate instructions.
   project.path=project.path.filter(s=>s.t<this.start);
   project.segments=project.segments.filter(s=>s.start<this.start).map(s=>({...s,end:Math.min(s.end,this.start)}));
-  this.segment={start:this.start,end:this.start,base:{...this.base},settings:clone(this.settings)};
+  this.segment={start:this.start,end:this.start,origin:this.origin,base:{...this.base},settings:clone(this.settings)};
   project.segments.push(this.segment);addSample(project.path,this.start,this.state);
  }
- programRotation(t){const r=this.settings.rotation;if(r.enabled===false)return 0;return r.degrees*(ease(r.curve,(t-this.project.start)/Math.max(1e-9,r.duration))-ease(r.curve,(this.start-this.project.start)/Math.max(1e-9,r.duration)));}
+ programRotation(t){const r=this.settings.rotation;if(r.enabled===false)return 0;return r.degrees*(ease(r.curve,(t-this.origin)/Math.max(1e-9,r.duration))-ease(r.curve,(this.start-this.origin)/Math.max(1e-9,r.duration)));}
  rotate(degrees,t){
   if(this.settings.rotation.enabled===false)return;
   this.rawManual+=degrees;this.manualTouched=true;
@@ -64,7 +67,7 @@ export class Action {
  }
  update(t) {
   t=clamp(t,this.start,this.end);
-  const elapsed=t-this.project.start,from=this.start-this.project.start;
+  const elapsed=t-this.origin,from=this.start-this.origin;
   const z=this.settings.zoom;
   const zp=ease(z.curve,elapsed/Math.max(1e-9,z.duration)),z0=ease(z.curve,from/Math.max(1e-9,z.duration));
   this.state.z=z0<1?this.base.z+(z.end-this.base.z)*(zp-z0)/(1-z0):this.base.z;

@@ -1,4 +1,4 @@
-import {newProject,initialCamera,stateAt,Action,CameraTouch,CameraJoystick,drawScene,pathDocument,importDocument,clamp,snapSquare,clipRange} from './core.mjs?v=5';
+import {newProject,initialCamera,stateAt,Action,CameraTouch,CameraJoystick,drawScene,pathDocument,importDocument,clamp,snapSquare,clipRange} from './core.mjs?v=6';
 import {inspectSource,renderCamera} from './render.mjs?v=2';
 import {mountPlayerScribe} from '../../shared/player-scribe.mjs?v=34';
 import {mountClipAudio,fadeGainAt} from '../../shared/clip-audio.mjs?v=3';
@@ -6,7 +6,7 @@ import {PLAYER_PROFILE} from '../../shared/player-shell.mjs?v=34';
 
 const $=id=>document.getElementById(id),video=$('sourceVideo'),canvas=$('picture'),ctx=canvas.getContext('2d',{alpha:false,colorSpace:'srgb'}),view=$('viewport');
 const KEY='gs-camlock-project-v1'+(new URLSearchParams(location.search).get('qa')==='acceptance'?'-qa':''),COPY=v=>JSON.parse(JSON.stringify(v));
-const VERSION='V1.4',DOCK_KEY=KEY+'-player-docked';
+const VERSION='V1.5',DOCK_KEY=KEY+'-player-docked';
 let project=newProject(),file=null,sourceURL=null,camera=initialCamera(),action=null,reverseTimer=null,busy=false,renderResult=null,renderURL=null,cancelled=false;
 let loading=0,playRequest=0,raf=0,sampleTimer=null,lastTime=0,stageGesture=null,stagePoints=new Map(),dirty=false;
 let playerDocked=true,topMenuOpen=false;
@@ -17,7 +17,6 @@ const error=e=>{say(e.message||String(e));console.error(e);};
 const guard=fn=>(...args)=>Promise.resolve().then(()=>fn(...args)).catch(error);
 const active=()=>!!action?.active;
 const frame=()=>Math.floor((video.currentTime||0)*project.fps+1e-5);
-const endpoint=()=>Math.min(project.source?.duration||0,project.start+project.settings.duration);
 const reviewedEnd=()=>clipRange(project).end;
 const seconds=t=>Math.max(0,t).toFixed(3)+'s';
 function outputRangeText(){const r=clipRange(project);return project.trim?'Output: '+seconds(r.duration)+' · trim '+seconds(r.start)+'–'+seconds(r.end):'Output: entire source · '+seconds(r.duration);}
@@ -52,7 +51,7 @@ function updateControls(){
  if(wizard)$('lockStage').disabled=true;
  $('dockHandle').disabled=busy||recording;
  $('recording').hidden=!recording;view.classList.toggle('recording',recording);
- $('modeLabel').textContent=!ready?'LOAD SOURCE':wizard?'WIZARD SETUP':project.stage.locked?($('touchArmed').checked&&!$('settingsCard').open?'HOT · TOUCH TO START':'CAMERA READY'):'STAGE SETUP';
+ $('modeLabel').textContent=!ready?'LOAD SOURCE':wizard?'WIZARD SETUP':project.stage.locked?($('touchArmed').checked&&!$('settingsCard').open?(video.paused?'HOT · TOUCH TO START':'ARMED · TOUCH TO INSERT'):'CAMERA READY'):'STAGE SETUP';
  $('play').textContent=!video.paused&&!recording?'Ⅱ Pause':'▶ Play';
  $('emptyLoad').hidden=!!file||busy;
  $('joystick').hidden=!ready||!project.stage.locked||!project.controls.joystick||!!wizard||$('settingsCard').open;
@@ -102,14 +101,13 @@ function seek(t){
 async function begin(){
  if(active())return;if(!sourceReady()||!project.stage.locked||busy)throw Error('Load a source and lock the stage first.');
  stopReverse();
- const at=video.currentTime;
- if(at<project.start-1e-4||at>=endpoint()-1e-6)throw Error('Go to a source time inside the Action range first.');
+ const at=video.currentTime,wasPlaying=!video.paused;
  const previousPath=project.path,previousSegments=COPY(project.segments);
- action=new Action(project,at,project.source.duration);camera={...action.state};lastTime=at;joystick.reset(at);invalidate();
+ action=new Action(project,at,project.source.duration,{insert:wasPlaying});camera={...action.state};lastTime=at;joystick.reset(at);invalidate();
  const request=++playRequest;video.playbackRate=project.performanceSpeed;audioPreview();updateControls();
  // Source time is still the only trajectory clock. Keep sampling if canvas rAF is throttled.
  clearInterval(sampleTimer);sampleTimer=setInterval(sample,1000/60);
- try{await video.play();if(request!==playRequest)video.pause();else{say('Action · direct with touch or joystick. Lift freely, then Pause to edit.');loop();}}
+ try{if(!wasPlaying)await video.play();if(request!==playRequest)video.pause();else{say('Action · direct with touch or joystick. Lift freely, then Pause to edit.');loop();}}
  catch(e){if(request===playRequest){clearInterval(sampleTimer);sampleTimer=null;action=null;resetJoystick();project.path=previousPath;project.segments=previousSegments;video.playbackRate=1;updateControls();}throw e;}
 }
 function sample(){
@@ -135,7 +133,7 @@ function paintJoystick(){const radius=$('joystick').clientWidth*.32;$('joystickK
 function resetJoystick(){joystickPointer=null;joystickKeys.clear();joystick.reset();paintJoystick();}
 function joystickReady(){
  if(busy||!sourceReady()||!project.stage.locked||!project.controls.joystick||touch.size||wizard||$('settingsCard').open)return false;
- if(!active()){if(!$('touchArmed').checked||!video.paused)return false;void begin().catch(error);}
+ if(!active()){if(!$('touchArmed').checked)return false;void begin().catch(error);}
  return active();
 }
 function moveJoystick(e){const rect=$('joystick').getBoundingClientRect();joystick.set(e.clientX-rect.left-rect.width/2,e.clientY-rect.top-rect.height/2,rect.width*.32);paintJoystick();}
@@ -159,7 +157,7 @@ function rebaseStage(){
 view.addEventListener('pointerdown',e=>{
  if(e.target.closest('button')||busy||!sourceReady()||e.button>0||joystickPointer!==null||joystickKeys.size)return;e.preventDefault();try{view.setPointerCapture(e.pointerId);}catch{}
  if(project.stage.locked){
-  if(!active()&&(!$('touchArmed').checked||!video.paused||wizard||$('settingsCard').open))return;
+  if(!active()&&(!$('touchArmed').checked||wizard||$('settingsCard').open))return;
   if(!active())void begin().catch(error);
   if(active())touch.down(e.pointerId,e.clientX,e.clientY);
  }else{if(stagePoints.size&&!project.settings.rotation.enabled)return;video.pause();stagePoints.set(e.pointerId,point(e));rebaseStage();}
