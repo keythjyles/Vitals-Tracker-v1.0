@@ -27,6 +27,14 @@ document.getElementById('run').onclick=async()=>{
   $('dockPlayer').click();assert($('sourceDrawer').hidden&&close(viewportTop(),0),'Dock did not return the picture to the top');log('Player itself docks at y=0; top pull-down exposes Dock and Unlock');
   assert(!app.snapshot().settings.rotation.enabled&&app.snapshot().settings.rotation.snap,'Rotation/snap defaults incorrect');
   $('wizard').click();assert($('settingsCard').open&&$('wizardPrompt').textContent.includes('open'),'Wizard did not present opening question');assert($('action').disabled,'Wizard prematurely armed Action');
+  const openingDefaults=JSON.stringify(app.snapshot().stage);assert(app.snapshot().stage.locked&&$('outputWidth').disabled&&$('opening').disabled,'Wizard opening defaults are not locked');
+  pointer('pointerdown',601,40,40);pointer('pointermove',601,80,90);pointer('pointerup',601,80,90);assert(JSON.stringify(app.snapshot().stage)===openingDefaults,'Locked wizard let the stage stray');
+  for(const [width,height]of [[320,640],[390,844],[430,844]]){iframe.style.width=width+'px';iframe.style.height=height+'px';await delay(30);const box=$('settingsCard').getBoundingClientRect(),next=$('wizardNext').getBoundingClientRect();assert(box.top>=0&&box.top<=20&&box.bottom<=height+1,'Wizard is not high and inside the screen');assert(next.top>=box.top&&next.bottom<=height+1,'Wizard Next is clipped');}
+  iframe.style.width='390px';iframe.style.height='844px';await delay(30);
+  assert($('sourceTiming').textContent.includes('Length 4.000s')&&$('wizardSourceTiming').textContent.includes('Remaining 4.000s'),'Source length/remaining missing');
+  app.seek(1);await wait(()=>!v.seeking);assert($('wizardClock').textContent.includes('F25')&&$('wizardSourceTiming').textContent.includes('Elapsed 1.000s')&&$('wizardSourceTiming').textContent.includes('Remaining 3.000s'),'Wizard readout did not follow navigation');app.seek(0);await wait(()=>!v.seeking);
+  log('Wizard opens high with locked defaults and live source length, elapsed, remaining, frame and time');
+  $('wizardOpeningLock').click();assert(!app.snapshot().stage.locked&&!$('outputWidth').disabled,'Explicit Unlock opening did not enable composition');
   await field('outputWidth',180);await field('outputHeight',320);await field('opening',.4);await wait(()=>!v.seeking&&app.sourceReady());
   const before=app.snapshot().stage;pointer('pointerdown',101,40,40);pointer('pointermove',101,45,50);pointer('pointerup',101,45,50);
   assert(app.snapshot().stage.y>before.y,'Stage source did not follow setup drag');log('Stage setup drag operates independently');
@@ -37,6 +45,9 @@ document.getElementById('run').onclick=async()=>{
   $('wizardNext').click();await delay(0);assert($('wizardPrompt').textContent.includes('long'),'Wizard duration question missing');await field('actionDuration',1.2);await field('speed',.5);
   $('wizardNext').click();await wait(()=>!$('settingsCard').open&&!v.seeking);assert(app.snapshot().stage.locked&&$('modeLabel').textContent.includes('HOT'),'Wizard did not arm the viewport');
   log('Wizard guides opening, effect and duration; only completion makes the screen hot');
+  const completedWizard=app.snapshot();$('wizard').click();assert($('outputWidth').disabled&&app.snapshot().stage.locked,'Repeated wizard did not relock opening');
+  $('wizardNext').click();await delay(0);$('wizardNext').click();await delay(0);$('trimEnabled').checked=true;$('trimEnabled').dispatchEvent(new w.Event('change',{bubbles:true}));await delay(0);await field('trimStart',.2);await field('trimEnd',2);
+  $('closeSettings').click();assert(JSON.stringify(app.snapshot().stage)===JSON.stringify(completedWizard.stage)&&app.snapshot().trim===null,'Wizard cancel did not restore stage and output range');await wait(()=>!v.seeking);log('Wizard cancellation restores the opening and any tentative trim');
   d.querySelector('[data-section="magnification"]').click();assert($('settingsCard').open&&$('magnification').parentElement===$('cardBody'),'Push/Pull did not open in popup');
   const card=$('settingsCard').getBoundingClientRect();assert(card.top>=0&&card.bottom<=w.innerHeight+1,'Settings card is hidden below the player');assert($('zoomEnd').value==='140','Ending size is not shown as percent');
   $('settingsDone').click();log('Push/Pull card overlays the player with percent, seconds and plain speed choices');
@@ -102,33 +113,42 @@ document.getElementById('run').onclick=async()=>{
   $('reverse').click();await delay(140);$('reverse').click();assert(v.currentTime<.9,'Reverse did not navigate');assert(JSON.stringify(app.snapshot().stage)===lockedStage,'Camera gestures mutated locked stage');
   d.querySelector('[data-section="save"]').click();$('render').click();await wait(()=>!$('export').disabled,60000);const render=app.rendered();assert(render?.blob.size>0,'No rendered video');log('Offline MP4 render uses saved path without re-performance',render.report);
   const output=new Input({formats:ALL_FORMATS,source:new BlobSource(new Blob([await render.blob.arrayBuffer()],{type:render.blob.type}))});inputs.push(output);const track=await output.getPrimaryVideoTrack(),audio=await output.getPrimaryAudioTrack();assert(audio,'Original audio was lost');
-  const packets=[];for await(const packet of new EncodedPacketSink(track).packets())packets.push(packet);assert(packets.length===30,'Wrong output frame count');assert(close(await track.computeDuration(),1.2,.005),'Wrong render speed');log('Encoded frame count and normal-speed duration',{frames:packets.length,duration:await track.computeDuration(),audioDuration:await audio.computeDuration()});
+  const packets=[];for await(const packet of new EncodedPacketSink(track).packets())packets.push(packet);assert(packets.length===100,'Whole-source render lost frames');assert(close(await track.computeDuration(),4,.005),'Whole-source render was shortened to Action');assert(render.report.camlock.start===0&&!render.report.camlock.trimmed,'Default render is implicitly trimmed');log('Whole source renders at normal speed despite nonzero Action opening and short performance',{frames:packets.length,duration:await track.computeDuration(),audioDuration:await audio.computeDuration()});
   const original=new Input({formats:ALL_FORMATS,source:new BlobSource(new Blob([await source.arrayBuffer()],{type:source.type}))});inputs.push(original);const originalVideo=await original.getPrimaryVideoTrack();const outSink=new CanvasSink(track,{poolSize:1}),sourceSink=new CanvasSink(originalVideo,{poolSize:1});
-  for(const t of [0,.4,.92]){
-   const decoded=await outSink.getCanvas(t+.000001),sourceFrame=await sourceSink.getCanvas(app.snapshot().start+t+.000001),expected=new OffscreenCanvas(180,320);
-   drawScene(expected.getContext('2d'),sourceFrame.canvas,app.snapshot().stage,stateAt(app.snapshot().path,app.snapshot().start+t),180,320);
+  for(const t of [0,.92,3.96]){
+   const decoded=await outSink.getCanvas(t+.000001),sourceFrame=await sourceSink.getCanvas(t+.000001),expected=new OffscreenCanvas(180,320);
+   drawScene(expected.getContext('2d'),sourceFrame.canvas,app.snapshot().stage,stateAt(app.snapshot().path,t),180,320);
    const actualData=decoded.canvas.getContext('2d').getImageData(0,0,180,320).data,expectedData=expected.getContext('2d').getImageData(0,0,180,320).data;
    let sum=0;for(let i=0;i<actualData.length;i+=4)for(let c=0;c<3;c++)sum+=Math.abs(actualData[i+c]-expectedData[i+c]);const mean=sum/(180*320*3);
    assert(mean<12,'Rendered picture differs from performed composition at '+t+': '+mean);log('Rendered pixels match saved composition; no UI overlay at '+t+'s',{meanChannelError:mean});
   }
-  // Gated test audio has tone at source .5-.8 and 1.5-1.8; opening .4 shifts it to .1-.4 and 1.1-1.4.
+  // Whole-source rendering keeps tones at their original .5-.8 and 1.5-1.8 source times.
   const values=[];for await(const item of new AudioBufferSink(audio).buffers()){const samples=item.buffer.getChannelData(0);for(let i=0;i<samples.length;i++)values.push([item.timestamp+i/item.buffer.sampleRate,samples[i]]);}
   const rms=(lo,hi)=>{const selected=values.filter(([t])=>t>=lo&&t<hi);return Math.sqrt(selected.reduce((sum,[,v])=>sum+v*v,0)/selected.length);};
-  const on=rms(.17,.3),off=rms(.6,.8);assert(on>.02&&off<.005,'Source audio is not aligned to opening timestamp');log('Source audio synchronized to nonzero opening',{toneRms:on,silentRms:off});
+  const on=rms(.57,.7),off=rms(1,1.2);assert(on>.02&&off<.005,'Whole-source audio shifted to Action opening');log('Whole-source audio stays synchronized before and after camera recording',{toneRms:on,silentRms:off});
+  d.querySelector('[data-section="duration"]').click();assert(!$('trimEnabled').checked&&$('trimStart').disabled&&$('trimEnd').disabled,'Trimming was enabled implicitly');
+  $('trimEnabled').checked=true;$('trimEnabled').dispatchEvent(new w.Event('change',{bubbles:true}));await delay(0);await field('trimStart',.4);await field('trimEnd',1.6);
+  const trimmedProject=app.snapshot();assert(JSON.stringify(trimmedProject.path)===JSON.stringify(exact),'Trimming deleted camera instructions');$('settingsDone').click();
+  const trimmed=await app.render({file:source,project:trimmedProject,format:'mp4'}),trimmedInput=new Input({formats:ALL_FORMATS,source:new BlobSource(new Blob([await trimmed.blob.arrayBuffer()],{type:trimmed.blob.type}))});inputs.push(trimmedInput);
+  const trimmedTrack=await trimmedInput.getPrimaryVideoTrack(),trimPackets=[];for await(const packet of new EncodedPacketSink(trimmedTrack).packets())trimPackets.push(packet);
+  assert(trimPackets.length===30&&close(await trimmedTrack.computeDuration(),1.2,.005),'Explicit trim did not select 30 frames / 1.2 seconds');
+  const trimValues=[];for await(const item of new AudioBufferSink(await trimmedInput.getPrimaryAudioTrack()).buffers()){const samples=item.buffer.getChannelData(0);for(let i=0;i<samples.length;i++)trimValues.push([item.timestamp+i/item.buffer.sampleRate,samples[i]]);}
+  const trimRms=(lo,hi)=>{const selected=trimValues.filter(([t])=>t>=lo&&t<hi);return Math.sqrt(selected.reduce((sum,[,value])=>sum+value*value,0)/selected.length);};assert(trimRms(.17,.3)>.02&&trimRms(.6,.8)<.005,'Trimmed audio lost source synchronization');
+  d.querySelector('[data-section="duration"]').click();$('clearTrim').click();await delay(0);assert(app.snapshot().trim===null&&JSON.stringify(app.snapshot().path)===JSON.stringify(exact),'Use entire source did not preserve path and remove trim');$('settingsDone').click();log('Explicit trim renders the chosen interval with aligned audio; clearing it restores the whole source');
   // Verify intentional empty space with a separately rendered path, using the same original.
-  const outside=app.snapshot();outside.path=[{t:.4,x:5,y:5,z:.5,r:120},{t:.56,x:5,y:5,z:.5,r:120}];outside.audio.volume=0;
+  const outside=app.snapshot();outside.path=[{t:.4,x:5,y:5,z:.5,r:120},{t:.56,x:5,y:5,z:.5,r:120}];outside.audio.volume=0;outside.trim={start:.4,end:.56};
   const black=await app.render({file:source,project:outside,format:'webm'});const blackInput=new Input({formats:ALL_FORMATS,source:new BlobSource(new Blob([await black.blob.arrayBuffer()],{type:black.blob.type}))});inputs.push(blackInput);
   const blackFrame=await new CanvasSink(await blackInput.getPrimaryVideoTrack()).getCanvas(0);const blackPixels=blackFrame.canvas.getContext('2d').getImageData(0,0,180,320).data;assert(blackPixels.every((v,i)=>i%4===3||v<4),'Camera outside source was corrected/cropped');log('Completely outside source renders intentional black; WebM works');
   assert(JSON.stringify(app.snapshot().path)===JSON.stringify(exact),'Rendering changed raw path');
   const joystickRender=await app.render({file:source,project:joystickProject,format:'mp4'});
   const joystickInput=new Input({formats:ALL_FORMATS,source:new BlobSource(new Blob([await joystickRender.blob.arrayBuffer()],{type:joystickRender.blob.type}))});inputs.push(joystickInput);
-  const joystickRenderTime=Math.min(.2,joystickRender.report.duration/2),joystickFrame=await new CanvasSink(await joystickInput.getPrimaryVideoTrack()).getCanvas(joystickRenderTime),joystickSource=await sourceSink.getCanvas(joystickProject.start+joystickFrame.timestamp+.000001),joystickExpected=new OffscreenCanvas(180,320);
-  drawScene(joystickExpected.getContext('2d'),joystickSource.canvas,joystickProject.stage,stateAt(joystickProject.path,joystickProject.start+joystickFrame.timestamp),180,320);
+  const joystickRenderTime=.6,joystickFrame=await new CanvasSink(await joystickInput.getPrimaryVideoTrack()).getCanvas(joystickRenderTime),joystickSource=await sourceSink.getCanvas(joystickFrame.timestamp+.000001),joystickExpected=new OffscreenCanvas(180,320);
+  drawScene(joystickExpected.getContext('2d'),joystickSource.canvas,joystickProject.stage,stateAt(joystickProject.path,joystickFrame.timestamp),180,320);
   const jp=joystickFrame.canvas.getContext('2d').getImageData(0,0,180,320).data,je=joystickExpected.getContext('2d').getImageData(0,0,180,320).data;
   let joystickError=0;for(let i=0;i<jp.length;i+=4)for(let c=0;c<3;c++)joystickError+=Math.abs(jp[i+c]-je[i+c]);joystickError/=180*320*3;
   assert(joystickError<12,'Joystick render differs from recorded path or includes control overlay');log('Joystick performance renders from its exact saved path with no joystick overlay',{meanChannelError:joystickError,frames:joystickRender.report.outputFrames});
   const report={status:'passed',checks:rows,limitations:['Simulated touch in 320/390/430px iframe, not physical Android or iOS.','Authenticated Scribe cloud synchronization not exercised.']};results.textContent=JSON.stringify(report,null,2);window.camlockAcceptance=report;
-  document.getElementById('getReport').hidden=false;document.getElementById('getReport').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'}));a.download='CamLock_Browser_Acceptance_V1_2.json';a.click();};
+  document.getElementById('getReport').hidden=false;document.getElementById('getReport').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'}));a.download='CamLock_Browser_Acceptance_V1_3.json';a.click();};
  }catch(e){const report={status:'failed',checks:rows,error:e.stack||e.message};window.camlockAcceptance=report;results.textContent=JSON.stringify(report,null,2);console.error(e);}
  finally{for(const input of inputs)input.dispose();document.getElementById('run').disabled=false;}
 };

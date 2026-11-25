@@ -1,14 +1,14 @@
 {
-  "version": "1.5",
+  "version": "1.6",
   "tools": [
     {
       "tool": "camlock",
       "tool_id": "GS-TOOL-CAMLOCK",
-      "source_version": "V1.2",
+      "source_version": "V1.3",
       "hosted_path": "tools/camlock/index.html",
-      "description": "Perform unrestricted camera direction with fine touch sensitivity or an optional joystick, additive rotation, independent push/pull, source-time path editing and offline MP4/WebM rendering.",
+      "description": "Perform unrestricted camera direction with fine touch or joystick, a protected setup wizard, source-time path editing and whole-source MP4/WebM rendering unless explicitly trimmed.",
       "operator_guide": "tools/camlock/README.md",
-      "verification": "tools/camlock/tests/BROWSER_ACCEPTANCE_V1_2.json"
+      "verification": "tools/camlock/tests/BROWSER_ACCEPTANCE_V1_3.json"
     },
     {
       "tool": "drive-manager",

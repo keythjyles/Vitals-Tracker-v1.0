@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {newProject,Action,CameraTouch,CameraJoystick,stateAt,addSample,pathDocument,importDocument,drawScene,snapSquare} from '../core.mjs';
+import {newProject,Action,CameraTouch,CameraJoystick,stateAt,addSample,pathDocument,importDocument,drawScene,snapSquare,clipRange} from '../core.mjs';
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-8,`${a} != ${b}`);
 test('independent durations: rotation holds at four, zoom at nine, Action ends at twelve source seconds',()=>{
  const p=newProject();p.settings.zoom.end=3;p.settings.rotation.enabled=true;p.settings.rotation.degrees=90;const a=new Action(p,0,30);
@@ -130,4 +130,26 @@ test('fine direction controls save with a project while old paths and projects r
  const old=structuredClone(p);delete old.controls;const restored=importDocument(old,newProject());assert.deepEqual(restored.path,p.path);near(restored.controls.touchGain,.25);
  const destination=newProject();destination.controls.touchGain=.5;assert.deepEqual(importDocument(pathDocument(p),destination).controls,destination.controls);
  assert.throws(()=>importDocument({...p,controls:{...p.controls,joystickSpeed:Infinity}},p));
+});
+
+test('a short camera performance at a nonzero opening never implicitly trims the source',()=>{
+ const p=newProject();p.source={duration:10};p.start=2;p.settings.duration=1;const a=new Action(p,2,10);a.state.x=.125;a.stop(2.5);
+ assert.deepEqual(clipRange(p),{start:0,end:10,duration:10});assert.equal(p.path.at(-1).t,2.5);
+ assert.deepEqual(stateAt(p.path,0),stateAt(p.path,2));assert.deepEqual(stateAt(p.path,9),stateAt(p.path,2.5));
+});
+test('explicit output trim saves independently without deleting or rescaling camera instructions',()=>{
+ const p=newProject();p.source={duration:10};const a=new Action(p,0,10);a.state.x=.5;a.stop(5);const path=structuredClone(p.path);
+ p.trim={start:1.2,end:7.6};near(clipRange(p).duration,6.4);assert.deepEqual(importDocument(p,newProject()).trim,p.trim);assert.deepEqual(p.path,path);
+ p.trim=null;assert.deepEqual(clipRange(p),{start:0,end:10,duration:10});assert.deepEqual(p.path,path);
+});
+test('old projects migrate to the whole source; reusable paths preserve the destination trim',()=>{
+ const old=newProject();old.source={duration:12};old.start=4;delete old.trim;const a=new Action(old,4,12);a.stop(6);
+ const current=newProject();current.trim={start:1,end:2};const restored=importDocument(old,current);
+ assert.equal(restored.trim,null);assert.deepEqual(clipRange(restored),{start:0,end:12,duration:12});assert.deepEqual(restored.path,old.path);
+ assert.deepEqual(importDocument(pathDocument(old),current).trim,current.trim);
+});
+test('invalid explicit trims cannot replace a saved camera project',()=>{
+ const p=newProject();p.source={duration:10};
+ for(const trim of [{start:-1,end:2},{start:2,end:2},{start:3,end:1},{start:0,end:11},{start:0,end:Infinity}])assert.throws(()=>importDocument({...p,trim},p));
+ assert.equal(p.trim,null);
 });

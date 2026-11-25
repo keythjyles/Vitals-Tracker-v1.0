@@ -73,3 +73,7 @@ The picture docks at screen y=0 with tool identity below it. The overlaid handle
 ## CamLock V1.2 — fine touch direction and optional joystick
 
 Owner testing finds the camera model working and requests finer manual direction. CamLock adds Full/½/¼/⅛ touch response, with ¼ as the default, plus an optional proportional thumb joystick in its Direction popup. Sensitivity affects new manual X/Y only. Joystick travel uses source seconds and stops on release while Action continues. Existing recorded paths, separate stage transforms, opt-in rotation, Scribe and shared production editors remain intact. Base/rollback: `d1bdd9b7ba31c0e767eaaf407e386eb8e1d48a35`. [Operation and verification](tools/camlock/README.md).
+
+## CamLock V1.3 — safe wizard and whole-source output
+
+Owner direction locks the first wizard screen unless explicitly unlocked and moves its card near the top. Source length, elapsed/remaining time and current frame/source time remain visible in both player and wizard. Render the entire source with the recorded treatment by default. Only explicit output trim IN/OUT may shorten it; Action opening/duration and the last path sample do not trim. Hold endpoint camera poses while the source continues. Keep original media, exact paths, cancellation recovery and all shared/adjacent tool code intact. Base/rollback: `18d6b6ddd99d4c449be6354748776b2868d33548`. [Operation and evidence](tools/camlock/README.md).

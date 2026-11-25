@@ -1,4 +1,4 @@
-// CamLock V1.2. World positions use viewport widths/heights; camera is independent of stage.
+// CamLock V1.3. World positions use viewport widths/heights; camera is independent of stage.
 export const SCHEMA = 'CamLockProject-1.0';
 export const COORDINATES = Object.freeze({version:1,origin:'viewport-center',x:'viewport-width',y:'viewport-height',z:'multiplier-of-locked-stage',r:'unwrapped-camera-degrees-clockwise',time:'absolute-source-seconds',interpolation:'linear-no-overshoot'});
 export const clamp = (n,a,b) => Math.max(a,Math.min(b,n));
@@ -12,13 +12,17 @@ export function ease(name,p) {
  return p;
 }
 export function newProject() {
- return {schema:SCHEMA,tool:'GS-TOOL-CAMLOCK',release:'V1.2',createdAt:new Date().toISOString(),source:null,
+ return {schema:SCHEMA,tool:'GS-TOOL-CAMLOCK',release:'V1.3',createdAt:new Date().toISOString(),source:null,trim:null,
   coordinates:{...COORDINATES},stage:{x:0,y:0,scale:1,r:0,mirror:false,flip:false,width:1080,height:1920,locked:false},
   start:0,settings:{duration:12,zoom:{end:1,duration:9,curve:'constant'},rotation:{enabled:false,snap:true,degrees:0,duration:4,curve:'constant'}},
   controls:{touchGain:.25,joystick:false,joystickSpeed:.1},
   audio:{volume:1,previousVolume:1,fadeIn:0,fadeOut:0},performanceSpeed:1,fps:25,path:[],segments:[],scribe:''};
 }
 export function initialCamera(){return {x:0,y:0,z:1,r:0};}
+export function clipRange(project){
+ const start=project.trim?.start??0,end=project.trim?.end??project.source?.duration??0;
+ return {start,end,duration:Math.max(0,end-start)};
+}
 export function stateAt(path,t,fallback=initialCamera()) {
  if(!path.length)return {...fallback};
  let lo=0,hi=path.length-1;
@@ -161,6 +165,12 @@ export function importDocument(input,current) {
  if(input.schema==='CamLockProject-1.0'){
   if(typeof input.createdAt==='string')out.createdAt=input.createdAt;
   out.source=input.source?clone(input.source):null;out.scribe=typeof input.scribe==='string'?input.scribe:'';
+  out.trim=null;
+  if(input.trim!==undefined&&input.trim!==null){
+   const t=input.trim;
+   if(!finite(t.start)||!finite(t.end)||t.start<0||t.end<=t.start||out.source?.duration!==undefined&&t.end>out.source.duration+1e-7)throw Error('Invalid output trim.');
+   out.trim={start:t.start,end:t.end};
+  }
   if(!finite(input.audio?.volume)||input.audio.volume<0||input.audio.volume>1)throw Error('Invalid audio level.');
   for(const key of ['fadeIn','fadeOut'])if(!finite(input.audio[key])||input.audio[key]<0)throw Error('Invalid audio fade.');
   out.audio=clone(input.audio);out.fps=[24,25,30,50,60].includes(input.fps)?input.fps:25;

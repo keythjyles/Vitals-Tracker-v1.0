@@ -1,0 +1,189 @@
+{
+  "status": "passed",
+  "checks": [
+    {
+      "name": "Real source loads",
+      "pass": true,
+      "duration": 4,
+      "width": 180,
+      "height": 320
+    },
+    {
+      "name": "Player itself docks at y=0; top pull-down exposes Dock and Unlock",
+      "pass": true
+    },
+    {
+      "name": "Wizard opens high with locked defaults and live source length, elapsed, remaining, frame and time",
+      "pass": true
+    },
+    {
+      "name": "Stage setup drag operates independently",
+      "pass": true
+    },
+    {
+      "name": "Wizard guides opening, effect and duration; only completion makes the screen hot",
+      "pass": true
+    },
+    {
+      "name": "Wizard cancellation restores the opening and any tentative trim",
+      "pass": true
+    },
+    {
+      "name": "Push/Pull card overlays the player with percent, seconds and plain speed choices",
+      "pass": true
+    },
+    {
+      "name": "Rotation must be enabled before a second finger can rotate",
+      "pass": true
+    },
+    {
+      "name": "Quarter-pixel touch direction and preferences preserve existing trajectory",
+      "pass": true
+    },
+    {
+      "name": "Joystick starts Action; center, travel, release, cancellation and reacquisition are stable",
+      "pass": true
+    },
+    {
+      "name": "Joystick supports keyboard direction without sticky movement",
+      "pass": true
+    },
+    {
+      "name": "Mobile layout 320px",
+      "pass": true,
+      "viewportWidth": 192,
+      "viewportHeight": 341.328125
+    },
+    {
+      "name": "Mobile layout 390px",
+      "pass": true,
+      "viewportWidth": 260,
+      "viewportHeight": 462.21875
+    },
+    {
+      "name": "Mobile layout 430px",
+      "pass": true,
+      "viewportWidth": 300,
+      "viewportHeight": 533.328125
+    },
+    {
+      "name": "Touch Action, first/second finger roles, radial separation, promotion and no-jump reacquisition",
+      "pass": true
+    },
+    {
+      "name": "Zoom and rotation hold while master Action continues",
+      "pass": true
+    },
+    {
+      "name": "Pause unlocks navigation",
+      "pass": true
+    },
+    {
+      "name": "Button Action, partial replacement, inherited boundary and automatic endpoint",
+      "pass": true,
+      "end": 1.6,
+      "samples": 160
+    },
+    {
+      "name": "Original Scribe frame mark, recoverable Clear and History",
+      "pass": true
+    },
+    {
+      "name": "Review returns to normal speed and original audio level",
+      "pass": true
+    },
+    {
+      "name": "Offline MP4 render uses saved path without re-performance",
+      "pass": true,
+      "engine": "SxLock-R26",
+      "fps": 25,
+      "width": 180,
+      "height": 320,
+      "sourceFrames": 0,
+      "duration": 4,
+      "hasSourceAudio": false,
+      "hasEffects": true,
+      "video": "offline-encode",
+      "audio": "sample-mix",
+      "sampleRate": 48000,
+      "pictureResized": false,
+      "encoderPrimingSamples": 1024,
+      "outputAudioEnd": 4.010666666666666,
+      "outputFrames": 100,
+      "composited": true,
+      "outputWidth": 180,
+      "outputHeight": 320,
+      "outputColorSpace": {
+        "primaries": "bt709",
+        "transfer": "iec61966-2-1",
+        "matrix": "bt709",
+        "fullRange": true
+      },
+      "camlock": {
+        "start": 0,
+        "end": 4,
+        "trimmed": false,
+        "sourceDuration": 4,
+        "coordinates": {
+          "version": 1,
+          "origin": "viewport-center",
+          "x": "viewport-width",
+          "y": "viewport-height",
+          "z": "multiplier-of-locked-stage",
+          "r": "unwrapped-camera-degrees-clockwise",
+          "time": "absolute-source-seconds",
+          "interpolation": "linear-no-overshoot"
+        },
+        "samples": 160,
+        "performanceSpeed": 0.5,
+        "renderSpeed": 1
+      }
+    },
+    {
+      "name": "Whole source renders at normal speed despite nonzero Action opening and short performance",
+      "pass": true,
+      "frames": 100,
+      "duration": 4,
+      "audioDuration": 4.010666666666666
+    },
+    {
+      "name": "Rendered pixels match saved composition; no UI overlay at 0s",
+      "pass": true,
+      "meanChannelError": 3.3870138888888888
+    },
+    {
+      "name": "Rendered pixels match saved composition; no UI overlay at 0.92s",
+      "pass": true,
+      "meanChannelError": 2.8226909722222224
+    },
+    {
+      "name": "Rendered pixels match saved composition; no UI overlay at 3.96s",
+      "pass": true,
+      "meanChannelError": 2.8827488425925925
+    },
+    {
+      "name": "Whole-source audio stays synchronized before and after camera recording",
+      "pass": true,
+      "toneRms": 0.10606159309678721,
+      "silentRms": 0
+    },
+    {
+      "name": "Explicit trim renders the chosen interval with aligned audio; clearing it restores the whole source",
+      "pass": true
+    },
+    {
+      "name": "Completely outside source renders intentional black; WebM works",
+      "pass": true
+    },
+    {
+      "name": "Joystick performance renders from its exact saved path with no joystick overlay",
+      "pass": true,
+      "meanChannelError": 3.8392766203703705,
+      "frames": 100
+    }
+  ],
+  "limitations": [
+    "Simulated touch in 320/390/430px iframe, not physical Android or iOS.",
+    "Authenticated Scribe cloud synchronization not exercised."
+  ]
+}
