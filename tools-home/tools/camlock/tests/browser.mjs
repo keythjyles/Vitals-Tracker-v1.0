@@ -9,7 +9,7 @@ const delay=ms=>new Promise(r=>setTimeout(r,ms));
 document.getElementById('run').onclick=async()=>{
  rows.length=0;document.getElementById('run').disabled=true;let inputs=[];
  try{
-  localStorage.removeItem('gs-camlock-project-v1-qa');
+  localStorage.removeItem('gs-camlock-project-v1-qa');localStorage.removeItem('gs-camlock-project-v1-qa-player-docked');
   await new Promise(resolve=>{iframe.onload=resolve;iframe.src='../?qa=acceptance&run='+Date.now();});
   await wait(()=>iframe.contentWindow.CamLock);
   const w=iframe.contentWindow,d=w.document,app=w.CamLock,$=id=>d.getElementById(id),v=app.sourceVideo;
@@ -18,11 +18,32 @@ document.getElementById('run').onclick=async()=>{
   await app.loadSource(source);await wait(app.sourceReady);log('Real source loads',{duration:v.duration,width:v.videoWidth,height:v.videoHeight});
   async function field(id,value){const el=$(id);el.value=String(value);el.dispatchEvent(new w.Event('change',{bubbles:true}));await delay(0);}
   function pointer(type,id,x,y){const rect=$('viewport').getBoundingClientRect();$('viewport').dispatchEvent(new w.PointerEvent(type,{pointerId:id,pointerType:'touch',isPrimary:id===1,clientX:rect.left+x,clientY:rect.top+y,button:0,buttons:type==='pointerup'?0:1,bubbles:true,cancelable:true}));}
-  const stage=$('stage');stage.open=true;await field('outputWidth',180);await field('outputHeight',320);await field('opening',.4);await wait(()=>!v.seeking&&app.sourceReady());
+  const viewportTop=()=>$('viewport').getBoundingClientRect().top;
+  assert(close(viewportTop(),0),'Player picture is not flush with the top');
+  const grip=$('dockHandle');
+  for(const [type,y]of [['pointerdown',10],['pointermove',65],['pointerup',65]])grip.dispatchEvent(new w.PointerEvent(type,{pointerId:501,pointerType:'touch',clientY:y,bubbles:true,cancelable:true}));grip.click();
+  assert(!$('sourceDrawer').hidden&&$('dockPlayer').closest('#sourceDrawer')&&$('unlockPlayer').closest('#sourceDrawer'),'Pull-down did not reveal top docking controls');
+  $('unlockPlayer').click();assert(w.getComputedStyle($('player')).position==='relative','Unlock did not release the player');
+  $('dockPlayer').click();assert($('sourceDrawer').hidden&&close(viewportTop(),0),'Dock did not return the picture to the top');log('Player itself docks at y=0; top pull-down exposes Dock and Unlock');
+  assert(!app.snapshot().settings.rotation.enabled&&app.snapshot().settings.rotation.snap,'Rotation/snap defaults incorrect');
+  $('wizard').click();assert($('settingsCard').open&&$('wizardPrompt').textContent.includes('open'),'Wizard did not present opening question');assert($('action').disabled,'Wizard prematurely armed Action');
+  await field('outputWidth',180);await field('outputHeight',320);await field('opening',.4);await wait(()=>!v.seeking&&app.sourceReady());
   const before=app.snapshot().stage;pointer('pointerdown',101,40,40);pointer('pointermove',101,45,50);pointer('pointerup',101,45,50);
   assert(app.snapshot().stage.y>before.y,'Stage source did not follow setup drag');log('Stage setup drag operates independently');
-  $('lockStage').click();assert(app.snapshot().stage.locked,'Stage not locked');assert($('outputWidth').disabled,'Stage editable while locked');log('Stage locks setup controls');
-  $('duration').open=true;await field('actionDuration',1.2);await field('speed',.5);$('magnification').open=true;await field('zoomEnd',1.4);await field('zoomDuration',.4);$('rotation').open=true;await field('rotationDegrees',45);await field('rotationDuration',.2);
+  $('wizardNext').click();await delay(0);assert($('wizardPrompt').textContent.includes('effect'),'Wizard effect question missing');
+  $('wizardEffect').value='combined';$('wizardEffect').dispatchEvent(new w.Event('change',{bubbles:true}));await delay(0);
+  await field('zoomEnd',140);await field('zoomDuration',.4);await field('rotationDegrees',45);await field('rotationDuration',.2);
+  assert(close(app.snapshot().settings.zoom.end,1.4),'Ending percent did not map to push multiplier');assert(app.snapshot().settings.rotation.enabled,'Rotation option did not turn rotation on');
+  $('wizardNext').click();await delay(0);assert($('wizardPrompt').textContent.includes('long'),'Wizard duration question missing');await field('actionDuration',1.2);await field('speed',.5);
+  $('wizardNext').click();await wait(()=>!$('settingsCard').open&&!v.seeking);assert(app.snapshot().stage.locked&&$('modeLabel').textContent.includes('HOT'),'Wizard did not arm the viewport');
+  log('Wizard guides opening, effect and duration; only completion makes the screen hot');
+  d.querySelector('[data-section="magnification"]').click();assert($('settingsCard').open&&$('magnification').parentElement===$('cardBody'),'Push/Pull did not open in popup');
+  const card=$('settingsCard').getBoundingClientRect();assert(card.top>=0&&card.bottom<=w.innerHeight+1,'Settings card is hidden below the player');assert($('zoomEnd').value==='140','Ending size is not shown as percent');
+  $('settingsDone').click();log('Push/Pull card overlays the player with percent, seconds and plain speed choices');
+  d.querySelector('[data-section="rotation"]').click();$('rotationEnabled').checked=false;$('rotationEnabled').dispatchEvent(new w.Event('change',{bubbles:true}));await delay(0);$('settingsDone').click();
+  pointer('pointerdown',11,60,60);await wait(app.active);pointer('pointerdown',12,140,60);pointer('pointermove',12,60,140);assert(close(app.camera().r,0),'Second finger rotated while Rotation off');
+  pointer('pointerup',12,60,140);pointer('pointerup',11,60,60);$('action').click();await wait(()=>!app.active());$('start').click();await wait(()=>!v.seeking);
+  d.querySelector('[data-section="rotation"]').click();$('rotationEnabled').checked=true;$('rotationEnabled').dispatchEvent(new w.Event('change',{bubbles:true}));await delay(0);$('settingsDone').click();log('Rotation must be enabled before a second finger can rotate');
   for(const width of [320,390,430]){iframe.style.width=width+'px';await delay(30);assert(d.documentElement.scrollWidth<=d.documentElement.clientWidth+1,'Horizontal overflow at '+width);const box=$('viewport').getBoundingClientRect();assert(box.width>140,'Viewport too narrow');assert($('rail').getBoundingClientRect().width===76,'Rail differs from reference');log('Mobile layout '+width+'px',{viewportWidth:box.width,viewportHeight:box.height});}
   iframe.style.width='390px';await delay(30);
   pointer('pointerdown',1,60,60);await wait(app.active);assert($('action').textContent.includes('Pause'),'Action did not become Pause');assert(!$('recording').hidden,'Missing recording label');assert($('play').disabled,'Navigation not blocked');
@@ -43,10 +64,10 @@ document.getElementById('run').onclick=async()=>{
   assert(v.paused&&close(v.currentTime,1.6,.025),'Master Action did not pause at source endpoint');assert($('recording').hidden&&!$('viewport').classList.contains('recording'),'Recording indicators remained');log('Button Action, partial replacement, inherited boundary and automatic endpoint',{end:v.currentTime,samples:app.snapshot().path.length});
   const exact=app.snapshot().path;assert(exact.every((s,i)=>!i||s.t>exact[i-1].t),'Samples are not source-time ordered');
   $('reference').querySelector('button').click();$('gs-notes').value='CamLock browser acceptance';$('gs-notes').dispatchEvent(new w.Event('input',{bubbles:true}));$('gs-scribeMark').click();assert($('gs-notes').value.includes('F40'),'Scribe did not mark the source frame');
-  $('gs-scribeClear').click();await wait(()=>$('gs-notes').value==='');$('gs-scribeHistory').click();await wait(()=>$('gs-scribeEntries').textContent.includes('CamLock browser acceptance'));$('gs-scribeClose').click();log('Original Scribe frame mark, recoverable Clear and History');
+  $('gs-scribeClear').click();await wait(()=>$('gs-notes').value==='');$('gs-scribeHistory').click();await wait(()=>$('gs-scribeEntries').textContent.includes('CamLock browser acceptance'));$('gs-scribeClose').click();$('settingsDone').click();log('Original Scribe frame mark, recoverable Clear and History');
   const lockedStage=JSON.stringify(app.snapshot().stage);app.seek(.7);await wait(()=>!v.seeking);$('play').click();await wait(()=>!v.paused);await delay(80);assert(v.playbackRate===1,'Review uses performance speed');$('play').click();await wait(()=>v.paused);log('Review returns to normal speed and original audio level');
   $('reverse').click();await delay(140);$('reverse').click();assert(v.currentTime<.9,'Reverse did not navigate');assert(JSON.stringify(app.snapshot().stage)===lockedStage,'Camera gestures mutated locked stage');
-  $('save').open=true;$('render').click();await wait(()=>!$('export').disabled,60000);const render=app.rendered();assert(render?.blob.size>0,'No rendered video');log('Offline MP4 render uses saved path without re-performance',render.report);
+  d.querySelector('[data-section="save"]').click();$('render').click();await wait(()=>!$('export').disabled,60000);const render=app.rendered();assert(render?.blob.size>0,'No rendered video');log('Offline MP4 render uses saved path without re-performance',render.report);
   const output=new Input({formats:ALL_FORMATS,source:new BlobSource(new Blob([await render.blob.arrayBuffer()],{type:render.blob.type}))});inputs.push(output);const track=await output.getPrimaryVideoTrack(),audio=await output.getPrimaryAudioTrack();assert(audio,'Original audio was lost');
   const packets=[];for await(const packet of new EncodedPacketSink(track).packets())packets.push(packet);assert(packets.length===30,'Wrong output frame count');assert(close(await track.computeDuration(),1.2,.005),'Wrong render speed');log('Encoded frame count and normal-speed duration',{frames:packets.length,duration:await track.computeDuration(),audioDuration:await audio.computeDuration()});
   const original=new Input({formats:ALL_FORMATS,source:new BlobSource(new Blob([await source.arrayBuffer()],{type:source.type}))});inputs.push(original);const originalVideo=await original.getPrimaryVideoTrack();const outSink=new CanvasSink(track,{poolSize:1}),sourceSink=new CanvasSink(originalVideo,{poolSize:1});
@@ -67,7 +88,7 @@ document.getElementById('run').onclick=async()=>{
   const blackFrame=await new CanvasSink(await blackInput.getPrimaryVideoTrack()).getCanvas(0);const blackPixels=blackFrame.canvas.getContext('2d').getImageData(0,0,180,320).data;assert(blackPixels.every((v,i)=>i%4===3||v<4),'Camera outside source was corrected/cropped');log('Completely outside source renders intentional black; WebM works');
   assert(JSON.stringify(app.snapshot().path)===JSON.stringify(exact),'Rendering changed raw path');
   const report={status:'passed',checks:rows,limitations:['Simulated touch in 320/390/430px iframe, not physical Android or iOS.','Authenticated Scribe cloud synchronization not exercised.']};results.textContent=JSON.stringify(report,null,2);window.camlockAcceptance=report;
-  document.getElementById('getReport').hidden=false;document.getElementById('getReport').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'}));a.download='CamLock_Browser_Acceptance_V1.json';a.click();};
+  document.getElementById('getReport').hidden=false;document.getElementById('getReport').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'}));a.download='CamLock_Browser_Acceptance_V1_1.json';a.click();};
  }catch(e){const report={status:'failed',checks:rows,error:e.stack||e.message};window.camlockAcceptance=report;results.textContent=JSON.stringify(report,null,2);console.error(e);}
  finally{for(const input of inputs)input.dispose();document.getElementById('run').disabled=false;}
 };

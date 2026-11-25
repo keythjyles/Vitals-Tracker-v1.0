@@ -1,0 +1,157 @@
+{
+  "status": "passed",
+  "checks": [
+    {
+      "name": "Real source loads",
+      "pass": true,
+      "duration": 4,
+      "width": 180,
+      "height": 320
+    },
+    {
+      "name": "Player itself docks at y=0; top pull-down exposes Dock and Unlock",
+      "pass": true
+    },
+    {
+      "name": "Stage setup drag operates independently",
+      "pass": true
+    },
+    {
+      "name": "Wizard guides opening, effect and duration; only completion makes the screen hot",
+      "pass": true
+    },
+    {
+      "name": "Push/Pull card overlays the player with percent, seconds and plain speed choices",
+      "pass": true
+    },
+    {
+      "name": "Rotation must be enabled before a second finger can rotate",
+      "pass": true
+    },
+    {
+      "name": "Mobile layout 320px",
+      "pass": true,
+      "viewportWidth": 192,
+      "viewportHeight": 341.328125
+    },
+    {
+      "name": "Mobile layout 390px",
+      "pass": true,
+      "viewportWidth": 260,
+      "viewportHeight": 462.21875
+    },
+    {
+      "name": "Mobile layout 430px",
+      "pass": true,
+      "viewportWidth": 300,
+      "viewportHeight": 533.328125
+    },
+    {
+      "name": "Touch Action, first/second finger roles, radial separation, promotion and no-jump reacquisition",
+      "pass": true
+    },
+    {
+      "name": "Zoom and rotation hold while master Action continues",
+      "pass": true
+    },
+    {
+      "name": "Pause unlocks navigation",
+      "pass": true
+    },
+    {
+      "name": "Button Action, partial replacement, inherited boundary and automatic endpoint",
+      "pass": true,
+      "end": 1.6,
+      "samples": 168
+    },
+    {
+      "name": "Original Scribe frame mark, recoverable Clear and History",
+      "pass": true
+    },
+    {
+      "name": "Review returns to normal speed and original audio level",
+      "pass": true
+    },
+    {
+      "name": "Offline MP4 render uses saved path without re-performance",
+      "pass": true,
+      "engine": "SxLock-R26",
+      "fps": 25,
+      "width": 180,
+      "height": 320,
+      "sourceFrames": 0,
+      "duration": 1.2,
+      "hasSourceAudio": false,
+      "hasEffects": true,
+      "video": "offline-encode",
+      "audio": "sample-mix",
+      "sampleRate": 48000,
+      "pictureResized": false,
+      "encoderPrimingSamples": 1024,
+      "outputAudioEnd": 1.216,
+      "outputFrames": 30,
+      "composited": true,
+      "outputWidth": 180,
+      "outputHeight": 320,
+      "outputColorSpace": {
+        "primaries": "bt709",
+        "transfer": "iec61966-2-1",
+        "matrix": "bt709",
+        "fullRange": true
+      },
+      "camlock": {
+        "start": 0.4,
+        "end": 1.6,
+        "coordinates": {
+          "version": 1,
+          "origin": "viewport-center",
+          "x": "viewport-width",
+          "y": "viewport-height",
+          "z": "multiplier-of-locked-stage",
+          "r": "unwrapped-camera-degrees-clockwise",
+          "time": "absolute-source-seconds",
+          "interpolation": "linear-no-overshoot"
+        },
+        "samples": 168,
+        "performanceSpeed": 0.5,
+        "renderSpeed": 1
+      }
+    },
+    {
+      "name": "Encoded frame count and normal-speed duration",
+      "pass": true,
+      "frames": 30,
+      "duration": 1.2,
+      "audioDuration": 1.216
+    },
+    {
+      "name": "Rendered pixels match saved composition; no UI overlay at 0s",
+      "pass": true,
+      "meanChannelError": 1.5382638888888889
+    },
+    {
+      "name": "Rendered pixels match saved composition; no UI overlay at 0.4s",
+      "pass": true,
+      "meanChannelError": 2.9509780092592592
+    },
+    {
+      "name": "Rendered pixels match saved composition; no UI overlay at 0.92s",
+      "pass": true,
+      "meanChannelError": 2.9581886574074074
+    },
+    {
+      "name": "Source audio synchronized to nonzero opening",
+      "pass": true,
+      "toneRms": 0.10608314350701523,
+      "silentRms": 0
+    },
+    {
+      "name": "Completely outside source renders intentional black; WebM works",
+      "pass": true
+    }
+  ],
+  "limitations": [
+    "Simulated touch in 320/390/430px iframe, not physical Android or iOS.",
+    "Authenticated Scribe cloud synchronization not exercised."
+  ]
+}

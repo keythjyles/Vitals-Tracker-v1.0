@@ -1,0 +1,46 @@
+{
+  "tool": "GS-TOOL-CAMLOCK",
+  "release": "V1.1",
+  "date": "2026-11-25",
+  "branch": "camlock-v1.1-player-dock",
+  "base_and_rollback": "13ba104d3cfe3f33f61a409c98ea9e452580f293",
+  "scope": [
+    "picture docked at y=0; top menu contains Dock and Unlock",
+    "floating settings and Scribe cards",
+    "optional opening/effect/duration wizard; cold until completion",
+    "rotation off by default and explicit enable before secondary gestures/program",
+    "square snap enabled by default; optional rawR retained",
+    "Push/Pull in percent, seconds and plain speed descriptions"
+  ],
+  "camera_tests": {
+    "passed": 22,
+    "failed": 0
+  },
+  "browser_tests": {
+    "status": "passed",
+    "checks": 22,
+    "receipt": "tests/BROWSER_ACCEPTANCE_V1_1.json"
+  },
+  "native_browser": {
+    "wizard_opening_effect_duration_complete": true,
+    "hot_after_finish": true,
+    "mobile_popup_visible": {
+      "viewport_height": 844,
+      "top": 544,
+      "bottom": 832
+    }
+  },
+  "preservation": [
+    "original source files",
+    "existing source-timed trajectories",
+    "Scribe history and note editor",
+    "existing production editors and shared engine source"
+  ],
+  "limits": [
+    "Simulated mobile touch and native desktop browser input; physical Android/iOS not verified.",
+    "Authenticated Scribe cloud synchronization not exercised."
+  ],
+  "deployment": {
+    "status": "pending"
+  }
+}
