@@ -41,6 +41,44 @@
     "Authenticated Scribe cloud synchronization not exercised."
   ],
   "deployment": {
-    "status": "pending"
+    "status": "verified",
+    "merge_commit": "8092ac07c556ce052d0c1e679cf862ae6681ddfe",
+    "pages_run": 45692864182,
+    "conclusion": "success",
+    "url": "https://keythjyles.github.io/Vitals-Tracker-v1.0/tools-home/tools/camlock/?v=1.1",
+    "live_browser": {
+      "version": "V1.1",
+      "picture_top": 0,
+      "top_menu_dock_and_unlock": true
+    },
+    "note": "Application and public page verified before this receipt-only commit."
+  },
+  "code_commit": "fe11ed160aff0019c02dfcc066238708d35414d6",
+  "pull_request": "https://github.com/keythjyles/Vitals-Tracker-v1.0/pull/46",
+  "github_checks": {
+    "branch": [
+      {
+        "id": 45692671105,
+        "name": "CamLock camera checks",
+        "event": "pull_request",
+        "conclusion": "success",
+        "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/45692671105"
+      },
+      {
+        "id": 45692656986,
+        "name": "CamLock camera checks",
+        "event": "push",
+        "conclusion": "success",
+        "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/45692656986"
+      }
+    ],
+    "main": [
+      {
+        "id": 45692864025,
+        "name": "CamLock camera checks",
+        "conclusion": "success",
+        "url": "https://github.com/keythjyles/Vitals-Tracker-v1.0/actions/runs/45692864025"
+      }
+    ]
   }
 }
