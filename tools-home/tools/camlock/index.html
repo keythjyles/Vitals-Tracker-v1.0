@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+ <meta name="theme-color" content="#101924"><title>CamLock · GS-TOOL-CAMLOCK · V1.0</title>
+ <link rel="stylesheet" href="../../shared/player-shell.css?v=34"><link rel="stylesheet" href="./camlock.css?v=1">
+ <script type="module" src="./app.mjs?v=1"></script>
+</head>
+<body>
+ <main>
+  <div class="title"><a href="../../" aria-label="Tools home">‹ Tools</a><h1>CamLock <small>GS-TOOL-CAMLOCK · V1.0</small></h1></div>
+  <div id="sourceDrawer" hidden>
+   <div class="row"><button id="loadSource">Load source</button><button id="openDocument">Open project / path / stage</button></div>
+   <details><summary>Source URL</summary><div class="row"><input id="sourceURL" type="url" placeholder="https://…" aria-label="Source video URL"><button id="loadURL">Load</button></div></details>
+   <p>Saved projects reference the original video. Choose the same source to reconnect.</p>
+  </div>
+  <section id="player" aria-label="Camera workspace">
+   <button id="dockHandle" aria-label="Pull down to reveal source settings and undock player" aria-expanded="false"><span></span></button>
+   <div class="monitor">
+    <div id="viewport" tabindex="0" aria-label="Camera viewport. Lock the stage, then touch to start Action. One finger directs; a second rotates.">
+     <canvas id="picture" width="540" height="960"></canvas>
+     <button id="emptyLoad">Load source video</button>
+     <div id="recording" hidden aria-hidden="true">● RECORDING</div>
+     <span id="modeLabel">STAGE SETUP</span>
+    </div>
+    <nav id="rail" aria-label="Camera controls">
+     <button id="start" title="Pause at the opening source timestamp">↤ Start</button>
+     <button id="play" title="Toggle normal-speed review">▶ Play</button>
+     <button id="reverse" aria-pressed="false" title="Toggle frame-by-frame reverse review">REV</button>
+     <button id="action" class="gold" title="Record a camera performance">● Action</button>
+     <button id="lockStage" title="Lock the opening composition">Lock stage</button>
+     <button data-section="magnification">Magnify</button>
+     <button data-section="rotation">Rotation</button>
+     <button data-section="duration">Duration</button>
+     <button data-section="save">Save</button>
+     <button id="render">Render</button>
+     <button id="export" disabled>Export</button>
+    </nav>
+   </div>
+   <div id="reference"><span id="sourceName">No source</span><span id="clock">F0 · 0.000s · 25fps</span></div>
+   <progress id="timeline" max="1" value="0" aria-label="Source position (read-only)"></progress>
+   <div class="transport" aria-label="Frame navigation">
+    <button id="back25" title="Back 25 frames">−25</button><button id="back" aria-label="Previous frame; double tap 25 frames">−</button>
+    <input id="goFrame" type="number" min="0" step="1" value="0" inputmode="numeric" aria-label="Go to source time at output frame rate">
+    <button id="go">Go</button><button id="next" aria-label="Next frame; double tap 25 frames">+</button><button id="next25" title="Forward 25 frames">+25</button>
+   </div>
+  </section>
+  <p id="status" role="status" aria-live="polite">Load a video, compose the stage, then lock it.</p>
+  <progress id="renderProgress" max="1" value="0" hidden aria-label="Render progress"></progress>
+  <button id="cancelRender" hidden>Cancel render</button>
+  <details id="scribe"><summary>Scribe</summary></details>
+  <div id="settings">
+   <details id="stage"><summary>Stage setup</summary><div class="fields">
+    <label>Horizontal <input data-stage="x" type="number" step="0.01" value="0"></label>
+    <label>Vertical <input data-stage="y" type="number" step="0.01" value="0"></label>
+    <label>Scale × <input data-stage="scale" type="number" min="0.001" step="0.05" value="1"></label>
+    <label>Rotation ° <input data-stage="r" type="number" step="1" value="0"></label>
+    <label><input data-stage="mirror" type="checkbox"> Mirror</label><label><input data-stage="flip" type="checkbox"> Vertical flip</label>
+    <label>Aspect ratio <select id="aspect"><option value="9:16">9:16</option><option value="16:9">16:9</option><option value="1:1">1:1</option><option value="4:5">4:5</option><option value="custom">Custom</option></select></label>
+    <label>Output width <input id="outputWidth" type="number" min="2" max="7680" step="2" value="1080"></label>
+    <label>Output height <input id="outputHeight" type="number" min="2" max="7680" step="2" value="1920"></label>
+    <label>Opening source time (s) <input id="opening" type="number" min="0" step="0.04" value="0"></label>
+   </div><button id="openingHere">Use current time</button><p>Drag to place the source; pinch to scale and rotate. Coordinates use viewport widths and heights.</p></details>
+   <details id="magnification"><summary>Magnification</summary><div class="fields">
+    <label>Ending × opening composition <input id="zoomEnd" type="number" min="0.001" max="10000" step="0.1" value="1"></label>
+    <label>Movement (s) <input id="zoomDuration" type="number" min="0.01" step="0.1" value="9"></label>
+    <label>Velocity <select id="zoomCurve"><option value="constant">Constant</option><option value="accelerating">Accelerating</option><option value="decelerating">Decelerating</option><option value="ease">Ease in and out</option></select></label>
+   </div><p>The stage supplies the opening magnification. Values below 1 pull out; above 1 push in.</p></details>
+   <details id="rotation"><summary>Programmed rotation</summary><div class="fields">
+    <label>Degrees <input id="rotationDegrees" type="number" min="0" step="1" value="0"></label>
+    <label>Direction <select id="rotationDirection"><option value="1">Clockwise camera</option><option value="-1">Counterclockwise camera</option></select></label>
+    <label>Movement (s) <input id="rotationDuration" type="number" min="0.01" step="0.1" value="4"></label>
+    <label>Velocity <select id="rotationCurve"><option value="constant">Constant</option><option value="accelerating">Accelerating</option><option value="decelerating">Decelerating</option><option value="ease">Ease in and out</option></select></label>
+   </div><p>A second finger adds rotation. Finger separation never changes magnification during Action.</p></details>
+   <details id="duration"><summary>Action duration and performance speed</summary><div class="fields">
+    <label>Action (source seconds) <input id="actionDuration" type="number" min="0.04" max="86400" step="0.1" value="12"></label>
+    <label>Performance speed <select id="speed"><option value="1">1×</option><option value="0.5">½×</option><option value="0.25">¼×</option><option value="0.125">⅛×</option></select></label>
+    <label><input id="mutePerformance" type="checkbox" checked> Mute while performing</label>
+    <label><input id="touchArmed" type="checkbox" checked> Touch starts Action</label>
+   </div><p>Action continues after individual movements finish and when your fingers leave the screen. Pause before navigating.</p></details>
+   <details id="audio"><summary>Audio</summary></details>
+   <details id="save"><summary>Save, open and export</summary><div class="row">
+    <button id="saveStage">Save stage</button><button id="savePath">Save camera path</button><button id="saveProject">Save project</button><button id="openSaved">Open saved</button>
+   </div><p>Saves download editable instructions. Keep the original video separately. Paths use normalized viewport coordinates for reuse.</p>
+   <div class="fields"><label>Video name <input id="outputName" value="CamLock_Treatment_V01"></label>
+    <label>Format <select id="format"><option value="mp4">MP4 · H.264 / AAC</option><option value="webm">WebM · VP9 / Opus</option></select></label>
+    <label>Output fps <select id="fps"><option>24</option><option selected>25</option><option>30</option><option>50</option><option>60</option></select></label>
+   </div><div class="row"><button id="share" disabled>Share rendered video</button><button id="reviewRender" disabled>Review render</button></div>
+   <p id="renderInfo">Render applies your saved path to the original frames at normal speed.</p></details>
+   <details id="help"><summary>Camera controls</summary><p>Lock stage to arm the viewport. The first finger directs the camera: move down and the picture moves up. A second finger rotates around the first. Lift either or both fingers freely; Action continues. If the primary finger lifts, the remaining finger becomes the direction controller without a jump.</p><p>Pause, navigate to a correction point, then start Action to replace only the path from that time onward. Navigation preserves the path. Raw movement uses linear interpolation with no smoothing.</p><p>Play toggles normal review; REV toggles frame-by-frame reverse. Frame buttons step one frame, or 25 on a double tap. Pull only the top handle to undock the player and reveal source controls.</p></details>
+  </div>
+  <input id="sourceFile" type="file" accept="video/*,.mp4,.mov,.webm" hidden><input id="documentFile" type="file" accept="application/json,.json" hidden>
+  <video id="sourceVideo" playsinline preload="auto" hidden></video>
+  <dialog id="renderReview"><button id="closeReview">Close</button><video id="renderedVideo" controls playsinline></video></dialog>
+ </main>
+</body></html>

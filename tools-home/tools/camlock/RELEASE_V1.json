@@ -1,0 +1,73 @@
+{
+  "tool": "GS-TOOL-CAMLOCK",
+  "release": "V1.0",
+  "date": "2026-11-25",
+  "branch": "camlock-v1",
+  "base_and_rollback": "7b4d955e739f08a7169bf5ec3679df9f8ba9507c",
+  "authorization": "Owner Master Development Handoff V1.0, November 25, 2026: proceed with a functioning implementation.",
+  "core_tests": {
+    "passed": 16,
+    "failed": 0
+  },
+  "existing_engine_tests": {
+    "passed": 77,
+    "failed": 0,
+    "scope": "CapLock, AspectLock, shared audio fades, SxLock mix cues"
+  },
+  "browser_tests": {
+    "status": "passed",
+    "checks": 19,
+    "receipt": "tests/BROWSER_ACCEPTANCE_V1.json",
+    "input": "Actual 4s H.264/AAC fixture; simulated touch PointerEvents at 320/390/430 CSS pixels"
+  },
+  "standalone": {
+    "actual_file_picker": true,
+    "native_viewport_drag": true,
+    "performance_speed": 0.125,
+    "requested_source_seconds": 0.3,
+    "mp4_download_verified": true,
+    "ffprobe": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "width": 180,
+          "height": 320,
+          "r_frame_rate": "25/1",
+          "duration": "0.320000",
+          "nb_frames": "8"
+        },
+        {
+          "codec_name": "aac",
+          "r_frame_rate": "0/0",
+          "duration": "0.320000",
+          "nb_frames": "16"
+        }
+      ],
+      "format": {
+        "duration": "0.320000"
+      }
+    },
+    "saved_project_download_and_reopen_verified": true,
+    "saved_camera_samples": 162,
+    "source_sha256_retained": true,
+    "dock_and_undock_verified": true
+  },
+  "scope": {
+    "existing_editor_code_modified": false,
+    "shared_code_modified": false,
+    "paid_generation": false,
+    "production_media_uploaded": false
+  },
+  "limitations": [
+    "Physical Android/iOS touch and device-specific codec/memory support unverified.",
+    "Authenticated Scribe shared-history sync not exercised.",
+    "No current Play/REV double/triple-tap implementation was found; see README for exact adopted controls.",
+    "Save and Export are file downloads, not verified cloud backups."
+  ],
+  "deployment": {
+    "status": "pending",
+    "note": "Record actual commit and Pages deployment in the release commit/PR or a subsequent receipt update."
+  }
+}

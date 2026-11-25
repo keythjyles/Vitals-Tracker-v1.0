@@ -1,0 +1,21 @@
+name: CamLock camera checks
+on:
+  pull_request:
+    paths: ['tools-home/tools/camlock/**', '.github/workflows/camlock-checks.yml']
+  push:
+    paths: ['tools-home/tools/camlock/**', '.github/workflows/camlock-checks.yml']
+permissions:
+  contents: read
+jobs:
+  camera:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --check tools-home/tools/camlock/app.mjs
+      - run: node --check tools-home/tools/camlock/render.mjs
+      - run: node --check tools-home/tools/camlock/tests/browser.mjs
+      - run: node --test tools-home/tools/camlock/tests/core.test.mjs
