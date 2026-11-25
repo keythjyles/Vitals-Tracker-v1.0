@@ -1,4 +1,4 @@
-// CamLock V1.1. World positions use viewport widths/heights; camera is independent of stage.
+// CamLock V1.2. World positions use viewport widths/heights; camera is independent of stage.
 export const SCHEMA = 'CamLockProject-1.0';
 export const COORDINATES = Object.freeze({version:1,origin:'viewport-center',x:'viewport-width',y:'viewport-height',z:'multiplier-of-locked-stage',r:'unwrapped-camera-degrees-clockwise',time:'absolute-source-seconds',interpolation:'linear-no-overshoot'});
 export const clamp = (n,a,b) => Math.max(a,Math.min(b,n));
@@ -12,9 +12,10 @@ export function ease(name,p) {
  return p;
 }
 export function newProject() {
- return {schema:SCHEMA,tool:'GS-TOOL-CAMLOCK',release:'V1.1',createdAt:new Date().toISOString(),source:null,
+ return {schema:SCHEMA,tool:'GS-TOOL-CAMLOCK',release:'V1.2',createdAt:new Date().toISOString(),source:null,
   coordinates:{...COORDINATES},stage:{x:0,y:0,scale:1,r:0,mirror:false,flip:false,width:1080,height:1920,locked:false},
   start:0,settings:{duration:12,zoom:{end:1,duration:9,curve:'constant'},rotation:{enabled:false,snap:true,degrees:0,duration:4,curve:'constant'}},
+  controls:{touchGain:.25,joystick:false,joystickSpeed:.1},
   audio:{volume:1,previousVolume:1,fadeIn:0,fadeOut:0},performanceSpeed:1,fps:25,path:[],segments:[],scribe:''};
 }
 export function initialCamera(){return {x:0,y:0,z:1,r:0};}
@@ -72,8 +73,12 @@ export class Action {
  }
  stop(t){const s=this.update(t);this.active=false;return s;}
 }
+export function cameraDirection(state,dx,dy,aspect){
+ const r=state.r*Math.PI/180,c=Math.cos(r),s=Math.sin(r);
+ return {x:(c*dx-s*dy/aspect)/state.z,y:(s*dx*aspect+c*dy)/state.z};
+}
 export class CameraTouch {
- constructor({read,translate,rotate,rotationEnabled=()=>true}){this.points=new Map();this.read=read;this.translate=translate;this.rotate=rotate;this.rotationEnabled=rotationEnabled;this.angle=null;}
+ constructor({read,translate,rotate,rotationEnabled=()=>true,sensitivity=()=>1}){this.points=new Map();this.read=read;this.translate=translate;this.rotate=rotate;this.rotationEnabled=rotationEnabled;this.sensitivity=sensitivity;this.angle=null;}
  get size(){return this.points.size;}
  resetAngle(){const [a,b]=this.points.values();this.angle=a&&b&&Math.hypot(b.x-a.x,b.y-a.y)>2?Math.atan2(b.y-a.y,b.x-a.x):null;}
  down(id,x,y){if(this.points.size>=2)return;this.points.set(id,{x,y});this.resetAngle();}
@@ -81,11 +86,9 @@ export class CameraTouch {
   const previous=this.points.get(id);if(!previous)return;
   const primary=this.points.keys().next().value;this.points.set(id,{x,y});
   if(id===primary){
-   const s=this.read(),r=s.r*Math.PI/180;
    // A screen-space direction is transformed into camera-world space. No edge limits.
-   const dx=(x-previous.x)/width/s.z,dy=(y-previous.y)/height/s.z;
-   const aspect=width/height;
-   this.translate(Math.cos(r)*dx-Math.sin(r)*dy/aspect,Math.sin(r)*dx*aspect+Math.cos(r)*dy);
+   const gain=this.sensitivity(),delta=cameraDirection(this.read(),(x-previous.x)/width*gain,(y-previous.y)/height*gain,width/height);
+   this.translate(delta.x,delta.y);
    this.resetAngle();
   }else{
    if(!this.rotationEnabled()){this.resetAngle();return;}
@@ -98,6 +101,21 @@ export class CameraTouch {
  }
  up(id){this.points.delete(id);this.resetAngle();} // Remaining finger is rebased in place, never teleported.
  clear(){this.points.clear();this.angle=null;}
+}
+export class CameraJoystick {
+ constructor({read,translate,speed=()=>.1,deadZone=.12}){this.read=read;this.translate=translate;this.speed=speed;this.deadZone=deadZone;this.reset();}
+ reset(t=null){this.x=0;this.y=0;this.time=t;}
+ set(x,y,radius){
+  const distance=Math.hypot(x,y),amount=clamp((distance/radius-this.deadZone)/(1-this.deadZone),0,1);
+  this.x=distance?x/distance*amount:0;this.y=distance?y/distance*amount:0;
+ }
+ advance(t,width,height){
+  const elapsed=this.time===null?0:Math.max(0,t-this.time);this.time=t;
+  if(!elapsed||!width||!height||!this.x&&!this.y)return;
+  // Rate is a fraction of picture width per source second, independent of performance speed.
+  const rate=this.speed()*elapsed,delta=cameraDirection(this.read(),this.x*rate,this.y*rate*width/height,width/height);
+  this.translate(delta.x,delta.y);
+ }
 }
 export function drawScene(ctx,image,stage,camera,width,height) {
  ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.fillStyle='#000';ctx.fillRect(0,0,width,height);
@@ -147,6 +165,11 @@ export function importDocument(input,current) {
   for(const key of ['fadeIn','fadeOut'])if(!finite(input.audio[key])||input.audio[key]<0)throw Error('Invalid audio fade.');
   out.audio=clone(input.audio);out.fps=[24,25,30,50,60].includes(input.fps)?input.fps:25;
   out.performanceSpeed=[1,.5,.25,.125].includes(input.performanceSpeed)?input.performanceSpeed:1;
+  if(input.controls!==undefined){
+   const c=input.controls;
+   if(!c||![1,.5,.25,.125].includes(c.touchGain)||typeof c.joystick!=='boolean'||!finite(c.joystickSpeed)||c.joystickSpeed<.01||c.joystickSpeed>2)throw Error('Invalid direction controls.');
+   out.controls=clone(c);
+  }
  }
  return out;
 }

@@ -44,6 +44,39 @@ document.getElementById('run').onclick=async()=>{
   pointer('pointerdown',11,60,60);await wait(app.active);pointer('pointerdown',12,140,60);pointer('pointermove',12,60,140);assert(close(app.camera().r,0),'Second finger rotated while Rotation off');
   pointer('pointerup',12,60,140);pointer('pointerup',11,60,60);$('action').click();await wait(()=>!app.active());$('start').click();await wait(()=>!v.seeking);
   d.querySelector('[data-section="rotation"]').click();$('rotationEnabled').checked=true;$('rotationEnabled').dispatchEvent(new w.Event('change',{bubbles:true}));await delay(0);$('settingsDone').click();log('Rotation must be enabled before a second finger can rotate');
+  d.querySelector('[data-section="direction"]').click();
+  assert($('settingsCard').open&&$('direction').parentElement===$('cardBody'),'Direction settings are not in a popup card');
+  assert($('touchSensitivity').value==='0.25','Quarter touch sensitivity is not the default');
+  const pathBeforeControls=JSON.stringify(app.snapshot().path);await field('touchSensitivity',.25);await field('joystickSpeed',20);
+  $('joystickEnabled').checked=true;$('joystickEnabled').dispatchEvent(new w.Event('change',{bubbles:true}));await delay(0);
+  assert(JSON.stringify(app.snapshot().path)===pathBeforeControls,'Direction preferences changed an existing path');$('settingsDone').click();
+  assert(!$('joystick').hidden,'Joystick switch did not show the control');
+  d.querySelector('[data-section="magnification"]').click();await field('zoomEnd',100);$('settingsDone').click();
+  d.querySelector('[data-section="rotation"]').click();$('rotationEnabled').checked=false;$('rotationEnabled').dispatchEvent(new w.Event('change',{bubbles:true}));await delay(0);$('settingsDone').click();
+  $('start').click();await wait(()=>!v.seeking);pointer('pointerdown',71,30,30);await wait(app.active);const quarterBase=app.camera(),pictureWidth=$('viewport').getBoundingClientRect().width;
+  pointer('pointermove',71,31,30);assert(close((app.camera().x-quarterBase.x)*pictureWidth,.25,.0001),'One touch pixel did not give a quarter pixel of camera travel');
+  pointer('pointerup',71,31,30);app.pause();$('start').click();await wait(()=>!v.seeking);log('Quarter-pixel touch direction and preferences preserve existing trajectory');
+  const stick=$('joystick');
+  function stickPointer(type,id,x=0,y=0){const box=stick.getBoundingClientRect();stick.dispatchEvent(new w.PointerEvent(type,{pointerId:id,pointerType:'touch',clientX:box.left+box.width/2+x,clientY:box.top+box.height/2+y,button:0,buttons:type==='pointerup'?0:1,bubbles:true,cancelable:true}));}
+  stickPointer('pointerdown',81,0,0);await wait(app.active);const centered=app.camera(),centerTime=v.currentTime;
+  await wait(()=>v.currentTime>centerTime+.1);assert(close(app.camera().x,centered.x),'Centered joystick drifted');assert($('action').disabled,'Editing enabled while holding joystick');
+  stickPointer('pointermove',81,35,0);const joystickTime=v.currentTime;await wait(()=>v.currentTime>joystickTime+.16);
+  assert(app.camera().x>centered.x+.01,'Joystick did not direct the camera');assert(close(app.camera().z,1)&&close(app.camera().r,0),'Joystick changed zoom or rotation');
+  const beforeOtherFinger=app.camera();pointer('pointerdown',82,30,50);pointer('pointermove',82,80,90);pointer('pointerup',82,80,90);
+  assert(close(app.camera().y,beforeOtherFinger.y),'Another viewport finger translated the joystick performance');
+  stickPointer('pointerup',81,35,0);const joystickHeld=app.camera(),holdTime=v.currentTime;await wait(()=>v.currentTime>holdTime+.12);
+  assert(app.active()&&close(app.camera().x,joystickHeld.x)&&close(app.camera().y,joystickHeld.y),'Joystick release stopped Action or drifted');
+  assert(!$('action').disabled,'Joystick release did not restore Pause');
+  stickPointer('pointerdown',83);assert(close(app.camera().x,joystickHeld.x),'Joystick reacquisition jumped');stickPointer('pointercancel',83);app.pause();
+  const joystickProject=app.snapshot();
+  log('Joystick starts Action; center, travel, release, cancellation and reacquisition are stable');
+  $('start').click();await wait(()=>!v.seeking);stick.dispatchEvent(new w.KeyboardEvent('keydown',{key:'ArrowDown',bubbles:true,cancelable:true}));await wait(app.active);const keyBase=app.camera(),keyTime=v.currentTime;
+  await wait(()=>v.currentTime>keyTime+.12);assert(app.camera().y>keyBase.y,'Keyboard joystick did not direct camera');
+  stick.dispatchEvent(new w.KeyboardEvent('keyup',{key:'ArrowDown',bubbles:true,cancelable:true}));const keyHeld=app.camera(),keyReleaseTime=v.currentTime;await wait(()=>v.currentTime>keyReleaseTime+.1);assert(close(app.camera().y,keyHeld.y),'Key release left joystick moving');app.pause();log('Joystick supports keyboard direction without sticky movement');
+  const remembered=app.snapshot().controls;assert(remembered.joystick&&close(remembered.joystickSpeed,.2)&&close(remembered.touchGain,.25),'Direction settings were not saved with the project');
+  d.querySelector('[data-section="direction"]').click();$('joystickEnabled').checked=false;$('joystickEnabled').dispatchEvent(new w.Event('change',{bubbles:true}));await delay(0);$('settingsDone').click();assert(stick.hidden,'Joystick switch did not hide the control');
+  d.querySelector('[data-section="magnification"]').click();await field('zoomEnd',140);$('settingsDone').click();
+  d.querySelector('[data-section="rotation"]').click();$('rotationEnabled').checked=true;$('rotationEnabled').dispatchEvent(new w.Event('change',{bubbles:true}));await delay(0);$('settingsDone').click();$('start').click();await wait(()=>!v.seeking);
   for(const width of [320,390,430]){iframe.style.width=width+'px';await delay(30);assert(d.documentElement.scrollWidth<=d.documentElement.clientWidth+1,'Horizontal overflow at '+width);const box=$('viewport').getBoundingClientRect();assert(box.width>140,'Viewport too narrow');assert($('rail').getBoundingClientRect().width===76,'Rail differs from reference');log('Mobile layout '+width+'px',{viewportWidth:box.width,viewportHeight:box.height});}
   iframe.style.width='390px';await delay(30);
   pointer('pointerdown',1,60,60);await wait(app.active);assert($('action').textContent.includes('Pause'),'Action did not become Pause');assert(!$('recording').hidden,'Missing recording label');assert($('play').disabled,'Navigation not blocked');
@@ -87,8 +120,15 @@ document.getElementById('run').onclick=async()=>{
   const black=await app.render({file:source,project:outside,format:'webm'});const blackInput=new Input({formats:ALL_FORMATS,source:new BlobSource(new Blob([await black.blob.arrayBuffer()],{type:black.blob.type}))});inputs.push(blackInput);
   const blackFrame=await new CanvasSink(await blackInput.getPrimaryVideoTrack()).getCanvas(0);const blackPixels=blackFrame.canvas.getContext('2d').getImageData(0,0,180,320).data;assert(blackPixels.every((v,i)=>i%4===3||v<4),'Camera outside source was corrected/cropped');log('Completely outside source renders intentional black; WebM works');
   assert(JSON.stringify(app.snapshot().path)===JSON.stringify(exact),'Rendering changed raw path');
+  const joystickRender=await app.render({file:source,project:joystickProject,format:'mp4'});
+  const joystickInput=new Input({formats:ALL_FORMATS,source:new BlobSource(new Blob([await joystickRender.blob.arrayBuffer()],{type:joystickRender.blob.type}))});inputs.push(joystickInput);
+  const joystickRenderTime=Math.min(.2,joystickRender.report.duration/2),joystickFrame=await new CanvasSink(await joystickInput.getPrimaryVideoTrack()).getCanvas(joystickRenderTime),joystickSource=await sourceSink.getCanvas(joystickProject.start+joystickFrame.timestamp+.000001),joystickExpected=new OffscreenCanvas(180,320);
+  drawScene(joystickExpected.getContext('2d'),joystickSource.canvas,joystickProject.stage,stateAt(joystickProject.path,joystickProject.start+joystickFrame.timestamp),180,320);
+  const jp=joystickFrame.canvas.getContext('2d').getImageData(0,0,180,320).data,je=joystickExpected.getContext('2d').getImageData(0,0,180,320).data;
+  let joystickError=0;for(let i=0;i<jp.length;i+=4)for(let c=0;c<3;c++)joystickError+=Math.abs(jp[i+c]-je[i+c]);joystickError/=180*320*3;
+  assert(joystickError<12,'Joystick render differs from recorded path or includes control overlay');log('Joystick performance renders from its exact saved path with no joystick overlay',{meanChannelError:joystickError,frames:joystickRender.report.outputFrames});
   const report={status:'passed',checks:rows,limitations:['Simulated touch in 320/390/430px iframe, not physical Android or iOS.','Authenticated Scribe cloud synchronization not exercised.']};results.textContent=JSON.stringify(report,null,2);window.camlockAcceptance=report;
-  document.getElementById('getReport').hidden=false;document.getElementById('getReport').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'}));a.download='CamLock_Browser_Acceptance_V1_1.json';a.click();};
+  document.getElementById('getReport').hidden=false;document.getElementById('getReport').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'}));a.download='CamLock_Browser_Acceptance_V1_2.json';a.click();};
  }catch(e){const report={status:'failed',checks:rows,error:e.stack||e.message};window.camlockAcceptance=report;results.textContent=JSON.stringify(report,null,2);console.error(e);}
  finally{for(const input of inputs)input.dispose();document.getElementById('run').disabled=false;}
 };

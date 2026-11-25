@@ -69,3 +69,7 @@ Implementation branch: `camlock-v1`; base/rollback: `7b4d955e739f08a7169bf5ec367
 ## CamLock V1.1 — owner interface corrections
 
 The picture docks at screen y=0 with tool identity below it. The overlaid handle reveals a top menu containing Dock player and Unlock player; explicit unlock and temporary menu reveal are independent. Settings buttons open floating cards over the visible screen. Wizard is optional and asks opening composition, effect and duration before making the viewport hot. Push / Pull uses direction, ending percent, seconds and plain speed descriptions. Rotation must be enabled before secondary-finger gestures or its programmed component operate; square snapping defaults on, can be disabled, and preserves unsnapped angles. Existing saved paths remain intact. Base/rollback: `13ba104d3cfe3f33f61a409c98ea9e452580f293`. See [V1.1 verification](tools/camlock/RELEASE_V1_1.json).
+
+## CamLock V1.2 — fine touch direction and optional joystick
+
+Owner testing finds the camera model working and requests finer manual direction. CamLock adds Full/½/¼/⅛ touch response, with ¼ as the default, plus an optional proportional thumb joystick in its Direction popup. Sensitivity affects new manual X/Y only. Joystick travel uses source seconds and stops on release while Action continues. Existing recorded paths, separate stage transforms, opt-in rotation, Scribe and shared production editors remain intact. Base/rollback: `d1bdd9b7ba31c0e767eaaf407e386eb8e1d48a35`. [Operation and verification](tools/camlock/README.md).

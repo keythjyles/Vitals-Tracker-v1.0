@@ -1,0 +1,39 @@
+{
+  "tool": "GS-TOOL-CAMLOCK",
+  "release": "V1.2",
+  "date": "2026-11-25",
+  "branch": "camlock-v1.2-fine-direction",
+  "base_and_rollback": "d1bdd9b7ba31c0e767eaaf407e386eb8e1d48a35",
+  "owner_direction": "Quarter-strength touch direction and a toggleable on-screen joystick after gentle V1.1 phone testing.",
+  "scope": [
+    "Full/half/quarter/eighth touch direction; quarter is default",
+    "Toggleable proportional joystick, 12% center dead zone, adjustable source-time rate",
+    "Release/cancel/focus loss clears velocity without ending Action",
+    "Keyboard joystick and exclusive per-gesture translation authority",
+    "Fractional camera positions and project controls preserved; old paths never rescaled"
+  ],
+  "camera_tests": {
+    "passed": 27,
+    "failed": 0
+  },
+  "browser_tests": {
+    "status": "passed",
+    "checks": 26,
+    "receipt": "tests/BROWSER_ACCEPTANCE_V1_2.json"
+  },
+  "native_browser": {
+    "joystick_switch_and_popup": true,
+    "pointer_drag_started_action_and_recorded_until_endpoint": true
+  },
+  "preservation": [
+    "original source video",
+    "existing stage and camera paths",
+    "original Scribe/history",
+    "shared and adjacent production tool code"
+  ],
+  "limits": [
+    "Simulated touch in 320/390/430px iframe, not physical Android or iOS.",
+    "Authenticated Scribe cloud synchronization not exercised."
+  ],
+  "release_verification": "This source checkpoint records prepublication checks. Commit-specific branch/main checks, Pages deployment and live-page verification are recorded in the release pull request."
+}
