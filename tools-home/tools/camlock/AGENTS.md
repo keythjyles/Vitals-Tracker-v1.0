@@ -7,3 +7,5 @@ The November 25, 2026 camera model is approved. Preserve independent stage and c
 Navigation never deletes instructions. Only starting Action replaces the trajectory after the selected source time. Keep raw data, original media, JSON project recovery and source references independent from rendered output.
 
 Consume existing Scribe/history and rendering modules without changing the production editors. Report physical-device verification separately from browser simulation. Never claim rendering, download, cloud backup or deployment from a code-only check. Keep the visible name, ID, version and release receipt consistent.
+
+V1.1 owner corrections require a picture docked at y=0, top-menu Dock/Unlock controls, floating settings cards and optional opening/effect/duration questions that arm only on completion. Rotation must be explicitly on; square snapping defaults on and preserves unsnapped `rawR` when used. Keep Push / Pull labels, percentages and plain speed descriptions. Do not restore settings hidden beneath the locked player.

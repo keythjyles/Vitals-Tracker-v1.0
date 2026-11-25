@@ -1,15 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {newProject,Action,CameraTouch,stateAt,addSample,pathDocument,importDocument,drawScene} from '../core.mjs';
+import {newProject,Action,CameraTouch,stateAt,addSample,pathDocument,importDocument,drawScene,snapSquare} from '../core.mjs';
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-8,`${a} != ${b}`);
 test('independent durations: rotation holds at four, zoom at nine, Action ends at twelve source seconds',()=>{
- const p=newProject();p.settings.zoom.end=3;p.settings.rotation.degrees=90;const a=new Action(p,0,30);
+ const p=newProject();p.settings.zoom.end=3;p.settings.rotation.enabled=true;p.settings.rotation.degrees=90;const a=new Action(p,0,30);
  near(a.update(4).r,90);assert.equal(a.active,true);near(a.update(6).z,1+2*6/9);
  const at9=a.update(9);near(at9.z,3);assert.equal(a.active,true);
  a.manual=17;const end=a.update(12);near(end.r,107);near(end.z,3);assert.equal(a.active,false);
 });
 for(const curve of ['constant','accelerating','decelerating','ease'])test(`${curve} push/pull and rotation retain exact endpoints`,()=>{
- const p=newProject();p.settings.zoom={end:.25,duration:3,curve};p.settings.rotation={degrees:-450,duration:2,curve};const a=new Action(p,0,20);
+ const p=newProject();p.settings.zoom={end:.25,duration:3,curve};p.settings.rotation={enabled:true,snap:true,degrees:-450,duration:2,curve};const a=new Action(p,0,20);
  near(a.update(0).z,1);const s=a.update(5);near(s.z,.25);near(s.r,-450);assert.ok(a.active);
 });
 test('path is tied to source time at 1x, half, quarter and eighth speed',()=>{
@@ -23,7 +23,7 @@ test('raw samples retain deliberate motion; linear interpolation never overshoot
  assert.throws(()=>addSample(path,.9,{x:0,y:0,z:1,r:0}));
 });
 test('navigation preserves path, correction inherits exact state and replaces only subsequent instructions',()=>{
- const p=newProject();p.settings.zoom.end=2;p.settings.rotation.degrees=120;const a=new Action(p,0,20);
+ const p=newProject();p.settings.zoom.end=2;p.settings.rotation.enabled=true;p.settings.rotation.degrees=120;const a=new Action(p,0,20);
  for(const t of [1,3,6,9,12]){a.state.x=t/10;a.update(t);}
  const original=structuredClone(p.path),at=stateAt(p.path,5);stateAt(p.path,2);assert.deepEqual(p.path,original);
  const b=new Action(p,5,20);assert.deepEqual(b.state,at);assert.deepEqual(p.path.slice(0,-1),original.filter(s=>s.t<5));
@@ -31,7 +31,7 @@ test('navigation preserves path, correction inherits exact state and replaces on
  near(b.update(9).z,2);assert.ok(!p.path.some(s=>s.t===12));
 });
 test('continuing at a paused time does not restart programmed movement',()=>{
- const p=newProject();p.settings.zoom.end=4;p.settings.rotation.degrees=180;const a=new Action(p,0,30);a.stop(3);
+ const p=newProject();p.settings.zoom.end=4;p.settings.rotation.enabled=true;p.settings.rotation.degrees=180;const a=new Action(p,0,30);a.stop(3);
  const before=stateAt(p.path,3),b=new Action(p,3,30);assert.deepEqual(b.state,before);near(b.update(4).r,180);near(b.update(9).z,4);
 });
 test('release and reacquisition preserve pose; secondary finger never translates or zooms',()=>{
@@ -66,4 +66,34 @@ test('painting uses inverse camera direction, unchanged zoom on rotation and opa
  const p=newProject();drawScene(ctx,{width:100,height:100},p.stage,{x:50,y:90,z:.25,r:90},100,200);
  assert.deepEqual(calls[0],['fill',0,0,100,200]);assert.ok(calls.some(c=>c[0]==='translate'&&c[1]===-5000&&c[2]===-18000));
  assert.ok(calls.some(c=>c[0]==='scale'&&c[1]===.25&&c[2]===.25));assert.equal(ctx.fillStyle,'#000');
+});
+
+test('rotation is off first; enabling it is required for both programmed and finger rotation',()=>{
+ const p=newProject();assert.equal(p.settings.rotation.enabled,false);assert.equal(p.settings.rotation.snap,true);p.settings.rotation.degrees=90;
+ const a=new Action(p,0,20);a.rotate(90,1);near(a.update(5).r,0);assert.equal(a.manualTouched,false);
+});
+test('secondary input is inert while rotation is off; primary direction remains active',()=>{
+ const s={x:0,y:0,z:1,r:0};let enabled=false;
+ const g=new CameraTouch({read:()=>s,translate:(x,y)=>{s.x+=x;s.y+=y;},rotate:r=>s.r+=r,rotationEnabled:()=>enabled});
+ g.down(1,0,0);g.down(2,100,0);g.move(1,10,0,100,200);near(s.x,.1);
+ g.move(2,10,100,100,200);near(s.r,0);near(s.z,1);near(s.x,.1);
+ enabled=true;g.move(2,-90,0,100,200);near(s.r,90);
+});
+test('square snapping catches nearby quarter turns and can be disabled',()=>{
+ for(const [input,expected]of [[4,0],[86,90],[94,90],[179,180],[-91,-90],[356,360],[719,720]]){near(snapSquare(input),expected);near(snapSquare(input,false),input);}
+ near(snapSquare(35),35);
+});
+test('manual snap retains the unsnapped input, preserves programmed rotation and round-trips saved paths',()=>{
+ const p=newProject();p.settings.rotation={enabled:true,snap:true,degrees:30,duration:2,curve:'constant'};
+ const a=new Action(p,0,20);a.rotate(73,1);const snapped=a.update(1);near(snapped.r,90);near(snapped.rawR,88);
+ const later=a.update(2);near(later.r,105);near(later.rawR,103);
+ const restored=importDocument(pathDocument(p),newProject());assert.deepEqual(restored.path,p.path);
+ const free=newProject();free.settings.rotation.enabled=true;free.settings.rotation.snap=false;const b=new Action(free,0,20);b.rotate(88,1);near(b.update(1).r,88);
+});
+test('square snapping accounts for the opening stage angle',()=>{
+ const p=newProject();p.stage.r=15;p.settings.rotation.enabled=true;const a=new Action(p,0,20);a.rotate(14,1);near(a.update(1).r,15);near(a.state.rawR,14);
+});
+test('older saved settings retain their programmed rotation and gain the default snap option',()=>{
+ const p=newProject();delete p.settings.rotation.enabled;delete p.settings.rotation.snap;p.settings.rotation.degrees=45;
+ const restored=importDocument(p,newProject());assert.equal(restored.settings.rotation.enabled,true);assert.equal(restored.settings.rotation.snap,true);assert.deepEqual(restored.path,p.path);
 });

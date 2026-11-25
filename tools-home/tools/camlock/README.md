@@ -1,4 +1,4 @@
-# CamLock · GS-TOOL-CAMLOCK · V1.0
+# CamLock · GS-TOOL-CAMLOCK · V1.1
 
 CamLock performs a virtual camera move against an independently composed, locked source-video stage. The November 25, 2026 owner handoff is the implementation authority. It is a working camera engine and source-frame renderer.
 
@@ -6,20 +6,20 @@ CamLock performs a virtual camera move against an independently composed, locked
 
 1. Load a source from the empty viewport or pull the dedicated top handle down. Device files stay original; HTTPS sources require a server that permits browser access.
 2. Establish the opening composition. Drag the source, pinch to scale/rotate, or use Stage setup. Position, uniform scale, rotation, horizontal mirror, vertical flip, output aspect/dimensions and opening source timestamp save independently of the camera path.
-3. Lock stage. Set Action duration, ending magnification, zoom duration/curve and rotation degrees/direction/duration/curve. Magnification is a multiplier of the established opening composition; 1 leaves its magnification unchanged.
-4. Touch the armed viewport or press Action. The first finger moves the camera, so a downward direction moves the picture upward. A second finger adds rotation; radial separation has no effect. Removing either or both fingers does not stop Action. If the primary finger lifts, the remaining finger becomes the direction controller at its present location without a jump.
+3. Choose **Wizard** for opening composition → effect → duration. Finish with **Arm camera** to make the viewport hot. Manual setup remains available. Settings buttons open popup cards inside the visible screen. Push / Pull offers Push in, Pull out and Hold size, an ending size in percent (100% is the opening size), time in seconds and plain speed choices.
+4. Touch the armed viewport or press Action. The first finger moves the camera, so a downward direction moves the picture upward. Turn **Rotation on** before a second finger can rotate. Rotation starts off on new projects. **Snap to square** starts on and catches angles within 5° of a quarter turn; disable it for free rotation. Radial separation has no effect during Action. Removing either or both fingers does not stop Action. If the primary finger lifts, the remaining finger becomes the direction controller at its present location without a jump.
 5. Lift your fingers and press Pause to navigate. Navigation preserves instructions. Starting Action at an earlier time inherits that exact camera state, retains the earlier path, and replaces its subsequent portion. Programmed motion continues from source time; it does not restart at every correction.
 6. Play reviews at normal speed. REV toggles frame-by-frame reverse. Start pauses at the opening source timestamp. Frame buttons step one frame, or 25 on a double tap, with explicit 25-frame buttons and Go. Touch-to-Action can be disarmed without unlocking the stage.
 7. Scribe uses the existing note editor, source/frame stamps, recoverable Clear, Copy, History, restore and existing shared-history connection. Its source data and current note are included in a project; the original shared history is retained separately.
 8. Save stage, Save camera path and Save project download JSON instructions. Render applies the path to the original decoded frames. Export downloads the resulting video, and Share uses native file sharing when available. The output can be loaded by AspectLock, CapLock or SxLock through their existing file controls. Automatic direct blob handoff is not implemented by those general source-loading routes.
 
-Pulling or tapping the handle undocks the player and reveals source controls. Pulling upward or tapping again redocks it. Only the handle owns this gesture; camera touches cannot undock the player. The page reserves scrolling room below the docked player so editing fields and saving controls remain reachable.
+The picture itself starts flush at screen y=0. Tool identity stays below it. Pulling or tapping the overlaid top handle reveals the top menu with **Dock player** and **Unlock player**. Dock closes the menu and pins the picture at y=0; Unlock allows the player to scroll. Pulling upward closes the menu without changing the chosen dock preference. Camera touches cannot open the menu. Settings and Scribe use floating cards rather than rows hidden under the locked player.
 
 ## Camera and timing contract
 
 - T is absolute source seconds. X and Y use viewport width and height, centered at zero. Z is relative to the locked stage's opening magnification. R is an unwrapped clockwise camera angle; the inverse camera transform moves the visible picture. Stage rotation is separate.
 - No source-edge bounds, automatic fit, recentering, compensating zoom or crop corrections are applied. Outside content is opaque black.
-- Manual rotation is added to the inherited/programmed angle. The first finger retains exclusive translation authority. Primary movement rebases the rotation reference; only secondary movement changes its manual offset.
+- Enabled manual rotation is added to the inherited/programmed angle. Programmed rotation also requires Rotation on. Manual square snapping retains the unsnapped angle in each affected sample as optional `rawR`; saved poses and rendering use `r`. Snapping accounts for the stage angle and does not rewrite existing paths. The first finger retains exclusive translation authority. Primary movement rebases the rotation reference; only secondary movement changes its manual offset.
 - Raw samples use the actual media currentTime, on touch events, preview frames and a 60 Hz sampling timer. The timer continues when the browser throttles preview painting. Equal-time samples retain their latest pose. No smoothing is applied; timestamp interpolation is piecewise linear with no overshoot and no angle wrapping.
 - Performance rates are 1, 1/2, 1/4 and 1/8. They change operator time only. Review and rendering use 1x source time. Performance muting is separate from the saved soundtrack level/fades.
 - Individual zoom and rotation durations hold their final components. Only the master Action endpoint, source EOF, explicit Pause, or leaving the active document stops Action. Leaving a hidden/background document pauses and preserves the performance for recovery.
@@ -56,3 +56,9 @@ A separate standalone check used the actual device file picker and native viewpo
 - Save downloads instructions and Export downloads video; neither claims cloud backup. An existing original source location/reference should be retained independently. No production-media upload, source deletion or paid generation is performed by this change.
 
 Keep previously saved JSON and all source/render files when rolling back. Remove the new entry/app or revert its commit; do not delete existing editors or clear Scribe history.
+
+## V1.1 correction — November 25, 2026
+
+Owner corrections: the player must lock at the top, dock controls belong in its revealed top menu, settings buttons must open popup cards, an optional question-driven wizard must guide opening/effect/duration before arming, rotation must be explicitly enabled, square snap must default on, and push/pull wording must be plain. Base/rollback is `13ba104d3cfe3f33f61a409c98ea9e452580f293`; branch `camlock-v1.1-player-dock`.
+
+V1.1 passes 22 camera checks, including opt-in rotation, square snapping, preserved raw angles and old-project migration. [V1.1 browser receipt](tests/BROWSER_ACCEPTANCE_V1_1.json) passes 22 checks including y=0 docking, top controls, popup visibility, guided setup/arming, rotation gating, source-time correction, original Scribe, actual MP4/WebM rendering, decoded picture comparisons and audio timing at 320/390/430px. Native browser clicks also completed the three wizard questions and returned to a hot viewport. V1.0 receipts above remain historical; physical phone and cloud-sync limits still apply.
