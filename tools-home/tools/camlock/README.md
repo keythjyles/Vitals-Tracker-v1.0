@@ -1,4 +1,4 @@
-# CamLock · GS-TOOL-CAMLOCK · V1.5
+# CamLock · GS-TOOL-CAMLOCK · V1.6
 
 CamLock performs a virtual camera move against an independently composed, locked source-video stage. The November 25, 2026 owner handoff is the implementation authority. It is a working camera engine and source-frame renderer.
 
@@ -97,3 +97,14 @@ A live insertion gets its own absolute source-time `origin` in segment metadata.
 35 camera checks and 31 real-media browser checks passed. Armed Play left the path untouched; contact at 2.136154s inserted a full 1.2-source-second Action ending at 3.336153s, with zero seek/pause events at insertion, no pose jump, and unchanged opening timestamp. Disarmed touches left playback/path intact. The existing source-frame, full-source/trim, synchronized-audio, Scribe, fine-direction and MP4/WebM checks also passed. Native browser Play showed the armed status and direct bed contact changed Action to Pause. [Browser receipt](tests/BROWSER_ACCEPTANCE_V1_5.json); [release checkpoint](RELEASE_V1_5.json). Physical Android/iOS and authenticated Scribe cloud sync remain unverified.
 
 Base/rollback: `da104a17ae4119f3bc8f04401b4fa88a2dc28926`; branch `camlock-v1.5-play-touch-insert`. Preserve original media, all raw paths and V1.5 project files if reverting. Earlier clients can render saved poses but do not understand the origin of a newly inserted performance when resuming edits.
+
+
+## V1.6 duration bounds and movable controls — November 26, 2026
+
+Loading a new source prepopulates Action length with the available source time. Its maximum follows the selected insertion origin. A typed duration above that maximum clamps to the available time; a deliberately shorter duration is retained. Recovered settings are bounded without changing recorded poses or segments. Camera, zoom and rotation remain independent and the output still covers the entire source unless explicitly trimmed.
+
+Duration now includes an editable **Insert frame** and **Use current frame**. Choosing an insertion frame positions the source and starts the next Action there, preserving the opening composition and prior instructions. Play shows **Pause** while the bed runs, including during Action; pressing it pauses the performance. Frame navigation stays disabled during Action.
+
+Drag the settings card by its heading or gold grip. The grip also supports arrow keys. The card stays within the visible viewport, remains scrollable and returns to its normal position when closed. Reopening the wizard restores its raised placement. Font sizes retain the compact editor styling.
+
+Verification: the existing source, path, Scribe, live insertion, phone-width and MP4/WebM checks plus new duration/frame/drag checks; Node timing/recovery checks are in `tests/duration.test.mjs`. [Release receipt](RELEASE_V1_6.json). Source/rollback baseline: `a235974a0b52a25de31c094fe988feb4182470f4`. Physical phone testing and authenticated Scribe cloud sync remain separate.

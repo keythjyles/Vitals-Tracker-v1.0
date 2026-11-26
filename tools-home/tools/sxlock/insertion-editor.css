@@ -1,0 +1,28 @@
+/* Scoped to the floating editors; the established transport dimensions are unchanged. */
+#effectSheet,#toolboxSheet,#visualSettings{font-size:13px;max-width:calc(100vw - 8px)}
+#effectSheet .sheet-head,#toolboxSheet .sheet-head{position:sticky;top:-12px;z-index:4;background:var(--panel);padding:5px 0 8px;user-select:none}
+#effectSheet .sheet-head h2,#toolboxSheet .sheet-head h2{font-size:16px}
+#effectSheet label,#effectSheet summary,#toolboxSheet p,#effectSheet .small{font-size:12px;line-height:1.4}
+#effectSheet button,#toolboxSheet button{font-size:12px;min-height:32px;padding:5px 7px}
+#effectSheet #selectedName{font-size:13px;font-weight:550;line-height:1.35;min-width:0;flex:1;white-space:normal;overflow-wrap:anywhere;text-align:left}
+#effectSheet .selected-sound{display:flex;align-items:center;gap:6px}
+#selectedSource{overflow-wrap:anywhere}
+#effectSheet .sheet-framebar output{font-size:12px}
+#effectSheet .sheet-framebar{justify-content:flex-start}
+#effectSheet .sheet-framebar input{min-width:0;width:72px;font-size:16px}
+.sx-effect-range,.sx-effect-source{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:8px 0}
+.sx-effect-range label,.sx-effect-source label{display:flex;flex-direction:column;gap:4px;min-width:0}
+.sx-effect-range input,.sx-effect-source input,.sx-effect-source select{width:100%;min-width:0;font-size:16px;min-height:32px;padding:5px}
+.sx-effect-range button{margin-top:4px}
+#effectTimingHint{font-size:11px;margin:4px 0 8px;color:var(--muted)}
+#effectSheet .fields input{font-size:16px}
+#toolboxItems .sx-toolbox-row,#visualPlacements .sx-toolbox-row{display:flex;align-items:center;flex-wrap:wrap;gap:4px;padding:8px 0}
+#toolboxItems .sx-toolbox-row>.sx-sound-name,#toolboxItems .sx-toolbox-row>strong,#visualPlacements .sx-toolbox-row>strong{flex:1 1 100px;min-width:0;max-width:100%;font-size:12px;font-weight:500;line-height:1.35;white-space:normal;overflow-wrap:anywhere;text-align:left;padding:3px}
+#toolboxItems .sx-toolbox-row>button:not(.sx-sound-name),#visualPlacements .sx-toolbox-row>button{flex:0 0 auto;min-width:0;font-size:11px;padding:5px}
+#toolboxInsertedTitle{font-size:13px;margin:14px 0 4px}
+#effectSheet .audition-row button{font-size:13px}
+#visualSettings .sx-effect-source{border-top:1px solid var(--line);padding-top:8px}
+.gs-insertion-header{touch-action:none;cursor:move}
+.gs-insertion-header{grid-template-columns:18px minmax(0,1fr) auto auto}
+.gs-panel-grip{display:inline-grid;place-items:center;flex:0 0 18px;width:18px;min-height:28px;font-size:18px;color:#efcf8f;cursor:move;user-select:none}
+#effectSheet .sheet-head h2,#toolboxSheet .sheet-head h2{flex:1;min-width:0}

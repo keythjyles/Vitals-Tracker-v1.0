@@ -1,0 +1,28 @@
+{
+  "tool": "GS-TOOL-CAMLOCK",
+  "release": "V1.6",
+  "date": "2026-11-26",
+  "base_and_rollback": "a235974a0b52a25de31c094fe988feb4182470f4",
+  "branch": "camlock-v1.6-insertion-controls-20261126",
+  "scope": [
+    "Prepopulate and bound Action duration to available source time",
+    "Editable insertion frame; preserve opening and recorded poses",
+    "Working Pause during Action",
+    "Draggable and keyboard-movable settings; reset before reopening wizard"
+  ],
+  "verification": {
+    "node_camera_checks": 38,
+    "browser_checks": 33,
+    "browser_harness": "tests/browser.html",
+    "actual_encoded_outputs": [
+      "100-frame / 4-second MP4 from a short Action",
+      "Explicit output trim with synchronized audio",
+      "Outside-source black WebM",
+      "Joystick treatment renders without interface overlays"
+    ],
+    "physical_phone": "Not exercised",
+    "scribe_authenticated_cloud": "Not exercised"
+  },
+  "recovery": "Preserve original video, project/path/stage JSON and browser recovery namespace. Older releases retain raw poses; newly saved automatic-duration preference is optional.",
+  "deployment": "This receipt records source and predeployment checks. Consult the associated pull request and Pages workflow for live deployment evidence."
+}

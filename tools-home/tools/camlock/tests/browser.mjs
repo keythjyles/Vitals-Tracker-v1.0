@@ -16,8 +16,19 @@ document.getElementById('run').onclick=async()=>{
   const response=await fetch(new URLSearchParams(location.search).get('source')||'/camlock-fixture.mp4');assert(response.ok,'Fixture source unavailable');
   const source=new w.File([await response.blob()],'CamLock_Source_Fixture.mp4',{type:'video/mp4',lastModified:1});
   await app.loadSource(source);await wait(app.sourceReady);log('Real source loads',{duration:v.duration,width:v.videoWidth,height:v.videoHeight});
+  assert(close(app.snapshot().settings.duration,4)&&Number($('actionDuration').max)===4,'Action duration did not prepopulate or set its source limit');
+  log('Action duration defaults to source length with a matching maximum');
   async function field(id,value){const el=$(id);el.value=String(value);el.dispatchEvent(new w.Event('change',{bubbles:true}));await delay(0);}
   function pointer(type,id,x,y){const rect=$('viewport').getBoundingClientRect();$('viewport').dispatchEvent(new w.PointerEvent(type,{pointerId:id,pointerType:'touch',isPrimary:id===1,clientX:rect.left+x,clientY:rect.top+y,button:0,buttons:type==='pointerup'?0:1,bubbles:true,cancelable:true}));}
+  d.querySelector('[data-section="duration"]').click();
+  await field('actionFrame',50);await field('actionDuration',999);
+  assert(Number($('actionDuration').max)===2&&Number($('actionDuration').value)===2,'Action length exceeded remaining source');
+  const floating=$('settingsCard'),dragHandle=floating.querySelector('.card-heading'),initial=floating.getBoundingClientRect();
+  for(const [type,y]of [['pointerdown',initial.top+10],['pointermove',initial.top-60],['pointerup',initial.top-60]])dragHandle.dispatchEvent(new w.PointerEvent(type,{pointerId:902,pointerType:'touch',button:0,clientX:initial.left+60,clientY:y,bubbles:true}));
+  assert(floating.getBoundingClientRect().top<initial.top-20,'CamLock settings panel did not drag');
+  await field('actionFrame',0);await wait(()=>!v.seeking&&app.sourceReady());$('settingsDone').click();
+  log('Editable insertion frame, remaining-time clamp and draggable camera panel');
+
   const viewportTop=()=>$('viewport').getBoundingClientRect().top;
   assert(close(viewportTop(),0),'Player picture is not flush with the top');
   const grip=$('dockHandle');
@@ -106,7 +117,7 @@ document.getElementById('run').onclick=async()=>{
   d.querySelector('[data-section="rotation"]').click();$('rotationEnabled').checked=true;$('rotationEnabled').dispatchEvent(new w.Event('change',{bubbles:true}));await delay(0);$('settingsDone').click();$('start').click();await wait(()=>!v.seeking);
   for(const width of [320,390,430]){iframe.style.width=width+'px';await delay(30);assert(d.documentElement.scrollWidth<=d.documentElement.clientWidth+1,'Horizontal overflow at '+width);const box=$('viewport').getBoundingClientRect();assert(box.width>140,'Viewport too narrow');assert($('rail').getBoundingClientRect().width===76,'Rail differs from reference');log('Mobile layout '+width+'px',{viewportWidth:box.width,viewportHeight:box.height});}
   iframe.style.width='390px';await delay(30);
-  pointer('pointerdown',1,60,60);await wait(app.active);assert($('action').textContent.includes('Pause'),'Action did not become Pause');assert(!$('recording').hidden,'Missing recording label');assert($('play').disabled,'Navigation not blocked');
+  pointer('pointerdown',1,60,60);await wait(app.active);assert($('action').textContent.includes('Pause'),'Action did not become Pause');assert(!$('recording').hidden,'Missing recording label');assert(!$('play').disabled&&$('play').textContent.includes('Pause')&&$('next').disabled,'Playback must offer Pause while frame navigation is blocked');
   pointer('pointermove',1,65,90);await wait(()=>v.currentTime>=.5);const moved=app.camera();assert(moved.y>0,'First finger did not direct camera');
   pointer('pointerdown',2,140,90);const beforeSecond=app.camera();pointer('pointermove',2,220,90);const radial=app.camera();assert(close(radial.x,beforeSecond.x)&&close(radial.y,beforeSecond.y),'Secondary finger translated camera');
   pointer('pointermove',2,65,170);assert(app.camera().r>beforeSecond.r+70,'Second finger failed manual rotation');
@@ -116,7 +127,7 @@ document.getElementById('run').onclick=async()=>{
   log('Touch Action, first/second finger roles, radial separation, promotion and no-jump reacquisition');
   await wait(()=>v.currentTime>=.95);assert(app.active(),'Shorter program stopped Action');nearZoom(app.camera().z,1.4);const finalProgrammed=app.camera().r;await delay(60);nearZoom(app.camera().r,finalProgrammed);
   log('Zoom and rotation hold while master Action continues');
-  $('action').click();await wait(()=>!app.active());const saved=app.snapshot(),path=JSON.stringify(saved.path);assert(!$('play').disabled,'Pause did not unlock navigation');log('Pause unlocks navigation');
+  $('play').click();await wait(()=>!app.active()&&v.paused);assert($('play').textContent.includes('Play'),'Pause did not return to Play');const saved=app.snapshot(),path=JSON.stringify(saved.path);assert(!$('play').disabled,'Pause did not unlock navigation');log('Pause unlocks navigation');
   app.seek(.6);await wait(()=>!v.seeking);assert(JSON.stringify(app.snapshot().path)===path,'Navigation deleted path');const inherited=stateAt(saved.path,v.currentTime),branchAt=v.currentTime;
   $('action').click();await wait(app.active);const joined=app.snapshot().path.at(-1);assert(close(joined.x,inherited.x)&&close(joined.y,inherited.y)&&close(joined.r,inherited.r),'Branch starts with discontinuity');
   const prefix=saved.path.filter(s=>s.t<branchAt);assert(JSON.stringify(app.snapshot().path.slice(0,prefix.length))===JSON.stringify(prefix),'Preserved prefix changed');
@@ -169,3 +180,4 @@ document.getElementById('run').onclick=async()=>{
  finally{for(const input of inputs)input.dispose();document.getElementById('run').disabled=false;}
 };
 function nearZoom(a,b){assert(close(a,b,.02),a+' != '+b);}
+

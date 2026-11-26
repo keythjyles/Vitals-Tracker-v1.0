@@ -1,0 +1,39 @@
+{
+  "tool": "GS-TOOL-SXLOCK",
+  "release": "R48",
+  "date": "2026-11-26",
+  "base_and_rollback": "a235974a0b52a25de31c094fe988feb4182470f4",
+  "branch": "camlock-v1.6-insertion-controls-20261126",
+  "owner_scope": "The November 26 request identifies the native SxLock Toolbox/effect editor in screenshots alongside the CamLock duration correction.",
+  "changes": [
+    "Compact filenames and settings labels",
+    "Audition Play/Pause mirrors actual audio state",
+    "Movable panels and visible keyboard-accessible grips",
+    "Top-level editable IN/OUT frames and current-frame navigation",
+    "Direct Edit insertion for every placed sound and visual",
+    "Source IN/OUT, 0.1x\u20138x item speed and explicit OUT trim/fit",
+    "Optional saved metadata preserves older 1x timing; preview, MP4 and WAV share sound mapping"
+  ],
+  "verification": {
+    "node_audio_mapping_checks": 4,
+    "existing_mixer_checks": 2,
+    "browser_checks": 7,
+    "browser_harness": "tests/insertion-browser.html",
+    "actual_mp4": {
+      "duration_seconds": 4,
+      "bytes": 474719,
+      "measured_cycles_in_100ms_at_2x": 87,
+      "expected_cycles": 88,
+      "visual_trim_pixel_mean_error": 1.0444502314814814
+    },
+    "phone_widths": [
+      320,
+      390,
+      430
+    ],
+    "portable_project_recovery": "Audio rate/sourceEnd and visual sourceOffset retained",
+    "physical_phone": "Not exercised"
+  },
+  "storage": "Original media, recording cache, recovery keys and Scribe storage retained. No media upload or deletion.",
+  "deployment": "This receipt records source and predeployment checks. Consult the associated pull request and Pages workflow for live deployment evidence."
+}

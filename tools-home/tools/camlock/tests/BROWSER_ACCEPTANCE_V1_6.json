@@ -1,0 +1,32 @@
+{
+  "release": "V1.6",
+  "environment": "Managed Chromium browser; generated 4-second 180x320 25fps H.264/AAC source",
+  "status": "passed",
+  "checks": 33,
+  "new_checks": [
+    "Duration prepopulation and matching maximum",
+    "Editable insertion frame, remaining-time clamp and panel drag",
+    "Working Play/Pause during Action; frame navigation remains disabled"
+  ],
+  "retained_checks": [
+    "Stage and camera independence",
+    "Wizard lock/cancellation and raised placement after closing a moved card",
+    "Live touch insertion without seek/restart",
+    "Multitouch role changes and joystick",
+    "320/390/430px layouts",
+    "Source Scribe",
+    "Whole-source and explicitly trimmed MP4/audio",
+    "Pixel comparison and black WebM",
+    "Joystick-free output"
+  ],
+  "sample_metrics": {
+    "output_frames": 100,
+    "source_duration_seconds": 4,
+    "tone_rms": 0.10595936179486276,
+    "silent_rms": 0
+  },
+  "limitations": [
+    "Simulated touch and desktop browser, not physical Android/iOS",
+    "Authenticated Scribe cloud sync not exercised"
+  ]
+}
