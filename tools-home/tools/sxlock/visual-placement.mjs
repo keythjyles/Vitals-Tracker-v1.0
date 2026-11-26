@@ -3,11 +3,12 @@ import {fadeGainAt, mixClipAudio, mountClipAudio, savedFades, scheduleClipGain, 
 import {scaledTarget} from '../caplock/focus-controls.mjs?v=25';
 import {hasSourceAudio, readSourceAudio} from '../caplock/source-audio.mjs?v=36';
 import {ALL_FORMATS, BlobSource, Input, VideoSampleSink} from './vendor/mediabunny-1.62.1-gs1.mjs';
+import {mountPanelDrag} from '../../shared/panel-drag.mjs?v=1';
 
 const EPS = .000001;
 const activeAt = (item,time)=>time>=item.start-EPS && time<item.start+item.duration-EPS;
 const rateOf = item=>item.sourceDuration ? item.sourceDuration/item.duration : 1;
-const sourceAt = (item,time)=>Math.max(0,(time-item.start)*rateOf(item));
+const sourceAt = (item,time)=>(item.sourceOffset||0)+Math.max(0,(time-item.start)*rateOf(item));
 const isVideo = file=>!!file&&(file.type.startsWith('video/')||/\.(mp4|webm|mov|m4v)$/i.test(file.name));
 const isImage = file=>!!file&&(file.type.startsWith('image/')||/\.(png|webp|jpg|jpeg|gif|avif)$/i.test(file.name));
 const isVisual = file=>isVideo(file)||isImage(file);
@@ -29,6 +30,7 @@ export function setupVisualPlacement({stage,video,playhead,duration,playing,fps,
  stage.append(layer);
  const panel = $('visualSettings');
  const showSettings = mountInsertionSettings(panel);
+ mountPanelDrag(panel,panel.querySelector('.gs-insertion-header'));
  let placements = [], entries = [], request = 0, selected = null, moving = false;
  let drag, selectedHasAudio;
  const currentFrame = ()=>Math.round(playhead()*fps());
@@ -92,7 +94,7 @@ export function setupVisualPlacement({stage,video,playhead,duration,playing,fps,
    handle.hidden = true;
    const url = URL.createObjectURL(file);
    if(isVideo(file))Object.assign(node,{muted:true,playsInline:true,preload:'metadata',preservesPitch:false});
-   node.addEventListener(isVideo(file)?'loadedmetadata':'load',sync);
+   node.addEventListener(isVideo(file)?'loadedmetadata':'load',()=>{if(isVideo(file)&&Number.isFinite(node.duration))placement.sourceLength??=node.duration;sync();});
    node.src = url;
    wrap.append(node,handle);
    layer.append(wrap);
@@ -204,7 +206,7 @@ export function setupVisualPlacement({stage,video,playhead,duration,playing,fps,
   if(sequence!==request)return;
   const frameRate=fps();
   const start=mode==='append'||startOverride!=null?time:Math.round(time*frameRate)/frameRate;
-  const item = {id:crypto.randomUUID(),fileId:id,name:file.name,start,duration:length,opacity:mode==='append'?1:.5,mode};
+  const item = {id:crypto.randomUUID(),fileId:id,name:file.name,start,duration:length,sourceLength:length,sourceOffset:0,opacity:mode==='append'?1:.5,mode};
   placements.push(item);
   reconnect();
   if(mode==='append')edit(start);
@@ -221,6 +223,11 @@ export function setupVisualPlacement({stage,video,playhead,duration,playing,fps,
   $('visualOpacity').value = item.opacity*100;
   $('visualOpacityValue').textContent = Math.round(item.opacity*100)+'%';
   $('visualMove').setAttribute('aria-pressed',String(moving));
+  $('visualRate').value=rateOf(item);
+  const videoItem=isVideo(fileById(item.fileId));
+  $('visualRate').disabled=!videoItem;$('visualOutMode').disabled=!videoItem;$('visualSourceTrim').hidden=!videoItem;
+  $('visualSourceIn').value=item.sourceOffset||0;
+  $('visualSourceOut').value=(item.sourceOffset||0)+(item.sourceDuration??item.duration);
   refreshClipAudio();
  }
  function openSettings(id) {
@@ -261,8 +268,11 @@ export function setupVisualPlacement({stage,video,playhead,duration,playing,fps,
    if(!file)throw Error('Reconnect the clip to change its OUT.');
    if(isVideo(file)){
     const sourceDuration = item.sourceDuration ?? item.duration;
-    fitInsertionRate(sourceDuration,span);
-    item.sourceDuration = sourceDuration;
+    if($('visualOutMode').value==='trim'){
+     const selectedSpan=span*rateOf(item),limit=item.sourceLength??(item.sourceOffset||0)+sourceDuration;
+     if((item.sourceOffset||0)+selectedSpan>limit+EPS)throw Error('OUT exceeds the source at this speed. Choose Fit source to OUT.');
+     item.sourceDuration=selectedSpan;
+    }else{fitInsertionRate(sourceDuration,span);item.sourceDuration = sourceDuration;}
    }
    item.duration=span;
   });
@@ -290,6 +300,18 @@ export function setupVisualPlacement({stage,video,playhead,duration,playing,fps,
   sync();
  };
  $('visualFit').onclick=()=>changeSetting(item=>{delete item.x;delete item.y;delete item.width;});
+ $('visualRate').onchange=()=>changeSetting(item=>{
+  const rate=$('visualRate').valueAsNumber;
+  if(!Number.isFinite(rate)||rate<.1||rate>8)throw Error('Item speed must be from 0.1× to 8×.');
+  const span=item.sourceDuration??item.duration;
+  item.sourceDuration=span;item.duration=span/rate;
+ });
+ for(const id of ['visualSourceIn','visualSourceOut'])$(id).onchange=()=>changeSetting(item=>{
+  const start=$('visualSourceIn').valueAsNumber,end=$('visualSourceOut').valueAsNumber,rate=rateOf(item);
+  const limit=item.sourceLength??(item.sourceOffset||0)+(item.sourceDuration??item.duration);
+  if(!Number.isFinite(start)||!Number.isFinite(end)||start<0||end<=start||end>limit+EPS)throw Error('Choose source IN before source OUT, inside the clip.');
+  item.sourceLength=limit;item.sourceOffset=start;item.sourceDuration=end-start;item.duration=(end-start)/rate;
+ });
  $('visualOpacity').oninput=event=>{
   if(selected&&canEdit()){
    selected.opacity=Number(event.target.value)/100;
@@ -318,6 +340,8 @@ export function setupVisualPlacement({stage,video,playhead,duration,playing,fps,
     const {fadeIn,fadeOut,...item}=p;
     Object.assign(item,savedFades(p));
     if(!Number.isFinite(item.sourceDuration)||rateOf(item)<.1||rateOf(item)>8)delete item.sourceDuration;
+    if(!Number.isFinite(item.sourceOffset)||item.sourceOffset<0)delete item.sourceOffset;
+    if(!Number.isFinite(item.sourceLength)||item.sourceLength<=0)delete item.sourceLength;
     for(const key of ['volume','previousVolume'])if(!validClipGain(item[key]))delete item[key];
     for(const [key,min,max] of [['x',-100,200],['y',-100,200],['width',5,400]]){
      if(!Number.isFinite(item[key])||item[key]<min||item[key]>max)delete item[key];
@@ -338,9 +362,9 @@ export function setupVisualPlacement({stage,video,playhead,duration,playing,fps,
    try {
     const track = await input.getPrimaryAudioTrack();
     if(!track)continue;
-    const end = Math.min(item.sourceDuration??item.duration,await track.computeDuration());
-    if(end<=0)continue;
-    const buffer = await readSourceAudio(track,check,{start:0,end});
+    const start=item.sourceOffset||0,end = Math.min(start+(item.sourceDuration??item.duration),await track.computeDuration());
+    if(end<=start)continue;
+    const buffer = await readSourceAudio(track,check,{start,end});
     if(buffer)tracks.push({buffer,start:item.start,end:item.start+item.duration,rate:rateOf(item),volume:item.volume,...savedFades(item)});
    } finally {
     input.dispose();
@@ -409,3 +433,4 @@ export function setupVisualPlacement({stage,video,playhead,duration,playing,fps,
  }
  return {isVisual,place,restore,renameFile,reconnect,sync,outlet,placements:()=>placements,openSettings,remove,prepareFrameRender,prepareAudioMix};
 }
+

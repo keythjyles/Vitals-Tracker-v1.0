@@ -1,16 +1,19 @@
-import {newProject,initialCamera,stateAt,Action,CameraTouch,CameraJoystick,drawScene,pathDocument,importDocument,clamp,snapSquare,clipRange} from './core.mjs?v=6';
+import {newProject,initialCamera,stateAt,Action,CameraTouch,CameraJoystick,drawScene,pathDocument,importDocument,clamp,snapSquare,clipRange,actionLimit,fitActionDuration} from './core.mjs?v=7';
 import {inspectSource,renderCamera} from './render.mjs?v=2';
 import {mountPlayerScribe} from '../../shared/player-scribe.mjs?v=34';
 import {mountClipAudio,fadeGainAt} from '../../shared/clip-audio.mjs?v=3';
 import {PLAYER_PROFILE} from '../../shared/player-shell.mjs?v=34';
+import {mountPanelDrag} from '../../shared/panel-drag.mjs?v=1';
 
 const $=id=>document.getElementById(id),video=$('sourceVideo'),canvas=$('picture'),ctx=canvas.getContext('2d',{alpha:false,colorSpace:'srgb'}),view=$('viewport');
 const KEY='gs-camlock-project-v1'+(new URLSearchParams(location.search).get('qa')==='acceptance'?'-qa':''),COPY=v=>JSON.parse(JSON.stringify(v));
-const VERSION='V1.5',DOCK_KEY=KEY+'-player-docked';
+const VERSION='V1.6',DOCK_KEY=KEY+'-player-docked';
 let project=newProject(),file=null,sourceURL=null,camera=initialCamera(),action=null,reverseTimer=null,busy=false,renderResult=null,renderURL=null,cancelled=false;
 let loading=0,playRequest=0,raf=0,sampleTimer=null,lastTime=0,stageGesture=null,stagePoints=new Map(),dirty=false;
 let playerDocked=true,topMenuOpen=false;
 let cardPanels=[],wizard=null;
+let insertionFrame=null;
+const resetCardPosition=mountPanelDrag($('settingsCard'),$('settingsCard').querySelector('.card-heading'));
 let joystickPointer=null;const joystickKeys=new Set();
 const say=text=>$('status').textContent=text;
 const error=e=>{say(e.message||String(e));console.error(e);};
@@ -27,6 +30,15 @@ function updateReadouts(){
  $('clock').dataset.frame=frame();$('clock').dataset.time=t;$('clock').dataset.fps=project.fps;
  $('sourceTiming').textContent=timing;$('wizardSourceTiming').textContent=timing;$('wizardClock').textContent=$('clock').textContent;
  $('wizardSourceName').textContent=project.source?.name||'No source';$('outputRangeInfo').textContent=$('wizardOutputRange').textContent=outputRangeText();
+ if(document.activeElement!==$('actionFrame'))$('actionFrame').value=insertionFrame??frame();
+}
+function durationOrigin(){return insertionFrame!==null?insertionFrame/project.fps:project.segments.findLast(s=>s.start<=(video.currentTime||0)+1e-7)?.origin??project.start;}
+function durationBounds(){
+ const limit=actionLimit(project,durationOrigin());
+ $('actionDuration').max=limit||86400;$('actionDuration').min=limit>0?Math.min(.04,limit):.04;
+ $('actionFrame').max=Math.max(0,Math.ceil((project.source?.duration||0)*project.fps)-1);
+ $('actionLimit').textContent=project.source?'Available from insertion: '+seconds(limit):'Load a source to set the duration.';
+ return limit;
 }
 function persist(){project.release=VERSION;project.scribe=$('gs-notes')?.value||'';try{localStorage.setItem(KEY,JSON.stringify(project));dirty=false;}catch{say('Draft storage is full. Save project before closing.');}}
 function invalidate(){dirty=true;if(renderResult){renderResult=null;if(renderURL)URL.revokeObjectURL(renderURL);renderURL=null;$('renderInfo').textContent='Camera edit changed. Render again to export this version.';}updateControls();}
@@ -41,7 +53,7 @@ function updateControls(){
  $('wizard').disabled=busy||!ready||recording;
  $('action').textContent=recording?'Ⅱ Pause':'● Action';$('action').setAttribute('aria-label',recording?'Pause Action':'Start Action');
  $('lockStage').textContent=project.stage.locked?'Unlock stage':'Lock stage';$('lockStage').setAttribute('aria-pressed',String(project.stage.locked));
- if(recording)for(const b of $('rail').querySelectorAll('button'))if(b.id!=='action')b.disabled=true;
+ if(recording)for(const b of $('rail').querySelectorAll('button'))if(!['action','play'].includes(b.id))b.disabled=true;
  for(const b of document.querySelectorAll('.transport button,.transport input'))b.disabled=busy||!ready||recording;
  $('settings').inert=busy||recording;$('sourceDrawer').inert=busy||recording;$('scribe').inert=busy||recording;
  $('settingsCard').inert=busy||recording;
@@ -52,7 +64,7 @@ function updateControls(){
  $('dockHandle').disabled=busy||recording;
  $('recording').hidden=!recording;view.classList.toggle('recording',recording);
  $('modeLabel').textContent=!ready?'LOAD SOURCE':wizard?'WIZARD SETUP':project.stage.locked?($('touchArmed').checked&&!$('settingsCard').open?(video.paused?'HOT · TOUCH TO START':'ARMED · TOUCH TO INSERT'):'CAMERA READY'):'STAGE SETUP';
- $('play').textContent=!video.paused&&!recording?'Ⅱ Pause':'▶ Play';
+ $('play').textContent=!video.paused?'Ⅱ Pause':'▶ Play';$('play').setAttribute('aria-label',!video.paused?'Pause':'Play');
  $('emptyLoad').hidden=!!file||busy;
  $('joystick').hidden=!ready||!project.stage.locked||!project.controls.joystick||!!wizard||$('settingsCard').open;
  $('joystick').disabled=busy;
@@ -76,6 +88,7 @@ function redraw(){
 }
 function fitCanvas(){const s=project.stage,ratio=s.width/s.height;view.style.setProperty('--ratio',s.width+'/'+s.height);view.style.setProperty('--aspect',ratio);canvas.width=Math.round(Math.min(720,s.width)/2)*2;canvas.height=Math.round(canvas.width/ratio);redraw();}
 function syncFields(){
+ fitActionDuration(project,durationOrigin());durationBounds();
  for(const el of document.querySelectorAll('[data-stage]')){const value=project.stage[el.dataset.stage];if(el.type==='checkbox')el.checked=value;else el.value=value;}
  for(const [id,value] of Object.entries({outputWidth:project.stage.width,outputHeight:project.stage.height,opening:project.start,zoomEnd:project.settings.zoom.end,zoomDuration:project.settings.zoom.duration,zoomCurve:project.settings.zoom.curve,rotationDegrees:Math.abs(project.settings.rotation.degrees),rotationDirection:Math.sign(project.settings.rotation.degrees)||1,rotationDuration:project.settings.rotation.duration,rotationCurve:project.settings.rotation.curve,actionDuration:project.settings.duration,speed:project.performanceSpeed,fps:project.fps}))$(id).value=value;
  $('rotationEnabled').checked=!!project.settings.rotation.enabled;$('rotationSnap').checked=project.settings.rotation.snap!==false;
@@ -102,8 +115,10 @@ async function begin(){
  if(active())return;if(!sourceReady()||!project.stage.locked||busy)throw Error('Load a source and lock the stage first.');
  stopReverse();
  const at=video.currentTime,wasPlaying=!video.paused;
+ const insert=wasPlaying||insertionFrame!==null;
+ fitActionDuration(project,insert?at:durationOrigin());
  const previousPath=project.path,previousSegments=COPY(project.segments);
- action=new Action(project,at,project.source.duration,{insert:wasPlaying});camera={...action.state};lastTime=at;joystick.reset(at);invalidate();
+ action=new Action(project,at,project.source.duration,{insert});insertionFrame=null;camera={...action.state};lastTime=at;joystick.reset(at);invalidate();
  const request=++playRequest;video.playbackRate=project.performanceSpeed;audioPreview();updateControls();
  // Source time is still the only trajectory clock. Keep sampling if canvas rAF is throttled.
  clearInterval(sampleTimer);sampleTimer=setInterval(sample,1000/60);
@@ -120,7 +135,8 @@ function loop(){cancelAnimationFrame(raf);function tick(){if(active())sample();e
   audioPreview();redraw();if(active()||!video.paused)raf=requestAnimationFrame(tick);
  }raf=requestAnimationFrame(tick);}
 async function play(){
- if(!sourceReady()||busy||active())return;
+ if(active()){stop();return;}
+ if(!sourceReady()||busy)return;
  stopReverse();if(!video.paused){video.pause();updateControls();return;}
  if(video.currentTime>=reviewedEnd()-1e-5){say('At the end. Press Start or choose a frame to review.');return;}
  if(video.currentTime<clipRange(project).start)seek(clipRange(project).start);
@@ -194,7 +210,8 @@ async function openSource(candidate,{reconnect=false}={}){
   const nextURL=URL.createObjectURL(candidate),testVideo=document.createElement('video');testVideo.preload='auto';testVideo.muted=true;testVideo.src=nextURL;
   try{await new Promise((resolve,reject)=>{testVideo.onloadeddata=resolve;testVideo.onerror=()=>reject(Error('This browser cannot decode the source picture.'));});}catch(e){URL.revokeObjectURL(nextURL);throw e;}
   testVideo.removeAttribute('src');testVideo.load();stopReverse();video.pause();
-  closeSettingsCard();if(!matches){if(project.source)jsonArchive();project=newProject();camera=initialCamera();}
+  closeSettingsCard();if(!matches){if(project.source)jsonArchive();project=newProject();project.settings.durationAutomatic=true;camera=initialCamera();}
+  insertionFrame=null;
   project.source={name:candidate.name,size:candidate.size,lastModified:candidate.lastModified,sha256:digest,...meta};
   file=candidate;if(sourceURL)URL.revokeObjectURL(sourceURL);sourceURL=nextURL;
   await new Promise((resolve,reject)=>{video.onloadeddata=resolve;video.onerror=()=>reject(Error('The source failed to load.'));video.src=sourceURL;video.load();});
@@ -214,7 +231,7 @@ $('documentFile').onchange=guard(async e=>{
  if(data.schema==='CamLockPath-1.0'&&file&&next.path.at(-1)?.t>project.source.duration+1e-5)throw Error('This source is shorter than the saved path.');
  stop();jsonArchive();
  if(data.schema==='CamLockProject-1.0'&&next.source?.sha256!==project.source?.sha256){file=null;video.removeAttribute('src');video.load();if(sourceURL)URL.revokeObjectURL(sourceURL);sourceURL=null;}
- project=next;camera=stateAt(project.path,project.start);$('sourceName').textContent=file?file.name:project.source?.name||'No source';
+ insertionFrame=null;project=next;camera=stateAt(project.path,project.start);$('sourceName').textContent=file?file.name:project.source?.name||'No source';
  await Promise.resolve(); // Let the original Scribe bind its source draft before restoring project notes.
  if($('gs-notes')){$('gs-notes').value=project.scribe;$('gs-notes').dispatchEvent(new Event('input',{bubbles:true}));}
  syncFields();invalidate();if(file)seek(project.start);persist();say(file?'Saved instructions opened.':'Saved instructions opened. Load the original video to reconnect.');
@@ -235,16 +252,23 @@ $('aspect').onchange=()=>{if(project.stage.locked)return;const size=ratios[$('as
 for(const id of ['outputWidth','outputHeight'])$(id).onchange=guard(()=>{if(project.stage.locked)return;const width=$('outputWidth').valueAsNumber,height=$('outputHeight').valueAsNumber;if(![width,height].every(n=>Number.isInteger(n)&&n>=2&&n<=7680&&n%2===0)){syncFields();throw Error('Output dimensions must be even whole numbers from 2 to 7680.');}project.stage.width=width;project.stage.height=height;invalidate();syncFields();persist();});
 function setOpening(t){if(project.stage.locked)return;if(!Number.isFinite(t)||t<0||t>=project.source?.duration)throw Error('Choose an opening inside the source.');project.start=t;invalidate();syncFields();seek(t);persist();}
 $('opening').onchange=guard(()=>setOpening($('opening').valueAsNumber));$('openingHere').onclick=guard(()=>setOpening(video.currentTime));
-function settingsChanged(){
- const duration=$('actionDuration').valueAsNumber,z=$('zoomEnd').valueAsNumber/100,zd=$('zoomDuration').valueAsNumber,rd=$('rotationDuration').valueAsNumber,degrees=$('rotationDegrees').valueAsNumber;
+function settingsChanged(event){
+ let duration=$('actionDuration').valueAsNumber;const z=$('zoomEnd').valueAsNumber/100,zd=$('zoomDuration').valueAsNumber,rd=$('rotationDuration').valueAsNumber,degrees=$('rotationDegrees').valueAsNumber;
  if(![duration,z,zd,rd].every(n=>Number.isFinite(n)&&n>0)||!Number.isFinite(degrees)||degrees<0||z>10000||duration>86400){syncFields();throw Error('Enter valid positive durations and magnification.');}
- project.settings={duration,zoom:{end:z,duration:zd,curve:$('zoomCurve').value},rotation:{enabled:$('rotationEnabled').checked,snap:$('rotationSnap').checked,degrees:degrees*Number($('rotationDirection').value),duration:rd,curve:$('rotationCurve').value}};
+ const limit=durationBounds();if(limit>0)duration=Math.min(duration,limit);$('actionDuration').value=duration;
+ project.settings={duration,durationAutomatic:event?.target?.id==='actionDuration'?false:project.settings.durationAutomatic,zoom:{end:z,duration:zd,curve:$('zoomCurve').value},rotation:{enabled:$('rotationEnabled').checked,snap:$('rotationSnap').checked,degrees:degrees*Number($('rotationDirection').value),duration:rd,curve:$('rotationCurve').value}};
  $('zoomMove').value=z===1?'hold':z>1?'push':'pull';
  project.performanceSpeed=Number($('speed').value);project.fps=Number($('fps').value);invalidate();redraw();persist();
 }
 for(const id of ['zoomEnd','zoomDuration','zoomCurve','rotationEnabled','rotationSnap','rotationDegrees','rotationDirection','rotationDuration','rotationCurve','actionDuration','speed','fps'])$(id).onchange=guard(settingsChanged);
 $('zoomMove').onchange=guard(()=>{const move=$('zoomMove').value,value=$('zoomEnd').valueAsNumber;if(move==='hold')$('zoomEnd').value=100;else if(move==='push'&&value<=100)$('zoomEnd').value=150;else if(move==='pull'&&value>=100)$('zoomEnd').value=70;settingsChanged();});
 $('touchArmed').onchange=updateControls;$('mutePerformance').onchange=audioPreview;
+$('actionFrame').onchange=guard(()=>{
+ const value=$('actionFrame').valueAsNumber,max=Math.ceil(project.source.duration*project.fps)-1;
+ if(!Number.isSafeInteger(value)||value<0||value>max)throw Error('Choose an insertion frame inside the video.');
+ stop();insertionFrame=value;seek(value/project.fps);syncFields();
+});
+$('actionHere').onclick=()=>{insertionFrame=frame();syncFields();};
 function trimChanged(){
  if(active()||busy||!sourceReady())return;
  const start=$('trimStart').valueAsNumber,end=$('trimEnd').valueAsNumber;
@@ -272,7 +296,8 @@ function restoreCardPanels(){for(const panel of cardPanels){panel.open=false;$('
 function showCardPanels(ids){restoreCardPanels();for(const id of ids){const panel=$(id);panel.open=!['stage','rotation'].includes(id);$('cardBody').append(panel);cardPanels.push(panel);}}
 function showSettingsCard(){if(!$('settingsCard').open)$('settingsCard').show();updateControls();}
 function closeSettingsCard(completed=false){
- if(wizard&&!completed){const previous=wizard.previous;project.stage=previous.stage;project.settings=previous.settings;project.start=previous.start;project.trim=previous.trim;project.performanceSpeed=previous.speed;$('touchArmed').checked=previous.armed;wizard=null;syncFields();seek(previous.time);persist();}
+ resetCardPosition();
+ if(wizard&&!completed){const previous=wizard.previous;project.stage=previous.stage;project.settings=previous.settings;project.start=previous.start;project.trim=previous.trim;project.performanceSpeed=previous.speed;insertionFrame=previous.insertionFrame??null;$('touchArmed').checked=previous.armed;wizard=null;syncFields();seek(previous.time);persist();}
  wizard=null;restoreCardPanels();$('settingsCard').close();$('settingsCard').classList.remove('wizard-mode');updateControls();
 }
 function openSettingsCard(id){
@@ -296,8 +321,8 @@ function showWizardStep(){
 }
 $('wizard').onclick=()=>{
  if(!sourceReady()||busy||active())return;stop();closeSettingsCard();
- wizard={step:0,openingUnlocked:false,previous:{stage:COPY(project.stage),settings:COPY(project.settings),start:project.start,trim:COPY(project.trim),speed:project.performanceSpeed,armed:$('touchArmed').checked,time:video.currentTime}};
- const z=project.settings.zoom.end,r=project.settings.rotation.enabled;$('wizardEffect').value=r?(z===1?'rotate':'combined'):(z===1?'direction':z>1?'push':'pull');
+ wizard={step:0,openingUnlocked:false,previous:{stage:COPY(project.stage),settings:COPY(project.settings),start:project.start,trim:COPY(project.trim),speed:project.performanceSpeed,insertionFrame,armed:$('touchArmed').checked,time:video.currentTime}};
+ insertionFrame=null;const z=project.settings.zoom.end,r=project.settings.rotation.enabled;$('wizardEffect').value=r?(z===1?'rotate':'combined'):(z===1?'direction':z>1?'push':'pull');
  seek(project.start);showWizardStep();
 };
 $('wizardEffect').onchange=guard(()=>{
@@ -320,7 +345,7 @@ $('wizardNext').onclick=guard(async()=>{
  if(!wizard)return;
  for(const input of $('cardBody').querySelectorAll('input'))if(!input.disabled&&!input.reportValidity())return;
  if(wizard.step<2){wizard.step++;showWizardStep();return;}
- settingsChanged();project.stage.locked=true;$('touchArmed').checked=true;closeSettingsCard(true);seek(project.start);persist();updateControls();say('Camera hot · touch the viewport or press Action.');
+ settingsChanged();project.stage.locked=true;$('touchArmed').checked=true;closeSettingsCard(true);seek(insertionFrame!==null?insertionFrame/project.fps:project.start);persist();updateControls();say('Camera hot · touch the viewport or press Action.');
 });
 
 $('saveStage').onclick=()=>jsonDownload({schema:'CamLockStage-1.0',stage:COPY(project.stage),start:project.start},'Stage');
@@ -373,3 +398,4 @@ syncFields();
 try{playerDocked=localStorage.getItem(DOCK_KEY)!=='false';}catch{}
 topMenuOpen=!playerDocked;applyPlayerDock();
 if($('scribe').open)openSettingsCard('scribe');
+

@@ -1,4 +1,4 @@
-// CamLock V1.5. World positions use viewport widths/heights; camera is independent of stage.
+// CamLock V1.6. World positions use viewport widths/heights; camera is independent of stage.
 export const SCHEMA = 'CamLockProject-1.0';
 export const COORDINATES = Object.freeze({version:1,origin:'viewport-center',x:'viewport-width',y:'viewport-height',z:'multiplier-of-locked-stage',r:'unwrapped-camera-degrees-clockwise',time:'absolute-source-seconds',interpolation:'linear-no-overshoot'});
 export const clamp = (n,a,b) => Math.max(a,Math.min(b,n));
@@ -12,13 +12,21 @@ export function ease(name,p) {
  return p;
 }
 export function newProject() {
- return {schema:SCHEMA,tool:'GS-TOOL-CAMLOCK',release:'V1.5',createdAt:new Date().toISOString(),source:null,trim:null,
+ return {schema:SCHEMA,tool:'GS-TOOL-CAMLOCK',release:'V1.6',createdAt:new Date().toISOString(),source:null,trim:null,
   coordinates:{...COORDINATES},stage:{x:0,y:0,scale:1,r:0,mirror:false,flip:false,width:1080,height:1920,locked:false},
-  start:0,settings:{duration:12,zoom:{end:1,duration:9,curve:'constant'},rotation:{enabled:false,snap:true,degrees:0,duration:4,curve:'constant'}},
+  start:0,settings:{duration:12,durationAutomatic:false,zoom:{end:1,duration:9,curve:'constant'},rotation:{enabled:false,snap:true,degrees:0,duration:4,curve:'constant'}},
   controls:{touchGain:.25,joystick:false,joystickSpeed:.1},
   audio:{volume:1,previousVolume:1,fadeIn:0,fadeOut:0},performanceSpeed:1,fps:25,path:[],segments:[],scribe:''};
 }
 export function initialCamera(){return {x:0,y:0,z:1,r:0};}
+export function actionLimit(project, origin=project.start) {
+ return Math.max(0,(project.source?.duration??0)-origin);
+}
+export function fitActionDuration(project, origin=project.start) {
+ const limit=actionLimit(project,origin);
+ if(limit>0)project.settings.duration=project.settings.durationAutomatic?limit:Math.min(project.settings.duration,limit);
+ return limit;
+}
 export function clipRange(project){
  const start=project.trim?.start??0,end=project.trim?.end??project.source?.duration??0;
  return {start,end,duration:Math.max(0,end-start)};
@@ -48,9 +56,10 @@ export class Action {
   const previous=project.segments.findLast(s=>s.start<=at+1e-7);
   this.project=project;this.start=clamp(at,0,sourceEnd);
   this.origin=insert?this.start:finite(previous?.origin)?previous.origin:project.start;
-  this.end=Math.min(sourceEnd,this.origin+project.settings.duration);
+  const length=Math.min(project.settings.duration,sourceEnd-this.origin);
+  this.end=Math.min(sourceEnd,this.origin+length);
   if(this.start<this.origin-1e-7||this.start>=this.end-1e-7)throw Error('Choose a source time inside the Action range, or Play and touch to insert here.');
-  this.base=stateAt(project.path,this.start);this.state={...this.base};this.settings=clone(project.settings);
+  this.base=stateAt(project.path,this.start);this.state={...this.base};this.settings=clone(project.settings);this.settings.duration=length;
   this.manual=0;this.rawManual=0;this.manualTouched=false;this.active=true;
   // Only Action truncates. Navigation and review never mutate instructions.
   project.path=project.path.filter(s=>s.t<this.start);
@@ -149,7 +158,7 @@ function settingsCheck(s){
  for(const part of [s.zoom,s.rotation])if(!part||!finite(part.duration)||part.duration<=0||!['constant','accelerating','decelerating','ease'].includes(part.curve))throw Error('Invalid programmed movement.');
  if(!finite(s.zoom.end)||s.zoom.end<=0||s.zoom.end>10000||!finite(s.rotation.degrees))throw Error('Invalid programmed movement values.');
  for(const key of ['enabled','snap'])if(s.rotation[key]!==undefined&&typeof s.rotation[key]!=='boolean')throw Error('Invalid rotation switch.');
- const out=clone(s);out.rotation.enabled??=s.rotation.degrees!==0;out.rotation.snap??=true;return out;
+ const out=clone(s);out.durationAutomatic=s.durationAutomatic===true;out.rotation.enabled??=s.rotation.degrees!==0;out.rotation.snap??=true;return out;
 }
 export function importDocument(input,current) {
  if(!input||!['CamLockProject-1.0','CamLockPath-1.0','CamLockStage-1.0'].includes(input.schema))throw Error('Choose a CamLock project, stage or camera path.');
@@ -184,5 +193,7 @@ export function importDocument(input,current) {
    out.controls=clone(c);
   }
  }
+ fitActionDuration(out);
  return out;
 }
+

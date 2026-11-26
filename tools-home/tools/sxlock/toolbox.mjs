@@ -2,6 +2,7 @@ import {clipNameControl, clipThumbnail} from '../../shared/clip-picker.mjs?v=1';
 
 export function setupToolbox({
  openSound, previewSound, editRecording, importAudio, getSound, useCount, persist, pause, stopPreview, busy, visual, editVideoRecording, soundNameButton,
+ audioPlacements=()=>[],editSound=()=>{},isPreviewing=()=>false,fps=()=>25,
 }) {
  const $ = id => document.getElementById(id);
  const sheet = $('toolboxSheet'), host = $('toolboxItems'), preview = $('toolboxPreview'), placed = $('visualPlacements');
@@ -69,6 +70,8 @@ export function setupToolbox({
     button('Use', () => {sheet.close();openSound(id);}, 'Place '+sound.name),
     button('Remove', () => {soundIds.delete(id);render();persist();}, 'Remove '+sound.name+' from Toolbox'),
    ];
+   actions[0].dataset.toolboxPreview=id;
+   if(used)actions.splice(2,0,button('Edit insertion',()=>{sheet.close();editSound(audioPlacements().find(item=>item.soundId===id));},'Edit insertion '+sound.name));
    if (sound.origin === 'microphone') actions.splice(2, 0, button('Edit', () => {sheet.close();editRecording(id);}, 'Edit recording '+sound.name));
    const name=soundNameButton(sound);
    if(used)name.append(document.createTextNode(' · used '+used+'×'));
@@ -125,13 +128,26 @@ export function setupToolbox({
   }
   if (!host.children.length) host.textContent = 'Add files or find sounds online.';
   placed.replaceChildren();
+  for(const item of audioPlacements()){
+   const sound=getSound(item.soundId),label=(sound?.name||'Missing sound')+' · F'+Math.round(item.start*fps())+'–'+Math.ceil((item.start+item.duration)*fps()-1e-6)+' · '+(item.rate||1)+'×';
+   placed.append(row(label,[button('Edit insertion',()=>{sheet.close();editSound(item);},'Edit insertion '+(sound?.name||'sound'))]));
+  }
   for (const item of visual.placements()) {
    placed.append(row(item.name+' · '+item.start.toFixed(3)+' s',[
     button('Edit insertion',()=>{sheet.close();visual.openSettings(item.id);},'Edit insertion '+item.name),
     button('Remove layer',()=>visual.remove(item.id),'Remove layer '+item.name),
    ]));
   }
+  $('toolboxInsertedTitle').hidden=!placed.children.length;
+  paintPreview();
  }
+ function paintPreview(){
+  for(const button of host.querySelectorAll('[data-toolbox-preview]')){
+   const on=!!isPreviewing(button.dataset.toolboxPreview);
+   button.textContent=on?'Ⅱ Pause':'▶ Play';button.setAttribute('aria-pressed',String(on));
+  }
+ }
+ document.addEventListener('sxlock-audition-change',paintPreview);
  function open() {
   if (busy()) return;
   pause();
@@ -187,3 +203,4 @@ export function setupToolbox({
   render, open,
  };
 }
+

@@ -85,3 +85,12 @@ Opening parameters start locked and collapsed in Wizard and the manual opening c
 ## CamLock V1.5 — armed bed-contact insertion
 
 Armed Play runs the source normally and records nothing until video-bed contact. Contact inserts Action at the current source timestamp without a seek, restart or pose jump; programmed and master durations start at contact. Keep each segment's absolute origin for paused correction and saved-project/path recovery. Preserve the opening composition/timestamp, all earlier camera instructions, whole-source rendering, audio and existing tools. Disarmed touches leave review unchanged. [Verification and rollback](tools/camlock/RELEASE_V1_5.json).
+
+
+## CamLock V1.6 / SxLock R48 — editable timing and movable panels
+
+The November 26 owner request covers CamLock's duration and the pictured SxLock Toolbox/effect controls. CamLock prepopulates Action length from available source time, clamps it to the insertion origin's remaining time, exposes an insertion frame and keeps Pause usable during Action. Existing path, opening and rendering contracts remain intact.
+
+SxLock presents insertion IN/OUT, source trim and item speed. Moving IN preserves the span. Audio OUT defaults to Trim at current speed; visual OUT retains its prior Fit source to OUT default. Each can explicitly choose the other behavior. Changing speed recalculates OUT from the selected source span. Source trim and rate are saved independently from the original media; preview, video export and WAV share the sound mapping. Toolbox provides direct settings for every placed sound as well as visual layers, compact filenames and real preview Play/Pause.
+
+Only these two tools consume the new panel-drag helper. Drag by the heading/grip or move the grip with arrow keys. Constrain cards to the visible viewport and reset their position on close so the wizard reopens high. The locked player profile and other adapters remain unchanged. [CamLock receipt](tools/camlock/RELEASE_V1_6.json); [SxLock receipt](tools/sxlock/INSERTION_CONTROLS_R48.json).

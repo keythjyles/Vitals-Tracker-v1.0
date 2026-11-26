@@ -1,9 +1,9 @@
 name: CamLock camera checks
 on:
   pull_request:
-    paths: ['tools-home/tools/camlock/**', '.github/workflows/camlock-checks.yml']
+    paths: ['tools-home/tools/camlock/**', 'tools-home/shared/panel-drag.mjs', '.github/workflows/camlock-checks.yml']
   push:
-    paths: ['tools-home/tools/camlock/**', '.github/workflows/camlock-checks.yml']
+    paths: ['tools-home/tools/camlock/**', 'tools-home/shared/panel-drag.mjs', '.github/workflows/camlock-checks.yml']
 permissions:
   contents: read
 jobs:
@@ -18,4 +18,5 @@ jobs:
       - run: node --check tools-home/tools/camlock/app.mjs
       - run: node --check tools-home/tools/camlock/render.mjs
       - run: node --check tools-home/tools/camlock/tests/browser.mjs
-      - run: node --test tools-home/tools/camlock/tests/core.test.mjs
+      - run: node --test tools-home/tools/camlock/tests/*.test.mjs
+
