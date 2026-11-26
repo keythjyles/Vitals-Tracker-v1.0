@@ -26,6 +26,7 @@ document.getElementById('run').onclick=async()=>{
   const floating=$('settingsCard'),dragHandle=floating.querySelector('.card-heading'),initial=floating.getBoundingClientRect();
   for(const [type,y]of [['pointerdown',initial.top+10],['pointermove',initial.top-60],['pointerup',initial.top-60]])dragHandle.dispatchEvent(new w.PointerEvent(type,{pointerId:902,pointerType:'touch',button:0,clientX:initial.left+60,clientY:y,bubbles:true}));
   assert(floating.getBoundingClientRect().top<initial.top-20,'CamLock settings panel did not drag');
+  app.seek(2.04);await wait(()=>!v.seeking);assert(Number($('actionFrame').value)===51,'Insertion frame did not follow deliberate source navigation');
   await field('actionFrame',0);await wait(()=>!v.seeking&&app.sourceReady());$('settingsDone').click();
   log('Editable insertion frame, remaining-time clamp and draggable camera panel');
 

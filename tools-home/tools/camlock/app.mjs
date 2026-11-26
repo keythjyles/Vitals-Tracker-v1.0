@@ -108,6 +108,7 @@ function stop(){
 function seek(t){
  if(active()||busy||!file)return;
  video.pause();t=clamp(t,0,Math.max(0,project.source.duration-1/project.fps));
+ if(insertionFrame!==null)insertionFrame=Math.round(t*project.fps);
  camera=stateAt(project.path,t);video.currentTime=t+1e-7;lastTime=t;
  if(!video.seeking)redraw();updateControls();
 }
