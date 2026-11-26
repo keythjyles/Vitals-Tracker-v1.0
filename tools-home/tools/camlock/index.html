@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
- <meta name="theme-color" content="#101924"><title>CamLock · GS-TOOL-CAMLOCK · V1.6</title>
+ <meta name="theme-color" content="#101924"><title>CamLock · GS-TOOL-CAMLOCK · V1.7</title>
  <link rel="stylesheet" href="../../shared/player-shell.css?v=34"><link rel="stylesheet" href="./camlock.css?v=7">
- <script type="module" src="./app.mjs?v=8"></script>
+ <script type="module" src="./app.mjs?v=9"></script>
 </head>
 <body>
  <main>
   <div id="sourceDrawer" role="region" aria-label="Top menu" hidden>
-   <div class="title"><a href="../../" aria-label="Tools home">‹ Tools</a><h1>CamLock <small>GS-TOOL-CAMLOCK · V1.6</small></h1></div>
+   <div class="title"><a href="../../" aria-label="Tools home">‹ Tools</a><h1>CamLock <small>GS-TOOL-CAMLOCK · V1.7</small></h1></div>
    <div class="row" role="group" aria-label="Player docking"><button id="dockPlayer" aria-pressed="true">Dock player</button><button id="unlockPlayer" aria-pressed="false">Unlock player</button></div>
    <div class="row"><button data-section="stage">Opening composition</button><button data-section="audio">Audio</button></div>
    <div class="row"><button id="loadSource">Load source</button><button id="openDocument">Open project / path / stage</button></div>
@@ -31,6 +31,7 @@
      <button id="play" title="Toggle normal-speed review">▶ Play</button>
      <button id="reverse" aria-pressed="false" title="Toggle frame-by-frame reverse review">REV</button>
      <button id="action" class="gold" title="Record a camera performance">● Action</button>
+     <button id="insert" title="Pause here and set up a camera move at this frame">Insert</button>
      <button id="lockStage" title="Lock the opening composition">Lock stage</button>
      <button id="wizard" title="Set the opening, effect and duration, then arm the viewport">Wizard</button>
      <button data-section="direction">Direction</button>
@@ -42,7 +43,7 @@
      <button id="export" disabled>Export</button>
     </nav>
    </div>
-   <div id="reference"><span id="playerIdentity">CamLock · GS-TOOL-CAMLOCK · V1.6</span><span id="sourceName">No source</span><span id="sourceTiming" class="source-timing">Length — · Elapsed — · Remaining —</span><span id="clock">F0 · 0.000s · 25fps</span></div>
+   <div id="reference"><span id="playerIdentity">CamLock · GS-TOOL-CAMLOCK · V1.7</span><span id="sourceName">No source</span><span id="sourceTiming" class="source-timing">Length — · Elapsed — · Remaining —</span><span id="clock">F0 · 0.000s · 25fps</span></div>
    <progress id="timeline" max="1" value="0" aria-label="Source position (read-only)"></progress>
    <div class="transport" aria-label="Frame navigation">
     <button id="back25" title="Back 25 frames">−25</button><button id="back" aria-label="Previous frame; double tap 25 frames">−</button>

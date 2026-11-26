@@ -1,0 +1,42 @@
+{
+  "tool": "GS-TOOL-CAMLOCK",
+  "release": "V1.7",
+  "base_and_rollback": "d3775df2bddc29be3a5251b90c897f8d09314e4d",
+  "branch": "camlock-v1.7-insert-playhead-20261126",
+  "date": "2026-11-26",
+  "problem": "Setup and arming sought project.start instead of preserving the selected playhead.",
+  "behavior": [
+    "Insert pauses and captures current source time",
+    "Editable insertion frame prepopulates from the paused playhead",
+    "Effect/duration setup and arming perform no seek",
+    "The next paused Action gets its own origin at the captured playhead",
+    "Full Wizard preserves selection too",
+    "Cancelling an unchanged selection does not seek",
+    "Opening, raw paths, source bytes and whole-source output are preserved"
+  ],
+  "verification": {
+    "node_checks": 38,
+    "real_media_browser_checks": 36,
+    "paused": {
+      "captured_seconds": 1.2,
+      "frame": 30,
+      "independent_opening_seconds": 0.4,
+      "insert_setup_seeks": 0,
+      "wizard_setup_seeks": 0,
+      "action_start_seconds": 1.2,
+      "action_origin_seconds": 1.2
+    },
+    "playing": {
+      "captured_seconds": 1.921617,
+      "cancel_seeks": 0
+    },
+    "existing_outputs": [
+      "Full-source MP4 with synchronized audio",
+      "Explicit output trim",
+      "Black-space WebM",
+      "Exact saved camera/joystick trajectory"
+    ],
+    "physical_phone": "Not exercised"
+  },
+  "deployment": "Consult the associated pull request and Pages workflow for live publication evidence."
+}

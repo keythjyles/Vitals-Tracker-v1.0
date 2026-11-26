@@ -1,4 +1,4 @@
-import {newProject,initialCamera,stateAt,Action,CameraTouch,CameraJoystick,drawScene,pathDocument,importDocument,clamp,snapSquare,clipRange,actionLimit,fitActionDuration} from './core.mjs?v=7';
+import {newProject,initialCamera,stateAt,Action,CameraTouch,CameraJoystick,drawScene,pathDocument,importDocument,clamp,snapSquare,clipRange,actionLimit,fitActionDuration} from './core.mjs?v=9';
 import {inspectSource,renderCamera} from './render.mjs?v=2';
 import {mountPlayerScribe} from '../../shared/player-scribe.mjs?v=34';
 import {mountClipAudio,fadeGainAt} from '../../shared/clip-audio.mjs?v=3';
@@ -7,7 +7,7 @@ import {mountPanelDrag} from '../../shared/panel-drag.mjs?v=1';
 
 const $=id=>document.getElementById(id),video=$('sourceVideo'),canvas=$('picture'),ctx=canvas.getContext('2d',{alpha:false,colorSpace:'srgb'}),view=$('viewport');
 const KEY='gs-camlock-project-v1'+(new URLSearchParams(location.search).get('qa')==='acceptance'?'-qa':''),COPY=v=>JSON.parse(JSON.stringify(v));
-const VERSION='V1.6',DOCK_KEY=KEY+'-player-docked';
+const VERSION='V1.7',DOCK_KEY=KEY+'-player-docked';
 let project=newProject(),file=null,sourceURL=null,camera=initialCamera(),action=null,reverseTimer=null,busy=false,renderResult=null,renderURL=null,cancelled=false;
 let loading=0,playRequest=0,raf=0,sampleTimer=null,lastTime=0,stageGesture=null,stagePoints=new Map(),dirty=false;
 let playerDocked=true,topMenuOpen=false;
@@ -296,9 +296,9 @@ $('gs-notes').addEventListener('input',()=>{project.scribe=$('gs-notes').value;p
 function restoreCardPanels(){for(const panel of cardPanels){panel.open=false;$('settings').append(panel);}cardPanels=[];}
 function showCardPanels(ids){restoreCardPanels();for(const id of ids){const panel=$(id);panel.open=!['stage','rotation'].includes(id);$('cardBody').append(panel);cardPanels.push(panel);}}
 function showSettingsCard(){if(!$('settingsCard').open)$('settingsCard').show();updateControls();}
-function closeSettingsCard(completed=false){
+function closeSettingsCard(completed=false,{keepPlayhead=false}={}){
  resetCardPosition();
- if(wizard&&!completed){const previous=wizard.previous;project.stage=previous.stage;project.settings=previous.settings;project.start=previous.start;project.trim=previous.trim;project.performanceSpeed=previous.speed;insertionFrame=previous.insertionFrame??null;$('touchArmed').checked=previous.armed;wizard=null;syncFields();seek(previous.time);persist();}
+ if(wizard&&!completed){const previous=wizard.previous;project.stage=previous.stage;project.settings=previous.settings;project.start=previous.start;project.trim=previous.trim;project.performanceSpeed=previous.speed;insertionFrame=previous.insertionFrame??null;$('touchArmed').checked=previous.armed;wizard=null;syncFields();if(!keepPlayhead&&Math.abs(video.currentTime-previous.time)>1e-7)seek(previous.time);persist();}
  wizard=null;restoreCardPanels();$('settingsCard').close();$('settingsCard').classList.remove('wizard-mode');updateControls();
 }
 function openSettingsCard(id){
@@ -316,16 +316,18 @@ const wizardSteps=[
  {prompt:'How long should Action last?',hint:'Choose the camera recording length and performance speed. Output keeps the entire source unless you explicitly enable Trim output.',panels:['duration']},
 ];
 function showWizardStep(){
- const step=wizardSteps[wizard.step];$('cardTitle').textContent='CamLock wizard';$('wizardStep').textContent=['Opening','Effect','Duration'][wizard.step]+' · '+(wizard.step+1)+' of 3';$('wizardPrompt').textContent=step.prompt;$('wizardHint').textContent=step.hint;
- $('wizardQuestion').hidden=false;$('wizardEffectBox').hidden=wizard.step!==1;$('wizardBack').hidden=false;$('wizardBack').disabled=wizard.step===0;$('wizardNext').hidden=false;$('wizardNext').textContent=wizard.step===2?'Arm camera':'Next';$('settingsDone').hidden=true;
+ const step=wizardSteps[wizard.step],first=wizard.insert?1:0;$('cardTitle').textContent=wizard.insert?'Insert camera move':'CamLock wizard';$('wizardStep').textContent=['Opening','Effect','Duration'][wizard.step]+' · '+(wizard.step-first+1)+' of '+(3-first);$('wizardPrompt').textContent=step.prompt;$('wizardHint').textContent=step.hint;
+ $('wizardQuestion').hidden=false;$('wizardEffectBox').hidden=wizard.step!==1;$('wizardBack').hidden=false;$('wizardBack').disabled=wizard.step===first;$('wizardNext').hidden=false;$('wizardNext').textContent=wizard.step===2?'Arm camera':'Next';$('settingsDone').hidden=true;
  project.stage.locked=wizard.step!==0||!wizard.openingUnlocked;showCardPanels(step.panels);$('settingsCard').classList.add('wizard-mode');showSettingsCard();syncFields();
 }
-$('wizard').onclick=()=>{
- if(!sourceReady()||busy||active())return;stop();closeSettingsCard();
- wizard={step:0,openingUnlocked:false,previous:{stage:COPY(project.stage),settings:COPY(project.settings),start:project.start,trim:COPY(project.trim),speed:project.performanceSpeed,insertionFrame,armed:$('touchArmed').checked,time:video.currentTime}};
- insertionFrame=null;const z=project.settings.zoom.end,r=project.settings.rotation.enabled;$('wizardEffect').value=r?(z===1?'rotate':'combined'):(z===1?'direction':z>1?'push':'pull');
- seek(project.start);showWizardStep();
-};
+function startWizard(insert=false){
+ if(!sourceReady()||busy||active())return;stop();closeSettingsCard(false,{keepPlayhead:true});
+ wizard={step:insert?1:0,insert,openingUnlocked:false,previous:{stage:COPY(project.stage),settings:COPY(project.settings),start:project.start,trim:COPY(project.trim),speed:project.performanceSpeed,insertionFrame,armed:$('touchArmed').checked,time:video.currentTime}};
+ insertionFrame=frame();const z=project.settings.zoom.end,r=project.settings.rotation.enabled;$('wizardEffect').value=r?(z===1?'rotate':'combined'):(z===1?'direction':z>1?'push':'pull');
+ showWizardStep();
+}
+$('wizard').onclick=()=>startWizard();
+$('insert').onclick=()=>startWizard(true);
 $('wizardEffect').onchange=guard(()=>{
  const effect=$('wizardEffect').value;
  if(effect==='direction'||effect==='rotate')$('zoomEnd').value=100;
@@ -341,12 +343,12 @@ $('wizardOpeningLock').onclick=()=>{
  project.stage.locked=!project.stage.locked;if(wizard)wizard.openingUnlocked=!project.stage.locked;
  $('stage').open=!project.stage.locked;touch.clear();stagePoints.clear();syncFields();if(!wizard)persist();
 };
-$('wizardBack').onclick=()=>{if(wizard&&wizard.step>0){wizard.step--;wizard.openingUnlocked=false;showWizardStep();}};
+$('wizardBack').onclick=()=>{if(wizard&&wizard.step>(wizard.insert?1:0)){wizard.step--;wizard.openingUnlocked=false;showWizardStep();}};
 $('wizardNext').onclick=guard(async()=>{
  if(!wizard)return;
  for(const input of $('cardBody').querySelectorAll('input'))if(!input.disabled&&!input.reportValidity())return;
  if(wizard.step<2){wizard.step++;showWizardStep();return;}
- settingsChanged();project.stage.locked=true;$('touchArmed').checked=true;closeSettingsCard(true);seek(insertionFrame!==null?insertionFrame/project.fps:project.start);persist();updateControls();say('Camera hot · touch the viewport or press Action.');
+ settingsChanged();project.stage.locked=true;$('touchArmed').checked=true;closeSettingsCard(true);persist();updateControls();say('Camera hot at F'+frame()+' · touch the viewport or press Action.');
 });
 
 $('saveStage').onclick=()=>jsonDownload({schema:'CamLockStage-1.0',stage:COPY(project.stage),start:project.start},'Stage');
