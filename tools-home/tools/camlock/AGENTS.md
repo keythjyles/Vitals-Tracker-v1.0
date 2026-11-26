@@ -20,3 +20,5 @@ V1.5 owner direction: armed Play runs the bed; contact inserts Action at that so
 
 
 V1.6 owner direction: prepopulate Action from available source time and clamp its editable length to the insertion origin's remaining time. Preserve shorter manual settings, all raw paths, independent movement clocks and full-source output. Duration exposes an exact insertion frame. Play is a working Pause during Action while frame navigation remains disabled. Settings headings/grips support dragging and keyboard movement; closing must synchronously reset position before the wizard reopens. See RELEASE_V1_6.json.
+
+V1.7 owner correction: Insert must take the current playhead and must not seek to the opening timestamp. Pause/capture once, prepopulate Insert frame from that position, and keep it through effect/duration setup and arming. Insert starts a fresh Action origin at that source time. The full Wizard must also preserve its selected playhead. Cancelling restores settings and only seeks if the operator deliberately moved away. Opening composition/time, recorded paths and whole-source output remain independent. See RELEASE_V1_7.json.

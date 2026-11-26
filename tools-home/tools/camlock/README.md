@@ -1,4 +1,4 @@
-# CamLock · GS-TOOL-CAMLOCK · V1.6
+# CamLock · GS-TOOL-CAMLOCK · V1.7
 
 CamLock performs a virtual camera move against an independently composed, locked source-video stage. The November 25, 2026 owner handoff is the implementation authority. It is a working camera engine and source-frame renderer.
 
@@ -108,3 +108,11 @@ Duration now includes an editable **Insert frame** and **Use current frame**. Ch
 Drag the settings card by its heading or gold grip. The grip also supports arrow keys. The card stays within the visible viewport, remains scrollable and returns to its normal position when closed. Reopening the wizard restores its raised placement. Font sizes retain the compact editor styling.
 
 Verification: the existing source, path, Scribe, live insertion, phone-width and MP4/WebM checks plus new duration/frame/drag checks; Node timing/recovery checks are in `tests/duration.test.mjs`. [Release receipt](RELEASE_V1_6.json). Source/rollback baseline: `a235974a0b52a25de31c094fe988feb4182470f4`. Physical phone testing and authenticated Scribe cloud sync remain separate.
+
+## V1.7 Insert stays at the playhead — November 26, 2026
+
+**Insert** in the right rail pauses at the current frame and opens the camera effect and duration questions. Insert frame is filled from that position. Arming holds the same playhead; the next Action starts its own source-time origin there. The full Wizard also holds the current frame throughout setup and arming. Neither route seeks to the saved opening timestamp. Start and an explicit opening-time edit retain their deliberate navigation behavior.
+
+Cancel restores settings. If the source stayed at the captured point it performs no seek; if the operator deliberately navigated while editing, cancellation returns to the captured point. The original opening, raw path, source video and full-source rendering are preserved.
+
+38 Node checks and 36 real-media browser checks passed. At F30 / 1.2 seconds with a distinct 0.4-second opening, both Insert and Wizard reported zero seek events through setup and arming; Action started and set its origin at 1.2 seconds. During Play, Insert paused at 1.921617 seconds and cancellation held that exact time with no seek. Existing camera, Scribe, phone-width and actual MP4/WebM output checks passed. Physical phone testing remains separate. [Receipt](RELEASE_V1_7.json). Base/rollback: d3775df2bddc29be3a5251b90c897f8d09314e4d.

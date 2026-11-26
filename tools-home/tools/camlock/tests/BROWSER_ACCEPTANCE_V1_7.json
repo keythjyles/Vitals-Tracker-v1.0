@@ -1,0 +1,24 @@
+{
+  "release": "V1.7",
+  "status": "passed",
+  "checks": 36,
+  "harness": "tests/browser.html",
+  "new_checks": {
+    "captured_seconds": 1.2,
+    "frame": 30,
+    "independent_opening_seconds": 0.4,
+    "insert_setup_seeks": 0,
+    "wizard_setup_seeks": 0,
+    "action_start_seconds": 1.2,
+    "action_origin_seconds": 1.2
+  },
+  "playing": {
+    "captured_seconds": 1.921617,
+    "cancel_seeks": 0
+  },
+  "retained_checks": "All V1.6 real-source camera, layout, Scribe, MP4/WebM and audio synchronization checks passed.",
+  "limitations": [
+    "Generated source and simulated touch in desktop Chromium; not physical phone",
+    "Authenticated Scribe cloud sync untested"
+  ]
+}

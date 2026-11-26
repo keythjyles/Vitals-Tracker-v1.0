@@ -4,11 +4,11 @@
     {
       "tool": "camlock",
       "tool_id": "GS-TOOL-CAMLOCK",
-      "source_version": "V1.6",
+      "source_version": "V1.7",
       "hosted_path": "tools/camlock/index.html",
       "description": "Play the armed video bed and touch to insert a camera performance, with fine touch/joystick direction, source-time path editing and whole-source rendering unless trimmed.",
       "operator_guide": "tools/camlock/README.md",
-      "verification": "tools/camlock/tests/BROWSER_ACCEPTANCE_V1_6.json"
+      "verification": "tools/camlock/tests/BROWSER_ACCEPTANCE_V1_7.json"
     },
     {
       "tool": "drive-manager",

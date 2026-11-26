@@ -60,6 +60,30 @@ document.getElementById('run').onclick=async()=>{
   const completedWizard=app.snapshot();$('wizard').click();assert($('outputWidth').disabled&&app.snapshot().stage.locked,'Repeated wizard did not relock opening');
   $('wizardNext').click();await delay(0);$('wizardNext').click();await delay(0);$('trimEnabled').checked=true;$('trimEnabled').dispatchEvent(new w.Event('change',{bubbles:true}));await delay(0);await field('trimStart',.2);await field('trimEnd',2);
   $('closeSettings').click();assert(JSON.stringify(app.snapshot().stage)===JSON.stringify(completedWizard.stage)&&app.snapshot().trim===null,'Wizard cancel did not restore stage and output range');await wait(()=>!v.seeking);log('Wizard cancellation restores the opening and any tentative trim');
+  for(const control of ['insert','wizard']){
+   app.seek(1.2);await wait(()=>!v.seeking&&app.sourceReady());
+   const captured=v.currentTime,opening=app.snapshot().start,raw=JSON.stringify(app.snapshot().path);let setupSeeks=0;
+   const observeSeek=()=>setupSeeks++;v.addEventListener('seeking',observeSeek);
+   $(control).click();await delay(0);
+   assert($('settingsCard').open&&close(v.currentTime,captured,1e-7),'Setup moved the paused playhead');
+   assert(Number($('actionFrame').value)===30&&$('wizardClock').textContent.includes('F30'),'Insertion did not prepopulate from playhead');
+   if(control==='insert')assert($('wizardPrompt').textContent.includes('effect')&&$('wizardBack').disabled,'Insert should start with its effect settings');
+   while($('settingsCard').open){$('wizardNext').click();await delay(0);}
+   assert(close(v.currentTime,captured,1e-7)&&setupSeeks===0,'Arming sought the opening instead of holding the selected frame');
+   assert(close(app.snapshot().start,opening)&&JSON.stringify(app.snapshot().path)===raw,'Setup changed opening or saved camera instructions');
+   await app.startAction();app.pause();const segment=app.snapshot().segments.at(-1);
+   assert(close(segment.start,captured,1e-7)&&close(segment.origin,captured,1e-7),'Paused insertion did not start its own clock at the captured playhead');
+   v.removeEventListener('seeking',observeSeek);
+   log(control==='insert'?'Insert captures F30 without any seek and starts Action at that playhead':'Wizard preserves the selected playhead through every step and arming',{captured,opening,setupSeeks});
+  }
+  app.seek(1.8);await wait(()=>!v.seeking&&app.sourceReady());$('play').click();await wait(()=>!v.paused&&v.currentTime>1.9);
+  const beforeClick=v.currentTime,playingOpening=app.snapshot().start;let playingInsertSeeks=0;
+  const trackPlayingSeek=()=>playingInsertSeeks++;v.addEventListener('seeking',trackPlayingSeek);
+  $('insert').click();const held=v.currentTime;await delay(0);
+  assert(v.paused&&Math.abs(held-beforeClick)<.04&&Number($('actionFrame').value)===Math.floor(held*25+1e-5),'Playing Insert did not pause/capture the current frame');
+  $('closeSettings').click();await delay(0);
+  assert(close(v.currentTime,held,1e-7)&&playingInsertSeeks===0&&close(app.snapshot().start,playingOpening),'Cancelling Insert rewound the source');
+  v.removeEventListener('seeking',trackPlayingSeek);log('Insert during Play pauses at contact; cancellation holds that frame with no seek',{held,playingInsertSeeks});
   app.seek(2);await wait(()=>!v.seeking);const beforeInsert=app.snapshot(),untouchedPath=JSON.stringify(beforeInsert.path);let insertionSeeks=0,insertionPauses=0;
   const countSeek=()=>insertionSeeks++,countPause=()=>insertionPauses++;v.addEventListener('seeking',countSeek);v.addEventListener('pause',countPause);
   $('play').click();await wait(()=>!v.paused&&v.currentTime>2.12);
