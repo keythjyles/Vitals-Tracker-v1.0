@@ -95,7 +95,7 @@ async function main(){
    await page.locator('#videoFile').setInputFiles(path.join(data,'fixture_40s.mp4'));
    await page.waitForFunction(()=>document.getElementById('video').readyState>=2&&!document.getElementById('play').disabled);
    await page.getByRole('button',{name:'Show file picker'}).click();
-   await page.getByText('SxLock · GS-TOOL-SXLOCK · R47',{exact:true}).waitFor();
+   await page.getByText('SxLock · GS-TOOL-SXLOCK · R48',{exact:true}).waitFor();
    await page.evaluate(()=>window.scrollTo(0,10));
    await page.locator('.gs-source-drawer').waitFor({state:'hidden'});
    await page.evaluate(()=>window.scrollTo(0,0));
@@ -422,4 +422,5 @@ async function main(){
  }finally{await browser.close();await new Promise(r=>server.close(r));}
 }
 main().catch(e=>{console.error(e);process.exit(1)});
+
 
