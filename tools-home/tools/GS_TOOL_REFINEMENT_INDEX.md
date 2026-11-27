@@ -1,3 +1,9 @@
+## Sound Scrubber R14.15 — Table to Farm review batch
+
+Owner-requested 70-item review slate, ten per category: turkey calls, single axe/cleaver-style wood chops, egg-timer dings, fluttering bird wings, pitter-patter footsteps, sighs and quick comedy scores. Audio source files were downloaded, decoded and SHA-256 checked before publishing. FSD50K archive entries were additionally checked against their archive byte counts and CRCs. Attribution and license data are retained on each row; Commons and Freesound recordings are identified as source recordings. Music previews stop at eight seconds, while explicit approval downloads the complete original. No row is pre-approved. The Table to Farm batch opts into a device download after approval while retaining the existing browser library and Drive queue behavior.
+
+42 existing Sound Scrubber frontend state checks pass. Deployment and live batch loading are pending. Rollback: remove the R14.15 opt-in download code and batch intake JSON; preserve any owner-approved library assets.
+
 ## R38 — phone green-screen transparency
 
 The owner reported an opaque green phone screen over a scrolling card. The sampler previously looked only at frame edges, failed on the surrounding room, and retained the default blue key. Explicit Transparent and Sample clip now detect a substantial connected flat green/blue patch inside the frame. Ordinary imports retain the established edge-only detection. Green screen and Blue screen controls repair an existing wrong key directly; they set background opacity to 0% and retain layer opacity, geometry, timing and source files. The existing per-frame alpha compositor keeps the finger above the card in both preview and MP4 export.

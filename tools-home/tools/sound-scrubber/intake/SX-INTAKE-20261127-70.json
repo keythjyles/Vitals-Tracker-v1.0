@@ -1,0 +1,2692 @@
+{
+  "schema": "SoundScrubberIntake-1",
+  "batchId": "SX-INTAKE-20261127-70",
+  "createdLocalDate": "2026-11-27",
+  "count": 70,
+  "approval": "pending-owner-review",
+  "sounds": [
+    {
+      "id": "freesound:233124",
+      "sourceTitle": "Turkey - Gobble 2 - 96kHz.wav",
+      "originalName": "233124.wav",
+      "source": "https://freesound.org/s/233124/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.zip/content",
+      "author": "JarredGibb",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.zip",
+        "offset": 1386626442,
+        "compressedBytes": 50553,
+        "bytes": 59926,
+        "crc32": "8776df75",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "From Jarred Gibb - Animal Farm",
+      "recordingType": "Source recording",
+      "duration": 0.679,
+      "bytes": 59926,
+      "sha256": "ec05a7972ebafe4917574e4845801eee8c7ab6d7471b1b7a4abb60d01ab9a457",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "01 Turkey gobbles",
+      "classification": {
+        "schema": 1,
+        "category": "01 Turkey gobbles",
+        "subcategory": "Turkey gobbles",
+        "tags": [
+          "table to farm",
+          "turkey gobbles",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_GOBBLE_01_Turkey - Gobble 2 - 96kHz.wav"
+    },
+    {
+      "id": "freesound:233120",
+      "sourceTitle": "Turkey - Gobble 5 - 96kHz.wav",
+      "originalName": "233120.wav",
+      "source": "https://freesound.org/s/233120/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z03/content",
+      "author": "JarredGibb",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z03",
+        "offset": 1063986157,
+        "compressedBytes": 70998,
+        "bytes": 83464,
+        "crc32": "0fb73e41",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "From Jarred Gibb - Animal Farm",
+      "recordingType": "Source recording",
+      "duration": 0.945,
+      "bytes": 83464,
+      "sha256": "c758b15522ade9aa4a9656a53c59ec8acbed1eaf5e53290118e3f1b420fbe723",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "01 Turkey gobbles",
+      "classification": {
+        "schema": 1,
+        "category": "01 Turkey gobbles",
+        "subcategory": "Turkey gobbles",
+        "tags": [
+          "table to farm",
+          "turkey gobbles",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_GOBBLE_02_Turkey - Gobble 5 - 96kHz.wav"
+    },
+    {
+      "id": "freesound:233126",
+      "sourceTitle": "Turkey - Gobble 4 - 96kHz.wav",
+      "originalName": "233126.wav",
+      "source": "https://freesound.org/s/233126/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z02/content",
+      "author": "JarredGibb",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z02",
+        "offset": 1608065040,
+        "compressedBytes": 72935,
+        "bytes": 87188,
+        "crc32": "738e4443",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "From Jarred Gibb - Animal Farm",
+      "recordingType": "Source recording",
+      "duration": 0.988,
+      "bytes": 87188,
+      "sha256": "9df6fd5d8fe3f56da68d8bc9a8b7fdaf98caed8eaa0d6ad2ffc3593cf27b018e",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "01 Turkey gobbles",
+      "classification": {
+        "schema": 1,
+        "category": "01 Turkey gobbles",
+        "subcategory": "Turkey gobbles",
+        "tags": [
+          "table to farm",
+          "turkey gobbles",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_GOBBLE_03_Turkey - Gobble 4 - 96kHz.wav"
+    },
+    {
+      "id": "freesound:233125",
+      "sourceTitle": "Turkey - Gobble 3 - 96kHz.wav",
+      "originalName": "233125.wav",
+      "source": "https://freesound.org/s/233125/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z05/content",
+      "author": "JarredGibb",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z05",
+        "offset": 337799737,
+        "compressedBytes": 145626,
+        "bytes": 182472,
+        "crc32": "4a5465c7",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "From Jarred Gibb - Animal Farm",
+      "recordingType": "Source recording",
+      "duration": 2.068,
+      "bytes": 182472,
+      "sha256": "7159689b68bf51b06e03e4a92e9f6f222bf47982748c708724464e9fa317f381",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "01 Turkey gobbles",
+      "classification": {
+        "schema": 1,
+        "category": "01 Turkey gobbles",
+        "subcategory": "Turkey gobbles",
+        "tags": [
+          "table to farm",
+          "turkey gobbles",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_GOBBLE_04_Turkey - Gobble 3 - 96kHz.wav"
+    },
+    {
+      "id": "freesound:147535",
+      "sourceTitle": "AlBundyX-Mexican-Turkey.wav",
+      "originalName": "147535.wav",
+      "source": "https://freesound.org/s/147535/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z02/content",
+      "author": "AlBundyX",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z02",
+        "offset": 1468000184,
+        "compressedBytes": 163836,
+        "bytes": 202564,
+        "crc32": "8eb86256",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "H2Zoom recording Mexican ranch turkey",
+      "recordingType": "Source recording",
+      "duration": 2.296,
+      "bytes": 202564,
+      "sha256": "0bf4945ad9a84f591218e881059f256bd5774d94e8b5d3d3c83d6e376f148608",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "01 Turkey gobbles",
+      "classification": {
+        "schema": 1,
+        "category": "01 Turkey gobbles",
+        "subcategory": "Turkey gobbles",
+        "tags": [
+          "table to farm",
+          "turkey gobbles",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_GOBBLE_05_AlBundyX-Mexican-Turkey.wav"
+    },
+    {
+      "id": "commons:24004264",
+      "sourceTitle": "Gobbler.ogg",
+      "originalName": "Gobbler.ogg",
+      "source": "https://commons.wikimedia.org/wiki/File:Gobbler.ogg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/1/11/Gobbler.ogg",
+      "author": "bod",
+      "license": "Public domain",
+      "licenseURL": "",
+      "mime": "application/ogg",
+      "sha1": "cfc99b43ca20bef7ae17e70af513e1110da3a113",
+      "recordingType": "Source recording",
+      "description": "Title Gobbler Artist bod Original mp3 data Length:0:11 minutes (169.43 KB) Format:MP3 Stereo 44kHz 128Kbps (CBR) User tags Animal, Bird, cackling, calling, Poultry, Turkey Type Natural PDSounds record number 500",
+      "duration": 10.58,
+      "bytes": 230253,
+      "sha256": "e546ff04319d1ae9b3a33ffb040a9698c1753f31bde3486e7c85bed2320a5770",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "01 Turkey gobbles",
+      "classification": {
+        "schema": 1,
+        "category": "01 Turkey gobbles",
+        "subcategory": "Turkey gobbles",
+        "tags": [
+          "table to farm",
+          "turkey gobbles",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_GOBBLE_06_Gobbler.ogg"
+    },
+    {
+      "id": "commons:27404674",
+      "sourceTitle": "Meleagris gallopavo - Wild Turkey XC134155.ogg",
+      "originalName": "Meleagris gallopavo - Wild Turkey XC134155.ogg",
+      "source": "https://commons.wikimedia.org/wiki/File:Meleagris_gallopavo_-_Wild_Turkey_XC134155.ogg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/3/35/Meleagris_gallopavo_-_Wild_Turkey_XC134155.ogg",
+      "author": "Jonathon Jongsma",
+      "license": "CC BY-SA 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by-sa/3.0",
+      "mime": "application/ogg",
+      "sha1": "2aa5134ae9b16f3fe89e86eb4c399da23d79aa3f",
+      "recordingType": "Source recording",
+      "description": "Unseen bird 'gobbling' from a steep wooded hillside bordering a small lake in deciduous woodland. Other turkeys can be heard in the background. Recorded with homemade parabolic reflector. Light filtering below 400Hz. bird-seen:no playback-used:no Common name: Wild Turkey Type: song Genus: Meleagris Species: gallopavo Location: Hyland Lake Park Reserve, Hennepin, MN Elevation: 280 m",
+      "duration": 259.176,
+      "bytes": 6560051,
+      "sha256": "58b31c23c13d45629e4c27dd82b83af218e7a47bf10b5e5bba6824bc6271fdfd",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "01 Turkey gobbles",
+      "classification": {
+        "schema": 1,
+        "category": "01 Turkey gobbles",
+        "subcategory": "Turkey gobbles",
+        "tags": [
+          "table to farm",
+          "turkey gobbles",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_GOBBLE_07_Meleagris gallopavo - Wild Turkey XC134155.ogg"
+    },
+    {
+      "id": "commons:27404634",
+      "sourceTitle": "Meleagris gallopavo - Wild Turkey XC136045.ogg",
+      "originalName": "Meleagris gallopavo - Wild Turkey XC136045.ogg",
+      "source": "https://commons.wikimedia.org/wiki/File:Meleagris_gallopavo_-_Wild_Turkey_XC136045.ogg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/f3/Meleagris_gallopavo_-_Wild_Turkey_XC136045.ogg",
+      "author": "Jonathon Jongsma",
+      "license": "CC BY-SA 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by-sa/3.0",
+      "mime": "application/ogg",
+      "sha1": "47a08fcdcb8705873bbd841ea3392f2d1fc1ec1d",
+      "recordingType": "Source recording",
+      "description": "A male calling from a walking path in deciduous woodland less than 10m away. The aspirated 'click' that often follows the gobble were also made by the turkey. bird-seen:yes playback-used:no Common name: Wild Turkey Type: male, song Genus: Meleagris Species: gallopavo Location: Hyland Lake Park Reserve, Hennepin, MN Elevation: 260 m",
+      "duration": 173.112,
+      "bytes": 4377078,
+      "sha256": "cbd641e02032bdccc01ae1d4a8cd978ce15aea7951c0a168a2988da869c9c9c2",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "01 Turkey gobbles",
+      "classification": {
+        "schema": 1,
+        "category": "01 Turkey gobbles",
+        "subcategory": "Turkey gobbles",
+        "tags": [
+          "table to farm",
+          "turkey gobbles",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_GOBBLE_08_Meleagris gallopavo - Wild Turkey XC136045.ogg"
+    },
+    {
+      "id": "commons:23927490",
+      "sourceTitle": "Meleagris gallopavo - Wild Turkey - XC104532.ogg",
+      "originalName": "Meleagris gallopavo - Wild Turkey - XC104532.ogg",
+      "source": "https://commons.wikimedia.org/wiki/File:Meleagris_gallopavo_-_Wild_Turkey_-_XC104532.ogg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/4/4f/Meleagris_gallopavo_-_Wild_Turkey_-_XC104532.ogg",
+      "author": "Jonathon Jongsma",
+      "license": "CC BY-SA 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by-sa/3.0",
+      "mime": "application/ogg",
+      "sha1": "6259c2fea9902ad0eccd17c8f9de3dd58b8bc64c",
+      "recordingType": "Source recording",
+      "description": "Species Wild Turkey ( Meleagris gallopavo ) Recordist Jonathon Jongsma Remarks Nervous calls and foraging sounds (stripping seeds from grass) from 3 adult turkeys after I had inadvertently flushed approximately 15 juvenile turkeys that were with them into the nearby pine trees. Juvenile calls toward the end of the cut. Bird seen yes Playback used no Elevation 1500 m Country United States",
+      "duration": 102.348,
+      "bytes": 1365446,
+      "sha256": "de4c3b074f70048d3b4edbe8f023e782e3dd59f095dd998256826a2f1f810744",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "01 Turkey gobbles",
+      "classification": {
+        "schema": 1,
+        "category": "01 Turkey gobbles",
+        "subcategory": "Turkey gobbles",
+        "tags": [
+          "table to farm",
+          "turkey gobbles",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_GOBBLE_09_Meleagris gallopavo - Wild Turkey - XC104532.ogg"
+    },
+    {
+      "id": "commons:68240323",
+      "sourceTitle": "Meleagris gallopavo - Wild Turkey XC320490.mp3",
+      "originalName": "Meleagris gallopavo - Wild Turkey XC320490.mp3",
+      "source": "https://commons.wikimedia.org/wiki/File:Meleagris_gallopavo_-_Wild_Turkey_XC320490.mp3",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/d/dc/Meleagris_gallopavo_-_Wild_Turkey_XC320490.mp3",
+      "author": "Jonathon Jongsma",
+      "license": "CC BY-SA 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by-sa/3.0",
+      "mime": "audio/mpeg",
+      "sha1": "e1efa1297876d8ef06195027489aa1ea949ffcbd",
+      "recordingType": "Source recording",
+      "description": ":Calls from an agitated adult turkey in response to human intruder. There were a family group of turkeys (perhaps 8-10 young?) that I accidentally disturbed on the wooded hillside next to my campsite. The adults called nervously for a while before flying toward me (@ 0:35) and landing in a tree perhaps 5 meters up and 5 meters away from me while continuously calling. It eventually flew off after the rest of the group had made it safely away down the hill. Some high-pitched calls from the young can also be heard. Clear and cool morning. bird-seen:yes playback-used:no Common name: Wild Turkey Type: call Genus: Meleagris Species: gallopavo Location: Afton State Park, Washington County, Minnesota Country: United States Elevation: 240 m",
+      "duration": 211.069,
+      "bytes": 4939979,
+      "sha256": "879cf7503c4085bbe4e3dd4165a3515cde2e3b5befe8b20f26953bfbba2466a6",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "01 Turkey gobbles",
+      "classification": {
+        "schema": 1,
+        "category": "01 Turkey gobbles",
+        "subcategory": "Turkey gobbles",
+        "tags": [
+          "table to farm",
+          "turkey gobbles",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_GOBBLE_10_Meleagris gallopavo - Wild Turkey XC320490.mp3"
+    },
+    {
+      "id": "freesound:31167",
+      "sourceTitle": "woodchop2.mp3",
+      "originalName": "31167.wav",
+      "source": "https://freesound.org/s/31167/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.eval_audio.z01/content",
+      "author": "skinhat",
+      "license": "CC BY 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0/",
+      "archive": {
+        "file": "FSD50K.eval_audio.z01",
+        "offset": 696881768,
+        "compressedBytes": 40187,
+        "bytes": 50766,
+        "crc32": "cf4b7bc7",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "Wood being chopped with an axe",
+      "recordingType": "Source recording",
+      "duration": 0.575,
+      "bytes": 50766,
+      "sha256": "6d6755adf5819cad94e8c9ba2ed047d40662772893db3afa3a3bf4a25cdb2e56",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "02 Single axe or cleaver chop",
+      "classification": {
+        "schema": 1,
+        "category": "02 Single axe or cleaver chop",
+        "subcategory": "Single axe or cleaver chop",
+        "tags": [
+          "table to farm",
+          "single axe or cleaver chop",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_CHOP_01_woodchop2.wav"
+    },
+    {
+      "id": "freesound:31168",
+      "sourceTitle": "woodchop3.mp3",
+      "originalName": "31168.wav",
+      "source": "https://freesound.org/s/31168/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.eval_audio.z01/content",
+      "author": "skinhat",
+      "license": "CC BY 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0/",
+      "archive": {
+        "file": "FSD50K.eval_audio.z01",
+        "offset": 3006261024,
+        "compressedBytes": 48651,
+        "bytes": 62286,
+        "crc32": "b944e6a6",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "Wood being chopped with an axe",
+      "recordingType": "Source recording",
+      "duration": 0.705,
+      "bytes": 62286,
+      "sha256": "ebf70d2d34425b8571f9b3a93e0d800c069427cd79dffc0ac69d4206a1f889f9",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "02 Single axe or cleaver chop",
+      "classification": {
+        "schema": 1,
+        "category": "02 Single axe or cleaver chop",
+        "subcategory": "Single axe or cleaver chop",
+        "tags": [
+          "table to farm",
+          "single axe or cleaver chop",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_CHOP_02_woodchop3.wav"
+    },
+    {
+      "id": "freesound:31166",
+      "sourceTitle": "woodchop.mp3",
+      "originalName": "31166.wav",
+      "source": "https://freesound.org/s/31166/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.eval_audio.zip/content",
+      "author": "skinhat",
+      "license": "CC BY 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0/",
+      "archive": {
+        "file": "FSD50K.eval_audio.zip",
+        "offset": 1656187844,
+        "compressedBytes": 53358,
+        "bytes": 69198,
+        "crc32": "590970c8",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "Wood being chopped with an axe",
+      "recordingType": "Source recording",
+      "duration": 0.784,
+      "bytes": 69198,
+      "sha256": "20f622e76c6befafca831c43372089af566f081514b315d416c2a6c85c3ec5e1",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "02 Single axe or cleaver chop",
+      "classification": {
+        "schema": 1,
+        "category": "02 Single axe or cleaver chop",
+        "subcategory": "Single axe or cleaver chop",
+        "tags": [
+          "table to farm",
+          "single axe or cleaver chop",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_CHOP_03_woodchop.wav"
+    },
+    {
+      "id": "freesound:66113",
+      "sourceTitle": "knife_chop.wav",
+      "originalName": "66113.wav",
+      "source": "https://freesound.org/s/66113/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.eval_audio.z01/content",
+      "author": "deleted_user_877451",
+      "license": "CC BY 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0/",
+      "archive": {
+        "file": "FSD50K.eval_audio.z01",
+        "offset": 1529811572,
+        "compressedBytes": 43561,
+        "bytes": 73284,
+        "crc32": "9bc81203",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "A butcher knife chopping a vegetable on a wooden cutting board.",
+      "recordingType": "Source recording",
+      "duration": 0.83,
+      "bytes": 73284,
+      "sha256": "203cca52f505ed10742e6334caa1dd22f1104709f43eacfa0b10632fd29d2178",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "02 Single axe or cleaver chop",
+      "classification": {
+        "schema": 1,
+        "category": "02 Single axe or cleaver chop",
+        "subcategory": "Single axe or cleaver chop",
+        "tags": [
+          "table to farm",
+          "single axe or cleaver chop",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_CHOP_04_knife_chop.wav"
+    },
+    {
+      "id": "freesound:386223",
+      "sourceTitle": "Wood - Chopping 1",
+      "originalName": "386223.wav",
+      "source": "https://freesound.org/s/386223/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z04/content",
+      "author": "ldezem",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z04",
+        "offset": 1416200339,
+        "compressedBytes": 74690,
+        "bytes": 130530,
+        "crc32": "412738d6",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "Wood chopped once with an axe. Recorded in 24-bit 96kHz with a Tascam DR-40 and a Sony ECM-NV1. For details on SOW: Blacksmith ed1 sound pack see: www.oree.storijapan.net/praxis/sound-of-work",
+      "recordingType": "Source recording",
+      "duration": 1.479,
+      "bytes": 130530,
+      "sha256": "9a46c128e7c988cccb6045008c736be3ef19eecb59ab048f9b89c4d6b01ddb82",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "02 Single axe or cleaver chop",
+      "classification": {
+        "schema": 1,
+        "category": "02 Single axe or cleaver chop",
+        "subcategory": "Single axe or cleaver chop",
+        "tags": [
+          "table to farm",
+          "single axe or cleaver chop",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_CHOP_05_Wood - Chopping 1.wav"
+    },
+    {
+      "id": "freesound:386224",
+      "sourceTitle": "Wood - Chopping 1 snappy",
+      "originalName": "386224.wav",
+      "source": "https://freesound.org/s/386224/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z01/content",
+      "author": "ldezem",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z01",
+        "offset": 569189384,
+        "compressedBytes": 71351,
+        "bytes": 130530,
+        "crc32": "89dcba45",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "Wood chopped once with an axe, short. Recorded in 24-bit 96kHz with a Tascam DR-40 and a Sony ECM-NV1. For details on SOW: Blacksmith ed1 sound pack see: www.oree.storijapan.net/praxis/sound-of-work",
+      "recordingType": "Source recording",
+      "duration": 1.479,
+      "bytes": 130530,
+      "sha256": "b054d6253daff7a7c8c03e10ab871d2c574e83d05c8bcfd1a004e7ca23ea73bf",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "02 Single axe or cleaver chop",
+      "classification": {
+        "schema": 1,
+        "category": "02 Single axe or cleaver chop",
+        "subcategory": "Single axe or cleaver chop",
+        "tags": [
+          "table to farm",
+          "single axe or cleaver chop",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_CHOP_06_Wood - Chopping 1 snappy.wav"
+    },
+    {
+      "id": "freesound:158972",
+      "sourceTitle": "Chopping Wood_02.wav",
+      "originalName": "158972.wav",
+      "source": "https://freesound.org/s/158972/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z05/content",
+      "author": "CGEffex",
+      "license": "CC BY 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z05",
+        "offset": 686023353,
+        "compressedBytes": 233773,
+        "bytes": 372436,
+        "crc32": "58c1b6be",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "Chopping up some logs of hardwood with a heavy splitting ax.",
+      "recordingType": "Source recording",
+      "duration": 4.222,
+      "bytes": 372436,
+      "sha256": "a6654f79a8f8b22d6010836e71300a4f76a889c6790d0373611c29e6048bbede",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "02 Single axe or cleaver chop",
+      "classification": {
+        "schema": 1,
+        "category": "02 Single axe or cleaver chop",
+        "subcategory": "Single axe or cleaver chop",
+        "tags": [
+          "table to farm",
+          "single axe or cleaver chop",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_CHOP_07_Chopping Wood_02.wav"
+    },
+    {
+      "id": "freesound:158973",
+      "sourceTitle": "Chopping Wood_01.wav",
+      "originalName": "158973.wav",
+      "source": "https://freesound.org/s/158973/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.zip/content",
+      "author": "CGEffex",
+      "license": "CC BY 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.zip",
+        "offset": 2008945442,
+        "compressedBytes": 407936,
+        "bytes": 672880,
+        "crc32": "b00ccf29",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "Chopping up some logs of hardwood with a heavy splitting ax.",
+      "recordingType": "Source recording",
+      "duration": 7.628,
+      "bytes": 672880,
+      "sha256": "92cfe8e8366cb45c6ca49671ed306ebe7484831ac618c174df21e0dc69dc2f26",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "02 Single axe or cleaver chop",
+      "classification": {
+        "schema": 1,
+        "category": "02 Single axe or cleaver chop",
+        "subcategory": "Single axe or cleaver chop",
+        "tags": [
+          "table to farm",
+          "single axe or cleaver chop",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_CHOP_08_Chopping Wood_01.wav"
+    },
+    {
+      "id": "freesound:258039",
+      "sourceTitle": "Chopping Wood 02",
+      "originalName": "258039.wav",
+      "source": "https://freesound.org/s/258039/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z03/content",
+      "author": "Jagadamba",
+      "license": "CC BY 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z03",
+        "offset": 2382073189,
+        "compressedBytes": 400005,
+        "bytes": 635982,
+        "crc32": "67ec1454",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "Chopping Wood Recorded with digital recorder and processed with Audacity",
+      "recordingType": "Source recording",
+      "duration": 7.21,
+      "bytes": 635982,
+      "sha256": "84d02d83b97a8801d819af4555ecbbfd583d1f9a450279e379b62d1161b27e1c",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "02 Single axe or cleaver chop",
+      "classification": {
+        "schema": 1,
+        "category": "02 Single axe or cleaver chop",
+        "subcategory": "Single axe or cleaver chop",
+        "tags": [
+          "table to farm",
+          "single axe or cleaver chop",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_CHOP_09_Chopping Wood 02.wav"
+    },
+    {
+      "id": "freesound:378296",
+      "sourceTitle": "destruction_chopping wood.wav",
+      "originalName": "378296.wav",
+      "source": "https://freesound.org/s/378296/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z04/content",
+      "author": "13GPanska_Langerova_Lucie",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z04",
+        "offset": 1908810978,
+        "compressedBytes": 148082,
+        "bytes": 296430,
+        "crc32": "ad4f8211",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "Sound of chopping wood.",
+      "recordingType": "Source recording",
+      "duration": 3.36,
+      "bytes": 296430,
+      "sha256": "950fc3c72fe2ec9b31dfdc3c70bf8c069e98b6e09ec3cb25073126035459da8f",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "02 Single axe or cleaver chop",
+      "classification": {
+        "schema": 1,
+        "category": "02 Single axe or cleaver chop",
+        "subcategory": "Single axe or cleaver chop",
+        "tags": [
+          "table to farm",
+          "single axe or cleaver chop",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_CHOP_10_destruction_chopping wood.wav"
+    },
+    {
+      "id": "freesound:264152",
+      "sourceTitle": "microwave ding.wav",
+      "originalName": "264152.wav",
+      "source": "https://freesound.org/s/264152/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z04/content",
+      "author": "Reitanna",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z04",
+        "offset": 1879995171,
+        "compressedBytes": 76530,
+        "bytes": 97356,
+        "crc32": "d54605e8",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "I was making popcorn, so I decided to take some sounds while doing it.",
+      "recordingType": "Source recording",
+      "duration": 1.103,
+      "bytes": 97356,
+      "sha256": "6c3fe32aabede54757fe80017d338b36ef25958b15c52bf9e4319097286b4744",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "03 Egg-timer ding",
+      "classification": {
+        "schema": 1,
+        "category": "03 Egg-timer ding",
+        "subcategory": "Egg-timer ding",
+        "tags": [
+          "table to farm",
+          "egg-timer ding",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_TIMER_01_microwave ding.wav"
+    },
+    {
+      "id": "freesound:153283",
+      "sourceTitle": "Microwave ding",
+      "originalName": "153283.wav",
+      "source": "https://freesound.org/s/153283/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z01/content",
+      "author": "gerardcatala",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z01",
+        "offset": 1596275903,
+        "compressedBytes": 86785,
+        "bytes": 98134,
+        "crc32": "2aabfe2b",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "Finalization sound of a microwave inside a bar",
+      "recordingType": "Source recording",
+      "duration": 1.112,
+      "bytes": 98134,
+      "sha256": "20cb56db77e14e9cc001244d9125d80102498b1446c4cfb9d40438cd378d528f",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "03 Egg-timer ding",
+      "classification": {
+        "schema": 1,
+        "category": "03 Egg-timer ding",
+        "subcategory": "Egg-timer ding",
+        "tags": [
+          "table to farm",
+          "egg-timer ding",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_TIMER_02_Microwave ding.wav"
+    },
+    {
+      "id": "freesound:232530",
+      "sourceTitle": "Microwave ding",
+      "originalName": "232530.wav",
+      "source": "https://freesound.org/s/232530/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.zip/content",
+      "author": "mario81",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.zip",
+        "offset": 1160726819,
+        "compressedBytes": 135796,
+        "bytes": 228324,
+        "crc32": "6b5a2130",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "the microwave finish its work.",
+      "recordingType": "Source recording",
+      "duration": 2.588,
+      "bytes": 228324,
+      "sha256": "325505b39edb0ea6c0f54675b848e2f22563d10cf66b8df34952122a1307d210",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "03 Egg-timer ding",
+      "classification": {
+        "schema": 1,
+        "category": "03 Egg-timer ding",
+        "subcategory": "Egg-timer ding",
+        "tags": [
+          "table to farm",
+          "egg-timer ding",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_TIMER_03_Microwave ding.wav"
+    },
+    {
+      "id": "freesound:11587",
+      "sourceTitle": "microwave ding.WAV",
+      "originalName": "11587.wav",
+      "source": "https://freesound.org/s/11587/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z05/content",
+      "author": "samplecat",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z05",
+        "offset": 860809224,
+        "compressedBytes": 187087,
+        "bytes": 258394,
+        "crc32": "bd8c22a9",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "short sound, microwave finished",
+      "recordingType": "Source recording",
+      "duration": 2.929,
+      "bytes": 258394,
+      "sha256": "64ff0f5f05d7d8c55d3e269f7d7ceee7c3bc074ae8afd0e328f793c2ee1df56f",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "03 Egg-timer ding",
+      "classification": {
+        "schema": 1,
+        "category": "03 Egg-timer ding",
+        "subcategory": "Egg-timer ding",
+        "tags": [
+          "table to farm",
+          "egg-timer ding",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_TIMER_04_microwave ding.wav"
+    },
+    {
+      "id": "freesound:135873",
+      "sourceTitle": "Vintage Microwave Timer Bell Ring - 26 November \u200e2011, \u200f\u200e11:39:00 P.M.",
+      "originalName": "135873.wav",
+      "source": "https://freesound.org/s/135873/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.eval_audio.z01/content",
+      "author": "crz1990",
+      "license": "CC BY 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0/",
+      "archive": {
+        "file": "FSD50K.eval_audio.z01",
+        "offset": 2320745256,
+        "compressedBytes": 318521,
+        "bytes": 476096,
+        "crc32": "be56fc2f",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "recording of my 1981 Kenmore microwave mechanical bell ringing when timer reaches zero, using ZOOM H2, internal mics, 90 degrees stereo image, positioned directly in front of appliance, cut but unedited, uncompressed WAV",
+      "recordingType": "Source recording",
+      "duration": 5.397,
+      "bytes": 476096,
+      "sha256": "c2a87260735cfeda3e97989bc564f3804dfd99b2d814db0a0d4fca1f79dce948",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "03 Egg-timer ding",
+      "classification": {
+        "schema": 1,
+        "category": "03 Egg-timer ding",
+        "subcategory": "Egg-timer ding",
+        "tags": [
+          "table to farm",
+          "egg-timer ding",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_TIMER_05_Vintage Microwave Timer Bell Ring - 26 November 2011 113900 PM.wav"
+    },
+    {
+      "id": "freesound:411749",
+      "sourceTitle": "Bell Ding",
+      "originalName": "411749.wav",
+      "source": "https://freesound.org/s/411749/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z04/content",
+      "author": "Natty23",
+      "license": "CC BY 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z04",
+        "offset": 663689527,
+        "compressedBytes": 57220,
+        "bytes": 77902,
+        "crc32": "a6251f8e",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "A single bell ding.",
+      "recordingType": "Source recording",
+      "duration": 0.882,
+      "bytes": 77902,
+      "sha256": "948c414c0898ac5d284f5eecbfb20313d154be357360259d4451adca48adfc59",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "03 Egg-timer ding",
+      "classification": {
+        "schema": 1,
+        "category": "03 Egg-timer ding",
+        "subcategory": "Egg-timer ding",
+        "tags": [
+          "table to farm",
+          "egg-timer ding",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_TIMER_06_Bell Ding.wav"
+    },
+    {
+      "id": "freesound:66717",
+      "sourceTitle": "bell.wav",
+      "originalName": "66717.wav",
+      "source": "https://freesound.org/s/66717/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.eval_audio.zip/content",
+      "author": "CJ4096",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.eval_audio.zip",
+        "offset": 1861539979,
+        "compressedBytes": 39199,
+        "bytes": 49230,
+        "crc32": "bca47823",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "This is a recording of a bell from a clockwork countdown timer of a microwave oven.",
+      "recordingType": "Source recording",
+      "duration": 0.557,
+      "bytes": 49230,
+      "sha256": "021c7daaeccb44c7172b12bbddab7d9c06a2c4156fcc0b313c9149649f013f01",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "03 Egg-timer ding",
+      "classification": {
+        "schema": 1,
+        "category": "03 Egg-timer ding",
+        "subcategory": "Egg-timer ding",
+        "tags": [
+          "table to farm",
+          "egg-timer ding",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_TIMER_07_bell.wav"
+    },
+    {
+      "id": "freesound:233496",
+      "sourceTitle": "microwave_bell.wav",
+      "originalName": "233496.wav",
+      "source": "https://freesound.org/s/233496/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z03/content",
+      "author": "aleixcm",
+      "license": "CC BY 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z03",
+        "offset": 1575292488,
+        "compressedBytes": 51295,
+        "bytes": 55806,
+        "crc32": "db051565",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "This sound was created in the bar of Campus Poblenou. We can percieve the sound that makes the bell of the microwaves when it finishes.",
+      "recordingType": "Source recording",
+      "duration": 0.632,
+      "bytes": 55806,
+      "sha256": "8daa63ee83e3c13792868a84220a92e8f768ec9cddde47ccdd63a5e4e609bad1",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "03 Egg-timer ding",
+      "classification": {
+        "schema": 1,
+        "category": "03 Egg-timer ding",
+        "subcategory": "Egg-timer ding",
+        "tags": [
+          "table to farm",
+          "egg-timer ding",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_TIMER_08_microwave_bell.wav"
+    },
+    {
+      "id": "freesound:190582",
+      "sourceTitle": "microwaves bell.wav",
+      "originalName": "190582.wav",
+      "source": "https://freesound.org/s/190582/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z01/content",
+      "author": "conradts",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z01",
+        "offset": 1984648536,
+        "compressedBytes": 32851,
+        "bytes": 40398,
+        "crc32": "2233483d",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "Harmonic sound obtained with the bell inside the microwave.",
+      "recordingType": "Source recording",
+      "duration": 0.457,
+      "bytes": 40398,
+      "sha256": "8f8eba272b21bb316b8e4c49d1f6f2a484f626d8f8865c7f5b07b3e7cdb764ed",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "03 Egg-timer ding",
+      "classification": {
+        "schema": 1,
+        "category": "03 Egg-timer ding",
+        "subcategory": "Egg-timer ding",
+        "tags": [
+          "table to farm",
+          "egg-timer ding",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_TIMER_09_microwaves bell.wav"
+    },
+    {
+      "id": "freesound:396427",
+      "sourceTitle": "Timer with Chime.wav",
+      "originalName": "396427.wav",
+      "source": "https://freesound.org/s/396427/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z03/content",
+      "author": "Joedozer",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z03",
+        "offset": 1207099118,
+        "compressedBytes": 434870,
+        "bytes": 1098442,
+        "crc32": "a66e10a0",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "I set my toaster oven for a moment and recorded the ticking as well as the \"time up\" chime. Recorded with my ZOOM H2N.",
+      "recordingType": "Source recording",
+      "duration": 12.453,
+      "bytes": 1098442,
+      "sha256": "0c40d87fe3d5042b64d2d9015575accf9e331ef81204a163a280c03931fb92cb",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "03 Egg-timer ding",
+      "classification": {
+        "schema": 1,
+        "category": "03 Egg-timer ding",
+        "subcategory": "Egg-timer ding",
+        "tags": [
+          "table to farm",
+          "egg-timer ding",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_TIMER_10_Timer with Chime.wav"
+    },
+    {
+      "id": "freesound:409643",
+      "sourceTitle": "7. Aleteo 2.wav",
+      "originalName": "409643.wav",
+      "source": "https://freesound.org/s/409643/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.zip/content",
+      "author": "las98",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.zip",
+        "offset": 553929609,
+        "compressedBytes": 24816,
+        "bytes": 34820,
+        "crc32": "32604c43",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "aleteo",
+      "recordingType": "Source recording",
+      "duration": 0.394,
+      "bytes": 34820,
+      "sha256": "0740ce266421e7ad8152a2aeb478ef607156d49a0692b3ced2ecfe70e2def8f4",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "04 Fluttering feathers",
+      "classification": {
+        "schema": 1,
+        "category": "04 Fluttering feathers",
+        "subcategory": "Fluttering feathers",
+        "tags": [
+          "table to farm",
+          "fluttering feathers",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_FEATHERS_01_7 Aleteo 2.wav"
+    },
+    {
+      "id": "freesound:240469",
+      "sourceTitle": "wings2.wav",
+      "originalName": "240469.wav",
+      "source": "https://freesound.org/s/240469/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z04/content",
+      "author": "Godowan",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z04",
+        "offset": 1008808051,
+        "compressedBytes": 32086,
+        "bytes": 55260,
+        "crc32": "afccbd21",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "Wings flapping small bird",
+      "recordingType": "Source recording",
+      "duration": 0.626,
+      "bytes": 55260,
+      "sha256": "de4904d1a1950aa2f7745b67c90d3737282cfb24de8bd3e00b42c10da917656c",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "04 Fluttering feathers",
+      "classification": {
+        "schema": 1,
+        "category": "04 Fluttering feathers",
+        "subcategory": "Fluttering feathers",
+        "tags": [
+          "table to farm",
+          "fluttering feathers",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_FEATHERS_02_wings2.wav"
+    },
+    {
+      "id": "freesound:240476",
+      "sourceTitle": "wings.wav",
+      "originalName": "240476.wav",
+      "source": "https://freesound.org/s/240476/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z05/content",
+      "author": "Godowan",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z05",
+        "offset": 1268370912,
+        "compressedBytes": 46895,
+        "bytes": 84688,
+        "crc32": "e3b60e67",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "Wings of a small bird flapping fast",
+      "recordingType": "Source recording",
+      "duration": 0.959,
+      "bytes": 84688,
+      "sha256": "e2f1c08b5da54cd1122dbbe1375987598031b40be53722331ebc73e2c00ee843",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "04 Fluttering feathers",
+      "classification": {
+        "schema": 1,
+        "category": "04 Fluttering feathers",
+        "subcategory": "Fluttering feathers",
+        "tags": [
+          "table to farm",
+          "fluttering feathers",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_FEATHERS_03_wings.wav"
+    },
+    {
+      "id": "freesound:153196",
+      "sourceTitle": "Pigeon flying.wav",
+      "originalName": "153196.wav",
+      "source": "https://freesound.org/s/153196/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.eval_audio.zip/content",
+      "author": "marcolo91",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.eval_audio.zip",
+        "offset": 62822220,
+        "compressedBytes": 77705,
+        "bytes": 89030,
+        "crc32": "150b51e8",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "Recording of a pigeon when it started to fly. It was recorded in Pompeu Fabra University (Poblenou Campus) with a zoom H4.",
+      "recordingType": "Source recording",
+      "duration": 1.009,
+      "bytes": 89030,
+      "sha256": "9645d4c6e0941015c246dd9e778f7436a23dc73151ec518771e579366aef1ce4",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "04 Fluttering feathers",
+      "classification": {
+        "schema": 1,
+        "category": "04 Fluttering feathers",
+        "subcategory": "Fluttering feathers",
+        "tags": [
+          "table to farm",
+          "fluttering feathers",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_FEATHERS_04_Pigeon flying.wav"
+    },
+    {
+      "id": "freesound:153277",
+      "sourceTitle": "Beating wings of a pigeon",
+      "originalName": "153277.wav",
+      "source": "https://freesound.org/s/153277/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.zip/content",
+      "author": "gerardcatala",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.zip",
+        "offset": 785879330,
+        "compressedBytes": 92092,
+        "bytes": 106292,
+        "crc32": "f9a7d5d2",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "The taking off of a pigeon outside the bar.",
+      "recordingType": "Source recording",
+      "duration": 1.204,
+      "bytes": 106292,
+      "sha256": "f6f2bc08ed13b294b5af84936746bccf15ba23f6a572fccc48d1a586131620aa",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "04 Fluttering feathers",
+      "classification": {
+        "schema": 1,
+        "category": "04 Fluttering feathers",
+        "subcategory": "Fluttering feathers",
+        "tags": [
+          "table to farm",
+          "fluttering feathers",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_FEATHERS_05_Beating wings of a pigeon.wav"
+    },
+    {
+      "id": "freesound:116226",
+      "sourceTitle": "mourning_dove_wings.wav",
+      "originalName": "116226.wav",
+      "source": "https://freesound.org/s/116226/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z01/content",
+      "author": "soundbytez",
+      "license": "CC BY 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z01",
+        "offset": 1344508162,
+        "compressedBytes": 101499,
+        "bytes": 119148,
+        "crc32": "87baab96",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "The sounds made by the wings of a Mourning Dove as it flies. Recorded with a Zoom H2.",
+      "recordingType": "Source recording",
+      "duration": 1.35,
+      "bytes": 119148,
+      "sha256": "b0c8f0a78bcb2b5ba6a0b02401c504143c50af37cae871ca26dc0f1a5622b1e8",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "04 Fluttering feathers",
+      "classification": {
+        "schema": 1,
+        "category": "04 Fluttering feathers",
+        "subcategory": "Fluttering feathers",
+        "tags": [
+          "table to farm",
+          "fluttering feathers",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_FEATHERS_06_mourning_dove_wings.wav"
+    },
+    {
+      "id": "freesound:414671",
+      "sourceTitle": "short pigeon wing flap",
+      "originalName": "414671.wav",
+      "source": "https://freesound.org/s/414671/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z03/content",
+      "author": "zouzmusic",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z03",
+        "offset": 926958035,
+        "compressedBytes": 81581,
+        "bytes": 119888,
+        "crc32": "6c7eaa11",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "boost the lows, layer and add some delay and it's a good wing flap of a flock of birds",
+      "recordingType": "Source recording",
+      "duration": 1.358,
+      "bytes": 119888,
+      "sha256": "72f430f8cd761bd15f001442e6f28e5c1e661de8e6bc58626031d1a201e1decf",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "04 Fluttering feathers",
+      "classification": {
+        "schema": 1,
+        "category": "04 Fluttering feathers",
+        "subcategory": "Fluttering feathers",
+        "tags": [
+          "table to farm",
+          "fluttering feathers",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_FEATHERS_07_short pigeon wing flap.wav"
+    },
+    {
+      "id": "freesound:330966",
+      "sourceTitle": "Bird Flap B 01.wav",
+      "originalName": "330966.wav",
+      "source": "https://freesound.org/s/330966/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.zip/content",
+      "author": "Adam_N",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.zip",
+        "offset": 2017585513,
+        "compressedBytes": 83573,
+        "bytes": 129656,
+        "crc32": "cde1bf3e",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "A bird flapping sound made using a pair of gloves recorded in sync with picture.",
+      "recordingType": "Source recording",
+      "duration": 1.469,
+      "bytes": 129656,
+      "sha256": "fbf8bf7915ca2fe4e706511e1493fb5fea5a577dddc923d0f41d03461a0d493d",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "04 Fluttering feathers",
+      "classification": {
+        "schema": 1,
+        "category": "04 Fluttering feathers",
+        "subcategory": "Fluttering feathers",
+        "tags": [
+          "table to farm",
+          "fluttering feathers",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_FEATHERS_08_Bird Flap B 01.wav"
+    },
+    {
+      "id": "freesound:424463",
+      "sourceTitle": "BirdWingFlap.wav",
+      "originalName": "424463.wav",
+      "source": "https://freesound.org/s/424463/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.eval_audio.zip/content",
+      "author": "nicStage",
+      "license": "CC BY 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0/",
+      "archive": {
+        "file": "FSD50K.eval_audio.zip",
+        "offset": 273447711,
+        "compressedBytes": 140778,
+        "bytes": 162182,
+        "crc32": "7aa7b8f1",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "Conure flapping its wings.",
+      "recordingType": "Source recording",
+      "duration": 1.838,
+      "bytes": 162182,
+      "sha256": "2b4d1651960b12d38a27ec033eca5af49cb40cf743d140d2d980444d942e22d8",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "04 Fluttering feathers",
+      "classification": {
+        "schema": 1,
+        "category": "04 Fluttering feathers",
+        "subcategory": "Fluttering feathers",
+        "tags": [
+          "table to farm",
+          "fluttering feathers",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_FEATHERS_09_BirdWingFlap.wav"
+    },
+    {
+      "id": "freesound:164913",
+      "sourceTitle": "birds-wings-48Hz",
+      "originalName": "164913.wav",
+      "source": "https://freesound.org/s/164913/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z05/content",
+      "author": "CosmicEmbers",
+      "license": "CC BY 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z05",
+        "offset": 2914584463,
+        "compressedBytes": 147022,
+        "bytes": 186408,
+        "crc32": "3581a271",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "This is exactly the same as my other sample \"Birds Wings\" except it is converted down to 48Hz someone was having trouble with the 96Hz version (no wonder really) so here is something which should be workable :-) I needed to make the sound of some birds flying away for a film I did Foley for, and I had read somewhere that leather gloves being flapped sounded a lot like birds flying, so I tried it out and it worked rather well :-) I was pleased :-) here check out the film here, its used when the pidgins take flight :-) http://www.youtube.com/watch?v=NK8f1Q8ARl4&feature;=plcp If you could credit us as follows when you use our sounds that would be awesome :-) (Name of sound here) by Cosmic Embers www.youtube.com/cosmicembers (or you could also put \"Additional Sound effects provided by Cosmic Embers www.youtube.com/cosmicembers\" that would work just as well :-)) Equipment used: AT875r Cardioid mic run into a zoom H4N ~Dane Vandewiele",
+      "recordingType": "Source recording",
+      "duration": 2.113,
+      "bytes": 186408,
+      "sha256": "b4d130bcf3e37d83b39e4221c506406e5a1d355d05cc02b6fa7d5433c9d05618",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "04 Fluttering feathers",
+      "classification": {
+        "schema": 1,
+        "category": "04 Fluttering feathers",
+        "subcategory": "Fluttering feathers",
+        "tags": [
+          "table to farm",
+          "fluttering feathers",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_FEATHERS_10_birds-wings-48Hz.wav"
+    },
+    {
+      "id": "freesound:233094",
+      "sourceTitle": "Chicken - Footsteps 1 - 96kHz.wav",
+      "originalName": "233094.wav",
+      "source": "https://freesound.org/s/233094/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z04/content",
+      "author": "JarredGibb",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z04",
+        "offset": 405618240,
+        "compressedBytes": 164251,
+        "bytes": 230600,
+        "crc32": "051be4f7",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "A chicken",
+      "recordingType": "Source recording",
+      "duration": 2.614,
+      "bytes": 230600,
+      "sha256": "15247d52e69b33ffc08e5cac67c1fadbd8d701083c49bde857ee1b0348fbafce",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "05 Pitter-patter feet",
+      "classification": {
+        "schema": 1,
+        "category": "05 Pitter-patter feet",
+        "subcategory": "Pitter-patter feet",
+        "tags": [
+          "table to farm",
+          "pitter-patter feet",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_FEET_01_Chicken - Footsteps 1 - 96kHz.wav"
+    },
+    {
+      "id": "freesound:392482",
+      "sourceTitle": "Footsteps tap.wav",
+      "originalName": "392482.wav",
+      "source": "https://freesound.org/s/392482/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.eval_audio.zip/content",
+      "author": "gpag1",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.eval_audio.zip",
+        "offset": 1096145510,
+        "compressedBytes": 133324,
+        "bytes": 239800,
+        "crc32": "7a7852a4",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "Foley footsteps done with a tap shoe. Recorded with AT875R on a wood stage floor.",
+      "recordingType": "Source recording",
+      "duration": 2.718,
+      "bytes": 239800,
+      "sha256": "24609dfed77b69e6005eb42aa0900c92f270d5eebc7b4e657b635a8aa2ed9100",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "05 Pitter-patter feet",
+      "classification": {
+        "schema": 1,
+        "category": "05 Pitter-patter feet",
+        "subcategory": "Pitter-patter feet",
+        "tags": [
+          "table to farm",
+          "pitter-patter feet",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_FEET_02_Footsteps tap.wav"
+    },
+    {
+      "id": "freesound:127955",
+      "sourceTitle": "Running on grass with wet feet.aif",
+      "originalName": "127955.wav",
+      "source": "https://freesound.org/s/127955/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.eval_audio.z01/content",
+      "author": "nathanaelsams",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.eval_audio.z01",
+        "offset": 2663356411,
+        "compressedBytes": 151099,
+        "bytes": 200470,
+        "crc32": "10e46258",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "This is a sound recorded for a project where the character is running on wet grass.",
+      "recordingType": "Source recording",
+      "duration": 2.272,
+      "bytes": 200470,
+      "sha256": "cca0654e3f4ce2fd7f81f47b15e6e9193682a3ba0452d8fade75af8cc50528b4",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "05 Pitter-patter feet",
+      "classification": {
+        "schema": 1,
+        "category": "05 Pitter-patter feet",
+        "subcategory": "Pitter-patter feet",
+        "tags": [
+          "table to farm",
+          "pitter-patter feet",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_FEET_03_Running on grass with wet feet.wav"
+    },
+    {
+      "id": "freesound:316922",
+      "sourceTitle": "Footsteps Running Away Fading 2",
+      "originalName": "316922.wav",
+      "source": "https://freesound.org/s/316922/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z04/content",
+      "author": "Rudmer_Rotteveel",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z04",
+        "offset": 703038600,
+        "compressedBytes": 128958,
+        "bytes": 218108,
+        "crc32": "f1bb1373",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "Sound effect for a person running away (2 of 2). A similar sound effect and a full recording of many types of running and walking are also available. Recorded with a Samson Q7 microphone through a Phonic AM85 analogue mixer. CC0, so no hassle with giving credit",
+      "recordingType": "Source recording",
+      "duration": 2.472,
+      "bytes": 218108,
+      "sha256": "7bc50a587460ec11646ef58bf02f1c299af26f05ce8f0826b696e3c6a01459f6",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "05 Pitter-patter feet",
+      "classification": {
+        "schema": 1,
+        "category": "05 Pitter-patter feet",
+        "subcategory": "Pitter-patter feet",
+        "tags": [
+          "table to farm",
+          "pitter-patter feet",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_FEET_04_Footsteps Running Away Fading 2.wav"
+    },
+    {
+      "id": "freesound:54780",
+      "sourceTitle": "running leafy area loop.wav",
+      "originalName": "54780.wav",
+      "source": "https://freesound.org/s/54780/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z05/content",
+      "author": "bevangoldswain",
+      "license": "CC BY 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/sampling+/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z05",
+        "offset": 1498362250,
+        "compressedBytes": 168666,
+        "bytes": 213840,
+        "crc32": "7c33b84e",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "footsteps running/walking through a leafy jungle.",
+      "recordingType": "Source recording",
+      "duration": 2.424,
+      "bytes": 213840,
+      "sha256": "0529f3253e1bbeda1218a2f3c0fdbd02cd25affac0344b480e2d155338b142a7",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "05 Pitter-patter feet",
+      "classification": {
+        "schema": 1,
+        "category": "05 Pitter-patter feet",
+        "subcategory": "Pitter-patter feet",
+        "tags": [
+          "table to farm",
+          "pitter-patter feet",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_FEET_05_running leafy area loop.wav"
+    },
+    {
+      "id": "freesound:340206",
+      "sourceTitle": "FootstepHardwood03.wav",
+      "originalName": "340206.wav",
+      "source": "https://freesound.org/s/340206/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z02/content",
+      "author": "kingof_thelab",
+      "license": "CC BY 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z02",
+        "offset": 3066369961,
+        "compressedBytes": 22670,
+        "bytes": 56858,
+        "crc32": "e12b6dca",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "A one-shot footstep on a hardwood floor.",
+      "recordingType": "Source recording",
+      "duration": 0.644,
+      "bytes": 56858,
+      "sha256": "7861fbd83033508998e0469525b0f22e68caac24c9e7f6945a2451acf64d3f78",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "05 Pitter-patter feet",
+      "classification": {
+        "schema": 1,
+        "category": "05 Pitter-patter feet",
+        "subcategory": "Pitter-patter feet",
+        "tags": [
+          "table to farm",
+          "pitter-patter feet",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_FEET_06_FootstepHardwood03.wav"
+    },
+    {
+      "id": "freesound:138337",
+      "sourceTitle": "Running_Boots_on_Pavement.wav",
+      "originalName": "138337.wav",
+      "source": "https://freesound.org/s/138337/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z03/content",
+      "author": "Tdude9000",
+      "license": "CC BY 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z03",
+        "offset": 1291372636,
+        "compressedBytes": 55724,
+        "bytes": 92046,
+        "crc32": "92d147fa",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "Running footsteps on pavement. The runner is wearing boots.",
+      "recordingType": "Source recording",
+      "duration": 1.043,
+      "bytes": 92046,
+      "sha256": "10f2f730eac39e1b3107afc3aea4a573da50a1bbb71135dcf44ea5bf919958e2",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "05 Pitter-patter feet",
+      "classification": {
+        "schema": 1,
+        "category": "05 Pitter-patter feet",
+        "subcategory": "Pitter-patter feet",
+        "tags": [
+          "table to farm",
+          "pitter-patter feet",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_FEET_07_Running_Boots_on_Pavement.wav"
+    },
+    {
+      "id": "freesound:348355",
+      "sourceTitle": "Footstep",
+      "originalName": "348355.wav",
+      "source": "https://freesound.org/s/348355/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z04/content",
+      "author": "Natty23",
+      "license": "CC BY 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z04",
+        "offset": 1481083475,
+        "compressedBytes": 26989,
+        "bytes": 42166,
+        "crc32": "0f7e4fa1",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "A simple footstep sound effect that was made by tapping my finger on a mouse pad. It was also recorded with my new Samson C03U microphone.",
+      "recordingType": "Source recording",
+      "duration": 0.477,
+      "bytes": 42166,
+      "sha256": "7eeba50651547af271ef08c1e7b01cb41e50c616afb645ad171be32cdfa1ba82",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "05 Pitter-patter feet",
+      "classification": {
+        "schema": 1,
+        "category": "05 Pitter-patter feet",
+        "subcategory": "Pitter-patter feet",
+        "tags": [
+          "table to farm",
+          "pitter-patter feet",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_FEET_08_Footstep.wav"
+    },
+    {
+      "id": "freesound:138336",
+      "sourceTitle": "Running_Distant.wav",
+      "originalName": "138336.wav",
+      "source": "https://freesound.org/s/138336/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z03/content",
+      "author": "Tdude9000",
+      "license": "CC BY 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z03",
+        "offset": 1549362786,
+        "compressedBytes": 53043,
+        "bytes": 86176,
+        "crc32": "91c108d3",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "Running footsteps from 20 feet away.",
+      "recordingType": "Source recording",
+      "duration": 0.976,
+      "bytes": 86176,
+      "sha256": "3114ade8d139d3cb0ff5022a549bd9087bc0f47daa2e63cd7a5278bea5ca005d",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "05 Pitter-patter feet",
+      "classification": {
+        "schema": 1,
+        "category": "05 Pitter-patter feet",
+        "subcategory": "Pitter-patter feet",
+        "tags": [
+          "table to farm",
+          "pitter-patter feet",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_FEET_09_Running_Distant.wav"
+    },
+    {
+      "id": "freesound:411148",
+      "sourceTitle": "running in grass",
+      "originalName": "411148.wav",
+      "source": "https://freesound.org/s/411148/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z05/content",
+      "author": "ETM654",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z05",
+        "offset": 2966690716,
+        "compressedBytes": 136292,
+        "bytes": 193614,
+        "crc32": "7a7ea8cf",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "sounds like when you walk in tall grass, made it by shaking a bean bag",
+      "recordingType": "Source recording",
+      "duration": 2.194,
+      "bytes": 193614,
+      "sha256": "efa4042fb1d2532046a6b72f2f39a2703acaa6943935825d5b09a094be49181c",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "05 Pitter-patter feet",
+      "classification": {
+        "schema": 1,
+        "category": "05 Pitter-patter feet",
+        "subcategory": "Pitter-patter feet",
+        "tags": [
+          "table to farm",
+          "pitter-patter feet",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_FEET_10_running in grass.wav"
+    },
+    {
+      "id": "freesound:334061",
+      "sourceTitle": "satisfiedSigh.wav",
+      "originalName": "334061.wav",
+      "source": "https://freesound.org/s/334061/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z02/content",
+      "author": "garynoden",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z02",
+        "offset": 2310696749,
+        "compressedBytes": 150428,
+        "bytes": 185298,
+        "crc32": "34caa46a",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "A single long happy contented sigh of a man aged between 30 and 45. Imagine he's sliding into a hot bath. Or taking a sip from a well deserved cup of coffee. He's a very happy man. Recorded at home on a Rode NTA1 mic using Adobe Audition CS6 on a PC. The voice is my own, the only edit was a cleaning of bg noise on the record and a trim to remove extraneous sound.",
+      "recordingType": "Source recording",
+      "duration": 2.1,
+      "bytes": 185298,
+      "sha256": "e6d9ac7bb37138ab9457ec601fbf7e3d49fe01abf37602af1ae5b81372555b56",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "06 Sighs",
+      "classification": {
+        "schema": 1,
+        "category": "06 Sighs",
+        "subcategory": "Sighs",
+        "tags": [
+          "table to farm",
+          "sighs",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_SIGH_01_satisfiedSigh.wav"
+    },
+    {
+      "id": "freesound:318088",
+      "sourceTitle": "Sigh_3_Male",
+      "originalName": "318088.wav",
+      "source": "https://freesound.org/s/318088/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z01/content",
+      "author": "Drkvixn91",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z01",
+        "offset": 1179410312,
+        "compressedBytes": 165114,
+        "bytes": 235402,
+        "crc32": "34933897",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "A young male sighing, possibly in frustration, exasperation, boredom, anger, etc. Recorded using my Turtlebeach Earforce-X12 headset and then edited in Audacity.",
+      "recordingType": "Source recording",
+      "duration": 2.668,
+      "bytes": 235402,
+      "sha256": "625a0f89dc483973e89ab61cc38d409bb9cf82415a9231ff5d8b76005ec41a8f",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "06 Sighs",
+      "classification": {
+        "schema": 1,
+        "category": "06 Sighs",
+        "subcategory": "Sighs",
+        "tags": [
+          "table to farm",
+          "sighs",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_SIGH_02_Sigh_3_Male.wav"
+    },
+    {
+      "id": "freesound:9661",
+      "sourceTitle": "sighclean.wav",
+      "originalName": "9661.wav",
+      "source": "https://freesound.org/s/9661/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z01/content",
+      "author": "thanvannispen",
+      "license": "CC BY 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z01",
+        "offset": 42448552,
+        "compressedBytes": 248692,
+        "bytes": 287290,
+        "crc32": "da1ce858",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "male sighs, 'end of the day'-sigh",
+      "recordingType": "Source recording",
+      "duration": 3.256,
+      "bytes": 287290,
+      "sha256": "839c0c1344d75d07418de34ab36379d48c05ae91f9e746a4cbf64c49ad534f03",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "06 Sighs",
+      "classification": {
+        "schema": 1,
+        "category": "06 Sighs",
+        "subcategory": "Sighs",
+        "tags": [
+          "table to farm",
+          "sighs",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_SIGH_03_sighclean.wav"
+    },
+    {
+      "id": "freesound:146769",
+      "sourceTitle": "Sigh1.wav",
+      "originalName": "146769.wav",
+      "source": "https://freesound.org/s/146769/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.eval_audio.zip/content",
+      "author": "tgfcoder",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.eval_audio.zip",
+        "offset": 1295930236,
+        "compressedBytes": 278788,
+        "bytes": 414798,
+        "crc32": "080b3fee",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "Full inhale and long exhale.",
+      "recordingType": "Source recording",
+      "duration": 4.702,
+      "bytes": 414798,
+      "sha256": "3d838f9d7482341b50d896a13f6728b6849d8209bc343d987cb392ca1107c0ee",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "06 Sighs",
+      "classification": {
+        "schema": 1,
+        "category": "06 Sighs",
+        "subcategory": "Sighs",
+        "tags": [
+          "table to farm",
+          "sighs",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_SIGH_04_Sigh1.wav"
+    },
+    {
+      "id": "freesound:336540",
+      "sourceTitle": "Sigh 2, male",
+      "originalName": "336540.wav",
+      "source": "https://freesound.org/s/336540/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z01/content",
+      "author": "chrillz3r",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z01",
+        "offset": 903111110,
+        "compressedBytes": 245169,
+        "bytes": 434704,
+        "crc32": "a1b52bcb",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "Another male sigh. Also slightly despondent. I looked that word up. Recorded with a Zoom H1.",
+      "recordingType": "Source recording",
+      "duration": 4.928,
+      "bytes": 434704,
+      "sha256": "542b41b0cda71bbfc03e4836eb18978af994599bf9bcde3996b659bcc80b9850",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "06 Sighs",
+      "classification": {
+        "schema": 1,
+        "category": "06 Sighs",
+        "subcategory": "Sighs",
+        "tags": [
+          "table to farm",
+          "sighs",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_SIGH_05_Sigh 2 male.wav"
+    },
+    {
+      "id": "freesound:336539",
+      "sourceTitle": "Sigh, male",
+      "originalName": "336539.wav",
+      "source": "https://freesound.org/s/336539/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.zip/content",
+      "author": "chrillz3r",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.zip",
+        "offset": 1563035928,
+        "compressedBytes": 212913,
+        "bytes": 449032,
+        "crc32": "68ae1912",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "A recording of a despondent male sigh. Recorded with a Zoom H1.",
+      "recordingType": "Source recording",
+      "duration": 5.09,
+      "bytes": 449032,
+      "sha256": "a6cb06c4a4d325be7154ef728ff921110e33c446b0b9011f443cd156e48d895d",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "06 Sighs",
+      "classification": {
+        "schema": 1,
+        "category": "06 Sighs",
+        "subcategory": "Sighs",
+        "tags": [
+          "table to farm",
+          "sighs",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_SIGH_06_Sigh male.wav"
+    },
+    {
+      "id": "freesound:275055",
+      "sourceTitle": "sigh.wav",
+      "originalName": "275055.wav",
+      "source": "https://freesound.org/s/275055/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z03/content",
+      "author": "Ashtalon",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z03",
+        "offset": 2770248935,
+        "compressedBytes": 62464,
+        "bytes": 94168,
+        "crc32": "8bda6b69",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "A grunty male sigh.",
+      "recordingType": "Source recording",
+      "duration": 1.067,
+      "bytes": 94168,
+      "sha256": "7596d3f16e29ec6e26409a732ab38b98907b85834a684ccf686b68a45e41fd2a",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "06 Sighs",
+      "classification": {
+        "schema": 1,
+        "category": "06 Sighs",
+        "subcategory": "Sighs",
+        "tags": [
+          "table to farm",
+          "sighs",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_SIGH_07_sigh.wav"
+    },
+    {
+      "id": "freesound:215380",
+      "sourceTitle": "male sigh.wav",
+      "originalName": "215380.wav",
+      "source": "https://freesound.org/s/215380/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z04/content",
+      "author": "Reitanna",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z04",
+        "offset": 338956080,
+        "compressedBytes": 134219,
+        "bytes": 160846,
+        "crc32": "ac95993f",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "my boyfriend sighing",
+      "recordingType": "Source recording",
+      "duration": 1.823,
+      "bytes": 160846,
+      "sha256": "dce37f20af287e9a6ef6a1e59d1f2b5fe201f34ffbf5b3edac39955476f7a68c",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "06 Sighs",
+      "classification": {
+        "schema": 1,
+        "category": "06 Sighs",
+        "subcategory": "Sighs",
+        "tags": [
+          "table to farm",
+          "sighs",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_SIGH_08_male sigh.wav"
+    },
+    {
+      "id": "freesound:318081",
+      "sourceTitle": "Sigh_2_Male",
+      "originalName": "318081.wav",
+      "source": "https://freesound.org/s/318081/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z05/content",
+      "author": "Drkvixn91",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z05",
+        "offset": 3060346715,
+        "compressedBytes": 239218,
+        "bytes": 317190,
+        "crc32": "ebaa88a3",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "A young male sighing, possibly in frustration, exasperation, boredom, anger, etc. Recorded using my Turtlebeach Earforce-X12 headset and then edited in Audacity.",
+      "recordingType": "Source recording",
+      "duration": 3.595,
+      "bytes": 317190,
+      "sha256": "4615a8e9f3b71bc1071d58c337cf96a766e850af26235d3f103de0cea6b35ff6",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "06 Sighs",
+      "classification": {
+        "schema": 1,
+        "category": "06 Sighs",
+        "subcategory": "Sighs",
+        "tags": [
+          "table to farm",
+          "sighs",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_SIGH_09_Sigh_2_Male.wav"
+    },
+    {
+      "id": "freesound:318083",
+      "sourceTitle": "Sigh_1_Male",
+      "originalName": "318083.wav",
+      "source": "https://freesound.org/s/318083/",
+      "url": "https://zenodo.org/api/records/4060432/files/FSD50K.dev_audio.z04/content",
+      "author": "Drkvixn91",
+      "license": "CC0 1.0",
+      "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "archive": {
+        "file": "FSD50K.dev_audio.z04",
+        "offset": 858281176,
+        "compressedBytes": 267012,
+        "bytes": 378324,
+        "crc32": "d66ca6a9",
+        "method": 8
+      },
+      "mime": "audio/wav",
+      "description": "A young male sighing, possibly in frustration, exasperation, boredom, anger, etc. Recorded using my Turtlebeach Earforce-X12 headset and then edited in Audacity.",
+      "recordingType": "Source recording",
+      "duration": 4.289,
+      "bytes": 378324,
+      "sha256": "0b8e54ddf400ac22b767b390d767eabea67ec41104157812f1466d86187180b3",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "06 Sighs",
+      "classification": {
+        "schema": 1,
+        "category": "06 Sighs",
+        "subcategory": "Sighs",
+        "tags": [
+          "table to farm",
+          "sighs",
+          "source recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_SIGH_10_Sigh_1_Male.wav"
+    },
+    {
+      "id": "commons:64739014",
+      "sourceTitle": "Sneaky Snitch (ISRC USUAN1100772).mp3",
+      "originalName": "Sneaky Snitch (ISRC USUAN1100772).mp3",
+      "source": "https://commons.wikimedia.org/wiki/File:Sneaky_Snitch_(ISRC_USUAN1100772).mp3",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/1/1f/Sneaky_Snitch_%28ISRC_USUAN1100772%29.mp3",
+      "author": "Kevin MacLeod",
+      "license": "CC BY 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0",
+      "mime": "audio/mpeg",
+      "sha1": "c7485de2ec8cd5254b3e7aba97194f4a240f75d7",
+      "recordingType": "Music recording",
+      "description": "Sneaky Snitch Sneaky Snitch Kevin MacLeod (incompetech.com)Licensed under Creative Commons: By Attribution 3.0 Licensehttps://creativecommons.org/licenses/by/3.0/",
+      "recommendedTrim": {
+        "start": 0,
+        "end": 7.92
+      },
+      "auditionSeconds": 8,
+      "duration": 136.62,
+      "bytes": 5466943,
+      "sha256": "db1710333d68a215277f77e4e17e1a64bf4ed38f87c70f8d0f56b16b6aa4f884",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "07 Quick comedy score",
+      "classification": {
+        "schema": 1,
+        "category": "07 Quick comedy score",
+        "subcategory": "Quick comedy score",
+        "tags": [
+          "table to farm",
+          "quick comedy score",
+          "music recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_SCORE_01_Sneaky Snitch.mp3"
+    },
+    {
+      "id": "commons:64739058",
+      "sourceTitle": "Fluffing a Duck (ISRC USUAN1100768).mp3",
+      "originalName": "Fluffing a Duck (ISRC USUAN1100768).mp3",
+      "source": "https://commons.wikimedia.org/wiki/File:Fluffing_a_Duck_(ISRC_USUAN1100768).mp3",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/2/27/Fluffing_a_Duck_%28ISRC_USUAN1100768%29.mp3",
+      "author": "Kevin MacLeod",
+      "license": "CC BY 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0",
+      "mime": "audio/mpeg",
+      "sha1": "d5aa8769c6f3e9f2dcfe15effb7e5922a4a98331",
+      "recordingType": "Music recording",
+      "description": "Fluffing a Duck Fluffing a Duck Kevin MacLeod (incompetech.com)Licensed under Creative Commons: By Attribution 3.0 Licensehttps://creativecommons.org/licenses/by/3.0/",
+      "recommendedTrim": {
+        "start": 0,
+        "end": 7.92
+      },
+      "auditionSeconds": 8,
+      "duration": 67.368,
+      "bytes": 2696840,
+      "sha256": "cb23b1833c35e391de10d998d6a40cfc760565ce31d23014c86025523ca8239b",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "07 Quick comedy score",
+      "classification": {
+        "schema": 1,
+        "category": "07 Quick comedy score",
+        "subcategory": "Quick comedy score",
+        "tags": [
+          "table to farm",
+          "quick comedy score",
+          "music recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_SCORE_02_Fluffing a Duck.mp3"
+    },
+    {
+      "id": "commons:145391560",
+      "sourceTitle": "Kevin MacLeod - Scheming Weasel (faster).wav",
+      "originalName": "Kevin MacLeod - Scheming Weasel (faster).wav",
+      "source": "https://commons.wikimedia.org/wiki/File:Kevin_MacLeod_-_Scheming_Weasel_(faster).wav",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/9/9e/Kevin_MacLeod_-_Scheming_Weasel_%28faster%29.wav",
+      "author": "Kevin MacLeod",
+      "license": "CC BY 4.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/4.0",
+      "mime": "audio/wav",
+      "sha1": null,
+      "recordingType": "Music recording",
+      "description": "Scheming Weasel (faster version) ISRC: USUAN1100085",
+      "recommendedTrim": {
+        "start": 0,
+        "end": 7.92
+      },
+      "auditionSeconds": 8,
+      "duration": 89.13,
+      "bytes": 15723002,
+      "sha256": "b184f59bbe34b20edc7b13c9c5f5c48737cf72cd0de52f57a2a0e1fc55f4646a",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "07 Quick comedy score",
+      "classification": {
+        "schema": 1,
+        "category": "07 Quick comedy score",
+        "subcategory": "Quick comedy score",
+        "tags": [
+          "table to farm",
+          "quick comedy score",
+          "music recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_SCORE_03_Scheming Weasel  faster.wav"
+    },
+    {
+      "id": "commons:88730740",
+      "sourceTitle": "Monkeys Spinning Monkeys by Kevin MacLeod.ogg",
+      "originalName": "Monkeys Spinning Monkeys by Kevin MacLeod.ogg",
+      "source": "https://commons.wikimedia.org/wiki/File:Monkeys_Spinning_Monkeys_by_Kevin_MacLeod.ogg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/fe/Monkeys_Spinning_Monkeys_by_Kevin_MacLeod.ogg",
+      "author": "Kevin MacLeod",
+      "license": "CC BY 4.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/4.0",
+      "mime": "application/ogg",
+      "sha1": null,
+      "recordingType": "Music recording",
+      "description": "Monkeys Spinning Monkeys Loopable happy light fluffy piece with bright flutes and a bunch of pizzicato strings.",
+      "recommendedTrim": {
+        "start": 0,
+        "end": 7.92
+      },
+      "auditionSeconds": 8,
+      "duration": 125.074,
+      "bytes": 2647613,
+      "sha256": "09d7249884554dcb8c08e2a5b7a7c8f12bbfbc30033b7ffc501ad32c785d525c",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "07 Quick comedy score",
+      "classification": {
+        "schema": 1,
+        "category": "07 Quick comedy score",
+        "subcategory": "Quick comedy score",
+        "tags": [
+          "table to farm",
+          "quick comedy score",
+          "music recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_SCORE_04_Monkeys Spinning Monkeys.ogg"
+    },
+    {
+      "id": "commons:95762187",
+      "sourceTitle": "Le Grand Chase by Kevin MacLeod.ogg",
+      "originalName": "Le Grand Chase by Kevin MacLeod.ogg",
+      "source": "https://commons.wikimedia.org/wiki/File:Le_Grand_Chase_by_Kevin_MacLeod.ogg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/c/cc/Le_Grand_Chase_by_Kevin_MacLeod.ogg",
+      "author": "Kevin MacLeod",
+      "license": "CC BY 4.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/4.0",
+      "mime": "application/ogg",
+      "sha1": null,
+      "recordingType": "Music recording",
+      "description": "You never notice how effective a car horn is until you use it. I usually park my car near a sidewalk and alarm 7 year olds on their way to and from school. 7 year olds are your target market for this sort of thing. They jump like antelope! All the kids in my neighborhood are acclimatized, now. It isn't as much fun. You also never notice how effective a Picardy third is until you do it with car horns. You're welcome.",
+      "recommendedTrim": {
+        "start": 0,
+        "end": 7.92
+      },
+      "auditionSeconds": 8,
+      "duration": 100.728,
+      "bytes": 2430590,
+      "sha256": "d4d5b0e9c642c1f0d41541841c9eca9d07126ec6befedaea5aab65e071cf25d5",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "07 Quick comedy score",
+      "classification": {
+        "schema": 1,
+        "category": "07 Quick comedy score",
+        "subcategory": "Quick comedy score",
+        "tags": [
+          "table to farm",
+          "quick comedy score",
+          "music recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_SCORE_05_Le Grand Chase.ogg"
+    },
+    {
+      "id": "commons:64741421",
+      "sourceTitle": "Investigations (ISRC USUAN1100646).mp3",
+      "originalName": "Investigations (ISRC USUAN1100646).mp3",
+      "source": "https://commons.wikimedia.org/wiki/File:Investigations_(ISRC_USUAN1100646).mp3",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/8/83/Investigations_%28ISRC_USUAN1100646%29.mp3",
+      "author": "Kevin MacLeod",
+      "license": "CC BY 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0",
+      "mime": "audio/mpeg",
+      "sha1": "fcc7a1c10a6f38256db095b2a9be0ddd0584f913",
+      "recordingType": "Music recording",
+      "description": "Investigations Investigations Kevin MacLeod (incompetech.com)Licensed under Creative Commons: By Attribution 3.0 Licensehttps://creativecommons.org/licenses/by/3.0/",
+      "recommendedTrim": {
+        "start": 0,
+        "end": 7.92
+      },
+      "auditionSeconds": 8,
+      "duration": 93.544,
+      "bytes": 3745876,
+      "sha256": "699f7a3cd227dfe5c1e88099b45af57202bfe9d56f86b8b43e4252b65dd96768",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "07 Quick comedy score",
+      "classification": {
+        "schema": 1,
+        "category": "07 Quick comedy score",
+        "subcategory": "Quick comedy score",
+        "tags": [
+          "table to farm",
+          "quick comedy score",
+          "music recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_SCORE_06_Investigations.mp3"
+    },
+    {
+      "id": "commons:64741457",
+      "sourceTitle": "Sneaky Adventure (ISRC USUAN1100644).mp3",
+      "originalName": "Sneaky Adventure (ISRC USUAN1100644).mp3",
+      "source": "https://commons.wikimedia.org/wiki/File:Sneaky_Adventure_(ISRC_USUAN1100644).mp3",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/9/9e/Sneaky_Adventure_%28ISRC_USUAN1100644%29.mp3",
+      "author": "Kevin MacLeod",
+      "license": "CC BY 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0",
+      "mime": "audio/mpeg",
+      "sha1": "841dc1205e2942163905a66666e26039d4c999b3",
+      "recordingType": "Music recording",
+      "description": "Sneaky Adventure Sneaky Adventure Kevin MacLeod (incompetech.com)Licensed under Creative Commons: By Attribution 3.0 Licensehttps://creativecommons.org/licenses/by/3.0/",
+      "recommendedTrim": {
+        "start": 0,
+        "end": 7.92
+      },
+      "auditionSeconds": 8,
+      "duration": 73.404,
+      "bytes": 2940260,
+      "sha256": "8514529e33cc05ee25a1ccddbe83cea8afea91e8b8e1261eaa4b85438bf6475e",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "07 Quick comedy score",
+      "classification": {
+        "schema": 1,
+        "category": "07 Quick comedy score",
+        "subcategory": "Quick comedy score",
+        "tags": [
+          "table to farm",
+          "quick comedy score",
+          "music recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_SCORE_07_Sneaky Adventure.mp3"
+    },
+    {
+      "id": "commons:64739672",
+      "sourceTitle": "Merry Go (ISRC USUAN1100731).mp3",
+      "originalName": "Merry Go (ISRC USUAN1100731).mp3",
+      "source": "https://commons.wikimedia.org/wiki/File:Merry_Go_(ISRC_USUAN1100731).mp3",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/fb/Merry_Go_%28ISRC_USUAN1100731%29.mp3",
+      "author": "Kevin MacLeod",
+      "license": "CC BY 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0",
+      "mime": "audio/mpeg",
+      "sha1": "933b7eb2e85faeb66ba7b9ca4b0dec6e33d3d1e4",
+      "recordingType": "Music recording",
+      "description": "Merry Go Merry Go Kevin MacLeod (incompetech.com)Licensed under Creative Commons: By Attribution 3.0 Licensehttps://creativecommons.org/licenses/by/3.0/",
+      "recommendedTrim": {
+        "start": 0,
+        "end": 7.92
+      },
+      "auditionSeconds": 8,
+      "duration": 120.424,
+      "bytes": 4821076,
+      "sha256": "c592ca0a9e2312280ea54070831a216c58ab7242890c0742eb95be5365b6e307",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "07 Quick comedy score",
+      "classification": {
+        "schema": 1,
+        "category": "07 Quick comedy score",
+        "subcategory": "Quick comedy score",
+        "tags": [
+          "table to farm",
+          "quick comedy score",
+          "music recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_SCORE_08_Merry Go.mp3"
+    },
+    {
+      "id": "commons:64751878",
+      "sourceTitle": "Comedic Juggernaut (ISRC USUAN1100288).mp3",
+      "originalName": "Comedic Juggernaut (ISRC USUAN1100288).mp3",
+      "source": "https://commons.wikimedia.org/wiki/File:Comedic_Juggernaut_(ISRC_USUAN1100288).mp3",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/d/da/Comedic_Juggernaut_%28ISRC_USUAN1100288%29.mp3",
+      "author": "Kevin MacLeod",
+      "license": "CC BY 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0",
+      "mime": "audio/mpeg",
+      "sha1": null,
+      "recordingType": "Music recording",
+      "description": "Comedic Juggernaut New Orleans style meets Spike Jones... sort of.",
+      "recommendedTrim": {
+        "start": 0,
+        "end": 7.92
+      },
+      "auditionSeconds": 8,
+      "duration": 46.056,
+      "bytes": 1933335,
+      "sha256": "a7f6f9185e8d747e648c2866591b7346eca62c8a377319e8655b8164bcdbed95",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "07 Quick comedy score",
+      "classification": {
+        "schema": 1,
+        "category": "07 Quick comedy score",
+        "subcategory": "Quick comedy score",
+        "tags": [
+          "table to farm",
+          "quick comedy score",
+          "music recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_SCORE_09_Comedic Juggernaut.mp3"
+    },
+    {
+      "id": "commons:64735502",
+      "sourceTitle": "The Builder (ISRC USUAN1400016).mp3",
+      "originalName": "The Builder (ISRC USUAN1400016).mp3",
+      "source": "https://commons.wikimedia.org/wiki/File:The_Builder_(ISRC_USUAN1400016).mp3",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/a/aa/The_Builder_%28ISRC_USUAN1400016%29.mp3",
+      "author": "Kevin MacLeod",
+      "license": "CC BY 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0",
+      "mime": "audio/mpeg",
+      "sha1": "a961f4061f1138fcb18c6faf85d47be882a86acc",
+      "recordingType": "Music recording",
+      "description": "The Builder Comedic, free-wheeling fun!",
+      "recommendedTrim": {
+        "start": 0,
+        "end": 7.92
+      },
+      "auditionSeconds": 8,
+      "duration": 117.629,
+      "bytes": 4707417,
+      "sha256": "e77d43a14ddf81c675d7171833ee3196a8bf8f7717039af6d48cc4f849b60577",
+      "downloadOnApprove": true,
+      "reviewPick": "Table to Farm",
+      "category": "07 Quick comedy score",
+      "classification": {
+        "schema": 1,
+        "category": "07 Quick comedy score",
+        "subcategory": "Quick comedy score",
+        "tags": [
+          "table to farm",
+          "quick comedy score",
+          "music recording"
+        ],
+        "method": "project-source-metadata"
+      },
+      "name": "TTF_SCORE_10_The Builder.mp3"
+    }
+  ],
+  "sourceNotes": [
+    "Table to Farm? project: ten candidates in each of seven categories.",
+    "No candidate is approved. The owner decides each recording in Sound Scrubber.",
+    "Source audio downloaded and decoded; FSD50K entries checked against archive CRC and byte count; all SHA256 hashes distinct.",
+    "AI-designed SFXMint effects are labeled separately from source recordings.",
+    "Music auditions stop after eight seconds; approval preserves and downloads the full source recording. Individual artist/license credits are retained.",
+    "This batch requests an actual device-file download on each explicit owner approval."
+  ]
+}

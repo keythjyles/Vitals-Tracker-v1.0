@@ -122,3 +122,9 @@ Baseline main `d6119539195b0faf2025ad9a93b297da3a4cb19a`; isolated branch `sound
 
 Validation before release: all 48 automated state/provider/classification checks passed. Includes 50 scientific-name cricket approvals, category/tag search, AI/owner precedence, offline edits, cloud-refresh deletion races, identity-bound AI receipts, owner-only metadata writes, safe receipt deletion, preservation of decoded buffers and placed cue decisions, and prior review/capture/cloud regressions. Full Scrubber inline script and changed JavaScript parse. Live deployment/browser/cloud checks follow separately.
 
+
+## Sound Scrubber R14.15 — Table to Farm review batch
+
+Open the [Table to Farm? review batch](?batch=SX-INTAKE-20261127-70&review=table%20to%20farm) for 70 pending candidates: ten each for turkey calls, single wood chops, timer dings, fluttering bird wings, quick footsteps, sighs and short comedy cues. Play auditions inline. Music previews stop after eight seconds; approval downloads the full original. **Approve and download** keeps the selected original in the approved library and starts a named audio-file download to the device. Each candidate remains pending until the owner approves it. Source, author and license details remain attached to each item.
+
+## Sound Scrubber R14.14 — clear during an active decision

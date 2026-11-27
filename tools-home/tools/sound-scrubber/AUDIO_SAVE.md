@@ -1,3 +1,7 @@
+## R14.15 device download on explicit approval
+
+Table to Farm intake rows opt into a device-file download after the owner selects **Approve**. The approved original remains in the browser's saved-audio store and continues through the existing direct Google Drive save queue. The device download does not replace the retained original, provenance metadata, or Drive backup. Music audition is capped at eight seconds; approval downloads the full source file. No intake item is approved during batch loading.
+
 ## R14.12 direct Google Drive saves
 
 New approvals keep the original audio or the explicitly recorded take in the browser and publish the approval to the local library. The cloud copy goes straight to the existing [Sound Effects folder](https://drive.google.com/drive/folders/1H269DHSY2hYwD7SKhmCmh2uAmBCh9LDy). **Connect Google Drive** requests file-level access through the existing Google project and verifies the selected folder and owner account. The browser holds an encrypted session for later saves.
@@ -77,3 +81,4 @@ This live bridge uses existing cached originals for immediate availability, then
 ## R14.3 — deletion overrides and mirror exclusion
 
 Older statements above saying intake Delete never deletes cloud originals are historical. [AUDIO_DELETE.md](AUDIO_DELETE.md) is the current protocol for selected managed recording deletion, including previously approved sounds. The daily Drive executor MUST process durable deletion requests first and check active deletion intent before/after every mirror upload. Do not recreate deleted asset folders or write mirror receipts for a pending deletion. Drive cleanup remains asynchronous through the existing connected-account execution path; the backend does not contain Drive credentials.
+
